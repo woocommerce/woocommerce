@@ -194,7 +194,8 @@ class WC_Frontend_Scripts {
 		switch ( $handle ) {
 			case 'woocommerce' :
 				return array(
-					'ajax_url'        => WC()->ajax_url(),
+					'ajax_url'    => WC()->ajax_url(),
+					'wc_ajax_url' => WC_AJAX::get_endpoint()
 				);
 			break;
 			case 'wc-single-product' :
@@ -206,6 +207,7 @@ class WC_Frontend_Scripts {
 			case 'wc-checkout' :
 				return array(
 					'ajax_url'                  => WC()->ajax_url(),
+					'wc_ajax_url'               => WC_AJAX::get_endpoint(),
 					'update_order_review_nonce' => wp_create_nonce( 'update-order-review' ),
 					'apply_coupon_nonce'        => wp_create_nonce( 'apply-coupon' ),
 					'remove_coupon_nonce'       => wp_create_nonce( 'remove-coupon' ),
@@ -225,18 +227,21 @@ class WC_Frontend_Scripts {
 			case 'wc-cart' :
 				return array(
 					'ajax_url'                     => WC()->ajax_url(),
+					'wc_ajax_url'                  => WC_AJAX::get_endpoint(),
 					'update_shipping_method_nonce' => wp_create_nonce( "update-shipping-method" ),
 				);
 			break;
 			case 'wc-cart-fragments' :
 				return array(
 					'ajax_url'      => WC()->ajax_url(),
+					'wc_ajax_url'   => WC_AJAX::get_endpoint(),
 					'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments' )
 				);
 			break;
 			case 'wc-add-to-cart' :
 				return array(
 					'ajax_url'                => WC()->ajax_url(),
+					'wc_ajax_url'             => WC_AJAX::get_endpoint(),
 					'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
 					'cart_url'                => wc_get_page_permalink( 'cart' ),
 					'is_cart'                 => is_cart(),

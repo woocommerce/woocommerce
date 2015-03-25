@@ -57,13 +57,6 @@ class WC_Product {
 	public $product_type = null;
 
 	/**
-	 * String of dimensions (imploded with X)
-	 *
-	 * @var string
-	 */
-	protected $dimensions = '';
-
-	/**
 	 * Prouduct shipping class
 	 *
 	 * @var string
@@ -604,7 +597,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function has_enough_stock( $quantity ) {
-		return ! $this->managing_stock() || $this->backorders_allowed() || $this->stock >= $quantity ? true : false;
+		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity ? true : false;
 	}
 
 	/**
@@ -722,15 +715,6 @@ class WC_Product {
 	 */
 	public function is_on_sale() {
 		return apply_filters( 'woocommerce_product_is_on_sale', ( $this->get_sale_price() !== $this->get_regular_price() && $this->get_sale_price() === $this->get_price() ), $this );
-	}
-
-	/**
-	 * Returns the product's weight.
-	 * @todo   refactor filters in this class to naming woocommerce_product_METHOD
-	 * @return string
-	 */
-	public function get_weight() {
-		return apply_filters( 'woocommerce_product_get_weight', $this->weight ? $this->weight : '' );
 	}
 
 	/**
@@ -1402,6 +1386,39 @@ class WC_Product {
 	}
 
 	/**
+	 * Returns the product length.
+	 * @return string
+	 */
+	public function get_length() {
+		return apply_filters( 'woocommerce_product_length', $this->length ? $this->length : '', $this );
+	}
+
+	/**
+	 * Returns the product width.
+	 * @return string
+	 */
+	public function get_width() {
+		return apply_filters( 'woocommerce_product_width', $this->width ? $this->width : '', $this );
+	}
+
+	/**
+	 * Returns the product height.
+	 * @return string
+	 */
+	public function get_height() {
+		return apply_filters( 'woocommerce_product_height', $this->height ? $this->height : '', $this );
+	}
+
+	/**
+	 * Returns the product's weight.
+	 * @todo   refactor filters in this class to naming woocommerce_product_METHOD
+	 * @return string
+	 */
+	public function get_weight() {
+		return apply_filters( 'woocommerce_product_weight', apply_filters( 'woocommerce_product_get_weight', $this->weight ? $this->weight : '' ), $this );
+	}
+
+	/**
 	 * Returns whether or not the product has weight set.
 	 *
 	 * @return bool
@@ -1411,36 +1428,21 @@ class WC_Product {
 	}
 
 	/**
-	 * Returns dimensions.
-	 *
+	 * Returns formatted dimensions.
 	 * @return string
 	 */
 	public function get_dimensions() {
+		$dimensions = implode( ' x ', array_filter( array(
+			$this->get_length(),
+			$this->get_width(),
+			$this->get_height(),
+		) ) );
 
-		if ( ! $this->dimensions ) {
-			$dimensions = array();
-
-			if ( $this->length ) {
-				$dimensions[] = $this->length;
-			}
-
-			if ( $this->width ) {
-				$dimensions[] = $this->width;
-			}
-
-			if ( $this->height ){
-				$dimensions[] = $this->height;
-			}
-
-			$this->dimensions = implode( ' x ', $dimensions );
-
-			if ( ! empty( $this->dimensions ) ) {
-				$this->dimensions .= ' ' . get_option( 'woocommerce_dimension_unit' );
-			}
-
+		if ( ! empty( $dimensions ) ) {
+			$dimensions .= ' ' . get_option( 'woocommerce_dimension_unit' );
 		}
 
-		return $this->dimensions;
+		return  apply_filters( 'woocommerce_product_dimensions', $dimensions, $this );
 	}
 
 	/**

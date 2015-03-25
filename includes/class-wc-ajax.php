@@ -18,10 +18,72 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_AJAX {
 
 	/**
-	 * Hook in methods
+	 * Hook in ajax handlers
 	 */
 	public static function init() {
+		add_action( 'init', array( __CLASS__, 'add_endpoint') );
+		add_action( 'parse_query', array( __CLASS__, 'do_wc_ajax'), 0 );
 
+		self::add_ajax_events();
+	}
+
+	/**
+	 * Add our endpoint for frontend ajax requests
+	 */
+	public static function add_endpoint() {
+		add_rewrite_tag( '%wc-ajax%', '([^/]*)' );
+		add_rewrite_rule( 'wc-ajax/([^/]*)/?', 'index.php?wc-ajax=$matches[1]', 'top' );
+	}
+
+	/**
+	 * Get WC Ajax Endpoint
+	 * @param  string $request Optional
+	 * @param  string $ssl     Optional
+	 * @return string
+	 */
+	public static function get_endpoint( $request = '', $ssl = null ) {
+		if ( is_null( $ssl ) ) {
+			$scheme = parse_url( home_url(), PHP_URL_SCHEME );
+		} elseif ( $ssl ) {
+			$scheme = 'https';
+		} else {
+			$scheme = 'http';
+		}
+
+		if ( strstr( get_option( 'permalink_structure' ), '/index.php/' ) ) {
+			$endpoint = trailingslashit( home_url( '/index.php/wc-ajax/' . $request, $scheme ) );
+		} elseif ( get_option( 'permalink_structure' ) ) {
+			$endpoint = trailingslashit( home_url( '/wc-ajax/' . $request, $scheme ) );
+		} else {
+			$endpoint = add_query_arg( 'wc-ajax=', $request, trailingslashit( home_url( '', $scheme ) ) );
+		}
+
+		return esc_url_raw( $endpoint );
+	}
+
+	/**
+	 * Check for WC Ajax request and fire action
+	 */
+	public static function do_wc_ajax() {
+		global $wp_query;
+
+		if ( ! empty( $_GET['wc-ajax'] ) ) {
+			 $wp_query->set( 'wc-ajax', sanitize_text_field( $_GET['wc-ajax'] ) );
+		}
+
+   		if ( $action = $wp_query->get( 'wc-ajax' ) ) {
+   			if ( ! defined( 'DOING_AJAX' ) ) {
+				define( 'DOING_AJAX', true );
+			}
+   			do_action( 'wc_ajax_' . sanitize_text_field( $action ) );
+   			die();
+   		}
+	}
+
+	/**
+	 * Hook in methods - uses WordPress ajax handlers (admin-ajax)
+	 */
+	public static function add_ajax_events() {
 		// woocommerce_EVENT => nopriv
 		$ajax_events = array(
 			'get_refreshed_fragments'                          => true,
@@ -74,6 +136,9 @@ class WC_AJAX {
 
 			if ( $nopriv ) {
 				add_action( 'wp_ajax_nopriv_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
+
+				// WC AJAX can be used for frontend ajax requests
+				add_action( 'wc_ajax_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 			}
 		}
 	}
@@ -96,7 +161,7 @@ class WC_AJAX {
 					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>'
 				)
 			),
-			'cart_hash' => apply_filters( 'woocommerce_add_to_cart_hash', WC()->cart->get_cart() ? md5( json_encode( WC()->cart->get_cart() ) ) : '', WC()->cart->get_cart() )
+			'cart_hash' => apply_filters( 'woocommerce_add_to_cart_hash', WC()->cart->get_cart_for_session() ? md5( json_encode( WC()->cart->get_cart_for_session() ) ) : '', WC()->cart->get_cart_for_session() )
 		);
 
 		wp_send_json( $data );

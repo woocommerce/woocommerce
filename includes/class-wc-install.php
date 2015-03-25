@@ -97,6 +97,8 @@ class WC_Install {
 		// Also register endpoints - this needs to be done prior to rewrite rule flush
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
+		WC_API::add_endpoint();
+		WC_AJAX::add_endpoint();
 
 		self::create_terms();
 		self::create_cron_jobs();
@@ -144,7 +146,8 @@ class WC_Install {
 			'2.0.9' => 'updates/woocommerce-update-2.0.9.php',
 			'2.1.0' => 'updates/woocommerce-update-2.1.php',
 			'2.2.0' => 'updates/woocommerce-update-2.2.php',
-			'2.3.0' => 'updates/woocommerce-update-2.3.php'
+			'2.3.0' => 'updates/woocommerce-update-2.3.php',
+			'2.4.0' => 'updates/woocommerce-update-2.4.php'
 		);
 
 		foreach ( $db_updates as $version => $updater ) {

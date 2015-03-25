@@ -387,14 +387,8 @@ class WC_API_Products extends WC_API_Resource {
 			return $id;
 		}
 
-		$args = array(
-			'post_id' => $id,
-			'approve' => 'approve',
-		);
-
-		$comments = get_comments( $args );
-
-		$reviews = array();
+		$comments = get_approved_comments( $id );
+		$reviews  = array();
 
 		foreach ( $comments as $comment ) {
 
@@ -518,6 +512,19 @@ class WC_API_Products extends WC_API_Resource {
 		// Filter products by category
 		if ( ! empty( $args['category'] ) ) {
 			$query_args['product_cat'] = $args['category'];
+		}
+
+		// Filter by specific sku
+		if ( ! empty( $args['sku'] ) ) {
+			if ( ! is_array( $query_args['meta_query'] ) ) {
+				$query_args['meta_query'] = array();
+			}
+
+			$query_args['meta_query'][] = array(
+				'key'     => '_sku',
+				'value'   => $args['sku'],
+				'compare' => '='
+			);
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );

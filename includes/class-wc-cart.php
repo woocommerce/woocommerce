@@ -88,6 +88,7 @@ class WC_Cart {
 		'taxes'                       => array(),
 		'shipping_taxes'              => array(),
 		'discount_cart'               => 0,
+		'discount_cart_tax'           => 0,
 		'shipping_total'              => 0,
 		'shipping_tax_total'          => 0,
 		'coupon_discount_amounts'     => array(),
@@ -186,7 +187,7 @@ class WC_Cart {
 	private function set_cart_cookies( $set = true ) {
 		if ( $set ) {
 			wc_setcookie( 'woocommerce_items_in_cart', 1 );
-			wc_setcookie( 'woocommerce_cart_hash', md5( json_encode( $this->get_cart() ) ) );
+			wc_setcookie( 'woocommerce_cart_hash', md5( json_encode( $this->get_cart_for_session() ) ) );
 		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
 			wc_setcookie( 'woocommerce_items_in_cart', 0, time() - HOUR_IN_SECONDS );
 			wc_setcookie( 'woocommerce_cart_hash', '', time() - HOUR_IN_SECONDS );
@@ -691,8 +692,7 @@ class WC_Cart {
 		 *
 		 * @return array contents of the cart
 		 */
-		private function get_cart_for_session() {
-
+		public function get_cart_for_session() {
 			$cart_session = array();
 
 			if ( $this->get_cart() ) {
@@ -844,16 +844,19 @@ class WC_Cart {
 		/**
 		 * Add a product to the cart.
 		 *
-		 * @param string $product_id contains the id of the product to add to the cart
+		 * @param integer $product_id contains the id of the product to add to the cart
 		 * @param integer $quantity contains the quantity of the item to add
-		 * @param int $variation_id
+		 * @param integer $variation_id
 		 * @param array $variation attribute values
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
 		 * @return string $cart_item_key
 		 */
-		public function add_to_cart( $product_id, $quantity = 1, $variation_id = '', $variation = array(), $cart_item_data = array() ) {
+		public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 			// Wrap in try catch so plugins can throw an exception to prevent adding to cart
 			try {
+				$product_id   = absint( $product_id );
+				$variation_id = absint( $variation_id );
+
 				// Ensure we don't add a variation to the cart directly by variation ID
 				if ( 'product_variation' == get_post_type( $product_id ) ) {
 					$variation_id = $product_id;
@@ -1797,13 +1800,15 @@ class WC_Cart {
 				return $price;
 			}
 
-			if ( ! empty( $this->coupons ) ) {
+			$undiscounted_price = $price;
 
+			if ( ! empty( $this->coupons ) ) {
 				$product = $values['data'];
 
 				foreach ( $this->coupons as $code => $coupon ) {
 					if ( $coupon->is_valid() && ( $coupon->is_valid_for_product( $product, $values ) || $coupon->is_valid_for_cart() ) ) {
-						$discount_amount = $coupon->get_discount_amount( $price, $values, $single = true );
+						$discount_amount = $coupon->get_discount_amount( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ? $price : $undiscounted_price ), $values, $single = true );
+						$discount_amount = min( $price, $discount_amount );
 						$price           = max( $price - $discount_amount, 0 );
 
 						// Store the totals for DISPLAY in the cart

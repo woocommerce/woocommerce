@@ -68,13 +68,24 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			array(	'title' => __( 'Checkout Process', 'woocommerce' ), 'type' => 'title', 'id' => 'checkout_process_options' ),
 
 			array(
-				'title'    => __( 'Coupons', 'woocommerce' ),
-				'desc'     => __( 'Enable the use of coupons', 'woocommerce' ),
-				'id'       => 'woocommerce_enable_coupons',
-				'default'  => 'yes',
-				'type'     => 'checkbox',
-				'desc_tip' =>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
-				'autoload' => false
+				'title'         => __( 'Coupons', 'woocommerce' ),
+				'desc'          => __( 'Enable the use of coupons', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_coupons',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'desc_tip'      =>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
+				'autoload'      => false
+			),
+
+			array(
+				'desc'          => __( 'Calculate coupon discounts sequentially', 'woocommerce' ),
+				'id'            => 'woocommerce_calc_discounts_sequentially',
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'desc_tip'      =>  __( 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.', 'woocommerce' ),
+				'checkboxgroup' => 'end',
+				'autoload'      => false
 			),
 
 			array(
