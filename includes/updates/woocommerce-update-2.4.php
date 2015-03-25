@@ -13,4 +13,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Maintain the old coupon logic for upgrades
-update_option( 'woocommerce_calc_discounts_sequentially', 'yes' )
+update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
