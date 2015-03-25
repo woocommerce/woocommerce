@@ -283,14 +283,14 @@ class WC_Product_Variable extends WC_Product {
 					$sale_price    = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price );
 				}
 
-				$prices[]         = $price;
-				$regular_prices[] = $regular_price;
-				$sale_prices[]    = $sale_price;
+				$prices[ $variation_id ]         = $price;
+				$regular_prices[ $variation_id ] = $regular_price;
+				$sale_prices[ $variation_id ]    = $sale_price;
 			}
 
-			sort( $prices );
-			sort( $regular_prices );
-			sort( $sale_prices );
+			asort( $prices );
+			asort( $regular_prices );
+			asort( $sale_prices );
 
 			$prices_array  = array(
 				'price'         => $prices,
