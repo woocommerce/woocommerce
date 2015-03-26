@@ -999,7 +999,7 @@ class WC_Meta_Box_Product_Data {
 
 						// Select based attributes - Format values (posted values are slugs)
 						if ( is_array( $attribute_values[ $i ] ) ) {
-							$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
+							$values = array_map( 'wc_clean', $attribute_values[ $i ] );
 
 						// Text based attributes - Posted values are term names - don't change to slugs
 						} else {
