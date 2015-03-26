@@ -420,9 +420,11 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Get the orders for a product
 	 *
-	 * @since 2.1
+	 * @since
 	 * @param int $id the product ID to get orders for
 	 * @param string $fields fields to include in response
+	 * @param string $status the order status to retrieve
+	 * @param $page  $page   page to retrieve
 	 * @return array
 	 */
 	public function get_product_orders( $id, $fields = null, $status = null, $page = 1 ) {
@@ -446,7 +448,7 @@ class WC_API_Products extends WC_API_Resource {
 			);
 
 			$orders_api = new WC_API_Orders( $this->server );
-			$orders     = $orders_api->get_orders( $fields, $order_args, null, $page );
+			$orders     = $orders_api->get_orders( $fields, $order_args, $status, $page );
 
 		}
 
