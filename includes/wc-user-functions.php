@@ -210,7 +210,6 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 /**
  * Checks if a user (by email) has bought an item
  *
- * @access public
  * @param string $customer_email
  * @param int $user_id
  * @param int $product_id
@@ -219,40 +218,47 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$customer_data = array( $user_id );
+	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . $product_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
 
-	if ( $user_id ) {
-		$user = get_user_by( 'id', $user_id );
+	if ( false === ( $result = get_transient( $transient_name ) ) ) {
+		$customer_data = array( $user_id );
 
-		if ( isset( $user->user_email ) ) {
-			$customer_data[] = $user->user_email;
+		if ( $user_id ) {
+			$user = get_user_by( 'id', $user_id );
+
+			if ( isset( $user->user_email ) ) {
+				$customer_data[] = $user->user_email;
+			}
 		}
+
+		if ( is_email( $customer_email ) ) {
+			$customer_data[] = $customer_email;
+		}
+
+		$customer_data = array_filter( array_unique( $customer_data ) );
+
+		if ( sizeof( $customer_data ) == 0 ) {
+			return false;
+		}
+
+		$result = $wpdb->get_var(
+			$wpdb->prepare( "
+				SELECT 1 FROM {$wpdb->posts} AS p
+				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+				WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
+				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+				AND im.meta_key IN ( '_product_id', '_variation_id' )
+				AND im.meta_value = %s
+				", $product_id
+			)
+		);
+
+		set_transient( $transient_name, $result ? 1 : 0, DAY_IN_SECONDS * 30 );
 	}
-
-	if ( is_email( $customer_email ) ) {
-		$customer_data[] = $customer_email;
-	}
-
-	$customer_data = array_filter( array_unique( $customer_data ) );
-
-	if ( sizeof( $customer_data ) == 0 ) {
-		return false;
-	}
-
-	return (bool) $wpdb->get_var(
-		$wpdb->prepare( "
-			SELECT 1 FROM {$wpdb->posts} AS p
-			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-			WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
-			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
-			AND im.meta_key IN ( '_product_id', '_variation_id' )
-			AND im.meta_value = %s
-			", $product_id
-		)
-	);
+	return (bool) $result;
 }
 
 /**
