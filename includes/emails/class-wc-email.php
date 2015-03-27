@@ -684,8 +684,8 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Admin Options
 	 *
-	 * Setup the gateway settings screen.
-	 * Override this in your gateway.
+	 * Setup the email settings screen.
+	 * Override this in your email.
 	 *
 	 * @since 1.0.0
 	 */
