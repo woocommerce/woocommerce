@@ -219,44 +219,38 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$emails = array();
+	$customer_data = array( $user_id );
 
 	if ( $user_id ) {
 		$user = get_user_by( 'id', $user_id );
 
 		if ( isset( $user->user_email ) ) {
-			$emails[] = $user->user_email;
+			$customer_data[] = $user->user_email;
 		}
 	}
 
 	if ( is_email( $customer_email ) ) {
-		$emails[] = $customer_email;
+		$customer_data[] = $customer_email;
 	}
 
-	if ( sizeof( $emails ) == 0 ) {
+	$customer_data = array_filter( array_unique( $customer_data ) );
+
+	if ( sizeof( $customer_data ) == 0 ) {
 		return false;
 	}
 
-	return $wpdb->get_var(
+	return (bool) $wpdb->get_var(
 		$wpdb->prepare( "
-			SELECT COUNT( DISTINCT order_items.order_item_id )
-			FROM {$wpdb->prefix}woocommerce_order_items as order_items
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON order_items.order_item_id = itemmeta.order_item_id
-			LEFT JOIN {$wpdb->postmeta} AS postmeta ON order_items.order_id = postmeta.post_id
-			LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
-			WHERE
-				posts.post_status IN ( 'wc-completed', 'wc-processing' ) AND
-				itemmeta.meta_value  = %s AND
-				itemmeta.meta_key    IN ( '_variation_id', '_product_id' ) AND
-				postmeta.meta_key    IN ( '_billing_email', '_customer_user' ) AND
-				(
-					postmeta.meta_value  IN ( '" . implode( "','", array_unique( $emails ) ) . "' ) OR
-					(
-						postmeta.meta_value = %s AND
-						postmeta.meta_value > 0
-					)
-				)
-			", $product_id, $user_id
+			SELECT 1 FROM {$wpdb->posts} AS p
+			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+			WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
+			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+			AND im.meta_key IN ( '_product_id', '_variation_id' )
+			AND im.meta_value = %s
+			", $product_id
 		)
 	);
 }
@@ -406,7 +400,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) );
 
 	if ( $results ) {
-		
+
 		$looped_downloads = array();
 		foreach ( $results as $result ) {
 			if ( ! $order || $order->id != $result->order_id ) {
@@ -439,7 +433,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			}
 
 			$download_file = $_product->get_file( $result->download_id );
-			
+
 			// Check if the file has been already added to the downloads list
 			if ( in_array( $download_file, $looped_downloads ) ) {
 				continue;
