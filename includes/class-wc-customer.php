@@ -371,12 +371,15 @@ class WC_Customer {
 		if ( empty( $this->_data['country'] ) ) {
 			$this->_data['country'] = $this->get_default_country();
 		}
+
 		if ( empty( $this->_data['shipping_country'] ) ) {
 			$this->_data['shipping_country'] = $this->get_default_country();
 		}
+
 		if ( empty( $this->_data['state'] ) ) {
 			$this->_data['state'] = $this->get_default_state();
 		}
+
 		if ( empty( $this->_data['shipping_state'] ) ) {
 			$this->_data['shipping_state'] = $this->get_default_state();
 		}

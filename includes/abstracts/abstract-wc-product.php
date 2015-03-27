@@ -1237,12 +1237,14 @@ class WC_Product {
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
+		global $wpdb;
+
 		// Related products are found from category and tag
 		$tags_array = $this->get_related_terms( 'product_tag' );
 		$cats_array = $this->get_related_terms( 'product_cat' );
 
 		// Don't bother if none are set
-		if ( sizeof( $cats_array ) == 0 && sizeof( $tags_array ) == 0 ) {
+		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
 			return array();
 		}
 
@@ -1445,7 +1447,7 @@ class WC_Product {
 	 * @return array
 	 */
 	protected function get_related_terms( $term ) {
-		$terms_array = array();
+		$terms_array = array(0);
 
 		$terms = apply_filters( 'woocommerce_get_related_' . $term . '_terms', wp_get_post_terms( $this->id, $term ), $this->id );
 		foreach ( $terms as $term ) {
