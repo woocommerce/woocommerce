@@ -50,42 +50,7 @@ class WC_Customer {
 
 		if ( empty( $this->_data ) ) {
 			// Defaults
-			$this->_data = array(
-				'postcode'            => '',
-				'city'                => '',
-				'address'             => '',
-				'address_2'           => '',
-				'state'               => '',
-				'country'             => '',
-				'shipping_postcode'   => '',
-				'shipping_city'       => '',
-				'shipping_address'    => '',
-				'shipping_address_2'  => '',
-				'shipping_state'      => '',
-				'shipping_country'    => '',
-				'is_vat_exempt'       => false,
-				'calculated_shipping' => false
-			);
-
-			if ( is_user_logged_in() ) {
-				foreach ( $this->_data as $key => $value ) {
-					$meta_value          = get_user_meta( get_current_user_id(), ( false === strstr( $key, 'shipping_' ) ? 'billing_' : '' ) . $key, true );
-					$this->_data[ $key ] = $meta_value ? $meta_value : $this->_data[ $key ];
-				}
-			}
-
-			if ( empty( $this->_data['country'] ) ) {
-				$this->_data['country'] = $this->get_default_country();
-			}
-			if ( empty( $this->_data['shipping_country'] ) ) {
-				$this->_data['shipping_country'] = $this->get_default_country();
-			}
-			if ( empty( $this->_data['state'] ) ) {
-				$this->_data['state'] = $this->get_default_state();
-			}
-			if ( empty( $this->_data['shipping_state'] ) ) {
-				$this->_data['shipping_state'] = $this->get_default_state();
-			}
+			$this->set_default_data();
 		}
 
 		// When leaving or ending page load, store data
@@ -134,6 +99,7 @@ class WC_Customer {
 
 	/**
 	 * Get default country for a customer
+	 *
 	 * @return string
 	 */
 	public function get_default_country() {
@@ -143,6 +109,7 @@ class WC_Customer {
 
 	/**
 	 * Get default state for a customer
+	 *
 	 * @return string
 	 */
 	public function get_default_state() {
@@ -371,6 +338,48 @@ class WC_Customer {
 		}
 
 		return apply_filters( 'woocommerce_customer_taxable_address', array( $country, $state, $postcode, $city ) );
+	}
+
+	/**
+	 * Set default data for a customer
+	 */
+	public function set_default_data() {
+		$this->_data = array(
+			'postcode'            => '',
+			'city'                => '',
+			'address'             => '',
+			'address_2'           => '',
+			'state'               => '',
+			'country'             => '',
+			'shipping_postcode'   => '',
+			'shipping_city'       => '',
+			'shipping_address'    => '',
+			'shipping_address_2'  => '',
+			'shipping_state'      => '',
+			'shipping_country'    => '',
+			'is_vat_exempt'       => false,
+			'calculated_shipping' => false
+		);
+
+		if ( is_user_logged_in() ) {
+			foreach ( $this->_data as $key => $value ) {
+				$meta_value          = get_user_meta( get_current_user_id(), ( false === strstr( $key, 'shipping_' ) ? 'billing_' : '' ) . $key, true );
+				$this->_data[ $key ] = $meta_value ? $meta_value : $this->_data[ $key ];
+			}
+		}
+
+		if ( empty( $this->_data['country'] ) ) {
+			$this->_data['country'] = $this->get_default_country();
+		}
+		if ( empty( $this->_data['shipping_country'] ) ) {
+			$this->_data['shipping_country'] = $this->get_default_country();
+		}
+		if ( empty( $this->_data['state'] ) ) {
+			$this->_data['state'] = $this->get_default_state();
+		}
+		if ( empty( $this->_data['shipping_state'] ) ) {
+			$this->_data['shipping_state'] = $this->get_default_state();
+		}
 	}
 
 
