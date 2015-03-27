@@ -35,7 +35,7 @@ class WC_Query {
 	/** @public array Product IDs that match the layered nav + price filter */
 	public $post__in 		= array();
 
-	/** @public array The meta query for the page */
+	/** @public array|string The meta query for the page */
 	public $meta_query 		= '';
 
 	/** @public array Post IDs matching layered nav only */

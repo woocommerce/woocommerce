@@ -11,11 +11,11 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
  *
  * An email sent to the customer when they create an account.
  *
- * @class 		WC_Email_Customer_New_Account
- * @version		2.3.0
- * @package		WooCommerce/Classes/Emails
- * @author 		WooThemes
- * @extends 	WC_Email
+ * @class       WC_Email_Customer_New_Account
+ * @version     2.3.0
+ * @package     WooCommerce/Classes/Emails
+ * @author      WooThemes
+ * @extends     WC_Email
  */
 class WC_Email_Customer_New_Account extends WC_Email {
 
@@ -31,15 +31,15 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	 */
 	function __construct() {
 
-		$this->id 				= 'customer_new_account';
-		$this->title 			= __( 'New account', 'woocommerce' );
-		$this->description		= __( 'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account pages.', 'woocommerce' );
+		$this->id               = 'customer_new_account';
+		$this->title            = __( 'New account', 'woocommerce' );
+		$this->description      = __( 'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account pages.', 'woocommerce' );
 
-		$this->template_html 	= 'emails/customer-new-account.php';
-		$this->template_plain 	= 'emails/plain/customer-new-account.php';
+		$this->template_html    = 'emails/customer-new-account.php';
+		$this->template_plain   = 'emails/plain/customer-new-account.php';
 
-		$this->subject 			= __( 'Your account on {site_title}', 'woocommerce');
-		$this->heading      	= __( 'Welcome to {site_title}', 'woocommerce');
+		$this->subject          = __( 'Your account on {site_title}', 'woocommerce');
+		$this->heading          = __( 'Welcome to {site_title}', 'woocommerce');
 
 		// Call parent constuctor
 		parent::__construct();
@@ -54,7 +54,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	function trigger( $user_id, $user_pass = '', $password_generated = false ) {
 
 		if ( $user_id ) {
-			$this->object 		= new WP_User( $user_id );
+			$this->object             = new WP_User( $user_id );
 
 			$this->user_pass          = $user_pass;
 			$this->user_login         = stripslashes( $this->object->user_login );
@@ -63,8 +63,9 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			$this->password_generated = $password_generated;
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() )
+		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
 			return;
+		}
 
 		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 	}
@@ -83,8 +84,8 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'user_pass'          => $this->user_pass,
 			'blogname'           => $this->get_blogname(),
 			'password_generated' => $this->password_generated,
-			'sent_to_admin' => false,
-			'plain_text'    => false
+			'sent_to_admin'      => false,
+			'plain_text'         => false
 		) );
 		return ob_get_clean();
 	}
@@ -103,8 +104,8 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'user_pass'          => $this->user_pass,
 			'blogname'           => $this->get_blogname(),
 			'password_generated' => $this->password_generated,
-			'sent_to_admin' => false,
-			'plain_text'    => true
+			'sent_to_admin'      => false,
+			'plain_text'         => true
 		) );
 		return ob_get_clean();
 	}

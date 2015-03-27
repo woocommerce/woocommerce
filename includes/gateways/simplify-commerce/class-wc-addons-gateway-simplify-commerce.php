@@ -41,7 +41,6 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 *
 	 * @param  array $args
 	 * @param  int   $order_id
-	 *
 	 * @return array
 	 */
 	public function hosted_payment_args( $args, $order_id ) {
@@ -58,7 +57,6 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * Check if order contains subscriptions.
 	 *
 	 * @param  int $order_id
-	 *
 	 * @return bool
 	 */
 	protected function order_contains_subscription( $order_id ) {
@@ -69,7 +67,6 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * Check if order contains pre-orders.
 	 *
 	 * @param  int $order_id
-	 *
 	 * @return bool
 	 */
 	protected function order_contains_pre_order( $order_id ) {
@@ -81,7 +78,8 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 *
 	 * @param WC_Order $order
 	 * @param string   $cart_token
-	 *
+	 * @uses  Simplify_ApiException
+	 * @uses  Simplify_BadRequestException
 	 * @return array
 	 */
 	protected function process_subscription( $order, $cart_token = '' ) {
@@ -157,7 +155,8 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 *
 	 * @param WC_Order $order
 	 * @param string   $cart_token
-	 *
+	 * @uses  Simplify_ApiException
+	 * @uses  Simplify_BadRequestException
 	 * @return array
 	 */
 	protected function process_pre_order( $order, $cart_token = '' ) {
@@ -263,9 +262,10 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 *
 	 * @param WC_order $order
 	 * @param integer $amount (default: 0)
+	 * @uses  Simplify_BadRequestException
 	 * @return bool|WP_Error
 	 */
-	public function process_subscription_payment( $order = '', $amount = 0 ) {
+	public function process_subscription_payment( $order, $amount = 0 ) {
 		$order_items       = $order->get_items();
 		$order_item        = array_shift( $order_items );
 		$subscription_name = sprintf( __( '%s - Subscription for "%s"', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order_item['name'] ) . ' ' . sprintf( __( '(Order #%s)', 'woocommerce' ), $order->get_order_number() );

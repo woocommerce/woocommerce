@@ -344,7 +344,7 @@ class WC_Product {
 
 		$downloadable_files = array_filter( isset( $this->downloadable_files ) ? (array) maybe_unserialize( $this->downloadable_files ) : array() );
 
-		if ( $downloadable_files ) {
+		if ( ! empty( $downloadable_files ) ) {
 
 			foreach ( $downloadable_files as $key => $file ) {
 

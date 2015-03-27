@@ -402,7 +402,6 @@ class WC_Email extends WC_Settings_API {
 			} catch ( Exception $e ) {
 
 				$logger = new WC_Logger();
-
 				$logger->add( 'emogrifier', $e->getMessage() );
 			}
 		}

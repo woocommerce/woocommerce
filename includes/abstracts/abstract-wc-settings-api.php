@@ -159,7 +159,7 @@ abstract class WC_Settings_API {
 			}
 		}
 
-		if ( $this->settings && is_array( $this->settings ) ) {
+		if ( ! empty( $this->settings ) && is_array( $this->settings ) ) {
 			$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
 			$this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
 		}
@@ -215,7 +215,7 @@ abstract class WC_Settings_API {
 	 */
 	public function generate_settings_html( $form_fields = array() ) {
 
-		if ( ! $form_fields ) {
+		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
 		}
 
@@ -726,7 +726,7 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_settings_fields( $form_fields = array() ) {
 
-		if ( ! $form_fields ) {
+		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
 		}
 
