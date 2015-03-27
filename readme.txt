@@ -138,6 +138,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Feature - Show full category hierarchy in permalinks.
 * Fix - Ensure coupon taxes are reset when calculating totals.
 * Tweak - Base discounts on the undiscounted price. #5874
 
