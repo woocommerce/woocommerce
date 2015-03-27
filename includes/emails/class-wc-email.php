@@ -690,7 +690,7 @@ class WC_Email extends WC_Settings_API {
 	 * @since 1.0.0
 	 */
 	public function admin_options() {
-		// Do admin acations.
+		// Do admin actions.
 		$this->admin_actions();
 
 		?>
