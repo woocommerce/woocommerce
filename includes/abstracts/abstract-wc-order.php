@@ -575,33 +575,29 @@ abstract class WC_Abstract_Order {
 	 * @return bool success or fail
 	 */
 	public function calculate_taxes() {
-
 		$tax_total    = 0;
 		$taxes        = array();
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
-		if ( 'base' === $tax_based_on ) {
+		if ( 'billing' === $tax_based_on ) {
+			$country  = $this->billing_country;
+			$state    = $this->billing_state;
+			$postcode = $this->billing_postcode;
+			$city     = $this->billing_city;
+		} elseif ( 'shipping' === $tax_based_on ) {
+			$country  = $this->shipping_country;
+			$state    = $this->shipping_state;
+			$postcode = $this->shipping_postcode;
+			$city     = $this->shipping_city;
+		}
 
+		// Default to base
+		if ( 'base' === $tax_based_on || empty( $country ) ) {
 			$default  = wc_get_base_location();
 			$country  = $default['country'];
 			$state    = $default['state'];
 			$postcode = '';
 			$city     = '';
-
-		} elseif ( 'billing' === $tax_based_on ) {
-
-			$country  = $this->billing_country;
-			$state    = $this->billing_state;
-			$postcode = $this->billing_postcode;
-			$city     = $this->billing_city;
-
-		} else {
-
-			$country  = $this->shipping_country;
-			$state    = $this->shipping_state;
-			$postcode = $this->shipping_postcode;
-			$city     = $this->shipping_city;
-
 		}
 
 		// Get items
