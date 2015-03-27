@@ -121,10 +121,15 @@ class WC_Coupon {
 		$this->code  = apply_filters( 'woocommerce_coupon_code', $code );
 
 		// Coupon data lets developers create coupons through code
-		if ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
+		if ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $this->code ) ) {
 			$this->populate( $coupon );
 			return true;
-		} elseif ( ( $this->id = $this->get_coupon_id_from_code( $code ) ) && $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
+		}
+
+		// Otherwise get ID from the code
+		$this->id = $this->get_coupon_id_from_code( $this->code );
+
+		if ( $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
 			$this->populate();
 			return true;
 		}
