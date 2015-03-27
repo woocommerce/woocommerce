@@ -1771,6 +1771,23 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$field .= '</p>' . $after;
 
 				break;
+			case 'email' :
+
+				$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $args['id'] ) . '_field">';
+
+				if ( $args['label'] ) {
+					$field .= '<label for="' . esc_attr( $args['id'] ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) .'">' . $args['label'] . $required . '</label>';
+				}
+
+				$field .= '<input type="email" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" '.$args['maxlength'].' value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+
+				if ( $args['description'] ) {
+					$field .= '<span class="description">' . esc_attr( $args['description'] ) . '</span>';
+				}
+
+				$field .= '</p>' . $after;
+
+				break;
 			case 'select' :
 
 				$options = $field = '';

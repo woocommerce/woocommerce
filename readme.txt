@@ -138,6 +138,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Feature - Show full category hierarchy in permalinks.
 * Fix - Ensure coupon taxes are reset when calculating totals.
 * Tweak - Base discounts on the undiscounted price. #5874
 
@@ -159,7 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Settings API - allow multiselect fields to be emptied.
 * Fix - Saving an order needs to save the discount amount ex. tax like the cart.
 * Fix - Order again with custom attributes.
-* Fix - Prevent potential XSS within tooltips (discovered by FortiGuard Labs).
+* Fix - [CVE-2015-2329] Prevent potential XSS within tooltips (discovered by Fortinet FortiGuard Labs).
 * Fix - Paypal debug option.
 * Fix - Removed $q->query['wc_query'] = 'product_query' which broke redirects (#7703). Use $q->get('wc_query') instead.
 * Fix - Sanitize tax_rate_id when saving taxes in the backend to prevent potential SQL injection (discovered by WordFence).

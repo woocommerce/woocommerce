@@ -953,10 +953,11 @@ class WC_Countries {
 		if ( $type == 'billing_' ) {
 
 			$address_fields['billing_email'] = array(
-				'label'    => __( 'Email Address', 'woocommerce' ),
-				'required' => true,
-				'class'    => array( 'form-row-first' ),
-				'validate' => array( 'email' ),
+				'label'		=> __( 'Email Address', 'woocommerce' ),
+				'required'	=> true,
+				'type'		=> 'email',
+				'class'		=> array( 'form-row-first' ),
+				'validate'	=> array( 'email' ),
 			);
 
 			$address_fields['billing_phone'] = array(
