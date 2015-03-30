@@ -135,7 +135,7 @@ abstract class WC_Abstract_Order {
 	public function remove_order_items( $type = null ) {
 		global $wpdb;
 
-		if ( $type ) {
+		if ( ! empty( $type ) ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->id, $type ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->id, $type ) );
 		} else {
@@ -645,7 +645,7 @@ abstract class WC_Abstract_Order {
 			'tax_class' => ''
 		) );
 
-		if ( $tax_rates ) {
+		if ( ! empty( $tax_rates ) ) {
 			foreach ( $tax_rates as $key => $rate ) {
 				if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
 					$matched_tax_rates[ $key ] = $rate;
@@ -1184,7 +1184,7 @@ abstract class WC_Abstract_Order {
 		$shipping_methods = $this->get_shipping_methods();
 		$has_method = false;
 
-		if ( ! $shipping_methods ) {
+		if ( empty( $shipping_methods ) ) {
 			return false;
 		}
 

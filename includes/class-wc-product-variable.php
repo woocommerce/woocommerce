@@ -43,20 +43,20 @@ class WC_Product_Variable extends WC_Product {
 		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Select options', 'woocommerce' ), $this );
 	}
 
-    /**
-     * Get total stock.
-     *
-     * This is the stock of parent and children combined.
-     *
-     * @access public
-     * @return int
-     */
-    public function get_total_stock() {
-        if ( empty( $this->total_stock ) ) {
-        	$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+	/**
+	 * Get total stock.
+	 *
+	 * This is the stock of parent and children combined.
+	 *
+	 * @access public
+	 * @return int
+	 */
+	public function get_total_stock() {
+		if ( empty( $this->total_stock ) ) {
+			$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-        	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-		        $this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
+			if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
+				$this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
 
 				if ( sizeof( $this->get_children() ) > 0 ) {
 					foreach ( $this->get_children() as $child_id ) {
@@ -70,7 +70,7 @@ class WC_Product_Variable extends WC_Product {
 			}
 		}
 		return wc_stock_amount( $this->total_stock );
-    }
+	}
 
 	/**
 	 * Set stock level of the product.
@@ -134,8 +134,8 @@ class WC_Product_Variable extends WC_Product {
 			$transient_name = 'wc_product_children_ids_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 			$this->children = get_transient( $transient_name );
 
-        	if ( empty( $this->children ) ) {
-		        $args = array(
+			if ( empty( $this->children ) ) {
+				$args = array(
 					'post_parent' => $this->id,
 					'post_type'   => 'product_variation',
 					'orderby'     => 'menu_order',
@@ -143,7 +143,7 @@ class WC_Product_Variable extends WC_Product {
 					'fields'      => 'ids',
 					'post_status' => 'publish',
 					'numberposts' => -1
-		        );
+				);
 
 				$this->children = get_posts( $args );
 
@@ -330,32 +330,32 @@ class WC_Product_Variable extends WC_Product {
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
-    /**
-     * Return an array of attributes used for variations, as well as their possible values.
-     *
-     * @access public
-     * @return array of attributes and their available values
-     */
-    public function get_variation_attributes() {
-	    $variation_attributes = array();
+	/**
+	 * Return an array of attributes used for variations, as well as their possible values.
+	 *
+	 * @access public
+	 * @return array of attributes and their available values
+	 */
+	public function get_variation_attributes() {
+		$variation_attributes = array();
 
-        if ( ! $this->has_child() ) {
-        	return $variation_attributes;
-        }
+		if ( ! $this->has_child() ) {
+			return $variation_attributes;
+		}
 
-        $attributes = $this->get_attributes();
+		$attributes = $this->get_attributes();
 
-        foreach ( $attributes as $attribute ) {
-            if ( ! $attribute['is_variation'] ) {
-            	continue;
-            }
+		foreach ( $attributes as $attribute ) {
+			if ( ! $attribute['is_variation'] ) {
+				continue;
+			}
 
-            $values = array();
-            $attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
+			$values = array();
+			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
-            foreach ( $this->get_children() as $child_id ) {
+			foreach ( $this->get_children() as $child_id ) {
 
-            	$variation = $this->get_child( $child_id );
+				$variation = $this->get_child( $child_id );
 
 				if ( ! empty( $variation->variation_id ) ) {
 
@@ -365,22 +365,22 @@ class WC_Product_Variable extends WC_Product {
 
 					$child_variation_attributes = $variation->get_variation_attributes();
 
-	                foreach ( $child_variation_attributes as $name => $value ) {
-	                    if ( $name == $attribute_field_name ) {
-	                    	$values[] = sanitize_title( $value );
-	                    }
-	                }
-                }
-            }
+					foreach ( $child_variation_attributes as $name => $value ) {
+						if ( $name == $attribute_field_name ) {
+							$values[] = sanitize_title( $value );
+						}
+					}
+				}
+			}
 
-            // empty value indicates that all options for given attribute are available
-            if ( in_array( '', $values ) ) {
+			// empty value indicates that all options for given attribute are available
+			if ( in_array( '', $values ) ) {
 
-            	$values = array();
+				$values = array();
 
-            	// Get all options
-            	if ( $attribute['is_taxonomy'] ) {
-	            	$post_terms = wp_get_post_terms( $this->id, $attribute['name'] );
+				// Get all options
+				if ( $attribute['is_taxonomy'] ) {
+					$post_terms = wp_get_post_terms( $this->id, $attribute['name'] );
 					foreach ( $post_terms as $term )
 						$values[] = $term->slug;
 				} else {
@@ -390,46 +390,46 @@ class WC_Product_Variable extends WC_Product {
 				$values = array_unique( $values );
 
 			// Order custom attributes (non taxonomy) as defined
-            } elseif ( ! $attribute['is_taxonomy'] ) {
+			} elseif ( ! $attribute['is_taxonomy'] ) {
 
-            	$option_names = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
-            	$option_slugs = $values;
-            	$values       = array();
+				$option_names = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
+				$option_slugs = $values;
+				$values       = array();
 
-            	foreach ( $option_names as $option_name ) {
-	            	if ( in_array( sanitize_title( $option_name ), $option_slugs ) )
-	            		$values[] = $option_name;
-            	}
-            }
+				foreach ( $option_names as $option_name ) {
+					if ( in_array( sanitize_title( $option_name ), $option_slugs ) )
+						$values[] = $option_name;
+				}
+			}
 
-            $variation_attributes[ $attribute['name'] ] = array_unique( $values );
-        }
+			$variation_attributes[ $attribute['name'] ] = array_unique( $values );
+		}
 
-        return $variation_attributes;
-    }
+		return $variation_attributes;
+	}
 
-    /**
-     * If set, get the default attributes for a variable product.
-     *
-     * @access public
-     * @return array
-     */
-    public function get_variation_default_attributes() {
+	/**
+	 * If set, get the default attributes for a variable product.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_variation_default_attributes() {
 
-    	$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
+		$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
 
-	    return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
-    }
+		return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
+	}
 
-    /**
-     * Get an array of available variations for the current product.
-     *
-     * @access public
-     * @return array
-     */
-    public function get_available_variations() {
+	/**
+	 * Get an array of available variations for the current product.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_available_variations() {
 
-	    $available_variations = array();
+		$available_variations = array();
 
 		foreach ( $this->get_children() as $child_id ) {
 
@@ -493,7 +493,7 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		return $available_variations;
-    }
+	}
 
 	/**
 	 * Sync variable product prices with the children lowest/highest prices.

@@ -139,7 +139,7 @@ abstract class WC_Widget extends WP_Widget {
 
 		$instance = $old_instance;
 
-		if ( ! $this->settings ) {
+		if ( empty( $this->settings ) ) {
 			return $instance;
 		}
 
@@ -165,7 +165,7 @@ abstract class WC_Widget extends WP_Widget {
 	 */
 	public function form( $instance ) {
 
-		if ( ! $this->settings ) {
+		if ( empty( $this->settings ) ) {
 			return;
 		}
 

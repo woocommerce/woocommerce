@@ -307,7 +307,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 *
 	 * @param  WC_Order $order
 	 * @param  string   $cart_token
-	 *
+	 * @uses   Simplify_ApiException
+	 * @uses   Simplify_BadRequestException
 	 * @return array
 	 */
 	protected function process_standard_payments( $order, $cart_token = '' ) {
@@ -501,6 +502,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 * @param  int $order_id
 	 * @param  float $amount
 	 * @param  string $reason
+	 * @uses   Simplify_ApiException
+	 * @uses   Simplify_BadRequestException
 	 * @return bool|WP_Error
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
