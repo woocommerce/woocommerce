@@ -95,7 +95,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Process the webhook for delivery by verifying the it should be delivered
+	 * Process the webhook for delivery by verifying that it should be delivered
 	 * and scheduling the delivery (in the background by default, or immediately)
 	 *
 	 * @since 2.2
