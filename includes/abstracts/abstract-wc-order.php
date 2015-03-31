@@ -627,6 +627,7 @@ abstract class WC_Abstract_Order {
 
 				wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax ) );
 				wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax ) );
+				wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $line_taxes, 'subtotal' => $line_subtotal_taxes ) );
 
 				// Sum the item taxes
 				foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
