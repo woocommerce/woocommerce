@@ -401,6 +401,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				permissions.access_expires IS NULL
 				OR
 				permissions.access_expires >= %s
+				OR
+				permissions.access_expires = '0000-00-00 00:00:00'
 			)
 		ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;
 		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) );
