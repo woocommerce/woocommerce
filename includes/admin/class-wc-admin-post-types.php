@@ -1528,7 +1528,7 @@ class WC_Admin_Post_Types {
 	 * @return array
 	 */
 	public function request_query( $vars ) {
-		global $typenow, $wp_query;
+		global $typenow, $wp_query, $wp_post_statuses;
 
 		if ( 'product' === $typenow ) {
 			// Sorting
@@ -1580,7 +1580,15 @@ class WC_Admin_Post_Types {
 
 			// Status
 			if ( ! isset( $vars['post_status'] ) ) {
-				$vars['post_status'] = array_keys( wc_get_order_statuses() );
+				$post_statuses = wc_get_order_statuses();
+
+				foreach ( $post_statuses as $status => $value ) {
+					if ( isset( $wp_post_statuses[ $status ] ) && false === $wp_post_statuses[ $status ]->show_in_admin_all_list ) {
+						unset( $post_statuses[ $status ] );
+					}
+				}
+
+				$vars['post_status'] = array_keys( $post_statuses );
 			}
 		}
 
