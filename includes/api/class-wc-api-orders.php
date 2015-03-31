@@ -242,7 +242,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
 				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
-				'quantity'     => (int) $item['qty'],
+				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
 				'name'         => $item['name'],
 				'product_id'   => $product_id,
