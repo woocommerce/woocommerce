@@ -489,9 +489,10 @@ class WC_Admin_Report {
 			break;
 
 			case 'last_month' :
-				$this->start_date    = strtotime( date( 'Y-m-01', strtotime( '-1 MONTH', current_time('timestamp') ) ) );
-				$this->end_date      = strtotime( date( 'Y-m-t', strtotime( '-1 MONTH', current_time('timestamp') ) ) );
-				$this->chart_groupby = 'day';
+				$first_day_current_month = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
+				$this->start_date        = strtotime( date( 'Y-m-01', strtotime( '-1 DAY', $first_day_current_month ) ) );
+				$this->end_date          = strtotime( date( 'Y-m-t', strtotime( '-1 DAY', $first_day_current_month ) ) );
+				$this->chart_groupby     = 'day';
 			break;
 
 			case 'month' :
