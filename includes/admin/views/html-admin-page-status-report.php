@@ -624,7 +624,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					'user-agent' => 'WooCommerce System Status'
 				);
 
-				$url = $http_url = 'http://api.wordpress.org/themes/update-check/1.1/';
+				$url = 'http://api.wordpress.org/themes/update-check/1.1/';
 				if ( $ssl = wp_http_supports( array( 'ssl' ) ) ) {
 					$url = set_url_scheme( $url, 'https' );
 				}
