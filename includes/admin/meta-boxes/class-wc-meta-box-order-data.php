@@ -405,7 +405,7 @@ class WC_Meta_Box_Order_Data {
 			}
 		}
 
-		if ( ! empty( self::$billing_fields ) ) {
+		if ( ! empty( self::$shipping_fields ) ) {
 			foreach ( self::$shipping_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ){
 					$field['id'] = '_shipping_' . $key;
