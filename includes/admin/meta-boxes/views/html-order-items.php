@@ -20,7 +20,7 @@ if ( wc_tax_enabled() ) {
 	$classes_options     = array();
 	$classes_options[''] = __( 'Standard', 'woocommerce' );
 
-	if ( $tax_classes ) {
+	if ( ! empty( $tax_classes ) ) {
 		foreach ( $tax_classes as $class ) {
 			$classes_options[ sanitize_title( $class ) ] = $class;
 		}

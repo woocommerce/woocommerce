@@ -505,7 +505,7 @@ class WC_Admin_Post_Types {
 								<?php else : ?>
 									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
 								<?php endif; ?>
-								<?php if ( $item_meta_html ) : ?>
+								<?php if ( ! empty( $item_meta_html ) ) : ?>
 									<a class="tips" href="#" data-tip="<?php echo esc_attr( $item_meta_html ); ?>">[?]</a>
 								<?php endif; ?>
 							</td>
@@ -2048,7 +2048,7 @@ class WC_Admin_Post_Types {
 		$new_download_ids      = array_filter( array_diff( $updated_download_ids, $existing_download_ids ) );
 		$removed_download_ids  = array_filter( array_diff( $existing_download_ids, $updated_download_ids ) );
 
-		if ( $new_download_ids || $removed_download_ids ) {
+		if ( ! empty( $new_download_ids ) || ! empty( $removed_download_ids ) ) {
 			// determine whether downloadable file access has been granted via the typical order completion, or via the admin ajax method
 			$existing_permissions = $wpdb->get_results( $wpdb->prepare( "SELECT * from {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE product_id = %d GROUP BY order_id", $product_id ) );
 
@@ -2057,7 +2057,7 @@ class WC_Admin_Post_Types {
 
 				if ( $order->id ) {
 					// Remove permissions
-					if ( $removed_download_ids ) {
+					if ( ! empty( $removed_download_ids ) ) {
 						foreach ( $removed_download_ids as $download_id ) {
 							if ( apply_filters( 'woocommerce_process_product_file_download_paths_remove_access_to_old_file', true, $download_id, $product_id, $order ) ) {
 								$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) );
@@ -2065,7 +2065,7 @@ class WC_Admin_Post_Types {
 						}
 					}
 					// Add permissions
-					if ( $new_download_ids ) {
+					if ( ! empty( $new_download_ids ) ) {
 
 						foreach ( $new_download_ids as $download_id ) {
 

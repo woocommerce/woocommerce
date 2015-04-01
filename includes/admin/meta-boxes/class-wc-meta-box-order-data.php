@@ -320,7 +320,7 @@ class WC_Meta_Box_Order_Data {
 									echo '<p class="none_set"><strong>' . __( 'Address', 'woocommerce' ) . ':</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
 								}
 
-								if ( self::$shipping_fields ) {
+								if ( ! empty( self::$shipping_fields ) ) {
 									foreach ( self::$shipping_fields as $key => $field ) {
 										if ( isset( $field['show'] ) && false === $field['show'] ) {
 											continue;
@@ -343,7 +343,7 @@ class WC_Meta_Box_Order_Data {
 							// Display form
 							echo '<div class="edit_address"><p><button class="button load_customer_shipping">' . __( 'Load shipping address', 'woocommerce' ) . '</button> <button class="button billing-same-as-shipping">' . __( 'Copy from billing', 'woocommerce' ) . '</button></p>';
 
-							if ( self::$shipping_fields ) {
+							if ( ! empty( self::$shipping_fields ) ) {
 								foreach ( self::$shipping_fields as $key => $field ) {
 									if ( ! isset( $field['type'] ) ) {
 										$field['type'] = 'text';
@@ -396,7 +396,7 @@ class WC_Meta_Box_Order_Data {
 		// Update meta
 		update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
 
-		if ( self::$billing_fields ) {
+		if ( ! empty( self::$billing_fields ) ) {
 			foreach ( self::$billing_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ){
 					$field['id'] = '_billing_' . $key;
@@ -405,7 +405,7 @@ class WC_Meta_Box_Order_Data {
 			}
 		}
 
-		if ( self::$shipping_fields ) {
+		if ( ! empty( self::$billing_fields ) ) {
 			foreach ( self::$shipping_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ){
 					$field['id'] = '_shipping_' . $key;

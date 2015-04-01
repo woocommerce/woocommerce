@@ -191,6 +191,7 @@ class WC_Admin_Notices {
 		$outdated       = false;
 
 		foreach ( $core_templates as $file ) {
+
 			$theme_file = false;
 			if ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
 				$theme_file = get_stylesheet_directory() . '/' . $file;
@@ -202,7 +203,7 @@ class WC_Admin_Notices {
 				$theme_file = get_template_directory() . '/woocommerce/' . $file;
 			}
 
-			if ( $theme_file ) {
+			if ( $theme_file !== false ) {
 				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
 				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
