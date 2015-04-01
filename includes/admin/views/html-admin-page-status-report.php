@@ -634,16 +634,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! is_wp_error( $raw_response ) ) {
 					$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
 
-					$theme_version_data = array();
-					foreach ( $response['themes'] as $theme ) {
-						$theme_dir            = $theme['theme'];
-						$last_checked_version = isset( $response['themes'][ $theme_dir ]['new_version'] ) ? $response['themes'][ $theme_dir ]['new_version'] : false;
+					if ( ! empty( $response['themes'] ) ) {
 
-						$theme_version_data[ $theme_dir ] = array(
-							'version' => $last_checked_version
-						);
+						$theme_version_data = array();
+						foreach ( $response['themes'] as $theme ) {
+							$theme_dir            = $theme['theme'];
+							$last_checked_version = isset( $response['themes'][ $theme_dir ]['new_version'] ) ? $response['themes'][ $theme_dir ]['new_version'] : false;
 
-						set_transient( $theme_dir . '_version_data', $theme_version_data, DAY_IN_SECONDS );
+							$theme_version_data[ $theme_dir ] = array(
+								'version' => $last_checked_version
+							);
+
+							set_transient( $theme_dir . '_version_data', $theme_version_data, DAY_IN_SECONDS );
+						}
 					}
 				}
 			}
