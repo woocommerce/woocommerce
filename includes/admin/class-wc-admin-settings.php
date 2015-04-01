@@ -561,7 +561,7 @@ class WC_Admin_Settings {
 				// Country multiselects
 				case 'multi_select_countries' :
 
-					$selections = ( array ) self::get_option( $value['id'] );
+					$selections = (array) self::get_option( $value['id'] );
 
 					if ( ! empty( $value['options'] ) ) {
 						$countries = $value['options'];
