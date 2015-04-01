@@ -4162,7 +4162,7 @@ table.bar_chart {
  * Select2
  */
 .select2-drop {
-	z-index: 999999;
+	z-index: 999999 !important;
 }
 .select2-container-multi .select2-choices .select2-search-field input {
 	font-family: inherit;
