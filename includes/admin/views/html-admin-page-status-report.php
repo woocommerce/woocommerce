@@ -309,12 +309,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</th>
+			<th colspan="3" data-export-label="Active Plugins (<?php echo count( ( array ) get_option( 'active_plugins' ) ); ?>)"><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</th>
 		</tr>
 	</thead>
 	<tbody>
 		<?php
-		$active_plugins = (array) get_option( 'active_plugins', array() );
+		$active_plugins = ( array ) get_option( 'active_plugins', array() );
 
 		if ( is_multisite() ) {
 			$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
@@ -507,7 +507,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				}
 
-				if ( ! $error ) echo '<mark class="yes">#' . absint( $page_id ) . ' - ' . str_replace( home_url(), '', get_permalink( $page_id ) ) . '</mark>';
+				if ( ! $error ) {
+					echo '<mark class="yes">#' . absint( $page_id ) . ' - <a href="' . get_permalink( $page_id ) . '" target="_blank">' . str_replace( home_url(), '', get_permalink( $page_id ) ) . '</a></mark>';
+				}
 
 				echo '</td></tr>';
 			}
