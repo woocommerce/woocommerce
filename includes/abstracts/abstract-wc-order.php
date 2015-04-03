@@ -135,7 +135,7 @@ abstract class WC_Abstract_Order {
 	public function remove_order_items( $type = null ) {
 		global $wpdb;
 
-		if ( $type ) {
+		if ( ! empty( $type ) ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->id, $type ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->id, $type ) );
 		} else {
@@ -575,33 +575,29 @@ abstract class WC_Abstract_Order {
 	 * @return bool success or fail
 	 */
 	public function calculate_taxes() {
-
 		$tax_total    = 0;
 		$taxes        = array();
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
-		if ( 'base' === $tax_based_on ) {
+		if ( 'billing' === $tax_based_on ) {
+			$country  = $this->billing_country;
+			$state    = $this->billing_state;
+			$postcode = $this->billing_postcode;
+			$city     = $this->billing_city;
+		} elseif ( 'shipping' === $tax_based_on ) {
+			$country  = $this->shipping_country;
+			$state    = $this->shipping_state;
+			$postcode = $this->shipping_postcode;
+			$city     = $this->shipping_city;
+		}
 
+		// Default to base
+		if ( 'base' === $tax_based_on || empty( $country ) ) {
 			$default  = wc_get_base_location();
 			$country  = $default['country'];
 			$state    = $default['state'];
 			$postcode = '';
 			$city     = '';
-
-		} elseif ( 'billing' === $tax_based_on ) {
-
-			$country  = $this->billing_country;
-			$state    = $this->billing_state;
-			$postcode = $this->billing_postcode;
-			$city     = $this->billing_city;
-
-		} else {
-
-			$country  = $this->shipping_country;
-			$state    = $this->shipping_state;
-			$postcode = $this->shipping_postcode;
-			$city     = $this->shipping_city;
-
 		}
 
 		// Get items
@@ -631,6 +627,7 @@ abstract class WC_Abstract_Order {
 
 				wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax ) );
 				wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax ) );
+				wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $line_taxes, 'subtotal' => $line_subtotal_taxes ) );
 
 				// Sum the item taxes
 				foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
@@ -649,7 +646,7 @@ abstract class WC_Abstract_Order {
 			'tax_class' => ''
 		) );
 
-		if ( $tax_rates ) {
+		if ( ! empty( $tax_rates ) ) {
 			foreach ( $tax_rates as $key => $rate ) {
 				if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
 					$matched_tax_rates[ $key ] = $rate;
@@ -1188,7 +1185,7 @@ abstract class WC_Abstract_Order {
 		$shipping_methods = $this->get_shipping_methods();
 		$has_method = false;
 
-		if ( ! $shipping_methods ) {
+		if ( empty( $shipping_methods ) ) {
 			return false;
 		}
 

@@ -499,8 +499,9 @@ function wc_cancel_unpaid_orders() {
 		foreach ( $unpaid_orders as $unpaid_order ) {
 			$order = wc_get_order( $unpaid_order );
 
-			if ( apply_filters( 'woocommerce_cancel_unpaid_order', true, $order ) )
+			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === get_post_meta( $unpaid_order, '_created_via', true ), $order ) ) {
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+			}
 		}
 	}
 
@@ -567,6 +568,9 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	foreach( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
+
+	// Increments the transient version to invalidate cache
+	WC_Cache_Helper::get_transient_version( 'orders', true );
 
 	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
 }

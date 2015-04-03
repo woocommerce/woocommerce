@@ -36,11 +36,17 @@ if ( $attachment_ids ) {
 			if ( ! $image_link )
 				continue;
 
-			$image       = wp_get_attachment_image( $attachment_id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ) );
-			$image_class = esc_attr( implode( ' ', $classes ) );
-			$image_title = esc_attr( get_the_title( $attachment_id ) );
+			$image_title 	= esc_attr( get_the_title( $attachment_id ) );
+			$image_caption 	= esc_attr( get_post_field( 'post_excerpt', $attachment_id ) );
 
-			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', sprintf( '<a href="%s" class="%s" title="%s" data-rel="prettyPhoto[product-gallery]">%s</a>', $image_link, $image_class, $image_title, $image ), $attachment_id, $post->ID, $image_class );
+			$image       = wp_get_attachment_image( $attachment_id, apply_filters( 'single_product_small_thumbnail_size', 'shop_thumbnail' ), 0, $attr = array(
+				'title'	=> $image_title,
+				'alt'	=> $image_title
+				) );
+
+			$image_class = esc_attr( implode( ' ', $classes ) );
+
+			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', sprintf( '<a href="%s" class="%s" title="%s" data-rel="prettyPhoto[product-gallery]">%s</a>', $image_link, $image_class, $image_caption, $image ), $attachment_id, $post->ID, $image_class );
 
 			$loop++;
 		}

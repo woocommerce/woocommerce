@@ -244,8 +244,8 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_user_counts() {
-		$user_count = array();
-		$user_count_data = count_users();
+		$user_count          = array();
+		$user_count_data     = count_users();
 		$user_count['total'] = $user_count_data['total_users'];
 
 		// Get user count based on user role
@@ -261,14 +261,15 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_product_counts() {
-		$product_count = array();
-		$product_count_data = wp_count_posts( 'product' );
+		$product_count          = array();
+		$product_count_data     = wp_count_posts( 'product' );
 		$product_count['total'] = $product_count_data->publish;
 
 		$product_statuses = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $product_statuses as $product_status ) {
 			$product_count[ $product_status->name ] = $product_status->count;
 		}
+
 		return $product_count;
 	}
 
@@ -277,12 +278,13 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_order_counts() {
-		$order_count = array();
+		$order_count      = array();
 		$order_count_data = wp_count_posts( 'shop_order' );
 
 		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
 			$order_count[ $status_slug ] = $order_count_data->{ $status_slug };
 		}
+
 		return $order_count;
 	}
 
@@ -292,12 +294,13 @@ class WC_Tracker {
 	 */
 	private static function get_active_payment_gateways() {
 		$active_gateways = array();
-		$gateways = WC()->payment_gateways->payment_gateways();
+		$gateways        = WC()->payment_gateways->payment_gateways();
 		foreach ( $gateways as $id => $gateway ) {
 			if ( isset( $gateway->enabled ) && $gateway->enabled == 'yes' ) {
 				$active_gateways[ $id ] = array( 'title' => $gateway->title, 'supports' => $gateway->supports );
 			}
 		}
+
 		return $active_gateways;
 	}
 
@@ -306,13 +309,14 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_active_shipping_methods() {
-		$active_methods = array();
+		$active_methods   = array();
 		$shipping_methods = WC()->shipping->get_shipping_methods();
 		foreach ( $shipping_methods as $id => $shipping_method ) {
 			if ( isset( $shipping_method->enabled ) && $shipping_method->enabled == 'yes' ) {
 				$active_methods[ $id ] = array( 'title' => $shipping_method->title, 'tax_status' => $shipping_method->tax_status );
 			}
 		}
+
 		return $active_methods;
 	}
 
@@ -322,23 +326,23 @@ class WC_Tracker {
 	 */
 	private static function get_all_woocommerce_options_values() {
 		return array(
-			'version'								=> WC()->version,
-			'currency'								=> get_woocommerce_currency(),
-			'base_location'							=> WC()->countries->get_base_country(),
-			'selling_locations'						=> WC()->countries->get_allowed_countries(),
-			'api_enabled'							=> get_option( 'woocommerce_api_enabled' ),
-			'weight_unit'							=> get_option( 'woocommerce_weight_unit' ),
-			'dimension_unit'						=> get_option( 'woocommerce_dimension_unit' ),
-			'download_method'						=> get_option( 'woocommerce_file_download_method' ),
-			'download_require_login'				=> get_option( 'woocommerce_downloads_require_login' ),
-			'calc_taxes'							=> get_option( 'woocommerce_calc_taxes' ),
-			'coupons_enabled'						=> get_option( 'woocommerce_enable_coupons' ),
-			'guest_checkout'						=> get_option( 'woocommerce_enable_guest_checkout'),
-			'secure_checkout'						=> get_option( 'woocommerce_force_ssl_checkout' ),
-			'enable_signup_and_login_from_checkout'	=> get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),
-			'enable_myaccount_registration'			=> get_option( 'woocommerce_enable_myaccount_registration' ),
-			'registration_generate_username'		=> get_option( 'woocommerce_registration_generate_username' ),
-			'registration_generate_password'		=> get_option( 'woocommerce_registration_generate_password' ),
+			'version'                               => WC()->version,
+			'currency'                              => get_woocommerce_currency(),
+			'base_location'                         => WC()->countries->get_base_country(),
+			'selling_locations'                     => WC()->countries->get_allowed_countries(),
+			'api_enabled'                           => get_option( 'woocommerce_api_enabled' ),
+			'weight_unit'                           => get_option( 'woocommerce_weight_unit' ),
+			'dimension_unit'                        => get_option( 'woocommerce_dimension_unit' ),
+			'download_method'                       => get_option( 'woocommerce_file_download_method' ),
+			'download_require_login'                => get_option( 'woocommerce_downloads_require_login' ),
+			'calc_taxes'                            => get_option( 'woocommerce_calc_taxes' ),
+			'coupons_enabled'                       => get_option( 'woocommerce_enable_coupons' ),
+			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout'),
+			'secure_checkout'                       => get_option( 'woocommerce_force_ssl_checkout' ),
+			'enable_signup_and_login_from_checkout' => get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),
+			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
+			'registration_generate_username'        => get_option( 'woocommerce_registration_generate_username' ),
+			'registration_generate_password'        => get_option( 'woocommerce_registration_generate_password' ),
 		);
 	}
 
@@ -370,7 +374,8 @@ class WC_Tracker {
 				} else {
 					$theme_file = false;
 				}
-				if ( $theme_file ) {
+
+				if ( $theme_file !== false ) {
 					$override_data[] = basename( $theme_file );
 				}
 			}

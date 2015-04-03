@@ -57,7 +57,9 @@ function wc_create_order( $args = array() ) {
 		'status'        => '',
 		'customer_id'   => null,
 		'customer_note' => null,
-		'order_id'      => 0
+		'order_id'      => 0,
+		'created_via'   => '',
+		'parent'        => 0
 	);
 
 	$args       = wp_parse_args( $args, $default_args );
@@ -74,6 +76,7 @@ function wc_create_order( $args = array() ) {
 		$order_data['post_author']   = 1;
 		$order_data['post_password'] = uniqid( 'order_' );
 		$order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		$order_data['post_parent']   = absint( $args['parent'] );
 	}
 
 	if ( $args['status'] ) {
@@ -97,7 +100,6 @@ function wc_create_order( $args = array() ) {
 		return $order_id;
 	}
 
-	// Default order meta data.
 	if ( ! $updating ) {
 		update_post_meta( $order_id, '_order_key', 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
 		update_post_meta( $order_id, '_order_currency', get_woocommerce_currency() );
@@ -105,6 +107,7 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_customer_ip_address', isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
 		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 		update_post_meta( $order_id, '_customer_user', 0 );
+		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
 	}
 
 	if ( is_numeric( $args['customer_id'] ) ) {

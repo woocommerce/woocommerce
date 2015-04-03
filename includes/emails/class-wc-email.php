@@ -402,7 +402,6 @@ class WC_Email extends WC_Settings_API {
 			} catch ( Exception $e ) {
 
 				$logger = new WC_Logger();
-
 				$logger->add( 'emogrifier', $e->getMessage() );
 			}
 		}
@@ -535,53 +534,8 @@ class WC_Email extends WC_Settings_API {
 		parent::process_admin_options();
 
 		// Save templates
-		if ( ! empty( $_POST['template_html_code'] ) && ! empty( $this->template_html ) ) {
-
-			$saved  = false;
-			$file   = get_stylesheet_directory() . '/woocommerce/' . $this->template_html;
-			$code   = stripslashes( $_POST['template_html_code'] );
-
-			if ( is_writeable( $file ) ) {
-
-				$f = fopen( $file, 'w+' );
-
-				if ( $f !== false ) {
-					fwrite( $f, $code );
-					fclose( $f );
-					$saved = true;
-				}
-			}
-
-			if ( ! $saved ) {
-				$redirect = add_query_arg( 'wc_error', urlencode( __( 'Could not write to template file.', 'woocommerce' ) ) );
-				wp_redirect( $redirect );
-				exit;
-			}
-		}
-
-		if ( ! empty( $_POST['template_plain_code'] ) && ! empty( $this->template_plain ) ) {
-
-			$saved  = false;
-			$file   = get_stylesheet_directory() . '/woocommerce/' . $this->template_plain;
-			$code   = stripslashes( $_POST['template_plain_code'] );
-
-			if ( is_writeable( $file ) ) {
-
-				$f = fopen( $file, 'w+' );
-
-				if ( $f !== false ) {
-					fwrite( $f, $code );
-					fclose( $f );
-					$saved = true;
-				}
-			}
-
-			if ( ! $saved ) {
-				$redirect = add_query_arg( 'wc_error', __( 'Could not write to template file.', 'woocommerce' ) );
-				wp_redirect( $redirect );
-				exit;
-			}
-		}
+		$this->save_template( $_POST['template_html_code'], $this->template_html );
+		$this->save_template( $_POST['template_plain_code'], $this->template_plain );
 	}
 
 	/**
@@ -601,6 +555,38 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Save the email templates
+	 *
+	 * @param string $template_code
+	 * @param string $template_path
+	 * @return void
+	 */
+	protected function save_template( $template_code, $template_path ) {
+		if ( ! empty( $template_code ) && ! empty( $template_path ) ) {
+			$saved  = false;
+			$file   = get_stylesheet_directory() . '/woocommerce/' . $template_path;
+			$code   = stripslashes( $template_code );
+
+			if ( is_writeable( $file ) ) {
+
+				$f = fopen( $file, 'w+' );
+
+				if ( $f !== false ) {
+					fwrite( $f, $code );
+					fclose( $f );
+					$saved = true;
+				}
+			}
+
+			if ( ! $saved ) {
+				$redirect = add_query_arg( 'wc_error', urlencode( __( 'Could not write to template file.', 'woocommerce' ) ) );
+				wp_redirect( $redirect );
+				exit;
+			}
+		}
 	}
 
 	/**
@@ -698,13 +684,13 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Admin Options
 	 *
-	 * Setup the gateway settings screen.
-	 * Override this in your gateway.
+	 * Setup the email settings screen.
+	 * Override this in your email.
 	 *
 	 * @since 1.0.0
 	 */
 	public function admin_options() {
-		// Do admin acations.
+		// Do admin actions.
 		$this->admin_actions();
 
 		?>

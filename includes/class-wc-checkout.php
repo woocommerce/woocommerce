@@ -186,7 +186,8 @@ class WC_Checkout {
 			$order_data = array(
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 				'customer_id'   => $this->customer_id,
-				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : ''
+				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
+				'created_via'   => 'checkout'
 			);
 
 			// Insert or update the post data
@@ -595,30 +596,30 @@ class WC_Checkout {
 					$password     = ! empty( $this->posted['account_password'] ) ? $this->posted['account_password'] : '';
 					$new_customer = wc_create_new_customer( $this->posted['billing_email'], $username, $password );
 
-                	if ( is_wp_error( $new_customer ) ) {
-                		throw new Exception( $new_customer->get_error_message() );
-                	}
+					if ( is_wp_error( $new_customer ) ) {
+						throw new Exception( $new_customer->get_error_message() );
+					}
 
-                	$this->customer_id = $new_customer;
+					$this->customer_id = $new_customer;
 
-                	wc_set_customer_auth_cookie( $this->customer_id );
+					wc_set_customer_auth_cookie( $this->customer_id );
 
-                	// As we are now logged in, checkout will need to refresh to show logged in data
-                	WC()->session->set( 'reload_checkout', true );
+					// As we are now logged in, checkout will need to refresh to show logged in data
+					WC()->session->set( 'reload_checkout', true );
 
-                	// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
+					// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering
 					WC()->cart->calculate_totals();
 
-                	// Add customer info from other billing fields
-                	if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
-                		$userdata = array(
+					// Add customer info from other billing fields
+					if ( $this->posted['billing_first_name'] && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
+						$userdata = array(
 							'ID'           => $this->customer_id,
 							'first_name'   => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : '',
 							'last_name'    => $this->posted['billing_last_name'] ? $this->posted['billing_last_name'] : '',
 							'display_name' => $this->posted['billing_first_name'] ? $this->posted['billing_first_name'] : ''
-                		);
-                		wp_update_user( apply_filters( 'woocommerce_checkout_customer_userdata', $userdata, $this ) );
-                	}
+						);
+						wp_update_user( apply_filters( 'woocommerce_checkout_customer_userdata', $userdata, $this ) );
+					}
 				}
 
 				// Do a final stock check at this point

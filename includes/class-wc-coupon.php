@@ -121,10 +121,15 @@ class WC_Coupon {
 		$this->code  = apply_filters( 'woocommerce_coupon_code', $code );
 
 		// Coupon data lets developers create coupons through code
-		if ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
+		if ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $this->code ) ) {
 			$this->populate( $coupon );
 			return true;
-		} elseif ( ( $this->id = $this->get_coupon_id_from_code( $code ) ) && $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
+		}
+
+		// Otherwise get ID from the code
+		$this->id = $this->get_coupon_id_from_code( $this->code );
+
+		if ( $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
 			$this->populate();
 			return true;
 		}
@@ -336,7 +341,7 @@ class WC_Coupon {
 	 * Ensure coupon amount is valid or throw exception
 	 */
 	private function validate_minimum_amount() {
-		if ( $this->minimum_amount > 0 && $this->minimum_amount > WC()->cart->subtotal ) {
+		if ( $this->minimum_amount > 0 && wc_format_decimal( $this->minimum_amount ) > wc_format_decimal( WC()->cart->subtotal ) ) {
 			throw new Exception( self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET );
 		}
 	}
@@ -345,7 +350,7 @@ class WC_Coupon {
 	 * Ensure coupon amount is valid or throw exception
 	 */
 	private function validate_maximum_amount() {
-		if ( $this->maximum_amount > 0 && $this->maximum_amount < WC()->cart->subtotal ) {
+		if ( $this->maximum_amount > 0 && wc_format_decimal( $this->minimum_amount ) < wc_format_decimal( WC()->cart->subtotal ) ) {
 			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
 		}
 	}
