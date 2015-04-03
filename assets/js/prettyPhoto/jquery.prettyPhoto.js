@@ -751,7 +751,7 @@
 
 			settings.markup = settings.markup.replace('{pp_social}','');
 
-			$('body').append(settings.markup); // Inject the markup
+			$(document.body).append(settings.markup); // Inject the markup
 
 			$pp_pic_holder = $('.pp_pic_holder') , $ppt = $('.ppt'), $pp_overlay = $('div.pp_overlay'); // Set my global selectors
 

@@ -6,12 +6,12 @@
 jQuery( function ( $ ) {
 
 	// Price input validation
-	$('body').on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
+	$(document.body).on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
 		$('.wc_error_tip').fadeOut('100', function(){ $(this).remove(); } );
 		return this;
 	});
 
-	$('body').on('keyup change', '.wc_input_price[type=text]', function(){
+	$(document.body).on('keyup change', '.wc_input_price[type=text]', function(){
 		var value		= $(this).val();
 		var regex		= new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.mon_decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
@@ -30,7 +30,7 @@ jQuery( function ( $ ) {
 		return this;
 	});
 
-	$('body').on('keyup change', '.wc_input_decimal[type=text]', function(){
+	$(document.body).on('keyup change', '.wc_input_decimal[type=text]', function(){
 		var value    = $(this).val();
 		var regex    = new RegExp( "[^\-0-9\%.\\" + woocommerce_admin.decimal_point + "]+", "gi" );
 		var newvalue = value.replace( regex, '' );
@@ -49,7 +49,7 @@ jQuery( function ( $ ) {
 		return this;
 	});
 
-	$('body').on( 'keyup', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function(){
+	$(document.body).on( 'keyup', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function(){
 		var sale_price_field = $(this);
 
 		if( sale_price_field.attr('name').indexOf('variable') !== -1 ) {
@@ -75,7 +75,7 @@ jQuery( function ( $ ) {
 		}
 		return this;
 	});
-	$('body').on( 'change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function(){
+	$(document.body).on( 'change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function(){
 		var sale_price_field = $(this);
 
 		if( sale_price_field.attr('name').indexOf('variable') !== -1 ) {
@@ -95,7 +95,7 @@ jQuery( function ( $ ) {
 		return this;
 	});
 
-	$('body').on('keyup change', '.wc_input_country_iso[type=text]', function(){
+	$(document.body).on('keyup change', '.wc_input_country_iso[type=text]', function(){
 		var value = $(this).val();
 		var regex = new RegExp( '^([A-Z])?([A-Z])$' );
 
@@ -222,7 +222,7 @@ jQuery( function ( $ ) {
 	}).change();
 
 	// Show order items on orders page
-	$('body').on( 'click', '.show_order_items', function() {
+	$(document.body).on( 'click', '.show_order_items', function() {
 		$(this).closest('td').find('table').toggle();
 		return false;
 	});

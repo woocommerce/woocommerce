@@ -61,7 +61,7 @@
 		render: function() {
 			this.$el.attr( 'tabindex' , '0' ).append( $( this._target ).html() );
 
-			$( 'body' ).css({
+			$(document.body).css({
 				'overflow': 'hidden'
 			}).append( this.$el );
 
@@ -89,21 +89,21 @@
 				'margin-top': '-' + ( $( '.wc-backbone-modal-content' ).height() / 2 ) + 'px'
 			});
 
-			$( 'body' ).trigger( 'wc_backbone_modal_loaded', this._target );
+			$(document.body).trigger( 'wc_backbone_modal_loaded', this._target );
 		},
 		closeButton: function( e ) {
 			e.preventDefault();
-			$( 'body' ).trigger( 'wc_backbone_modal_before_remove', this._target );
+			$(document.body).trigger( 'wc_backbone_modal_before_remove', this._target );
 			this.undelegateEvents();
 			$( document ).off( 'focusin' );
-			$( 'body' ).css({
+			$(document.body).css({
 				'overflow': 'auto'
 			});
 			this.remove();
-			$( 'body' ).trigger( 'wc_backbone_modal_removed', this._target );
+			$(document.body).trigger( 'wc_backbone_modal_removed', this._target );
 		},
 		addButton: function( e ) {
-			$( 'body' ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
+			$(document.body).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e );
 		},
 		getFormData: function() {

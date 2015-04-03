@@ -75,7 +75,7 @@
 
 	$( function () {
 
-		$( 'body' ).on( 'checkout_error', function () {
+		$(document.body).on( 'checkout_error', function () {
 			$( '.simplify-token' ).remove();
 		});
 

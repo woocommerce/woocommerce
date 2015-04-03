@@ -14,9 +14,9 @@ jQuery( function( $ ) {
 		$order_review: $( '#order_review' ),
 		$checkout_form: $( 'form.checkout' ),
 	    init: function() {
-	    	$( 'body' ).bind( 'update_checkout', this.reset_update_checkout_timer );
-			$( 'body' ).bind( 'update_checkout', this.update_checkout );
-			$( 'body' ).bind( 'init_checkout', this.init_checkout );
+	    	$( document.body ).bind( 'update_checkout', this.reset_update_checkout_timer );
+			$( document.body ).bind( 'update_checkout', this.update_checkout );
+			$( document.body ).bind( 'init_checkout', this.init_checkout );
 
 			// Payment methods
 			this.$order_review.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
@@ -42,7 +42,7 @@ jQuery( function( $ ) {
 
 			// Update on page load
 			if ( wc_checkout_params.is_checkout === '1' ) {
-				$( 'body' ).trigger( 'init_checkout' );
+				$(document.body).trigger( 'init_checkout' );
 			}
 			if ( wc_checkout_params.option_guest_checkout === 'yes' ) {
 				$( 'input#createaccount' ).change( this.toggle_create_account ).change();
@@ -57,7 +57,7 @@ jQuery( function( $ ) {
 	    },
 	    init_checkout: function( e ) {
 	    	$( '#billing_country, #shipping_country, .country_to_state' ).change();
-			$( 'body' ).trigger( 'update_checkout' );
+			$(document.body).trigger( 'update_checkout' );
 	    },
 	    maybe_input_changed: function( e ) {
 	    	if ( wc_checkout_form.dirtyInput ) {
@@ -82,13 +82,13 @@ jQuery( function( $ ) {
 	    trigger_update_checkout: function( e ) {
 	    	wc_checkout_form.reset_update_checkout_timer();
 	    	wc_checkout_form.dirtyInput = false;
-	    	$( 'body' ).trigger( 'update_checkout' );
+	    	$(document.body).trigger( 'update_checkout' );
 	    },
 		maybe_update_checkout: function() {
 			var update_totals = true;
 
 			if ( $( wc_checkout_form.dirtyInput ).size() ) {
-				$required_inputs = $( wc_checkout_form.dirtyInput ).closest( 'div' ).find( '.address-field.validate-required' );
+				var $required_inputs = $( wc_checkout_form.dirtyInput ).closest( 'div' ).find( '.address-field.validate-required' );
 
 				if ( $required_inputs.size() ) {
 					$required_inputs.each( function( e ) {
@@ -287,7 +287,7 @@ jQuery( function( $ ) {
 					$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).eq(0).trigger( 'click' );
 
 					// Fire updated_checkout e
-					$( 'body' ).trigger( 'updated_checkout' );
+					$(document.body).trigger( 'updated_checkout' );
 				}
 
 			});
@@ -378,10 +378,10 @@ jQuery( function( $ ) {
 
 							// Trigger update in case we need a fresh nonce
 							if ( result.refresh === 'true' ) {
-								$( 'body' ).trigger( 'update_checkout' );
+								$(document.body).trigger( 'update_checkout' );
 							}
 
-							$( 'body' ).trigger( 'checkout_error' );
+							$(document.body).trigger( 'checkout_error' );
 						}
 					},
 					dataType: 'html'
@@ -395,8 +395,8 @@ jQuery( function( $ ) {
 
 	var wc_checkout_coupons = {
 		init: function() {
-			$( 'body' ).on( 'click', 'a.showcoupon', this.show_coupon_form );
-			$( 'body' ).on( 'click', '.woocommerce-remove-coupon', this.remove_coupon );
+			$( document.body ).on( 'click', 'a.showcoupon', this.show_coupon_form );
+			$( document.body ).on( 'click', '.woocommerce-remove-coupon', this.remove_coupon );
 			$( 'form.checkout_coupon' ).hide().submit( this.submit );
 		},
 		show_coupon_form: function( e ) {
@@ -435,7 +435,7 @@ jQuery( function( $ ) {
 						$form.before( code );
 						$form.slideUp();
 
-						$( 'body' ).trigger( 'update_checkout' );
+						$(document.body).trigger( 'update_checkout' );
 					}
 				},
 				dataType: 'html'
@@ -473,7 +473,7 @@ jQuery( function( $ ) {
 					if ( code ) {
 						$( 'form.woocommerce-checkout' ).before( code );
 
-						$( 'body' ).trigger( 'update_checkout' );
+						$(document.body).trigger( 'update_checkout' );
 
 						// remove coupon code from coupon field
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
@@ -491,7 +491,7 @@ jQuery( function( $ ) {
 
 	var wc_checkout_login_form = {
 		init: function() {
-			$( 'body' ).on( 'click', 'a.showlogin', this.show_login_form );
+			$(document.body).on( 'click', 'a.showlogin', this.show_login_form );
 		},
 		show_login_form: function( e ) {
 	    	$( 'form.login' ).slideToggle();
