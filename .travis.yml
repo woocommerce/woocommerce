@@ -17,6 +17,8 @@ matrix:
   include:
   - php: 5.3
     env: WP_VERSION=latest WP_MULTISITE=1
+  - php: 7.0
+    env: WP_VERSION=latest WP_MULTISITE=0
 
 before_script:
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
