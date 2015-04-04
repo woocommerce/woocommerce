@@ -66,7 +66,7 @@
 			}).append( this.$el );
 
 			var $content  = $( '.wc-backbone-modal-content' ).find( 'article' );
-			var content_h = ( 0 === $content.height() ) ? 90 : $content.height();
+			var content_h = ( $content.height() < 90 ) ? 90 : $content.height();
 			var max_h     = $( window ).height() - 200;
 
 			if ( max_h > 400 ) {
@@ -81,7 +81,7 @@
 			} else {
 				$content.css({
 					'overflow': 'visible',
-					height: content_h
+					height: ( content_h > 90 ) ? 'auto' : content_h + 'px'
 				});
 			}
 
@@ -113,8 +113,7 @@
 				if ( data.hasOwnProperty( item.name ) ) {
 					data[ item.name ] = $.makeArray( data[ item.name ] );
 					data[ item.name ].push( item.value );
-				}
-				else {
+				} else {
 					data[ item.name ] = item.value;
 				}
 			});
