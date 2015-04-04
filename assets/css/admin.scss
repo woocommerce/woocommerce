@@ -4036,7 +4036,7 @@ table.bar_chart {
  */
 .wc-backbone-modal {
 	* {
-		box-sizing: content-box;
+		box-sizing: border-box;
 	}
 
 	.wc-backbone-modal-content {
@@ -4045,7 +4045,7 @@ table.bar_chart {
 		left: 50%;
 		width: 500px;
 		background: #fff;
-		margin: -150px 0 0 -250px;
+		margin-left: -250px;
 		z-index: 160000;
 	}
 }
@@ -4063,7 +4063,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: 50px;
+	padding-bottom: 51px;
 
 	header,
 	article {
@@ -4144,17 +4144,20 @@ table.bar_chart {
 		left: 0;
 		right: 0;
 		bottom: 0;
-		height: 30px;
 		z-index: 100;
-		padding: 10px 0px;
-		border: 0 solid #dfdfdf;
-		border-width: 1px 0 0 0;
+		padding: 10px 16px;
+		background: #fcfcfc;
+		border-top: 1px solid #dfdfdf;
 		box-shadow: 0 -4px 4px -4px rgba(0,0,0,0.1);
-	}
 
-	footer .inner {
-		padding: 0 10px;
-		text-align: right;
+		.inner {
+			float: right;
+			line-height: 23px;
+
+			.button {
+				margin-bottom: 0;
+			}
+		}
 	}
 }
 
