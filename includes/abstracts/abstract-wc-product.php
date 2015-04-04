@@ -33,7 +33,7 @@
  * @property    string $visibility Product visibility
  * @property    string $variation_id Variation ID when dealing with variations
  */
-class WC_Product {
+abstract class WC_Product {
 
 	/**
 	 * The product (post) ID.
