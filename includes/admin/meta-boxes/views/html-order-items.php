@@ -297,8 +297,8 @@ if ( wc_tax_enabled() ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<a class="modal-close modal-close-link" href="#"><span class="close-icon"><span class="screen-reader-text">Close media panel</span></span></a>
 					<h1><?php _e( 'Add products', 'woocommerce' ); ?></h1>
+					<a class="modal-close modal-close-link" href="#"><span class="close-icon"><span class="screen-reader-text">Close media panel</span></span></a>
 				</header>
 				<article>
 					<form action="" method="post">
@@ -321,8 +321,8 @@ if ( wc_tax_enabled() ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<a class="modal-close modal-close-link" href="#"><span class="close-icon"><span class="screen-reader-text">Close media panel</span></span></a>
 					<h1><?php _e( 'Add tax', 'woocommerce' ); ?></h1>
+					<a class="modal-close modal-close-link" href="#"><span class="close-icon"><span class="screen-reader-text">Close media panel</span></span></a>
 				</header>
 				<article>
 					<form action="" method="post">
