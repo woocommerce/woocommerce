@@ -4069,63 +4069,51 @@ table.bar_chart {
 	article {
 		display: block;
 		position: relative;
-		padding: 4px 16px;
 	}
 
 	.wc-backbone-modal-header {
+		height: 50px;
 		background: #fcfcfc;
+		padding: 0 50px 0 16px;
 		border-bottom: 1px solid #ddd;
 
 		h1 {
+			margin: 0;
 			font-size: 22px;
 			font-weight: 700;
-			line-height: 42px;
-			margin: 0;
-		}
-	}
-
-	.modal-close-link {
-		cursor: pointer;
-		color: #777;
-		background-color: transparent;
-		height: 50px;
-		width: 50px;
-		padding: 0;
-		position: absolute;
-		text-align: center;
-		border: 0;
-		border-left: 1px solid #ddd;
-		-webkit-transition: color .1s ease-in-out,background .1s ease-in-out;
-		transition: color .1s ease-in-out,background .1s ease-in-out;
-		top: 0;
-		right: 0;
-		text-decoration: none;
-
-		&:hover {
-			background: #ddd;
-			border-color: #ccc;
-			color: #000;
-			outline: 0;
-			text-decoration: none;
+			line-height: 50px;
 		}
 
-		.close-icon {
-			display: block;
-			height: 15px;
-			background-image: none;
+		.modal-close-link {
+			cursor: pointer;
+			color: #777;
+			height: 50px;
+			width: 50px;
+			padding: 0;
+			position: absolute;
+			top: 0;
+			right: 0;
 			text-align: center;
-			margin: 14px;
-			width: 22px;
+			border: 0;
+			border-left: 1px solid #ddd;
+			background-color: transparent;
+			-webkit-transition: color .1s ease-in-out,background .1s ease-in-out;
+			transition: color .1s ease-in-out,background .1s ease-in-out;
 
 			&:before {
-				content: '\f335';
-				font-size: 22px;
-				font: 400 20px/1 dashicons;
-				speak: none;
-				vertical-align: middle;
-				-webkit-font-smoothing: antialiased;
-				-moz-osx-font-smoothing: grayscale;
+				font: normal 22px/50px 'dashicons' !important;
 				color: #666;
+				display: block;
+				content: '\f335';
+				font-weight: 300;
+			}
+
+			&:hover,
+			&:focus {
+				background: #ddd;
+				border-color: #ccc;
+				color: #000;
+				outline: 0;
 			}
 		}
 	}
