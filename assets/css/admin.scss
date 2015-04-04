@@ -4113,7 +4113,10 @@ table.bar_chart {
 				background: #ddd;
 				border-color: #ccc;
 				color: #000;
-				outline: 0;
+			}
+
+			&:focus {
+				outline: none;
 			}
 		}
 	}
