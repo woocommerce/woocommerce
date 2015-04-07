@@ -29,6 +29,6 @@ jQuery( function( $ ) {
 		$( '#add_payment_method' ).block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 	});
 
-	$( 'body' ).trigger( 'init_add_payment_method' );
+	$(document.body).trigger( 'init_add_payment_method' );
 
 });
