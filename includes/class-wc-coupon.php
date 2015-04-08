@@ -711,7 +711,7 @@ class WC_Coupon {
 				$err = __( 'Coupon is not valid.', 'woocommerce' );
 			break;
 			case self::E_WC_COUPON_NOT_EXIST:
-				$err = __( 'Coupon does not exist!', 'woocommerce' );
+				$err = sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), $this->code );
 			break;
 			case self::E_WC_COUPON_INVALID_REMOVED:
 				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), $this->code );
