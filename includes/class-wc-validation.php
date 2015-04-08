@@ -131,7 +131,7 @@ class WC_Validation {
 	 * @return  string	formatted postcode
 	 */
 	public static function format_postcode( $postcode, $country ) {
-		wc_format_postcode( $postcode, $country );
+		return wc_format_postcode( $postcode, $country );
 	}
 
 	/**
@@ -142,6 +142,6 @@ class WC_Validation {
 	 * @return string
 	 */
 	public static function format_phone( $tel ) {
-		wc_format_phone_number( $tel );
+		return wc_format_phone_number( $tel );
 	}
 }
