@@ -34,7 +34,7 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 
 ## Writing Tests
 
-* Each test file should roughly correspond to an associated source file, e.g. the `formatting-functions.php` test file covers code in the `wc-formatting-functions.php` file
+* Each test file should roughly correspond to an associated source file, e.g. the `formatting/functions.php` test file covers code in the `wc-formatting-functions.php` file
 * Each test method should cover a single method or function with one or more assertions
 * A single method or function can have multiple associated test methods if it's a large or complex method
 * Use the test coverage HTML report (under `tmp/coverage/index.html`) to examine which lines your tests are covering and aim for 100% coverage
