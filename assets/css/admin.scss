@@ -3116,16 +3116,17 @@ img.help_tip {
 		float: left;
 		margin-right: 20px;
 		position: relative;
+		cursor: pointer;
 
 		img {
 			width: 100%;
 			height: auto;
+			display: none;
 		}
 
 		&:before {
-			content: "\f317";
+			content: "\f128";
 			font-family: 'Dashicons';
-			display: none;
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -3133,18 +3134,25 @@ img.help_tip {
 			bottom: 0;
 			text-align: center;
 			line-height: 48px;
-			font-size: 2em;
+			font-size: 48px;
 			font-weight: 400;
 			-webkit-font-smoothing: antialiased;
 		}
 
-		&.remove:before {
-			content: "\f335";
-		}
-
-		&:hover {
-			&:before {
+		&.remove{
+			img {
 				display: block;
+			}
+
+			&:before {
+				content: "\f335";
+				display: none;
+			}
+
+			&:hover {
+				&:before {
+					display: block;
+				}
 			}
 		}
 	}
