@@ -385,7 +385,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 	$file_number = 0;
 
 	// Get results from valid orders only
-	$results = $wpdb->get_results( $wpdb->prepare( "
+	$results = apply_filters( 'woocommerce_permission_list', $wpdb->get_results( $wpdb->prepare( "
 		SELECT permissions.*
 		FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions as permissions
 		WHERE user_id = %d
@@ -403,7 +403,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				permissions.access_expires >= %s
 			)
 		ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;
-		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) );
+		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) ), $customer_id );
 
 	if ( $results ) {
 

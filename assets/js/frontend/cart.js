@@ -34,7 +34,7 @@ jQuery( function( $ ) {
 		$.post( wc_cart_params.wc_ajax_url + 'update_shipping_method', data, function( response ) {
 
 			$( 'div.cart_totals' ).replaceWith( response );
-			$( 'body' ).trigger( 'updated_shipping_method' );
+			$(document.body).trigger( 'updated_shipping_method' );
 
 		});
 	});

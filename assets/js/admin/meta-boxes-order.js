@@ -14,7 +14,7 @@ jQuery( function ( $ ) {
 
 			$( '.js_field-country' ).select2().change( this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
-			$( 'body' ).on( 'change', 'select.js_field-state', this.change_state );
+			$(document.body).on( 'change', 'select.js_field-state', this.change_state );
 			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).click(function() {
 				window.onbeforeunload = '';
 			});
@@ -70,7 +70,7 @@ jQuery( function ( $ ) {
 				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" placeholder="' + placeholder + '" />' );
 			}
 
-			$( 'body' ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
+			$(document.body).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
 		},
 
 		change_state: function() {
@@ -992,7 +992,7 @@ jQuery( function ( $ ) {
 
 			init: function( e, target ) {
 				if ( '#wc-modal-add-products' === target ) {
-					$( 'body' ).trigger( 'wc-enhanced-select-init' );
+					$(document.body).trigger( 'wc-enhanced-select-init' );
 				}
 			},
 
@@ -1213,7 +1213,7 @@ jQuery( function ( $ ) {
 					window.alert( woocommerce_admin_meta_boxes.i18n_download_permission_fail );
 				}
 
-				$('body').trigger( 'wc-init-datepickers' );
+				$(document.body).trigger( 'wc-init-datepickers' );
 				$( '#grant_access_id' ).val( '' ).change();
 				$( '.order_download_permissions' ).unblock();
 			});

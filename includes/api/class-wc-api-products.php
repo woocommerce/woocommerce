@@ -1609,7 +1609,7 @@ class WC_API_Products extends WC_API_Resource {
 				'src'        => current( $attachment ),
 				'title'      => get_the_title( $attachment_id ),
 				'alt'        => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-				'position'   => $position,
+				'position'   => (int) $position,
 			);
 		}
 
@@ -1821,7 +1821,7 @@ class WC_API_Products extends WC_API_Resource {
 				$attributes[] = array(
 					'name'      => wc_attribute_label( $attribute['name'] ),
 					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
-					'position'  => $attribute['position'],
+					'position'  => (int) $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
 					'options'   => array_map( 'trim', $options ),

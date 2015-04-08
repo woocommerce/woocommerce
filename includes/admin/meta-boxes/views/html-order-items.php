@@ -20,7 +20,7 @@ if ( wc_tax_enabled() ) {
 	$classes_options     = array();
 	$classes_options[''] = __( 'Standard', 'woocommerce' );
 
-	if ( $tax_classes ) {
+	if ( ! empty( $tax_classes ) ) {
 		foreach ( $tax_classes as $class ) {
 			$classes_options[ sanitize_title( $class ) ] = $class;
 		}
@@ -297,8 +297,10 @@ if ( wc_tax_enabled() ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<a class="modal-close modal-close-link" href="#"><span class="close-icon"><span class="screen-reader-text">Close media panel</span></span></a>
 					<h1><?php _e( 'Add products', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text">Close modal panel</span>
+					</button>
 				</header>
 				<article>
 					<form action="" method="post">
@@ -313,7 +315,7 @@ if ( wc_tax_enabled() ) {
 			</section>
 		</div>
 	</div>
-	<div class="wc-backbone-modal-backdrop modal-close">&nbsp;</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
 </script>
 
 <script type="text/template" id="wc-modal-add-tax">
@@ -321,8 +323,10 @@ if ( wc_tax_enabled() ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<a class="modal-close modal-close-link" href="#"><span class="close-icon"><span class="screen-reader-text">Close media panel</span></span></a>
 					<h1><?php _e( 'Add tax', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text">Close modal panel</span>
+					</button>
 				</header>
 				<article>
 					<form action="" method="post">
@@ -368,5 +372,5 @@ if ( wc_tax_enabled() ) {
 			</section>
 		</div>
 	</div>
-	<div class="wc-backbone-modal-backdrop modal-close">&nbsp;</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
 </script>

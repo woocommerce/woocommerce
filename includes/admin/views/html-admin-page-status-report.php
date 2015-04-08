@@ -781,7 +781,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			'delay':      0
 		});
 
-		$( 'body' ).on( 'copy', '#copy-for-support', function ( e ) {
+		$(document.body).on( 'copy', '#copy-for-support', function ( e ) {
 			e.clipboardData.clearData();
 			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
 			e.preventDefault();
