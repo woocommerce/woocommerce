@@ -114,6 +114,18 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_log_file_path()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_log_file_path() {
+		$log_dir   = trailingslashit( WC_LOG_DIR );
+		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
+
+		$this->assertEquals( $log_dir . 'unit-tests-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
+	}
+
+	/**
 	 * Test wc_get_core_supported_themes()
 	 *
 	 * @since 2.2
