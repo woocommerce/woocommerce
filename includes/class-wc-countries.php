@@ -520,7 +520,6 @@ class WC_Countries {
 			'state' => array(
 				'type'        => 'state',
 				'label'       => __( 'State / County', 'woocommerce' ),
-				'placeholder' => __( 'Make a selection', 'woocommerce' ),
 				'required'    => true,
 				'class'       => array( 'form-row-first', 'address-field' ),
 				'validate'    => array( 'state' )
