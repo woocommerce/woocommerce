@@ -578,7 +578,7 @@ class WC_Admin_Settings {
 						<td class="forminp">
 							<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
 								<?php
-									if ( $countries ) {
+									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
 											echo '<option value="' . esc_attr( $key ) . '" ' . selected( in_array( $key, $selections ), true, false ).'>' . $val . '</option>';
 										}

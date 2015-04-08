@@ -35,7 +35,7 @@ class WC_Order_Item_Meta {
 	 * @param bool $return (default: false)
 	 * @param string $hideprefix (default: _)
 	 * @param  string $delimiter Delimiter used to separate items when $flat is true
-	 * @return string
+	 * @return string|void
 	 */
 	public function display( $flat = false, $return = false, $hideprefix = '_', $delimiter = ", \n" ) {
 

@@ -255,7 +255,7 @@ class WC_Admin_Status {
 
 		if ( ! empty( $_REQUEST['log_file'] ) && isset( $logs[ sanitize_title( $_REQUEST['log_file'] ) ] ) ) {
 			$viewed_log = $logs[ sanitize_title( $_REQUEST['log_file'] ) ];
-		} elseif ( $logs ) {
+		} elseif ( ! empty( $logs ) ) {
 			$viewed_log = current( $logs );
 		}
 
@@ -301,10 +301,10 @@ class WC_Admin_Status {
 	 */
 	public static function scan_template_files( $template_path ) {
 
-		$files         = scandir( $template_path );
-		$result        = array();
+		$files  = @scandir( $template_path );
+		$result = array();
 
-		if ( $files ) {
+		if ( ! empty( $files ) ) {
 
 			foreach ( $files as $key => $value ) {
 
@@ -329,8 +329,8 @@ class WC_Admin_Status {
 	 * @return array
 	 */
 	public static function scan_log_files() {
-		$files         = @scandir( WC_LOG_DIR );
-		$result        = array();
+		$files  = @scandir( WC_LOG_DIR );
+		$result = array();
 
 		if ( $files ) {
 
@@ -342,7 +342,9 @@ class WC_Admin_Status {
 					}
 				}
 			}
+
 		}
+
 		return $result;
 	}
 }

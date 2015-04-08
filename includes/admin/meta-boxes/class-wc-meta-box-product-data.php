@@ -262,7 +262,7 @@ class WC_Meta_Box_Product_Data {
 						$classes_options     = array();
 						$classes_options[''] = __( 'Standard', 'woocommerce' );
 
-						if ( $tax_classes ) {
+						if ( ! empty( $tax_classes ) ) {
 
 							foreach ( $tax_classes as $class ) {
 								$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
@@ -634,8 +634,7 @@ class WC_Meta_Box_Product_Data {
 		$tax_class_options     = array();
 		$tax_class_options[''] = __( 'Standard', 'woocommerce' );
 
-		if ( $tax_classes ) {
-
+		if ( ! empty( $tax_classes ) ) {
 			foreach ( $tax_classes as $class ) {
 				$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
 			}
@@ -1018,7 +1017,7 @@ class WC_Meta_Box_Product_Data {
 						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
 					}
 
-					if ( $values ) {
+					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values
 						$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
 							'name'         => wc_clean( $attribute_names[ $i ] ),
@@ -1129,7 +1128,7 @@ class WC_Meta_Box_Product_Data {
 				$clear_parent_ids[] = absint( $_POST['previous_parent_id'] );
 			}
 
-			if ( $clear_parent_ids ) {
+			if ( ! empty( $clear_parent_ids ) ) {
 				foreach ( $clear_parent_ids as $clear_id ) {
 					$children_by_price = get_posts( array(
 						'post_parent'    => $clear_id,
