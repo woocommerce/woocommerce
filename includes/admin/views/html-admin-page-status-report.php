@@ -507,7 +507,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				}
 
-				if ( ! $error ) echo '<mark class="yes">#' . absint( $page_id ) . ' - ' . str_replace( home_url(), '', get_permalink( $page_id ) ) . '</mark>';
+				if ( ! $error ) {
+					echo '<mark class="yes">#' . absint( $page_id ) . ' - <a href="' . get_permalink( $page_id ) . '" target="_blank">' . str_replace( home_url(), '', get_permalink( $page_id ) ) . '</a></mark>';
+				}
 
 				echo '</td></tr>';
 			}
@@ -542,10 +544,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</thead>
 		<?php
-		$active_theme = wp_get_theme();
-		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) {
+		$free_woo_themes  = array(
+			'storefront', 'boutique'
+		);
 
-			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->Name ) ), 0, 45 );
+		$active_theme = wp_get_theme();
+		if ( is_child_theme() ) {
+			$parent_theme = wp_get_theme( $active_theme->get_template() );
+		}
+
+		if ( ( $active_theme->get( 'AuthorURI' ) == 'http://www.woothemes.com' || $active_theme->get( 'AuthorURI' ) == 'http://woothemes.com' ) && ! in_array( $active_theme->get_stylesheet(), $free_woo_themes ) ) {
+
+			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->get( 'Name' ) ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {
 
@@ -559,9 +569,83 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$theme_date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
 							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
-							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
-							set_transient( $theme_dir . '_version_data', $theme_version_data , DAY_IN_SECONDS );
+							$theme_version_data = array();
+							$theme_version_data[ $theme_dir ] = array(
+								'date'      => $theme_date,
+								'version'   => $theme_version,
+								'update'    => $theme_update,
+								'changelog' => $theme_changelog
+							);
+
+							set_transient( $theme_dir . '_version_data', $theme_version_data, DAY_IN_SECONDS );
 							break;
+						}
+					}
+				}
+			}
+		} else {
+			$theme_dir        = $active_theme->get_stylesheet();
+			$parent_theme_dir = is_child_theme() ? $parent_theme->get_stylesheet() : '';
+
+			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) )
+				 || ( is_child_theme() && false === ( $theme_version_data = get_transient( $parent_theme_dir . '_version_data' ) ) ) ) {
+				$request           = array();
+				$request['active'] = get_option( 'stylesheet' );
+				$request['themes'] = array(
+					$active_theme->get_stylesheet() => array(
+						'Name'       => $active_theme->get('Name'),
+						'Title'      => $active_theme->get('Name'),
+						'Version'    => $active_theme->get('Version'),
+						'Author'     => $active_theme->get('Author'),
+						'Author URI' => $active_theme->get('AuthorURI'),
+						'Template'   => $active_theme->get_template(),
+						'Stylesheet' => $active_theme->get_stylesheet(),
+					)
+				);
+
+				// Add also the child theme to the request
+				if ( is_child_theme() ) {
+					$request['themes'][ $parent_theme->get_stylesheet() ] = array(
+						'Name'       => $parent_theme->get('Name'),
+						'Title'      => $parent_theme->get('Name'),
+						'Version'    => $parent_theme->get('Version'),
+						'Author'     => $parent_theme->get('Author'),
+						'Author URI' => $parent_theme->get('AuthorURI'),
+						'Template'   => $parent_theme->get_template(),
+						'Stylesheet' => $parent_theme->get_stylesheet(),
+					);
+				}
+
+				$options = array(
+					'timeout' => DAY_IN_SECONDS,
+					'body'    => array(
+						'themes' => wp_json_encode( $request )
+					),
+					'user-agent' => 'WooCommerce System Status'
+				);
+
+				$url = 'http://api.wordpress.org/themes/update-check/1.1/';
+				if ( $ssl = wp_http_supports( array( 'ssl' ) ) ) {
+					$url = set_url_scheme( $url, 'https' );
+				}
+
+				$raw_response = wp_remote_post( $url, $options );
+
+				if ( ! is_wp_error( $raw_response ) ) {
+					$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
+
+					if ( ! empty( $response['themes'] ) ) {
+
+						$theme_version_data = array();
+						foreach ( $response['themes'] as $theme ) {
+							$theme_dir            = $theme['theme'];
+							$last_checked_version = isset( $response['themes'][ $theme_dir ]['new_version'] ) ? $response['themes'][ $theme_dir ]['new_version'] : false;
+
+							$theme_version_data[ $theme_dir ] = array(
+								'version' => $last_checked_version
+							);
+
+							set_transient( $theme_dir . '_version_data', $theme_version_data, DAY_IN_SECONDS );
 						}
 					}
 				}
@@ -572,23 +656,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="Name"><?php _e( 'Name', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The name of the current active theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo $active_theme->Name; ?></td>
+			<td><?php echo $active_theme->get( 'Name' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Version"><?php _e( 'Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the current active theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php
-				echo $active_theme->Version;
+				echo $active_theme->get( 'Version' );
 
-				if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) ) {
-					echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
+				if ( ! empty( $theme_version_data[ $active_theme->get_stylesheet() ]['version'] ) && version_compare( $theme_version_data[ $active_theme->get_stylesheet() ]['version'], $active_theme->get( 'Version' ), '!=' ) ) {
+					echo ' &ndash; <strong style="color:red;">' . $theme_version_data[ $active_theme->get_stylesheet() ]['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
 				}
 			?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Author URL"><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The theme developers URL.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo $active_theme->{'Author URI'}; ?></td>
+			<td><?php echo $active_theme->get( 'AuthorURI' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Child Theme"><?php _e( 'Child Theme', 'woocommerce' ); ?>:</td>
@@ -599,29 +683,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<?php
 		if( is_child_theme() ) :
-			$parent_theme = wp_get_theme( $active_theme->Template );
 		?>
 		<tr>
 			<td data-export-label="Parent Theme Name"><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The name of the parent theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo $parent_theme->Name; ?></td>
+			<td><?php echo $parent_theme->get( 'Name' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Parent Theme Version"><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the parent theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo  $parent_theme->Version; ?></td>
+			<td><?php
+				echo  $parent_theme->get( 'Version' );
+
+				if ( ! empty( $theme_version_data[ $parent_theme->get_stylesheet() ]['version'] ) && version_compare( $theme_version_data[ $parent_theme->get_stylesheet() ]['version'], $parent_theme->get( 'Version' ), '!=' ) ) {
+					echo ' &ndash; <strong style="color:red;">' . $theme_version_data[ $parent_theme->get_stylesheet() ]['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
+				}
+			?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Parent Theme Author URL"><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The parent theme developers URL.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo $parent_theme->{'Author URI'}; ?></td>
+			<td><?php echo $parent_theme->get( 'AuthorURI' ); ?></td>
 		</tr>
 		<?php endif ?>
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php
-				if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
+				if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->get_template(), wc_get_core_supported_themes() ) ) {
 					echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . '&#10004;' . '</mark>';
