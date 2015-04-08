@@ -3240,7 +3240,7 @@ img.tips {
 		#tiptip_arrow_inner {
 			margin-top: -7px;
 			margin-left: -6px;
-			border-top-color: #464646;
+			border-top-color: #333;
 		}
 	}
 
@@ -3250,7 +3250,7 @@ img.tips {
 		#tiptip_arrow_inner {
 			margin-top: -5px;
 			margin-left: -6px;
-			border-bottom-color: #464646;
+			border-bottom-color: #333;
 		}
 	}
 
@@ -3260,7 +3260,7 @@ img.tips {
 		#tiptip_arrow_inner {
 			margin-top: -6px;
 			margin-left: -5px;
-			border-right-color: #464646;
+			border-right-color: #333;
 		}
 	}
 
@@ -3270,7 +3270,7 @@ img.tips {
 		#tiptip_arrow_inner {
 			margin-top: -6px;
 			margin-left: -7px;
-			border-left-color: #464646;
+			border-left-color: #333;
 		}
 	}
 }
@@ -3278,14 +3278,12 @@ img.tips {
 #tiptip_content,
 .chart-tooltip,
 .wc_error_tip {
-	font-size: 11px;
+	font-size: .8em;
 	color: #fff;
-	padding: .5em .5em;
-	background: #464646;
-	@include border-radius(3px);
-	-webkit-box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
-	-moz-box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
-	box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
+	padding: .618em 1em;
+	background: #333;
+	border-radius: 3px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 	text-align: center;
 	max-width: 150px;
 
