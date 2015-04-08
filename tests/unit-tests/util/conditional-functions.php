@@ -39,6 +39,32 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_is_webhook_valid_topic()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_is_webhook_valid_topic() {
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'action.woocommerce_add_to_cart' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'action.wc_add_to_cart' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'product.created' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'product.updated' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'product.deleted' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'order.created' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'order.updated' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'order.deleted' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'customer.created' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'customer.updated' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'customer.deleted' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'coupon.created' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'coupon.updated' ) );
+		$this->assertEquals( true, wc_is_webhook_valid_topic( 'coupon.deleted' ) );
+		$this->assertEquals( false, wc_is_webhook_valid_topic( 'coupon.upgraded' ) );
+		$this->assertEquals( false, wc_is_webhook_valid_topic( 'wc.product.updated' ) );
+		$this->assertEquals( false, wc_is_webhook_valid_topic( 'missingdot' ) );
+		$this->assertEquals( false, wc_is_webhook_valid_topic( 'with space' ) );
+	}
+
+	/**
 	 * Test wc_is_valid_url()
 	 *
 	 * @since 2.3.0
