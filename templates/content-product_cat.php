@@ -25,13 +25,16 @@ if ( empty( $woocommerce_loop['columns'] ) )
 
 // Increase loop count
 $woocommerce_loop['loop']++;
+
+// Extra category classes
+$classes = array( 'product-category', 'product' );
+if ( ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] == 0 || $woocommerce_loop['columns'] == 1 )
+	$classes[] = 'first';
+if ( $woocommerce_loop['loop'] % $woocommerce_loop['columns'] == 0 )
+	$classes[] = 'last';
 ?>
-<li class="product-category product<?php
-    if ( ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] == 0 || $woocommerce_loop['columns'] == 1 )
-        echo ' first';
-	if ( $woocommerce_loop['loop'] % $woocommerce_loop['columns'] == 0 )
-		echo ' last';
-	?>">
+
+<li <?php wc_category_class( $classes );?>>
 
 	<?php do_action( 'woocommerce_before_subcategory', $category ); ?>
 

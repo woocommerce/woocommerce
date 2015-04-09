@@ -269,6 +269,21 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 	return $classes;
 }
 
+/**
+ * Adds extra category classes
+ *
+ * @since 2.4.0
+ * @param array $classes
+ * @return void
+ */
+function wc_category_class( $classes = array() ) {
+
+	if ( $classes = apply_filters( 'wc_category_loop_class', $classes ) ) {
+		echo 'class="' . join( ' ', $classes ) . '"';
+	}
+
+}
+
 /** Template pages ********************************************************/
 
 if ( ! function_exists( 'woocommerce_content' ) ) {
