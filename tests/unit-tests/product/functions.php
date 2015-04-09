@@ -33,13 +33,32 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_update_product_stock() {
-		// Create product 
+		// Create product
 		$product = \WC_Helper_Product::create_simple_product();
 
 		update_post_meta( $product->id, '_manage_stock', 'yes' );
 
 		wc_update_product_stock( $product->id, 5 );
 		$this->assertEquals( 5, $product->stock );
+
+		// Delete Product
+		\WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
+	 * Test wc_get_product_ids_on_sale()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_product_ids_on_sale() {
+		// Create product
+		$product = \WC_Helper_Product::create_simple_product();
+
+		update_post_meta( $product->id, '_regular_price', wc_format_decimal( 10 ) );
+		update_post_meta( $product->id, '_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->id, '_sale_price', wc_format_decimal( 5 ) );
+
+		$this->assertEquals( array( $product->id ), wc_get_product_ids_on_sale() );
 
 		// Delete Product
 		\WC_Helper_Product::delete_product( $product->id );
@@ -87,7 +106,7 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product_id_by_sku() {
-		// Create product 
+		// Create product
 		$product = \WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( $product->id, wc_get_product_id_by_sku( $product->sku ) );
