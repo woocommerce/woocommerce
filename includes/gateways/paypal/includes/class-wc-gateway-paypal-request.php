@@ -59,7 +59,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_paypal_args( $order ) {
-		$this->gateway->log( 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
+		WC_Gateway_Paypal::log( 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		return apply_filters( 'woocommerce_paypal_args', array_merge(
 			array(

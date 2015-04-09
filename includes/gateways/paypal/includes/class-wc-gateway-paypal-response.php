@@ -13,25 +13,6 @@ abstract class WC_Gateway_Paypal_Response {
 	protected $sandbox = false;
 
 	/**
-	 * Stores logging class
-	 * @var WC_Logger
-	 */
-	protected $log;
-
-	/**
-	 * Logging method
-	 * @param  string $message
-	 */
-	protected function log( $message ) {
-		if ( $this->sandbox ) {
-			if ( empty( $this->log ) ) {
-				$this->log = new WC_Logger();
-			}
-			$this->log->add( 'paypal', $message );
-		}
-	}
-
-	/**
 	 * Get the order from the PayPal 'Custom' variable
 	 *
 	 * @param  string $custom
@@ -51,12 +32,12 @@ abstract class WC_Gateway_Paypal_Response {
 			}
 
 			if ( ! $order || $order->order_key !== $order_key ) {
-				$this->log( 'Error: Order Keys do not match.' );
+				WC_Gateway_Paypal::log( 'Error: Order Keys do not match.' );
 				return false;
 			}
 
 		} elseif ( ! $order = apply_filters( 'woocommerce_get_paypal_order', false, $custom ) ) {
-			$this->log( 'Error: Order ID and key were not found in "custom".' );
+			WC_Gateway_Paypal::log( 'Error: Order ID and key were not found in "custom".' );
 			return false;
 		}
 

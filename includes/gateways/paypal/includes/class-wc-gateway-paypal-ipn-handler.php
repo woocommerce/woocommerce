@@ -54,8 +54,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 				$posted['payment_status'] = 'completed';
 			}
 
-			$this->log( 'Found order #' . $order->id );
-			$this->log( 'Payment status: ' . $posted['payment_status'] );
+			WC_Gateway_Paypal::log( 'Found order #' . $order->id );
+			WC_Gateway_Paypal::log( 'Payment status: ' . $posted['payment_status'] );
 
 			if ( method_exists( __CLASS__, 'payment_status_' . $posted['payment_status'] ) ) {
 				call_user_func( array( __CLASS__, 'payment_status_' . $posted['payment_status'] ), $order, $posted );
@@ -67,7 +67,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * Check PayPal IPN validity
 	 */
 	public function validate_ipn() {
-		$this->log( 'Checking IPN response is valid' );
+		WC_Gateway_Paypal::log( 'Checking IPN response is valid' );
 
 		// Get received values from post data
 		$validate_ipn = array( 'cmd' => '_notify-validate' );
@@ -87,19 +87,19 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		// Post back to get a response
 		$response = wp_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $params );
 
-		$this->log( 'IPN Request: ' . print_r( $params, true ) );
-		$this->log( 'IPN Response: ' . print_r( $response, true ) );
+		WC_Gateway_Paypal::log( 'IPN Request: ' . print_r( $params, true ) );
+		WC_Gateway_Paypal::log( 'IPN Response: ' . print_r( $response, true ) );
 
 		// check to see if the request was valid
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
-			$this->log( 'Received valid response from PayPal' );
+			WC_Gateway_Paypal::log( 'Received valid response from PayPal' );
 			return true;
 		}
 
-		$this->log( 'Received invalid response from PayPal' );
+		WC_Gateway_Paypal::log( 'Received invalid response from PayPal' );
 
 		if ( is_wp_error( $response ) ) {
-			$this->log( 'Error response: ' . $response->get_error_message() );
+			WC_Gateway_Paypal::log( 'Error response: ' . $response->get_error_message() );
 		}
 
 		return false;
@@ -113,7 +113,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money' );
 
 		if ( ! in_array( strtolower( $txn_type ), $accepted_types ) ) {
-			$this->log( 'Aborting, Invalid type:' . $txn_type );
+			WC_Gateway_Paypal::log( 'Aborting, Invalid type:' . $txn_type );
 			exit;
 		}
 	}
@@ -126,7 +126,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	private function validate_currency( $order, $currency ) {
 		// Validate currency
 		if ( $order->get_order_currency() != $currency ) {
-			$this->log( 'Payment error: Currencies do not match (sent "' . $order->get_order_currency() . '" | returned "' . $currency . '")' );
+			WC_Gateway_Paypal::log( 'Payment error: Currencies do not match (sent "' . $order->get_order_currency() . '" | returned "' . $currency . '")' );
 
 			// Put this order on-hold for manual checking
 			$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal currencies do not match (code %s).', 'woocommerce' ), $currency ) );
@@ -140,7 +140,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	private function validate_amount( $order, $amount ) {
 		if ( number_format( $order->get_total(), 2, '.', '' ) != number_format( $amount, 2, '.', '' ) ) {
-			$this->log( 'Payment error: Amounts do not match (gross ' . $amount . ')' );
+			WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (gross ' . $amount . ')' );
 
 			// Put this order on-hold for manual checking
 			$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal amounts do not match (gross %s).', 'woocommerce' ), $amount ) );
@@ -154,7 +154,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	private function validate_receiver_email( $order, $receiver_email ) {
 		if ( strcasecmp( trim( $receiver_email ), trim( $this->receiver_email ) ) != 0 ) {
-			$this->log( "IPN Response is for another account: {$receiver_email}. Your email is {$this->receiver_email}" );
+			WC_Gateway_Paypal::log( "IPN Response is for another account: {$receiver_email}. Your email is {$this->receiver_email}" );
 
 			// Put this order on-hold for manual checking
 			$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal IPN response from a different email address (%s).', 'woocommerce' ), $receiver_email ) );
@@ -169,7 +169,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	private function payment_status_completed( $order, $posted ) {
 		if ( $order->has_status( 'completed' ) ) {
-			$this->log( 'Aborting, Order #' . $order->id . ' is already complete.' );
+			WC_Gateway_Paypal::log( 'Aborting, Order #' . $order->id . ' is already complete.' );
 			exit;
 		}
 
