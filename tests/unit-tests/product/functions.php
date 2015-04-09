@@ -115,6 +115,27 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_placeholder_img()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_placeholder_img() {
+		$sizes = array(
+			'shop_thumbnail' => array( 'width' => '180', 'height' => '180' ),
+			'shop_single'    => array( 'width' => '600', 'height' => '600' ),
+			'shop_catalog'   => array( 'width' => '300', 'height' => '300' )
+		);
+
+		foreach ( $sizes as $size => $values ) {
+			$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="' . $values['width'] . '" class="woocommerce-placeholder wp-post-image" height="' . $values['height'] . '" />';
+			$this->assertEquals( $img, wc_placeholder_img( $size ) );
+		}
+
+		$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="180" class="woocommerce-placeholder wp-post-image" height="180" />';
+		$this->assertEquals( $img, wc_placeholder_img() );
+	}
+
+	/**
 	 * Test wc_get_product_types()
 	 *
 	 * @since 2.3
