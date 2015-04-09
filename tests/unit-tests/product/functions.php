@@ -51,6 +51,10 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_get_product_ids_on_sale() {
+		$this->assertEquals( array(), wc_get_product_ids_on_sale() );
+
+		delete_transient( 'wc_products_onsale' );
+
 		// Create product
 		$product = \WC_Helper_Product::create_simple_product();
 
@@ -70,6 +74,10 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_get_featured_product_ids() {
+		$this->assertEquals( array(), wc_get_featured_product_ids() );
+
+		delete_transient( 'wc_featured_products' );
+
 		// Create product
 		$product = \WC_Helper_Product::create_simple_product();
 
