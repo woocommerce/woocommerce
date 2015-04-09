@@ -46,6 +46,31 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_delete_product_transients()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_delete_product_transients() {
+		// Create product
+		$product = \WC_Helper_Product::create_simple_product();
+
+		update_post_meta( $product->id, '_regular_price', wc_format_decimal( 10 ) );
+		update_post_meta( $product->id, '_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->id, '_sale_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->id, '_featured', 'yes' );
+
+		wc_get_product_ids_on_sale();  // Creates the transient for on sale products
+		wc_get_featured_product_ids(); // Creates the transient for featured products
+
+		wc_delete_product_transients();
+
+		$this->assertFalse( get_transient( 'wc_products_onsale' ) );
+		$this->assertFalse( get_transient( 'wc_featured_products' ) );
+
+		\WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
 	 * Test wc_get_product_ids_on_sale()
 	 *
 	 * @since 2.4
