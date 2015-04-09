@@ -542,20 +542,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</thead>
 		<?php
-		$active_theme = wp_get_theme();
-		if ( $active_theme->{'Author URI'} == 'http://www.woothemes.com' ) {
+		include_once( ABSPATH . 'wp-admin/includes/theme-install.php' );
 
+		$active_theme         = wp_get_theme();
+		$theme_version        = $active_theme->Version;
+		$update_theme_version = $active_theme->Version;
+		$api                  = themes_api( 'theme_information', array( 'slug' => get_template(), 'fields' => array( 'sections' => false, 'tags' => false ) ) );
+
+		// Check .org
+		if ( $api && ! is_wp_error( $api ) ) {
+			$update_theme_version = $api->version;
+
+		// Check WooThemes Theme Version
+		} elseif ( strstr( $active_theme->{'Author URI'}, 'woothemes' ) ) {
 			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->Name ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {
-
 				$theme_changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
 				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
 				if ( ! empty( $cl_lines ) ) {
-
 					foreach ( $cl_lines as $line_num => $cl_line ) {
 						if ( preg_match( '/^[0-9]/', $cl_line ) ) {
-
 							$theme_date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
 							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
 							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
@@ -565,6 +572,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 						}
 					}
 				}
+			}
+
+			if ( ! empty( $theme_version_data['version'] ) ) {
+				$update_theme_version = $theme_version_data['version'];
 			}
 		}
 		?>
@@ -578,10 +589,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td data-export-label="Version"><?php _e( 'Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the current active theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php
-				echo $active_theme->Version;
+				echo esc_html( $theme_version );
 
-				if ( ! empty( $theme_version_data['version'] ) && version_compare( $theme_version_data['version'], $active_theme->Version, '!=' ) ) {
-					echo ' &ndash; <strong style="color:red;">' . $theme_version_data['version'] . ' ' . __( 'is available', 'woocommerce' ) . '</strong>';
+				if ( version_compare( $theme_version, $update_theme_version, '<' ) ) {
+					echo ' &ndash; <strong style="color:red;">' . sprintf( __( '%s is available', 'woocommerce' ), esc_html( $update_theme_version ) ) . '</strong>';
 				}
 			?></td>
 		</tr>
