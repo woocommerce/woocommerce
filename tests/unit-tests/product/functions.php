@@ -65,6 +65,23 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_featured_product_ids()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_featured_product_ids() {
+		// Create product
+		$product = \WC_Helper_Product::create_simple_product();
+
+		update_post_meta( $product->id, '_featured', 'yes' );
+
+		$this->assertEquals( array( $product->id ), wc_get_featured_product_ids() );
+
+		// Delete Product
+		\WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
 	 * Test wc_get_product_types()
 	 *
 	 * @since 2.3
