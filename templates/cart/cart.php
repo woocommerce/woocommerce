@@ -143,8 +143,6 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 	<?php do_action( 'woocommerce_cart_collaterals' ); ?>
 
-	<?php woocommerce_cart_totals(); ?>
-
 </div>
 
 <?php do_action( 'woocommerce_after_cart' ); ?>
