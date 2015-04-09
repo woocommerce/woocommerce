@@ -70,10 +70,15 @@ class WC_API_Products extends WC_API_Resource {
 		$routes[ $this->base . '/sku/(?P<sku>\w+)' ] = array(
 			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
 		);
+		
+		# POST /products/bulk
+		$routes[ $this->base . '/bulk' ] = array(
+			array( array( $this, 'bulk' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
 
 		return $routes;
 	}
-
+	
 	/**
 	 * Get all products
 	 *
@@ -1901,5 +1906,39 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Delete product
 		wp_delete_post( $product_id, true );
+	}
+	
+	/**
+	 * Bulk update or insert products
+	 * Accepts an array with products in the formats supported by
+	 * WC_API_Products->create_product() and WC_API_Products->edit_product()
+	 *
+	 * @param array $products
+	 * @throws Exception
+	 */
+	public function bulk( $data )    {
+	    $products = array();
+	    foreach ( $data as $_product )   {
+	        try {
+	            $existing = $this->get_product_by_sku( $_product['sku'] );
+	            if(is_wp_error($existing) && $existing->get_error_code() === "woocommerce_api_invalid_product_sku") {
+	                // SKU not found, go ahead and crate!
+	                $result = $this->create_product($_product);
+	            } else {
+	                // Assume existing, update
+	                $result = $this->edit_product( $existing['product']['id'], $_product );
+	            }
+	            if(is_wp_error($result))   {
+	                // if it fails, add the error message to the return object. Do not! stop further execution.
+	                $products[ $_product['sku'] ] = array( 'error' => array( 'code' => $result->get_error_code(), 'message' => $result->get_error_message() ) );
+	            } else {
+	                // If everything is well, add the updated or created product to the return array
+	                $products[ $_product['sku'] ] = $result;
+	            }
+	        } catch(Exception $e)  {
+	            $products[ $_product['sku'] ] = array( 'error' => array( 'code' => $e->getCode(), 'message' => $e->getMessage() ) );
+	        }
+	    }
+	    return array('products'=>$products);
 	}
 }
