@@ -681,8 +681,10 @@ class WC_Cart {
 		 */
 		public function get_cart() {
 			if ( ! did_action( 'wp_loaded' ) ) {
-				$this->get_cart_from_session();
 				_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
+			}
+			if ( ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
+				$this->get_cart_from_session();
 			}
 			return array_filter( (array) $this->cart_contents );
 		}
