@@ -121,8 +121,9 @@ function wc_get_product_ids_on_sale() {
 	$product_ids_on_sale = get_transient( 'wc_products_onsale' );
 
 	// Valid cache found
-	if ( false !== $product_ids_on_sale )
+	if ( false !== $product_ids_on_sale ) {
 		return $product_ids_on_sale;
+	}
 
 	$on_sale_posts = $wpdb->get_results( "
 		SELECT post.ID, post.post_parent FROM `$wpdb->posts` AS post
