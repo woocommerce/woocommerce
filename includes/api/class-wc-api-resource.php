@@ -434,25 +434,25 @@ class WC_API_Resource {
 	 */
 	private function check_permission( $post, $context ) {
 
-		if ( ! is_a( $post, 'WP_Post' ) )
+		if ( ! is_a( $post, 'WP_Post' ) ) {
 			$post = get_post( $post );
+		}
 
-		if ( is_null( $post ) )
+		if ( is_null( $post ) ) {
 			return false;
+		}
 
 		$post_type = get_post_type_object( $post->post_type );
 
-		if ( 'read' === $context )
-			return current_user_can( $post_type->cap->read_private_posts, $post->ID );
-
-		elseif ( 'edit' === $context )
+		if ( 'read' === $context ) {
+			return ( 'revision' !== $post->post_type && current_user_can( $post_type->cap->read_private_posts, $post->ID ) );
+		} elseif ( 'edit' === $context ) {
 			return current_user_can( $post_type->cap->edit_post, $post->ID );
-
-		elseif ( 'delete' === $context )
+		} elseif ( 'delete' === $context ) {
 			return current_user_can( $post_type->cap->delete_post, $post->ID );
-
-		else
+		} else {
 			return false;
+		}
 	}
 
 }
