@@ -620,7 +620,7 @@ class WC_Coupon {
 			$discount         = ( $this->coupon_amount * $discount_percent ) / $cart_item_qty;
 
 		} elseif ( $this->is_type( 'fixed_product' ) ) {
-			$discount = min( $discount, $discounting_amount );
+			$discount = min( $this->coupon_amount, $discounting_amount );
 			$discount = $single ? $discount : $discount * $cart_item_qty;
 		}
 
