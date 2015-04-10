@@ -140,7 +140,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 * Feature - Show full category hierarchy in permalinks.
 * Fix - Ensure coupon taxes are reset when calculating totals.
+* Fix - Improve discount amount rounding.
 * Tweak - Base discounts on the undiscounted price. #5874
+* Tweak - Added wc_product_cat_class functions.
 
 = 2.3.7 - 18/03/2015 =
 * Fix - Allow saving of empty download expiry date on orders.

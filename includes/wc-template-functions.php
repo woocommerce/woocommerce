@@ -199,6 +199,45 @@ function wc_body_class( $classes ) {
 }
 
 /**
+ * Display the classes for the product cat div.
+ *
+ * @since 2.4.0
+ * @param string|array $class One or more classes to add to the class list.
+ * @param object $category object Optional.
+ */
+function wc_product_cat_class( $class = '', $category = null ) {
+	// Separates classes with a single space, collates classes for post DIV
+	echo 'class="' . esc_attr( join( ' ', wc_get_product_cat_class( $class, $category ) ) ) . '"';
+}
+
+/**
+ * Get the classes for the product cat div.
+ *
+ * @since 2.4.0
+ * @param string|array $class One or more classes to add to the class list.
+ * @param object $category object Optional.
+ */
+function wc_get_product_cat_class( $class = '', $category = null ) {
+	global $woocommerce_loop;
+
+	$classes   = is_array( $class ) ? $class : array_map( 'trim', explode( ' ', $class ) );
+	$classes[] = 'product-category';
+	$classes[] = 'product';
+
+	if ( ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] == 0 || $woocommerce_loop['columns'] == 1 ) {
+		$classes[] = 'first';
+	}
+
+	if ( $woocommerce_loop['loop'] % $woocommerce_loop['columns'] == 0 ) {
+		$classes[] = 'last';
+	}
+
+	$classes = apply_filters( 'product_cat_class', $classes, $class, $category );
+
+	return array_unique( array_filter( $classes ) );
+}
+
+/**
  * Adds extra post classes for products
  *
  * @since 2.1.0
