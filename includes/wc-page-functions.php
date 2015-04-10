@@ -16,7 +16,7 @@
  * @return string
  */
 function wc_page_endpoint_title( $title ) {
-	if ( is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url() ) {
+	if ( ! is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url() ) {
 		$endpoint = WC()->query->get_current_endpoint();
 		if ( $endpoint_title = WC()->query->get_endpoint_title( $endpoint ) ) {
 			$title = $endpoint_title;
