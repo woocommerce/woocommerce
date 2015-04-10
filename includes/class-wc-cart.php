@@ -1298,6 +1298,9 @@ class WC_Cart {
 				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $discounted_taxes, 'subtotal' => $taxes );
 			}
 
+			// Round cart contents
+			$this->cart_contents_total = round( $this->cart_contents_total, $this->dp );
+
 			// Only calculate the grand total + shipping if on the cart/checkout
 			if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT') || defined('WOOCOMMERCE_CART') ) {
 
@@ -1740,11 +1743,11 @@ class WC_Cart {
 		public function get_coupon_discount_amount( $code, $ex_tax = true ) {
 			$discount_amount = isset( $this->coupon_discount_amounts[ $code ] ) ? $this->coupon_discount_amounts[ $code ] : 0;
 
-			if ( $ex_tax ) {
-				return $discount_amount;
-			} else {
-				return $discount_amount + $this->get_coupon_discount_tax_amount( $code );
+			if ( ! $ex_tax ) {
+				$discount_amount += $this->get_coupon_discount_tax_amount( $code );
 			}
+
+			return round( $discount_amount, $this->dp, WC_DISCOUNT_ROUNDING_MODE );
 		}
 
 		/**
@@ -1754,7 +1757,7 @@ class WC_Cart {
 		 * @return float discount amount
 		 */
 		public function get_coupon_discount_tax_amount( $code ) {
-			return isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0;
+			return round( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp, WC_DISCOUNT_ROUNDING_MODE );
 		}
 
 		/**
@@ -1809,7 +1812,7 @@ class WC_Cart {
 
 				foreach ( $this->coupons as $code => $coupon ) {
 					if ( $coupon->is_valid() && ( $coupon->is_valid_for_product( $product, $values ) || $coupon->is_valid_for_cart() ) ) {
-						$discount_amount = $coupon->get_discount_amount( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ? $price : $undiscounted_price ), $values, $single = true );
+						$discount_amount = $coupon->get_discount_amount( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ? $price : $undiscounted_price ), $values, true );
 						$discount_amount = min( $price, $discount_amount );
 						$price           = max( $price - $discount_amount, 0 );
 
@@ -2149,7 +2152,7 @@ class WC_Cart {
 		 * @return float
 		 */
 		public function get_cart_discount_total() {
-			return $this->discount_cart;
+			return round( $this->discount_cart, $this->dp, WC_DISCOUNT_ROUNDING_MODE );
 		}
 
 		/**
@@ -2158,7 +2161,7 @@ class WC_Cart {
 		 * @return float
 		 */
 		public function get_cart_discount_tax_total() {
-			return $this->discount_cart_tax;
+			return round( $this->discount_cart_tax, $this->dp, WC_DISCOUNT_ROUNDING_MODE );
 		}
 
 		/**
@@ -2167,8 +2170,8 @@ class WC_Cart {
 		 * @return mixed formatted price or false if there are none
 		 */
 		public function get_total_discount() {
-			if ( $this->discount_cart ) {
-				$total_discount = wc_price( $this->discount_cart );
+			if ( $this->get_cart_discount_total() ) {
+				$total_discount = wc_price( $this->get_cart_discount_total() );
 			} else {
 				$total_discount = false;
 			}
@@ -2183,8 +2186,8 @@ class WC_Cart {
 		 */
 		public function get_discounts_before_tax() {
 			_deprecated_function( 'get_discounts_before_tax', '2.3', 'get_total_discount' );
-			if ( $this->discount_cart ) {
-				$discounts_before_tax = wc_price( $this->discount_cart );
+			if ( $this->get_cart_discount_total() ) {
+				$discounts_before_tax = wc_price( $this->get_cart_discount_total() );
 			} else {
 				$discounts_before_tax = false;
 			}

@@ -199,7 +199,7 @@ class Coupon extends \WC_Unit_Test_Case {
 		update_post_meta( $coupon->id, 'discount_type', 'fixed_product' );
 		update_post_meta( $coupon->id, 'coupon_amount', '5' );
 
-		// Create a flat rate method
+		// Create a flat rate method - $10
 		\WC_Helper_Shipping::create_simple_flat_rate();
 
 		// We need this to have the calculate_totals() method calculate totals
@@ -207,7 +207,7 @@ class Coupon extends \WC_Unit_Test_Case {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 		}
 
-		// Add fee
+		// Add fee - $10
 		\WC_Helper_Fee::add_cart_fee();
 
 		// Add product to cart
