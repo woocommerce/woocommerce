@@ -141,6 +141,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Show full category hierarchy in permalinks.
 * Fix - Ensure coupon taxes are reset when calculating totals.
 * Fix - Improve discount amount rounding.
+* Tweak - Improve save_attributes ajax function to correctly save text attributes.
 * Tweak - Base discounts on the undiscounted price. #5874
 * Tweak - Added wc_product_cat_class functions.
 

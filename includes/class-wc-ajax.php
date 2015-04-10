@@ -607,9 +607,23 @@ class WC_AJAX {
 						if ( is_array( $attribute_values[ $i ] ) ) {
 							$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
 
-						// Text based attributes - Posted values are term names - don't change to slugs
+						// Text based attributes - Posted values are term names, wp_set_object_terms wants ids or slugs.
 						} else {
-							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+							$values     = array();
+							$raw_values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+
+							foreach ( $raw_values as $value ) {
+								$term = get_term_by( 'name', $value, $attribute_names[ $i ] );
+								if ( ! $term ) {
+									$term = wp_insert_term( $value, $attribute_names[ $i ] );
+
+									if ( $term && ! is_wp_error( $term ) ) {
+										$values[] = $term['term_id'];
+									}
+								} else {
+									$values[] = $term->term_id;
+								}
+							}
 						}
 
 						// Remove empty items in the array
