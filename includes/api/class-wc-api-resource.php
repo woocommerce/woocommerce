@@ -442,17 +442,19 @@ class WC_API_Resource {
 
 		$post_type = get_post_type_object( $post->post_type );
 
-		if ( 'read' === $context )
-			return current_user_can( $post_type->cap->read_private_posts, $post->ID );
+		if ( 'read' === $context ) {
+			if ( ( 'revision' !== $post->post_type && current_user_can( $post_type->cap->read_private_posts, $post->ID ) ) || ( 'revision' === $post->post_type && current_user_can( $post_type->cap->edit_post, $post->ID ) ) ) {
+				return true;
+			}
 
-		elseif ( 'edit' === $context )
-			return current_user_can( $post_type->cap->edit_post, $post->ID );
-
-		elseif ( 'delete' === $context )
-			return current_user_can( $post_type->cap->delete_post, $post->ID );
-
-		else
 			return false;
+		} elseif ( 'edit' === $context ) {
+			return current_user_can( $post_type->cap->edit_post, $post->ID );
+		} elseif ( 'delete' === $context ) {
+			return current_user_can( $post_type->cap->delete_post, $post->ID );
+		} else {
+			return false;
+		}
 	}
 
 }
