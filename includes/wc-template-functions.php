@@ -954,11 +954,11 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 
 	/**
 	 * Output the reviews tab content.
-	 *
+	 * @deprecated  2.4.0 Unused
 	 * @subpackage	Product/Tabs
 	 */
 	function woocommerce_product_reviews_tab() {
-		wc_get_template( 'single-product/tabs/reviews.php' );
+		_deprecated_function( 'woocommerce_product_reviews_tab', '2.4', '' );
 	}
 }
 
