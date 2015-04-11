@@ -4052,7 +4052,7 @@ table.bar_chart {
 		width: 500px;
 		background: #fff;
 		margin-left: -250px;
-		z-index: 160000;
+		z-index: 100000;
 	}
 }
 
@@ -4065,7 +4065,7 @@ table.bar_chart {
 	min-height: 360px;
 	background: #000;
 	opacity: .7;
-	z-index: 159900;
+	z-index: 99900;
 }
 
 .wc-backbone-modal-main {
