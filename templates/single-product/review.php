@@ -45,7 +45,7 @@ $rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 							if ( wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $comment->comment_post_ID ) )
 								echo '<em class="verified">(' . __( 'verified owner', 'woocommerce' ) . ')</em> ';
 
-					?>&ndash; <time itemprop="datePublished" datetime="<?php echo get_comment_date( 'c' ); ?>"><?php echo get_comment_date( get_option( 'date_format' ) ); ?></time>:
+					?>&ndash; <time itemprop="datePublished" datetime="<?php echo get_comment_date( 'c' ); ?>"><?php echo get_comment_date( wc_date_format() ); ?></time>:
 				</p>
 
 			<?php endif; ?>
