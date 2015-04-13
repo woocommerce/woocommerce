@@ -329,7 +329,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		if ( $matched ) {
 			return $cost + $fee;
 		} else {
-			return null;
+			return 0;
 		}
 	}
 
@@ -372,7 +372,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		if ( $matched ) {
 			return $costs;
 		} else {
-			return null;
+			return 0;
 		}
 	}
 
