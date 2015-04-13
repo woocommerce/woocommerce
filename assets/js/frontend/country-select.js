@@ -74,7 +74,7 @@ jQuery( function( $ ) {
 
 		wc_country_select_select2();
 
-		$(document.body).bind( 'country_to_state_changed', function() {
+		$( document.body ).bind( 'country_to_state_changed', function() {
 			wc_country_select_select2();
 		});
 	}
@@ -83,7 +83,7 @@ jQuery( function( $ ) {
 	var states_json = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
 		states = $.parseJSON( states_json );
 
-	$(document.body).on( 'change', 'select.country_to_state, input.country_to_state', function() {
+	$( document.body ).on( 'change', 'select.country_to_state, input.country_to_state', function() {
 
 		var country = $( this ).val(),
 			$statebox = $( this ).closest( 'div' ).find( '#billing_state, #shipping_state, #calc_shipping_state' ),
@@ -99,7 +99,7 @@ jQuery( function( $ ) {
 				$statebox.parent().hide().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />' );
 
-				$(document.body).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
+				$( document.body ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
 
 			} else {
 
@@ -123,7 +123,7 @@ jQuery( function( $ ) {
 				$statebox.html( '<option value="">' + wc_country_select_params.i18n_select_state_text + '</option>' + options );
 				$statebox.val( value ).change();
 
-				$(document.body).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
+				$( document.body ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
 
 			}
 		} else {
@@ -132,19 +132,19 @@ jQuery( function( $ ) {
 				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
 
-				$(document.body).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
+				$( document.body ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
 
 			} else if ( $statebox.is( '.hidden' ) ) {
 
 				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
 
-				$(document.body).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
+				$( document.body ).trigger( 'country_to_state_changed', [country, $( this ).closest( 'div' )] );
 
 			}
 		}
 
-		$(document.body).trigger( 'country_to_state_changing', [country, $( this ).closest( 'div' )] );
+		$( document.body ).trigger( 'country_to_state_changing', [country, $( this ).closest( 'div' )] );
 
 	});
 

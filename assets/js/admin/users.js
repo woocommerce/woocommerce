@@ -14,7 +14,7 @@ jQuery( function ( $ ) {
 
 			$( '.js_field-country' ).select2().change( this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
-			$(document.body).on( 'change', 'select.js_field-state', this.change_state );
+			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
 		},
 
 		change_country: function( e, stickValue ) {
@@ -63,7 +63,7 @@ jQuery( function ( $ ) {
 				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" placeholder="' + placeholder + '" />' );
 			}
 
-			$(document.body).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
+			$( document.body ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
 		},
 
 		change_state: function() {

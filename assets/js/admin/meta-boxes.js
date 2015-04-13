@@ -48,7 +48,7 @@ jQuery( function ( $ ) {
 	});
 	$('ul.wc-tabs li:visible').eq(0).find('a').click();
 
-	$(document.body).on( 'wc-init-datepickers', function() {
+	$( document.body ).on( 'wc-init-datepickers', function() {
 		$( ".date-picker-field, .date-picker" ).datepicker({
 			dateFormat: "yy-mm-dd",
 			numberOfMonths: 1,
@@ -56,7 +56,7 @@ jQuery( function ( $ ) {
 		});
 	});
 
-	$(document.body).trigger( 'wc-init-datepickers' );
+	$( document.body ).trigger( 'wc-init-datepickers' );
 
 	// META BOXES - Open/close
 	$('.wc-metaboxes-wrapper').on('click', '.wc-metabox h3', function(event){

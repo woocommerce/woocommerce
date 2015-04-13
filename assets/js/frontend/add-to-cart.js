@@ -25,7 +25,7 @@ jQuery( function( $ ) {
 			});
 
 			// Trigger event
-			$(document.body).trigger( 'adding_to_cart', [ $thisbutton, data ] );
+			$( document.body ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
 
 			// Ajax action
 			$.post( wc_add_to_cart_params.wc_ajax_url + 'add_to_cart', data, function( response ) {
@@ -94,7 +94,7 @@ jQuery( function( $ ) {
 
 						$( '.shop_table.cart' ).stop( true ).css( 'opacity', '1' ).unblock();
 
-						$(document.body).trigger( 'cart_page_refreshed' );
+						$( document.body ).trigger( 'cart_page_refreshed' );
 					});
 
 					$( '.cart_totals' ).load( this_page + ' .cart_totals:eq(0) > *', function() {
@@ -102,7 +102,7 @@ jQuery( function( $ ) {
 					});
 
 					// Trigger event so themes can refresh other areas
-					$(document.body).trigger( 'added_to_cart', [ fragments, cart_hash, $thisbutton ] );
+					$( document.body ).trigger( 'added_to_cart', [ fragments, cart_hash, $thisbutton ] );
 				}
 			});
 
