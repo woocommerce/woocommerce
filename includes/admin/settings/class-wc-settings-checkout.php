@@ -238,11 +238,10 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 						<tr>
 							<?php
 								$columns = apply_filters( 'woocommerce_payment_gateways_setting_columns', array(
-									'default'  => __( 'Default', 'woocommerce' ),
+									'sort'     => '',
 									'name'     => __( 'Gateway', 'woocommerce' ),
 									'id'       => __( 'Gateway ID', 'woocommerce' ),
-									'status'   => __( 'Status', 'woocommerce' ),
-									'settings' => ''
+									'status'   => __( 'Enabled', 'woocommerce' )
 								) );
 
 								foreach ( $columns as $key => $column ) {
@@ -263,16 +262,15 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 								switch ( $key ) {
 
-									case 'default' :
-										echo '<td width="1%" class="default">
-											<input type="radio" name="default_gateway" value="' . esc_attr( $gateway->id ) . '" ' . checked( $default_gateway, esc_attr( $gateway->id ), false ) . ' />
+									case 'sort' :
+										echo '<td width="1%" class="sort">
 											<input type="hidden" name="gateway_order[]" value="' . esc_attr( $gateway->id ) . '" />
 										</td>';
 									break;
 
 									case 'name' :
 										echo '<td class="name">
-											' . $gateway->get_title() . '
+											<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . $gateway->get_title() . '</a>
 										</td>';
 									break;
 
@@ -286,17 +284,11 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										echo '<td class="status">';
 
 										if ( $gateway->enabled == 'yes' )
-											echo '<span class="status-enabled tips" data-tip="' . __ ( 'Enabled', 'woocommerce' ) . '">' . __ ( 'Enabled', 'woocommerce' ) . '</span>';
+											echo '<span class="status-enabled tips" data-tip="' . __ ( 'Yes', 'woocommerce' ) . '">' . __ ( 'Yes', 'woocommerce' ) . '</span>';
 										else
 											echo '-';
 
 										echo '</td>';
-									break;
-
-									case 'settings' :
-										echo '<td class="settings">
-											<a class="button" href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>
-										</td>';
 									break;
 
 									default :

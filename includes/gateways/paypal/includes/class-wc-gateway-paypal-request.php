@@ -263,7 +263,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Check for mismatched totals
-		if ( ( $calculated_total + $order->get_total_tax() + round( $order->get_total_shipping(), 2 ) - round( $order->get_total_discount(), 2 ) ) != $order->get_total() ) {
+		if ( wc_format_decimal( $calculated_total + $order->get_total_tax() + round( $order->get_total_shipping(), 2 ) - round( $order->get_total_discount(), 2 ), 2 ) != wc_format_decimal( $order->get_total(), 2 ) ) {
 			return false;
 		}
 

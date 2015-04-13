@@ -1940,8 +1940,14 @@ table.wc_shipping {
 
 	td {
 		vertical-align: middle;
-		cursor: move;
 		padding: 7px;
+		line-height: 2em;
+	}
+
+	tr:nth-child(odd) {
+		td {
+			background: #f9f9f9;
+		}
 	}
 
 	th {
@@ -1968,6 +1974,27 @@ table.wc_shipping {
 
 		input {
 			margin: 0;
+		}
+	}
+	th.sort {
+		width: 28px;
+		padding: 0;
+	}
+	td.sort {
+		padding: 0 7px;
+		cursor: move;
+		text-align: center;
+		vertical-align: middle;
+		&:before {
+			content: "\e032";
+			font-family: 'WooCommerce';
+			text-align: center;
+			line-height: 1;
+			color: #ccc;
+			display: block;
+			width: 17px;
+			float: left;
+			height: 100%;
 		}
 	}
 }
