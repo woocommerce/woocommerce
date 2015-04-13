@@ -273,7 +273,7 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.add_order_item_meta', this.item_meta.add )
 				.on( 'click', 'button.remove_order_item_meta', this.item_meta.remove );
 
-			$( 'body' )
+			$( document.body )
 				.on( 'wc_backbone_modal_loaded', this.backbone.init )
 				.on( 'wc_backbone_modal_response', this.backbone.response );
 		},

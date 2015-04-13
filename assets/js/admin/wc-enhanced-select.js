@@ -52,7 +52,7 @@ jQuery( function( $ ) {
 		return formatString;
 	}
 
-	$( 'body' )
+	$( document.body )
 
 		.on( 'wc-enhanced-select-init', function() {
 
