@@ -86,7 +86,8 @@
 			}
 
 			$( '.wc-backbone-modal-content' ).css({
-				'margin-top': '-' + ( $( '.wc-backbone-modal-content' ).height() / 2 ) + 'px'
+				'margin-top': '-' + ( $( '.wc-backbone-modal-content' ).height() / 2 ) + 'px',
+				'margin-left': '-' + ( $( '.wc-backbone-modal-content' ).width() / 2 ) + 'px'
 			});
 
 			$(document.body).trigger( 'wc_backbone_modal_loaded', this._target );
