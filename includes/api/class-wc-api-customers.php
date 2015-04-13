@@ -337,7 +337,11 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function create_customer( $data ) {
 		try {
-			$data = isset( $data['customer'] ) ? $data['customer'] : array();
+			if ( ! isset( $data['customer'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_customer_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'customer' ), 400 );
+			}
+
+			$data = $data['customer'];
 
 			// Checks with can create new users.
 			if ( ! current_user_can( 'create_users' ) ) {
@@ -391,35 +395,42 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @return array
 	 */
 	public function edit_customer( $id, $data ) {
+		try {
+			if ( ! isset( $data['customer'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_customer_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'customer' ), 400 );
+			}
 
-		$data = isset( $data['customer'] ) ? $data['customer'] : array();
+			$data = $data['customer'];
 
-		// Validate the customer ID.
-		$id = $this->validate_request( $id, 'customer', 'edit' );
+			// Validate the customer ID.
+			$id = $this->validate_request( $id, 'customer', 'edit' );
 
-		// Return the validate error.
-		if ( is_wp_error( $id ) ) {
-			return $id;
+			// Return the validate error.
+			if ( is_wp_error( $id ) ) {
+				throw new WC_API_Exception( $id->get_error_code(), $id->get_error_message(), 400 );
+			}
+
+			$data = apply_filters( 'woocommerce_api_edit_customer_data', $data, $this );
+
+			// Customer email.
+			if ( isset( $data['email'] ) ) {
+				wp_update_user( array( 'ID' => $id, 'user_email' => sanitize_email( $data['email'] ) ) );
+			}
+
+			// Customer password.
+			if ( isset( $data['password'] ) ) {
+				wp_update_user( array( 'ID' => $id, 'user_pass' => wc_clean( $data['password'] ) ) );
+			}
+
+			// Update customer data.
+			$this->update_customer_data( $id, $data );
+
+			do_action( 'woocommerce_api_edit_customer', $id, $data );
+
+			return $this->get_customer( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-
-		$data = apply_filters( 'woocommerce_api_edit_customer_data', $data, $this );
-
-		// Customer email.
-		if ( isset( $data['email'] ) ) {
-			wp_update_user( array( 'ID' => $id, 'user_email' => sanitize_email( $data['email'] ) ) );
-		}
-
-		// Customer password.
-		if ( isset( $data['password'] ) ) {
-			wp_update_user( array( 'ID' => $id, 'user_pass' => wc_clean( $data['password'] ) ) );
-		}
-
-		// Update customer data.
-		$this->update_customer_data( $id, $data );
-
-		do_action( 'woocommerce_api_edit_customer', $id, $data );
-
-		return $this->get_customer( $id );
 	}
 
 	/**
@@ -514,7 +525,7 @@ class WC_API_Customers extends WC_API_Resource {
 	 *
 	 * Note that WP_User_Query does not have built-in pagination so limit & offset are used to provide limited
 	 * pagination support
-	 * 
+	 *
 	 * The filter for role can only be a single role in a string.
 	 *
 	 * @since 2.3

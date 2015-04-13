@@ -183,7 +183,11 @@ class WC_API_Products extends WC_API_Resource {
 		$id = 0;
 
 		try {
-			$data = isset( $data['product'] ) ? $data['product'] : array();
+			if ( ! isset( $data['product'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product' ), 400 );
+			}
+
+			$data = $data['product'];
 
 			// Check permissions
 			if ( ! current_user_can( 'publish_products' ) ) {
@@ -280,7 +284,11 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function edit_product( $id, $data ) {
 		try {
-			$data = isset( $data['product'] ) ? $data['product'] : array();
+			if ( ! isset( $data['product'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product' ), 400 );
+			}
+
+			$data = $data['product'];
 
 			$id = $this->validate_request( $id, 'product', 'edit' );
 

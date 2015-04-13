@@ -204,7 +204,11 @@ class WC_API_Coupons extends WC_API_Resource {
 		global $wpdb;
 
 		try {
-			$data = isset( $data['coupon'] ) ? $data['coupon'] : array();
+			if ( ! isset( $data['coupon'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_coupon_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'coupon' ), 400 );
+			}
+
+			$data = $data['coupon'];
 
 			// Check user permission
 			if ( ! current_user_can( 'publish_shop_coupons' ) ) {
@@ -316,7 +320,11 @@ class WC_API_Coupons extends WC_API_Resource {
 	public function edit_coupon( $id, $data ) {
 
 		try {
-			$data = isset( $data['coupon'] ) ? $data['coupon'] : array();
+			if ( ! isset( $data['coupon'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_coupon_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'coupon' ), 400 );
+			}
+
+			$data = $data['coupon'];
 
 			$id = $this->validate_request( $id, 'shop_coupon', 'edit' );
 

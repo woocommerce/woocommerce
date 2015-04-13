@@ -373,9 +373,12 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function create_order( $data ) {
 
-		$data = isset( $data['order'] ) ? $data['order'] : array();
-
 		try {
+			if ( ! isset( $data['order'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_order_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'order' ), 400 );
+			}
+
+			$data = $data['order'];
 
 			// permission check
 			if ( ! current_user_can( 'publish_shop_orders' ) ) {
@@ -510,9 +513,12 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function edit_order( $id, $data ) {
 
-		$data = isset( $data['order'] ) ? $data['order'] : array();
-
 		try {
+			if ( ! isset( $data['order'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_order_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'order' ), 400 );
+			}
+
+			$data = $data['order'];
 
 			$update_totals = false;
 
@@ -1229,7 +1235,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function create_order_note( $order_id, $data ) {
 		try {
-			$data = isset( $data['order_note'] ) ? $data['order_note'] : array();
+			if ( ! isset( $data['order_note'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_order_note_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'order_note' ), 400 );
+			}
+
+			$data = $data['order_note'];
 
 			// permission check
 			if ( ! current_user_can( 'publish_shop_orders' ) ) {
@@ -1282,7 +1292,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function edit_order_note( $order_id, $id, $data ) {
 		try {
-			$data = isset( $data['order_note'] ) ? $data['order_note'] : array();
+			if ( ! isset( $data['order_note'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_order_note_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'order_note' ), 400 );
+			}
+
+			$data = $data['order_note'];
 
 			// Validate order ID
 			$order_id = $this->validate_request( $order_id, $this->post_type, 'edit' );
@@ -1512,7 +1526,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function create_order_refund( $order_id, $data, $api_refund = true ) {
 		try {
-			$data = isset( $data['order_refund'] ) ? $data['order_refund'] : array();
+			if ( ! isset( $data['order_refund'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_order_refund_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'order_refund' ), 400 );
+			}
+
+			$data = $data['order_refund'];
 
 			// Permission check
 			if ( ! current_user_can( 'publish_shop_orders' ) ) {
@@ -1585,7 +1603,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	public function edit_order_refund( $order_id, $id, $data ) {
 		try {
-			$data = isset( $data['order_refund'] ) ? $data['order_refund'] : array();
+			if ( ! isset( $data['order_refund'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_order_refund_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'order_refund' ), 400 );
+			}
+
+			$data = $data['order_refund'];
 
 			// Validate order ID
 			$order_id = $this->validate_request( $order_id, $this->post_type, 'edit' );
