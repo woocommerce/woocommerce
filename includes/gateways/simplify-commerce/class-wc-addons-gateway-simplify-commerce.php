@@ -265,14 +265,24 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * @param integer $amount (default: 0)
 	 * @return bool|WP_Error
 	 */
-	public function process_subscription_payment( $order = '', $amount = 0 ) {
-		$order_items       = $order->get_items();
-		$order_item        = array_shift( $order_items );
-		$subscription_name = sprintf( __( '%s - Subscription for "%s"', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order_item['name'] ) . ' ' . sprintf( __( '(Order #%s)', 'woocommerce' ), $order->get_order_number() );
+	public function process_subscription_payment( $order, $amount = 0 ) {
+		if ( 0 == $amount ) {
+			// Payment complete
+			$order->payment_complete();
+
+			// Add order note
+			$order->add_order_note( __( 'Subscription approved for a free trial period.', 'woocommerce' ) );
+
+			return true;
+		}
 
 		if ( $amount * 100 < 50 ) {
 			return new WP_Error( 'simplify_error', __( 'Sorry, the minimum allowed order total is 0.50 to use this payment method.', 'woocommerce' ) );
 		}
+
+		$order_items       = $order->get_items();
+		$order_item        = array_shift( $order_items );
+		$subscription_name = sprintf( __( '%s - Subscription for "%s"', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order_item['name'] ) . ' ' . sprintf( __( '(Order #%s)', 'woocommerce' ), $order->get_order_number() );
 
 		$customer_id = get_post_meta( $order->id, '_simplify_customer_id', true );
 
