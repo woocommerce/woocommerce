@@ -147,6 +147,28 @@ function wc_get_product_ids_on_sale() {
 }
 
 /**
+ * Function that returns an array containing the IDs of the products that are related.
+ *
+ * @since 2.0
+ * @access public
+ * @return array
+ * Mohamed Mahrous m.mahrous.94@gmail.com
+ */
+function wc_get_product_related($number) {
+	global $product;
+
+	if ( empty( $product ) || ! $product->exists() ) {
+		return;
+	}
+
+	$related = $product->get_related( $number );
+
+	if ( sizeof( $related ) == 0 ) return;
+
+	return $related;
+}
+
+/**
  * Function that returns an array containing the IDs of the featured products.
  *
  * @since 2.1
