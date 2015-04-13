@@ -343,6 +343,8 @@ function wc_add_order_item( $order_id, $item ) {
 	if ( ! $order_id )
 		return false;
 
+	do_action( 'woocommerce_before_new_order_item', $order_id, $item );
+
 	$defaults = array(
 		'order_item_name' 		=> '',
 		'order_item_type' 		=> 'line_item',
@@ -379,6 +381,8 @@ function wc_add_order_item( $order_id, $item ) {
  */
 function wc_update_order_item( $item_id, $args ) {
 	global $wpdb;
+
+	do_action( 'woocommerce_before_update_order_item', $item_id, $args );
 
 	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
 
@@ -427,6 +431,8 @@ function wc_delete_order_item( $item_id ) {
  * @return bool
  */
 function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
+	do_action( 'woocommerce_before_update_metadata', $item_id, $meta_key, $meta_value, $prev_value );
+
 	return update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value );
 }
 
@@ -441,6 +447,8 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
  * @return bool
  */
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
+	do_action( 'woocommerce_before_add_metadata', $item_id, $meta_key, $meta_value, $unique );
+
 	return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
 }
 
@@ -455,6 +463,8 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
  * @return bool
  */
 function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	do_action( 'woocommerce_before_add_metadata', $item_id, $meta_key, $meta_value, $delete_all );
+
 	return delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all );
 }
 
