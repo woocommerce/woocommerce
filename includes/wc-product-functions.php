@@ -181,7 +181,7 @@ function wc_get_featured_product_ids() {
 	) );
 
 	$product_ids          = array_keys( $featured );
-	$parent_ids           = array_values( $featured );
+	$parent_ids           = array_values( array_filter( $featured ) );
 	$featured_product_ids = array_unique( array_merge( $product_ids, $parent_ids ) );
 
 	set_transient( 'wc_featured_products', $featured_product_ids, DAY_IN_SECONDS * 30 );
