@@ -60,7 +60,7 @@ jQuery(window).load(function(){
 		items:'tr',
 		cursor:'move',
 		axis:'y',
-		handle: 'td',
+		handle: 'td.sort',
 		scrollSensitivity:40,
 		helper:function(e,ui){
 			ui.children().each(function(){

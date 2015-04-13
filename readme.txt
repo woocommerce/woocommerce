@@ -139,6 +139,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 * Feature - Show full category hierarchy in permalinks.
+* Feature - Added priorities for shipping methods to give more control over defaults.
 * Fix - Ensure coupon taxes are reset when calculating totals.
 * Fix - Improve discount amount rounding.
 * Tweak - Improve save_attributes ajax function to correctly save text attributes.
