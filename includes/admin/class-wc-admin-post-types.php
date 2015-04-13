@@ -1797,7 +1797,7 @@ class WC_Admin_Post_Types {
 
 					$child_product_variations = get_children( 'post_parent=' . $id . '&post_type=product_variation' );
 
-					if ( $child_product_variations ) {
+					if ( ! empty( $child_product_variations ) ) {
 						foreach ( $child_product_variations as $child ) {
 							wp_delete_post( $child->ID, true );
 						}
@@ -1805,10 +1805,10 @@ class WC_Admin_Post_Types {
 
 					$child_products = get_children( 'post_parent=' . $id . '&post_type=product' );
 
-					if ( $child_products ) {
+					if ( ! empty( $child_products ) ) {
 						foreach ( $child_products as $child ) {
-							$child_post = array();
-							$child_post['ID'] = $child->ID;
+							$child_post                = array();
+							$child_post['ID']          = $child->ID;
 							$child_post['post_parent'] = 0;
 							wp_update_post( $child_post );
 						}
@@ -1825,8 +1825,10 @@ class WC_Admin_Post_Types {
 				case 'shop_order' :
 					$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
 
-					foreach ( $refunds as $refund ) {
-						wp_delete_post( $refund->ID, true );
+					if ( ! is_null( $refunds ) ) {
+						foreach ( $refunds as $refund ) {
+							wp_delete_post( $refund->ID, true );
+						}
 					}
 				break;
 			}
