@@ -354,7 +354,7 @@ class WC_Coupon {
 	 * Ensure coupon is valid for products in the cart is valid or throw exception
 	 */
 	private function validate_product_ids() {
-		if ( sizeof( $this->product_ids ) > 0 && ! $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
+		if ( sizeof( $this->product_ids ) > 0 ) {
 			$valid_for_cart = false;
 			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -373,13 +373,11 @@ class WC_Coupon {
 	 * Ensure coupon is valid for product categories in the cart is valid or throw exception
 	 */
 	private function validate_product_categories() {
-		if ( sizeof( $this->product_categories ) > 0 && ! $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
+		if ( sizeof( $this->product_categories ) > 0 ) {
 			$valid_for_cart = false;
 			if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-
 					$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
-
 					if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) {
 						$valid_for_cart = true;
 					}
