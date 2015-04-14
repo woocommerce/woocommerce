@@ -661,4 +661,13 @@ class WC_Product_Variation extends WC_Product {
 
 		return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
 	}
+
+	/**
+	 * Get product variation description
+	 *
+	 * @return string
+	 */
+	public function get_variation_description() {
+		return get_post_meta( $this->variation_id, '_variation_description', true );
+	}
 }
