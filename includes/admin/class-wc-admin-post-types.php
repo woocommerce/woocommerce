@@ -977,7 +977,9 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
-			wp_set_object_terms( $post_id, wc_clean( $_REQUEST['_shipping_class'] ), 'product_shipping_class' );
+			$shipping_class = '_no_shipping_class' == $_REQUEST['_shipping_class'] ? '' : wc_clean( $_REQUEST['_shipping_class'] );
+
+			wp_set_object_terms( $post_id, $shipping_class, 'product_shipping_class' );
 		}
 
 		if ( isset( $_REQUEST['_visibility'] ) ) {

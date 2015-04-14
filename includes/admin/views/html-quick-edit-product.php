@@ -121,7 +121,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="title"><?php _e( 'Shipping class', 'woocommerce' ); ?></span>
 			<span class="input-text-wrap">
 				<select class="shipping_class" name="_shipping_class">
-					<option value=""><?php _e( 'No shipping class', 'woocommerce' ); ?></option>
+					<option value="_no_shipping_class"><?php _e( 'No shipping class', 'woocommerce' ); ?></option>
 				<?php
 					foreach ( $shipping_class as $key => $value ) {
 						echo '<option value="' . esc_attr( $value->slug ) . '">'. $value->name .'</option>';
