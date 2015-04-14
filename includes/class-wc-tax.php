@@ -340,7 +340,7 @@ class WC_Tax {
 
 		if ( ! empty( WC()->customer ) ) {
 			$location = WC()->customer->get_taxable_address();
-		} elseif ( wc_prices_include_tax() || 'base' === get_option( 'woocommerce_default_customer_address' ) ) {
+		} elseif ( wc_prices_include_tax() || 'base' === get_option( 'woocommerce_default_customer_address' ) || 'base' === get_option( 'woocommerce_tax_based_on' ) ) {
 			$location = array(
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),
