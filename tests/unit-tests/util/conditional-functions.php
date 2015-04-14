@@ -39,49 +39,72 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_is_webhook_valid_topic()
+	 * Data provider for test_wc_is_webhook_valid_topic
 	 *
 	 * @since 2.4
 	 */
-	public function test_wc_is_webhook_valid_topic() {
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'action.woocommerce_add_to_cart' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'action.wc_add_to_cart' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'product.created' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'product.updated' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'product.deleted' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'order.created' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'order.updated' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'order.deleted' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'customer.created' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'customer.updated' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'customer.deleted' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'coupon.created' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'coupon.updated' ) );
-		$this->assertEquals( true, wc_is_webhook_valid_topic( 'coupon.deleted' ) );
-		$this->assertEquals( false, wc_is_webhook_valid_topic( 'coupon.upgraded' ) );
-		$this->assertEquals( false, wc_is_webhook_valid_topic( 'wc.product.updated' ) );
-		$this->assertEquals( false, wc_is_webhook_valid_topic( 'missingdot' ) );
-		$this->assertEquals( false, wc_is_webhook_valid_topic( 'with space' ) );
+	public function data_provider_test_wc_is_webhook_valid_topic() {
+		return array(
+			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_add_to_cart' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.wc_add_to_cart' ) ),
+			array( true, wc_is_webhook_valid_topic( 'product.created' ) ),
+			array( true, wc_is_webhook_valid_topic( 'product.updated' ) ),
+			array( true, wc_is_webhook_valid_topic( 'product.deleted' ) ),
+			array( true, wc_is_webhook_valid_topic( 'order.created' ) ),
+			array( true, wc_is_webhook_valid_topic( 'order.updated' ) ),
+			array( true, wc_is_webhook_valid_topic( 'order.deleted' ) ),
+			array( true, wc_is_webhook_valid_topic( 'customer.created' ) ),
+			array( true, wc_is_webhook_valid_topic( 'customer.updated' ) ),
+			array( true, wc_is_webhook_valid_topic( 'customer.deleted' ) ),
+			array( true, wc_is_webhook_valid_topic( 'coupon.created' ) ),
+			array( true, wc_is_webhook_valid_topic( 'coupon.updated' ) ),
+			array( true, wc_is_webhook_valid_topic( 'coupon.deleted' ) ),
+			array( false, wc_is_webhook_valid_topic( 'coupon.upgraded' ) ),
+			array( false, wc_is_webhook_valid_topic( 'wc.product.updated' ) ),
+			array( false, wc_is_webhook_valid_topic( 'missingdot' ) ),
+			array( false, wc_is_webhook_valid_topic( 'with space' ) )
+		);
+	}
+
+	/**
+	 * Test wc_is_webhook_valid_topic()
+	 *
+	 * @dataProvider data_provider_test_wc_is_webhook_valid_topic
+	 * @since 2.4
+	 */
+	public function test_wc_is_webhook_valid_topic( $assert, $values ) {
+		$this->assertEquals( $assert, $values );
+	}
+
+	/**
+	 * Data provider for test_wc_is_valid_url
+	 *
+	 * @since 2.4
+	 */
+	public function data_provider_test_wc_is_valid_url() {
+		return array(
+			// Test some invalid URLs
+			array( false, wc_is_valid_url( 'google.com' ) ),
+			array( false, wc_is_valid_url( 'ftp://google.com' ) ),
+			array( false, wc_is_valid_url( 'sftp://google.com' ) ),
+			array( false, wc_is_valid_url( 'https://google.com/test invalid' ) ),
+
+			// Test some valid URLs
+			array( true,  wc_is_valid_url( 'http://google.com' ) ),
+			array( true,  wc_is_valid_url( 'https://google.com' ) ),
+			array( true,  wc_is_valid_url( 'https://google.com/test%20valid' ) ),
+			array( true,  wc_is_valid_url( 'https://google.com/test-valid/?query=test' ) ),
+			array( true,  wc_is_valid_url( 'https://google.com/test-valid/#hash' ) )
+		);
 	}
 
 	/**
 	 * Test wc_is_valid_url()
 	 *
+	 * @dataProvider data_provider_test_wc_is_valid_url
 	 * @since 2.3.0
 	 */
-	public function test_wc_is_valid_url() {
-
-		// Test some invalid URLs
-		$this->assertEquals( false, wc_is_valid_url( 'google.com' ) );
-		$this->assertEquals( false, wc_is_valid_url( 'ftp://google.com' ) );
-		$this->assertEquals( false, wc_is_valid_url( 'sftp://google.com' ) );
-		$this->assertEquals( false, wc_is_valid_url( 'https://google.com/test invalid' ) );
-
-		// Test some valid URLs
-		$this->assertEquals( true,  wc_is_valid_url( 'http://google.com' ) );
-		$this->assertEquals( true,  wc_is_valid_url( 'https://google.com' ) );
-		$this->assertEquals( true,  wc_is_valid_url( 'https://google.com/test%20valid' ) );
-		$this->assertEquals( true,  wc_is_valid_url( 'https://google.com/test-valid/?query=test' ) );
-		$this->assertEquals( true,  wc_is_valid_url( 'https://google.com/test-valid/#hash' ) );
+	public function test_wc_is_valid_url( $assert, $values ) {
+		$this->assertEquals( $assert,  $values );
 	}
 }
