@@ -277,7 +277,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$user_id = $args[1];
 				$order   = wc_get_order( $args[2] );
 
-				if ( $user_id == $order->user_id ) {
+				if ( $order && $user_id == $order->user_id ) {
 					$allcaps['view_order'] = true;
 				}
 			break;
