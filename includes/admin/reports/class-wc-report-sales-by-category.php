@@ -262,7 +262,6 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 				$category            = get_term( $category, 'product_cat' );
 				$product_ids         = $this->get_products_in_category( $category->term_id );
-				$category_total      = 0;
 				$category_chart_data = array();
 
 				for ( $i = 0; $i <= $this->chart_interval; $i ++ ) {
@@ -283,15 +282,11 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
 						if ( isset( $this->item_sales_and_times[ $time ][ $id ] ) ) {
 							$interval_total += $this->item_sales_and_times[ $time ][ $id ];
-							$category_total += $this->item_sales_and_times[ $time ][ $id ];
 						}
 					}
 
-					$category_chart_data[] = array( $time, $interval_total );
+					$category_chart_data[] = array( $time, (float) wc_format_decimal( $interval_total, wc_get_price_decimals() ) );
 				}
-
-				//if ( ! $category_total )
-				//	continue;
 
 				$chart_data[ $category->term_id ]['category'] = $category->name;
 				$chart_data[ $category->term_id ]['data'] = $category_chart_data;
@@ -315,8 +310,9 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 									$width  = $this->barwidth / sizeof( $chart_data );
 									$offset = ( $width * $index );
 									$series = $data['data'];
-									foreach ( $series as $key => $series_data )
+									foreach ( $series as $key => $series_data ) {
 										$series[ $key ][0] = $series_data[0] + $offset;
+									}
 									echo '{
 										label: "' . esc_js( $data['category'] ) . '",
 										data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
