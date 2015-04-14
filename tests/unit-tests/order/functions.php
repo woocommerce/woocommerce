@@ -52,6 +52,31 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_processing_order_count()
+	 *
+	 * @todo needs improvement when we have an orders helper
+	 * @since 2.4
+	 */
+	public function test_wc_processing_order_count() {
+		$this->assertEquals( 0, wc_processing_order_count() );
+	}
+
+	/**
+	 * Test wc_orders_count()
+	 *
+	 * @todo needs improvement when we have an orders helper
+	 * @since 2.4
+	 */
+	public function test_wc_orders_count() {
+		foreach ( wc_get_order_statuses() as $status ) {
+			$this->assertEquals( 0, wc_orders_count( $status ) );
+		}
+
+		// Invalid status returns 0
+		$this->assertEquals( 0, wc_orders_count( 'unkown-status' ) );
+	}
+
+	/**
 	 * Test wc_ship_to_billing_address_only()
 	 *
 	 * @since 2.3.0
