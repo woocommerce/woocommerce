@@ -265,9 +265,6 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			// Payment complete
 			$order->payment_complete();
 
-			// Add order note
-			$order->add_order_note( __( 'Subscription approved for a free trial period.', 'woocommerce' ) );
-
 			return true;
 		}
 
