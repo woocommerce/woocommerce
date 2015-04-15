@@ -113,16 +113,11 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				throw new Simplify_ApiException( $error_msg );
 			}
 
-			$initial_payment = WC_Subscriptions_Order::get_total_initial_payment( $order );
+			$initial_payment  = WC_Subscriptions_Order::get_total_initial_payment( $order );
+			$payment_response = $this->process_subscription_payment( $order, $initial_payment );
 
-			if ( $initial_payment > 0 ) {
-				$payment_response = $this->process_subscription_payment( $order, $initial_payment );
-			}
-
-			if ( isset( $payment_response ) && is_wp_error( $payment_response ) ) {
-
+			if ( is_wp_error( $payment_response ) ) {
 				throw new Exception( $payment_response->get_error_message() );
-
 			} else {
 				// Remove cart
 				WC()->cart->empty_cart();
