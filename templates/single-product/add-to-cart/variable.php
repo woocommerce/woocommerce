@@ -4,7 +4,7 @@
  *
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.3.0
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,9 +17,9 @@ global $product, $post;
 <?php do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 <form class="variations_form cart" method="post" enctype='multipart/form-data' data-product_id="<?php echo $post->ID; ?>" data-product_variations="<?php echo esc_attr( json_encode( $available_variations ) ) ?>">
-	
+
 	<?php do_action( 'woocommerce_before_variations_form' ); ?>
-	
+
 	<?php if ( ! empty( $available_variations ) ) : ?>
 		<table class="variations" cellspacing="0">
 			<tbody>
