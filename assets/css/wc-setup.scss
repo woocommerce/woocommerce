@@ -1,0 +1,141 @@
+body {
+	margin: 100px auto 24px;
+	box-shadow: none;
+	background: #f1f1f1;
+	padding: 0;
+}
+#wc-logo {
+	border: 0;
+	margin: 0 0 24px;
+	padding: 0;
+	text-align: center;
+	img {
+		max-width: 50%;
+	}
+}
+.wc-install-content {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.13);
+	padding: 24px 24px 0;
+	background: #fff;
+	overflow: hidden;
+
+	h1, h2, h3, table {
+		margin: 0 0 24px;
+		border: 0;
+		padding: 0;
+	}
+	p {
+		margin: 0 0 24px;
+	}
+	.form-table {
+		tbody {
+			th {
+				width: 30%;
+				vertical-align: middle;
+				font-weight: normal;
+			}
+			td {
+				vertical-align: middle;
+				select, input {
+					width: 100%;
+					box-sizing: border-box;
+				}
+				input[size] {
+					width: auto;
+				}
+			}
+			th, td {
+				padding: 12px 0 12px;
+				margin: 0;
+				border: 0;
+				&:first-child {
+					padding-right: 9px;
+				}
+			}
+		}
+	}
+	.wc-install-pages {
+		width: 100%;
+		th.page-name {
+			width: 30%;
+		}
+		th, td {
+			padding: 7px 0;
+			&:first-child {
+				padding-right: 9px;
+			}
+		}
+	}
+	@media screen and (max-width: 782px) {
+		.form-table {
+			tbody {
+				th {
+					width: auto;
+				}
+			}
+		}
+	}
+}
+.wc-install-steps {
+	padding: 0 0 24px;
+	margin: 0;
+	list-style: none outside;
+	overflow: hidden;
+	color: #ccc;
+	li {
+		width: 20%;
+		float: left;
+		padding: 0 0 1em;
+		margin: 0;
+		text-align: center;
+		position: relative;
+		border-bottom: 4px solid #ccc;
+		line-height: 1;
+	}
+	li:before {
+		content: "";
+		border: 4px solid #ccc;
+		border-radius: 100%;
+		width: 4px;
+		height: 4px;
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		margin-left: -6px;
+		margin-bottom: -8px;
+		background: #fff;
+	}
+	li.active {
+		border-color: #A16696;
+		color: #A16696;
+		&:before {
+			border-color: #A16696;
+		}
+	}
+	li.done {
+		border-color: #A16696;
+		color: #A16696;
+		&:before {
+			border-color: #A16696;
+			background: #A16696;
+		}
+	}
+}
+.wc-setup .wc-install-actions {
+	overflow: hidden;
+	a.button {
+		float: left;
+		font-size: 1.5em;
+		padding: .5em 1em;
+		line-height: 1em;
+		height: auto;
+	}
+	a.button-primary {
+		float: right;
+		opacity: 1;
+		background-color: #A16696;
+		border-color: #A16696;
+		-webkit-box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+		box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+	}
+}
