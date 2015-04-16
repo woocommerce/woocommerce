@@ -422,12 +422,13 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @since
 	 * @param int $id the product ID to get orders for
-	 * @param string $fields fields to include in response
+	 * @param string fields  fields to retrieve
+	 * @param string $filter filters to include in response
 	 * @param string $status the order status to retrieve
 	 * @param $page  $page   page to retrieve
 	 * @return array
 	 */
-	public function get_product_orders( $id, $fields = null, $status = null, $page = 1 ) {
+	public function get_product_orders( $id, $fields = null, $filter = array(), $status = null, $page = 1 ) {
 
 		$id = $this->validate_request( $id, 'product', 'read' );
 
@@ -447,12 +448,14 @@ class WC_API_Products extends WC_API_Resource {
 				'in' => implode( ',', $order_ids )
 			);
 
+			$filter = array_merge( $filter, $order_args );
+
 			$orders_api = new WC_API_Orders( $this->server );
-			$orders     = $orders_api->get_orders( $fields, $order_args, $status, $page );
+			$orders     = $orders_api->get_orders( $fields, $filter, $status, $page );
 
 		}
 
-		return array( 'product_orders' => apply_filters( 'woocommerce_api_product_orders_response', $orders, $id, $fields, $this->server ) );
+		return array( 'product_orders' => apply_filters( 'woocommerce_api_product_orders_response', $orders, $id, $filter, $fields, $this->server ) );
 	}
 
 	/**
