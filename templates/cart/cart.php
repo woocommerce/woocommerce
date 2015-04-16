@@ -94,7 +94,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 								), $_product, false );
 							}
 
-							echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key );
+							echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item, $cart_item_key );
 						?>
 					</td>
 
