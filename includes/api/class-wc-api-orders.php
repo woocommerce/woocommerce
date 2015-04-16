@@ -374,8 +374,6 @@ class WC_API_Orders extends WC_API_Resource {
 	public function create_order( $data ) {
 		global $wpdb;
 
-		$data = isset( $data['order'] ) ? $data['order'] : array();
-
 		$wpdb->query( 'START TRANSACTION' );
 
 		try {
@@ -950,6 +948,8 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( isset( $item['subtotal_tax'] ) ) {
 			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
 		}
+
+		error_log( print_r( $item_args, true ) );
 
 		if ( $creating ) {
 
