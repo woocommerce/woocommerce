@@ -138,7 +138,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.3.7 - xx/04/2015 =
 * Fix - Ensure coupon taxes are reset when calculating totals.
+* Fix - Downloads url sanitization to work correctly with shortcodes and urls.
+* Fix - State/Contry select2 issues with Internet Explorer.
+* Fix - Flat rate per item and per class if no additional costs added.
+* Fix - Simplify Commerce compatibility with free trial subscriptions.
+* Fix - Select2 z-index in the admin.
+* Fix - Postmeta records deletation on plugin uninstall.
+* Fix - List only approved comments in products reviews on API.
+* Tweak - Prevent errors when adding or deleting products for the coupon.
+* Tweak - Prevent errors when check customer capability to view orders.
+* Tweak - Ensure Price Filter links has a trailing slash to avoid pagination issues.
+* Tweak - Improved the check for mismatched totals in items lines for PayPal payment gateway.
+* Tweak - Use wc_stock_amount to format API orders stock amount.
 
 = 2.3.7 - 18/03/2015 =
 * Fix - Allow saving of empty download expiry date on orders.
