@@ -579,6 +579,8 @@ class WC_API_Products extends WC_API_Resource {
 			'visible'            => $product->is_visible(),
 			'catalog_visibility' => $product->visibility,
 			'on_sale'            => $product->is_on_sale(),
+			'product_url'        => $product->is_type( 'external' ) ? $product->get_product_url() : '',
+			'button_text'        => $product->is_type( 'external' ) ? $product->get_button_text() : '',
 			'weight'             => $product->get_weight() ? wc_format_decimal( $product->get_weight(), 2 ) : null,
 			'dimensions'         => array(
 				'length' => $product->length,
