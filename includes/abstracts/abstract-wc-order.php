@@ -1654,7 +1654,7 @@ abstract class WC_Abstract_Order {
 				// Show shipping excluding tax
 				$shipping = wc_price( $this->order_shipping, array('currency' => $this->get_order_currency()) );
 
-				if ( $this->order_shipping_tax > 0 && $this->prices_include_tax ) {
+				if ( $this->order_shipping_tax != 0 && $this->prices_include_tax ) {
 					$tax_text = WC()->countries->ex_tax_or_vat() . ' ';
 				}
 
@@ -1663,7 +1663,7 @@ abstract class WC_Abstract_Order {
 				// Show shipping including tax
 				$shipping = wc_price( $this->order_shipping + $this->order_shipping_tax, array('currency' => $this->get_order_currency()) );
 
-				if ( $this->order_shipping_tax > 0 && ! $this->prices_include_tax ) {
+				if ( $this->order_shipping_tax != 0 && ! $this->prices_include_tax ) {
 					$tax_text = WC()->countries->inc_tax_or_vat() . ' ';
 				}
 
