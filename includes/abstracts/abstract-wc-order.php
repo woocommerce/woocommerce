@@ -1645,7 +1645,7 @@ abstract class WC_Abstract_Order {
 			$tax_display = $this->tax_display_cart;
 		}
 
-		if ( $this->order_shipping > 0 ) {
+		if ( $this->order_shipping != 0 ) {
 
 			$tax_text = '';
 
