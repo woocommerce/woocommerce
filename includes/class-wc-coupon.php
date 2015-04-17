@@ -596,7 +596,6 @@ class WC_Coupon {
 		$discount = 0;
 
 		if ( $this->is_type( 'fixed_product' ) ) {
-
 			$discount = $discounting_amount < $this->coupon_amount ? $discounting_amount : $this->coupon_amount;
 
 			// If dealing with a line and not a single item, we need to multiple fixed discount by cart item qty.
@@ -622,7 +621,7 @@ class WC_Coupon {
 
 				if ( WC()->cart->subtotal_ex_tax ) {
 					// Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669
-					$discount_percent = ( $cart_item['data']->get_price() * $cart_item['quantity'] ) / ( wc_prices_include_tax() ? WC()->cart->subtotal : WC()->cart->subtotal_ex_tax );
+					$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item['quantity'] ) / WC()->cart->subtotal_ex_tax;
 				}
 
 				$discount = min( ( $this->coupon_amount * $discount_percent ) / $cart_item['quantity'], $discounting_amount );
