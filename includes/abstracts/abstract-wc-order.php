@@ -2070,13 +2070,14 @@ abstract class WC_Abstract_Order {
 	 *
 	 * @param string $note Note to add
 	 * @param int $is_customer_note (default: 0) Is this a note for the customer?
+	 * @param  bool added_by_user Was the note added by a user?
 	 * @return int Comment ID
 	 */
-	public function add_order_note( $note, $is_customer_note = 0 ) {
+	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
 
 		$is_customer_note = intval( $is_customer_note );
 
-		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->id ) ) {
+		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->id ) && $added_by_user ) {
 			$user                 = get_user_by( 'id', get_current_user_id() );
 			$comment_author       = $user->display_name;
 			$comment_author_email = $user->user_email;

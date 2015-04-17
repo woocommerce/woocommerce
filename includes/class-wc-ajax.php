@@ -1570,7 +1570,7 @@ class WC_AJAX {
 
 		if ( $post_id > 0 ) {
 			$order      = wc_get_order( $post_id );
-			$comment_id = $order->add_order_note( $note, $is_customer_note );
+			$comment_id = $order->add_order_note( $note, $is_customer_note, true );
 
 			echo '<li rel="' . esc_attr( $comment_id ) . '" class="note ';
 			if ( $is_customer_note ) {
