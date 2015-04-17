@@ -50,7 +50,7 @@ class WC_Admin_Welcome {
 			'locale' => array(
 				'name'    =>  __( 'Store Locale', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_locale' ),
-				'handler' => ''
+				'handler' => array( $this, 'wc_setup_locale_save' )
 			),
 			'pages' => array(
 				'name'    =>  __( 'Page Setup', 'woocommerce' ),
@@ -64,13 +64,13 @@ class WC_Admin_Welcome {
 			),
 			'next_steps' => array(
 				'name'    =>  __( 'Ready!', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_next_steps' ),
+				'view'    => array( $this, 'wc_setup_ready' ),
 				'handler' => ''
 			)
 		);
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
 
-		$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.2' );
 		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
 		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
@@ -90,13 +90,17 @@ class WC_Admin_Welcome {
 			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
 			'search_customers_nonce'    => wp_create_nonce( 'search-customers' )
 		) );
-
 		wp_register_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
 		wp_register_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array(), WC_VERSION );
 		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup.min.js', array( 'jquery' ), WC_VERSION );
 		wp_localize_script( 'wc-setup', 'wc_setup_params', array(
 			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) )
 		) );
+
+		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
+			call_user_func( $this->steps[ $this->step ]['handler'] );
+		}
+
 		$this->setup_wizard_header();
 		$this->setup_wizard_steps();
 		$this->setup_wizard_content();
@@ -169,19 +173,24 @@ class WC_Admin_Welcome {
 		echo '</div>';
 	}
 
+	/**
+	 * Introduction step
+	 */
 	public function wc_setup_introduction() {
 		?>
 		<h1><?php _e( 'Welcome to WooCommerce', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Thanks for choosing WooCommerce to power your online store! To help you get started we\'ve prepared this quick setup wizard - it\'s completely optional and should take no longer than 5 minutes.', 'woocommerce' ); ?></p>
 		<p><?php _e( 'No time right now? Want to setup your store manually? Just press the skip button to return to the WordPress dashboard. You can come back anytime if you change your mind!', 'woocommerce' ); ?></p>
-
 		<p class="wc-install-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
-			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( admin_url() ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
 		<?php
 	}
 
+	/**
+	 * Locale settings
+	 */
 	public function wc_setup_locale() {
 		$user_location = WC_Geolocation::geolocate_ip();
 		$country       = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
@@ -189,27 +198,28 @@ class WC_Admin_Welcome {
 		$state         = 'US' === $country && '*' === $state ? 'AL' : $state;
 		?>
 		<h1><?php _e( 'Store Locale Setup', 'woocommerce' ); ?></h1>
-
-		<form id="setup" method="post" action="install.php?step=2" novalidate="novalidate">
+		<form method="post">
 			<table class="form-table">
 				<tr>
-					<th scope="row"><label for="weblog_title"><?php _e( 'Where is your store based?' ); ?></label></th>
+					<th scope="row"><label for="store_location"><?php _e( 'Where is your store based?' ); ?></label></th>
 					<td>
-					<select name="store_location" style="width:100%;" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+					<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
 							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 						</select>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="weblog_title"><?php _e( 'Which currency will your store use?' ); ?></label></th>
+					<th scope="row"><label for="currency_code"><?php _e( 'Which currency will your store use?', 'woocommerce' ); ?></label></th>
 					<td>
-						<select name="store_currency" style="width:100%;" data-placeholder="<?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+						<select id="currency_code" name="currency_code" required style="width:100%;" data-placeholder="<?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+							<option value=""><?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 							<?php
 							foreach ( get_woocommerce_currencies() as $code => $name ) {
 								echo '<option value="' . esc_attr( $code ) . '">' . esc_html( $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')' ) . '</option>';
 							}
 							?>
 						</select>
+						<span class="description"><?php printf( __( 'If your currency is not listed you can %sadd it later%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -236,26 +246,66 @@ class WC_Admin_Welcome {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="num_decimals"><?php _e( 'Number of Decimals' ); ?></label></th>
+					<th scope="row"><label for="weight_unit"><?php _e( 'Which unit should be used for product weights?' ); ?></label></th>
 					<td>
-						<input type="text" id="num_decimals" name="num_decimals" size="2" value="" />
+						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
+							<option value="kg"><?php echo __( 'kg', 'woocommerce' ); ?></option>
+							<option value="g"><?php echo __( 'g', 'woocommerce' ); ?></option>
+							<option value="lbs"><?php echo __( 'lbs', 'woocommerce' ); ?></option>
+							<option value="oz"><?php echo __( 'oz', 'woocommerce' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="dimension_unit"><?php _e( 'Which unit should be used for product dimensions?' ); ?></label></th>
+					<td>
+						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
+							<option value="m"><?php echo __( 'm', 'woocommerce' ); ?></option>
+							<option value="cm"><?php echo __( 'cm', 'woocommerce' ); ?></option>
+							<option value="mm"><?php echo __( 'mm', 'woocommerce' ); ?></option>
+							<option value="in"><?php echo __( 'in', 'woocommerce' ); ?></option>
+							<option value="yd"><?php echo __( 'yd', 'woocommerce' ); ?></option>
+						</select>
 					</td>
 				</tr>
 			</table>
+			<p class="wc-install-actions step">
+				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+			</p>
 		</form>
-
-		<p class="wc-install-actions step">
-			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large"><?php _e( 'Continue', 'woocommerce' ); ?></a>
-			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
-		</p>
 		<?php
 	}
 
+	/**
+	 * Save Locale Settings
+	 */
+	public function wc_setup_locale_save() {
+		$store_location = sanitize_text_field( $_POST['store_location'] );
+		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
+		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
+		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
+		$weight_unit    = sanitize_text_field( $_POST['weight_unit'] );
+		$dimension_unit = sanitize_text_field( $_POST['dimension_unit'] );
+
+		update_option( 'woocommerce_default_country', $store_location );
+		update_option( 'woocommerce_currency', $currency_code );
+		update_option( 'woocommerce_currency_pos', $currency_pos );
+		update_option( 'woocommerce_thousand_sep', $thousand_sep );
+		update_option( 'woocommerce_weight_unit', $weight_unit );
+		update_option( 'woocommerce_dimension_unit', $dimension_unit );
+
+		wp_redirect( $this->get_next_step_link() );
+		exit;
+	}
+
+	/**
+	 * Page setup
+	 */
 	public function wc_setup_pages() {
 		?>
 		<h1><?php _e( 'Page Setup', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'There are a few pages WooCommerce needs to install in order to function correctly. The following pages will be created if they do not already exist:', 'woocommerce' ); ?></p>
-
 		<table class="wc-install-pages">
 			<head>
 				<tr>
@@ -282,7 +332,6 @@ class WC_Admin_Welcome {
 				</tr>
 			</tbody>
 		</table>
-
 		<p class="wc-install-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large"><?php _e( 'Continue', 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
@@ -290,7 +339,10 @@ class WC_Admin_Welcome {
 		<?php
 	}
 
-	public function wc_setup_next_steps() {
+	/**
+	 * Final step
+	 */
+	public function wc_setup_ready() {
 		?>
 		<h1><?php _e( 'Your Store is Ready', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Congratulations - basic setup is complete. Wondering what to do next?', 'woocommerce' ); ?></p>
@@ -312,6 +364,9 @@ class WC_Admin_Welcome {
 		$welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' );
 
 		switch ( $_GET['page'] ) {
+			case 'wc-setup' :
+				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-setup', array( $this, 'about_screen' ) );
+			break;
 			case 'wc-about' :
 				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-about', array( $this, 'about_screen' ) );
 				add_action( 'admin_print_styles-' . $page, array( $this, 'admin_css' ) );
@@ -341,7 +396,6 @@ class WC_Admin_Welcome {
 		remove_submenu_page( 'index.php', 'wc-about' );
 		remove_submenu_page( 'index.php', 'wc-credits' );
 		remove_submenu_page( 'index.php', 'wc-translators' );
-
 		?>
 		<style type="text/css">
 			/*<![CDATA[*/
@@ -447,7 +501,6 @@ class WC_Admin_Welcome {
 	 * Intro text/links shown on all about pages.
 	 */
 	private function intro() {
-
 		// Flush after upgrades
 		if ( ! empty( $_GET['wc-updated'] ) || ! empty( $_GET['wc-installed'] ) ) {
 			flush_rewrite_rules();
