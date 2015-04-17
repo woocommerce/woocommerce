@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.3.7 Admin\n"
+"Project-Id-Version: WooCommerce 2.3.8 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-03-18 12:39:45+00:00\n"
+"POT-Creation-Date: 2015-04-17 15:06:22+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -215,7 +215,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:233
 #: includes/admin/class-wc-admin-post-types.php:122
-#: includes/admin/class-wc-admin-post-types.php:1956
+#: includes/admin/class-wc-admin-post-types.php:1964
 #: includes/admin/views/html-bulk-edit-product.php:197
 #: includes/admin/views/html-quick-edit-product.php:155
 msgid "Featured"
@@ -376,7 +376,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-attributes.php:366
 #: includes/admin/class-wc-admin-post-types.php:212
 #: includes/admin/class-wc-admin-post-types.php:368
-#: includes/admin/class-wc-admin-post-types.php:1960
+#: includes/admin/class-wc-admin-post-types.php:1968
 #: includes/admin/class-wc-admin-webhooks-table-list.php:99
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:232
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:312
@@ -1141,51 +1141,51 @@ msgstr ""
 msgid "Search for a customer&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1675
-msgid "Product updated. <a href=\"%s\">View Product</a>"
-msgstr ""
-
-#: includes/admin/class-wc-admin-post-types.php:1676
-#: includes/admin/class-wc-admin-post-types.php:1691
-#: includes/admin/class-wc-admin-post-types.php:1707
-msgid "Custom field updated."
-msgstr ""
-
-#: includes/admin/class-wc-admin-post-types.php:1677
-#: includes/admin/class-wc-admin-post-types.php:1692
-#: includes/admin/class-wc-admin-post-types.php:1708
-msgid "Custom field deleted."
-msgstr ""
-
-#: includes/admin/class-wc-admin-post-types.php:1678
-msgid "Product updated."
-msgstr ""
-
-#: includes/admin/class-wc-admin-post-types.php:1679
-msgid "Product restored to revision from %s"
-msgstr ""
-
-#: includes/admin/class-wc-admin-post-types.php:1680
-msgid "Product published. <a href=\"%s\">View Product</a>"
-msgstr ""
-
-#: includes/admin/class-wc-admin-post-types.php:1681
-msgid "Product saved."
-msgstr ""
-
-#: includes/admin/class-wc-admin-post-types.php:1682
-msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
-msgstr ""
-
 #: includes/admin/class-wc-admin-post-types.php:1683
-msgid ""
-"Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" "
-"href=\"%2$s\">Preview Product</a>"
+msgid "Product updated. <a href=\"%s\">View Product</a>"
 msgstr ""
 
 #: includes/admin/class-wc-admin-post-types.php:1684
 #: includes/admin/class-wc-admin-post-types.php:1699
 #: includes/admin/class-wc-admin-post-types.php:1715
+msgid "Custom field updated."
+msgstr ""
+
+#: includes/admin/class-wc-admin-post-types.php:1685
+#: includes/admin/class-wc-admin-post-types.php:1700
+#: includes/admin/class-wc-admin-post-types.php:1716
+msgid "Custom field deleted."
+msgstr ""
+
+#: includes/admin/class-wc-admin-post-types.php:1686
+msgid "Product updated."
+msgstr ""
+
+#: includes/admin/class-wc-admin-post-types.php:1687
+msgid "Product restored to revision from %s"
+msgstr ""
+
+#: includes/admin/class-wc-admin-post-types.php:1688
+msgid "Product published. <a href=\"%s\">View Product</a>"
+msgstr ""
+
+#: includes/admin/class-wc-admin-post-types.php:1689
+msgid "Product saved."
+msgstr ""
+
+#: includes/admin/class-wc-admin-post-types.php:1690
+msgid "Product submitted. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
+msgstr ""
+
+#: includes/admin/class-wc-admin-post-types.php:1691
+msgid ""
+"Product scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" "
+"href=\"%2$s\">Preview Product</a>"
+msgstr ""
+
+#: includes/admin/class-wc-admin-post-types.php:1692
+#: includes/admin/class-wc-admin-post-types.php:1707
+#: includes/admin/class-wc-admin-post-types.php:1723
 #: includes/admin/settings/views/html-webhook-log.php:10
 #: includes/admin/settings/views/html-webhooks-edit.php:126
 #: includes/admin/settings/views/html-webhooks-edit.php:135
@@ -1193,131 +1193,131 @@ msgstr ""
 msgid "M j, Y @ G:i"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1685
+#: includes/admin/class-wc-admin-post-types.php:1693
 msgid "Product draft updated. <a target=\"_blank\" href=\"%s\">Preview Product</a>"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1690
-#: includes/admin/class-wc-admin-post-types.php:1693
-#: includes/admin/class-wc-admin-post-types.php:1695
+#: includes/admin/class-wc-admin-post-types.php:1698
+#: includes/admin/class-wc-admin-post-types.php:1701
+#: includes/admin/class-wc-admin-post-types.php:1703
 msgid "Order updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1694
+#: includes/admin/class-wc-admin-post-types.php:1702
 msgid "Order restored to revision from %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1696
+#: includes/admin/class-wc-admin-post-types.php:1704
 msgid "Order saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1697
+#: includes/admin/class-wc-admin-post-types.php:1705
 msgid "Order submitted."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1698
+#: includes/admin/class-wc-admin-post-types.php:1706
 msgid "Order scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1700
+#: includes/admin/class-wc-admin-post-types.php:1708
 msgid "Order draft updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1701
+#: includes/admin/class-wc-admin-post-types.php:1709
 msgid "Order updated and email sent."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1706
-#: includes/admin/class-wc-admin-post-types.php:1709
-#: includes/admin/class-wc-admin-post-types.php:1711
+#: includes/admin/class-wc-admin-post-types.php:1714
+#: includes/admin/class-wc-admin-post-types.php:1717
+#: includes/admin/class-wc-admin-post-types.php:1719
 msgid "Coupon updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1710
+#: includes/admin/class-wc-admin-post-types.php:1718
 msgid "Coupon restored to revision from %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1712
+#: includes/admin/class-wc-admin-post-types.php:1720
 msgid "Coupon saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1713
+#: includes/admin/class-wc-admin-post-types.php:1721
 msgid "Coupon submitted."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1714
+#: includes/admin/class-wc-admin-post-types.php:1722
 msgid "Coupon scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1716
+#: includes/admin/class-wc-admin-post-types.php:1724
 msgid "Coupon draft updated."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1889
+#: includes/admin/class-wc-admin-post-types.php:1897
 msgid "Product name"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1892
+#: includes/admin/class-wc-admin-post-types.php:1900
 msgid "Coupon code"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1907
+#: includes/admin/class-wc-admin-post-types.php:1915
 msgid "Description (optional)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1924
+#: includes/admin/class-wc-admin-post-types.php:1932
 msgid "Insert into %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1925
+#: includes/admin/class-wc-admin-post-types.php:1933
 msgid "Uploaded to this %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1945
+#: includes/admin/class-wc-admin-post-types.php:1953
 msgid "Catalog/search"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1946
+#: includes/admin/class-wc-admin-post-types.php:1954
 #: includes/admin/views/html-bulk-edit-product.php:185
 #: includes/admin/views/html-quick-edit-product.php:142
 msgid "Catalog"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1947
+#: includes/admin/class-wc-admin-post-types.php:1955
 #: includes/admin/views/html-bulk-edit-product.php:186
 #: includes/admin/views/html-quick-edit-product.php:143
 msgid "Search"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1948
+#: includes/admin/class-wc-admin-post-types.php:1956
 #: includes/admin/views/html-bulk-edit-product.php:187
 #: includes/admin/views/html-quick-edit-product.php:144
 msgid "Hidden"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1952
+#: includes/admin/class-wc-admin-post-types.php:1960
 msgid "Catalog visibility:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1968
+#: includes/admin/class-wc-admin-post-types.php:1976
 msgid ""
 "Define the loops this product should be visible in. The product will still "
 "be accessible directly."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1974
+#: includes/admin/class-wc-admin-post-types.php:1982
 msgid "Enable this option to feature this product."
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1976
+#: includes/admin/class-wc-admin-post-types.php:1984
 msgid "Featured Product"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1979
+#: includes/admin/class-wc-admin-post-types.php:1987
 msgid "OK"
 msgstr ""
 
-#: includes/admin/class-wc-admin-post-types.php:1980
+#: includes/admin/class-wc-admin-post-types.php:1988
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:175
 #: includes/admin/meta-boxes/views/html-order-items.php:243
 #: includes/admin/meta-boxes/views/html-order-items.php:289
@@ -2213,7 +2213,7 @@ msgid ""
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:100
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:116
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:118
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:478
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:493
 #: includes/admin/meta-boxes/views/html-order-items.php:305
@@ -2221,93 +2221,93 @@ msgstr ""
 msgid "Search for a product&hellip;"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:110
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:112
 msgid ""
 "Products which need to be in the cart to use this coupon or, for \"Product "
 "Discounts\", which products are discounted."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:115
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:117
 msgid "Exclude products"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:126
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:130
 msgid ""
 "Products which must not be in the cart to use this coupon or, for \"Product "
 "Discounts\", which products are not discounted."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:133
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:137
 msgid "Product categories"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:134
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:138
 msgid "Any category"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:143
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:147
 msgid ""
 "A product must be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will be discounted."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:148
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:152
 msgid "Exclude categories"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:149
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:153
 msgid "No categories"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:158
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:162
 msgid ""
 "Product must not be in this category for the coupon to remain valid or, for "
 "\"Product Discounts\", products in these categories will not be discounted."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:164
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "Email restrictions"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:164
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid "No restrictions"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:164
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:168
 msgid ""
 "List of allowed emails to check against the customer's billing email when "
 "an order is placed. Separate email addresses with commas."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:178
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "Usage limit per coupon"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:178
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:182
 msgid "How many times this coupon can be used before it is void."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:184
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid "Limit usage to X items"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:184
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgid ""
 "The maximum number of individual items this coupon can apply to when using "
 "product discounts. Leave blank to apply to all qualifying items in cart."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:190
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid "Usage limit per user"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:190
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgid ""
 "How many times this coupon can be used by an invidual user. Uses billing "
 "email for guests, and user ID for logged in users."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:227
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:231
 msgid ""
 "Coupon code already exists - customers will use the latest coupon with this "
 "code."
@@ -6278,13 +6278,13 @@ msgctxt "placeholder"
 msgid "YYYY-MM-DD"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:178
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:190
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:182
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:194
 msgctxt "placeholder"
 msgid "Unlimited usage"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:184
+#: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:188
 msgctxt "placeholder"
 msgid "Apply to all qualifying items in cart"
 msgstr ""
