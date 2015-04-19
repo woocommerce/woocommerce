@@ -64,7 +64,7 @@ foreach ( $items as $item_id => $item ) :
 				do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
 
 			?></td>
-			<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo $item['qty'] ;?></td>
+			<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item ); ?></td>
 			<td style="text-align:left; vertical-align:middle; border: 1px solid #eee;"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
 		</tr>
 		<?php
