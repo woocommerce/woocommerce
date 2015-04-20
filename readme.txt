@@ -138,7 +138,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.3.8 - xx/04/2015 =
+= 2.3.8 - 20/04/2015 =
 * Fix - Ensure coupon taxes are reset when calculating totals.
 * Fix - Downloads url sanitization to work correctly with shortcodes and urls.
 * Fix - State/Contry select2 issues with Internet Explorer.
