@@ -64,33 +64,26 @@ function wc_load_persistent_cart( $user_login, $user ) {
  * @param int|array $product_id
  */
 function wc_add_to_cart_message( $product_id ) {
+	$titles = array();
 
 	if ( is_array( $product_id ) ) {
-
-		$titles = array();
-
 		foreach ( $product_id as $id ) {
 			$titles[] = get_the_title( $id );
 		}
-
-		$added_text = sprintf( __( 'Added %s to your cart.', 'woocommerce' ), wc_format_list_of_items( $titles ) );
-
 	} else {
-		$added_text = sprintf( __( '&quot;%s&quot; was successfully added to your cart.', 'woocommerce' ), get_the_title( $product_id ) );
+		$titles[] = get_the_title( $product_id );
 	}
 
+	$titles     = array_filter( $titles );
+	$added_text = sprintf( _n( '%s has been added to your cart.', '%s have been added to your cart.', sizeof( $titles ), 'woocommerce' ), wc_format_list_of_items( $titles ) );
+
 	// Output success messages
-	if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) :
-
-		$return_to 	= apply_filters( 'woocommerce_continue_shopping_redirect', wp_get_referer() ? wp_get_referer() : home_url() );
-
-		$message 	= sprintf('<a href="%s" class="button wc-forward">%s</a> %s', $return_to, __( 'Continue Shopping', 'woocommerce' ), $added_text );
-
-	else :
-
-		$message 	= sprintf('<a href="%s" class="button wc-forward">%s</a> %s', wc_get_page_permalink( 'cart' ), __( 'View Cart', 'woocommerce' ), $added_text );
-
-	endif;
+	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wp_get_referer() ? wp_get_referer() : home_url() );
+		$message   = sprintf('<a href="%s" class="button wc-forward">%s</a> %s', $return_to, __( 'Continue Shopping', 'woocommerce' ), $added_text );
+	} else {
+		$message   = sprintf('<a href="%s" class="button wc-forward">%s</a> %s', wc_get_page_permalink( 'cart' ), __( 'View Cart', 'woocommerce' ), $added_text );
+	}
 
 	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
 }
@@ -102,7 +95,6 @@ function wc_add_to_cart_message( $product_id ) {
  */
 function wc_format_list_of_items( $items ) {
 	$item_string = '';
-	$items       = array_filter( $items );
 
 	foreach ( $items as $key => $item ) {
 		$item_string .= sprintf( _x( '&ldquo;%s&ldquo;', 'Item name in quotes' ), $item );
