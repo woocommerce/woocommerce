@@ -214,6 +214,8 @@ class WC_Admin_Notices {
 			}
 		}
 
+		$outdated = apply_filters( 'woocommerce_outdated_template_notice', $outdated, $core_templates );
+
 		if ( $outdated ) {
 			include( 'views/html-notice-template-check.php' );
 		} else {
