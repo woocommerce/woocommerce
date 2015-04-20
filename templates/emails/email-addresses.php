@@ -4,14 +4,14 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
- * @version     2.2.0
+ * @version     2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-?><table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
+?><table id="addresses" cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
 
 	<tr>
 
