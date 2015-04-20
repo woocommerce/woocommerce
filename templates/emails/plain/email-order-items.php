@@ -32,7 +32,7 @@ foreach ( $items as $item_id => $item ) :
 		echo ( $item_meta_content = $item_meta->display( true, true ) ) ? "\n" . $item_meta_content : '';
 
 		// Quantity
-		echo "\n" . sprintf( __( 'Quantity: %s', 'woocommerce' ), $item['qty'] );
+		echo "\n" . sprintf( __( 'Quantity: %s', 'woocommerce' ), apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item ) );
 
 		// Cost
 		echo "\n" . sprintf( __( 'Cost: %s', 'woocommerce' ), $order->get_formatted_line_subtotal( $item ) );
