@@ -24,12 +24,26 @@ body {
 		margin: 0 0 24px;
 		border: 0;
 		padding: 0;
+		color: #666;
 	}
 	p {
 		margin: 0 0 24px;
+		font-size: 1em;
+		line-height: 1.75em;
+		color: #666;
+	}
+	table {
+		font-size: 1em;
+		line-height: 1.75em;
+		color: #666;
+	}
+	a {
+		color: #A16696;
+		&:hover, &:focus {
+			color: #111;
+		}
 	}
 	.form-table {
-		line-height: 1.5em;
 		tbody {
 			th {
 				width: 40%;
@@ -65,13 +79,27 @@ body {
 	}
 	.wc-install-pages {
 		width: 100%;
-		th.page-name {
+		border-top: 1px solid #eee;
+		thead th {
+			display: none;
+		}
+		.page-name {
 			width: 30%;
+			font-weight: bold;
 		}
 		th, td {
-			padding: 7px 0;
+			padding: 14px 0;
+			border-bottom: 1px solid #eee;
 			&:first-child {
 				padding-right: 9px;
+			}
+		}
+		th {
+			padding-top: 0;
+		}
+		.page-options {
+			p {
+				margin: 6px 0 0 24px;
 			}
 		}
 	}

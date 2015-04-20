@@ -55,11 +55,11 @@ class WC_Admin_Welcome {
 			'pages' => array(
 				'name'    =>  __( 'Page Setup', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_pages' ),
-				'handler' => ''
+				'handler' => array( $this, 'wc_setup_pages_save' )
 			),
 			'shipping_taxes' => array(
 				'name'    =>  __( 'Shipping &amp; Tax', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_pages' ),
+				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
 				'handler' => ''
 			),
 			'next_steps' => array(
@@ -305,38 +305,78 @@ class WC_Admin_Welcome {
 	public function wc_setup_pages() {
 		?>
 		<h1><?php _e( 'Page Setup', 'woocommerce' ); ?></h1>
-		<p><?php _e( 'There are a few pages WooCommerce needs to install in order to function correctly. The following pages will be created if they do not already exist:', 'woocommerce' ); ?></p>
-		<table class="wc-install-pages">
-			<head>
-				<tr>
-					<th class="page-name"><?php _e( 'Page Name', 'woocommerce' ); ?></th>
-					<th class="page-description"><?php _e( 'Description', 'woocommerce' ); ?></th>
-				</tr>
-			</head>
-			<tbody>
-				<tr>
-					<td><?php echo _x( 'Shop', 'Page title', 'woocommerce' ); ?></td>
-					<td><?php _e( 'The shop page will house your product catalog.', 'woocommerce' ); ?></td>
-				</tr>
-				<tr>
-					<td><?php echo _x( 'Cart', 'Page title', 'woocommerce' ); ?></td>
-					<td><?php _e( 'The cart page will be where the customer goes to view their cart and begin checkout.', 'woocommerce' ); ?></td>
-				</tr>
-				<tr>
-					<td><?php echo _x( 'Checkout', 'Page title', 'woocommerce' ); ?></td>
-					<td><?php _e( 'The checkout page will be where the customer goes to pay for their items.', 'woocommerce' ); ?></td>
-				</tr>
-				<tr>
-					<td><?php echo _x( 'My Account', 'Page title', 'woocommerce' ); ?></td>
-					<td><?php _e( 'Registered customers will be able to go to this page to manage their account details and view past orders. Non-registered users will be able to login or register.', 'woocommerce' ); ?></td>
-				</tr>
-			</tbody>
-		</table>
-		<p class="wc-install-actions step">
-			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large"><?php _e( 'Continue', 'woocommerce' ); ?></a>
-			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
-		</p>
+		<form method="post">
+			<p><?php _e( 'There are a few pages that need to be setup to show parts of your store. The following pages will be created automatically if they do not already exist:', 'woocommerce' ); ?></p>
+			<table class="wc-install-pages" cellspacing="0">
+				<thead>
+					<tr>
+						<th class="page-name"><?php _e( 'Page Name', 'woocommerce' ); ?></th>
+						<th class="page-description"><?php _e( 'Description', 'woocommerce' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="page-name"><?php echo _x( 'Shop', 'Page title', 'woocommerce' ); ?></td>
+						<td><?php _e( 'The shop page will house your product catalog.', 'woocommerce' ); ?></td>
+					</tr>
+					<tr>
+						<td class="page-name"><?php echo _x( 'Cart', 'Page title', 'woocommerce' ); ?></td>
+						<td><?php _e( 'The cart page will be where the customer goes to view their cart and begin checkout.', 'woocommerce' ); ?></td>
+					</tr>
+					<tr>
+						<td class="page-name"><?php echo _x( 'Checkout', 'Page title', 'woocommerce' ); ?></td>
+						<td>
+							<?php _e( 'The checkout page will be where the customer goes to pay for their items.', 'woocommerce' ); ?>
+							<div class="page-options">
+								<p><input type="checkbox" checked="checked" name="woocommerce_enable_guest_checkout" id="woocommerce_enable_guest_checkout" /> <label for="woocommerce_enable_guest_checkout"><?php _e( 'Enable guest checkout', 'woocommerce' ); ?></label></p>
+
+								<p><input type="checkbox" checked="checked" name="woocommerce_enable_signup_and_login_from_checkout" id="woocommerce_enable_signup_and_login_from_checkout" /> <label for="woocommerce_enable_signup_and_login_from_checkout"><?php _e( 'Enable registration on the "Checkout" page', 'woocommerce' ); ?></label></p>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td class="page-name"><?php echo _x( 'My Account', 'Page title', 'woocommerce' ); ?></td>
+						<td>
+							<?php _e( 'Registered customers will be able to go to this page to manage their account details and view past orders.', 'woocommerce' ); ?>
+							<div class="page-options">
+								<p><input type="checkbox" checked="checked" name="woocommerce_enable_myaccount_registration" id="woocommerce_enable_myaccount_registration" /> <label for="woocommerce_enable_myaccount_registration"><?php _e( 'Enable registration on the "My Account" page', 'woocommerce' ); ?></label></p>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<p><?php printf( __( 'Once created, these pages can be managed from your admin dashboard on the %sPages screen%s. You can control which pages are shown in your website menus via the %sAppearance > Menus screen%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>', '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
+
+			<p class="wc-install-actions step">
+				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+			</p>
+		</form>
 		<?php
+	}
+
+	/**
+	 * Save Page Settings
+	 */
+	public function wc_setup_pages_save() {
+		// Create pages
+		WC_Install::create_pages();
+
+		// Page options
+		update_option( 'woocommerce_enable_guest_checkout', isset( $_POST['woocommerce_enable_guest_checkout'] ) ? 'yes' : 'no' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', isset( $_POST['woocommerce_enable_signup_and_login_from_checkout'] ) ? 'yes' : 'no' );
+		update_option( 'woocommerce_enable_myaccount_registration', isset( $_POST['woocommerce_enable_myaccount_registration'] ) ? 'yes' : 'no' );
+
+		wp_redirect( $this->get_next_step_link() );
+		exit;
+	}
+
+	/**
+	 * Shipping and taxes
+	 */
+	public function wc_setup_shipping_taxes() {
+
 	}
 
 	/**
