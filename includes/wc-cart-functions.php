@@ -101,7 +101,20 @@ function wc_add_to_cart_message( $product_id ) {
  * @return string
  */
 function wc_format_list_of_items( $items ) {
-	return '&quot;' . join( __( '&quot; and &quot;', 'woocommerce' ), array_filter( array_merge( array( implode( '&quot;, &quot;', array_slice( $items, 0, -1 ) ) ), array_slice( $items, -1 ) ) ) ) . '&quot;';
+	$item_string = '';
+	$items       = array_filter( $items );
+
+	foreach ( $items as $key => $item ) {
+		$item_string .= sprintf( _x( '&ldquo;%s&ldquo;', 'Item name in quotes' ), $item );
+
+		if ( $key + 2 === sizeof( $items ) ) {
+			$item_string .= ' ' . __( 'and', 'woocommerce' ) . ' ';
+		} elseif ( $key + 1 !== sizeof( $items ) ) {
+			$item_string .= ', ';
+		}
+	}
+
+	return $item_string;
 }
 
 /**
