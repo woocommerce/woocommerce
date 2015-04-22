@@ -55,7 +55,7 @@ class WC_Auth {
 		return add_query_arg( array(
 			'app_name'        => wc_clean( $data['app_name'] ),
 			'return_url'      => urlencode( $data['return_url'] ),
-			'permission_type' => absint( $data['permission_type'] ),
+			'permission_type' => wc_clean( $data['permission_type'] ),
 		), $url );
 	}
 
@@ -98,7 +98,8 @@ class WC_Auth {
 					'app_name'        => $_REQUEST['app_name'],
 					'return_url'      => $_REQUEST['return_url'],
 					'permission_type' => $_REQUEST['permission_type'],
-					'redirect'        => $this->build_url( $_REQUEST, wc_get_endpoint_url( 'wc-auth', 'login', get_home_url( '/' ) ) )
+					'redirect_url'    => $this->build_url( $_REQUEST, wc_get_endpoint_url( 'wc-auth', 'grant_access', get_home_url( '/' ) ) ),
+					'logout_url'      => wp_logout_url( $this->build_url( $_REQUEST, wc_get_endpoint_url( 'wc-auth', 'login', get_home_url( '/' ) ) ) )
 				);
 
 				if ( 'login' == $method && ! is_user_logged_in() ) { // Login endpoint
