@@ -80,8 +80,42 @@ class WC_Auth {
 		return add_query_arg( array(
 			'app_name'        => wc_clean( $data['app_name'] ),
 			'return_url'      => urlencode( $data['return_url'] ),
+			'callback_url'    => urlencode( $data['callback_url'] ),
 			'permission_type' => wc_clean( $data['permission_type'] ),
 		), $url );
+	}
+
+	/**
+	 * Make validation
+	 */
+	protected function make_validation() {
+		if ( empty( $_REQUEST['app_name'] ) ) {
+			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'app_name' ) );
+		}
+
+		if ( empty( $_REQUEST['return_url'] ) ) {
+			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'return_url' ) );
+		}
+
+		if ( false === filter_var( urldecode( $_REQUEST['return_url'] ), FILTER_VALIDATE_URL ) ) {
+			throw new Exception( __( 'The return_url is not a valid URL', 'woocommerce' ) );
+		}
+
+		if ( empty( $_REQUEST['callback_url'] ) ) {
+			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'callback_url' ) );
+		}
+
+		if ( 0 !== stripos( urldecode( $_REQUEST['callback_url'] ), 'https://' ) ) {
+			throw new Exception( __( 'The callback_url need to be over SSL', 'woocommerce' ) );
+		}
+
+		if ( empty( $_REQUEST['permission_type'] ) ) {
+			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'permission_type' ) );
+		}
+
+		if ( ! in_array( $_REQUEST['permission_type'], array( 'read', 'write', 'read_write' ) ) ) {
+			throw new Exception( sprintf( __( 'Invalid permission_type %s', 'woocommerce' ), wc_clean( $_REQUEST['permission_type'] ) ) );
+		}
 	}
 
 	/**
@@ -103,23 +137,10 @@ class WC_Auth {
 			try {
 				$method = strtolower( wc_clean( $wp->query_vars['wc-auth'] ) );
 
-				if ( empty( $_REQUEST['app_name'] ) ) {
-					throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'app_name' ) );
-				}
+				$this->make_validation();
 
-				if ( empty( $_REQUEST['return_url'] ) ) {
-					throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'return_url' ) );
-				}
-
-				if ( empty( $_REQUEST['permission_type'] ) ) {
-					throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'permission_type' ) );
-				}
-
-				if ( ! in_array( $_REQUEST['permission_type'], array( 'read', 'write', 'read_write' ) ) ) {
-					throw new Exception( sprintf( __( 'Invalid permission_type %s', 'woocommerce' ), wc_clean( $_REQUEST['permission_type'] ) ) );
-				}
-
-				if ( 'login' == $method && ! is_user_logged_in() ) { // Login endpoint
+				// Login endpoint
+				if ( 'login' == $method && ! is_user_logged_in() ) {
 					wc_get_template( 'auth/form-login.php', array(
 						'app_name'     => $_REQUEST['app_name'],
 						'return_url'   => $_REQUEST['return_url'],
@@ -127,6 +148,8 @@ class WC_Auth {
 					) );
 
 					exit;
+
+				// Grant access endpoint
 				} else if ( ( 'grant_access' == $method && current_user_can( 'manage_woocommerce' ) ) || ( 'login' == $method && is_user_logged_in() ) ) {
 					wc_get_template( 'auth/form-grant-access.php', array(
 						'app_name'        => $_REQUEST['app_name'],
@@ -137,6 +160,8 @@ class WC_Auth {
 					) );
 
 					exit;
+
+				// Granted access endpoint
 				} else if ( 'granted_access' == $method && current_user_can( 'manage_woocommerce' ) ) {
 					echo '@TODO';
 
