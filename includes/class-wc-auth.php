@@ -46,6 +46,20 @@ class WC_Auth {
 	}
 
 	/**
+	 * [build_url description]
+	 * @param  [type] $data [description]
+	 * @param  [type] $url  [description]
+	 * @return [type]       [description]
+	 */
+	protected function build_url( $data, $url ) {
+		return add_query_arg( array(
+			'app_name'        => wc_clean( $data['app_name'] ),
+			'return_url'      => urlencode( $data['return_url'] ),
+			'permission_type' => absint( $data['permission_type'] ),
+		), $url );
+	}
+
+	/**
 	 * Handle auth requests
 	 *
 	 * @since 2.4.0
@@ -61,23 +75,46 @@ class WC_Auth {
 		if ( ! empty( $wp->query_vars['wc-auth'] ) ) {
 			ob_start();
 
-			$method = strtolower( wc_clean( $wp->query_vars['wc-auth'] ) );
+			try {
+				$method = strtolower( wc_clean( $wp->query_vars['wc-auth'] ) );
 
-			if ( is_user_logged_in() ) {
-				$method = 'grant_access';
+				if ( empty( $_REQUEST['app_name'] ) ) {
+					throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'app_name' ) );
+				}
+
+				if ( empty( $_REQUEST['return_url'] ) ) {
+					throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'return_url' ) );
+				}
+
+				if ( empty( $_REQUEST['permission_type'] ) ) {
+					throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'permission_type' ) );
+				}
+
+				if ( is_user_logged_in() ) {
+					$method = 'grant_access';
+				}
+
+				$params = array(
+					'app_name'        => $_REQUEST['app_name'],
+					'return_url'      => $_REQUEST['return_url'],
+					'permission_type' => $_REQUEST['permission_type'],
+					'redirect'        => $this->build_url( $_REQUEST, wc_get_endpoint_url( 'wc-auth', 'login', get_home_url( '/' ) ) )
+				);
+
+				if ( 'login' == $method && ! is_user_logged_in() ) { // Login endpoint
+					wc_get_template( 'auth/form-login.php', $params );
+
+					exit;
+				} else if ( 'grant_access' == $method && current_user_can( 'manage_woocommerce' ) ) {
+					wc_get_template( 'auth/form-grant-access.php', $params );
+
+					exit;
+				}
+
+				wp_die( __( 'You do not have permissions to access this page!' ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
+			} catch ( Exception $e ) {
+				wp_die( sprintf( __( 'Error: %s', 'woocommerce' ), $e->getMessage() ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
 			}
-
-			if ( 'login' == $method && ! is_user_logged_in() ) { // Login endpoint
-				wc_get_template( 'auth/form-login.php' );
-
-				exit;
-			} else if ( 'grant_access' == $method && current_user_can( 'manage_woocommerce' ) ) {
-				wc_get_template( 'auth/form-login.php' );
-
-				exit;
-			}
-
-			wp_die( __( 'You do not have permissions to access this page!' ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
 		}
 	}
 }
