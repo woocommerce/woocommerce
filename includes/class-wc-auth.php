@@ -46,12 +46,37 @@ class WC_Auth {
 	}
 
 	/**
-	 * [build_url description]
-	 * @param  [type] $data [description]
-	 * @param  [type] $url  [description]
-	 * @return [type]       [description]
+	 * Get permission type name.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @param  string $type
+	 *
+	 * @return string
 	 */
-	protected function build_url( $data, $url ) {
+	protected function get_i18n_permission_type( $type ) {
+		$permissions = array(
+			'read'       => __( 'Read', 'woocommerce' ),
+			'write'      => __( 'Write', 'woocommerce' ),
+			'read_write' => __( 'Read/Write', 'woocommerce' ),
+		);
+
+		return $permissions[ $type ];
+	}
+
+	/**
+	 * Build auth urls
+	 *
+	 * @since  2.4.0
+	 *
+	 * @param  array $data
+	 * @param  string $endpoint
+	 *
+	 * @return string
+	 */
+	protected function build_url( $data, $endpoint ) {
+		$url = wc_get_endpoint_url( 'wc-auth', $endpoint, get_home_url( '/' ) );
+
 		return add_query_arg( array(
 			'app_name'        => wc_clean( $data['app_name'] ),
 			'return_url'      => urlencode( $data['return_url'] ),
@@ -90,24 +115,30 @@ class WC_Auth {
 					throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'permission_type' ) );
 				}
 
-				if ( is_user_logged_in() ) {
-					$method = 'grant_access';
+				if ( ! in_array( $_REQUEST['permission_type'], array( 'read', 'write', 'read_write' ) ) ) {
+					throw new Exception( sprintf( __( 'Invalid permission_type %s', 'woocommerce' ), wc_clean( $_REQUEST['permission_type'] ) ) );
 				}
 
-				$params = array(
-					'app_name'        => $_REQUEST['app_name'],
-					'return_url'      => $_REQUEST['return_url'],
-					'permission_type' => $_REQUEST['permission_type'],
-					'redirect_url'    => $this->build_url( $_REQUEST, wc_get_endpoint_url( 'wc-auth', 'grant_access', get_home_url( '/' ) ) ),
-					'logout_url'      => wp_logout_url( $this->build_url( $_REQUEST, wc_get_endpoint_url( 'wc-auth', 'login', get_home_url( '/' ) ) ) )
-				);
-
 				if ( 'login' == $method && ! is_user_logged_in() ) { // Login endpoint
-					wc_get_template( 'auth/form-login.php', $params );
+					wc_get_template( 'auth/form-login.php', array(
+						'app_name'     => $_REQUEST['app_name'],
+						'return_url'   => $_REQUEST['return_url'],
+						'redirect_url' => $this->build_url( $_REQUEST, 'login' ),
+					) );
 
 					exit;
-				} else if ( 'grant_access' == $method && current_user_can( 'manage_woocommerce' ) ) {
-					wc_get_template( 'auth/form-grant-access.php', $params );
+				} else if ( ( 'grant_access' == $method && current_user_can( 'manage_woocommerce' ) ) || ( 'login' == $method && is_user_logged_in() ) ) {
+					wc_get_template( 'auth/form-grant-access.php', array(
+						'app_name'        => $_REQUEST['app_name'],
+						'return_url'      => $_REQUEST['return_url'],
+						'permission_type' => $this->get_i18n_permission_type( wc_clean( $_REQUEST['permission_type'] ) ),
+						'granted_url'     => wp_nonce_url( $this->build_url( $_REQUEST, 'granted_access' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
+						'logout_url'      => wp_logout_url( $this->build_url( $_REQUEST, 'login' ) )
+					) );
+
+					exit;
+				} else if ( 'granted_access' == $method && current_user_can( 'manage_woocommerce' ) ) {
+					echo '@TODO';
 
 					exit;
 				}
