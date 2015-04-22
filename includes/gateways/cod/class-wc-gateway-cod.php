@@ -99,8 +99,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				)
 			),
 			'enable_for_virtual' => array(
-				'title'             => __( 'Enable for virtual orders', 'woocommerce' ),
-				'label'             => __( 'Enable COD if the order is virtual', 'woocommerce' ),
+				'title'             => __( 'Accept for virtual orders', 'woocommerce' ),
+				'label'             => __( 'Accept COD if the order is virtual', 'woocommerce' ),
 				'type'              => 'checkbox',
 				'default'           => 'yes'
 			)
