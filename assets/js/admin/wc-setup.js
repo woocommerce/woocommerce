@@ -25,4 +25,24 @@ jQuery(function( $ ) {
 		}
 	}).change();
 
+	$('input[name="enable_shipping"]').change(function(){
+		if ( $(this).is( ':checked' ) ) {
+			$(':input[name="shipping_cost_domestic"]').closest('tr').show();
+			$(':input[name="shipping_cost_international"]').closest('tr').show();
+		} else {
+			$(':input[name="shipping_cost_domestic"]').closest('tr').hide();
+			$(':input[name="shipping_cost_international"]').closest('tr').hide();
+		}
+	}).change();
+
+	$('input[name="woocommerce_calc_taxes"]').change(function(){
+		if ( $(this).is( ':checked' ) ) {
+			$(':input[name="woocommerce_prices_include_tax"]').closest('tr').show();
+			$('tr.tax-rates').show();
+		} else {
+			$(':input[name="woocommerce_prices_include_tax"]').closest('tr').hide();
+			$('tr.tax-rates').hide();
+		}
+	}).change();
+
 });

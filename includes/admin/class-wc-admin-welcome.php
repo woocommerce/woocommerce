@@ -97,6 +97,8 @@ class WC_Admin_Welcome {
 			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) )
 		) );
 
+		wp_enqueue_style( 'dashicons' );
+
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
 			call_user_func( $this->steps[ $this->step ]['handler'] );
 		}
@@ -128,7 +130,7 @@ class WC_Admin_Welcome {
 			<?php wp_admin_css( 'wc-setup', true ); ?>
 			<?php wp_admin_css( 'woocommerce_admin_styles', true ); ?>
 			<?php wp_print_scripts( 'wc-enhanced-select' ); ?>
-			<?php wp_print_scripts( 'wc-setup' ); ?>
+			<?php wp_print_scripts( 'wc-setup' );  do_action( 'admin_print_styles' );  ?>
 		</head>
 		<body class="wc-setup wp-core-ui">
 			<h1 id="wc-logo"><a href="http://woothemes.com/woocommerce"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
@@ -201,7 +203,7 @@ class WC_Admin_Welcome {
 		<form method="post">
 			<table class="form-table">
 				<tr>
-					<th scope="row"><label for="store_location"><?php _e( 'Where is your store based?' ); ?></label></th>
+					<th scope="row"><label for="store_location"><?php _e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
 					<td>
 					<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
 							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
@@ -223,7 +225,7 @@ class WC_Admin_Welcome {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="currency_pos"><?php _e( 'Currency Position' ); ?></label></th>
+					<th scope="row"><label for="currency_pos"><?php _e( 'Currency Position', 'woocommerce' ); ?></label></th>
 					<td>
 						<select id="currency_pos" name="currency_pos" class="wc-enhanced-select">
 							<option value="left"><?php echo __( 'Left', 'woocommerce' ); ?></option>
@@ -234,19 +236,19 @@ class WC_Admin_Welcome {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="thousand_sep"><?php _e( 'Thousand Separator' ); ?></label></th>
+					<th scope="row"><label for="thousand_sep"><?php _e( 'Thousand Separator', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="thousand_sep" name="thousand_sep" size="2" value="" />
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator' ); ?></label></th>
+					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="" />
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="weight_unit"><?php _e( 'Which unit should be used for product weights?' ); ?></label></th>
+					<th scope="row"><label for="weight_unit"><?php _e( 'Which unit should be used for product weights?', 'woocommerce' ); ?></label></th>
 					<td>
 						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
 							<option value="kg"><?php echo __( 'kg', 'woocommerce' ); ?></option>
@@ -257,7 +259,7 @@ class WC_Admin_Welcome {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="dimension_unit"><?php _e( 'Which unit should be used for product dimensions?' ); ?></label></th>
+					<th scope="row"><label for="dimension_unit"><?php _e( 'Which unit should be used for product dimensions?', 'woocommerce' ); ?></label></th>
 					<td>
 						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
 							<option value="m"><?php echo __( 'm', 'woocommerce' ); ?></option>
@@ -330,7 +332,7 @@ class WC_Admin_Welcome {
 							<div class="page-options">
 								<p><input type="checkbox" checked="checked" name="woocommerce_enable_guest_checkout" id="woocommerce_enable_guest_checkout" /> <label for="woocommerce_enable_guest_checkout"><?php _e( 'Enable guest checkout', 'woocommerce' ); ?></label></p>
 
-								<p><input type="checkbox" checked="checked" name="woocommerce_enable_signup_and_login_from_checkout" id="woocommerce_enable_signup_and_login_from_checkout" /> <label for="woocommerce_enable_signup_and_login_from_checkout"><?php _e( 'Enable registration on the "Checkout" page', 'woocommerce' ); ?></label></p>
+								<p><input type="checkbox" checked="checked" name="woocommerce_enable_signup_and_login_from_checkout" id="woocommerce_enable_signup_and_login_from_checkout" /> <label for="woocommerce_enable_signup_and_login_from_checkout"><?php _e( 'Enable registration form', 'woocommerce' ); ?></label></p>
 							</div>
 						</td>
 					</tr>
@@ -339,7 +341,7 @@ class WC_Admin_Welcome {
 						<td>
 							<?php _e( 'Registered customers will be able to go to this page to manage their account details and view past orders.', 'woocommerce' ); ?>
 							<div class="page-options">
-								<p><input type="checkbox" checked="checked" name="woocommerce_enable_myaccount_registration" id="woocommerce_enable_myaccount_registration" /> <label for="woocommerce_enable_myaccount_registration"><?php _e( 'Enable registration on the "My Account" page', 'woocommerce' ); ?></label></p>
+								<p><input type="checkbox" checked="checked" name="woocommerce_enable_myaccount_registration" id="woocommerce_enable_myaccount_registration" /> <label for="woocommerce_enable_myaccount_registration"><?php _e( 'Enable registration form', 'woocommerce' ); ?></label></p>
 							</div>
 						</td>
 					</tr>
@@ -376,7 +378,90 @@ class WC_Admin_Welcome {
 	 * Shipping and taxes
 	 */
 	public function wc_setup_shipping_taxes() {
+		?>
+		<h1><?php _e( 'Shipping &amp; Tax Setup', 'woocommerce' ); ?></h1>
+		<form method="post">
+			<p><?php printf( __( 'If you will be charging sales tax, or shipping physical goods to customers, you can configure the basic options below. This is optional and can be changed later from the %1$stax settings%3$s and %2$sshipping settings%3$s screens.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping' ) . '" target="_blank">', '</a>' ); ?></p>
+			<table class="form-table">
+				<tr class="section_title">
+					<td colspan="2">
+						<h2><?php _e( 'Basic Shipping Setup', 'woocommerce' ); ?></h2>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="enable_shipping"><?php _e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
+					<td>
+						<input type="checkbox" id="enable_shipping" name="enable_shipping" class="input-checkbox" value="1" />
+						<label for="enable_shipping"><?php _e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="shipping_cost_domestic"><?php _e( 'How much do you charge to ship products <strong>domestically</strong>?', 'woocommerce' ); ?></label></th>
+					<td>
+						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="shipping_cost_international"><?php _e( 'How much do you charge to ship products <strong>internationally</strong>?', 'woocommerce' ); ?></label></th>
+					<td>
+						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="" />
+					</td>
+				</tr>
+				<tr class="section_title">
+					<td colspan="2">
+						<h2><?php _e( 'Basic Tax Setup', 'woocommerce' ); ?></h2>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_calc_taxes"><?php _e( 'Will you be charging sales tax?', 'woocommerce' ); ?></label></th>
+					<td>
+						<input type="checkbox" id="woocommerce_calc_taxes" name="woocommerce_calc_taxes" class="input-checkbox" value="1" />
+						<label for="woocommerce_calc_taxes"><?php _e( 'Yes, I will be charging sales tax', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_prices_include_tax"><?php _e( 'Will you enter product prices including taxes?', 'woocommerce' ); ?></label></th>
+					<td>
+						<label><input type="radio" checked id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ); ?></label><br/>
+						<label><input type="radio" id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'No, I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<tr class="section_title tax-rates">
+					<td colspan="2">
+						<h2><?php _e( 'Standard Tax Rates', 'woocommerce' ); ?></h2>
 
+						<table class="tax-rates">
+							<thead>
+								<tr>
+									<th>&nbsp;</th>
+									<th><?php _e( 'Country Code', 'woocommerce' ); ?></th>
+									<th><?php _e( 'State Code', 'woocommerce' ); ?></th>
+									<th><?php _e( 'Rate (%)', 'woocommerce' ); ?></th>
+									<th><?php _e( 'Name', 'woocommerce' ); ?></th>
+									<th><a href="#" class="add">+</a></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td class="sort"></td>
+									<td><input type="text" value="GB" /></td>
+									<td><input type="text" value="*" /></td>
+									<td><input type="text" value="20.0000" /></td>
+									<td><input type="text" value="VAT" /></td>
+									<td><a href="#" class="remove">X</a></td>
+								</tr>
+							</tbody>
+						</table>
+						<p class="description"><?php printf( __( 'You can edit and add more tax rates later from the %1$stax settings%3$s screen and read more about taxes in %2$sour documentation%3$s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '<a href="http://docs.woothemes.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
+					</td>
+				</tr>
+			</table>
+			<p class="wc-install-actions step">
+				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+			</p>
+		</form>
+		<?php
 	}
 
 	/**
