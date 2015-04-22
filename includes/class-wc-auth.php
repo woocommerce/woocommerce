@@ -63,9 +63,21 @@ class WC_Auth {
 
 			$method = strtolower( wc_clean( $wp->query_vars['wc-auth'] ) );
 
-			// TODO
+			if ( is_user_logged_in() ) {
+				$method = 'grant_access';
+			}
 
-			exit;
+			if ( 'login' == $method && ! is_user_logged_in() ) { // Login endpoint
+				wc_get_template( 'auth/form-login.php' );
+
+				exit;
+			} else if ( 'grant_access' == $method && current_user_can( 'manage_woocommerce' ) ) {
+				wc_get_template( 'auth/form-login.php' );
+
+				exit;
+			}
+
+			wp_die( __( 'You do not have permissions to access this page!' ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
 		}
 	}
 }

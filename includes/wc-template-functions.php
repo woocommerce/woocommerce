@@ -1944,3 +1944,23 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 		}
 	}
 }
+
+if ( ! function_exists( 'woocommerce_output_auth_header' ) ) {
+
+	/**
+	 * Output the Auth header.
+	 */
+	function woocommerce_output_auth_header() {
+		wc_get_template( 'auth/header.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_output_auth_footer' ) ) {
+
+	/**
+	 * Output the Auth footer.
+	 */
+	function woocommerce_output_auth_footer() {
+		wc_get_template( 'auth/footer.php' );
+	}
+}

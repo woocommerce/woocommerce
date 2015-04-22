@@ -204,3 +204,12 @@ add_action( 'wp_footer', 'woocommerce_demo_store' );
 add_action( 'woocommerce_view_order', 'woocommerce_order_details_table', 10 );
 add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 add_action( 'woocommerce_order_details_after_order_table', 'woocommerce_order_again_button' );
+
+/**
+ * Auth
+ *
+ * @see woocommerce_output_auth_header()
+ * @see woocommerce_output_auth_footer()
+ */
+add_action( 'woocommerce_auth_page_header', 'woocommerce_output_auth_header', 10 );
+add_action( 'woocommerce_auth_page_footer', 'woocommerce_output_auth_footer', 10 );
