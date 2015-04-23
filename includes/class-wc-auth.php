@@ -245,8 +245,13 @@ class WC_Auth {
 					wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'authorize' ) ) );
 					exit;
 
+				// Redirect with user is not logged in and trying to access the authorize endpoint
+				} else if ( 'authorize' == $method && ! is_user_logged_in() ) {
+					wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'login' ) ) );
+					exit;
+
 				// Authorize endpoint
-				} else if ( ( 'authorize' == $method && current_user_can( 'manage_woocommerce' ) ) ) {
+				} else if ( 'authorize' == $method && current_user_can( 'manage_woocommerce' ) ) {
 					wc_get_template( 'auth/form-grant-access.php', array(
 						'app_name'    => $_REQUEST['app_name'],
 						'return_url'  => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ),
