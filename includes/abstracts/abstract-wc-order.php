@@ -2074,9 +2074,6 @@ abstract class WC_Abstract_Order {
 	 * @return int Comment ID
 	 */
 	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
-
-		$is_customer_note = intval( $is_customer_note );
-
 		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->id ) && $added_by_user ) {
 			$user                 = get_user_by( 'id', get_current_user_id() );
 			$comment_author       = $user->display_name;
@@ -2099,9 +2096,9 @@ abstract class WC_Abstract_Order {
 
 		$comment_id = wp_insert_comment( $commentdata );
 
-		add_comment_meta( $comment_id, 'is_customer_note', $is_customer_note );
-
 		if ( $is_customer_note ) {
+			add_comment_meta( $comment_id, 'is_customer_note', 1 );
+
 			do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->id, 'customer_note' => $commentdata['comment_content'] ) );
 		}
 
@@ -2442,13 +2439,11 @@ abstract class WC_Abstract_Order {
 	 * @return array
 	 */
 	public function get_customer_order_notes() {
-
 		$notes = array();
-
-		$args = array(
+		$args  = array(
 			'post_id' => $this->id,
 			'approve' => 'approve',
-			'type' => ''
+			'type'    => ''
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
@@ -2456,19 +2451,16 @@ abstract class WC_Abstract_Order {
 		$comments = get_comments( $args );
 
 		foreach ( $comments as $comment ) {
-
-			$is_customer_note = get_comment_meta( $comment->comment_ID, 'is_customer_note', true );
-			$comment->comment_content = make_clickable( $comment->comment_content );
-
-			if ( $is_customer_note ) {
-				$notes[] = $comment;
+			if ( ! get_comment_meta( $comment->comment_ID, 'is_customer_note', true ) ) {
+				continue;
 			}
+			$comment->comment_content = make_clickable( $comment->comment_content );
+			$notes[] = $comment;
 		}
 
 		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
 
-		return (array) $notes;
-
+		return $notes;
 	}
 
 	/**

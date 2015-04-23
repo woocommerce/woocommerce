@@ -1351,7 +1351,7 @@ class WC_API_Orders extends WC_API_Resource {
 			// Customer note
 			if ( isset( $data['customer_note'] ) ) {
 
-				update_comment_meta( $note->comment_ID, 'is_customer_note', true === $data['customer_note'] );
+				update_comment_meta( $note->comment_ID, 'is_customer_note', true === $data['customer_note'] ? 1 : 0 );
 			}
 
 			do_action( 'woocommerce_api_edit_order_note', $note->comment_ID, $order->id, $this );
