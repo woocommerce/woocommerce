@@ -184,7 +184,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'data' => array(
 				'_refund_amount' => array(
 					'type'     => 'meta',
-					'function' => 'SUM',
+					'function' => '',
 					'name'     => 'total_refund'
 				),
 				'post_date' => array(
@@ -196,7 +196,8 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
-					'name'            => 'order_item_count'
+					'name'            => 'order_item_count',
+					'join_type'       => 'LEFT'
 				)
 			),
 			'group_by'            => $this->group_by_query,
