@@ -2405,8 +2405,6 @@ abstract class WC_Abstract_Order {
 			}
 
 			do_action( 'woocommerce_reduce_order_stock', $this );
-
-			$this->add_order_note( __( 'Order item stock reduced successfully.', 'woocommerce' ) );
 		}
 	}
 
