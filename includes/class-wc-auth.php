@@ -29,6 +29,9 @@ class WC_Auth {
 	 * @since 2.4.0
 	 */
 	public function __construct() {
+		// Add query vars
+		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+
 		// Register auth endpoint
 		add_action( 'init', array( __CLASS__, 'add_endpoint' ), 0 );
 
@@ -37,12 +40,28 @@ class WC_Auth {
 	}
 
 	/**
+	 * Add query vars
+	 *
+	 * @since  2.4.0
+	 *
+	 * @param  $vars
+	 *
+	 * @return string[]
+	 */
+	public function add_query_vars( $vars ) {
+		$vars[] = 'wc-auth-version';
+		$vars[] = 'wc-auth-route';
+
+		return $vars;
+	}
+
+	/**
 	 * Add auth endpoint
 	 *
 	 * @since 2.4.0
 	 */
 	public static function add_endpoint() {
-		add_rewrite_endpoint( 'wc-auth', EP_ROOT );
+		add_rewrite_rule( '^wc-auth/v([1]{1})/(.*)?', 'index.php?wc-auth-version=$matches[1]&wc-auth-route=$matches[2]', 'top' );
 	}
 
 	/**
@@ -75,7 +94,7 @@ class WC_Auth {
 	 * @return string
 	 */
 	protected function build_url( $data, $endpoint ) {
-		$url = wc_get_endpoint_url( 'wc-auth', $endpoint, get_home_url( '/' ) );
+		$url = wc_get_endpoint_url( 'wc-auth/v' . self::VERSION, $endpoint, get_home_url( '/' ) );
 
 		return add_query_arg( array(
 			'app_name'     => wc_clean( $data['app_name'] ),
@@ -218,16 +237,20 @@ class WC_Auth {
 	public function handle_auth_requests() {
 		global $wp;
 
-		if ( ! empty( $_GET['wc-auth'] ) ) {
-			$wp->query_vars['wc-auth'] = $_GET['wc-auth'];
+		if ( ! empty( $_GET['wc-auth-version'] ) ) {
+			$wp->query_vars['wc-auth-version'] = $_GET['wc-auth-version'];
+		}
+
+		if ( ! empty( $_GET['wc-auth-route'] ) ) {
+			$wp->query_vars['wc-auth-route'] = $_GET['wc-auth-route'];
 		}
 
 		// wc-auth endpoint requests
-		if ( ! empty( $wp->query_vars['wc-auth'] ) ) {
+		if ( ! empty( $wp->query_vars['wc-auth-version'] ) && ! empty( $wp->query_vars['wc-auth-route'] ) ) {
 			ob_start();
 
 			try {
-				$method = strtolower( wc_clean( $wp->query_vars['wc-auth'] ) );
+				$method = strtolower( wc_clean( $wp->query_vars['wc-auth-route'] ) );
 				$this->make_validation();
 
 				// Login endpoint
