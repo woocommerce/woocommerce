@@ -7162,11 +7162,11 @@ msgid "Select shipping methods"
 msgstr ""
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:102
-msgid "Enable for virtual orders"
+msgid "Accept for virtual orders"
 msgstr ""
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:103
-msgid "Enable COD if the order is virtual"
+msgid "Accept COD if the order is virtual"
 msgstr ""
 
 #: includes/gateways/cod/class-wc-gateway-cod.php:206
