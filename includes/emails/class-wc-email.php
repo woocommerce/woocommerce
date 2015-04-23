@@ -162,7 +162,7 @@ class WC_Email extends WC_Settings_API {
 		'/&(pound|#163);/i',                             // Pound sign
 		'/&(euro|#8364);/i',                             // Euro sign
 		'/&#36;/',                                       // Dollar sign
-		'/&[^&;]+;/i',                                   // Unknown/unhandled entities
+		'/&[^&\s;]+;/i',                                 // Unknown/unhandled entities
 		'/[ ]{2,}/'                                      // Runs of spaces, post-handling
 	);
 
