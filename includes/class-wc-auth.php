@@ -123,16 +123,18 @@ class WC_Auth {
 			}
 		}
 
-		if ( false === filter_var( urldecode( $_REQUEST['return_url'] ), FILTER_VALIDATE_URL ) ) {
-			throw new Exception( __( 'The return_url is not a valid URL', 'woocommerce' ) );
+		if ( ! in_array( $_REQUEST['scope'], array( 'read', 'write', 'read_write' ) ) ) {
+			throw new Exception( sprintf( __( 'Invalid scope %s', 'woocommerce' ), wc_clean( $_REQUEST['scope'] ) ) );
+		}
+
+		foreach ( array( 'return_url', 'callback_url' ) as $param ) {
+			if ( false === filter_var( urldecode( $param ), FILTER_VALIDATE_URL ) ) {
+				throw new Exception( sprintf( __( 'The %s is not a valid URL', 'woocommerce' ), $param ) );
+			}
 		}
 
 		if ( 0 !== stripos( urldecode( $_REQUEST['callback_url'] ), 'https://' ) ) {
 			throw new Exception( __( 'The callback_url need to be over SSL', 'woocommerce' ) );
-		}
-
-		if ( ! in_array( $_REQUEST['scope'], array( 'read', 'write', 'read_write' ) ) ) {
-			throw new Exception( sprintf( __( 'Invalid scope %s', 'woocommerce' ), wc_clean( $_REQUEST['scope'] ) ) );
 		}
 	}
 
