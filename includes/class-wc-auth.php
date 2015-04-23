@@ -128,7 +128,7 @@ class WC_Auth {
 		}
 
 		foreach ( array( 'return_url', 'callback_url' ) as $param ) {
-			if ( false === filter_var( urldecode( $param ), FILTER_VALIDATE_URL ) ) {
+			if ( false === filter_var( urldecode( $_REQUEST[ $param ] ), FILTER_VALIDATE_URL ) ) {
 				throw new Exception( sprintf( __( 'The %s is not a valid URL', 'woocommerce' ), $param ) );
 			}
 		}
