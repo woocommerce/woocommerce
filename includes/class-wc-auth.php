@@ -109,32 +109,26 @@ class WC_Auth {
 	 * Make validation
 	 */
 	protected function make_validation() {
-		if ( empty( $_REQUEST['app_name'] ) ) {
-			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'app_name' ) );
-		}
+		$params = array(
+			'app_name',
+			'user_id',
+			'return_url',
+			'callback_url',
+			'scope'
+		);
 
-		if ( empty( $_REQUEST['user_id'] ) ) {
-			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'user_id' ) );
-		}
-
-		if ( empty( $_REQUEST['return_url'] ) ) {
-			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'return_url' ) );
+		foreach ( $params as $param ) {
+			if ( empty( $_REQUEST[ $param ] ) ) {
+				throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param ) );
+			}
 		}
 
 		if ( false === filter_var( urldecode( $_REQUEST['return_url'] ), FILTER_VALIDATE_URL ) ) {
 			throw new Exception( __( 'The return_url is not a valid URL', 'woocommerce' ) );
 		}
 
-		if ( empty( $_REQUEST['callback_url'] ) ) {
-			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'callback_url' ) );
-		}
-
 		if ( 0 !== stripos( urldecode( $_REQUEST['callback_url'] ), 'https://' ) ) {
 			throw new Exception( __( 'The callback_url need to be over SSL', 'woocommerce' ) );
-		}
-
-		if ( empty( $_REQUEST['scope'] ) ) {
-			throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'scope' ) );
 		}
 
 		if ( ! in_array( $_REQUEST['scope'], array( 'read', 'write', 'read_write' ) ) ) {
