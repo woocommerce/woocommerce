@@ -243,63 +243,72 @@ class WC_Auth {
 
 		// wc-auth endpoint requests
 		if ( ! empty( $wp->query_vars['wc-auth-version'] ) && ! empty( $wp->query_vars['wc-auth-route'] ) ) {
-			ob_start();
+			$this->auth_endpoint( $wp->query_vars['wc-auth-route'] );
+		}
+	}
 
-			try {
-				$method = strtolower( wc_clean( $wp->query_vars['wc-auth-route'] ) );
-				$this->make_validation();
+	/**
+	 * Auth endpoint
+	 *
+	 * @param  string $route
+	 */
+	protected function auth_endpoint( $route ) {
+		ob_start();
 
-				// Login endpoint
-				if ( 'login' == $method && ! is_user_logged_in() ) {
-					wc_get_template( 'auth/form-login.php', array(
-						'app_name'     => $_REQUEST['app_name'],
-						'return_url'   => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ),
-						'redirect_url' => $this->build_url( $_REQUEST, 'authorize' ),
-					) );
+		try {
+			$route = strtolower( wc_clean( $route ) );
+			$this->make_validation();
 
-					exit;
+			// Login endpoint
+			if ( 'login' == $route && ! is_user_logged_in() ) {
+				wc_get_template( 'auth/form-login.php', array(
+					'app_name'     => $_REQUEST['app_name'],
+					'return_url'   => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ),
+					'redirect_url' => $this->build_url( $_REQUEST, 'authorize' ),
+				) );
 
-				// Redirect with user is logged in
-				} else if ( 'login' == $method && is_user_logged_in() ) {
-					wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'authorize' ) ) );
-					exit;
+				exit;
 
-				// Redirect with user is not logged in and trying to access the authorize endpoint
-				} else if ( 'authorize' == $method && ! is_user_logged_in() ) {
-					wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'login' ) ) );
-					exit;
+			// Redirect with user is logged in
+			} else if ( 'login' == $route && is_user_logged_in() ) {
+				wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'authorize' ) ) );
+				exit;
 
-				// Authorize endpoint
-				} else if ( 'authorize' == $method && current_user_can( 'manage_woocommerce' ) ) {
-					wc_get_template( 'auth/form-grant-access.php', array(
-						'app_name'    => $_REQUEST['app_name'],
-						'return_url'  => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ),
-						'scope'       => $this->get_i18n_scope( wc_clean( $_REQUEST['scope'] ) ),
-						'granted_url' => wp_nonce_url( $this->build_url( $_REQUEST, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
-						'logout_url'  => wp_logout_url( $this->build_url( $_REQUEST, 'login' ) )
-					) );
+			// Redirect with user is not logged in and trying to access the authorize endpoint
+			} else if ( 'authorize' == $route && ! is_user_logged_in() ) {
+				wp_redirect( esc_url_raw( $this->build_url( $_REQUEST, 'login' ) ) );
+				exit;
 
-					exit;
+			// Authorize endpoint
+			} else if ( 'authorize' == $route && current_user_can( 'manage_woocommerce' ) ) {
+				wc_get_template( 'auth/form-grant-access.php', array(
+					'app_name'    => $_REQUEST['app_name'],
+					'return_url'  => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ),
+					'scope'       => $this->get_i18n_scope( wc_clean( $_REQUEST['scope'] ) ),
+					'granted_url' => wp_nonce_url( $this->build_url( $_REQUEST, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
+					'logout_url'  => wp_logout_url( $this->build_url( $_REQUEST, 'login' ) )
+				) );
 
-				// Granted access endpoint
-				} else if ( 'access_granted' == $method && current_user_can( 'manage_woocommerce' ) ) {
-					if ( ! isset( $_GET['wc_auth_nonce'] ) || ! wp_verify_nonce( $_GET['wc_auth_nonce'], 'wc_auth_grant_access' ) ) {
-						throw new Exception( __( 'Invalid nonce verification', 'woocommerce' ) );
-					}
+				exit;
 
-					$consumer_data = $this->create_auth_user( $_REQUEST['app_name'], $_REQUEST['user_id'], $_REQUEST['scope'] );
-					$response      = $this->post_consumer_data( $consumer_data, $_REQUEST['callback_url'] );
-
-					if ( $response ) {
-						wp_redirect( esc_url_raw( add_query_arg( array( 'success' => 1, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ) ) );
-						exit;
-					}
+			// Granted access endpoint
+			} else if ( 'access_granted' == $route && current_user_can( 'manage_woocommerce' ) ) {
+				if ( ! isset( $_GET['wc_auth_nonce'] ) || ! wp_verify_nonce( $_GET['wc_auth_nonce'], 'wc_auth_grant_access' ) ) {
+					throw new Exception( __( 'Invalid nonce verification', 'woocommerce' ) );
 				}
 
-				wp_die( __( 'You do not have permissions to access this page!' ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
-			} catch ( Exception $e ) {
-				wp_die( sprintf( __( 'Error: %s', 'woocommerce' ), $e->getMessage() ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
+				$consumer_data = $this->create_auth_user( $_REQUEST['app_name'], $_REQUEST['user_id'], $_REQUEST['scope'] );
+				$response      = $this->post_consumer_data( $consumer_data, $_REQUEST['callback_url'] );
+
+				if ( $response ) {
+					wp_redirect( esc_url_raw( add_query_arg( array( 'success' => 1, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ) ) );
+					exit;
+				}
 			}
+
+			wp_die( __( 'You do not have permissions to access this page!' ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
+		} catch ( Exception $e ) {
+			wp_die( sprintf( __( 'Error: %s', 'woocommerce' ), $e->getMessage() ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
 		}
 	}
 }
