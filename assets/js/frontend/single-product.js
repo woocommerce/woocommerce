@@ -6,36 +6,36 @@ jQuery( function( $ ) {
 	}
 
 	// Tabs
-	$( '.woocommerce-tabs .panel' ).hide();
+	$('.wc-tabs-wrapper, .woocommerce-tabs')
+		.on( 'init', function() {
+			$('.wc-tab, .panel:not(.panel .panel)').hide();
 
-	$( '.woocommerce-tabs ul.tabs li a' ).click( function() {
+			var hash  = window.location.hash;
+			var url   = window.location.href;
+			var $tabs = $( this ).find('.wc-tabs, ul.tabs').first();
 
-		var $tab = $( this ),
-			$tabs_wrapper = $tab.closest( '.woocommerce-tabs' );
+			if ( hash.toLowerCase().indexOf( "comment-" ) >= 0 || hash == '#reviews' ) {
+				$tabs.find('li.reviews_tab a').click();
+			} else if ( url.indexOf( "comment-page-" ) > 0 || url.indexOf( "cpage=" ) > 0 ) {
+				$tabs.find('li.reviews_tab a').click();
+			} else {
+				$tabs.find('li:first a').click();
+			}
+		})
+		.on( 'click', '.wc-tabs li a, ul.tabs li a', function() {
+			var $tab          = $( this );
+			var $tabs_wrapper = $tab.closest( '.wc-tabs-wrapper, .woocommerce-tabs' );
+			var $tabs         = $tabs_wrapper.find( '.wc-tabs, ul.tabs' );
 
-		$( 'ul.tabs li', $tabs_wrapper ).removeClass( 'active' );
-		$( 'div.panel', $tabs_wrapper ).hide();
-		$( 'div' + $tab.attr( 'href' ), $tabs_wrapper).show();
-		$tab.parent().addClass( 'active' );
+			$tabs.find('li').removeClass( 'active' );
+			$tabs_wrapper.find('.wc-tab, .panel:not(.panel .panel)').hide();
 
-		return false;
-	});
+			$tab.closest('li').addClass( 'active' );
+			$tabs_wrapper.find( $tab.attr( 'href' ) ).show();
 
-	$( '.woocommerce-tabs' ).each( function() {
-		var hash	= window.location.hash,
-			url		= window.location.href,
-			tabs	= $( this );
-
-		if ( hash.toLowerCase().indexOf( "comment-" ) >= 0 || hash == '#reviews' ) {
-			$('ul.tabs li.reviews_tab a', tabs ).click();
-
-		} else if ( url.indexOf( "comment-page-" ) > 0 || url.indexOf( "cpage=" ) > 0 ) {
-			$( 'ul.tabs li.reviews_tab a', $( this ) ).click();
-
-		} else {
-			$( 'ul.tabs li:first a', tabs ).click();
-		}
-	});
+			return false;
+		})
+		.trigger('init');
 
 	$( 'a.woocommerce-review-link' ).click( function() {
 		$( '.reviews_tab a' ).click();
