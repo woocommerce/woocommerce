@@ -37,6 +37,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<input type="hidden" name="redirect" value="<?php echo esc_url( $redirect_url ); ?>" />
 	</form>
 
-	<a href="<?php echo esc_url( urldecode( $return_url ) ); ?>"><?php printf( __( 'Return To %s', 'woocommerce' ), wc_clean( $app_name ) ); ?></a>
+	<a href="<?php echo esc_url( $return_url ); ?>"><?php printf( __( 'Return To %s', 'woocommerce' ), wc_clean( $app_name ) ); ?></a>
 
 <?php do_action( 'woocommerce_auth_page_footer' ); ?>

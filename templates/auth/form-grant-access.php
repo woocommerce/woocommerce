@@ -17,7 +17,7 @@ $user = wp_get_current_user();
 
 <?php do_action( 'woocommerce_auth_page_header' ); ?>
 
-	<h1><?php printf( __( 'Grant "%s" permissions to "%s".', 'woocommerce' ), esc_html( $permission_type ), wc_clean( $app_name ) ); ?></h1>
+	<h1><?php printf( __( 'Grant "%s" permissions to "%s".', 'woocommerce' ), esc_html( $scope ), wc_clean( $app_name ) ); ?></h1>
 
 	<?php wc_print_notices(); ?>
 
@@ -29,6 +29,6 @@ $user = wp_get_current_user();
 
 	<p><?php printf( __( 'Not %s? %s', 'woocommerce' ), wc_clean( $user->display_name ), '<a href="' . esc_url( $logout_url ) . '">' . __( 'Logout', 'woocommerce' ) . '</a>' ); ?></p>
 
-	<a href="<?php echo esc_url( urldecode( $return_url ) ); ?>"><?php printf( __( 'Return To %s', 'woocommerce' ), wc_clean( $app_name ) ); ?></a>
+	<a href="<?php echo esc_url( $return_url ); ?>"><?php printf( __( 'Return To %s', 'woocommerce' ), wc_clean( $app_name ) ); ?></a>
 
 <?php do_action( 'woocommerce_auth_page_footer' ); ?>
