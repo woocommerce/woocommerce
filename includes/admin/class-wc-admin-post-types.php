@@ -1225,9 +1225,8 @@ class WC_Admin_Post_Types {
 	 * Process the new bulk actions for changing order status
 	 */
 	public function bulk_action() {
-
 		$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
-		$action = $wp_list_table->current_action();
+		$action        = $wp_list_table->current_action();
 
 		// Bail out if this is not a status-changing action
 		if ( strpos( $action, 'mark_' ) === false ) {
@@ -1256,7 +1255,12 @@ class WC_Admin_Post_Types {
 		}
 
 		$sendback = add_query_arg( array( 'post_type' => 'shop_order', $report_action => true, 'changed' => $changed, 'ids' => join( ',', $post_ids ) ), '' );
-		wp_redirect( $sendback );
+
+		if ( isset( $_GET['post_status'] ) ) {
+			$sendback = add_query_arg( 'post_status', sanitize_text_field( $_GET['post_status'] ), $sendback );
+		}
+
+		wp_redirect( esc_url_raw( $sendback ) );
 		exit();
 	}
 
