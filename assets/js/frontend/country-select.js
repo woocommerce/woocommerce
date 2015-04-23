@@ -62,7 +62,6 @@ jQuery( function( $ ) {
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {
 				var select2_args = $.extend({
-					minimumResultsForSearch: 10,
 					placeholder: $( this ).attr( 'placeholder' ),
 					placeholderOption: 'first',
 					width: '100%'
