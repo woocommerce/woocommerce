@@ -182,7 +182,7 @@ extract( $variation_data );
 						<option value="parent" <?php selected( is_null( $_tax_class ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
 						<?php
 						foreach ( $parent_data['tax_class_options'] as $key => $value )
-							echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class, true, false ) . '>' . esc_html( $value ) . '</option>';
+							echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class && $_tax_class != NULL , true, false ) . '>' . esc_html( $value ) . '</option>';
 					?></select>
 					<?php endif; ?>
 				</p>
