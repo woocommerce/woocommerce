@@ -18,7 +18,7 @@
     "grunt-contrib-uglify": "^0.9.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-shell": "^1.1.2",
-    "grunt-wp-i18n": "^0.5.1",
+    "grunt-wp-i18n": "^0.5.2",
     "node-bourbon": "^4.2.1-beta1"
   },
   "engines": {
