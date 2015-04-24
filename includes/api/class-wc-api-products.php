@@ -56,6 +56,11 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_reviews' ), WC_API_Server::READABLE ),
 		);
 
+		# GET /products/<id>/orders
+		$routes[ $this->base . '/(?P<id>\d+)/orders' ] = array(
+			array( array( $this, 'get_product_orders' ), WC_API_Server::READABLE ),
+		);
+
 		# GET /products/categories
 		$routes[ $this->base . '/categories' ] = array(
 			array( array( $this, 'get_product_categories' ), WC_API_Server::READABLE ),
@@ -412,6 +417,47 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return array( 'product_reviews' => apply_filters( 'woocommerce_api_product_reviews_response', $reviews, $id, $fields, $comments, $this->server ) );
+	}
+
+	/**
+	 * Get the orders for a product
+	 *
+	 * @since
+	 * @param int $id the product ID to get orders for
+	 * @param string fields  fields to retrieve
+	 * @param string $filter filters to include in response
+	 * @param string $status the order status to retrieve
+	 * @param $page  $page   page to retrieve
+	 * @return array
+	 */
+	public function get_product_orders( $id, $fields = null, $filter = array(), $status = null, $page = 1 ) {
+
+		$id = $this->validate_request( $id, 'product', 'read' );
+
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+
+		global $wpdb;
+		$sql = "SELECT order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key = '_product_id' AND meta_value = $id ) AND order_item_type = 'line_item'";
+
+		$order_ids = $wpdb->get_col( $sql );
+		$orders    = array();
+
+		if ( ! empty( $order_ids ) ) {
+
+			$order_args = array(
+				'in' => implode( ',', $order_ids )
+			);
+
+			$filter = array_merge( $filter, $order_args );
+
+			$orders_api = new WC_API_Orders( $this->server );
+			$orders     = $orders_api->get_orders( $fields, $filter, $status, $page );
+
+		}
+
+		return array( 'product_orders' => apply_filters( 'woocommerce_api_product_orders_response', $orders, $id, $filter, $fields, $this->server ) );
 	}
 
 	/**
