@@ -75,15 +75,15 @@ class WC_API_Products extends WC_API_Resource {
 		$routes[ $this->base . '/sku/(?P<sku>\w+)' ] = array(
 			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
 		);
-		
-		# POST /products/bulk
+
+		# POST|PUT /products/bulk
 		$routes[ $this->base . '/bulk' ] = array(
-			array( array( $this, 'bulk' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'bulk' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		return $routes;
 	}
-	
+
 	/**
 	 * Get all products
 	 *
@@ -1962,38 +1962,81 @@ class WC_API_Products extends WC_API_Resource {
 		// Delete product
 		wp_delete_post( $product_id, true );
 	}
-	
+
 	/**
 	 * Bulk update or insert products
 	 * Accepts an array with products in the formats supported by
 	 * WC_API_Products->create_product() and WC_API_Products->edit_product()
 	 *
+	 * @since 2.4.0
 	 * @param array $products
-	 * @throws Exception
+	 * @return array
 	 */
-	public function bulk( $data )    {
-	    $products = array();
-	    foreach ( $data as $_product )   {
-	        try {
-	            $existing = $this->get_product_by_sku( $_product['sku'] );
-	            if(is_wp_error($existing) && $existing->get_error_code() === "woocommerce_api_invalid_product_sku") {
-	                // SKU not found, go ahead and crate!
-	                $result = $this->create_product($_product);
-	            } else {
-	                // Assume existing, update
-	                $result = $this->edit_product( $existing['product']['id'], $_product );
-	            }
-	            if(is_wp_error($result))   {
-	                // if it fails, add the error message to the return object. Do not! stop further execution.
-	                $products[ $_product['sku'] ] = array( 'error' => array( 'code' => $result->get_error_code(), 'message' => $result->get_error_message() ) );
-	            } else {
-	                // If everything is well, add the updated or created product to the return array
-	                $products[ $_product['sku'] ] = $result;
-	            }
-	        } catch(Exception $e)  {
-	            $products[ $_product['sku'] ] = array( 'error' => array( 'code' => $e->getCode(), 'message' => $e->getMessage() ) );
-	        }
-	    }
-	    return array('products'=>$products);
+	public function bulk( $data ) {
+
+		try {
+			if ( ! isset( $data['products'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_products_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'products' ), 400 );
+			}
+
+			$data  = $data['products'];
+			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'products' );
+
+			// Limit bulk operation
+			if ( $limit < count( $data ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_products_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+			}
+
+			$products = array();
+
+			foreach ( $data as $_product ) {
+				$product_id  = 0;
+				$product_sku = '';
+
+				// Try to get the product ID
+				if ( isset( $_product['id'] ) ) {
+					$product_id = intval( $_product['id'] );
+				}
+
+				if ( ! $product_id && isset( $_product['sku'] ) ) {
+					$product_sku = wc_clean( $_product['sku'] );
+					$product_id  = wc_get_product_id_by_sku( $product_sku );
+				}
+
+				// Product exists / edit product
+				if ( $product_id ) {
+					$edit = $this->edit_product( $product_id, array( 'product' => $_product ) );
+
+					if ( is_wp_error( $edit ) ) {
+						$products[] = array(
+							'id'    => $product_id,
+							'sku'   => $product_sku,
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+						);
+					} else {
+						$products[] = $edit['product'];
+					}
+				}
+
+				// Product don't exists / create product
+				else {
+					$new = $this->create_product( array( 'product' => $_product ) );
+
+					if ( is_wp_error( $new ) ) {
+						$products[] = array(
+							'id'    => $product_id,
+							'sku'   => $product_sku,
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+						);
+					} else {
+						$products[] = $new['product'];
+					}
+				}
+			}
+
+			return array( 'products' => apply_filters( 'woocommerce_api_products_bulk_response', $products, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 }
