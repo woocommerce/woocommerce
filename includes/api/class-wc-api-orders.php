@@ -949,8 +949,6 @@ class WC_API_Orders extends WC_API_Resource {
 			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
 		}
 
-		error_log( print_r( $item_args, true ) );
-
 		if ( $creating ) {
 
 			$item_id = $order->add_product( $product, $item_args['qty'], $item_args );
