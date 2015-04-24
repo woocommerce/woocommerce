@@ -720,7 +720,6 @@ class WC_AJAX {
 			// Get tax classes
 			$tax_classes                 = WC_Tax::get_tax_classes();
 			$tax_class_options           = array();
-			$tax_class_options['parent'] =__( 'Same as parent', 'woocommerce' );
 			$tax_class_options['']       = __( 'Standard', 'woocommerce' );
 
 			if ( $tax_classes ) {
