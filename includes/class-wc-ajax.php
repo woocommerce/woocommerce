@@ -771,7 +771,7 @@ class WC_AJAX {
 				$parent_data['height'] = '0';
 			}
 
-			$_tax_class          = '';
+			$_tax_class          = null;
 			$_downloadable_files = '';
 			$_stock_status       = '';
 			$_backorders         = '';
