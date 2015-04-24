@@ -1850,6 +1850,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				if ( ! empty( $args['options'] ) ) {
 					foreach ( $args['options'] as $option_key => $option_text ) {
+
 						if ( "" === $option_key ) {
 							// If we have a blank option, select2 needs a placeholder
 							if ( empty( $args['placeholder'] ) ) {
@@ -1857,7 +1858,29 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 							}
 							$custom_attributes[] = 'data-allow_clear="true"';
 						}
-						$options .= '<option value="' . esc_attr( $option_key ) . '" '. selected( $value, $option_key, false ) . '>' . esc_attr( $option_text ) .'</option>';
+
+						$option_atts = array();
+						$custom_option_attributes = array();
+
+						if ( is_array( $option_text ) ) {
+							$option_atts = $option_text;
+
+							if ( isset( $option_atts['value'] ) ) {
+								$option_text = $option_atts['value'];
+								unset( $option_atts['value'] );
+							} else {
+								$option_text = '';
+							}
+						}
+
+						if ( ! empty( $option_atts ) ) {
+
+							foreach ( $option_atts as $attribute => $attribute_value ){
+								$custom_option_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
+							}
+						}
+
+						$options .= '<option value="' . esc_attr( $option_key ) . '" '. selected( $value, $option_key, false ) . ' ' . implode( ' ', $custom_option_attributes ) . '>' . esc_attr( $option_text ) .'</option>';
 					}
 
 					$field = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) .'" id="' . esc_attr( $args['id'] ) . '_field">';
@@ -1888,7 +1911,29 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				if ( ! empty( $args['options'] ) ) {
 					foreach ( $args['options'] as $option_key => $option_text ) {
-						$field .= '<input type="radio" class="input-radio ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" value="' . esc_attr( $option_key ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '_' . esc_attr( $option_key ) . '"' . checked( $value, $option_key, false ) . ' />';
+
+						$option_atts = array();
+						$custom_option_attributes = array();
+
+						if ( is_array( $option_text ) ) {
+							$option_atts = $option_text;
+
+							if ( isset( $option_atts['value'] ) ) {
+								$option_text = $option_atts['value'];
+								unset( $option_atts['value'] );
+							} else {
+								$option_text = '';
+							}
+						}
+
+						if ( ! empty( $option_atts ) ) {
+
+							foreach ( $option_atts as $attribute => $attribute_value ){
+								$custom_option_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
+							}
+						}
+
+						$field .= '<input type="radio" class="input-radio ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" value="' . esc_attr( $option_key ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '_' . esc_attr( $option_key ) . '"' . checked( $value, $option_key, false ) . ' ' . implode( ' ', $custom_option_attributes ) . '/>';
 						$field .= '<label for="' . esc_attr( $args['id'] ) . '_' . esc_attr( $option_key ) . '" class="radio ' . implode( ' ', $args['label_class'] ) .'">' . $option_text . '</label>';
 					}
 				}
