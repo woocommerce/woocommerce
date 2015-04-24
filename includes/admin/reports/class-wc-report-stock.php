@@ -18,6 +18,8 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  */
 class WC_Report_Stock extends WP_List_Table {
 
+	protected $max_items;
+
 	/**
 	 * __construct function.
 	 */
