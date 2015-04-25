@@ -1586,8 +1586,11 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Grant permission to any newly added files on any existing orders for this product prior to saving
 		do_action( 'woocommerce_process_product_file_download_paths', $product_id, $variation_id, $files );
-
-		update_post_meta( $product_id, '_downloadable_files', $files );
+		
+		if ( $variation_id != 0 )	
+			update_post_meta( $variation_id, '_downloadable_files', $files );
+		else
+			update_post_meta( $product_id, '_downloadable_files', $files );
 	}
 
 	/**
