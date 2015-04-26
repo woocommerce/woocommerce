@@ -110,7 +110,7 @@ class WC_Admin_Attributes {
 		if ( strlen( $attribute_name ) >= 28 ) {
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		} elseif ( in_array( $attribute_name, $reserved_terms ) ) {
-			return new WP_Error( 'error', __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) );
+			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		}
 
 		return true;
