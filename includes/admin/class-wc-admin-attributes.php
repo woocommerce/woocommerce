@@ -300,9 +300,19 @@ class WC_Admin_Attributes {
 							</th>
 							<td>
 								<select name="attribute_type" id="attribute_type">
-									<option value="select" <?php selected( $att_type, 'select' ); ?>><?php _e( 'Select', 'woocommerce' ); ?></option>
-									<option value="text" <?php selected( $att_type, 'text' ); ?>><?php _e( 'Text', 'woocommerce' ); ?></option>
-									<?php do_action('woocommerce_admin_attribute_types'); ?>
+									<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
+										<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $att_type, $key ); ?>><?php echo esc_attr( $value ); ?></option>
+									<?php endforeach; ?>
+
+									<?php
+
+										/**
+										 * Deprecated action in favor of product_attributes_type_selector filter
+										 *
+										 * @deprecated 2.4.0
+										 */
+										do_action( 'woocommerce_admin_attribute_types' );
+									?>
 								</select>
 								<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
 							</td>
@@ -446,9 +456,19 @@ class WC_Admin_Attributes {
 								<div class="form-field">
 									<label for="attribute_type"><?php _e( 'Type', 'woocommerce' ); ?></label>
 									<select name="attribute_type" id="attribute_type">
-										<option value="select"><?php _e( 'Select', 'woocommerce' ) ?></option>
-										<option value="text"><?php _e( 'Text', 'woocommerce' ); ?></option>
-										<?php do_action('woocommerce_admin_attribute_types'); ?>
+										<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
+											<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_attr( $value ); ?></option>
+										<?php endforeach; ?>
+
+										<?php
+
+											/**
+											 * Deprecated action in favor of product_attributes_type_selector filter
+											 *
+											 * @deprecated 2.4.0
+											 */
+											do_action( 'woocommerce_admin_attribute_types' );
+										?>
 									</select>
 									<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
 								</div>
@@ -474,7 +494,7 @@ class WC_Admin_Attributes {
 			/* <![CDATA[ */
 
 				jQuery( 'a.delete' ).click( function() {
-					if ( window.confirm( "<?php _e( 'Are you sure you want to delete this attribute?', 'woocommerce' ); ?>" ) ) {
+					if ( window.confirm( '<?php _e( "Are you sure you want to delete this attribute?", "woocommerce" ); ?>' ) ) {
 						return true;
 					}
 					return false;

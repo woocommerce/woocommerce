@@ -90,7 +90,6 @@ function wc_attribute_orderby( $name ) {
 /**
  * Get an array of product attribute taxonomies.
  *
- * @access public
  * @return array
  */
 function wc_get_attribute_taxonomy_names() {
@@ -102,4 +101,17 @@ function wc_get_attribute_taxonomy_names() {
 		}
 	}
 	return $taxonomy_names;
+}
+
+/**
+ * Get attribute types.
+ *
+ * @since  2.4.0
+ * @return array
+ */
+function wc_get_attribute_types() {
+	return (array) apply_filters( 'product_attributes_type_selector', array(
+		'select' => __( 'Select', 'woocommerce' ),
+		'text'   => __( 'Text', 'woocommerce' )
+	) );
 }
