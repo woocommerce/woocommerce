@@ -185,9 +185,6 @@ class WC_Shortcode_My_Account {
 	 * Lost password page
 	 */
 	public static function lost_password() {
-
-		global $post;
-
 		// arguments to pass to template
 		$args = array( 'form' => 'lost_password' );
 
