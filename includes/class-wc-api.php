@@ -38,13 +38,13 @@ class WC_API {
 	public function __construct() {
 
 		// add query vars
-		add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
+		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 
 		// register API endpoints
-		add_action( 'init', array( $this, 'add_endpoint'), 0 );
+		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
 
 		// handle REST API requests
-		add_action( 'parse_request', array( $this, 'handle_rest_api_requests'), 0 );
+		add_action( 'parse_request', array( $this, 'handle_rest_api_requests' ), 0 );
 
 		// handle wc-api endpoint requests
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
