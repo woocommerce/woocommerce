@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 <br/>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="WordPress Environment"><?php _e( 'WordPress Environment', 'woocommerce' ); ?></th>
@@ -51,9 +51,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extensions can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php
 				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
-					echo '<mark class="yes">' . '&#10004; <code>' . WC_LOG_DIR . '</code></mark> ';
+					echo '<mark class="yes">&#10004; <code>' . WC_LOG_DIR . '</code></mark> ';
 				} else {
-					printf( '<mark class="error">' . '&#10005; ' . __( 'To allow logging, make <code>%s</code> writable or define a custom <code>WC_LOG_DIR</code>.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
+					printf( '<mark class="error">&#10005; ' . __( 'To allow logging, make <code>%s</code> writable or define a custom <code>WC_LOG_DIR</code>.', 'woocommerce' ) . '</mark>', WC_LOG_DIR );
 				}
 			?></td>
 		</tr>
@@ -83,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="WP Debug Mode"><?php _e( 'WP Debug Mode', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">' . '&#10004;' . '</mark>'; else echo '<mark class="no">' . '&ndash;' . '</mark>'; ?></td>
+			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">&#10004;</mark>'; else echo '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Language"><?php _e( 'Language', 'woocommerce' ); ?>:</td>
@@ -92,7 +92,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Server Environment"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
@@ -166,9 +166,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td><?php
 				$default_timezone = date_default_timezone_get();
 				if ( 'UTC' !== $default_timezone ) {
-					echo '<mark class="error">' . '&#10005; ' . sprintf( __( 'Default timezone is %s - it should be UTC', 'woocommerce' ), $default_timezone ) . '</mark>';
+					echo '<mark class="error">&#10005; ' . sprintf( __( 'Default timezone is %s - it should be UTC', 'woocommerce' ), $default_timezone ) . '</mark>';
 				} else {
-					echo '<mark class="yes">' . '&#10004;' . '</mark>';
+					echo '<mark class="yes">&#10004;</mark>';
 				} ?>
 			</td>
 		</tr>
@@ -282,7 +282,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Server Locale"><?php _e( 'Server Locale', 'woocommerce' ); ?></th>
@@ -306,7 +306,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</th>
@@ -377,7 +377,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Settings"><?php _e( 'Settings', 'woocommerce' ); ?></th>
@@ -385,29 +385,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</thead>
 	<tbody>
 		<tr>
-			<td data-export-label="API Enabled"><?php _e( 'API Enabled', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have REST API enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' === get_option( 'woocommerce_api_enabled' ) ? '<mark class="yes">'.'&#10004;'.'</mark>' : '<mark class="no">'.'&ndash;'.'</mark>'; ?></td>
-		</tr>
-		<tr>
-			<td data-export-label="API Version"><?php _e( 'API Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What version of the REST API does your site use?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo WC_API::VERSION ?></td>
-		</tr>
-		<tr>
 			<td data-export-label="Taxes Enabled"><?php _e( 'Taxes Enabled', 'woocommerce' ) ?></td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have taxes enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo wc_tax_enabled() ? '<mark class="yes">' . '&#10004;' . '</mark>' : '<mark class="no">' . '&ndash;' . '</mark>'; ?></td>
+			<td><?php echo wc_tax_enabled() ? '<mark class="yes">&#10004;</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Shipping Enabled"><?php _e( 'Shipping Enabled', 'woocommerce' ) ?></td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have shipping enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' === get_option( 'woocommerce_calc_shipping' ) ? '<mark class="yes">' . '&#10004;' . '</mark>' : '<mark class="no">' . '&ndash;' . '</mark>'; ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_calc_shipping' ) ? '<mark class="yes">&#10004;</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Force SSL"><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ? '<mark class="yes">'.'&#10004;'.'</mark>' : '<mark class="no">'.'&ndash;'.'</mark>'; ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ? '<mark class="yes">&#10004;</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Currency"><?php _e( 'Currency', 'woocommerce' ) ?></td>
@@ -436,7 +426,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
+			<th colspan="3" data-export-label="API"><?php _e( 'API', 'woocommerce' ); ?></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="API Enabled"><?php _e( 'API Enabled', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have REST API enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_api_enabled' ) ? '<mark class="yes">&#10004;</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="API Version"><?php _e( 'API Version', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What version of the REST API does your site use?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td><?php echo esc_html( WC_API::VERSION ); ?></td>
+		</tr>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="WC Pages"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
@@ -514,7 +523,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Taxonomies"><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo ' <a href="#" class="help_tip" data-tip="' . esc_attr__( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) . '">[?]</a>'; ?></th>
@@ -535,7 +544,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Theme"><?php _e( 'Theme', 'woocommerce' ); ?></th>
@@ -605,7 +614,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td data-export-label="Child Theme"><?php _e( 'Child Theme', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php
-				echo is_child_theme() ? '<mark class="yes">' . '&#10004;' . '</mark>' : '&#10005; &ndash; ' . sprintf( __( 'If you\'re modifying WooCommerce or a parent theme you didn\'t build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' );
+				echo is_child_theme() ? '<mark class="yes">&#10004;</mark>' : '&#10005; &ndash; ' . sprintf( __( 'If you\'re modifying WooCommerce or a parent theme you didn\'t build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' );
 			?></td>
 		</tr>
 		<?php
@@ -635,13 +644,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
 					echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
 				} else {
-					echo '<mark class="yes">' . '&#10004;' . '</mark>';
+					echo '<mark class="yes">&#10004;</mark>';
 				}
 			?></td>
 		</tr>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
+<table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Templates"><?php _e( 'Templates', 'woocommerce' ); ?><?php echo ' <a href="#" class="help_tip" data-tip="' . esc_attr__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) . '">[?]</a>'; ?></th>
@@ -734,16 +743,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		var report = '';
 
-		jQuery( '#status thead, #status tbody' ).each(function(){
+		jQuery( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
 
 			if ( jQuery( this ).is('thead') ) {
 
 				var label = jQuery( this ).find( 'th:eq(0)' ).data( 'export-label' ) || jQuery( this ).text();
-				report = report + "\n### " + jQuery.trim( label ) + " ###\n\n";
+				report = report + '\n### ' + jQuery.trim( label ) + ' ###\n\n';
 
 			} else {
 
-				jQuery('tr', jQuery( this ) ).each(function(){
+				jQuery( 'tr', jQuery( this ) ).each( function() {
 
 					var label       = jQuery( this ).find( 'td:eq(0)' ).data( 'export-label' ) || jQuery( this ).find( 'td:eq(0)' ).text();
 					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML
@@ -754,24 +763,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						// If value have a list of plugins ','
 						// Split to add new line
-						var output = '';
 						var temp_line ='';
-						jQuery.each( value_array, function( key, line ){
+						jQuery.each( value_array, function( key, line ) {
 							temp_line = temp_line + line + '\n';
 						});
 
 						the_value = temp_line;
 					}
 
-					report = report + '' + the_name + ': ' + the_value + "\n";
+					report = report + '' + the_name + ': ' + the_value + '\n';
 				});
 
 			}
 		});
 
 		try {
-			jQuery( "#debug-report" ).slideDown();
-			jQuery( "#debug-report textarea" ).val( report ).focus().select();
+			jQuery( '#debug-report' ).slideDown();
+			jQuery( '#debug-report textarea' ).val( report ).focus().select();
 			jQuery( this ).fadeOut();
 			return false;
 		} catch( e ){
@@ -781,7 +789,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		return false;
 	});
 
-	jQuery( document ).ready( function ( $ ) {
+	jQuery( document ).ready( function( $ ) {
 		$( '#copy-for-support' ).tipTip({
 			'attribute':  'data-tip',
 			'activation': 'click',
@@ -790,7 +798,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			'delay':      0
 		});
 
-		$( document.body ).on( 'copy', '#copy-for-support', function ( e ) {
+		$( document.body ).on( 'copy', '#copy-for-support', function( e ) {
 			e.clipboardData.clearData();
 			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
 			e.preventDefault();
