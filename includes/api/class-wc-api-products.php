@@ -71,6 +71,11 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
 		);
 
+		# GET /products/attributes
+		$routes[ $this->base . '/attributes' ] = array(
+			array( array( $this, 'get_product_attributes' ), WC_API_Server::READABLE ),
+		);
+
 		# GET /products/sku/<product sku>
 		$routes[ $this->base . '/sku/(?P<sku>\w+)' ] = array(
 			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
@@ -1917,6 +1922,40 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return $downloads;
+	}
+
+	/**
+	 * Get a listing of product attributes
+	 *
+	 * @since 2.4.0
+	 * @param string|null $fields fields to limit response to
+	 * @return array
+	 */
+	public function get_product_attributes( $fields = null ) {
+		try {
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attributes', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
+			}
+
+			$product_attributes   = array();
+			$attribute_taxonomies = wc_get_attribute_taxonomies();
+
+			foreach ( $attribute_taxonomies as $attribute ) {
+				$product_attributes[] = array(
+					'id'           => intval( $attribute->attribute_id ),
+					'name'         => $attribute->attribute_label,
+					'slug'         => wc_attribute_taxonomy_name( $attribute->attribute_name ),
+					'type'         => $attribute->attribute_type,
+					'order_by'     => $attribute->attribute_orderby,
+					'has_archives' => (bool) $attribute->attribute_public
+				);
+			}
+
+			return array( 'product_attributes' => apply_filters( 'woocommerce_api_product_attributes_response', $product_attributes, $attribute_taxonomies, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
