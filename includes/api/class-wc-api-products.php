@@ -81,7 +81,7 @@ class WC_API_Products extends WC_API_Resource {
 		$routes[ $this->base . '/attributes/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product_attribute' ), WC_API_Server::READABLE ),
 			array( array( $this, 'edit_product_attribute' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			// array( array( $this, 'delete_product_attribute' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'delete_product_attribute' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET /products/sku/<product sku>
@@ -2153,7 +2153,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Check permissions
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_attribute', __( 'You do not have permission to edit product attributes', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_attribute', __( 'You do not have permission to edit product attributes', 'woocommerce' ), 401 );
 			}
 
 			$data      = apply_filters( 'woocommerce_api_edit_product_attribute_data', $data, $this );
@@ -2208,6 +2208,67 @@ class WC_API_Products extends WC_API_Resource {
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			return $this->get_product_attribute( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product attribute
+	 *
+	 * @since  2.4.0
+	 * @param  int $id the product attribute ID
+	 * @return array
+	 */
+	public function delete_product_attribute( $id ) {
+		global $wpdb;
+
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_attribute', __( 'You do not have permission to delete product attributes', 'woocommerce' ), 401 );
+			}
+
+			$id = absint( $id );
+
+			$attribute_name = $wpdb->get_var( $wpdb->prepare( "
+				SELECT attribute_name
+				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+				WHERE attribute_id = %d
+			 ", $id ) );
+
+			if ( is_null( $attribute_name ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$deleted = $wpdb->delete(
+				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+				array( 'attribute_id' => $id ),
+				array( '%d' )
+			);
+
+			if ( false === $deleted ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute', __( 'Could not delete the attribute', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name( $attribute_name );
+
+			if ( taxonomy_exists( $taxonomy ) ) {
+				$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
+				foreach ( $terms as $term ) {
+					wp_delete_term( $term->term_id, $taxonomy );
+				}
+			}
+
+			do_action( 'woocommerce_attribute_deleted', $id, $attribute_name, $taxonomy );
+			do_action( 'woocommerce_api_delete_product_attribute', $id, $this );
+
+			// Clear transients
+			delete_transient( 'wc_attribute_taxonomies' );
+
+			$this->server->send_status( '202' );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
