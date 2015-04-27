@@ -4,10 +4,10 @@
  *
  * Handles WC-API endpoint requests
  *
- * @author      WooThemes
- * @category    API
- * @package     WooCommerce/API
- * @since       2.0
+ * @author   WooThemes
+ * @category API
+ * @package  WooCommerce/API
+ * @since    2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,7 +21,7 @@ class WC_API {
 	/** This is the major version for the REST API and takes
 	 * first-order position in endpoint URLs
 	 */
-	const VERSION = 2;
+	const VERSION = '2.1.0';
 
 	/** @var WC_API_Server the REST API server */
 	public $server;
@@ -32,7 +32,6 @@ class WC_API {
 	/**
 	 * Setup class
 	 *
-	 * @access public
 	 * @since 2.0
 	 * @return WC_API
 	 */
@@ -52,9 +51,8 @@ class WC_API {
 	}
 
 	/**
-	 * add_query_vars function.
+	 * Add new query vars.
 	 *
-	 * @access public
 	 * @since 2.0
 	 * @param $vars
 	 * @return string[]
@@ -67,11 +65,9 @@ class WC_API {
 	}
 
 	/**
-	 * add_endpoint function.
+	 * Add new endpoints.
 	 *
-	 * @access public
 	 * @since 2.0
-	 * @return void
 	 */
 	public static function add_endpoint() {
 
@@ -234,9 +230,7 @@ class WC_API {
 	/**
 	 * API request - Trigger any API requests
 	 *
-	 * @access public
 	 * @since 2.0
-	 * @return void
 	 */
 	public function handle_api_requests() {
 		global $wp;
