@@ -71,6 +71,19 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
 		);
 
+		# GET/POST /products/attributes
+		$routes[ $this->base . '/attributes' ] = array(
+			array( array( $this, 'get_product_attributes' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product_attribute' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
+		# GET/PUT/DELETE /attributes/<id>
+		$routes[ $this->base . '/attributes/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_attribute' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_attribute' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_attribute' ), WC_API_Server::DELETABLE ),
+		);
+
 		# GET /products/sku/<product sku>
 		$routes[ $this->base . '/sku/(?P<sku>\w+)' ] = array(
 			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
@@ -1917,6 +1930,348 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return $downloads;
+	}
+
+	/**
+	 * Get a listing of product attributes
+	 *
+	 * @since 2.4.0
+	 * @param string|null $fields fields to limit response to
+	 * @return array
+	 */
+	public function get_product_attributes( $fields = null ) {
+		try {
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attributes', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
+			}
+
+			$product_attributes   = array();
+			$attribute_taxonomies = wc_get_attribute_taxonomies();
+
+			foreach ( $attribute_taxonomies as $attribute ) {
+				$product_attributes[] = array(
+					'id'           => intval( $attribute->attribute_id ),
+					'name'         => $attribute->attribute_label,
+					'slug'         => wc_attribute_taxonomy_name( $attribute->attribute_name ),
+					'type'         => $attribute->attribute_type,
+					'order_by'     => $attribute->attribute_orderby,
+					'has_archives' => (bool) $attribute->attribute_public
+				);
+			}
+
+			return array( 'product_attributes' => apply_filters( 'woocommerce_api_product_attributes_response', $product_attributes, $attribute_taxonomies, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the product attribute for the given ID
+	 *
+	 * @since 2.4.0
+	 * @param string $id product attribute term ID
+	 * @param string|null $fields fields to limit response to
+	 * @return array
+	 */
+	public function get_product_attribute( $id, $fields = null ) {
+		global $wpdb;
+
+		try {
+			$id = absint( $id );
+
+			// Validate ID
+			if ( empty( $id ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'Invalid product attribute ID', 'woocommerce' ), 400 );
+			}
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_categories', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
+			}
+
+			$attribute = $wpdb->get_row( $wpdb->prepare( "
+				SELECT *
+				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+				WHERE attribute_id = %d
+			 ", $id ) );
+
+			if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$product_attribute = array(
+				'id'           => intval( $attribute->attribute_id ),
+				'name'         => $attribute->attribute_label,
+				'slug'         => wc_attribute_taxonomy_name( $attribute->attribute_name ),
+				'type'         => $attribute->attribute_type,
+				'order_by'     => $attribute->attribute_orderby,
+				'has_archives' => (bool) $attribute->attribute_public
+			);
+
+			return array( 'product_attribute' => apply_filters( 'woocommerce_api_product_attribute_response', $product_attribute, $id, $fields, $attribute, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Validate attribute data.
+	 *
+	 * @since  2.4.0
+	 * @param  string $name
+	 * @param  string $slug
+	 * @param  string $type
+	 * @param  string $order_by
+	 * @param  bool   $new_data
+	 * @return bool
+	 */
+	protected function validate_attribute_data( $name, $slug, $type, $order_by, $new_data = true ) {
+		if ( empty( $name ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_missing_product_attribute_name', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'name' ), 400 );
+		}
+
+		if ( strlen( $slug ) >= 28 ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), 400 );
+		} else if ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), 400 );
+		} else if ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), 400 );
+		}
+
+		// Validate the attribute type
+		if ( ! in_array( wc_clean( $type ), array_keys( wc_get_attribute_types() ) ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_type', sprintf( __( 'Invalid product attribute type - the product attribute type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_attribute_types() ) ) ), 400 );
+		}
+
+		// Validate the attribute order by
+		if ( ! in_array( wc_clean( $order_by ), array( 'menu_order', 'name', 'name_num', 'id' ) ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_order_by', sprintf( __( 'Invalid product attribute order_by type - the product attribute order_by type must be any of these: %s', 'woocommerce' ), implode( ', ', array( 'menu_order', 'name', 'name_num', 'id' ) ) ), 400 );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Create a new product attribute
+	 *
+	 * @since 2.4.0
+	 * @param array $data posted data
+	 * @return array
+	 */
+	public function create_product_attribute( $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_attribute'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_attribute_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_attribute' ), 400 );
+			}
+
+			$data = $data['product_attribute'];
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_attribute', __( 'You do not have permission to create product attributes', 'woocommerce' ), 401 );
+			}
+
+			$data = apply_filters( 'woocommerce_api_create_product_attribute_data', $data, $this );
+
+			if ( ! isset( $data['name'] ) ) {
+				$data['name'] = '';
+			}
+
+			// Set the attribute slug
+			if ( ! isset( $data['slug'] ) ) {
+				$data['slug'] = wc_sanitize_taxonomy_name( stripslashes( $data['name'] ) );
+			} else {
+				$data['slug'] = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( stripslashes( $data['slug'] ) ) );
+			}
+
+			// Set attribute type when not sent
+			if ( ! isset( $data['type'] ) ) {
+				$data['type'] = 'select';
+			}
+
+			// Set order by when not sent
+			if ( ! isset( $data['order_by'] ) ) {
+				$data['order_by'] = 'menu_order';
+			}
+
+			// Validate the attribute data
+			$this->validate_attribute_data( $data['name'], $data['slug'], $data['type'], $data['order_by'], true );
+
+			$insert = $wpdb->insert(
+				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+				array(
+					'attribute_label'   => $data['name'],
+					'attribute_name'    => $data['slug'],
+					'attribute_type'    => $data['type'],
+					'attribute_orderby' => $data['order_by'],
+					'attribute_public'  => isset( $data['has_archives'] ) && true === $data['has_archives'] ? 1 : 0
+				),
+				array( '%s', '%s', '%s', '%s', '%d' )
+			);
+
+			// Checks for an error in the product creation
+			if ( is_wp_error( $insert ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_attribute', $insert->get_error_message(), 400 );
+			}
+
+			$id = $wpdb->insert_id;
+
+			do_action( 'woocommerce_api_create_product_attribute', $id, $data );
+
+			// Clear transients
+			delete_transient( 'wc_attribute_taxonomies' );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_product_attribute( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product attribute
+	 *
+	 * @since 2.4.0
+	 * @param int $id the attribute ID
+	 * @param array $data
+	 * @return array
+	 */
+	public function edit_product_attribute( $id, $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_attribute'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_attribute_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_attribute' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_attribute'];
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_attribute', __( 'You do not have permission to edit product attributes', 'woocommerce' ), 401 );
+			}
+
+			$data      = apply_filters( 'woocommerce_api_edit_product_attribute_data', $data, $this );
+			$attribute = $this->get_product_attribute( $id );
+
+			if ( is_wp_error( $attribute ) ) {
+				return $attribute;
+			}
+
+			$attribute_name     = isset( $data['name'] ) ? $data['name'] : $attribute['product_attribute']['name'];
+			$attribute_type     = isset( $data['type'] ) ? $data['type'] : $attribute['product_attribute']['type'];
+			$attribute_order_by = isset( $data['order_by'] ) ? $data['order_by'] : $attribute['product_attribute']['order_by'];
+
+			if ( isset( $data['slug'] ) ) {
+				$attribute_slug = wc_sanitize_taxonomy_name( stripslashes( $data['slug'] ) );
+			} else {
+				$attribute_slug = $attribute['product_attribute']['slug'];
+			}
+			$attribute_slug = preg_replace( '/^pa\_/', '', $attribute_slug );
+
+			if ( isset( $data['has_archives'] ) ) {
+				$attribute_public = true === $data['has_archives'] ? 1 : 0;
+			} else {
+				$attribute_public = $attribute['product_attribute']['has_archives'];
+			}
+
+			// Validate the attribute data
+			$this->validate_attribute_data( $attribute_name, $attribute_slug, $attribute_type, $attribute_order_by, false );
+
+			$update = $wpdb->update(
+				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+				array(
+					'attribute_label'   => $attribute_name,
+					'attribute_name'    => $attribute_slug,
+					'attribute_type'    => $attribute_type,
+					'attribute_orderby' => $attribute_order_by,
+					'attribute_public'  => $attribute_public
+				),
+				array( 'attribute_id' => $id ),
+				array( '%s', '%s', '%s', '%s', '%d' ),
+				array( '%d' )
+			);
+
+			// Checks for an error in the product creation
+			if ( false === $update ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_attribute', __( 'Could not edit the attribute', 'woocommerce' ), 400 );
+			}
+
+			do_action( 'woocommerce_api_edit_product_attribute', $id, $data );
+
+			// Clear transients
+			delete_transient( 'wc_attribute_taxonomies' );
+
+			return $this->get_product_attribute( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product attribute
+	 *
+	 * @since  2.4.0
+	 * @param  int $id the product attribute ID
+	 * @return array
+	 */
+	public function delete_product_attribute( $id ) {
+		global $wpdb;
+
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_attribute', __( 'You do not have permission to delete product attributes', 'woocommerce' ), 401 );
+			}
+
+			$id = absint( $id );
+
+			$attribute_name = $wpdb->get_var( $wpdb->prepare( "
+				SELECT attribute_name
+				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+				WHERE attribute_id = %d
+			 ", $id ) );
+
+			if ( is_null( $attribute_name ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$deleted = $wpdb->delete(
+				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+				array( 'attribute_id' => $id ),
+				array( '%d' )
+			);
+
+			if ( false === $deleted ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute', __( 'Could not delete the attribute', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name( $attribute_name );
+
+			if ( taxonomy_exists( $taxonomy ) ) {
+				$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
+				foreach ( $terms as $term ) {
+					wp_delete_term( $term->term_id, $taxonomy );
+				}
+			}
+
+			do_action( 'woocommerce_attribute_deleted', $id, $attribute_name, $taxonomy );
+			do_action( 'woocommerce_api_delete_product_attribute', $id, $this );
+
+			// Clear transients
+			delete_transient( 'wc_attribute_taxonomies' );
+
+			$this->server->send_status( '202' );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**

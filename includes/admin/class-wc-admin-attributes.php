@@ -94,22 +94,9 @@ class WC_Admin_Attributes {
 	 * @return bool|WP_error result
 	 */
 	private static function valid_attribute_name( $attribute_name ) {
-		// Forbidden attribute names
-		// http://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms
-		$reserved_terms = array(
-			'attachment', 'attachment_id', 'author', 'author_name', 'calendar', 'cat', 'category', 'category__and',
-			'category__in', 'category__not_in', 'category_name', 'comments_per_page', 'comments_popup', 'cpage', 'day',
-			'debug', 'error', 'exact', 'feed', 'hour', 'link_category', 'm', 'minute', 'monthnum', 'more', 'name',
-			'nav_menu', 'nopaging', 'offset', 'order', 'orderby', 'p', 'page', 'page_id', 'paged', 'pagename', 'pb', 'perm',
-			'post', 'post__in', 'post__not_in', 'post_format', 'post_mime_type', 'post_status', 'post_tag', 'post_type',
-			'posts', 'posts_per_archive_page', 'posts_per_page', 'preview', 'robots', 's', 'search', 'second', 'sentence',
-			'showposts', 'static', 'subpost', 'subpost_id', 'tag', 'tag__and', 'tag__in', 'tag__not_in', 'tag_id',
-			'tag_slug__and', 'tag_slug__in', 'taxonomy', 'tb', 'term', 'type', 'w', 'withcomments', 'withoutcomments', 'year',
-		);
-
 		if ( strlen( $attribute_name ) >= 28 ) {
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
-		} elseif ( in_array( $attribute_name, $reserved_terms ) ) {
+		} elseif ( wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
 			return new WP_Error( 'error', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), sanitize_title( $attribute_name ) ) );
 		}
 
@@ -300,9 +287,19 @@ class WC_Admin_Attributes {
 							</th>
 							<td>
 								<select name="attribute_type" id="attribute_type">
-									<option value="select" <?php selected( $att_type, 'select' ); ?>><?php _e( 'Select', 'woocommerce' ); ?></option>
-									<option value="text" <?php selected( $att_type, 'text' ); ?>><?php _e( 'Text', 'woocommerce' ); ?></option>
-									<?php do_action('woocommerce_admin_attribute_types'); ?>
+									<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
+										<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $att_type, $key ); ?>><?php echo esc_attr( $value ); ?></option>
+									<?php endforeach; ?>
+
+									<?php
+
+										/**
+										 * Deprecated action in favor of product_attributes_type_selector filter
+										 *
+										 * @deprecated 2.4.0
+										 */
+										do_action( 'woocommerce_admin_attribute_types' );
+									?>
 								</select>
 								<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
 							</td>
@@ -446,9 +443,19 @@ class WC_Admin_Attributes {
 								<div class="form-field">
 									<label for="attribute_type"><?php _e( 'Type', 'woocommerce' ); ?></label>
 									<select name="attribute_type" id="attribute_type">
-										<option value="select"><?php _e( 'Select', 'woocommerce' ) ?></option>
-										<option value="text"><?php _e( 'Text', 'woocommerce' ); ?></option>
-										<?php do_action('woocommerce_admin_attribute_types'); ?>
+										<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
+											<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_attr( $value ); ?></option>
+										<?php endforeach; ?>
+
+										<?php
+
+											/**
+											 * Deprecated action in favor of product_attributes_type_selector filter
+											 *
+											 * @deprecated 2.4.0
+											 */
+											do_action( 'woocommerce_admin_attribute_types' );
+										?>
 									</select>
 									<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
 								</div>
@@ -475,7 +482,7 @@ class WC_Admin_Attributes {
 			/* <![CDATA[ */
 
 				jQuery( 'a.delete' ).click( function() {
-					if ( window.confirm( "<?php _e( 'Are you sure you want to delete this attribute?', 'woocommerce' ); ?>" ) ) {
+					if ( window.confirm( '<?php _e( "Are you sure you want to delete this attribute?", "woocommerce" ); ?>' ) ) {
 						return true;
 					}
 					return false;
