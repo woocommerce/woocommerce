@@ -76,6 +76,13 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_attributes' ), WC_API_Server::READABLE ),
 		);
 
+		# GET/PUT/DELETE /attributes/<id>
+		$routes[ $this->base . '/attributes/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_attribute' ), WC_API_Server::READABLE ),
+			// array( array( $this, 'edit_product_attribute' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			// array( array( $this, 'delete_product_attribute' ), WC_API_Server::DELETABLE ),
+		);
+
 		# GET /products/sku/<product sku>
 		$routes[ $this->base . '/sku/(?P<sku>\w+)' ] = array(
 			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
@@ -1953,6 +1960,55 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			return array( 'product_attributes' => apply_filters( 'woocommerce_api_product_attributes_response', $product_attributes, $attribute_taxonomies, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the product attribute for the given ID
+	 *
+	 * @since 2.4.0
+	 * @param string $id product attribute term ID
+	 * @param string|null $fields fields to limit response to
+	 * @return array
+	 */
+	public function get_product_attribute( $id, $fields = null ) {
+		global $wpdb;
+
+		try {
+			$id = absint( $id );
+
+			// Validate ID
+			if ( empty( $id ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'Invalid product attribute ID', 'woocommerce' ), 400 );
+			}
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_categories', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
+			}
+
+			$attribute = $wpdb->get_row( $wpdb->prepare( "
+				SELECT *
+				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+				WHERE attribute_id = %d
+			 ", $id ) );
+
+			if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$product_attribute = array(
+				'id'           => intval( $attribute->attribute_id ),
+				'name'         => $attribute->attribute_label,
+				'slug'         => wc_attribute_taxonomy_name( $attribute->attribute_name ),
+				'type'         => $attribute->attribute_type,
+				'order_by'     => $attribute->attribute_orderby,
+				'has_archives' => (bool) $attribute->attribute_public
+			);
+
+			return array( 'product_attribute' => apply_filters( 'woocommerce_api_product_attribute_response', $product_attribute, $id, $fields, $attribute, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
