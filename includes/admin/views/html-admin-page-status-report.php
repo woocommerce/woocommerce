@@ -756,7 +756,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 					var label       = jQuery( this ).find( 'td:eq(0)' ).data( 'export-label' ) || jQuery( this ).find( 'td:eq(0)' ).text();
 					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML
-					var the_value   = jQuery.trim( jQuery( this ).find( 'td:eq(2)' ).text() );
+					var image       = jQuery( this ).find( 'td:eq(2)' ).find( 'img' ); // Get WP 4.2 emojis
+					var prefix      = ( undefined === image.attr( 'alt' ) ) ? '' : image.attr( 'alt' ) + ' '; // Remove WP 4.2 emojis
+					var the_value   = jQuery.trim( prefix + jQuery( this ).find( 'td:eq(2)' ).text() );
 					var value_array = the_value.split( ', ' );
 
 					if ( value_array.length > 1 ) {
