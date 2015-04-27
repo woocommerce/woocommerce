@@ -93,6 +93,14 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 								'none'		=> _x( 'None', 'Tax status', 'woocommerce' )
 							)
 						),
+			'cost_per_order' => array(
+				'title' 		=> __( 'Cost per order', 'woocommerce' ),
+				'type' 			=> 'price',
+				'placeholder'	=> wc_format_localized_price( 0 ),
+				'description'	=> __( 'Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0.', 'woocommerce' ),
+				'default'		=> '',
+				'desc_tip'		=> true
+			),
 			'type' => array(
 							'title'			=> __( 'Cost Added...', 'woocommerce' ),
 							'type'			=> 'select',
@@ -171,7 +179,8 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	 * @return void
 	 */
 	public function calculate_shipping( $package = array() ) {
-		$this->rates = array();
+		$this->rates    = array();
+		$cost_per_order = ! empty( $this->cost_per_order ) ? $this->cost_per_order : 0;
 
 		if ( 'order' === $this->type ) {
 
@@ -180,7 +189,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			$rate = array(
 				'id' 	=> $this->id,
 				'label' => $this->title,
-				'cost' 	=> $shipping_total ? $shipping_total : 0,
+				'cost' 	=> $cost_per_order + ( $shipping_total ? $shipping_total : 0 ),
 			);
 
 		} elseif ( 'class' === $this->type ) {
@@ -190,7 +199,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			$rate = array(
 				'id' 	=> $this->id,
 				'label' => $this->title,
-				'cost' 	=> $shipping_total ? $shipping_total : 0,
+				'cost' 	=> $cost_per_order + ( $shipping_total ? $shipping_total : 0 ),
 			);
 
 		} elseif ( 'item' === $this->type ) {
@@ -200,6 +209,8 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 			if ( ! is_array( $costs ) ) {
 				$costs = array();
 			}
+
+			$costs['order'] = $cost_per_order;
 
 			$rate = array(
 				'id' 		=> $this->id,

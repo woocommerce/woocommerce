@@ -60,7 +60,7 @@ class WC_Admin_Welcome {
 			'shipping_taxes' => array(
 				'name'    =>  __( 'Shipping &amp; Tax', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
-				'handler' => ''
+				'handler' => array( $this, 'wc_setup_shipping_taxes_save' ),
 			),
 			'next_steps' => array(
 				'name'    =>  __( 'Ready!', 'woocommerce' ),
@@ -389,22 +389,22 @@ class WC_Admin_Welcome {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="enable_shipping"><?php _e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="woocommerce_calc_shipping"><?php _e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="checkbox" id="enable_shipping" name="enable_shipping" class="input-checkbox" value="1" />
-						<label for="enable_shipping"><?php _e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
+						<input type="checkbox" id="woocommerce_calc_shipping" name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
+						<label for="woocommerce_calc_shipping"><?php _e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="shipping_cost_domestic"><?php _e( 'How much do you charge to ship products <strong>domestically</strong>?', 'woocommerce' ); ?></label></th>
 					<td>
-						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="" />
+						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="" /> <?php _e( 'per order, and', 'woocommerce' ); ?> <?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" value="" /> <?php _e( 'per item', 'woocommerce' ); ?>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="shipping_cost_international"><?php _e( 'How much do you charge to ship products <strong>internationally</strong>?', 'woocommerce' ); ?></label></th>
 					<td>
-						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="" />
+						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="" /> <?php _e( 'per order, and', 'woocommerce' ); ?> <?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international_item" name="shipping_cost_international_item" size="5" value="" /> <?php _e( 'per item', 'woocommerce' ); ?>
 					</td>
 				</tr>
 				<tr class="section_title">
@@ -423,7 +423,13 @@ class WC_Admin_Welcome {
 					<th scope="row"><label for="woocommerce_prices_include_tax"><?php _e( 'Will you enter product prices including taxes?', 'woocommerce' ); ?></label></th>
 					<td>
 						<label><input type="radio" checked id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ); ?></label><br/>
-						<label><input type="radio" id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'No, I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
+						<label><input type="radio" id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php _e( 'No, I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_prices_include_tax"><?php _e( 'Import Tax Rates', 'woocommerce' ); ?></label></th>
+					<td>
+						<label><input type="radio" checked id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'Yes, import tax rates', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
 				<tr class="section_title tax-rates">
@@ -462,6 +468,53 @@ class WC_Admin_Welcome {
 			</p>
 		</form>
 		<?php
+	}
+
+	/**
+	 * Save shipping and tax options
+	 */
+	public function wc_setup_shipping_taxes_save() {
+		$woocommerce_calc_shipping = isset( $_POST['woocommerce_calc_shipping'] ) ? 'yes' : 'no';
+		$woocommerce_calc_taxes    = isset( $_POST['woocommerce_calc_taxes'] ) ? 'yes' : 'no';
+
+		update_option( 'woocommerce_calc_shipping', $woocommerce_calc_shipping );
+		update_option( 'woocommerce_calc_taxes', $woocommerce_calc_taxes );
+		update_option( 'woocommerce_prices_include_tax', sanitize_text_field( $_POST['woocommerce_prices_include_tax'] ) );
+
+		if ( 'yes' === $woocommerce_calc_shipping && ! empty( $_POST['shipping_cost_domestic'] ) ) {
+			// Delete existing settings if they exist
+			delete_option( 'woocommerce_flat_rates' );
+			delete_option( 'woocommerce_flat_rate_settings' );
+
+			// Init rate and settings
+			$shipping_method                             = new WC_Shipping_Flat_Rate();
+			$shipping_method->settings['enabled']        = 'yes';
+			$shipping_method->settings['type']           = 'item';
+			$shipping_method->settings['cost_per_order'] = woocommerce_format_decimal( sanitize_text_field( $_POST['shipping_cost_domestic'] ) );
+			$shipping_method->settings['cost']           = woocommerce_format_decimal( sanitize_text_field( $_POST['shipping_cost_domestic_item'] ) );
+			$shipping_method->settings['fee']            = '';
+
+			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
+		}
+
+		if ( 'yes' === $woocommerce_calc_shipping && ! empty( $_POST['shipping_cost_international'] ) ) {
+			// Delete existing settings if they exist
+			delete_option( 'woocommerce_international_delivery_flat_rates' );
+			delete_option( 'woocommerce_international_delivery_settings' );
+
+			// Init rate and settings
+			$shipping_method                             = new WC_Shipping_International_Delivery();
+			$shipping_method->settings['enabled']        = 'yes';
+			$shipping_method->settings['type']           = 'item';
+			$shipping_method->settings['cost_per_order'] = woocommerce_format_decimal( sanitize_text_field( $_POST['shipping_cost_international'] ) );
+			$shipping_method->settings['cost']           = woocommerce_format_decimal( sanitize_text_field( $_POST['shipping_cost_international_item'] ) );
+			$shipping_method->settings['fee']            = '';
+
+			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
+		}
+
+		wp_redirect( $this->get_next_step_link() );
+		exit;
 	}
 
 	/**

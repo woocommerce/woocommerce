@@ -25,7 +25,7 @@ jQuery(function( $ ) {
 		}
 	}).change();
 
-	$('input[name="enable_shipping"]').change(function(){
+	$('input[name="woocommerce_calc_shipping"]').change(function(){
 		if ( $(this).is( ':checked' ) ) {
 			$(':input[name="shipping_cost_domestic"]').closest('tr').show();
 			$(':input[name="shipping_cost_international"]').closest('tr').show();
