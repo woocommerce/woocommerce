@@ -37,11 +37,19 @@ jQuery(function( $ ) {
 
 	$('input[name="woocommerce_calc_taxes"]').change(function(){
 		if ( $(this).is( ':checked' ) ) {
-			$(':input[name="woocommerce_prices_include_tax"]').closest('tr').show();
+			$(':input[name="woocommerce_prices_include_tax"], :input[name="woocommerce_import_tax_rates"]').closest('tr').show();
 			$('tr.tax-rates').show();
 		} else {
-			$(':input[name="woocommerce_prices_include_tax"]').closest('tr').hide();
+			$(':input[name="woocommerce_prices_include_tax"], :input[name="woocommerce_import_tax_rates"]').closest('tr').hide();
 			$('tr.tax-rates').hide();
+		}
+	}).change();
+
+	$('input[name="woocommerce_import_tax_rates"]').change(function(){
+		if ( $(this).is( ':checked' ) ) {
+			$('.importing-tax-rates').show();
+		} else {
+			$('.importing-tax-rates').hide();
 		}
 	}).change();
 
