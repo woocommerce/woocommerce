@@ -47,15 +47,15 @@ class WC_Admin_Welcome {
 				'view'    => array( $this, 'wc_setup_introduction' ),
 				'handler' => ''
 			),
-			'locale' => array(
-				'name'    =>  __( 'Store Locale', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_locale' ),
-				'handler' => array( $this, 'wc_setup_locale_save' )
-			),
 			'pages' => array(
 				'name'    =>  __( 'Page Setup', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_pages' ),
 				'handler' => array( $this, 'wc_setup_pages_save' )
+			),
+			'locale' => array(
+				'name'    =>  __( 'Store Locale', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_locale' ),
+				'handler' => array( $this, 'wc_setup_locale_save' )
 			),
 			'shipping_taxes' => array(
 				'name'    =>  __( 'Shipping &amp; Tax', 'woocommerce' ),
@@ -529,6 +529,35 @@ class WC_Admin_Welcome {
 			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
 		}
 
+		if ( 'yes' === $woocommerce_calc_taxes && ! empty( $_POST['woocommerce_import_tax_rates'] ) ) {
+			$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
+			$tax_rates   = false;
+			if ( isset( $locale_info[ WC()->countries->get_base_country() ] ) ) {
+				if ( isset( $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][ WC()->countries->get_base_state() ] ) ) {
+					$tax_rates = $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][ WC()->countries->get_base_state() ];
+				} elseif ( isset( $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][''] ) ) {
+					$tax_rates = $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][''];
+				}
+			}
+			if ( $tax_rates ) {
+				$loop = 0;
+				foreach ( $tax_rates as $rate ) {
+					$tax_rate = array(
+						'tax_rate_country'  => $rate['country'],
+						'tax_rate_state'    => $rate['state'],
+						'tax_rate'          => $rate['rate'],
+						'tax_rate_name'     => $rate['name'],
+						'tax_rate_priority' => 1,
+						'tax_rate_compound' => 0,
+						'tax_rate_shipping' => $rate['shipping'] ? 1 : 0,
+						'tax_rate_order'    => $loop ++,
+						'tax_rate_class'    => ''
+					);
+					$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+				}
+			}
+		}
+
 		wp_redirect( $this->get_next_step_link() );
 		exit;
 	}
@@ -540,9 +569,10 @@ class WC_Admin_Welcome {
 		?>
 		<h1><?php _e( 'Your Store is Ready', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Congratulations - basic setup is complete. Wondering what to do next?', 'woocommerce' ); ?></p>
-		<ul>
-			<li>Item 1</li>
-		</ul>
+		<dl>
+			<dt>Create your first product</dt>
+			<dd>Do something</dd>
+		</dl>
 		<?php
 	}
 
