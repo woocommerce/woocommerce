@@ -108,6 +108,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			case 'MX' :
 			case 'ZA' :
 			case 'MT' :
+			case 'CH' :
 				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
 			break;
 			default :
