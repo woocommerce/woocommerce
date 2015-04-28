@@ -51,9 +51,6 @@ class WC_Admin_Welcome {
 		$welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' );
 
 		switch ( $_GET['page'] ) {
-			case 'wc-setup' :
-				//$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-setup', array( $this, 'about_screen' ) );
-			break;
 			case 'wc-about' :
 				$page = add_dashboard_page( $welcome_page_title, $welcome_page_name, 'manage_options', 'wc-about', array( $this, 'about_screen' ) );
 				add_action( 'admin_print_styles-' . $page, array( $this, 'admin_css' ) );

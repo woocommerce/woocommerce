@@ -52,7 +52,7 @@ class WC_Admin_Setup_Wizard {
 	 * Show the setup wizard
 	 */
 	public function setup_wizard() {
-		if ( empty( $_GET['page'] ) || $_GET['page'] !== 'wc-setup' ) {
+		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) {
 			return;
 		}
 		$this->steps = array(
@@ -83,8 +83,8 @@ class WC_Admin_Setup_Wizard {
 			)
 		);
 		$this->step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) );
+		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.2' );
 		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
 		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
@@ -104,14 +104,13 @@ class WC_Admin_Setup_Wizard {
 			'search_products_nonce'     => wp_create_nonce( 'search-products' ),
 			'search_customers_nonce'    => wp_create_nonce( 'search-customers' )
 		) );
-		wp_register_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
-		wp_register_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array(), WC_VERSION );
-		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup.min.js', array( 'jquery' ), WC_VERSION );
+		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
+		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), WC_VERSION );
+
+		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup.min.js', array( 'jquery', 'wc-enhanced-select'  ), WC_VERSION );
 		wp_localize_script( 'wc-setup', 'wc_setup_params', array(
 			'locale_info' => json_encode( include( WC()->plugin_path() . '/i18n/locale-info.php' ) )
 		) );
-
-		wp_enqueue_style( 'dashicons' );
 
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
 			call_user_func( $this->steps[ $this->step ]['handler'] );
@@ -140,11 +139,8 @@ class WC_Admin_Setup_Wizard {
 			<meta name="viewport" content="width=device-width" />
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 			<title><?php _e( 'WooCommerce &rsaquo; Setup Wizard', 'woocommerce' ); ?></title>
-			<?php wp_admin_css( 'install', true ); ?>
-			<?php wp_admin_css( 'wc-setup', true ); ?>
-			<?php wp_admin_css( 'woocommerce_admin_styles', true ); ?>
-			<?php wp_print_scripts( 'wc-enhanced-select' ); ?>
-			<?php wp_print_scripts( 'wc-setup' );  do_action( 'admin_print_styles' );  ?>
+			<?php wp_print_scripts( 'wc-setup' ); ?>
+			<?php do_action( 'admin_print_styles' );  ?>
 		</head>
 		<body class="wc-setup wp-core-ui">
 			<h1 id="wc-logo"><a href="http://woothemes.com/woocommerce"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
@@ -195,7 +191,7 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_introduction() {
 		?>
 		<h1><?php _e( 'Welcome to WooCommerce', 'woocommerce' ); ?></h1>
-		<p><?php _e( 'Thanks for choosing WooCommerce to power your online store! To help you get started we\'ve prepared this quick setup wizard - it\'s completely optional and should take no longer than 5 minutes.', 'woocommerce' ); ?></p>
+		<p><?php _e( 'Thanks for choosing WooCommerce to power your online store! To help you get started we&lsquo;ve prepared this quick setup wizard - it&lsquo;s completely optional and should take no longer than 5 minutes.', 'woocommerce' ); ?></p>
 		<p><?php _e( 'No time right now? Want to setup your store manually? Just press the skip button to return to the WordPress dashboard. You can come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
