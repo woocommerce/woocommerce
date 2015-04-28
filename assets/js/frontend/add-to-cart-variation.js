@@ -230,7 +230,7 @@
 					$product_link = $product.find( 'div.images a.zoom:eq(0)' ),
 					o_src = $product_img.attr( 'data-o_src' ),
 					o_title = $product_img.attr( 'data-o_title' ),
-					o_alt = $product_img.attr( 'data-o_alt' ),
+					o_alt = $product_img.attr( 'data-o_title' ),
 					o_href = $product_link.attr( 'data-o_href' );
 
 				if ( o_src !== undefined ) {
@@ -349,6 +349,7 @@
 					o_href = $product_link.attr( 'data-o_href' ),
 					variation_image = variation.image_src,
 					variation_link  = variation.image_link,
+					variation_caption = variation.image_caption,
 					variation_title = variation.image_title,
 					variation_alt = variation.image_alt;
 
@@ -378,11 +379,11 @@
 				if ( variation_image && variation_image.length > 1 ) {
 					$product_img
 						.attr( 'src', variation_image )
-						.attr( 'alt', variation_alt )
+						.attr( 'alt', variation_title )
 						.attr( 'title', variation_title );
 					$product_link
 						.attr( 'href', variation_link )
-						.attr( 'title', variation_title );
+						.attr( 'title', variation_caption );
 				} else {
 					$product_img
 						.attr( 'src', o_src )
