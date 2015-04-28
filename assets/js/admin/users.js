@@ -44,7 +44,7 @@ jQuery( function ( $ ) {
 			$parent.show().find( '.select2-container' ).remove();
 
 			if ( ! $.isEmptyObject( wc_users_fields.states[ country ] ) ) {
-				var $states_select = $( '<select name="' + input_name + '" id="' + input_id + '" class="js_field-state" placeholder="' + placeholder + '" style="width: 25em;"></select>' ),
+				var $states_select = $( '<select name="' + input_name + '" id="' + input_id + '" class="js_field-state" style="width: 25em;"></select>' ),
 					state = wc_users_fields.states[ country ];
 
 				$states_select.append( $( '<option value="">' + wc_users_params.i18n_select_state_text + '</option>' ) );
@@ -59,7 +59,7 @@ jQuery( function ( $ ) {
 
 				$states_select.show().select2().hide().change();
 			} else {
-				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" placeholder="' + placeholder + '" />' );
+				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" />' );
 			}
 
 			$( 'body' ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
