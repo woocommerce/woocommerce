@@ -54,6 +54,11 @@ class WC_Admin {
 			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 				include_once( 'class-wc-admin-help.php' );
 			}
+
+			// Setup
+			if ( ! empty( $_GET['page'] ) && 'wc-setup' === $_GET['page'] ) {
+				include_once( 'class-wc-admin-setup-wizard.php' );
+			}
 		}
 
 		// Importers
