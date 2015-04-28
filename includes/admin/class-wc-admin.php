@@ -149,6 +149,7 @@ class WC_Admin {
 	public function admin_footer_text( $footer_text ) {
 		$screen = get_current_screen();
 
+		// Ensure admin functions are loaded
 		include_once( 'wc-admin-functions.php' );
 		$wc_pages = wc_get_screen_ids();
 
