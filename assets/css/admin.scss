@@ -2450,13 +2450,12 @@ img.help_tip {
 	}
 
 	ul.wc-tabs {
-		background: #fff;
-		line-height: 1em;
-		float: left;
-		width: 20%;
 		margin: 0;
-		position: relative;
+		width: 20%;
+		float: left;
+		line-height: 1em;
 		padding: 0 0 10px;
+		position: relative;
 		background-color: #fafafa;
 		border-right: 1px solid #eee;
 		box-sizing: border-box;
@@ -2474,26 +2473,22 @@ img.help_tip {
 		}
 
 		li {
-			display: block;
-			padding: 0;
 			margin: 0;
+			padding: 0;
+			display: block;
+			position: relative;
 
 			a {
-				padding: 10px;
-				line-height: 20px !important;
 				margin: 0;
+				padding: 10px;
 				display: block;
+				box-shadow: none;
 				text-decoration: none;
+				line-height: 20px !important;
 				border-bottom: 1px solid #eee;
 
 				&:before {
 					@include iconbefore( "\e028" );
-				}
-			}
-
-			&:first-child {
-				a {
-					border-top: 0 !important;
 				}
 			}
 
@@ -2559,9 +2554,9 @@ img.help_tip {
 
 			&.active {
 				a {
+					color: #555;
 					position: relative;
 					background-color: #eee;
-					color: #555;
 				}
 			}
 		}
@@ -3995,6 +3990,7 @@ table.bar_chart {
  */
 @media only screen and (max-width: 900px) {
 
+	#woocommerce-coupon-data ul.coupon_data_tabs,
 	#woocommerce-product-data ul.product_data_tabs,
 	#woocommerce-product-data .wc-tabs-back {
 		width: 10%;
@@ -4007,6 +4003,7 @@ table.bar_chart {
 		width: 90%;
 	}
 
+	#woocommerce-coupon-data ul.coupon_data_tabs li a,
 	#woocommerce-product-data ul.product_data_tabs li a {
 		position: relative;
 		text-indent: -999px;
