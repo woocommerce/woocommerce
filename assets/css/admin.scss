@@ -2492,12 +2492,6 @@ img.help_tip {
 				}
 			}
 
-			&:first-child {
-				a {
-					border-top: 0 !important;
-				}
-			}
-
 			&.general_options {
 				a:before {
 					content: "\e006";
@@ -2560,9 +2554,9 @@ img.help_tip {
 
 			&.active {
 				a {
+					color: #555;
 					position: relative;
 					background-color: #eee;
-					color: #555;
 				}
 			}
 		}
