@@ -2269,8 +2269,6 @@ class WC_API_Products extends WC_API_Resource {
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
 
-			$this->server->send_status( '202' );
-
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
