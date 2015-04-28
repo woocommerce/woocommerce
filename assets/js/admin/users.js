@@ -34,8 +34,7 @@ jQuery( function ( $ ) {
 				$parent = $state.parent(),
 				input_name = $state.attr( 'name' ),
 				input_id = $state.attr( 'id' ),
-				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val(),
-				placeholder = $state.attr( 'placeholder' );
+				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val();
 
 			if ( stickValue ){
 				$this.data( 'woocommerce.stickState-' + country, value );
