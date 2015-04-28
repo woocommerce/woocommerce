@@ -53,4 +53,9 @@ jQuery(function( $ ) {
 		}
 	}).change();
 
+	$('.woocommerce-tracker').on( 'click', 'a.skip', function() {
+		$('.woocommerce-tracker').slideUp();
+		return false;
+	});
+
 });

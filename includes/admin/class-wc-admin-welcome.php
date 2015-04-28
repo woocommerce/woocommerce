@@ -22,10 +22,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Welcome {
 
 	/** @var string Currenct Step */
-	private $step  = '';
+	private $step   = '';
 
 	/** @var array Steps for the setup wizard */
-	private $steps = array();
+	private $steps  = array();
+
+	/** @var array Tweets user can optionally send after install */
+	private $tweets = array(
+		'WooCommerce kickstarts online stores. It\'s free and has been downloaded over 6 million times.',
+		'Building an online store? WooCommerce is the leading #eCommerce plugin for WordPress (and it\'s free).',
+		'WooCommerce is a free #eCommerce plugin for #WordPress for selling #allthethings online, beautifully.',
+		'Ready to ship your idea? WooCommerce is the fastest growing #eCommerce plugin for WordPress on the web'
+	);
 
 	/**
 	 * Hook in tabs.
@@ -35,6 +43,7 @@ class WC_Admin_Welcome {
 		add_action( 'admin_head', array( $this, 'admin_head' ) );
 		add_action( 'admin_init', array( $this, 'welcome'    ) );
 		add_action( 'admin_init', array( $this, 'setup_wizard'    ) );
+		shuffle( $this->tweets );
 	}
 
 	public function setup_wizard() {
@@ -152,7 +161,7 @@ class WC_Admin_Welcome {
 	 */
 	public function setup_wizard_steps() {
 		?>
-		<ol class="wc-install-steps">
+		<ol class="wc-setup-steps">
 			<?php foreach ( $this->steps as $step_key => $step ) : ?>
 				<li class="<?php
 					if ( $step_key === $this->step ) {
@@ -170,7 +179,7 @@ class WC_Admin_Welcome {
 	 * Output the content for the current step
 	 */
 	public function setup_wizard_content() {
-		echo '<div class="wc-install-content">';
+		echo '<div class="wc-setup-content">';
 		call_user_func( $this->steps[ $this->step ]['view'] );
 		echo '</div>';
 	}
@@ -183,7 +192,7 @@ class WC_Admin_Welcome {
 		<h1><?php _e( 'Welcome to WooCommerce', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Thanks for choosing WooCommerce to power your online store! To help you get started we\'ve prepared this quick setup wizard - it\'s completely optional and should take no longer than 5 minutes.', 'woocommerce' ); ?></p>
 		<p><?php _e( 'No time right now? Want to setup your store manually? Just press the skip button to return to the WordPress dashboard. You can come back anytime if you change your mind!', 'woocommerce' ); ?></p>
-		<p class="wc-install-actions step">
+		<p class="wc-setup-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( admin_url() ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
@@ -271,7 +280,7 @@ class WC_Admin_Welcome {
 					</td>
 				</tr>
 			</table>
-			<p class="wc-install-actions step">
+			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
 			</p>
@@ -309,7 +318,7 @@ class WC_Admin_Welcome {
 		<h1><?php _e( 'Page Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
 			<p><?php _e( 'There are a few pages that need to be setup to show parts of your store. The following pages will be created automatically if they do not already exist:', 'woocommerce' ); ?></p>
-			<table class="wc-install-pages" cellspacing="0">
+			<table class="wc-setup-pages" cellspacing="0">
 				<thead>
 					<tr>
 						<th class="page-name"><?php _e( 'Page Name', 'woocommerce' ); ?></th>
@@ -350,7 +359,7 @@ class WC_Admin_Welcome {
 
 			<p><?php printf( __( 'Once created, these pages can be managed from your admin dashboard on the %sPages screen%s. You can control which pages are shown in your website menus via the %sAppearance > Menus screen%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>', '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
 
-			<p class="wc-install-actions step">
+			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
 			</p>
@@ -478,7 +487,7 @@ class WC_Admin_Welcome {
 					}
 				?>
 			</table>
-			<p class="wc-install-actions step">
+			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
 			</p>
@@ -567,12 +576,37 @@ class WC_Admin_Welcome {
 	 */
 	public function wc_setup_ready() {
 		?>
-		<h1><?php _e( 'Your Store is Ready', 'woocommerce' ); ?></h1>
-		<p><?php _e( 'Congratulations - basic setup is complete. Wondering what to do next?', 'woocommerce' ); ?></p>
-		<dl>
-			<dt>Create your first product</dt>
-			<dd>Do something</dd>
-		</dl>
+		<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
+		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+		<h1><?php _e( 'Your Store is Ready!', 'woocommerce' ); ?></h1>
+
+		<div class="woocommerce-message woocommerce-tracker">
+			<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information, and get %s discount on your next WooThemes purchase. %sFind out more%s.', 'woocommerce' ), '20%', '<a href="http://www.woothemes.com/woocommerce/usage-tracking/" target="_blank">', '</a>' ); ?></p>
+			<p class="submit">
+				<a class="button-primary button button-large" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optin', 'true' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'Allow', 'woocommerce' ); ?></a>
+				<a class="button-secondary button button-large skip" href="#"><?php _e( 'No thanks', 'woocommerce' ); ?></a>
+			</p>
+		</div>
+
+		<div class="wc-setup-next-steps">
+			<div class="wc-setup-next-steps-first">
+				<h2><?php _e( 'Next Steps', 'woocommerce' ); ?></h2>
+				<ul>
+					<li class="setup-product"><a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php _e( 'Create your first product', 'woocommerce' ); ?></a></li>
+					<li class="view-product"><a href="#"><?php _e( 'View a test product', 'woocommerce' ); ?></a></li>
+					<li class="return-dashboard"><a href="<?php echo esc_url( admin_url() ); ?>"><?php _e( 'Return to the WordPress Dashboard', 'woocommerce' ); ?></a></li>
+				</ul>
+			</div>
+			<div class="wc-setup-next-steps-last">
+				<h2><?php _e( 'More Actions', 'woocommerce' ); ?></h2>
+				<ul>
+					<li class="setup-gateways"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ); ?>"><?php _e( 'Setup payment gateways for your store', 'woocommerce' ); ?></a></li>
+					<li class="setup-taxes"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ); ?>"><?php _e( 'Setup your store&lsquo;s tax rates', 'woocommerce' ); ?></a></li>
+					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/"><?php _e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
+				</ul>
+			</div>
+		</div>
 		<?php
 	}
 
@@ -732,15 +766,6 @@ class WC_Admin_Welcome {
 
 		// Drop minor version if 0
 		$major_version = substr( WC()->version, 0, 3 );
-
-		// Random tweet - must be kept to 102 chars to "fit"
-		$tweets        = array(
-			'WooCommerce kickstarts online stores. It\'s free and has been downloaded over 6 million times.',
-			'Building an online store? WooCommerce is the leading #eCommerce plugin for WordPress (and it\'s free).',
-			'WooCommerce is a free #eCommerce plugin for #WordPress for selling #allthethings online, beautifully.',
-			'Ready to ship your idea? WooCommerce is the fastest growing #eCommerce plugin for WordPress on the web'
-		);
-		shuffle( $tweets );
 		?>
 		<h1><?php printf( __( 'Welcome to WooCommerce %s', 'woocommerce' ), $major_version ); ?></h1>
 
@@ -763,7 +788,7 @@ class WC_Admin_Welcome {
 		<p class="woocommerce-actions">
 			<a href="<?php echo admin_url('admin.php?page=wc-settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'woocommerce' ) ); ?>" class="docs button button-primary"><?php _e( 'Docs', 'woocommerce' ); ?></a>
-			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
 			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 		</p>
 
