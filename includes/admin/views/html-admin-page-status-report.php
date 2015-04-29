@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="updated woocommerce-message">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a>
-	<a class="skip button-primary" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
+	<a class="skip button" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
 		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
@@ -391,16 +391,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td data-export-label="API Version"><?php _e( 'API Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What version of the REST API does your site use?', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php echo WC_API::VERSION ?></td>
-		</tr>
-		<tr>
-			<td data-export-label="Taxes Enabled"><?php _e( 'Taxes Enabled', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have taxes enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo wc_tax_enabled() ? '<mark class="yes">' . '&#10004;' . '</mark>' : '<mark class="no">' . '&ndash;' . '</mark>'; ?></td>
-		</tr>
-		<tr>
-			<td data-export-label="Shipping Enabled"><?php _e( 'Shipping Enabled', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have shipping enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' === get_option( 'woocommerce_calc_shipping' ) ? '<mark class="yes">' . '&#10004;' . '</mark>' : '<mark class="no">' . '&ndash;' . '</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Force SSL"><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
