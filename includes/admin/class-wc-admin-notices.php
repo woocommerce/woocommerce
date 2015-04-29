@@ -37,7 +37,10 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( $this, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( $this, 'hide_notices' ) );
 		add_action( 'woocommerce_hide_translation_upgrade_notice', array( $this, 'hide_translation_upgrade_notice' ) );
-		add_action( 'admin_print_styles', array( $this, 'add_notices' ) );
+
+		if ( current_user_can( 'manage_woocommerce' ) ) {
+			add_action( 'admin_print_styles', array( $this, 'add_notices' ) );
+		}
 	}
 
 	/**
@@ -135,8 +138,10 @@ class WC_Admin_Notices {
 	 * Show the Theme Check notice
 	 */
 	public function theme_check_notice() {
-		if ( ! current_theme_supports( 'woocommerce' ) ) {
+		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
 			include( 'views/html-notice-theme-support.php' );
+		} else {
+			self::remove_notice( 'theme_support' );
 		}
 	}
 
