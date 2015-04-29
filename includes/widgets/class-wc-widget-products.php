@@ -150,7 +150,7 @@ class WC_Widget_Products extends WC_Widget {
 				$query_args['orderby']  = 'date';
 		}
 
-		return new WP_Query( $query_args );
+		return new WP_Query( apply_filters( 'woocommerce_products_widget_query_args', $query_args ) );
 	}
 
 	/**
