@@ -107,6 +107,10 @@ class WC_Install {
 			WC_Admin_Notices::add_notice( 'install' );
 			set_transient( '_wc_activation_redirect', 1, 30 );
 
+		// No page? Let user run wizard again..
+		} elseif ( empty( get_option( 'woocommerce_cart_page_id' ) ) ) {
+			WC_Admin_Notices::add_notice( 'install' );
+
 		// Show welcome screen for major updates only
 		} elseif ( version_compare( $current_wc_version, $major_wc_version, '<' ) ) {
 			set_transient( '_wc_activation_redirect', 1, 30 );

@@ -32,7 +32,7 @@ return array(
 		'title'       => __( 'PayPal Email', 'woocommerce' ),
 		'type'        => 'email',
 		'description' => __( 'Please enter your PayPal email address; this is needed in order to take payment.', 'woocommerce' ),
-		'default'     => '',
+		'default'     => get_option( 'admin_email' ),
 		'desc_tip'    => true,
 		'placeholder' => 'you@youremail.com'
 	),
