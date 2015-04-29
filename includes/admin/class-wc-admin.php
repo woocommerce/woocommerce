@@ -35,33 +35,31 @@ class WC_Admin {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		// Functions
 		include_once( 'wc-admin-functions.php' );
 		include_once( 'wc-meta-box-functions.php' );
-
-		// Classes
 		include_once( 'class-wc-admin-post-types.php' );
 		include_once( 'class-wc-admin-taxonomies.php' );
+		include_once( 'class-wc-admin-menus.php' );
+		include_once( 'class-wc-admin-notices.php' );
+		include_once( 'class-wc-admin-assets.php' );
+		include_once( 'class-wc-admin-webhooks.php' );
 
-		// Classes we only need during non-ajax requests
-		if ( ! is_ajax() ) {
-			include_once( 'class-wc-admin-menus.php' );
-			include_once( 'class-wc-admin-notices.php' );
-			include_once( 'class-wc-admin-assets.php' );
-			include_once( 'class-wc-admin-webhooks.php' );
+		// Help Tabs
+		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
+			include_once( 'class-wc-admin-help.php' );
+		}
 
-			// Help
-			if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-				include_once( 'class-wc-admin-help.php' );
-			}
-
-			// Setup/welcome
-			if ( ! empty( $_GET['page'] ) && current_user_can( 'manage_woocommerce' ) ) {
-				if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && 'wc-setup' === $_GET['page'] ) {
+		// Setup/welcome
+		if ( ! empty( $_GET['page'] ) ) {
+			switch ( $_GET['page'] ) {
+				case 'wc-setup' :
 					include_once( 'class-wc-admin-setup-wizard.php' );
-				} elseif ( 'wc-about' === $_GET['page'] || 'wc-credits' === $_GET['page'] || 'wc-translators' === $_GET['page'] ) {
+					break;
+				case 'wc-about' :
+				case 'wc-credits' :
+				case 'wc-translators' :
 					include_once( 'class-wc-admin-welcome.php' );
-				}
+					break;
 			}
 		}
 

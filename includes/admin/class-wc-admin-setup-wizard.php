@@ -36,9 +36,11 @@ class WC_Admin_Setup_Wizard {
 	 * Hook in tabs.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'admin_menus' ) );
-		add_action( 'admin_init', array( $this, 'setup_wizard' ) );
-		shuffle( $this->tweets );
+		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && current_user_can( 'manage_woocommerce' ) ) {
+			add_action( 'admin_menu', array( $this, 'admin_menus' ) );
+			add_action( 'admin_init', array( $this, 'setup_wizard' ) );
+			shuffle( $this->tweets );
+		}
 	}
 
 	/**

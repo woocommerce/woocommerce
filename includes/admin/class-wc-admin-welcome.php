@@ -42,9 +42,6 @@ class WC_Admin_Welcome {
 	 * Add admin menus/screens.
 	 */
 	public function admin_menus() {
-		if ( empty( $_GET['page'] ) ) {
-			return;
-		}
 		$welcome_page_name  = __( 'About WooCommerce', 'woocommerce' );
 		$welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' );
 
