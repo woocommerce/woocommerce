@@ -21,7 +21,7 @@ class WC_Admin_Notices {
 	 * Array of notices - name => callback
 	 * @var array
 	 */
-	private $notices = array(
+	private $core_notices = array(
 		'install'             => 'install_notice',
 		'update'              => 'update_notice',
 		'template_files'      => 'template_file_check_notice',
@@ -111,11 +111,12 @@ class WC_Admin_Notices {
 	public function add_notices() {
 		$notices = get_option( 'woocommerce_admin_notices', array() );
 
-		foreach ( $notices as $notice ) {
-			if ( ! empty( $this->notices[ $notice ] ) ) {
-				wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
-				wp_enqueue_script( 'wc-admin-notices' );
-				add_action( 'admin_notices', array( $this, $this->notices[ $notice ] ) );
+		if ( $notices ) {
+			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
+			foreach ( $notices as $notice ) {
+				if ( ! empty( $this->core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
+					add_action( 'admin_notices', array( $this, $this->core_notices[ $notice ] ) );
+				}
 			}
 		}
 	}
