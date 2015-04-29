@@ -283,30 +283,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Server Locale"><?php _e( 'Server Locale', 'woocommerce' ); ?></th>
-		</tr>
-	</thead>
-	<tbody>
-		<?php
-			$locale = localeconv();
-			$locale_help = array(
-				'decimal_point'     => __( 'The character used for decimal points.', 'woocommerce' ),
-				'thousands_sep'     => __( 'The character used for a thousands separator.', 'woocommerce' ),
-				'mon_decimal_point' => __( 'The character used for decimal points in monetary values.', 'woocommerce' ),
-				'mon_thousands_sep' => __( 'The character used for a thousands separator in monetary values.', 'woocommerce' ),
-			);
-
-			foreach ( $locale as $key => $val ) {
-				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) ) {
-					echo '<tr><td data-export-label="' . $key . '">' . $key . ':</td><td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '">[?]</a></td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
-				}
-			}
-		?>
-	</tbody>
-</table>
-<table class="wc_status_table widefat" cellspacing="0" id="status">
-	<thead>
-		<tr>
 			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</th>
 		</tr>
 	</thead>
