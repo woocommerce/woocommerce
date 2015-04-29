@@ -25,7 +25,6 @@ class WC_Admin_Notices {
 		'install'             => 'install_notice',
 		'update'              => 'update_notice',
 		'template_files'      => 'template_file_check_notice',
-		'frontend_colors'     => 'frontend_colors_notice',
 		'theme_support'       => 'theme_check_notice',
 		'translation_upgrade' => 'translation_upgrade_notice'
 	);
@@ -37,7 +36,6 @@ class WC_Admin_Notices {
 		add_action( 'switch_theme', array( $this, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( $this, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( $this, 'hide_notices' ) );
-		add_action( 'woocommerce_hide_frontend_colors_notice', array( $this, 'hide_frontend_colors_notice' ) );
 		add_action( 'woocommerce_hide_translation_upgrade_notice', array( $this, 'hide_translation_upgrade_notice' ) );
 		add_action( 'admin_print_styles', array( $this, 'add_notices' ) );
 	}
@@ -53,14 +51,9 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed
 	 */
 	public function reset_admin_notices() {
-		if ( $this->has_frontend_colors() ) {
-			self::add_notice( 'frontend_colors' );
-		}
-
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
 			self::add_notice( 'theme_support' );
 		}
-
 		self::add_notice( 'template_files' );
 	}
 
@@ -100,13 +93,6 @@ class WC_Admin_Notices {
 			self::remove_notice( $hide_notice );
 			do_action( 'woocommerce_hide_' . $hide_notice . '_notice' );
 		}
-	}
-
-	/**
-	 * Delete colors option
-	 */
-	public function hide_frontend_colors_notice() {
-		delete_option( 'woocommerce_frontend_css_colors' );
 	}
 
 	/**
@@ -201,41 +187,6 @@ class WC_Admin_Notices {
 		} else {
 			self::remove_notice( 'template_files' );
 		}
-	}
-
-	/**
-	 * Checks if there is any change in woocommerce_frontend_css_colors
-	 *
-	 * @return bool
-	 */
-	public function has_frontend_colors() {
-		$styles = (array) WC_Frontend_Scripts::get_styles();
-
-		if ( ! array_key_exists( 'woocommerce-general', $styles ) ) {
-			return false;
-		}
-
-		$colors  = get_option( 'woocommerce_frontend_css_colors' );
-		$default = array(
-			'primary'    => '#ad74a2',
-			'secondary'  => '#f7f6f7',
-			'highlight'  => '#85ad74',
-			'content_bg' => '#ffffff',
-			'subtext'    => '#777777'
-		);
-
-		if ( ! $colors || $colors === $default ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Notice to say Frontend Colors options has been deprecated in 2.3
-	 */
-	public function frontend_colors_notice() {
-		include( 'views/html-notice-frontend-colors.php' );
 	}
 }
 
