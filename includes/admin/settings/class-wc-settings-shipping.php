@@ -74,7 +74,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'title'         => __( 'Shipping Calculations', 'woocommerce' ),
 				'desc'          => __( 'Enable shipping', 'woocommerce' ),
 				'id'            => 'woocommerce_calc_shipping',
-				'default'       => 'yes',
+				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start'
 			),

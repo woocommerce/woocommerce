@@ -203,117 +203,6 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Locale settings
-	 */
-	public function wc_setup_locale() {
-		$user_location = WC_Geolocation::geolocate_ip();
-		$country       = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
-		$state         = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
-		$state         = 'US' === $country && '*' === $state ? 'AL' : $state;
-		?>
-		<h1><?php _e( 'Store Locale Setup', 'woocommerce' ); ?></h1>
-		<form method="post">
-			<table class="form-table">
-				<tr>
-					<th scope="row"><label for="store_location"><?php _e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
-					<td>
-					<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="currency_code"><?php _e( 'Which currency will your store use?', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="currency_code" name="currency_code" required style="width:100%;" data-placeholder="<?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
-							<option value=""><?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
-							<?php
-							foreach ( get_woocommerce_currencies() as $code => $name ) {
-								echo '<option value="' . esc_attr( $code ) . '">' . esc_html( $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')' ) . '</option>';
-							}
-							?>
-						</select>
-						<span class="description"><?php printf( __( 'If your currency is not listed you can %sadd it later%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="currency_pos"><?php _e( 'Currency Position', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="currency_pos" name="currency_pos" class="wc-enhanced-select">
-							<option value="left"><?php echo __( 'Left', 'woocommerce' ); ?></option>
-							<option value="right"><?php echo __( 'Right', 'woocommerce' ); ?></option>
-							<option value="left_space"><?php echo __( 'Left with space', 'woocommerce' ); ?></option>
-							<option value="right_space"><?php echo __( 'Right with space', 'woocommerce' ); ?></option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="thousand_sep"><?php _e( 'Thousand Separator', 'woocommerce' ); ?></label></th>
-					<td>
-						<input type="text" id="thousand_sep" name="thousand_sep" size="2" value="" />
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator', 'woocommerce' ); ?></label></th>
-					<td>
-						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="" />
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="weight_unit"><?php _e( 'Which unit should be used for product weights?', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
-							<option value="kg"><?php echo __( 'kg', 'woocommerce' ); ?></option>
-							<option value="g"><?php echo __( 'g', 'woocommerce' ); ?></option>
-							<option value="lbs"><?php echo __( 'lbs', 'woocommerce' ); ?></option>
-							<option value="oz"><?php echo __( 'oz', 'woocommerce' ); ?></option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="dimension_unit"><?php _e( 'Which unit should be used for product dimensions?', 'woocommerce' ); ?></label></th>
-					<td>
-						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
-							<option value="m"><?php echo __( 'm', 'woocommerce' ); ?></option>
-							<option value="cm"><?php echo __( 'cm', 'woocommerce' ); ?></option>
-							<option value="mm"><?php echo __( 'mm', 'woocommerce' ); ?></option>
-							<option value="in"><?php echo __( 'in', 'woocommerce' ); ?></option>
-							<option value="yd"><?php echo __( 'yd', 'woocommerce' ); ?></option>
-						</select>
-					</td>
-				</tr>
-			</table>
-			<p class="wc-setup-actions step">
-				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
-				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
-			</p>
-		</form>
-		<?php
-	}
-
-	/**
-	 * Save Locale Settings
-	 */
-	public function wc_setup_locale_save() {
-		$store_location = sanitize_text_field( $_POST['store_location'] );
-		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
-		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
-		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
-		$weight_unit    = sanitize_text_field( $_POST['weight_unit'] );
-		$dimension_unit = sanitize_text_field( $_POST['dimension_unit'] );
-
-		update_option( 'woocommerce_default_country', $store_location );
-		update_option( 'woocommerce_currency', $currency_code );
-		update_option( 'woocommerce_currency_pos', $currency_pos );
-		update_option( 'woocommerce_thousand_sep', $thousand_sep );
-		update_option( 'woocommerce_weight_unit', $weight_unit );
-		update_option( 'woocommerce_dimension_unit', $dimension_unit );
-
-		wp_redirect( $this->get_next_step_link() );
-		exit;
-	}
-
-	/**
 	 * Page setup
 	 */
 	public function wc_setup_pages() {
@@ -342,9 +231,9 @@ class WC_Admin_Setup_Wizard {
 						<td>
 							<?php _e( 'The checkout page will be where the customer goes to pay for their items.', 'woocommerce' ); ?>
 							<div class="page-options">
-								<p><input type="checkbox" checked="checked" name="woocommerce_enable_guest_checkout" id="woocommerce_enable_guest_checkout" /> <label for="woocommerce_enable_guest_checkout"><?php _e( 'Enable guest checkout', 'woocommerce' ); ?></label></p>
+								<p><input type="checkbox" <?php checked( get_option( 'woocommerce_enable_guest_checkout' ), 'yes' ); ?> name="woocommerce_enable_guest_checkout" id="woocommerce_enable_guest_checkout" /> <label for="woocommerce_enable_guest_checkout"><?php _e( 'Enable guest checkout', 'woocommerce' ); ?></label></p>
 
-								<p><input type="checkbox" checked="checked" name="woocommerce_enable_signup_and_login_from_checkout" id="woocommerce_enable_signup_and_login_from_checkout" /> <label for="woocommerce_enable_signup_and_login_from_checkout"><?php _e( 'Enable registration form', 'woocommerce' ); ?></label></p>
+								<p><input type="checkbox" <?php checked( get_option( 'woocommerce_enable_signup_and_login_from_checkout' ), 'yes' ); ?> name="woocommerce_enable_signup_and_login_from_checkout" id="woocommerce_enable_signup_and_login_from_checkout" /> <label for="woocommerce_enable_signup_and_login_from_checkout"><?php _e( 'Enable registration form', 'woocommerce' ); ?></label></p>
 							</div>
 						</td>
 					</tr>
@@ -353,7 +242,7 @@ class WC_Admin_Setup_Wizard {
 						<td>
 							<?php _e( 'Registered customers will be able to go to this page to manage their account details and view past orders.', 'woocommerce' ); ?>
 							<div class="page-options">
-								<p><input type="checkbox" checked="checked" name="woocommerce_enable_myaccount_registration" id="woocommerce_enable_myaccount_registration" /> <label for="woocommerce_enable_myaccount_registration"><?php _e( 'Enable registration form', 'woocommerce' ); ?></label></p>
+								<p><input type="checkbox" <?php checked( get_option( 'woocommerce_enable_myaccount_registration' ), 'yes' ); ?> name="woocommerce_enable_myaccount_registration" id="woocommerce_enable_myaccount_registration" /> <label for="woocommerce_enable_myaccount_registration"><?php _e( 'Enable registration form', 'woocommerce' ); ?></label></p>
 							</div>
 						</td>
 					</tr>
@@ -387,9 +276,146 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Locale settings
+	 */
+	public function wc_setup_locale() {
+		$user_location  = WC_Geolocation::geolocate_ip();
+		$country        = ! empty( $user_location['country'] ) ? $user_location['country'] : 'US';
+		$state          = ! empty( $user_location['state'] ) ? $user_location['state'] : '*';
+		$state          = 'US' === $country && '*' === $state ? 'AL' : $state;
+
+		// Defaults
+		$currency       = get_option( 'woocommerce_currency', 'GBP' );
+		$currency_pos   = get_option( 'woocommerce_currency_pos', 'left' );
+		$decimal_sep    = get_option( 'woocommerce_decimal_sep', '.' );
+		$thousand_sep   = get_option( 'woocommerce_thousand_sep', ',' );
+		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
+		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
+		?>
+		<h1><?php _e( 'Store Locale Setup', 'woocommerce' ); ?></h1>
+		<form method="post">
+			<table class="form-table">
+				<tr>
+					<th scope="row"><label for="store_location"><?php _e( 'Where is your store based?', 'woocommerce' ); ?></label></th>
+					<td>
+					<select id="store_location" name="store_location" style="width:100%;" required data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="currency_code"><?php _e( 'Which currency will your store use?', 'woocommerce' ); ?></label></th>
+					<td>
+						<select id="currency_code" name="currency_code" required style="width:100%;" data-placeholder="<?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+							<option value=""><?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
+							<?php
+							foreach ( get_woocommerce_currencies() as $code => $name ) {
+								echo '<option value="' . esc_attr( $code ) . '" ' . checked( $currency, $code, false ) . '>' . esc_html( $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')' ) . '</option>';
+							}
+							?>
+						</select>
+						<span class="description"><?php printf( __( 'If your currency is not listed you can %sadd it later%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="currency_pos"><?php _e( 'Currency Position', 'woocommerce' ); ?></label></th>
+					<td>
+						<select id="currency_pos" name="currency_pos" class="wc-enhanced-select">
+							<option value="left" <?php selected( $currency_pos, 'left' ); ?>><?php echo __( 'Left', 'woocommerce' ); ?></option>
+							<option value="right" <?php selected( $currency_pos, 'right' ); ?>><?php echo __( 'Right', 'woocommerce' ); ?></option>
+							<option value="left_space" <?php selected( $currency_pos, 'left_space' ); ?>><?php echo __( 'Left with space', 'woocommerce' ); ?></option>
+							<option value="right_space" <?php selected( $currency_pos, 'right_space' ); ?>><?php echo __( 'Right with space', 'woocommerce' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="thousand_sep"><?php _e( 'Thousand Separator', 'woocommerce' ); ?></label></th>
+					<td>
+						<input type="text" id="thousand_sep" name="thousand_sep" size="2" value="<?php echo esc_attr( $thousand_sep ) ; ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator', 'woocommerce' ); ?></label></th>
+					<td>
+						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="<?php echo esc_attr( $decimal_sep ) ; ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="weight_unit"><?php _e( 'Which unit should be used for product weights?', 'woocommerce' ); ?></label></th>
+					<td>
+						<select id="weight_unit" name="weight_unit" class="wc-enhanced-select">
+							<option value="kg" <?php selected( $weight_unit, 'kg' ); ?>><?php echo __( 'kg', 'woocommerce' ); ?></option>
+							<option value="g" <?php selected( $weight_unit, 'g' ); ?>><?php echo __( 'g', 'woocommerce' ); ?></option>
+							<option value="lbs" <?php selected( $weight_unit, 'lbs' ); ?>><?php echo __( 'lbs', 'woocommerce' ); ?></option>
+							<option value="oz" <?php selected( $weight_unit, 'oz' ); ?>><?php echo __( 'oz', 'woocommerce' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="dimension_unit"><?php _e( 'Which unit should be used for product dimensions?', 'woocommerce' ); ?></label></th>
+					<td>
+						<select id="dimension_unit" name="dimension_unit" class="wc-enhanced-select">
+							<option value="m" <?php selected( $dimension_unit, 'm' ); ?>><?php echo __( 'm', 'woocommerce' ); ?></option>
+							<option value="cm" <?php selected( $dimension_unit, 'cm' ); ?>><?php echo __( 'cm', 'woocommerce' ); ?></option>
+							<option value="mm" <?php selected( $dimension_unit, 'mm' ); ?>><?php echo __( 'mm', 'woocommerce' ); ?></option>
+							<option value="in" <?php selected( $dimension_unit, 'in' ); ?>><?php echo __( 'in', 'woocommerce' ); ?></option>
+							<option value="yd" <?php selected( $dimension_unit, 'yd' ); ?>><?php echo __( 'yd', 'woocommerce' ); ?></option>
+						</select>
+					</td>
+				</tr>
+			</table>
+			<p class="wc-setup-actions step">
+				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+			</p>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Save Locale Settings
+	 */
+	public function wc_setup_locale_save() {
+		$store_location = sanitize_text_field( $_POST['store_location'] );
+		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
+		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
+		$decimal_sep    = sanitize_text_field( $_POST['decimal_sep'] );
+		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
+		$weight_unit    = sanitize_text_field( $_POST['weight_unit'] );
+		$dimension_unit = sanitize_text_field( $_POST['dimension_unit'] );
+
+		update_option( 'woocommerce_default_country', $store_location );
+		update_option( 'woocommerce_currency', $currency_code );
+		update_option( 'woocommerce_currency_pos', $currency_pos );
+		update_option( 'woocommerce_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_thousand_sep', $thousand_sep );
+		update_option( 'woocommerce_weight_unit', $weight_unit );
+		update_option( 'woocommerce_dimension_unit', $dimension_unit );
+
+		wp_redirect( $this->get_next_step_link() );
+		exit;
+	}
+
+	/**
 	 * Shipping and taxes
 	 */
 	public function wc_setup_shipping_taxes() {
+		$domestic                         = new WC_Shipping_Flat_Rate();
+		$international                    = new WC_Shipping_International_Delivery();
+		$shipping_cost_domestic           = '';
+		$shipping_cost_domestic_item      = '';
+		$shipping_cost_international      = '';
+		$shipping_cost_international_item = '';
+
+		if ( 'yes' === $domestic->get_option( 'enabled' ) ) {
+			$shipping_cost_domestic      = $domestic->get_option( 'cost_per_order' );
+			$shipping_cost_domestic_item = $domestic->get_option( 'cost' );
+		}
+
+		if ( 'yes' === $international->get_option( 'enabled' ) ) {
+			$shipping_cost_international      = $international->get_option( 'cost_per_order' );
+			$shipping_cost_international_item = $international->get_option( 'cost' );
+		}
 		?>
 		<h1><?php _e( 'Shipping &amp; Tax Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
@@ -403,20 +429,20 @@ class WC_Admin_Setup_Wizard {
 				<tr>
 					<th scope="row"><label for="woocommerce_calc_shipping"><?php _e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="checkbox" id="woocommerce_calc_shipping" name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
+						<input type="checkbox" id="woocommerce_calc_shipping" <?php checked( get_option( 'woocommerce_calc_shipping', 'no' ), 'yes' ); ?> name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
 						<label for="woocommerce_calc_shipping"><?php _e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="shipping_cost_domestic"><?php _e( 'How much do you charge to ship products <strong>domestically</strong>?', 'woocommerce' ); ?></label></th>
 					<td>
-						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="" /> <?php _e( 'per order, and', 'woocommerce' ); ?> <?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" value="" /> <?php _e( 'per item', 'woocommerce' ); ?>
+						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="<?php echo esc_attr( $shipping_cost_domestic ); ?>" /> <?php _e( 'per order, and', 'woocommerce' ); ?> <?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" value="<?php echo esc_attr( $shipping_cost_domestic_item ); ?>" /> <?php _e( 'per item', 'woocommerce' ); ?>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="shipping_cost_international"><?php _e( 'How much do you charge to ship products <strong>internationally</strong>?', 'woocommerce' ); ?></label></th>
 					<td>
-						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="" /> <?php _e( 'per order, and', 'woocommerce' ); ?> <?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international_item" name="shipping_cost_international_item" size="5" value="" /> <?php _e( 'per item', 'woocommerce' ); ?>
+						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="<?php echo esc_attr( $shipping_cost_international ); ?>" /> <?php _e( 'per order, and', 'woocommerce' ); ?> <?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international_item" name="shipping_cost_international_item" size="5" value="<?php echo esc_attr( $shipping_cost_international_item ); ?>" /> <?php _e( 'per item', 'woocommerce' ); ?>
 					</td>
 				</tr>
 				<tr class="section_title">
@@ -427,15 +453,15 @@ class WC_Admin_Setup_Wizard {
 				<tr>
 					<th scope="row"><label for="woocommerce_calc_taxes"><?php _e( 'Will you be charging sales tax?', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="checkbox" id="woocommerce_calc_taxes" name="woocommerce_calc_taxes" class="input-checkbox" value="1" />
+						<input type="checkbox" <?php checked( get_option( 'woocommerce_calc_taxes', 'no' ), 'yes' ); ?> id="woocommerce_calc_taxes" name="woocommerce_calc_taxes" class="input-checkbox" value="1" />
 						<label for="woocommerce_calc_taxes"><?php _e( 'Yes, I will be charging sales tax', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="woocommerce_prices_include_tax"><?php _e( 'Will you enter product prices including taxes?', 'woocommerce' ); ?></label></th>
 					<td>
-						<label><input type="radio" checked id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ); ?></label><br/>
-						<label><input type="radio" id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php _e( 'No, I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
+						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'yes' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ); ?></label><br/>
+						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'no' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php _e( 'No, I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
 				<?php

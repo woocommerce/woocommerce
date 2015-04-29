@@ -17,11 +17,10 @@ jQuery(function( $ ) {
 				}
 			} );
 		} else {
-			$(':input[name="currency_code"]').val( '' ).change();
-			$(':input[name="currency_pos"]').val( 'left' ).change().closest('tr').show();
-			$(':input[name="thousand_sep"]').val( ',' ).change().closest('tr').show();
-			$(':input[name="decimal_sep"]').val( '.' ).change().closest('tr').show();
-			$(':input[name="num_decimals"]').val( '2' ).change().closest('tr').show();
+			$(':input[name="currency_pos"]').closest('tr').show();
+			$(':input[name="thousand_sep"]').closest('tr').show();
+			$(':input[name="decimal_sep"]').closest('tr').show();
+			$(':input[name="num_decimals"]').closest('tr').show();
 		}
 	}).change();
 
