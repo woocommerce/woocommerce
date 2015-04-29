@@ -103,7 +103,7 @@ class WC_Install {
 		WC_Admin_Notices::remove_all_notices();
 
 		// No versions? This is a new install :)
-		if ( is_null( $current_wc_version ) && is_null( $current_db_version ) ) {
+		if ( is_null( $current_wc_version ) && is_null( $current_db_version ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
 			WC_Admin_Notices::add_notice( 'install' );
 			set_transient( '_wc_setup_redirect', 1, 30 );
 

@@ -57,7 +57,7 @@ class WC_Admin {
 
 			// Setup/welcome
 			if ( ! empty( $_GET['page'] ) && current_user_can( 'manage_woocommerce' ) ) {
-				if ( 'wc-setup' === $_GET['page'] ) {
+				if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && 'wc-setup' === $_GET['page'] ) {
 					include_once( 'class-wc-admin-setup-wizard.php' );
 				} elseif ( 'wc-about' === $_GET['page'] || 'wc-credits' === $_GET['page'] || 'wc-translators' === $_GET['page'] ) {
 					include_once( 'class-wc-admin-welcome.php' );
@@ -120,7 +120,7 @@ class WC_Admin {
 			return;
 		}
 
-		if ( get_transient( '_wc_setup_redirect' ) ) {
+		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && get_transient( '_wc_setup_redirect' ) ) {
 			delete_transient( '_wc_setup_redirect' );
 			wp_redirect( admin_url( 'index.php?page=wc-setup' ) );
 			exit;
