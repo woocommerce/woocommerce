@@ -158,7 +158,7 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $order->get_status() ); ?>" />
 			<div id="order_data" class="panel">
 
-				<h2><?php printf( __( '%s #%s Details', 'woocommerce' ), $order_type_object->labels->singular_name, esc_html( $order->get_order_number() ) ); ?></h2>
+				<h2><?php printf( __( '%s %s details', 'woocommerce' ), $order_type_object->labels->singular_name, esc_html( $order->get_order_number() ) ); ?></h2>
 				<p class="order_number"><?php
 
 					if ( $payment_method ) {
