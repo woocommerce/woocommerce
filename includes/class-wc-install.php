@@ -105,7 +105,7 @@ class WC_Install {
 		// No versions? This is a new install :)
 		if ( is_null( $current_wc_version ) && is_null( $current_db_version ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
 			WC_Admin_Notices::add_notice( 'install' );
-			set_transient( '_wc_setup_redirect', 1, 30 );
+			set_transient( '_wc_activation_redirect', 1, 30 );
 
 		// Show welcome screen for major updates only
 		} elseif ( version_compare( $current_wc_version, $major_wc_version, '<' ) ) {

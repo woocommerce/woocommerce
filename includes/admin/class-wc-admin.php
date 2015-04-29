@@ -94,41 +94,22 @@ class WC_Admin {
 	}
 
 	/**
-	 * Handle redirects to setup/welcome page
+	 * Handle redirects to setup/welcome page after install and updates.
+	 *
+	 * Transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! get_transient( '_wc_activation_redirect' ) || is_network_admin() || isset( $_GET['activate-multi'] ) || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
-		if ( ! get_transient( '_wc_setup_redirect' ) && ! get_transient( '_wc_activation_redirect' ) ) {
-			return;
-		}
+		set_transient( '_wc_activation_redirect', 0, 30 );
 
-		// Bail if activating from network, or bulk, or within an iFrame
-		if ( is_network_admin() || isset( $_GET['activate-multi'] ) || defined( 'IFRAME_REQUEST' ) ) {
-			return;
-		}
-
-		// Don't affect upgrade plugin screen
-		if ( isset( $_GET['action'] ) && 'upgrade-plugin' === $_GET['action'] ) {
-			return;
-		}
-
-		// Prevent loop
-		if ( ! empty( $_GET['page'] ) && ( $_GET['page'] === 'wc-about' || $_GET['page'] === 'wc-setup' ) ) {
-			return;
-		}
-
-		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && get_transient( '_wc_setup_redirect' ) ) {
-			delete_transient( '_wc_setup_redirect' );
-			wp_redirect( admin_url( 'index.php?page=wc-setup' ) );
+		if ( WC_Admin_Notices::has_notice( 'install' ) ) {
+			wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
 			exit;
-		}
-
-		if ( ! WC_Admin_Notices::has_notice( 'update' ) && get_transient( '_wc_activation_redirect' ) ) {
-			delete_transient( '_wc_activation_redirect' );
-			wp_redirect( admin_url( 'index.php?page=wc-about' ) );
+		} else {
+			wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
 			exit;
 		}
 	}
