@@ -24,6 +24,7 @@ class WC_Admin {
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
 		add_action( 'current_screen', array( $this, 'conditonal_includes' ) );
+		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
@@ -45,7 +46,6 @@ class WC_Admin {
 		// Classes we only need during non-ajax requests
 		if ( ! is_ajax() ) {
 			include_once( 'class-wc-admin-menus.php' );
-			include_once( 'class-wc-admin-welcome.php' );
 			include_once( 'class-wc-admin-notices.php' );
 			include_once( 'class-wc-admin-assets.php' );
 			include_once( 'class-wc-admin-webhooks.php' );
@@ -55,9 +55,13 @@ class WC_Admin {
 				include_once( 'class-wc-admin-help.php' );
 			}
 
-			// Setup
-			if ( ! empty( $_GET['page'] ) && 'wc-setup' === $_GET['page'] ) {
-				include_once( 'class-wc-admin-setup-wizard.php' );
+			// Setup/welcome
+			if ( ! empty( $_GET['page'] ) && current_user_can( 'manage_woocommerce' ) ) {
+				if ( 'wc-setup' === $_GET['page'] ) {
+					include_once( 'class-wc-admin-setup-wizard.php' );
+				} elseif ( 'wc-about' === $_GET['page'] || 'wc-credits' === $_GET['page'] || 'wc-translators' === $_GET['page'] ) {
+					include_once( 'class-wc-admin-welcome.php' );
+				}
 			}
 		}
 
@@ -71,7 +75,6 @@ class WC_Admin {
 	 * Include admin files conditionally
 	 */
 	public function conditonal_includes() {
-
 		$screen = get_current_screen();
 
 		switch ( $screen->id ) {
@@ -91,10 +94,49 @@ class WC_Admin {
 	}
 
 	/**
+	 * Handle redirects to setup/welcome page
+	 */
+	public function admin_redirects() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		if ( ! get_transient( '_wc_setup_redirect' ) && ! get_transient( '_wc_activation_redirect' ) ) {
+			return;
+		}
+
+		// Bail if activating from network, or bulk, or within an iFrame
+		if ( is_network_admin() || isset( $_GET['activate-multi'] ) || defined( 'IFRAME_REQUEST' ) ) {
+			return;
+		}
+
+		// Don't affect upgrade plugin screen
+		if ( isset( $_GET['action'] ) && 'upgrade-plugin' === $_GET['action'] ) {
+			return;
+		}
+
+		// Prevent loop
+		if ( ! empty( $_GET['page'] ) && ( $_GET['page'] === 'wc-about' || $_GET['page'] === 'wc-setup' ) ) {
+			return;
+		}
+
+		if ( get_transient( '_wc_setup_redirect' ) ) {
+			delete_transient( '_wc_setup_redirect' );
+			wp_redirect( admin_url( 'index.php?page=wc-setup' ) );
+			exit;
+		}
+
+		if ( ! WC_Admin_Notices::has_notice( 'update' ) && get_transient( '_wc_activation_redirect' ) ) {
+			delete_transient( '_wc_activation_redirect' );
+			wp_redirect( admin_url( 'index.php?page=wc-about' ) );
+			exit;
+		}
+	}
+
+	/**
 	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin
 	 */
 	public function prevent_admin_access() {
-
 		$prevent_access = false;
 
 		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) && basename( $_SERVER["SCRIPT_FILENAME"] ) !== 'admin-post.php' ) {

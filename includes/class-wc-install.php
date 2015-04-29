@@ -17,6 +17,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Install {
 
+	/** @var array DB updates that need to be run */
+	private static $db_updates = array(
+		'2.0.0' => 'updates/woocommerce-update-2.0.php',
+		'2.0.9' => 'updates/woocommerce-update-2.0.9.php',
+		'2.1.0' => 'updates/woocommerce-update-2.1.php',
+		'2.2.0' => 'updates/woocommerce-update-2.2.php',
+		'2.3.0' => 'updates/woocommerce-update-2.3.php',
+	//	'2.4.0' => 'updates/woocommerce-update-2.4.php'
+	);
+
 	/**
 	 * Hook in tabs.
 	 */
@@ -43,35 +53,16 @@ class WC_Install {
 	 * Install actions such as installing pages when a button is clicked.
 	 */
 	public static function install_actions() {
-		// Install - Add pages button
-		if ( ! empty( $_GET['install_woocommerce_pages'] ) ) {
-
-			self::create_pages();
-
-			// We no longer need to install pages
-			WC_Admin_Notices::remove_notice( 'install' );
-
-			// What's new redirect
-			if ( ! WC_Admin_Notices::has_notice( 'update' ) ) {
-				delete_transient( '_wc_activation_redirect' );
-				wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
-				exit;
-			}
-
-		// Update button
-		} elseif ( ! empty( $_GET['do_update_woocommerce'] ) ) {
-
+		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
 			self::update();
 
 			// Update complete
 			WC_Admin_Notices::remove_notice( 'update' );
 
 			// What's new redirect
-			if ( ! WC_Admin_Notices::has_notice( 'install' ) ) {
-				delete_transient( '_wc_activation_redirect' );
-				wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
-				exit;
-			}
+			delete_transient( '_wc_activation_redirect' );
+			wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
+			exit;
 		}
 	}
 
@@ -104,36 +95,53 @@ class WC_Install {
 		self::create_cron_jobs();
 		self::create_files();
 
-		// Queue upgrades
+		// Queue upgrades/setup wizard
+		$current_wc_version = get_option( 'woocommerce_version', null );
 		$current_db_version = get_option( 'woocommerce_db_version', null );
+		$major_wc_version   = substr( WC()->version, 0, strrpos( WC()->version, '.' ) );
 
-		if ( version_compare( $current_db_version, '2.3.0', '<' ) && null !== $current_db_version ) {
+		WC_Admin_Notices::remove_all_notices();
+
+		// No versions? This is a new install :)
+		if ( is_null( $current_wc_version ) && is_null( $current_db_version ) ) {
+			WC_Admin_Notices::add_notice( 'install' );
+			set_transient( '_wc_setup_redirect', 1, 30 );
+
+		// Show welcome screen for major updates only
+		} elseif ( version_compare( $current_wc_version, $major_wc_version, '<' ) ) {
+			set_transient( '_wc_activation_redirect', 1, 30 );
+		}
+
+		if ( ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( self::$db_updates ) ), '<' ) ) {
 			WC_Admin_Notices::add_notice( 'update' );
 		} else {
-			delete_option( 'woocommerce_db_version' );
-			add_option( 'woocommerce_db_version', WC()->version );
+			self::update_db_version();
 		}
 
-		// Update version
-		delete_option( 'woocommerce_version' );
-		add_option( 'woocommerce_version', WC()->version );
-
-		// Check if pages are needed
-		if ( wc_get_page_id( 'shop' ) < 1 ) {
-			WC_Admin_Notices::add_notice( 'install' );
-		}
+		self::update_wc_version();
 
 		// Flush rules after install
 		flush_rewrite_rules();
 		delete_transient( 'wc_attribute_taxonomies' );
 
-		// Redirect to welcome screen
-		if ( ! is_network_admin() && ! isset( $_GET['activate-multi'] ) ) {
-			set_transient( '_wc_activation_redirect', 1, 30 );
-		}
-
 		// Trigger action
 		do_action( 'woocommerce_installed' );
+	}
+
+	/**
+	 * Update WC version to current
+	 */
+	private static function update_wc_version() {
+		delete_option( 'woocommerce_version' );
+		add_option( 'woocommerce_version', WC()->version );
+	}
+
+	/**
+	 * Update DB version to current
+	 */
+	private static function update_db_version( $version = null ) {
+		delete_option( 'woocommerce_db_version' );
+		add_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
 	}
 
 	/**
@@ -141,25 +149,15 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$db_updates         = array(
-			'2.0.0' => 'updates/woocommerce-update-2.0.php',
-			'2.0.9' => 'updates/woocommerce-update-2.0.9.php',
-			'2.1.0' => 'updates/woocommerce-update-2.1.php',
-			'2.2.0' => 'updates/woocommerce-update-2.2.php',
-			'2.3.0' => 'updates/woocommerce-update-2.3.php',
-			'2.4.0' => 'updates/woocommerce-update-2.4.php'
-		);
 
-		foreach ( $db_updates as $version => $updater ) {
+		foreach ( self::$db_updates as $version => $updater ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				include( $updater );
-				delete_option( 'woocommerce_db_version' );
-				add_option( 'woocommerce_db_version', $version );
+				self::update_db_version( $version );
 			}
 		}
 
-		delete_option( 'woocommerce_db_version' );
-		add_option( 'woocommerce_db_version', WC()->version );
+		self::update_db_version();
 	}
 
 	/**

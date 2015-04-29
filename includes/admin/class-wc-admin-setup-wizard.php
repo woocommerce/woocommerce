@@ -195,7 +195,7 @@ class WC_Admin_Setup_Wizard {
 		<p><?php _e( 'No time right now? Want to setup your store manually? Just press the skip button to return to the WordPress dashboard. You can come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
-			<a href="<?php echo esc_url( admin_url() ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( admin_url( 'plugins.php' ) ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
 		<?php
 	}
@@ -576,6 +576,9 @@ class WC_Admin_Setup_Wizard {
 	 * Final step
 	 */
 	public function wc_setup_ready() {
+		// We're done!
+		WC_Admin_Notices::remove_notice( 'install' );
+
 		// Enable or disable tracking
 		if ( isset( $_GET['wc_tracker_optin'] ) && isset( $_GET['wc_tracker_nonce'] ) && wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optin' ) ) {
 			update_option( 'woocommerce_allow_tracking', 'yes' );
@@ -583,6 +586,7 @@ class WC_Admin_Setup_Wizard {
 		} elseif ( isset( $_GET['wc_tracker_optout'] ) && isset( $_GET['wc_tracker_nonce'] ) && wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optout' ) ) {
 			update_option( 'woocommerce_allow_tracking', 'no' );
 		}
+
 		?>
 		<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>

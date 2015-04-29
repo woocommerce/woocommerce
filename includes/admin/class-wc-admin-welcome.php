@@ -35,7 +35,6 @@ class WC_Admin_Welcome {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'admin_menus') );
 		add_action( 'admin_head', array( $this, 'admin_head' ) );
-		add_action( 'admin_init', array( $this, 'welcome'    ) );
 		shuffle( $this->tweets );
 	}
 
@@ -46,7 +45,6 @@ class WC_Admin_Welcome {
 		if ( empty( $_GET['page'] ) ) {
 			return;
 		}
-
 		$welcome_page_name  = __( 'About WooCommerce', 'woocommerce' );
 		$welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' );
 
@@ -185,11 +183,6 @@ class WC_Admin_Welcome {
 	 * Intro text/links shown on all about pages.
 	 */
 	private function intro() {
-		// Flush after upgrades
-		if ( ! empty( $_GET['wc-updated'] ) || ! empty( $_GET['wc-installed'] ) ) {
-			flush_rewrite_rules();
-		}
-
 		// Drop minor version if 0
 		$major_version = substr( WC()->version, 0, 3 );
 		?>
@@ -416,37 +409,6 @@ class WC_Admin_Welcome {
 		set_transient( 'woocommerce_contributors', $contributors, HOUR_IN_SECONDS );
 
 		return $contributors;
-	}
-
-	/**
-	 * Sends user to the welcome page on first activation.
-	 */
-	public function welcome() {
-
-		// Bail if no activation redirect transient is set
-		if ( ! get_transient( '_wc_activation_redirect' ) ) {
-			return;
-		}
-
-		// Delete the redirect transient
-		delete_transient( '_wc_activation_redirect' );
-
-		// Bail if we are waiting to install or update via the interface update/install links
-		if ( WC_Admin_Notices::has_notice( 'install' ) || WC_Admin_Notices::has_notice( 'update' ) ) {
-			return;
-		}
-
-		// Bail if activating from network, or bulk, or within an iFrame
-		if ( is_network_admin() || isset( $_GET['activate-multi'] ) || defined( 'IFRAME_REQUEST' ) ) {
-			return;
-		}
-
-		if ( ( isset( $_GET['action'] ) && 'upgrade-plugin' == $_GET['action'] ) || ( ! empty( $_GET['page'] ) && $_GET['page'] === 'wc-about' ) ) {
-			return;
-		}
-
-		wp_redirect( admin_url( 'index.php?page=wc-about' ) );
-		exit;
 	}
 }
 
