@@ -118,6 +118,7 @@ class WC_Admin_Setup_Wizard {
 			call_user_func( $this->steps[ $this->step ]['handler'] );
 		}
 
+		ob_start();
 		$this->setup_wizard_header();
 		$this->setup_wizard_steps();
 		$this->setup_wizard_content();
@@ -601,20 +602,56 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Final step
+	 * Actions on the final step
 	 */
-	public function wc_setup_ready() {
-		// We're done!
+	private function wc_setup_ready_actions() {
 		WC_Admin_Notices::remove_notice( 'install' );
 
-		// Enable or disable tracking
 		if ( isset( $_GET['wc_tracker_optin'] ) && isset( $_GET['wc_tracker_nonce'] ) && wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optin' ) ) {
 			update_option( 'woocommerce_allow_tracking', 'yes' );
 			WC_Tracker::send_tracking_data( true );
+
 		} elseif ( isset( $_GET['wc_tracker_optout'] ) && isset( $_GET['wc_tracker_nonce'] ) && wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optout' ) ) {
 			update_option( 'woocommerce_allow_tracking', 'no' );
-		}
 
+		} elseif ( ! empty( $_GET['wc_view_test_product'] ) && isset( $_GET['wc_view_test_product_nonce'] ) && wp_verify_nonce( $_GET['wc_view_test_product_nonce'], 'wc_view_test_product' ) ) {
+			// include & load API classes
+			WC()->api->includes();
+			WC()->api->register_resources( new WC_API_Server( '/' ) );
+
+			$product_id = wc_get_product_id_by_sku( 'test-product' );
+
+			if ( empty( $product_id ) ) {
+				$result = WC()->api->WC_API_Products->create_product( array(
+					"product" => array(
+						"title"             => "Test Product",
+						"sku"               => 'test-product',
+						"type"              => "simple",
+						"regular_price"     => "21.99",
+						"description"       => "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.",
+						"short_description" => "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+						"categories"        => array(
+							"Test Category"
+						)
+					)
+				) );
+				if ( ! is_wp_error( $result ) ) {
+					$product_id = $result->id;
+				}
+			}
+
+			if ( $product_id ) {
+				wp_safe_redirect( get_permalink( $product_id ) );
+				exit;
+			}
+		}
+	}
+
+	/**
+	 * Final step
+	 */
+	public function wc_setup_ready() {
+		$this->wc_setup_ready_actions();
 		?>
 		<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
@@ -636,7 +673,7 @@ class WC_Admin_Setup_Wizard {
 				<h2><?php _e( 'Next Steps', 'woocommerce' ); ?></h2>
 				<ul>
 					<li class="setup-product"><a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php _e( 'Create your first product', 'woocommerce' ); ?></a></li>
-					<li class="view-product"><a href="#"><?php _e( 'View a test product', 'woocommerce' ); ?></a></li>
+					<li class="view-product"><a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_view_test_product', true ), 'wc_view_test_product', 'wc_view_test_product_nonce' ) ); ?>"><?php _e( 'View a test product', 'woocommerce' ); ?></a></li>
 					<li class="return-dashboard"><a href="<?php echo esc_url( admin_url() ); ?>"><?php _e( 'Return to the WordPress Dashboard', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
