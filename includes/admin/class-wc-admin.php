@@ -43,6 +43,7 @@ class WC_Admin {
 		include_once( 'class-wc-admin-notices.php' );
 		include_once( 'class-wc-admin-assets.php' );
 		include_once( 'class-wc-admin-webhooks.php' );
+		include_once( 'class-wc-admin-pointers.php' );
 
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
