@@ -635,8 +635,8 @@ class WC_Admin_Setup_Wizard {
 						)
 					)
 				) );
-				if ( ! is_wp_error( $result ) ) {
-					$product_id = $result->id;
+				if ( $result && ! is_wp_error( $result ) ) {
+					$product_id = $result['product']['id'];
 				}
 			}
 
