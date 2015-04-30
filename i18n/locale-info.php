@@ -1,6 +1,26 @@
 <?php
 
 return array(
+	'FR' => array(
+		'currency_code'  => 'EUR',
+		'currency_pos'   => 'right',
+		'thousand_sep'   => ' ',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'FR',
+					'state'    => '',
+					'rate'     => '20.0000',
+					'name'     => 'VAT',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'GB' => array(
 		'currency_code'  => 'GBP',
 		'currency_pos'   => 'left',
