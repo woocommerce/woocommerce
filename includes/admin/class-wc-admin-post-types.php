@@ -1241,11 +1241,13 @@ class WC_Admin_Post_Types {
 						break;
 				}
 
-				if ( isset( $new_price ) && $new_price != $old_sale_price ) {
+				if ( ! empty( $new_price ) && $new_price != $old_sale_price ) {
 					$price_changed = true;
 					$new_price = round( $new_price, wc_get_price_decimals() );
 					update_post_meta( $post_id, '_sale_price', $new_price );
 					$product->sale_price = $new_price;
+				} else {
+					update_post_meta( $post_id, '_sale_price', '' );
 				}
 			}
 
