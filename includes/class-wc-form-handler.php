@@ -199,8 +199,8 @@ class WC_Form_Handler {
 			wc_add_notice( __( 'Please re-enter your password.', 'woocommerce' ), 'error' );
 
 			$save_pass = false;
-		} elseif ( ! empty( $pass1 ) && $pass1 !== $pass2 ) {
-			wc_add_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
+		} elseif ( ( ! empty( $pass1 ) || ! empty( $pass2 ) ) && $pass1 !== $pass2 ) {
+			wc_add_notice( __( 'New passwords do not match.', 'woocommerce' ), 'error' );
 
 			$save_pass = false;
 		}
