@@ -65,7 +65,7 @@ class WC_Admin_Pointers {
 				),
 				'content' => array(
 					'target'       => "#content",
-					'next'         => 'product-data',
+					'next'         => 'product-type',
 					'next_trigger' => array(
 						'target' => '#content',
 						'event'  => 'click change input'
@@ -73,22 +73,6 @@ class WC_Admin_Pointers {
 					'options'      => array(
 						'content'  => 	'<h3>' . esc_html__( 'Product Description', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'This is your products main body of content. Here you should describe your product in detail.', 'woocommerce' ) . '</p>',
-						'position' => array(
-							'edge'  => 'bottom',
-							'align' => 'middle'
-						)
-					)
-				),
-				'product-data' => array(
-					'target'       => "#woocommerce-product-data",
-					'next'         => 'product-type',
-					'next_trigger' => array(
-						'target' => "#woocommerce-product-data",
-						'event'  => 'hover'
-					),
-					'options' => array(
-						'content'  => 	'<h3>' . esc_html__( 'Product Data', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'The product data panel is where you setup the various product options...', 'woocommerce' ) . '</p>',
 						'position' => array(
 							'edge'  => 'bottom',
 							'align' => 'middle'
@@ -103,8 +87,8 @@ class WC_Admin_Pointers {
 						'event'  => 'change blur click'
 					),
 					'options'  => array(
-						'content'  => 	'<h3>' . esc_html__( 'Product Type', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'First choose a type of product. Simple is suitable for most physical goods and services (we recommend setting up a simple product for now).', 'woocommerce' ) . '</p>' .
+						'content'  => 	'<h3>' . esc_html__( 'Choose Product Type', 'woocommerce' ) . '</h3>' .
+										'<p>' . esc_html__( 'Choose a type for this product. Simple is suitable for most physical goods and services (we recommend setting up a simple product for now).', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Variable is for more complex products such as t-shirts with multiple sizes', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Grouped products are for grouping several simple products into one.', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Finally, external products are for linking off-site.', 'woocommerce' ) . '</p>',
@@ -185,7 +169,7 @@ class WC_Admin_Pointers {
 						'content'  => 	'<h3>' . esc_html__( 'Product Images', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Upload or assign an image to your product here. This image will be shown in your store\'s catalog.', 'woocommerce' ) . '</p>',
 						'position' => array(
-							'edge'  => 'bottom',
+							'edge'  => 'right',
 							'align' => 'middle'
 						)
 					)
@@ -195,9 +179,9 @@ class WC_Admin_Pointers {
 					'next'         => 'product_catdiv',
 					'options' => array(
 						'content'  => 	'<h3>' . esc_html__( 'Product Tags', 'woocommerce' ) . '</h3>' .
-										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags as a method of labelling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
+										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags as a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
 						'position' => array(
-							'edge'  => 'bottom',
+							'edge'  => 'right',
 							'align' => 'middle'
 						)
 					)
@@ -209,7 +193,7 @@ class WC_Admin_Pointers {
 						'content'  => 	'<h3>' . esc_html__( 'Product Categories', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Optionally assign categories to your products to make them easier to browse through and find in your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
-							'edge'  => 'bottom',
+							'edge'  => 'right',
 							'align' => 'middle'
 						)
 					)
@@ -221,7 +205,7 @@ class WC_Admin_Pointers {
 						'content'  => 	'<h3>' . esc_html__( 'Publish Your Product!', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'When you are finished editing your product, hit the "Publish" button to publish your product to your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
-							'edge'  => 'top',
+							'edge'  => 'right',
 							'align' => 'middle'
 						)
 					)
