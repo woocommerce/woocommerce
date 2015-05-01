@@ -195,20 +195,13 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Returns whether or not the product is on sale.
-	 *
-	 * @access public
 	 * @return bool
 	 */
 	public function is_on_sale() {
 		$is_on_sale = false;
-		if ( $this->has_child() ) {
-			foreach ( $this->get_children( true ) as $child_id ) {
-				$price      = get_post_meta( $child_id, '_price', true );
-				$sale_price = get_post_meta( $child_id, '_sale_price', true );
-				if ( $sale_price !== "" && $sale_price >= 0 && $sale_price == $price ) {
-					$is_on_sale = true;
-				}
-			}
+		$prices     = $this->get_variation_prices();
+		if ( $prices['regular_price'] !== $prices['price'] ) {
+			$is_on_sale = true;
 		}
 		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale, $this );
 	}
@@ -220,19 +213,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_regular_price( $min_or_max = 'min', $display = false ) {
-		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_regular_price_variation_id', true );
-
-		if ( ! $variation_id ) {
-			$price = false;
-		} else {
-			$price = get_post_meta( $variation_id, '_regular_price', true );
-
-			if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
-				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-				$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
-			}
-		}
-
+		$prices = $this->get_variation_prices( $display );
+		$price  = 'min' === $min_or_max ? current( $prices['regular_price'] ) : end( $prices['regular_price'] );
 		return apply_filters( 'woocommerce_get_variation_regular_price', $price, $this, $min_or_max, $display );
 	}
 
@@ -243,20 +225,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_sale_price( $min_or_max = 'min', $display = false ) {
-		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_sale_price_variation_id', true );
-
-		if ( ! $variation_id ) {
-			$price = false;
-		} else {
-			$price = get_post_meta( $variation_id, '_sale_price', true );
-
-			if ( $display ) {
-				$variation        = $this->get_child( $variation_id );
-				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-				$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
-			}
-		}
-
+		$prices = $this->get_variation_prices( $display );
+		$price  = 'min' === $min_or_max ? current( $prices['sale_price'] ) : end( $prices['sale_price'] );
 		return apply_filters( 'woocommerce_get_variation_sale_price', $price, $this, $min_or_max, $display );
 	}
 
@@ -267,22 +237,72 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_price( $min_or_max = 'min', $display = false ) {
-		$variation_id = get_post_meta( $this->id, '_' . $min_or_max . '_price_variation_id', true );
+		$prices = $this->get_variation_prices( $display );
+		$price  = 'min' === $min_or_max ? current( $prices['price'] ) : end( $prices['price'] );
+		return apply_filters( 'woocommerce_get_variation_price', $price, $this, $min_or_max, $display );
+	}
 
-		if ( $display ) {
-			$variation        = $this->get_child( $variation_id );
+	/**
+	 * Get an array of all sale and regular prices from all variations.
+	 * @param  bool Are prices for display? If so, taxes will be calculated.
+	 * @return array()
+	 */
+	public function get_variation_prices( $display = false ) {
+		$cache_key = 'var_prices_' . md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array(
+			$this->id,
+			$display ? WC_Tax::get_rates() : '',
+			WC_Cache_Helper::get_transient_version( 'product' )
+		), $this, $display ) ) );
 
-			if ( $variation ) {
-				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-				$price            = $tax_display_mode == 'incl' ? $variation->get_price_including_tax() : $variation->get_price_excluding_tax();
-			} else {
-				$price = '';
+		if ( false === ( $prices_array = get_transient( $cache_key ) ) ) {
+			$prices            = array();
+			$regular_prices    = array();
+			$sale_prices       = array();
+			$tax_display_mode  = get_option( 'woocommerce_tax_display_shop' );
+			$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+
+			foreach ( $this->get_children() as $variation_id ) {
+				$price         = get_post_meta( $variation_id, '_price', true );
+				$regular_price = get_post_meta( $variation_id, '_regular_price', true );
+				$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+				$stock         = get_post_meta( $variation_id, '_stock', true );
+
+				// Skip hidden and non priced variations
+				if ( '' === $price || ( $hide_out_of_stock && '' !== $stock && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) ) {
+					continue;
+				}
+
+				// If sale price does not equal price, the product is not yet on sale
+				if ( $price != $sale_price ) {
+					$sale_price = $regular_price;
+				}
+
+				// If we are getting prices for display, we need to account for taxes
+				if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
+					$price         = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
+					$regular_price = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $regular_price ) : $variation->get_price_excluding_tax( 1, $regular_price );
+					$sale_price    = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price );
+				}
+
+				$prices[ $variation_id ]         = $price;
+				$regular_prices[ $variation_id ] = $regular_price;
+				$sale_prices[ $variation_id ]    = $sale_price;
 			}
-		} else {
-			$price = get_post_meta( $variation_id, '_price', true );
+
+			asort( $prices );
+			asort( $regular_prices );
+			asort( $sale_prices );
+
+			$prices_array  = array(
+				'price'         => $prices,
+				'regular_price' => $regular_prices,
+				'sale_price'    => $sale_prices
+			);
+
+			set_transient( $cache_key, $prices_array, DAY_IN_SECONDS * 30 );
 		}
 
-		return apply_filters( 'woocommerce_get_variation_price', $price, $this, $min_or_max, $display );
+		return apply_filters( 'woocommerce_variation_prices', $prices_array, $this, $display );
 	}
 
 	/**
@@ -293,40 +313,26 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_price_html( $price = '' ) {
-
-		// Ensure variation prices are synced with variations
-		if ( $this->get_variation_regular_price( 'min' ) === false || $this->get_variation_price( 'min' ) === false || $this->get_variation_price( 'min' ) === '' || $this->get_price() === '' ) {
-			$this->variable_product_sync( $this->id );
-		}
-
-		// Get the price
 		if ( $this->get_price() === '' ) {
-
 			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
-
 		} else {
+			$prices    = $this->get_variation_prices( true );
+			$min_price = current( $prices['price'] );
+			$max_price = end( $prices['price'] );
+			$price     = $min_price !== $max_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) : wc_price( $min_price );
+			$is_free   = $min_price == 0 && $max_price == 0;
 
-			// Main price
-			$prices = array( $this->get_variation_price( 'min', true ), $this->get_variation_price( 'max', true ) );
-			$price  = $prices[0] !== $prices[1] ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $prices[0] ), wc_price( $prices[1] ) ) : wc_price( $prices[0] );
-
-			// Sale
-			$prices = array( $this->get_variation_regular_price( 'min', true ), $this->get_variation_regular_price( 'max', true ) );
-			sort( $prices );
-			$saleprice = $prices[0] !== $prices[1] ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $prices[0] ), wc_price( $prices[1] ) ) : wc_price( $prices[0] );
-
-			if ( $price !== $saleprice ) {
-				$price = apply_filters( 'woocommerce_variable_sale_price_html', $this->get_price_html_from_to( $saleprice, $price ) . $this->get_price_suffix(), $this );
+			if ( $this->is_on_sale() ) {
+				$min_regular_price = current( $prices['regular_price'] );
+				$max_regular_price = end( $prices['regular_price'] );
+				$regular_price     = $min_regular_price !== $max_regular_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_regular_price ), wc_price( $max_regular_price ) ) : wc_price( $min_regular_price );
+				$price             = apply_filters( 'woocommerce_variable_sale_price_html', $this->get_price_html_from_to( $regular_price, $price ) . $this->get_price_suffix(), $this );
+			} elseif ( $is_free ) {
+				$price = apply_filters( 'woocommerce_variable_free_price_html', __( 'Free!', 'woocommerce' ), $this );
 			} else {
-				if ( $prices[0] == 0 && $prices[1] == 0 ) {
-					$price = __( 'Free!', 'woocommerce' );
-					$price = apply_filters( 'woocommerce_variable_free_price_html', $price, $this );
-				} else {
-					$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
-				}
+				$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
 			}
 		}
-
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
 	}
 
@@ -507,7 +513,7 @@ class WC_Product_Variable extends WC_Product {
 		self::sync( $product_id );
 
 		// Re-load prices
-		$this->price                  = get_post_meta( $product_id, '_price', true );
+		$this->price = get_post_meta( $product_id, '_price', true );
 
 		foreach ( array( 'price', 'regular_price', 'sale_price' ) as $price_type ) {
 			$min_variation_id_key        = "min_{$price_type}_variation_id";
@@ -575,7 +581,6 @@ class WC_Product_Variable extends WC_Product {
 
 			// Set the variable product to be virtual/downloadable if all children are virtual/downloadable
 			foreach ( array( '_downloadable', '_virtual' ) as $meta_key ) {
-
 				$all_variations_yes = true;
 
 				foreach ( $children as $child_id ) {
