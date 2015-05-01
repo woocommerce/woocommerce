@@ -102,7 +102,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = str_replace( 'http:', 'https:', $return_url );
 		}
 
-		return apply_filters( 'woocommerce_get_return_url', $return_url );
+		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 	}
 
 	/**
