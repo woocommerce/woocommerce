@@ -76,9 +76,9 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			} else {
 				$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );
 
-				if ( isset( $_REQUEST['mc_fee'] ) ) {
+				if ( ! empty( $_REQUEST['mc_fee'] ) ) {
 					// log paypal transaction fee
-					update_post_meta( $order->id, '_paypal_standard_txn_fee', $_REQUEST['mc_fee'] ); 
+					update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) ); 
 				}
 			}
 		}
