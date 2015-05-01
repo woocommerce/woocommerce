@@ -208,7 +208,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_order_item_name( $order, $item ) {
 		$item_name = $item['name'];
-		$item_meta = new WC_Order_Item_Meta( $item['item_meta'] );
+		$item_meta = new WC_Order_Item_Meta( $item );
 
 		if ( $meta = $item_meta->display( true, true ) ) {
 			$item_name .= ' ( ' . $meta . ' )';
