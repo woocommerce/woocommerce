@@ -248,12 +248,12 @@ class WC_Cart {
 				}
 			}
 
+			// Trigger action
+			do_action( 'woocommerce_cart_loaded_from_session', $this );
+
 			if ( $update_cart_session ) {
 				WC()->session->cart = $this->get_cart_for_session();
 			}
-
-			// Trigger action
-			do_action( 'woocommerce_cart_loaded_from_session', $this );
 
 			// Queue re-calc if subtotal is not set
 			if ( ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 ) || $update_cart_session ) {
