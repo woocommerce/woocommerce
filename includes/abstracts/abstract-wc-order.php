@@ -1075,6 +1075,7 @@ abstract class WC_Abstract_Order {
 			'name',
 			'type',
 			'item_meta',
+			'item_meta_array',
 			'qty',
 			'tax_class',
 			'product_id',
@@ -1087,20 +1088,17 @@ abstract class WC_Abstract_Order {
 
 		// Loop items
 		foreach ( $line_items as $item ) {
-
-			// Place line item into array to return
-			$items[ $item->order_item_id ]['name']      = $item->order_item_name;
-			$items[ $item->order_item_id ]['type']      = $item->order_item_type;
-			$items[ $item->order_item_id ]['item_meta'] = $this->get_item_meta( $item->order_item_id );
+			$items[ $item->order_item_id ]['name']            = $item->order_item_name;
+			$items[ $item->order_item_id ]['type']            = $item->order_item_type;
+			$items[ $item->order_item_id ]['item_meta']       = $this->get_item_meta( $item->order_item_id );
+			$items[ $item->order_item_id ]['item_meta_array'] = $this->get_item_meta_array( $item->order_item_id );
 
 			// Expand meta data into the array
 			if ( $items[ $item->order_item_id ]['item_meta'] ) {
 				foreach ( $items[ $item->order_item_id ]['item_meta'] as $name => $value ) {
-
 					if ( in_array( $name, $reserved_item_meta_keys ) ) {
 						continue;
 					}
-
 					if ( '_' === substr( $name, 0, 1 ) ) {
 						$items[ $item->order_item_id ][ substr( $name, 1 ) ] = $value[0];
 					} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
@@ -1190,7 +1188,6 @@ abstract class WC_Abstract_Order {
 		}
 
 		foreach ( $shipping_methods as $shipping_method ) {
-
 			if ( $shipping_method['method_id'] == $method_id ) {
 				$has_method = true;
 			}
@@ -1241,6 +1238,35 @@ abstract class WC_Abstract_Order {
 		return $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id, order_item_id
 			FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d
 			ORDER BY meta_id", absint( $order_item_id ) ), ARRAY_A );
+	}
+
+	/**
+	 * Get all item meta data in array format in the order it was saved. Does not group meta by key like get_item_meta()
+	 *
+	 * @param mixed $order_item_id
+	 * @return array of objects
+	 */
+	public function get_item_meta_array( $order_item_id ) {
+		global $wpdb;
+
+		$item_meta_array = array();
+		$metadata        = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", absint( $order_item_id ) ) );
+
+		foreach ( $metadata as $metadata_row ) {
+			$item_meta_array[ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
+		}
+
+		return $item_meta_array ;
+	}
+
+	/**
+	 * Display meta data belonging to an item
+	 * @param  array $item
+	 */
+	public function display_item_meta( $item ) {
+		$product   = $this->get_product_from_item( $item );
+		$item_meta = new WC_Order_Item_Meta( $item, $product );
+		$item_meta->display();
 	}
 
 	/**
@@ -2047,6 +2073,26 @@ abstract class WC_Abstract_Order {
 		}
 
 		return apply_filters( 'woocommerce_get_item_downloads', $files, $item, $this );
+	}
+
+	/**
+	 * Display download links for an order item
+	 * @param  array $item
+	 */
+	public function display_item_downloads( $item ) {
+		$product = $this->get_product_from_item( $item );
+
+		if ( $product && $product->exists() && $product->is_downloadable() && $this->is_download_permitted() ) {
+			$download_files = $this->get_item_downloads( $item );
+			$i              = 0;
+			$links          = array();
+
+			foreach ( $download_files as $download_id => $file ) {
+				$links[] = '<small><a href="' . esc_url( $file['download_url'] ) . '">' . sprintf( __( 'Download file%s', 'woocommerce' ), ( count( $download_files ) > 1 ? ' ' . ( $i++ ) . ': ' : ': ' ) ) . esc_html( $file['name'] ) . '</a></small>';
+			}
+
+			echo '<br/>' . implode( '<br/>', $links );
+		}
 	}
 
 	/**
