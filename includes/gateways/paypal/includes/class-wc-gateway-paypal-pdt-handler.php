@@ -75,6 +75,11 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 				$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
 			} else {
 				$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );
+
+				if ( ! empty( $_REQUEST['mc_fee'] ) ) {
+					// log paypal transaction fee
+					update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) ); 
+				}
 			}
 		}
 	}

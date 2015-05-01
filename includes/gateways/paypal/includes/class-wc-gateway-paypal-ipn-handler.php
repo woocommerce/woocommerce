@@ -181,6 +181,12 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 		if ( 'completed' === $posted['payment_status'] ) {
 			$this->payment_complete( $order, ( ! empty( $posted['txn_id'] ) ? wc_clean( $posted['txn_id'] ) : '' ), __( 'IPN payment completed', 'woocommerce' ) );
+
+			if ( ! empty( $posted['mc_fee'] ) ) {
+				// log paypal transaction fee
+				update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $posted['mc_fee'] ) ); 
+			}
+			
 		} else {
 			$this->payment_on_hold( $order, sprintf( __( 'Payment pending: %s', 'woocommerce' ), $posted['pending_reason'] ) );
 		}
