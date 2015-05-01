@@ -1835,30 +1835,42 @@ abstract class WC_Abstract_Order {
 			);
 		}
 
-		$total_rows['order_total'] = array(
-			'label' => __( 'Total:', 'woocommerce' ),
-			'value'	=> $this->get_formatted_order_total()
-		);
+		// Order total display
+		$order_total    = $this->get_total();
+		$total_refunded = $this->get_total_refunded();
+		$total_string   = '';
+		$tax_string     = '';
 
 		// Tax for inclusive prices
 		if ( wc_tax_enabled() && 'incl' == $tax_display ) {
-
 			$tax_string_array = array();
 
 			if ( 'itemized' == get_option( 'woocommerce_tax_total_display' ) ) {
-
 				foreach ( $this->get_tax_totals() as $code => $tax ) {
-					$tax_string_array[] = sprintf( '%s %s', $tax->formatted_amount, $tax->label );
+					$tax_amount         = $total_refunded ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_order_currency() ) ) : $tax->formatted_amount;
+					$tax_string_array[] = sprintf( '%s %s', $tax_amount, $tax->label );
 				}
-
 			} else {
-				$tax_string_array[] = sprintf( '%s %s', wc_price( $this->get_total_tax(), array('currency' => $this->get_order_currency()) ), WC()->countries->tax_or_vat() );
+				$tax_string_array[] = sprintf( '%s %s', wc_price( $this->get_total_tax() - $this->get_total_tax_refunded(), array( 'currency' => $this->get_order_currency() ) ), WC()->countries->tax_or_vat() );
 			}
-
 			if ( ! empty( $tax_string_array ) ) {
-				$total_rows['order_total']['value'] .= ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) );
+				$tax_string = ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) );
 			}
 		}
+
+		if ( $total_refunded ) {
+			$total_string  = '<del>' . strip_tags( $this->get_formatted_order_total() ) . '</del> <ins>';
+			$total_string .= wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_order_currency() ) );
+			$total_string .= $tax_string;
+			$total_string .= '</ins>';
+		} else {
+			$total_string  = $this->get_formatted_order_total() . $tax_string;
+		}
+
+		$total_rows['order_total'] = array(
+			'label' => __( 'Total:', 'woocommerce' ),
+			'value'	=> $total_string
+		);
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
 	}
@@ -2533,11 +2545,14 @@ abstract class WC_Abstract_Order {
 	 * @return boolean
 	 */
 	public function needs_shipping_address() {
+		if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
+			return false;
+		}
+
 		$hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
 		$needs = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
-
 			if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
 				$needs = true;
 				break;
