@@ -435,15 +435,15 @@ class WC_Admin_Setup_Wizard {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="shipping_cost_domestic"><?php _e( 'How much do you charge to ship products <strong>domestically</strong>?', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="shipping_cost_domestic"><?php _e( '<strong>Domestic</strong> shipping costs:', 'woocommerce' ); ?></label></th>
 					<td>
-						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="<?php echo esc_attr( $shipping_cost_domestic ); ?>" /> <?php _e( 'per order, and', 'woocommerce' ); ?> <?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" value="<?php echo esc_attr( $shipping_cost_domestic_item ); ?>" /> <?php _e( 'per item', 'woocommerce' ); ?>
+						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="' . esc_attr( $shipping_cost_domestic ) . '" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" value="' . esc_attr( $shipping_cost_domestic_item ) . '" />' ); ?>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="shipping_cost_international"><?php _e( 'How much do you charge to ship products <strong>internationally</strong>?', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="shipping_cost_international"><?php _e( '<strong>International</strong> shipping costs:', 'woocommerce' ); ?></label></th>
 					<td>
-						<?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="<?php echo esc_attr( $shipping_cost_international ); ?>" /> <?php _e( 'per order, and', 'woocommerce' ); ?> <?php echo get_woocommerce_currency_symbol(); ?> <input type="text" id="shipping_cost_international_item" name="shipping_cost_international_item" size="5" value="<?php echo esc_attr( $shipping_cost_international_item ); ?>" /> <?php _e( 'per item', 'woocommerce' ); ?>
+						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="' . esc_attr( $shipping_cost_international ) . '" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_international_item" name="shipping_cost_international_item" size="5" value="' . esc_attr( $shipping_cost_international_item ) . '" />' ); ?>
 					</td>
 				</tr>
 				<tr class="section_title">
