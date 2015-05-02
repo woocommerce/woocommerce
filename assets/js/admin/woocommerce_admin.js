@@ -171,11 +171,8 @@ jQuery( function ( $ ) {
 		hasFocus = false;
 	});
 
-	// Additional cost tables
-	$( '.woocommerce_page_wc-settings .shippingrows tbody tr:even' ).addClass( 'alternate' );
-
-	// Attribute term table
-	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+	// Additional cost and Attribute term tables
+	$( '.woocommerce_page_wc-settings .shippingrows tbody tr:even, table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
 	// Show order items on orders page
 	$( document.body ).on( 'click', '.show_order_items', function() {
