@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 							$topic_data = $this->get_topic_data( $webhook );
 
-							$topics = array(
+							$topics = apply_filters( 'woocommerce_webhook_topics', array(
 								''                 => __( 'Select an option&hellip;', 'woocommerce' ),
 								'coupon.created'   => __( 'Coupon Created', 'woocommerce' ),
 								'coupon.updated'   => __( 'Coupon Updated', 'woocommerce' ),
@@ -62,7 +62,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								'product.deleted'  => __( 'Product Deleted', 'woocommerce' ),
 								'action'           => __( 'Action', 'woocommerce' ),
 								'custom'           => __( 'Custom', 'woocommerce' )
-							);
+							) );
 
 							foreach ( $topics as $topic_slug => $topic_name ) : ?>
 							<option value="<?php echo esc_attr( $topic_slug ); ?>" <?php selected( $topic_data['topic'], $topic_slug, true ); ?>><?php echo esc_html( $topic_name ); ?></option>
