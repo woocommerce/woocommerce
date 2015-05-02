@@ -3296,18 +3296,18 @@ img.tips {
 #tiptip_content,
 .chart-tooltip,
 .wc_error_tip {
-	font-size: .8em;
 	color: #fff;
-	padding: .618em 1em;
-	background: #333;
-	border-radius: 3px;
-	box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-	text-align: center;
+	font-size: .8em;
 	max-width: 150px;
+	background: #333;
+	text-align: center;
+	border-radius: 3px;
+	padding: .618em 1em;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 
 	code {
-		background: #888;
 		padding: 1px;
+		background: #888;
 	}
 }
 
@@ -3322,10 +3322,11 @@ img.tips {
 }
 
 .wc_error_tip {
-	background: #d82223;
 	max-width: 20em;
-	white-space: normal;
+	line-height: 1.8em;
 	position: absolute;
+	white-space: normal;
+	background: #d82223;
 	margin: 1.5em 1px 0 -1em;
 	z-index: 9999999;
 
