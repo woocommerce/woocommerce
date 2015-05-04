@@ -424,6 +424,12 @@ jQuery( function( $ ){
 			$('#variable_product_options').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 			$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
 				$('#variable_product_options').unblock();
+
+                // Update dynamic content of variations panel
+                $( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).trigger( 'change' );
+                $('.wc-metabox.closed').each( function() {
+                    $(this).find('.wc-metabox-content').hide();
+                } );
 			} );
 
 			$('.product_attributes').unblock();
