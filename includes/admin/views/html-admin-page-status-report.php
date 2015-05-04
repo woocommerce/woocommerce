@@ -606,6 +606,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?></td>
 		</tr>
 		<tr>
+			<td data-export-label="Location"><?php _e( 'Location', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Where is located this theme on your server?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td><code><?php echo get_template_directory(); ?></code></td>
+		</tr>
+		<tr>
 			<td data-export-label="Author URL"><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The theme developers URL.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php echo $active_theme->{'Author URI'}; ?></td>
@@ -630,6 +635,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td data-export-label="Parent Theme Version"><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the parent theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php echo  $parent_theme->Version; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Parent Theme Location"><?php _e( 'Parent Theme Location', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Where is located this theme on your server?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td><code><?php echo get_stylesheet_directory(); ?></code></td>
 		</tr>
 		<tr>
 			<td data-export-label="Parent Theme Author URL"><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
