@@ -254,7 +254,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_shipping        = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_shipping' ) ), 2 );
 		$this->report_data->total_shipping_tax    = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_shipping_tax' ) ), 2 );
 		$this->report_data->total_refunds         = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->partial_refunds, 'total_refund' ) ) + array_sum( wp_list_pluck( $this->report_data->full_refunds, 'total_refund' ) ), 2 );
-		$this->report_data->total_coupons         = number_format( array_sum( wp_list_pluck( $this->report_data->coupons, 'discount_amount' ) ), 2 );
+		$this->report_data->total_coupons         = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->coupons, 'discount_amount' ) ), 2 );
 		$this->report_data->total_orders          = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) );
 		$this->report_data->total_partial_refunds = array_sum( wp_list_pluck( $this->report_data->partial_refunds, 'order_item_count' ) ) * -1;
 		$this->report_data->total_item_refunds    = array_sum( wp_list_pluck( $this->report_data->refunded_order_items, 'order_item_count' ) ) * -1;
