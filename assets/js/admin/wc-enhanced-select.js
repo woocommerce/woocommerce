@@ -98,7 +98,7 @@ jQuery( function( $ ) {
 							};
 						},
 						processResults: function( data ) {
-				        	var terms = [];
+							var terms = [];
 
 							if ( data ) {
 								$.each( data, function( id, text ) {
@@ -130,20 +130,22 @@ jQuery( function( $ ) {
 						url:         wc_enhanced_select_params.ajax_url,
 						dataType:    'json',
 						quietMillis: 250,
-						data: function( term, page ) {
+						data: function( params ) {
 							return {
-								term:     term,
+								term:     params.term,
 								action:   'woocommerce_json_search_customers',
 								security: wc_enhanced_select_params.search_customers_nonce
 							};
 						},
-						results: function( data, page ) {
+						processResults: function( data ) {console.log(data);
 							var terms = [];
+
 							if ( data ) {
 								$.each( data, function( id, text ) {
 									terms.push( { id: id, text: text } );
 								});
 							}
+
 							return { results: terms };
 						},
 						cache: true

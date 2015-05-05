@@ -4199,3 +4199,8 @@ table.bar_chart {
 	outlline:0 !important;
 	border:none !important;
 }
+
+.select2-container--default .select2-selection--single .select2-selection__clear {
+	position:relative;
+	z-index:9999;
+}

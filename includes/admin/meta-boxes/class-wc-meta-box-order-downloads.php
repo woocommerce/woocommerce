@@ -65,7 +65,9 @@ class WC_Meta_Box_Order_Downloads {
 
 			<div class="toolbar">
 				<p class="buttons">
-					<input type="hidden" id="grant_access_id" name="grant_access_id" data-multiple="true" class="wc-product-search" style="width: 400px;" data-placeholder="<?php _e( 'Search for a downloadable product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_downloadable_products_and_variations" />
+					<select id="grant_access_id" class="wc-product-search" name="grant_access_id" data-placeholder="<?php _e( 'Search for a downloadable product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true" style="width:400px" data-action="woocommerce_json_search_downloadable_products_and_variations" multiple="multiple">
+					</select>
+
 					<button type="button" class="button grant_access"><?php _e( 'Grant Access', 'woocommerce' ); ?></button>
 				</p>
 				<div class="clear"></div>

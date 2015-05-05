@@ -476,7 +476,6 @@ class WC_Meta_Box_Product_Data {
 
 				<p class="form-field"><label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
 				<select class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" multiple="multiple">
-					<option value=""><?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?></option>
 					<?php
 						$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_upsell_ids', true ) ) );
 
@@ -493,7 +492,6 @@ class WC_Meta_Box_Product_Data {
 
 				<p class="form-field"><label for="crosssell_ids"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
 				<select class="wc-product-search" style="width: 50%;" id="crosssell_ids" name="crosssell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" multiple="multiple">
-					<option value=""><?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?></option>
 					<?php
 						$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_crosssell_ids', true ) ) );
 
