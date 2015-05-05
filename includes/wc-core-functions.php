@@ -563,7 +563,8 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
  */
 function get_woocommerce_api_url( $path ) {
 
-	$version = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : WC_API::VERSION;
+	$_version = substr( WC_API::VERSION, 0, 1 );
+	$version  = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : $_version;
 
 	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
 
