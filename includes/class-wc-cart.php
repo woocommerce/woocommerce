@@ -974,10 +974,10 @@ class WC_Cart {
 				$remove = $this->cart_contents[ $cart_item_key ];
 				$this->removed_cart_contents[ $cart_item_key ] = $remove;
 
-				unset( $this->cart_contents[ $cart_item_key ] );
-
 				do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this );
-
+				
+				unset( $this->cart_contents[ $cart_item_key ] );
+				
 				$this->calculate_totals();
 
 				return true;
