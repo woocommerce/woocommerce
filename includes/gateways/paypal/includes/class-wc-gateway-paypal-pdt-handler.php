@@ -36,7 +36,6 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 				'tx'  => $transaction,
 				'at'  => $this->identity_token
 			),
-			'sslverify' 	=> false,
 			'timeout' 		=> 60,
 			'httpversion'   => '1.1',
 			'user-agent'	=> 'WooCommerce/' . WC_VERSION

@@ -76,7 +76,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		// Send back post vars to paypal
 		$params = array(
 			'body'        => $validate_ipn,
-			'sslverify'   => false,
 			'timeout'     => 60,
 			'httpversion' => '1.1',
 			'compress'    => false,
