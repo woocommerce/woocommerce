@@ -612,9 +612,13 @@ class WC_Coupon {
 			 *
 			 * Get item discount by dividing item cost by subtotal to get a %
 			 *
-			 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669
+			 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669 and https://github.com/woothemes/woocommerce/issues/8074
 			 */
-			$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
+			if ( wc_prices_include_tax() ) {
+				$discount_percent = ( $cart_item['data']->get_price_including_tax() * $cart_item_qty ) / WC()->cart->subtotal;
+			} else {
+				$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
+			}
 			$discount         = ( $this->coupon_amount * $discount_percent ) / $cart_item_qty;
 
 		} elseif ( $this->is_type( 'fixed_product' ) ) {
