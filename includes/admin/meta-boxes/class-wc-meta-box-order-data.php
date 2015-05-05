@@ -153,6 +153,7 @@ class WC_Meta_Box_Order_Data {
 
 		$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
 
+		$order_type_object = get_post_type_object( $post->post_type );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
 		<style type="text/css">
@@ -163,7 +164,7 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $post->post_status ); ?>" />
 			<div id="order_data" class="panel">
 
-				<h2><?php printf( __( 'Order #%s Details', 'woocommerce' ), esc_html( $order->get_order_number() ) ); ?></h2>
+				<h2><?php echo esc_html( sprintf( __( '%s %s details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
 				<p class="order_number"><?php
 
 					if ( $payment_method ) {
