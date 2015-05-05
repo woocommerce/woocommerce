@@ -76,7 +76,6 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		// Send back post vars to paypal
 		$params = array(
 			'body'        => $validate_ipn,
-			'sslverify'   => false,
 			'timeout'     => 60,
 			'httpversion' => '1.1',
 			'compress'    => false,
@@ -184,9 +183,9 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 			if ( ! empty( $posted['mc_fee'] ) ) {
 				// log paypal transaction fee
-				update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $posted['mc_fee'] ) ); 
+				update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $posted['mc_fee'] ) );
 			}
-			
+
 		} else {
 			$this->payment_on_hold( $order, sprintf( __( 'Payment pending: %s', 'woocommerce' ), $posted['pending_reason'] ) );
 		}

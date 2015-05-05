@@ -224,7 +224,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting['wp_remote_post']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) . '">[?]</a>';
 
 			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
-				'sslverify'  => false,
 				'timeout'    => 60,
 				'user-agent' => 'WooCommerce/' . WC()->version,
 				'body'       => array(

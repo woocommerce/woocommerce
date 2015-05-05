@@ -36,7 +36,6 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 				'tx'  => $transaction,
 				'at'  => $this->identity_token
 			),
-			'sslverify' 	=> false,
 			'timeout' 		=> 60,
 			'httpversion'   => '1.1',
 			'user-agent'	=> 'WooCommerce/' . WC_VERSION
@@ -78,7 +77,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 				if ( ! empty( $_REQUEST['mc_fee'] ) ) {
 					// log paypal transaction fee
-					update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) ); 
+					update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) );
 				}
 			}
 		}

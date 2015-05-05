@@ -191,7 +191,6 @@ class WC_Webhook {
 			'timeout'     => MINUTE_IN_SECONDS,
 			'redirection' => 0,
 			'httpversion' => '1.0',
-			'sslverify'   => false,
 			'blocking'    => true,
 			'user-agent'  => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
 			'body'        => trim( json_encode( $payload ) ),

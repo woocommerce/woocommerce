@@ -59,7 +59,6 @@ class WC_Gateway_Paypal_Refund {
 				'method'      => 'POST',
 				'body'        => self::get_request( $order, $amount, $reason ),
 				'timeout'     => 70,
-				'sslverify'   => false,
 				'user-agent'  => 'WooCommerce',
 				'httpversion' => '1.1'
 			)
