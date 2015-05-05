@@ -51,7 +51,7 @@ class WC_Admin_Attributes {
 		}
 
 		if ( is_wp_error( $result ) ) {
-			echo '<div id="woocommerce_errors" class="error fade"><p>' . $result->get_error_message() . '</p></div>';
+			echo '<div id="woocommerce_errors" class="error"><p>' . $result->get_error_message() . '</p></div>';
 		}
 
 		// Show admin interface
@@ -191,7 +191,7 @@ class WC_Admin_Attributes {
 			);
 		}
 
-		echo '<div class="updated fade"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p></div>';
+		echo '<div class="updated"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p></div>';
 
 		flush_rewrite_rules();
 		delete_transient( 'wc_attribute_taxonomies' );

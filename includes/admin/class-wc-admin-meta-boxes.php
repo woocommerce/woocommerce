@@ -84,7 +84,7 @@ class WC_Admin_Meta_Boxes {
 
 		if ( ! empty( $errors ) ) {
 
-			echo '<div id="woocommerce_errors" class="error fade">';
+			echo '<div id="woocommerce_errors" class="error">';
 
 			foreach ( $errors as $error ) {
 				echo '<p>' . esc_html( $error ) . '</p>';

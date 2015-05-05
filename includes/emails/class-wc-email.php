@@ -629,7 +629,7 @@ class WC_Email extends WC_Settings_API {
 					 */
 					do_action( 'woocommerce_copy_email_template', $template_type, $this );
 
-					echo '<div class="updated fade"><p>' . __( 'Template file copied to theme.', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated"><p>' . __( 'Template file copied to theme.', 'woocommerce' ) . '</p></div>';
 				}
 			}
 		}
@@ -658,7 +658,7 @@ class WC_Email extends WC_Settings_API {
 					 */
 					do_action( 'woocommerce_delete_email_template', $template_type, $this );
 
-					echo '<div class="updated fade"><p>' . __( 'Template file deleted from theme.', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated"><p>' . __( 'Template file deleted from theme.', 'woocommerce' ) . '</p></div>';
 				}
 			}
 		}
