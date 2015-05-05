@@ -389,7 +389,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	 */
 	private function round_chart_totals( $amount ) {
 		if ( is_array( $amount ) ) {
-			return array_map( array( $this, 'round_chart_totals' ), $amount );
+			return array( $amount[0], wc_format_decimal( $amount[1], wc_get_price_decimals() ) );
 		} else {
 			return wc_format_decimal( $amount, wc_get_price_decimals() );
 		}
