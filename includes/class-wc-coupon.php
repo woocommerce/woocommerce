@@ -121,10 +121,15 @@ class WC_Coupon {
 		$this->code  = apply_filters( 'woocommerce_coupon_code', $code );
 
 		// Coupon data lets developers create coupons through code
-		if ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
+		if ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $this->code ) ) {
 			$this->populate( $coupon );
 			return true;
-		} elseif ( ( $this->id = $this->get_coupon_id_from_code( $code ) ) && $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
+		}
+
+		// Otherwise get ID from the code
+		$this->id = $this->get_coupon_id_from_code( $this->code );
+
+		if ( $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
 			$this->populate();
 			return true;
 		}
@@ -336,7 +341,7 @@ class WC_Coupon {
 	 * Ensure coupon amount is valid or throw exception
 	 */
 	private function validate_minimum_amount() {
-		if ( $this->minimum_amount > 0 && $this->minimum_amount > WC()->cart->subtotal ) {
+		if ( $this->minimum_amount > 0 && wc_format_decimal( $this->minimum_amount ) > wc_format_decimal( WC()->cart->subtotal ) ) {
 			throw new Exception( self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET );
 		}
 	}
@@ -345,7 +350,7 @@ class WC_Coupon {
 	 * Ensure coupon amount is valid or throw exception
 	 */
 	private function validate_maximum_amount() {
-		if ( $this->maximum_amount > 0 && $this->maximum_amount < WC()->cart->subtotal ) {
+		if ( $this->maximum_amount > 0 && wc_format_decimal( $this->minimum_amount ) < wc_format_decimal( WC()->cart->subtotal ) ) {
 			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
 		}
 	}
@@ -593,58 +598,52 @@ class WC_Coupon {
 	 * @return float Amount this coupon has discounted
 	 */
 	public function get_discount_amount( $discounting_amount, $cart_item = null, $single = false ) {
-		$discount = 0;
+		$discount      = 0;
+		$cart_item_qty = is_null( $cart_item ) ? 1 : $cart_item['quantity'];
 
-		if ( $this->is_type( 'fixed_product' ) ) {
-			$discount = $discounting_amount < $this->coupon_amount ? $discounting_amount : $this->coupon_amount;
+		if ( $this->is_type( array( 'percent_product', 'percent' ) ) ) {
+			$discount = $this->coupon_amount * ( $discounting_amount / 100 );
 
-			// If dealing with a line and not a single item, we need to multiple fixed discount by cart item qty.
-			if ( ! $single && ! is_null( $cart_item ) ) {
-				// Discount for the line.
-				$discount = $discount * $cart_item['quantity'];
-			}
-
-		} elseif ( $this->is_type( array( 'percent_product', 'percent' ) ) ) {
-
-			$discount = round( ( $discounting_amount / 100 ) * $this->coupon_amount, WC()->cart->dp );
-
-		} elseif ( $this->is_type( 'fixed_cart' ) ) {
-			if ( ! is_null( $cart_item ) ) {
-				/**
-				 * This is the most complex discount - we need to divide the discount between rows based on their price in
-				 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows
-				 * with no price (free) don't get discounted.
-				 *
-				 * Get item discount by dividing item cost by subtotal to get a %
-				 */
-				$discount_percent = 0;
-
-				if ( WC()->cart->subtotal_ex_tax ) {
-					// Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669
-					$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item['quantity'] ) / WC()->cart->subtotal_ex_tax;
-				}
-
-				$discount = min( ( $this->coupon_amount * $discount_percent ) / $cart_item['quantity'], $discounting_amount );
+		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
+			/**
+			 * This is the most complex discount - we need to divide the discount between rows based on their price in
+			 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows
+			 * with no price (free) don't get discounted.
+			 *
+			 * Get item discount by dividing item cost by subtotal to get a %
+			 *
+			 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669 and https://github.com/woothemes/woocommerce/issues/8074
+			 */
+			if ( wc_prices_include_tax() ) {
+				$discount_percent = ( $cart_item['data']->get_price_including_tax() * $cart_item_qty ) / WC()->cart->subtotal;
 			} else {
-				$discount = min( $this->coupon_amount, $discounting_amount );
+				$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
 			}
+			$discount         = ( $this->coupon_amount * $discount_percent ) / $cart_item_qty;
+
+		} elseif ( $this->is_type( 'fixed_product' ) ) {
+			$discount = min( $this->coupon_amount, $discounting_amount );
+			$discount = $single ? $discount : $discount * $cart_item_qty;
 		}
+
+		$discount = min( $discount, $discounting_amount );
 
 		// Handle the limit_usage_to_x_items option
-		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) && ! is_null( $cart_item ) ) {
+		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
 			if ( '' === $this->limit_usage_to_x_items ) {
-				$qty = $cart_item['quantity'];
+				$limit_usage_qty = $cart_item_qty;
 			} else {
-				$qty                          = min( $this->limit_usage_to_x_items, $cart_item['quantity'] );
-				$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $qty );
+				$limit_usage_qty              = min( $this->limit_usage_to_x_items, $cart_item_qty );
+				$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $limit_usage_qty );
 			}
-
 			if ( $single ) {
-				$discount = ( $discount * $qty ) / $cart_item['quantity'];
+				$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
 			} else {
-				$discount = ( $discount / $cart_item['quantity'] ) * $qty;
+				$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
 			}
 		}
+
+		$discount = round( $discount, WC_ROUNDING_PRECISION );
 
 		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}
@@ -703,7 +702,7 @@ class WC_Coupon {
 				$err = __( 'Coupon is not valid.', 'woocommerce' );
 			break;
 			case self::E_WC_COUPON_NOT_EXIST:
-				$err = __( 'Coupon does not exist!', 'woocommerce' );
+				$err = sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), $this->code );
 			break;
 			case self::E_WC_COUPON_INVALID_REMOVED:
 				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), $this->code );
