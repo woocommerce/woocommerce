@@ -41,7 +41,7 @@ class WC_Gateway_Paypal_Refund {
 			$request['CURRENCYCODE'] = $order->get_order_currency();
 			$request['REFUNDTYPE']   = 'Partial';
 		}
-		return $request;
+		return apply_filters( 'woocommerce_paypal_refund_request', $request, $order, $amount, $reason );
 	}
 
 	/**
