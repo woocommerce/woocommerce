@@ -50,7 +50,7 @@ if ( wc_tax_enabled() ) {
 				<th><input type="checkbox" class="check-column" /></th>
 				<th class="item sortable" colspan="2" data-sort="string-ins"><?php _e( 'Item', 'woocommerce' ); ?></th>
 
-				<?php do_action( 'woocommerce_admin_order_item_headers' ); ?>
+				<?php do_action( 'woocommerce_admin_order_item_headers', $order ); ?>
 
 				<th class="item_cost sortable" data-sort="float"><?php _e( 'Cost', 'woocommerce' ); ?></th>
 				<th class="quantity sortable" data-sort="int"><?php _e( 'Qty', 'woocommerce' ); ?></th>
