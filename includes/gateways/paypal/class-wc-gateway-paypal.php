@@ -109,6 +109,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			case 'ZA' :
 			case 'MT' :
 			case 'CH' :
+			case 'JP' :
 				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
 			break;
 			default :
@@ -175,6 +176,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			case 'TH' :
 				$icon = 'https://www.paypalobjects.com/webstatic/en_TH/mktg/Logos/AM_mc_vs_dc_ae.jpg';
 			break;
+			case 'JP' :
+				$icon = 'https://www.paypal.com/ja_JP/JP/i/bnr/horizontal_solution_4_jcb.gif';
+				break;
 			default :
 				$icon = WC_HTTPS::force_https_url( WC()->plugin_url() . '/includes/gateways/paypal/assets/images/paypal.png' );
 			break;
