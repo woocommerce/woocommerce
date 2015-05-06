@@ -85,6 +85,11 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'delete_order_refund' ), WC_API_SERVER::DELETABLE ),
 		);
 
+		# POST|PUT /orders/bulk
+		$routes[ $this->base . '/bulk' ] = array(
+			array( array( $this, 'bulk' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
 		return $routes;
 	}
 
@@ -1706,6 +1711,75 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_delete_order_refund', $refund->ID, $order_id, $this );
 
 			return $this->delete( $refund->ID, 'refund', true );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Bulk update or insert orders
+	 * Accepts an array with orders in the formats supported by
+	 * WC_API_Products->create_order() and WC_API_Products->edit_order()
+	 *
+	 * @since 2.4.0
+	 * @param array $data
+	 * @return array
+	 */
+	public function bulk( $data ) {
+
+		try {
+			if ( ! isset( $data['orders'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_orders_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'orders' ), 400 );
+			}
+
+			$data  = $data['orders'];
+			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'orders' );
+
+			// Limit bulk operation
+			if ( count( $data ) > $limit ) {
+				throw new WC_API_Exception( 'woocommerce_api_orders_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+			}
+
+			$orders = array();
+
+			foreach ( $data as $_order ) {
+				$order_id = 0;
+
+				// Try to get the order ID
+				if ( isset( $_order['id'] ) ) {
+					$order_id = intval( $_order['id'] );
+				}
+
+				// Order exists / edit order
+				if ( $order_id ) {
+					$edit = $this->edit_order( $order_id, array( 'order' => $_order ) );
+
+					if ( is_wp_error( $edit ) ) {
+						$orders[] = array(
+							'id'    => $order_id,
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+						);
+					} else {
+						$orders[] = $edit['order'];
+					}
+				}
+
+				// Order don't exists / create order
+				else {
+					$new = $this->create_order( array( 'order' => $_order ) );
+
+					if ( is_wp_error( $new ) ) {
+						$orders[] = array(
+							'id'    => $order_id,
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+						);
+					} else {
+						$orders[] = $new['order'];
+					}
+				}
+			}
+
+			return array( 'orders' => apply_filters( 'woocommerce_api_orders_bulk_response', $orders, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}

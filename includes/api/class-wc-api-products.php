@@ -2329,7 +2329,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * WC_API_Products->create_product() and WC_API_Products->edit_product()
 	 *
 	 * @since 2.4.0
-	 * @param array $products
+	 * @param array $data
 	 * @return array
 	 */
 	public function bulk( $data ) {
