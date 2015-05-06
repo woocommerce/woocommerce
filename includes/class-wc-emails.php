@@ -101,7 +101,7 @@ class WC_Emails {
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
-		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 10, 3 );
+		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 20, 3 );
 
 		// Hooks for sending emails during store events
 		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
