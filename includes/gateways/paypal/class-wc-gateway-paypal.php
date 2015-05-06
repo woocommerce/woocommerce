@@ -278,6 +278,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		WC_Gateway_Paypal_Refund::$api_password  = $this->get_option( 'api_password' );
 		WC_Gateway_Paypal_Refund::$api_signature = $this->get_option( 'api_signature' );
 
+		do_action('wc_paypal_standard_refund_before', $order, $amount, $reason, $this);
+
 		$result = WC_Gateway_Paypal_Refund::refund_order( $order, $amount, $reason, $this->testmode );
 
 		if ( is_wp_error( $result ) ) {
