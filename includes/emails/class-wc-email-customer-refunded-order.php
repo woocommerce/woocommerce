@@ -149,7 +149,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'default'     => ''
 			),
 			'heading' => array(
-				'title'       => __( 'Email Heading', 'woocommerce' ),
+				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder' => '',

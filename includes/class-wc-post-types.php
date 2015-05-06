@@ -412,7 +412,7 @@ class WC_Post_types {
 	 */
 	public static function register_post_status() {
 		register_post_status( 'wc-pending', array(
-			'label'                     => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+			'label'                     => _x( 'Pending Payment', 'Order status', 'woocommerce' ),
 			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
@@ -428,7 +428,7 @@ class WC_Post_types {
 			'label_count'               => _n_noop( 'Processing <span class="count">(%s)</span>', 'Processing <span class="count">(%s)</span>', 'woocommerce' )
 		) );
 		register_post_status( 'wc-on-hold', array(
-			'label'                     => _x( 'On hold', 'Order status', 'woocommerce' ),
+			'label'                     => _x( 'On Hold', 'Order status', 'woocommerce' ),
 			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
