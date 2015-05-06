@@ -108,6 +108,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			case 'MX' :
 			case 'ZA' :
 			case 'MT' :
+			case 'JP' :
+				$link = 'https://www.paypal.jp/jp/home/';
+			break;
 			case 'CH' :
 				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
 			break;
@@ -130,6 +133,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			case 'NZ' :
 			case 'CZ' :
 			case 'HU' :
+			case 'JP' :
+				$icon = 'https://www.paypal.com/ja_JP/JP/i/bnr/horizontal_solution_4_jcb.gif';
+			break;
 			case 'MY' :
 				$icon = 'https://www.paypalobjects.com/webstatic/mktg/logo/AM_mc_vs_dc_ae.jpg';
 			break;
