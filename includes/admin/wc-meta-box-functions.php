@@ -195,7 +195,32 @@ function woocommerce_wp_select( $field ) {
 	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label><select id="' . esc_attr( $field['id'] ) . '" name="' . esc_attr( $field['name'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" ' . implode( ' ', $custom_attributes ) . '>';
 
 	foreach ( $field['options'] as $key => $value ) {
-		echo '<option value="' . esc_attr( $key ) . '" ' . selected( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '>' . esc_html( $value ) . '</option>';
+
+		// Determine value and custom option attributes
+		$atts = array();
+
+		if ( is_array( $value ) ) {
+			$atts = $value;
+
+			if ( isset( $atts['value'] ) ) {
+				$value = $atts['value'];
+				unset( $atts['value'] );
+			} else {
+				$value = '';
+			}
+		}
+
+		// Custom option attribute handling
+		$custom_option_attributes = array();
+
+		if ( ! empty( $atts ) ) {
+
+			foreach ( $atts as $attribute => $attribute_value ){
+				$custom_option_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
+			}
+		}
+
+		echo '<option value="' . esc_attr( $key ) . '" ' . selected( esc_attr( $field['value'] ), esc_attr( $key ), false ) . ' ' . implode( ' ', $custom_option_attributes ) . '>' . esc_html( $value ) . '</option>';
 	}
 
 	echo '</select> ';
@@ -230,6 +255,30 @@ function woocommerce_wp_radio( $field ) {
 
 	foreach ( $field['options'] as $key => $value ) {
 
+		// Determine value and custom option attributes
+		$atts = array();
+
+		if ( is_array( $value ) ) {
+			$atts = $value;
+
+			if ( isset( $atts['value'] ) ) {
+				$value = $atts['value'];
+				unset( $atts['value'] );
+			} else {
+				$value = '';
+			}
+		}
+
+		// Custom option attribute handling
+		$custom_option_attributes = array();
+
+		if ( ! empty( $atts ) ) {
+
+			foreach ( $atts as $attribute => $attribute_value ){
+				$custom_option_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
+			}
+		}
+
 		echo '<li><label><input
 				name="' . esc_attr( $field['name'] ) . '"
 				value="' . esc_attr( $key ) . '"
@@ -237,6 +286,7 @@ function woocommerce_wp_radio( $field ) {
 				class="' . esc_attr( $field['class'] ) . '"
 				style="' . esc_attr( $field['style'] ) . '"
 				' . checked( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '
+				' . implode( ' ', $custom_option_attributes ) . '
 				/> ' . esc_html( $value ) . '</label>
 		</li>';
 	}
