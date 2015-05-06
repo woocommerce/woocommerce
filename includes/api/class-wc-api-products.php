@@ -214,13 +214,14 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Enable description html tags.
 			$post_content = isset( $data['description'] ) ? wc_clean( $data['description'] ) : '';
-			if ( $post_content && isset( $data['enable_html_description'] ) && 'true' === $data['enable_html_description'] ) {
+			if ( $post_content && isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) {
+
 				$post_content = $data['description'];
 			}
 
 			// Enable short description html tags.
 			$post_excerpt = isset( $data['short_description'] ) ? wc_clean( $data['short_description'] ) : '';
-			if ( $post_excerpt && isset( $data['enable_html_short_description'] ) && 'true' === $data['enable_html_short_description'] ) {
+			if ( $post_excerpt && isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) {
 				$post_excerpt = $data['short_description'];
 			}
 
@@ -308,7 +309,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Product short description.
 			if ( isset( $data['short_description'] ) ) {
 				// Enable short description html tags.
-				$post_excerpt = ( isset( $data['enable_html_short_description'] ) && 'true' === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
+				$post_excerpt = ( isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
 
 				wp_update_post( array( 'ID' => $id, 'post_excerpt' => $post_excerpt ) );
 			}
@@ -316,7 +317,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Product description.
 			if ( isset( $data['description'] ) ) {
 				// Enable description html tags.
-				$post_content = ( isset( $data['enable_html_description'] ) && 'true' === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
+				$post_content = ( isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
 
 				wp_update_post( array( 'ID' => $id, 'post_content' => $post_content ) );
 			}
