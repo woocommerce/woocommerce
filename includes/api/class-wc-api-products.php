@@ -942,18 +942,18 @@ class WC_API_Products extends WC_API_Resource {
 				$sale_price = get_post_meta( $product_id, '_sale_price', true );
 			}
 
-			$date_from = isset( $data['sale_price_dates_from'] ) ? $data['sale_price_dates_from'] : get_post_meta( $product_id, '_sale_price_dates_from', true );
-			$date_to   = isset( $data['sale_price_dates_to'] ) ? $data['sale_price_dates_to'] : get_post_meta( $product_id, '_sale_price_dates_to', true );
+			$date_from = isset( $data['sale_price_dates_from'] ) ? strtotime( $data['sale_price_dates_from'] ) : get_post_meta( $product_id, '_sale_price_dates_from', true );
+			$date_to   = isset( $data['sale_price_dates_to'] ) ? strtotime( $data['sale_price_dates_to'] ) : get_post_meta( $product_id, '_sale_price_dates_to', true );
 
 			// Dates
 			if ( $date_from ) {
-				update_post_meta( $product_id, '_sale_price_dates_from', strtotime( $date_from ) );
+				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
 			} else {
 				update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			}
 
 			if ( $date_to ) {
-				update_post_meta( $product_id, '_sale_price_dates_to', strtotime( $date_to ) );
+				update_post_meta( $product_id, '_sale_price_dates_to', $date_to );
 			} else {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
@@ -969,11 +969,11 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_price', $regular_price );
 			}
 
-			if ( '' !== $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== $sale_price && $date_from && $date_from < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
 			}
 
-			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( $date_to && $date_to < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $product_id, '_price', $regular_price );
 				update_post_meta( $product_id, '_sale_price_dates_from', '' );
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
@@ -1364,18 +1364,18 @@ class WC_API_Products extends WC_API_Resource {
 				$sale_price = get_post_meta( $variation_id, '_sale_price', true );
 			}
 
-			$date_from = isset( $variation['sale_price_dates_from'] ) ? $variation['sale_price_dates_from'] : get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = isset( $variation['sale_price_dates_to'] ) ? $variation['sale_price_dates_to'] : get_post_meta( $variation_id, '_sale_price_dates_to', true );
+			$date_from = isset( $variation['sale_price_dates_from'] ) ? strtotime( $variation['sale_price_dates_from'] ) : get_post_meta( $variation_id, '_sale_price_dates_from', true );
+			$date_to   = isset( $variation['sale_price_dates_to'] ) ? strtotime( $variation['sale_price_dates_to'] ) : get_post_meta( $variation_id, '_sale_price_dates_to', true );
 
 			// Save Dates
 			if ( $date_from ) {
-				update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( $date_from ) );
+				update_post_meta( $variation_id, '_sale_price_dates_from', $date_from );
 			} else {
 				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
 			}
 
 			if ( $date_to ) {
-				update_post_meta( $variation_id, '_sale_price_dates_to', strtotime( $date_to ) );
+				update_post_meta( $variation_id, '_sale_price_dates_to', $date_to );
 			} else {
 				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
 			}
@@ -1391,11 +1391,11 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $variation_id, '_price', $regular_price );
 			}
 
-			if ( '' != $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' != $sale_price && $date_from && $date_from < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $variation_id, '_price', $sale_price );
 			}
 
-			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( $date_to && $date_to < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $variation_id, '_price', $regular_price );
 				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
 				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
