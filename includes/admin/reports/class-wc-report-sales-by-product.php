@@ -178,8 +178,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 		<div class="section">
 			<form method="GET">
 				<div>
-					<input type="hidden" class="wc-product-search" style="width:203px;" name="product_ids[]" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" />
+					<select class="wc-product-search" name="product_ids[]" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true" style="width:400px" data-action="woocommerce_json_search_products_and_variations">
+					</select>
+
 					<input type="submit" class="submit button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
+
 					<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
 					<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
 					<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
