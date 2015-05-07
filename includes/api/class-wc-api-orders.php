@@ -1719,7 +1719,7 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Bulk update or insert orders
 	 * Accepts an array with orders in the formats supported by
-	 * WC_API_Products->create_order() and WC_API_Products->edit_order()
+	 * WC_API_Orders->create_order() and WC_API_Orders->edit_order()
 	 *
 	 * @since 2.4.0
 	 * @param array $data
