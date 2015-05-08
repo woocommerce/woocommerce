@@ -883,13 +883,14 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	function woocommerce_external_add_to_cart() {
 		global $product;
 
-		if ( ! $product->get_product_url() )
+		if ( ! $product->add_to_cart_url() ) {
 			return;
+		}
 
 		wc_get_template( 'single-product/add-to-cart/external.php', array(
-				'product_url' => $product->get_product_url(),
-				'button_text' => $product->single_add_to_cart_text()
-			) );
+			'product_url' => $product->add_to_cart_url(),
+			'button_text' => $product->single_add_to_cart_text()
+		) );
 	}
 }
 
