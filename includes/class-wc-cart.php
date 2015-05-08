@@ -971,8 +971,9 @@ class WC_Cart {
 		 */
 		public function remove_cart_item( $cart_item_key ) {
 			if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
-				$remove = $this->cart_contents[ $cart_item_key ];
-				$this->removed_cart_contents[ $cart_item_key ] = $remove;
+				$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
+
+				do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
 
 				unset( $this->cart_contents[ $cart_item_key ] );
 
@@ -994,8 +995,9 @@ class WC_Cart {
 		 */
 		public function restore_cart_item( $cart_item_key ) {
 			if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
-				$restore = $this->removed_cart_contents[ $cart_item_key ];
-				$this->cart_contents[ $cart_item_key ] = $restore;
+				$this->cart_contents[ $cart_item_key ] = $this->removed_cart_contents[ $cart_item_key ];
+
+				do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
 
 				unset( $this->removed_cart_contents[ $cart_item_key ] );
 
