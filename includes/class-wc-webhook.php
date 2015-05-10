@@ -725,7 +725,7 @@ class WC_Webhook {
 	 * @return string
 	 */
 	public function get_name() {
-		return apply_filters( 'woocommece_webhook_name', $this->get_post_data()->post_title, $this->id );
+		return apply_filters( 'woocommerce_webhook_name', $this->get_post_data()->post_title, $this->id );
 	}
 
 	/**
