@@ -1563,7 +1563,7 @@ class WC_AJAX {
 
 		$post_id   = absint( $_POST['post_id'] );
 		$note      = wp_kses_post( trim( stripslashes( $_POST['note'] ) ) );
-		$note_type = $_POST['note_type'];
+		$note_type = sanitize_key( $_POST['note_type'] );
 
 		$is_customer_note = $note_type == 'customer' ? 1 : 0;
 
