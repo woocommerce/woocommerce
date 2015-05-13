@@ -123,7 +123,7 @@ class WC_Admin_Status {
 				break;
 				case 'install_pages' :
 					WC_Install::create_pages();
-					echo '<div class="updated"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated notice is-dismissible"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'delete_taxes' :
 
