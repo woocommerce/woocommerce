@@ -5,7 +5,7 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce/Admin/System Status
- * @version     2.2.0
+ * @version     2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
