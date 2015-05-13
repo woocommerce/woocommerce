@@ -540,9 +540,12 @@ class WC_API_Orders extends WC_API_Resource {
 				return $id;
 			}
 
-			$data = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
-
+			$data  = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
 			$order = wc_get_order( $id );
+
+			if ( empty( $order ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), 400 );
+			}
 
 			$order_args = array( 'order_id' => $order->id );
 
