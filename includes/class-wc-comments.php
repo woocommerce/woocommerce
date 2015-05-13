@@ -21,10 +21,10 @@ class WC_Comments {
 	 * Hook in methods.
 	 */
 	public static function init() {
-
 		// Rating posts
 		add_filter( 'preprocess_comment', array( __CLASS__, 'check_comment_rating' ), 0 );
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_rating' ), 1 );
+		add_action( 'comment_moderation_recipients', array( __CLASS__, 'comment_moderation_recipients' ), 10, 2 );
 
 		// Clear transients
 		add_action( 'wp_update_comment_count', array( __CLASS__, 'clear_transients' ) );
@@ -197,9 +197,22 @@ class WC_Comments {
 			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) {
 				return;
 			}
-
 			add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
 		}
+	}
+
+	/**
+	 * Modify recipient of review email.
+	 * @return array
+	 */
+	public static function comment_moderation_recipients( $emails, $comment_id ) {
+		$comment = get_comment( $comment_id );
+
+		if ( $comment && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+			$emails = array( get_option( 'admin_email' ) );
+		}
+
+		return $emails;
 	}
 
 	/**
