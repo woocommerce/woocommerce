@@ -137,7 +137,7 @@ jQuery( function( $ ) {
 								security: wc_enhanced_select_params.search_customers_nonce
 							};
 						},
-						processResults: function( data ) {console.log(data);
+						processResults: function( data ) {
 							var terms = [];
 
 							if ( data ) {
