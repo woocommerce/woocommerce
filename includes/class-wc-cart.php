@@ -256,7 +256,7 @@ class WC_Cart {
 			}
 
 			// Queue re-calc if subtotal is not set
-			if ( ( ! $this->subtotal && ! $this->is_empty() || $update_cart_session ) {
+			if ( ( ! $this->subtotal && ! $this->is_empty() ) || $update_cart_session ) {
 				$this->calculate_totals();
 			}
 		}
