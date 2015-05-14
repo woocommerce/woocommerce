@@ -37,6 +37,25 @@
 			return match;
 		};
 
+		$.fn.wc_variation_form.get_variation_description_html = function( form, selected_index ) {
+			var all_variations = form.data( 'product_variations' ),
+				var_description_html;
+
+			if ( selected_index > 0 ) {
+				// minus an index to account for first non selected option
+				selected_index--;
+
+				if ( all_variations[ selected_index ].hasOwnProperty( 'variation_description' ) ) {
+					var_description_html = '<p class="woocommerce-variation-description woocommerce-variation-description-' + 
+					all_variations[ selected_index ].variation_id + '">' + all_variations[ selected_index ].variation_description + '</p>';
+
+					return var_description_html;
+				}
+			}
+
+			return '';
+		};
+
 		// Unbind any existing events
 		this.unbind( 'check_variations update_variation_values found_variation' );
 		this.find( '.reset_variations' ).unbind( 'click' );
@@ -69,12 +88,22 @@
 			// Upon changing an option
 			.on( 'change', '.variations select', function( event ) {
 
-				$variation_form = $( this ).closest( '.variations_form' );
+				var $variation_form = $( this ).closest( '.variations_form' ),
+					var_description = $.fn.wc_variation_form.get_variation_description_html( $variation_form, this.selectedIndex );
 
-				if ( $variation_form.find( 'input.variation_id' ).length > 0 )
+				// remove variation description on change
+				$variation_form.find( '.variations' ).next( '.woocommerce-variation-description' ).remove();
+				
+				// display variation description
+				if ( var_description ) {
+					$variation_form.find( '.variations' ).after( var_description );
+				}
+
+				if ( $variation_form.find( 'input.variation_id' ).length > 0 ) {
 					$variation_form.find( 'input.variation_id' ).val( '' ).change();
-				else
+				} else {
 					$variation_form.find( 'input[name=variation_id]' ).val( '' ).change();
+				}
 
 				$variation_form
 					.trigger( 'woocommerce_variation_select_change' )
