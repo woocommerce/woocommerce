@@ -51,7 +51,6 @@ class WC_Auth {
 	public function add_query_vars( $vars ) {
 		$vars[] = 'wc-auth-version';
 		$vars[] = 'wc-auth-route';
-
 		return $vars;
 	}
 
@@ -81,6 +80,38 @@ class WC_Auth {
 		);
 
 		return $permissions[ $scope ];
+	}
+
+	/**
+	 * Return a list of permissions a scope allows
+	 * @param  string $scope
+	 * @return array
+	 */
+	protected function get_permissions_in_scope( $scope ) {
+		$permissions = array();
+		switch ( $scope )  {
+			case 'read' :
+				$permissions[] = __( 'View coupons', 'woocommerce' );
+				$permissions[] = __( 'View customers', 'woocommerce' );
+				$permissions[] = __( 'View orders and sales reports', 'woocommerce' );
+				$permissions[] = __( 'View products', 'woocommerce' );
+			break;
+			case 'write' :
+				$permissions[] = __( 'Create webhooks', 'woocommerce' );
+				$permissions[] = __( 'Create coupons', 'woocommerce' );
+				$permissions[] = __( 'Create customers', 'woocommerce' );
+				$permissions[] = __( 'Create orders', 'woocommerce' );
+				$permissions[] = __( 'Create products', 'woocommerce' );
+			break;
+			case 'read_write' :
+				$permissions[] = __( 'Create webhooks', 'woocommerce' );
+				$permissions[] = __( 'View and manage coupons', 'woocommerce' );
+				$permissions[] = __( 'View and manage customers', 'woocommerce' );
+				$permissions[] = __( 'View and manage orders and sales reports', 'woocommerce' );
+				$permissions[] = __( 'View and manage products', 'woocommerce' );
+			break;
+		}
+		return $permissions;
 	}
 
 	/**
@@ -285,10 +316,11 @@ class WC_Auth {
 					'app_name'    => $_REQUEST['app_name'],
 					'return_url'  => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ),
 					'scope'       => $this->get_i18n_scope( wc_clean( $_REQUEST['scope'] ) ),
+					'permissions' => $this->get_permissions_in_scope( wc_clean( $_REQUEST['scope'] ) ),
 					'granted_url' => wp_nonce_url( $this->build_url( $_REQUEST, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
-					'logout_url'  => wp_logout_url( $this->build_url( $_REQUEST, 'login' ) )
+					'logout_url'  => wp_logout_url( $this->build_url( $_REQUEST, 'login' ) ),
+					'user'        => wp_get_current_user()
 				) );
-
 				exit;
 
 			// Granted access endpoint

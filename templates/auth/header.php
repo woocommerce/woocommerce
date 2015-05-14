@@ -22,3 +22,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<link rel="stylesheet" href="<?php echo esc_url( str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/auth.css' ); ?>" type="text/css" />
 </head>
 <body class="wc-auth wp-core-ui">
+	<h1 id="wc-logo"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></h1>
+	<div class="wc-auth-content">
