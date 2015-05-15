@@ -230,7 +230,11 @@ class WC_Meta_Box_Order_Data {
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
 					<div class="order_data_column">
-						<h4><?php _e( 'Billing Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="<?php _e( 'Edit', 'woocommerce' ); ?>" width="14" /></a></h4>
+						<h4>
+							<?php _e( 'Billing Details', 'woocommerce' ); ?>
+							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+							<a href="#" class="tips load_customer_billing" data-tip="<?php _e( 'Load billing address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
+						</h4>
 						<?php
 							// Display values
 							echo '<div class="address">';
@@ -256,7 +260,7 @@ class WC_Meta_Box_Order_Data {
 							echo '</div>';
 
 							// Display form
-							echo '<div class="edit_address"><p><button class="button load_customer_billing">' . __( 'Load billing address', 'woocommerce' ) . '</button></p>';
+							echo '<div class="edit_address">';
 
 							foreach ( self::$billing_fields as $key => $field ) {
 								if ( ! isset( $field['type'] ) ) {
@@ -310,7 +314,12 @@ class WC_Meta_Box_Order_Data {
 					</div>
 					<div class="order_data_column">
 
-						<h4><?php _e( 'Shipping Details', 'woocommerce' ); ?> <a class="edit_address" href="#"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/icons/edit.png" alt="<?php _e( 'Edit', 'woocommerce' ); ?>" width="14" /></a></h4>
+						<h4>
+							<?php _e( 'Shipping Details', 'woocommerce' ); ?>
+							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+							<a href="#" class="tips billing-same-as-shipping" data-tip="<?php _e( 'Copy from billing', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Copy from billing', 'woocommerce' ); ?></a>
+							<a href="#" class="tips load_customer_shipping" data-tip="<?php _e( 'Load shipping address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
+						</h4>
 						<?php
 							// Display values
 							echo '<div class="address">';
@@ -342,7 +351,7 @@ class WC_Meta_Box_Order_Data {
 							echo '</div>';
 
 							// Display form
-							echo '<div class="edit_address"><p><button class="button load_customer_shipping">' . __( 'Load shipping address', 'woocommerce' ) . '</button> <button class="button billing-same-as-shipping">' . __( 'Copy from billing', 'woocommerce' ) . '</button></p>';
+							echo '<div class="edit_address">';
 
 							if ( ! empty( self::$shipping_fields ) ) {
 								foreach ( self::$shipping_fields as $key => $field ) {

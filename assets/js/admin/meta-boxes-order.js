@@ -19,9 +19,10 @@ jQuery( function ( $ ) {
 				window.onbeforeunload = '';
 			});
 			$( 'a.edit_address' ).click( this.edit_address );
-			$( 'button.billing-same-as-shipping' ).on( 'click', this.copy_billing_to_shipping );
-			$( 'button.load_customer_billing' ).on( 'click', this.load_billing );
-			$( 'button.load_customer_shipping' ).on( 'click', this.load_shipping );
+			$( 'a.billing-same-as-shipping' ).on( 'click', this.copy_billing_to_shipping );
+			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
+			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );
+			$( '#customer_user' ).on( 'change', this.change_customer_user );
 		},
 
 		change_country: function( e, stickValue ) {
@@ -37,7 +38,7 @@ jQuery( function ( $ ) {
 
 			var $this = $( this ),
 				country = $this.val(),
-				$state = $this.parents( '.edit_address' ).find( ':input.js_field-state' ),
+				$state = $this.parents( 'div.edit_address' ).find( ':input.js_field-state' ),
 				$parent = $state.parent(),
 				input_name = $state.attr( 'name' ),
 				input_id = $state.attr( 'id' ),
@@ -77,7 +78,7 @@ jQuery( function ( $ ) {
 			// Here we will find if state value on a select has changed and stick it to the country data
 			var $this = $( this ),
 				state = $this.val(),
-				$country = $this.parents( '.edit_address' ).find( ':input.js_field-country' ),
+				$country = $this.parents( 'div.edit_address' ).find( ':input.js_field-country' ),
 				country = $country.val();
 
 			$country.data( 'woocommerce.stickState-' + country, state );
@@ -97,12 +98,21 @@ jQuery( function ( $ ) {
 		edit_address: function( e ) {
 			e.preventDefault();
 			$( this ).hide();
+			$( this ).parent().find( 'a:not(.edit_address)' ).show();
 			$( this ).closest( '.order_data_column' ).find( 'div.address' ).hide();
 			$( this ).closest( '.order_data_column' ).find( 'div.edit_address' ).show();
 		},
 
-		load_billing: function() {
-			if ( window.confirm( woocommerce_admin_meta_boxes.load_billing ) ) {
+		change_customer_user: function( e ) {
+			if ( ! $( '#_billing_country' ).val() ) {
+				$( 'a.edit_address' ).click();
+				wc_meta_boxes_order.load_billing( true );
+				wc_meta_boxes_order.load_shipping( true );
+			}
+		},
+
+		load_billing: function( force ) {
+			if ( true === force || window.confirm( woocommerce_admin_meta_boxes.load_billing ) ) {
 
 				// Get user ID to load data for
 				var user_id = $( '#customer_user' ).val();
@@ -119,7 +129,7 @@ jQuery( function ( $ ) {
 					security:     woocommerce_admin_meta_boxes.get_customer_details_nonce
 				};
 
-				$( this ).closest( '.edit_address' ).block({
+				$( this ).closest( 'div.edit_address' ).block({
 					message: null,
 					overlayCSS: {
 						background: '#fff',
@@ -148,15 +158,15 @@ jQuery( function ( $ ) {
 							$( 'input#_billing_phone' ).val( info.billing_phone ).change();
 						}
 
-						$( '.edit_address' ).unblock();
+						$( 'div.edit_address' ).unblock();
 					}
 				});
 			}
 			return false;
 		},
 
-		load_shipping: function() {
-			if ( window.confirm( woocommerce_admin_meta_boxes.load_shipping ) ) {
+		load_shipping: function( force ) {
+			if ( true === force || window.confirm( woocommerce_admin_meta_boxes.load_shipping ) ) {
 
 				// Get user ID to load data for
 				var user_id = $( '#customer_user' ).val();
@@ -173,7 +183,7 @@ jQuery( function ( $ ) {
 					security:     woocommerce_admin_meta_boxes.get_customer_details_nonce
 				};
 
-				$( this ).closest( '.edit_address' ).block({
+				$( this ).closest( 'div.edit_address' ).block({
 					message: null,
 					overlayCSS: {
 						background: '#fff',
@@ -200,7 +210,7 @@ jQuery( function ( $ ) {
 							$( '#_shipping_state' ).val( info.shipping_state ).change();
 						}
 
-						$( '.edit_address' ).unblock();
+						$( 'div.edit_address' ).unblock();
 					}
 				});
 			}
