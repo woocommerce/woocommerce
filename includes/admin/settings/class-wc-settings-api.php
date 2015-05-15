@@ -42,10 +42,14 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			''         => __( 'Settings', 'woocommerce' ),
-			'keys'     => __( 'Keys', 'woocommerce' ),
-			'webhooks' => __( 'Webhooks', 'woocommerce' ),
+			'' => __( 'Settings', 'woocommerce' )
 		);
+
+		if ( current_user_can( 'edit_user' ) ) {
+			$sections['keys'] = __( 'Keys/Apps', 'woocommerce' );
+		}
+
+		$sections['webhooks'] = __( 'Webhooks', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
