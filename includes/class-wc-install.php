@@ -325,6 +325,17 @@ class WC_Install {
 		}
 
 		return "
+CREATE TABLE {$wpdb->prefix}woocommerce_api_apps (
+  app_id bigint(20) NOT NULL auto_increment,
+  user_id bigint(20) NOT NULL,
+  description longtext NULL,
+  permission varchar(10) NOT NULL,
+  consumer_key varchar(200) NOT NULL,
+  consumer_secret varchar(200) NOT NULL,
+  PRIMARY KEY (app_id),
+  KEY consumer_key (consumer_key),
+  KEY consumer_secret (consumer_secret)
+) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_id bigint(20) NOT NULL auto_increment,
   attribute_name varchar(200) NOT NULL,
