@@ -652,8 +652,7 @@ class WC_Checkout {
 						$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
 						if ( is_ajax() ) {
-							echo '<!--WC_START-->' . json_encode( $result ) . '<!--WC_END-->';
-							exit;
+							wp_send_json( $result );
 						} else {
 							wp_redirect( $result['redirect'] );
 							exit;
@@ -678,13 +677,10 @@ class WC_Checkout {
 
 					// Redirect to success/confirmation/payment page
 					if ( is_ajax() ) {
-						echo '<!--WC_START-->' . json_encode(
-							array(
-								'result' 	=> 'success',
-								'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
-							)
-						) . '<!--WC_END-->';
-						exit;
+						wp_send_json( array(
+							'result' 	=> 'success',
+							'redirect'  => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
+						) );
 					} else {
 						wp_safe_redirect(
 							apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $return_url, $order )
@@ -712,17 +708,16 @@ class WC_Checkout {
 				$messages = ob_get_clean();
 			}
 
-			echo '<!--WC_START-->' . json_encode(
-				array(
-					'result'	=> 'failure',
-					'messages' 	=> isset( $messages ) ? $messages : '',
-					'refresh' 	=> isset( WC()->session->refresh_totals ) ? 'true' : 'false',
-					'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false'
-				)
-			) . '<!--WC_END-->';
+			$response = array(
+				'result'	=> 'failure',
+				'messages' 	=> isset( $messages ) ? $messages : '',
+				'refresh' 	=> isset( WC()->session->refresh_totals ) ? 'true' : 'false',
+				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false'
+			);
 
 			unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
-			exit;
+
+			wp_send_json( $response );
 		}
 	}
 
