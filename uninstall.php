@@ -35,7 +35,7 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
 
 	// Tables
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_api_apps" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_api_keys" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_attribute_taxonomies" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_downloadable_product_permissions" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_termmeta" );

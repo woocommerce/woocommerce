@@ -38,7 +38,7 @@ if ( ! empty( $apps_keys ) ) {
 	// Create new apps
 	foreach ( $apps_keys as $app ) {
 		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_api_apps',
+			$wpdb->prefix . 'woocommerce_api_keys',
 			$app,
 			array(
 				'%d',

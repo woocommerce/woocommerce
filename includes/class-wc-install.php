@@ -325,7 +325,7 @@ class WC_Install {
 		}
 
 		return "
-CREATE TABLE {$wpdb->prefix}woocommerce_api_apps (
+CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   app_id bigint(20) NOT NULL auto_increment,
   user_id bigint(20) NOT NULL,
   description longtext NULL,
