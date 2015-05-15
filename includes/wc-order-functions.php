@@ -597,7 +597,8 @@ function wc_create_refund( $args = array() ) {
 		'reason'     => null,
 		'order_id'   => 0,
 		'refund_id'  => 0,
-		'line_items' => array()
+		'line_items' => array(),
+		'date'       => current_time( 'mysql', 0 )
 	);
 
 	$args        = wp_parse_args( $args, $default_args );
@@ -615,6 +616,7 @@ function wc_create_refund( $args = array() ) {
 		$refund_data['post_password'] = uniqid( 'refund_' );
 		$refund_data['post_parent']   = absint( $args['order_id'] );
 		$refund_data['post_title']    = sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		$refund_data['post_date']     = $args['date'];
 	}
 
 	if ( ! is_null( $args['reason'] ) ) {
@@ -757,7 +759,6 @@ function wc_get_payment_gateway_by_order( $order ) {
  */
 function wc_order_fully_refunded( $order_id ) {
 	$order       = wc_get_order( $order_id );
-	$order_items = $order->get_items();
 	$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 
 	if ( ! $max_refund ) {
