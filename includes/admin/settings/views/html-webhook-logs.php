@@ -9,7 +9,7 @@ $total          = $count_comments->approved;
 
 ?>
 
-<?php echo $this->webhooks_get_logs_navigation( $total, $webhook ); ?>
+<?php echo WC_Admin_Webhooks::get_logs_navigation( $total, $webhook ); ?>
 
 <table id="webhook-logs-table" class="widefat">
 	<thead>
@@ -39,4 +39,4 @@ $total          = $count_comments->approved;
 	</tbody>
 </table>
 
-<?php echo $this->webhooks_get_logs_navigation( $total, $webhook ); ?>
+<?php echo WC_Admin_Webhooks::get_logs_navigation( $total, $webhook ); ?>
