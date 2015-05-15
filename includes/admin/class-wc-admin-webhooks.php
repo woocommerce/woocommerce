@@ -5,7 +5,7 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.3.0
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,7 +30,12 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	private function is_webhook_settings_page() {
-		return isset( $_GET['page'] ) && 'wc-settings' == $_GET['page'] && isset( $_GET['tab'] ) && 'webhooks' == $_GET['tab'];
+		return isset( $_GET['page'] )
+			&& 'wc-settings' == $_GET['page']
+			&& isset( $_GET['tab'] )
+			&& 'api' == $_GET['tab']
+			&& isset( $_GET['section'] )
+			&& 'webhooks' == isset( $_GET['section'] );
 	}
 
 	/**
@@ -157,7 +162,7 @@ class WC_Admin_Webhooks {
 		delete_transient( 'woocommerce_webhook_ids' );
 
 		// Redirect to webhook edit page to avoid settings save actions
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
 		exit();
 	}
 
@@ -188,7 +193,7 @@ class WC_Admin_Webhooks {
 		delete_transient( 'woocommerce_webhook_ids' );
 
 		// Redirect to edit page
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook_id . '&created=1' ) );
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook_id . '&created=1' ) );
 		exit();
 	}
 
@@ -212,7 +217,7 @@ class WC_Admin_Webhooks {
 		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( $_GET['status'] ) : '';
 
 		// Redirect to webhooks page
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks' . $status . '&' . $type . '=' . $qty ) );
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' . $status . '&' . $type . '=' . $qty ) );
 		exit();
 	}
 
@@ -229,7 +234,7 @@ class WC_Admin_Webhooks {
 		$qty = count( $webhooks );
 
 		// Redirect to webhooks page
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&status=trash&untrashed=' . $qty ) );
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&untrashed=' . $qty ) );
 		exit();
 	}
 
@@ -283,7 +288,7 @@ class WC_Admin_Webhooks {
 		$qty = count( $webhooks );
 
 		// Redirect to webhooks page
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=webhooks&deleted=' . $qty ) );
+		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&deleted=' . $qty ) );
 		exit();
 	}
 

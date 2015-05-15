@@ -1,36 +1,52 @@
 <?php
 /**
- * WooCommerce Webhooks Settings
+ * WooCommerce API Settings
  *
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.3.0
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Settings_Webhooks' ) ) :
+if ( ! class_exists( 'WC_Settings_Rest_API' ) ) :
 
 /**
- * WC_Settings_Webhooks
+ * WC_Settings_Rest_API
  */
-class WC_Settings_Webhooks extends WC_Settings_Page {
+class WC_Settings_Rest_API extends WC_Settings_Page {
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->id    = 'webhooks';
-		$this->label = __( 'Webhooks', 'woocommerce' );
+		$this->id    = 'api';
+		$this->label = __( 'API', 'woocommerce' );
 
 		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
+		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
 		add_action( 'woocommerce_settings_form_method_tab_' . $this->id, array( $this, 'form_method' ) );
 
 		$this->notices();
+	}
+
+	/**
+	 * Get sections
+	 *
+	 * @return array
+	 */
+	public function get_sections() {
+		$sections = array(
+			''         => __( 'Settings', 'woocommerce' ),
+			'keys'     => __( 'Keys', 'woocommerce' ),
+			'webhooks' => __( 'Webhooks', 'woocommerce' ),
+		);
+
+		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**
@@ -41,7 +57,9 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 	 * @return string
 	 */
 	public function form_method( $method ) {
-		if ( isset( $_GET['edit-webhook'] ) ) {
+		global $current_section;
+
+		if ( 'webhooks' == $current_section && isset( $_GET['edit-webhook'] ) ) {
 			$webhook_id = absint( $_GET['edit-webhook'] );
 			$webhook    = new WC_Webhook( $webhook_id );
 
@@ -57,6 +75,46 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 	 * Notices.
 	 */
 	private function notices() {
+		if ( isset( $_GET['section'] ) && 'webhooks' == $_GET['section'] ) {
+			$this->webhook_notices();
+		}
+	}
+
+	/**
+	 * Output the settings
+	 */
+	public function output() {
+		global $current_section;
+
+		if ( 'webhooks' == $current_section ) {
+			$this->webhooks_output();
+		}
+	}
+
+	/**
+	 * Webhooks output
+	 */
+	private function webhooks_output() {
+		// Hide the save button
+		$GLOBALS['hide_save_button'] = true;
+
+		if ( isset( $_GET['edit-webhook'] ) ) {
+			$webhook_id = absint( $_GET['edit-webhook'] );
+			$webhook    = new WC_Webhook( $webhook_id );
+
+			if ( 'trash' != $webhook->post_data->post_status ) {
+				$this->webhooks_edit_output( $webhook );
+				return;
+			}
+		}
+
+		$this->webhooks_table_list_output();
+	}
+
+	/**
+	 * Webhooks - Notices.
+	 */
+	private function webhook_notices() {
 		if ( isset( $_GET['trashed'] ) ) {
 			$trashed = absint( $_GET['trashed'] );
 
@@ -85,16 +143,17 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 	}
 
 	/**
-	 * Table list output
+	 * Webhooks - Table list output
 	 */
-	private function table_list_output() {
-		echo '<h3>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=webhooks&create-webhook=1' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h3>';
+	private function webhooks_table_list_output() {
+		echo '<h3>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h3>';
 
 		$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 		$webhooks_table_list->prepare_items();
 
 		echo '<input type="hidden" name="page" value="wc-settings" />';
-		echo '<input type="hidden" name="tab" value="webhooks" />';
+		echo '<input type="hidden" name="tab" value="api" />';
+		echo '<input type="hidden" name="section" value="webhooks" />';
 
 		$webhooks_table_list->views();
 		$webhooks_table_list->search_box( __( 'Search Webhooks', 'woocommerce' ), 'webhook' );
@@ -102,20 +161,20 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 	}
 
 	/**
-	 * Edit webhook output
+	 * Webhooks - Edit webhook output
 	 *
 	 * @param WC_Webhook $webhook
 	 */
-	private function edit_output( $webhook ) {
+	private function webhooks_edit_output( $webhook ) {
 		include_once( 'views/html-webhooks-edit.php' );
 	}
 
 	/**
-	 * Logs output
+	 * Webhooks - Logs output
 	 *
 	 * @param  WC_Webhook $webhook
 	 */
-	private function logs_output( $webhook ) {
+	private function webhooks_logs_output( $webhook ) {
 		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1;
 		$args    = array(
 			'post_id' => $webhook->id,
@@ -142,33 +201,11 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings
-	 */
-	public function output() {
-		global $current_section;
-
-		// Hide the save button
-		$GLOBALS['hide_save_button'] = true;
-
-		if ( isset( $_GET['edit-webhook'] ) ) {
-			$webhook_id = absint( $_GET['edit-webhook'] );
-			$webhook    = new WC_Webhook( $webhook_id );
-
-			if ( 'trash' != $webhook->post_data->post_status ) {
-				$this->edit_output( $webhook );
-				return;
-			}
-		}
-
-		$this->table_list_output();
-	}
-
-	/**
-	 * Get the webhook topic data
+	 * Webhooks - Get the webhook topic data
 	 *
 	 * @return array
 	 */
-	private function get_topic_data( $webhook ) {
+	private function webhooks_get_topic_data( $webhook ) {
 		$topic    = $webhook->get_topic();
 		$event    = '';
 		$resource = '';
@@ -191,13 +228,13 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get the logs navigation.
+	 * Webhooks - Get the logs navigation.
 	 *
 	 * @param  int $total
 	 *
 	 * @return string
 	 */
-	private function get_logs_navigation( $total, $webhook ) {
+	private function webhooks_get_logs_navigation( $total, $webhook ) {
 		$pages   = ceil( $total / 10 );
 		$current = isset( $_GET['log_page'] ) ? absint( $_GET['log_page'] ) : 1;
 
@@ -212,13 +249,13 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 					if ( 1 == $current ) {
 						$html .= '<button class="button-primary" disabled="disabled">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</button> ';
 					} else {
-						$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current - 1 ) ) . '#webhook-logs">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</a> ';
+						$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current - 1 ) ) . '#webhook-logs">' . __( '&lsaquo; Previous', 'woocommerce' ) . '</a> ';
 					}
 
 					if ( $pages == $current ) {
 						$html .= '<button class="button-primary" disabled="disabled">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</button>';
 					} else {
-						$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current + 1 ) ) . '#webhook-logs">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</a>';
+						$html .= '<a class="button-primary" href="' . admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&log_page=' . ( $current + 1 ) ) . '#webhook-logs">' . __( 'Next &rsaquo;', 'woocommerce' ) . '</a>';
 					}
 				$html .= '</p>';
 			}
@@ -231,4 +268,4 @@ class WC_Settings_Webhooks extends WC_Settings_Page {
 
 endif;
 
-return new WC_Settings_Webhooks();
+return new WC_Settings_Rest_API();
