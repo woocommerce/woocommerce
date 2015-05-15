@@ -142,14 +142,6 @@ class WC_Admin_Assets {
 				'mon_decimal_point'                 => wc_get_price_decimal_separator()
 			);
 
-			// If we're on the profile page and the current user has generated API keys, enqueue and add to $params array
-			if ( $screen->id == 'profile' && $current_user->woocommerce_api_consumer_key ) {
-
-				wp_enqueue_script( 'qrcode' );
-				$params['qrcode_key'] = $current_user->woocommerce_api_consumer_key . '|' .  $current_user->woocommerce_api_consumer_secret;
-
-			}
-
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
 		}
 
