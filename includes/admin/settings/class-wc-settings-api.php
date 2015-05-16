@@ -42,14 +42,10 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			'' => __( 'Settings', 'woocommerce' )
+			'' => __( 'Settings', 'woocommerce' ),
+			'keys' => __( 'Keys/Apps', 'woocommerce' ),
+			'webhooks' => __( 'Webhooks', 'woocommerce' )
 		);
-
-		if ( current_user_can( 'edit_user' ) ) {
-			$sections['keys'] = __( 'Keys/Apps', 'woocommerce' );
-		}
-
-		$sections['webhooks'] = __( 'Webhooks', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
@@ -108,6 +104,14 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 			return 'get';
 		}
 
+		if ( 'keys' == $current_section ) {
+			if ( isset( $_GET['create-key'] ) || isset( $_GET['edit-key'] ) ) {
+				return 'post';
+			}
+
+			return 'get';
+		}
+
 		return 'post';
 	}
 
@@ -116,7 +120,7 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 	 */
 	private function notices() {
 		if ( isset( $_GET['section'] ) && 'webhooks' == $_GET['section'] ) {
-			WC_Admin_Webhooks::settings_notices();
+			WC_Admin_Webhooks::notices();
 		}
 	}
 
@@ -127,7 +131,9 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 		global $current_section;
 
 		if ( 'webhooks' == $current_section ) {
-			WC_Admin_Webhooks::settings_output();
+			WC_Admin_Webhooks::page_output();
+		} else if ( 'keys' == $current_section ) {
+			WC_Admin_API_Keys::page_output();
 		} else {
 			$settings = $this->get_settings( $current_section );
 			WC_Admin_Settings::output_fields( $settings );

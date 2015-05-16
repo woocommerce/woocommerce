@@ -320,9 +320,9 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Settings output
+	 * Page output
 	 */
-	public static function settings_output() {
+	public static function page_output() {
 		// Hide the save button
 		$GLOBALS['hide_save_button'] = true;
 
@@ -331,7 +331,7 @@ class WC_Admin_Webhooks {
 			$webhook    = new WC_Webhook( $webhook_id );
 
 			if ( 'trash' != $webhook->post_data->post_status ) {
-				self::edit_output( $webhook );
+				include( 'settings/views/html-webhooks-edit.php' );
 				return;
 			}
 		}
@@ -340,9 +340,9 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
-	 * Setting Notices.
+	 * Notices.
 	 */
-	public static function settings_notices() {
+	public static function notices() {
 		if ( isset( $_GET['trashed'] ) ) {
 			$trashed = absint( $_GET['trashed'] );
 
@@ -373,7 +373,7 @@ class WC_Admin_Webhooks {
 	/**
 	 * Table list output
 	 */
-	public static function table_list_output() {
+	private static function table_list_output() {
 		echo '<h3>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h3>';
 
 		$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
@@ -386,15 +386,6 @@ class WC_Admin_Webhooks {
 		$webhooks_table_list->views();
 		$webhooks_table_list->search_box( __( 'Search Webhooks', 'woocommerce' ), 'webhook' );
 		$webhooks_table_list->display();
-	}
-
-	/**
-	 * Edit webhook output
-	 *
-	 * @param WC_Webhook $webhook
-	 */
-	public static function edit_output( $webhook ) {
-		include_once( 'settings/views/html-webhooks-edit.php' );
 	}
 
 	/**
