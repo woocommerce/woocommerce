@@ -326,14 +326,14 @@ class WC_Install {
 
 		return "
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
-  app_id bigint(20) NOT NULL auto_increment,
+  key_id bigint(20) NOT NULL auto_increment,
   user_id bigint(20) NOT NULL,
   description longtext NULL,
-  permission varchar(10) NOT NULL,
+  permissions varchar(10) NOT NULL,
   consumer_key varchar(200) NOT NULL,
   consumer_secret varchar(200) NOT NULL,
   nonces longtext NULL,
-  PRIMARY KEY (app_id),
+  PRIMARY KEY (key_id),
   KEY consumer_key (consumer_key),
   KEY consumer_secret (consumer_secret)
 ) $collate;

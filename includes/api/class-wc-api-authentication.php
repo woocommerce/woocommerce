@@ -44,15 +44,15 @@ class WC_API_Authentication {
 		try {
 
 			if ( is_ssl() ) {
-				$app = $this->perform_ssl_authentication();
+				$keys = $this->perform_ssl_authentication();
 			} else {
-				$app = $this->perform_oauth_authentication();
+				$keys = $this->perform_oauth_authentication();
 			}
 
 			// Check API key-specific permission
-			$this->check_api_key_permissions( $app['permission'] );
+			$this->check_api_key_permissions( $keys['permissions'] );
 
-			$user = $this->get_user_by_id( $app['user_id'] );
+			$user = $this->get_user_by_id( $keys['user_id'] );
 
 		} catch ( Exception $e ) {
 			$user = new WP_Error( 'woocommerce_api_authentication_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -107,13 +107,13 @@ class WC_API_Authentication {
 			throw new Exception( __( 'Consumer Secret is missing', 'woocommerce' ), 404 );
 		}
 
-		$app = $this->get_app_by_consumer_key( $consumer_key );
+		$keys = $this->get_keys_by_consumer_key( $consumer_key );
 
-		if ( ! $this->is_consumer_secret_valid( $app['consumer_secret'], $consumer_secret ) ) {
+		if ( ! $this->is_consumer_secret_valid( $keys['consumer_secret'], $consumer_secret ) ) {
 			throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce' ), 401 );
 		}
 
-		return $app;
+		return $keys;
 	}
 
 	/**
@@ -148,38 +148,38 @@ class WC_API_Authentication {
 		}
 
 		// Fetch WP user by consumer key
-		$app = $this->get_app_by_consumer_key( $params['oauth_consumer_key'] );
+		$keys = $this->get_keys_by_consumer_key( $params['oauth_consumer_key'] );
 
 		// Perform OAuth validation
-		$this->check_oauth_signature( $app, $params );
-		$this->check_oauth_timestamp_and_nonce( $app, $params['oauth_timestamp'], $params['oauth_nonce'] );
+		$this->check_oauth_signature( $keys, $params );
+		$this->check_oauth_timestamp_and_nonce( $keys, $params['oauth_timestamp'], $params['oauth_nonce'] );
 
 		// Authentication successful, return user
-		return $app;
+		return $keys;
 	}
 
 	/**
-	 * Return the app for the given consumer key
+	 * Return the keys for the given consumer key
 	 *
 	 * @since 2.4.0
 	 * @param string $consumer_key
 	 * @return array
 	 * @throws Exception
 	 */
-	private function get_app_by_consumer_key( $consumer_key ) {
+	private function get_keys_by_consumer_key( $consumer_key ) {
 		global $wpdb;
 
-		$app = $wpdb->get_row( $wpdb->prepare( "
+		$keys = $wpdb->get_row( $wpdb->prepare( "
 			SELECT *
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE consumer_key = '%s'
 		", sanitize_text_field( $consumer_key ) ), ARRAY_A );
 
-		if ( empty( $app ) ) {
+		if ( empty( $keys ) ) {
 			throw new Exception( __( 'Consumer Key is invalid', 'woocommerce' ), 401 );
 		}
 
-		return $app;
+		return $keys;
 	}
 
 	/**
@@ -203,23 +203,23 @@ class WC_API_Authentication {
 	 * Check if the consumer secret provided for the given user is valid
 	 *
 	 * @since 2.1
-	 * @param string $app_consumer_secret
+	 * @param string $keys_consumer_secret
 	 * @param string $consumer_secret
 	 * @return bool
 	 */
-	private function is_consumer_secret_valid( $app_consumer_secret, $consumer_secret ) {
-		return hash_equals( $app_consumer_secret, $consumer_secret );
+	private function is_consumer_secret_valid( $keys_consumer_secret, $consumer_secret ) {
+		return hash_equals( $keys_consumer_secret, $consumer_secret );
 	}
 
 	/**
 	 * Verify that the consumer-provided request signature matches our generated signature, this ensures the consumer
 	 * has a valid key/secret
 	 *
-	 * @param array $app
+	 * @param array $keys
 	 * @param array $params the request parameters
 	 * @throws Exception
 	 */
-	private function check_oauth_signature( $app, $params ) {
+	private function check_oauth_signature( $keys, $params ) {
 
 		$http_method = strtoupper( WC()->api->server->method );
 
@@ -262,7 +262,7 @@ class WC_API_Authentication {
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
-		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $app['consumer_secret'], true ) );
+		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $keys['consumer_secret'], true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
@@ -312,21 +312,21 @@ class WC_API_Authentication {
 	 * - A timestamp is valid if it is within 15 minutes of now
 	 * - A nonce is valid if it has not been used within the last 15 minutes
 	 *
-	 * @param array $app
+	 * @param array $keys
 	 * @param int $timestamp the unix timestamp for when the request was made
 	 * @param string $nonce a unique (for the given user) 32 alphanumeric string, consumer-generated
 	 * @throws Exception
 	 */
-	private function check_oauth_timestamp_and_nonce( $app, $timestamp, $nonce ) {
+	private function check_oauth_timestamp_and_nonce( $keys, $timestamp, $nonce ) {
 		global $wpdb;
 
 		$valid_window = 15 * 60; // 15 minute window
 
-		if ( ( $timestamp < time() - $valid_window ) ||  ( $timestamp > time() + $valid_window ) ) {
+		if ( ( $timestamp < time() - $valid_window ) || ( $timestamp > time() + $valid_window ) ) {
 			throw new Exception( __( 'Invalid timestamp', 'woocommerce' ) );
 		}
 
-		$used_nonces = maybe_unserialize( $app['nonces'] );
+		$used_nonces = maybe_unserialize( $keys['nonces'] );
 
 		if ( empty( $used_nonces ) ) {
 			$used_nonces = array();
@@ -350,7 +350,7 @@ class WC_API_Authentication {
 		$wpdb->update(
 			$wpdb->prefix . 'woocommerce_api_keys',
 			array( 'nonces' => $used_nonces ),
-			array( 'app_id' => $app['app_id'] ),
+			array( 'key_id' => $keys['key_id'] ),
 			array( '%s' ),
 			array( '%d' )
 		);
