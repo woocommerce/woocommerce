@@ -55,6 +55,41 @@ class WC_Admin_API_Keys {
 		$keys_table_list->search_box( __( 'Search Key', 'woocommerce' ), 'key' );
 		$keys_table_list->display();
 	}
+
+	/**
+	 * Get key data
+	 *
+	 * @param  int $key_id
+	 * @return array
+	 */
+	private static function get_key_data( $key_id ) {
+		global $wpdb;
+
+		$empty = array(
+			'key_id'          => 0,
+			'user_id'         => '',
+			'description'     => '',
+			'permissions'     => '',
+			'consumer_key'    => '',
+			'consumer_secret' => ''
+		);
+
+		if ( 0 == $key_id ) {
+			return $empty;
+		}
+
+		$key = $wpdb->get_row( $wpdb->prepare( "
+			SELECT key_id, user_id, description, permissions, consumer_key, consumer_secret
+			FROM {$wpdb->prefix}woocommerce_api_keys
+			WHERE key_id = %d
+		", $key_id ), ARRAY_A );
+
+		if ( is_null( $key ) ) {
+			return $empty;
+		}
+
+		return $key;
+	}
 }
 
 new WC_Admin_API_Keys();
