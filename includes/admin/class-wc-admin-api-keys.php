@@ -277,7 +277,7 @@ class WC_Admin_API_Keys {
 	/**
 	 * Bulk revoke key
 	 *
-	 * @param  array $keys
+	 * @param array $keys
 	 */
 	private function bulk_revoke_key( $keys ) {
 		foreach ( $keys as $key_id ) {

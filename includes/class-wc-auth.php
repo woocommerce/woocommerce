@@ -84,7 +84,11 @@ class WC_Auth {
 
 	/**
 	 * Return a list of permissions a scope allows
+	 *
+	 * @since  2.4.0
+	 *
 	 * @param  string $scope
+	 *
 	 * @return array
 	 */
 	protected function get_permissions_in_scope( $scope ) {
@@ -138,6 +142,8 @@ class WC_Auth {
 
 	/**
 	 * Make validation
+	 *
+	 * @since  2.4.0
 	 */
 	protected function make_validation() {
 		$params = array(
@@ -170,55 +176,48 @@ class WC_Auth {
 	}
 
 	/**
-	 * Get auth username.
-	 *
-	 * @param  string $app_name
-	 * @param  string $user_id
-	 *
-	 * @return string
-	 */
-	protected function get_auth_username( $app_name, $user_id ) {
-		return 'auth-user_' . sanitize_title( urldecode( $app_name ) . '_' . urldecode( $user_id ) );
-	}
-
-	/**
-	 * Create auth user.
+	 * Create keys.
 	 *
 	 * @since  2.4.0
 	 *
 	 * @param  string $app_name
-	 * @param  string $id
+	 * @param  string $app_user_id
 	 * @param  string $scope
 	 *
 	 * @return array
 	 */
-	protected function create_auth_user( $app_name, $id, $scope ) {
-		$description = sprintf( __( 'Generic user created to grant API %s access to %s.', 'woocommerce' ), $this->get_i18n_scope( $scope ), wc_clean( $app_name ) );
-		$user_login  = $this->get_auth_username( $app_name, $id );
+	protected function create_keys( $app_name, $app_user_id, $scope ) {
+		global $wpdb;
 
-		$userdata = array(
-			'user_login'  => $user_login,
-			'user_pass'   => wp_generate_password(),
-			'description' => $description,
-			'role'        => 'administrator' // @TODO: Need to review this role!
-		);
-
-		$user_id = wp_insert_user( $userdata );
-
-		if ( is_wp_error( $user_id ) ) {
-			throw new Exception( $user_id->get_error_message() );
-		}
+		$description = sprintf( __( '%s - API %s (created on %s at %s).', 'woocommerce' ), wc_clean( $app_name ), $this->get_i18n_scope( $scope ), date_i18n( wc_date_format() ), date_i18n( wc_time_format() ) );
+		$user        = wp_get_current_user();
 
 		// Created API keys.
-		$consumer_key    = 'ck_' . hash( 'md5', $user_login . date( 'U' ) . mt_rand() );
-		$consumer_secret = 'cs_' . hash( 'md5', $user_id . date( 'U' ) . mt_rand() );
-		$permissions     = ( in_array( $scope, array( 'read', 'write', 'read_write' ) ) ) ? $scope : 'read';
-		update_user_meta( $user_id, 'woocommerce_api_consumer_key', $consumer_key );
-		update_user_meta( $user_id, 'woocommerce_api_consumer_secret', $consumer_secret );
-		update_user_meta( $user_id, 'woocommerce_api_key_permissions', $permissions );
+		$permissions     = ( in_array( $scope, array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $scope ) : 'read';
+		$consumer_key    = 'ck_' . hash( 'md5', $user->user_login . date( 'U' ) . mt_rand() );
+		$consumer_secret = 'cs_' . hash( 'md5', $user->ID . date( 'U' ) . mt_rand() );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => $user->ID,
+				'description'     => $description,
+				'permissions'     => $permissions,
+				'consumer_key'    => $consumer_key,
+				'consumer_secret' => $consumer_secret
+			),
+			array(
+				'%d',
+				'%s',
+				'%s',
+				'%s',
+				'%s'
+			)
+		);
 
 		return array(
-			'user_id'         => $id,
+			'key_id'          => $wpdb->insert_id,
+			'user_id'         => $app_user_id,
 			'consumer_key'    => $consumer_key,
 			'consumer_secret' => $consumer_secret,
 			'key_permissions' => $permissions
@@ -238,7 +237,7 @@ class WC_Auth {
 	protected function post_consumer_data( $consumer_data, $url ) {
 		$params = array(
 			'body'      => json_encode( $consumer_data ),
-			'sslverify' => true,
+			'sslverify' => false,
 			'timeout'   => 60,
 			'headers'   => array(
 				'Content-Type' => 'application/xml;charset=' . get_bloginfo( 'charset' ),
@@ -281,12 +280,20 @@ class WC_Auth {
 	/**
 	 * Auth endpoint
 	 *
-	 * @param  string $route
+	 * @since  2.4.0
+	 *
+	 * @param string $route
 	 */
 	protected function auth_endpoint( $route ) {
 		ob_start();
 
+		$consumer_data = array();
+
 		try {
+			if ( 'yes' !== get_option( 'woocommerce_api_enabled' ) ) {
+				throw new Exception( __( 'API disabled!', 'woocommerce' ) );
+			}
+
 			$route = strtolower( wc_clean( $route ) );
 			$this->make_validation();
 
@@ -329,18 +336,35 @@ class WC_Auth {
 					throw new Exception( __( 'Invalid nonce verification', 'woocommerce' ) );
 				}
 
-				$consumer_data = $this->create_auth_user( $_REQUEST['app_name'], $_REQUEST['user_id'], $_REQUEST['scope'] );
+				$consumer_data = $this->create_keys( $_REQUEST['app_name'], $_REQUEST['user_id'], $_REQUEST['scope'] );
 				$response      = $this->post_consumer_data( $consumer_data, $_REQUEST['callback_url'] );
 
 				if ( $response ) {
 					wp_redirect( esc_url_raw( add_query_arg( array( 'success' => 1, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ) ) );
 					exit;
 				}
+			} else {
+				throw new Exception( __( 'You do not have permissions to access this page!', 'woocommerce' ) );
 			}
-
-			wp_die( __( 'You do not have permissions to access this page!' ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
 		} catch ( Exception $e ) {
+			$this->maybe_delete_key( $consumer_data );
+
 			wp_die( sprintf( __( 'Error: %s', 'woocommerce' ), $e->getMessage() ), __( 'Access Denied', 'woocommerce' ), array( 'response' => 401 ) );
+		}
+	}
+
+	/**
+	 * Maybe delete key
+	 *
+	 * @since 2.4.0
+	 *
+	 * @param array $key
+	 */
+	private function maybe_delete_key( $key ) {
+		global $wpdb;
+
+		if ( isset( $key['key_id'] ) ) {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key['key_id'] ), array( '%d' ) );
 		}
 	}
 }
