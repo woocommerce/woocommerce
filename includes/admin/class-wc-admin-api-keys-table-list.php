@@ -39,8 +39,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			'cb'          => '<input type="checkbox" />',
 			'description' => __( 'Description', 'woocommerce' ),
 			'user'        => __( 'User', 'woocommerce' ),
-			'permissions' => __( 'Permissions', 'woocommerce' ),
-			'actions'     => __( 'Actions', 'woocommerce' ),
+			'permissions' => __( 'Permissions', 'woocommerce' )
 		);
 	}
 
@@ -61,13 +60,32 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_description( $key ) {
+		$url = admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&edit-key=' . $key['key_id'] );
+
 		$output = '<strong>';
+		$output .= '<a href="' . esc_url( $url ) . '">';
 		if ( empty( $key['description'] ) ) {
 			$output .= esc_html__( 'API Key', 'woocommerce' );
 		} else {
 			$output .= esc_html( $key['description'] );
 		}
+		$output .= '</a>';
 		$output .= '</strong>';
+
+		// Get actions
+		$actions = array(
+			'id'    => sprintf( __( 'ID: %d', 'woocommerce' ), $key['key_id'] ),
+			'edit'  => '<a href="' . esc_url( $url ) . '">' . __( 'View/Edit', 'woocommerce' ) . '</a>',
+			'trash' => '<a class="submitdelete" title="' . esc_attr__( 'Revoke API Key', 'woocommerce' ) . '" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key['key_id'] ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke', 'woocommerce' ) . '</a>'
+		);
+
+		$row_actions = array();
+
+		foreach ( $actions as $action => $link ) {
+			$row_actions[] = '<span class="' . esc_attr( $action ) . '">' . $link . '</span>';
+		}
+
+		$output .= '<div class="row-actions">' . implode(  ' | ', $row_actions ) . '</div>';
 
 		return $output;
 	}
@@ -113,36 +131,6 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		} else {
 			return '';
 		}
-	}
-
-	/**
-	 * Return actions column
-	 *
-	 * @param  array $key
-	 * @return string
-	 */
-	public function column_actions( $key ) {
-		$actions = array();
-
-		$actions['revoke'] = array(
-			'url'       => wp_nonce_url( add_query_arg( 'revoke', $key['key_id'] ), 'revoke' ),
-			'name'      => __( 'Revoke API Key', 'woocommerce' ),
-			'action'    => 'revoke'
-		);
-
-		$actions['edit'] = array(
-			'url'       => admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&edit-key=' . $key['key_id'] ),
-			'name'      => __( 'View/Edit', 'woocommerce' ),
-			'action'    => 'edit'
-		);
-
-		$output = '';
-
-		foreach ( $actions as $action ) {
-			$output .= sprintf( '<a class="button tips %1$s" href="%2$s" data-tip="%3$s">%3$s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ) );
-		}
-
-		return $output;
 	}
 
 	/**

@@ -86,7 +86,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		if ( 'trash' == $post_status ) {
 			$output .= esc_html( $title );
 		} else {
-			$output .= '<a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ) . '</a>';
+			$output .= '<a href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
 		}
 		$output .= '</strong>';
 
@@ -96,12 +96,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		);
 
 		if ( current_user_can( $post_type_object->cap->edit_post, $the_webhook->id ) && 'trash' !== $post_status ) {
-			$actions['edit'] = '<a href="' . esc_attr( $edit_link ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
+			$actions['edit'] = '<a href="' . esc_url( $edit_link ) . '">' . __( 'Edit', 'woocommerce' ) . '</a>';
 		}
 
 		if ( current_user_can( $post_type_object->cap->delete_post, $the_webhook->id ) ) {
 			if ( 'trash' == $post_status ) {
-				$actions['untrash'] = '<a title="' . esc_attr( __( 'Restore this item from the Trash', 'woocommerce' ) ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . '">' . __( 'Restore', 'woocommerce' ) . '</a>';
+				$actions['untrash'] = '<a title="' . esc_attr__( 'Restore this item from the Trash', 'woocommerce' ) . '" href="' . wp_nonce_url( admin_url( sprintf( $post_type_object->_edit_link . '&amp;action=untrash', $the_webhook->id ) ), 'untrash-post_' . $the_webhook->id ) . '">' . __( 'Restore', 'woocommerce' ) . '</a>';
 			} elseif ( EMPTY_TRASH_DAYS ) {
 				$actions['trash'] = '<a class="submitdelete" title="' . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . __( 'Trash', 'woocommerce' ) . '</a>';
 			}
