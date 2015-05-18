@@ -200,9 +200,9 @@ class Simplify_HTTP
 
             if ( $error == 'invalid_request'){
                 throw new Simplify_BadRequestException("", $status, $this->buildOauthError('Error during OAuth request', $error, $error_description));
-            }else if (error_code == 'unsupported_grant_type'){
+            }else if ( $error == 'unsupported_grant_type'){
                 throw new Simplify_BadRequestException("", $status, $this->buildOauthError('Unsupported grant type in OAuth request', $error, $error_description));
-            }else if (error_code == 'invalid_scope'){
+            }else if ( $error == 'invalid_scope'){
                 throw new Simplify_BadRequestException("", $status, $this->buildOauthError('Invalid scope in OAuth request', $error, $error_description));
             }else{
                 throw new Simplify_BadRequestException("", $status, $this->buildOauthError('Unknown OAuth error', $error, $error_description));
@@ -212,11 +212,11 @@ class Simplify_HTTP
 
         } else if ($status == self::HTTP_UNAUTHORIZED){
 
-            if (error_code == 'access_denied'){
+            if ( $error == 'access_denied'){
                 throw new Simplify_AuthenticationException("", $status, $this->buildOauthError('Access denied for OAuth request', $error, $error_description));
-            }else if (error_code == 'invalid_client'){
+            }else if ( $error == 'invalid_client'){
                 throw new Simplify_AuthenticationException("", $status, $this->buildOauthError('Invalid client ID in OAuth request', $error, $error_description));
-            }else if (error_code == 'unauthorized_client'){
+            }else if ( $error == 'unauthorized_client'){
                 throw new Simplify_AuthenticationException("", $status, $this->buildOauthError('Unauthorized client in OAuth request', $error, $error_description));
             }else{
                 throw new Simplify_AuthenticationException("", $status, $this->buildOauthError('Unknown authentication error', $error, $error_description));
