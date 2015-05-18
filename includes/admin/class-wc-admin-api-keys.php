@@ -18,10 +18,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_API_Keys {
 
 	/**
-	 * Initialize the webhooks admin actions
+	 * Initialize the API Keys admin actions
 	 */
 	public function __construct() {
+		add_action( 'admin_init', array( $this, 'actions' ) );
+	}
 
+	/**
+	 * Check if is API Keys settings page
+	 *
+	 * @return bool
+	 */
+	private function is_api_keys_settings_page() {
+		return isset( $_GET['page'] )
+			&& 'wc-settings' == $_GET['page']
+			&& isset( $_GET['tab'] )
+			&& 'api' == $_GET['tab']
+			&& isset( $_GET['section'] )
+			&& 'keys' == isset( $_GET['section'] );
 	}
 
 	/**
@@ -32,6 +46,9 @@ class WC_Admin_API_Keys {
 		$GLOBALS['hide_save_button'] = true;
 
 		if ( isset( $_GET['create-key'] ) || isset( $_GET['edit-key'] ) ) {
+			$key_id   = isset( $_GET['edit-key'] ) ? absint( $_GET['edit-key'] ) : 0;
+			$key_data = self::get_key_data( $key_id );
+
 			include( 'settings/views/html-keys-edit.php' );
 		} else {
 			self::table_list_output();
@@ -89,6 +106,134 @@ class WC_Admin_API_Keys {
 		}
 
 		return $key;
+	}
+
+	/**
+	 * API Keys admin actions
+	 */
+	public function actions() {
+		if ( $this->is_api_keys_settings_page() ) {
+			// Generate Key / Edit Key
+			if ( isset( $_POST['update_api_key'] ) && isset( $_POST['key_id'] ) ) {
+				$this->update_key();
+			}
+
+			// Bulk actions
+			if ( isset( $_GET['action'] ) && isset( $_GET['keys'] ) ) {
+				// $this->bulk_actions();
+			}
+		}
+	}
+
+	/**
+	 * Notices.
+	 */
+	public static function notices() {
+		if ( isset( $_GET['edit-key'] ) && isset( $_GET['status'] ) ) {
+
+			switch ( intval( $_GET['status'] ) ) {
+				case 2 :
+					WC_Admin_Settings::add_message( __( 'API Key generated successfully.', 'woocommerce' ) );
+					break;
+				case -1 :
+					WC_Admin_Settings::add_error( __( 'Description is missing.', 'woocommerce' ) );
+					break;
+				case -2 :
+					WC_Admin_Settings::add_error( __( 'User is missing.', 'woocommerce' ) );
+					break;
+				case -3 :
+					WC_Admin_Settings::add_error( __( 'Description is missing.', 'woocommerce' ) );
+					break;
+
+				default :
+					WC_Admin_Settings::add_message( __( 'API Key updated successfully.', 'woocommerce' ) );
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Update Key
+	 */
+	private function update_key() {
+		global $wpdb;
+
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
+			die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$url    = admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' );
+		$key_id = absint( $_POST['key_id'] );
+		$status = 1;
+
+		try {
+			if ( empty( $_POST['key_description'] ) ) {
+				throw new Exception( 'Description is missing', -1 );
+			}
+			if ( empty( $_POST['key_user'] ) ) {
+				throw new Exception( 'User is missing', -2 );
+			}
+			if ( empty( $_POST['key_permissions'] ) ) {
+				throw new Exception( 'permissions is missing', -3 );
+			}
+
+			$description = sanitize_text_field( $_POST['key_description'] );
+			$permissions = ( in_array( $_POST['key_permissions'], array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $_POST['key_permissions'] ) : 'read';
+			$user_id     = absint( $_POST['key_user'] );
+
+			if ( 0 < $key_id ) {
+				$wpdb->update(
+					$wpdb->prefix . 'woocommerce_api_keys',
+					array(
+						'user_id'     => $user_id,
+						'description' => $description,
+						'permissions' => $permissions
+					),
+					array( 'key_id' => $key_id ),
+					array(
+						'%d',
+						'%s',
+						'%s'
+					),
+					array( '%d' )
+				);
+			} else {
+				$status          = 2;
+				$user            = get_userdata( $user_id );
+				$consumer_key    = 'ck_' . hash( 'md5', $user->user_login . date( 'U' ) . mt_rand() );
+				$consumer_secret = 'cs_' . hash( 'md5', $user->ID . date( 'U' ) . mt_rand() );
+
+				$wpdb->insert(
+					$wpdb->prefix . 'woocommerce_api_keys',
+					array(
+						'user_id'         => $user_id,
+						'description'     => $description,
+						'permissions'     => $permissions,
+						'consumer_key'    => $consumer_key,
+						'consumer_secret' => $consumer_secret
+					),
+					array(
+						'%d',
+						'%s',
+						'%s',
+						'%s',
+						'%s'
+					)
+				);
+
+				$key_id = $wpdb->insert_id;
+			}
+
+			wp_redirect( esc_url_raw( add_query_arg( array( 'edit-key' => $key_id, 'status' => $status ), $url ) ) );
+			exit();
+		} catch ( Exception $e ) {
+			wp_redirect( esc_url_raw( add_query_arg( array( 'edit-key' => $key_id, 'status' => $e->getCode() ), $url ) ) );
+			exit();
+		}
 	}
 }
 

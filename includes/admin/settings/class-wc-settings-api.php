@@ -42,8 +42,8 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			'' => __( 'Settings', 'woocommerce' ),
-			'keys' => __( 'Keys/Apps', 'woocommerce' ),
+			''         => __( 'Settings', 'woocommerce' ),
+			'keys'     => __( 'Keys/Apps', 'woocommerce' ),
 			'webhooks' => __( 'Webhooks', 'woocommerce' )
 		);
 
@@ -121,6 +121,9 @@ class WC_Settings_Rest_API extends WC_Settings_Page {
 	private function notices() {
 		if ( isset( $_GET['section'] ) && 'webhooks' == $_GET['section'] ) {
 			WC_Admin_Webhooks::notices();
+		}
+		if ( isset( $_GET['section'] ) && 'keys' == $_GET['section'] ) {
+			WC_Admin_API_Keys::notices();
 		}
 	}
 

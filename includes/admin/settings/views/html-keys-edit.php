@@ -2,12 +2,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-$key_id   = isset( $_GET['edit-key'] ) ? absint( $_GET['edit-key'] ) : 0;
-$key_data = self::get_key_data( $key_id );
 ?>
 
-<input type="hidden" name="key_id" value="<?php echo esc_url( $key_id ); ?>" />
+<input type="hidden" name="key_id" value="<?php echo esc_attr( $key_id ); ?>" />
 
 <div id="key-fields" class="settings-panel">
 	<h3><?php _e( 'Key Details', 'woocommerce' ); ?></h3>
@@ -29,14 +26,12 @@ $key_data = self::get_key_data( $key_id );
 				</th>
 				<td class="forminp">
 					<?php
-						$user_string = '';
-						$user_id     = absint( $key_data['user_id'] );
-						if ( ! empty( $user_id ) ) {
-							$user        = get_user_by( 'id', $user_id );
-							$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
-						}
-						?>
-						<input type="hidden" class="wc-customer-search" name="key_user" data-placeholder="<?php _e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
+						$curent_user_id = get_current_user_id();
+						$user_id        = ! empty( $key_data['user_id'] ) ? absint( $key_data['user_id'] ) : $curent_user_id;
+						$user           = get_user_by( 'id', $user_id );
+						$user_string    = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
+					?>
+					<input type="hidden" class="wc-customer-search" name="key_user" data-placeholder="<?php esc_html_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo esc_attr( $user_id ); ?>" data-allow_clear="true" />
 				</td>
 			</tr>
 			<tr valign="top">
@@ -65,7 +60,7 @@ $key_data = self::get_key_data( $key_id );
 						<?php _e( 'Consumer Key', 'woocommerce' ); ?>
 					</th>
 					<td class="forminp">
-						<code id="key_consumer_key" data-value="<?php echo esc_attr( $key_data['consumer_key'] ); ?>"><?php echo esc_attr( $key_data['consumer_key'] ); ?></code> <button type="button" class="button-secondary copy-key" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy Key', 'woocommerce' ); ?></button>
+						<code id="key_consumer_key"><?php echo esc_html( $key_data['consumer_key'] ); ?></code> <button type="button" class="button-secondary copy-key" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
 					</td>
 				</tr>
 				<tr valign="top" id="webhook-action-event-wrap">
@@ -73,7 +68,7 @@ $key_data = self::get_key_data( $key_id );
 						<label for="key_consumer_secret"><?php _e( 'Consumer Secret', 'woocommerce' ); ?></label>
 					</th>
 					<td class="forminp">
-						<code id="key_consumer_secret" data-value="<?php echo esc_attr( $key_data['consumer_secret'] ); ?>"><?php echo esc_attr( $key_data['consumer_secret'] ); ?></code> <button type="button" class="button-secondary copy-key" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy Key', 'woocommerce' ); ?></button>
+						<code id="key_consumer_secret"><?php echo esc_html( $key_data['consumer_secret'] ); ?></code> <button type="button" class="button-secondary copy-key" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
 					</td>
 				</tr>
 				<tr valign="top" id="webhook-action-event-wrap">
@@ -94,9 +89,9 @@ $key_data = self::get_key_data( $key_id );
 									'delay':      0
 								});
 
-								$( document.body ).on( 'copy', '.copy-key', function ( e ) {
+								$( document.body ).on( 'copy', '.copy-key', function( e ) {
 									e.clipboardData.clearData();
-									e.clipboardData.setData( 'text/plain', $( this ).prev( 'code' ).data( 'value' ) );
+									e.clipboardData.setData( 'text/plain', $.trim( $( this ).prev( 'code' ).html() ) );
 									e.preventDefault();
 								});
 
@@ -118,10 +113,15 @@ $key_data = self::get_key_data( $key_id );
 	<?php do_action( 'woocommerce_admin_key_fields', $key_data ); ?>
 
 	<?php
-		if ( 0 == $key_data['key_id'] ) {
-			submit_button( __( 'Generate API Key', 'woocommerce' ) );
+		if ( 0 == $key_id ) {
+			submit_button( __( 'Generate API Key', 'woocommerce' ), 'primary', 'update_api_key' );
 		} else {
-			submit_button();
+			?>
+			<p class="submit">
+				<?php submit_button( __( 'Save Changes', 'woocommerce' ), 'primary', 'update_api_key', false ); ?>
+				<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ) ); ?>"><?php _e( 'Revoke Key', 'woocommerce' ); ?></a>
+			</p>
+			<?php
 		}
 	?>
 </div>
