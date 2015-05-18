@@ -308,6 +308,7 @@ function wc_stock_amount( $amount ) {
  */
 function get_woocommerce_price_format() {
 	$currency_pos = get_option( 'woocommerce_currency_pos' );
+	$format = '%1$s%2$s';
 
 	switch ( $currency_pos ) {
 		case 'left' :
