@@ -476,7 +476,7 @@ function woocommerce_get_endpoint_url( $endpoint, $value = '', $permalink = '' )
  * @deprecated
  */
 function woocommerce_lostpassword_url( $url ) {
-	return wc_lostpassword_url( $url );
+	return wc_lostpassword_url();
 }
 /**
  * @deprecated
@@ -488,13 +488,13 @@ function woocommerce_customer_edit_account_url() {
  * @deprecated
  */
 function woocommerce_nav_menu_items( $items, $args ) {
-	return wc_nav_menu_items( $items, $args );
+	return wc_nav_menu_items( $items );
 }
 /**
  * @deprecated
  */
 function woocommerce_nav_menu_item_classes( $menu_items, $args ) {
-	return wc_nav_menu_item_classes( $menu_items, $args );
+	return wc_nav_menu_item_classes( $menu_items );
 }
 /**
  * @deprecated
@@ -593,7 +593,7 @@ function woocommerce_recount_after_stock_change( $product_id ) {
  * @deprecated
  */
 function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
-	return wc_change_term_counts( $terms, $taxonomies, $args );
+	return wc_change_term_counts( $terms, $taxonomies );
 }
 
 /**
