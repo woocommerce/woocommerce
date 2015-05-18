@@ -268,7 +268,7 @@ class WC_Admin_Post_Types {
 	 * @param  string $column
 	 */
 	public function render_product_columns( $column ) {
-		global $post;
+		global $post, $the_product;
 
 		if ( empty( $the_product ) || $the_product->id != $post->ID ) {
 			$the_product = wc_get_product( $post );
