@@ -125,7 +125,7 @@ class WC_Admin_Webhooks {
 	 */
 	private function save() {
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
-			die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
 		$webhook_id = absint( $_POST['webhook_id'] );
@@ -170,6 +170,10 @@ class WC_Admin_Webhooks {
 	 * Create Webhook
 	 */
 	private function create() {
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'create-webhook' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		}
+
 		if ( ! current_user_can( 'publish_shop_webhooks' ) ) {
 			wp_die( __( 'You don\'t have permissions to create Webhooks!', 'woocommerce' ) );
 		}
@@ -216,6 +220,8 @@ class WC_Admin_Webhooks {
 		$qty    = count( $webhooks );
 		$status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( $_GET['status'] ) : '';
 
+		delete_transient( 'woocommerce_webhook_ids' );
+
 		// Redirect to webhooks page
 		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks' . $status . '&' . $type . '=' . $qty ) );
 		exit();
@@ -233,22 +239,26 @@ class WC_Admin_Webhooks {
 
 		$qty = count( $webhooks );
 
+		delete_transient( 'woocommerce_webhook_ids' );
+
 		// Redirect to webhooks page
 		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&status=trash&untrashed=' . $qty ) );
 		exit();
 	}
 
 	/**
-	 * Webhook bulk actions
+	 * Bulk actions
 	 */
 	private function bulk_actions() {
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		}
+
 		if ( ! current_user_can( 'edit_shop_webhooks' ) ) {
 			wp_die( __( 'You don\'t have permissions to edit Webhooks!', 'woocommerce' ) );
 		}
 
 		$webhooks = array_map( 'absint', (array) $_GET['webhook'] );
-
-		delete_transient( 'woocommerce_webhook_ids' );
 
 		switch ( $_GET['action'] ) {
 			case 'trash' :
@@ -269,6 +279,10 @@ class WC_Admin_Webhooks {
 	 * Empty Trash
 	 */
 	private function empty_trash() {
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'empty_trash' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		}
+
 		if ( ! current_user_can( 'delete_shop_webhooks' ) ) {
 			wp_die( __( 'You don\'t have permissions to delete Webhooks!', 'woocommerce' ) );
 		}
@@ -312,7 +326,7 @@ class WC_Admin_Webhooks {
 				$this->bulk_actions();
 			}
 
-			// Bulk actions
+			// Empty trash
 			if ( isset( $_GET['empty_trash'] ) ) {
 				$this->empty_trash();
 			}
@@ -374,7 +388,7 @@ class WC_Admin_Webhooks {
 	 * Table list output
 	 */
 	private static function table_list_output() {
-		echo '<h3>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h3>';
+		echo '<h3>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h3>';
 
 		$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 		$webhooks_table_list->prepare_items();
