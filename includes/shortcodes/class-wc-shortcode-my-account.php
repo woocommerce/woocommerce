@@ -71,7 +71,7 @@ class WC_Shortcode_My_Account {
 
 			} elseif ( isset( $wp->query_vars['add-payment-method'] ) ) {
 
-				self::add_payment_method( $wp->query_vars['add-payment-method'] );
+				self::add_payment_method();
 
 			} else {
 
