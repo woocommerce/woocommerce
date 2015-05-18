@@ -334,7 +334,7 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_get_price_thousand_separator() {
-	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
+	$separator = stripslashes( get_option( 'woocommerce_price_thousand_sep' ) );
 	return $separator;
 }
 
@@ -344,7 +344,7 @@ function wc_get_price_thousand_separator() {
  * @return string
  */
 function wc_get_price_decimal_separator() {
-	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
+	$separator = stripslashes( get_option( 'woocommerce_price_decimal_sep' ) );
 	return $separator ? $separator : '.';
 }
 
