@@ -48,6 +48,7 @@ class WC_Admin {
 			include_once( 'class-wc-admin-welcome.php' );
 			include_once( 'class-wc-admin-notices.php' );
 			include_once( 'class-wc-admin-assets.php' );
+			include_once( 'class-wc-admin-api-keys.php' );
 			include_once( 'class-wc-admin-webhooks.php' );
 
 			// Help

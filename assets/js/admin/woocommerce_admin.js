@@ -219,12 +219,6 @@ jQuery( function ( $ ) {
 		}
 	}).change();
 
-	// Generate QR Code
-	if ( typeof woocommerce_admin !== 'undefined' && typeof woocommerce_admin.qrcode_key !== 'undefined' ) {
-		$( '#qrcode_small' ).qrcode({
-			text: woocommerce_admin.qrcode_key,
-			width: 90,
-			height: 90
-		});
-	}
+	// Attribute term table
+	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 });

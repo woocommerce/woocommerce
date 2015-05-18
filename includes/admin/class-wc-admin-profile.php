@@ -2,10 +2,10 @@
 /**
  * Add extra profile fields for users in admin.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,12 +28,6 @@ class WC_Admin_Profile {
 
 		add_action( 'personal_options_update', array( $this, 'save_customer_meta_fields' ) );
 		add_action( 'edit_user_profile_update', array( $this, 'save_customer_meta_fields' ) );
-
-		add_action( 'show_user_profile', array( $this, 'add_api_key_field' ) );
-		add_action( 'edit_user_profile', array( $this, 'add_api_key_field' ) );
-
-		add_action( 'personal_options_update', array( $this, 'generate_api_key' ) );
-		add_action( 'edit_user_profile_update', array( $this, 'generate_api_key' ) );
 	}
 
 	/**
@@ -141,14 +135,14 @@ class WC_Admin_Profile {
 					)
 				)
 			)
-		));
+		) );
 		return $show_fields;
 	}
 
 	/**
 	 * Show Address Fields on edit user pages.
 	 *
-	 * @param mixed $user User (object) being displayed
+	 * @param WP_User $user
 	 */
 	public function add_customer_meta_fields( $user ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -193,14 +187,14 @@ class WC_Admin_Profile {
 	/**
 	 * Save Address Fields on edit user pages
 	 *
-	 * @param mixed $user_id User ID of the user being saved
+	 * @param int $user_id User ID of the user being saved
 	 */
 	public function save_customer_meta_fields( $user_id ) {
 		$save_fields = $this->get_customer_meta_fields();
 
-		foreach( $save_fields as $fieldset ) {
+		foreach ( $save_fields as $fieldset ) {
 
-			foreach( $fieldset['fields'] as $key => $field ) {
+			foreach ( $fieldset['fields'] as $key => $field ) {
 
 				if ( isset( $_POST[ $key ] ) ) {
 					update_user_meta( $user_id, $key, wc_clean( $_POST[ $key ] ) );
@@ -208,133 +202,6 @@ class WC_Admin_Profile {
 			}
 		}
 	}
-
-	/**
-	 * Display the API key info for a user
-	 *
-	 * @since 2.1
-	 * @param WP_User $user
-	 */
-	public function add_api_key_field( $user ) {
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-
-		$permissions = array(
-			'read'       => __( 'Read', 'woocommerce' ),
-			'write'      => __( 'Write', 'woocommerce' ),
-			'read_write' => __( 'Read/Write', 'woocommerce' ),
-		);
-
-		if ( current_user_can( 'edit_user', $user->ID ) ) {
-			?>
-				<table class="form-table">
-					<tbody>
-						<tr>
-							<th><label for="woocommerce_api_keys"><?php _e( 'WooCommerce API Keys', 'woocommerce' ); ?></label></th>
-							<td>
-								<?php if ( empty( $user->woocommerce_api_consumer_key ) ) : ?>
-									<label for="woocommerce_generate_api_key">
-										<input name="woocommerce_generate_api_key" type="checkbox" id="woocommerce_generate_api_key" value="0" />
-										<?php _e( 'Generate API Key', 'woocommerce' ); ?>
-									</label>
-								<?php else : ?>
-									<div class="api-keys-wrapper">
-										<strong><?php _e( 'Consumer Key:', 'woocommerce' ); ?></strong><br /><code id="woocommerce_api_consumer_key"><?php echo $user->woocommerce_api_consumer_key; ?></code><br/><br />
-										<strong><?php _e( 'Consumer Secret:', 'woocommerce' ); ?></strong><br /><code id="woocommerce_api_consumer_secret"><?php echo $user->woocommerce_api_consumer_secret; ?></code><br/>
-									</div>
-									<div class="api-keys-get-qr">
-										<div id="qrcode_small"></div>
-									</div>
-									<div class="clear"></div>
-									<strong><?php _e( 'Permissions:', 'woocommerce' ); ?>&nbsp;</strong><span id="woocommerce_api_key_permissions"><select name="woocommerce_api_key_permissions" id="woocommerce_api_key_permissions"><?php
-										foreach ( $permissions as $permission_key => $permission_name ) { echo '<option value="' . esc_attr( $permission_key ) . '" '.selected($permission_key, $user->woocommerce_api_key_permissions, false).'>'.esc_html( $permission_name ) . '</option>';} ?>
-									</select></span><br/>
-									<label for="woocommerce_generate_api_key">
-										<input name="woocommerce_generate_api_key" type="checkbox" id="woocommerce_generate_api_key" value="0" />
-										<?php _e( 'Revoke API Key', 'woocommerce' ); ?>
-									</label>
-								<?php endif; ?>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			<?php
-		}
-	}
-
-	/**
-	 * Generate and save (or delete) the API keys for a user
-	 *
-	 * @since 2.1
-	 * @param int $user_id
-	 */
-	public function generate_api_key( $user_id ) {
-
-		if ( current_user_can( 'edit_user', $user_id ) ) {
-
-			$user = get_userdata( $user_id );
-
-			// creating/deleting key
-			if ( isset( $_POST['woocommerce_generate_api_key'] ) ) {
-
-				// consumer key
-				if ( empty( $user->woocommerce_api_consumer_key ) ) {
-
-					$consumer_key = 'ck_' . hash( 'md5', $user->user_login . date( 'U' ) . mt_rand() );
-
-					update_user_meta( $user_id, 'woocommerce_api_consumer_key', $consumer_key );
-
-				} else {
-
-					delete_user_meta( $user_id, 'woocommerce_api_consumer_key' );
-				}
-
-				// consumer secret
-				if ( empty( $user->woocommerce_api_consumer_secret ) ) {
-
-					$consumer_secret = 'cs_' . hash( 'md5', $user->ID . date( 'U' ) . mt_rand() );
-
-					update_user_meta( $user_id, 'woocommerce_api_consumer_secret', $consumer_secret );
-
-				} else {
-
-					delete_user_meta( $user_id, 'woocommerce_api_consumer_secret' );
-				}
-
-				// permissions
-				if ( empty( $user->woocommerce_api_key_permissions ) ) {
-
-					if ( isset( $_POST['woocommerce_api_key_permissions'] ) ) {
-
-						$permissions = ( in_array( $_POST['woocommerce_api_key_permissions'], array( 'read', 'write', 'read_write' ) ) ) ? $_POST['woocommerce_api_key_permissions'] : 'read';
-
-					} else {
-
-						$permissions = 'read';
-					}
-
-					update_user_meta( $user_id, 'woocommerce_api_key_permissions', $permissions );
-
-				} else {
-
-					delete_user_meta( $user_id, 'woocommerce_api_key_permissions' );
-				}
-
-			} else {
-
-				// updating permissions for key
-				if ( ! empty( $_POST['woocommerce_api_key_permissions'] ) && $user->woocommerce_api_key_permissions !== $_POST['woocommerce_api_key_permissions'] ) {
-
-					$permissions = ( ! in_array( $_POST['woocommerce_api_key_permissions'], array( 'read', 'write', 'read_write' ) ) ) ? 'read' : $_POST['woocommerce_api_key_permissions'];
-
-					update_user_meta( $user_id, 'woocommerce_api_key_permissions', $permissions );
-				}
-			}
-		}
-	}
-
 }
 
 endif;
