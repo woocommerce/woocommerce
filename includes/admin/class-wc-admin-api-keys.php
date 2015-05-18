@@ -118,6 +118,11 @@ class WC_Admin_API_Keys {
 				$this->update_key();
 			}
 
+			// Revoke key
+			if ( isset( $_GET['revoke-key'] ) ) {
+				$this->revoke_key();
+			}
+
 			// Bulk actions
 			if ( isset( $_GET['action'] ) && isset( $_GET['keys'] ) ) {
 				// $this->bulk_actions();
@@ -129,11 +134,14 @@ class WC_Admin_API_Keys {
 	 * Notices.
 	 */
 	public static function notices() {
-		if ( isset( $_GET['edit-key'] ) && isset( $_GET['status'] ) ) {
+		if ( isset( $_GET['status'] ) ) {
 
 			switch ( intval( $_GET['status'] ) ) {
 				case 2 :
 					WC_Admin_Settings::add_message( __( 'API Key generated successfully.', 'woocommerce' ) );
+					break;
+				case 3 :
+					WC_Admin_Settings::add_message( __( 'API Key revoked successfully.', 'woocommerce' ) );
 					break;
 				case -1 :
 					WC_Admin_Settings::add_error( __( 'Description is missing.', 'woocommerce' ) );
@@ -159,7 +167,7 @@ class WC_Admin_API_Keys {
 		global $wpdb;
 
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
-			die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -234,6 +242,23 @@ class WC_Admin_API_Keys {
 			wp_redirect( esc_url_raw( add_query_arg( array( 'edit-key' => $key_id, 'status' => $e->getCode() ), $url ) ) );
 			exit();
 		}
+	}
+
+	/**
+	 * Revoke key
+	 */
+	private function revoke_key() {
+		global $wpdb;
+
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'revoke' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		}
+
+		$key_id = absint( $_GET['revoke-key'] );
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ), array( '%d' ) );
+
+		wp_redirect( esc_url_raw( add_query_arg( array( 'status' => 3 ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ) ) );
+		exit();
 	}
 }
 
