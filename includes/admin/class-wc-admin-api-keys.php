@@ -124,8 +124,8 @@ class WC_Admin_API_Keys {
 			}
 
 			// Bulk actions
-			if ( isset( $_GET['action'] ) && isset( $_GET['keys'] ) ) {
-				// $this->bulk_actions();
+			if ( isset( $_GET['action'] ) && isset( $_GET['key'] ) ) {
+				$this->bulk_actions();
 			}
 		}
 	}
@@ -248,17 +248,55 @@ class WC_Admin_API_Keys {
 	 * Revoke key
 	 */
 	private function revoke_key() {
-		global $wpdb;
-
 		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'revoke' ) ) {
 			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 		}
 
 		$key_id = absint( $_GET['revoke-key'] );
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ), array( '%d' ) );
+		$this->remove_key( $key_id );
 
 		wp_redirect( esc_url_raw( add_query_arg( array( 'status' => 3 ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ) ) );
 		exit();
+	}
+
+	/**
+	 * Bulk actions
+	 */
+	private function bulk_actions() {
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
+			wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		}
+
+		$keys = array_map( 'absint', (array) $_GET['key'] );
+
+		if ( 'revoke' == $_GET['action'] ) {
+			$this->bulk_revoke_key( $keys );
+		}
+	}
+
+	/**
+	 * Bulk revoke key
+	 *
+	 * @param  array $keys
+	 */
+	private function bulk_revoke_key( $keys ) {
+		foreach ( $keys as $key_id ) {
+			$this->remove_key( $key_id );
+		}
+	}
+
+	/**
+	 * Remove key
+	 *
+	 * @param  int $key_id
+	 * @return bool
+	 */
+	private function remove_key( $key_id ) {
+		global $wpdb;
+
+		$delete = $wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ), array( '%d' ) );
+
+		return $delete;
 	}
 }
 
