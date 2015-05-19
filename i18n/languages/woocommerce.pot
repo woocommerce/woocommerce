@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.3.8 Frontend\n"
+"Project-Id-Version: WooCommerce 2.3.9 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-04-17 15:06:22+00:00\n"
+"POT-Creation-Date: 2015-05-19 20:00:59+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5177,34 +5177,34 @@ msgid "You do not have permission to create products"
 msgstr ""
 
 #: includes/api/class-wc-api-products.php:212
-#: includes/api/class-wc-api-products.php:326
+#: includes/api/class-wc-api-products.php:327
 msgid "Invalid product type - the product type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:420
-#: includes/api/class-wc-api-products.php:456
+#: includes/api/class-wc-api-products.php:421
+#: includes/api/class-wc-api-products.php:457
 msgid "You do not have permission to read product categories"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:451
+#: includes/api/class-wc-api-products.php:452
 msgid "Invalid product category ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:462
+#: includes/api/class-wc-api-products.php:463
 msgid "A product category with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:725
-#: includes/api/class-wc-api-products.php:1183
+#: includes/api/class-wc-api-products.php:726
+#: includes/api/class-wc-api-products.php:1184
 msgid "The SKU already exists on another product"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1136
+#: includes/api/class-wc-api-products.php:1137
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1611
-#: includes/api/class-wc-api-products.php:1612
+#: includes/api/class-wc-api-products.php:1613
+#: includes/api/class-wc-api-products.php:1614
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
 #: includes/wc-product-functions.php:272
@@ -5212,19 +5212,19 @@ msgstr ""
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1686
+#: includes/api/class-wc-api-products.php:1688
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1698
+#: includes/api/class-wc-api-products.php:1700
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1727
+#: includes/api/class-wc-api-products.php:1729
 msgid "Zero size file downloaded"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1861
+#: includes/api/class-wc-api-products.php:1863
 msgid "Invalid product SKU"
 msgstr ""
 
@@ -5731,77 +5731,81 @@ msgstr ""
 msgid "Phone"
 msgstr ""
 
-#: includes/class-wc-coupon.php:683
+#: includes/class-wc-coupon.php:681
 msgid "Coupon code applied successfully."
 msgstr ""
 
-#: includes/class-wc-coupon.php:686
+#: includes/class-wc-coupon.php:684
 msgid "Coupon code removed successfully."
 msgstr ""
 
-#: includes/class-wc-coupon.php:704
+#: includes/class-wc-coupon.php:702
 msgid "Coupon is not valid."
 msgstr ""
 
-#: includes/class-wc-coupon.php:707 includes/class-wc-coupon.php:790
-msgid "Coupon does not exist!"
+#: includes/class-wc-coupon.php:705
+msgid "Coupon \"%s\" does not exist!"
 msgstr ""
 
-#: includes/class-wc-coupon.php:710
+#: includes/class-wc-coupon.php:708
 msgid ""
 "Sorry, it seems the coupon \"%s\" is invalid - it has now been removed from "
 "your order."
 msgstr ""
 
-#: includes/class-wc-coupon.php:713
+#: includes/class-wc-coupon.php:711
 msgid ""
 "Sorry, it seems the coupon \"%s\" is not yours - it has now been removed "
 "from your order."
 msgstr ""
 
-#: includes/class-wc-coupon.php:716
+#: includes/class-wc-coupon.php:714
 msgid "Coupon code already applied!"
 msgstr ""
 
-#: includes/class-wc-coupon.php:719
+#: includes/class-wc-coupon.php:717
 msgid ""
 "Sorry, coupon \"%s\" has already been applied and cannot be used in "
 "conjunction with other coupons."
 msgstr ""
 
-#: includes/class-wc-coupon.php:722
+#: includes/class-wc-coupon.php:720
 msgid "Coupon usage limit has been reached."
 msgstr ""
 
-#: includes/class-wc-coupon.php:725
+#: includes/class-wc-coupon.php:723
 msgid "This coupon has expired."
 msgstr ""
 
-#: includes/class-wc-coupon.php:728
+#: includes/class-wc-coupon.php:726
 msgid "The minimum spend for this coupon is %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:731
+#: includes/class-wc-coupon.php:729
 msgid "The maximum spend for this coupon is %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:734
+#: includes/class-wc-coupon.php:732
 msgid "Sorry, this coupon is not applicable to your cart contents."
 msgstr ""
 
-#: includes/class-wc-coupon.php:747
+#: includes/class-wc-coupon.php:745
 msgid "Sorry, this coupon is not applicable to the products: %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:767
+#: includes/class-wc-coupon.php:765
 msgid "Sorry, this coupon is not applicable to the categories: %s."
 msgstr ""
 
-#: includes/class-wc-coupon.php:770
+#: includes/class-wc-coupon.php:768
 msgid "Sorry, this coupon is not valid for sale items."
 msgstr ""
 
-#: includes/class-wc-coupon.php:793
+#: includes/class-wc-coupon.php:788
+msgid "Coupon does not exist!"
+msgstr ""
+
+#: includes/class-wc-coupon.php:791
 msgid "Please enter a coupon code."
 msgstr ""
 
@@ -7188,15 +7192,15 @@ msgstr ""
 msgid "What is PayPal?"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:203
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:204
 msgid "Gateway Disabled"
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:203
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:204
 msgid "PayPal does not support your store currency."
 msgstr ""
 
-#: includes/gateways/paypal/class-wc-gateway-paypal.php:291
+#: includes/gateways/paypal/class-wc-gateway-paypal.php:292
 msgid "Refunded %s - Refund ID: %s"
 msgstr ""
 
@@ -9968,12 +9972,12 @@ msgctxt "Order date parsed by strftime"
 msgid "%b %d, %Y @ %I:%M %p"
 msgstr ""
 
-#: includes/wc-page-functions.php:106
+#: includes/wc-page-functions.php:112
 msgctxt "edit-address-slug"
 msgid "billing"
 msgstr ""
 
-#: includes/wc-page-functions.php:107
+#: includes/wc-page-functions.php:113
 msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr ""
