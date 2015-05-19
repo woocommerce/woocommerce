@@ -779,8 +779,8 @@ class WC_Shortcodes {
 	 */
 	public static function related_products( $atts ) {
 		$atts = shortcode_atts( array(
-			'posts_per_page' => '2',
-			'columns'        => '2',
+			'posts_per_page' => '4',
+			'columns'        => '4',
 			'orderby'        => 'rand'
 		), $atts );
 

@@ -1059,9 +1059,9 @@ if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 	function woocommerce_output_related_products() {
 
 		$args = array(
-			'posts_per_page' => 2,
-			'columns' => 2,
-			'orderby' => 'rand'
+			'posts_per_page' 	=> 4,
+			'columns' 			=> 4,
+			'orderby' 			=> 'rand'
 		);
 
 		woocommerce_related_products( apply_filters( 'woocommerce_output_related_products_args', $args ) );
@@ -1111,7 +1111,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 * @param int $columns (default: 2)
 	 * @param string $orderby (default: 'rand')
 	 */
-	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 2, $orderby = 'rand' ) {
+	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 4, $orderby = 'rand' ) {
 		wc_get_template( 'single-product/up-sells.php', array(
 				'posts_per_page'	=> $posts_per_page,
 				'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
