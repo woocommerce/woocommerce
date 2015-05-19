@@ -1430,7 +1430,7 @@ class WC_Admin_Post_Types {
 		$post_ids = array_unique( array_merge(
 			$wpdb->get_col(
 				$wpdb->prepare( "
-					SELECT p1.post_id
+					SELECT DISTINCT p1.post_id
 					FROM {$wpdb->postmeta} p1
 					INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
 					WHERE
