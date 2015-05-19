@@ -590,7 +590,7 @@ class WC_AJAX {
 			$attribute_position      = $data['attribute_position'];
 			$attribute_names_max_key = max( $attribute_names );
 
-			for ( $i = 0; $i < $attribute_names_max_key; $i++ ) {
+			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
 				if ( empty( $attribute_names[ $i ] ) ) {
 					continue;
 				}

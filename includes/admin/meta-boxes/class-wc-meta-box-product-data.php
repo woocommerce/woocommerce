@@ -982,7 +982,7 @@ class WC_Meta_Box_Product_Data {
 			$attribute_position      = $_POST['attribute_position'];
 			$attribute_names_max_key = max( $attribute_names );
 
-			for ( $i = 0; $i < $attribute_names_max_key; $i++ ) {
+			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
 				if ( empty( $attribute_names[ $i ] ) ) {
 					continue;
 				}
