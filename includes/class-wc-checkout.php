@@ -363,7 +363,7 @@ class WC_Checkout {
 
 			do_action( 'woocommerce_before_checkout_process' );
 
-			if ( 0 === sizeof( WC()->cart->get_cart() ) ) {
+			if ( WC()->cart->is_empty() ) {
 				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to homepage</a>', 'woocommerce' ), home_url() ) );
 			}
 

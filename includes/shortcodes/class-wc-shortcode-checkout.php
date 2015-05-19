@@ -205,7 +205,7 @@ class WC_Shortcode_Checkout {
 		wc_print_notices();
 
 		// Check cart has contents
-		if ( sizeof( WC()->cart->get_cart() ) == 0 ) {
+		if ( WC()->cart->is_empty() ) {
 			return;
 		}
 
