@@ -139,6 +139,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.3.9 - 19/05/2015 =
+* Fix - Fixed language upgrader verification.
+* Fix - Refund reporting #8010
+* Fix - Redirect after bulk editing.
+* Fix - Prevent variable overwrite in save_product_meta.
+* Fix - Fix stock report pagination.
+* Fix - Fixed paypal about URL for Malta.
+* Fix - Fixed save downloadable files for product variations.
+* Fix - Remove submitdiv and fix post status updating.
+* Fix - Fixed the sort order dropdown items when create new product attributes.
+* Fix - Move action to prevent infinite recursion on login/restoring saved carts.
 * Fix - Update PrettyPhoto to 3.1.6 to resolve XSS security issue https://github.com/scaron/prettyphoto/issues/149
 
 = 2.3.8 - 20/04/2015 =
