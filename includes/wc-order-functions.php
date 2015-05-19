@@ -51,13 +51,7 @@ function wc_is_order_status( $maybe_status ) {
  * @return WC_Order
  */
 function wc_get_order( $the_order = false ) {
-	$order = WC()->order_factory->get_order( $the_order );
-
-	if ( is_object( $order ) && wc_get_order_type( $order->post->post_type ) ) {
-		return $order;
-	}
-
-	return false;
+	return WC()->order_factory->get_order( $the_order );
 }
 
 /**

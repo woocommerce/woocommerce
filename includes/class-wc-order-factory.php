@@ -44,7 +44,7 @@ class WC_Order_Factory {
 		$classname = apply_filters( 'woocommerce_order_class', $classname, $post_type, $order_id, $the_order );
 
 		if ( ! class_exists( $classname ) ) {
-			$classname = 'WC_Order';
+			return false;
 		}
 
 		return new $classname( $the_order );
