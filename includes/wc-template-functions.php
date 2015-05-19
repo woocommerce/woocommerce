@@ -1492,9 +1492,9 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			}
 
 			echo $after;
-		}
 
-		return true;
+			return true;
+		}
 	}
 }
 
