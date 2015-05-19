@@ -74,7 +74,7 @@ class WC_Language_Pack_Upgrader {
 	public function has_available_update() {
 		$locale  = get_locale();
 
-		if ( 'en_US' !== $locale ) {
+		if ( 'en_US' === $locale ) {
 			return false;
 		}
 
