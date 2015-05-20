@@ -138,6 +138,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Tweak - Bump the PrettyPhoto version during enqueue to flush caches.
+* Tweak - Remove all instances of sslverify=false #8058
+
 = 2.3.9 - 19/05/2015 =
 * Fix - Fixed language upgrader verification.
 * Fix - Refund reporting #8010
