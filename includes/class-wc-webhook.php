@@ -176,7 +176,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Deliver the webhook payload using wp_remote_request()
+	 * Deliver the webhook payload using wp_safe_remote_request()
 	 *
 	 * @since 2.2
 	 * @param mixed $arg first hook argument
@@ -211,7 +211,7 @@ class WC_Webhook {
 		$start_time = microtime( true );
 
 		// webhook away!
-		$response = wp_remote_request( $this->get_delivery_url(), $http_args );
+		$response = wp_safe_remote_request( $this->get_delivery_url(), $http_args );
 
 		$duration = round( microtime( true ) - $start_time, 5 );
 
@@ -595,7 +595,7 @@ class WC_Webhook {
 			'body'       => "webhook_id={$this->id}",
 		);
 
-		wp_remote_post( $this->get_delivery_url(), $args );
+		wp_safe_remote_post( $this->get_delivery_url(), $args );
 	}
 
 	/**
