@@ -97,6 +97,14 @@ class WC_Admin_Notices {
 	 */
 	public function hide_notices() {
 		if ( isset( $_GET['wc-hide-notice'] ) ) {
+			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce_hide_notices_nonce' ) ) {
+				wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+			}
+
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( __( 'Cheatin&#8217; huh?', 'woocommerce' ) );
+			}
+
 			$hide_notice = sanitize_text_field( $_GET['wc-hide-notice'] );
 			self::remove_notice( $hide_notice );
 			do_action( 'woocommerce_hide_' . $hide_notice . '_notice' );
