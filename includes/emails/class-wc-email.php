@@ -683,7 +683,18 @@ class WC_Email extends WC_Settings_API {
 	 */
 	protected function admin_actions() {
 		// Handle any actions
-		if ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) {
+		if (
+			( ! empty( $this->template_html ) || ! empty( $this->template_plain ) )
+			&& ( ! empty( $_GET['move_template'] ) || ! empty( $_GET['delete_template'] ) )
+		) {
+
+			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce_email_template_nonce' ) ) {
+				wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+			}
+
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( __( 'Cheatin&#8217; huh?', 'woocommerce' ) );
+			}
 
 			if ( ! empty( $_GET['move_template'] ) ) {
 				$this->move_template_action( $_GET['move_template'] );
@@ -764,7 +775,7 @@ class WC_Email extends WC_Settings_API {
 								<a href="#" class="button toggle_editor"></a>
 
 								<?php if ( is_writable( $local_file ) ) : ?>
-									<a href="<?php echo esc_url( remove_query_arg( array( 'move_template', 'saved' ), add_query_arg( 'delete_template', $template_type ) ) ); ?>" class="delete_template button"><?php _e( 'Delete template file', 'woocommerce' ); ?></a>
+									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'move_template', 'saved' ), add_query_arg( 'delete_template', $template_type ) ), 'woocommerce_email_template_nonce' ) ); ?>" class="delete_template button"><?php _e( 'Delete template file', 'woocommerce' ); ?></a>
 								<?php endif; ?>
 
 								<?php printf( __( 'This template has been overridden by your theme and can be found in: <code>%s</code>.', 'woocommerce' ), 'yourtheme/' . $template_dir . '/' . $template ); ?>
@@ -780,7 +791,7 @@ class WC_Email extends WC_Settings_API {
 								<a href="#" class="button toggle_editor"></a>
 
 								<?php if ( ( is_dir( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) && is_writable( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) ) || is_writable( get_stylesheet_directory() ) ) { ?>
-									<a href="<?php echo esc_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
+									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
 								<?php } ?>
 
 								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , 'yourtheme/' . $template_dir . '/' . $template ); ?>
