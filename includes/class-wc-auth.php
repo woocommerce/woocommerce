@@ -237,14 +237,13 @@ class WC_Auth {
 	protected function post_consumer_data( $consumer_data, $url ) {
 		$params = array(
 			'body'      => json_encode( $consumer_data ),
-			'sslverify' => false,
 			'timeout'   => 60,
 			'headers'   => array(
 				'Content-Type' => 'application/xml;charset=' . get_bloginfo( 'charset' ),
 			)
 		);
 
-		$response = wp_remote_post( esc_url_raw( urldecode( $url ) ), $params );
+		$response = wp_safe_remote_post( esc_url_raw( urldecode( $url ) ), $params );
 
 		if ( is_wp_error( $response ) ) {
 			throw new Exception( $response->get_error_message() );
