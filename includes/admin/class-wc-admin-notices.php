@@ -96,8 +96,8 @@ class WC_Admin_Notices {
 	 * Hide a notice if the GET variable is set.
 	 */
 	public function hide_notices() {
-		if ( isset( $_GET['wc-hide-notice'] ) ) {
-			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce_hide_notices_nonce' ) ) {
+		if ( isset( $_GET['wc-hide-notice'] ) && isset( $_GET['_wc_notice_nonce'] ) ) {
+			if ( ! wp_verify_nonce( $_GET['_wc_notice_nonce'], 'woocommerce_hide_notices_nonce' ) ) {
 				wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 			}
 
