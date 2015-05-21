@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Email Class
  *
@@ -569,7 +570,7 @@ class WC_Email extends WC_Settings_API {
 	 * @param string $template_path
 	 */
 	protected function save_template( $template_code, $template_path ) {
-		if ( ! empty( $template_code ) && ! empty( $template_path ) ) {
+		if ( current_user_can( 'edit_themes' ) && ! empty( $template_code ) && ! empty( $template_path ) ) {
 			$saved  = false;
 			$file   = get_stylesheet_directory() . '/woocommerce/' . $template_path;
 			$code   = stripslashes( $template_code );
@@ -676,13 +677,14 @@ class WC_Email extends WC_Settings_API {
 		if (
 			( ! empty( $this->template_html ) || ! empty( $this->template_plain ) )
 			&& ( ! empty( $_GET['move_template'] ) || ! empty( $_GET['delete_template'] ) )
+			&& $_SERVER['REQUEST_METHOD'] == 'GET'
 		) {
 
 			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce_email_template_nonce' ) ) {
 				wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 			}
 
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			if ( ! current_user_can( 'edit_themes' ) ) {
 				wp_die( __( 'Cheatin&#8217; huh?', 'woocommerce' ) );
 			}
 
@@ -735,7 +737,7 @@ class WC_Email extends WC_Settings_API {
 			do_action( 'woocommerce_email_settings_after', $this );
 		?>
 
-		<?php if ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) { ?>
+		<?php if ( current_user_can( 'edit_themes' ) && ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) ) { ?>
 			<div id="template">
 			<?php
 				$templates = array(
