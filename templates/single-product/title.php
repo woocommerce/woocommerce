@@ -2,9 +2,9 @@
 /**
  * Single Product title
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.3.10
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,4 +12,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<h1 itemprop="name" class="product_title entry-title"><?php the_title(); ?></h1>
+<h1 itemprop="name" class="product_title entry-title"><?php echo esc_html( get_the_title() ); ?></h1>
