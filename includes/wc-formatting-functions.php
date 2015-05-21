@@ -254,21 +254,24 @@ function wc_clean( $var ) {
 }
 
 /**
- * Sanitize a string destined to be a tooltip. Prevents XSS.
+ * Sanitize a string destined to be a tooltip.
+ *
+ * @since 2.3.10 Tooltips are encoded with htmlspecialchars to prevent XSS. Should not be used in conjunction with esc_attr()
  * @param string $var
  * @return string
  */
 function wc_sanitize_tooltip( $var ) {
-	return wp_kses( html_entity_decode( $var ), array(
+	return htmlspecialchars( wp_kses( html_entity_decode( $var ), array(
 		'br'     => array(),
 		'em'     => array(),
 		'strong' => array(),
+		'small'  => array(),
 		'span'   => array(),
 		'ul'     => array(),
 		'li'     => array(),
 		'ol'     => array(),
 		'p'      => array(),
-    ) );
+    ) ) );
 }
 
 /**
