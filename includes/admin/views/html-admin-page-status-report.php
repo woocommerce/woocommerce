@@ -218,7 +218,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce');
 			$posting['wp_remote_post']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) . '">[?]</a>';
 
-			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
+			$response = wp_safe_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
 				'timeout'    => 60,
 				'user-agent' => 'WooCommerce/' . WC()->version,
 				'body'       => array(
@@ -242,7 +242,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
 			$posting['wp_remote_get']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) . '">[?]</a>';
 
-			$response = wp_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+			$response = wp_safe_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
 
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				$posting['wp_remote_get']['success'] = true;
@@ -371,7 +371,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( strstr( $dirname, 'woocommerce-' ) ) {
 
 					if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
-						$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
+						$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 						$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
 						if ( ! empty( $cl_lines ) ) {
 							foreach ( $cl_lines as $line_num => $cl_line ) {
@@ -599,7 +599,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->Name ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {
-				$theme_changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
+				$theme_changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
 				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
 				if ( ! empty( $cl_lines ) ) {
 					foreach ( $cl_lines as $line_num => $cl_line ) {

@@ -628,7 +628,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 		$transient_name = 'wc_upgrade_notice_' . $args['Version'];
 
 		if ( false === ( $upgrade_notice = get_transient( $transient_name ) ) ) {
-			$response = wp_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
+			$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 
 			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
 				$upgrade_notice = self::parse_update_notice( $response['body'] );

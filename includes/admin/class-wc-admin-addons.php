@@ -24,7 +24,7 @@ class WC_Admin_Addons {
 
 		if ( false === ( $addons = get_transient( 'woocommerce_addons_data' ) ) ) {
 
-			$addons_json = wp_remote_get( 'http://d3t0oesq8995hv.cloudfront.net/woocommerce-addons.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+			$addons_json = wp_safe_remote_get( 'http://d3t0oesq8995hv.cloudfront.net/woocommerce-addons.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
 
 			if ( ! is_wp_error( $addons_json ) ) {
 
