@@ -2,9 +2,9 @@
 /**
  * Email Header
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates/Emails
- * @version     2.3.0
+ * @author  WooThemes
+ * @package WooCommerce/Templates/Emails
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
