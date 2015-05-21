@@ -33,7 +33,10 @@ $args = apply_filters( 'woocommerce_related_products_args', array(
 
 $products = new WP_Query( $args );
 
-$woocommerce_loop['columns'] = $columns;
+// Store column count for displaying the grid
+if ( empty( $woocommerce_loop['columns'] ) ) {
+	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
+}
 
 if ( $products->have_posts() ) : ?>
 
