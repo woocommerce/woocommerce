@@ -53,7 +53,7 @@ class WC_Gateway_Paypal_Refund {
 	 * @return array|wp_error The parsed response from paypal, or a WP_Error object
 	 */
 	public static function refund_order( $order, $amount = null, $reason = '', $sandbox = false ) {
-		$response = wp_remote_post(
+		$response = wp_safe_remote_post(
 			$sandbox ? 'https://api-3t.sandbox.paypal.com/nvp' : 'https://api-3t.paypal.com/nvp',
 			array(
 				'method'      => 'POST',

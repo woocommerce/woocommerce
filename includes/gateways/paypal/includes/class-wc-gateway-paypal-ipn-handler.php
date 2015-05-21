@@ -84,7 +84,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		);
 
 		// Post back to get a response
-		$response = wp_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $params );
+		$response = wp_safe_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $params );
 
 		WC_Gateway_Paypal::log( 'IPN Request: ' . print_r( $params, true ) );
 		WC_Gateway_Paypal::log( 'IPN Response: ' . print_r( $response, true ) );

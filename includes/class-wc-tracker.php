@@ -60,7 +60,7 @@ class WC_Tracker {
 		update_option( 'woocommerce_tracker_last_send', time() );
 
 		$params   = self::get_tracking_data();
-		$response = wp_remote_post( self::$api_url, array(
+		$response = wp_safe_remote_post( self::$api_url, array(
 				'method'      => 'POST',
 				'timeout'     => 45,
 				'redirection' => 5,

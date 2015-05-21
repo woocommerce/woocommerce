@@ -98,7 +98,7 @@ class WC_Geolocation {
 
 			foreach ( $ip_lookup_services_keys as $service_name ) {
 				$service_endpoint = $ip_lookup_services[ $service_name ];
-				$response         = wp_remote_get( $service_endpoint, array( 'timeout' => 2 ) );
+				$response         = wp_safe_remote_get( $service_endpoint, array( 'timeout' => 2 ) );
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					$external_ip_address = apply_filters( 'woocommerce_geolocation_ip_lookup_api_response', wc_clean( $response['body'] ), $service_name );
@@ -219,7 +219,7 @@ class WC_Geolocation {
 
 			foreach ( $geoip_services_keys as $service_name ) {
 				$service_endpoint = $geoip_services[ $service_name ];
-				$response         = wp_remote_get( sprintf( $service_endpoint, $ip_address ), array( 'timeout' => 2 ) );
+				$response         = wp_safe_remote_get( sprintf( $service_endpoint, $ip_address ), array( 'timeout' => 2 ) );
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {
