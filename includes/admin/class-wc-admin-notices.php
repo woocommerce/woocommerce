@@ -167,7 +167,7 @@ class WC_Admin_Notices {
 	 * Show the Theme Check notice
 	 */
 	public function theme_check_notice() {
-		if ( ! current_theme_supports( 'woocommerce' ) ) {
+		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
 			include( 'views/html-notice-theme-support.php' );
 		}
 	}
