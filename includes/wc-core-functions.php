@@ -70,7 +70,7 @@ function wc_admin_bar_site_menu( $wp_admin_bar ) {
 	// Create submenu item.
 	$shop_page_url = get_permalink( woocommerce_get_page_id( 'shop' ) );
 	
-	if ( is_admin() ) {
+	if ( is_admin() && $shop_page_url != home_url() ) {
 		// Add an option to visit the store.
 		$wp_admin_bar->add_menu( array(
 			'parent' => 'site-name',
