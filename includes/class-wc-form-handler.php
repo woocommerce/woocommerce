@@ -385,7 +385,7 @@ class WC_Form_Handler {
 				$product = wc_get_product( $cart_item['product_id'] );
 				$undo    = WC()->cart->get_undo_url( $cart_item_key );
 
-				wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $product ? $product->get_title() : __( 'Item', 'woocommerce' ), '<a href="' . esc_url( $undo ) . '">', '</a>' ) );
+				wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), apply_filters( 'woocommerce_cart_item_removed_title', $product ? $product->get_title() : __( 'Item', 'woocommerce' ), $cart_item ), '<a href="' . esc_url( $undo ) . '">', '</a>' ) );
 			}
 
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : WC()->cart->get_cart_url();
