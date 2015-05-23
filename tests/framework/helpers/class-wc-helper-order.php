@@ -23,7 +23,6 @@ class WC_Helper_Order {
 
 		WC_Helper_Shipping::delete_simple_flat_rate();
 
-
 		// Delete the order post
 		wp_delete_post( $order_id, true );
 	}
@@ -45,7 +44,7 @@ class WC_Helper_Order {
 			'status'        => 'pending',
 			'customer_id'   => 1,
 			'customer_note' => '',
-			'total' 		=> '',
+			'total'         => '',
 		);
 
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1'; // Required, else wc_create_order throws an exception
@@ -56,20 +55,19 @@ class WC_Helper_Order {
 
 		// Set billing address
 		$billing_address = array(
-			'country' 		=> 'US',
-			'first_name'	=> 'Jeroen',
-			'last_name' 	=> 'Sormani',
-			'company' 		=> 'WooCompany',
-			'address_1' 	=> 'WooAddress',
-			'address_2' 	=> '',
-			'postcode' 		=> '123456',
-			'city' 			=> 'WooCity',
-			'state' 		=> 'NY',
-			'email' 		=> 'admin@example.org',
-			'phone' 		=> '555-32123',
+			'country'    => 'US',
+			'first_name' => 'Jeroen',
+			'last_name'  => 'Sormani',
+			'company'    => 'WooCompany',
+			'address_1'  => 'WooAddress',
+			'address_2'  => '',
+			'postcode'   => '123456',
+			'city'       => 'WooCity',
+			'state'      => 'NY',
+			'email'      => 'admin@example.org',
+			'phone'      => '555-32123',
 		);
 		$order->set_address( $billing_address, 'billing' );
-
 
 		// Add shipping costs
 		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
