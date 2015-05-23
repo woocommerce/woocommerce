@@ -52,7 +52,7 @@ class WC_Helper_Order {
 		$order 					= wc_create_order( $order_data );
 
 		// Add order products
-		$item_id = $order->add_product( $product, 1 );
+		$item_id = $order->add_product( $product, 4 );
 
 		// Set billing address
 		$billing_address = array(
@@ -85,7 +85,7 @@ class WC_Helper_Order {
 		$order->set_total( 0, 'cart_discount_tax' );
 		$order->set_total( 0, 'tax' );
 		$order->set_total( 0, 'shipping_tax' );
-		$order->set_total( 45, 'total' );
+		$order->set_total( 40, 'total' ); // 4 x $10 simple helper product
 
 		return new WC_Order( $order->id );
 	}
