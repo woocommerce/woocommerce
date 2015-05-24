@@ -85,7 +85,7 @@ extract( $variation_data );
 
 				<?php do_action( 'woocommerce_variation_options', $loop, $variation_data, $variation ); ?>
 			</p>
-
+			<?php do_action( 'woocommerce_product_before_variable_attributes', $loop, $variation_data, $variation ); ?>
 			<div class="variable_pricing">
 				<p class="form-row form-row-first" id="variable_regular_price">
 					<label><?php echo __( 'Regular Price:', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')'; ?></label>
