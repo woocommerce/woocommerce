@@ -581,7 +581,7 @@ class WC_Admin_Post_Types {
 					$customer_tip[] = __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
 				}
 
-				echo '<div class="tips" data-tip="' . esc_attr( wc_sanitize_tooltip( $customer_tip ) ) . '">';
+				echo '<div class="tips" data-tip="' . esc_attr( wc_sanitize_tooltip( implode( "<br/>", $customer_tip ) ) ) . '">';
 
 				if ( $the_order->user_id ) {
 					$user_info = get_userdata( $the_order->user_id );
