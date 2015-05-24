@@ -10,7 +10,7 @@
 global $states;
 
 $states['IN'] = array(
-	'AP' => __( 'Andra Pradesh', 'woocommerce' ),
+	'AP' => __( 'Andhra Pradesh', 'woocommerce' ),
 	'AR' => __( 'Arunachal Pradesh', 'woocommerce' ),
 	'AS' => __( 'Assam', 'woocommerce' ),
 	'BR' => __( 'Bihar', 'woocommerce' ),
