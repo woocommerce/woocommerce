@@ -87,11 +87,11 @@ extract( $variation_data );
 			</p>
 
 			<div class="variable_pricing">
-				<p class="form-row form-row-first">
+				<p class="form-row form-row-first" id="variable_regular_price">
 					<label><?php echo __( 'Regular Price:', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')'; ?></label>
 					<input type="text" size="5" name="variable_regular_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_regular_price ) ) echo esc_attr( $_regular_price ); ?>" class="wc_input_price" placeholder="<?php _e( 'Variation price (required)', 'woocommerce' ); ?>" />
 				</p>
-				<p class="form-row form-row-last">
+				<p class="form-row form-row-last" id="variable_sale_price">
 					<label><?php echo __( 'Sale Price:', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')'; ?> <a href="#" class="sale_schedule"><?php _e( 'Schedule', 'woocommerce' ); ?></a><a href="#" class="cancel_sale_schedule" style="display:none"><?php _e( 'Cancel schedule', 'woocommerce' ); ?></a></label>
 					<input type="text" size="5" name="variable_sale_price[<?php echo $loop; ?>]" value="<?php if ( isset( $_sale_price ) ) echo esc_attr( $_sale_price ); ?>" class="wc_input_price" />
 				</p>
