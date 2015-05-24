@@ -47,19 +47,19 @@ class WC_Frontend_Scripts {
 	public static function get_styles() {
 		return apply_filters( 'woocommerce_enqueue_styles', array(
 			'woocommerce-layout' => array(
-				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-layout.css',
+				'src'     => WC()->plugin_url() . '/assets/css/woocommerce-layout.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
 				'media'   => 'all'
 			),
 			'woocommerce-smallscreen' => array(
-				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce-smallscreen.css',
+				'src'     => WC()->plugin_url() . '/assets/css/woocommerce-smallscreen.css',
 				'deps'    => 'woocommerce-layout',
 				'version' => WC_VERSION,
 				'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', $breakpoint = '768px' ) . ')'
 			),
 			'woocommerce-general' => array(
-				'src'     => str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/css/woocommerce.css',
+				'src'     => WC()->plugin_url() . '/assets/css/woocommerce.css',
 				'deps'    => '',
 				'version' => WC_VERSION,
 				'media'   => 'all'
@@ -110,7 +110,7 @@ class WC_Frontend_Scripts {
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$lightbox_en          = 'yes' === get_option( 'woocommerce_enable_lightbox' );
 		$ajax_cart_en         = 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart' );
-		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
+		$assets_path          = WC()->plugin_url() . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
 
 		// Chosen is @deprecated as of 2.3 in favour of 2.3. Here for backwards compatibility.
