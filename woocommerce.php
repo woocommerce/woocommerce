@@ -33,7 +33,12 @@ final class WooCommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.4.0-dev';
+	public $version = '';
+
+	/**
+	 * @var array
+	 */
+	public $plugin = array();
 
 	/**
 	 * @var WooCommerce The single instance of the class
@@ -129,6 +134,13 @@ final class WooCommerce {
 	 * WooCommerce Constructor.
 	 */
 	public function __construct() {
+		if ( ! function_exists( 'get_plugin_data' ) ) {
+			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		}
+
+		$this->plugin = get_plugin_data( __FILE__, false, false );
+		// Set the version based on this plugin's header Version
+		$this->version = $this->plugin[ 'Version' ];
 		$this->define_constants();
 		$this->includes();
 		$this->init_hooks();
