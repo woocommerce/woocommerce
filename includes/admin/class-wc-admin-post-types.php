@@ -667,14 +667,14 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_title' :
 
-				$customer_tip = '';
+				$customer_tip = array();
 
 				if ( $address = $the_order->get_formatted_billing_address() ) {
-					$customer_tip .= __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
+					$customer_tip[] = __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
 				}
 
 				if ( $the_order->billing_phone ) {
-					$customer_tip .= __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
+					$customer_tip[] = __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
 				}
 
 				echo '<div class="tips" data-tip="' . wc_sanitize_tooltip( implode( "<br/>", $customer_tip ) ) . '">';
