@@ -194,6 +194,16 @@ abstract class WC_Settings_API {
 	}
 
 	/**
+	 * Prefix key for settings.
+	 *
+	 * @param  mixed $key
+	 * @return string
+	 */
+	public function get_field_key( $key ) {
+		return $this->plugin_id . $this->id . '_' . $key;
+	}
+
+	/**
 	 * Decode values for settings.
 	 *
 	 * @param mixed $value
