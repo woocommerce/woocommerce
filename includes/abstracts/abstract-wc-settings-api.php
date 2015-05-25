@@ -315,7 +315,7 @@ abstract class WC_Settings_API {
 	 */
 	public function generate_text_html( $key, $data ) {
 
-		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
 			'disabled'          => false,
@@ -360,7 +360,7 @@ abstract class WC_Settings_API {
 	 */
 	public function generate_price_html( $key, $data ) {
 
-		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
 			'disabled'          => false,
@@ -405,7 +405,7 @@ abstract class WC_Settings_API {
 	 */
 	public function generate_decimal_html( $key, $data ) {
 
-		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
 			'disabled'          => false,
@@ -462,7 +462,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_color_html( $key, $data ) {
-		$field    = $this->plugin_id . $this->id . '_' . $key;
+
+		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
 			'disabled'          => false,
@@ -509,7 +510,7 @@ abstract class WC_Settings_API {
 	 */
 	public function generate_textarea_html( $key, $data ) {
 
-		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
 			'disabled'          => false,
@@ -554,7 +555,7 @@ abstract class WC_Settings_API {
 	 */
 	public function generate_checkbox_html( $key, $data ) {
 
-		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
 			'label'             => '',
@@ -604,7 +605,7 @@ abstract class WC_Settings_API {
 	 */
 	public function generate_select_html( $key, $data ) {
 
-		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
 			'disabled'          => false,
@@ -654,7 +655,7 @@ abstract class WC_Settings_API {
 	 */
 	public function generate_multiselect_html( $key, $data ) {
 
-		$field    = $this->plugin_id . $this->id . '_' . $key;
+		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
 			'disabled'          => false,
