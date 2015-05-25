@@ -767,27 +767,6 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Validate Checkbox Field.
-	 *
-	 * If not set, return "no", otherwise return "yes".
-	 *
-	 * @param  mixed $key
-	 * @since  1.0.0
-	 * @return string
-	 */
-	public function validate_checkbox_field( $key ) {
-
-		$status = 'no';
-		$field  = $this->get_field_key( $key );
-
-		if ( isset( $_POST[ $field ] ) && ( 1 == $_POST[ $field ] ) ) {
-			$status = 'yes';
-		}
-
-		return $status;
-	}
-
-	/**
 	 * Validate Text Field.
 	 *
 	 * Make sure the data is escaped correctly, etc.
@@ -905,6 +884,27 @@ abstract class WC_Settings_API {
 		}
 
 		return $text;
+	}
+
+	/**
+	 * Validate Checkbox Field.
+	 *
+	 * If not set, return "no", otherwise return "yes".
+	 *
+	 * @param  mixed $key
+	 * @since  1.0.0
+	 * @return string
+	 */
+	public function validate_checkbox_field( $key ) {
+
+		$status = 'no';
+		$field  = $this->get_field_key( $key );
+
+		if ( isset( $_POST[ $field ] ) && ( 1 == $_POST[ $field ] ) ) {
+			$status = 'yes';
+		}
+
+		return $status;
 	}
 
 	/**
