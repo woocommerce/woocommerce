@@ -48,10 +48,50 @@ class WC_Cache_Helper {
 		$transient_value = get_transient( $transient_name );
 
 		if ( false === $transient_value || true === $refresh ) {
-			$transient_value = time();
-			set_transient( $transient_name, $transient_value );
+			self::delete_version_transients( $transient_value );
+			set_transient( $transient_name, $transient_value = time() );
 		}
 		return $transient_value;
+	}
+
+	/**
+	 * When the transient version increases, this is used to remove all past transients to avoid filling the DB.
+	 *
+	 * Note; this only works on transients appended with the transient version, and when object caching is not being used.
+	 *
+	 * @since  2.3.10
+	 */
+	private static function delete_version_transients( $version ) {
+		if ( ! wp_using_ext_object_cache() ) {
+			global $wpdb;
+			$wpdb->query( $wpdb->prepare( "
+				DELETE a, b
+				FROM {$wpdb->options} a, {$wpdb->options} b
+				WHERE
+					( a.option_name LIKE %s OR a.option_name LIKE %s ) AND
+					a.option_name NOT LIKE '\_transient\_timeout\_%%' AND
+					a.option_name NOT LIKE '\_site\_transient\_timeout\_%%' AND
+					(
+						b.option_name = CONCAT(
+							'_transient_timeout_',
+							SUBSTRING(
+								a.option_name,
+								CHAR_LENGTH('_transient_') + 1
+							)
+						) OR
+						b.option_name = CONCAT(
+							'_site_transient_timeout_',
+							SUBSTRING(
+								a.option_name,
+								CHAR_LENGTH('_site_transient_') + 1
+							)
+						)
+					)
+			",
+			"\_transient\_%" . $version,
+			"\_site\_transient\_%" . $version
+			) );
+		}
 	}
 
 	/**
