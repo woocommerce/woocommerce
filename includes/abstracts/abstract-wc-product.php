@@ -1226,25 +1226,33 @@ class WC_Product {
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
-		global $wpdb;
+		$transient_name = 'wc_related_' . $limit . '_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-		// Related products are found from category and tag
-		$tags_array = $this->get_related_terms( 'product_tag' );
-		$cats_array = $this->get_related_terms( 'product_cat' );
+		if ( false === ( $related_posts = get_transient( $transient_name ) ) ) {
+			global $wpdb;
 
-		// Don't bother if none are set
-		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
-			return array();
+			// Related products are found from category and tag
+			$tags_array = $this->get_related_terms( 'product_tag' );
+			$cats_array = $this->get_related_terms( 'product_cat' );
+
+			// Don't bother if none are set
+			if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
+				$related_posts = array();
+			} else {
+				// Sanitize
+				$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
+
+				// Generate query
+				$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit );
+
+				// Get the posts
+				$related_posts = $wpdb->get_col( implode( ' ', $query ) );
+			}
+
+			set_transient( $transient_name, $related_posts, DAY_IN_SECONDS * 30 );
 		}
 
-		// Sanitize
-		$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
-
-		// Generate query
-		$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit );
-
-		// Get the posts
-		$related_posts = $wpdb->get_col( implode( ' ', $query ) );
+		shuffle( $related_posts );
 
 		return $related_posts;
 	}
@@ -1512,12 +1520,8 @@ class WC_Product {
 			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
 		}
 
-		$query = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
-
-		// Generate limit
-		$product_count   = wp_count_posts( 'product' );
-		$offset          = $product_count->publish < $limit ? 0 : absint( rand( 0, $product_count->publish - $limit ) );
-		$query['limits'] = " LIMIT {$offset}, {$limit} ";
+		$query['limits'] = " LIMIT {$limit} ";
+		$query           = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
 
 		return $query;
 	}
