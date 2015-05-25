@@ -91,6 +91,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				'default'  => 'geolocation',
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
+				'css'      => 'min-width: 350px;',
 				'options'  => array(
 					''            => __( 'No address', 'woocommerce' ),
 					'base'        => __( 'Shop base address', 'woocommerce' ),

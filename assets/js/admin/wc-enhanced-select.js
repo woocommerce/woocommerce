@@ -87,50 +87,30 @@ jQuery( function( $ ) {
 						return m;
 					},
 					ajax: {
-				        url:         wc_enhanced_select_params.ajax_url,
-				        dataType:    'json',
-				        quietMillis: 250,
-				        data: function( term, page ) {
-				            return {
-								term:     term,
+						url:         wc_enhanced_select_params.ajax_url,
+						dataType:    'json',
+						quietMillis: 250,
+						data: function( params ) {
+							return {
+								term:     params.term,
 								action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
 								security: wc_enhanced_select_params.search_products_nonce
-				            };
-				        },
-				        results: function( data, page ) {
-				        	var terms = [];
-					        if ( data ) {
+							};
+						},
+						processResults: function( data ) {
+							var terms = [];
+
+							if ( data ) {
 								$.each( data, function( id, text ) {
 									terms.push( { id: id, text: text } );
 								});
 							}
-				            return { results: terms };
-				        },
-				        cache: true
-				    }
+
+							return { results: terms };
+						},
+						cache: true
+					}
 				};
-
-				if ( $( this ).data( 'multiple' ) === true ) {
-					select2_args.multiple = true;
-					select2_args.initSelection = function( element, callback ) {
-						var data     = $.parseJSON( element.attr( 'data-selected' ) );
-						var selected = [];
-
-						$( element.val().split( "," ) ).each( function( i, val ) {
-							selected.push( { id: val, text: data[ val ] } );
-						});
-						return callback( selected );
-					};
-					select2_args.formatSelection = function( data ) {
-						return '<div class="selected-option" data-id="' + data.id + '">' + data.text + '</div>';
-					};
-				} else {
-					select2_args.multiple = false;
-					select2_args.initSelection = function( element, callback ) {
-						var data = {id: element.val(), text: element.attr( 'data-selected' )};
-						return callback( data );
-					};
-				}
 
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 
@@ -147,49 +127,30 @@ jQuery( function( $ ) {
 						return m;
 					},
 					ajax: {
-				        url:         wc_enhanced_select_params.ajax_url,
-				        dataType:    'json',
-				        quietMillis: 250,
-				        data: function( term, page ) {
-				            return {
-								term:     term,
+						url:         wc_enhanced_select_params.ajax_url,
+						dataType:    'json',
+						quietMillis: 250,
+						data: function( params ) {
+							return {
+								term:     params.term,
 								action:   'woocommerce_json_search_customers',
 								security: wc_enhanced_select_params.search_customers_nonce
-				            };
-				        },
-				        results: function( data, page ) {
-				        	var terms = [];
-					        if ( data ) {
+							};
+						},
+						processResults: function( data ) {
+							var terms = [];
+
+							if ( data ) {
 								$.each( data, function( id, text ) {
 									terms.push( { id: id, text: text } );
 								});
 							}
-				            return { results: terms };
-				        },
-				        cache: true
-				    }
-				};
-				if ( $( this ).data( 'multiple' ) === true ) {
-					select2_args.multiple = true;
-					select2_args.initSelection = function( element, callback ) {
-						var data     = $.parseJSON( element.attr( 'data-selected' ) );
-						var selected = [];
 
-						$( element.val().split( ',' ) ).each( function( i, val ) {
-							selected.push( { id: val, text: data[ val ] } );
-						});
-						return callback( selected );
-					};
-					select2_args.formatSelection = function( data ) {
-						return '<div class="selected-option" data-id="' + data.id + '">' + data.text + '</div>';
-					};
-				} else {
-					select2_args.multiple = false;
-					select2_args.initSelection = function( element, callback ) {
-						var data = {id: element.val(), text: element.attr( 'data-selected' )};
-						return callback( data );
-					};
-				}
+							return { results: terms };
+						},
+						cache: true
+					}
+				};
 
 				select2_args = $.extend( select2_args, getEnhancedSelectFormatString() );
 

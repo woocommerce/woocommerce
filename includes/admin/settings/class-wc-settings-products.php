@@ -293,6 +293,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc'     => '',
 					'id'       => 'woocommerce_stock_email_recipient',
 					'type'     => 'email',
+					'css'      => 'min-width: 350px;',
 					'default'  => get_option( 'admin_email' ),
 					'autoload' => false
 				),
