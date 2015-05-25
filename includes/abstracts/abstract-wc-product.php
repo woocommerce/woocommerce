@@ -1242,89 +1242,33 @@ class WC_Product {
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
-		global $wpdb;
+		$transient_name = 'wc_related_' . $limit . '_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-		$limit = absint( $limit );
+		if ( false === ( $related_posts = get_transient( $transient_name ) ) ) {
+			global $wpdb;
 
-		// Related products are found from category and tag
-		$tags_array = array(0);
-		$cats_array = array(0);
+			// Related products are found from category and tag
+			$tags_array = $this->get_related_terms( 'product_tag' );
+			$cats_array = $this->get_related_terms( 'product_cat' );
 
-		// Get tags
-		$terms = apply_filters( 'woocommerce_get_related_product_tag_terms', wp_get_post_terms( $this->id, 'product_tag' ), $this->id );
-		foreach ( $terms as $term ) {
-			$tags_array[] = $term->term_id;
+			// Don't bother if none are set
+			if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
+				$related_posts = array();
+			} else {
+				// Sanitize
+				$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
+
+				// Generate query
+				$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit );
+
+				// Get the posts
+				$related_posts = $wpdb->get_col( implode( ' ', $query ) );
+			}
+
+			set_transient( $transient_name, $related_posts, DAY_IN_SECONDS * 30 );
 		}
 
-		// Get categories
-		$terms = apply_filters( 'woocommerce_get_related_product_cat_terms', wp_get_post_terms( $this->id, 'product_cat' ), $this->id );
-		foreach ( $terms as $term ) {
-			$cats_array[] = $term->term_id;
-		}
-
-		// Don't bother if none are set
-		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
-			return array();
-		}
-
-		// Sanitize
-		$cats_array  = array_map( 'absint', $cats_array );
-		$tags_array  = array_map( 'absint', $tags_array );
-		$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
-
-		// Generate query
-		$query           = array();
-		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
-		$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
-		$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
-		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
-		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
-
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' ) {
-			$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
-		}
-
-		$query['where']  = " WHERE 1=1";
-		$query['where'] .= " AND p.post_status = 'publish'";
-		$query['where'] .= " AND p.post_type = 'product'";
-		$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
-		$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
-
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' ) {
-			$query['where'] .= " AND pm2.meta_value = 'instock'";
-		}
-
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $this->id ) ) {
-			$query['where'] .= " AND ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) )";
-			$andor = 'OR';
-		} else {
-			$andor = 'AND';
-		}
-
-		// when query is OR - need to check against excluded ids again
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $this->id ) ) {
-			$query['where'] .= " {$andor} ( ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
-			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
-		}
-
-		$query = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
-
-		// How many rows total?
-		$max_related_posts_transient_name = 'wc_max_related_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-		if ( false === ( $max_related_posts = get_transient( $max_related_posts_transient_name ) ) ) {
-			$max_related_posts_query           = $query;
-			$max_related_posts_query['fields'] = "SELECT COUNT(DISTINCT ID) FROM {$wpdb->posts} p";
-			$max_related_posts                 = absint( $wpdb->get_var( implode( ' ', apply_filters( 'woocommerce_product_max_related_posts_query', $max_related_posts_query, $this->id ) ) ) );
-			set_transient( $max_related_posts_transient_name, $max_related_posts, DAY_IN_SECONDS * 30 );
-		}
-
-		// Generate limit
-		$offset          = $max_related_posts < $limit ? 0 : absint( rand( 0, $max_related_posts - $limit ) );
-		$query['limits'] = " LIMIT {$offset}, {$limit} ";
-
-		// Get the posts
-		$related_posts = $wpdb->get_col( implode( ' ', $query ) );
+		shuffle( $related_posts );
 
 		return $related_posts;
 	}
@@ -1507,5 +1451,76 @@ class WC_Product {
 		}
 
 		return sprintf( __( '%s &ndash; %s', 'woocommerce' ), $identifier, $this->get_title() );
+	}
+
+	/**
+	 * Retrieves related product terms
+	 *
+	 * @param string $term
+	 * @return array
+	 */
+	protected function get_related_terms( $term ) {
+		$terms_array = array(0);
+
+		$terms = apply_filters( 'woocommerce_get_related_' . $term . '_terms', wp_get_post_terms( $this->id, $term ), $this->id );
+		foreach ( $terms as $term ) {
+			$terms_array[] = $term->term_id;
+		}
+
+		return array_map( 'absint', $terms_array );
+	}
+
+	/**
+	 * Builds the related posts query
+	 *
+	 * @param array $cats_array
+	 * @param array $tags_array
+	 * @param array $exclude_ids
+	 * @param int   $limit
+	 * @return string
+	 */
+	protected function build_related_query( $cats_array, $tags_array, $exclude_ids, $limit ) {
+		global $wpdb;
+
+		$limit = absint( $limit );
+
+		$query           = array();
+		$query['fields'] = "SELECT DISTINCT ID FROM {$wpdb->posts} p";
+		$query['join']   = " INNER JOIN {$wpdb->postmeta} pm ON ( pm.post_id = p.ID AND pm.meta_key='_visibility' )";
+		$query['join']  .= " INNER JOIN {$wpdb->term_relationships} tr ON (p.ID = tr.object_id)";
+		$query['join']  .= " INNER JOIN {$wpdb->term_taxonomy} tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id)";
+		$query['join']  .= " INNER JOIN {$wpdb->terms} t ON (t.term_id = tt.term_id)";
+
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' ) {
+			$query['join'] .= " INNER JOIN {$wpdb->postmeta} pm2 ON ( pm2.post_id = p.ID AND pm2.meta_key='_stock_status' )";
+		}
+
+		$query['where']  = " WHERE 1=1";
+		$query['where'] .= " AND p.post_status = 'publish'";
+		$query['where'] .= " AND p.post_type = 'product'";
+		$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " )";
+		$query['where'] .= " AND pm.meta_value IN ( 'visible', 'catalog' )";
+
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' ) {
+			$query['where'] .= " AND pm2.meta_value = 'instock'";
+		}
+
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $this->id ) ) {
+			$query['where'] .= " AND ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) )";
+			$andor = 'OR';
+		} else {
+			$andor = 'AND';
+		}
+
+		// when query is OR - need to check against excluded ids again
+		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $this->id ) ) {
+			$query['where'] .= " {$andor} ( ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
+			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
+		}
+
+		$query['limits'] = " LIMIT {$limit} ";
+		$query           = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
+
+		return $query;
 	}
 }
