@@ -336,7 +336,6 @@ final class WooCommerce {
 
 		$this->add_thumbnail_support();
 		$this->add_image_sizes();
-		$this->fix_server_vars();
 	}
 
 	/**
@@ -362,28 +361,6 @@ final class WooCommerce {
 		add_image_size( 'shop_thumbnail', $shop_thumbnail['width'], $shop_thumbnail['height'], $shop_thumbnail['crop'] );
 		add_image_size( 'shop_catalog', $shop_catalog['width'], $shop_catalog['height'], $shop_catalog['crop'] );
 		add_image_size( 'shop_single', $shop_single['width'], $shop_single['height'], $shop_single['crop'] );
-	}
-
-	/**
-	 * Fix `$_SERVER` variables for various setups.
-	 *
-	 * Note: Removed IIS handling due to wp_fix_server_vars()
-	 *
-	 * @since 2.3
-	 */
-	private function fix_server_vars() {
-		// NGINX Proxy
-		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) && isset( $_SERVER['HTTP_REMOTE_ADDR'] ) ) {
-			$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_REMOTE_ADDR'];
-		}
-
-		if ( ! isset( $_SERVER['HTTPS'] ) ) {
-			if ( ! empty( $_SERVER['HTTP_HTTPS'] ) ) {
-				$_SERVER['HTTPS'] = $_SERVER['HTTP_HTTPS'];
-			} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ) {
-				$_SERVER['HTTPS'] = '1';
-			}
-		}
 	}
 
 	/**
