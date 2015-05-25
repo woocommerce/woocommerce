@@ -85,10 +85,7 @@ class WC_API_Products extends WC_API_Resource {
 		);
 
 		# GET /products/sku/<product sku>
-		/**
-		 * Deprecated since 2.4.0
-		 */
-		$routes[ $this->base . '/sku/(?P<sku>\w+)' ] = array(
+		$routes[ $this->base . '/sku/(?P<sku>\w[\w\s\-]*)' ] = array(
 			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
 		);
 
