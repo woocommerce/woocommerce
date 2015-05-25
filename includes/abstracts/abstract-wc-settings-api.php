@@ -779,8 +779,9 @@ abstract class WC_Settings_API {
 	public function validate_checkbox_field( $key ) {
 
 		$status = 'no';
+		$field  = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) && ( 1 == $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
+		if ( isset( $_POST[ $field ] ) && ( 1 == $_POST[ $field ] ) ) {
 			$status = 'yes';
 		}
 
@@ -797,10 +798,11 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_text_field( $key ) {
 
-		$text = $this->get_option( $key );
+		$text  = $this->get_option( $key );
+		$field = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
-			$text = wp_kses_post( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
+		if ( isset( $_POST[ $field ] ) ) {
+			$text = wp_kses_post( trim( stripslashes( $_POST[ $field ] ) ) );
 		}
 
 		return $text;
@@ -816,12 +818,13 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_price_field( $key ) {
 
-		$text = $this->get_option( $key );
+		$text  = $this->get_option( $key );
+		$field = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
+		if ( isset( $_POST[ $field ] ) ) {
 
-			if ( $_POST[ $this->plugin_id . $this->id . '_' . $key ] !== '' ) {
-				$text = wc_format_decimal( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
+			if ( $_POST[ $field ] !== '' ) {
+				$text = wc_format_decimal( trim( stripslashes( $_POST[ $field ] ) ) );
 			} else {
 				$text = '';
 			}
@@ -840,12 +843,13 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_decimal_field( $key ) {
 
-		$text = $this->get_option( $key );
+		$text  = $this->get_option( $key );
+		$field = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
+		if ( isset( $_POST[ $field ] ) ) {
 
-			if ( $_POST[ $this->plugin_id . $this->id . '_' . $key ] !== '' ) {
-				$text = wc_format_decimal( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) );
+			if ( $_POST[ $field ] !== '' ) {
+				$text = wc_format_decimal( trim( stripslashes( $_POST[ $field ] ) ) );
 			} else {
 				$text = '';
 			}
@@ -865,10 +869,11 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_password_field( $key ) {
 
-		$text = $this->get_option( $key );
+		$text  = $this->get_option( $key );
+		$field = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
-			$text = wc_clean( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
+		if ( isset( $_POST[ $field ] ) ) {
+			$text = wc_clean( stripslashes( $_POST[ $field ] ) );
 		}
 
 		return $text;
@@ -885,11 +890,12 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_textarea_field( $key ) {
 
-		$text = $this->get_option( $key );
+		$text  = $this->get_option( $key );
+		$field = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
+		if ( isset( $_POST[ $field ] ) ) {
 
-			$text = wp_kses( trim( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ),
+			$text = wp_kses( trim( stripslashes( $_POST[ $field ] ) ),
 				array_merge(
 					array(
 						'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
@@ -914,9 +920,10 @@ abstract class WC_Settings_API {
 	public function validate_select_field( $key ) {
 
 		$value = $this->get_option( $key );
+		$field = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
-			$value = wc_clean( stripslashes( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
+		if ( isset( $_POST[ $field ] ) ) {
+			$value = wc_clean( stripslashes( $_POST[ $field ] ) );
 		}
 
 		return $value;
@@ -933,8 +940,10 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_multiselect_field( $key ) {
 
-		if ( isset( $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) ) {
-			$value = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $this->plugin_id . $this->id . '_' . $key ] ) );
+		$field = $this->get_field_key( $key );
+
+		if ( isset( $_POST[ $field ] ) ) {
+			$value = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $field ] ) );
 		} else {
 			$value = '';
 		}
