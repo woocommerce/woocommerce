@@ -1509,18 +1509,9 @@ class WC_Product {
 
 		$query = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
 
-		// How many rows total?
-		$max_related_posts_transient_name = 'wc_max_related_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-		if ( false === ( $max_related_posts = get_transient( $max_related_posts_transient_name ) ) ) {
-			$max_related_posts_query           = $query;
-			$max_related_posts_query['fields'] = "SELECT COUNT(DISTINCT ID) FROM {$wpdb->posts} p";
-			$max_related_posts                 = absint( $wpdb->get_var( implode( ' ', apply_filters( 'woocommerce_product_max_related_posts_query', $max_related_posts_query, $this->id ) ) ) );
-			set_transient( $max_related_posts_transient_name, $max_related_posts, DAY_IN_SECONDS * 30 );
-		}
-
 		// Generate limit
-		$offset          = $max_related_posts < $limit ? 0 : absint( rand( 0, $max_related_posts - $limit ) );
+		$product_count   = wp_count_posts( 'product' );
+		$offset          = $product_count->publish < $limit ? 0 : absint( rand( 0, $product_count->publish - $limit ) );
 		$query['limits'] = " LIMIT {$offset}, {$limit} ";
 
 		return $query;
