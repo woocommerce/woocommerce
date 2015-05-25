@@ -1050,28 +1050,33 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_rating_count( $value = null ) {
-		$value          = intval( $value );
-		$value_suffix   = $value ? '_' . $value : '';
-		$transient_name = 'wc_rating_count_' . $this->id . $value_suffix . WC_Cache_Helper::get_transient_version( 'product' );
+		$transient_name = 'wc_rating_count_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-		if ( false === ( $count = get_transient( $transient_name ) ) ) {
-
+		if ( ! is_array( $counts = get_transient( $transient_name ) ) ) {
 			global $wpdb;
-
-			$where_meta_value = $value ? $wpdb->prepare( " AND meta_value = %d", $value ) : " AND meta_value > 0";
-
-			$count = $wpdb->get_var( $wpdb->prepare("
-				SELECT COUNT(meta_value) FROM $wpdb->commentmeta
+			$counts     = array();
+			$raw_counts = $wpdb->get_results( $wpdb->prepare("
+				SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
 				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
 				WHERE meta_key = 'rating'
 				AND comment_post_ID = %d
 				AND comment_approved = '1'
-			", $this->id ) . $where_meta_value );
+				AND meta_value > 0
+				GROUP BY meta_value
+			", $this->id ) );
 
-			set_transient( $transient_name, $count, DAY_IN_SECONDS * 30 );
+			foreach ( $raw_counts as $count ) {
+				$counts[ $count->meta_value ] = $count->meta_value_count;
+			}
+
+			set_transient( $transient_name, $counts, DAY_IN_SECONDS * 30 );
 		}
 
-		return $count;
+		if ( is_null( $value ) ) {
+			return array_sum( $counts );
+		} else {
+			return isset( $counts[ $value ] ) ? $counts[ $value ] : 0;
+		}
 	}
 
 	/**
