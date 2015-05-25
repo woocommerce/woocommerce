@@ -58,8 +58,8 @@ class WC_Admin_Status {
 						FROM
 							{$wpdb->options} a, {$wpdb->options} b
 						WHERE
-							a.option_name LIKE '_transient_%' AND
-							a.option_name NOT LIKE '_transient_timeout_%' AND
+							a.option_name LIKE '\_transient\_%' AND
+							a.option_name NOT LIKE '\_transient\_timeout\_%' AND
 							b.option_name = CONCAT(
 								'_transient_timeout_',
 								SUBSTRING(
@@ -76,8 +76,8 @@ class WC_Admin_Status {
 						FROM
 							{$wpdb->options} a, {$wpdb->options} b
 						WHERE
-							a.option_name LIKE '_site_transient_%' AND
-							a.option_name NOT LIKE '_site_transient_timeout_%' AND
+							a.option_name LIKE '\_site\_transient\_%' AND
+							a.option_name NOT LIKE '\_site\_transient\_timeout\_%' AND
 							b.option_name = CONCAT(
 								'_site_transient_timeout_',
 								SUBSTRING(
