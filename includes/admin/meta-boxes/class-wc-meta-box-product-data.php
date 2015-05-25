@@ -158,6 +158,8 @@ class WC_Meta_Box_Product_Data {
 
 				echo '<div class="options_group pricing show_if_simple show_if_external">';
 
+					do_action( 'woocommerce_product_options_before_pricing' );
+
 					// Price
 					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'label' => __( 'Regular Price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')', 'data_type' => 'price' ) );
 

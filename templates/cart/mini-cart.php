@@ -35,10 +35,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<li class="<?php echo esc_attr( apply_filters( 'woocommerce_mini_cart_item_class', 'mini_cart_item', $cart_item, $cart_item_key ) ); ?>">
 						<?php echo apply_filters( 'woocommerce_cart_item_remove_link', sprintf( '<a href="%s" class="remove" title="%s">&times;</a>', esc_url( WC()->cart->get_remove_url( $cart_item_key ) ), __( 'Remove this item', 'woocommerce' ) ), $cart_item_key ); ?>
 						<?php if ( ! $_product->is_visible() ) : ?>
-							<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name . '&nbsp;'; ?>
+							<?php echo esc_url( $thumbnail ) . $product_name . '&nbsp;'; ?>
 						<?php else : ?>
 							<a href="<?php echo esc_url( $_product->get_permalink( $cart_item ) ); ?>">
-								<?php echo str_replace( array( 'http:', 'https:' ), '', $thumbnail ) . $product_name . '&nbsp;'; ?>
+								<?php echo esc_url( $thumbnail ) . $product_name . '&nbsp;'; ?>
 							</a>
 						<?php endif; ?>
 						<?php echo WC()->cart->get_item_data( $cart_item ); ?>
