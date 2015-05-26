@@ -29,12 +29,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="Home URL"><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The URL of your site\'s homepage.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo home_url(); ?></td>
+			<td><?php form_option( 'home' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Site URL"><?php _e( 'Site URL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The root URL of your site.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo site_url(); ?></td>
+			<td><?php form_option( 'siteurl' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WC Version"><?php _e( 'WC Version', 'woocommerce' ); ?>:</td>
