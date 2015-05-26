@@ -350,7 +350,7 @@ class WC_Coupon {
 	 * Ensure coupon amount is valid or throw exception
 	 */
 	private function validate_maximum_amount() {
-		if ( $this->maximum_amount > 0 && wc_format_decimal( $this->minimum_amount ) < wc_format_decimal( WC()->cart->subtotal ) ) {
+		if ( $this->maximum_amount > 0 && wc_format_decimal( $this->maximum_amount ) < wc_format_decimal( WC()->cart->subtotal ) ) {
 			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
 		}
 	}
