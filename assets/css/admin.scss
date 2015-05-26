@@ -617,14 +617,51 @@ ul.wc_coupon_list_block {
 				float: right;
 			}
 		}
-	}
-
-	a.edit_address {
-		opacity: 0.4;
-
-		&:hover,
-		&:focus {
-			opacity: 1;
+		a.edit_address, .billing-same-as-shipping, .load_customer_shipping, .load_customer_billing {
+			width: 14px;
+			height: 0;
+			padding: 14px 0 0 0;
+			margin: 0 0 0 6px;
+			overflow: hidden;
+			position: relative;
+			color: #999;
+			border: 0;
+			float: right;
+			&:hover, &:focus {
+				color: #000;
+			}
+			&:after {
+				font-family: 'WooCommerce';
+				position: absolute;
+				top: 0;
+				left: 0;
+				text-align: center;
+				vertical-align: top;
+				line-height: 14px;
+				font-size: 14px;
+				font-weight: 400;
+				-webkit-font-smoothing: antialiased;
+			}
+		}
+		.billing-same-as-shipping {
+			&:after {
+				content: "\e008";
+			}
+		}
+		.load_customer_shipping {
+			&:after {
+				content: "\e03a";
+			}
+		}
+		.load_customer_billing {
+			&:after {
+				content: "\e03a";
+			}
+		}
+		a.edit_address {
+			&:after {
+				content: "\e603";
+			}
 		}
 	}
 }
@@ -3902,21 +3939,6 @@ table.bar_chart {
 				}
 			}
 		}
-	}
-}
-
-/**
- * Profile Page
- */
-
-#profile-page {
-	.api-keys-wrapper {
-		float: left;
-		padding-bottom: 10px;
-	}
-	.api-keys-get-qr {
-		float: left;
-		padding-left: 10px;
 	}
 }
 

@@ -31,7 +31,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->has_fields         = false;
 		$this->order_button_text  = __( 'Proceed to PayPal', 'woocommerce' );
 		$this->method_title       = __( 'PayPal', 'woocommerce' );
-		$this->method_description = __( 'PayPal standard works by sending customers to PayPal where they can enter their payment information.', 'woocommerce' );
+		$this->method_description = sprintf( __( 'PayPal standard sends customers to PayPal to enter their payment information. PayPal IPN requires fsockopen/cURL support to update order statuses after payment. Check the %ssystem status%s page for more details.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-status' ) . '">', '</a>' );
 		$this->supports           = array(
 			'products',
 			'refunds'

@@ -978,13 +978,12 @@ class WC_Meta_Box_Product_Data {
 				$attribute_variation = $_POST['attribute_variation'];
 			}
 
-			$attribute_is_taxonomy = $_POST['attribute_is_taxonomy'];
-			$attribute_position    = $_POST['attribute_position'];
-			$attribute_names_count = sizeof( $attribute_names );
+			$attribute_is_taxonomy   = $_POST['attribute_is_taxonomy'];
+			$attribute_position      = $_POST['attribute_position'];
+			$attribute_names_max_key = max( $attribute_names );
 
-			for ( $i = 0; $i < $attribute_names_count; $i++ ) {
-
-				if ( ! $attribute_names[ $i ] ) {
+			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
+				if ( empty( $attribute_names[ $i ] ) ) {
 					continue;
 				}
 

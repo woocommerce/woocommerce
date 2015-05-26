@@ -540,9 +540,12 @@ class WC_API_Orders extends WC_API_Resource {
 				return $id;
 			}
 
-			$data = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
-
+			$data  = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
 			$order = wc_get_order( $id );
+
+			if ( empty( $order ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), 400 );
+			}
 
 			$order_args = array( 'order_id' => $order->id );
 
@@ -1045,10 +1048,14 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_invalid_fee_item', __( 'Fee title is required', 'woocommerce' ), 400 );
 			}
 
-			$order_fee         = new stdClass();
-			$order_fee->id     = sanitize_title( $fee['title'] );
-			$order_fee->name   = $fee['title'];
-			$order_fee->amount = isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0;
+			$order_fee            = new stdClass();
+			$order_fee->id        = sanitize_title( $fee['title'] );
+			$order_fee->name      = $fee['title'];
+			$order_fee->amount    = isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0;
+			$order_fee->taxable   = false;
+			$order_fee->tax       = 0;
+			$order_fee->tax_data  = array();
+			$order_fee->tax_class = '';
 
 			// if taxable, tax class and total are required
 			if ( isset( $fee['taxable'] ) && $fee['taxable'] ) {
@@ -1059,8 +1066,6 @@ class WC_API_Orders extends WC_API_Resource {
 
 				$order_fee->taxable   = true;
 				$order_fee->tax_class = $fee['tax_class'];
-				$order_fee->tax       = 0;
-				$order_fee->tax_data  = array();
 
 				if ( isset( $fee['total_tax'] ) ) {
 					$order_fee->tax = isset( $fee['total_tax'] ) ? wc_format_refund_total( $fee['total_tax'] ) : 0;

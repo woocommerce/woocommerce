@@ -1,7 +1,7 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 $count_comments = wp_count_comments( $webhook->id );
@@ -9,7 +9,7 @@ $total          = $count_comments->approved;
 
 ?>
 
-<?php echo $this->get_logs_navigation( $total, $webhook ); ?>
+<?php echo WC_Admin_Webhooks::get_logs_navigation( $total, $webhook ); ?>
 
 <table id="webhook-logs-table" class="widefat">
 	<thead>
@@ -39,4 +39,4 @@ $total          = $count_comments->approved;
 	</tbody>
 </table>
 
-<?php echo $this->get_logs_navigation( $total, $webhook ); ?>
+<?php echo WC_Admin_Webhooks::get_logs_navigation( $total, $webhook ); ?>

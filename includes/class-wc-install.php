@@ -98,6 +98,7 @@ class WC_Install {
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
+		WC_Auth::add_endpoint();
 		WC_AJAX::add_endpoint();
 
 		self::create_terms();
@@ -324,6 +325,18 @@ class WC_Install {
 		}
 
 		return "
+CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
+  key_id bigint(20) NOT NULL auto_increment,
+  user_id bigint(20) NOT NULL,
+  description longtext NULL,
+  permissions varchar(10) NOT NULL,
+  consumer_key varchar(200) NOT NULL,
+  consumer_secret varchar(200) NOT NULL,
+  nonces longtext NULL,
+  PRIMARY KEY (key_id),
+  KEY consumer_key (consumer_key),
+  KEY consumer_secret (consumer_secret)
+) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_id bigint(20) NOT NULL auto_increment,
   attribute_name varchar(200) NOT NULL,

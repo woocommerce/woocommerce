@@ -2,10 +2,10 @@
 /**
  * WooCommerce Admin Settings Class.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.2.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -40,7 +40,7 @@ class WC_Admin_Settings {
 			$settings[] = include( 'settings/class-wc-settings-accounts.php' );
 			$settings[] = include( 'settings/class-wc-settings-emails.php' );
 			$settings[] = include( 'settings/class-wc-settings-integrations.php' );
-			$settings[] = include( 'settings/class-wc-settings-webhooks.php' );
+			$settings[] = include( 'settings/class-wc-settings-api.php' );
 
 			self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
 		}

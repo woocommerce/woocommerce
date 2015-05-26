@@ -82,11 +82,12 @@ class WC_Admin_Assets {
 
 		// Register scripts
 		wp_register_script( 'woocommerce_admin', WC()->plugin_url() . '/assets/js/admin/woocommerce_admin' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-ui-sortable', 'jquery-ui-widget', 'jquery-ui-core', 'jquery-tiptip' ), WC_VERSION );
-		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.66', true );
+		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70', true );
 		wp_register_script( 'jquery-tiptip', WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/admin/accounting' . $suffix . '.js', array( 'jquery' ), '0.3.2' );
 		wp_register_script( 'round', WC()->plugin_url() . '/assets/js/admin/round' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 		wp_register_script( 'wc-admin-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'accounting', 'round', 'wc-enhanced-select', 'plupload-all', 'stupidtable' ), WC_VERSION );
+		wp_register_script( 'zeroclipboard', WC()->plugin_url() . '/assets/js/zeroclipboard/jquery.zeroclipboard' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 		wp_register_script( 'qrcode', WC()->plugin_url() . '/assets/js/admin/jquery.qrcode.min.js', array( 'jquery' ), WC_VERSION );
 		wp_register_script( 'stupidtable', WC()->plugin_url() . '/assets/js/stupidtable/stupidtable' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 		wp_register_script( 'wc-admin-notices', WC()->plugin_url() . '/assets/js/admin/woocommerce_notices' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
@@ -141,14 +142,6 @@ class WC_Admin_Assets {
 				'decimal_point'                     => $decimal,
 				'mon_decimal_point'                 => wc_get_price_decimal_separator()
 			);
-
-			// If we're on the profile page and the current user has generated API keys, enqueue and add to $params array
-			if ( $screen->id == 'profile' && $current_user->woocommerce_api_consumer_key ) {
-
-				wp_enqueue_script( 'qrcode' );
-				$params['qrcode_key'] = $current_user->woocommerce_api_consumer_key . '|' .  $current_user->woocommerce_api_consumer_secret;
-
-			}
 
 			wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
 		}
@@ -298,9 +291,15 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'flot-stack', WC()->plugin_url() . '/assets/js/admin/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 		}
 
+		// API settings
+		if ( 'woocommerce_page_wc-settings' === $screen->id && isset( $_GET['section'] ) && 'keys' == $_GET['section'] ) {
+			wp_enqueue_script( 'qrcode' );
+			wp_enqueue_script( 'zeroclipboard' );
+		}
+
 		// System status
 		if ( 'woocommerce_page_wc-status' === $screen->id ) {
-			wp_enqueue_script( 'zeroclipboard', WC()->plugin_url() . '/assets/js/zeroclipboard/jquery.zeroclipboard' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
+			wp_enqueue_script( 'zeroclipboard' );
 		}
 
 		if ( in_array( $screen->id, array( 'user-edit', 'profile' ) ) ) {

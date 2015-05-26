@@ -225,6 +225,7 @@ final class WooCommerce {
 		$this->query = include( 'includes/class-wc-query.php' );                // The main query class
 		$this->api   = include( 'includes/class-wc-api.php' );                  // API Class
 
+		include_once( 'includes/class-wc-auth.php' );                            // Auth Class
 		include_once( 'includes/class-wc-post-types.php' );                     // Registers post types
 		include_once( 'includes/abstracts/abstract-wc-product.php' );           // Products
 		include_once( 'includes/abstracts/abstract-wc-order.php' );             // Orders

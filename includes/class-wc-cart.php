@@ -170,7 +170,7 @@ class WC_Cart {
 	 */
 	public function maybe_set_cart_cookies() {
 		if ( ! headers_sent() ) {
-			if ( sizeof( $this->cart_contents ) > 0 ) {
+			if ( ! $this->is_empty() ) {
 				$this->set_cart_cookies( true );
 			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
 				$this->set_cart_cookies( false );
@@ -256,7 +256,7 @@ class WC_Cart {
 			}
 
 			// Queue re-calc if subtotal is not set
-			if ( ( ! $this->subtotal && sizeof( $this->cart_contents ) > 0 ) || $update_cart_session ) {
+			if ( ( ! $this->subtotal && ! $this->is_empty() ) || $update_cart_session ) {
 				$this->calculate_totals();
 			}
 		}
@@ -343,6 +343,15 @@ class WC_Cart {
 		 */
 		public function get_cart_contents_count() {
 			return apply_filters( 'woocommerce_cart_contents_count', $this->cart_contents_count );
+		}
+
+		/**
+		* Checks if the cart is empty.
+		*
+		* @return bool
+		*/
+		public function is_empty() {
+			return 0 === sizeof( $this->get_cart() );
 		}
 
 		/**
@@ -603,7 +612,7 @@ class WC_Cart {
 		public function get_cross_sells() {
 			$cross_sells = array();
 			$in_cart = array();
-			if ( sizeof( $this->get_cart() ) > 0 ) {
+			if ( ! $this->is_empty() ) {
 				foreach ( $this->get_cart() as $cart_item_key => $values ) {
 					if ( $values['quantity'] > 0 ) {
 						$cross_sells = array_merge( $values['data']->get_cross_sells(), $cross_sells );
@@ -947,7 +956,7 @@ class WC_Cart {
 				}
 
 				if ( did_action( 'wp' ) ) {
-					$this->set_cart_cookies( sizeof( $this->cart_contents ) > 0 );
+					$this->set_cart_cookies( ! $this->is_empty() );
 				}
 
 				do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
@@ -971,8 +980,9 @@ class WC_Cart {
 		 */
 		public function remove_cart_item( $cart_item_key ) {
 			if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
-				$remove = $this->cart_contents[ $cart_item_key ];
-				$this->removed_cart_contents[ $cart_item_key ] = $remove;
+				$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
+
+				do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
 
 				unset( $this->cart_contents[ $cart_item_key ] );
 
@@ -994,8 +1004,9 @@ class WC_Cart {
 		 */
 		public function restore_cart_item( $cart_item_key ) {
 			if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
-				$restore = $this->removed_cart_contents[ $cart_item_key ];
-				$this->cart_contents[ $cart_item_key ] = $restore;
+				$this->cart_contents[ $cart_item_key ] = $this->removed_cart_contents[ $cart_item_key ];
+
+				do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
 
 				unset( $this->removed_cart_contents[ $cart_item_key ] );
 
@@ -1064,7 +1075,7 @@ class WC_Cart {
 
 			do_action( 'woocommerce_before_calculate_totals', $this );
 
-			if ( sizeof( $this->get_cart() ) == 0 ) {
+			if ( $this->is_empty() ) {
 				$this->set_session();
 				return;
 			}

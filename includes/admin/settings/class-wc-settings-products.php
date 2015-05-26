@@ -58,7 +58,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 		$settings = $this->get_settings( $current_section );
 
- 		WC_Admin_Settings::output_fields( $settings );
+		WC_Admin_Settings::output_fields( $settings );
 	}
 
 	/**

@@ -250,7 +250,7 @@ class WC_AJAX {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 		}
 
-		if ( 0 == sizeof( WC()->cart->get_cart() ) ) {
+		if ( WC()->cart->is_empty() ) {
 			$data = array(
 				'fragments' => apply_filters( 'woocommerce_update_order_review_fragments', array(
 					'form.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . home_url() . '" class="wc-backward">' . __( 'Return to homepage', 'woocommerce' ) . '</a></div>'
@@ -586,12 +586,12 @@ class WC_AJAX {
 				$attribute_variation = $data['attribute_variation'];
 			}
 
-			$attribute_is_taxonomy = $data['attribute_is_taxonomy'];
-			$attribute_position    = $data['attribute_position'];
-			$attribute_names_count = sizeof( $attribute_names );
+			$attribute_is_taxonomy   = $data['attribute_is_taxonomy'];
+			$attribute_position      = $data['attribute_position'];
+			$attribute_names_max_key = max( $attribute_names );
 
-			for ( $i = 0; $i < $attribute_names_count; $i++ ) {
-				if ( ! $attribute_names[ $i ] ) {
+			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
+				if ( empty( $attribute_names[ $i ] ) ) {
 					continue;
 				}
 

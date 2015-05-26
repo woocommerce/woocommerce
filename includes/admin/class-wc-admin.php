@@ -23,7 +23,7 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
-		add_action( 'current_screen', array( $this, 'conditonal_includes' ) );
+		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
@@ -48,6 +48,7 @@ class WC_Admin {
 			include_once( 'class-wc-admin-welcome.php' );
 			include_once( 'class-wc-admin-notices.php' );
 			include_once( 'class-wc-admin-assets.php' );
+			include_once( 'class-wc-admin-api-keys.php' );
 			include_once( 'class-wc-admin-webhooks.php' );
 
 			// Help
@@ -65,7 +66,7 @@ class WC_Admin {
 	/**
 	 * Include admin files conditionally
 	 */
-	public function conditonal_includes() {
+	public function conditional_includes() {
 
 		$screen = get_current_screen();
 

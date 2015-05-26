@@ -322,20 +322,9 @@ jQuery( function( $ ) {
 					type:		'POST',
 					url:		wc_checkout_params.checkout_url,
 					data:		$form.serialize(),
-					success:	function( code ) {
-						var result = '';
-
+					dataType:   'json',
+					success:	function( result ) {
 						try {
-							// Get the valid JSON only from the returned string
-							if ( code.indexOf( '<!--WC_START-->' ) >= 0 )
-								code = code.split( '<!--WC_START-->' )[1]; // Strip off before after WC_START
-
-							if ( code.indexOf( '<!--WC_END-->' ) >= 0 )
-								code = code.split( '<!--WC_END-->' )[0]; // Strip off anything after WC_END
-
-							// Parse
-							result = $.parseJSON( code );
-
 							if ( result.result === 'success' ) {
 								if ( result.redirect.indexOf( "https://" ) != -1 || result.redirect.indexOf( "http://" ) != -1 ) {
 									window.location = result.redirect;
@@ -347,50 +336,43 @@ jQuery( function( $ ) {
 							} else {
 								throw 'Invalid response';
 							}
-						}
-
-						catch( err ) {
-
+						} catch( err ) {
+							// Reload page
 							if ( result.reload === 'true' ) {
 								window.location.reload();
 								return;
 							}
-
-							// Remove old errors
-							$( '.woocommerce-error, .woocommerce-message' ).remove();
-
-							// Add new errors
-							if ( result.messages ) {
-								$form.prepend( result.messages );
-							} else {
-								$form.prepend( code );
-							}
-
-							// Cancel processing
-							$form.removeClass( 'processing' ).unblock();
-
-							// Lose focus for all fields
-							$form.find( '.input-text, select' ).blur();
-
-							// Scroll to top
-							$( 'html, body' ).animate({
-								scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
-							}, 1000 );
 
 							// Trigger update in case we need a fresh nonce
 							if ( result.refresh === 'true' ) {
 								$( document.body ).trigger( 'update_checkout' );
 							}
 
-							$( document.body ).trigger( 'checkout_error' );
+							// Add new errors
+							if ( result.messages ) {
+								wc_checkout_form.submit_error( result.messages );
+							} else {
+								wc_checkout_form.submit_error( '<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>' );
+							}
 						}
 					},
-					dataType: 'html'
+					error:	function( jqXHR, textStatus, errorThrown ) {
+						wc_checkout_form.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
+					}
 				});
-
 			}
 
 			return false;
+		},
+		submit_error: function( error_message ) {
+			$( '.woocommerce-error, .woocommerce-message' ).remove();
+			wc_checkout_form.$checkout_form.prepend( error_message );
+			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
+			wc_checkout_form.$checkout_form.find( '.input-text, select' ).blur();
+			$( 'html, body' ).animate({
+				scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
+			}, 1000 );
+			$( document.body ).trigger( 'checkout_error' );
 		}
 	};
 
