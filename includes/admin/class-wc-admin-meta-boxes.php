@@ -87,7 +87,7 @@ class WC_Admin_Meta_Boxes {
 			echo '<div id="woocommerce_errors" class="error fade">';
 
 			foreach ( $errors as $error ) {
-				echo '<p>' . esc_html( $error ) . '</p>';
+				echo '<p>' . wp_kses_post( $error ) . '</p>';
 			}
 
 			echo '</div>';
