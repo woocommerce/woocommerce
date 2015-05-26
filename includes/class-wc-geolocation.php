@@ -27,10 +27,10 @@ class WC_Geolocation {
 
 	/** @var array API endpoints for looking up user IP address */
 	private static $ip_lookup_apis = array(
-		'icanhazip'         => 'http://ipv4.icanhazip.com',
+		'icanhazip'         => 'http://icanhazip.com',
 		'ipify'             => 'http://api.ipify.org/',
 		'ipecho'            => 'http://ipecho.net/plain',
-		'ident'             => 'http://v4.ident.me',
+		'ident'             => 'http://ident.me',
 		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
 		'ip.appspot'        => 'http://ip.appspot.com'
 	);
@@ -283,7 +283,7 @@ class WC_Geolocation {
 	 * @return bool
 	 */
 	private static function is_IPv6( $ip_address ) {
-		return ! ( false === strpos( $ip_address, ':' ) );
+		return false !== filter_var( $ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 );
 	}
 }
 
