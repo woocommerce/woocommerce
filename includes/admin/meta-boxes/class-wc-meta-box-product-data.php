@@ -1226,15 +1226,46 @@ class WC_Meta_Box_Product_Data {
 			$files = array();
 
 			if ( isset( $_POST['_wc_file_urls'] ) ) {
-				$file_names    = isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array();
-				$file_urls     = isset( $_POST['_wc_file_urls'] )  ? array_map( 'trim', $_POST['_wc_file_urls'] ) : array();
-				$file_url_size = sizeof( $file_urls );
+				$file_names         = isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array();
+				$file_urls          = isset( $_POST['_wc_file_urls'] )  ? array_map( 'trim', $_POST['_wc_file_urls'] ) : array();
+				$file_url_size      = sizeof( $file_urls );
+				$allowed_file_types = get_allowed_mime_types();
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
 					if ( ! empty( $file_urls[ $i ] ) ) {
-						$file_url            = ( 0 !== strpos( $file_urls[ $i ], 'http' ) ) ? wc_clean( $file_urls[ $i ] ) : esc_url_raw( $file_urls[ $i ] );
-						$file_name           = wc_clean( $file_names[ $i ] );
-						$file_hash           = md5( $file_url );
+						// Find type and file URL
+						if ( 0 === strpos( $file_urls[ $i ], 'http' ) ) {
+							$file_is  = 'absolute';
+							$file_url = esc_url_raw( $file_urls[ $i ] );
+						} elseif ( '[' === substr( $file_urls[ $i ], 0, 1 ) && ']' === substr( $file_urls[ $i ], -1 ) ) {
+							$file_is  = 'shortcode';
+							$file_url = wc_clean( $file_urls[ $i ] );
+						} else {
+							$file_is = 'relative';
+							$file_url = wc_clean( $file_urls[ $i ] );
+						}
+
+						$file_name = wc_clean( $file_names[ $i ] );
+						$file_hash = md5( $file_url );
+
+						// Validate the file extension
+						if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
+							$file_type  = wp_check_filetype( $file_url );
+							$parsed_url = parse_url( $file_url, PHP_URL_PATH );
+							$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
+
+							if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
+								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not have an allowed file type. Allowed types include: %s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
+								continue;
+							}
+						}
+
+						// Validate the file exists
+						if ( 'relative' === $file_is && ! file_exists( $file_url ) ) {
+							WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
+							continue;
+						}
+
 						$files[ $file_hash ] = array(
 							'name' => $file_name,
 							'file' => $file_url
@@ -1474,12 +1505,43 @@ class WC_Meta_Box_Product_Data {
 					$file_url_size = sizeof( $file_urls );
 
 					for ( $ii = 0; $ii < $file_url_size; $ii ++ ) {
-
 						if ( ! empty( $file_urls[ $ii ] ) ) {
+							// Find type and file URL
+							if ( 0 === strpos( $file_urls[ $ii ], 'http' ) ) {
+								$file_is  = 'absolute';
+								$file_url = esc_url_raw( $file_urls[ $ii ] );
+							} elseif ( '[' === substr( $file_urls[ $ii ], 0, 1 ) && ']' === substr( $file_urls[ $ii ], -1 ) ) {
+								$file_is  = 'shortcode';
+								$file_url = wc_clean( $file_urls[ $ii ] );
+							} else {
+								$file_is = 'relative';
+								$file_url = wc_clean( $file_urls[ $ii ] );
+							}
 
-							$files[ md5( $file_urls[ $ii ] ) ] = array(
-								'name' => $file_names[ $ii ],
-								'file' => $file_urls[ $ii ]
+							$file_name = wc_clean( $file_names[ $ii ] );
+							$file_hash = md5( $file_url );
+
+							// Validate the file extension
+							if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
+								$file_type  = wp_check_filetype( $file_url );
+								$parsed_url = parse_url( $file_url, PHP_URL_PATH );
+								$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
+
+								if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
+									WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not have an allowed file type. Allowed types include: %s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
+									continue;
+								}
+							}
+
+							// Validate the file exists
+							if ( 'relative' === $file_is && ! file_exists( $file_url ) ) {
+								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
+								continue;
+							}
+
+							$files[ $file_hash ] = array(
+								'name' => $file_name,
+								'file' => $file_url
 							);
 						}
 					}
