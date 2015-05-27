@@ -140,7 +140,7 @@ class WC_Email_New_Order extends WC_Email {
 				'default'       => ''
 			),
 			'heading' => array(
-				'title'         => __( 'Email Heading', 'woocommerce' ),
+				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>.', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
