@@ -139,16 +139,12 @@ class WC_Webhook {
 		}
 
 		$current_action = current_action();
-		$resource       = get_post( absint( $arg ) );
 
 		// only deliver deleted event for coupons, orders, and products
 		if ( 'delete_post' == $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
-
 			return false;
 
 		} elseif ( 'delete_user' == $current_action ) {
-
-
 			$user = get_userdata( absint( $arg ) );
 
 			// only deliver deleted customer event for users with customer role
@@ -157,13 +153,14 @@ class WC_Webhook {
 			}
 
 		// check if the custom order type has chosen to exclude order webhooks from triggering along with its own webhooks.
-		} elseif ( 'order' == $this->get_resource() && ! in_array( $resource->post_type, wc_get_order_types( 'order-webhooks' ) ) ) {
+		} elseif ( 'order' == $this->get_resource() && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ) ) ) {
 			return false;
 
 		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) ) {
-
 			// the `woocommerce_process_shop_*` hook fires for both updates
 			// and creation so check the post creation date to determine the actual event
+			$resource = get_post( absint( $arg ) );
+
 			// a resource is considered created when the hook is executed within 10 seconds of the post creation date
 			$resource_created = ( ( time() - 10 ) <= strtotime( $resource->post_date_gmt ) );
 
