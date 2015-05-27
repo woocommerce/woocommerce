@@ -291,6 +291,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<?php
 			$tables = array(
+				'woocommerce_api_keys',
 				'woocommerce_attribute_taxonomies',
 				'woocommerce_termmeta',
 				'woocommerce_downloadable_product_permissions',

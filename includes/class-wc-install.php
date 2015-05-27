@@ -696,13 +696,14 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	public static function wpmu_drop_tables( $tables ) {
 		global $wpdb;
 
-		$tables[] = $wpdb->prefix . "woocommerce_attribute_taxonomies";
-		$tables[] = $wpdb->prefix . "woocommerce_downloadable_product_permissions";
-		$tables[] = $wpdb->prefix . "woocommerce_termmeta";
-		$tables[] = $wpdb->prefix . "woocommerce_tax_rates";
-		$tables[] = $wpdb->prefix . "woocommerce_tax_rate_locations";
-		$tables[] = $wpdb->prefix . "woocommerce_order_items";
-		$tables[] = $wpdb->prefix . "woocommerce_order_itemmeta";
+		$tables[] = $wpdb->prefix . 'woocommerce_api_keys';
+		$tables[] = $wpdb->prefix . 'woocommerce_attribute_taxonomies';
+		$tables[] = $wpdb->prefix . 'woocommerce_downloadable_product_permissions';
+		$tables[] = $wpdb->prefix . 'woocommerce_termmeta';
+		$tables[] = $wpdb->prefix . 'woocommerce_tax_rates';
+		$tables[] = $wpdb->prefix . 'woocommerce_tax_rate_locations';
+		$tables[] = $wpdb->prefix . 'woocommerce_order_items';
+		$tables[] = $wpdb->prefix . 'woocommerce_order_itemmeta';
 
 		return $tables;
 	}
