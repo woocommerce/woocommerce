@@ -103,68 +103,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param  string $country
 	 * @return string
 	 */
-	private function get_icon_url( $country ) {
-		switch ( $country ) {
-			case 'DZ' :
-			case 'AU' :
-			case 'BH' :
-			case 'BE' :
-			case 'BQ' :
-			case 'BW' :
-			case 'CA' :
-			case 'CN' :
-			case 'CW' :
-			case 'CZ' :
-			case 'DK' :
-			case 'FI' :
-			case 'FR' :
-			case 'DE' :
-			case 'GR' :
-			case 'HK' :
-			case 'HU' :
-			case 'IN' :
-			case 'ID' :
-			case 'IT' :
-			case 'JO' :
-			case 'KE' :
-			case 'KW' :
-			case 'LU' :
-			case 'MY' :
-			case 'MA' :
-			case 'NL' :
-			case 'NO' :
-			case 'OM' :
-			case 'PH' :
-			case 'PL' :
-			case 'PT' :
-			case 'QA' :
-			case 'IE' :
-			case 'RU' :
-			case 'BL' :
-			case 'SX' :
-			case 'MF' :
-			case 'SA' :
-			case 'SG' :
-			case 'SK' :
-			case 'KR' :
-			case 'SS' :
-			case 'ES' :
-			case 'SE' :
-			case 'TW' :
-			case 'TH' :
-			case 'TR' :
-			case 'AE' :
-			case 'GB' :
-			case 'US' :
-			case 'VN' :
-				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/webapps/mpp/paypal-popup';
-			break;
-			default :
-				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
-			break;
+	protected function get_icon_url( $country ) {
+		$countries = array( 'DZ', 'AU', 'BH', 'BE', 'BQ', 'BW', 'CA', 'CN', 'CW', 'CZ', 'DK', 'FI', 'FR', 'DE', 'GR', 'HK', 'HU', 'IN', 'ID', 'IT', 'JO', 'KE', 'KW', 'LU', 'MY', 'MA', 'NL', 'NO', 'OM', 'PH', 'PL', 'PT', 'QA', 'IE', 'RU', 'BL', 'SX', 'MF', 'SA', 'SG', 'SK', 'KR', 'SS', 'ES', 'SE', 'TW', 'TH', 'TR', 'AE', 'GB', 'US', 'VN' );
+
+		if ( in_array( $country, $countries ) ) {
+			return 'https://www.paypal.com/' . strtolower( $country ) . '/webapps/mpp/paypal-popup';
 		}
 
-		return $link;
+		return 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
 	}
 
 	/**
