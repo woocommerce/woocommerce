@@ -242,6 +242,10 @@ class WC_Admin_Attributes {
 
 		$attribute_to_edit = $wpdb->get_row( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'" );
 
+		if ( ! $attribute_to_edit ) {
+			wp_die( __( 'Error: non-existing attribute ID.', 'woocommerce' ) );
+		}
+
 		$att_type    = $attribute_to_edit->attribute_type;
 		$att_label   = $attribute_to_edit->attribute_label;
 		$att_name    = $attribute_to_edit->attribute_name;
