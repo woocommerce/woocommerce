@@ -144,10 +144,8 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// Get the decimal precession
-		$dp = ( isset( $filter['dp'] ) ? $filter['dp'] : 2 );
-
-		$order = wc_get_order( $id );
-
+		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
+		$order      = wc_get_order( $id );
 		$order_post = get_post( $id );
 
 		$order_data = array(
@@ -158,14 +156,14 @@ class WC_API_Orders extends WC_API_Resource {
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_order_currency(),
-			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
-			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), 2 ),
+			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
+			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), $dp ),
 			'total_line_items_quantity' => $order->get_item_count(),
-			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
-			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), 2 ),
-			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), 2 ),
-			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), 2 ),
-			'total_discount'            => wc_format_decimal( $order->get_total_discount(), 2 ),
+			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), $dp ),
+			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), $dp ),
+			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), $dp ),
+			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), $dp ),
+			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->payment_method,
@@ -238,9 +236,9 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['line_items'][] = array(
 				'id'           => $item_id,
 				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
+				'subtotal_tax' => wc_format_decimal( wc_round_tax_total( $item['line_subtotal_tax'] ), $dp ),
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
+				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
 				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
@@ -258,7 +256,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'           => $shipping_item_id,
 				'method_id'    => $shipping_item['method_id'],
 				'method_title' => $shipping_item['name'],
-				'total'        => wc_format_decimal( $shipping_item['cost'], 2 ),
+				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
 			);
 		}
 
@@ -270,7 +268,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'rate_id'  => $tax->rate_id,
 				'code'     => $tax_code,
 				'title'    => $tax->label,
-				'total'    => wc_format_decimal( $tax->amount, 2 ),
+				'total'    => wc_format_decimal( $tax->amount, $dp ),
 				'compound' => (bool) $tax->is_compound,
 			);
 		}
@@ -282,8 +280,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'        => $fee_item_id,
 				'title'     => $fee_item['name'],
 				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
-				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), 2 ),
-				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), 2 ),
+				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), $dp ),
+				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), $dp ),
 			);
 		}
 
@@ -293,7 +291,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'][] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item['name'],
-				'amount' => wc_format_decimal( $coupon_item['discount_amount'], 2 ),
+				'amount' => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
 			);
 		}
 
