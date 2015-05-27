@@ -1622,7 +1622,7 @@ abstract class WC_Abstract_Order {
 			$subtotal = wc_price( $subtotal, array('currency' => $this->get_order_currency()) );
 
 			if ( $tax_display == 'excl' && $this->prices_include_tax ) {
-				$subtotal .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 
 		} else {

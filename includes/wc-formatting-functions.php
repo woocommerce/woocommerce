@@ -385,7 +385,7 @@ function wc_price( $price, $args = array() ) {
 	$return          = '<span class="amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && wc_tax_enabled() ) {
-		$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+		$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
 	return apply_filters( 'wc_price', $return, $price, $args );

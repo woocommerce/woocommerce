@@ -1532,7 +1532,7 @@ class WC_Cart {
 						$return = wc_price( $this->shipping_total );
 
 						if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
-							$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+							$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 						}
 
 						return $return;
@@ -1542,7 +1542,7 @@ class WC_Cart {
 						$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
 						if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
-							$return .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
+							$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 						}
 
 						return $return;
@@ -2022,7 +2022,7 @@ class WC_Cart {
 					$cart_subtotal = wc_price( $this->subtotal_ex_tax );
 
 					if ( $this->tax_total > 0 && $this->prices_include_tax ) {
-						$cart_subtotal .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
 
 				} else {
@@ -2030,7 +2030,7 @@ class WC_Cart {
 					$cart_subtotal = wc_price( $this->subtotal );
 
 					if ( $this->tax_total > 0 && !$this->prices_include_tax ) {
-						$cart_subtotal .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
+						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
 
 				}
