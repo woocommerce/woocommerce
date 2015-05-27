@@ -387,7 +387,7 @@ class Functions extends \WC_Unit_Test_Case {
 		// ex tax label
 		$calc_taxes = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->assertEquals( '<span class="amount">&pound;1,111.17</span> <small>(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
+		$this->assertEquals( '<span class="amount">&pound;1,111.17</span> <small class="tax_label">(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
 		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 	}
 
