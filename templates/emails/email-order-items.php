@@ -26,7 +26,7 @@ foreach ( $items as $item_id => $item ) :
 				}
 
 				// Product name
-				echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item );
+				echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
 
 				// SKU
 				if ( $show_sku && is_object( $_product ) && $_product->get_sku() ) {
