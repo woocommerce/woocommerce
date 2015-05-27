@@ -105,13 +105,62 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	private function get_icon_url( $country ) {
 		switch ( $country ) {
-			case 'MX' :
-			case 'ZA' :
-			case 'MT' :
-				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
+			case 'DZ' :
+			case 'AU' :
+			case 'BH' :
+			case 'BE' :
+			case 'BQ' :
+			case 'BW' :
+			case 'CA' :
+			case 'CN' :
+			case 'CW' :
+			case 'CZ' :
+			case 'DK' :
+			case 'FI' :
+			case 'FR' :
+			case 'DE' :
+			case 'GR' :
+			case 'HK' :
+			case 'HU' :
+			case 'IN' :
+			case 'ID' :
+			case 'IT' :
+			case 'JO' :
+			case 'KE' :
+			case 'KW' :
+			case 'LU' :
+			case 'MY' :
+			case 'MA' :
+			case 'NL' :
+			case 'NO' :
+			case 'OM' :
+			case 'PH' :
+			case 'PL' :
+			case 'PT' :
+			case 'QA' :
+			case 'IE' :
+			case 'RU' :
+			case 'BL' :
+			case 'SX' :
+			case 'MF' :
+			case 'SA' :
+			case 'SG' :
+			case 'SK' :
+			case 'KR' :
+			case 'SS' :
+			case 'ES' :
+			case 'SE' :
+			case 'TW' :
+			case 'TH' :
+			case 'TR' :
+			case 'AE' :
+			case 'GB' :
+			case 'US' :
+			case 'VN' :
+				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/webapps/mpp/paypal-popup';
 			break;
 			default :
-				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/webapps/mpp/paypal-popup';
+				$link = 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
 			break;
 		}
 
