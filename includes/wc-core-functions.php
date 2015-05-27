@@ -35,6 +35,11 @@ add_filter( 'woocommerce_coupon_code', 'strtolower' ); // Coupons case-insensiti
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default
 
 /**
+ * Actions used in admin and frontend
+ */
+add_action( 'add_admin_bar_menus', 'wc_admin_bar_site_menu', 30 );
+
+/**
  * Short Description (excerpt)
  */
 add_filter( 'woocommerce_short_description', 'wptexturize' );
@@ -44,6 +49,37 @@ add_filter( 'woocommerce_short_description', 'wpautop' );
 add_filter( 'woocommerce_short_description', 'shortcode_unautop' );
 add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
+
+/**
+ * Add the "Visit Store" link in admin bar main menu.
+ *
+ * @since 2.3.9
+ * @param WP_Admin_Bar $wp_admin_bar
+ */
+function wc_admin_bar_site_menu( $wp_admin_bar ) {
+	global $wp_admin_bar;
+	
+	// Don't show for logged out users.
+	if ( ! is_user_logged_in() )
+		return;
+
+	// Show only when the user is a member of this site, or they're a super admin.
+	if ( ! is_user_member_of_blog() && ! is_super_admin() )
+		return;
+
+	// Create submenu item.
+	$shop_page_url = get_permalink( woocommerce_get_page_id( 'shop' ) );
+	
+	if ( is_admin() && $shop_page_url != home_url() ) {
+		// Add an option to visit the store.
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'site-name',
+			'id'     => 'view-store',
+			'title'  => __( 'Visit Store', 'woocommerce' ),
+			'href'   => $shop_page_url,
+		) );
+	}
+}
 
 /**
  * Create a new order programmatically
