@@ -64,33 +64,7 @@ class WC_Cache_Helper {
 	private static function delete_version_transients( $version ) {
 		if ( ! wp_using_ext_object_cache() ) {
 			global $wpdb;
-			$wpdb->query( $wpdb->prepare( "
-				DELETE a, b
-				FROM {$wpdb->options} a, {$wpdb->options} b
-				WHERE
-					( a.option_name LIKE %s OR a.option_name LIKE %s ) AND
-					a.option_name NOT LIKE '\_transient\_timeout\_%%' AND
-					a.option_name NOT LIKE '\_site\_transient\_timeout\_%%' AND
-					(
-						b.option_name = CONCAT(
-							'_transient_timeout_',
-							SUBSTRING(
-								a.option_name,
-								CHAR_LENGTH('_transient_') + 1
-							)
-						) OR
-						b.option_name = CONCAT(
-							'_site_transient_timeout_',
-							SUBSTRING(
-								a.option_name,
-								CHAR_LENGTH('_site_transient_') + 1
-							)
-						)
-					)
-			",
-			"\_transient\_%" . $version,
-			"\_site\_transient\_%" . $version
-			) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s;", "\_transient\_%" . $version ) );
 		}
 	}
 

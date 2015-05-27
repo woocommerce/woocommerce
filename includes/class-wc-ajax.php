@@ -2045,6 +2045,8 @@ class WC_AJAX {
 		if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
 			wc_delete_shop_order_transients( wp_get_post_parent_id( $refund_id ) );
 			wp_delete_post( $refund_id );
+			
+			do_action( 'woocommerce_refund_deleted', $refund_id );
 		}
 
 		die();
