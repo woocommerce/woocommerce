@@ -141,6 +141,13 @@ function wc_get_order_types( $for = '' ) {
 				}
 			}
 		break;
+		case 'order-webhooks' :
+			foreach ( $wc_order_types as $type => $args ) {
+				if ( ! $args['exclude_from_order_webhooks'] ) {
+					$order_types[] = $type;
+				}
+			}
+		break;
 		default :
 			$order_types = array_keys( $wc_order_types );
 		break;
@@ -208,6 +215,7 @@ function wc_register_order_type( $type, $args = array() ) {
 		'add_order_meta_boxes'             => true,
 		'exclude_from_order_count'         => false,
 		'exclude_from_order_views'         => false,
+		'exclude_from_order_webhooks'      => false,
 		'exclude_from_order_reports'       => false,
 		'exclude_from_order_sales_reports' => false,
 		'class_name'                       => 'WC_Order'
