@@ -86,9 +86,7 @@ class WC_Cache_Helper {
 
 	/**
 	 * Prevent caching on dynamic pages.
-	 *
 	 * @access public
-	 * @return void
 	 */
 	public static function prevent_caching() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
@@ -96,7 +94,9 @@ class WC_Cache_Helper {
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
 		}
 
-		if ( is_array( $wc_page_uris ) ) {
+		if ( isset( $_GET['download_file'] ) ) {
+			self::nocache();
+		} elseif ( is_array( $wc_page_uris ) ) {
 			foreach( $wc_page_uris as $uri ) {
 				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
 					self::nocache();
@@ -108,9 +108,7 @@ class WC_Cache_Helper {
 
 	/**
 	 * Set nocache constants and headers.
-	 *
 	 * @access private
-	 * @return void
 	 */
 	private static function nocache() {
 		if ( ! defined( 'DONOTCACHEPAGE' ) )
@@ -127,9 +125,6 @@ class WC_Cache_Helper {
 
 	/**
 	 * notices function.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public static function notices() {
 		if ( ! function_exists( 'w3tc_pgcache_flush' ) || ! function_exists( 'w3_instance' ) ) {
