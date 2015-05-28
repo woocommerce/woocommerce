@@ -97,7 +97,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		if ( method_exists( $this, $this->type . '_shipping' ) ) {
 			$costs = call_user_func( array( $this, $this->type . '_shipping' ), $package );
 
-			if ( ! is_null( $costs ) || $costs > 0 ) {
+			if ( $costs > 0 || $cost_per_order > 0 ) {
 				if ( is_array( $costs ) ) {
 					$costs['order'] = $cost_per_order;
 				} else {
