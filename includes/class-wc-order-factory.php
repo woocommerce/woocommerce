@@ -25,6 +25,8 @@ class WC_Order_Factory {
 			$the_order = $post;
 		} elseif ( is_numeric( $the_order ) ) {
 			$the_order = get_post( $the_order );
+		} elseif ( $the_order instanceof WC_Order ) {
+			$the_order = get_post( $the_order->id );
 		}
 
 		if ( ! $the_order || ! is_object( $the_order ) ) {
