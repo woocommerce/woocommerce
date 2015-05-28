@@ -1172,11 +1172,7 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 	 * @subpackage	Cart
 	 */
 	function woocommerce_button_proceed_to_checkout() {
-		$checkout_url = WC()->cart->get_checkout_url();
-
-		?>
-		<a href="<?php echo $checkout_url; ?>" class="checkout-button button alt wc-forward"><?php _e( 'Proceed to Checkout', 'woocommerce' ); ?></a>
-		<?php
+		wc_get_template( 'cart/proceed-to-checkout-button.php' );
 	}
 }
 
