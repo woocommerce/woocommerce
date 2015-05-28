@@ -475,8 +475,9 @@ add_filter( 'wp_prepare_attachment_for_js', 'wc_prepare_attachment_for_js' );
  * Track product views
  */
 function wc_track_product_view() {
-	if ( ! is_singular( 'product' ) )
+	if ( ! is_singular( 'product' ) || ! is_active_widget( false, false, 'woocommerce_recently_viewed_products', true ) ) {
 		return;
+	}
 
 	global $post;
 
@@ -485,11 +486,13 @@ function wc_track_product_view() {
 	else
 		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
 
-	if ( ! in_array( $post->ID, $viewed_products ) )
+	if ( ! in_array( $post->ID, $viewed_products ) ) {
 		$viewed_products[] = $post->ID;
+	}
 
-	if ( sizeof( $viewed_products ) > 15 )
+	if ( sizeof( $viewed_products ) > 15 ) {
 		array_shift( $viewed_products );
+	}
 
 	// Store for session only
 	wc_setcookie( 'woocommerce_recently_viewed', implode( '|', $viewed_products ) );
