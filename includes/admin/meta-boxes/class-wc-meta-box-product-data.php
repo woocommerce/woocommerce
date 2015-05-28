@@ -775,7 +775,8 @@ class WC_Meta_Box_Product_Data {
 								'_manage_stock'          => '',
 								'_stock_status'          => '',
 								'_backorders'            => null,
-								'_tax_class'             => null
+								'_tax_class'             => null,
+								'_variation_description' => ''
 							);
 
 							foreach ( $variation_fields as $field => $value ) {
@@ -1314,6 +1315,8 @@ class WC_Meta_Box_Product_Data {
 			$variable_backorders            = isset( $_POST['variable_backorders'] ) ? $_POST['variable_backorders'] : array();
 			$variable_stock_status          = isset( $_POST['variable_stock_status'] ) ? $_POST['variable_stock_status'] : array();
 
+			$variable_description           = isset( $_POST['variable_description'] ) ? $_POST['variable_description'] : array();
+
 			$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
 
 			for ( $i = 0; $i <= $max_loop; $i ++ ) {
@@ -1491,6 +1494,8 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_downloadable_files', '' );
 				}
 
+				update_post_meta( $variation_id, '_variation_description', sanitize_text_field( $variable_description[ $i ] ) );
+				
 				// Save shipping class
 				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
