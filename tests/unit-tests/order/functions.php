@@ -68,4 +68,34 @@ class Functions extends \WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_ship_to_destination', $default );
 	}
+
+	/**
+	 * Test wc_get_order()
+	 *
+	 * @since 2.4.0
+	 * @group test
+	 */
+	public function test_wc_get_order() {
+
+		$order = \WC_Helper_Order::create_order();
+
+		// Assert that $order is a WC_Order object
+		$this->assertInstanceOf( 'WC_Order', $order );
+
+		// Assert that wc_get_order() accepts a WC_Order object
+		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order ) );
+
+		// Assert that wc_get_order() accepts a order post id.
+		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->id ) );
+
+		// Assert that a non-shop_order post returns false
+		$post = $this->factory->post->create_and_get( array( 'post_type' => 'post' ) );
+		$this->assertFalse( wc_get_order( $post->ID ) );
+
+		// Assert the return when $the_order args is false
+		$this->assertFalse( wc_get_order( false ) );
+
+		// Assert the return when $the_order args is a random (incorrect) id.
+		$this->assertFalse( wc_get_order( 123456 ) );
+	}
 }
