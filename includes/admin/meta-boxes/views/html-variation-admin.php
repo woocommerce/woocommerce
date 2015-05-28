@@ -189,7 +189,7 @@ extract( $variation_data );
 
 				<p class="form-row form-row-full">
 					<label><?php _e( 'Variation Description:', 'woocommerce' ); ?></label>
-					<textarea name="variable_description[<?php echo $loop; ?>]" rows="3" style="width:100%;"><?php echo isset( $variation_data['_variation_description'] ) ? sanitize_text_field( $variation_data['_variation_description'] ) : ''; ?></textarea>
+					<textarea name="variable_description[<?php echo $loop; ?>]" rows="3" style="width:100%;"><?php echo isset( $variation_data['_variation_description'] ) ? wp_kses_post( $variation_data['_variation_description'] ) : ''; ?></textarea>
 				</p>
 			</div>
 			<div class="show_if_variation_downloadable" style="display: none;">

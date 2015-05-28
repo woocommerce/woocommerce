@@ -46,8 +46,8 @@
 				selected_index--;
 
 				if ( all_variations[ selected_index ].hasOwnProperty( 'variation_description' ) ) {
-					var_description_html = '<p class="woocommerce-variation-description woocommerce-variation-description-' + 
-					all_variations[ selected_index ].variation_id + '">' + all_variations[ selected_index ].variation_description + '</p>';
+					var_description_html = '<div class="woocommerce-variation-description woocommerce-variation-description-' + 
+					all_variations[ selected_index ].variation_id + '">' + all_variations[ selected_index ].variation_description + '</div>';
 
 					return var_description_html;
 				}

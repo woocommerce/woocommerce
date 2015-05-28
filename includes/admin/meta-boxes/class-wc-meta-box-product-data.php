@@ -1494,7 +1494,7 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_downloadable_files', '' );
 				}
 
-				update_post_meta( $variation_id, '_variation_description', sanitize_text_field( $variable_description[ $i ] ) );
+				update_post_meta( $variation_id, '_variation_description', wp_kses_post( $variable_description[ $i ] ) );
 				
 				// Save shipping class
 				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
