@@ -106,16 +106,27 @@ class WC_Product_Variation extends WC_Product {
 		}
 	}
 
+	private $_cached_variation_post_meta = array();
+	private $_cached_id_post_meta = array();
+	
 	/**
 	 * Get method returns variation meta data if set, otherwise in most cases the data from the parent.
 	 *
+	 * @access public
 	 * @param string $key
 	 * @return mixed
 	 */
 	public function __get( $key ) {
+		if (!$this->_cached_variation_post_meta) {
+			$this->_cached_variation_post_meta = get_post_meta($this->variation_id);
+		}
+		if (!$this->_cached_id_post_meta) {
+			$this->_cached_id_post_meta = get_post_meta($this->id);
+		}
+		
 		if ( in_array( $key, array_keys( $this->variation_level_meta_data ) ) ) {
 
-			$value = get_post_meta( $this->variation_id, '_' . $key, true );
+			$value = $this->_cached_variation_post_meta['_' . $key][0];
 
 			if ( '' === $value ) {
 				$value = $this->variation_level_meta_data[ $key ];
@@ -123,11 +134,11 @@ class WC_Product_Variation extends WC_Product {
 
 		} elseif ( in_array( $key, array_keys( $this->variation_inherited_meta_data ) ) ) {
 
-			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : get_post_meta( $this->id, '_' . $key, true );
+			$value = isset($this->_cached_variation_post_meta['_' . $key]) ? $this->_cached_variation_post_meta['_' . $key][0] : $this->_cached_id_post_meta['_' . $key][0];
 
 			// Handle meta data keys which can be empty at variation level to cause inheritance
 			if ( '' === $value && in_array( $key, array( 'sku', 'weight', 'length', 'width', 'height' ) ) ) {
-				$value = get_post_meta( $this->id, '_' . $key, true );
+				$value = $this->_cached_id_post_meta['_' . $key][0];
 			}
 
 			if ( '' === $value ) {
@@ -135,7 +146,7 @@ class WC_Product_Variation extends WC_Product {
 			}
 
 		} elseif ( 'variation_data' === $key ) {
-			$all_meta = get_post_meta( $this->variation_id );
+			$all_meta = $this->_cached_variation_post_meta;
 
 			// The variation data array
 			$this->variation_data = array();
@@ -153,7 +164,7 @@ class WC_Product_Variation extends WC_Product {
 			return $this->managing_stock();
 
 		} else {
-			$value = metadata_exists( 'post', $this->variation_id, '_' . $key ) ? get_post_meta( $this->variation_id, '_' . $key, true ) : parent::__get( $key );
+			$value = parent::__get( $key );
 		}
 
 		return $value;
