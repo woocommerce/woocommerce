@@ -175,7 +175,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
  			foreach ( $shipping_methods as $method ) {
 
-				if ( strtolower( get_class( $method ) ) == strtolower( $current_section ) && $method->has_settings() ) {
+				if ( strtolower( stripslashes( get_class( $method ) ) ) == strtolower( $current_section ) && $method->has_settings() ) {					
 					$method->admin_options();
 					break;
 				}
