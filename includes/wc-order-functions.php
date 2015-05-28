@@ -331,7 +331,6 @@ function wc_downloadable_product_permissions( $order_id ) {
 
 	do_action( 'woocommerce_grant_product_download_permissions', $order_id );
 }
-
 add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
 add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_permissions' );
 
@@ -606,7 +605,8 @@ function wc_create_refund( $args = array() ) {
 		'reason'     => null,
 		'order_id'   => 0,
 		'refund_id'  => 0,
-		'line_items' => array()
+		'line_items' => array(),
+		'date'       => current_time( 'mysql', 0 )
 	);
 
 	$args        = wp_parse_args( $args, $default_args );
@@ -624,6 +624,7 @@ function wc_create_refund( $args = array() ) {
 		$refund_data['post_password'] = uniqid( 'refund_' );
 		$refund_data['post_parent']   = absint( $args['order_id'] );
 		$refund_data['post_title']    = sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		$refund_data['post_date']     = $args['date'];
 	}
 
 	if ( ! is_null( $args['reason'] ) ) {
@@ -755,3 +756,33 @@ function wc_get_payment_gateway_by_order( $order ) {
 
 	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
 }
+
+/**
+ * When refunding an order, create a refund line item if the partial refunds do not match order total.
+ *
+ * This is manual; no gateway refund will be performed.
+ *
+ * @since 2.4
+ * @param int $order_id
+ */
+function wc_order_fully_refunded( $order_id ) {
+	$order       = wc_get_order( $order_id );
+	$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
+
+	if ( ! $max_refund ) {
+		return;
+	}
+
+	// Create the refund object
+	$refund = wc_create_refund( array(
+		'amount'     => $max_refund,
+		'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
+		'order_id'   => $order_id,
+		'line_items' => array()
+	) );
+
+	wc_delete_shop_order_transients( $order_id );
+
+	do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->id );
+}
+add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
