@@ -154,6 +154,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Combine transients for get_rating_count.
 * Tweak - Bump the PrettyPhoto version during enqueue to flush caches.
 * Tweak - Remove all instances of sslverify=false #8058
+* Tweak - Error prevention when showing customer orders on the frontend.
 
 = 2.3.9 - 19/05/2015 =
 * Fix - Fixed language upgrader verification.
