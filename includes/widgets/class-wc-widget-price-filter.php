@@ -161,6 +161,19 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
+		if ( 'yes' === get_option( 'woocommerce_calc_taxes' ) ) {
+			if ( 'incl' == get_option( 'woocommerce_tax_display_shop' ) && 'no' == get_option( 'woocommerce_prices_include_tax' ) ) {
+				$rates = WC_Tax::get_rates();
+
+				if ( is_array( $rates ) && ! empty( $rates ) ) {
+					$_tax = current( $rates );
+
+					$min = floor( ( $min ) * ( ( $_tax['rate'] + 100 ) / 100 ) );
+					$max = ceil( $max * ( ( $_tax['rate'] + 100 ) / 100 ) ) + 1;
+				}
+			}
+		}
+
 		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>

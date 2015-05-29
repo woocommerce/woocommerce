@@ -865,6 +865,24 @@ class WC_Query {
 			$min              = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
 			$max              = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
 
+		$tax_display_mode      = get_option( 'woocommerce_tax_display_shop' );
+		$tax_prices_include_tax      = get_option( 'woocommerce_prices_include_tax' );
+		//check if tax are include and display mode
+		if($tax_display_mode=='incl' && $tax_prices_include_tax=='no') {
+			$_tax  = new WC_Tax();
+			$tax_rates= $_tax->get_rates();
+			foreach($tax_rates as $tax) {
+				$my_tax = $tax;
+				break;
+			}
+
+
+			//calculation the negative dif in tax
+			$tax_down = ( 10000/($my_tax['rate']+100) )/100;
+			$min =floor($min*$tax_down);
+			$max =ceil($max*$tax_down);
+		}
+
 	        $matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( '
 	        	SELECT DISTINCT ID, post_parent, post_type FROM %1$s
 				INNER JOIN %2$s ON ID = post_id
