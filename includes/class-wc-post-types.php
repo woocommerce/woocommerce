@@ -268,7 +268,8 @@ class WC_Post_types {
 					'label'        => __( 'Variations', 'woocommerce' ),
 					'public'       => false,
 					'hierarchical' => false,
-					'supports'     => false
+					'supports'     => false,
+					'capability_type' => 'product'
 				)
 			)
 		);
