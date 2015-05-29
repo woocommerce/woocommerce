@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.2
-Stable tag: 2.3.9
+Stable tag: 2.3.10
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -138,6 +138,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.3.10 - 01/06/2015 =
+* Fix - Fixed theme check notice for core supported themes.
+* Fix - Add RTL direction to emails.
+* Fix - Fixed product category media upload modal.
+* Fix - Coupon maximum discount calculation.
+* Fix - PayPal icons and URLs.
+* Fix - API - Fixed subtotal_tax round and decimal dp.
+* Fix - Wrap payment js in jquery.
+* Fix - Delete correct transient when linking variations.
+* Tweak - Filter: woocommerce_cart_item_removed_title
+* Tweak - Update html-admin-page-status-report.php to show unaltered URLs.
+* Tweak - When updating transients, clear previous version of transients.
+* Tweak - Replace max_related_posts_query for performance reasons.
+* Tweak - Combine transients for get_rating_count.
 * Tweak - Bump the PrettyPhoto version during enqueue to flush caches.
 * Tweak - Remove all instances of sslverify=false #8058
 
