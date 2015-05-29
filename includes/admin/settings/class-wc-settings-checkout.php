@@ -310,20 +310,19 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	public function save() {
 		global $current_section;
 
+		$wc_payment_gateways = WC_Payment_Gateways::instance();
+
 		if ( ! $current_section ) {
+			WC_Admin_Settings::save_fields( $this->get_settings() );
+			$wc_payment_gateways->process_admin_options();
 
-			$settings = $this->get_settings();
-
-			WC_Admin_Settings::save_fields( $settings );
-			WC()->payment_gateways->process_admin_options();
-
-		} elseif ( class_exists( $current_section ) ) {
-
-			$current_section_class = new $current_section();
-
-			do_action( 'woocommerce_update_options_payment_gateways_' . $current_section_class->id );
-
-			WC()->payment_gateways()->init();
+		} else {
+			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
+				if ( $current_section === sanitize_title( get_class( $gateway ) ) ) {
+					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
+					$wc_payment_gateways->init();
+				}
+			}
 		}
 	}
 }

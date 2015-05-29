@@ -262,18 +262,18 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	public function save() {
 		global $current_section;
 
+		$wc_shipping = WC_Shipping::instance();
+
 		if ( ! $current_section ) {
+			WC_Admin_Settings::save_fields( $this->get_settings() );
+			$wc_shipping->process_admin_options();
 
-			$settings = $this->get_settings();
-
-			WC_Admin_Settings::save_fields( $settings );
-			WC()->shipping->process_admin_options();
-
-		} elseif ( class_exists( $current_section ) ) {
-
-			$current_section_class = new $current_section();
-
-			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
+		} else {
+			foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
+				if ( $current_section === sanitize_title( get_class( $method ) ) ) {
+					do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
+				}
+			}
 		}
 
 		// Increments the transient version to invalidate cache
