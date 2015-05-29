@@ -269,6 +269,7 @@ class WC_Post_types {
 					'public'       => false,
 					'hierarchical' => false,
 					'supports'     => false
+					'capability_type' => 'product'
 				)
 			)
 		);
