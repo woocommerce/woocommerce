@@ -534,8 +534,12 @@ class WC_Email extends WC_Settings_API {
 		parent::process_admin_options();
 
 		// Save templates
-		$this->save_template( $_POST['template_html_code'], $this->template_html );
-		$this->save_template( $_POST['template_plain_code'], $this->template_plain );
+		if ( isset( $_POST['template_html_code'] ) ) {
+			$this->save_template( $_POST['template_html_code'], $this->template_html );
+		}
+		if ( isset( $_POST['template_plain_code'] ) ) {
+			$this->save_template( $_POST['template_plain_code'], $this->template_plain );
+		}
 	}
 
 	/**
@@ -560,9 +564,9 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Save the email templates
 	 *
+	 * @since 2.4.0
 	 * @param string $template_code
 	 * @param string $template_path
-	 * @return void
 	 */
 	protected function save_template( $template_code, $template_path ) {
 		if ( ! empty( $template_code ) && ! empty( $template_path ) ) {
