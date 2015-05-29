@@ -171,7 +171,7 @@ class WC_Admin {
 		$wc_pages[] = 'dashboard_page_wc-translators';
 
 		// Check to make sure we're on a WooCommerce admin page
-		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
+		if ( isset( $current_screen->id ) && current_user_can( 'manage_woocommerce' ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
 			// Change the footer text
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {
 				$footer_text = sprintf( __( 'If you like <strong>WooCommerce</strong> please leave us a %s&#9733;&#9733;&#9733;&#9733;&#9733;%s rating. A huge thank you from WooThemes in advance!', 'woocommerce' ), '<a href="https://wordpress.org/support/view/plugin-reviews/woocommerce?filter=5#postform" target="_blank" class="wc-rating-link" data-rated="' . __( 'Thanks :)', 'woocommerce' ) . '">', '</a>' );

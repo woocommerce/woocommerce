@@ -415,6 +415,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'add-attribute', 'security' );
 
+		if ( ! current_user_can( 'edit_products' ) ) {
+			die(-1);
+		}
+
 		global $wc_product_attributes;
 
 		$thepostid     = 0;
@@ -451,6 +455,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'add-attribute', 'security' );
 
+		if ( ! current_user_can( 'manage_product_terms' ) ) {
+			die(-1);
+		}
+
 		$taxonomy = esc_attr( $_POST['taxonomy'] );
 		$term     = wc_clean( $_POST['term'] );
 
@@ -481,6 +489,10 @@ class WC_AJAX {
 	public static function remove_variations() {
 		check_ajax_referer( 'delete-variations', 'security' );
 
+		if ( ! current_user_can( 'edit_products' ) ) {
+			die(-1);
+		}
+
 		$variation_ids = (array) $_POST['variation_ids'];
 
 		foreach ( $variation_ids as $variation_id ) {
@@ -500,6 +512,10 @@ class WC_AJAX {
 	public static function save_attributes() {
 
 		check_ajax_referer( 'save-attributes', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			die(-1);
+		}
 
 		// Get post data
 		parse_str( $_POST['data'], $data );
@@ -613,6 +629,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'add-variation', 'security' );
 
+		if ( ! current_user_can( 'edit_products' ) ) {
+			die(-1);
+		}
+
 		$post_id = intval( $_POST['post_id'] );
 		$loop = intval( $_POST['loop'] );
 
@@ -716,6 +736,10 @@ class WC_AJAX {
 		}
 
 		check_ajax_referer( 'link-variations', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			die(-1);
+		}
 
 		@set_time_limit(0);
 
@@ -878,6 +902,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'revoke-access', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		global $wpdb;
 
 		$download_id = $_POST['download_id'];
@@ -897,6 +925,10 @@ class WC_AJAX {
 	public static function grant_access_to_download() {
 
 		check_ajax_referer( 'grant-access', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
 
 		global $wpdb;
 
@@ -952,6 +984,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'get-customer-details', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$user_id      = (int) trim(stripslashes($_POST['user_id']));
 		$type_to_load = esc_attr(trim(stripslashes($_POST['type_to_load'])));
 
@@ -972,7 +1008,6 @@ class WC_AJAX {
 		$customer_data = apply_filters( 'woocommerce_found_customer_details', $customer_data, $user_id, $type_to_load );
 
 		wp_send_json( $customer_data );
-
 	}
 
 	/**
@@ -980,6 +1015,10 @@ class WC_AJAX {
 	 */
 	public static function add_order_item() {
 		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
 
 		$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
 		$order_id    = absint( $_POST['order_id'] );
@@ -1059,6 +1098,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$order_id      = absint( $_POST['order_id'] );
 		$order         = wc_get_order( $order_id );
 		$order_taxes   = $order->get_taxes();
@@ -1086,6 +1129,10 @@ class WC_AJAX {
 	public static function add_order_shipping() {
 
 		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
 
 		$order_id         = absint( $_POST['order_id'] );
 		$order            = wc_get_order( $order_id );
@@ -1115,6 +1162,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$order_id = absint( $_POST['order_id'] );
 		$rate_id  = absint( $_POST['rate_id'] );
 		$order    = wc_get_order( $order_id );
@@ -1134,6 +1185,10 @@ class WC_AJAX {
 	 */
 	public static function remove_order_item() {
 		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
 
 		$order_item_ids = $_POST['order_item_ids'];
 
@@ -1157,6 +1212,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$order_id = absint( $_POST['order_id'] );
 		$rate_id  = absint( $_POST['rate_id'] );
 
@@ -1175,6 +1234,10 @@ class WC_AJAX {
 	 */
 	public static function reduce_order_item_stock() {
 		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
 
 		$order_id       = absint( $_POST['order_id'] );
 		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
@@ -1221,6 +1284,10 @@ class WC_AJAX {
 	 */
 	public static function increase_order_item_stock() {
 		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
 
 		$order_id       = absint( $_POST['order_id'] );
 		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
@@ -1269,6 +1336,10 @@ class WC_AJAX {
 	public static function add_order_item_meta() {
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$meta_id = wc_add_order_item_meta( absint( $_POST['order_item_id'] ), __( 'Name', 'woocommerce' ), __( 'Value', 'woocommerce' ) );
 
 		if ( $meta_id ) {
@@ -1286,6 +1357,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$meta_id = absint( $_POST['meta_id'] );
 
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $meta_id ) );
@@ -1300,6 +1375,10 @@ class WC_AJAX {
 		global $wpdb;
 
 		check_ajax_referer( 'calc-totals', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
 
 		$tax            = new WC_Tax();
 		$order_id       = absint( $_POST['order_id'] );
@@ -1442,6 +1521,10 @@ class WC_AJAX {
 	public static function save_order_items() {
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		if ( isset( $_POST['order_id'] ) && isset( $_POST['items'] ) ) {
 			$order_id = absint( $_POST['order_id'] );
 
@@ -1467,6 +1550,10 @@ class WC_AJAX {
 	public static function load_order_items() {
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		// Return HTML items
 		$order_id = absint( $_POST['order_id'] );
 		$order    = wc_get_order( $order_id );
@@ -1482,6 +1569,10 @@ class WC_AJAX {
 	public static function add_order_note() {
 
 		check_ajax_referer( 'add-order-note', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
 
 		$post_id   = absint( $_POST['post_id'] );
 		$note      = wp_kses_post( trim( stripslashes( $_POST['note'] ) ) );
@@ -1514,6 +1605,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'delete-order-note', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$note_id = (int) $_POST['note_id'];
 
 		if ( $note_id > 0 ) {
@@ -1534,6 +1629,10 @@ class WC_AJAX {
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			die(-1);
+		}
 
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1638,6 +1737,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-customers', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$term = wc_clean( stripslashes( $_GET['term'] ) );
 
 		if ( empty( $term ) ) {
@@ -1678,6 +1781,12 @@ class WC_AJAX {
 	 */
 	public static function json_search_downloadable_products_and_variations() {
 		ob_start();
+
+		check_ajax_referer( 'search-products', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			die(-1);
+		}
 
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
@@ -1733,10 +1842,16 @@ class WC_AJAX {
 	 * Ajax request handling for categories ordering
 	 */
 	public static function term_ordering() {
+
+		// check permissions again and make sure we have what we need
+		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
+			die(-1);
+		}
+
 		$id       = (int) $_POST['id'];
 		$next_id  = isset( $_POST['nextid'] ) && (int) $_POST['nextid'] ? (int) $_POST['nextid'] : null;
 		$taxonomy = isset( $_POST['thetaxonomy'] ) ? esc_attr( $_POST['thetaxonomy'] ) : null;
-		$term     = get_term_by('id', $id, $taxonomy);
+		$term     = get_term_by( 'id', $id, $taxonomy );
 
 		if ( ! $id || ! $term || ! $taxonomy ) {
 			die(0);
@@ -1850,6 +1965,10 @@ class WC_AJAX {
 
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$order_id               = absint( $_POST['order_id'] );
 		$refund_amount          = wc_format_decimal( sanitize_text_field( $_POST['refund_amount'] ) );
 		$refund_reason          = sanitize_text_field( $_POST['refund_reason'] );
@@ -1962,6 +2081,10 @@ class WC_AJAX {
 	public static function delete_refund() {
 		check_ajax_referer( 'order-item', 'security' );
 
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
 		$refund_id = absint( $_POST['refund_id'] );
 
 		if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
@@ -1978,6 +2101,10 @@ class WC_AJAX {
 	 * Triggered when clicking the rating footer.
 	 */
 	public static function rated() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			die(-1);
+		}
+
 		update_option( 'woocommerce_admin_footer_text_rated', 1 );
 		die();
 	}
