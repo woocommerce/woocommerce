@@ -1143,7 +1143,7 @@ class WC_API_Products extends WC_API_Resource {
 		// Product tags
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
 			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
-			wp_set_object_terms( $product_id, $terms, 'product_tag' );
+			wp_set_object_terms( $product_id, $term_ids, 'product_tag' );
 		}
 
 		// Downloadable
