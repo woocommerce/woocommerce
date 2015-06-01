@@ -155,9 +155,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Missing global in `render_product_columns()`.
 * Fix - Add `$args` arguments to `WC_Product_Factory->get_product_class()` to allow `$product_type` to be overwritten by `$args['product_type']`.
 * Fix - Remove call to `wp_specialchars_decode()` in `wc_get_price_thousand_separator()` and `wc_get_price_decimal_separator()`.
-* Fix - Extra escaping of customer emails in `wc_customer_bought_product()`.
 * Fix - fclose in logging class requires a resource, not a string.
 * Fix - Prevent (admin) SQLi when setting stock levels for product variations.
+* Tweak - Extra escaping of customer emails in `wc_customer_bought_product()`.
 * Tweak - Improve tooltip sanitization.
 * Tweak - Escape provided array of post codes in tax class.
 * Tweak - Escape metadata when duplicating products.
@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Bump the PrettyPhoto version during enqueue to flush caches.
 * Tweak - Remove all instances of sslverify=false #8058
 * Tweak - Error prevention when showing customer orders on the frontend.
+* Tweak - Added PH states.
 
 = 2.3.9 - 19/05/2015 =
 * Fix - Fixed language upgrader verification.
