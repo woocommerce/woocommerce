@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.3.10 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-06-01 13:19:35+00:00\n"
+"POT-Creation-Date: 2015-06-01 14:24:00+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4992,180 +4992,10 @@ msgstr ""
 msgid "Western Cape"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-email.php:555
-#: includes/emails/class-wc-email-cancelled-order.php:117
-#: includes/emails/class-wc-email-customer-completed-order.php:143
-#: includes/emails/class-wc-email-new-order.php:123
-#: includes/emails/class-wc-email.php:478
-#: includes/gateways/bacs/class-wc-gateway-bacs.php:74
-#: includes/gateways/cheque/class-wc-gateway-cheque.php:54
-#: includes/gateways/paypal/includes/settings-paypal.php:12
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:185
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:12
-#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:69
-#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:52
-msgid "Enable/Disable"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:557
-#: includes/emails/class-wc-email-cancelled-order.php:119
-#: includes/emails/class-wc-email-customer-completed-order.php:145
-#: includes/emails/class-wc-email-new-order.php:125
-#: includes/emails/class-wc-email.php:480
-msgid "Enable this email notification"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:561
-#: includes/emails/class-wc-email-customer-invoice.php:151
-#: includes/emails/class-wc-email.php:484
-msgid "Email subject"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:563
-#: includes/abstracts/abstract-wc-email.php:570
-#: includes/emails/class-wc-email-customer-completed-order.php:151
-#: includes/emails/class-wc-email-customer-completed-order.php:158
-#: includes/emails/class-wc-email-customer-completed-order.php:165
-#: includes/emails/class-wc-email-customer-completed-order.php:172
-#: includes/emails/class-wc-email-customer-invoice.php:153
-#: includes/emails/class-wc-email-customer-invoice.php:160
-#: includes/emails/class-wc-email-customer-invoice.php:167
-#: includes/emails/class-wc-email-customer-invoice.php:174
-#: includes/emails/class-wc-email.php:486
-#: includes/emails/class-wc-email.php:493
-msgid "Defaults to <code>%s</code>"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:568
-#: includes/emails/class-wc-email-customer-invoice.php:158
-#: includes/emails/class-wc-email.php:491
-msgid "Email heading"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:575
-#: includes/emails/class-wc-email-cancelled-order.php:144
-#: includes/emails/class-wc-email-customer-completed-order.php:177
-#: includes/emails/class-wc-email-customer-invoice.php:179
-#: includes/emails/class-wc-email-new-order.php:150
-#: includes/emails/class-wc-email.php:498
-msgid "Email type"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:577
-#: includes/emails/class-wc-email-cancelled-order.php:146
-#: includes/emails/class-wc-email-customer-completed-order.php:179
-#: includes/emails/class-wc-email-customer-invoice.php:181
-#: includes/emails/class-wc-email-new-order.php:152
-#: includes/emails/class-wc-email.php:500
-msgid "Choose which format of email to send."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:581
-#: includes/emails/class-wc-email.php:515
-msgid "Plain text"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:582
-#: includes/emails/class-wc-email.php:519
-msgid "HTML"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:583
-#: includes/emails/class-wc-email.php:520
-msgid "Multipart"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:620
-#: includes/abstracts/abstract-wc-email.php:644
-#: includes/emails/class-wc-email.php:557
-#: includes/emails/class-wc-email.php:580
-msgid "Could not write to template file."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:669
-#: includes/emails/class-wc-email.php:692
-msgid "Action failed. Please refresh the page and retry."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:673
-#: includes/class-wc-checkout.php:69 includes/class-wc-checkout.php:78
-#: includes/class-wc-emails.php:43 includes/class-wc-emails.php:52
-#: includes/class-wc-payment-gateways.php:46
-#: includes/class-wc-payment-gateways.php:55 includes/class-wc-shipping.php:65
-#: includes/class-wc-shipping.php:74 includes/emails/class-wc-email.php:696
-#: woocommerce.php:106 woocommerce.php:114
-msgid "Cheatin&#8217; huh?"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:688
-#: includes/emails/class-wc-email.php:646
-msgid "Template file copied to theme."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:699
-#: includes/emails/class-wc-email.php:675
-msgid "Template file deleted from theme."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:707
 #: includes/abstracts/abstract-wc-integration.php:29
 #: includes/abstracts/abstract-wc-settings-api.php:77
 #: includes/class-wc-install.php:664 includes/emails/class-wc-email.php:722
 msgid "Settings"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:719
-#: includes/emails/class-wc-email.php:752
-msgid "HTML template"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:720
-#: includes/emails/class-wc-email.php:753
-msgid "Plain text template"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:743
-#: includes/emails/class-wc-email.php:778
-msgid "Delete template file"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:746
-#: includes/emails/class-wc-email.php:781
-msgid ""
-"This template has been overridden by your theme and can be found in: "
-"<code>%s</code>."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:759
-#: includes/emails/class-wc-email.php:794
-msgid "Copy file to theme"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:762
-#: includes/emails/class-wc-email.php:797
-msgid ""
-"To override and edit this email template copy <code>%s</code> to your theme "
-"folder: <code>%s</code>."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:771
-#: includes/emails/class-wc-email.php:806
-msgid "File was not found."
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:796
-#: includes/emails/class-wc-email.php:831
-msgid "View template"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:797
-#: includes/emails/class-wc-email.php:832
-msgid "Hide template"
-msgstr ""
-
-#: includes/abstracts/abstract-wc-email.php:808
-#: includes/emails/class-wc-email.php:843
-msgid "Are you sure you want to delete this template file?"
 msgstr ""
 
 #: includes/abstracts/abstract-wc-order.php:232
@@ -6017,6 +5847,15 @@ msgstr ""
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
+msgstr ""
+
+#: includes/class-wc-checkout.php:69 includes/class-wc-checkout.php:78
+#: includes/class-wc-emails.php:43 includes/class-wc-emails.php:52
+#: includes/class-wc-payment-gateways.php:46
+#: includes/class-wc-payment-gateways.php:55 includes/class-wc-shipping.php:65
+#: includes/class-wc-shipping.php:74 includes/emails/class-wc-email.php:696
+#: woocommerce.php:106 woocommerce.php:114
+msgid "Cheatin&#8217; huh?"
 msgstr ""
 
 #: includes/class-wc-checkout.php:101
@@ -7091,6 +6930,27 @@ msgstr ""
 msgid "[{site_title}] Cancelled order ({order_number})"
 msgstr ""
 
+#: includes/emails/class-wc-email-cancelled-order.php:117
+#: includes/emails/class-wc-email-customer-completed-order.php:143
+#: includes/emails/class-wc-email-new-order.php:123
+#: includes/emails/class-wc-email.php:478
+#: includes/gateways/bacs/class-wc-gateway-bacs.php:74
+#: includes/gateways/cheque/class-wc-gateway-cheque.php:54
+#: includes/gateways/paypal/includes/settings-paypal.php:12
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:185
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:12
+#: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:69
+#: includes/shipping/international-delivery/class-wc-shipping-international-delivery.php:52
+msgid "Enable/Disable"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:119
+#: includes/emails/class-wc-email-customer-completed-order.php:145
+#: includes/emails/class-wc-email-new-order.php:125
+#: includes/emails/class-wc-email.php:480
+msgid "Enable this email notification"
+msgstr ""
+
 #: includes/emails/class-wc-email-cancelled-order.php:123
 #: includes/emails/class-wc-email-new-order.php:129
 msgid "Recipient(s)"
@@ -7129,6 +6989,22 @@ msgid ""
 "Leave blank to use the default heading: <code>%s</code>."
 msgstr ""
 
+#: includes/emails/class-wc-email-cancelled-order.php:144
+#: includes/emails/class-wc-email-customer-completed-order.php:177
+#: includes/emails/class-wc-email-customer-invoice.php:179
+#: includes/emails/class-wc-email-new-order.php:150
+#: includes/emails/class-wc-email.php:498
+msgid "Email type"
+msgstr ""
+
+#: includes/emails/class-wc-email-cancelled-order.php:146
+#: includes/emails/class-wc-email-customer-completed-order.php:179
+#: includes/emails/class-wc-email-customer-invoice.php:181
+#: includes/emails/class-wc-email-new-order.php:152
+#: includes/emails/class-wc-email.php:500
+msgid "Choose which format of email to send."
+msgstr ""
+
 #: includes/emails/class-wc-email-customer-completed-order.php:28
 msgid "Completed order"
 msgstr ""
@@ -7153,6 +7029,19 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:42
 msgid "Your {site_title} order from {order_date} is complete - download your files"
+msgstr ""
+
+#: includes/emails/class-wc-email-customer-completed-order.php:151
+#: includes/emails/class-wc-email-customer-completed-order.php:158
+#: includes/emails/class-wc-email-customer-completed-order.php:165
+#: includes/emails/class-wc-email-customer-completed-order.php:172
+#: includes/emails/class-wc-email-customer-invoice.php:153
+#: includes/emails/class-wc-email-customer-invoice.php:160
+#: includes/emails/class-wc-email-customer-invoice.php:167
+#: includes/emails/class-wc-email-customer-invoice.php:174
+#: includes/emails/class-wc-email.php:486
+#: includes/emails/class-wc-email.php:493
+msgid "Defaults to <code>%s</code>"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-completed-order.php:163
@@ -7187,6 +7076,16 @@ msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:41
 msgid "Order {order_number} details"
+msgstr ""
+
+#: includes/emails/class-wc-email-customer-invoice.php:151
+#: includes/emails/class-wc-email.php:484
+msgid "Email subject"
+msgstr ""
+
+#: includes/emails/class-wc-email-customer-invoice.php:158
+#: includes/emails/class-wc-email.php:491
+msgid "Email heading"
 msgstr ""
 
 #: includes/emails/class-wc-email-customer-invoice.php:165
@@ -7281,6 +7180,79 @@ msgstr ""
 
 #: includes/emails/class-wc-email-new-order.php:32
 msgid "[{site_title}] New customer order ({order_number}) - {order_date}"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:515
+msgid "Plain text"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:519
+msgid "HTML"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:520
+msgid "Multipart"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:557
+#: includes/emails/class-wc-email.php:580
+msgid "Could not write to template file."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:646
+msgid "Template file copied to theme."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:675
+msgid "Template file deleted from theme."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:692
+msgid "Action failed. Please refresh the page and retry."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:752
+msgid "HTML template"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:753
+msgid "Plain text template"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:778
+msgid "Delete template file"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:781
+msgid ""
+"This template has been overridden by your theme and can be found in: "
+"<code>%s</code>."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:794
+msgid "Copy file to theme"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:797
+msgid ""
+"To override and edit this email template copy <code>%s</code> to your theme "
+"folder: <code>%s</code>."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:806
+msgid "File was not found."
+msgstr ""
+
+#: includes/emails/class-wc-email.php:831
+msgid "View template"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:832
+msgid "Hide template"
+msgstr ""
+
+#: includes/emails/class-wc-email.php:843
+msgid "Are you sure you want to delete this template file?"
 msgstr ""
 
 #: includes/gateways/bacs/class-wc-gateway-bacs.php:31
