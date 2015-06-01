@@ -147,6 +147,28 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - API - Fixed subtotal_tax round and decimal dp.
 * Fix - Wrap payment js in jquery.
 * Fix - Delete correct transient when linking variations.
+* Fix - Set default currency position format string (in case of missing or invalid `woocommerce_currency_pos` option value).
+* Fix - Simplify Commerce undefined constant ('error_code' > '$error' typo).
+* Fix - Fixes too many arguments in function or method call: WC_Shortcode_My_Account::add_payment_method.
+* Fix - Pass correct number of arguments to `wc_lostpassword_url()`, `wc_nav_menu_items()`, `wc_nav_menu_item_classes()`, and `wc_change_term_counts()`.
+* Fix - Fixes usage of void return value from `wc_cart_totals_taxes_total_html()`.
+* Fix - Missing global in `render_product_columns()`.
+* Fix - Add `$args` arguments to `WC_Product_Factory->get_product_class()` to allow `$product_type` to be overwritten by `$args['product_type']`.
+* Fix - Remove call to `wp_specialchars_decode()` in `wc_get_price_thousand_separator()` and `wc_get_price_decimal_separator()`.
+* Fix - Extra escaping of customer emails in `wc_customer_bought_product()`.
+* Fix - fclose in logging class requires a resource, not a string.
+* Fix - Prevent (admin) SQLi when setting stock levels for product variations.
+* Tweak - Improve tooltip sanitization.
+* Tweak - Escape provided array of post codes in tax class.
+* Tweak - Escape metadata when duplicating products.
+* Tweak - Escape permalink settings slugs.
+* Tweak - Sanitize columns value in shortcodes.
+* Tweak - Use prepare for updating attributes.
+* Tweak - Use wp_safe_remote_ functions in place of wp_remote_ where applicable.
+* Tweak - Added extra capability checks to notices, email template editing, and admin ajax requests.
+* Tweak - Set nonce_user_logged_out to WC session ID, if set.
+* Tweak - Added `wc_send_frame_options_header` function to prevent checkout and account pages from being used in iFrames. Added via filter so this can be disabled.
+* Tweak - Validate file types are allowed for downloadable products when saving.
 * Tweak - Filter: woocommerce_cart_item_removed_title
 * Tweak - Update html-admin-page-status-report.php to show unaltered URLs.
 * Tweak - When updating transients, clear previous version of transients.
