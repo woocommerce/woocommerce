@@ -380,7 +380,7 @@ class Functions extends \WC_Unit_Test_Case {
 		$this->assertEquals( '.', wc_get_price_thousand_separator() );
 
 		update_option( 'woocommerce_price_thousand_sep', '&lt;.&gt;' );
-		$this->assertEquals( '<.>', wc_get_price_thousand_separator() );
+		$this->assertEquals( '&lt;.&gt;', wc_get_price_thousand_separator() );
 
 		update_option( 'woocommerce_price_thousand_sep', $separator );
 	}
@@ -400,7 +400,7 @@ class Functions extends \WC_Unit_Test_Case {
 		$this->assertEquals( ',', wc_get_price_decimal_separator() );
 
 		update_option( 'woocommerce_price_decimal_sep', '&lt;.&gt;' );
-		$this->assertEquals( '<.>', wc_get_price_decimal_separator() );
+		$this->assertEquals( '&lt;.&gt;', wc_get_price_decimal_separator() );
 
 		update_option( 'woocommerce_price_decimal_sep', $separator );
 	}
