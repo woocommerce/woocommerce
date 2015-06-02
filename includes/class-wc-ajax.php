@@ -1782,7 +1782,7 @@ class WC_AJAX {
 
 		$found_products = array();
 
-		if ( $posts ) {
+		if ( ! empty( $posts ) ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post );
 
