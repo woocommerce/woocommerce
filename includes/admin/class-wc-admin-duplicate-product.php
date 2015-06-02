@@ -219,7 +219,13 @@ class WC_Admin_Duplicate_Product {
 
 		$taxonomies = get_object_taxonomies( $post_type );
 
+		$taxonomy_blacklist = esc_sql( apply_filters( 'woocommerce_duplicate_product_taxonomy_blacklist', array() ) );
+
 		foreach ( $taxonomies as $taxonomy ) {
+
+			if ( in_array( $taxonomy, $taxonomy_blacklist ) ) {
+				continue;
+			}
 
 			$post_terms = wp_get_object_terms( $id, $taxonomy );
 			$post_terms_count = sizeof( $post_terms );
@@ -239,7 +245,12 @@ class WC_Admin_Duplicate_Product {
 	private function duplicate_post_meta( $id, $new_id ) {
 		global $wpdb;
 
-		$post_meta_infos = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d AND meta_key NOT IN ( 'total_sales' );", absint( $id ) ) );
+		$meta_blacklist = esc_sql( apply_filters( 'woocommerce_duplicate_product_meta_blacklist', array( 'total_sales' ) ) );
+		if ( count( $meta_blacklist ) > 0 ) {
+			$blacklist_sql = "AND meta_key NOT IN ( '" . implode( "', '", $meta_blacklist ) . "' )";
+		}
+
+		$post_meta_infos = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d $blacklist_sql;", absint( $id ) ) );
 
 		if ( count( $post_meta_infos ) != 0 ) {
 
