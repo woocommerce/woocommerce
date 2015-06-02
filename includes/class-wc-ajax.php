@@ -1782,7 +1782,7 @@ class WC_AJAX {
 
 		$found_products = array();
 
-		if ( $posts ) {
+		if ( ! empty( $posts ) ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post );
 
@@ -1793,7 +1793,6 @@ class WC_AJAX {
 		$found_products = apply_filters( 'woocommerce_json_search_found_products', $found_products );
 
 		wp_send_json( $found_products );
-
 	}
 
 	/**
@@ -1840,14 +1839,13 @@ class WC_AJAX {
 
 		$customers = $customers_query->get_results();
 
-		if ( $customers ) {
+		if ( ! empty( $customers ) ) {
 			foreach ( $customers as $customer ) {
 				$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
 			}
 		}
 
 		wp_send_json( $found_customers );
-
 	}
 
 	/**
@@ -1886,7 +1884,7 @@ class WC_AJAX {
 		$posts = get_posts( $args );
 		$found_products = array();
 
-		if ( $posts ) {
+		if ( ! empty( $posts ) ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post->ID );
 				$found_products[ $post->ID ] = $product->get_formatted_name();
@@ -1894,7 +1892,6 @@ class WC_AJAX {
 		}
 
 		wp_send_json( $found_products );
-
 	}
 
 	/**
