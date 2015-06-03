@@ -53,7 +53,7 @@ if ( ! function_exists( 'is_product_category' ) ) {
 	 */
 	function is_product_category( $term = '' ) {
 		return is_tax( 'product_cat', $term );
-	}i
+	}
 }
 
 if ( ! function_exists( 'is_product_tag' ) ) {
