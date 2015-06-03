@@ -55,7 +55,6 @@ jQuery( function( $ ) {
 		$('#catalog-visibility-select').slideUp('fast');
 		$('#catalog-visibility .edit-catalog-visibility').show();
 
-		var value = $( 'input[name=_visibility]:checked' ).val();
 		var label = $( 'input[name=_visibility]:checked' ).attr( 'data-label' );
 
 		if ( $( 'input[name=_featured]' ).is( ':checked' ) ) {
