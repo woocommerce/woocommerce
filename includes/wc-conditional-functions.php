@@ -53,7 +53,7 @@ if ( ! function_exists( 'is_product_category' ) ) {
 	 */
 	function is_product_category( $term = '' ) {
 		return is_tax( 'product_cat', $term );
-	}
+	}i
 }
 
 if ( ! function_exists( 'is_product_tag' ) ) {
@@ -289,7 +289,7 @@ if ( ! function_exists( 'wc_tax_enabled' ) ) {
 	 * @return bool
 	 */
 	function wc_tax_enabled() {
-		return get_option( 'woocommerce_calc_taxes' ) === 'yes';
+		return apply_filters( 'wc_tax_enabled', get_option( 'woocommerce_calc_taxes' ) === 'yes' );
 	}
 }
 
