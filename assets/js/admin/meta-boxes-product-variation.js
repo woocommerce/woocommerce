@@ -159,7 +159,7 @@ jQuery( function ( $ ) {
 		return false;
 	});
 
-	$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.bulk_edit', function ( event ) {
+	$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.bulk_edit', function () {
 		var bulk_edit  = $( 'select#field_to_edit' ).val(),
 			checkbox,
 			answer,
@@ -290,12 +290,12 @@ jQuery( function ( $ ) {
 				var end   = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_end );
 				var set   = false;
 
-				if ( start != null && start != '' ) {
+				if ( start != null && start !== '' ) {
 					$('.woocommerce_variable_attributes .sale_schedule').click();
 					$( ':input[name^="variable_sale_price_dates_from"]').val( start ).change();
 					set = true;
 				}
-				if ( end != null && end != '') {
+				if ( end != null && end !== '' ) {
 					$('.woocommerce_variable_attributes .sale_schedule').click();
 					$( ':input[name^="variable_sale_price_dates_to"]').val( end ).change();
 					set = true;
