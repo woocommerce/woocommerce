@@ -188,7 +188,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$this->set_pagination_args( array(
 			'total_items' => $count,
 			'per_page'    => $per_page,
-			'total_pages' => $count / $per_page
+			'total_pages' => ceil( $count / $per_page )
 		) );
 	}
 }
