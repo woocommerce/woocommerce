@@ -127,6 +127,7 @@ function wc_print_notices() {
 
 	wc_clear_notices();
 }
+add_action( 'woocommerce_shortcode_before_product_cat_loop', 'wc_print_notices', 10 );
 add_action( 'woocommerce_before_shop_loop', 'wc_print_notices', 10 );
 add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
 
