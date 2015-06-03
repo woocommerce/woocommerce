@@ -269,7 +269,7 @@ jQuery( function( $ ) {
 	});
 
 	// Add rows
-	$( 'button.add_attribute' ).on('click', function(){
+	$( 'button.add_attribute' ).on( 'click', function() {
 		var size         = $( '.product_attributes .woocommerce_attribute' ).size();
 		var attribute    = $( 'select.attribute_taxonomy' ).val();
 		var $wrapper     = $( this ).closest( '#product_attributes' ).find( '.product_attributes' );
@@ -305,33 +305,33 @@ jQuery( function( $ ) {
 		return false;
 	});
 
-	$('.product_attributes').on('blur', 'input.attribute_name', function(){
-		$(this).closest('.woocommerce_attribute').find('strong.attribute_name').text( $(this).val() );
+	$( '.product_attributes' ).on('blur', 'input.attribute_name', function() {
+		$( this ).closest( '.woocommerce_attribute' ).find( 'strong.attribute_name' ).text( $( this ).val() );
 	});
 
-	$('.product_attributes').on('click', 'button.select_all_attributes', function(){
-		$(this).closest('td').find('select option').attr("selected","selected");
-		$(this).closest('td').find('select').change();
+	$( '.product_attributes' ).on( 'click', 'button.select_all_attributes', function() {
+		$( this ).closest( 'td' ).find( 'select option' ).attr( 'selected', 'selected' );
+		$( this ).closest( 'td' ).find( 'select' ).change();
 		return false;
 	});
 
-	$('.product_attributes').on('click', 'button.select_no_attributes', function(){
-		$(this).closest('td').find('select option').removeAttr("selected");
-		$(this).closest('td').find('select').change();
+	$( '.product_attributes' ).on( 'click', 'button.select_no_attributes', function() {
+		$( this ).closest( 'td' ).find( 'select option' ).removeAttr( 'selected' );
+		$( this ).closest( 'td' ).find( 'select').change();
 		return false;
 	});
 
-	$('.product_attributes').on('click', 'button.remove_row', function() {
-		var answer = confirm(woocommerce_admin_meta_boxes.remove_attribute);
-		if (answer){
-			var $parent = $(this).parent().parent();
+	$( '.product_attributes' ).on( 'click', 'button.remove_row', function() {
+		var answer = confirm( woocommerce_admin_meta_boxes.remove_attribute );
+		if ( answer ){
+			var $parent = $( this ).parent().parent();
 
-			if ($parent.is('.taxonomy')) {
-				$parent.find('select, input[type=text]').val('');
+			if ( $parent.is( '.taxonomy' ) ) {
+				$parent.find( 'select, input[type=text]' ).val('');
 				$parent.hide();
-				$('select.attribute_taxonomy').find('option[value="' + $parent.data( 'taxonomy' ) + '"]').removeAttr('disabled');
+				$( 'select.attribute_taxonomy' ).find( 'option[value="' + $parent.data( 'taxonomy' ) + '"]' ).removeAttr( 'disabled' );
 			} else {
-				$parent.find('select, input[type=text]').val('');
+				$parent.find( 'select, input[type=text]' ).val('');
 				$parent.hide();
 				attribute_row_indexes();
 			}
@@ -340,41 +340,41 @@ jQuery( function( $ ) {
 	});
 
 	// Attribute ordering
-	$('.product_attributes').sortable({
-		items:'.woocommerce_attribute',
-		cursor:'move',
-		axis:'y',
+	$( '.product_attributes' ).sortable({
+		items: '.woocommerce_attribute',
+		cursor: 'move',
+		axis: 'y',
 		handle: 'h3',
-		scrollSensitivity:40,
+		scrollSensitivity: 40,
 		forcePlaceholderSize: true,
 		helper: 'clone',
 		opacity: 0.65,
 		placeholder: 'wc-metabox-sortable-placeholder',
-		start:function(event,ui){
-			ui.item.css('background-color','#f6f6f6');
+		start: function( event, ui ) {
+			ui.item.css( 'background-color', '#f6f6f6' );
 		},
-		stop:function(event,ui){
-			ui.item.removeAttr('style');
+		stop: function( event, ui ) {
+			ui.item.removeAttr( 'style' );
 			attribute_row_indexes();
 		}
 	});
 
 	// Add a new attribute (via ajax)
-	$('.product_attributes').on('click', 'button.add_new_attribute', function() {
+	$( '.product_attributes' ).on( 'click', 'button.add_new_attribute', function() {
 
-		$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
+		$( '.product_attributes' ).block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 
-		var $wrapper           = $(this).closest('.woocommerce_attribute');
-		var attribute          = $wrapper.data('taxonomy');
+		var $wrapper           = $( this ).closest( '.woocommerce_attribute' );
+		var attribute          = $wrapper.data( 'taxonomy' );
 		var new_attribute_name = prompt( woocommerce_admin_meta_boxes.new_attribute_prompt );
 
 		if ( new_attribute_name ) {
 
 			var data = {
-				action: 		'woocommerce_add_new_attribute',
-				taxonomy:		attribute,
-				term:			new_attribute_name,
-				security: 		woocommerce_admin_meta_boxes.add_attribute_nonce
+				action:   'woocommerce_add_new_attribute',
+				taxonomy: attribute,
+				term:     new_attribute_name,
+				security: woocommerce_admin_meta_boxes.add_attribute_nonce
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
@@ -384,60 +384,55 @@ jQuery( function( $ ) {
 					alert( response.error );
 				} else if ( response.slug ) {
 					// Success
-					$wrapper.find('select.attribute_values').append('<option value="' + response.slug + '" selected="selected">' + response.name + '</option>');
-					$wrapper.find('select.attribute_values').change();
+					$wrapper.find( 'select.attribute_values' ).append( '<option value="' + response.slug + '" selected="selected">' + response.name + '</option>' );
+					$wrapper.find( 'select.attribute_values' ).change();
 				}
 
-				$('.product_attributes').unblock();
-
+				$( '.product_attributes' ).unblock();
 			});
 
 		} else {
-			$('.product_attributes').unblock();
+			$( '.product_attributes' ).unblock();
 		}
 
 		return false;
 	});
 
 	// Save attributes and update variations
-	$('.save_attributes').on('click', function(){
+	$( '.save_attributes' ).on( 'click', function() {
 
-		$('.product_attributes').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
+		$( '.product_attributes' ).block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 
 		var data = {
-			post_id: 		woocommerce_admin_meta_boxes.post_id,
-			data:			$('.product_attributes').find('input, select, textarea').serialize(),
-			action: 		'woocommerce_save_attributes',
-			security: 		woocommerce_admin_meta_boxes.save_attributes_nonce
+			post_id:  woocommerce_admin_meta_boxes.post_id,
+			data:     $( '.product_attributes' ).find( 'input, select, textarea' ).serialize(),
+			action:   'woocommerce_save_attributes',
+			security: woocommerce_admin_meta_boxes.save_attributes_nonce
 		};
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-
 			var this_page = window.location.toString();
-
 			this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_admin_meta_boxes.post_id + '&action=edit&' );
 
 			// Load variations panel
-			$('#variable_product_options').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
-			$('#variable_product_options').load( this_page + ' #variable_product_options_inner', function() {
-				$('#variable_product_options').unblock();
-			} );
+			$( '#variable_product_options' ).block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
+			$( '#variable_product_options' ).load( this_page + ' #variable_product_options_inner', function() {
+				$( '#variable_product_options' ).unblock();
+			});
 
-			$('.product_attributes').unblock();
-
+			$( '.product_attributes' ).unblock();
 		});
-
 	});
 
 	// Uploading files
 	var downloadable_file_frame;
 	var file_path_field;
 
-	jQuery(document).on( 'click', '.upload_file_button', function( event ){
+	jQuery(  document).on( 'click', '.upload_file_button', function( event ) {
 
 		var $el = $(this);
 
-		file_path_field = $el.closest('tr').find('td.file_url input');
+		file_path_field = $el.closest( 'tr' ).find( 'td.file_url input' );
 
 		event.preventDefault();
 
@@ -454,7 +449,7 @@ jQuery( function( $ ) {
 				multiple:  true,
 				title:     $el.data('choose'),
 				priority:  20,
-				filterable: 'uploaded',
+				filterable: 'uploaded'
 			})
 		];
 
@@ -466,26 +461,23 @@ jQuery( function( $ ) {
 				type: ''
 			},
 			button: {
-				text: $el.data('update'),
+				text: $el.data('update')
 			},
 			multiple: true,
-			states: downloadable_file_states,
+			states: downloadable_file_states
 		});
 
 		// When an image is selected, run a callback.
 		downloadable_file_frame.on( 'select', function() {
-
 			var file_path = '';
-			var selection = downloadable_file_frame.state().get('selection');
+			var selection = downloadable_file_frame.state().get( 'selection' );
 
 			selection.map( function( attachment ) {
-
 				attachment = attachment.toJSON();
-
-				if ( attachment.url )
-					file_path = attachment.url
-
-			} );
+				if ( attachment.url ) {
+					file_path = attachment.url;
+				}
+			});
 
 			file_path_field.val( file_path );
 		});
@@ -502,24 +494,24 @@ jQuery( function( $ ) {
 	});
 
 	// Download ordering
-	jQuery('.downloadable_files tbody').sortable({
-		items:'tr',
-		cursor:'move',
-		axis:'y',
+	jQuery( '.downloadable_files tbody' ).sortable({
+		items: 'tr',
+		cursor: 'move',
+		axis: 'y',
 		handle: 'td.sort',
-		scrollSensitivity:40,
+		scrollSensitivity: 40,
 		forcePlaceholderSize: true,
 		helper: 'clone',
-		opacity: 0.65,
+		opacity: 0.65
 	});
 
 	// Product gallery file uploads
 	var product_gallery_frame;
-	var $image_gallery_ids = $('#product_image_gallery');
-	var $product_images = $('#product_images_container ul.product_images');
+	var $image_gallery_ids = $( '#product_image_gallery' );
+	var $product_images    = $( '#product_images_container ul.product_images' );
 
-	jQuery('.add_product_images').on( 'click', 'a', function( event ) {
-		var $el = $(this);
+	jQuery( '.add_product_images' ).on( 'click', 'a', function( event ) {
+		var $el = $( this );
 		var attachment_ids = $image_gallery_ids.val();
 
 		event.preventDefault();
@@ -533,31 +525,29 @@ jQuery( function( $ ) {
 		// Create the media frame.
 		product_gallery_frame = wp.media.frames.product_gallery = wp.media({
 			// Set the title of the modal.
-			title: $el.data('choose'),
+			title: $el.data( 'choose' ),
 			button: {
-				text: $el.data('update'),
+				text: $el.data( 'update' )
 			},
-			states : [
+			states: [
 				new wp.media.controller.Library({
-					title: $el.data('choose'),
-					filterable :	'all',
-					multiple: true,
+					title: $el.data( 'choose' ),
+					filterable: 'all',
+					multiple: true
 				})
 			]
 		});
 
 		// When an image is selected, run a callback.
 		product_gallery_frame.on( 'select', function() {
-
-			var selection = product_gallery_frame.state().get('selection');
+			var selection = product_gallery_frame.state().get( 'selection' );
 
 			selection.map( function( attachment ) {
-
 				attachment = attachment.toJSON();
 
 				if ( attachment.id ) {
-					attachment_ids   = attachment_ids ? attachment_ids + "," + attachment.id : attachment.id;
-					attachment_image = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+					var attachment_ids   = attachment_ids ? attachment_ids + ',' + attachment.id : attachment.id;
+					var attachment_image = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
 					$product_images.append('\
 						<li class="image" data-attachment_id="' + attachment.id + '">\
@@ -581,23 +571,23 @@ jQuery( function( $ ) {
 	$product_images.sortable({
 		items: 'li.image',
 		cursor: 'move',
-		scrollSensitivity:40,
+		scrollSensitivity: 40,
 		forcePlaceholderSize: true,
 		forceHelperSize: false,
 		helper: 'clone',
 		opacity: 0.65,
 		placeholder: 'wc-metabox-sortable-placeholder',
-		start:function(event,ui){
-			ui.item.css('background-color','#f6f6f6');
+		start: function( event, ui ) {
+			ui.item.css( 'background-color', '#f6f6f6' );
 		},
-		stop:function(event,ui){
-			ui.item.removeAttr('style');
+		stop: function( event, ui ) {
+			ui.item.removeAttr( 'style' );
 		},
-		update: function(event, ui) {
+		update: function() {
 			var attachment_ids = '';
 
-			$('#product_images_container ul li.image').css('cursor','default').each(function() {
-				var attachment_id = jQuery(this).attr( 'data-attachment_id' );
+			$( '#product_images_container ul li.image' ).css( 'cursor', 'default' ).each( function() {
+				var attachment_id = jQuery( this ).attr( 'data-attachment_id' );
 				attachment_ids = attachment_ids + attachment_id + ',';
 			});
 
@@ -606,13 +596,13 @@ jQuery( function( $ ) {
 	});
 
 	// Remove images
-	$('#product_images_container').on( 'click', 'a.delete', function() {
-		$(this).closest('li.image').remove();
+	$( '#product_images_container' ).on( 'click', 'a.delete', function() {
+		$( this ).closest( 'li.image' ).remove();
 
 		var attachment_ids = '';
 
-		$('#product_images_container ul li.image').css('cursor','default').each(function() {
-			var attachment_id = jQuery(this).attr( 'data-attachment_id' );
+		$( '#product_images_container ul li.image' ).css( 'cursor', 'default' ).each( function() {
+			var attachment_id = jQuery( this ).attr( 'data-attachment_id' );
 			attachment_ids = attachment_ids + attachment_id + ',';
 		});
 
