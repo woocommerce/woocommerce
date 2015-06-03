@@ -180,7 +180,14 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in
-		if ( ! is_admin() && 'product' === get_post_type( $_POST['comment_post_ID'] ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && 'yes' === get_option( 'woocommerce_review_rating_required' ) ) {
+		if (
+			! is_admin()
+			&& 'product' === get_post_type( $_POST['comment_post_ID'] )
+			&& empty( $_POST['rating'] )
+			&& '' === $comment_data['comment_type']
+			&& 'yes' === get_option( 'woocommerce_enable_review_rating' )
+			&& 'yes' === get_option( 'woocommerce_review_rating_required' )
+		) {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
