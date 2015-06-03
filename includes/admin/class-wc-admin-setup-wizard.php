@@ -210,7 +210,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php _e( 'Page Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php _e( 'There are a few pages that need to be setup to show parts of your store. The following pages will be created automatically if they do not already exist:', 'woocommerce' ); ?></p>
+			<p><?php _e( 'There are a few pages that need to be set up to show parts of your store. The following pages will be created automatically if they do not already exist:', 'woocommerce' ); ?></p>
 			<table class="wc-setup-pages" cellspacing="0">
 				<thead>
 					<tr>
@@ -225,12 +225,12 @@ class WC_Admin_Setup_Wizard {
 					</tr>
 					<tr>
 						<td class="page-name"><?php echo _x( 'Cart', 'Page title', 'woocommerce' ); ?></td>
-						<td><?php _e( 'The cart page will be where the customer goes to view their cart and begin checkout.', 'woocommerce' ); ?></td>
+						<td><?php _e( 'The cart page will be where the customers go to view their cart and begin checkout.', 'woocommerce' ); ?></td>
 					</tr>
 					<tr>
 						<td class="page-name"><?php echo _x( 'Checkout', 'Page title', 'woocommerce' ); ?></td>
 						<td>
-							<?php _e( 'The checkout page will be where the customer goes to pay for their items.', 'woocommerce' ); ?>
+							<?php _e( 'The checkout page will be where the customers go to pay for their items.', 'woocommerce' ); ?>
 							<div class="page-options">
 								<p><input type="checkbox" <?php checked( get_option( 'woocommerce_enable_guest_checkout' ), 'yes' ); ?> name="woocommerce_enable_guest_checkout" id="woocommerce_enable_guest_checkout" /> <label for="woocommerce_enable_guest_checkout"><?php _e( 'Enable guest checkout', 'woocommerce' ); ?></label></p>
 
@@ -250,7 +250,7 @@ class WC_Admin_Setup_Wizard {
 				</tbody>
 			</table>
 
-			<p><?php printf( __( 'Once created, these pages can be managed from your admin dashboard on the %sPages screen%s. You can control which pages are shown in your website menus via the %sAppearance > Menus screen%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>', '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php printf( __( 'Once created, these pages can be managed via %sDashboard > Pages%s. You can control which pages are shown in your website menus via %sAppearance > Menus%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>', '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
 
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
