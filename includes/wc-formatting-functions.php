@@ -254,21 +254,24 @@ function wc_clean( $var ) {
 }
 
 /**
- * Sanitize a string destined to be a tooltip. Prevents XSS.
+ * Sanitize a string destined to be a tooltip.
+ *
+ * @since 2.3.10 Tooltips are encoded with htmlspecialchars to prevent XSS. Should not be used in conjunction with esc_attr()
  * @param string $var
  * @return string
  */
 function wc_sanitize_tooltip( $var ) {
-	return wp_kses( html_entity_decode( $var ), array(
+	return htmlspecialchars( wp_kses( html_entity_decode( $var ), array(
 		'br'     => array(),
 		'em'     => array(),
 		'strong' => array(),
+		'small'  => array(),
 		'span'   => array(),
 		'ul'     => array(),
 		'li'     => array(),
 		'ol'     => array(),
 		'p'      => array(),
-    ) );
+    ) ) );
 }
 
 /**
@@ -308,6 +311,7 @@ function wc_stock_amount( $amount ) {
  */
 function get_woocommerce_price_format() {
 	$currency_pos = get_option( 'woocommerce_currency_pos' );
+	$format = '%1$s%2$s';
 
 	switch ( $currency_pos ) {
 		case 'left' :
@@ -333,7 +337,7 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_get_price_thousand_separator() {
-	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
+	$separator = stripslashes( get_option( 'woocommerce_price_thousand_sep' ) );
 	return $separator;
 }
 
@@ -343,7 +347,7 @@ function wc_get_price_thousand_separator() {
  * @return string
  */
 function wc_get_price_decimal_separator() {
-	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
+	$separator = stripslashes( get_option( 'woocommerce_price_decimal_sep' ) );
 	return $separator ? $separator : '.';
 }
 
@@ -385,7 +389,7 @@ function wc_price( $price, $args = array() ) {
 	$return          = '<span class="amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && wc_tax_enabled() ) {
-		$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+		$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
 	return apply_filters( 'wc_price', $return, $price, $args );

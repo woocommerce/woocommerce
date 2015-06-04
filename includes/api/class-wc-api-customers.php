@@ -90,6 +90,11 @@ class WC_API_Customers extends WC_API_Resource {
 			array( array( $this, 'get_customer_downloads' ), WC_API_SERVER::READABLE ),
 		);
 
+		# POST|PUT /customers/bulk
+		$routes[ $this->base . '/bulk' ] = array(
+			array( array( $this, 'bulk' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
 		return $routes;
 	}
 
@@ -773,4 +778,72 @@ class WC_API_Customers extends WC_API_Resource {
 		return current_user_can( 'list_users' );
 	}
 
+	/**
+	 * Bulk update or insert customers
+	 * Accepts an array with customers in the formats supported by
+	 * WC_API_Customers->create_customer() and WC_API_Customers->edit_customer()
+	 *
+	 * @since 2.4.0
+	 * @param array $data
+	 * @return array
+	 */
+	public function bulk( $data ) {
+
+		try {
+			if ( ! isset( $data['customers'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_customers_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'customers' ), 400 );
+			}
+
+			$data  = $data['customers'];
+			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'customers' );
+
+			// Limit bulk operation
+			if ( count( $data ) > $limit ) {
+				throw new WC_API_Exception( 'woocommerce_api_customers_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+			}
+
+			$customers = array();
+
+			foreach ( $data as $_customer ) {
+				$customer_id = 0;
+
+				// Try to get the customer ID
+				if ( isset( $_customer['id'] ) ) {
+					$customer_id = intval( $_customer['id'] );
+				}
+
+				// Customer exists / edit customer
+				if ( $customer_id ) {
+					$edit = $this->edit_customer( $customer_id, array( 'customer' => $_customer ) );
+
+					if ( is_wp_error( $edit ) ) {
+						$customers[] = array(
+							'id'    => $customer_id,
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+						);
+					} else {
+						$customers[] = $edit['customer'];
+					}
+				}
+
+				// Customer don't exists / create customer
+				else {
+					$new = $this->create_customer( array( 'customer' => $_customer ) );
+
+					if ( is_wp_error( $new ) ) {
+						$customers[] = array(
+							'id'    => $customer_id,
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+						);
+					} else {
+						$customers[] = $new['customer'];
+					}
+				}
+			}
+
+			return array( 'customers' => apply_filters( 'woocommerce_api_customers_bulk_response', $customers, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
 }

@@ -4,9 +4,9 @@
  *
  * Shows recent orders on the account page
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.2.0
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.3.10
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,13 +39,13 @@ if ( $customer_orders ) : ?>
 
 		<tbody><?php
 			foreach ( $customer_orders as $customer_order ) {
-				$order      = wc_get_order();
+				$order = wc_get_order( $customer_order );
 				$order->populate( $customer_order );
 				$item_count = $order->get_item_count();
 
 				?><tr class="order">
 					<td class="order-number" data-title="<?php _e( 'Order Number', 'woocommerce' ); ?>">
-						<a href="<?php echo $order->get_view_order_url(); ?>">
+						<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>">
 							#<?php echo $order->get_order_number(); ?>
 						</a>
 					</td>
@@ -83,7 +83,7 @@ if ( $customer_orders ) : ?>
 
 							$actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
 
-							if ($actions) {
+							if ( $actions ) {
 								foreach ( $actions as $key => $action ) {
 									echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';
 								}

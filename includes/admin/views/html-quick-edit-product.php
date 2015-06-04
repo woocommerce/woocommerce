@@ -32,14 +32,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<label>
 				<span class="title"><?php _e( 'Price', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
-					<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e( 'Regular price', 'woocommerce' ); ?>" value="">
+					<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e( 'Regular Price', 'woocommerce' ); ?>" value="">
 				</span>
 			</label>
 			<br class="clear" />
 			<label>
 				<span class="title"><?php _e( 'Sale', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
-					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e( 'Sale price', 'woocommerce' ); ?>" value="">
+					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e( 'Sale Price', 'woocommerce' ); ?>" value="">
 				</span>
 			</label>
 			<br class="clear" />

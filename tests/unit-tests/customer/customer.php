@@ -1,5 +1,4 @@
 <?php
-
 namespace WooCommerce\Tests\Customer;
 
 /**
@@ -14,17 +13,17 @@ class Customer extends \WC_Unit_Test_Case {
 	public function test_get_taxable_address() {
 
 		$base_store_address = \WC_Helper_Customer::get_expected_store_location();
-		$customer_address = \WC_Helper_Customer::get_expected_customer_location();
-		
+		$customer_address   = \WC_Helper_Customer::get_expected_customer_location();
+
 		// Get the original settings for the session and the WooCommerce options
 		$original_chosen_shipping_methods = \WC_Helper_Customer::get_chosen_shipping_methods();
-		$original_tax_based_on = \WC_Helper_Customer::get_tax_based_on();
-		$original_customer_details = \WC_Helper_Customer::get_customer_details();
+		$original_tax_based_on            = \WC_Helper_Customer::get_tax_based_on();
+		$original_customer_details        = \WC_Helper_Customer::get_customer_details();
 
 		$customer = \WC_Helper_Customer::create_mock_customer();
 
 		// Create dummy product, and add the product to the cart.
-		
+
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->id, 1 );
 
@@ -43,13 +42,13 @@ class Customer extends \WC_Unit_Test_Case {
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the customer's billing address.
 
 		\WC_Helper_Customer::set_chosen_shipping_methods( array( 'free_shipping' ) );
-		\WC_Helper_Customer::set_tax_based_on( 'billing' );		
+		\WC_Helper_Customer::set_tax_based_on( 'billing' );
 		$this->assertEquals( $customer->get_taxable_address(), $customer_address );
 
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the store base location.
 
 		\WC_Helper_Customer::set_chosen_shipping_methods( array( 'free_shipping' ) );
-		\WC_Helper_Customer::set_tax_based_on( 'base' );		
+		\WC_Helper_Customer::set_tax_based_on( 'base' );
 		$this->assertEquals( $customer->get_taxable_address(), $base_store_address );
 
 		//Now reset the settings back to the way they were before this test
@@ -72,8 +71,8 @@ class Customer extends \WC_Unit_Test_Case {
 
 		// Get the original settings for the session and the WooCommerce options
 		$original_chosen_shipping_methods = \WC_Helper_Customer::get_chosen_shipping_methods();
-		$original_tax_based_on = \WC_Helper_Customer::get_tax_based_on();
-		$original_customer_details = \WC_Helper_Customer::get_customer_details();
+		$original_tax_based_on            = \WC_Helper_Customer::get_tax_based_on();
+		$original_customer_details        = \WC_Helper_Customer::get_customer_details();
 
 		$customer = \WC_Helper_Customer::create_mock_customer();
 
@@ -97,13 +96,13 @@ class Customer extends \WC_Unit_Test_Case {
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the customer's billing address.
 
 		\WC_Helper_Customer::set_chosen_shipping_methods( array( 'free_shipping' ) );
-		\WC_Helper_Customer::set_tax_based_on( 'billing' );		
+		\WC_Helper_Customer::set_tax_based_on( 'billing' );
 		$this->assertEquals( $customer->is_customer_outside_base(), true );
 
 		// Customer is going with the Free Shipping option, and the store calculates tax based on the store base location.
 
 		\WC_Helper_Customer::set_chosen_shipping_methods( array( 'free_shipping' ) );
-		\WC_Helper_Customer::set_tax_based_on( 'base' );		
+		\WC_Helper_Customer::set_tax_based_on( 'base' );
 		$this->assertEquals( $customer->is_customer_outside_base(), false );
 
 		//Now reset the settings back to the way they were before this test
@@ -111,7 +110,7 @@ class Customer extends \WC_Unit_Test_Case {
 		\WC_Helper_Customer::set_chosen_shipping_methods( $original_chosen_shipping_methods );
 		\WC_Helper_Customer::set_tax_based_on( $original_tax_based_on );
 		\WC_Helper_Customer::set_customer_details( $original_customer_details );
-		
+
 		// Clean up the cart
 		WC()->cart->empty_cart();
 

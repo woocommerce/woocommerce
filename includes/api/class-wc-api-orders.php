@@ -85,6 +85,11 @@ class WC_API_Orders extends WC_API_Resource {
 			array( array( $this, 'delete_order_refund' ), WC_API_SERVER::DELETABLE ),
 		);
 
+		# POST|PUT /orders/bulk
+		$routes[ $this->base . '/bulk' ] = array(
+			array( array( $this, 'bulk' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
 		return $routes;
 	}
 
@@ -144,10 +149,8 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// Get the decimal precession
-		$dp = ( isset( $filter['dp'] ) ? $filter['dp'] : 2 );
-
-		$order = wc_get_order( $id );
-
+		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
+		$order      = wc_get_order( $id );
 		$order_post = get_post( $id );
 
 		$order_data = array(
@@ -158,14 +161,14 @@ class WC_API_Orders extends WC_API_Resource {
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_order_currency(),
-			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
-			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), 2 ),
+			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
+			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), $dp ),
 			'total_line_items_quantity' => $order->get_item_count(),
-			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
-			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), 2 ),
-			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), 2 ),
-			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), 2 ),
-			'total_discount'            => wc_format_decimal( $order->get_total_discount(), 2 ),
+			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), $dp ),
+			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), $dp ),
+			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), $dp ),
+			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), $dp ),
+			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->payment_method,
@@ -238,9 +241,9 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['line_items'][] = array(
 				'id'           => $item_id,
 				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
+				'subtotal_tax' => wc_format_decimal( wc_round_tax_total( $item['line_subtotal_tax'] ), $dp ),
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
+				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
 				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
@@ -258,7 +261,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'           => $shipping_item_id,
 				'method_id'    => $shipping_item['method_id'],
 				'method_title' => $shipping_item['name'],
-				'total'        => wc_format_decimal( $shipping_item['cost'], 2 ),
+				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
 			);
 		}
 
@@ -270,7 +273,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'rate_id'  => $tax->rate_id,
 				'code'     => $tax_code,
 				'title'    => $tax->label,
-				'total'    => wc_format_decimal( $tax->amount, 2 ),
+				'total'    => wc_format_decimal( $tax->amount, $dp ),
 				'compound' => (bool) $tax->is_compound,
 			);
 		}
@@ -282,8 +285,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'        => $fee_item_id,
 				'title'     => $fee_item['name'],
 				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
-				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), 2 ),
-				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), 2 ),
+				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), $dp ),
+				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), $dp ),
 			);
 		}
 
@@ -293,7 +296,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'][] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item['name'],
-				'amount' => wc_format_decimal( $coupon_item['discount_amount'], 2 ),
+				'amount' => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
 			);
 		}
 
@@ -535,9 +538,12 @@ class WC_API_Orders extends WC_API_Resource {
 				return $id;
 			}
 
-			$data = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
-
+			$data  = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
 			$order = wc_get_order( $id );
+
+			if ( empty( $order ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), 400 );
+			}
 
 			$order_args = array( 'order_id' => $order->id );
 
@@ -1040,10 +1046,14 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_invalid_fee_item', __( 'Fee title is required', 'woocommerce' ), 400 );
 			}
 
-			$order_fee         = new stdClass();
-			$order_fee->id     = sanitize_title( $fee['title'] );
-			$order_fee->name   = $fee['title'];
-			$order_fee->amount = isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0;
+			$order_fee            = new stdClass();
+			$order_fee->id        = sanitize_title( $fee['title'] );
+			$order_fee->name      = $fee['title'];
+			$order_fee->amount    = isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0;
+			$order_fee->taxable   = false;
+			$order_fee->tax       = 0;
+			$order_fee->tax_data  = array();
+			$order_fee->tax_class = '';
 
 			// if taxable, tax class and total are required
 			if ( isset( $fee['taxable'] ) && $fee['taxable'] ) {
@@ -1054,8 +1064,6 @@ class WC_API_Orders extends WC_API_Resource {
 
 				$order_fee->taxable   = true;
 				$order_fee->tax_class = $fee['tax_class'];
-				$order_fee->tax       = 0;
-				$order_fee->tax_data  = array();
 
 				if ( isset( $fee['total_tax'] ) ) {
 					$order_fee->tax = isset( $fee['total_tax'] ) ? wc_format_refund_total( $fee['total_tax'] ) : 0;
@@ -1706,6 +1714,75 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_delete_order_refund', $refund->ID, $order_id, $this );
 
 			return $this->delete( $refund->ID, 'refund', true );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Bulk update or insert orders
+	 * Accepts an array with orders in the formats supported by
+	 * WC_API_Orders->create_order() and WC_API_Orders->edit_order()
+	 *
+	 * @since 2.4.0
+	 * @param array $data
+	 * @return array
+	 */
+	public function bulk( $data ) {
+
+		try {
+			if ( ! isset( $data['orders'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_orders_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'orders' ), 400 );
+			}
+
+			$data  = $data['orders'];
+			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'orders' );
+
+			// Limit bulk operation
+			if ( count( $data ) > $limit ) {
+				throw new WC_API_Exception( 'woocommerce_api_orders_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+			}
+
+			$orders = array();
+
+			foreach ( $data as $_order ) {
+				$order_id = 0;
+
+				// Try to get the order ID
+				if ( isset( $_order['id'] ) ) {
+					$order_id = intval( $_order['id'] );
+				}
+
+				// Order exists / edit order
+				if ( $order_id ) {
+					$edit = $this->edit_order( $order_id, array( 'order' => $_order ) );
+
+					if ( is_wp_error( $edit ) ) {
+						$orders[] = array(
+							'id'    => $order_id,
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+						);
+					} else {
+						$orders[] = $edit['order'];
+					}
+				}
+
+				// Order don't exists / create order
+				else {
+					$new = $this->create_order( array( 'order' => $_order ) );
+
+					if ( is_wp_error( $new ) ) {
+						$orders[] = array(
+							'id'    => $order_id,
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+						);
+					} else {
+						$orders[] = $new['order'];
+					}
+				}
+			}
+
+			return array( 'orders' => apply_filters( 'woocommerce_api_orders_bulk_response', $orders, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}

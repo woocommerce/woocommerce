@@ -85,10 +85,7 @@ class WC_API_Products extends WC_API_Resource {
 		);
 
 		# GET /products/sku/<product sku>
-		/**
-		 * Deprecated since 2.4.0
-		 */
-		$routes[ $this->base . '/sku/(?P<sku>\w+)' ] = array(
+		$routes[ $this->base . '/sku/(?P<sku>\w[\w\s\-]*)' ] = array(
 			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
 		);
 
@@ -244,13 +241,14 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Enable description html tags.
 			$post_content = isset( $data['description'] ) ? wc_clean( $data['description'] ) : '';
-			if ( $post_content && isset( $data['enable_html_description'] ) && 'true' === $data['enable_html_description'] ) {
+			if ( $post_content && isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) {
+
 				$post_content = $data['description'];
 			}
 
 			// Enable short description html tags.
 			$post_excerpt = isset( $data['short_description'] ) ? wc_clean( $data['short_description'] ) : '';
-			if ( $post_excerpt && isset( $data['enable_html_short_description'] ) && 'true' === $data['enable_html_short_description'] ) {
+			if ( $post_excerpt && isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) {
 				$post_excerpt = $data['short_description'];
 			}
 
@@ -342,7 +340,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Product short description.
 			if ( isset( $data['short_description'] ) ) {
 				// Enable short description html tags.
-				$post_excerpt = ( isset( $data['enable_html_short_description'] ) && 'true' === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
+				$post_excerpt = ( isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
 
 				wp_update_post( array( 'ID' => $id, 'post_excerpt' => $post_excerpt ) );
 			}
@@ -350,7 +348,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Product description.
 			if ( isset( $data['description'] ) ) {
 				// Enable description html tags.
-				$post_content = ( isset( $data['enable_html_description'] ) && 'true' === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
+				$post_content = ( isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
 
 				wp_update_post( array( 'ID' => $id, 'post_content' => $post_content ) );
 			}
@@ -942,18 +940,18 @@ class WC_API_Products extends WC_API_Resource {
 				$sale_price = get_post_meta( $product_id, '_sale_price', true );
 			}
 
-			$date_from = isset( $data['sale_price_dates_from'] ) ? $data['sale_price_dates_from'] : get_post_meta( $product_id, '_sale_price_dates_from', true );
-			$date_to   = isset( $data['sale_price_dates_to'] ) ? $data['sale_price_dates_to'] : get_post_meta( $product_id, '_sale_price_dates_to', true );
+			$date_from = isset( $data['sale_price_dates_from'] ) ? strtotime( $data['sale_price_dates_from'] ) : get_post_meta( $product_id, '_sale_price_dates_from', true );
+			$date_to   = isset( $data['sale_price_dates_to'] ) ? strtotime( $data['sale_price_dates_to'] ) : get_post_meta( $product_id, '_sale_price_dates_to', true );
 
 			// Dates
 			if ( $date_from ) {
-				update_post_meta( $product_id, '_sale_price_dates_from', strtotime( $date_from ) );
+				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
 			} else {
 				update_post_meta( $product_id, '_sale_price_dates_from', '' );
 			}
 
 			if ( $date_to ) {
-				update_post_meta( $product_id, '_sale_price_dates_to', strtotime( $date_to ) );
+				update_post_meta( $product_id, '_sale_price_dates_to', $date_to );
 			} else {
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
 			}
@@ -969,11 +967,11 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_price', $regular_price );
 			}
 
-			if ( '' !== $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== $sale_price && $date_from && $date_from < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
 			}
 
-			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( $date_to && $date_to < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $product_id, '_price', $regular_price );
 				update_post_meta( $product_id, '_sale_price_dates_from', '' );
 				update_post_meta( $product_id, '_sale_price_dates_to', '' );
@@ -1138,14 +1136,14 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Product categories
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$terms = array_map( 'wc_clean', $data['categories'] );
-			wp_set_object_terms( $product_id, $terms, 'product_cat' );
+			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
+			wp_set_object_terms( $product_id, $term_ids, 'product_cat' );
 		}
 
 		// Product tags
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$terms = array_map( 'wc_clean', $data['tags'] );
-			wp_set_object_terms( $product_id, $terms, 'product_tag' );
+			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
+			wp_set_object_terms( $product_id, $term_ids, 'product_tag' );
 		}
 
 		// Downloadable
@@ -1364,18 +1362,18 @@ class WC_API_Products extends WC_API_Resource {
 				$sale_price = get_post_meta( $variation_id, '_sale_price', true );
 			}
 
-			$date_from = isset( $variation['sale_price_dates_from'] ) ? $variation['sale_price_dates_from'] : get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = isset( $variation['sale_price_dates_to'] ) ? $variation['sale_price_dates_to'] : get_post_meta( $variation_id, '_sale_price_dates_to', true );
+			$date_from = isset( $variation['sale_price_dates_from'] ) ? strtotime( $variation['sale_price_dates_from'] ) : get_post_meta( $variation_id, '_sale_price_dates_from', true );
+			$date_to   = isset( $variation['sale_price_dates_to'] ) ? strtotime( $variation['sale_price_dates_to'] ) : get_post_meta( $variation_id, '_sale_price_dates_to', true );
 
 			// Save Dates
 			if ( $date_from ) {
-				update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( $date_from ) );
+				update_post_meta( $variation_id, '_sale_price_dates_from', $date_from );
 			} else {
 				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
 			}
 
 			if ( $date_to ) {
-				update_post_meta( $variation_id, '_sale_price_dates_to', strtotime( $date_to ) );
+				update_post_meta( $variation_id, '_sale_price_dates_to', $date_to );
 			} else {
 				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
 			}
@@ -1391,11 +1389,11 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $variation_id, '_price', $regular_price );
 			}
 
-			if ( '' != $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' != $sale_price && $date_from && $date_from < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $variation_id, '_price', $sale_price );
 			}
 
-			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( $date_to && $date_to < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $variation_id, '_price', $regular_price );
 				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
 				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
@@ -1780,7 +1778,7 @@ class WC_API_Products extends WC_API_Resource {
 		$image_url = str_replace( ' ', '%20', $image_url );
 
 		// Get the file
-		$response = wp_remote_get( $image_url, array(
+		$response = wp_safe_remote_get( $image_url, array(
 			'timeout' => 10
 		) );
 
@@ -2328,7 +2326,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * WC_API_Products->create_product() and WC_API_Products->edit_product()
 	 *
 	 * @since 2.4.0
-	 * @param array $products
+	 * @param array $data
 	 * @return array
 	 */
 	public function bulk( $data ) {

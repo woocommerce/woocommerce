@@ -775,7 +775,8 @@ class WC_Meta_Box_Product_Data {
 								'_manage_stock'          => '',
 								'_stock_status'          => '',
 								'_backorders'            => null,
-								'_tax_class'             => null
+								'_tax_class'             => null,
+								'_variation_description' => ''
 							);
 
 							foreach ( $variation_fields as $field => $value ) {
@@ -978,13 +979,12 @@ class WC_Meta_Box_Product_Data {
 				$attribute_variation = $_POST['attribute_variation'];
 			}
 
-			$attribute_is_taxonomy = $_POST['attribute_is_taxonomy'];
-			$attribute_position    = $_POST['attribute_position'];
-			$attribute_names_count = sizeof( $attribute_names );
+			$attribute_is_taxonomy   = $_POST['attribute_is_taxonomy'];
+			$attribute_position      = $_POST['attribute_position'];
+			$attribute_names_max_key = max( $attribute_names );
 
-			for ( $i = 0; $i < $attribute_names_count; $i++ ) {
-
-				if ( ! $attribute_names[ $i ] ) {
+			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
+				if ( empty( $attribute_names[ $i ] ) ) {
 					continue;
 				}
 
@@ -1226,15 +1226,46 @@ class WC_Meta_Box_Product_Data {
 			$files = array();
 
 			if ( isset( $_POST['_wc_file_urls'] ) ) {
-				$file_names    = isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array();
-				$file_urls     = isset( $_POST['_wc_file_urls'] )  ? array_map( 'trim', $_POST['_wc_file_urls'] ) : array();
-				$file_url_size = sizeof( $file_urls );
+				$file_names         = isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array();
+				$file_urls          = isset( $_POST['_wc_file_urls'] )  ? array_map( 'trim', $_POST['_wc_file_urls'] ) : array();
+				$file_url_size      = sizeof( $file_urls );
+				$allowed_file_types = get_allowed_mime_types();
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
 					if ( ! empty( $file_urls[ $i ] ) ) {
-						$file_url            = ( 0 !== strpos( $file_urls[ $i ], 'http' ) ) ? wc_clean( $file_urls[ $i ] ) : esc_url_raw( $file_urls[ $i ] );
-						$file_name           = wc_clean( $file_names[ $i ] );
-						$file_hash           = md5( $file_url );
+						// Find type and file URL
+						if ( 0 === strpos( $file_urls[ $i ], 'http' ) ) {
+							$file_is  = 'absolute';
+							$file_url = esc_url_raw( $file_urls[ $i ] );
+						} elseif ( '[' === substr( $file_urls[ $i ], 0, 1 ) && ']' === substr( $file_urls[ $i ], -1 ) ) {
+							$file_is  = 'shortcode';
+							$file_url = wc_clean( $file_urls[ $i ] );
+						} else {
+							$file_is = 'relative';
+							$file_url = wc_clean( $file_urls[ $i ] );
+						}
+
+						$file_name = wc_clean( $file_names[ $i ] );
+						$file_hash = md5( $file_url );
+
+						// Validate the file extension
+						if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
+							$file_type  = wp_check_filetype( $file_url );
+							$parsed_url = parse_url( $file_url, PHP_URL_PATH );
+							$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
+
+							if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
+								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not have an allowed file type. Allowed types include: %s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
+								continue;
+							}
+						}
+
+						// Validate the file exists
+						if ( 'relative' === $file_is && ! file_exists( $file_url ) ) {
+							WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
+							continue;
+						}
+
 						$files[ $file_hash ] = array(
 							'name' => $file_name,
 							'file' => $file_url
@@ -1314,6 +1345,8 @@ class WC_Meta_Box_Product_Data {
 			$variable_stock                 = isset( $_POST['variable_stock'] ) ? $_POST['variable_stock'] : array();
 			$variable_backorders            = isset( $_POST['variable_backorders'] ) ? $_POST['variable_backorders'] : array();
 			$variable_stock_status          = isset( $_POST['variable_stock_status'] ) ? $_POST['variable_stock_status'] : array();
+
+			$variable_description           = isset( $_POST['variable_description'] ) ? $_POST['variable_description'] : array();
 
 			$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
 
@@ -1466,18 +1499,50 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_download_limit', wc_clean( $variable_download_limit[ $i ] ) );
 					update_post_meta( $variation_id, '_download_expiry', wc_clean( $variable_download_expiry[ $i ] ) );
 
-					$files         = array();
-					$file_names    = isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_names'][ $variation_id ] ) : array();
-					$file_urls     = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_urls'][ $variation_id ] ) : array();
-					$file_url_size = sizeof( $file_urls );
+					$files              = array();
+					$file_names         = isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_names'][ $variation_id ] ) : array();
+					$file_urls          = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_urls'][ $variation_id ] ) : array();
+					$file_url_size      = sizeof( $file_urls );
+					$allowed_file_types = get_allowed_mime_types();
 
 					for ( $ii = 0; $ii < $file_url_size; $ii ++ ) {
-
 						if ( ! empty( $file_urls[ $ii ] ) ) {
+							// Find type and file URL
+							if ( 0 === strpos( $file_urls[ $ii ], 'http' ) ) {
+								$file_is  = 'absolute';
+								$file_url = esc_url_raw( $file_urls[ $ii ] );
+							} elseif ( '[' === substr( $file_urls[ $ii ], 0, 1 ) && ']' === substr( $file_urls[ $ii ], -1 ) ) {
+								$file_is  = 'shortcode';
+								$file_url = wc_clean( $file_urls[ $ii ] );
+							} else {
+								$file_is = 'relative';
+								$file_url = wc_clean( $file_urls[ $ii ] );
+							}
 
-							$files[ md5( $file_urls[ $ii ] ) ] = array(
-								'name' => $file_names[ $ii ],
-								'file' => $file_urls[ $ii ]
+							$file_name = wc_clean( $file_names[ $ii ] );
+							$file_hash = md5( $file_url );
+
+							// Validate the file extension
+							if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
+								$file_type  = wp_check_filetype( $file_url );
+								$parsed_url = parse_url( $file_url, PHP_URL_PATH );
+								$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
+
+								if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
+									WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not have an allowed file type. Allowed types include: %s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
+									continue;
+								}
+							}
+
+							// Validate the file exists
+							if ( 'relative' === $file_is && ! file_exists( $file_url ) ) {
+								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
+								continue;
+							}
+
+							$files[ $file_hash ] = array(
+								'name' => $file_name,
+								'file' => $file_url
 							);
 						}
 					}
@@ -1492,6 +1557,8 @@ class WC_Meta_Box_Product_Data {
 					update_post_meta( $variation_id, '_downloadable_files', '' );
 				}
 
+				update_post_meta( $variation_id, '_variation_description', wp_kses_post( $variable_description[ $i ] ) );
+				
 				// Save shipping class
 				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');

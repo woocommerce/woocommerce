@@ -21,10 +21,10 @@ class WC_Comments {
 	 * Hook in methods.
 	 */
 	public static function init() {
-
 		// Rating posts
 		add_filter( 'preprocess_comment', array( __CLASS__, 'check_comment_rating' ), 0 );
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_rating' ), 1 );
+		add_action( 'comment_moderation_recipients', array( __CLASS__, 'comment_moderation_recipients' ), 10, 2 );
 
 		// Clear transients
 		add_action( 'wp_update_comment_count', array( __CLASS__, 'clear_transients' ) );
@@ -180,7 +180,14 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in
-		if ( ! is_admin() && 'product' === get_post_type( $_POST['comment_post_ID'] ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && 'yes' === get_option( 'woocommerce_review_rating_required' ) ) {
+		if (
+			! is_admin()
+			&& 'product' === get_post_type( $_POST['comment_post_ID'] )
+			&& empty( $_POST['rating'] )
+			&& '' === $comment_data['comment_type']
+			&& 'yes' === get_option( 'woocommerce_enable_review_rating' )
+			&& 'yes' === get_option( 'woocommerce_review_rating_required' )
+		) {
 			wp_die( __( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
@@ -197,9 +204,22 @@ class WC_Comments {
 			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) {
 				return;
 			}
-
 			add_comment_meta( $comment_id, 'rating', (int) esc_attr( $_POST['rating'] ), true );
 		}
+	}
+
+	/**
+	 * Modify recipient of review email.
+	 * @return array
+	 */
+	public static function comment_moderation_recipients( $emails, $comment_id ) {
+		$comment = get_comment( $comment_id );
+
+		if ( $comment && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+			$emails = array( get_option( 'admin_email' ) );
+		}
+
+		return $emails;
 	}
 
 	/**
@@ -209,14 +229,8 @@ class WC_Comments {
 	public static function clear_transients( $post_id ) {
 		$post_id = absint( $post_id );
 		$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
-
 		delete_transient( 'wc_average_rating_' . $post_id . $transient_version );
 		delete_transient( 'wc_rating_count_' . $post_id . $transient_version );
-		delete_transient( 'wc_rating_count_' . $post_id . '_1' . $transient_version );
-		delete_transient( 'wc_rating_count_' . $post_id . '_2' . $transient_version );
-		delete_transient( 'wc_rating_count_' . $post_id . '_3' . $transient_version );
-		delete_transient( 'wc_rating_count_' . $post_id . '_4' . $transient_version );
-		delete_transient( 'wc_rating_count_' . $post_id . '_5' . $transient_version );
 		delete_transient( 'wc_review_count_' . $post_id . $transient_version );
 	}
 

@@ -148,35 +148,35 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	function init_form_fields() {
 		$this->form_fields = array(
 			'subject' => array(
-				'title'         => __( 'Email subject', 'woocommerce' ),
+				'title'         => __( 'Email Subject', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
 				'placeholder'   => '',
 				'default'       => ''
 			),
 			'heading' => array(
-				'title'         => __( 'Email heading', 'woocommerce' ),
+				'title'         => __( 'Email Heading', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
 				'default'       => ''
 			),
 			'subject_paid' => array(
-				'title'         => __( 'Email subject (paid)', 'woocommerce' ),
+				'title'         => __( 'Email Subject (paid)', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_paid ),
 				'placeholder'   => '',
 				'default'       => ''
 			),
 			'heading_paid' => array(
-				'title'         => __( 'Email heading (paid)', 'woocommerce' ),
+				'title'         => __( 'Email Heading (paid)', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_paid ),
 				'placeholder'   => '',
 				'default'       => ''
 			),
 			'email_type' => array(
-				'title'         => __( 'Email type', 'woocommerce' ),
+				'title'         => __( 'Email Type', 'woocommerce' ),
 				'type'          => 'select',
 				'description'   => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'       => 'html',

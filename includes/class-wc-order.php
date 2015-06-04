@@ -80,6 +80,27 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the total shipping refunded
+	 *
+	 * @since  2.4
+	 * @return float
+	 */
+	public function get_total_shipping_refunded() {
+		global $wpdb;
+
+		$total = $wpdb->get_var( $wpdb->prepare( "
+			SELECT SUM( order_itemmeta.meta_value )
+			FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
+			WHERE order_itemmeta.order_item_id = order_items.order_item_id
+			AND order_itemmeta.meta_key IN ('cost')
+		", $this->id ) );
+
+		return abs( $total );
+	}
+
+	/**
 	 * Get the refunded amount for a line item
 	 *
 	 * @param  int $item_id ID of the item we're checking

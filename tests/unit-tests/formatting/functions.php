@@ -276,7 +276,18 @@ class Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_clean() {
 
-		$this->assertInternalType( 'string', wc_clean( 'cleaned' ) );
+		$this->assertEquals( 'cleaned', wc_clean( '<script>alert();</script>cleaned' ) );
+	}
+
+	/**
+	 * Test wc_sanitize_tooltip() - note this is a basic type test as WP core already
+	 * has coverage for wp_kses()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_sanitize_tooltip() {
+
+		$this->assertEquals( 'alert();cleaned', wc_sanitize_tooltip( '<script>alert();</script>cleaned' ) );
 	}
 
 	/**
@@ -355,6 +366,69 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_price_thousand_separator()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_price_thousand_separator() {
+		$separator = get_option( 'woocommerce_price_thousand_sep' );
+
+		// defualt value
+		$this->assertEquals( ',', wc_get_price_thousand_separator() );
+
+		update_option( 'woocommerce_price_thousand_sep', '.' );
+		$this->assertEquals( '.', wc_get_price_thousand_separator() );
+
+		update_option( 'woocommerce_price_thousand_sep', '&lt;.&gt;' );
+		$this->assertEquals( '&lt;.&gt;', wc_get_price_thousand_separator() );
+
+		update_option( 'woocommerce_price_thousand_sep', $separator );
+	}
+
+	/**
+	 * Test wc_get_price_decimal_separator()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_price_decimal_separator() {
+		$separator = get_option( 'woocommerce_price_decimal_sep' );
+
+		// defualt value
+		$this->assertEquals( '.', wc_get_price_decimal_separator() );
+
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+		$this->assertEquals( ',', wc_get_price_decimal_separator() );
+
+		update_option( 'woocommerce_price_decimal_sep', '&lt;.&gt;' );
+		$this->assertEquals( '&lt;.&gt;', wc_get_price_decimal_separator() );
+
+		update_option( 'woocommerce_price_decimal_sep', $separator );
+	}
+
+	/**
+	 * Test wc_get_price_decimals()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_price_decimals() {
+		$decimals = get_option( 'woocommerce_price_num_decimals' );
+
+		// defualt value
+		$this->assertEquals( 2, wc_get_price_decimals() );
+
+		update_option( 'woocommerce_price_num_decimals', '1' );
+		$this->assertEquals( 1, wc_get_price_decimals() );
+
+		update_option( 'woocommerce_price_num_decimals', '-2' );
+		$this->assertEquals( 2, wc_get_price_decimals() );
+
+		update_option( 'woocommerce_price_num_decimals', '2.50' );
+		$this->assertEquals( 2, wc_get_price_decimals() );
+
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+	}
+
+	/**
 	 * Test wc_price()
 	 *
 	 * @since 2.2
@@ -387,7 +461,7 @@ class Functions extends \WC_Unit_Test_Case {
 		// ex tax label
 		$calc_taxes = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->assertEquals( '<span class="amount">&pound;1,111.17</span> <small>(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
+		$this->assertEquals( '<span class="amount">&pound;1,111.17</span> <small class="tax_label">(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
 		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 	}
 

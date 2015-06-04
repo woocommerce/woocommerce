@@ -18,7 +18,7 @@ foreach ( $items as $item_id => $item ) :
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 
 		// Title
-		echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item );
+		echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
 
 		// SKU
 		if ( $show_sku && $_product->get_sku() ) {

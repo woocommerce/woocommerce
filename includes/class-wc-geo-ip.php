@@ -1395,6 +1395,60 @@ class WC_Geo_IP {
 		return $this->_common_get_record( $seek_country );
 	}
 
+	function _geoip_seek_country_v6( $ipnum ) {
+		// arrays from unpack start with offset 1
+		// yet another php mystery. array_merge work around
+		// this broken behaviour
+		$v6vec = array_merge( unpack( 'C16', $ipnum ) );
+
+		$offset = 0;
+		for ( $depth = 127; $depth >= 0; --$depth ) {
+			if ( $this->flags & self::GEOIP_MEMORY_CACHE ) {
+				$buf = $this->_safe_substr(
+					$this->memory_buffer,
+					2 * $this->record_length * $offset,
+					2 * $this->record_length
+				);
+			} elseif ( $this->flags & self::GEOIP_SHARED_MEMORY ) {
+				$buf = @shmop_read(
+					$this->shmid,
+					2 * $this->record_length * $offset,
+					2 * $this->record_length
+				);
+			} else {
+				fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) == 0
+				or trigger_error( 'GeoIP API: fseek failed', E_USER_ERROR );
+
+				$buf = fread( $this->filehandle, 2 * $this->record_length );
+			}
+			$x = array( 0, 0 );
+			for ( $i = 0; $i < 2; ++$i ) {
+				for ( $j = 0; $j < $this->record_length; ++$j ) {
+					$x[ $i ] += ord( $buf[ $this->record_length * $i + $j ] ) << ( $j * 8 );
+				}
+			}
+
+			$bnum = 127 - $depth;
+			$idx = $bnum >> 3;
+			$b_mask = 1 << ( $bnum & 7 ^ 7 );
+			if ( ( $v6vec[ $idx ] & $b_mask ) > 0 ) {
+				if ( $x[1] >= $this->databaseSegments ) {
+					return $x[1];
+				}
+				$offset = $x[1];
+			} else {
+				if ( $x[0] >= $this->databaseSegments ) {
+					return $x[0];
+				}
+				$offset = $x[0];
+			}
+		}
+
+		trigger_error( 'GeoIP API: Error traversing database - perhaps it is corrupt?', E_USER_ERROR );
+
+		return false;
+	}
+
 	private function _geoip_seek_country( $ipnum ) {
 		$offset = 0;
 		for ( $depth = 31; $depth >= 0; --$depth ) {
@@ -1412,7 +1466,7 @@ class WC_Geo_IP {
 				);
 			} else {
 				fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) == 0
-				or trigger_error( "GeoIP API: fseek failed", E_USER_ERROR );
+				or trigger_error( 'GeoIP API: fseek failed', E_USER_ERROR );
 
 				$buf = fread( $this->filehandle, 2 * $this->record_length );
 			}
@@ -1438,12 +1492,12 @@ class WC_Geo_IP {
 			}
 		}
 
-		trigger_error( "GeoIP API: Error traversing database - perhaps it is corrupt?", E_USER_ERROR );
+		trigger_error( 'GeoIP API: Error traversing database - perhaps it is corrupt?', E_USER_ERROR );
 
 		return false;
 	}
 
-	function geoip_record_by_addr( $addr ) {
+	public function geoip_record_by_addr( $addr ) {
 		if ( $addr == null ) {
 			return 0;
 		}
@@ -1452,9 +1506,23 @@ class WC_Geo_IP {
 		return $this->_get_record( $ipnum );
 	}
 
-	function geoip_country_id_by_addr( $addr ) {
+	public function geoip_country_id_by_addr_v6( $addr ) {
+		$ipnum = inet_pton( $addr );
+		return $this->_geoip_seek_country_v6( $ipnum ) - self::GEOIP_COUNTRY_BEGIN;
+	}
+
+	public function geoip_country_id_by_addr( $addr ) {
 		$ipnum = ip2long( $addr );
 		return $this->_geoip_seek_country( $ipnum ) - self::GEOIP_COUNTRY_BEGIN;
+	}
+
+	public function geoip_country_code_by_addr_v6( $addr ) {
+		$country_id = $this->geoip_country_id_by_addr_v6( $addr );
+		if ( $country_id !== false ) {
+			return $this->GEOIP_COUNTRY_CODES[ $country_id ];
+		}
+
+		return false;
 	}
 
 	public function geoip_country_code_by_addr( $addr ) {

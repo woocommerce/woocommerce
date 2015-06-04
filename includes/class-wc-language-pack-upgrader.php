@@ -109,7 +109,7 @@ class WC_Language_Pack_Upgrader {
 	 * @return bool
 	 */
 	public function check_if_language_pack_exists() {
-		$response = wp_remote_get( $this->get_language_package_uri(), array( 'timeout' => 60 ) );
+		$response = wp_safe_remote_get( $this->get_language_package_uri(), array( 'timeout' => 60 ) );
 
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 			return true;
@@ -188,7 +188,7 @@ class WC_Language_Pack_Upgrader {
 			}
 
 			// Download the language pack
-			$response = wp_remote_get( $this->get_language_package_uri(), array( 'timeout' => 60 ) );
+			$response = wp_safe_remote_get( $this->get_language_package_uri(), array( 'timeout' => 60 ) );
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				global $wp_filesystem;
 

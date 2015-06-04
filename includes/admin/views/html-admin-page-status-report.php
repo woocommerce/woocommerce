@@ -29,22 +29,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="Home URL"><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The URL of your site\'s homepage.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo home_url(); ?></td>
+			<td><?php form_option( 'home' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Site URL"><?php _e( 'Site URL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The root URL of your site.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo site_url(); ?></td>
+			<td><?php form_option( 'siteurl' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WC Version"><?php _e( 'WC Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) . '">[?]</a>'; ?></td>
 			<td><?php echo esc_html( WC()->version ); ?></td>
-		</tr>
-		<tr>
-			<td data-export-label="WC Database Version"><?php _e( 'WC Database Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Log Directory Writable"><?php _e( 'Log Directory Writable', 'woocommerce' ); ?>:</td>
@@ -223,7 +218,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce');
 			$posting['wp_remote_post']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) . '">[?]</a>';
 
-			$response = wp_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
+			$response = wp_safe_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
 				'timeout'    => 60,
 				'user-agent' => 'WooCommerce/' . WC()->version,
 				'body'       => array(
@@ -247,7 +242,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
 			$posting['wp_remote_get']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) . '">[?]</a>';
 
-			$response = wp_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+			$response = wp_safe_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
 
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				$posting['wp_remote_get']['success'] = true;
@@ -279,6 +274,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php
 			}
 		?>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
+			<th colspan="3" data-export-label="Database"><?php _e( 'Database', 'woocommerce' ); ?></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="WC Database Version"><?php _e( 'WC Database Version', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
+		</tr>
+		<tr>
+			<?php
+			$tables = array(
+				'woocommerce_api_keys',
+				'woocommerce_attribute_taxonomies',
+				'woocommerce_termmeta',
+				'woocommerce_downloadable_product_permissions',
+				'woocommerce_order_items',
+				'woocommerce_order_itemmeta',
+				'woocommerce_tax_rates',
+				'woocommerce_tax_rate_locations'
+			);
+
+			foreach ( $tables as $table ) {
+				?>
+				<tr>
+					<td><?php echo esc_html( $table ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td><?php echo $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s;", $wpdb->prefix . $table ) ) !== $wpdb->prefix . $table ? '<mark class="error">' . __( 'Table does not exist', 'woocommerce' ) . '</mark>' : '&#10004'; ?></td>
+				</tr>
+				<?php
+			}
+			?>
+		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -338,7 +371,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( strstr( $dirname, 'woocommerce-' ) ) {
 
 					if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
-						$changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
+						$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
 						$cl_lines  = explode( "\n", wp_remote_retrieve_body( $changelog ) );
 						if ( ! empty( $cl_lines ) ) {
 							foreach ( $cl_lines as $line_num => $cl_line ) {
@@ -566,7 +599,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$theme_dir = substr( strtolower( str_replace( ' ','', $active_theme->Name ) ), 0, 45 );
 
 			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {
-				$theme_changelog = wp_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
+				$theme_changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
 				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
 				if ( ! empty( $cl_lines ) ) {
 					foreach ( $cl_lines as $line_num => $cl_line ) {

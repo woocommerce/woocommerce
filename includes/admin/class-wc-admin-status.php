@@ -51,42 +51,26 @@ class WC_Admin_Status {
 				break;
 				case 'clear_expired_transients' :
 
-					// http://w-shadow.com/blog/2012/04/17/delete-stale-transients/
-					$rows = $wpdb->query( "
-						DELETE
-							a, b
-						FROM
-							{$wpdb->options} a, {$wpdb->options} b
-						WHERE
-							a.option_name LIKE '_transient_%' AND
-							a.option_name NOT LIKE '_transient_timeout_%' AND
-							b.option_name = CONCAT(
-								'_transient_timeout_',
-								SUBSTRING(
-									a.option_name,
-									CHAR_LENGTH('_transient_') + 1
-								)
-							)
-							AND b.option_value < UNIX_TIMESTAMP()
-					" );
+					/*
+					 * Deletes all expired transients. The multi-table delete syntax is used
+					 * to delete the transient record from table a, and the corresponding
+					 * transient_timeout record from table b.
+					 *
+					 * Based on code inside core's upgrade_network() function.
+					 */
+					$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
+						WHERE a.option_name LIKE %s
+						AND a.option_name NOT LIKE %s
+						AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
+						AND b.option_value < %d";
+					$rows = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_transient_timeout_' ) . '%', time() ) );
 
-					$rows2 = $wpdb->query( "
-						DELETE
-							a, b
-						FROM
-							{$wpdb->options} a, {$wpdb->options} b
-						WHERE
-							a.option_name LIKE '_site_transient_%' AND
-							a.option_name NOT LIKE '_site_transient_timeout_%' AND
-							b.option_name = CONCAT(
-								'_site_transient_timeout_',
-								SUBSTRING(
-									a.option_name,
-									CHAR_LENGTH('_site_transient_') + 1
-								)
-							)
-							AND b.option_value < UNIX_TIMESTAMP()
-					" );
+					$sql = "DELETE a, b FROM $wpdb->options a, $wpdb->options b
+						WHERE a.option_name LIKE %s
+						AND a.option_name NOT LIKE %s
+						AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
+						AND b.option_value < %d";
+					$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) );
 
 					echo '<div class="updated"><p>' . sprintf( __( '%d Transients Rows Cleared', 'woocommerce' ), $rows + $rows2 ) . '</p></div>';
 

@@ -2,9 +2,9 @@
 /**
  * Cart Page
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.3.8
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.3.8
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -52,26 +52,29 @@ do_action( 'woocommerce_before_cart' ); ?>
 						<?php
 							$thumbnail = apply_filters( 'woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key );
 
-							if ( ! $_product->is_visible() )
+							if ( ! $_product->is_visible() ) {
 								echo $thumbnail;
-							else
-								printf( '<a href="%s">%s</a>', $_product->get_permalink( $cart_item ), $thumbnail );
+							} else {
+								printf( '<a href="%s">%s</a>', esc_url( $_product->get_permalink( $cart_item ) ), $thumbnail );
+							}
 						?>
 					</td>
 
 					<td class="product-name">
 						<?php
-							if ( ! $_product->is_visible() )
+							if ( ! $_product->is_visible() ) {
 								echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
-							else
-								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', $_product->get_permalink( $cart_item ), $_product->get_title() ), $cart_item, $cart_item_key );
+							} else {
+								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', esc_url( $_product->get_permalink( $cart_item ) ), $_product->get_title() ), $cart_item, $cart_item_key );
+							}
 
 							// Meta data
 							echo WC()->cart->get_item_data( $cart_item );
 
-               				// Backorder notification
-               				if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $cart_item['quantity'] ) )
-               					echo '<p class="backorder_notification">' . __( 'Available on backorder', 'woocommerce' ) . '</p>';
+							// Backorder notification
+							if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $cart_item['quantity'] ) ) {
+								echo '<p class="backorder_notification">' . esc_html__( 'Available on backorder', 'woocommerce' ) . '</p>';
+							}
 						?>
 					</td>
 
@@ -119,7 +122,6 @@ do_action( 'woocommerce_before_cart' ); ?>
 						<label for="coupon_code"><?php _e( 'Coupon', 'woocommerce' ); ?>:</label> <input type="text" name="coupon_code" class="input-text" id="coupon_code" value="" placeholder="<?php _e( 'Coupon code', 'woocommerce' ); ?>" /> <input type="submit" class="button" name="apply_coupon" value="<?php _e( 'Apply Coupon', 'woocommerce' ); ?>" />
 
 						<?php do_action( 'woocommerce_cart_coupon' ); ?>
-
 					</div>
 				<?php } ?>
 

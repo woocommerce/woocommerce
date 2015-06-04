@@ -33,7 +33,7 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_update_product_stock() {
-		// Create product 
+		// Create product
 		$product = \WC_Helper_Product::create_simple_product();
 
 		update_post_meta( $product->id, '_manage_stock', 'yes' );
@@ -43,6 +43,96 @@ class Functions extends \WC_Unit_Test_Case {
 
 		// Delete Product
 		\WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
+	 * Test wc_delete_product_transients()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_delete_product_transients() {
+		// Create product
+		$product = \WC_Helper_Product::create_simple_product();
+
+		update_post_meta( $product->id, '_regular_price', wc_format_decimal( 10 ) );
+		update_post_meta( $product->id, '_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->id, '_sale_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->id, '_featured', 'yes' );
+
+		wc_get_product_ids_on_sale();  // Creates the transient for on sale products
+		wc_get_featured_product_ids(); // Creates the transient for featured products
+
+		wc_delete_product_transients();
+
+		$this->assertFalse( get_transient( 'wc_products_onsale' ) );
+		$this->assertFalse( get_transient( 'wc_featured_products' ) );
+
+		\WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
+	 * Test wc_get_product_ids_on_sale()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_product_ids_on_sale() {
+		$this->assertEquals( array(), wc_get_product_ids_on_sale() );
+
+		delete_transient( 'wc_products_onsale' );
+
+		// Create product
+		$product = \WC_Helper_Product::create_simple_product();
+
+		update_post_meta( $product->id, '_regular_price', wc_format_decimal( 10 ) );
+		update_post_meta( $product->id, '_price', wc_format_decimal( 5 ) );
+		update_post_meta( $product->id, '_sale_price', wc_format_decimal( 5 ) );
+
+		$this->assertEquals( array( $product->id ), wc_get_product_ids_on_sale() );
+
+		// Delete Product
+		\WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
+	 * Test wc_get_featured_product_ids()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_featured_product_ids() {
+		$this->assertEquals( array(), wc_get_featured_product_ids() );
+
+		delete_transient( 'wc_featured_products' );
+
+		// Create product
+		$product = \WC_Helper_Product::create_simple_product();
+
+		update_post_meta( $product->id, '_featured', 'yes' );
+
+		$this->assertEquals( array( $product->id ), wc_get_featured_product_ids() );
+
+		// Delete Product
+		\WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
+	 * Test wc_placeholder_img()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_placeholder_img() {
+		$sizes = array(
+			'shop_thumbnail' => array( 'width' => '180', 'height' => '180' ),
+			'shop_single'    => array( 'width' => '600', 'height' => '600' ),
+			'shop_catalog'   => array( 'width' => '300', 'height' => '300' )
+		);
+
+		foreach ( $sizes as $size => $values ) {
+			$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="' . $values['width'] . '" class="woocommerce-placeholder wp-post-image" height="' . $values['height'] . '" />';
+			$this->assertEquals( apply_filters( 'woocommerce_placeholder_img', $img ), wc_placeholder_img( $size ) );
+		}
+
+		$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="180" class="woocommerce-placeholder wp-post-image" height="180" />';
+		$this->assertEquals( apply_filters( 'woocommerce_placeholder_img', $img ), wc_placeholder_img() );
 	}
 
 	/**
@@ -87,7 +177,7 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product_id_by_sku() {
-		// Create product 
+		// Create product
 		$product = \WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( $product->id, wc_get_product_id_by_sku( $product->sku ) );

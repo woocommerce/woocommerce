@@ -44,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td class="forminp">
 					<select name="webhook_topic" id="webhook_topic" class="wc-enhanced-select">
 						<?php
-							$topic_data = $this->get_topic_data( $webhook );
+							$topic_data = WC_Admin_Webhooks::get_topic_data( $webhook );
 
 							$topics = apply_filters( 'woocommerce_webhook_topics', array(
 								''                 => __( 'Select an option&hellip;', 'woocommerce' ),
@@ -162,7 +162,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div id="webhook-logs" class="settings-panel">
 	<h3><?php _e( 'Webhook Logs', 'woocommerce' ); ?></h3>
 
-	<?php $this->logs_output( $webhook ); ?>
+	<?php WC_Admin_Webhooks::logs_output( $webhook ); ?>
 </div>
 
 <script type="text/javascript">

@@ -29,7 +29,7 @@ function wc_template_redirect() {
 	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && sizeof( WC()->cart->get_cart() ) == 0 && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 	}
@@ -68,6 +68,20 @@ function wc_template_redirect() {
 	}
 }
 add_action( 'template_redirect', 'wc_template_redirect' );
+
+/**
+ * When loading sensitive checkout or account pages, send a HTTP header to limit rendering of pages to same origin iframes for security reasons.
+ *
+ * Can be disabled with: remove_action( 'template_redirect', 'wc_send_frame_options_header' );
+ *
+ * @since  2.3.10
+ */
+function wc_send_frame_options_header() {
+	if ( is_checkout() || is_account_page() ) {
+		send_frame_options_header();
+	}
+}
+add_action( 'template_redirect', 'wc_send_frame_options_header' );
 
 /**
  * When the_post is called, put product data into a global.
@@ -883,13 +897,14 @@ if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {
 	function woocommerce_external_add_to_cart() {
 		global $product;
 
-		if ( ! $product->get_product_url() )
+		if ( ! $product->add_to_cart_url() ) {
 			return;
+		}
 
 		wc_get_template( 'single-product/add-to-cart/external.php', array(
-				'product_url' => $product->get_product_url(),
-				'button_text' => $product->single_add_to_cart_text()
-			) );
+			'product_url' => $product->add_to_cart_url(),
+			'button_text' => $product->single_add_to_cart_text()
+		) );
 	}
 }
 
@@ -1058,9 +1073,9 @@ if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 	function woocommerce_output_related_products() {
 
 		$args = array(
-			'posts_per_page' => 2,
-			'columns' => 2,
-			'orderby' => 'rand'
+			'posts_per_page' 	=> 4,
+			'columns' 			=> 4,
+			'orderby' 			=> 'rand'
 		);
 
 		woocommerce_related_products( apply_filters( 'woocommerce_output_related_products_args', $args ) );
@@ -1110,7 +1125,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 * @param int $columns (default: 2)
 	 * @param string $orderby (default: 'rand')
 	 */
-	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 2, $orderby = 'rand' ) {
+	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 4, $orderby = 'rand' ) {
 		wc_get_template( 'single-product/up-sells.php', array(
 				'posts_per_page'	=> $posts_per_page,
 				'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
@@ -1171,11 +1186,7 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 	 * @subpackage	Cart
 	 */
 	function woocommerce_button_proceed_to_checkout() {
-		$checkout_url = WC()->cart->get_checkout_url();
-
-		?>
-		<a href="<?php echo $checkout_url; ?>" class="checkout-button button alt wc-forward"><?php _e( 'Proceed to Checkout', 'woocommerce' ); ?></a>
-		<?php
+		wc_get_template( 'cart/proceed-to-checkout-button.php' );
 	}
 }
 
@@ -1491,9 +1502,9 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			}
 
 			echo $after;
-		}
 
-		return true;
+			return true;
+		}
 	}
 }
 
@@ -1942,5 +1953,25 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 		} else {
 			return $form;
 		}
+	}
+}
+
+if ( ! function_exists( 'woocommerce_output_auth_header' ) ) {
+
+	/**
+	 * Output the Auth header.
+	 */
+	function woocommerce_output_auth_header() {
+		wc_get_template( 'auth/header.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_output_auth_footer' ) ) {
+
+	/**
+	 * Output the Auth footer.
+	 */
+	function woocommerce_output_auth_footer() {
+		wc_get_template( 'auth/footer.php' );
 	}
 }

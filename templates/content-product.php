@@ -4,9 +4,9 @@
  *
  * Override this template by copying it to yourtheme/woocommerce/content-product.php
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 1.6.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,26 +16,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $product, $woocommerce_loop;
 
 // Store loop count we're currently on
-if ( empty( $woocommerce_loop['loop'] ) )
+if ( empty( $woocommerce_loop['loop'] ) ) {
 	$woocommerce_loop['loop'] = 0;
+}
 
 // Store column count for displaying the grid
-if ( empty( $woocommerce_loop['columns'] ) )
+if ( empty( $woocommerce_loop['columns'] ) ) {
 	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
+}
 
 // Ensure visibility
-if ( ! $product || ! $product->is_visible() )
+if ( ! $product || ! $product->is_visible() ) {
 	return;
+}
 
 // Increase loop count
 $woocommerce_loop['loop']++;
 
 // Extra post classes
 $classes = array();
-if ( 0 == ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 == $woocommerce_loop['columns'] )
+if ( 0 == ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 == $woocommerce_loop['columns'] ) {
 	$classes[] = 'first';
-if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] )
+}
+if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] ) {
 	$classes[] = 'last';
+}
 ?>
 <li <?php post_class( $classes ); ?>>
 
@@ -74,7 +79,7 @@ if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] )
 		 *
 		 * @hooked woocommerce_template_loop_add_to_cart - 10
 		 */
-		do_action( 'woocommerce_after_shop_loop_item' ); 
+		do_action( 'woocommerce_after_shop_loop_item' );
 
 	?>
 

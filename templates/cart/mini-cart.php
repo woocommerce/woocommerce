@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <ul class="cart_list product_list_widget <?php echo $args['list_class']; ?>">
 
-	<?php if ( sizeof( WC()->cart->get_cart() ) > 0 ) : ?>
+	<?php if ( ! WC()->cart->is_empty() ) : ?>
 
 		<?php
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -58,7 +58,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 </ul><!-- end product list -->
 
-<?php if ( sizeof( WC()->cart->get_cart() ) > 0 ) : ?>
+<?php if ( ! WC()->cart->is_empty() ) : ?>
 
 	<p class="total"><strong><?php _e( 'Subtotal', 'woocommerce' ); ?>:</strong> <?php echo WC()->cart->get_cart_subtotal(); ?></p>
 

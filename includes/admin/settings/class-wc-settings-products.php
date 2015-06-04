@@ -2,10 +2,10 @@
 /**
  * WooCommerce Product Settings
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -58,7 +58,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 		$settings = $this->get_settings( $current_section );
 
- 		WC_Admin_Settings::output_fields( $settings );
+		WC_Admin_Settings::output_fields( $settings );
 	}
 
 	/**
@@ -264,7 +264,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'min'  => 0,
 						'step' => 1
 					),
-					'css'               => 'width:50px;',
+					'css'               => 'width: 80px;',
 					'default'           => '60',
 					'autoload'          => false
 				),

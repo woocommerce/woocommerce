@@ -96,7 +96,15 @@ class WC_Admin_Notices {
 	 * Hide a notice if the GET variable is set.
 	 */
 	public function hide_notices() {
-		if ( isset( $_GET['wc-hide-notice'] ) ) {
+		if ( isset( $_GET['wc-hide-notice'] ) && isset( $_GET['_wc_notice_nonce'] ) ) {
+			if ( ! wp_verify_nonce( $_GET['_wc_notice_nonce'], 'woocommerce_hide_notices_nonce' ) ) {
+				wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+			}
+
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( __( 'Cheatin&#8217; huh?', 'woocommerce' ) );
+			}
+
 			$hide_notice = sanitize_text_field( $_GET['wc-hide-notice'] );
 			self::remove_notice( $hide_notice );
 			do_action( 'woocommerce_hide_' . $hide_notice . '_notice' );
@@ -167,7 +175,7 @@ class WC_Admin_Notices {
 	 * Show the Theme Check notice
 	 */
 	public function theme_check_notice() {
-		if ( ! current_theme_supports( 'woocommerce' ) ) {
+		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
 			include( 'views/html-notice-theme-support.php' );
 		}
 	}
