@@ -275,23 +275,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		WC_Gateway_Paypal_Refund::$api_password  = $this->get_option( 'api_password' );
 		WC_Gateway_Paypal_Refund::$api_signature = $this->get_option( 'api_signature' );
 
-		// Allow 3rd parties to modify the arguments. By passing the refund class,
-		// we can allow them to override it entirely, if needed
-		$refund_args = apply_filters('wc_paypal_standard_refund_args', array(
-			'order' => $order,
-			'amount' => $amount,
-			'reason' => $reason,
-			'refund_class' => WC_Gateway_Paypal_Refund
-		), $this);
-
-		// Failsafe check - If the filter remove the refund class from the arguments,
-		// use the default one
-		$refund_class = !empty($refund_args['refund_class']) ? $refund_args['refund_class'] : WC_Gateway_Paypal_Refund;
-
-		$result = $refund_class::refund_order( $refund_args['order'],
-																					 $refund_args['amount'],
-																					 $refund_args['reason'],
-																					 $this->testmode );
+		$result = WC_Gateway_Paypal_Refund::refund_order( $order, $amount, $reason, $this->testmode );
 
 		if ( is_wp_error( $result ) ) {
 			$this->log( 'Refund Failed: ' . $result->get_error_message() );
