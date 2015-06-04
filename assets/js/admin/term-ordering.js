@@ -31,7 +31,8 @@ jQuery( function( $ ) {
 			var nexttermid = ui.item.next().find( '.check-column input' ).val();
 
 			// Can only sort in same tree
-			var prevtermparent = undefined;
+			var prevtermparent, nexttermparent;
+
 			if ( prevtermid !== undefined ) {
 				prevtermparent = ui.item.prev().find('.parent').html();
 				if ( prevtermparent !== termparent) {
@@ -39,7 +40,6 @@ jQuery( function( $ ) {
 				}
 			}
 
-			var nexttermparent = undefined;
 			if ( nexttermid !== undefined ) {
 				nexttermparent = ui.item.next().find( '.parent' ).html();
 				if ( nexttermparent !== termparent) {
