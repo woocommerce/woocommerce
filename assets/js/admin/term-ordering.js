@@ -32,9 +32,8 @@ jQuery( function( $ ) {
 
 			// Can only sort in same tree
 			var prevtermparent, nexttermparent;
-
 			if ( prevtermid !== undefined ) {
-				prevtermparent = ui.item.prev().find('.parent').html();
+				prevtermparent = ui.item.prev().find( '.parent' ).html();
 				if ( prevtermparent !== termparent) {
 					prevtermid = undefined;
 				}
@@ -65,7 +64,7 @@ jQuery( function( $ ) {
 				}
 			});
 
-			// fix cell colors
+			// Fix cell colors
 			$( 'table.widefat tbody tr' ).each( function() {
 				var i = jQuery( 'table.widefat tbody tr' ).index( this );
 				if ( i%2 === 0 ) {
