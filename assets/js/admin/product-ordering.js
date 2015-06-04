@@ -42,9 +42,7 @@ $( document ).ready( function() {
 			$( 'table.widefat tbody th, table.widefat tbody td' ).css( 'cursor', 'default' );
 			$( 'table.widefat tbody' ).sortable( 'disable' );
 
-			var postid = ui.item.find( '.check-column input' ).val(); // this post id
-			var postparent = ui.item.find( '.post_parent' ).html();   // post parent
-
+			var postid     = ui.item.find( '.check-column input' ).val();
 			var prevpostid = ui.item.prev().find( '.check-column input' ).val();
 			var nextpostid = ui.item.next().find( '.check-column input' ).val();
 
