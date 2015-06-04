@@ -647,10 +647,13 @@ function wc_create_refund( $args = array() ) {
 
 		// Get refund object
 		$refund = wc_get_order( $refund_id );
+		$order  = wc_get_order( $args['order_id'] );
+
+		// Refund currency is the same used for the parent order
+		update_post_meta( $refund_id, '_order_currency', $order->get_order_currency() );
 
 		// Negative line items
 		if ( sizeof( $args['line_items'] ) > 0 ) {
-			$order       = wc_get_order( $args['order_id'] );
 			$order_items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
 
 			foreach ( $args['line_items'] as $refund_item_id => $refund_item ) {
