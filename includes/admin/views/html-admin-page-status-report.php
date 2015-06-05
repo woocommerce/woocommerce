@@ -242,7 +242,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
 			$posting['wp_remote_get']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) . '">[?]</a>';
 
-			$response = wp_safe_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+			$response = wp_safe_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ), array(
+				'user-agent' => 'WooCommerce/' . WC()->version
+			) );
 
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				$posting['wp_remote_get']['success'] = true;
