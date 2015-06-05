@@ -604,7 +604,7 @@ class WC_AJAX {
 
 			$attribute_is_taxonomy   = $data['attribute_is_taxonomy'];
 			$attribute_position      = $data['attribute_position'];
-			$attribute_names_max_key = max( $attribute_names );
+			$attribute_names_max_key = max( array_keys( $attribute_names ) );
 
 			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
 				if ( empty( $attribute_names[ $i ] ) ) {
