@@ -58,6 +58,18 @@ if ( ! empty( $apps_keys ) ) {
 	}
 }
 
+// Make sure order.update webhooks get the woocommerce_order_edit_status hook
+$order_update_webhooks = get_posts( array(
+	'posts_per_page' => -1,
+	'post_type'      => 'shop_webhook',
+	'meta_key'       => '_topic',
+	'meta_value'     => 'order.updated'
+) );
+foreach ( $order_update_webhooks as $order_update_webhook ) {
+	$webhook = new WC_Webhook( $order_update_webhook->ID );
+	$webhook->set_topic( 'order.updated' );
+}
+
 // Update fully refunded orders to ensure they have a refund line item so reports add up
 $refunded_orders = get_posts( array(
 	'posts_per_page' => -1,
