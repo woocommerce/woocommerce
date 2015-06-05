@@ -1351,6 +1351,7 @@ class WC_Admin_Post_Types {
 		foreach ( $post_ids as $post_id ) {
 			$order = wc_get_order( $post_id );
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
+			do_action( 'woocommerce_order_edit_status', $post_id, $new_status );
 			$changed++;
 		}
 
