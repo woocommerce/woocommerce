@@ -1811,14 +1811,15 @@ class WC_Cart {
 							$total_discount     = $discount_amount * $values['quantity'];
 							$total_discount_tax = 0;
 
-							// Calc discounted tax
-							$tax_rates           = WC_Tax::get_rates( $product->get_tax_class() );
-							$taxes               = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
-							$total_discount_tax  = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
-							$total_discount      = $this->prices_include_tax ? $total_discount - $total_discount_tax : $total_discount;
+							if ( wc_tax_enabled() ) {
+								$tax_rates          = WC_Tax::get_rates( $product->get_tax_class() );
+								$taxes              = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
+								$total_discount_tax = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
+								$total_discount     = $this->prices_include_tax ? $total_discount - $total_discount_tax : $total_discount;
+								$this->discount_cart_tax += $total_discount_tax;
+							}
 
 							$this->discount_cart     += $total_discount;
-							$this->discount_cart_tax += $total_discount_tax;
 							$this->increase_coupon_discount_amount( $code, $total_discount, $total_discount_tax );
 							$this->increase_coupon_applied_count( $code, $values['quantity'] );
 						}
