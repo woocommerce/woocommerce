@@ -78,6 +78,11 @@ class WC_Admin_Setup_Wizard {
 				'view'    => array( $this, 'wc_setup_shipping_taxes' ),
 				'handler' => array( $this, 'wc_setup_shipping_taxes_save' ),
 			),
+			'payments' => array(
+				'name'    =>  __( 'Payments', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_payments' ),
+				'handler' => array( $this, 'wc_setup_payments_save' ),
+			),
 			'next_steps' => array(
 				'name'    =>  __( 'Ready!', 'woocommerce' ),
 				'view'    => array( $this, 'wc_setup_ready' ),
@@ -164,9 +169,11 @@ class WC_Admin_Setup_Wizard {
 	 * Output the steps
 	 */
 	public function setup_wizard_steps() {
+		$ouput_steps = $this->steps;
+		array_shift( $ouput_steps );
 		?>
 		<ol class="wc-setup-steps">
-			<?php foreach ( $this->steps as $step_key => $step ) : ?>
+			<?php foreach ( $ouput_steps as $step_key => $step ) : ?>
 				<li class="<?php
 					if ( $step_key === $this->step ) {
 						echo 'active';
@@ -581,6 +588,91 @@ class WC_Admin_Setup_Wizard {
 				}
 			}
 		}
+
+		wp_redirect( $this->get_next_step_link() );
+		exit;
+	}
+
+	/**
+	 * Payments Step
+	 */
+	public function wc_setup_payments() {
+		$paypal_settings = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
+		$cheque_settings = array_filter( (array) get_option( 'woocommerce_cheque_settings', array() ) );
+		$cod_settings    = array_filter( (array) get_option( 'woocommerce_cod_settings', array() ) );
+		$bacs_settings   = array_filter( (array) get_option( 'woocommerce_bacs_settings', array() ) );
+		?>
+		<h1><?php _e( 'Payments', 'woocommerce' ); ?></h1>
+		<form method="post">
+			<p><?php printf( __( 'WooCommerce comes with some payment gateways pre-installed. %2$sAdditonal gateways%3$s can be installed later. Payment Gateways can be setup, enabled and disabled from the %1$scheckout settings%3$s screen.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout' ) . '" target="_blank">', '<a href="' . admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) . '" target="_blank">', '</a>' ); ?></p>
+			<table class="form-table">
+				<tr class="section_title">
+					<td colspan="2">
+						<h2><?php _e( 'PayPal Standard', 'woocommerce' ); ?></h2>
+						<p><?php _e( 'To accept payments via PayPal on your store, simply enter your PayPal email address below.', 'woocommerce' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_paypal_email"><?php _e( 'PayPal Email Address:', 'woocommerce' ); ?></label></th>
+					<td>
+						<input type="email" id="woocommerce_paypal_email" name="woocommerce_paypal_email" class="input-text" value="<?php echo esc_attr( isset( $paypal_settings['email'] ) ? $paypal_settings['email'] : '' ); ?>" />
+					</td>
+				</tr>
+				<tr class="section_title">
+					<td colspan="2">
+						<h2><?php _e( 'Offline Payments', 'woocommerce' ); ?></h2>
+						<p><?php _e( 'Offline gateways require manual processing, but can be useful in certain circumstances or for testing payments.', 'woocommerce' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_enable_cheque"><?php _e( 'Cheque Payments', 'woocommerce' ); ?></label></th>
+					<td>
+						<label><input type="checkbox" id="woocommerce_enable_cheque" name="woocommerce_enable_cheque" class="input-checkbox" value="yes" <?php checked( ( isset( $cheque_settings['enabled'] ) && 'yes' === $cheque_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable payment via Cheques', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_enable_cod"><?php _e( 'Cash on Delivery', 'woocommerce' ); ?></label></th>
+					<td>
+						<label><input type="checkbox" id="woocommerce_enable_cod" name="woocommerce_enable_cod" class="input-checkbox" value="yes" <?php checked( ( isset( $cod_settings['enabled'] ) && 'yes' === $cod_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable cash on delivery', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="woocommerce_enable_bacs"><?php _e( 'Bank Transfer (BACS)', 'woocommerce' ); ?></label></th>
+					<td>
+						<label><input type="checkbox" id="woocommerce_enable_bacs" name="woocommerce_enable_bacs" class="input-checkbox" value="yes" <?php checked( ( isset( $bacs_settings['enabled'] ) && 'yes' === $bacs_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable BACS payments', 'woocommerce' ); ?></label>
+					</td>
+				</tr>
+			</table>
+			<p class="wc-setup-actions step">
+				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
+				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+			</p>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Payments Step save
+	 */
+	public function wc_setup_payments_save() {
+		$paypal_settings            = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
+		$cheque_settings            = array_filter( (array) get_option( 'woocommerce_cheque_settings', array() ) );
+		$cod_settings               = array_filter( (array) get_option( 'woocommerce_cod_settings', array() ) );
+		$bacs_settings              = array_filter( (array) get_option( 'woocommerce_bacs_settings', array() ) );
+
+		$paypal_settings['enabled'] = ! empty( $_POST['woocommerce_paypal_email'] ) ? 'yes' : 'no';
+		$cheque_settings['enabled'] = isset( $_POST['woocommerce_enable_cheque'] ) ? 'yes' : 'no';
+		$cod_settings['enabled']    = isset( $_POST['woocommerce_enable_cod'] ) ? 'yes' : 'no';
+		$bacs_settings['enabled']   = isset( $_POST['woocommerce_enable_bacs'] ) ? 'yes' : 'no';
+
+		if ( ! empty( $_POST['woocommerce_paypal_email'] ) ) {
+			$paypal_settings['email'] = wc_clean( $_POST['woocommerce_paypal_email'] );
+		}
+
+		update_option( 'woocommerce_paypal_settings', $paypal_settings );
+		update_option( 'woocommerce_cheque_settings', $cheque_settings );
+		update_option( 'woocommerce_cod_settings', $cod_settings );
+		update_option( 'woocommerce_bacs_settings', $bacs_settings );
 
 		wp_redirect( $this->get_next_step_link() );
 		exit;
