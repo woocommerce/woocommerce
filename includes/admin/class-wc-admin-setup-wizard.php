@@ -210,7 +210,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php _e( 'Page Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php _e( 'There are a few pages that need to be set up to show parts of your store. The following pages will be created automatically if they do not already exist:', 'woocommerce' ); ?></p>
+			<p><?php printf( __( 'There are a few %spages%s that need to be set up to show parts of your store. These will be created automatically if they do not already exist:', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>' ); ?></p>
 			<table class="wc-setup-pages" cellspacing="0">
 				<thead>
 					<tr>
@@ -231,26 +231,18 @@ class WC_Admin_Setup_Wizard {
 						<td class="page-name"><?php echo _x( 'Checkout', 'Page title', 'woocommerce' ); ?></td>
 						<td>
 							<?php _e( 'The checkout page will be where the customers go to pay for their items.', 'woocommerce' ); ?>
-							<div class="page-options">
-								<p><input type="checkbox" <?php checked( get_option( 'woocommerce_enable_guest_checkout' ), 'yes' ); ?> name="woocommerce_enable_guest_checkout" id="woocommerce_enable_guest_checkout" /> <label for="woocommerce_enable_guest_checkout"><?php _e( 'Enable guest checkout', 'woocommerce' ); ?></label></p>
-
-								<p><input type="checkbox" <?php checked( get_option( 'woocommerce_enable_signup_and_login_from_checkout' ), 'yes' ); ?> name="woocommerce_enable_signup_and_login_from_checkout" id="woocommerce_enable_signup_and_login_from_checkout" /> <label for="woocommerce_enable_signup_and_login_from_checkout"><?php _e( 'Enable registration form', 'woocommerce' ); ?></label></p>
-							</div>
 						</td>
 					</tr>
 					<tr>
 						<td class="page-name"><?php echo _x( 'My Account', 'Page title', 'woocommerce' ); ?></td>
 						<td>
 							<?php _e( 'Registered customers will be able to go to this page to manage their account details and view past orders.', 'woocommerce' ); ?>
-							<div class="page-options">
-								<p><input type="checkbox" <?php checked( get_option( 'woocommerce_enable_myaccount_registration' ), 'yes' ); ?> name="woocommerce_enable_myaccount_registration" id="woocommerce_enable_myaccount_registration" /> <label for="woocommerce_enable_myaccount_registration"><?php _e( 'Enable registration form', 'woocommerce' ); ?></label></p>
-							</div>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 
-			<p><?php printf( __( 'Once created, these pages can be managed via %sDashboard > Pages%s. You can control which pages are shown in your website menus via %sAppearance > Menus%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>', '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php printf( __( 'You can control which pages are shown on your website via %sAppearance > Menus%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
 
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
@@ -264,14 +256,7 @@ class WC_Admin_Setup_Wizard {
 	 * Save Page Settings
 	 */
 	public function wc_setup_pages_save() {
-		// Create pages
 		WC_Install::create_pages();
-
-		// Page options
-		update_option( 'woocommerce_enable_guest_checkout', isset( $_POST['woocommerce_enable_guest_checkout'] ) ? 'yes' : 'no' );
-		update_option( 'woocommerce_enable_signup_and_login_from_checkout', isset( $_POST['woocommerce_enable_signup_and_login_from_checkout'] ) ? 'yes' : 'no' );
-		update_option( 'woocommerce_enable_myaccount_registration', isset( $_POST['woocommerce_enable_myaccount_registration'] ) ? 'yes' : 'no' );
-
 		wp_redirect( $this->get_next_step_link() );
 		exit;
 	}
