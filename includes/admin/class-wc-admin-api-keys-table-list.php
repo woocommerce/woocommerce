@@ -176,6 +176,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE 1 = 1
 			$search
+			ORDER BY key_id DESC
 			LIMIT %d
 			OFFSET %d
 		 ", $per_page, $offset ), ARRAY_A );
