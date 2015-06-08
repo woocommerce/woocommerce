@@ -292,8 +292,8 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		if ( $product->is_purchasable() ) {
 			$classes[] = 'purchasable';
 		}
-		if ( isset( $product->product_type ) ) {
-			$classes[] = "product-type-" . $product->product_type;
+		if ( $product->get_type() ) {
+			$classes[] = "product-type-" . $product->get_type();
 		}
 
 		// add category slugs
