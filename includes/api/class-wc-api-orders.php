@@ -902,7 +902,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$product_id = wc_get_product_id_by_sku( $item['sku'] );
 		}
 
-		$variation_id = $this->get_variation_id( $product_id, $item );
+		$variation_id = $this->get_variation_id( $product_id, $item['variations'] );
 		$product = wc_get_product( $variation_id ? $variation_id : $product_id );
 
 		// must be a valid WC_Product
@@ -982,17 +982,17 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param  int $product_id main product ID
 	 * @return int             returns an ID if a valid variation was found for this product
 	 */
-	function get_variation_id( $product_id, $item ) {
-		$variations = array();
-		$product = wc_get_product( $item['product_id'] );
+	function get_variation_id( $product_id, $variations ) {
+		$product = wc_get_product( $product_id );
 		$variation_id = null;
+		$variations_normalized = array();
 
-		if ( $product->is_type( 'variable') && $product->has_child() ) {
-			if ( isset( $item['variations'] ) && is_array( $item['variations'] ) ) {
+		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
+			if ( isset( $variations ) && is_array( $variations ) ) {
 				// start by normalizing the passed variations
-				foreach ( $item['variations'] as $key => $value ) {
-					$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) );
-					$variations[ $key ] = strtolower( $value );
+				foreach ( $variations as $key => $value ) {
+					$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ); // from get_attributes in class-wc-api-products.php
+					$variations_normalized[ $key ] = strtolower( $value );
 				}
 				// now search through each product child and see if our passed variations match anything
 				foreach ( $product->get_children() as $variation ) {
@@ -1003,7 +1003,7 @@ class WC_API_Orders extends WC_API_Resource {
 						$meta[ $key ] = strtolower( $value );
 					}
 					// if the variation array is a part of the $meta array, we found our match
-					if ( $this->array_contains( $variations, $meta ) ) {
+					if ( $this->array_contains( $variations_normalized, $meta ) ) {
 						$variation_id = $variation;
 						break;
 					}
