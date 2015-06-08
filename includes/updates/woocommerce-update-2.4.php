@@ -29,7 +29,7 @@ foreach ( $api_users as $_user ) {
 	$apps_keys[] = array(
 		'user_id'         => $user->ID,
 		'permission'      => $user->woocommerce_api_key_permissions,
-		'consumer_key'    => $user->woocommerce_api_consumer_key,
+		'consumer_key'    => wc_api_hash( $user->woocommerce_api_consumer_key ),
 		'consumer_secret' => $user->woocommerce_api_consumer_secret
 	);
 }
