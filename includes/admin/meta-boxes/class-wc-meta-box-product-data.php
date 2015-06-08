@@ -1250,7 +1250,7 @@ class WC_Meta_Box_Product_Data {
 
 						// Validate the file extension
 						if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
-							$file_type  = wp_check_filetype( $file_url );
+							$file_type  = wp_check_filetype( strtok( $file_url, '?' ) );
 							$parsed_url = parse_url( $file_url, PHP_URL_PATH );
 							$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
 
@@ -1524,7 +1524,7 @@ class WC_Meta_Box_Product_Data {
 
 							// Validate the file extension
 							if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
-								$file_type  = wp_check_filetype( $file_url );
+								$file_type  = wp_check_filetype( strtok( $file_url, '?' ) );
 								$parsed_url = parse_url( $file_url, PHP_URL_PATH );
 								$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
 
