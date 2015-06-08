@@ -657,17 +657,18 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-setup-next-steps-first">
 				<h2><?php _e( 'Next Steps', 'woocommerce' ); ?></h2>
 				<ul>
-					<li class="setup-product"><a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php _e( 'Create your first product', 'woocommerce' ); ?></a></li>
+					<li class="setup-product"><a class="button button-primary button-large" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php _e( 'Create your first product', 'woocommerce' ); ?></a></li>
 					<li class="view-product"><a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_view_test_product', true ), 'wc_view_test_product', 'wc_view_test_product_nonce' ) ); ?>"><?php _e( 'View a test product', 'woocommerce' ); ?></a></li>
 					<li class="return-dashboard"><a href="<?php echo esc_url( admin_url() ); ?>"><?php _e( 'Return to the WordPress Dashboard', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 			<div class="wc-setup-next-steps-last">
-				<h2><?php _e( 'More Actions', 'woocommerce' ); ?></h2>
+				<h2><?php _e( 'Learn More', 'woocommerce' ); ?></h2>
 				<ul>
-					<li class="setup-gateways"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ); ?>"><?php _e( 'Setup payment gateways for your store', 'woocommerce' ); ?></a></li>
-					<li class="setup-taxes"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ); ?>"><?php _e( 'Setup your store&lsquo;s tax rates', 'woocommerce' ); ?></a></li>
-					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/"><?php _e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
+					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/"><?php _e( 'Read more about getting started', 'woocommerce' ); ?></a></li>
+					<li class="video-walkthrough"><a href="#"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
+					<li class="sidekick"><a href="#"><?php _e( 'Follow Sidekick live walkthroughs', 'woocommerce' ); ?></a></li>
+					<li class="course"><a href="#"><?php _e( 'Take a course about WooCommerce', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 		</div>

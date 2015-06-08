@@ -225,12 +225,27 @@ body {
 			box-sizing: border-box;
 		}
 		ul {
-			padding: 0;
+			padding: 0 2em 0 0;
 			list-style: none outside;
 			margin: 0;
 			li a {
 				display: block;
-				padding: 0 0 8px;
+				padding: 0 0 .75em;
+			}
+			.setup-product {
+				a {
+					text-align: center;
+					font-size: 1em;
+					padding: 1em;
+					line-height: 1.75em;
+					height: auto;
+					margin: 0 0 .75em;
+					opacity: 1;
+					background-color: #A16696;
+					border-color: #A16696;
+					-webkit-box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+					box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+				}
 			}
 			li a:before {
 				color: #82878c;
@@ -246,16 +261,16 @@ body {
 				vertical-align: top;
 			}
 			.learn-more a:before {
+				content: "\f348";
+			}
+			.video-walkthrough a:before {
+				content: "\f126";
+			}
+			.sidekick a:before {
+				content: "\f468";
+			}
+			.course a:before {
 				content: "\f118";
-			}
-			.setup-gateways a:before {
-				content: "\f526";
-			}
-			.setup-taxes a:before {
-				content: "\f214";
-			}
-			.setup-product a:before {
-				content: "\f119";
 			}
 			.view-product a:before {
 				content: "\f312";
