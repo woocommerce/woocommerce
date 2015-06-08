@@ -2236,7 +2236,6 @@ class WC_AJAX {
 					array( '%d' )
 				);
 
-				$data['key_id']          = $key_id;
 				$data['consumer_key']    = '';
 				$data['consumer_secret'] = '';
 				$data['message']         = __( 'API Key updated successfully.', 'woocommerce' );
@@ -2265,11 +2264,11 @@ class WC_AJAX {
 					)
 				);
 
-				$data['key_id']          = $wpdb->insert_id;
+				$key_id                  = $wpdb->insert_id;
 				$data['consumer_key']    = $consumer_key;
 				$data['consumer_secret'] = $consumer_secret;
 				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new API keys now. You won\'t be able to see it again!', 'woocommerce' );
-				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $data['key_id'] ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ). '">' . __( 'Revoke Key', 'woocommerce' ) . '</a>';
+				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ). '">' . __( 'Revoke Key', 'woocommerce' ) . '</a>';
 			}
 
 			wp_send_json_success( $data );

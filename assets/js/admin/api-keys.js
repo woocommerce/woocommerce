@@ -70,13 +70,9 @@
 
 						$( 'h3', self.el ).first().append( '<div class="wc-api-message updated"><p>' + data.message + '</p></div>' );
 
-						$( '#key_id', self.el ).val( data.key_id );
-						$( '#key_description', self.el ).val( data.description );
-						$( '#key_user', self.el ).val( data.user_id );
-						$( '#key_permissions', self.el ).val( data.permissions );
-
 						if ( 0 < data.consumer_key.length && 0 < data.consumer_secret.length ) {
-							$( '#update_api_key', self.el ).val( woocommerce_admin_api_keys.i18n_save_changes ).after( data.revoke_url );
+							$( '#api-keys-options', self.el ).remove();
+							$( 'p.submit', self.el ).empty().append( data.revoke_url );
 
 							var keysTemplate = _.template( $( '#api-keys-template' ).html(), {
 								consumer_key:    data.consumer_key,
@@ -86,6 +82,10 @@
 							$( 'p.submit', self.el ).before( keysTemplate );
 							self.createQRCode( data.consumer_key, data.consumer_secret );
 							self.initTipTip();
+						} else {
+							$( '#key_description', self.el ).val( data.description );
+							$( '#key_user', self.el ).val( data.user_id );
+							$( '#key_permissions', self.el ).val( data.permissions );
 						}
 					} else {
 						$( 'h3', self.el ).first().append( '<div class="wc-api-message error"><p>' + response.data.message + '</p></div>' );

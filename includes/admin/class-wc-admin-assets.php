@@ -298,9 +298,8 @@ class WC_Admin_Assets {
 				'wc-api-keys',
 				'woocommerce_admin_api_keys',
 				array(
-					'ajax_url'          => admin_url( 'admin-ajax.php' ),
-					'update_api_nonce'  => wp_create_nonce( 'update-api-key' ),
-					'i18n_save_changes' => __( 'Save Changes', 'woocommerce' )
+					'ajax_url'         => admin_url( 'admin-ajax.php' ),
+					'update_api_nonce' => wp_create_nonce( 'update-api-key' )
 				)
 			);
 		}

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<input type="hidden" id="key_id" value="<?php echo esc_attr( $key_id ); ?>" />
 
-	<table class="form-table">
+	<table id="api-keys-options" class="form-table">
 		<tbody>
 			<tr valign="top">
 				<th scope="row" class="titledesc">
