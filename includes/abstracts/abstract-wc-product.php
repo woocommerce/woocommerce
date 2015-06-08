@@ -296,10 +296,9 @@ class WC_Product {
 	/**
 	 * Return the product type.
 	 *
-	 * @param string $type Array or string of types
 	 * @return string
 	 */
-	public function get_type( $type ) {
+	public function get_type() {
 		return is_null( $this->product_type ) ? '' : $this->product_type;
 	}
 
