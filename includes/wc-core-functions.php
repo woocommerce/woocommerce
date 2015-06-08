@@ -803,3 +803,17 @@ if ( ! function_exists( 'hash_equals' ) ) :
 		return $result === 0;
 	}
 endif;
+
+/**
+ * Generate a rand hash
+ *
+ * @since  2.4.0
+ * @return string
+ */
+function wc_rand_hash() {
+	if ( function_exists( 'openssl_random_pseudo_bytes' ) ) {
+		return bin2hex( openssl_random_pseudo_bytes( 20 ) );
+	} else {
+		return sha1( wp_rand() );
+	}
+}

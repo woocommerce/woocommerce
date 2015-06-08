@@ -211,9 +211,8 @@ class WC_Admin_API_Keys {
 				);
 			} else {
 				$status          = 2;
-				$user            = get_userdata( $user_id );
-				$consumer_key    = 'ck_' . hash( 'md5', $user->user_login . date( 'U' ) . mt_rand() );
-				$consumer_secret = 'cs_' . hash( 'md5', $user->ID . date( 'U' ) . mt_rand() );
+				$consumer_key    = 'ck_' . wc_rand_hash();
+				$consumer_secret = 'cs_' . wc_rand_hash();
 
 				$wpdb->insert(
 					$wpdb->prefix . 'woocommerce_api_keys',

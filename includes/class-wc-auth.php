@@ -194,8 +194,8 @@ class WC_Auth {
 
 		// Created API keys.
 		$permissions     = ( in_array( $scope, array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $scope ) : 'read';
-		$consumer_key    = 'ck_' . hash( 'md5', $user->user_login . date( 'U' ) . mt_rand() );
-		$consumer_secret = 'cs_' . hash( 'md5', $user->ID . date( 'U' ) . mt_rand() );
+		$consumer_key    = 'ck_' . wc_rand_hash();
+		$consumer_secret = 'cs_' . wc_rand_hash();
 
 		$wpdb->insert(
 			$wpdb->prefix . 'woocommerce_api_keys',
