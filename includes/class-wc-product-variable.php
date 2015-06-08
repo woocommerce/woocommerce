@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_Variable extends WC_Product {
 
 	/** @public array Array of child products/posts/variations. */
-	public $children;
+	public $children = null;
 
 	/** @public string The product's total stock, including that of its children. */
 	public $total_stock;
@@ -124,17 +124,17 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Return the products children posts.
+	 * Return a products child ids.
 	 *
 	 * @param  boolean $visible_only Only return variations which are not hidden
 	 * @return array of children ids
 	 */
 	public function get_children( $visible_only = false ) {
-		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
-			$transient_name = 'wc_product_children_ids_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+		if ( ! is_array( $this->children ) ) {
+			$transient_name = 'wc_product_children' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 			$this->children = get_transient( $transient_name );
 
-			if ( empty( $this->children ) ) {
+			if ( empty( $this->children ) || ! is_array( $this->children ) || ! isset( $this->children[ $visible_only ? 'visible' : 'all' ] ) ) {
 				$args = array(
 					'post_parent' => $this->id,
 					'post_type'   => 'product_variation',
@@ -144,29 +144,29 @@ class WC_Product_Variable extends WC_Product {
 					'post_status' => 'publish',
 					'numberposts' => -1
 				);
-
-				$this->children = get_posts( $args );
-
+				if ( $visible_only ) {
+					$args['meta_query'] = array(
+						'relation' => 'AND',
+						// Price is required
+						array(
+							'key'     => '_price',
+							'value'   => '',
+							'compare' => '!=',
+						),
+						// Must be in stock
+						array(
+							'key'     => '_stock_status',
+							'value'   => 'instock',
+							'compare' => '=',
+						)
+					);
+				}
+				$this->children[ $visible_only ? 'visible' : 'all' ] = get_posts( $args );
 				set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
 			}
 		}
 
-		if ( $visible_only ) {
-			$children = array();
-			foreach( $this->children as $child_id ) {
-				if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-					if ( 'instock' === get_post_meta( $child_id, '_stock_status', true ) ) {
-						$children[] = $child_id;
-					}
-				} elseif ( $this->is_in_stock() ) {
-					$children[] = $child_id;
-				}
-			}
-		} else {
-			$children = $this->children;
-		}
-
-		return apply_filters( 'woocommerce_get_children', $children, $this );
+		return apply_filters( 'woocommerce_get_children', $this->children[ $visible_only ? 'visible' : 'all' ], $this, $visible_only );
 	}
 
 	/**
@@ -259,18 +259,11 @@ class WC_Product_Variable extends WC_Product {
 			$regular_prices    = array();
 			$sale_prices       = array();
 			$tax_display_mode  = get_option( 'woocommerce_tax_display_shop' );
-			$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
 
-			foreach ( $this->get_children() as $variation_id ) {
+			foreach ( $this->get_children( true ) as $variation_id ) {
 				$price         = get_post_meta( $variation_id, '_price', true );
 				$regular_price = get_post_meta( $variation_id, '_regular_price', true );
 				$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-				$stock         = get_post_meta( $variation_id, '_stock', true );
-
-				// Skip hidden and non priced variations
-				if ( '' === $price || ( $hide_out_of_stock && '' !== $stock && $stock <= get_option( 'woocommerce_notify_no_stock_amount' ) ) ) {
-					continue;
-				}
 
 				// If sale price does not equal price, the product is not yet on sale
 				if ( $price != $sale_price ) {
