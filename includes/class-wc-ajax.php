@@ -1711,7 +1711,7 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) ) {
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
 
@@ -1863,7 +1863,7 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) ) {
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
 
