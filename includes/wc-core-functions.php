@@ -817,3 +817,14 @@ function wc_rand_hash() {
 		return sha1( wp_rand() );
 	}
 }
+
+/**
+ * WC API - Hash
+ *
+ * @since  2.4.0
+ * @param  string $data
+ * @return string
+ */
+function wc_api_hash( $data ) {
+	return hash_hmac( 'sha256', $data, 'wc-api' );
+}

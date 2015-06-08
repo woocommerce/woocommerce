@@ -203,8 +203,8 @@ class WC_Auth {
 				'user_id'         => $user->ID,
 				'description'     => $description,
 				'permissions'     => $permissions,
-				'consumer_key'    => $consumer_key,
-				'consumer_secret' => $consumer_secret
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => wc_api_hash( $consumer_secret )
 			),
 			array(
 				'%d',

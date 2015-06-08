@@ -220,8 +220,8 @@ class WC_Admin_API_Keys {
 						'user_id'         => $user_id,
 						'description'     => $description,
 						'permissions'     => $permissions,
-						'consumer_key'    => $consumer_key,
-						'consumer_secret' => $consumer_secret
+						'consumer_key'    => wc_api_hash( $consumer_key ),
+						'consumer_secret' => wc_api_hash( $consumer_secret )
 					),
 					array(
 						'%d',
