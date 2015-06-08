@@ -2250,7 +2250,7 @@ class WC_AJAX {
 					'description'     => $description,
 					'permissions'     => $permissions,
 					'consumer_key'    => wc_api_hash( $consumer_key ),
-					'consumer_secret' => wc_api_hash( $consumer_secret )
+					'consumer_secret' => $consumer_secret
 				);
 
 				$wpdb->insert(
