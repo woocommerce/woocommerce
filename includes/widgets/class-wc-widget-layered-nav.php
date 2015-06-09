@@ -236,7 +236,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					wc_enqueue_js( "
 						jQuery( '.dropdown_layered_nav_$taxonomy_filter' ).change( function() {
-							location.href = '" . esc_js( esc_url_raw( preg_replace( '%\/page/[0-9]+%', '', add_query_arg( 'filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) ) ) . "&filter_$taxonomy_filter=' + parseInt( jQuery( this ).val(), 10 );
+							var term_id = parseInt( jQuery( this ).val(), 10 );
+							location.href = '" . str_replace( array( '&amp;', '%2C' ), array( '&', ',' ), esc_js( esc_url_raw( preg_replace( '%\/page/[0-9]+%', '', add_query_arg( 'filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) ) ) ) . "&filter_$taxonomy_filter=' + ( isNaN( term_id ) ? '' : term_id );
 						});
 					" );
 
