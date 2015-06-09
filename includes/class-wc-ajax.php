@@ -1711,10 +1711,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		if ( empty( $term ) ) {
@@ -1788,6 +1784,10 @@ class WC_AJAX {
 		if ( ! empty( $posts ) ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post );
+
+				if ( ! current_user_can( 'read_product', $post ) ) {
+					continue;
+				}
 
 				$found_products[ $post ] = rawurldecode( $product->get_formatted_name() );
 			}
@@ -1863,10 +1863,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		$args = array(
@@ -1890,6 +1886,11 @@ class WC_AJAX {
 		if ( ! empty( $posts ) ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post->ID );
+
+				if ( ! current_user_can( 'read_product', $post->ID ) ) {
+					continue;
+				}
+
 				$found_products[ $post->ID ] = $product->get_formatted_name();
 			}
 		}
