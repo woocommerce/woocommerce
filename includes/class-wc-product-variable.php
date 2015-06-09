@@ -130,43 +130,47 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array of children ids
 	 */
 	public function get_children( $visible_only = false ) {
-		if ( ! is_array( $this->children ) ) {
-			$transient_name = 'wc_product_children' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-			$this->children = get_transient( $transient_name );
+		$key            = $visible_only ? 'visible' : 'all';
+		$transient_name = 'wc_product_children' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-			if ( empty( $this->children ) || ! is_array( $this->children ) || ! isset( $this->children[ $visible_only ? 'visible' : 'all' ] ) ) {
-				$args = array(
-					'post_parent' => $this->id,
-					'post_type'   => 'product_variation',
-					'orderby'     => 'menu_order',
-					'order'       => 'ASC',
-					'fields'      => 'ids',
-					'post_status' => 'publish',
-					'numberposts' => -1
-				);
-				if ( $visible_only ) {
-					$args['meta_query'] = array(
-						'relation' => 'AND',
-						// Price is required
-						array(
-							'key'     => '_price',
-							'value'   => '',
-							'compare' => '!=',
-						),
-						// Must be in stock
-						array(
-							'key'     => '_stock_status',
-							'value'   => 'instock',
-							'compare' => '=',
-						)
-					);
-				}
-				$this->children[ $visible_only ? 'visible' : 'all' ] = get_posts( $args );
-				set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
-			}
+		// Get value of transient
+		if ( ! is_array( $this->children ) ) {
+			$this->children = get_transient( $transient_name );
 		}
 
-		return apply_filters( 'woocommerce_get_children', $this->children[ $visible_only ? 'visible' : 'all' ], $this, $visible_only );
+		// Get value from DB
+		if ( empty( $this->children ) || ! is_array( $this->children ) || ! isset( $this->children[ $key ] ) ) {
+			$args = array(
+				'post_parent' => $this->id,
+				'post_type'   => 'product_variation',
+				'orderby'     => 'menu_order',
+				'order'       => 'ASC',
+				'fields'      => 'ids',
+				'post_status' => 'publish',
+				'numberposts' => -1
+			);
+			if ( $visible_only ) {
+				$args['meta_query'] = array(
+					'relation' => 'AND',
+					// Price is required
+					array(
+						'key'     => '_price',
+						'value'   => '',
+						'compare' => '!=',
+					),
+					// Must be in stock
+					array(
+						'key'     => '_stock_status',
+						'value'   => 'instock',
+						'compare' => '=',
+					)
+				);
+			}
+			$this->children[ $key ] = get_posts( $args );
+			set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
+		}
+
+		return apply_filters( 'woocommerce_get_children', $this->children[ $key ], $this, $visible_only );
 	}
 
 	/**
