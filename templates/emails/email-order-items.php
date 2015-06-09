@@ -56,7 +56,7 @@ foreach ( $items as $item_id => $item ) :
 							$prefix = __( 'Download', 'woocommerce' );
 						}
 
-						echo '<br/><small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>';
+						echo '<br/><small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
 					}
 				}
 
