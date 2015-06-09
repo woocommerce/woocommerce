@@ -104,7 +104,7 @@ class WC_Tax {
 	 * @param  array $rates
 	 * @return array
 	 */
-	private static function calc_inclusive_tax( $price, $rates ) {
+	public static function calc_inclusive_tax( $price, $rates ) {
 		$taxes = array();
 
 		$regular_tax_rates = $compound_tax_rates = 0;
@@ -148,7 +148,7 @@ class WC_Tax {
 	 * @param  array $rates
 	 * @return array
 	 */
-	private static function calc_exclusive_tax( $price, $rates ) {
+	public static function calc_exclusive_tax( $price, $rates ) {
 		$taxes = array();
 
 		if ( $rates ) {
