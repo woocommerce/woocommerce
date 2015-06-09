@@ -902,7 +902,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$product_id = wc_get_product_id_by_sku( $item['sku'] );
 		}
 
-		$variation_id = $this->get_variation_id( $product_id, $item['variations'] );
+		$variation_id = $this->get_variation_id( wc_get_product( $product_id ), $item['variations'] );
 		$product = wc_get_product( $variation_id ? $variation_id : $product_id );
 
 		// must be a valid WC_Product
@@ -982,8 +982,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param  int $product_id main product ID
 	 * @return int             returns an ID if a valid variation was found for this product
 	 */
-	function get_variation_id( $product_id, $variations ) {
-		$product = wc_get_product( $product_id );
+	function get_variation_id( $product, $variations = array() ) {
 		$variation_id = null;
 		$variations_normalized = array();
 
