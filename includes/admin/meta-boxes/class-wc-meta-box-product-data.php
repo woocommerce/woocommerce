@@ -1262,7 +1262,7 @@ class WC_Meta_Box_Product_Data {
 						}
 
 						// Validate the file exists
-						if ( 'relative' === $file_is && ! file_exists( $file_url ) ) {
+						if ( 'relative' === $file_is && ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $file_url ) ) {
 							WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
 							continue;
 						}
@@ -1534,7 +1534,7 @@ class WC_Meta_Box_Product_Data {
 							}
 
 							// Validate the file exists
-							if ( 'relative' === $file_is && ! file_exists( $file_url ) ) {
+							if ( 'relative' === $file_is && ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $file_url ) ) {
 								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
 								continue;
 							}
