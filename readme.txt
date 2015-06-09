@@ -3,7 +3,7 @@ Contributors: woothemes, mikejolley, jameskoster, claudiosanches, barrykooij
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
-Tested up to: 4.2
+Tested up to: 4.2.2
 Stable tag: 2.3.11
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -145,6 +145,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Newfoundland and Labrador state rename.
 * Fix - Escaped js/url in widget layered nav when use the dropdown option.
 * Fix - Switch the permissions check for json_search_products to use the read_product capability.
+* Fix - Fixed the addition of variable products using the Order API.
 * Tweak - woocommerce_downloadable_file_exists filter.
 
 = 2.3.10 - 01/06/2015 =
