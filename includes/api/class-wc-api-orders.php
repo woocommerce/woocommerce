@@ -902,7 +902,18 @@ class WC_API_Orders extends WC_API_Resource {
 			$product_id = wc_get_product_id_by_sku( $item['sku'] );
 		}
 
-		$variation_id = $this->get_variation_id( wc_get_product( $product_id ), $item['variations'] );
+		// variations must each have a key & value
+		$variation_id = 0;
+		if ( isset( $item['variations'] ) && is_array( $item['variations'] ) ) {
+			foreach ( $item['variations'] as $key => $value ) {
+				if ( ! $key || ! $value ) {
+					throw new WC_API_Exception( 'woocommerce_api_invalid_product_variation', __( 'The product variation is invalid', 'woocommerce' ), 400 );
+				}
+			}
+			$item_args['variation'] = $item['variations'];
+			$variation_id = $this->get_variation_id( wc_get_product( $product_id ), $item_args['variation'] );
+		}
+
 		$product = wc_get_product( $variation_id ? $variation_id : $product_id );
 
 		// must be a valid WC_Product
@@ -925,16 +936,6 @@ class WC_API_Orders extends WC_API_Resource {
 		// quantity
 		if ( isset( $item['quantity'] ) ) {
 			$item_args['qty'] = $item['quantity'];
-		}
-
-		// variations must each have a key & value
-		if ( isset( $item['variations'] ) && is_array( $item['variations'] ) ) {
-			foreach ( $item['variations'] as $key => $value ) {
-				if ( ! $key || ! $value ) {
-					throw new WC_API_Exception( 'woocommerce_api_invalid_product_variation', __( 'The product variation is invalid', 'woocommerce' ), 400 );
-				}
-			}
-			$item_args['variation'] = $item['variations'];
 		}
 
 		// total
