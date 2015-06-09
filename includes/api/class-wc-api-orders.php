@@ -236,9 +236,9 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['line_items'][] = array(
 				'id'           => $item_id,
 				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( wc_round_tax_total( $item['line_subtotal_tax'] ), $dp ),
+				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), $dp ),
+				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
 				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
