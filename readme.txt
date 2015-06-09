@@ -146,6 +146,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Escaped js/url in widget layered nav when use the dropdown option.
 * Fix - Switch the permissions check for json_search_products to use the read_product capability.
 * Fix - Fixed the addition of variable products using the Order API.
+* Fix - Sale item exclusion logic for variations.
 * Tweak - woocommerce_downloadable_file_exists filter.
 
 = 2.3.10 - 01/06/2015 =
