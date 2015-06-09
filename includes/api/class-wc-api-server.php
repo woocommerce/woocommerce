@@ -564,10 +564,16 @@ class WC_API_Server {
 		// WP_User_Query
 		if ( is_a( $query, 'WP_User_Query' ) ) {
 
-			$page        = $query->page;
 			$single      = count( $query->get_results() ) == 1;
 			$total       = $query->get_total();
-			$total_pages = $query->total_pages;
+
+			if( $query->get( 'number' ) > 0 ) {
+				$page = ( $query->get( 'offset' ) / $query->get( 'number' ) ) + 1;
+				$total_pages = ceil( $total / $query->get( 'number' ) );
+			} else {
+				$page = 1;
+				$total_pages = 1;
+			}
 
 		// WP_Query
 		} else {
