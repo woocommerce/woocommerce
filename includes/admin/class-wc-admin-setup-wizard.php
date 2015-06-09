@@ -200,9 +200,10 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_introduction() {
 		?>
-		<h1><?php _e( 'Welcome to WooCommerce', 'woocommerce' ); ?></h1>
-		<p><?php _e( 'Thanks for choosing WooCommerce to power your online store! To help you get started we&lsquo;ve prepared this quick setup wizard - it&lsquo;s completely optional and should take no longer than 5 minutes.', 'woocommerce' ); ?></p>
-		<p><?php _e( 'No time right now? Want to setup your store manually? Just press the skip button to return to the WordPress dashboard. You can come back anytime if you change your mind!', 'woocommerce' ); ?></p>
+		<h1><?php _e( 'Welcome to the world of WooCommerce!
+', 'woocommerce' ); ?></h1>
+		<p><?php _e( 'Thank you for choosing WooCommerce to power your online store! This quick setup wizard will help you configure the basic settings. <strong>It’s completely optional and shouldn’t take longer than five minutes.</strong>', 'woocommerce' ); ?></p>
+		<p><?php _e( 'No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard. Come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( admin_url( 'plugins.php' ) ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
@@ -217,7 +218,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php _e( 'Page Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php printf( __( 'There are a few %spages%s that need to be set up to show parts of your store. These will be created automatically if they do not already exist:', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php printf( __( 'Your store needs a few essential %spages%s. The following will be created automatically (if they do not already exist):', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>' ); ?></p>
 			<table class="wc-setup-pages" cellspacing="0">
 				<thead>
 					<tr>
@@ -228,7 +229,7 @@ class WC_Admin_Setup_Wizard {
 				<tbody>
 					<tr>
 						<td class="page-name"><?php echo _x( 'Shop', 'Page title', 'woocommerce' ); ?></td>
-						<td><?php _e( 'The shop page will house your product catalog.', 'woocommerce' ); ?></td>
+						<td><?php _e( 'The shop page will display your products.', 'woocommerce' ); ?></td>
 					</tr>
 					<tr>
 						<td class="page-name"><?php echo _x( 'Cart', 'Page title', 'woocommerce' ); ?></td>
@@ -243,13 +244,13 @@ class WC_Admin_Setup_Wizard {
 					<tr>
 						<td class="page-name"><?php echo _x( 'My Account', 'Page title', 'woocommerce' ); ?></td>
 						<td>
-							<?php _e( 'Registered customers will be able to go to this page to manage their account details and view past orders.', 'woocommerce' ); ?>
+							<?php _e( 'Registered customers will be able to manage their account details and view past orders on this page.', 'woocommerce' ); ?>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 
-			<p><?php printf( __( 'You can control which pages are shown on your website via %sAppearance > Menus%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php printf( __( 'Once created, these pages can be managed from your admin dashboard on the %sPages screen%s. You can control which pages are shown on your website via %sAppearance > Menus%s.', 'woocommerce' ), '<a href="' . esc_url( admin_url( 'edit.php?post_type=page' ) ) . '" target="_blank">', '</a>', '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '" target="_blank">', '</a>' ); ?></p>
 
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
