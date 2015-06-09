@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.2
-Stable tag: 2.3.10
+Stable tag: 2.3.11
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -137,6 +137,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.3.11 =
+* Fix - Check if rating is enabled before check if rating is required to a review.
+* Fix - get_discounted_price needs to check if taxes are enabled.
+* Fix - Fixed filetype check for digital downloads.
+* Fix - Newfoundland and Labrador state rename.
+* Fix - Escaped js/url in widget layered nav when use the dropdown option.
+* Fix - Switch the permissions check for json_search_products to use the read_product capability.
 
 = 2.3.10 - 01/06/2015 =
 * Fix - Fixed theme check notice for core supported themes.
