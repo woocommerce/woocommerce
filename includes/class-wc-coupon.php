@@ -581,7 +581,11 @@ class WC_Coupon {
 		if ( $this->exclude_sale_items == 'yes' ) {
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
-			if ( in_array( $product->id, $product_ids_on_sale, true ) || ( isset( $product->variation_id ) && in_array( $product->variation_id, $product_ids_on_sale, true ) ) || in_array( $product->get_parent(), $product_ids_on_sale, true ) ) {
+			if ( isset( $product->variation_id ) ) {
+				if ( in_array( $product->variation_id, $product_ids_on_sale, true ) ) {
+					$valid = false;
+				}
+			} elseif ( in_array( $product->id, $product_ids_on_sale, true ) ) {
 				$valid = false;
 			}
 		}
