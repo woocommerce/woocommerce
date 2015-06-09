@@ -138,13 +138,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.3.11 =
+= 2.3.11 - 09/06/2015 =
 * Fix - Check if rating is enabled before check if rating is required to a review.
 * Fix - get_discounted_price needs to check if taxes are enabled.
 * Fix - Fixed filetype check for digital downloads.
 * Fix - Newfoundland and Labrador state rename.
 * Fix - Escaped js/url in widget layered nav when use the dropdown option.
 * Fix - Switch the permissions check for json_search_products to use the read_product capability.
+* Tweak - woocommerce_downloadable_file_exists filter.
 
 = 2.3.10 - 01/06/2015 =
 * Fix - Fixed theme check notice for core supported themes.
