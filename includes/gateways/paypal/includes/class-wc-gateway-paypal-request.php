@@ -76,7 +76,7 @@ class WC_Gateway_Paypal_Request {
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
 				'bn'            => 'WooThemes_Cart',
 				'invoice'       => $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(),
-				'custom'        => serialize( array( $order->id, $order->order_key ) ),
+				'custom'        => json_encode( array( 'order_id' => $order->id, 'order_key' => $order->order_key ) ),
 				'notify_url'    => $this->notify_url,
 				'first_name'    => $order->billing_first_name,
 				'last_name'     => $order->billing_last_name,
