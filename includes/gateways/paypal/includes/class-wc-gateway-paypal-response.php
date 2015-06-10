@@ -19,28 +19,30 @@ abstract class WC_Gateway_Paypal_Response {
 	 * @return bool|WC_Order object
 	 */
 	protected function get_paypal_order( $raw_custom ) {
-		$custom = json_decode( $raw_custom );
-
-		// We want an object
-		if ( is_object( $custom ) ) {
-			// We have the data in the correct format, so get the order
+		// We have the data in the correct format, so get the order
+		if ( ( $custom = json_decode( $raw_custom ) ) && is_object( $custom ) ) {
 			$order_id  = $custom->order_id;
 			$order_key = $custom->order_key;
 
-			if ( ! $order = wc_get_order( $order_id ) ) {
-				// We have an invalid $order_id, probably because invoice_prefix has changed
-				$order_id 	= wc_get_order_id_by_order_key( $order_key );
-				$order 		= wc_get_order( $order_id );
-			}
+		// Fallback to serialized data if safe. This is @deprecated in 2.3.11
+		} elseif ( preg_match( '/^a:2:{/', $raw_custom ) && ! preg_match( '/[CO]:\+?[0-9]+:"/', $raw_custom ) && ( $custom = maybe_unserialize( $raw_custom ) ) ) {
+			$order_id  = $custom[0];
+			$order_key = $custom[1];
 
-			if ( ! $order || $order->order_key !== $order_key ) {
-				WC_Gateway_Paypal::log( 'Error: Order Keys do not match.' );
-				return false;
-			}
-
-		// Fallback to filter to allow 3rd parties to retrieve the order
-		} elseif ( ! $order = apply_filters( 'woocommerce_get_paypal_order', false, $raw_custom ) ) {
+		// Nothing was found
+		} else {
 			WC_Gateway_Paypal::log( 'Error: Order ID and key were not found in "custom".' );
+			return false;
+		}
+
+		if ( ! $order = wc_get_order( $order_id ) ) {
+			// We have an invalid $order_id, probably because invoice_prefix has changed
+			$order_id = wc_get_order_id_by_order_key( $order_key );
+			$order    = wc_get_order( $order_id );
+		}
+
+		if ( ! $order || $order->order_key !== $order_key ) {
+			WC_Gateway_Paypal::log( 'Error: Order Keys do not match.' );
 			return false;
 		}
 
