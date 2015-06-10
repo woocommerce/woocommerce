@@ -57,8 +57,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			WC_Gateway_Paypal::log( 'Found order #' . $order->id );
 			WC_Gateway_Paypal::log( 'Payment status: ' . $posted['payment_status'] );
 
-			if ( method_exists( __CLASS__, 'payment_status_' . $posted['payment_status'] ) ) {
-				call_user_func( array( __CLASS__, 'payment_status_' . $posted['payment_status'] ), $order, $posted );
+			if ( method_exists( $this, 'payment_status_' . $posted['payment_status'] ) ) {
+				call_user_func( array( $this, 'payment_status_' . $posted['payment_status'] ), $order, $posted );
 			}
 		}
 	}
