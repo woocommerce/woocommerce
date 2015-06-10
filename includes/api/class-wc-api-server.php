@@ -459,6 +459,7 @@ class WC_API_Server {
 				'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
 				'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
 				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
+				'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
 				'links'              => array(
 					'help' => 'http://woothemes.github.io/woocommerce-rest-api-docs/',
 				),
