@@ -367,7 +367,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 			// Sets the password.
 			if ( ! isset( $data['password'] ) ) {
-				$data['password'] = wp_generate_password();
+				$data['password'] = "";
 			}
 
 			// Attempts to create the new customer
