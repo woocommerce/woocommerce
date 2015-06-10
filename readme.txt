@@ -138,7 +138,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.3.11 - 09/06/2015 =
+= 2.3.11 - 10/06/2015 =
 * Fix - Check if rating is enabled before check if rating is required to a review.
 * Fix - get_discounted_price needs to check if taxes are enabled.
 * Fix - Fixed filetype check for digital downloads.
@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Switch the permissions check for json_search_products to use the read_product capability.
 * Fix - Fixed the addition of variable products using the Order API.
 * Fix - Sale item exclusion logic for variations.
+* Fix - Switch to JSON to avoid unserializing untrusted data when handling responses from PayPal.
 * Tweak - woocommerce_downloadable_file_exists filter.
 
 = 2.3.10 - 01/06/2015 =
