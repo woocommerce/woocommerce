@@ -176,6 +176,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE 1 = 1
 			$search
+			ORDER BY key_id DESC
 			LIMIT %d
 			OFFSET %d
 		 ", $per_page, $offset ), ARRAY_A );
@@ -188,7 +189,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$this->set_pagination_args( array(
 			'total_items' => $count,
 			'per_page'    => $per_page,
-			'total_pages' => $count / $per_page
+			'total_pages' => ceil( $count / $per_page )
 		) );
 	}
 }

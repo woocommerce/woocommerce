@@ -800,6 +800,7 @@ class WC_Meta_Box_Product_Data {
 							$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
 							$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
 							$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
+							$variation_data['_stock']         = wc_stock_amount( $variation_data['_stock'] );
 
 							// Stock BW compat
 							if ( '' !== $variation_data['_stock'] ) {
@@ -981,7 +982,7 @@ class WC_Meta_Box_Product_Data {
 
 			$attribute_is_taxonomy   = $_POST['attribute_is_taxonomy'];
 			$attribute_position      = $_POST['attribute_position'];
-			$attribute_names_max_key = max( $attribute_names );
+			$attribute_names_max_key = max( array_keys( $attribute_names ) );
 
 			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
 				if ( empty( $attribute_names[ $i ] ) ) {
@@ -1250,7 +1251,7 @@ class WC_Meta_Box_Product_Data {
 
 						// Validate the file extension
 						if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
-							$file_type  = wp_check_filetype( $file_url );
+							$file_type  = wp_check_filetype( strtok( $file_url, '?' ) );
 							$parsed_url = parse_url( $file_url, PHP_URL_PATH );
 							$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
 
@@ -1261,7 +1262,7 @@ class WC_Meta_Box_Product_Data {
 						}
 
 						// Validate the file exists
-						if ( 'relative' === $file_is && ! file_exists( $file_url ) ) {
+						if ( 'relative' === $file_is && ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $file_url ) ) {
 							WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
 							continue;
 						}
@@ -1524,7 +1525,7 @@ class WC_Meta_Box_Product_Data {
 
 							// Validate the file extension
 							if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
-								$file_type  = wp_check_filetype( $file_url );
+								$file_type  = wp_check_filetype( strtok( $file_url, '?' ) );
 								$parsed_url = parse_url( $file_url, PHP_URL_PATH );
 								$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
 
@@ -1535,7 +1536,7 @@ class WC_Meta_Box_Product_Data {
 							}
 
 							// Validate the file exists
-							if ( 'relative' === $file_is && ! file_exists( $file_url ) ) {
+							if ( 'relative' === $file_is && ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $file_url ) ) {
 								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
 								continue;
 							}
@@ -1558,7 +1559,7 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				update_post_meta( $variation_id, '_variation_description', wp_kses_post( $variable_description[ $i ] ) );
-				
+
 				// Save shipping class
 				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');

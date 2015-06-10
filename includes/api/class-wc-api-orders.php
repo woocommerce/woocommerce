@@ -241,9 +241,9 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['line_items'][] = array(
 				'id'           => $item_id,
 				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( wc_round_tax_total( $item['line_subtotal_tax'] ), $dp ),
+				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), $dp ),
+				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
 				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
@@ -897,11 +897,24 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		if ( isset( $item['product_id'] ) ) {
-			$product = wc_get_product( $item['product_id'] );
+			$product_id = $item['product_id'];
 		} elseif ( isset( $item['sku'] ) ) {
 			$product_id = wc_get_product_id_by_sku( $item['sku'] );
-			$product = wc_get_product( $product_id );
 		}
+
+		// variations must each have a key & value
+		$variation_id = 0;
+		if ( isset( $item['variations'] ) && is_array( $item['variations'] ) ) {
+			foreach ( $item['variations'] as $key => $value ) {
+				if ( ! $key || ! $value ) {
+					throw new WC_API_Exception( 'woocommerce_api_invalid_product_variation', __( 'The product variation is invalid', 'woocommerce' ), 400 );
+				}
+			}
+			$item_args['variation'] = $item['variations'];
+			$variation_id = $this->get_variation_id( wc_get_product( $product_id ), $item_args['variation'] );
+		}
+
+		$product = wc_get_product( $variation_id ? $variation_id : $product_id );
 
 		// must be a valid WC_Product
 		if ( ! is_object( $product ) ) {
@@ -923,16 +936,6 @@ class WC_API_Orders extends WC_API_Resource {
 		// quantity
 		if ( isset( $item['quantity'] ) ) {
 			$item_args['qty'] = $item['quantity'];
-		}
-
-		// variations must each have a key & value
-		if ( isset( $item['variations'] ) && is_array( $item['variations'] ) ) {
-			foreach ( $item['variations'] as $key => $value ) {
-				if ( ! $key || ! $value ) {
-					throw new WC_API_Exception( 'woocommerce_api_invalid_product_variation', __( 'The product variation is invalid', 'woocommerce' ), 400 );
-				}
-			}
-			$item_args['variation'] = $item['variations'];
 		}
 
 		// total
@@ -971,6 +974,56 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_line_item', __( 'Cannot update line item, try again', 'woocommerce' ), 500 );
 			}
 		}
+	}
+
+	/**
+	 * Given a product ID & API provided variations, find the correct variation ID to use for calculation
+	 * We can't just trust input from the API to pass a variation_id manually, otherwise you could pass
+	 * the cheapest variation ID but provide other information so we have to look up the variation ID.
+	 * @param  int $product_id main product ID
+	 * @return int             returns an ID if a valid variation was found for this product
+	 */
+	function get_variation_id( $product, $variations = array() ) {
+		$variation_id = null;
+		$variations_normalized = array();
+
+		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
+			if ( isset( $variations ) && is_array( $variations ) ) {
+				// start by normalizing the passed variations
+				foreach ( $variations as $key => $value ) {
+					$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ); // from get_attributes in class-wc-api-products.php
+					$variations_normalized[ $key ] = strtolower( $value );
+				}
+				// now search through each product child and see if our passed variations match anything
+				foreach ( $product->get_children() as $variation ) {
+					$meta = array();
+					foreach ( get_post_meta( $variation ) as $key => $value ) {
+						$value = $value[0];
+						$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) );
+						$meta[ $key ] = strtolower( $value );
+					}
+					// if the variation array is a part of the $meta array, we found our match
+					if ( $this->array_contains( $variations_normalized, $meta ) ) {
+						$variation_id = $variation;
+						break;
+					}
+				}
+			}
+		}
+
+		return $variation_id;
+	}
+
+	/**
+	 * Utility function to see if the meta array contains data from variations
+	 */
+	protected function array_contains( $needles, $haystack ) {
+		foreach ( $needles as $key => $value ) {
+			if ( $haystack[ $key ] !== $value ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

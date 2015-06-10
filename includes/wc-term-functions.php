@@ -88,7 +88,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
 	}
 
-	return $terms;
+	return apply_filters( 'woocommerce_get_product_terms' , $terms, $product_id, $taxonomy, $args );
 }
 
 

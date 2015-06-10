@@ -361,14 +361,10 @@ class WC_API_Customers extends WC_API_Resource {
 			}
 
 			// Sets the username.
-			if ( ! isset( $data['username'] ) ) {
-				$data['username'] = '';
-			}
+			$data['username'] = ! empty( $data['username'] ) ? $data['username'] : '';
 
 			// Sets the password.
-			if ( ! isset( $data['password'] ) ) {
-				$data['password'] = wp_generate_password();
-			}
+			$data['password'] = ! empty( $data['password'] ) ? $data['password'] : '';
 
 			// Attempts to create the new customer
 			$id = wc_create_new_customer( $data['email'], $data['username'], $data['password'] );

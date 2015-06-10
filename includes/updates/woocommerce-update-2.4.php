@@ -29,7 +29,7 @@ foreach ( $api_users as $_user ) {
 	$apps_keys[] = array(
 		'user_id'         => $user->ID,
 		'permission'      => $user->woocommerce_api_key_permissions,
-		'consumer_key'    => $user->woocommerce_api_consumer_key,
+		'consumer_key'    => wc_api_hash( $user->woocommerce_api_consumer_key ),
 		'consumer_secret' => $user->woocommerce_api_consumer_secret
 	);
 }
@@ -56,6 +56,18 @@ if ( ! empty( $apps_keys ) ) {
 		delete_user_meta( $user_id, 'woocommerce_api_consumer_secret' );
 		delete_user_meta( $user_id, 'woocommerce_api_key_permissions' );
 	}
+}
+
+// Make sure order.update webhooks get the woocommerce_order_edit_status hook
+$order_update_webhooks = get_posts( array(
+	'posts_per_page' => -1,
+	'post_type'      => 'shop_webhook',
+	'meta_key'       => '_topic',
+	'meta_value'     => 'order.updated'
+) );
+foreach ( $order_update_webhooks as $order_update_webhook ) {
+	$webhook = new WC_Webhook( $order_update_webhook->ID );
+	$webhook->set_topic( 'order.updated' );
 }
 
 // Update fully refunded orders to ensure they have a refund line item so reports add up

@@ -294,6 +294,15 @@ class WC_Product {
 	}
 
 	/**
+	 * Return the product type.
+	 *
+	 * @return string
+	 */
+	public function get_type() {
+		return is_null( $this->product_type ) ? '' : $this->product_type;
+	}
+
+	/**
 	 * Checks the product type.
 	 *
 	 * Backwards compat with downloadable/virtual.

@@ -77,9 +77,9 @@ class WC_Helper_Product {
 		// Price related meta
 		update_post_meta( $product_id, '_price', '10' );
 		update_post_meta( $product_id, '_min_variation_price', '10' );
-		update_post_meta( $product_id, '_max_variation_price', '10' );
+		update_post_meta( $product_id, '_max_variation_price', '15' );
 		update_post_meta( $product_id, '_min_variation_regular_price', '10' );
-		update_post_meta( $product_id, '_max_variation_regular_price', '10' );
+		update_post_meta( $product_id, '_max_variation_regular_price', '15' );
 
 		// General meta
 		update_post_meta( $product_id, '_sku', 'DUMMY SKU' );
@@ -135,6 +135,31 @@ class WC_Helper_Product {
 
 		// Add the variation meta to the main product
 		update_post_meta( $product_id, '_min_price_variation_id', $variation_id );
+
+		// Create the variation
+		$variation_id = wp_insert_post( array(
+			'post_title'  => 'Variation #' . ( $product_id + 2 ) . ' of Dummy Product',
+			'post_type'   => 'product_variation',
+			'post_parent' => $product_id,
+			'post_status' => 'publish'
+		) );
+
+		// Price related meta
+		update_post_meta( $variation_id, '_price', '15' );
+		update_post_meta( $variation_id, '_regular_price', '15' );
+
+		// General meta
+		update_post_meta( $variation_id, '_sku', 'DUMMY SKU VARIABLE SMALL' );
+		update_post_meta( $variation_id, '_manage_stock', 'no' );
+		update_post_meta( $variation_id, '_downloadable', 'no' );
+		update_post_meta( $variation_id, '_virtual', 'taxable' );
+		update_post_meta( $variation_id, '_stock_status', 'instock' );
+
+		// Attribute meta
+		update_post_meta( $variation_id, 'attribute_pa_size', 'large' );
+
+		// Add the variation meta to the main product
+
 		update_post_meta( $product_id, '_max_price_variation_id', $variation_id );
 
 		return new WC_Product_Variable( $product_id );

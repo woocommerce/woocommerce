@@ -128,7 +128,8 @@ class WC_AJAX {
 			'product_ordering'                                 => false,
 			'refund_line_items'                                => false,
 			'delete_refund'                                    => false,
-			'rated'                                            => false
+			'rated'                                            => false,
+			'update_api_key'                                   => false
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -465,6 +466,7 @@ class WC_AJAX {
 			if ( wc_is_order_status( 'wc-' . $status ) && $order_id ) {
 				$order = wc_get_order( $order_id );
 				$order->update_status( $status );
+				do_action( 'woocommerce_order_edit_status', $order_id, $status );
 			}
 		}
 
@@ -604,7 +606,7 @@ class WC_AJAX {
 
 			$attribute_is_taxonomy   = $data['attribute_is_taxonomy'];
 			$attribute_position      = $data['attribute_position'];
-			$attribute_names_max_key = max( $attribute_names );
+			$attribute_names_max_key = max( array_keys( $attribute_names ) );
 
 			for ( $i = 0; $i <= $attribute_names_max_key; $i++ ) {
 				if ( empty( $attribute_names[ $i ] ) ) {
@@ -966,7 +968,7 @@ class WC_AJAX {
 			}
 		}
 
-		delete_transient( 'wc_product_children_ids_' . $post_id . WC_Cache_Helper::get_transient_version( 'product' ) );
+		delete_transient( 'wc_product_children' . $post_id . WC_Cache_Helper::get_transient_version( 'product' ) );
 
 		echo $added;
 
@@ -1338,9 +1340,10 @@ class WC_AJAX {
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
+					$note         = sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['product_id'], $new_stock + $stock_change, $new_stock );
+					$return[]     = $note;
 
-					$return[] = sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['product_id'], $new_stock + $stock_change, $new_stock );
-					$order->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['product_id'], $new_stock + $stock_change, $new_stock ) );
+					$order->add_order_note( $note );
 					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
 				}
 			}
@@ -1386,13 +1389,13 @@ class WC_AJAX {
 				$_product = $order->get_product_from_item( $order_item );
 
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
-
 					$old_stock    = $_product->stock;
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = $_product->increase_stock( $stock_change );
+					$note         = sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity );
+					$return[]     = $note;
 
-					$return[] = sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity );
-					$order->add_order_note( sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity ) );
+					$order->add_order_note( $note );
 				}
 			}
 
@@ -1708,10 +1711,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) ) {
-			die(-1);
-		}
-
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		if ( empty( $term ) ) {
@@ -1785,6 +1784,10 @@ class WC_AJAX {
 		if ( ! empty( $posts ) ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post );
+
+				if ( ! current_user_can( 'read_product', $post ) ) {
+					continue;
+				}
 
 				$found_products[ $post ] = rawurldecode( $product->get_formatted_name() );
 			}
@@ -1860,10 +1863,6 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		if ( ! current_user_can( 'edit_products' ) ) {
-			die(-1);
-		}
-
 		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		$args = array(
@@ -1887,6 +1886,11 @@ class WC_AJAX {
 		if ( ! empty( $posts ) ) {
 			foreach ( $posts as $post ) {
 				$product = wc_get_product( $post->ID );
+
+				if ( ! current_user_can( 'read_product', $post->ID ) ) {
+					continue;
+				}
+
 				$found_products[ $post->ID ] = $product->get_formatted_name();
 			}
 		}
@@ -2182,6 +2186,96 @@ class WC_AJAX {
 
 		update_option( 'woocommerce_admin_footer_text_rated', 1 );
 		die();
+	}
+
+	/**
+	 * Create/Update API key
+	 */
+	public static function update_api_key() {
+		ob_start();
+
+		global $wpdb;
+
+		check_ajax_referer( 'update-api-key', 'security' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			die(-1);
+		}
+
+		try {
+			if ( empty( $_POST['description'] ) ) {
+				throw new Exception( __( 'Description is missing.', 'woocommerce' ) );
+			}
+			if ( empty( $_POST['user'] ) ) {
+				throw new Exception( __( 'User is missing.', 'woocommerce' ) );
+			}
+			if ( empty( $_POST['permissions'] ) ) {
+				throw new Exception( __( 'Permissions is missing.', 'woocommerce' ) );
+			}
+
+			$key_id      = absint( $_POST['key_id'] );
+			$description = sanitize_text_field( $_POST['description'] );
+			$permissions = ( in_array( $_POST['permissions'], array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $_POST['permissions'] ) : 'read';
+			$user_id     = absint( $_POST['user'] );
+
+			if ( 0 < $key_id ) {
+				$data = array(
+					'user_id'     => $user_id,
+					'description' => $description,
+					'permissions' => $permissions
+				);
+
+				$wpdb->update(
+					$wpdb->prefix . 'woocommerce_api_keys',
+					$data,
+					array( 'key_id' => $key_id ),
+					array(
+						'%d',
+						'%s',
+						'%s'
+					),
+					array( '%d' )
+				);
+
+				$data['consumer_key']    = '';
+				$data['consumer_secret'] = '';
+				$data['message']         = __( 'API Key updated successfully.', 'woocommerce' );
+			} else {
+				$status          = 2;
+				$consumer_key    = 'ck_' . wc_rand_hash();
+				$consumer_secret = 'cs_' . wc_rand_hash();
+
+				$data = array(
+					'user_id'         => $user_id,
+					'description'     => $description,
+					'permissions'     => $permissions,
+					'consumer_key'    => wc_api_hash( $consumer_key ),
+					'consumer_secret' => $consumer_secret
+				);
+
+				$wpdb->insert(
+					$wpdb->prefix . 'woocommerce_api_keys',
+					$data,
+					array(
+						'%d',
+						'%s',
+						'%s',
+						'%s',
+						'%s'
+					)
+				);
+
+				$key_id                  = $wpdb->insert_id;
+				$data['consumer_key']    = $consumer_key;
+				$data['consumer_secret'] = $consumer_secret;
+				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new API keys now. You won\'t be able to see it again!', 'woocommerce' );
+				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ). '">' . __( 'Revoke Key', 'woocommerce' ) . '</a>';
+			}
+
+			wp_send_json_success( $data );
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+		}
 	}
 }
 

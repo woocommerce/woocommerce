@@ -244,7 +244,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 			$this->send_ipn_email_notification(
 				sprintf( __( 'Payment for order #%s refunded/reversed', 'woocommerce' ), $order->get_order_number() ),
-				sprintf( __( 'Order %s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
+				sprintf( __( 'Order #%s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 			);
 		}
 	}
@@ -258,7 +258,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
 		$this->send_ipn_email_notification(
 			sprintf( __( 'Payment for order #%s reversed', 'woocommerce' ), $order->get_order_number() ),
-			sprintf( __( 'Order %s has been marked on-hold due to a reversal - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), wc_clean( $posted['reason_code'] ) )
+			sprintf( __( 'Order #%s has been marked on-hold due to a reversal - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), wc_clean( $posted['reason_code'] ) )
 		);
 	}
 

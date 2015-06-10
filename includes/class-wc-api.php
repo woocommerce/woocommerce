@@ -36,7 +36,6 @@ class WC_API {
 	 * @return WC_API
 	 */
 	public function __construct() {
-
 		// add query vars
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 
@@ -48,6 +47,9 @@ class WC_API {
 
 		// handle wc-api endpoint requests
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
+
+		// Ensure payment gateways are initialized in time for API requests
+		add_action( 'woocommerce_api_request', array( 'WC_Payment_Gateways', 'instance' ), 0 );
 	}
 
 	/**
@@ -228,9 +230,10 @@ class WC_API {
 	}
 
 	/**
-	 * API request - Trigger any API requests
+	 * API request - Trigger any API requests.
 	 *
-	 * @since 2.0
+	 * @since    2.0
+	 * @version  2.4
 	 */
 	public function handle_api_requests() {
 		global $wp;
@@ -245,20 +248,24 @@ class WC_API {
 			// Buffer, we won't want any output here
 			ob_start();
 
-			// Get API trigger
-			$api = strtolower( esc_attr( $wp->query_vars['wc-api'] ) );
+			// No cache headers
+			nocache_headers();
 
-			// Load class if exists
-			if ( class_exists( $api ) ) {
-				new $api();
-			}
+			// Clean the API request
+			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
 
-			// Trigger actions
-			do_action( 'woocommerce_api_' . $api );
+			// Trigger generic action before request hook
+			do_action( 'woocommerce_api_request', $api_request );
+
+			// Is there actually something hooked into this API request? If not trigger 400 - Bad request
+			status_header( has_action( 'woocommerce_api_' . $api_request ) ? 200 : 400 );
+
+			// Trigger an action which plugins can hook into to fulfill the request
+			do_action( 'woocommerce_api_' . $api_request );
 
 			// Done, clear buffer and exit
 			ob_end_clean();
-			die('1');
+			die('-1');
 		}
 	}
 }

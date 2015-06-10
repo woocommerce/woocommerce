@@ -6,8 +6,8 @@
  * Version: 2.4.0-dev
  * Author: WooThemes
  * Author URI: http://woothemes.com
- * Requires at least: 4.0
- * Tested up to: 4.1
+ * Requires at least: 4.1
+ * Tested up to: 4.2
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/

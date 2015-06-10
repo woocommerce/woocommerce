@@ -534,13 +534,26 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_category_id', __( 'A product category with the provided ID could not be found', 'woocommerce' ), 404 );
 			}
 
+			$term_id = intval( $term->term_id );
+
+			// Get category display type
+			$display_type = get_woocommerce_term_meta( $term_id, 'display_type' );
+
+			// Get category image
+			$image = '';
+			if ( $image_id = get_woocommerce_term_meta( $term_id, 'thumbnail_id' ) ) {
+				$image = wp_get_attachment_url( $image_id );
+			}
+
 			$product_category = array(
-				'id'          => intval( $term->term_id ),
+				'id'          => $term_id,
 				'name'        => $term->name,
 				'slug'        => $term->slug,
 				'parent'      => $term->parent,
 				'description' => $term->description,
-				'count'       => intval( $term->count ),
+				'display'     => $display_type ? $display_type : 'default',
+				'image'       => $image ? esc_url( $image ) : '',
+				'count'       => intval( $term->count )
 			);
 
 			return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $id, $fields, $term, $this ) );
@@ -1590,7 +1603,12 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			$file_name = isset( $file['name'] ) ? wc_clean( $file['name'] ) : '';
-			$file_url  = wc_clean( $file['file'] );
+
+			if ( 0 === strpos( $file['file'], 'http' ) ) {
+				$file_url = esc_url_raw( $file['file'] );
+			} else {
+				$file_url = wc_clean( $file['file'] );
+			}
 
 			$files[ md5( $file_url ) ] = array(
 				'name' => $file_name,
@@ -1721,7 +1739,7 @@ class WC_API_Products extends WC_API_Resource {
 					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
 					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+						$upload = $this->upload_product_image( esc_url_raw( $image['src'] ) );
 
 						if ( is_wp_error( $upload ) ) {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
@@ -1735,7 +1753,7 @@ class WC_API_Products extends WC_API_Resource {
 					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
 					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+						$upload = $this->upload_product_image( esc_url_raw( $image['src'] ) );
 
 						if ( is_wp_error( $upload ) ) {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
