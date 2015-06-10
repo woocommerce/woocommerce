@@ -443,7 +443,7 @@ class WC_Product_Variation extends WC_Product {
 			wp_cache_delete( $this->variation_id, 'post_meta' );
 
 			// Clear total stock transient
-			delete_transient( 'wc_product_total_stock_' . $this->id );
+			delete_transient( 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' ) );
 
 			// Stock status
 			$this->check_stock_status();

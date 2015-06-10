@@ -81,7 +81,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function set_stock( $amount = null, $mode = 'set' ) {
 		$this->total_stock = '';
-		delete_transient( 'wc_product_total_stock_' . $this->id );
+		delete_transient( 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' ) );
 		return parent::set_stock( $amount, $mode );
 	}
 
