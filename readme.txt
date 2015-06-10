@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Switch the permissions check for json_search_products to use the read_product capability.
 * Fix - Fixed the addition of variable products using the Order API.
 * Fix - Sale item exclusion logic for variations.
+* Fix - Clear correct variation stock transients when setting stock.
 * Fix - Switch to JSON to avoid unserializing untrusted data when handling responses from PayPal.
 * Tweak - woocommerce_downloadable_file_exists filter.
 
