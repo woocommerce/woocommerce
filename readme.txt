@@ -149,6 +149,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Sale item exclusion logic for variations.
 * Fix - Clear correct variation stock transients when setting stock.
 * Fix - Switch to JSON to avoid unserializing untrusted data when handling responses from PayPal.
+* Fix - API - Fixed the sanitization for downloadable files on products endpoint.
 * Tweak - woocommerce_downloadable_file_exists filter.
 
 = 2.3.10 - 01/06/2015 =
