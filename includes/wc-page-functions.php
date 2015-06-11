@@ -130,10 +130,15 @@ function wc_edit_address_i18n( $id, $flip = false ) {
  * @access public
  * @return string
  */
-function wc_lostpassword_url() {
-    return wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) );
+function wc_lostpassword_url( $default_password_reset_url ) {
+	$wc_password_reset_url = wc_get_page_permalink( 'myaccount' );
+	if ( false !== $wc_password_reset_url ) {
+    	return wc_get_endpoint_url( 'lost-password', '', $wc_password_reset_url );
+	} else {
+		return $default_password_reset_url;
+	}
 }
-add_filter( 'lostpassword_url',  'wc_lostpassword_url', 10, 0 );
+add_filter( 'lostpassword_url',  'wc_lostpassword_url', 10, 1 );
 
 
 /**
