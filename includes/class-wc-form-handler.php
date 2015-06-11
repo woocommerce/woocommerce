@@ -609,28 +609,33 @@ class WC_Form_Handler {
 				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
 
 					// Get value from post data
-					// Don't use wc_clean as it destroys sanitized characters
-					$value = sanitize_title( trim( stripslashes( $_REQUEST[ $taxonomy ] ) ) );
+					if ( $attribute['is_taxonomy'] ) {
+						// Don't use wc_clean as it destroys sanitized characters
+						$value = sanitize_title( stripslashes( $_REQUEST[ $taxonomy ] ) );
+					} else {
+						$value = wc_clean( stripslashes( $_REQUEST[ $taxonomy ] ) );
+					}
 
 					// Get valid value from variation
 					$valid_value = $variation->variation_data[ $taxonomy ];
 
 					// Allow if valid
-					if ( $valid_value == '' || $valid_value == $value ) {
-						if ( $attribute['is_taxonomy'] ) {
-							$variations[ $taxonomy ] = $value;
-						}
-						else {
-							// For custom attributes, get the name from the slug
-							$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
-							foreach ( $options as $option ) {
-								if ( sanitize_title( $option ) == $value ) {
-									$value = $option;
-									break;
+					if ( '' === $valid_value || $valid_value === $value ) {
+
+						// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
+						if ( ! $attribute['is_taxonomy'] ) {
+							if ( $value === sanitize_title( $value ) ) {
+								$text_attributes = wc_get_text_attributes( $attribute['value'] );
+								foreach ( $text_attributes as $text_attribute ) {
+									if ( sanitize_title( $text_attribute ) === $value ) {
+										$value = $text_attribute;
+										break;
+									}
 								}
 							}
-							 $variations[ $taxonomy ] = $value;
 						}
+
+						$variations[ $taxonomy ] = $value;
 						continue;
 					}
 

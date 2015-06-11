@@ -145,7 +145,7 @@ class WC_Product_Variation extends WC_Product {
 				if ( ! strstr( $name, 'attribute_' ) ) {
 					continue;
 				}
-				$this->variation_data[ $name ] = sanitize_title( $value[0] );
+				$this->variation_data[ $name ] = $value[0];
 			}
 			return $this->variation_data;
 

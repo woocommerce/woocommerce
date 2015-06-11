@@ -336,7 +336,6 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Return an array of attributes used for variations, as well as their possible values.
 	 *
-	 * @access public
 	 * @return array of attributes and their available values
 	 */
 	public function get_variation_attributes() {
@@ -353,55 +352,52 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			$values = array();
+			$values               = array();
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
+			// Get used values from children variations
 			foreach ( $this->get_children() as $child_id ) {
-
 				$variation = $this->get_child( $child_id );
 
 				if ( ! empty( $variation->variation_id ) ) {
-
 					if ( ! $variation->variation_is_visible() ) {
 						continue; // Disabled or hidden
 					}
 
 					$child_variation_attributes = $variation->get_variation_attributes();
 
-					foreach ( $child_variation_attributes as $name => $value ) {
-						if ( $name == $attribute_field_name ) {
-							$values[] = sanitize_title( $value );
-						}
+					if ( isset( $child_variation_attributes[ $attribute_field_name ] ) ) {
+						$values[] = $child_variation_attributes[ $attribute_field_name ];
 					}
 				}
 			}
 
 			// empty value indicates that all options for given attribute are available
 			if ( in_array( '', $values ) ) {
-
-				$values = array();
-
-				// Get all options
-				if ( $attribute['is_taxonomy'] ) {
-					$post_terms = wp_get_post_terms( $this->id, $attribute['name'] );
-					foreach ( $post_terms as $term )
-						$values[] = $term->slug;
-				} else {
-					$values = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
-				}
-
-				$values = array_unique( $values );
+				$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
 
 			// Order custom attributes (non taxonomy) as defined
 			} elseif ( ! $attribute['is_taxonomy'] ) {
+				$text_attributes          = wc_get_text_attributes( $attribute['value'] );
+				$assigned_text_attributes = $values;
+				$values                   = array();
 
-				$option_names = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
-				$option_slugs = $values;
-				$values       = array();
-
-				foreach ( $option_names as $option_name ) {
-					if ( in_array( sanitize_title( $option_name ), $option_slugs ) )
-						$values[] = $option_name;
+				// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
+				if ( $assigned_text_attributes === array_map( 'sanitize_title', $assigned_text_attributes ) ) {
+					$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
+					foreach ( $text_attributes as $text_attribute ) {
+						if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
+							$values[] = $text_attribute;
+							continue;
+						}
+					}
+				} else {
+					foreach ( $text_attributes as $text_attribute ) {
+						if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
+							$values[] = $text_attribute;
+							continue;
+						}
+					}
 				}
 			}
 
