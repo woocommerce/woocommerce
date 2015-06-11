@@ -142,11 +142,32 @@ class WC_Product_Variation extends WC_Product {
 
 			// Get the variation attributes from meta
 			foreach ( $all_meta as $name => $value ) {
-				if ( ! strstr( $name, 'attribute_' ) ) {
+				if ( 0 !== strpos( $name, 'attribute_' ) ) {
 					continue;
+				}
+				/**
+				 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+				 * Attempt to get full version of the text attribute from the parent.
+				 */
+				if ( sanitize_title( $value[0] ) === $value[0] ) {
+					$attributes = $this->parent->get_attributes();
+
+					foreach ( $attributes as $attribute ) {
+						if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+							continue;
+						}
+						$text_attributes = wc_get_text_attributes( $attribute['value'] );
+
+						foreach ( $text_attributes as $text_attribute ) {
+							if ( sanitize_title( $text_attribute ) === $value[0] ) {
+								$value[0] = $text_attribute;
+							}
+						}
+					}
 				}
 				$this->variation_data[ $name ] = $value[0];
 			}
+
 			return $this->variation_data;
 
 		} elseif ( 'variation_has_stock' === $key ) {

@@ -385,17 +385,16 @@ class WC_Product_Variable extends WC_Product {
 				// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
 				if ( $assigned_text_attributes === array_map( 'sanitize_title', $assigned_text_attributes ) ) {
 					$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
+
 					foreach ( $text_attributes as $text_attribute ) {
 						if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
 							$values[] = $text_attribute;
-							continue;
 						}
 					}
 				} else {
 					foreach ( $text_attributes as $text_attribute ) {
 						if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
 							$values[] = $text_attribute;
-							continue;
 						}
 					}
 				}
