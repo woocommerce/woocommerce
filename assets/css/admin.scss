@@ -2218,6 +2218,17 @@ img.help_tip {
 			}
 		}
 
+		.colorpickpreview {
+			padding: 3px;
+			padding-left: 20px;
+			border: 1px solid #ddd;
+			border-right: 0;
+		}
+
+		.colorpick {
+			border-left: 0;
+		}
+
 		.image_width_settings {
 			vertical-align: middle;
 
