@@ -267,16 +267,10 @@ body {
 				content: "\f126";
 			}
 			.sidekick a:before {
-				content: "\f468";
-			}
-			.course a:before {
 				content: "\f118";
 			}
 			.view-product a:before {
 				content: "\f312";
-			}
-			.return-dashboard a:before {
-				content: "\f226";
 			}
 		}
 	}
@@ -350,4 +344,11 @@ body {
 		-webkit-box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 		box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 	}
+}
+.wc-return-to-dashboard {
+	font-size: 0.85em;
+	color: #b5b5b5;
+	margin: 1.18em 0;
+	display: block;
+	text-align: center;
 }
