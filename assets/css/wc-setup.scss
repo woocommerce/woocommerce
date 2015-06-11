@@ -227,7 +227,7 @@ body {
 		ul {
 			padding: 0 2em 0 0;
 			list-style: none outside;
-			margin: 0;
+			margin: 0 0 -.75em;
 			li a {
 				display: block;
 				padding: 0 0 .75em;
@@ -261,7 +261,7 @@ body {
 				vertical-align: top;
 			}
 			.learn-more a:before {
-				content: "\f348";
+				content: "\f105";
 			}
 			.video-walkthrough a:before {
 				content: "\f126";
@@ -269,8 +269,8 @@ body {
 			.sidekick a:before {
 				content: "\f118";
 			}
-			.view-product a:before {
-				content: "\f312";
+			.newsletter a:before {
+				content: "\f465";
 			}
 		}
 	}
