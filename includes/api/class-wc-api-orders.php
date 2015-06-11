@@ -149,10 +149,8 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// Get the decimal precession
-		$dp = ( isset( $filter['dp'] ) ? $filter['dp'] : 2 );
-
-		$order = wc_get_order( $id );
-
+		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
+		$order      = wc_get_order( $id );
 		$order_post = get_post( $id );
 
 		$order_data = array(
@@ -163,14 +161,14 @@ class WC_API_Orders extends WC_API_Resource {
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_order_currency(),
-			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
-			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), 2 ),
+			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
+			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), $dp ),
 			'total_line_items_quantity' => $order->get_item_count(),
-			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
-			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), 2 ),
-			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), 2 ),
-			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), 2 ),
-			'total_discount'            => wc_format_decimal( $order->get_total_discount(), 2 ),
+			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), $dp ),
+			'total_shipping'            => wc_format_decimal( $order->get_total_shipping(), $dp ),
+			'cart_tax'                  => wc_format_decimal( $order->get_cart_tax(), $dp ),
+			'shipping_tax'              => wc_format_decimal( $order->get_shipping_tax(), $dp ),
+			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
 				'method_id'    => $order->payment_method,
@@ -245,7 +243,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
 				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
 				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
+				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
 				'quantity'     => wc_stock_amount( $item['qty'] ),
 				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
@@ -263,7 +261,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'           => $shipping_item_id,
 				'method_id'    => $shipping_item['method_id'],
 				'method_title' => $shipping_item['name'],
-				'total'        => wc_format_decimal( $shipping_item['cost'], 2 ),
+				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
 			);
 		}
 
@@ -275,7 +273,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'rate_id'  => $tax->rate_id,
 				'code'     => $tax_code,
 				'title'    => $tax->label,
-				'total'    => wc_format_decimal( $tax->amount, 2 ),
+				'total'    => wc_format_decimal( $tax->amount, $dp ),
 				'compound' => (bool) $tax->is_compound,
 			);
 		}
@@ -287,8 +285,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'        => $fee_item_id,
 				'title'     => $fee_item['name'],
 				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
-				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), 2 ),
-				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), 2 ),
+				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), $dp ),
+				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), $dp ),
 			);
 		}
 
@@ -298,7 +296,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'][] = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item['name'],
-				'amount' => wc_format_decimal( $coupon_item['discount_amount'], 2 ),
+				'amount' => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
 			);
 		}
 
@@ -899,11 +897,24 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		if ( isset( $item['product_id'] ) ) {
-			$product = wc_get_product( $item['product_id'] );
+			$product_id = $item['product_id'];
 		} elseif ( isset( $item['sku'] ) ) {
 			$product_id = wc_get_product_id_by_sku( $item['sku'] );
-			$product = wc_get_product( $product_id );
 		}
+
+		// variations must each have a key & value
+		$variation_id = 0;
+		if ( isset( $item['variations'] ) && is_array( $item['variations'] ) ) {
+			foreach ( $item['variations'] as $key => $value ) {
+				if ( ! $key || ! $value ) {
+					throw new WC_API_Exception( 'woocommerce_api_invalid_product_variation', __( 'The product variation is invalid', 'woocommerce' ), 400 );
+				}
+			}
+			$item_args['variation'] = $item['variations'];
+			$variation_id = $this->get_variation_id( wc_get_product( $product_id ), $item_args['variation'] );
+		}
+
+		$product = wc_get_product( $variation_id ? $variation_id : $product_id );
 
 		// must be a valid WC_Product
 		if ( ! is_object( $product ) ) {
@@ -925,16 +936,6 @@ class WC_API_Orders extends WC_API_Resource {
 		// quantity
 		if ( isset( $item['quantity'] ) ) {
 			$item_args['qty'] = $item['quantity'];
-		}
-
-		// variations must each have a key & value
-		if ( isset( $item['variations'] ) && is_array( $item['variations'] ) ) {
-			foreach ( $item['variations'] as $key => $value ) {
-				if ( ! $key || ! $value ) {
-					throw new WC_API_Exception( 'woocommerce_api_invalid_product_variation', __( 'The product variation is invalid', 'woocommerce' ), 400 );
-				}
-			}
-			$item_args['variation'] = $item['variations'];
 		}
 
 		// total
@@ -973,6 +974,56 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_line_item', __( 'Cannot update line item, try again', 'woocommerce' ), 500 );
 			}
 		}
+	}
+
+	/**
+	 * Given a product ID & API provided variations, find the correct variation ID to use for calculation
+	 * We can't just trust input from the API to pass a variation_id manually, otherwise you could pass
+	 * the cheapest variation ID but provide other information so we have to look up the variation ID.
+	 * @param  int $product_id main product ID
+	 * @return int             returns an ID if a valid variation was found for this product
+	 */
+	function get_variation_id( $product, $variations = array() ) {
+		$variation_id = null;
+		$variations_normalized = array();
+
+		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
+			if ( isset( $variations ) && is_array( $variations ) ) {
+				// start by normalizing the passed variations
+				foreach ( $variations as $key => $value ) {
+					$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ); // from get_attributes in class-wc-api-products.php
+					$variations_normalized[ $key ] = strtolower( $value );
+				}
+				// now search through each product child and see if our passed variations match anything
+				foreach ( $product->get_children() as $variation ) {
+					$meta = array();
+					foreach ( get_post_meta( $variation ) as $key => $value ) {
+						$value = $value[0];
+						$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) );
+						$meta[ $key ] = strtolower( $value );
+					}
+					// if the variation array is a part of the $meta array, we found our match
+					if ( $this->array_contains( $variations_normalized, $meta ) ) {
+						$variation_id = $variation;
+						break;
+					}
+				}
+			}
+		}
+
+		return $variation_id;
+	}
+
+	/**
+	 * Utility function to see if the meta array contains data from variations
+	 */
+	protected function array_contains( $needles, $haystack ) {
+		foreach ( $needles as $key => $value ) {
+			if ( $haystack[ $key ] !== $value ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

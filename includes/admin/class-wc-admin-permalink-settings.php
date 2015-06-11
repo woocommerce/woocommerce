@@ -113,21 +113,21 @@ class WC_Admin_Permalink_Settings {
 		<table class="form-table">
 			<tbody>
 				<tr>
-					<th><label><input name="product_permalink" type="radio" value="<?php echo $structures[0]; ?>" class="wctog" <?php checked( $structures[0], $product_permalink ); ?> /> <?php _e( 'Default', 'woocommerce' ); ?></label></th>
-					<td><code><?php echo home_url(); ?>/?product=sample-product</code></td>
+					<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[0] ); ?>" class="wctog" <?php checked( $structures[0], $product_permalink ); ?> /> <?php _e( 'Default', 'woocommerce' ); ?></label></th>
+					<td><code><?php echo esc_html( home_url() ); ?>/?product=sample-product</code></td>
 				</tr>
 				<tr>
-					<th><label><input name="product_permalink" type="radio" value="<?php echo $structures[1]; ?>" class="wctog" <?php checked( $structures[1], $product_permalink ); ?> /> <?php _e( 'Product', 'woocommerce' ); ?></label></th>
-					<td><code><?php echo home_url(); ?>/<?php echo $product_base; ?>/sample-product/</code></td>
+					<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[1] ); ?>" class="wctog" <?php checked( $structures[1], $product_permalink ); ?> /> <?php _e( 'Product', 'woocommerce' ); ?></label></th>
+					<td><code><?php echo esc_html( home_url() ); ?>/<?php echo esc_html( $product_base ); ?>/sample-product/</code></td>
 				</tr>
 				<?php if ( $shop_page_id ) : ?>
 					<tr>
-						<th><label><input name="product_permalink" type="radio" value="<?php echo $structures[2]; ?>" class="wctog" <?php checked( $structures[2], $product_permalink ); ?> /> <?php _e( 'Shop base', 'woocommerce' ); ?></label></th>
-						<td><code><?php echo home_url(); ?>/<?php echo $base_slug; ?>/sample-product/</code></td>
+						<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[2] ); ?>" class="wctog" <?php checked( $structures[2], $product_permalink ); ?> /> <?php _e( 'Shop base', 'woocommerce' ); ?></label></th>
+						<td><code><?php echo esc_html( home_url() ); ?>/<?php echo esc_html( $base_slug ); ?>/sample-product/</code></td>
 					</tr>
 					<tr>
-						<th><label><input name="product_permalink" type="radio" value="<?php echo $structures[3]; ?>" class="wctog" <?php checked( $structures[3], $product_permalink ); ?> /> <?php _e( 'Shop base with category', 'woocommerce' ); ?></label></th>
-						<td><code><?php echo home_url(); ?>/<?php echo $base_slug; ?>/product-category/sample-product/</code></td>
+						<th><label><input name="product_permalink" type="radio" value="<?php echo esc_attr( $structures[3] ); ?>" class="wctog" <?php checked( $structures[3], $product_permalink ); ?> /> <?php _e( 'Shop base with category', 'woocommerce' ); ?></label></th>
+						<td><code><?php echo esc_html( home_url() ); ?>/<?php echo esc_html( $base_slug ); ?>/product-category/sample-product/</code></td>
 					</tr>
 				<?php endif; ?>
 				<tr>

@@ -26,7 +26,7 @@ foreach ( $items as $item_id => $item ) :
 				}
 
 				// Product name
-				echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item );
+				echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
 
 				// SKU
 				if ( $show_sku && is_object( $_product ) && $_product->get_sku() ) {
@@ -56,7 +56,7 @@ foreach ( $items as $item_id => $item ) :
 							$prefix = __( 'Download', 'woocommerce' );
 						}
 
-						echo '<br/><small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>';
+						echo '<br/><small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
 					}
 				}
 

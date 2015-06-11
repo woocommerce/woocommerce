@@ -9,7 +9,7 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Classes
- * @version  2.3.0
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,14 +22,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Geolocation {
 
 	/** URL to the geolocation database we're using */
-	const GEOLITE_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz';
+	const GEOLITE_DB      = 'http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz';
+	const GEOLITE_IPV6_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoIPv6.dat.gz';
 
 	/** @var array API endpoints for looking up user IP address */
 	private static $ip_lookup_apis = array(
-		'icanhazip'         => 'http://ipv4.icanhazip.com',
+		'icanhazip'         => 'http://icanhazip.com',
 		'ipify'             => 'http://api.ipify.org/',
 		'ipecho'            => 'http://ipecho.net/plain',
-		'ident'             => 'http://v4.ident.me',
+		'ident'             => 'http://ident.me',
 		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
 		'ip.appspot'        => 'http://ip.appspot.com'
 	);
@@ -98,7 +99,7 @@ class WC_Geolocation {
 
 			foreach ( $ip_lookup_services_keys as $service_name ) {
 				$service_endpoint = $ip_lookup_services[ $service_name ];
-				$response         = wp_remote_get( $service_endpoint, array( 'timeout' => 2 ) );
+				$response         = wp_safe_remote_get( $service_endpoint, array( 'timeout' => 2 ) );
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					$external_ip_address = apply_filters( 'woocommerce_geolocation_ip_lookup_api_response', wc_clean( $response['body'] ), $service_name );
@@ -119,12 +120,18 @@ class WC_Geolocation {
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = true ) {
 		// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview)
-		if ( ! empty( $_SERVER[ "HTTP_CF_IPCOUNTRY" ] ) ) {
-			$country_code = sanitize_text_field( strtoupper( $_SERVER["HTTP_CF_IPCOUNTRY"] ) );
+		if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
+			$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_CF_IPCOUNTRY'] ) );
 		} else {
 			$ip_address = $ip_address ? $ip_address : self::get_ip_address();
 
-			if ( file_exists( self::get_local_database_path() ) ) {
+			if ( self::is_IPv6( $ip_address ) ) {
+				$database = self::get_local_database_path( 'v6' );
+			} else {
+				$database = self::get_local_database_path();
+			}
+
+			if ( file_exists( $database ) ) {
 				$country_code = self::geolocate_via_db( $ip_address );
 			} else {
 				$country_code = self::geolocate_via_api( $ip_address );
@@ -144,11 +151,14 @@ class WC_Geolocation {
 
 	/**
 	 * Path to our local db
+	 * @param  string $version
 	 * @return string
 	 */
-	private static function get_local_database_path() {
+	private static function get_local_database_path( $version = 'v4' ) {
+		$version    = ( 'v4' == $version ) ? '' : 'v6';
 		$upload_dir = wp_upload_dir();
-		return $upload_dir['basedir'] . '/GeoIP.dat';
+
+		return $upload_dir['basedir'] . '/GeoIP' . $version . '.dat';
 	}
 
 	/**
@@ -164,24 +174,29 @@ class WC_Geolocation {
 
 		require_once( ABSPATH . 'wp-admin/includes/file.php' );
 
-		$tmp_database = download_url( self::GEOLITE_DB );
+		$tmp_databases = array(
+			'v4' => download_url( self::GEOLITE_DB ),
+			'v6' => download_url( self::GEOLITE_IPV6_DB )
+		);
 
-		if ( ! is_wp_error( $tmp_database ) ) {
-			$gzhandle = @gzopen( $tmp_database, 'r' );
-			$handle   = @fopen( self::get_local_database_path(), 'w' );
+		foreach ( $tmp_databases as $tmp_database_version => $tmp_database_path ) {
+			if ( ! is_wp_error( $tmp_database_path ) ) {
+				$gzhandle = @gzopen( $tmp_database_path, 'r' );
+				$handle   = @fopen( self::get_local_database_path( $tmp_database_version ), 'w' );
 
-			if ( $gzhandle && $handle ) {
-				while ( ( $string = gzread( $gzhandle, 4096 ) ) != false ) {
-					fwrite( $handle, $string, strlen( $string ) );
+				if ( $gzhandle && $handle ) {
+					while ( ( $string = gzread( $gzhandle, 4096 ) ) != false ) {
+						fwrite( $handle, $string, strlen( $string ) );
+					}
+					gzclose( $gzhandle );
+					fclose( $handle );
+				} else {
+					$logger->add( 'geolocation', 'Unable to open database file' );
 				}
-				gzclose( $gzhandle );
-				fclose( $handle );
+				@unlink( $tmp_database_path );
 			} else {
-				$logger->add( 'geolocation', 'Unable to open database file' );
+				$logger->add( 'geolocation', 'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message() );
 			}
-			@unlink( $tmp_database );
-		} else {
-			$logger->add( 'geolocation', 'Unable to download GeoIP Database: ' . $tmp_database->get_error_message() );
 		}
 	}
 
@@ -194,11 +209,19 @@ class WC_Geolocation {
 		if ( ! class_exists( 'WC_Geo_IP' ) ) {
 			include_once( 'class-wc-geo-ip.php' );
 		}
-		$database = self::get_local_database_path();
-		$gi       = new WC_Geo_IP();
 
-		$gi->geoip_open( $database, 0 );
-		$country_code = $gi->geoip_country_code_by_addr( $ip_address );
+		$gi = new WC_Geo_IP();
+
+		if ( self::is_IPv6( $ip_address ) ) {
+			$database = self::get_local_database_path( 'v6' );
+			$gi->geoip_open( $database, 0 );
+			$country_code = $gi->geoip_country_code_by_addr_v6( $ip_address );
+		} else {
+			$database = self::get_local_database_path();
+			$gi->geoip_open( $database, 0 );
+			$country_code = $gi->geoip_country_code_by_addr( $ip_address );
+		}
+
 		$gi->geoip_close();
 
 		return sanitize_text_field( strtoupper( $country_code ) );
@@ -219,7 +242,7 @@ class WC_Geolocation {
 
 			foreach ( $geoip_services_keys as $service_name ) {
 				$service_endpoint = $geoip_services[ $service_name ];
-				$response         = wp_remote_get( sprintf( $service_endpoint, $ip_address ), array( 'timeout' => 2 ) );
+				$response         = wp_safe_remote_get( sprintf( $service_endpoint, $ip_address ), array( 'timeout' => 2 ) );
 
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {
@@ -249,6 +272,18 @@ class WC_Geolocation {
 		}
 
 		return $country_code;
+	}
+
+	/**
+	 * Test if is IPv6
+	 *
+	 * @since  2.4.0
+	 *
+	 * @param  string $ip_address
+	 * @return bool
+	 */
+	private static function is_IPv6( $ip_address ) {
+		return false !== filter_var( $ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 );
 	}
 }
 

@@ -294,6 +294,15 @@ class WC_Product {
 	}
 
 	/**
+	 * Return the product type.
+	 *
+	 * @return string
+	 */
+	public function get_type() {
+		return is_null( $this->product_type ) ? '' : $this->product_type;
+	}
+
+	/**
 	 * Checks the product type.
 	 *
 	 * Backwards compat with downloadable/virtual.
@@ -1050,28 +1059,33 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_rating_count( $value = null ) {
-		$value          = intval( $value );
-		$value_suffix   = $value ? '_' . $value : '';
-		$transient_name = 'wc_rating_count_' . $this->id . $value_suffix . WC_Cache_Helper::get_transient_version( 'product' );
+		$transient_name = 'wc_rating_count_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-		if ( false === ( $count = get_transient( $transient_name ) ) ) {
-
+		if ( ! is_array( $counts = get_transient( $transient_name ) ) ) {
 			global $wpdb;
-
-			$where_meta_value = $value ? $wpdb->prepare( " AND meta_value = %d", $value ) : " AND meta_value > 0";
-
-			$count = $wpdb->get_var( $wpdb->prepare("
-				SELECT COUNT(meta_value) FROM $wpdb->commentmeta
+			$counts     = array();
+			$raw_counts = $wpdb->get_results( $wpdb->prepare("
+				SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
 				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
 				WHERE meta_key = 'rating'
 				AND comment_post_ID = %d
 				AND comment_approved = '1'
-			", $this->id ) . $where_meta_value );
+				AND meta_value > 0
+				GROUP BY meta_value
+			", $this->id ) );
 
-			set_transient( $transient_name, $count, DAY_IN_SECONDS * 30 );
+			foreach ( $raw_counts as $count ) {
+				$counts[ $count->meta_value ] = $count->meta_value_count;
+			}
+
+			set_transient( $transient_name, $counts, DAY_IN_SECONDS * 30 );
 		}
 
-		return $count;
+		if ( is_null( $value ) ) {
+			return array_sum( $counts );
+		} else {
+			return isset( $counts[ $value ] ) ? $counts[ $value ] : 0;
+		}
 	}
 
 	/**
@@ -1221,25 +1235,33 @@ class WC_Product {
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
-		global $wpdb;
+		$transient_name = 'wc_related_' . $limit . '_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
 
-		// Related products are found from category and tag
-		$tags_array = $this->get_related_terms( 'product_tag' );
-		$cats_array = $this->get_related_terms( 'product_cat' );
+		if ( false === ( $related_posts = get_transient( $transient_name ) ) ) {
+			global $wpdb;
 
-		// Don't bother if none are set
-		if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
-			return array();
+			// Related products are found from category and tag
+			$tags_array = $this->get_related_terms( 'product_tag' );
+			$cats_array = $this->get_related_terms( 'product_cat' );
+
+			// Don't bother if none are set
+			if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
+				$related_posts = array();
+			} else {
+				// Sanitize
+				$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
+
+				// Generate query
+				$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit );
+
+				// Get the posts
+				$related_posts = $wpdb->get_col( implode( ' ', $query ) );
+			}
+
+			set_transient( $transient_name, $related_posts, DAY_IN_SECONDS * 30 );
 		}
 
-		// Sanitize
-		$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
-
-		// Generate query
-		$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit );
-
-		// Get the posts
-		$related_posts = $wpdb->get_col( implode( ' ', $query ) );
+		shuffle( $related_posts );
 
 		return $related_posts;
 	}
@@ -1507,21 +1529,8 @@ class WC_Product {
 			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
 		}
 
-		$query = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
-
-		// How many rows total?
-		$max_related_posts_transient_name = 'wc_max_related_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-		if ( false === ( $max_related_posts = get_transient( $max_related_posts_transient_name ) ) ) {
-			$max_related_posts_query           = $query;
-			$max_related_posts_query['fields'] = "SELECT COUNT(DISTINCT ID) FROM {$wpdb->posts} p";
-			$max_related_posts                 = absint( $wpdb->get_var( implode( ' ', apply_filters( 'woocommerce_product_max_related_posts_query', $max_related_posts_query, $this->id ) ) ) );
-			set_transient( $max_related_posts_transient_name, $max_related_posts, DAY_IN_SECONDS * 30 );
-		}
-
-		// Generate limit
-		$offset          = $max_related_posts < $limit ? 0 : absint( rand( 0, $max_related_posts - $limit ) );
-		$query['limits'] = " LIMIT {$offset}, {$limit} ";
+		$query['limits'] = " LIMIT {$limit} ";
+		$query           = apply_filters( 'woocommerce_product_related_posts_query', $query, $this->id );
 
 		return $query;
 	}

@@ -142,12 +142,9 @@ class WC_Webhook {
 
 		// only deliver deleted event for coupons, orders, and products
 		if ( 'delete_post' == $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
-
 			return false;
 
 		} elseif ( 'delete_user' == $current_action ) {
-
-
 			$user = get_userdata( absint( $arg ) );
 
 			// only deliver deleted customer event for users with customer role
@@ -155,8 +152,11 @@ class WC_Webhook {
 				return false;
 			}
 
-		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) ) {
+		// check if the custom order type has chosen to exclude order webhooks from triggering along with its own webhooks.
+		} elseif ( 'order' == $this->get_resource() && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ) ) ) {
+			return false;
 
+		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) ) {
 			// the `woocommerce_process_shop_*` hook fires for both updates
 			// and creation so check the post creation date to determine the actual event
 			$resource = get_post( absint( $arg ) );
@@ -176,7 +176,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Deliver the webhook payload using wp_remote_request()
+	 * Deliver the webhook payload using wp_safe_remote_request()
 	 *
 	 * @since 2.2
 	 * @param mixed $arg first hook argument
@@ -211,7 +211,7 @@ class WC_Webhook {
 		$start_time = microtime( true );
 
 		// webhook away!
-		$response = wp_remote_request( $this->get_delivery_url(), $http_args );
+		$response = wp_safe_remote_request( $this->get_delivery_url(), $http_args );
 
 		$duration = round( microtime( true ) - $start_time, 5 );
 
@@ -561,6 +561,7 @@ class WC_Webhook {
 			'order.updated' => array(
 				'woocommerce_process_shop_order_meta',
 				'woocommerce_api_edit_order',
+				'woocommerce_order_edit_status',
 			),
 			'order.deleted' => array(
 				'wp_trash_post',
@@ -595,7 +596,7 @@ class WC_Webhook {
 			'body'       => "webhook_id={$this->id}",
 		);
 
-		wp_remote_post( $this->get_delivery_url(), $args );
+		wp_safe_remote_post( $this->get_delivery_url(), $args );
 	}
 
 	/**

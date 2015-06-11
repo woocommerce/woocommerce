@@ -175,16 +175,22 @@ extract( $variation_data );
 
 					echo wp_dropdown_categories( $args );
 				?></p>
+
+				<?php if ( wc_tax_enabled() ) : ?>
+					<p class="form-row form-row-full">
+						<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
+						<select name="variable_tax_class[<?php echo $loop; ?>]">
+							<option value="parent" <?php selected( is_null( $_tax_class ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
+							<?php
+							foreach ( $parent_data['tax_class_options'] as $key => $value )
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class, true, false ) . '>' . esc_html( $value ) . '</option>';
+						?></select>
+					</p>
+				<?php endif; ?>
+
 				<p class="form-row form-row-full">
-					<?php if ( wc_tax_enabled() ) : ?>
-					<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
-					<select name="variable_tax_class[<?php echo $loop; ?>]">
-						<option value="parent" <?php selected( is_null( $_tax_class ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
-						<?php
-						foreach ( $parent_data['tax_class_options'] as $key => $value )
-							echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class, true, false ) . '>' . esc_html( $value ) . '</option>';
-					?></select>
-					<?php endif; ?>
+					<label><?php _e( 'Variation Description:', 'woocommerce' ); ?></label>
+					<textarea name="variable_description[<?php echo $loop; ?>]" rows="3" style="width:100%;"><?php echo isset( $variation_data['_variation_description'] ) ? esc_textarea( $variation_data['_variation_description'] ) : ''; ?></textarea>
 				</p>
 			</div>
 			<div class="show_if_variation_downloadable" style="display: none;">

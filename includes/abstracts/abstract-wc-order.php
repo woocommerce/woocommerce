@@ -1622,7 +1622,7 @@ abstract class WC_Abstract_Order {
 			$subtotal = wc_price( $subtotal, array('currency' => $this->get_order_currency()) );
 
 			if ( $tax_display == 'excl' && $this->prices_include_tax ) {
-				$subtotal .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 
 		} else {
@@ -2550,16 +2550,16 @@ abstract class WC_Abstract_Order {
 		}
 
 		$hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
-		$needs = false;
+		$needs_address = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
 			if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
-				$needs = true;
+				$needs_address = true;
 				break;
 			}
 		}
 
-		return $needs;
+		return apply_filters( 'woocommerce_order_needs_shipping_address', $needs_address, $hide, $this );
 	}
 
 	/**

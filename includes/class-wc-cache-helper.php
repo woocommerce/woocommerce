@@ -48,10 +48,24 @@ class WC_Cache_Helper {
 		$transient_value = get_transient( $transient_name );
 
 		if ( false === $transient_value || true === $refresh ) {
-			$transient_value = time();
-			set_transient( $transient_name, $transient_value );
+			self::delete_version_transients( $transient_value );
+			set_transient( $transient_name, $transient_value = time() );
 		}
 		return $transient_value;
+	}
+
+	/**
+	 * When the transient version increases, this is used to remove all past transients to avoid filling the DB.
+	 *
+	 * Note; this only works on transients appended with the transient version, and when object caching is not being used.
+	 *
+	 * @since  2.3.10
+	 */
+	private static function delete_version_transients( $version ) {
+		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
+			global $wpdb;
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s;", "\_transient\_%" . $version ) );
+		}
 	}
 
 	/**
@@ -72,9 +86,7 @@ class WC_Cache_Helper {
 
 	/**
 	 * Prevent caching on dynamic pages.
-	 *
 	 * @access public
-	 * @return void
 	 */
 	public static function prevent_caching() {
 		if ( false === ( $wc_page_uris = get_transient( 'woocommerce_cache_excluded_uris' ) ) ) {
@@ -82,7 +94,9 @@ class WC_Cache_Helper {
 	    	set_transient( 'woocommerce_cache_excluded_uris', $wc_page_uris );
 		}
 
-		if ( is_array( $wc_page_uris ) ) {
+		if ( isset( $_GET['download_file'] ) ) {
+			self::nocache();
+		} elseif ( is_array( $wc_page_uris ) ) {
 			foreach( $wc_page_uris as $uri ) {
 				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
 					self::nocache();
@@ -94,9 +108,7 @@ class WC_Cache_Helper {
 
 	/**
 	 * Set nocache constants and headers.
-	 *
 	 * @access private
-	 * @return void
 	 */
 	private static function nocache() {
 		if ( ! defined( 'DONOTCACHEPAGE' ) )
@@ -113,9 +125,6 @@ class WC_Cache_Helper {
 
 	/**
 	 * notices function.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public static function notices() {
 		if ( ! function_exists( 'w3tc_pgcache_flush' ) || ! function_exists( 'w3_instance' ) ) {

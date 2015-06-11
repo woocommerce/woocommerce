@@ -62,11 +62,11 @@ jQuery( function( $ ) {
 		},
 		maybe_input_changed: function( e ) {
 			if ( wc_checkout_form.dirtyInput ) {
-				wc_checkout_form.input_changed();
+				wc_checkout_form.input_changed( e );
 			}
 		},
 		input_changed: function( e ) {
-			wc_checkout_form.dirtyInput = this;
+			wc_checkout_form.dirtyInput = e.target;
 			wc_checkout_form.maybe_update_checkout();
 		},
 		queue_update_checkout: function( e ) {

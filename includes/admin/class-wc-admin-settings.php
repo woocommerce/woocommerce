@@ -296,6 +296,11 @@ class WC_Admin_Settings {
 							<?php echo $tooltip_html; ?>
 						</th>
 						<td class="forminp forminp-<?php echo sanitize_title( $value['type'] ) ?>">
+							<?php
+							if ( 'color' == $value['type'] ) {
+								echo '<span class="colorpickpreview" style="background: ' . esc_attr( $option_value ) . ';"></span>';
+							}
+							?>
 							<input
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"

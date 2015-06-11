@@ -2,11 +2,11 @@
 /**
  * Contains Validation functions
  *
- * @class 		WC_Validation
- * @version		2.1.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @class    WC_Validation
+ * @version  2.4.0
+ * @package  WooCommerce/Classes
+ * @category Class
+ * @author   WooThemes
  */
 class WC_Validation {
 
@@ -27,8 +27,9 @@ class WC_Validation {
 	 * @return  bool
 	 */
 	public static function is_phone( $phone ) {
-		if ( strlen( trim( preg_replace( '/[\s\#0-9_\-\+\(\)]/', '', $phone ) ) ) > 0 )
+		if ( 0 < strlen( trim( preg_replace( '/[\s\#0-9_\-\+\(\)]/', '', $phone ) ) ) ) {
 			return false;
+		}
 
 		return true;
 	}
@@ -41,50 +42,53 @@ class WC_Validation {
 	 * @return  bool
 	 */
 	public static function is_postcode( $postcode, $country ) {
-		if ( strlen( trim( preg_replace( '/[\s\-A-Za-z0-9]/', '', $postcode ) ) ) > 0 )
+		if ( strlen( trim( preg_replace( '/[\s\-A-Za-z0-9]/', '', $postcode ) ) ) > 0 ) {
 			return false;
-
-		switch ( $country ) {
-			case "GB" :
-				return self::is_GB_postcode( $postcode );
-			case "US" :
-				 if ( preg_match( "/^([0-9]{5})(-[0-9]{4})?$/i", $postcode ) )
-				 	return true;
-				 else
-				 	return false;
-			case "CH" :
-				 if ( preg_match( "/^([0-9]{4})$/i", $postcode ) )
-				 	return true;
-				 else
-				 	return false;
-			case "BR" :
-				if ( preg_match( "/^([0-9]{5,5})([-])?([0-9]{3,3})$/", $postcode ) )
-					return true;
-				else
-					return false;
 		}
 
-		return true;
+		switch ( $country ) {
+			case 'BR' :
+				$valid = (bool) preg_match( '/^([0-9]{5})([-])?([0-9]{3})$/', $postcode );
+				break;
+			case 'CH' :
+				$valid = (bool) preg_match( '/^([0-9]{4})$/i', $postcode );
+				break;
+			case 'GB' :
+				$valid = self::is_GB_postcode( $postcode );
+				break;
+			case 'PT' :
+				$valid = (bool) preg_match( '/^([0-9]{4})([-])([0-9]{3})$/', $postcode );
+				break;
+			case 'US' :
+				$valid = (bool) preg_match( '/^([0-9]{5})(-[0-9]{4})?$/i', $postcode );
+				break;
+
+			default :
+				$valid = true;
+				break;
+		}
+
+		return apply_filters( 'woocommerce_validate_postcode', $valid, $postcode, $country );
 	}
 
 	/**
-	 * is_GB_postcode function.
+	 * Check if is a GB postcode.
 	 *
 	 * @author John Gardner
-	 * @param string $to_check A postcode
+	 * @param  string $to_check A postcode
 	 * @return bool
 	 */
 	public static function is_GB_postcode( $to_check ) {
 
 		// Permitted letters depend upon their position in the postcode.
 		// http://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
-		$alpha1 = "[abcdefghijklmnoprstuwyz]";                          // Character 1
-		$alpha2 = "[abcdefghklmnopqrstuvwxy]";                          // Character 2
-		$alpha3 = "[abcdefghjkpstuw]";                                  // Character 3 == ABCDEFGHJKPSTUW
-		$alpha4 = "[abehmnprvwxy]";                                     // Character 4 == ABEHMNPRVWXY
-		$alpha5 = "[abdefghjlnpqrstuwxyz]";                             // Character 5 != CIKMOV
+		$alpha1 = "[abcdefghijklmnoprstuwyz]"; // Character 1
+		$alpha2 = "[abcdefghklmnopqrstuvwxy]"; // Character 2
+		$alpha3 = "[abcdefghjkpstuw]";         // Character 3 == ABCDEFGHJKPSTUW
+		$alpha4 = "[abehmnprvwxy]";            // Character 4 == ABEHMNPRVWXY
+		$alpha5 = "[abdefghjlnpqrstuwxyz]";    // Character 5 != CIKMOV
 
-		$pcexp    = array();
+		$pcexp = array();
 
 		// Expression for postcodes: AN NAA, ANN NAA, AAN NAA, and AANN NAA
 		$pcexp[0] = '/^('.$alpha1.'{1}'.$alpha2.'{0,1}[0-9]{1,2})([0-9]{1}'.$alpha5.'{2})$/';

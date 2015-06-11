@@ -350,7 +350,7 @@ class WC_Coupon {
 	 * Ensure coupon amount is valid or throw exception
 	 */
 	private function validate_maximum_amount() {
-		if ( $this->maximum_amount > 0 && wc_format_decimal( $this->minimum_amount ) < wc_format_decimal( WC()->cart->subtotal ) ) {
+		if ( $this->maximum_amount > 0 && wc_format_decimal( $this->maximum_amount ) < wc_format_decimal( WC()->cart->subtotal ) ) {
 			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
 		}
 	}
@@ -581,7 +581,11 @@ class WC_Coupon {
 		if ( $this->exclude_sale_items == 'yes' ) {
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
-			if ( in_array( $product->id, $product_ids_on_sale, true ) || ( isset( $product->variation_id ) && in_array( $product->variation_id, $product_ids_on_sale, true ) ) || in_array( $product->get_parent(), $product_ids_on_sale, true ) ) {
+			if ( isset( $product->variation_id ) ) {
+				if ( in_array( $product->variation_id, $product_ids_on_sale, true ) ) {
+					$valid = false;
+				}
+			} elseif ( in_array( $product->id, $product_ids_on_sale, true ) ) {
 				$valid = false;
 			}
 		}

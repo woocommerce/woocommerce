@@ -196,18 +196,17 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		global $current_section;
 
 		if ( ! $current_section ) {
-
-			$settings = $this->get_settings();
-			WC_Admin_Settings::save_fields( $settings );
+			WC_Admin_Settings::save_fields( $this->get_settings() );
 
 		} else {
-			// Init email classes
-			WC()->mailer()->init();
+			$wc_emails = WC_Emails::instance();
 
-			if ( class_exists( $current_section ) ) {
-
-				$current_section_class = new $current_section();
-				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
+			if ( in_array( $current_section, array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) ) ) ) {
+				foreach ( $wc_emails->get_emails() as $email ) {
+					if ( $current_section === sanitize_title( get_class( $email ) ) ) {
+						do_action( 'woocommerce_update_options_' . $this->id . '_' . $email->id );
+					}
+				}
 			} else {
 				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 			}
