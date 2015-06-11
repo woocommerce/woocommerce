@@ -244,7 +244,7 @@ class WC_Frontend_Scripts {
 					'ajax_url'                => WC()->ajax_url(),
 					'wc_ajax_url'             => WC_AJAX::get_endpoint(),
 					'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
-					'cart_url'                => wc_get_page_permalink( 'cart' ),
+					'cart_url'                => ($redirect_url = apply_filters( 'woocommerce_add_to_cart_redirect', false )) ? $redirect_url : WC()->cart->get_cart_url(),
 					'is_cart'                 => is_cart(),
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' )
 				);
