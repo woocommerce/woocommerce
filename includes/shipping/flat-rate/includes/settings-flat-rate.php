@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Settings for flat rate shipping
  */
-return array(
+$settings = array(
 	'enabled' => array(
 		'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 		'type' 			=> 'checkbox',
@@ -50,54 +50,29 @@ return array(
 		'options'		=> array(
 			'taxable' 	=> __( 'Taxable', 'woocommerce' ),
 			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
-		),
+		)
 	),
-	'cost_per_order' => array(
-		'title' 		=> __( 'Cost per order', 'woocommerce' ),
-		'type' 			=> 'price',
+	'cost' => array(
+		'title' 		=> __( 'Cost', 'woocommerce' ),
+		'type' 			=> 'text',
 		'placeholder'	=> wc_format_localized_price( 0 ),
-		'description'	=> __( 'Enter a cost (excluding tax) per order, e.g. 5.00. Default is 0.', 'woocommerce' ),
+		'description'	=> __( 'Enter a cost (excl. tax) or sum, e.g. <code>10 * [qty]</code>.', 'woocommerce' ) . '<br/>' . __( 'Supports the following placeholders: <code>[qty]</code> = number of items, <code>[cost]</code> = cost of items.', 'woocommerce' ),
 		'default'		=> '',
 		'desc_tip'		=> true
-	),
-	'additional_costs' => array(
-		'title'			=> __( 'Additional Costs', 'woocommerce' ),
-		'type'			=> 'title',
-		'description'   => __( 'Additional costs can be added below - these will all be added to the per-order cost above.', 'woocommerce' )
-	),
-	'type' => array(
-		'title' 		=> __( 'Costs Added...', 'woocommerce' ),
-		'type' 			=> 'select',
-		'class'         => 'wc-enhanced-select',
-		'default' 		=> 'order',
-		'options' 		=> array(
-			'order' 	=> __( 'Per Order - charge shipping for the entire order as a whole', 'woocommerce' ),
-			'item' 		=> __( 'Per Item - charge shipping for each item individually', 'woocommerce' ),
-			'class' 	=> __( 'Per Class - charge shipping for each shipping class in an order', 'woocommerce' ),
-		),
-	),
-	'additional_costs_table' => array(
-		'type'				=> 'additional_costs_table'
-	),
-	'minimum_fee' => array(
-		'title' 		=> __( 'Minimum Handling Fee', 'woocommerce' ),
-		'type' 			=> 'price',
-		'placeholder'	=> wc_format_localized_price( 0 ),
-		'description'	=> __( 'Enter a minimum fee amount. Fee\'s less than this will be increased. Leave blank to disable.', 'woocommerce' ),
-		'default'		=> '',
-		'desc_tip'		=> true
-	),
-	'addons' => array(
-		'title'			=> __( 'Add-on Rates', 'woocommerce' ),
-		'type'			=> 'title',
-		'description'   => __( 'Add-on rates are extra shipping options with additional costs (based on the flat rate).', 'woocommerce' )
-	),
-	'options' => array(
-		'title' 		=> __( 'Rates', 'woocommerce' ),
-		'type' 			=> 'textarea',
-		'description'	=> __( 'One per line: Option Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>.', 'woocommerce' ),
-		'default'		=> '',
-		'desc_tip'		=> true,
-		'placeholder'	=> __( 'Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item)', 'woocommerce' )
-	),
+	)
 );
+
+if ( WC()->shipping->get_shipping_classes() ) {
+	foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
+		$settings[ 'class_cost_' . $shipping_class->slug ] = array(
+			'title'       => sprintf( __( '"%s" Cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
+			'type'        => 'text',
+			'placeholder' => wc_format_localized_price( 0 ),
+			'description'	=> __( 'Enter a cost (excl. tax) or sum, e.g. <code>10 * [qty]</code>.', 'woocommerce' ) . '<br/>' . __( 'Supports the following placeholders: <code>[qty]</code> = number of items, <code>[cost]</code> = cost of items.', 'woocommerce' ),
+			'default'     => '',
+			'desc_tip'    => true
+		);
+	}
+}
+
+return $settings;
