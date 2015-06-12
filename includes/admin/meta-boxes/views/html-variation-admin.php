@@ -112,7 +112,7 @@ extract( $variation_data );
 				<div class="show_if_variation_manage_stock" style="display: none;">
 					<p class="form-row form-row-first">
 						<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-						<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
+						<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( wc_stock_amount( $_stock ) ); ?>" step="any" />
 					</p>
 					<p class="form-row form-row-last">
 						<label><?php _e( 'Allow Backorders?', 'woocommerce' ); ?></label>
