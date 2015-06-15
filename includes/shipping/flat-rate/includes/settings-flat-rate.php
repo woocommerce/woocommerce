@@ -75,4 +75,15 @@ if ( WC()->shipping->get_shipping_classes() ) {
 	}
 }
 
+if ( $this->get_option( 'options', false ) ) {
+	$settings['options'] = array(
+		'title' 		=> __( 'Additional Rates', 'woocommerce' ),
+		'type' 			=> 'textarea',
+		'description'	=> __( 'One per line: Option Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>.', 'woocommerce' ),
+		'default'		=> '',
+		'desc_tip'		=> true,
+		'placeholder'	=> __( 'Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item)', 'woocommerce' )
+	);
+}
+
 return $settings;
