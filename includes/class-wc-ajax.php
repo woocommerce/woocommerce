@@ -2065,7 +2065,7 @@ class WC_AJAX {
 			$order_items = $order->get_items();
 			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 
-			if ( ! $refund_amount || $max_refund < $refund_amount ) {
+			if ( ! $refund_amount || $max_refund < $refund_amount || 0 > $refund_amount ) {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
 
