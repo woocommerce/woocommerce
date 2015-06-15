@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</thead>
 		<tbody class="tools">
 			<?php foreach ( $tools as $action => $tool ) : ?>
-				<tr class="<?php echo esc_attr( $action ); ?>">
+				<tr class="<?php echo sanitize_html_class( $action ); ?>">
 					<td><?php echo esc_html( $tool['name'] ); ?></td>
 					<td>
 						<p>
