@@ -612,6 +612,11 @@ function wc_create_refund( $args = array() ) {
 	$args        = wp_parse_args( $args, $default_args );
 	$refund_data = array();
 
+	// prevent negative refunds
+	if ( 0 > $args['amount'] ) {
+		$args['amount'] = 0;
+	}
+
 	if ( $args['refund_id'] > 0 ) {
 		$updating          = true;
 		$refund_data['ID'] = $args['refund_id'];
