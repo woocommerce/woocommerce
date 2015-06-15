@@ -430,7 +430,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
   PRIMARY KEY  (location_id),
   KEY tax_rate_id (tax_rate_id),
   KEY location_type (location_type),
-  KEY location_type_code (location_type,location_code)
+  KEY location_type_code (location_type(40),location_code(90))
 ) $collate;
 		";
 	}
