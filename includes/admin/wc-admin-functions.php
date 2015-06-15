@@ -229,7 +229,7 @@ function wc_save_order_items( $order_id, $items ) {
 		$meta_value = ( empty( $meta_values[ $id ] ) && ! is_numeric( $meta_values[ $id ] ) ) ? '' : $meta_values[ $id ];
 
 		// Delele blank item meta entries
-		if ( mb_strlen( $meta_key ) == 0 && mb_strlen( $meta_value ) == 0 ) {
+		if ( $meta_key === '' && $meta_value === '' ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $id ) );
 		}
 		else {
