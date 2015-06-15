@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
+	protected $fee_cost = 0;
+
 	/**
 	 * Constructor
 	 */
@@ -39,11 +41,79 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$this->title        = $this->get_option( 'title' );
 		$this->availability = $this->get_option( 'availability' );
 		$this->countries    = $this->get_option( 'countries' );
-		$this->type         = $this->get_option( 'type' );
 		$this->tax_status   = $this->get_option( 'tax_status' );
+		$this->cost         = $this->get_option( 'cost' );
+		$this->type         = $this->get_option( 'type', 'class' );
+		$this->options      = $this->get_option( 'options', false ); // @deprecated in 2.4.0
 
-		// @deprecated in 2.4.0
-		$this->options      = $this->get_option( 'options', false );
+		// Convert old pre-2.4 options to math based costs
+		if ( get_option( 'woocommerce_flat_rates', false ) ) {
+			$math_cost_strings                   = array();
+			$math_cost_strings[ 'cost' ]         = array();
+			$math_cost_strings[ 'no_class_cost'] = array();
+			$has_classes                         = sizeof( WC()->shipping->get_shipping_classes() ) > 0;
+
+			if ( $this->cost ) {
+				$math_cost_strings[ $has_classes ? 'no_class_cost' : 'cost' ][] = $this->cost;
+			}
+
+			if ( $fee = $this->get_option( 'fee' ) ) {
+				if ( strstr( $fee, '%' ) ) {
+					$min_fee = $this->get_option( 'minimum_fee' );
+					$math_cost_strings[ $has_classes ? 'no_class_cost' : 'cost' ][] = '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]';
+				} else {
+					$math_cost_strings[ $has_classes ? 'no_class_cost' : 'cost' ][] = $fee;
+				}
+			}
+
+			if ( $flat_rates = array_filter( (array) get_option( 'woocommerce_flat_rates' ) ) ) {
+				foreach ( $flat_rates as $shipping_class => $rate ) {
+					$rate_key = 'class_cost_' . $shipping_class;
+					if ( $rate['cost'] || $rate['fee'] ) {
+						$math_cost_strings[ $rate_key ][] = $rate['cost'];
+
+						if ( strstr( $rate['fee'], '%' ) ) {
+							$min_fee = $this->get_option( 'minimum_fee' );
+							$math_cost_strings[ $rate_key ][] = '[fee percent="' . str_replace( '%', '', $rate['fee'] ) . '" min="' . esc_attr( $min_fee ) . '"]';
+						} else {
+							$math_cost_strings[ $rate_key ][] = $rate['fee'];
+						}
+					} else {
+						// default
+						$math_cost_strings[ $rate_key ] = $math_cost_strings[ 'no_class_cost' ];
+					}
+				}
+			}
+
+			switch ( $this->get_option( 'type' ) ) {
+				case 'item' :
+					foreach ( $math_cost_strings as $key => $math_cost_string ) {
+						$math_cost_strings[ $key ] = array_filter( $math_cost_strings );
+						if ( $math_cost_strings[ $key ] ) {
+							$math_cost_string[0] = '( ' . $math_cost_string[0];
+							end( $math_cost_string );
+							$last_key = key( $math_cost_string );
+							$math_cost_string[ $last_key  ] .= ' ) * [qty]';
+						}
+					}
+				break;
+			}
+
+			$math_cost_strings[ 'cost' ][] = $this->get_option( 'cost_per_order' );
+
+			// Update options
+			$settings = get_option( $this->plugin_id . $this->id . '_settings' );
+
+			foreach ( $math_cost_strings as $option_id => $math_cost_string ) {
+				$settings[ $option_id ] = implode( ' + ', $math_cost_string );
+			}
+
+			$settings['type'] = $settings['type'] === 'item' ? 'class' : $settings['type'];
+
+			update_option( $this->plugin_id . $this->id . '_settings', $settings );
+			delete_option( 'woocommerce_flat_rates' );
+			$this->init();
+		}
 	}
 
 	/**
@@ -62,7 +132,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	protected function evalulate_cost( $sum, $args = array() ) {
 		include_once( 'includes/class-wc-eval-math.php' );
 
-		$sum = str_replace(
+		add_shortcode( 'fee', array( $this, 'fee' ) );
+		$this->fee_cost = $args['cost'];
+
+		$sum = do_shortcode( str_replace(
 			array(
 				'[qty]',
 				'[cost]'
@@ -72,10 +145,35 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$args['cost']
 			),
 			$sum
-		);
+		) );
 
-		$m = new WC_Eval_Math;
-		return $m->evaluate( $sum );
+		remove_shortcode( 'fee', array( $this, 'fee' ) );
+
+		return $sum ? WC_Eval_Math::evaluate( $sum ) : 0;
+	}
+
+	/**
+	 * Work out fee (shortcode)
+	 * @param  array $atts
+	 * @return string
+	 */
+	public function fee( $atts ) {
+		$atts = shortcode_atts( array(
+			'percent' => '',
+			'min_fee' => ''
+		), $atts );
+
+		$calculated_fee = 0;
+
+		if ( $atts['percent'] ) {
+			$calculated_fee = $this->fee_cost * ( floatval( $atts['percent'] ) / 100 );
+		}
+
+		if ( $atts['min_fee'] && $calculated_fee < $atts['min_fee'] ) {
+			$calculated_fee = $atts['min_fee'];
+		}
+
+		return $calculated_fee;
 	}
 
 	/**
@@ -98,16 +196,29 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		// Add shipping class costs
 		$found_shipping_classes = $this->find_shipping_classes( $package );
+		$highest_class_cost     = 0;
 
 		foreach ( $found_shipping_classes as $shipping_class => $products ) {
-			$class_cost = $this->get_option( 'class_cost_' . $shipping_class, '' );
+			$class_cost_string = $shipping_class ? $this->get_option( 'class_cost_' . $shipping_class, '' ) : $this->get_option( 'no_class_cost', '' );
 
-			if ( $class_cost ) {
-				$rate['cost'] += $this->evalulate_cost( $class_cost, array(
-					'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-					'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
-				) );
+			if ( ! $class_cost_string ) {
+				continue;
 			}
+
+			$class_cost = $this->evalulate_cost( $class_cost_string, array(
+				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
+				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
+			) );
+
+			if ( $this->type === 'class' ) {
+				$rate['cost'] += $class_cost;
+			} else {
+				$highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
+			}
+		}
+
+		if ( $this->type === 'order' && $highest_class_cost ) {
+			$rate['cost'] += $highest_class_cost;
 		}
 
 		// Add the rate

@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$cost_placeholder = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10 * [qty]</code>.', 'woocommerce' ) . '<br/>' . __( 'Supports the following placeholders: <code>[qty]</code> = number of items, <code>[cost]</code> = cost of items, <code>[fee percent="10" min="20"]</code> = Percentage based fee.', 'woocommerce' );
+
 /**
  * Settings for flat rate shipping
  */
@@ -56,26 +58,54 @@ $settings = array(
 		'title' 		=> __( 'Cost', 'woocommerce' ),
 		'type' 			=> 'text',
 		'placeholder'	=> wc_format_localized_price( 0 ),
-		'description'	=> __( 'Enter a cost (excl. tax) or sum, e.g. <code>10 * [qty]</code>.', 'woocommerce' ) . '<br/>' . __( 'Supports the following placeholders: <code>[qty]</code> = number of items, <code>[cost]</code> = cost of items.', 'woocommerce' ),
+		'description'	=> $cost_placeholder,
 		'default'		=> '',
 		'desc_tip'		=> true
 	)
 );
 
 if ( WC()->shipping->get_shipping_classes() ) {
+	$settings[ 'class_costs' ] = array(
+		'title'			=> __( 'Shipping Class Costs', 'woocommerce' ),
+		'type'			=> 'title',
+		'description'   => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' ) . '">', '</a>' )
+	);
 	foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
 		$settings[ 'class_cost_' . $shipping_class->slug ] = array(
-			'title'       => sprintf( __( '"%s" Cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
+			'title'       => sprintf( __( '"%s" Shipping Class Cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
 			'type'        => 'text',
 			'placeholder' => wc_format_localized_price( 0 ),
-			'description'	=> __( 'Enter a cost (excl. tax) or sum, e.g. <code>10 * [qty]</code>.', 'woocommerce' ) . '<br/>' . __( 'Supports the following placeholders: <code>[qty]</code> = number of items, <code>[cost]</code> = cost of items.', 'woocommerce' ),
+			'description' => $cost_placeholder,
 			'default'     => '',
 			'desc_tip'    => true
 		);
 	}
+	$settings[ 'no_class_cost' ] = array(
+		'title'       => __( 'No Shipping Class Cost', 'woocommerce' ),
+		'type'        => 'text',
+		'placeholder' => wc_format_localized_price( 0 ),
+		'description' => $cost_placeholder,
+		'default'     => '',
+		'desc_tip'    => true
+	);
+	$settings[ 'type' ] = array(
+		'title' 		=> __( 'Calculation Type', 'woocommerce' ),
+		'type' 			=> 'select',
+		'class'         => 'wc-enhanced-select',
+		'default' 		=> 'class',
+		'options' 		=> array(
+			'class' 	=> __( 'Per Class: Charge shipping for each shipping class individually', 'woocommerce' ),
+			'order' 	=> __( 'Per Order: Charge shipping for the most expensive shipping class', 'woocommerce' ),
+		),
+	);
 }
 
 if ( $this->get_option( 'options', false ) ) {
+	$settings[ 'additional_rates' ] = array(
+		'title'			=> __( 'Additional Rates', 'woocommerce' ),
+		'type'			=> 'title',
+		'description'   => __( 'These rates are extra shipping options with additional costs (based on the flat rate).', 'woocommerce' ),
+	);
 	$settings['options'] = array(
 		'title' 		=> __( 'Additional Rates', 'woocommerce' ),
 		'type' 			=> 'textarea',
