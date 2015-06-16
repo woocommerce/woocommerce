@@ -60,12 +60,19 @@ function wc_get_screen_ids() {
 function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
 	global $wpdb;
 
+	$page_found_trash = false;
+
 	$option_value = get_option( $option );
 
-	if ( $option_value > 0 && get_post( $option_value ) ) {
-		return -1;
+	if ( $option_value > 0 && ( $page_object = get_post( $option_value ) ) ) {
+		if( 'trash' != $page_object->post_status ) {
+			return -1;
+		} else {
+			$page_found_trash = true;
+			$page_found_trash_id = $option_value;
+		}
 	}
-
+ 	
 	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page with the specified page content (typically a shortcode)
 		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
@@ -76,25 +83,38 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 	$page_found = apply_filters( 'woocommerce_create_page_id', $page_found, $slug, $page_content );
 
-	if ( $page_found ) {
+
+	if ( $page_found && ! $page_found_trash ) {
 		if ( ! $option_value ) {
 			update_option( $option, $page_found );
 		}
 
 		return $page_found;
 	}
+	elseif ( !$page_found && $page_found_trash ) {
+		// Page was found in trash but it did not have the correct shortcode (so just recreate it)
+		$page_found_trash = false;
+	}
 
-	$page_data = array(
-		'post_status'       => 'publish',
-		'post_type'         => 'page',
-		'post_author'       => 1,
-		'post_name'         => $slug,
-		'post_title'        => $page_title,
-		'post_content'      => $page_content,
-		'post_parent'       => $post_parent,
-		'comment_status'    => 'closed'
-	);
-	$page_id = wp_insert_post( $page_data );
+	if( ! $page_found_trash ) {
+		$page_data = array(
+			'post_status'    => 'publish',
+			'post_type'      => 'page',
+			'post_author'    => 1,
+			'post_name'      => $slug,
+			'post_title'     => $page_title,
+			'post_content'   => $page_content,
+			'post_parent'    => $post_parent,
+			'comment_status' => 'closed'
+		);
+		$page_id   = wp_insert_post( $page_data );
+	} else {
+		$page_data = array(
+			'ID'             => $page_found,
+			'post_status'    => 'publish',
+		);
+		$page_id = wp_update_post( $page_data );
+	}
 
 	if ( $option ) {
 		update_option( $option, $page_id );
