@@ -159,6 +159,8 @@ class WC_Form_Handler {
 			return;
 		}
 
+		$old_user = clone $current_user;
+
 		$account_first_name = ! empty( $_POST[ 'account_first_name' ] ) ? wc_clean( $_POST[ 'account_first_name' ] ) : '';
 		$account_last_name  = ! empty( $_POST[ 'account_last_name' ] ) ? wc_clean( $_POST[ 'account_last_name' ] ) : '';
 		$account_email      = ! empty( $_POST[ 'account_email' ] ) ? sanitize_email( $_POST[ 'account_email' ] ) : '';
@@ -224,7 +226,7 @@ class WC_Form_Handler {
 
 			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
 
-			do_action( 'woocommerce_save_account_details', $user->ID );
+			do_action( 'woocommerce_save_account_details', $user->ID, $user, $old_user );
 
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
