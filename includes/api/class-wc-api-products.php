@@ -970,7 +970,8 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( $date_to && ! $date_from ) {
-				update_post_meta( $product_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+				$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
+				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
 			}
 
 			// Update price if on sale
@@ -980,7 +981,7 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_price', $regular_price );
 			}
 
-			if ( '' !== $sale_price && $date_from && $date_from < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== $sale_price && $date_from && $date_from <= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
 			}
 
