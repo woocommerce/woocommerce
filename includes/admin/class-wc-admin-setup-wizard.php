@@ -695,36 +695,6 @@ class WC_Admin_Setup_Wizard {
 		} elseif ( isset( $_GET['wc_tracker_optout'] ) && isset( $_GET['wc_tracker_nonce'] ) && wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optout' ) ) {
 			update_option( 'woocommerce_allow_tracking', 'no' );
 
-		} elseif ( ! empty( $_GET['wc_view_test_product'] ) && isset( $_GET['wc_view_test_product_nonce'] ) && wp_verify_nonce( $_GET['wc_view_test_product_nonce'], 'wc_view_test_product' ) ) {
-			// include & load API classes
-			WC()->api->includes();
-			WC()->api->register_resources( new WC_API_Server( '/' ) );
-
-			$product_id = wc_get_product_id_by_sku( 'test-product' );
-
-			if ( empty( $product_id ) ) {
-				$result = WC()->api->WC_API_Products->create_product( array(
-					"product" => array(
-						"title"             => "Test Product",
-						"sku"               => 'test-product',
-						"type"              => "simple",
-						"regular_price"     => "21.99",
-						"description"       => "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.",
-						"short_description" => "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
-						"categories"        => array(
-							"Test Category"
-						)
-					)
-				) );
-				if ( $result && ! is_wp_error( $result ) ) {
-					$product_id = $result['product']['id'];
-				}
-			}
-
-			if ( $product_id ) {
-				wp_safe_redirect( get_permalink( $product_id ) );
-				exit;
-			}
 		}
 	}
 
