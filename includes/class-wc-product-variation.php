@@ -149,7 +149,7 @@ class WC_Product_Variation extends WC_Product {
 				 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
 				 * Attempt to get full version of the text attribute from the parent.
 				 */
-				if ( sanitize_title( $value[0] ) === $value[0] ) {
+				if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
 					$attributes = $this->parent->get_attributes();
 
 					foreach ( $attributes as $attribute ) {

@@ -624,7 +624,7 @@ class WC_Form_Handler {
 
 						// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
 						if ( ! $attribute['is_taxonomy'] ) {
-							if ( $value === sanitize_title( $value ) ) {
+							if ( $value === sanitize_title( $value ) && version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
 								$text_attributes = wc_get_text_attributes( $attribute['value'] );
 								foreach ( $text_attributes as $text_attribute ) {
 									if ( sanitize_title( $text_attribute ) === $value ) {

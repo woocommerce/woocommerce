@@ -792,7 +792,7 @@ class WC_Meta_Box_Product_Data {
 								 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
 								 * Attempt to get full version of the text attribute from the parent.
 								 */
-								if ( sanitize_title( $value[0] ) === $value[0] ) {
+								if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $post->ID, '_product_version', true ), '2.4.0', '<' ) ) {
 									foreach ( $attributes as $attribute ) {
 										if ( $key !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
 											continue;
@@ -1322,6 +1322,9 @@ class WC_Meta_Box_Product_Data {
 		if ( 'variable' == $product_type ) {
 			self::save_variations( $post_id, $post );
 		}
+
+		// Update version after saving
+		update_post_meta( $post_id, '_product_version', WC_VERSION );
 
 		// Do action for product type
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
