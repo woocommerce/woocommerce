@@ -13,7 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
-	protected $fee_cost = 0;
+	/** @var string cost passed to [fee] shortcode */
+	protected $fee_cost = '';
 
 	/**
 	 * Constructor
@@ -22,11 +23,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$this->id                 = 'flat_rate';
 		$this->method_title       = __( 'Flat Rate', 'woocommerce' );
 		$this->method_description = __( 'Flat Rate Shipping lets you charge a fixed rate for shipping.', 'woocommerce' );
+		$this->init();
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_flat_rate_shipping_add_rate', array( $this, 'calculate_extra_shipping' ), 10, 3 );
-
-		$this->init();
 	}
 
 	/**
@@ -45,73 +45,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$this->cost         = $this->get_option( 'cost' );
 		$this->type         = $this->get_option( 'type', 'class' );
 		$this->options      = $this->get_option( 'options', false ); // @deprecated in 2.4.0
-
-		// Convert old pre-2.4 options to math based costs
-		if ( get_option( 'woocommerce_flat_rates', false ) ) {
-			$math_cost_strings                   = array();
-			$math_cost_strings[ 'cost' ]         = array();
-			$math_cost_strings[ 'no_class_cost'] = array();
-			$has_classes                         = sizeof( WC()->shipping->get_shipping_classes() ) > 0;
-
-			if ( $this->cost ) {
-				$math_cost_strings[ $has_classes ? 'no_class_cost' : 'cost' ][] = $this->cost;
-			}
-
-			if ( $fee = $this->get_option( 'fee' ) ) {
-				if ( strstr( $fee, '%' ) ) {
-					$min_fee = $this->get_option( 'minimum_fee' );
-					$math_cost_strings[ $has_classes ? 'no_class_cost' : 'cost' ][] = '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]';
-				} else {
-					$math_cost_strings[ $has_classes ? 'no_class_cost' : 'cost' ][] = $fee;
-				}
-			}
-
-			if ( $flat_rates = array_filter( (array) get_option( 'woocommerce_flat_rates' ) ) ) {
-				foreach ( $flat_rates as $shipping_class => $rate ) {
-					$rate_key = 'class_cost_' . $shipping_class;
-					if ( $rate['cost'] || $rate['fee'] ) {
-						$math_cost_strings[ $rate_key ][] = $rate['cost'];
-
-						if ( strstr( $rate['fee'], '%' ) ) {
-							$min_fee = $this->get_option( 'minimum_fee' );
-							$math_cost_strings[ $rate_key ][] = '[fee percent="' . str_replace( '%', '', $rate['fee'] ) . '" min="' . esc_attr( $min_fee ) . '"]';
-						} else {
-							$math_cost_strings[ $rate_key ][] = $rate['fee'];
-						}
-					} else {
-						// default
-						$math_cost_strings[ $rate_key ] = $math_cost_strings[ 'no_class_cost' ];
-					}
-				}
-			}
-
-			switch ( $this->type ) {
-				case 'item' :
-					foreach ( $math_cost_strings as $key => $math_cost_string ) {
-						$math_cost_strings[ $key ] = array_filter( $math_cost_strings[ $key ] );
-						if ( $math_cost_strings[ $key ] ) {
-							$math_cost_strings[ $key ][0] = '( ' . $math_cost_strings[ $key ][0];
-							$math_cost_strings[ $key ][ sizeof( $math_cost_strings[ $key ] ) - 1 ] .= ' ) * [qty]';
-						}
-					}
-				break;
-			}
-
-			$math_cost_strings[ 'cost' ][] = $this->get_option( 'cost_per_order' );
-
-			// Update options
-			$settings = get_option( $this->plugin_id . $this->id . '_settings' );
-
-			foreach ( $math_cost_strings as $option_id => $math_cost_string ) {
-				$settings[ $option_id ] = implode( ' + ', $math_cost_string );
-			}
-
-			$settings['type'] = $settings['type'] === 'item' ? 'class' : $settings['type'];
-
-			update_option( $this->plugin_id . $this->id . '_settings', $settings );
-			delete_option( 'woocommerce_flat_rates' );
-			$this->init();
-		}
 	}
 
 	/**
@@ -242,7 +175,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		 * 			$method->add_rate( $new_rate );
 		 * 		}
 		 */
-		do_action( 'woocommerce_flat_rate_shipping_add_rate', $this, $rate, $package );
+		do_action( 'woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate, $package );
 	}
 
 	/**

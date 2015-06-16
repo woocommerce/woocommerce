@@ -14,8 +14,71 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
-// Maintain the old coupon logic for upgrades
+/**
+ * Coupon discount calculations
+ * Maintain the old coupon logic for upgrades
+ */
 update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
+
+/**
+ * Flat Rate Shipping
+ * Update legacy options to new math based options.
+ */
+$shipping_methods = array(
+	'woocommerce_flat_rates'                        => new WC_Shipping_Flat_Rate(),
+	'woocommerce_international_delivery_flat_rates' => new WC_Shipping_International_Delivery()
+);
+foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
+	// Stop this running more than once if routine is repeated
+	if ( version_compare( $shipping_method->get_option( 'version', 0 ), '2.4.0', '<' ) ) {
+		$has_classes                      = sizeof( WC()->shipping->get_shipping_classes() ) > 0;
+		$cost_key                         = $has_classes ? 'no_class_cost' : 'cost';
+		$min_fee                          = $shipping_method->get_option( 'minimum_fee' );
+		$math_cost_strings                = array( 'cost' => array(), 'no_class_cost' => array() );
+		$math_cost_strings[ $cost_key ][] = $shipping_method->get_option( 'cost' );
+
+		if ( $fee = $shipping_method->get_option( 'fee' ) ) {
+			$math_cost_strings[ $cost_key ][] = strstr( $fee, '%' ) ? '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]' : $fee;
+		}
+
+		foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
+			$rate_key                       = 'class_cost_' . $shipping_class->slug;
+			$math_cost_strings[ $rate_key ] = $math_cost_strings[ 'no_class_cost' ];
+		}
+
+		if ( $flat_rates = array_filter( (array) get_option( $flat_rate_option_key, array() ) ) ) {
+			foreach ( $flat_rates as $shipping_class => $rate ) {
+				$rate_key = 'class_cost_' . $shipping_class;
+				if ( $rate['cost'] || $rate['fee'] ) {
+					$math_cost_strings[ $rate_key ][] = $rate['cost'];
+					$math_cost_strings[ $rate_key ][] = strstr( $rate['fee'], '%' ) ? '[fee percent="' . str_replace( '%', '', $rate['fee'] ) . '" min="' . esc_attr( $min_fee ) . '"]' : $rate['fee'];
+				}
+			}
+		}
+
+		if ( 'item' === $shipping_method->type ) {
+			foreach ( $math_cost_strings as $key => $math_cost_string ) {
+				$math_cost_strings[ $key ] = array_filter( $math_cost_strings[ $key ] );
+				if ( $math_cost_strings[ $key ] ) {
+					$math_cost_strings[ $key ][0] = '( ' . $math_cost_strings[ $key ][0];
+					$math_cost_strings[ $key ][ sizeof( $math_cost_strings[ $key ] ) - 1 ] .= ' ) * [qty]';
+				}
+			}
+		}
+
+		$math_cost_strings[ 'cost' ][] = $shipping_method->get_option( 'cost_per_order' );
+
+		// Save settings
+		foreach ( $math_cost_strings as $option_id => $math_cost_string ) {
+			$shipping_method->settings[ $option_id ] = implode( ' + ', $math_cost_string );
+		}
+
+		$shipping_method->settings['version'] = '2.4.0';
+		$shipping_method->settings['type']    = 'item' === $shipping_method->settings['type'] ? 'class' : $shipping_method->settings['type'];
+
+		update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
+	}
+}
 
 /**
  * Update the old user API keys to the new Apps keys
@@ -58,7 +121,10 @@ if ( ! empty( $apps_keys ) ) {
 	}
 }
 
-// Make sure order.update webhooks get the woocommerce_order_edit_status hook
+/**
+ * Webhooks
+ * Make sure order.update webhooks get the woocommerce_order_edit_status hook
+ */
 $order_update_webhooks = get_posts( array(
 	'posts_per_page' => -1,
 	'post_type'      => 'shop_webhook',
@@ -70,7 +136,10 @@ foreach ( $order_update_webhooks as $order_update_webhook ) {
 	$webhook->set_topic( 'order.updated' );
 }
 
-// Update fully refunded orders to ensure they have a refund line item so reports add up
+/**
+ * Refunds for full refunded orders.
+ * Update fully refunded orders to ensure they have a refund line item so reports add up.
+ */
 $refunded_orders = get_posts( array(
 	'posts_per_page' => -1,
 	'post_type'      => 'shop_order',
