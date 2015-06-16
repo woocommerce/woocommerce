@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$cost_placeholder = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10 * [qty]</code>.', 'woocommerce' ) . '<br/>' . __( 'Supports the following placeholders: <code>[qty]</code> = number of items, <code>[cost]</code> = cost of items, <code>[fee percent="10" min="20"]</code> = Percentage based fee.', 'woocommerce' );
+$cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10 * [qty]</code>.', 'woocommerce' ) . '<br/>' . __( 'Supports the following placeholders: <code>[qty]</code> = number of items, <code>[cost]</code> = cost of items, <code>[fee percent="10" min="20"]</code> = Percentage based fee.', 'woocommerce' );
 
 /**
  * Settings for flat rate shipping
@@ -57,8 +57,8 @@ $settings = array(
 	'cost' => array(
 		'title' 		=> __( 'Cost', 'woocommerce' ),
 		'type' 			=> 'text',
-		'placeholder'	=> wc_format_localized_price( 0 ),
-		'description'	=> $cost_placeholder,
+		'placeholder'	=> '',
+		'description'	=> $cost_desc,
 		'default'		=> '',
 		'desc_tip'		=> true
 	)
@@ -74,8 +74,8 @@ if ( WC()->shipping->get_shipping_classes() ) {
 		$settings[ 'class_cost_' . $shipping_class->slug ] = array(
 			'title'       => sprintf( __( '"%s" Shipping Class Cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
 			'type'        => 'text',
-			'placeholder' => wc_format_localized_price( 0 ),
-			'description' => $cost_placeholder,
+			'placeholder' => __( 'N/A', 'woocommerce' ),
+			'description' => $cost_desc,
 			'default'     => '',
 			'desc_tip'    => true
 		);
@@ -83,8 +83,8 @@ if ( WC()->shipping->get_shipping_classes() ) {
 	$settings[ 'no_class_cost' ] = array(
 		'title'       => __( 'No Shipping Class Cost', 'woocommerce' ),
 		'type'        => 'text',
-		'placeholder' => wc_format_localized_price( 0 ),
-		'description' => $cost_placeholder,
+		'placeholder' => __( 'N/A', 'woocommerce' ),
+		'description' => $cost_desc,
 		'default'     => '',
 		'desc_tip'    => true
 	);

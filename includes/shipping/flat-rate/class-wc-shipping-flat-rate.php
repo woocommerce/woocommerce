@@ -120,10 +120,16 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		);
 
 		// Calculate the costs
-		$rate['cost'] = $this->evalulate_cost( $this->get_option( 'cost' ), array(
-			'qty'  => $this->get_package_item_qty( $package ),
-			'cost' => $package['contents_cost']
-		) );
+		$has_costs = false; // True when a cost is set. False if all costs are blank strings.
+		$cost      = $this->get_option( 'cost' );
+
+		if ( $cost !== '' ) {
+			$has_costs    = true;
+			$rate['cost'] = $this->evalulate_cost( $cost, array(
+				'qty'  => $this->get_package_item_qty( $package ),
+				'cost' => $package['contents_cost']
+			) );
+		}
 
 		// Add shipping class costs
 		$found_shipping_classes = $this->find_shipping_classes( $package );
@@ -132,10 +138,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		foreach ( $found_shipping_classes as $shipping_class => $products ) {
 			$class_cost_string = $shipping_class ? $this->get_option( 'class_cost_' . $shipping_class, '' ) : $this->get_option( 'no_class_cost', '' );
 
-			if ( ! $class_cost_string ) {
+			if ( $class_cost_string === '' ) {
 				continue;
 			}
 
+			$has_costs  = true;
 			$class_cost = $this->evalulate_cost( $class_cost_string, array(
 				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
 				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
@@ -153,7 +160,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		}
 
 		// Add the rate
-		$this->add_rate( $rate );
+		if ( $has_costs ) {
+			$this->add_rate( $rate );
+		}
 
 		/**
 		 * Developers can add additional flat rates based on this one via this action since @version 2.4
