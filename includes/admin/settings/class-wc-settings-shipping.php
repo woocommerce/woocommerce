@@ -120,7 +120,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'options' => array(
 					'shipping'     => __( 'Default to shipping address', 'woocommerce' ),
 					'billing'      => __( 'Default to billing address', 'woocommerce' ),
-					'billing_only' => __( 'Only ship to the users billing address', 'woocommerce' ),
+					'billing_only' => __( 'Only ship to the customer\'s billing address', 'woocommerce' ),
 				),
 				'autoload'        => false,
 				'desc_tip'        =>  true,
