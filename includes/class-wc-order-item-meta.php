@@ -79,6 +79,8 @@ class WC_Order_Item_Meta {
 			}
 		}
 
+		$output = apply_filters( 'woocommerce_order_items_meta_display', $output, $this );
+
 		if ( $return ) {
 			return $output;
 		} else {
@@ -129,7 +131,7 @@ class WC_Order_Item_Meta {
 			);
 		}
 
-		return $formatted_meta;
+		return apply_filters( 'woocommerce_order_items_meta_get_formatted', $formatted_meta, $this );
 	}
 
 	/**
