@@ -203,7 +203,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			if ( in_array( $current_section, array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) ) ) ) {
 				foreach ( $wc_emails->get_emails() as $email_id => $email ) {
 					if ( $current_section === sanitize_title( $email_id ) ) {
-						do_action( 'woocommerce_update_options_' . $this->id . '_' . $email_id );
+						do_action( 'woocommerce_update_options_' . $this->id . '_' . $email->id );
 					}
 				}
 			} else {
