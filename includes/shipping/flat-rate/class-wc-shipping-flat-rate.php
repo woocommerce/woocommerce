@@ -60,7 +60,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @param  array  $args
 	 * @return string
 	 */
-	protected function evalulate_cost( $sum, $args = array() ) {
+	protected function evaluate_cost( $sum, $args = array() ) {
 		include_once( 'includes/class-wc-eval-math.php' );
 
 		add_shortcode( 'fee', array( $this, 'fee' ) );
@@ -120,7 +120,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		);
 
 		// Calculate the costs
-		$rate['cost'] = $this->evalulate_cost( $this->get_option( 'cost' ), array(
+		$rate['cost'] = $this->evaluate_cost( $this->get_option( 'cost' ), array(
 			'qty'  => $this->get_package_item_qty( $package ),
 			'cost' => $package['contents_cost']
 		) );
@@ -136,7 +136,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				continue;
 			}
 
-			$class_cost = $this->evalulate_cost( $class_cost_string, array(
+			$class_cost = $this->evaluate_cost( $class_cost_string, array(
 				'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
 				'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) )
 			) );
