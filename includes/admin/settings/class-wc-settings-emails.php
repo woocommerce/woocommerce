@@ -47,11 +47,10 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$mailer          = WC()->mailer();
 		$email_templates = $mailer->get_emails();
 
-		foreach ( $email_templates as $email ) {
-
+		foreach ( $email_templates as $email_id => $email ) {
 			$title = empty( $email->title ) ? ucfirst( $email->id ) : ucfirst( $email->title );
 
-			$sections[ strtolower( get_class( $email ) ) ] = esc_html( $title );
+			$sections[ strtolower( $email_id ) ] = esc_html( $title );
 		}
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
