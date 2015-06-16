@@ -19,14 +19,9 @@ class WC_Helper_Shipping {
 			'availability'           => 'all',
 			'countries'              => '',
 			'tax_status'             => 'taxable',
-			'cost_per_order'         => '10',
-			'options'                => '',
-			'additional_costs'       => '',
 			'type'                   => 'order',
-			'additional_costs_table' => false,
 			'minimum_fee'            => '',
-			'cost'                   => '',
-			'fee'                    => '',
+			'cost'                   => '10'
 		);
 
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
