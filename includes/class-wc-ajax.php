@@ -129,7 +129,8 @@ class WC_AJAX {
 			'refund_line_items'                                => false,
 			'delete_refund'                                    => false,
 			'rated'                                            => false,
-			'update_api_key'                                   => false
+			'update_api_key'                                   => false,
+			'geolocate'                                        => true
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -2276,6 +2277,19 @@ class WC_AJAX {
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
+	}
+
+	/**
+	 * Geolocate user via AJAX
+	 */
+	public static function geolocate() {
+		$location = WC_Geolocation::geolocate_ip();
+
+		if ( empty( $location['country'] ) ) {
+			wp_send_json_error();
+		}
+
+		wp_send_json_success( $location );
 	}
 }
 

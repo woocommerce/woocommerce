@@ -92,9 +92,10 @@ class WC_Settings_General extends WC_Settings_Page {
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
 				'options'  => array(
-					''            => __( 'No address', 'woocommerce' ),
-					'base'        => __( 'Shop base address', 'woocommerce' ),
-					'geolocation' => __( 'Geolocate address', 'woocommerce' ),
+					''                 => __( 'No address', 'woocommerce' ),
+					'base'             => __( 'Shop base address', 'woocommerce' ),
+					'geolocation'      => __( 'Geolocate address', 'woocommerce' ),
+					'geolocation_ajax' => __( 'Geolocate address via ajax', 'woocommerce' ),
 				),
 			),
 

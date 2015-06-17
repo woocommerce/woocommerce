@@ -193,9 +193,15 @@ class WC_Frontend_Scripts {
 
 		switch ( $handle ) {
 			case 'woocommerce' :
+				$default  = wc_get_base_location();
 				return array(
-					'ajax_url'    => WC()->ajax_url(),
-					'wc_ajax_url' => WC_AJAX::get_endpoint()
+					'ajax_url'       => WC()->ajax_url(),
+					'wc_ajax_url'    => WC_AJAX::get_endpoint(),
+					'home_url'       => home_url(),
+					'geolocation'    => isset( $_GET['location'] ) ? wc_clean( $_GET['location'] ) : '',
+					'base_country'   => $default['country'],
+					'base_state'     => $default['state'],
+					'is_woocommerce' => is_woocommerce() ? 1 : 0
 				);
 			break;
 			case 'wc-single-product' :
