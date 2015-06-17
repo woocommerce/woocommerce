@@ -1109,7 +1109,8 @@ class WC_Meta_Box_Product_Data {
 			}
 
 			if ( $date_to && ! $date_from ) {
-				update_post_meta( $post_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+				$date_from = date( 'Y-m-d' );
+				update_post_meta( $post_id, '_sale_price_dates_from', strtotime( $date_from ) );
 			}
 
 			// Update price if on sale
@@ -1119,7 +1120,7 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
 			}
 
-			if ( '' !== $_POST['_sale_price'] && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== $_POST['_sale_price'] && $date_from && strtotime( $date_from ) <= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $post_id, '_price', wc_format_decimal( $_POST['_sale_price'] ) );
 			}
 
