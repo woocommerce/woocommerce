@@ -26,7 +26,7 @@ jQuery( function( $ ) {
 
 	function add_geolocation_to_links() {
 		if ( woocommerce_params.geolocation ) {
-			$( "a[href*='" + woocommerce_params.home_url + "'], a[href*='/']").each( function() {
+			$( "a[href^='" + woocommerce_params.home_url + "'], a[href^='/']").each( function() {
 				var $this = $(this);
 				var href  = $this.attr('href');
 
@@ -43,7 +43,7 @@ jQuery( function( $ ) {
 		}
 	}
 
-	if ( $supports_html5_storage && woocommerce_params.is_woocommerce == 1 ) {
+	if ( $supports_html5_storage && '1' === woocommerce_params.is_woocommerce ) {
 
 		// Redirect based on geolocation to get around static caching
 		var $geolocate_customer = {
@@ -60,7 +60,7 @@ jQuery( function( $ ) {
 
 		function handle_geolocation_redirect( country, state ) {
 			// Redirect if not base location
-			if ( country != woocommerce_params.base_country || state != woocommerce_params.base_state ) {
+			if ( country !== woocommerce_params.base_country || state !== woocommerce_params.base_state ) {
 				var this_page = window.location.toString();
 
 				if ( state ) {
@@ -76,15 +76,15 @@ jQuery( function( $ ) {
 		}
 
 		if ( window.location.toString().indexOf( 'location=' ) < 0 ) {
-			if ( sessionStorage.getItem( 'wc_geolocated_country' ) ) {
+			if ( ! sessionStorage.getItem( 'wc_geolocated_country' ) ) {
 				$.ajax( $geolocate_customer );
-			} else if ( sessionStorage.getItem( 'wc_geolocated_country' ) ) {
+			} else {
 				handle_geolocation_redirect( sessionStorage.getItem( 'wc_geolocated_country' ), sessionStorage.getItem( 'wc_geolocated_state' ) );
 			}
 		}
 	}
 
-	$( document.body ).on('added_to_cart', function() {
+	$( document.body ).on( 'added_to_cart', function() {
 		add_geolocation_to_links();
 	});
 
