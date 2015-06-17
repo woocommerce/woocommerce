@@ -39,7 +39,6 @@ class WC_Admin_Setup_Wizard {
 		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && current_user_can( 'manage_woocommerce' ) ) {
 			add_action( 'admin_menu', array( $this, 'admin_menus' ) );
 			add_action( 'admin_init', array( $this, 'setup_wizard' ) );
-			shuffle( $this->tweets );
 		}
 	}
 
@@ -258,6 +257,7 @@ class WC_Admin_Setup_Wizard {
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
 		<?php
@@ -267,6 +267,8 @@ class WC_Admin_Setup_Wizard {
 	 * Save Page Settings
 	 */
 	public function wc_setup_pages_save() {
+		check_admin_referer( 'wc-setup' );
+
 		WC_Install::create_pages();
 		wp_redirect( $this->get_next_step_link() );
 		exit;
@@ -364,6 +366,7 @@ class WC_Admin_Setup_Wizard {
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
 		<?php
@@ -373,6 +376,8 @@ class WC_Admin_Setup_Wizard {
 	 * Save Locale Settings
 	 */
 	public function wc_setup_locale_save() {
+		check_admin_referer( 'wc-setup' );
+
 		$store_location = sanitize_text_field( $_POST['store_location'] );
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
@@ -512,6 +517,7 @@ class WC_Admin_Setup_Wizard {
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
 		<?php
@@ -521,6 +527,8 @@ class WC_Admin_Setup_Wizard {
 	 * Save shipping and tax options
 	 */
 	public function wc_setup_shipping_taxes_save() {
+		check_admin_referer( 'wc-setup' );
+
 		$woocommerce_calc_shipping = isset( $_POST['woocommerce_calc_shipping'] ) ? 'yes' : 'no';
 		$woocommerce_calc_taxes    = isset( $_POST['woocommerce_calc_taxes'] ) ? 'yes' : 'no';
 
@@ -650,6 +658,7 @@ class WC_Admin_Setup_Wizard {
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
+				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
 		<?php
@@ -659,6 +668,8 @@ class WC_Admin_Setup_Wizard {
 	 * Payments Step save
 	 */
 	public function wc_setup_payments_save() {
+		check_admin_referer( 'wc-setup' );
+
 		$paypal_settings            = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
 		$cheque_settings            = array_filter( (array) get_option( 'woocommerce_cheque_settings', array() ) );
 		$cod_settings               = array_filter( (array) get_option( 'woocommerce_cod_settings', array() ) );
@@ -694,7 +705,6 @@ class WC_Admin_Setup_Wizard {
 
 		} elseif ( isset( $_GET['wc_tracker_optout'] ) && isset( $_GET['wc_tracker_nonce'] ) && wp_verify_nonce( $_GET['wc_tracker_nonce'], 'wc_tracker_optout' ) ) {
 			update_option( 'woocommerce_allow_tracking', 'no' );
-
 		}
 	}
 
@@ -703,6 +713,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_ready() {
 		$this->wc_setup_ready_actions();
+		shuffle( $this->tweets );
 		?>
 		<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
