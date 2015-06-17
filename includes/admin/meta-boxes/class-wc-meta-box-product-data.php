@@ -974,8 +974,8 @@ class WC_Meta_Box_Product_Data {
 
 				if ( ! $unique_sku ) {
 					// set woocommerce_unique_skus filter true to require unique variation skus and false to allow non-unique variation skus.
-					$unique_skus = apply_filters( 'woocommerce_unique_skus' , true);
-					if( $unique_skus == true ){
+					$unique_skus = apply_filters( 'woocommerce_unique_skus' , true );
+					if ( $unique_skus == true ) {
 						WC_Admin_Meta_Boxes::add_error( __( 'Variation SKU must be unique.', 'woocommerce' ) );
 					} else {
 						WC_Admin_Meta_Boxes::add_error( __( 'Warning: You added a non-unique Variation SKU.', 'woocommerce' ) );
