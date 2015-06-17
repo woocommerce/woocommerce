@@ -202,13 +202,10 @@ class WC_Frontend_Scripts {
 				);
 			break;
 			case 'wc-geolocation' :
-				$default  = wc_get_base_location();
 				return array(
 					'wc_ajax_url'    => WC_AJAX::get_endpoint(),
 					'home_url'       => home_url(),
 					'geolocation'    => isset( $_GET['location'] ) ? wc_clean( $_GET['location'] ) : '',
-					'base_country'   => $default['country'],
-					'base_state'     => $default['state'],
 					'is_woocommerce' => is_woocommerce() ? 1 : 0
 				);
 			break;
