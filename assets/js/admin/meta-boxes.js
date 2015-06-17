@@ -35,9 +35,6 @@ jQuery( function ( $ ) {
 
 	// Tabs
 	$( 'ul.wc-tabs' ).show();
-	$( 'div.panel-wrap' ).each( function() {
-		$( this ).find( 'div.panel:not(:first)' ).hide();
-	});
 	$( 'ul.wc-tabs a' ).click( function() {
 		var panel_wrap = $( this ).closest( 'div.panel-wrap' );
 		$( 'ul.wc-tabs li', panel_wrap ).removeClass( 'active' );
@@ -46,7 +43,10 @@ jQuery( function ( $ ) {
 		$( $( this ).attr( 'href' ) ).show();
 		return false;
 	});
-	$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).click();
+	$( 'div.panel-wrap' ).each( function() {
+		$( this ).find( 'div.panel:not(:first)' ).hide();
+		$( this ).find( 'ul.wc-tabs li' ).eq( 0 ).find( 'a' ).click();
+	});
 
 	// Date Picker
 	$( document.body ).on( 'wc-init-datepickers', function() {
