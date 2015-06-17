@@ -70,6 +70,7 @@ class WC_Emails {
 			'woocommerce_order_status_on-hold_to_cancelled',
 			'woocommerce_order_status_completed',
 			'woocommerce_order_status_refunded',
+			'woocommerce_order_partially_refunded',
 			'woocommerce_new_customer_note',
 			'woocommerce_created_customer'
 		) );
@@ -120,15 +121,16 @@ class WC_Emails {
 		// Include email classes
 		include_once( 'emails/class-wc-email.php' );
 
-		$this->emails['WC_Email_New_Order']                 = include( 'emails/class-wc-email-new-order.php' );
-		$this->emails['WC_Email_Cancelled_Order']           = include( 'emails/class-wc-email-cancelled-order.php' );
-		$this->emails['WC_Email_Customer_Processing_Order'] = include( 'emails/class-wc-email-customer-processing-order.php' );
-		$this->emails['WC_Email_Customer_Completed_Order']  = include( 'emails/class-wc-email-customer-completed-order.php' );
-		$this->emails['WC_Email_Customer_Refunded_Order']   = include( 'emails/class-wc-email-customer-refunded-order.php' );
-		$this->emails['WC_Email_Customer_Invoice']          = include( 'emails/class-wc-email-customer-invoice.php' );
-		$this->emails['WC_Email_Customer_Note']             = include( 'emails/class-wc-email-customer-note.php' );
-		$this->emails['WC_Email_Customer_Reset_Password']   = include( 'emails/class-wc-email-customer-reset-password.php' );
-		$this->emails['WC_Email_Customer_New_Account']      = include( 'emails/class-wc-email-customer-new-account.php' );
+		$this->emails['WC_Email_New_Order']                 		= include( 'emails/class-wc-email-new-order.php' );
+		$this->emails['WC_Email_Cancelled_Order']           		= include( 'emails/class-wc-email-cancelled-order.php' );
+		$this->emails['WC_Email_Customer_Processing_Order'] 		= include( 'emails/class-wc-email-customer-processing-order.php' );
+		$this->emails['WC_Email_Customer_Completed_Order']  		= include( 'emails/class-wc-email-customer-completed-order.php' );
+		$this->emails['WC_Email_Customer_Refunded_Order']   		= include( 'emails/class-wc-email-customer-refunded-order.php' );
+		$this->emails['WC_Email_Customer_Partially_Refunded_Order'] = include( 'emails/class-wc-email-customer-partially-refunded-order.php' );
+		$this->emails['WC_Email_Customer_Invoice']          		= include( 'emails/class-wc-email-customer-invoice.php' );
+		$this->emails['WC_Email_Customer_Note']             		= include( 'emails/class-wc-email-customer-note.php' );
+		$this->emails['WC_Email_Customer_Reset_Password']   		= include( 'emails/class-wc-email-customer-reset-password.php' );
+		$this->emails['WC_Email_Customer_New_Account']      		= include( 'emails/class-wc-email-customer-new-account.php' );
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 
