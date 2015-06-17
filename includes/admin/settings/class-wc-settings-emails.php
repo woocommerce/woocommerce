@@ -174,9 +174,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 		if ( $current_section ) {
 
-			foreach ( $email_templates as $email ) {
+			foreach ( $email_templates as $email_key => $email ) {
 
-				if ( strtolower( get_class( $email ) ) == $current_section ) {
+				if ( strtolower( $email_key ) == $current_section ) {
 					$email->admin_options();
 					break;
 				}
