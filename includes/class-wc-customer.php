@@ -48,9 +48,17 @@ class WC_Customer {
 	public function __construct() {
 		$this->_data = (array) WC()->session->get( 'customer' );
 
+		// No data - set defaults
 		if ( empty( $this->_data ) ) {
-			// Defaults
 			$this->set_default_data();
+
+		// Using geolocation via ajax and query string changes - set defaults (based on QS)
+		} elseif ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! empty( $_GET['location'] ) ) {
+			$location = wc_format_country_state_string( wc_clean( $_GET['location'] ) );
+
+			if ( $location['country'] !== $this->_data['country'] || $location['state'] !== $this->_data['state'] ) {
+				$this->set_default_data( false );
+			}
 		}
 
 		// When leaving or ending page load, store data
@@ -336,7 +344,7 @@ class WC_Customer {
 	/**
 	 * Set default data for a customer
 	 */
-	public function set_default_data() {
+	public function set_default_data( $get_user_profile_data = true ) {
 		$this->_data = array(
 			'postcode'            => '',
 			'city'                => '',
@@ -354,7 +362,7 @@ class WC_Customer {
 			'calculated_shipping' => false
 		);
 
-		if ( is_user_logged_in() ) {
+		if ( is_user_logged_in() && $get_user_profile_data ) {
 			foreach ( $this->_data as $key => $value ) {
 				$meta_value          = get_user_meta( get_current_user_id(), ( false === strstr( $key, 'shipping_' ) ? 'billing_' : '' ) . $key, true );
 				$this->_data[ $key ] = $meta_value ? $meta_value : $this->_data[ $key ];
