@@ -252,7 +252,6 @@ class WC_Customer {
 		return $this->shipping_state;
 	}
 
-
 	/**
 	 * Gets the country from the current session.
 	 *
@@ -262,7 +261,6 @@ class WC_Customer {
 		return $this->shipping_country;
 	}
 
-
 	/**
 	 * Gets the postcode from the current session.
 	 *
@@ -271,7 +269,6 @@ class WC_Customer {
 	public function get_shipping_postcode() {
 		return empty( $this->shipping_postcode ) ? '' : wc_format_postcode( $this->shipping_postcode, $this->get_shipping_country() );
 	}
-
 
 	/**
 	 * Gets the city from the current session.
@@ -314,27 +311,23 @@ class WC_Customer {
 		}
 
 		if ( 'base' === $tax_based_on || ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && empty( $_GET['location'] ) && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WOOCOMMERCE_CART' ) ) ) {
-
 			$default  = wc_get_base_location();
 			$country  = $default['country'];
 			$state    = $default['state'];
 			$postcode = '';
 			$city     = '';
 
-		} elseif ( $tax_based_on == 'billing' ) {
-
+		} elseif ( 'billing' === $tax_based_on ) {
 			$country  = $this->get_country();
 			$state    = $this->get_state();
 			$postcode = $this->get_postcode();
 			$city     = $this->get_city();
 
 		} else {
-
 			$country  = $this->get_shipping_country();
 			$state    = $this->get_shipping_state();
 			$postcode = $this->get_shipping_postcode();
 			$city     = $this->get_shipping_city();
-
 		}
 
 		return apply_filters( 'woocommerce_customer_taxable_address', array( $country, $state, $postcode, $city ) );
@@ -384,7 +377,6 @@ class WC_Customer {
 			$this->_data['shipping_state'] = $this->_data['state'];
 		}
 	}
-
 
 	/**
 	 * Sets session data for the location.

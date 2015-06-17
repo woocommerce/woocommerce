@@ -762,7 +762,6 @@ function wc_get_customer_default_location() {
 			if ( ! empty( $_GET['location'] ) ) {
 				$location = wc_format_country_state_string( wc_clean( $_GET['location'] ) );
 			}
-
 			// Base fallback
 			if ( empty( $location['country'] ) ) {
 				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
