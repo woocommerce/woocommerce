@@ -77,7 +77,7 @@ global $product, $post;
 
 			<div class="variations_button">
 				<?php woocommerce_quantity_input( array(
-					'input_value' => ( isset( $_POST['quantity'] ) ? $_POST['quantity'] : 1 )
+					'input_value' => ( isset( $_POST['quantity'] ) ? wc_stock_amount( $_POST['quantity'] ) : 1 )
 				) ); ?>
 				<button type="submit" class="single_add_to_cart_button button alt"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
 			</div>
