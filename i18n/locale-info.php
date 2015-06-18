@@ -1,6 +1,16 @@
 <?php
 
 return array(
+	'BR' => array(
+		'currency_code'  => 'BRL',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array()
+	),
 	'FR' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right',
