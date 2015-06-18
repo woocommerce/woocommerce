@@ -104,6 +104,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 .text {
     color: <?php echo esc_attr( $text ); ?>;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
 }
 
 .link {
