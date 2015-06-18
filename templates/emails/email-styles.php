@@ -17,6 +17,7 @@ $base_text       = wc_light_or_dark( $base, '#202020', '#ffffff' );
 $text            = get_option( 'woocommerce_email_text_color' );
 
 $bg_darker_10    = wc_hex_darker( $bg, 10 );
+$body_darker_10  = wc_hex_darker( $body, 10 );
 $base_lighter_20 = wc_hex_lighter( $base, 20 );
 $base_lighter_40 = wc_hex_lighter( $base, 40 );
 $text_lighter_20 = wc_hex_lighter( $text, 20 );
@@ -98,6 +99,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 .td {
     color: <?php echo esc_attr( $text_lighter_20 ); ?>;
+    border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 }
 
 .link {
