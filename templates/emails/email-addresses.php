@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<h3><?php _e( 'Billing address', 'woocommerce' ); ?></h3>
 
-			<p><?php echo $order->get_formatted_billing_address(); ?></p>
+			<p class="text"><?php echo $order->get_formatted_billing_address(); ?></p>
 
 		</td>
 
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<h3><?php _e( 'Shipping address', 'woocommerce' ); ?></h3>
 
-			<p><?php echo $shipping; ?></p>
+			<p class="text"><?php echo $shipping; ?></p>
 
 		</td>
 
