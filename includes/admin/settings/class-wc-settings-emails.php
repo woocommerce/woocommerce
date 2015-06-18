@@ -47,11 +47,10 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$mailer          = WC()->mailer();
 		$email_templates = $mailer->get_emails();
 
-		foreach ( $email_templates as $email ) {
-
+		foreach ( $email_templates as $email_key => $email ) {
 			$title = empty( $email->title ) ? ucfirst( $email->id ) : ucfirst( $email->title );
 
-			$sections[ strtolower( get_class( $email ) ) ] = esc_html( $title );
+			$sections[ strtolower( $email_key ) ] = esc_html( $title );
 		}
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
@@ -175,9 +174,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 		if ( $current_section ) {
 
-			foreach ( $email_templates as $email ) {
+			foreach ( $email_templates as $email_key => $email ) {
 
-				if ( strtolower( get_class( $email ) ) == $current_section ) {
+				if ( strtolower( $email_key ) == $current_section ) {
 					$email->admin_options();
 					break;
 				}
@@ -202,8 +201,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			$wc_emails = WC_Emails::instance();
 
 			if ( in_array( $current_section, array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) ) ) ) {
-				foreach ( $wc_emails->get_emails() as $email ) {
-					if ( $current_section === sanitize_title( get_class( $email ) ) ) {
+				foreach ( $wc_emails->get_emails() as $email_id => $email ) {
+					if ( $current_section === sanitize_title( $email_id ) ) {
 						do_action( 'woocommerce_update_options_' . $this->id . '_' . $email->id );
 					}
 				}

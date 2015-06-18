@@ -2,10 +2,10 @@
 /**
  * WooCommerce Admin Functions
  *
- * @author      WooThemes
- * @category    Core
- * @package     WooCommerce/Admin/Functions
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Core
+ * @package  WooCommerce/Admin/Functions
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -60,12 +60,11 @@ function wc_get_screen_ids() {
 function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
 	global $wpdb;
 
+	$option_value     = get_option( $option );
 	$page_found_trash = false;
 
-	$option_value = get_option( $option );
-
 	if ( $option_value > 0 && ( $page_object = get_post( $option_value ) ) ) {
-		if( 'trash' != $page_object->post_status ) {
+		if ( 'trash' != $page_object->post_status ) {
 			return -1;
 		} else {
 			$page_found_trash = true;
@@ -74,13 +73,14 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page with the specified page content (typically a shortcode)
-		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
+		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
 	} else {
 		// Search for an existing page with the specified page slug
-		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM " . $wpdb->posts . " WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
+		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
 	}
 
 	$page_found = apply_filters( 'woocommerce_create_page_id', $page_found, $slug, $page_content );
+
 
 	if ( $page_found && ! $page_found_trash ) {
 		if ( ! $option_value ) {
@@ -89,8 +89,12 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 		return $page_found;
 	}
+	elseif ( ! $page_found && $page_found_trash ) {
+		// Page was found in trash but it did not have the correct shortcode (so just recreate it)
+		$page_found_trash = false;
+	}
 
-	if( ! $page_found_trash ) {
+	if ( ! $page_found_trash ) {
 		$page_data = array(
 			'post_status'    => 'publish',
 			'post_type'      => 'page',
@@ -107,7 +111,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 			'ID'             => $page_found,
 			'post_status'    => 'publish',
 		);
-		$page_id   = wp_update_post( $page_data );
+		$page_id = wp_update_post( $page_data );
 	}
 
 	if ( $option ) {
@@ -241,16 +245,24 @@ function wc_save_order_items( $order_id, $items ) {
 
 	foreach ( $meta_keys as $id => $meta_key ) {
 		$meta_value = ( empty( $meta_values[ $id ] ) && ! is_numeric( $meta_values[ $id ] ) ) ? '' : $meta_values[ $id ];
-		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_order_itemmeta',
-			array(
-				'meta_key'   => wp_unslash( $meta_key ),
-				'meta_value' => wp_unslash( $meta_value )
-			),
-			array( 'meta_id' => $id ),
-			array( '%s', '%s' ),
-			array( '%d' )
-		);
+
+		// Delele blank item meta entries
+		if ( $meta_key === '' && $meta_value === '' ) {
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $id ) );
+		}
+		else {
+
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_order_itemmeta',
+				array(
+					'meta_key'   => wp_unslash( $meta_key ),
+					'meta_value' => wp_unslash( $meta_value )
+				),
+				array( 'meta_id' => $id ),
+				array( '%s', '%s' ),
+				array( '%d' )
+			);
+		}
 	}
 
 	// Shipping Rows

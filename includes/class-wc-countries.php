@@ -479,12 +479,6 @@ class WC_Countries {
 	 */
 	public function get_default_address_fields() {
 		$fields = array(
-			'country' => array(
-				'type'     => 'country',
-				'label'    => __( 'Country', 'woocommerce' ),
-				'required' => true,
-				'class'    => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
-			),
 			'first_name' => array(
 				'label'    => __( 'First Name', 'woocommerce' ),
 				'required' => true,
@@ -499,6 +493,12 @@ class WC_Countries {
 			'company' => array(
 				'label' => __( 'Company Name', 'woocommerce' ),
 				'class' => array( 'form-row-wide' ),
+			),
+			'country' => array(
+				'type'     => 'country',
+				'label'    => __( 'Country', 'woocommerce' ),
+				'required' => true,
+				'class'    => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
 			),
 			'address_1' => array(
 				'label'       => __( 'Address', 'woocommerce' ),
@@ -946,27 +946,25 @@ class WC_Countries {
 
 		foreach ( $fields as $key => $value ) {
 			$address_fields[ $type . $key ] = $value;
-		}
 
-		// Billing/Shipping Specific
-		if ( $type == 'billing_' ) {
-
-			$address_fields['billing_email'] = array(
-				'label'		=> __( 'Email Address', 'woocommerce' ),
-				'required'	=> true,
-				'type'		=> 'email',
-				'class'		=> array( 'form-row-first' ),
-				'validate'	=> array( 'email' ),
-			);
-
-			$address_fields['billing_phone'] = array(
-				'label'    	=> __( 'Phone', 'woocommerce' ),
-				'required' 	=> true,
-				'type'		=> 'tel',
-				'class'    	=> array( 'form-row-last' ),
-				'clear'    	=> true,
-				'validate' 	=> array( 'phone' ),
-			);
+			// Add email and phone after company or last
+			if ( $type == 'billing_' && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && $key === end( array_keys( $fields ) ) ) ) ) {
+				$address_fields['billing_email'] = array(
+					'label'		=> __( 'Email Address', 'woocommerce' ),
+					'required'	=> true,
+					'type'		=> 'email',
+					'class'		=> array( 'form-row-first' ),
+					'validate'	=> array( 'email' ),
+				);
+				$address_fields['billing_phone'] = array(
+					'label'    	=> __( 'Phone', 'woocommerce' ),
+					'required' 	=> true,
+					'type'		=> 'tel',
+					'class'    	=> array( 'form-row-last' ),
+					'clear'    	=> true,
+					'validate' 	=> array( 'phone' ),
+				);
+			}
 		}
 
 		$address_fields = apply_filters( 'woocommerce_' . $type . 'fields', $address_fields, $country );

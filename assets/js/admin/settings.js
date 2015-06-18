@@ -19,14 +19,14 @@ jQuery( window ).load( function() {
 		border: true
 	}).click( function() {
 		jQuery( '.iris-picker' ).hide();
-		jQuery( this ).closest( '.color_box, td' ).find( '.iris-picker' ).show();
+		jQuery( this ).closest( 'td' ).find( '.iris-picker' ).show();
 	});
 
 	jQuery( 'body' ).click( function() {
 		jQuery( '.iris-picker' ).hide();
 	});
 
-	jQuery( '.color_box, .colorpick' ).click( function( event ) {
+	jQuery( '.colorpick' ).click( function( event ) {
 		event.stopPropagation();
 	});
 

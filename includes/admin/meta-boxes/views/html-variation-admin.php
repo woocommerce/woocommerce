@@ -26,7 +26,7 @@ extract( $variation_data );
 				}
 
 				// Get current value for variation (if set)
-				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ][0] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ][0] : '';
+				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] : '';
 
 				// Name will be something like attribute_pa_color
 				echo '<select name="attribute_' . sanitize_title( $attribute['name'] ) . '[' . $loop . ']"><option value="">' . __( 'Any', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
@@ -42,10 +42,10 @@ extract( $variation_data );
 
 				} else {
 
-					$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
+					$options = wc_get_text_attributes( $attribute['value'] );
 
 					foreach ( $options as $option ) {
-						echo '<option ' . selected( sanitize_title( $variation_selected_value ), sanitize_title( $option ), false ) . ' value="' . esc_attr( sanitize_title( $option ) ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+						echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
 					}
 
 				}
@@ -112,7 +112,7 @@ extract( $variation_data );
 				<div class="show_if_variation_manage_stock" style="display: none;">
 					<p class="form-row form-row-first">
 						<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-						<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
+						<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( wc_stock_amount( $_stock ) ); ?>" step="any" />
 					</p>
 					<p class="form-row form-row-last">
 						<label><?php _e( 'Allow Backorders?', 'woocommerce' ); ?></label>
@@ -200,7 +200,7 @@ extract( $variation_data );
 						<thead>
 							<div>
 								<th><?php _e( 'Name', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the name of the download shown to the customer.', 'woocommerce' ); ?>">[?]</span></th>
-								<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to.', 'woocommerce' ); ?>">[?]</span></th>
+								<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to. URLs entered here should already be encoded.', 'woocommerce' ); ?>">[?]</span></th>
 								<th>&nbsp;</th>
 							</div>
 						</thead>

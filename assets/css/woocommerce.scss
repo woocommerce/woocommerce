@@ -89,6 +89,7 @@ p.demo_store {
 		list-style: none outside !important;
 		@include clearfix();
 		width: auto;
+		word-wrap: break-word;
 
 		&:before {
 			font-family: "WooCommerce";

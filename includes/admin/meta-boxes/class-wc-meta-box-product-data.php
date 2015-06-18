@@ -190,7 +190,7 @@ class WC_Meta_Box_Product_Data {
 								<tr>
 									<th class="sort">&nbsp;</th>
 									<th><?php _e( 'Name', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the name of the download shown to the customer.', 'woocommerce' ); ?>">[?]</span></th>
-									<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to.', 'woocommerce' ); ?>">[?]</span></th>
+									<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to. URLs entered here should already be encoded.', 'woocommerce' ); ?>">[?]</span></th>
 									<th>&nbsp;</th>
 								</tr>
 							</thead>
@@ -785,9 +785,28 @@ class WC_Meta_Box_Product_Data {
 
 							// Add the variation attributes
 							foreach ( $variation_meta as $key => $value ) {
-								if ( false !== strpos( $key, 'attribute_' ) ) {
-									$variation_data[ $key ] = $value;
+								if ( 0 !== strpos( $key, 'attribute_' ) ) {
+									continue;
 								}
+								/**
+								 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+								 * Attempt to get full version of the text attribute from the parent.
+								 */
+								if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $post->ID, '_product_version', true ), '2.4.0', '<' ) ) {
+									foreach ( $attributes as $attribute ) {
+										if ( $key !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+											continue;
+										}
+										$text_attributes = wc_get_text_attributes( $attribute['value'] );
+
+										foreach ( $text_attributes as $text_attribute ) {
+											if ( sanitize_title( $text_attribute ) === $value[0] ) {
+												$value[0] = $text_attribute;
+											}
+										}
+									}
+								}
+								$variation_data[ $key ] = $value[0];
 							}
 
 							// Formatting
@@ -800,7 +819,6 @@ class WC_Meta_Box_Product_Data {
 							$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
 							$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
 							$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
-							$variation_data['_stock']         = wc_stock_amount( $variation_data['_stock'] );
 
 							// Stock BW compat
 							if ( '' !== $variation_data['_stock'] ) {
@@ -849,10 +867,10 @@ class WC_Meta_Box_Product_Data {
 
 							} else {
 
-								$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
+								$options = wc_get_text_attributes( $attribute['value'] );
 
 								foreach ( $options as $option ) {
-									echo '<option ' . selected( sanitize_title( $variation_selected_value ), sanitize_title( $option ), false ) . ' value="' . esc_attr( sanitize_title( $option ) ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
+									echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
 								}
 
 							}
@@ -1033,7 +1051,7 @@ class WC_Meta_Box_Product_Data {
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 					// Text based, separate by pipe
-					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'trim', array_map( 'wp_kses_post', array_map( 'stripslashes', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) ) ) );
+					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', wc_get_text_attributes( $attribute_values[ $i ] ) ) );
 
 					// Custom attribute - Add attribute to array and set the values
 					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -1091,7 +1109,8 @@ class WC_Meta_Box_Product_Data {
 			}
 
 			if ( $date_to && ! $date_from ) {
-				update_post_meta( $post_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+				$date_from = date( 'Y-m-d' );
+				update_post_meta( $post_id, '_sale_price_dates_from', strtotime( $date_from ) );
 			}
 
 			// Update price if on sale
@@ -1101,7 +1120,7 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
 			}
 
-			if ( '' !== $_POST['_sale_price'] && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== $_POST['_sale_price'] && $date_from && strtotime( $date_from ) <= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $post_id, '_price', wc_format_decimal( $_POST['_sale_price'] ) );
 			}
 
@@ -1230,7 +1249,7 @@ class WC_Meta_Box_Product_Data {
 				$file_names         = isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array();
 				$file_urls          = isset( $_POST['_wc_file_urls'] )  ? array_map( 'trim', $_POST['_wc_file_urls'] ) : array();
 				$file_url_size      = sizeof( $file_urls );
-				$allowed_file_types = get_allowed_mime_types();
+				$allowed_file_types = apply_filters( 'woocommerce_downloadable_file_allowed_mime_types', get_allowed_mime_types() );
 
 				for ( $i = 0; $i < $file_url_size; $i ++ ) {
 					if ( ! empty( $file_urls[ $i ] ) ) {
@@ -1303,6 +1322,9 @@ class WC_Meta_Box_Product_Data {
 		if ( 'variable' == $product_type ) {
 			self::save_variations( $post_id, $post );
 		}
+
+		// Update version after saving
+		update_post_meta( $post_id, '_product_version', WC_VERSION );
 
 		// Do action for product type
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
@@ -1564,14 +1586,20 @@ class WC_Meta_Box_Product_Data {
 				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
 				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
 
-				// Update taxonomies - don't use wc_clean as it destroys sanitized characters
+				// Update Attributes
 				$updated_attribute_keys = array();
 				foreach ( $attributes as $attribute ) {
-
 					if ( $attribute['is_variation'] ) {
-						$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
-						$value         = isset( $_POST[ $attribute_key ][ $i ] ) ? sanitize_title( stripslashes( $_POST[ $attribute_key ][ $i ] ) ) : '';
+						$attribute_key            = 'attribute_' . sanitize_title( $attribute['name'] );
 						$updated_attribute_keys[] = $attribute_key;
+
+						if ( $attribute['is_taxonomy'] ) {
+							// Don't use wc_clean as it destroys sanitized characters
+							$value = isset( $_POST[ $attribute_key ][ $i ] ) ? sanitize_title( stripslashes( $_POST[ $attribute_key ][ $i ] ) ) : '';
+						} else {
+							$value = isset( $_POST[ $attribute_key ][ $i ] ) ? wc_clean( stripslashes( $_POST[ $attribute_key ][ $i ] ) ) : '';
+						}
+
 						update_post_meta( $variation_id, $attribute_key, $value );
 					}
 				}
