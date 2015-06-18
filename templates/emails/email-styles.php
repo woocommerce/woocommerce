@@ -100,6 +100,10 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 }
 
+.link {
+    color: <?php echo esc_attr( $base ); ?>;
+}
+
 #header_wrapper {
     padding: 36px 48px;
     display: block;
