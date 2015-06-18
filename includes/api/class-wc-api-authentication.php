@@ -111,7 +111,8 @@ class WC_API_Authentication {
 	 * @since 2.4
 	 */
 	private function exit_with_unauthorized_headers() {
-		header( 'WWW-Authenticate: Basic realm="' . __( 'WooCommerce API', 'woocommerce' ) . '"' );
+		$auth_message = __( 'WooCommerce API. Use a consumer key in the username field and a consumer secret in the password field', 'woocommerce' );
+		header( 'WWW-Authenticate: Basic realm="' . $auth_message . '"' );
 		header( 'HTTP/1.0 401 Unauthorized' );
 		esc_html_e( 'A valid consumer key and secret must be provided to access this resource', 'woocommerce' );
 		exit;
