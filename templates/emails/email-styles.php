@@ -96,15 +96,18 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 
+#header_wrapper {
+    padding: 36px 48px;
+    display: block;
+}
+
 h1 {
     color: <?php echo esc_attr( $base ); ?>;
-    display: block;
     font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
     font-size: 30px;
     font-weight: 300;
     line-height: 150%;
     margin: 0;
-    padding: 36px 48px;
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
     text-shadow: 0 1px 0 <?php echo esc_attr( $base_lighter_20 ); ?>;
     -webkit-font-smoothing: antialiased;
