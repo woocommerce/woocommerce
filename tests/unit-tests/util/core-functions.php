@@ -107,10 +107,10 @@ class Core_Functions extends \WC_Unit_Test_Case {
 		$base_uri = get_home_url();
 
 		// base uri
-		$this->assertEquals( "$base_uri/wc-api/v2/", get_woocommerce_api_url( null ) );
+		$this->assertEquals( "$base_uri/wc-api/v3/", get_woocommerce_api_url( null ) );
 
 		// path
-		$this->assertEquals( "$base_uri/wc-api/v2/orders", get_woocommerce_api_url( 'orders' ) );
+		$this->assertEquals( "$base_uri/wc-api/v3/orders", get_woocommerce_api_url( 'orders' ) );
 	}
 
 	/**
