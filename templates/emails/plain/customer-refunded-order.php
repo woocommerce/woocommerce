@@ -28,6 +28,10 @@ echo "\n" . $order->email_order_items_table( true, false, true, '', '', true );
 
 echo "==========\n\n";
 
+if ( $refund && $refund->get_refund_amount() > 0 ) {
+	echo __( 'Amount Refunded', 'woocommerce' ) . "\t " . $refund->get_formatted_refund_amount() . "\n";
+}
+
 if ( $totals = $order->get_order_item_totals() ) {
 	foreach ( $totals as $total ) {
 		echo $total['label'] . "\t " . $total['value'] . "\n";

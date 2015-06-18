@@ -723,7 +723,7 @@ function wc_create_refund( $args = array() ) {
 		$max_remaining_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 	
 		if ( $max_remaining_refund > 0 ) {
-			do_action( 'woocommerce_order_partially_refunded', $args['order_id'], $refund_id );
+			do_action( 'woocommerce_order_partially_refunded', $args['order_id'], true, $refund_id );
 		}
 		
 		do_action( 'woocommerce_refund_created', $refund_id );

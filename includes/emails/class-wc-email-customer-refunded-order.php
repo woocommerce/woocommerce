@@ -28,17 +28,27 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 		$this->title          = __( 'Refunded order', 'woocommerce' );
 		$this->description    = __( 'Order refunded emails are sent to customers when their orders are marked refunded.', 'woocommerce' );
 
-		$this->heading        = __( 'Your order has been refunded', 'woocommerce' );
-		$this->subject        = __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' );
-
 		$this->template_html  = 'emails/customer-refunded-order.php';
 		$this->template_plain = 'emails/plain/customer-refunded-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_refunded_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_refunded_notification', array( $this, 'trigger' ), null, 3 );
+		add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger' ), null, 3 );
+
 
 		// Call parent constuctor
 		parent::__construct();
+	}
+
+	function set_email_strings( $partial_refund ) {
+		if ( $partial_refund ) {
+			$this->heading        = __( 'Your order has been partially refunded', 'woocommerce' );
+			$this->subject        = __( 'Your {site_title} order from {order_date} has been partially refunded', 'woocommerce' );
+		}
+		else {
+			$this->heading        = __( 'Your order has been refunded', 'woocommerce' );
+			$this->subject        = __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' );
+		}
 	}
 
 	/**
@@ -47,8 +57,11 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * @access public
 	 * @return void
 	 */
-	function trigger( $order_id ) {
+	function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
 
+		$this->partial_refund = $partial_refund;
+		$this->set_email_strings( $partial_refund );
+		
 		if ( $order_id ) {
 			$this->object    = wc_get_order( $order_id );
 			$this->recipient = $this->object->billing_email;
@@ -58,6 +71,10 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 			$this->replace['order-number'] = $this->object->get_order_number();
+		}
+		
+		if ( $refund_id ) {
+			$this->refund = wc_get_order( $refund_id );
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
@@ -102,10 +119,12 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	function get_content_html() {
 		ob_start();
 		wc_get_template( $this->template_html, array(
-			'order'         => $this->object,
-			'email_heading' => $this->get_heading(),
-			'sent_to_admin' => false,
-			'plain_text'    => false
+			'order'          => $this->object,
+			'refund'		 => $this->refund,
+			'partial_refund' => $this->partial_refund,
+			'email_heading'  => $this->get_heading(),
+			'sent_to_admin'  => false,
+			'plain_text'     => false
 		) );
 		return ob_get_clean();
 	}
@@ -119,10 +138,12 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	function get_content_plain() {
 		ob_start();
 		wc_get_template( $this->template_plain, array(
-			'order'         => $this->object,
-			'email_heading' => $this->get_heading(),
-			'sent_to_admin' => false,
-			'plain_text'    => true
+			'order'          => $this->object,
+			'refund'		 => $this->refund,
+			'partial_refund' => $this->partial_refund,
+			'email_heading'  => $this->get_heading(),
+			'sent_to_admin'  => false,
+			'plain_text'     => true
 		) );
 		return ob_get_clean();
 	}
