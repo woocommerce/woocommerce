@@ -19,9 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 <table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee;" border="1" bordercolor="#eee">
 	<thead>
 		<tr>
-			<th scope="col" style="text-align:left; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php _e( 'Product', 'woocommerce' ); ?></th>
-			<th scope="col" style="text-align:left; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php _e( 'Quantity', 'woocommerce' ); ?></th>
-			<th scope="col" style="text-align:left; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php _e( 'Price', 'woocommerce' ); ?></th>
+			<th class="td" scope="col" style="text-align:left; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php _e( 'Product', 'woocommerce' ); ?></th>
+			<th class="td" scope="col" style="text-align:left; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php _e( 'Quantity', 'woocommerce' ); ?></th>
+			<th class="td" scope="col" style="text-align:left; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php _e( 'Price', 'woocommerce' ); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -34,8 +34,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 				foreach ( $totals as $total ) {
 					$i++;
 					?><tr>
-						<th scope="row" colspan="2" style="text-align:left; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['label']; ?></th>
-						<td style="text-align:left; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['value']; ?></td>
+						<th class="td" scope="row" colspan="2" style="text-align:left; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['label']; ?></th>
+						<td class="td" style="text-align:left; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; border: 1px solid #eee; <?php if ( $i == 1 ) echo 'border-top-width: 4px;'; ?>"><?php echo $total['value']; ?></td>
 					</tr><?php
 				}
 			}

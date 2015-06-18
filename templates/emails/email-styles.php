@@ -96,6 +96,10 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
     text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 }
 
+.td {
+    color: <?php echo esc_attr( $text_lighter_20 ); ?>;
+}
+
 #header_wrapper {
     padding: 36px 48px;
     display: block;
