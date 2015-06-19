@@ -173,6 +173,7 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Returns the requested address in raw, non-formatted way
+	 * @since  2.4.0
 	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address
 	 * @return array The stored address after filter
 	 */
