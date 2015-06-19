@@ -91,7 +91,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				'class'             => 'wc-enhanced-select',
 				'css'               => 'width: 450px;',
 				'default'           => '',
-				'description'       => __( 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
+				'description'       => __( 'If Cash on Delivery is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce' ),
 				'options'           => $shipping_methods,
 				'desc_tip'          => true,
 				'custom_attributes' => array(
@@ -100,7 +100,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			),
 			'enable_for_virtual' => array(
 				'title'             => __( 'Enable for virtual orders', 'woocommerce' ),
-				'label'             => __( 'Enable COD if the order is virtual', 'woocommerce' ),
+				'label'             => __( 'Enable Cash on Delivery if the order is virtual', 'woocommerce' ),
 				'type'              => 'checkbox',
 				'default'           => 'yes'
 			)
