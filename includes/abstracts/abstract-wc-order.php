@@ -172,6 +172,45 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Returns the requested address in raw, non-formatted way
+	 * @since  2.4.0
+	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address
+	 * @return array The stored address after filter
+	 */
+	public function get_address( $type = 'billing' ) {
+
+		if ( 'billing' === $type ) {
+			$address = array(
+				'first_name' => $this->billing_first_name,
+				'last_name'  => $this->billing_last_name,
+				'company'    => $this->billing_company,
+				'address_1'  => $this->billing_address_1,
+				'address_2'  => $this->billing_address_2,
+				'city'       => $this->billing_city,
+				'state'      => $this->billing_state,
+				'postcode'   => $this->billing_postcode,
+				'country'    => $this->billing_country,
+				'email'      => $this->billing_email,
+				'phone'      => $this->billing_phone,
+			);
+		} else {
+			$address = array(
+				'first_name' => $this->shipping_first_name,
+				'last_name'  => $this->shipping_last_name,
+				'company'    => $this->shipping_company,
+				'address_1'  => $this->shipping_address_1,
+				'address_2'  => $this->shipping_address_2,
+				'city'       => $this->shipping_city,
+				'state'      => $this->shipping_state,
+				'postcode'   => $this->shipping_postcode,
+				'country'    => $this->shipping_country,
+			);
+		}
+
+		return apply_filters( 'woocommerce_get_order_address', $address, $type, $this );
+	}
+
+	/**
 	 * Add a product line item to the order
 	 *
 	 * @since 2.2
