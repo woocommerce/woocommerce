@@ -225,7 +225,14 @@ class WC_API_Authentication {
 
 		$http_method = strtoupper( WC()->api->server->method );
 
-		$base_request_uri = rawurlencode( untrailingslashit( get_woocommerce_api_url( '' ) ) . WC()->api->server->path );
+		$server_path = WC()->api->server->path;
+
+		// if the requested URL has a trailingslash, make sure our base URL does as well
+		if ( wp_endswith( $_SERVER['REDIRECT_URL'], '/' ) ) {
+			$server_path .= '/';
+		}
+
+		$base_request_uri = rawurlencode( untrailingslashit( get_woocommerce_api_url( '' ) ) . $server_path );
 
 		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature
 		$consumer_signature = rawurldecode( $params['oauth_signature'] );
