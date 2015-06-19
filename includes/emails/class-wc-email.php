@@ -222,9 +222,11 @@ class WC_Email extends WC_Settings_API {
 		// Find/replace
 		$this->find['blogname']      = '{blogname}';
 		$this->find['site-title']    = '{site_title}';
+		$this->find                  = apply_filters( 'woocommerce_emails_placeholders_find_array', $this->find );
 
 		$this->replace['blogname']   = $this->get_blogname();
 		$this->replace['site-title'] = $this->get_blogname();
+		$this->replace               = apply_filters( 'woocommerce_emails_placeholders_replace_array', $this->replace );
 
 		// For multipart messages
 		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
