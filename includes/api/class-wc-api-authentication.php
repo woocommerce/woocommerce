@@ -242,8 +242,19 @@ class WC_API_Authentication {
 			throw new Exception( __( 'Invalid Signature - failed to sort parameters', 'woocommerce' ), 401 );
 		}
 
-		$query_string = http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
-		$query_string = rawurlencode( $query_string );
+		// Normalize parameter key/values
+		$params = $this->normalize_parameters( $params );
+		$query_parameters = array();
+		foreach ( $params as $param_key => $param_value ) {
+			if ( is_array( $param_value ) ) {
+				foreach ( $param_value as $param_key_inner => $param_value_inner ) {
+					$query_parameters[] = $param_key . '%255B' . $param_key_inner . '%255D%3D' . $param_value_inner;
+				}
+			} else {
+				$query_parameters[] = $param_key . '%3D' . $param_value; // join with equals sign
+			}
+		}
+		$query_string = implode( '%26', $query_parameters ); // join with ampersand
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
@@ -258,6 +269,49 @@ class WC_API_Authentication {
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
+		}
+	}
+
+	/**
+	 * Normalize each parameter by assuming each parameter may have already been
+	 * encoded, so attempt to decode, and then re-encode according to RFC 3986
+	 *
+	 * Note both the key and value is normalized so a filter param like:
+	 *
+	 * 'filter[period]' => 'week'
+	 *
+	 * is encoded to:
+	 *
+	 * 'filter%5Bperiod%5D' => 'week'
+	 *
+	 * This conforms to the OAuth 1.0a spec which indicates the entire query string
+	 * should be URL encoded
+	 *
+	 * @since 2.1
+	 * @see rawurlencode()
+	 * @param array $parameters un-normalized pararmeters
+	 * @return array normalized parameters
+	 */
+	private function normalize_parameters( $parameters ) {
+		$keys = WC_API_Authentication::urlencode_rfc3986( array_keys( $parameters ) );
+		$values = WC_API_Authentication::urlencode_rfc3986( array_values( $parameters ) );
+		$parameters = array_combine( $keys, $values );
+		return $parameters;
+	}
+
+	/**
+	 * Encodes a value according to RFC 3986. Supports multidimensional arrays.
+	 *
+	 * @since 2.4
+	 * @param  string|array $value The value to encode
+	 * @return string|array        Encoded values
+	 */
+	public static function urlencode_rfc3986( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( array( 'WC_API_Authentication', 'urlencode_rfc3986' ), $value );
+		} else {
+			// Percent symbols (%) must be double-encoded
+			return str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
 		}
 	}
 
