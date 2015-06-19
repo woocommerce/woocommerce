@@ -264,7 +264,8 @@ class WC_API_Authentication {
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
-		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $keys['consumer_secret'], true ) );
+		$secret = $keys['consumer_secret'] . '&';
+		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
