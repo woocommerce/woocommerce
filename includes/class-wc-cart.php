@@ -1788,17 +1788,21 @@ class WC_Cart {
 		 */
 		public function remove_coupon( $coupon_code ) {
 			// Coupons are globally disabled
-			if ( ! $this->coupons_enabled() )
+			if ( ! $this->coupons_enabled() ) {
 				return false;
+			}
 
 			// Get the coupon
 			$coupon_code  = apply_filters( 'woocommerce_coupon_code', $coupon_code );
 			$position     = array_search( $coupon_code, $this->applied_coupons );
 
-			if ( $position !== false )
+			if ( $position !== false ) {
 				unset( $this->applied_coupons[ $position ] );
+			}
 
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
+
+			do_action( 'woocommerce_removed_coupon', $coupon_code );
 
 			return true;
 		}
