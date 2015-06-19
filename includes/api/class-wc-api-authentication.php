@@ -222,7 +222,6 @@ class WC_API_Authentication {
 	 * @throws Exception
 	 */
 	private function check_oauth_signature( $keys, $params ) {
-
 		$http_method = strtoupper( WC()->api->server->method );
 
 		$server_path = WC()->api->server->path;
@@ -238,30 +237,13 @@ class WC_API_Authentication {
 		$consumer_signature = rawurldecode( $params['oauth_signature'] );
 		unset( $params['oauth_signature'] );
 
-		// Remove filters and convert them from array to strings to void normalize issues
-		if ( isset( $params['filter'] ) ) {
-			$filters = $params['filter'];
-			unset( $params['filter'] );
-			foreach ( $filters as $filter => $filter_value ) {
-				$params['filter[' . $filter . ']'] = $filter_value;
-			}
-		}
-
-		// Normalize parameter key/values
-		$params = $this->normalize_parameters( $params );
-
 		// Sort parameters
 		if ( ! uksort( $params, 'strcmp' ) ) {
 			throw new Exception( __( 'Invalid Signature - failed to sort parameters', 'woocommerce' ), 401 );
 		}
 
-		// Form query string
-		$query_params = array();
-		foreach ( $params as $param_key => $param_value ) {
-
-			$query_params[] = $param_key . '%3D' . $param_value; // join with equals sign
-		}
-		$query_string = implode( '%26', $query_params ); // join with ampersand
+		$query_string = http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
+		$query_string = rawurlencode( $query_string );
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
@@ -277,42 +259,6 @@ class WC_API_Authentication {
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
 		}
-	}
-
-	/**
-	 * Normalize each parameter by assuming each parameter may have already been
-	 * encoded, so attempt to decode, and then re-encode according to RFC 3986
-	 *
-	 * Note both the key and value is normalized so a filter param like:
-	 *
-	 * 'filter[period]' => 'week'
-	 *
-	 * is encoded to:
-	 *
-	 * 'filter%5Bperiod%5D' => 'week'
-	 *
-	 * This conforms to the OAuth 1.0a spec which indicates the entire query string
-	 * should be URL encoded
-	 *
-	 * @since 2.1
-	 * @see rawurlencode()
-	 * @param array $parameters un-normalized pararmeters
-	 * @return array normalized parameters
-	 */
-	private function normalize_parameters( $parameters ) {
-
-		$normalized_parameters = array();
-
-		foreach ( $parameters as $key => $value ) {
-
-			// Percent symbols (%) must be double-encoded
-			$key   = str_replace( '%', '%25', rawurlencode( rawurldecode( $key ) ) );
-			$value = str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
-
-			$normalized_parameters[ $key ] = $value;
-		}
-
-		return $normalized_parameters;
 	}
 
 	/**
