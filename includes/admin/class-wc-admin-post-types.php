@@ -1768,7 +1768,7 @@ class WC_Admin_Post_Types {
 		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
 
 		if ( sizeof( $search_ids ) > 0 ) {
-			$where = str_replace( ')))', ") OR ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . "))))", $where );
+			$where = str_replace( 'AND (((', "AND ( ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . ")) OR ((", $where );
 		}
 
 		return $where;
