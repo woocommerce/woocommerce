@@ -646,7 +646,7 @@ class WC_API_Products extends WC_API_Resource {
 			'tax_status'         => $product->get_tax_status(),
 			'tax_class'          => $product->get_tax_class(),
 			'managing_stock'     => $product->managing_stock(),
-			'stock_quantity'     => (int) $product->get_stock_quantity(),
+			'stock_quantity'     => $product->get_stock_quantity(),
 			'in_stock'           => $product->is_in_stock(),
 			'backorders_allowed' => $product->backorders_allowed(),
 			'backordered'        => $product->is_on_backorder(),
@@ -728,7 +728,7 @@ class WC_API_Products extends WC_API_Resource {
 					'tax_status'        => $variation->get_tax_status(),
 					'tax_class'         => $variation->get_tax_class(),
 					'managing_stock'    => $variation->managing_stock(),
-					'stock_quantity'    => (int) $variation->get_stock_quantity(),
+					'stock_quantity'    => $variation->get_stock_quantity(),
 					'in_stock'          => $variation->is_in_stock(),
 					'backordered'       => $variation->is_on_backorder(),
 					'purchaseable'      => $variation->is_purchasable(),
@@ -970,7 +970,8 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( $date_to && ! $date_from ) {
-				update_post_meta( $product_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+				$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
+				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
 			}
 
 			// Update price if on sale
@@ -980,7 +981,7 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_price', $regular_price );
 			}
 
-			if ( '' !== $sale_price && $date_from && $date_from < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+			if ( '' !== $sale_price && $date_from && $date_from <= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
 				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
 			}
 

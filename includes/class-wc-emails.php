@@ -355,7 +355,7 @@ class WC_Emails {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo '<p><strong>' . $field['label'] . ':</strong> ' . $field['value'] . '</p>';
+						echo '<p><strong>' . $field['label'] . ':</strong> <span class="text">' . $field['value'] . '</span></p>';
 					}
 				}
 			}

@@ -353,7 +353,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = '&#75;&#269;';
 			break;
 		case 'DKK' :
-			$currency_symbol = 'kr.';
+			$currency_symbol = 'DKK';
 			break;
 		case 'DOP' :
 			$currency_symbol = 'RD&#36;';
