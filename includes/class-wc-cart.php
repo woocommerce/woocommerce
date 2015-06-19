@@ -1800,6 +1800,8 @@ class WC_Cart {
 
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
 
+			do_action( 'woocommerce_coupon_removed', $coupon_code );
+
 			return true;
 		}
 
