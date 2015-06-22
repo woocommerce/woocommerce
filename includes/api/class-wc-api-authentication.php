@@ -219,39 +219,39 @@ class WC_API_Authentication {
 	 * @throws Exception
 	 */
 	private function check_oauth_signature( $keys, $params ) {
-
 		$http_method = strtoupper( WC()->api->server->method );
 
-		$base_request_uri = rawurlencode( untrailingslashit( get_woocommerce_api_url( '' ) ) . WC()->api->server->path );
+		$server_path = WC()->api->server->path;
+
+		// if the requested URL has a trailingslash, make sure our base URL does as well
+		if ( '/' === substr( $_SERVER['REDIRECT_URL'], -1 ) ) {
+			$server_path .= '/';
+		}
+
+		$base_request_uri = rawurlencode( untrailingslashit( get_woocommerce_api_url( '' ) ) . $server_path );
 
 		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature
 		$consumer_signature = rawurldecode( $params['oauth_signature'] );
 		unset( $params['oauth_signature'] );
-
-		// Remove filters and convert them from array to strings to void normalize issues
-		if ( isset( $params['filter'] ) ) {
-			$filters = $params['filter'];
-			unset( $params['filter'] );
-			foreach ( $filters as $filter => $filter_value ) {
-				$params['filter[' . $filter . ']'] = $filter_value;
-			}
-		}
-
-		// Normalize parameter key/values
-		$params = $this->normalize_parameters( $params );
 
 		// Sort parameters
 		if ( ! uksort( $params, 'strcmp' ) ) {
 			throw new Exception( __( 'Invalid Signature - failed to sort parameters', 'woocommerce' ), 401 );
 		}
 
-		// Form query string
-		$query_params = array();
+		// Normalize parameter key/values
+		$params = $this->normalize_parameters( $params );
+		$query_parameters = array();
 		foreach ( $params as $param_key => $param_value ) {
-
-			$query_params[] = $param_key . '%3D' . $param_value; // join with equals sign
+			if ( is_array( $param_value ) ) {
+				foreach ( $param_value as $param_key_inner => $param_value_inner ) {
+					$query_parameters[] = $param_key . '%255B' . $param_key_inner . '%255D%3D' . $param_value_inner;
+				}
+			} else {
+				$query_parameters[] = $param_key . '%3D' . $param_value; // join with equals sign
+			}
 		}
-		$query_string = implode( '%26', $query_params ); // join with ampersand
+		$query_string = implode( '%26', $query_parameters ); // join with ampersand
 
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
@@ -261,7 +261,8 @@ class WC_API_Authentication {
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
-		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $keys['consumer_secret'], true ) );
+		$secret = $keys['consumer_secret'] . '&';
+		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
 			throw new Exception( __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), 401 );
@@ -289,19 +290,26 @@ class WC_API_Authentication {
 	 * @return array normalized parameters
 	 */
 	private function normalize_parameters( $parameters ) {
+		$keys = WC_API_Authentication::urlencode_rfc3986( array_keys( $parameters ) );
+		$values = WC_API_Authentication::urlencode_rfc3986( array_values( $parameters ) );
+		$parameters = array_combine( $keys, $values );
+		return $parameters;
+	}
 
-		$normalized_parameters = array();
-
-		foreach ( $parameters as $key => $value ) {
-
+	/**
+	 * Encodes a value according to RFC 3986. Supports multidimensional arrays.
+	 *
+	 * @since 2.4
+	 * @param  string|array $value The value to encode
+	 * @return string|array        Encoded values
+	 */
+	public static function urlencode_rfc3986( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( array( 'WC_API_Authentication', 'urlencode_rfc3986' ), $value );
+		} else {
 			// Percent symbols (%) must be double-encoded
-			$key   = str_replace( '%', '%25', rawurlencode( rawurldecode( $key ) ) );
-			$value = str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
-
-			$normalized_parameters[ $key ] = $value;
+			return str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
 		}
-
-		return $normalized_parameters;
 	}
 
 	/**
