@@ -203,10 +203,10 @@ class WC_Frontend_Scripts {
 			break;
 			case 'wc-geolocation' :
 				return array(
-					'wc_ajax_url'    => WC_AJAX::get_endpoint(),
-					'home_url'       => home_url(),
-					'geolocation'    => isset( $_GET['location'] ) ? wc_clean( $_GET['location'] ) : '',
-					'is_woocommerce' => is_woocommerce() ? 1 : 0
+					'wc_ajax_url' => WC_AJAX::get_endpoint(),
+					'home_url'    => home_url(),
+					'is_checkout' => is_checkout() ? '1' : '0',
+					'hash'        => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
 				);
 			break;
 			case 'wc-single-product' :

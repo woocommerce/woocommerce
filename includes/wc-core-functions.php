@@ -759,14 +759,6 @@ function wc_get_base_location() {
 function wc_get_customer_default_location() {
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
 		case 'geolocation_ajax' :
-			if ( ! empty( $_GET['location'] ) ) {
-				$location = wc_format_country_state_string( wc_clean( $_GET['location'] ) );
-			}
-			// Base fallback
-			if ( empty( $location['country'] ) ) {
-				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
-			}
-		break;
 		case 'geolocation' :
 			$location = WC_Geolocation::geolocate_ip();
 
