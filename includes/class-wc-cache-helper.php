@@ -49,7 +49,16 @@ class WC_Cache_Helper {
 			$current_hash  = isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : '';
 			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
 				global $wp;
-				wp_safe_redirect( esc_url_raw( add_query_arg( 'v', $location_hash, remove_query_arg( array( 'v', 'pagename' ), add_query_arg( $wp->query_string, '', trailingslashit( home_url( $wp->request ) ) ) ) ) ), 307 );
+
+				$redirect_url = trailingslashit( home_url( $wp->request ) );
+
+				if ( ! get_option( 'permalink_structure' ) ) {
+					$redirect_url = add_query_arg( $wp->query_string, '', $redirect_url );
+				}
+
+				$redirect_url = add_query_arg( 'v', $location_hash, remove_query_arg( 'v', $redirect_url ) );
+
+				wp_safe_redirect( esc_url_raw( $redirect_url ), 307 );
 				exit;
 			}
 		}
