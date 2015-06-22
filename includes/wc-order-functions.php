@@ -726,7 +726,7 @@ function wc_create_refund( $args = array() ) {
 			do_action( 'woocommerce_order_partially_refunded', $args['order_id'], true, $refund_id );
 		}
 		
-		do_action( 'woocommerce_refund_created', $refund_id );
+		do_action( 'woocommerce_refund_created', $refund_id, $args );
 	}
 
 	// Clear transients
