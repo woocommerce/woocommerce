@@ -222,7 +222,6 @@ class WC_Email extends WC_Settings_API {
 		// Find/replace
 		$this->find['blogname']      = '{blogname}';
 		$this->find['site-title']    = '{site_title}';
-
 		$this->replace['blogname']   = $this->get_blogname();
 		$this->replace['site-title'] = $this->get_blogname();
 
@@ -255,7 +254,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( $this->find, $this->replace, $string );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
 	}
 
 	/**
