@@ -39,7 +39,7 @@ jQuery( function( $ ) {
 		}
 	};
 
-	if ( 0 > this_page.indexOf( '?v=' ) && 0 > this_page.indexOf( '&v=' ) && '1' !== wc_geolocation_params.is_checkout ) {
+	if ( '1' !== wc_geolocation_params.is_checkout ) {
 		$.ajax( $geolocate_customer );
 	}
 
