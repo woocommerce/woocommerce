@@ -42,6 +42,7 @@ class WC_API_Authentication {
 		}
 
 		try {
+
 			if ( is_ssl() ) {
 				$keys = $this->perform_ssl_authentication();
 			} else {
@@ -71,46 +72,48 @@ class WC_API_Authentication {
 	 * @throws Exception
 	 */
 	private function perform_ssl_authentication() {
+
 		$params = WC()->api->server->params['GET'];
 
-		// if the $_GET parameters are present, use those first
-		if ( ! empty( $params['consumer_key'] ) && ! empty( $params['consumer_secret'] ) ) {
-			$keys = $this->get_keys_by_consumer_key( $params['consumer_key'] );
+		// Get consumer key
+		if ( ! empty( $_SERVER['PHP_AUTH_USER'] ) ) {
 
-			if ( ! $this->is_consumer_secret_valid( $keys['consumer_secret'], $params['consumer_secret'] ) ) {
-				throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce' ), 401 );
-			}
+			// Should be in HTTP Auth header by default
+			$consumer_key = $_SERVER['PHP_AUTH_USER'];
 
-			return $keys;
+		} elseif ( ! empty( $params['consumer_key'] ) ) {
+
+			// Allow a query string parameter as a fallback
+			$consumer_key = $params['consumer_key'];
+
+		} else {
+
+			throw new Exception( __( 'Consumer Key is missing', 'woocommerce' ), 404 );
 		}
 
-		// if the above is not present, we will do full basic auth
+		// Get consumer secret
+		if ( ! empty( $_SERVER['PHP_AUTH_PW'] ) ) {
 
-		if ( empty( $_SERVER['PHP_AUTH_USER'] ) || empty( $_SERVER['PHP_AUTH_PW'] ) ) {
-			$this->exit_with_unauthorized_headers();
+			// Should be in HTTP Auth header by default
+			$consumer_secret = $_SERVER['PHP_AUTH_PW'];
+
+		} elseif ( ! empty( $params['consumer_secret'] ) ) {
+
+			// Allow a query string parameter as a fallback
+			$consumer_secret = $params['consumer_secret'];
+
+		} else {
+
+			throw new Exception( __( 'Consumer Secret is missing', 'woocommerce' ), 404 );
 		}
 
-		$keys = $this->get_keys_by_consumer_key( $_SERVER['PHP_AUTH_USER'] );
+		$keys = $this->get_keys_by_consumer_key( $consumer_key );
 
-		if ( ! $this->is_consumer_secret_valid( $keys['consumer_secret'], $_SERVER['PHP_AUTH_PW'] ) ) {
-			$this->exit_with_unauthorized_headers();
+		if ( ! $this->is_consumer_secret_valid( $keys['consumer_secret'], $consumer_secret ) ) {
+			throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce' ), 401 );
 		}
 
 		return $keys;
-	}
-
-	/**
-	 * If the consumer_key and consumer_secret $_GET parameters are NOT provided
-	 * and the Basic auth headers are either not present or the consumer secret does not match the consumer
-	 * key provided, then return the correct Basic headers and an error message.
-	 *
-	 * @since 2.4
-	 */
-	private function exit_with_unauthorized_headers() {
-		$auth_message = __( 'WooCommerce API. Use a consumer key in the username field and a consumer secret in the password field', 'woocommerce' );
-		header( 'WWW-Authenticate: Basic realm="' . $auth_message . '"' );
-		header( 'HTTP/1.0 401 Unauthorized' );
-		throw new Exception( __( 'Consumer Secret is invalid', 'woocommerce' ), 401 );
 	}
 
 	/**
