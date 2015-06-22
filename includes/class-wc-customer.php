@@ -310,7 +310,7 @@ class WC_Customer {
 			$tax_based_on = 'base';
 		}
 
-		if ( 'base' === $tax_based_on || ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && empty( $_GET['location'] ) && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WOOCOMMERCE_CART' ) ) ) {
+		if ( 'base' === $tax_based_on ) {
 			$default  = wc_get_base_location();
 			$country  = $default['country'];
 			$state    = $default['state'];
