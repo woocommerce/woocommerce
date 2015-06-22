@@ -31,6 +31,8 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 		$this->template_html  = 'emails/customer-refunded-order.php';
 		$this->template_plain = 'emails/plain/customer-refunded-order.php';
 
+		$this->set_email_strings();
+	
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_refunded_notification', array( $this, 'trigger' ), null, 3 );
 		add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger' ), null, 3 );
@@ -40,7 +42,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 		parent::__construct();
 	}
 
-	function set_email_strings( $partial_refund ) {
+	function set_email_strings( $partial_refund = false ) {
 		if ( $partial_refund ) {
 			$this->heading        = __( 'Your order has been partially refunded', 'woocommerce' );
 			$this->subject        = __( 'Your {site_title} order from {order_date} has been partially refunded', 'woocommerce' );
