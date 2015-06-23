@@ -801,7 +801,7 @@ abstract class WC_Abstract_Order {
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		if ( $and_taxes ) {
+		if ( $and_taxes && wc_tax_enabled() ) {
 			$this->calculate_taxes();
 		}
 
