@@ -33,6 +33,7 @@ class WC_AJAX {
 	public static function add_endpoint() {
 		add_rewrite_tag( '%wc-ajax%', '([^/]*)' );
 		add_rewrite_rule( 'wc-ajax/([^/]*)/?', 'index.php?wc-ajax=$matches[1]', 'top' );
+		add_rewrite_rule( 'index.php/wc-ajax/([^/]*)/?', 'index.php?wc-ajax=$matches[1]', 'top' );
 	}
 
 	/**
