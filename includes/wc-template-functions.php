@@ -637,11 +637,9 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 *
 	 * @subpackage	Loop
 	 * @param string $size (default: 'shop_catalog')
-	 * @param int $placeholder_width (default: 0)
-	 * @param int $placeholder_height (default: 0)
 	 * @return string
 	 */
-	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $placeholder_width = 0, $placeholder_height = 0  ) {
+	function woocommerce_get_product_thumbnail( $size = 'shop_catalog'  ) {
 		global $post;
 
 		if ( has_post_thumbnail() ) {
