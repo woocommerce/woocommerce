@@ -224,7 +224,7 @@ class WC_API_Orders extends WC_API_Resource {
 				$product_sku = $product->get_sku();
 			}
 
-			$meta = new WC_Order_Item_Meta( $item['item_meta'], $product );
+			$meta = new WC_Order_Item_Meta( $item, $product );
 
 			$item_meta = array();
 
@@ -1542,7 +1542,7 @@ class WC_API_Orders extends WC_API_Resource {
 			foreach ( $refund->get_items( 'line_item' ) as $item_id => $item ) {
 
 				$product   = $order->get_product_from_item( $item );
-				$meta      = new WC_Order_Item_Meta( $item['item_meta'], $product );
+				$meta      = new WC_Order_Item_Meta( $item, $product );
 				$item_meta = array();
 
 				foreach ( $meta->get_formatted() as $meta_key => $formatted_meta ) {
