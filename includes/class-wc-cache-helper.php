@@ -19,8 +19,49 @@ class WC_Cache_Helper {
 	 * Hook in methods
 	 */
 	public static function init() {
+		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'before_woocommerce_init', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
+	}
+
+	/**
+	 * Get a hash of the customer location
+	 * @return string
+	 */
+	public static function geolocation_ajax_get_location_hash() {
+		$customer             = new WC_Customer();
+		$location             = array();
+		$location['country']  = $customer->get_country();
+		$location['state']    = $customer->get_state();
+		$location['postcode'] = $customer->get_postcode();
+		$location['city']     = $customer->get_city();
+		return substr( md5( implode( '', $location ) ), 0, 12 );
+	}
+
+	/**
+	 * When using geolocation via ajax, to bust cache, redirect if the location hash does not equal the querystring.
+	 *
+	 * This prevents caching of the wrong data for this request.
+	 */
+	public static function geolocation_ajax_redirect() {
+		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_ajax() ) {
+			$location_hash = self::geolocation_ajax_get_location_hash();
+			$current_hash  = isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : '';
+			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
+				global $wp;
+
+				$redirect_url = trailingslashit( home_url( $wp->request ) );
+
+				if ( ! get_option( 'permalink_structure' ) ) {
+					$redirect_url = add_query_arg( $wp->query_string, '', $redirect_url );
+				}
+
+				$redirect_url = add_query_arg( 'v', $location_hash, remove_query_arg( 'v', $redirect_url ) );
+
+				wp_safe_redirect( esc_url_raw( $redirect_url ), 307 );
+				exit;
+			}
+		}
 	}
 
 	/**

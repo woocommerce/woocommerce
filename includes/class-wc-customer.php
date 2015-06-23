@@ -48,8 +48,8 @@ class WC_Customer {
 	public function __construct() {
 		$this->_data = (array) WC()->session->get( 'customer' );
 
+		// No data - set defaults
 		if ( empty( $this->_data ) ) {
-			// Defaults
 			$this->set_default_data();
 		}
 
@@ -123,7 +123,7 @@ class WC_Customer {
 	 * @return bool
 	 */
 	public function has_calculated_shipping() {
-		return ( ! empty( $this->calculated_shipping ) ) ? true : false;
+		return ! empty( $this->calculated_shipping );
 	}
 
 	/**
@@ -252,7 +252,6 @@ class WC_Customer {
 		return $this->shipping_state;
 	}
 
-
 	/**
 	 * Gets the country from the current session.
 	 *
@@ -262,7 +261,6 @@ class WC_Customer {
 		return $this->shipping_country;
 	}
 
-
 	/**
 	 * Gets the postcode from the current session.
 	 *
@@ -271,7 +269,6 @@ class WC_Customer {
 	public function get_shipping_postcode() {
 		return empty( $this->shipping_postcode ) ? '' : wc_format_postcode( $this->shipping_postcode, $this->get_shipping_country() );
 	}
-
 
 	/**
 	 * Gets the city from the current session.
@@ -313,27 +310,24 @@ class WC_Customer {
 			$tax_based_on = 'base';
 		}
 
-		if ( $tax_based_on == 'base' ) {
+		if ( 'base' === $tax_based_on ) {
 
 			$country  = WC()->countries->get_base_country();
 			$state    = WC()->countries->get_base_state();
 			$postcode = WC()->countries->get_base_postcode();
 			$city     = WC()->countries->get_base_city();
 
-		} elseif ( $tax_based_on == 'billing' ) {
-
+		} elseif ( 'billing' === $tax_based_on ) {
 			$country  = $this->get_country();
 			$state    = $this->get_state();
 			$postcode = $this->get_postcode();
 			$city     = $this->get_city();
 
 		} else {
-
 			$country  = $this->get_shipping_country();
 			$state    = $this->get_shipping_state();
 			$postcode = $this->get_shipping_postcode();
 			$city     = $this->get_shipping_city();
-
 		}
 
 		return apply_filters( 'woocommerce_customer_taxable_address', array( $country, $state, $postcode, $city ) );
@@ -342,7 +336,7 @@ class WC_Customer {
 	/**
 	 * Set default data for a customer
 	 */
-	public function set_default_data() {
+	public function set_default_data( $get_user_profile_data = true ) {
 		$this->_data = array(
 			'postcode'            => '',
 			'city'                => '',
@@ -360,7 +354,7 @@ class WC_Customer {
 			'calculated_shipping' => false
 		);
 
-		if ( is_user_logged_in() ) {
+		if ( is_user_logged_in() && $get_user_profile_data ) {
 			foreach ( $this->_data as $key => $value ) {
 				$meta_value          = get_user_meta( get_current_user_id(), ( false === strstr( $key, 'shipping_' ) ? 'billing_' : '' ) . $key, true );
 				$this->_data[ $key ] = $meta_value ? $meta_value : $this->_data[ $key ];
@@ -383,7 +377,6 @@ class WC_Customer {
 			$this->_data['shipping_state'] = $this->_data['state'];
 		}
 	}
-
 
 	/**
 	 * Sets session data for the location.

@@ -155,6 +155,9 @@ class WC_Frontend_Scripts {
 		if ( is_product() ) {
 			self::enqueue_script( 'wc-single-product' );
 		}
+		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
+			self::enqueue_script( 'wc-geolocation', $frontend_script_path . 'geolocation' . $suffix . '.js', array( 'jquery' ) );
+		}
 
 		// Global frontend scripts
 		self::enqueue_script( 'woocommerce', $frontend_script_path . 'woocommerce' . $suffix . '.js', array( 'jquery', 'jquery-blockui' ) );
@@ -196,6 +199,14 @@ class WC_Frontend_Scripts {
 				return array(
 					'ajax_url'    => WC()->ajax_url(),
 					'wc_ajax_url' => WC_AJAX::get_endpoint()
+				);
+			break;
+			case 'wc-geolocation' :
+				return array(
+					'wc_ajax_url' => WC_AJAX::get_endpoint(),
+					'home_url'    => home_url(),
+					'is_checkout' => is_checkout() ? '1' : '0',
+					'hash'        => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
 				);
 			break;
 			case 'wc-single-product' :

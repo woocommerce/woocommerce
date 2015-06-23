@@ -749,12 +749,16 @@ function wc_get_base_location() {
 
 /**
  * Get the customer's default location. Filtered, and set to base location or left blank.
+ *
+ * If cache-busting, this should only be used when 'location' is set in the querystring.
+ *
  * @todo should the woocommerce_default_country option be renamed to contain 'base'?
  * @since 2.3.0
  * @return array
  */
 function wc_get_customer_default_location() {
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
+		case 'geolocation_ajax' :
 		case 'geolocation' :
 			$location = WC_Geolocation::geolocate_ip();
 

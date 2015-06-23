@@ -1,5 +1,4 @@
 jQuery( function( $ ) {
-
 	// Orderby
 	$( '.woocommerce-ordering' ).on( 'change', 'select.orderby', function() {
 		$( this ).closest( 'form' ).submit();

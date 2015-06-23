@@ -120,7 +120,8 @@ class WC_AJAX {
 			'refund_line_items'                                => false,
 			'delete_refund'                                    => false,
 			'rated'                                            => false,
-			'update_api_key'                                   => false
+			'update_api_key'                                   => false,
+			'get_customer_location'                            => true
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -2267,6 +2268,14 @@ class WC_AJAX {
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
+	}
+
+	/**
+	 * Locate user via AJAX
+	 */
+	public static function get_customer_location() {
+		$location_hash = WC_Cache_Helper::geolocation_ajax_get_location_hash();
+		wp_send_json_success( array( 'hash' => $location_hash ) );
 	}
 }
 
