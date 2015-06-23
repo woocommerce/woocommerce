@@ -94,8 +94,8 @@ class WC_Settings_General extends WC_Settings_Page {
 				'options'  => array(
 					''                 => __( 'No address', 'woocommerce' ),
 					'base'             => __( 'Shop base address', 'woocommerce' ),
-					'geolocation'      => __( 'Geolocate address', 'woocommerce' ),
-					'geolocation_ajax' => __( 'Geolocate via ajax (supports page caching)', 'woocommerce' ),
+					'geolocation'      => __( 'Geolocate', 'woocommerce' ),
+					'geolocation_ajax' => __( 'Geolocate (with page caching support)', 'woocommerce' ),
 				),
 			),
 
