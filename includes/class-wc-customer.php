@@ -315,11 +315,10 @@ class WC_Customer {
 
 		if ( $tax_based_on == 'base' ) {
 
-			$default  = wc_get_base_location();
-			$country  = $default['country'];
-			$state    = $default['state'];
-			$postcode = '';
-			$city     = '';
+			$country  = WC()->countries->get_base_country();
+			$state    = WC()->countries->get_base_state();
+			$postcode = WC()->countries->get_base_postcode();
+			$city     = WC()->countries->get_base_city();
 
 		} elseif ( $tax_based_on == 'billing' ) {
 
