@@ -205,6 +205,11 @@ class WC_API_Resource {
 			unset( $request_args['in'] );
 		}
 
+		// filter by a list of post id
+		if ( ! empty( $request_args['in'] ) ) {
+			$args['post__in'] = explode( ',', $request_args['in'] );
+			unset( $request_args['in'] );
+		}
 
 		// resource page
 		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
