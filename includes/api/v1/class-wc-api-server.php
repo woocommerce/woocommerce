@@ -133,6 +133,8 @@ class WC_API_Server {
 		// Compatibility for clients that can't use PUT/PATCH/DELETE
 		if ( isset( $_GET['_method'] ) ) {
 			$this->method = strtoupper( $_GET['_method'] );
+		} elseif ( isset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) ) {
+			$this->method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
 		}
 
 		// determine type of request/response and load handler, JSON by default
