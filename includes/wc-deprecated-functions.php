@@ -476,7 +476,7 @@ function woocommerce_get_endpoint_url( $endpoint, $value = '', $permalink = '' )
  * @deprecated
  */
 function woocommerce_lostpassword_url( $url ) {
-	return wc_lostpassword_url();
+	return wc_lostpassword_url( $url );
 }
 /**
  * @deprecated
