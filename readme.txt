@@ -148,6 +148,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added wc_product_cat_class functions.
 * Tweak - Display related products and upsells in 4 columns.
 * Dev - Created a template file for the Proceed to Checkout button.
+* Localisation - Add Argentine currency and symbol.
 
 = 2.3.8 - 20/04/2015 =
 * Fix - Ensure coupon taxes are reset when calculating totals.

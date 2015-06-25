@@ -257,6 +257,7 @@ function get_woocommerce_currencies() {
 		apply_filters( 'woocommerce_currencies',
 			array(
 				'AED' => __( 'United Arab Emirates Dirham', 'woocommerce' ),
+				'ARS' => __( 'Argentine Peso', 'woocommerce' ),
 				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 				'BDT' => __( 'Bangladeshi Taka', 'woocommerce' ),
 				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
@@ -322,6 +323,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = 'د.إ';
 			break;
 		case 'AUD' :
+		case 'ARS' :
 		case 'CAD' :
 		case 'CLP' :
 		case 'COP' :
