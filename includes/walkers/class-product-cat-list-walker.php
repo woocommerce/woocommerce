@@ -75,7 +75,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 			$output .= ' current-cat-parent';
 		}
 
-		$output .=  '"><a href="' . get_term_link( (int) $cat->term_id, 'product_cat' ) . '">' . __( $cat->name, 'woocommerce' ) . '</a>';
+		$output .=  '"><a href="' . get_term_link( (int) $cat->term_id, $this->tree_type ) . '">' . __( $cat->name, 'woocommerce' ) . '</a>';
 
 		if ( $args['show_count'] ) {
 			$output .= ' <span class="count">(' . $cat->count . ')</span>';
