@@ -240,7 +240,6 @@ class WC_Email extends WC_Settings_API {
 		if ( $this->sending && $this->get_email_type() == 'multipart' ) {
 
 			$mailer->AltBody = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) ) );
-			//$mailer->AltBody = wordwrap( html_entity_decode( strip_tags( $this->get_content_plain() ) ), 70 );
 			$this->sending = false;
 		}
 
