@@ -242,8 +242,6 @@ class WC_Admin_Welcome {
 
 			<?php $this->intro(); ?>
 
-			<!--<div class="changelog point-releases"></div>-->
-
 			<div class="changelog">
 				<h4><?php _e( 'UI Overhaul', 'woocommerce' ); ?></h4>
 				<p><?php _e( 'We\'ve updated the user interface on both the front and backend of WooCommerce 2.3 "Handsome Hippo".', 'woocommerce' ); ?></p>
