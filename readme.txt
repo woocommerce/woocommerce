@@ -16,7 +16,7 @@ Transform your WordPress website into a thoroughbred eCommerce store. Delivering
 
 WooCommerce is built by the experienced folk at WooThemes who also offer premium [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") and [extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes") to further enhance your shopfront.
 
-[youtube https://youtu.be/1KahlicghaE]
+https://www.youtube.com/watch?v=1KahlicghaE
 
 = Strength & flexibility =
 WooCommerce is built using WordPress best practises both on the front and the back end. This results in an efficient, robust and intuitive plugin.
