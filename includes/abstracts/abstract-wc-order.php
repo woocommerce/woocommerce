@@ -2031,6 +2031,13 @@ abstract class WC_Abstract_Order {
 
 		$product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
 		$product      = wc_get_product( $product_id );
+		if ( ! $product ) {
+			/**
+			 * $product can be `false`. Example: checking an old order, when a product or variation has been deleted
+			 * @see \WC_Product_Factory::get_product
+			 */
+			return array();
+		}
 		$download_ids = $wpdb->get_col( $wpdb->prepare("
 			SELECT download_id
 			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
