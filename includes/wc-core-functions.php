@@ -302,7 +302,7 @@ function get_woocommerce_currencies() {
 				'UAH' => __( 'Ukrainian Hryvnia', 'woocommerce' ),
 				'USD' => __( 'US Dollars', 'woocommerce' ),
 				'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
-				'EGP' => __( 'Egyptian Pound', 'woocommerce' ),
+				'EGP' => __( 'Egyptian Pound', 'woocommerce' )
 			)
 		)
 	);
