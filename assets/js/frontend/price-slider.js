@@ -42,7 +42,7 @@ jQuery( function( $ ) {
 
 		}
 
-		$( 'body' ).trigger( 'price_slider_updated', min, max );
+		$( 'body' ).trigger( 'price_slider_updated', [ min, max ] );
 	});
 
 	$( '.price_slider' ).slider({
