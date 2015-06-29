@@ -12,10 +12,9 @@ jQuery( function( $ ) {
 
 	// Price slider uses jquery ui
 	var min_price = $( '.price_slider_amount #min_price' ).data( 'min' ),
-		max_price = $( '.price_slider_amount #max_price' ).data( 'max' );
-
-	var current_min_price = parseInt( min_price, 10 );
-	var current_max_price = parseInt( max_price, 10 );
+		max_price = $( '.price_slider_amount #max_price' ).data( 'max' ),
+		current_min_price = parseInt( min_price, 10 ),
+		current_max_price = parseInt( max_price, 10 );
 
 	if ( woocommerce_price_slider_params.min_price ) {
 		current_min_price = parseInt( woocommerce_price_slider_params.min_price, 10 );
