@@ -456,10 +456,10 @@ class WC_Admin_Setup_Wizard {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="woocommerce_prices_include_tax"><?php _e( 'Will you enter product prices including taxes?', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="woocommerce_prices_include_tax"><?php _e( 'How will you enter product prices?', 'woocommerce' ); ?></label></th>
 					<td>
-						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'yes' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ); ?></label><br/>
-						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'no' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php _e( 'No, I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
+						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'yes' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="yes" /> <?php _e( 'I will enter prices inclusive of tax', 'woocommerce' ); ?></label><br/>
+						<label><input type="radio" <?php checked( get_option( 'woocommerce_prices_include_tax', 'no' ), 'no' ); ?> id="woocommerce_prices_include_tax" name="woocommerce_prices_include_tax" class="input-radio" value="no" /> <?php _e( 'I will enter prices exclusive of tax', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
 				<?php
