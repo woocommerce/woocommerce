@@ -897,9 +897,15 @@ class WC_Product {
 	/**
 	 * Get the suffix to display after prices > 0
 	 *
+	 * @param  string  $price to calculate, left blank to just use get_price()
+	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
 	 * @return string
 	 */
-	public function get_price_suffix() {
+	public function get_price_suffix( $price = '', $qty = 1 ) {
+
+		if ( $price === '' ) {
+			$price = $this->get_price();
+		}
 
 		$price_display_suffix  = get_option( 'woocommerce_price_display_suffix' );
 
@@ -913,8 +919,8 @@ class WC_Product {
 			);
 
 			$replace = array(
-				wc_price( $this->get_price_including_tax() ),
-				wc_price( $this->get_price_excluding_tax() )
+				wc_price( $this->get_price_including_tax( $qty, $price ) ),
+				wc_price( $this->get_price_excluding_tax( $qty, $price ) )
 			);
 
 			$price_display_suffix = str_replace( $find, $replace, $price_display_suffix );
