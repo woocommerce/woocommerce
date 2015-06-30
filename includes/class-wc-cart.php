@@ -567,32 +567,27 @@ class WC_Cart {
 				}
 			}
 
-			// Other data - returned as array with name/value values
-			$other_data = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
+			// Filter item data to allow 3rd parties to add more to the array
+			$item_data = apply_filters( 'woocommerce_get_item_data', $item_data, $cart_item );
 
-			if ( $other_data && is_array( $other_data ) && sizeof( $other_data ) > 0 ) {
-
-				foreach ( $other_data as $data ) {
-					// Set hidden to true to not display meta on cart.
-					if ( empty( $data['hidden'] ) ) {
-						$display_value = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
-
-						$item_data[] = array(
-							'key'   => $data['name'],
-							'value' => $display_value
-						);
-					}
+			// Format item data ready to display
+			foreach ( $item_data as $key => $data ) {
+				// Set hidden to true to not display meta on cart.
+				if ( ! empty( $data['hidden'] ) ) {
+					unset( $item_data[ $key ] );
+					continue;
 				}
+				// Display
+				$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
 			}
 
 			// Output flat or in list format
 			if ( sizeof( $item_data ) > 0 ) {
-
 				ob_start();
 
 				if ( $flat ) {
 					foreach ( $item_data as $data ) {
-						echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['value'] ) . "\n";
+						echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
 					}
 				} else {
 					wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
