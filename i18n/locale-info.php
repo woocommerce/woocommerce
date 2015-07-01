@@ -80,21 +80,110 @@ return array(
 		'weight_unit'    => 'lbs',
 		'dimension_unit' => 'in',
 		'tax_rates'      => array(
-			// Origin based
+			'AL' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'AL',
+					'rate'     => '4.0000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
 			'AZ' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'AZ',
 					'rate'     => '5.6000',
 					'name'     => 'State Tax',
 					'shipping' => false
 				)
 			),
+			'AR' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'AR',
+					'rate'     => '6.5000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
 			'CA' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'CA',
 					'rate'     => '7.5000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'CO' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'CO',
+					'rate'     => '2.9000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'CT' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'CT',
+					'rate'     => '6.3500',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'DC' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'DC',
+					'rate'     => '5.7500',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'FL' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'FL',
+					'rate'     => '6.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'GA' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'GA',
+					'rate'     => '4.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'GU' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'GU',
+					'rate'     => '4.0000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'HI' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'HI',
+					'rate'     => '4.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'ID' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'ID',
+					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => false
 				)
@@ -102,16 +191,106 @@ return array(
 			'IL' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'IL',
 					'rate'     => '6.2500',
 					'name'     => 'State Tax',
 					'shipping' => false
 				)
 			),
+			'IN' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'IN',
+					'rate'     => '7.0000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'IA' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'IA',
+					'rate'     => '6.0000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'KS' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'KS',
+					'rate'     => '6.1500',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'KY' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'KY',
+					'rate'     => '6.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'LA' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'LA',
+					'rate'     => '4.0000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'ME' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'ME',
+					'rate'     => '5.5000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'MD' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'MD',
+					'rate'     => '6.0000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'MA' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'MA',
+					'rate'     => '6.2500',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'MI' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'MI',
+					'rate'     => '6.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'MN' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'MN',
+					'rate'     => '6.8750',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
 			'MS' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'MS',
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
 					'shipping' => true
@@ -120,17 +299,71 @@ return array(
 			'MO' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
-					'rate'     => '4.2250',
+					'state'    => 'MO',
+					'rate'     => '4.225',
 					'name'     => 'State Tax',
 					'shipping' => false
+				)
+			),
+			'NE' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'NE',
+					'rate'     => '5.5000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'NV' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'NV',
+					'rate'     => '6.8500',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'NJ' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'NJ',
+					'rate'     => '7.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
 				)
 			),
 			'NM' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'NM',
 					'rate'     => '5.1250',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'NY' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'NY',
+					'rate'     => '4.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'NC' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'NC',
+					'rate'     => '4.7500',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'ND' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'ND',
+					'rate'     => '5.0000',
 					'name'     => 'State Tax',
 					'shipping' => true
 				)
@@ -138,17 +371,62 @@ return array(
 			'OH' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'OH',
 					'rate'     => '5.7500',
 					'name'     => 'State Tax',
 					'shipping' => true
 				)
 			),
+			'OK' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'OK',
+					'rate'     => '4.5000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
 			'PA' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'PA',
 					'rate'     => '6.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'PR' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'PR',
+					'rate'     => '6.0000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'RI' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'RI',
+					'rate'     => '7.0000',
+					'name'     => 'State Tax',
+					'shipping' => false
+				)
+			),
+			'SC' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'SC',
+					'rate'     => '6.0000',
+					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			),
+			'SD' => array(
+				array(
+					'country'  => 'US',
+					'state'    => 'SD',
+					'rate'     => '4.0000',
 					'name'     => 'State Tax',
 					'shipping' => true
 				)
@@ -156,7 +434,7 @@ return array(
 			'TN' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'TN',
 					'rate'     => '7.0000',
 					'name'     => 'State Tax',
 					'shipping' => true
@@ -165,7 +443,7 @@ return array(
 			'TX' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
+					'state'    => 'TX',
 					'rate'     => '6.2500',
 					'name'     => 'State Tax',
 					'shipping' => true
@@ -174,353 +452,58 @@ return array(
 			'UT' => array(
 				array(
 					'country'  => 'US',
-					'state'    => '',
-					'rate'     => '5.9500',
-					'name'     => 'State Tax',
-					'shipping' => false
-				)
-			),
-			'VA' => array(
-				array(
-					'country'  => 'US',
-					'state'    => '',
-					'rate'     => '5.3000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				)
-			),
-
-			// Destination based
-			'' => array(
-				array(
-					'country'  => 'US',
-					'state'    => 'AL',
-					'rate'     => '4.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'AZ',
-					'rate'     => '5.6000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'AR',
-					'rate'     => '6.5000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'CA',
-					'rate'     => '7.5000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'CO',
-					'rate'     => '2.9000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'CT',
-					'rate'     => '6.3500',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'DC',
-					'rate'     => '5.7500',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'FL',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'GA',
-					'rate'     => '4.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'GU',
-					'rate'     => '4.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'HI',
-					'rate'     => '4.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'ID',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'IL',
-					'rate'     => '6.2500',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'IN',
-					'rate'     => '7.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'IA',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'KS',
-					'rate'     => '6.1500',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'KY',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'LA',
-					'rate'     => '4.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'ME',
-					'rate'     => '5.5000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'MD',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'MA',
-					'rate'     => '6.2500',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'MI',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'MN',
-					'rate'     => '6.8750',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'MS',
-					'rate'     => '7.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'MO',
-					'rate'     => '4.225',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'NE',
-					'rate'     => '5.5000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'NV',
-					'rate'     => '6.8500',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'NJ',
-					'rate'     => '7.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'NM',
-					'rate'     => '5.1250',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'NY',
-					'rate'     => '4.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'NC',
-					'rate'     => '4.7500',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'ND',
-					'rate'     => '5.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'OH',
-					'rate'     => '5.7500',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'OK',
-					'rate'     => '4.5000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'PA',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'PR',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'RI',
-					'rate'     => '7.0000',
-					'name'     => 'State Tax',
-					'shipping' => false
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'SC',
-					'rate'     => '6.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'SD',
-					'rate'     => '4.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'TN',
-					'rate'     => '7.0000',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
-					'state'    => 'TX',
-					'rate'     => '6.2500',
-					'name'     => 'State Tax',
-					'shipping' => true
-				),
-				array(
-					'country'  => 'US',
 					'state'    => 'UT',
 					'rate'     => '5.9500',
 					'name'     => 'State Tax',
 					'shipping' => false
-				),
+				)
+			),
+			'VT' => array(
 				array(
 					'country'  => 'US',
 					'state'    => 'VT',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true
-				),
+				)
+			),
+			'VA' => array(
 				array(
 					'country'  => 'US',
 					'state'    => 'VA',
 					'rate'     => '5.3000',
 					'name'     => 'State Tax',
 					'shipping' => false
-				),
+				)
+			),
+			'WA' => array(
 				array(
 					'country'  => 'US',
 					'state'    => 'WA',
 					'rate'     => '6.5000',
 					'name'     => 'State Tax',
 					'shipping' => true
-				),
+				)
+			),
+			'WV' => array(
 				array(
 					'country'  => 'US',
 					'state'    => 'WV',
 					'rate'     => '6.0000',
 					'name'     => 'State Tax',
 					'shipping' => true
-				),
+				)
+			),
+			'WI' => array(
 				array(
 					'country'  => 'US',
 					'state'    => 'WI',
 					'rate'     => '5.0000',
 					'name'     => 'State Tax',
 					'shipping' => true
-				),
+				)
+			),
+			'WY' => array(
 				array(
 					'country'  => 'US',
 					'state'    => 'WY',
