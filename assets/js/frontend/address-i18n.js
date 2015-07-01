@@ -43,7 +43,8 @@ jQuery( function( $ ) {
 
 			// Re-order postcode/city
 			if ( thislocale.postcode_before_city ) {
-				$postcodefield.add( $cityfield ).add( $statefield ).removeClass( 'form-row-first form-row-last' ).addClass( 'form-row-wide' );
+				$postcodefield.add( $cityfield ).add( $statefield ).removeClass( 'form-row-first form-row-last' ).addClass( 'form-row-first' );
+				$cityfield.removeClass( 'form-row-wide form-row-first' ).addClass( 'form-row-last' );
 				$postcodefield.insertBefore( $cityfield );
 			} else {
 				// Default
