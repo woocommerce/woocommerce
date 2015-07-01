@@ -66,7 +66,7 @@ return array(
 	'identity_token' => array(
 		'title'       => __( 'PayPal Identity Token', 'woocommerce' ),
 		'type'        => 'text',
-		'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Website Payment Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
+		'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Profile and Settings > My Selling Tools > Website Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => ''
