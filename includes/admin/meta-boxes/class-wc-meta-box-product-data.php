@@ -4,10 +4,10 @@
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin/Meta Boxes
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -613,43 +613,20 @@ class WC_Meta_Box_Product_Data {
 	public static function output_variations() {
 		global $post;
 
+		// Get attributes
 		$attributes = maybe_unserialize( get_post_meta( $post->ID, '_product_attributes', true ) );
 
 		// See if any are set
 		$variation_attribute_found = false;
 
 		if ( $attributes ) {
-
 			foreach ( $attributes as $attribute ) {
-
 				if ( isset( $attribute['is_variation'] ) ) {
 					$variation_attribute_found = true;
 					break;
 				}
 			}
 		}
-
-		// Get tax classes
-		$tax_classes           = WC_Tax::get_tax_classes();
-		$tax_class_options     = array();
-		$tax_class_options[''] = __( 'Standard', 'woocommerce' );
-
-		if ( ! empty( $tax_classes ) ) {
-			foreach ( $tax_classes as $class ) {
-				$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
-			}
-		}
-
-		$backorder_options = array(
-			'no'     => __( 'Do not allow', 'woocommerce' ),
-			'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-			'yes'    => __( 'Allow', 'woocommerce' )
-		);
-
-		$stock_status_options = array(
-			'instock'    => __( 'In stock', 'woocommerce' ),
-			'outofstock' => __( 'Out of stock', 'woocommerce' )
-		);
 
 		?>
 		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
@@ -702,135 +679,8 @@ class WC_Meta_Box_Product_Data {
 					<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
 				</p>
 
-				<div class="woocommerce_variations wc-metaboxes">
-					<?php
-					// Get parent data
-					$parent_data = array(
-						'id'                   => $post->ID,
-						'attributes'           => $attributes,
-						'tax_class_options'    => $tax_class_options,
-						'sku'                  => get_post_meta( $post->ID, '_sku', true ),
-						'weight'               => wc_format_localized_decimal( get_post_meta( $post->ID, '_weight', true ) ),
-						'length'               => wc_format_localized_decimal( get_post_meta( $post->ID, '_length', true ) ),
-						'width'                => wc_format_localized_decimal( get_post_meta( $post->ID, '_width', true ) ),
-						'height'               => wc_format_localized_decimal( get_post_meta( $post->ID, '_height', true ) ),
-						'tax_class'            => get_post_meta( $post->ID, '_tax_class', true ),
-						'backorder_options'    => $backorder_options,
-						'stock_status_options' => $stock_status_options
-					);
-
-					if ( ! $parent_data['weight'] ) {
-						$parent_data['weight'] = wc_format_localized_decimal( 0 );
-					}
-
-					if ( ! $parent_data['length'] ) {
-						$parent_data['length'] = wc_format_localized_decimal( 0 );
-					}
-
-					if ( ! $parent_data['width'] ) {
-						$parent_data['width'] = wc_format_localized_decimal( 0 );
-					}
-
-					if ( ! $parent_data['height'] ) {
-						$parent_data['height'] = wc_format_localized_decimal( 0 );
-					}
-
-					// Get variations
-					$args = array(
-						'post_type'   => 'product_variation',
-						'post_status' => array( 'private', 'publish' ),
-						'numberposts' => -1,
-						'orderby'     => 'menu_order',
-						'order'       => 'asc',
-						'post_parent' => $post->ID
-					);
-
-					$variations = get_posts( $args );
-					$loop = 0;
-
-					if ( $variations ) {
-
-						foreach ( $variations as $variation ) {
-							$variation_id     = absint( $variation->ID );
-							$variation_meta   = get_post_meta( $variation_id );
-							$variation_data   = array();
-							$shipping_classes = get_the_terms( $variation_id, 'product_shipping_class' );
-							$variation_fields = array(
-								'_sku'                   => '',
-								'_stock'                 => '',
-								'_regular_price'         => '',
-								'_sale_price'            => '',
-								'_weight'                => '',
-								'_length'                => '',
-								'_width'                 => '',
-								'_height'                => '',
-								'_download_limit'        => '',
-								'_download_expiry'       => '',
-								'_downloadable_files'    => '',
-								'_downloadable'          => '',
-								'_virtual'               => '',
-								'_thumbnail_id'          => '',
-								'_sale_price_dates_from' => '',
-								'_sale_price_dates_to'   => '',
-								'_manage_stock'          => '',
-								'_stock_status'          => '',
-								'_backorders'            => null,
-								'_tax_class'             => null,
-								'_variation_description' => ''
-							);
-
-							foreach ( $variation_fields as $field => $value ) {
-								$variation_data[ $field ] = isset( $variation_meta[ $field ][0] ) ? maybe_unserialize( $variation_meta[ $field ][0] ) : $value;
-							}
-
-							// Add the variation attributes
-							foreach ( $variation_meta as $key => $value ) {
-								if ( 0 !== strpos( $key, 'attribute_' ) ) {
-									continue;
-								}
-								/**
-								 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-								 * Attempt to get full version of the text attribute from the parent.
-								 */
-								if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $post->ID, '_product_version', true ), '2.4.0', '<' ) ) {
-									foreach ( $attributes as $attribute ) {
-										if ( $key !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
-											continue;
-										}
-										$text_attributes = wc_get_text_attributes( $attribute['value'] );
-
-										foreach ( $text_attributes as $text_attribute ) {
-											if ( sanitize_title( $text_attribute ) === $value[0] ) {
-												$value[0] = $text_attribute;
-											}
-										}
-									}
-								}
-								$variation_data[ $key ] = $value[0];
-							}
-
-							// Formatting
-							$variation_data['_regular_price'] = wc_format_localized_price( $variation_data['_regular_price'] );
-							$variation_data['_sale_price']    = wc_format_localized_price( $variation_data['_sale_price'] );
-							$variation_data['_weight']        = wc_format_localized_decimal( $variation_data['_weight'] );
-							$variation_data['_length']        = wc_format_localized_decimal( $variation_data['_length'] );
-							$variation_data['_width']         = wc_format_localized_decimal( $variation_data['_width'] );
-							$variation_data['_height']        = wc_format_localized_decimal( $variation_data['_height'] );
-							$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
-							$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
-							$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
-
-							// Stock BW compat
-							if ( '' !== $variation_data['_stock'] ) {
-								$variation_data['_manage_stock'] = 'yes';
-							}
-
-							include( 'views/html-variation-admin.php' );
-
-							$loop++;
-						}
-					}
-					?>
+				<button id="load-varitions">Load Variations</button>
+				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-product_id="<?php echo intval( $post->ID ); ?>">
 				</div>
 
 				<p class="toolbar">
@@ -858,7 +708,6 @@ class WC_Meta_Box_Product_Data {
 
 							// Get terms for attribute taxonomy or value if its a custom attribute
 							if ( $attribute['is_taxonomy'] ) {
-
 								$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
 
 								foreach ( $post_terms as $term ) {
@@ -866,7 +715,6 @@ class WC_Meta_Box_Product_Data {
 								}
 
 							} else {
-
 								$options = wc_get_text_attributes( $attribute['value'] );
 
 								foreach ( $options as $option ) {

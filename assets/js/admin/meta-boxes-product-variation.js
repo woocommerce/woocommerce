@@ -1,4 +1,5 @@
 /* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, woocommerce_admin_meta_boxes, accounting */
+/*jshint devel: true */
 jQuery( function ( $ ) {
 
 	var variation_sortable_options = {
@@ -142,7 +143,7 @@ jQuery( function ( $ ) {
 					security: woocommerce_admin_meta_boxes_variations.delete_variations_nonce
 				};
 
-				$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function ( response ) {
+				$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function() {
 					// Success
 					$( el ).fadeOut( '300', function () {
 						$( el ).remove();
@@ -218,7 +219,7 @@ jQuery( function ( $ ) {
 							security: woocommerce_admin_meta_boxes_variations.delete_variations_nonce
 						};
 
-						$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function( response ) {
+						$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function() {
 							$( '.woocommerce_variations .woocommerce_variation' ).fadeOut( '300', function () {
 								$( '.woocommerce_variations .woocommerce_variation' ).remove();
 							});
@@ -420,5 +421,70 @@ jQuery( function ( $ ) {
 	$( 'a.add_media' ).on(' click', function () {
 		wp.media.model.settings.post.id = wp_media_post_id;
 	});
+
+	/**
+	 * Product variations metabox
+	 */
+	var wc_meta_boxes_product_variations = {
+
+		/**
+		 * Initialize products variations meta box
+		 */
+		init: function() {
+			$( '#load-varitions' ).on( 'click', this.initial_load );
+		},
+
+		/**
+		 * Initial load variations
+		 *
+		 * @return {bool}
+		 */
+		initial_load: function() {
+			wc_meta_boxes_product_variations.load_variations();
+
+			return false;
+		},
+
+		/**
+		 * Load variations via Ajax
+		 *
+		 * @param {int} page (default: 1)
+		 * @param {int} per_page (default: 10)
+		 */
+		load_variations: function( page, per_page ) {
+			page     = page || 1;
+			per_page = per_page || 10;
+
+			var wrapper = $( '#variable_product_options_inner .woocommerce_variations' );
+
+			$( '#woocommerce-product-data' ).block({
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			});
+
+			$.ajax({
+				url: woocommerce_admin_meta_boxes_variations.ajax_url,
+				data: {
+					action:     'woocommerce_load_variations',
+					security:   woocommerce_admin_meta_boxes_variations.load_variations_nonce,
+					product_id: wrapper.data( 'product_id' ),
+					attributes: wrapper.data( 'attributes' ),
+					page:       page,
+					per_page:   per_page
+				},
+				type: 'POST',
+				success: function( response ) {
+					wrapper.empty();
+					wrapper.append( response );
+					$( '#woocommerce-product-data' ).unblock();
+				}
+			});
+		}
+	};
+
+	wc_meta_boxes_product_variations.init();
 
 });
