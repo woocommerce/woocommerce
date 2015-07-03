@@ -246,6 +246,25 @@ abstract class WC_Settings_API {
 	}
 
 	/**
+	 * Generate text description for the email settings tabs
+	 *
+	 * Filter applied to easily adjust description text
+	 * 
+	 * @param  string $description current description text
+	 * @return string the text for the modified settings description
+	 */
+	public function generate_email_settings_text_description( $description ) {
+
+		if ( ! empty( $description ) ) {
+			wpautop( $description );
+		} else {
+			$description = '';
+		}
+
+		return apply_filters( 'woocommerce_settings_api_description_text_' . $this->id, $description );
+	}
+
+	/**
 	 * Get HTML for tooltips
 	 *
 	 * @param  array $data

@@ -710,7 +710,7 @@ class WC_Email extends WC_Settings_API {
 		?>
 		<h3><?php echo ( ! empty( $this->title ) ) ? $this->title : __( 'Settings','woocommerce' ) ; ?></h3>
 
-		<?php echo ( ! empty( $this->description ) ) ? wpautop( $this->description ) : ''; ?>
+		<?php echo $this->generate_email_settings_text_description( $this->description ); ?>
 
 		<?php
 			/**
