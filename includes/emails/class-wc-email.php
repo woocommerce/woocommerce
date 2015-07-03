@@ -696,6 +696,24 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Generate text description for the email settings tabs
+	 *
+	 * Filter applied to easily adjust description text
+	 * 
+	 * @return string the text for the modified settings description
+	 */
+	public function generate_settings_text_description() {
+
+		if ( ! empty( $this->description ) ) {
+			$description = wpautop( $this->description );
+		} else {
+			$description = '';
+		}
+
+		return apply_filters( 'woocommerce_email_settings_description_text_' . $this->id, $description );
+	}
+
+	/**
 	 * Admin Options
 	 *
 	 * Setup the email settings screen.
@@ -710,7 +728,7 @@ class WC_Email extends WC_Settings_API {
 		?>
 		<h3><?php echo ( ! empty( $this->title ) ) ? $this->title : __( 'Settings','woocommerce' ) ; ?></h3>
 
-		<?php echo $this->generate_email_settings_text_description( $this->description ); ?>
+		<?php echo $this->generate_settings_text_description(); ?>
 
 		<?php
 			/**
