@@ -8,18 +8,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-
 <div class="updated woocommerce-message">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a>
-	<a class="skip button-primary" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
+	<a class="button-secondary docs" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
 		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
 	</div>
 </div>
-<br/>
-<table class="wc_status_table widefat" cellspacing="0">
+<table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="WordPress Environment"><?php _e( 'WordPress Environment', 'woocommerce' ); ?></th>
@@ -317,30 +315,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Server Locale"><?php _e( 'Server Locale', 'woocommerce' ); ?></th>
-		</tr>
-	</thead>
-	<tbody>
-		<?php
-			$locale = localeconv();
-			$locale_help = array(
-				'decimal_point'     => __( 'The character used for decimal points.', 'woocommerce' ),
-				'thousands_sep'     => __( 'The character used for a thousands separator.', 'woocommerce' ),
-				'mon_decimal_point' => __( 'The character used for decimal points in monetary values.', 'woocommerce' ),
-				'mon_thousands_sep' => __( 'The character used for a thousands separator in monetary values.', 'woocommerce' ),
-			);
-
-			foreach ( $locale as $key => $val ) {
-				if ( in_array( $key, array( 'decimal_point', 'mon_decimal_point', 'thousands_sep', 'mon_thousands_sep' ) ) ) {
-					echo '<tr><td data-export-label="' . $key . '">' . $key . ':</td><td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $locale_help[$key]  ) . '">[?]</a></td><td>' . ( $val ? $val : __( 'N/A', 'woocommerce' ) ) . '</td></tr>';
-				}
-			}
-		?>
-	</tbody>
-</table>
-<table class="wc_status_table widefat" cellspacing="0">
-	<thead>
-		<tr>
 			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</th>
 		</tr>
 	</thead>
@@ -417,14 +391,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</thead>
 	<tbody>
 		<tr>
-			<td data-export-label="Taxes Enabled"><?php _e( 'Taxes Enabled', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have taxes enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo wc_tax_enabled() ? '<mark class="yes">&#10004;</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td data-export-label="API Enabled"><?php _e( 'API Enabled', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have REST API enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_api_enabled' ) ? '<mark class="yes">'.'&#10004;'.'</mark>' : '<mark class="no">'.'&ndash;'.'</mark>'; ?></td>
 		</tr>
 		<tr>
-			<td data-export-label="Shipping Enabled"><?php _e( 'Shipping Enabled', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have shipping enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' === get_option( 'woocommerce_calc_shipping' ) ? '<mark class="yes">&#10004;</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td data-export-label="API Version"><?php _e( 'API Version', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What version of the REST API does your site use?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td><?php echo WC_API::VERSION ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Force SSL"><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>

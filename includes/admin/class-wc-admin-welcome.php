@@ -9,11 +9,11 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.3.0
+ * @version     2.4.0
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -21,24 +21,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Welcome {
 
+	/** @var array Tweets user can optionally send after install */
+	private $tweets = array(
+		'WooCommerce kickstarts online stores. It\'s free and has been downloaded over 6 million times.',
+		'Building an online store? WooCommerce is the leading #eCommerce plugin for WordPress (and it\'s free).',
+		'WooCommerce is a free #eCommerce plugin for #WordPress for selling #allthethings online, beautifully.',
+		'Ready to ship your idea? WooCommerce is the fastest growing #eCommerce plugin for WordPress on the web'
+	);
+
 	/**
 	 * Hook in tabs.
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'admin_menus') );
 		add_action( 'admin_head', array( $this, 'admin_head' ) );
-		add_action( 'admin_init', array( $this, 'welcome'    ) );
+		shuffle( $this->tweets );
 	}
 
 	/**
 	 * Add admin menus/screens.
 	 */
 	public function admin_menus() {
-
-		if ( empty( $_GET['page'] ) ) {
-			return;
-		}
-
 		$welcome_page_name  = __( 'About WooCommerce', 'woocommerce' );
 		$welcome_page_title = __( 'Welcome to WooCommerce', 'woocommerce' );
 
@@ -72,7 +75,6 @@ class WC_Admin_Welcome {
 		remove_submenu_page( 'index.php', 'wc-about' );
 		remove_submenu_page( 'index.php', 'wc-credits' );
 		remove_submenu_page( 'index.php', 'wc-translators' );
-
 		?>
 		<style type="text/css">
 			/*<![CDATA[*/
@@ -178,23 +180,8 @@ class WC_Admin_Welcome {
 	 * Intro text/links shown on all about pages.
 	 */
 	private function intro() {
-
-		// Flush after upgrades
-		if ( ! empty( $_GET['wc-updated'] ) || ! empty( $_GET['wc-installed'] ) ) {
-			flush_rewrite_rules();
-		}
-
 		// Drop minor version if 0
 		$major_version = substr( WC()->version, 0, 3 );
-
-		// Random tweet - must be kept to 102 chars to "fit"
-		$tweets        = array(
-			'WooCommerce kickstarts online stores. It\'s free and has been downloaded over 6 million times.',
-			'Building an online store? WooCommerce is the leading #eCommerce plugin for WordPress (and it\'s free).',
-			'WooCommerce is a free #eCommerce plugin for #WordPress for selling #allthethings online, beautifully.',
-			'Ready to ship your idea? WooCommerce is the fastest growing #eCommerce plugin for WordPress on the web'
-		);
-		shuffle( $tweets );
 		?>
 		<h1><?php printf( __( 'Welcome to WooCommerce %s', 'woocommerce' ), $major_version ); ?></h1>
 
@@ -217,7 +204,7 @@ class WC_Admin_Welcome {
 		<p class="woocommerce-actions">
 			<a href="<?php echo admin_url('admin.php?page=wc-settings'); ?>" class="button button-primary"><?php _e( 'Settings', 'woocommerce' ); ?></a>
 			<a href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/', 'woocommerce' ) ); ?>" class="docs button button-primary"><?php _e( 'Docs', 'woocommerce' ); ?></a>
-			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
 			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 		</p>
 
@@ -419,37 +406,6 @@ class WC_Admin_Welcome {
 		set_transient( 'woocommerce_contributors', $contributors, HOUR_IN_SECONDS );
 
 		return $contributors;
-	}
-
-	/**
-	 * Sends user to the welcome page on first activation.
-	 */
-	public function welcome() {
-
-		// Bail if no activation redirect transient is set
-		if ( ! get_transient( '_wc_activation_redirect' ) ) {
-			return;
-		}
-
-		// Delete the redirect transient
-		delete_transient( '_wc_activation_redirect' );
-
-		// Bail if we are waiting to install or update via the interface update/install links
-		if ( WC_Admin_Notices::has_notice( 'install' ) || WC_Admin_Notices::has_notice( 'update' ) ) {
-			return;
-		}
-
-		// Bail if activating from network, or bulk, or within an iFrame
-		if ( is_network_admin() || isset( $_GET['activate-multi'] ) || defined( 'IFRAME_REQUEST' ) ) {
-			return;
-		}
-
-		if ( ( isset( $_GET['action'] ) && 'upgrade-plugin' == $_GET['action'] ) || ( ! empty( $_GET['page'] ) && $_GET['page'] === 'wc-about' ) ) {
-			return;
-		}
-
-		wp_redirect( admin_url( 'index.php?page=wc-about' ) );
-		exit;
 	}
 }
 
