@@ -1,6 +1,45 @@
 <?php
-
 return array(
+	'AU' => array(
+		'currency_code'  => 'AUD',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'AU',
+					'state'    => '',
+					'rate'     => '10.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'BE' => array(
+		'currency_code'  => 'EUR',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ' ',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+			  array(
+					'country'  => 'BE',
+					'state'    => '',
+					'rate'     => '20.0000',
+					'name'     => 'BTW',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'BR' => array(
 		'currency_code'  => 'BRL',
 		'currency_pos'   => 'left',
@@ -10,6 +49,190 @@ return array(
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 		'tax_rates'      => array()
+	),
+	'CA' => array(
+		'currency_code'  => 'CAD',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'BC' => array(
+				array(
+					'country'  => 'CA',
+					'state'    => 'BC',
+					'rate'     => '7.0000',
+					'name'     => 'PST',
+					'shipping' => false,
+					'priority' => 2
+				)
+			),
+			'SK' => array(
+				array(
+					'country'  => 'CA',
+					'state'    => 'SK',
+					'rate'     => '5.0000',
+					'name'     => 'PST',
+					'shipping' => false,
+					'priority' => 2
+				)
+			),
+			'MB' => array(
+				array(
+					'country'  => 'CA',
+					'state'    => 'MB',
+					'rate'     => '8.0000',
+					'name'     => 'PST',
+					'shipping' => false,
+					'priority' => 2
+				)
+			),
+			'QC' => array(
+				array(
+					'country'  => 'CA',
+					'state'    => 'QC',
+					'rate'     => '9.975',
+					'name'     => 'QST',
+					'shipping' => false,
+					'priority' => 2
+				)
+			),
+			'*' => array(
+				array(
+					'country'  => 'CA',
+					'state'    => 'ON',
+					'rate'     => '13.0000',
+					'name'     => 'HST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'NL',
+					'rate'     => '13.0000',
+					'name'     => 'HST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'NB',
+					'rate'     => '13.0000',
+					'name'     => 'HST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'PE',
+					'rate'     => '14.0000',
+					'name'     => 'HST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'NS',
+					'rate'     => '15.0000',
+					'name'     => 'HST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'AB',
+					'rate'     => '5.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'BC',
+					'rate'     => '5.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'NT',
+					'rate'     => '5.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'NU',
+					'rate'     => '5.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'YT',
+					'rate'     => '5.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'SK',
+					'rate'     => '5.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'MB',
+					'rate'     => '5.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				),
+				array(
+					'country'  => 'CA',
+					'state'    => 'QC',
+					'rate'     => '5.0000',
+					'name'     => 'GST',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'DE' => array(
+		'currency_code'  => 'EUR',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'DE',
+					'state'    => '',
+					'rate'     => '19.0000',
+					'name'     => 'Mwst.',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'ES' => array(
+		'currency_code'  => 'EUR',
+		'currency_pos'   => 'right',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'ES',
+					'state'    => '',
+					'rate'     => '21.0000',
+					'name'     => 'VAT',
+					'shipping' => true
+				)
+			)
+		)
 	),
 	'FR' => array(
 		'currency_code'  => 'EUR',
@@ -33,19 +256,39 @@ return array(
 	),
 	'GB' => array(
 		'currency_code'  => 'GBP',
-		'currency_pos'   => 'left',
-		'thousand_sep'   => ',',
-		'decimal_sep'    => '.',
+		'currency_pos'	=> 'left',
+		'thousand_sep'	=> ',',
+		'decimal_sep'	 => '.',
+		'num_decimals'	=> 2,
+		'weight_unit'	 => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'		=> array(
+			'' => array(
+				array(
+					'country'  => 'GB',
+					'state'	 => '',
+					'rate'	  => '20.0000',
+					'name'	  => 'VAT',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'IT' => array(
+		'currency_code'  => 'EUR',
+		'currency_pos'   => 'right',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
 		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
 		'tax_rates'      => array(
 			'' => array(
 				array(
-					'country'  => 'GB',
+					'country'  => 'IT',
 					'state'    => '',
-					'rate'     => '20.0000',
-					'name'     => 'VAT',
+					'rate'     => '22.0000',
+					'name'     => 'IVA',
 					'shipping' => true
 				)
 			)
@@ -59,7 +302,7 @@ return array(
 		'num_decimals'   => 2,
 		'weight_unit'    => 'kg',
 		'dimension_unit' => 'cm',
-		'tax_rates' => array(
+		'tax_rates'      => array(
 			'' => array(
 				array(
 					'country'  => 'NL',
@@ -71,15 +314,75 @@ return array(
 			)
 		)
 	),
-	'US' => array(
-		'currency_code'  => 'USD',
+	'NO' => array(
+		'currency_code'  => 'Kr',
+		'currency_pos'   => 'left_space',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'NO',
+					'state'    => '',
+					'rate'     => '25.0000',
+					'name'     => 'MVA',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'PL' => array(
+		'currency_code'  => 'PLN',
+		'currency_pos'   => 'right',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+			 	array(
+					'country'  => 'PL',
+					'state'    => '',
+					'rate'     => '23.0000',
+					'name'     => 'VAT',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'TH' => array(
+		'currency_code'  => 'THB',
 		'currency_pos'   => 'left',
 		'thousand_sep'   => ',',
 		'decimal_sep'    => '.',
 		'num_decimals'   => 2,
-		'weight_unit'    => 'lbs',
-		'dimension_unit' => 'in',
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
 		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'TH',
+					'state'    => '',
+					'rate'     => '7.0000',
+					'name'     => 'VAT',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'US' => array(
+		'currency_code'  => 'USD',
+		'currency_pos'	=> 'left',
+		'thousand_sep'	=> ',',
+		'decimal_sep'	 => '.',
+		'num_decimals'	=> 2,
+		'weight_unit'	 => 'lbs',
+		'dimension_unit' => 'in',
+		'tax_rates'		=> array(
 			'AL' => array(
 				array(
 					'country'  => 'US',
@@ -509,6 +812,26 @@ return array(
 					'state'    => 'WY',
 					'rate'     => '4.0000',
 					'name'     => 'State Tax',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'ZA' => array(
+		'currency_code'  => 'ZAR',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'ZA',
+					'state'    => '',
+					'rate'     => '14.0000',
+					'name'     => 'VAT',
 					'shipping' => true
 				)
 			)

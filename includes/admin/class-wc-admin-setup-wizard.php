@@ -464,12 +464,18 @@ class WC_Admin_Setup_Wizard {
 				</tr>
 				<?php
 					$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-					$tax_rates   = false;
-					if ( isset( $locale_info[ WC()->countries->get_base_country() ] ) ) {
-						if ( isset( $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][ WC()->countries->get_base_state() ] ) ) {
-							$tax_rates = $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][ WC()->countries->get_base_state() ];
-						} elseif ( isset( $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][''] ) ) {
-							$tax_rates = $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][''];
+					$tax_rates   = array();
+					$country     = WC()->countries->get_base_country();
+					$state       = WC()->countries->get_base_state();
+
+					if ( isset( $locale_info[ $country ] ) ) {
+						if ( isset( $locale_info[ $country ]['tax_rates'][ $state ] ) ) {
+							$tax_rates = $locale_info[ $country ]['tax_rates'][ $state ];
+						} elseif ( isset( $locale_info[ $country ]['tax_rates'][''] ) ) {
+							$tax_rates = $locale_info[ $country ]['tax_rates'][''];
+						}
+						if ( isset( $locale_info[ $country ]['tax_rates']['*'] ) ) {
+							$tax_rates = array_merge( $locale_info[ $country ]['tax_rates']['*'], $tax_rates );
 						}
 					}
 					if ( $tax_rates ) {
@@ -574,12 +580,18 @@ class WC_Admin_Setup_Wizard {
 
 		if ( 'yes' === $woocommerce_calc_taxes && ! empty( $_POST['woocommerce_import_tax_rates'] ) ) {
 			$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
-			$tax_rates   = false;
-			if ( isset( $locale_info[ WC()->countries->get_base_country() ] ) ) {
-				if ( isset( $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][ WC()->countries->get_base_state() ] ) ) {
-					$tax_rates = $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][ WC()->countries->get_base_state() ];
-				} elseif ( isset( $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][''] ) ) {
-					$tax_rates = $locale_info[ WC()->countries->get_base_country() ]['tax_rates'][''];
+			$tax_rates   = array();
+			$country     = WC()->countries->get_base_country();
+			$state       = WC()->countries->get_base_state();
+
+			if ( isset( $locale_info[ $country ] ) ) {
+				if ( isset( $locale_info[ $country ]['tax_rates'][ $state ] ) ) {
+					$tax_rates = $locale_info[ $country ]['tax_rates'][ $state ];
+				} elseif ( isset( $locale_info[ $country ]['tax_rates'][''] ) ) {
+					$tax_rates = $locale_info[ $country ]['tax_rates'][''];
+				}
+				if ( isset( $locale_info[ $country ]['tax_rates']['*'] ) ) {
+					$tax_rates = array_merge( $locale_info[ $country ]['tax_rates']['*'], $tax_rates );
 				}
 			}
 			if ( $tax_rates ) {
@@ -590,7 +602,7 @@ class WC_Admin_Setup_Wizard {
 						'tax_rate_state'    => $rate['state'],
 						'tax_rate'          => $rate['rate'],
 						'tax_rate_name'     => $rate['name'],
-						'tax_rate_priority' => 1,
+						'tax_rate_priority' => isset( $rate['priority'] ) ? absint( $rate['priority'] ) : 1,
 						'tax_rate_compound' => 0,
 						'tax_rate_shipping' => $rate['shipping'] ? 1 : 0,
 						'tax_rate_order'    => $loop ++,
