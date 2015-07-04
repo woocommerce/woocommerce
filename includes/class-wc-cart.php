@@ -577,7 +577,7 @@ class WC_Cart {
 					unset( $item_data[ $key ] );
 					continue;
 				}
-				// Display
+				$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
 				$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
 			}
 
