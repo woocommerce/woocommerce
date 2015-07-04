@@ -2093,7 +2093,7 @@ class WC_AJAX {
 			wc_delete_shop_order_transients( $order_id );
 			wp_delete_post( $refund_id );
 
-			do_action( 'woocommerce_refund_deleted', $order_id );
+			do_action( 'woocommerce_refund_deleted', $refund_id, $order_id );
 		}
 
 		die();
