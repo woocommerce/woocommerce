@@ -418,7 +418,7 @@ jQuery( function ( $ ) {
 	});
 
 	// Restore ID
-	$( 'a.add_media' ).on(' click', function () {
+	$( 'a.add_media' ).on( 'click', function() {
 		wp.media.model.settings.post.id = wp_media_post_id;
 	});
 
@@ -431,7 +431,7 @@ jQuery( function ( $ ) {
 		 * Initialize products variations meta box
 		 */
 		init: function() {
-			$( '#load-varitions' ).on( 'click', this.initial_load );
+			$( 'li.variations_tab a' ).on( 'click', this.initial_load );
 		},
 
 		/**
@@ -440,9 +440,9 @@ jQuery( function ( $ ) {
 		 * @return {bool}
 		 */
 		initial_load: function() {
-			wc_meta_boxes_product_variations.load_variations();
-
-			return false;
+			if ( 0 === $( '#variable_product_options_inner .woocommerce_variations .woocommerce_variation' ).length ) {
+				wc_meta_boxes_product_variations.load_variations();
+			}
 		},
 
 		/**
