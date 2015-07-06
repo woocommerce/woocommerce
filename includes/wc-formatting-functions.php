@@ -675,3 +675,48 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
 function wc_format_content( $raw_string ) {
 	return apply_filters( 'woocommerce_format_content', do_shortcode( shortcode_unautop( wpautop( $raw_string ) ) ), $raw_string );
 }
+
+/**
+ * Formats curency symbols when saved in settings
+ * @param  string $value
+ * @param  array $option
+ * @param  string $raw_value
+ * @return string
+ */
+function wc_format_option_price_separators( $value, $option, $raw_value ) {
+	return wp_kses_post( $raw_value );
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_decimal_sep', 'wc_format_option_price_separators', 10, 3 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousand_sep', 'wc_format_option_price_separators', 10, 3 );
+
+/**
+ * Formats decimals when saved in settings
+ * @param  string $value
+ * @param  array $option
+ * @param  string $raw_value
+ * @return string
+ */
+function wc_format_option_price_num_decimals( $value, $option, $raw_value ) {
+	return is_null( $raw_value ) ? 2 : absint( $raw_value );
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_decimals', 'wc_format_option_price_num_decimals', 10, 3 );
+
+/**
+ * Formats hold stock option and sets cron event up.
+ * @param  string $value
+ * @param  array $option
+ * @param  string $raw_value
+ * @return string
+ */
+function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
+	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''
+
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+
+	if ( '' !== $value ) {
+		wp_schedule_single_event( time() + ( absint( $value ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+	}
+
+	return $value;
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_minutes', 'wc_format_option_hold_stock_minutes', 10, 3 );
