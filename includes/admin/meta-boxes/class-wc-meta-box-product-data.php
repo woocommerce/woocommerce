@@ -611,7 +611,7 @@ class WC_Meta_Box_Product_Data {
 	 * Show options for the variable product type
 	 */
 	public static function output_variations() {
-		global $post;
+		global $post, $wpdb;
 
 		// Get attributes
 		$attributes = maybe_unserialize( get_post_meta( $post->ID, '_product_attributes', true ) );
@@ -628,6 +628,9 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
+		$variations_count       = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation'", $post->ID ) );
+		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 10 ) );
+		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 		?>
 		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
 
@@ -679,7 +682,26 @@ class WC_Meta_Box_Product_Data {
 					<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
 				</p>
 
-				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-product_id="<?php echo intval( $post->ID ); ?>">
+				<div class="variations-pagenav">
+					<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
+					<span class="pagination-links">
+						<a class="first-page disabled" title="<?php _e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
+						<a class="prev-page disabled" title="<?php _e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
+						<span class="paging-select">
+							<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+							<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
+								<?php for ( $i = 1; $i < ( $variations_total_pages + 1 ); $i++ ) : ?>
+									<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+								<?php endfor; ?>
+							</select>
+							 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
+						</span>
+						<a class="next-page" title="<?php _e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
+						<a class="last-page" title="<?php _e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
+					</span>
+				</div>
+
+				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-product_id="<?php echo intval( $post->ID ); ?>" data-total_pages="<?php echo $variations_total_pages; ?>" page="1">
 				</div>
 
 				<p class="toolbar">
