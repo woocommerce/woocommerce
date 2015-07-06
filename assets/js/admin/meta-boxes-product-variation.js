@@ -1,6 +1,6 @@
 /* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, woocommerce_admin_meta_boxes, accounting */
 /*jshint devel: true */
-jQuery( function ( $ ) {
+jQuery( function( $ ) {
 
 	$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.bulk_edit', function () {
 		var bulk_edit  = $( 'select#field_to_edit' ).val(),
@@ -154,102 +154,172 @@ jQuery( function ( $ ) {
 		}
 	});
 
-	$( '#variable_product_options' ).on( 'change', 'input.variable_is_downloadable', function () {
-		$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_downloadable' ).hide();
+	/**
+	 * Variations actions
+	 */
+	var wc_meta_boxes_product_variations_actions = {
 
-		if ( $( this ).is( ':checked' ) ) {
-			$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_downloadable' ).show();
-		}
-	});
+		/**
+		 * Initialize variations actions
+		 */
+		init: function() {
+			$( '#variable_product_options' )
+				.on( 'change', 'input.variable_is_downloadable', this.variable_is_downloadable )
+				.on( 'change', 'input.variable_is_virtual', this.variable_is_virtual )
+				.on( 'change', 'input.variable_manage_stock', this.variable_manage_stock );
 
-	$( '#variable_product_options' ).on( 'change', 'input.variable_is_virtual', function () {
-		$( this ).closest( '.woocommerce_variation' ).find( '.hide_if_variation_virtual' ).show();
+			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
 
-		if ( $( this ).is( ':checked' ) ) {
-			$( this ).closest( '.woocommerce_variation' ).find( '.hide_if_variation_virtual' ).hide();
-		}
-	});
+			$( 'a.add_media' ).on( 'click', this.restore_media_post_id );
+		},
 
-	$( '#variable_product_options' ).on( 'change', 'input.variable_manage_stock', function () {
-		$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).hide();
+		/**
+		 * Check if variation is downloadable and show/hide elements
+		 */
+		variable_is_downloadable: function() {
+			$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_downloadable' ).hide();
 
-		if ( $( this ).is( ':checked' ) ) {
-			$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).show();
-		}
-	});
-
-	$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
-
-	// Uploader
-	var variable_image_frame;
-	var setting_variation_image_id;
-	var setting_variation_image;
-	var wp_media_post_id = wp.media.model.settings.post.id;
-
-	$( '#variable_product_options' ).on( 'click', '.upload_image_button', function ( event ) {
-
-		var $button                = $( this );
-		var post_id                = $button.attr( 'rel' );
-		var $parent                = $button.closest( '.upload_image' );
-		setting_variation_image    = $parent;
-		setting_variation_image_id = post_id;
-
-		event.preventDefault();
-
-		if ( $button.is( '.remove' ) ) {
-
-			setting_variation_image.find( '.upload_image_id' ).val( '' );
-			setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', woocommerce_admin_meta_boxes_variations.woocommerce_placeholder_img_src );
-			setting_variation_image.find( '.upload_image_button' ).removeClass( 'remove' );
-
-		} else {
-
-			// If the media frame already exists, reopen it.
-			if ( variable_image_frame ) {
-				variable_image_frame.uploader.uploader.param( 'post_id', setting_variation_image_id );
-				variable_image_frame.open();
-				return;
-			} else {
-				wp.media.model.settings.post.id = setting_variation_image_id;
+			if ( $( this ).is( ':checked' ) ) {
+				$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_downloadable' ).show();
 			}
+		},
 
-			// Create the media frame.
-			variable_image_frame = wp.media.frames.variable_image = wp.media({
-				// Set the title of the modal.
-				title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
-				button: {
-					text: woocommerce_admin_meta_boxes_variations.i18n_set_image
-				},
-				states : [
-					new wp.media.controller.Library({
-						title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
-						filterable :	'all'
-					})
-				]
-			});
+		/**
+		 * Check if variation is virtual and show/hide elements
+		 */
+		variable_is_virtual: function() {
+			$( this ).closest( '.woocommerce_variation' ).find( '.hide_if_variation_virtual' ).show();
 
-			// When an image is selected, run a callback.
-			variable_image_frame.on( 'select', function () {
+			if ( $( this ).is( ':checked' ) ) {
+				$( this ).closest( '.woocommerce_variation' ).find( '.hide_if_variation_virtual' ).hide();
+			}
+		},
 
-				var attachment = variable_image_frame.state().get( 'selection' ).first().toJSON(),
-					url = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+		/**
+		 * Check if variation manage stock and show/hide elements
+		 */
+		variable_manage_stock: function() {
+			$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).hide();
 
-				setting_variation_image.find( '.upload_image_id' ).val( attachment.id );
-				setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
-				setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', url );
-
-				wp.media.model.settings.post.id = wp_media_post_id;
-			});
-
-			// Finally, open the modal.
-			variable_image_frame.open();
+			if ( $( this ).is( ':checked' ) ) {
+				$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).show();
+			}
 		}
-	});
+	};
 
-	// Restore ID
-	$( 'a.add_media' ).on( 'click', function() {
-		wp.media.model.settings.post.id = wp_media_post_id;
-	});
+	/**
+	 * Variations media actions
+	 */
+	var wc_meta_boxes_product_variations_media = {
+
+		/**
+		 * wp.media frame object
+		 *
+		 * @type {object}
+		 */
+		variable_image_frame: null,
+
+		/**
+		 * Variation image ID
+		 *
+		 * @type {int}
+		 */
+		setting_variation_image_id: null,
+
+		/**
+		 * Variation image object
+		 *
+		 * @type {object}
+		 */
+		setting_variation_image: null,
+
+		/**
+		 * wp.media post ID
+		 *
+		 * @type {int}
+		 */
+		wp_media_post_id: wp.media.model.settings.post.id,
+
+		/**
+		 * Initialize media actions
+		 */
+		init: function() {
+			$( '#variable_product_options' ).on( 'click', '.upload_image_button', this.add_image );
+			$( 'a.add_media' ).on( 'click', this.restore_wp_media_post_id );
+		},
+
+		/**
+		 * Added new image
+		 *
+		 * @param {object} event
+		 */
+		add_image: function( event ) {
+			var $button = $( this ),
+				post_id = $button.attr( 'rel' ),
+				$parent = $button.closest( '.upload_image' );
+
+			wc_meta_boxes_product_variations_media.setting_variation_image    = $parent;
+			wc_meta_boxes_product_variations_media.setting_variation_image_id = post_id;
+
+			event.preventDefault();
+
+			if ( $button.is( '.remove' ) ) {
+
+				$( '.upload_image_id', wc_meta_boxes_product_variations_media.setting_variation_image ).val( '' ).change();
+				wc_meta_boxes_product_variations_media.setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', woocommerce_admin_meta_boxes_variations.woocommerce_placeholder_img_src );
+				wc_meta_boxes_product_variations_media.setting_variation_image.find( '.upload_image_button' ).removeClass( 'remove' );
+
+			} else {
+
+				// If the media frame already exists, reopen it.
+				if ( wc_meta_boxes_product_variations_media.variable_image_frame ) {
+					wc_meta_boxes_product_variations_media.variable_image_frame.uploader.uploader.param( 'post_id', wc_meta_boxes_product_variations_media.setting_variation_image_id );
+					wc_meta_boxes_product_variations_media.variable_image_frame.open();
+					return;
+				} else {
+					wp.media.model.settings.post.id = wc_meta_boxes_product_variations_media.setting_variation_image_id;
+				}
+
+				// Create the media frame.
+				wc_meta_boxes_product_variations_media.variable_image_frame = wp.media.frames.variable_image = wp.media({
+					// Set the title of the modal.
+					title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
+					button: {
+						text: woocommerce_admin_meta_boxes_variations.i18n_set_image
+					},
+					states: [
+						new wp.media.controller.Library({
+							title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
+							filterable: 'all'
+						})
+					]
+				});
+
+				// When an image is selected, run a callback.
+				wc_meta_boxes_product_variations_media.variable_image_frame.on( 'select', function () {
+
+					var attachment = wc_meta_boxes_product_variations_media.variable_image_frame.state().get( 'selection' ).first().toJSON(),
+						url = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+
+					$( '.upload_image_id', wc_meta_boxes_product_variations_media.setting_variation_image ).val( attachment.id ).change();
+					wc_meta_boxes_product_variations_media.setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
+					wc_meta_boxes_product_variations_media.setting_variation_image.find( 'img' ).eq( 0 ).attr( 'src', url );
+
+					wp.media.model.settings.post.id = wc_meta_boxes_product_variations_media.wp_media_post_id;
+				});
+
+				// Finally, open the modal.
+				wc_meta_boxes_product_variations_media.variable_image_frame.open();
+			}
+		},
+
+		/**
+		 * Restore wp.media post ID.
+		 */
+		restore_wp_media_post_id: function() {
+			wp.media.model.settings.post.id = wc_meta_boxes_product_variations_media.wp_media_post_id;
+		}
+	};
 
 	/**
 	 * Product variations metabox ajax methods
@@ -688,6 +758,8 @@ jQuery( function ( $ ) {
 		}
 	};
 
+	wc_meta_boxes_product_variations_actions.init();
+	wc_meta_boxes_product_variations_media.init();
 	wc_meta_boxes_product_variations_ajax.init();
 	wc_meta_boxes_product_variations_pagenav.init();
 
