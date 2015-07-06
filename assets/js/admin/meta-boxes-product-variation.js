@@ -432,6 +432,7 @@ jQuery( function ( $ ) {
 		 */
 		init: function() {
 			$( 'li.variations_tab a' ).on( 'click', this.initial_load );
+			$( 'body' ).on( 'change', '#variable_product_options_inner .woocommerce_variations :input', this.input_changed );
 		},
 
 		/**
@@ -482,6 +483,13 @@ jQuery( function ( $ ) {
 					$( '#woocommerce-product-data' ).unblock();
 				}
 			});
+		},
+
+		/**
+		 * Add new class when have changes in some input
+		 */
+		input_changed: function() {
+			$( '#variable_product_options_inner .woocommerce_variations' ).attr( 'data-edited', true );
 		}
 	};
 
@@ -494,9 +502,6 @@ jQuery( function ( $ ) {
 		 * Initialize products variations meta box
 		 */
 		init: function() {
-			$( 'li.variations_tab a' ).on( 'click', this.initial_load );
-
-			// Pagenav
 			$( '.variations-pagenav .page-selector' ).on( 'change', this.page_selector );
 			$( '.variations-pagenav .first-page' ).on( 'click', this.first_page );
 			$( '.variations-pagenav .prev-page' ).on( 'click', this.prev_page );
@@ -505,12 +510,37 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Paginav pagination selector
+		 * Check if have some edition before leave the page
+		 *
+		 * @return {bool}
 		 */
-		page_selector: function() {
-			var selected    = parseInt( $( this ).val(), 10 ),
-				total_pages = $( '#variable_product_options_inner .woocommerce_variations' ).data( 'total_pages' );
+		check_for_editions: function() {
+			var wrapper = $( '#variable_product_options_inner .woocommerce_variations' );
 
+			if ( 'true' === wrapper.attr( 'data-edited' ) ) {
+				if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_edited_variations ) ) {
+					wrapper.attr( 'data-edited', false );
+				} else {
+					return false;
+				}
+			}
+
+			return true;
+		},
+
+		/**
+		 * Check button if enabled and if don't have editions
+		 *
+		 * @return {bool}
+		 */
+		check_is_enabled: function( current ) {
+			return ! $( current ).hasClass( 'disabled' ) && wc_meta_boxes_product_variations_pagenav.check_for_editions();
+		},
+
+		/**
+		 * Change "disabled" class on pagenav
+		 */
+		change_classes: function( selected, total ) {
 			if ( 1 === selected ) {
 				$( '.variations-pagenav .first-page' ).addClass( 'disabled' );
 				$( '.variations-pagenav .prev-page' ).addClass( 'disabled' );
@@ -519,15 +549,28 @@ jQuery( function ( $ ) {
 				$( '.variations-pagenav .prev-page' ).removeClass( 'disabled' );
 			}
 
-			if ( total_pages === selected ) {
+			if ( total === selected ) {
 				$( '.variations-pagenav .next-page' ).addClass( 'disabled' );
 				$( '.variations-pagenav .last-page' ).addClass( 'disabled' );
 			} else {
 				$( '.variations-pagenav .next-page' ).removeClass( 'disabled' );
 				$( '.variations-pagenav .last-page' ).removeClass( 'disabled' );
 			}
+		},
 
-			wc_meta_boxes_product_variations_ajax.load_variations( selected );
+		/**
+		 * Paginav pagination selector
+		 */
+		page_selector: function() {
+			var selected = parseInt( $( this ).val(), 10 ),
+				wrapper  = $( '#variable_product_options_inner .woocommerce_variations' );
+
+			if ( wc_meta_boxes_product_variations_pagenav.check_for_editions() ) {
+				wc_meta_boxes_product_variations_pagenav.change_classes();
+				wc_meta_boxes_product_variations_ajax.load_variations( selected );
+			} else {
+				$( this ).val( parseInt( wrapper.attr( 'page' ), 10 ) );
+			}
 		},
 
 		/**
@@ -536,7 +579,7 @@ jQuery( function ( $ ) {
 		 * @return {bool}
 		 */
 		first_page: function() {
-			if ( ! $( this ).hasClass( 'disabled' ) ) {
+			if ( wc_meta_boxes_product_variations_pagenav.check_is_enabled( this ) ) {
 				$( '.variations-pagenav .page-selector' ).val( 1 ).change();
 			}
 
@@ -549,7 +592,7 @@ jQuery( function ( $ ) {
 		 * @return {bool}
 		 */
 		prev_page: function() {
-			if ( ! $( this ).hasClass( 'disabled' ) ) {
+			if ( wc_meta_boxes_product_variations_pagenav.check_is_enabled( this ) ) {
 				var wrapper   = $( '#variable_product_options_inner .woocommerce_variations' ),
 					prev_page = parseInt( wrapper.attr( 'page' ), 10 ) - 1,
 					new_page  = ( 0 < prev_page ) ? prev_page : 1;
@@ -566,7 +609,7 @@ jQuery( function ( $ ) {
 		 * @return {bool}
 		 */
 		next_page: function() {
-			if ( ! $( this ).hasClass( 'disabled' ) ) {
+			if ( wc_meta_boxes_product_variations_pagenav.check_is_enabled( this ) ) {
 				var wrapper     = $( '#variable_product_options_inner .woocommerce_variations' ),
 					total_pages = wrapper.data( 'total_pages' ),
 					next_page   = parseInt( wrapper.attr( 'page' ), 10 ) + 1,
@@ -584,7 +627,7 @@ jQuery( function ( $ ) {
 		 * @return {bool}
 		 */
 		last_page: function() {
-			if ( ! $( this ).hasClass( 'disabled' ) ) {
+			if ( wc_meta_boxes_product_variations_pagenav.check_is_enabled( this ) ) {
 				var last_page = $( '#variable_product_options_inner .woocommerce_variations' ).data( 'total_pages' );
 
 				$( '.variations-pagenav .page-selector' ).val( last_page ).change();

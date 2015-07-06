@@ -701,7 +701,7 @@ class WC_Meta_Box_Product_Data {
 					</span>
 				</div>
 
-				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-product_id="<?php echo intval( $post->ID ); ?>" data-total_pages="<?php echo $variations_total_pages; ?>" page="1">
+				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-product_id="<?php echo intval( $post->ID ); ?>" data-total_pages="<?php echo $variations_total_pages; ?>" page="1" data-edited="false">
 				</div>
 
 				<p class="toolbar">
