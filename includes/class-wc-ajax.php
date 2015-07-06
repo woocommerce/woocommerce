@@ -2364,8 +2364,8 @@ class WC_AJAX {
 			'post_status'    => array( 'private', 'publish' ),
 			'posts_per_page' => $per_page,
 			'paged'          => $page,
-			'orderby'        => 'menu_order',
-			'order'          => 'asc',
+			'orderby'        => 'ID',
+			'order'          => 'DESC',
 			'post_parent'    => $product_id
 		);
 
