@@ -341,7 +341,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
 				}
 
-				if ( strstr( $dirname, 'woocommerce-' ) ) {
+				if ( strstr( $dirname, 'woocommerce-' ) && strstr( $plugin_data['PluginURI'], 'woothemes.com' ) ) {
 
 					if ( false === ( $version_data = get_transient( md5( $plugin ) . '_version_data' ) ) ) {
 						$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
