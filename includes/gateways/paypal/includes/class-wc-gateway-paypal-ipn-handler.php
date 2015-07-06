@@ -35,8 +35,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			do_action( "valid-paypal-standard-ipn-request", $posted );
 			exit;
 		}
-
-		wp_die( "PayPal IPN Request Failure", "PayPal IPN", array( 'response' => 200 ) );
+		wp_die( "PayPal IPN Request Failure", "PayPal IPN", array( 'response' => 500 ) );
 	}
 
 	/**
