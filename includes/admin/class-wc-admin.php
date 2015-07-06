@@ -23,11 +23,11 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
-		add_action( 'current_screen', array( $this, 'conditonal_includes' ) );
+		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
-		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
+		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
 	}
 
@@ -74,7 +74,7 @@ class WC_Admin {
 	/**
 	 * Include admin files conditionally
 	 */
-	public function conditonal_includes() {
+	public function conditional_includes() {
 		$screen = get_current_screen();
 
 		switch ( $screen->id ) {

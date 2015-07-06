@@ -18,14 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Pointers {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'setup_pointers_for_screen' ) );
 	}
 
 	/**
-	 * Setup pointers for screen
+	 * Setup pointers for screen.
 	 */
 	public function setup_pointers_for_screen() {
 		$screen = get_current_screen();
@@ -38,7 +38,7 @@ class WC_Admin_Pointers {
 	}
 
 	/**
-	 * Pointers for creating a product
+	 * Pointers for creating a product.
 	 */
 	public function create_product_tutorial() {
 		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) {
@@ -217,43 +217,43 @@ class WC_Admin_Pointers {
 	}
 
 	/**
-	 * Enqueue pointers and add script to page
-	 * @param  array $pointers
+	 * Enqueue pointers and add script to page.
+	 * @param array $pointers
 	 */
 	public function enqueue_pointers( $pointers ) {
-		$pointers = json_encode( $pointers );
+		$pointers = wp_json_encode( $pointers );
 		wp_enqueue_style( 'wp-pointer' );
 		wp_enqueue_script( 'wp-pointer' );
 		wc_enqueue_js( "
-			jQuery(function($){
+			jQuery( function( $ ) {
 				var wc_pointers = {$pointers};
 
 				setTimeout( init_wc_pointers, 800 );
 
 				function init_wc_pointers() {
-					$.each( wc_pointers.pointers, function(i) {
-		                show_wc_pointer( i );
-		                return false;
-		            });
+					$.each( wc_pointers.pointers, function( i ) {
+						show_wc_pointer( i );
+						return false;
+					});
 				}
 
 				function show_wc_pointer( id ) {
 					var pointer = wc_pointers.pointers[ id ];
 					var options = $.extend( pointer.options, {
-	                	close: function() {
-	                        if ( pointer.next ) {
-	                        	show_wc_pointer( pointer.next );
-	                        }
-	                    }
-	                } );
-	                var this_pointer = $( pointer.target ).pointer( options );
-	                this_pointer.pointer( 'open' );
+						close: function() {
+							if ( pointer.next ) {
+								show_wc_pointer( pointer.next );
+							}
+						}
+					} );
+					var this_pointer = $( pointer.target ).pointer( options );
+					this_pointer.pointer( 'open' );
 
-	                if ( pointer.next_trigger ) {
-	                	$( pointer.next_trigger.target ).on( pointer.next_trigger.event, function() {
-	                		setTimeout( function() { this_pointer.pointer( 'close' ); }, 400 );
-	                	});
-	                }
+					if ( pointer.next_trigger ) {
+						$( pointer.next_trigger.target ).on( pointer.next_trigger.event, function() {
+							setTimeout( function() { this_pointer.pointer( 'close' ); }, 400 );
+						});
+					}
 				}
 			});
 		" );
