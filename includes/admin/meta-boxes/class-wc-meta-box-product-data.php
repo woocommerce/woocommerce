@@ -704,11 +704,32 @@ class WC_Meta_Box_Product_Data {
 				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-product_id="<?php echo intval( $post->ID ); ?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
 				</div>
 
+				<div class="variations-pagenav">
+					<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
+					<span class="pagination-links">
+						<a class="first-page disabled" title="<?php _e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
+						<a class="prev-page disabled" title="<?php _e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
+						<span class="paging-select">
+							<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+							<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
+								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
+									<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+								<?php endfor; ?>
+							</select>
+							 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
+						</span>
+						<a class="next-page" title="<?php _e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
+						<a class="last-page" title="<?php _e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
+					</span>
+				</div>
+
+				<button type="button" class="button button-primary save-variation-changes"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
+
 				<p class="toolbar">
 
 					<button type="button" class="button button-primary add_variation" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Add Variation', 'woocommerce' ); ?></button>
 
-					<button type="button" class="button link_all_variations" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Link all variations', 'woocommerce' ); ?></button>
+					<button type="button" class="button link_all_variations" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Link All Variations', 'woocommerce' ); ?></button>
 
 					<strong><?php _e( 'Defaults', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
 					<?php
@@ -1188,9 +1209,10 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Save variations
-		if ( 'variable' == $product_type ) {
-			self::save_variations( $post_id, $post );
-		}
+		// Deprecated since WooCommerce 2.4.0 in favor to WC_AJAX::save_variations()
+		// if ( 'variable' == $product_type ) {
+			// self::save_variations( $post_id, $post );
+		// }
 
 		// Update version after saving
 		update_post_meta( $post_id, '_product_version', WC_VERSION );
@@ -1204,6 +1226,8 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Save meta box data
+	 *
+	 * @deprecated 2.4.0 Deprecated in favor to WC_AJAX::save_variations()
 	 */
 	public static function save_variations( $post_id, $post ) {
 		global $wpdb;

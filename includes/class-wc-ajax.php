@@ -122,7 +122,8 @@ class WC_AJAX {
 			'rated'                                            => false,
 			'update_api_key'                                   => false,
 			'get_customer_location'                            => true,
-			'load_variations'                                  => false
+			'load_variations'                                  => false,
+			'save_variations'                                  => false
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -2287,11 +2288,9 @@ class WC_AJAX {
 
 		check_ajax_referer( 'load-variations', 'security' );
 
-		if ( empty( $_POST['product_id'] ) ) {
-			die();
-		}
-		if ( empty( $_POST['attributes'] ) ) {
-			die();
+		// Check permissions again and make sure we have what we need
+		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['product_id'] ) || empty( $_POST['attributes'] ) ) {
+			die( -1 );
 		}
 
 		$product_id = absint( $_POST['product_id'] );
@@ -2457,6 +2456,325 @@ class WC_AJAX {
 		}
 
 		die();
+	}
+
+	/**
+	 * Save variations via AJAX
+	 */
+	public static function save_variations() {
+		ob_start();
+
+		check_ajax_referer( 'save-variations', 'security' );
+
+		// Check permissions again and make sure we have what we need
+		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['data'] ) || empty( $_POST['product_id'] ) ) {
+			die( -1 );
+		}
+
+		global $wpdb;
+
+		parse_str( $_POST['data'], $data );
+		$product_id = absint( $_POST['product_id'] );
+
+		$attributes = (array) maybe_unserialize( get_post_meta( $product_id, '_product_attributes', true ) );
+
+		if ( isset( $data['variable_sku'] ) ) {
+			$variable_post_id               = $data['variable_post_id'];
+			$variable_sku                   = $data['variable_sku'];
+			$variable_regular_price         = $data['variable_regular_price'];
+			$variable_sale_price            = $data['variable_sale_price'];
+			$upload_image_id                = $data['upload_image_id'];
+			$variable_download_limit        = $data['variable_download_limit'];
+			$variable_download_expiry       = $data['variable_download_expiry'];
+			$variable_shipping_class        = $data['variable_shipping_class'];
+			$variable_tax_class             = isset( $data['variable_tax_class'] ) ? $data['variable_tax_class'] : array();
+			$variable_menu_order            = $data['variation_menu_order'];
+			$variable_sale_price_dates_from = $data['variable_sale_price_dates_from'];
+			$variable_sale_price_dates_to   = $data['variable_sale_price_dates_to'];
+
+			$variable_weight                = isset( $data['variable_weight'] ) ? $data['variable_weight'] : array();
+			$variable_length                = isset( $data['variable_length'] ) ? $data['variable_length'] : array();
+			$variable_width                 = isset( $data['variable_width'] ) ? $data['variable_width'] : array();
+			$variable_height                = isset( $data['variable_height'] ) ? $data['variable_height'] : array();
+			$variable_enabled               = isset( $data['variable_enabled'] ) ? $data['variable_enabled'] : array();
+			$variable_is_virtual            = isset( $data['variable_is_virtual'] ) ? $data['variable_is_virtual'] : array();
+			$variable_is_downloadable       = isset( $data['variable_is_downloadable'] ) ? $data['variable_is_downloadable'] : array();
+
+			$variable_manage_stock          = isset( $data['variable_manage_stock'] ) ? $data['variable_manage_stock'] : array();
+			$variable_stock                 = isset( $data['variable_stock'] ) ? $data['variable_stock'] : array();
+			$variable_backorders            = isset( $data['variable_backorders'] ) ? $data['variable_backorders'] : array();
+			$variable_stock_status          = isset( $data['variable_stock_status'] ) ? $data['variable_stock_status'] : array();
+
+			$variable_description           = isset( $data['variable_description'] ) ? $data['variable_description'] : array();
+
+			$max_loop = max( array_keys( $data['variable_post_id'] ) );
+
+			for ( $i = 0; $i <= $max_loop; $i ++ ) {
+
+				if ( ! isset( $variable_post_id[ $i ] ) ) {
+					continue;
+				}
+
+				$variation_id = absint( $variable_post_id[ $i ] );
+
+				// Checkboxes
+				$is_virtual          = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
+				$is_downloadable     = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
+				$post_status         = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
+				$manage_stock        = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
+
+				// Generate a useful post title
+				$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $product_id ) ) );
+
+				// Update or Add post
+				if ( ! $variation_id ) {
+
+					$variation = array(
+						'post_title'   => $variation_post_title,
+						'post_content' => '',
+						'post_status'  => $post_status,
+						'post_author'  => get_current_user_id(),
+						'post_parent'  => $product_id,
+						'post_type'    => 'product_variation',
+						'menu_order'   => $variable_menu_order[ $i ]
+					);
+
+					$variation_id = wp_insert_post( $variation );
+
+					do_action( 'woocommerce_create_product_variation', $variation_id );
+
+				} else {
+
+					$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[ $i ] ), array( 'ID' => $variation_id ) );
+
+					do_action( 'woocommerce_update_product_variation', $variation_id );
+
+				}
+
+				// Only continue if we have a variation ID
+				if ( ! $variation_id ) {
+					continue;
+				}
+
+				// Unique SKU
+				$sku     = get_post_meta( $variation_id, '_sku', true );
+				$new_sku = wc_clean( stripslashes( $variable_sku[ $i ] ) );
+
+				if ( '' == $new_sku ) {
+					update_post_meta( $variation_id, '_sku', '' );
+				} elseif ( $new_sku !== $sku ) {
+
+					if ( ! empty( $new_sku ) ) {
+						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
+
+						if ( ! $unique_sku ) {
+							WC_Admin_Meta_Boxes::add_error( __( 'Variation SKU must be unique.', 'woocommerce' ) );
+						} else {
+							update_post_meta( $variation_id, '_sku', $new_sku );
+						}
+					} else {
+						update_post_meta( $variation_id, '_sku', '' );
+					}
+				}
+
+				// Update post meta
+				update_post_meta( $variation_id, '_thumbnail_id', absint( $upload_image_id[ $i ] ) );
+				update_post_meta( $variation_id, '_virtual', wc_clean( $is_virtual ) );
+				update_post_meta( $variation_id, '_downloadable', wc_clean( $is_downloadable ) );
+
+				if ( isset( $variable_weight[ $i ] ) ) {
+					update_post_meta( $variation_id, '_weight', ( '' === $variable_weight[ $i ] ) ? '' : wc_format_decimal( $variable_weight[ $i ] ) );
+				}
+
+				if ( isset( $variable_length[ $i ] ) ) {
+					update_post_meta( $variation_id, '_length', ( '' === $variable_length[ $i ] ) ? '' : wc_format_decimal( $variable_length[ $i ] ) );
+				}
+
+				if ( isset( $variable_width[ $i ] ) ) {
+					update_post_meta( $variation_id, '_width', ( '' === $variable_width[ $i ] ) ? '' : wc_format_decimal( $variable_width[ $i ] ) );
+				}
+
+				if ( isset( $variable_height[ $i ] ) ) {
+					update_post_meta( $variation_id, '_height', ( '' === $variable_height[ $i ] ) ? '' : wc_format_decimal( $variable_height[ $i ] ) );
+				}
+
+				// Stock handling
+				update_post_meta( $variation_id, '_manage_stock', $manage_stock );
+
+				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
+				if ( ! empty( $variable_stock_status[ $i ] ) ) {
+					wc_update_product_stock_status( $variation_id, $variable_stock_status[ $i ] );
+				}
+
+				if ( 'yes' === $manage_stock ) {
+					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
+					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
+				} else {
+					delete_post_meta( $variation_id, '_backorders' );
+					delete_post_meta( $variation_id, '_stock' );
+				}
+
+				// Price handling
+				$regular_price = wc_format_decimal( $variable_regular_price[ $i ] );
+				$sale_price    = $variable_sale_price[ $i ] === '' ? '' : wc_format_decimal( $variable_sale_price[ $i ] );
+				$date_from     = wc_clean( $variable_sale_price_dates_from[ $i ] );
+				$date_to       = wc_clean( $variable_sale_price_dates_to[ $i ] );
+
+				update_post_meta( $variation_id, '_regular_price', $regular_price );
+				update_post_meta( $variation_id, '_sale_price', $sale_price );
+
+				// Save Dates
+				update_post_meta( $variation_id, '_sale_price_dates_from', $date_from ? strtotime( $date_from ) : '' );
+				update_post_meta( $variation_id, '_sale_price_dates_to', $date_to ? strtotime( $date_to ) : '' );
+
+				if ( $date_to && ! $date_from ) {
+					update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+				}
+
+				// Update price if on sale
+				if ( '' !== $sale_price && '' === $date_to && '' === $date_from ) {
+					update_post_meta( $variation_id, '_price', $sale_price );
+				} else {
+					update_post_meta( $variation_id, '_price', $regular_price );
+				}
+
+				if ( '' !== $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+					update_post_meta( $variation_id, '_price', $sale_price );
+				}
+
+				if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+					update_post_meta( $variation_id, '_price', $regular_price );
+					update_post_meta( $variation_id, '_sale_price_dates_from', '' );
+					update_post_meta( $variation_id, '_sale_price_dates_to', '' );
+				}
+
+				if ( isset( $variable_tax_class[ $i ] ) && $variable_tax_class[ $i ] !== 'parent' ) {
+					update_post_meta( $variation_id, '_tax_class', wc_clean( $variable_tax_class[ $i ] ) );
+				} else {
+					delete_post_meta( $variation_id, '_tax_class' );
+				}
+
+				if ( 'yes' == $is_downloadable ) {
+					update_post_meta( $variation_id, '_download_limit', wc_clean( $variable_download_limit[ $i ] ) );
+					update_post_meta( $variation_id, '_download_expiry', wc_clean( $variable_download_expiry[ $i ] ) );
+
+					$files              = array();
+					$file_names         = isset( $data['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'wc_clean', $data['_wc_variation_file_names'][ $variation_id ] ) : array();
+					$file_urls          = isset( $data['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'wc_clean', $data['_wc_variation_file_urls'][ $variation_id ] ) : array();
+					$file_url_size      = sizeof( $file_urls );
+					$allowed_file_types = get_allowed_mime_types();
+
+					for ( $ii = 0; $ii < $file_url_size; $ii ++ ) {
+						if ( ! empty( $file_urls[ $ii ] ) ) {
+							// Find type and file URL
+							if ( 0 === strpos( $file_urls[ $ii ], 'http' ) ) {
+								$file_is  = 'absolute';
+								$file_url = esc_url_raw( $file_urls[ $ii ] );
+							} elseif ( '[' === substr( $file_urls[ $ii ], 0, 1 ) && ']' === substr( $file_urls[ $ii ], -1 ) ) {
+								$file_is  = 'shortcode';
+								$file_url = wc_clean( $file_urls[ $ii ] );
+							} else {
+								$file_is = 'relative';
+								$file_url = wc_clean( $file_urls[ $ii ] );
+							}
+
+							$file_name = wc_clean( $file_names[ $ii ] );
+							$file_hash = md5( $file_url );
+
+							// Validate the file extension
+							if ( in_array( $file_is, array( 'absolute', 'relative' ) ) ) {
+								$file_type  = wp_check_filetype( strtok( $file_url, '?' ) );
+								$parsed_url = parse_url( $file_url, PHP_URL_PATH );
+								$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
+
+								if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
+									WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not have an allowed file type. Allowed types include: %s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
+									continue;
+								}
+							}
+
+							// Validate the file exists
+							if ( 'relative' === $file_is && ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $file_url ) ) {
+								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
+								continue;
+							}
+
+							$files[ $file_hash ] = array(
+								'name' => $file_name,
+								'file' => $file_url
+							);
+						}
+					}
+
+					// grant permission to any newly added files on any existing orders for this product prior to saving
+					do_action( 'woocommerce_process_product_file_download_paths', $product_id, $variation_id, $files );
+
+					update_post_meta( $variation_id, '_downloadable_files', $files );
+				} else {
+					update_post_meta( $variation_id, '_download_limit', '' );
+					update_post_meta( $variation_id, '_download_expiry', '' );
+					update_post_meta( $variation_id, '_downloadable_files', '' );
+				}
+
+				update_post_meta( $variation_id, '_variation_description', wp_kses_post( $variable_description[ $i ] ) );
+
+				// Save shipping class
+				$variable_shipping_class[ $i ] = ! empty( $variable_shipping_class[ $i ] ) ? (int) $variable_shipping_class[ $i ] : '';
+				wp_set_object_terms( $variation_id, $variable_shipping_class[ $i ], 'product_shipping_class');
+
+				// Update Attributes
+				$updated_attribute_keys = array();
+				foreach ( $attributes as $attribute ) {
+					if ( $attribute['is_variation'] ) {
+						$attribute_key            = 'attribute_' . sanitize_title( $attribute['name'] );
+						$updated_attribute_keys[] = $attribute_key;
+
+						if ( $attribute['is_taxonomy'] ) {
+							// Don't use wc_clean as it destroys sanitized characters
+							$value = isset( $data[ $attribute_key ][ $i ] ) ? sanitize_title( stripslashes( $data[ $attribute_key ][ $i ] ) ) : '';
+						} else {
+							$value = isset( $data[ $attribute_key ][ $i ] ) ? wc_clean( stripslashes( $data[ $attribute_key ][ $i ] ) ) : '';
+						}
+
+						update_post_meta( $variation_id, $attribute_key, $value );
+					}
+				}
+
+				// Remove old taxonomies attributes so data is kept up to date - first get attribute key names
+				$delete_attribute_keys = $wpdb->get_col( $wpdb->prepare( "SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE 'attribute_%%' AND meta_key NOT IN ( '" . implode( "','", $updated_attribute_keys ) . "' ) AND post_id = %d;", $variation_id ) );
+
+				foreach ( $delete_attribute_keys as $key ) {
+					delete_post_meta( $variation_id, $key );
+				}
+
+				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
+			}
+		}
+
+		// Update parent if variable so price sorting works and stays in sync with the cheapest child
+		WC_Product_Variable::sync( $product_id );
+
+		// Update default attribute options setting
+		$default_attributes = array();
+
+		foreach ( $attributes as $attribute ) {
+
+			if ( $attribute['is_variation'] ) {
+
+				// Don't use wc_clean as it destroys sanitized characters
+				if ( isset( $data[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) {
+					$value = sanitize_title( trim( stripslashes( $data[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+				} else {
+					$value = '';
+				}
+
+				if ( $value ) {
+					$default_attributes[ sanitize_title( $attribute['name'] ) ] = $value;
+				}
+			}
+		}
+
+		update_post_meta( $product_id, '_default_attributes', $default_attributes );
 	}
 }
 
