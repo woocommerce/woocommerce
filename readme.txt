@@ -140,6 +140,14 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.3.12 - 06/07/2015 =
 * Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](http://docs.woothemes.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
+* Fix - Escaped shop url in empty cart template.
+* Fix - Escaped product tabs titles.
+* Fix - Removed deprecated PHP4 constructor on Widget classes.
+* Fix - Wrong `price_slider_updated` JS event arguments.
+* Fix - Stock quantity type in WC-API.
+* Fix - Don't reveal username when login failed on valid email login.
+* Fix - Fatal error on order details when have some downloadable product deleted.
+* Tweak - Keep product quantity when happens some error while add product on the cart.
 
 = 2.3.11 - 10/06/2015 =
 * Fix - Check if rating is enabled before check if rating is required to a review.
