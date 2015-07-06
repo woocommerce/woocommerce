@@ -284,8 +284,8 @@ jQuery( function( $ ) {
 					// Trigger click e on selected payment method
 					if ( $( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).size() === 0 ) {
 						$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:eq(0)' ).attr( 'checked', 'checked' );
+						$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).eq(0).trigger( 'click' );
 					}
-					$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).eq(0).trigger( 'click' );
 
 					// Fire updated_checkout e
 					$( document.body ).trigger( 'updated_checkout' );
