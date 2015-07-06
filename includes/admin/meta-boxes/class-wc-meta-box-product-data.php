@@ -631,7 +631,6 @@ class WC_Meta_Box_Product_Data {
 		$variations_count       = absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation'", $post->ID ) ) );
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 10 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
-
 		?>
 		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
 
@@ -691,7 +690,7 @@ class WC_Meta_Box_Product_Data {
 						<span class="paging-select">
 							<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
 							<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
-								<?php for ( $i = 1; $i < ( $variations_total_pages + 1 ); $i++ ) : ?>
+								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 									<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
 								<?php endfor; ?>
 							</select>

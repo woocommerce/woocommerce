@@ -296,7 +296,8 @@ jQuery( function ( $ ) {
 		 */
 		initial_load: function() {
 			if ( 0 === $( '#variable_product_options_inner .woocommerce_variations .woocommerce_variation' ).length ) {
-				wc_meta_boxes_product_variations_ajax.load_variations();
+				wc_meta_boxes_product_variations_pagenav.set_paginav( 0 );
+				wc_meta_boxes_product_variations_pagenav.set_page( 1 );
 			}
 		},
 
@@ -365,6 +366,7 @@ jQuery( function ( $ ) {
 			};
 
 			$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function() {
+				wc_meta_boxes_product_variations_pagenav.set_paginav( 1 );
 				wc_meta_boxes_product_variations_pagenav.set_page( 1 );
 
 				$( '#woocommerce-product-data' ).unblock();
@@ -408,8 +410,7 @@ jQuery( function ( $ ) {
 					$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function() {
 						var current = parseInt( $( '#variable_product_options_inner .woocommerce_variations' ).attr( 'data-page' ), 10 );
 
-						console.log( current );
-
+						wc_meta_boxes_product_variations_pagenav.set_paginav( -1 );
 						wc_meta_boxes_product_variations_pagenav.set_page( current );
 					});
 
@@ -458,6 +459,7 @@ jQuery( function ( $ ) {
 					}
 
 					if ( count > 0 ) {
+						wc_meta_boxes_product_variations_pagenav.set_paginav( count );
 						wc_meta_boxes_product_variations_pagenav.set_page( 1 );
 
 						$( '#variable_product_options' ).trigger( 'woocommerce_variations_added' );
@@ -487,11 +489,47 @@ jQuery( function ( $ ) {
 		 * Initialize products variations meta box
 		 */
 		init: function() {
-			$( '.variations-pagenav .page-selector' ).on( 'change', this.page_selector );
-			$( '.variations-pagenav .first-page' ).on( 'click', this.first_page );
-			$( '.variations-pagenav .prev-page' ).on( 'click', this.prev_page );
-			$( '.variations-pagenav .next-page' ).on( 'click', this.next_page );
-			$( '.variations-pagenav .last-page' ).on( 'click', this.last_page );
+			$( '.variations-pagenav' )
+				.on( 'change', '.page-selector', this.page_selector )
+				.on( 'click', '.first-page', this.first_page )
+				.on( 'click', '.prev-page', this.prev_page )
+				.on( 'click', '.next-page', this.next_page )
+				.on( 'click', '.last-page', this.last_page );
+		},
+
+		/**
+		 * Set the pagenav fields
+		 *
+		 * @param {int} qty
+		 */
+		set_paginav: function( qty ) {
+			var wrapper        = $( '#variable_product_options_inner .woocommerce_variations' ),
+				total          = parseInt( wrapper.attr( 'data-total' ), 10 ),
+				new_qty        = total + qty,
+				displaying_num = $( '.variations-pagenav .displaying-num' ),
+				total_pages    = Math.ceil( new_qty / woocommerce_admin_meta_boxes_variations.variations_per_page ),
+				options        = '';
+
+			// Set the new total of variations
+			wrapper.attr( 'data-total', new_qty );
+
+			if ( 1 === new_qty ) {
+				displaying_num.text( woocommerce_admin_meta_boxes_variations.i18n_item.replace( '%qty%', new_qty ) );
+			} else {
+				displaying_num.text( woocommerce_admin_meta_boxes_variations.i18n_items.replace( '%qty%', new_qty ) );
+			}
+
+			// Set the new total of pages
+			wrapper.attr( 'data-total_pages', total_pages );
+
+			$( '.variations-pagenav .total-pages' ).text( total_pages );
+
+			// Set the new pagenav options
+			for ( var i = 1; i <= total_pages; i++ ) {
+				options += '<option value="' + i + '">' + i + '</option>';
+			}
+
+			$( '.page-selector' ).empty().html( options );
 		},
 
 		/**
@@ -507,20 +545,25 @@ jQuery( function ( $ ) {
 		 * Change "disabled" class on pagenav
 		 */
 		change_classes: function( selected, total ) {
+			var first_page = $( '.variations-pagenav .first-page' ),
+				prev_page  = $( '.variations-pagenav .prev-page' ),
+				next_page  = $( '.variations-pagenav .next-page' ),
+				last_page  = $( '.variations-pagenav .last-page' );
+
 			if ( 1 === selected ) {
-				$( '.variations-pagenav .first-page' ).addClass( 'disabled' );
-				$( '.variations-pagenav .prev-page' ).addClass( 'disabled' );
+				first_page.addClass( 'disabled' );
+				prev_page.addClass( 'disabled' );
 			} else {
-				$( '.variations-pagenav .first-page' ).removeClass( 'disabled' );
-				$( '.variations-pagenav .prev-page' ).removeClass( 'disabled' );
+				first_page.removeClass( 'disabled' );
+				prev_page.removeClass( 'disabled' );
 			}
 
 			if ( total === selected ) {
-				$( '.variations-pagenav .next-page' ).addClass( 'disabled' );
-				$( '.variations-pagenav .last-page' ).addClass( 'disabled' );
+				next_page.addClass( 'disabled' );
+				last_page.addClass( 'disabled' );
 			} else {
-				$( '.variations-pagenav .next-page' ).removeClass( 'disabled' );
-				$( '.variations-pagenav .last-page' ).removeClass( 'disabled' );
+				next_page.removeClass( 'disabled' );
+				last_page.removeClass( 'disabled' );
 			}
 		},
 
@@ -539,7 +582,7 @@ jQuery( function ( $ ) {
 				wrapper  = $( '#variable_product_options_inner .woocommerce_variations' );
 
 			if ( wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
-				wc_meta_boxes_product_variations_pagenav.change_classes();
+				wc_meta_boxes_product_variations_pagenav.change_classes( selected, parseInt( wrapper.attr( 'data-total_pages' ), 10 ) );
 				wc_meta_boxes_product_variations_ajax.load_variations( selected );
 			} else {
 				$( this ).val( parseInt( wrapper.data( 'page' ), 10 ) );
@@ -584,7 +627,7 @@ jQuery( function ( $ ) {
 		next_page: function() {
 			if ( wc_meta_boxes_product_variations_pagenav.check_is_enabled( this ) ) {
 				var wrapper     = $( '#variable_product_options_inner .woocommerce_variations' ),
-					total_pages = wrapper.data( 'total_pages' ),
+					total_pages = parseInt( wrapper.data( 'total_pages' ), 10 ),
 					next_page   = parseInt( wrapper.data( 'page' ), 10 ) + 1,
 					new_page    = ( total_pages >= next_page ) ? next_page : total_pages;
 
