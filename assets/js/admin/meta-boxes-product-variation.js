@@ -2,25 +2,6 @@
 /*jshint devel: true */
 jQuery( function ( $ ) {
 
-	var variation_sortable_options = {
-		items: '.woocommerce_variation',
-		cursor: 'move',
-		axis: 'y',
-		handle: 'h3',
-		scrollSensitivity: 40,
-		forcePlaceholderSize: true,
-		helper: 'clone',
-		opacity: 0.65,
-		placeholder: 'wc-metabox-sortable-placeholder',
-		start: function( event, ui ) {
-			ui.item.css( 'background-color', '#f6f6f6' );
-		},
-		stop: function ( event, ui ) {
-			ui.item.removeAttr( 'style' );
-			variation_row_indexes();
-		}
-	};
-
 	$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.bulk_edit', function () {
 		var bulk_edit  = $( 'select#field_to_edit' ).val(),
 			checkbox,
@@ -198,19 +179,6 @@ jQuery( function ( $ ) {
 	});
 
 	$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
-
-	// Ordering
-	$( '#variable_product_options' ).on( 'woocommerce_variations_added', function () {
-		$( '.woocommerce_variations' ).sortable( variation_sortable_options );
-	} );
-
-	$( '.woocommerce_variations' ).sortable( variation_sortable_options );
-
-	function variation_row_indexes() {
-		$( '.woocommerce_variations .woocommerce_variation' ).each( function ( index, el ) {
-			$( '.variation_menu_order', el ).val( parseInt( $( el ).index( '.woocommerce_variations .woocommerce_variation' ), 10 ) );
-		});
-	}
 
 	// Uploader
 	var variable_image_frame;
