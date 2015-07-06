@@ -85,7 +85,7 @@ if ( wc_tax_enabled() ) {
 
 				include( 'html-order-item.php' );
 
-				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item );
+				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item, $order );
 			}
 		?>
 		</tbody>
