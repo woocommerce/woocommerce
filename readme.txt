@@ -147,6 +147,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Stock quantity type in WC-API.
 * Fix - Don't reveal username when login failed on valid email login.
 * Fix - Fatal error on order details when have some downloadable product deleted.
+* Fix - Relative paths validation for downloadable product.
 * Tweak - Keep product quantity when happens some error while add product on the cart.
 
 = 2.3.11 - 10/06/2015 =
