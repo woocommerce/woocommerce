@@ -2475,7 +2475,6 @@ class WC_AJAX {
 
 		parse_str( $_POST['data'], $data );
 		$product_id = absint( $_POST['product_id'] );
-
 		$attributes = (array) maybe_unserialize( get_post_meta( $product_id, '_product_attributes', true ) );
 
 		if ( isset( $data['variable_sku'] ) ) {
@@ -2775,6 +2774,9 @@ class WC_AJAX {
 		}
 
 		update_post_meta( $product_id, '_default_attributes', $default_attributes );
+
+		// Clear cache/transients
+		wc_delete_product_transients( $product_id );
 	}
 }
 

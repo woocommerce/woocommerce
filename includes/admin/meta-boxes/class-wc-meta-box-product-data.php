@@ -723,7 +723,7 @@ class WC_Meta_Box_Product_Data {
 					</span>
 				</div>
 
-				<button type="button" class="button button-primary save-variation-changes"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
+				<button type="button" class="button button-primary save-variation-changes" disabled="disabled"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
 
 				<p class="toolbar">
 
@@ -1209,10 +1209,13 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Save variations
-		// Deprecated since WooCommerce 2.4.0 in favor to WC_AJAX::save_variations()
-		// if ( 'variable' == $product_type ) {
+		if ( 'variable' == $product_type ) {
+			// Deprecated since WooCommerce 2.4.0 in favor to WC_AJAX::save_variations()
 			// self::save_variations( $post_id, $post );
-		// }
+
+			// Update parent if variable so price sorting works and stays in sync with the cheapest child
+			WC_Product_Variable::sync( $post_id );
+		}
 
 		// Update version after saving
 		update_post_meta( $post_id, '_product_version', WC_VERSION );

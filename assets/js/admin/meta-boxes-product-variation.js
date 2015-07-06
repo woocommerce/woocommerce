@@ -277,11 +277,12 @@ jQuery( function ( $ ) {
 		 * @return {bool}
 		 */
 		check_for_editions: function() {
-			var wrapper = $( '#variable_product_options .woocommerce_variations' );
+			var need_update = $( '#variable_product_options .woocommerce_variations .variation-needs-update' );
 
-			if ( 'true' === wrapper.attr( 'data-edited' ) ) {
+			if ( 0 < need_update.legnth ) {
 				if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_edited_variations ) ) {
-					wrapper.attr( 'data-edited', false );
+					need_update.removeClass( 'variation-needs-update' );
+					$( 'button.save-variation-changes' ).removeAttr( 'disabled' );
 				} else {
 					return false;
 				}
@@ -361,26 +362,32 @@ jQuery( function ( $ ) {
 		 * @return {bool}
 		 */
 		save_variations: function() {
-			var wrapper = $( '#variable_product_options .woocommerce_variations' );
+			var button      = $( this ),
+				wrapper     = $( '#variable_product_options .woocommerce_variations' ),
+				need_update = $( '.variation-needs-update', wrapper );
 
-			wc_meta_boxes_product_variations_ajax.block();
+			// Save only with products need update.
+			if ( 0 < need_update.length ) {
+				wc_meta_boxes_product_variations_ajax.block();
 
-			$.ajax({
-				url: woocommerce_admin_meta_boxes_variations.ajax_url,
-				data: {
-					action:     'woocommerce_save_variations',
-					security:   woocommerce_admin_meta_boxes_variations.save_variations_nonce,
-					product_id: wrapper.data( 'product_id' ),
-					data:       $( ':input', wrapper ).serialize()
-				},
-				type: 'POST',
-				success: function() {
-					// Allow change page, delete and add new variations
-					wrapper.attr( 'data-edited', false );
+				$.ajax({
+					url: woocommerce_admin_meta_boxes_variations.ajax_url,
+					data: {
+						action:     'woocommerce_save_variations',
+						security:   woocommerce_admin_meta_boxes_variations.save_variations_nonce,
+						product_id: wrapper.data( 'product_id' ),
+						data:       $( ':input', need_update ).serialize()
+					},
+					type: 'POST',
+					success: function() {
+						// Allow change page, delete and add new variations
+						need_update.removeClass( 'variation-needs-update' );
+						button.attr( 'disabled', 'disabled' );
 
-					wc_meta_boxes_product_variations_ajax.unblock();
-				}
-			});
+						wc_meta_boxes_product_variations_ajax.unblock();
+					}
+				});
+			}
 
 			return false;
 		},
@@ -503,7 +510,8 @@ jQuery( function ( $ ) {
 		 * Add new class when have changes in some input
 		 */
 		input_changed: function() {
-			$( '#variable_product_options .woocommerce_variations' ).attr( 'data-edited', true );
+			$( this ).closest( '.woocommerce_variation' ).addClass( 'variation-needs-update' );
+			$( '.save-variation-changes' ).removeAttr( 'disabled' );
 		}
 	};
 
