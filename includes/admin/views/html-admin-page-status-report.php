@@ -264,8 +264,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td class="help"><?php echo isset( $post['help'] ) ? $post['help'] : ''; ?></td>
 					<td>
 						<mark class="<?php echo $mark; ?>">
-							<?php echo ! empty( $post['success'] ) ? '&#10004' : '&#10005'; ?>
-							<?php echo ! empty( $post['note'] ) ? wp_kses_data( $post['note'] ) : ''; ?>
+							<?php echo ! empty( $post['success'] ) ? '&#10004' : '&#10005'; ?> <?php echo ! empty( $post['note'] ) ? wp_kses_data( $post['note'] ) : ''; ?>
 						</mark>
 					</td>
 				</tr>
