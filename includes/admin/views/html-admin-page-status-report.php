@@ -213,7 +213,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 
 			// WP Remote Post Check
-			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce');
+			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce' );
 			$posting['wp_remote_post']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) . '">[?]</a>';
 
 			$response = wp_safe_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
@@ -227,7 +227,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				$posting['wp_remote_post']['success'] = true;
 			} else {
-				$posting['wp_remote_post']['note']    = __( 'wp_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider.', 'woocommerce' );
+				$posting['wp_remote_post']['note']    = __( 'wp_safe_remote_post() failed. PayPal IPN won\'t work with your server. Contact your hosting provider.', 'woocommerce' );
 				if ( is_wp_error( $response ) ) {
 					$posting['wp_remote_post']['note'] .= ' ' . sprintf( __( 'Error: %s', 'woocommerce' ), wc_clean( $response->get_error_message() ) );
 				} else {
@@ -237,7 +237,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 
 			// WP Remote Get Check
-			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
+			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce' );
 			$posting['wp_remote_get']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) . '">[?]</a>';
 
 			$response = wp_safe_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
@@ -245,7 +245,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				$posting['wp_remote_get']['success'] = true;
 			} else {
-				$posting['wp_remote_get']['note']    = __( 'wp_remote_get() failed. The WooCommerce plugin updater won\'t work with your server. Contact your hosting provider.', 'woocommerce' );
+				$posting['wp_remote_get']['note']    = __( 'wp_safe_remote_get() failed. The WooCommerce plugin updater won\'t work with your server. Contact your hosting provider.', 'woocommerce' );
 				if ( is_wp_error( $response ) ) {
 					$posting['wp_remote_get']['note'] .= ' ' . sprintf( __( 'Error: %s', 'woocommerce' ), wc_clean( $response->get_error_message() ) );
 				} else {
