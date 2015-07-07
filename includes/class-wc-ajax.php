@@ -2854,8 +2854,8 @@ class WC_AJAX {
 				foreach ( $variations as $variation_id ) {
 					$regular_price = '_regular_price' === $field ? $data['value'] : get_post_meta( $variation_id, '_regular_price', true );
 					$sale_price    = '_sale_price' === $field ? $data['value'] : get_post_meta( $variation_id, '_sale_price', true );
-					$date_from     = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-					$date_to       = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+					$date_from     = date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_from', true ) );
+					$date_to       = date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_to', true ) );
 
 					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
 				}
@@ -2919,15 +2919,40 @@ class WC_AJAX {
 				}
 				break;
 			case 'variable_regular_price_increase' :
-
-				break;
 			case 'variable_regular_price_decrease' :
-
-				break;
 			case 'variable_sale_price_increase' :
-
-				break;
 			case 'variable_sale_price_decrease' :
+				if ( empty( $data['value'] ) ) {
+					break;
+				}
+
+				$field    = str_replace( array( 'variable', '_increase', '_decrease' ), '', $bulk_action );
+				$operator = 'increase' === substr( $bulk_action, -8 ) ? +1 : -1;
+
+				foreach ( $variations as $variation_id ) {
+					$regular_price = get_post_meta( $variation_id, '_regular_price', true );
+					$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+					$date_from     = date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_from', true ) );
+					$date_to       = date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_to', true ) );
+
+					if ( '%' === substr( $data['value'], -1 ) ) {
+						$percent = wc_format_decimal( substr( $data['value'], 0, -1 ) );
+
+						if ( '_regular_price' === $field ) {
+							$regular_price += ( ( $regular_price / 100 ) * $percent ) * $operator;
+						} else {
+							$sale_price += ( ( $sale_price / 100 ) * $percent ) * $operator;
+						}
+					} else {
+						if ( '_regular_price' === $field ) {
+							$regular_price += $data['value'];
+						} else {
+							$sale_price    += $data['value'];
+						}
+					}
+
+					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+				}
 
 				break;
 			case 'variable_sale_schedule' :

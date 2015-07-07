@@ -1,4 +1,4 @@
-/* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, woocommerce_admin_meta_boxes, accounting */
+/* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, accounting */
 /*jshint devel: true */
 jQuery( function( $ ) {
 
@@ -475,45 +475,15 @@ jQuery( function( $ ) {
 				case 'variable_regular_price_decrease' :
 				case 'variable_sale_price_increase' :
 				case 'variable_sale_price_decrease' :
-					// var edit_field;
-					// if ( bulk_edit.lastIndexOf( 'variable_regular_price', 0 ) === 0 ) {
-					// 	edit_field = 'variable_regular_price';
-					// } else {
-					// 	edit_field = 'variable_sale_price';
-					// }
+					value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
 
-					// value = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_a_value_fixed_or_percent );
-
-					// if ( value == null ) {
-					// 	return;
-					// } else {
-					// 	value = value.toString();
-					// }
-
-					// $( ':input[name^="' + edit_field + '"]' ).not('[name*="dates"]').each( function() {
-					// 	var current_value = accounting.unformat( $( this ).val(), woocommerce_admin.mon_decimal_point ),
-					// 		new_value,
-					// 		mod_value;
-
-					// 	if ( value.indexOf( '%' ) >= 0 ) {
-					// 		mod_value = ( current_value / 100 ) * accounting.unformat( value.replace( /\%/, '' ), woocommerce_admin.mon_decimal_point );
-					// 	} else {
-					// 		mod_value = accounting.unformat( value, woocommerce_admin.mon_decimal_point );
-					// 	}
-
-					// 	if ( bulk_edit.indexOf( 'increase' ) !== -1 ) {
-					// 		new_value = current_value + mod_value;
-					// 	} else {
-					// 		new_value = current_value - mod_value;
-					// 	}
-
-					// 	$( this ).val( accounting.formatNumber(
-					// 		new_value,
-					// 		woocommerce_admin_meta_boxes.currency_format_num_decimals,
-					// 		woocommerce_admin_meta_boxes.currency_format_thousand_sep,
-					// 		woocommerce_admin_meta_boxes.currency_format_decimal_sep
-					// 	) ).change();
-					// });
+					if ( value != null ) {
+						if ( value.indexOf( '%' ) >= 0 ) {
+							data.value = accounting.unformat( value.replace( /\%/, '' ), woocommerce_admin.mon_decimal_point ) + '%';
+						} else {
+							data.value = accounting.unformat( value, woocommerce_admin.mon_decimal_point );
+						}
+					}
 				break;
 				case 'variable_regular_price' :
 				case 'variable_sale_price' :
