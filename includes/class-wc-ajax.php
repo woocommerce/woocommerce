@@ -2912,7 +2912,7 @@ class WC_AJAX {
 				}
 				break;
 			case 'delete_all' :
-				if ( isset( $data['allowed'] ) && true === $data['allowed'] ) {
+				if ( isset( $data['allowed'] ) && 'true' === $data['allowed'] ) {
 					foreach ( $variations as $variation_id ) {
 						wp_delete_post( $variation_id );
 					}
