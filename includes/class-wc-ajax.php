@@ -2518,10 +2518,10 @@ class WC_AJAX {
 				$variation_id = absint( $variable_post_id[ $i ] );
 
 				// Checkboxes
-				$is_virtual          = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
-				$is_downloadable     = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
-				$post_status         = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
-				$manage_stock        = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
+				$is_virtual      = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
+				$is_downloadable = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
+				$post_status     = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
+				$manage_stock    = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
 
 				// Generate a useful post title
 				$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $product_id ) ) );
@@ -2800,7 +2800,7 @@ class WC_AJAX {
 		$data        = ! empty( $_POST['data'] ) ? array_map( 'wc_clean', $_POST['data'] ) : array();
 		$variations  = array();
 
-		if ( apply_filters( 'woocommerce_bulk_edit_variations_need_children', in_array( $bulk_action, array( 'toggle_enabled', 'toggle_downloadable', 'toggle_virtual', 'toggle_manage_stock', 'variable_stock', 'variable_download_limit', 'variable_download_expiry' ) ) ) ) {
+		if ( apply_filters( 'woocommerce_bulk_edit_variations_need_children', in_array( $bulk_action, array( 'toggle_enabled', 'toggle_downloadable', 'toggle_virtual', 'toggle_manage_stock', 'variable_stock', 'variable_regular_price', 'variable_sale_price', 'variable_download_limit', 'variable_download_expiry', 'delete_all' ) ) ) ) {
 			$variations = get_posts( array(
 				'post_parent'    => $product_id,
 				'posts_per_page' => -1,
@@ -2845,10 +2845,23 @@ class WC_AJAX {
 				break;
 			case 'variable_regular_price' :
 			case 'variable_sale_price' :
+				if ( empty( $data['value'] ) ) {
+					break;
+				}
 
+				$field = str_replace( 'variable', '', $bulk_action );
+
+				foreach ( $variations as $variation_id ) {
+					$regular_price = '_regular_price' === $field ? $data['value'] : get_post_meta( $variation_id, '_regular_price', true );
+					$sale_price    = '_sale_price' === $field ? $data['value'] : get_post_meta( $variation_id, '_sale_price', true );
+					$date_from     = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+					$date_to       = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+
+					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+				}
 				break;
 			case 'variable_stock' :
-				if ( isset( $data['value'] ) ) {
+				if ( empty( $data['value'] ) ) {
 					break;
 				}
 
@@ -2866,7 +2879,7 @@ class WC_AJAX {
 			case 'variable_length' :
 			case 'variable_width' :
 			case 'variable_height' :
-				if ( isset( $data['value'] ) ) {
+				if ( empty( $data['value'] ) ) {
 					break;
 				}
 
@@ -2883,7 +2896,7 @@ class WC_AJAX {
 				break;
 			case 'variable_download_limit' :
 			case 'variable_download_expiry' :
-				if ( isset( $data['value'] ) ) {
+				if ( empty( $data['value'] ) ) {
 					break;
 				}
 
