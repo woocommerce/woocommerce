@@ -139,7 +139,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.3.13 - 07/07/2015 =
-* Fix - Improved the email settings save and tabs for 3rd party plugins. 
+* Fix - Improved the email settings save and tabs for 3rd party plugins.
+* Fix - Datepicker range for variations.
 
 = 2.3.12 - 06/07/2015 =
 * Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](http://docs.woothemes.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
