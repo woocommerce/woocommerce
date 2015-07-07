@@ -661,10 +661,12 @@ jQuery( function( $ ) {
 				wrapper  = $( '#variable_product_options .woocommerce_variations' );
 
 			if ( wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
+				console.log( 'page_selector', selected );
+
 				wc_meta_boxes_product_variations_pagenav.change_classes( selected, parseInt( wrapper.attr( 'data-total_pages' ), 10 ) );
 				wc_meta_boxes_product_variations_ajax.load_variations( selected );
 			} else {
-				$( this ).val( parseInt( wrapper.data( 'page' ), 10 ) );
+				$( this ).val( parseInt( wrapper.attr( 'data-page' ), 10 ) );
 			}
 		},
 
@@ -689,7 +691,7 @@ jQuery( function( $ ) {
 		prev_page: function() {
 			if ( wc_meta_boxes_product_variations_pagenav.check_is_enabled( this ) ) {
 				var wrapper   = $( '#variable_product_options .woocommerce_variations' ),
-					prev_page = parseInt( wrapper.data( 'page' ), 10 ) - 1,
+					prev_page = parseInt( wrapper.attr( 'data-page' ), 10 ) - 1,
 					new_page  = ( 0 < prev_page ) ? prev_page : 1;
 
 				wc_meta_boxes_product_variations_pagenav.set_page( new_page );
@@ -706,9 +708,13 @@ jQuery( function( $ ) {
 		next_page: function() {
 			if ( wc_meta_boxes_product_variations_pagenav.check_is_enabled( this ) ) {
 				var wrapper     = $( '#variable_product_options .woocommerce_variations' ),
-					total_pages = parseInt( wrapper.data( 'total_pages' ), 10 ),
-					next_page   = parseInt( wrapper.data( 'page' ), 10 ) + 1,
+					total_pages = parseInt( wrapper.attr( 'data-total_pages' ), 10 ),
+					next_page   = parseInt( wrapper.attr( 'data-page' ), 10 ) + 1,
 					new_page    = ( total_pages >= next_page ) ? next_page : total_pages;
+
+				/*jshint devel:true */
+				console.log( total_pages );
+				console.log( next_page );
 
 				wc_meta_boxes_product_variations_pagenav.set_page( new_page );
 			}
@@ -723,7 +729,7 @@ jQuery( function( $ ) {
 		 */
 		last_page: function() {
 			if ( wc_meta_boxes_product_variations_pagenav.check_is_enabled( this ) ) {
-				var last_page = $( '#variable_product_options .woocommerce_variations' ).data( 'total_pages' );
+				var last_page = $( '#variable_product_options .woocommerce_variations' ).attr( 'data-total_pages' );
 
 				wc_meta_boxes_product_variations_pagenav.set_page( last_page );
 			}
