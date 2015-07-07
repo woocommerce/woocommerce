@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 echo "= " . $email_heading . " =\n\n";
-
-echo sprintf( __( 'You have received an order from %s.', 'woocommerce' ), $order->billing_first_name . ' ' . $order->billing_last_name ) . "\n\n";
+$name = apply_filters( 'woocommerce_email_name_text', $order->billing_first_name . ' ' . $order->billing_last_name, $order);
+echo sprintf( __( 'You have received an order from %s.', 'woocommerce' ), $name ) . "\n\n";
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
