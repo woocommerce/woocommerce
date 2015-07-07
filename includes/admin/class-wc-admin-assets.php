@@ -166,9 +166,12 @@ class WC_Admin_Assets {
 				'plugin_url'                          => WC()->plugin_url(),
 				'ajax_url'                            => admin_url( 'admin-ajax.php' ),
 				'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
-				'add_variation_nonce'                 => wp_create_nonce("add-variation"),
-				'link_variation_nonce'                => wp_create_nonce("link-variations"),
-				'delete_variations_nonce'             => wp_create_nonce("delete-variations"),
+				'add_variation_nonce'                 => wp_create_nonce( 'add-variation' ),
+				'link_variation_nonce'                => wp_create_nonce( 'link-variations' ),
+				'delete_variations_nonce'             => wp_create_nonce( 'delete-variations' ),
+				'load_variations_nonce'               => wp_create_nonce( 'load-variations' ),
+				'save_variations_nonce'               => wp_create_nonce( 'save-variations' ),
+				'bulk_edit_variations_nonce'          => wp_create_nonce( 'bulk-edit-variations' ),
 				'i18n_link_all_variations'            => esc_js( __( 'Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).', 'woocommerce' ) ),
 				'i18n_enter_a_value'                  => esc_js( __( 'Enter a value', 'woocommerce' ) ),
 				'i18n_enter_a_value_fixed_or_percent' => esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ),
@@ -181,7 +184,11 @@ class WC_Admin_Assets {
 				'i18n_no_variations_added'            => esc_js( __( "No variations added", 'woocommerce' ) ),
 				'i18n_remove_variation'               => esc_js( __( 'Are you sure you want to remove this variation?', 'woocommerce' ) ),
 				'i18n_scheduled_sale_start'           => esc_js( __( 'Sale start date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
-				'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date  (YYYY-MM-DD format or leave blank)', 'woocommerce' ) )
+				'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date  (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
+				'i18n_edited_variations'              => esc_js( __( 'You have some editions in your variations, data you have entered will not be saved if you continue.', 'woocommerce' ) ),
+				'i18n_item'                           => esc_js( __( '%qty% item', 'woocommerce' ) ),
+				'i18n_items'                          => esc_js( __( '%qty% items', 'woocommerce' ) ),
+				'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 10 ) )
 			);
 
 			wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );

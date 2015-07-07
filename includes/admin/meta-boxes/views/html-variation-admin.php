@@ -56,7 +56,7 @@ extract( $variation_data );
 		<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
 		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo $loop; ?>" />
 	</h3>
-	<div class="woocommerce_variable_attributes wc-metabox-content">
+	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
 				<a href="#" class="upload_image_button tips <?php if ( $_thumbnail_id > 0 ) echo 'remove'; ?>" data-tip="<?php if ( $_thumbnail_id > 0 ) { echo __( 'Remove this image', 'woocommerce' ); } else { echo __( 'Upload an image', 'woocommerce' ); } ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php if ( ! empty( $image ) ) echo esc_attr( $image ); else echo esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $_thumbnail_id ); ?>" /></a>
@@ -103,7 +103,7 @@ extract( $variation_data );
 					</p>
 					<p class="form-row form-row-last">
 						<label><?php _e( 'Sale end date:', 'woocommerce' ); ?></label>
-						<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 					</p>
 				</div>
 			</div>

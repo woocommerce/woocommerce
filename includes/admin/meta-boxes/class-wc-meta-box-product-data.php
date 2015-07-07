@@ -4,10 +4,10 @@
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin/Meta Boxes
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -611,17 +611,16 @@ class WC_Meta_Box_Product_Data {
 	 * Show options for the variable product type
 	 */
 	public static function output_variations() {
-		global $post;
+		global $post, $wpdb;
 
+		// Get attributes
 		$attributes = maybe_unserialize( get_post_meta( $post->ID, '_product_attributes', true ) );
 
 		// See if any are set
 		$variation_attribute_found = false;
 
 		if ( $attributes ) {
-
 			foreach ( $attributes as $attribute ) {
-
 				if ( isset( $attribute['is_variation'] ) ) {
 					$variation_attribute_found = true;
 					break;
@@ -629,28 +628,9 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		// Get tax classes
-		$tax_classes           = WC_Tax::get_tax_classes();
-		$tax_class_options     = array();
-		$tax_class_options[''] = __( 'Standard', 'woocommerce' );
-
-		if ( ! empty( $tax_classes ) ) {
-			foreach ( $tax_classes as $class ) {
-				$tax_class_options[ sanitize_title( $class ) ] = esc_attr( $class );
-			}
-		}
-
-		$backorder_options = array(
-			'no'     => __( 'Do not allow', 'woocommerce' ),
-			'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-			'yes'    => __( 'Allow', 'woocommerce' )
-		);
-
-		$stock_status_options = array(
-			'instock'    => __( 'In stock', 'woocommerce' ),
-			'outofstock' => __( 'Out of stock', 'woocommerce' )
-		);
-
+		$variations_count       = absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation'", $post->ID ) ) );
+		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 10 ) );
+		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 		?>
 		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
 
@@ -702,182 +682,99 @@ class WC_Meta_Box_Product_Data {
 					<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
 				</p>
 
-				<div class="woocommerce_variations wc-metaboxes">
-					<?php
-					// Get parent data
-					$parent_data = array(
-						'id'                   => $post->ID,
-						'attributes'           => $attributes,
-						'tax_class_options'    => $tax_class_options,
-						'sku'                  => get_post_meta( $post->ID, '_sku', true ),
-						'weight'               => wc_format_localized_decimal( get_post_meta( $post->ID, '_weight', true ) ),
-						'length'               => wc_format_localized_decimal( get_post_meta( $post->ID, '_length', true ) ),
-						'width'                => wc_format_localized_decimal( get_post_meta( $post->ID, '_width', true ) ),
-						'height'               => wc_format_localized_decimal( get_post_meta( $post->ID, '_height', true ) ),
-						'tax_class'            => get_post_meta( $post->ID, '_tax_class', true ),
-						'backorder_options'    => $backorder_options,
-						'stock_status_options' => $stock_status_options
-					);
+				<div class="toolbar">
+					<div class="variations-pagenav">
+						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
+						<span class="pagination-links">
+							<a class="first-page disabled" title="<?php _e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
+							<a class="prev-page disabled" title="<?php _e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
+							<span class="paging-select">
+								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+								<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
+									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
+										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+									<?php endfor; ?>
+								</select>
+								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
+							</span>
+							<a class="next-page" title="<?php _e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
+							<a class="last-page" title="<?php _e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
+						</span>
+					</div>
+					<div class="clear"></div>
+				</div>
 
-					if ( ! $parent_data['weight'] ) {
-						$parent_data['weight'] = wc_format_localized_decimal( 0 );
-					}
+				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-product_id="<?php echo intval( $post->ID ); ?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
+				</div>
 
-					if ( ! $parent_data['length'] ) {
-						$parent_data['length'] = wc_format_localized_decimal( 0 );
-					}
+				<div class="toolbar">
+					<div class="variations-pagenav">
+						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
+						<span class="pagination-links">
+							<a class="first-page disabled" title="<?php _e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
+							<a class="prev-page disabled" title="<?php _e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
+							<span class="paging-select">
+								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+								<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
+									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
+										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+									<?php endfor; ?>
+								</select>
+								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
+							</span>
+							<a class="next-page" title="<?php _e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
+							<a class="last-page" title="<?php _e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
+						</span>
+					</div>
 
-					if ( ! $parent_data['width'] ) {
-						$parent_data['width'] = wc_format_localized_decimal( 0 );
-					}
+					<div class="variations-defaults">
+						<strong><?php _e( 'Defaults', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
+						<?php
+							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
 
-					if ( ! $parent_data['height'] ) {
-						$parent_data['height'] = wc_format_localized_decimal( 0 );
-					}
+							foreach ( $attributes as $attribute ) {
 
-					// Get variations
-					$args = array(
-						'post_type'   => 'product_variation',
-						'post_status' => array( 'private', 'publish' ),
-						'numberposts' => -1,
-						'orderby'     => 'menu_order',
-						'order'       => 'asc',
-						'post_parent' => $post->ID
-					);
-
-					$variations = get_posts( $args );
-					$loop = 0;
-
-					if ( $variations ) {
-
-						foreach ( $variations as $variation ) {
-							$variation_id     = absint( $variation->ID );
-							$variation_meta   = get_post_meta( $variation_id );
-							$variation_data   = array();
-							$shipping_classes = get_the_terms( $variation_id, 'product_shipping_class' );
-							$variation_fields = array(
-								'_sku'                   => '',
-								'_stock'                 => '',
-								'_regular_price'         => '',
-								'_sale_price'            => '',
-								'_weight'                => '',
-								'_length'                => '',
-								'_width'                 => '',
-								'_height'                => '',
-								'_download_limit'        => '',
-								'_download_expiry'       => '',
-								'_downloadable_files'    => '',
-								'_downloadable'          => '',
-								'_virtual'               => '',
-								'_thumbnail_id'          => '',
-								'_sale_price_dates_from' => '',
-								'_sale_price_dates_to'   => '',
-								'_manage_stock'          => '',
-								'_stock_status'          => '',
-								'_backorders'            => null,
-								'_tax_class'             => null,
-								'_variation_description' => ''
-							);
-
-							foreach ( $variation_fields as $field => $value ) {
-								$variation_data[ $field ] = isset( $variation_meta[ $field ][0] ) ? maybe_unserialize( $variation_meta[ $field ][0] ) : $value;
-							}
-
-							// Add the variation attributes
-							foreach ( $variation_meta as $key => $value ) {
-								if ( 0 !== strpos( $key, 'attribute_' ) ) {
+								// Only deal with attributes that are variations
+								if ( ! $attribute['is_variation'] ) {
 									continue;
 								}
-								/**
-								 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-								 * Attempt to get full version of the text attribute from the parent.
-								 */
-								if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $post->ID, '_product_version', true ), '2.4.0', '<' ) ) {
-									foreach ( $attributes as $attribute ) {
-										if ( $key !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
-											continue;
-										}
-										$text_attributes = wc_get_text_attributes( $attribute['value'] );
 
-										foreach ( $text_attributes as $text_attribute ) {
-											if ( sanitize_title( $text_attribute ) === $value[0] ) {
-												$value[0] = $text_attribute;
-											}
-										}
+								// Get current value for variation (if set)
+								$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
+
+								// Name will be something like attribute_pa_color
+								echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
+
+								// Get terms for attribute taxonomy or value if its a custom attribute
+								if ( $attribute['is_taxonomy'] ) {
+									$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
+
+									foreach ( $post_terms as $term ) {
+										echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) ) . '</option>';
 									}
+
+								} else {
+									$options = wc_get_text_attributes( $attribute['value'] );
+
+									foreach ( $options as $option ) {
+										echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
+									}
+
 								}
-								$variation_data[ $key ] = $value[0];
+
+								echo '</select>';
 							}
-
-							// Formatting
-							$variation_data['_regular_price'] = wc_format_localized_price( $variation_data['_regular_price'] );
-							$variation_data['_sale_price']    = wc_format_localized_price( $variation_data['_sale_price'] );
-							$variation_data['_weight']        = wc_format_localized_decimal( $variation_data['_weight'] );
-							$variation_data['_length']        = wc_format_localized_decimal( $variation_data['_length'] );
-							$variation_data['_width']         = wc_format_localized_decimal( $variation_data['_width'] );
-							$variation_data['_height']        = wc_format_localized_decimal( $variation_data['_height'] );
-							$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
-							$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
-							$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
-
-							// Stock BW compat
-							if ( '' !== $variation_data['_stock'] ) {
-								$variation_data['_manage_stock'] = 'yes';
-							}
-
-							include( 'views/html-variation-admin.php' );
-
-							$loop++;
-						}
-					}
-					?>
+						?>
+					</div>
+					<div class="clear"></div>
 				</div>
 
 				<p class="toolbar">
+					<button type="button" class="button button-primary save-variation-changes" disabled="disabled"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
 
 					<button type="button" class="button button-primary add_variation" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Add Variation', 'woocommerce' ); ?></button>
 
-					<button type="button" class="button link_all_variations" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Link all variations', 'woocommerce' ); ?></button>
-
-					<strong><?php _e( 'Defaults', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
-					<?php
-						$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
-
-						foreach ( $attributes as $attribute ) {
-
-							// Only deal with attributes that are variations
-							if ( ! $attribute['is_variation'] ) {
-								continue;
-							}
-
-							// Get current value for variation (if set)
-							$variation_selected_value = isset( $default_attributes[ sanitize_title( $attribute['name'] ) ] ) ? $default_attributes[ sanitize_title( $attribute['name'] ) ] : '';
-
-							// Name will be something like attribute_pa_color
-							echo '<select name="default_attribute_' . sanitize_title( $attribute['name'] ) . '"><option value="">' . __( 'No default', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
-
-							// Get terms for attribute taxonomy or value if its a custom attribute
-							if ( $attribute['is_taxonomy'] ) {
-
-								$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
-
-								foreach ( $post_terms as $term ) {
-									echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) ) . '</option>';
-								}
-
-							} else {
-
-								$options = wc_get_text_attributes( $attribute['value'] );
-
-								foreach ( $options as $option ) {
-									echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
-								}
-
-							}
-
-							echo '</select>';
-						}
-					?>
+					<button type="button" class="button link_all_variations" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Link All Variations', 'woocommerce' ); ?></button>
 				</p>
 
 			<?php endif; ?>
@@ -1324,7 +1221,11 @@ class WC_Meta_Box_Product_Data {
 
 		// Save variations
 		if ( 'variable' == $product_type ) {
-			self::save_variations( $post_id, $post );
+			// Deprecated since WooCommerce 2.4.0 in favor to WC_AJAX::save_variations()
+			// self::save_variations( $post_id, $post );
+
+			// Update parent if variable so price sorting works and stays in sync with the cheapest child
+			WC_Product_Variable::sync( $post_id );
 		}
 
 		// Update version after saving
@@ -1339,6 +1240,8 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Save meta box data
+	 *
+	 * @deprecated 2.4.0 Deprecated in favor to WC_AJAX::save_variations()
 	 */
 	public static function save_variations( $post_id, $post ) {
 		global $wpdb;
