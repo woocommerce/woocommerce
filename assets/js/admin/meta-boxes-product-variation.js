@@ -59,6 +59,15 @@ jQuery( function( $ ) {
 		 */
 		variations_loaded: function() {
 			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock', $( this ) ).change();
+			$( '.woocommerce_variation', $( this ) ).each( function( index, el ) {
+				var $el       = $( el ),
+					date_from = $( '.sale_price_dates_from', $el ).val(),
+					date_to   = $( '.sale_price_dates_to', $el ).val();
+
+				if ( '' !== date_from || '' !== date_to ) {
+					$( 'a.sale_schedule', $el ).click();
+				}
+			});
 			$( '.woocommerce_variations .variation-needs-update', $( this ) ).removeClass( 'variation-needs-update' );
 			$( 'button.save-variation-changes', $( this ) ).attr( 'disabled', 'disabled' );
 		}
@@ -522,23 +531,16 @@ jQuery( function( $ ) {
 					}
 				break;
 				case 'variable_sale_schedule' :
-					// var start = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_start );
-					// var end   = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_end );
-					// var set   = false;
+					data.date_from = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_start );
+					data.date_to   = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_end );
 
-					// if ( start != null && start !== '' ) {
-					// 	$('.woocommerce_variable_attributes .sale_schedule').click();
-					// 	$( ':input[name^="variable_sale_price_dates_from"]').val( start ).change();
-					// 	set = true;
-					// }
-					// if ( end != null && end !== '' ) {
-					// 	$('.woocommerce_variable_attributes .sale_schedule').click();
-					// 	$( ':input[name^="variable_sale_price_dates_to"]').val( end ).change();
-					// 	set = true;
-					// }
-					// if ( ! set ) {
-					// 	$('.woocommerce_variable_attributes .cancel_sale_schedule').click();
-					// }
+					if ( null === data.date_from ) {
+						data.date_from = false;
+					}
+
+					if ( null === data.date_to ) {
+						data.date_to = false;
+					}
 				break;
 				default :
 					$( 'select#field_to_edit' ).trigger( bulk_edit );

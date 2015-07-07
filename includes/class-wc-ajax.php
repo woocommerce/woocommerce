@@ -2800,7 +2800,7 @@ class WC_AJAX {
 		$data        = ! empty( $_POST['data'] ) ? array_map( 'wc_clean', $_POST['data'] ) : array();
 		$variations  = array();
 
-		if ( apply_filters( 'woocommerce_bulk_edit_variations_need_children', in_array( $bulk_action, array( 'toggle_enabled', 'toggle_downloadable', 'toggle_virtual', 'toggle_manage_stock', 'variable_stock', 'variable_regular_price', 'variable_sale_price', 'variable_download_limit', 'variable_download_expiry', 'delete_all' ) ) ) ) {
+		if ( apply_filters( 'woocommerce_bulk_edit_variations_need_children', ! in_array( $bulk_action, array( 'variable_weight', 'variable_length', 'variable_width', 'variable_height' ) ) ) ) {
 			$variations = get_posts( array(
 				'post_parent'    => $product_id,
 				'posts_per_page' => -1,
@@ -2931,13 +2931,26 @@ class WC_AJAX {
 
 				break;
 			case 'variable_sale_schedule' :
+				if ( ! isset( $data['date_from'] ) && ! isset( $data['date_to'] ) ) {
+					break;
+				}
 
+				foreach ( $variations as $variation_id ) {
+					$regular_price = get_post_meta( $variation_id, '_regular_price', true );
+					$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+					$date_from     = 'false' === $data['date_from'] ? date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_from', true ) ) : $data['date_from'];
+					$date_to       = 'false' === $data['date_to'] ? date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_to', true ) ) : $data['date_to'];
+
+					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+				}
 				break;
 
 			default :
-				do_action( 'woocommerce_bulk_edit_variations', $bulk_action, $data, $product_id, $variations );
+				do_action( 'woocommerce_bulk_edit_variations_default', $bulk_action, $data, $product_id, $variations );
 				break;
 		}
+
+		do_action( 'woocommerce_bulk_edit_variations', $bulk_action, $data, $product_id, $variations );
 
 		// Sync and update transients
 		WC_Product_Variable::sync( $product_id );
