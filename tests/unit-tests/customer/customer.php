@@ -13,7 +13,7 @@ class Customer extends \WC_Unit_Test_Case {
 	public function test_get_taxable_address() {
 
 		$base_store_address = \WC_Helper_Customer::get_expected_store_location();
-		$customer_address   = \WC_Helper_Customer::get_expected_customer_location();
+		$customer_address   = $customer->get_taxable_address(); // Default is geolocation!
 
 		// Get the original settings for the session and the WooCommerce options
 		$original_chosen_shipping_methods = \WC_Helper_Customer::get_chosen_shipping_methods();

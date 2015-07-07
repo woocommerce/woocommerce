@@ -14,7 +14,7 @@ class WC_Helper_Customer {
 	 */
 
 	public static function create_mock_customer() {
-		
+
 		$customer_data = array(
 			'country' 				=> 'US',
 			'state' 				=> 'PA',
@@ -31,20 +31,10 @@ class WC_Helper_Customer {
 			'is_vat_exempt' 		=> false,
 			'calculated_shipping'	=> false
 		);
-		
+
 		WC_Helper_Customer::set_customer_details( $customer_data );
 
 		return new WC_Customer();
-	}
-
-	/**
-	 * Get the expected output for the mock customer's shipping destination.
-	 *
-	 * @return array
-	 */
-
-	public static function get_expected_customer_location() {
-		return array( "US", "PA", "19123", "Philadelphia" );
 	}
 
 	/**
