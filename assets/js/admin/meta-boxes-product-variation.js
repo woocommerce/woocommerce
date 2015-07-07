@@ -217,7 +217,7 @@ jQuery( function( $ ) {
 		check_for_editions: function() {
 			var need_update = $( '#variable_product_options .woocommerce_variations .variation-needs-update' );
 
-			if ( 0 < need_update.legnth ) {
+			if ( 0 < need_update.length ) {
 				if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_edited_variations ) ) {
 					need_update.removeClass( 'variation-needs-update' );
 					$( 'button.save-variation-changes' ).removeAttr( 'disabled' );
@@ -458,6 +458,10 @@ jQuery( function( $ ) {
 		 * Bulk edit actions
 		 */
 		bulk_edit: function() {
+			if ( ! wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
+				return false;
+			}
+
 			var bulk_edit  = $( 'select#field_to_edit' ).val(),
 				product_id = $( '#variable_product_options .woocommerce_variations' ).data( 'product_id' ),
 				data       = {},
