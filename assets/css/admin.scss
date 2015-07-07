@@ -881,11 +881,11 @@ ul.wc_coupon_list_block {
 			text-align: left;
 			color: #555;
 			-webkit-touch-callout: none;
-		    -webkit-user-select: none;
-		    -khtml-user-select: none;
-		    -moz-user-select: none;
-		    -ms-user-select: none;
-		    user-select: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
 			&:last-child {
 				padding-right: 12px;
 			}
@@ -2934,7 +2934,8 @@ img.help_tip {
 		}
 
 		.link_all_variations,
-		.add_variation {
+		.add_variation,
+		.save-variation-changes {
 			float: right;
 			margin-left: 5px;
 		}
@@ -3125,6 +3126,37 @@ img.help_tip {
 			content: "\e035";
 		}
 	}
+}
+
+.variations-pagenav {
+	float: right;
+
+	.displaying-num {
+		margin-right: 2px;
+		color: #777;
+		font-size: 12px;
+		font-style: italic;
+	}
+
+	a {
+		padding: 0px 10px 3px;
+		background: rgba(0, 0, 0, 0.05);
+		font-size: 16px;
+		font-weight: 400;
+		text-decoration: none;
+	}
+
+	a.disabled,
+	a.disabled:active,
+	a.disabled:focus,
+	a.disabled:hover {
+		color: #A0A5AA;
+		background: rgba(0, 0, 0, 0.05);
+	}
+}
+
+.variations-defaults {
+	float: left;
 }
 
 .woocommerce_variable_attributes {
@@ -4034,6 +4066,31 @@ table.bar_chart {
 
 	#woocommerce-product-data .checkbox {
 		width: 25px;
+	}
+
+	.variations-pagenav {
+		float: none;
+		text-align: center;
+		font-size: 18px;
+
+		.displaying-num {
+			font-size: 16px;
+		}
+
+		a {
+			padding: 8px 20px 11px;
+			font-size: 18px;
+		}
+
+		select {
+			padding: 0 20px;
+		}
+	}
+
+	.variations-defaults {
+		float: none;
+		text-align: center;
+		margin-top: 10px;
 	}
 }
 
