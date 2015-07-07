@@ -176,7 +176,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				break;
 				case 'item' :
 					foreach ( $package['contents'] as $item_id => $values ) {
-						$cost = $this->calc_percentage_adjustment( $cost, $cost_percent, $cost_operator, $values['line_total'] );
+						if ( $values['data']->needs_shipping() ) {
+							$cost = $this->calc_percentage_adjustment( $cost, $cost_percent, $cost_operator, $values['line_total'] );
+						}
 					}
 				break;
 				case  'order' :
