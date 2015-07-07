@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.3.11 Admin\n"
+"Project-Id-Version: WooCommerce 2.3.13 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-07-06 18:06:23+00:00\n"
+"POT-Creation-Date: 2015-07-07 16:47:14+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4126,29 +4126,29 @@ msgstr ""
 msgid "Email Options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:70
+#: includes/admin/settings/class-wc-settings-emails.php:69
 msgid "Email Sender Options"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:70
+#: includes/admin/settings/class-wc-settings-emails.php:69
 msgid ""
 "The following options affect the sender (email address and name) used in "
 "WooCommerce emails."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:73
+#: includes/admin/settings/class-wc-settings-emails.php:72
 msgid "\"From\" Name"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:83
+#: includes/admin/settings/class-wc-settings-emails.php:82
 msgid "\"From\" Email Address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:97
+#: includes/admin/settings/class-wc-settings-emails.php:96
 msgid "Email Template"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:97
+#: includes/admin/settings/class-wc-settings-emails.php:96
 msgid ""
 "This section lets you customise the WooCommerce emails. <a href=\"%s\" "
 "target=\"_blank\">Click here to preview your email template</a>. For more "
@@ -4156,61 +4156,61 @@ msgid ""
 "<code>yourtheme/woocommerce/emails/</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:100
+#: includes/admin/settings/class-wc-settings-emails.php:99
 msgid "Header Image"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:101
+#: includes/admin/settings/class-wc-settings-emails.php:100
 msgid ""
 "Enter a URL to an image you want to show in the email's header. Upload your "
 "image using the <a href=\"%s\">media uploader</a>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:110
+#: includes/admin/settings/class-wc-settings-emails.php:109
 msgid "Email Footer Text"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:111
+#: includes/admin/settings/class-wc-settings-emails.php:110
 msgid "The text to appear in the footer of WooCommerce emails."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:115
+#: includes/admin/settings/class-wc-settings-emails.php:114
 msgid "Powered by WooCommerce"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:120
+#: includes/admin/settings/class-wc-settings-emails.php:119
 msgid "Base Colour"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:121
+#: includes/admin/settings/class-wc-settings-emails.php:120
 msgid ""
 "The base colour for WooCommerce email templates. Default "
 "<code>#557da1</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:130
+#: includes/admin/settings/class-wc-settings-emails.php:129
 msgid "Background Colour"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:131
+#: includes/admin/settings/class-wc-settings-emails.php:130
 msgid ""
 "The background colour for WooCommerce email templates. Default "
 "<code>#f5f5f5</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:140
+#: includes/admin/settings/class-wc-settings-emails.php:139
 msgid "Email Body Background Colour"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:141
+#: includes/admin/settings/class-wc-settings-emails.php:140
 msgid "The main body background colour. Default <code>#fdfdfd</code>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:150
+#: includes/admin/settings/class-wc-settings-emails.php:149
 msgid "Email Body Text Colour"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-emails.php:151
+#: includes/admin/settings/class-wc-settings-emails.php:150
 msgid "The main body text colour. Default <code>#505050</code>."
 msgstr ""
 
