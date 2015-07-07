@@ -172,6 +172,7 @@ class WC_Admin_Assets {
 				'delete_variations_nonce'             => wp_create_nonce( 'delete-variations' ),
 				'load_variations_nonce'               => wp_create_nonce( 'load-variations' ),
 				'save_variations_nonce'               => wp_create_nonce( 'save-variations' ),
+				'bulk_edit_variations_nonce'          => wp_create_nonce( 'bulk-edit-variations' ),
 				'i18n_link_all_variations'            => esc_js( __( 'Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).', 'woocommerce' ) ),
 				'i18n_enter_a_value'                  => esc_js( __( 'Enter a value', 'woocommerce' ) ),
 				'i18n_enter_a_value_fixed_or_percent' => esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ),
