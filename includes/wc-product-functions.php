@@ -564,3 +564,53 @@ function wc_get_product_id_by_sku( $sku ) {
 
 	return ( $product_id ) ? intval( $product_id ) : 0;
 }
+
+/**
+ * Save product price
+ *
+ * This is a private function (internal use ONLY) used until a data manipulation api is built
+ *
+ * @since  2.4.0
+ * @todo   look into Data manipulation API
+ *
+ * @param  int $variation_id
+ * @param  float $regular_price
+ * @param  float $sale_price
+ * @param  string $date_from
+ * @param  string $date_to
+ */
+function _wc_save_product_price( $variation_id, $regular_price, $sale_price = '', $date_from = '', $date_to = '' ) {
+	$variation_id  = absint( $variation_id );
+	$regular_price = wc_format_decimal( $regular_price );
+	$sale_price    = $sale_price === '' ? '' : wc_format_decimal( $sale_price );
+	$date_from     = wc_clean( $date_from );
+	$date_to       = wc_clean( $date_to );
+
+	update_post_meta( $variation_id, '_regular_price', $regular_price );
+	update_post_meta( $variation_id, '_sale_price', $sale_price );
+
+	// Save Dates
+	update_post_meta( $variation_id, '_sale_price_dates_from', $date_from ? strtotime( $date_from ) : '' );
+	update_post_meta( $variation_id, '_sale_price_dates_to', $date_to ? strtotime( $date_to ) : '' );
+
+	if ( $date_to && ! $date_from ) {
+		update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+	}
+
+	// Update price if on sale
+	if ( '' !== $sale_price && '' === $date_to && '' === $date_from ) {
+		update_post_meta( $variation_id, '_price', $sale_price );
+	} else {
+		update_post_meta( $variation_id, '_price', $regular_price );
+	}
+
+	if ( '' !== $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+		update_post_meta( $variation_id, '_price', $sale_price );
+	}
+
+	if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+		update_post_meta( $variation_id, '_price', $regular_price );
+		update_post_meta( $variation_id, '_sale_price_dates_from', '' );
+		update_post_meta( $variation_id, '_sale_price_dates_to', '' );
+	}
+}
