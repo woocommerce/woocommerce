@@ -104,6 +104,8 @@ jQuery( function( $ ) {
 					}
 				});
 			});
+
+			$( document.body ).trigger( 'wc-enhanced-select-init' );
 		}
 	};
 
