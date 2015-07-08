@@ -2478,8 +2478,6 @@ class WC_AJAX {
 		$product_id = absint( $_POST['product_id'] );
 		$attributes = (array) maybe_unserialize( get_post_meta( $product_id, '_product_attributes', true ) );
 
-		die();
-
 		if ( isset( $_POST['variable_sku'] ) ) {
 			$variable_post_id               = $_POST['variable_post_id'];
 			$variable_sku                   = $_POST['variable_sku'];
