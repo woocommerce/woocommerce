@@ -113,6 +113,7 @@ class WC_AJAX {
 			'delete_order_note'                                => false,
 			'json_search_products'                             => false,
 			'json_search_products_and_variations'              => false,
+			'json_search_grouped_products'                     => false,
 			'json_search_downloadable_products_and_variations' => false,
 			'json_search_customers'                            => false,
 			'term_ordering'                                    => false,
@@ -1796,8 +1797,6 @@ class WC_AJAX {
 	/**
 	 * Search for product variations and return json
 	 *
-	 * @access public
-	 * @return void
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_products_and_variations() {
@@ -1805,45 +1804,59 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Search for customers and return json
+	 * Search for gruoped products and return json
 	 */
-	public static function json_search_customers() {
+	public static function json_search_grouped_products() {
 		ob_start();
 
-		check_ajax_referer( 'search-customers', 'security' );
+		check_ajax_referer( 'search-products', 'security' );
 
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			die(-1);
-		}
-
-		$term = wc_clean( stripslashes( $_GET['term'] ) );
+		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		if ( empty( $term ) ) {
 			die();
 		}
 
-		$found_customers = array();
+		$found_products = array();
 
-		add_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
+		if ( $grouped_term = get_term_by( 'slug', 'grouped', 'product_type' ) ) {
 
-		$customers_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
-			'fields'         => 'all',
-			'orderby'        => 'display_name',
-			'search'         => '*' . $term . '*',
-			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
-		) ) );
+			$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
 
-		remove_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
+			if ( sizeof( $posts_in ) > 0 ) {
 
-		$customers = $customers_query->get_results();
+				$args = array(
+					'post_type'        => 'product',
+					'post_status'      => 'any',
+					'numberposts'      => -1,
+					'orderby'          => 'title',
+					'order'            => 'asc',
+					'post_parent'      => 0,
+					'suppress_filters' => 0,
+					'include'          => $posts_in,
+					's'                => $term,
+					'fields'           => 'ids'
+				);
 
-		if ( ! empty( $customers ) ) {
-			foreach ( $customers as $customer ) {
-				$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+				$posts = get_posts( $args );
+
+				if ( ! empty( $posts ) ) {
+					foreach ( $posts as $post ) {
+						$product = wc_get_product( $post );
+
+						if ( ! current_user_can( 'read_product', $post ) ) {
+							continue;
+						}
+
+						$found_products[ $post ] = rawurldecode( $product->get_formatted_name() );
+					}
+				}
 			}
 		}
 
-		wp_send_json( $found_customers );
+		$found_products = apply_filters( 'woocommerce_json_search_found_grouped_products', $found_products );
+
+		wp_send_json( $found_products );
 	}
 
 	/**
@@ -1891,6 +1904,48 @@ class WC_AJAX {
 		}
 
 		wp_send_json( $found_products );
+	}
+
+	/**
+	 * Search for customers and return json
+	 */
+	public static function json_search_customers() {
+		ob_start();
+
+		check_ajax_referer( 'search-customers', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
+		$term = wc_clean( stripslashes( $_GET['term'] ) );
+
+		if ( empty( $term ) ) {
+			die();
+		}
+
+		$found_customers = array();
+
+		add_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
+
+		$customers_query = new WP_User_Query( apply_filters( 'woocommerce_json_search_customers_query', array(
+			'fields'         => 'all',
+			'orderby'        => 'display_name',
+			'search'         => '*' . $term . '*',
+			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
+		) ) );
+
+		remove_action( 'pre_user_query', array( __CLASS__, 'json_search_customer_name' ) );
+
+		$customers = $customers_query->get_results();
+
+		if ( ! empty( $customers ) ) {
+			foreach ( $customers as $customer ) {
+				$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+			}
+		}
+
+		wp_send_json( $found_customers );
 	}
 
 	/**

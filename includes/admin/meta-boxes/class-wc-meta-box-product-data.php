@@ -474,121 +474,91 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="options_group">
 
-				<p class="form-field"><label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-selected="<?php
-					$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_upsell_ids', true ) ) );
-					$json_ids    = array();
+					<p class="form-field">
+						<label for="upsell_ids"><?php _e( 'Up-Sells', 'woocommerce' ); ?></label>
+						<input type="hidden" class="wc-product-search" style="width: 50%;" id="upsell_ids" name="upsell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-selected="<?php
+							$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_upsell_ids', true ) ) );
+							$json_ids    = array();
 
-					foreach ( $product_ids as $product_id ) {
-						$product = wc_get_product( $product_id );
-						if ( is_object( $product ) ) {
-							$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
-						}
-					}
-
-					echo esc_attr( json_encode( $json_ids ) );
-				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
-
-				<p class="form-field"><label for="crosssell_ids"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" style="width: 50%;" id="crosssell_ids" name="crosssell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-selected="<?php
-					$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_crosssell_ids', true ) ) );
-					$json_ids    = array();
-
-					foreach ( $product_ids as $product_id ) {
-						$product = wc_get_product( $product_id );
-						if ( is_object( $product ) ) {
-							$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
-						}
-					}
-
-					echo esc_attr( json_encode( $json_ids ) );
-				?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></p>
-
-				</div>
-
-				<?php
-
-				echo '<div class="options_group grouping show_if_simple show_if_external">';
-
-					// List Grouped products
-					$post_parents = array();
-					$post_parents[''] = __( 'Choose a grouped product&hellip;', 'woocommerce' );
-
-					if ( $grouped_term = get_term_by( 'slug', 'grouped', 'product_type' ) ) {
-
-						$posts_in = array_unique( (array) get_objects_in_term( $grouped_term->term_id, 'product_type' ) );
-
-						if ( sizeof( $posts_in ) > 0 ) {
-
-							$args = array(
-								'post_type'        => 'product',
-								'post_status'      => 'any',
-								'numberposts'      => -1,
-								'orderby'          => 'title',
-								'order'            => 'asc',
-								'post_parent'      => 0,
-								'suppress_filters' => 0,
-								'include'          => $posts_in,
-							);
-
-							$grouped_products = get_posts( $args );
-
-							if ( $grouped_products ) {
-
-								foreach ( $grouped_products as $product ) {
-
-									if ( $product->ID == $post->ID ) {
-										continue;
-									}
-
-									$post_parents[ $product->ID ] = $product->post_title;
+							foreach ( $product_ids as $product_id ) {
+								$product = wc_get_product( $product_id );
+								if ( is_object( $product ) ) {
+									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
 								}
 							}
-						}
 
-					}
+							echo esc_attr( json_encode( $json_ids ) );
+						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					</p>
 
-					woocommerce_wp_select( array( 'id' => 'parent_id', 'label' => __( 'Grouping', 'woocommerce' ), 'value' => absint( $post->post_parent ), 'options' => $post_parents, 'desc_tip' => true, 'description' => __( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ) );
+					<p class="form-field">
+						<label for="crosssell_ids"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
+						<input type="hidden" class="wc-product-search" style="width: 50%;" id="crosssell_ids" name="crosssell_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products" data-multiple="true" data-selected="<?php
+							$product_ids = array_filter( array_map( 'absint', (array) get_post_meta( $post->ID, '_crosssell_ids', true ) ) );
+							$json_ids    = array();
 
-					woocommerce_wp_hidden_input( array( 'id' => 'previous_parent_id', 'value' => absint( $post->post_parent ) ) );
+							foreach ( $product_ids as $product_id ) {
+								$product = wc_get_product( $product_id );
+								if ( is_object( $product ) ) {
+									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
+								}
+							}
 
-					do_action( 'woocommerce_product_options_grouping' );
+							echo esc_attr( json_encode( $json_ids ) );
+						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					</p>
+				</div>
 
-				echo '</div>';
-				?>
+				<div class="options_group grouping show_if_simple show_if_external">
+
+					<p class="form-field">
+						<label for="parent_id"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
+						<input type="hidden" class="wc-product-search" style="width: 50%;" id="parent_id" name="parent_id" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_grouped_products" data-multiple="false" data-selected="<?php
+							$parent_id = absint( $post->post_parent );
+							$parent    = wc_get_product( $parent_id );
+							if ( is_object( $parent ) ) {
+								$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name() ) );
+							}
+
+							echo esc_attr( $parent_title );
+						?>" value="<?php echo $parent_id; ?>" /> <img class="help_tip" data-tip='<?php _e( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					</p>
+
+					<?php
+						woocommerce_wp_hidden_input( array( 'id' => 'previous_parent_id', 'value' => absint( $post->post_parent ) ) );
+
+						do_action( 'woocommerce_product_options_grouping' );
+					?>
+				</div>
 
 				<?php do_action( 'woocommerce_product_options_related' ); ?>
-
 			</div>
 
 			<div id="advanced_product_data" class="panel woocommerce_options_panel">
 
-				<?php
+				<div class="options_group hide_if_external">
+					<?php
+						// Purchase note
+						woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
+					?>
+				</div>
 
-				echo '<div class="options_group hide_if_external">';
+				<div class="options_group">
+					<?php
+						// menu_order
+						woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
+							'step' 	=> '1'
+						)  ) );
+					?>
+				</div>
 
-					// Purchase note
-					woocommerce_wp_textarea_input(  array( 'id' => '_purchase_note', 'label' => __( 'Purchase Note', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Enter an optional note to send the customer after purchase.', 'woocommerce' ) ) );
+				<div class="options_group reviews">
+					<?php
+						woocommerce_wp_checkbox( array( 'id' => 'comment_status', 'label' => __( 'Enable reviews', 'woocommerce' ), 'cbvalue' => 'open', 'value' => esc_attr( $post->comment_status ) ) );
 
-				echo '</div>';
-
-				echo '<div class="options_group">';
-
-					// menu_order
-					woocommerce_wp_text_input(  array( 'id' => 'menu_order', 'label' => __( 'Menu order', 'woocommerce' ), 'desc_tip' => 'true', 'description' => __( 'Custom ordering position.', 'woocommerce' ), 'value' => intval( $post->menu_order ), 'type' => 'number', 'custom_attributes' => array(
-						'step' 	=> '1'
-					)  ) );
-
-				echo '</div>';
-
-				echo '<div class="options_group reviews">';
-
-					woocommerce_wp_checkbox( array( 'id' => 'comment_status', 'label' => __( 'Enable reviews', 'woocommerce' ), 'cbvalue' => 'open', 'value' => esc_attr( $post->comment_status ) ) );
-
-					do_action( 'woocommerce_product_options_reviews' );
-
-				echo '</div>';
-				?>
+						do_action( 'woocommerce_product_options_reviews' );
+					?>
+				</div>
 
 				<?php do_action( 'woocommerce_product_options_advanced' ); ?>
 
