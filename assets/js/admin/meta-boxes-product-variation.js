@@ -661,8 +661,6 @@ jQuery( function( $ ) {
 				wrapper  = $( '#variable_product_options .woocommerce_variations' );
 
 			if ( wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
-				console.log( 'page_selector', selected );
-
 				wc_meta_boxes_product_variations_pagenav.change_classes( selected, parseInt( wrapper.attr( 'data-total_pages' ), 10 ) );
 				wc_meta_boxes_product_variations_ajax.load_variations( selected );
 			} else {
@@ -711,10 +709,6 @@ jQuery( function( $ ) {
 					total_pages = parseInt( wrapper.attr( 'data-total_pages' ), 10 ),
 					next_page   = parseInt( wrapper.attr( 'data-page' ), 10 ) + 1,
 					new_page    = ( total_pages >= next_page ) ? next_page : total_pages;
-
-				/*jshint devel:true */
-				console.log( total_pages );
-				console.log( next_page );
 
 				wc_meta_boxes_product_variations_pagenav.set_page( new_page );
 			}
