@@ -325,7 +325,7 @@ jQuery( function( $ ) {
 		return false;
 	});
 
-	$( '.product_attributes' ).on( 'click', 'button.remove_row', function() {
+	$( '.product_attributes' ).on( 'click', '.remove_row', function() {
 		if ( window.confirm( woocommerce_admin_meta_boxes.remove_attribute ) ) {
 			var $parent = $( this ).parent().parent();
 

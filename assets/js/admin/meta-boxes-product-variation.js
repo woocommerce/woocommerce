@@ -238,7 +238,7 @@ jQuery( function( $ ) {
 				.on( 'click', 'button.save-variation-changes', this.save_variations )
 				.on( 'click', 'button.cancel-variation-changes', this.cancel_variations )
 				.on( 'click', 'button.add_variation', this.add_variation )
-				.on( 'click', 'button.remove_variation', this.remove_variation )
+				.on( 'click', '.remove_variation', this.remove_variation )
 				.on( 'click', 'button.link_all_variations', this.link_all_variations );
 
 			$( document.body ).on( 'change', '#variable_product_options .woocommerce_variations :input', this.input_changed );

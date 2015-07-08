@@ -14,7 +14,7 @@ extract( $variation_data );
 ?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
-		<button type="button" class="remove_variation button" rel="<?php echo esc_attr( $variation_id ); ?>"><?php _e( 'Remove', 'woocommerce' ); ?></button>
+		<a href="#" class="remove_variation delete" rel="<?php echo esc_attr( $variation_id ); ?>"><?php _e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php _e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<strong>#<?php echo esc_html( $variation_id ); ?> &mdash; </strong>
 		<?php

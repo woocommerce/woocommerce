@@ -3020,24 +3020,33 @@ img.help_tip {
 			zoom: 1;
 			cursor: move;
 
-			button {
+			button, a.delete {
 				float: right;
+			}
+
+			a.delete {
+				color: red;
+				font-weight: normal;
+				line-height: 26px;
+				display: none;
+				text-decoration: none;
 			}
 
 			strong {
 				font-weight: normal;
-				line-height: 24px;
+				line-height: 26px;
 				font-weight: 700;
 			}
 
 			select {
 				font-family: sans-serif;
+				margin: 0 1px;
 			}
 
 			.handlediv {
 				background-position: 6px 5px !important;
 				display: none;
-				height: 24px;
+				height: 26px;
 			}
 
 			&.fixed {
@@ -3045,8 +3054,10 @@ img.help_tip {
 			}
 		}
 
-		h3:hover .handlediv {
-			display: block;
+		h3:hover {
+			a.delete, .handlediv {
+				display: block;
+			}
 		}
 
 		table {
