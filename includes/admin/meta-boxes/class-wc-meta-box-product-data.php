@@ -617,12 +617,13 @@ class WC_Meta_Box_Product_Data {
 				<p class="toolbar">
 					<a href="#" class="close_all"><?php _e( 'Close all', 'woocommerce' ); ?></a><a href="#" class="expand_all"><?php _e( 'Expand all', 'woocommerce' ); ?></a>
 					<select id="field_to_edit">
-						<option value=""><?php _e( 'Choose a field to bulk edit&hellip;', 'woocommerce' ); ?></option>
+						<option value=""><?php _e( 'Bulk Actions', 'woocommerce' ); ?></option>
+						<option value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
+						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
 							<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
 							<option value="toggle_downloadable"><?php _e( 'Toggle &quot;Downloadable&quot;', 'woocommerce' ); ?></option>
 							<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
-							<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 						</optgroup>
 						<optgroup label="<?php esc_attr_e( 'Pricing', 'woocommerce' ); ?>">
 							<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
@@ -698,7 +699,7 @@ class WC_Meta_Box_Product_Data {
 					</div>
 
 					<div class="variations-defaults">
-						<strong><?php _e( 'Defaults', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
+						<strong><?php _e( 'Default Selection', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
 						<?php
 							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
 
@@ -742,9 +743,6 @@ class WC_Meta_Box_Product_Data {
 				<p class="toolbar">
 					<button type="button" class="button-primary save-variation-changes" disabled="disabled"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
 					<button type="button" class="button cancel-variation-changes" disabled="disabled"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
-
-					<button type="button" class="button link_all_variations" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Link All Variations', 'woocommerce' ); ?></button>
-
 					<button type="button" class="button button-primary add_variation" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Add Variation', 'woocommerce' ); ?></button>
 				</p>
 
