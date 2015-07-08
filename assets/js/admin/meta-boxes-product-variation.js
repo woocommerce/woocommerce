@@ -74,8 +74,8 @@ jQuery( function( $ ) {
 			// Remove variation-needs-update classes
 			$( '.woocommerce_variations .variation-needs-update', $( this ) ).removeClass( 'variation-needs-update' );
 
-			// Disable save button
-			$( 'button.save-variation-changes', $( this ) ).attr( 'disabled', 'disabled' );
+			// Disable cancel and save buttons
+			$( 'button.cancel-variation-changes, button.save-variation-changes', $( this ) ).attr( 'disabled', 'disabled' );
 
 			// Init TipTip
 			$( '#tiptip_holder' ).removeAttr( 'style' );
@@ -236,6 +236,7 @@ jQuery( function( $ ) {
 
 			$( '#variable_product_options' )
 				.on( 'click', 'button.save-variation-changes', this.save_variations )
+				.on( 'click', 'button.cancel-variation-changes', this.cancel_variations )
 				.on( 'click', 'button.add_variation', this.add_variation )
 				.on( 'click', 'button.remove_variation', this.remove_variation )
 				.on( 'click', 'button.link_all_variations', this.link_all_variations );
@@ -246,17 +247,17 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * Check if have some edition before leave the page
+		 * Check if have some changes before leave the page
 		 *
 		 * @return {bool}
 		 */
-		check_for_editions: function() {
+		check_for_changes: function() {
 			var need_update = $( '#variable_product_options .woocommerce_variations .variation-needs-update' );
 
 			if ( 0 < need_update.length ) {
 				if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_edited_variations ) ) {
 					need_update.removeClass( 'variation-needs-update' );
-					$( 'button.save-variation-changes' ).removeAttr( 'disabled' );
+					$( 'button.cancel-variation-changes, button.save-variation-changes' ).removeAttr( 'disabled' );
 				} else {
 					return false;
 				}
@@ -387,6 +388,7 @@ jQuery( function( $ ) {
 						// Allow change page, delete and add new variations
 						need_update.removeClass( 'variation-needs-update' );
 						button.attr( 'disabled', 'disabled' );
+						$( 'button.cancel-variation-changes' ).attr( 'disabled', 'disabled' );
 
 						wc_meta_boxes_product_variations_ajax.unblock();
 					}
@@ -397,12 +399,26 @@ jQuery( function( $ ) {
 		},
 
 		/**
+		 * Discart changes.
+		 *
+		 * @return {bool}
+		 */
+		cancel_variations: function() {
+			var current = parseInt( $( '#variable_product_options .woocommerce_variations' ).attr( 'data-page' ), 10 );
+
+			$( '#variable_product_options .woocommerce_variations .variation-needs-update' ).removeClass( 'variation-needs-update' );
+			wc_meta_boxes_product_variations_pagenav.go_to_page( current );
+
+			return false;
+		},
+
+		/**
 		 * Add variation
 		 *
 		 * @return {bool}
 		 */
 		add_variation: function() {
-			if ( ! wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
+			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
 				return false;
 			}
 
@@ -431,7 +447,7 @@ jQuery( function( $ ) {
 		 * @return {bool}
 		 */
 		remove_variation: function() {
-			if ( ! wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
+			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
 				return false;
 			}
 
@@ -470,7 +486,7 @@ jQuery( function( $ ) {
 		 * @return {bool}
 		 */
 		link_all_variations: function() {
-			if ( ! wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
+			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
 				return false;
 			}
 
@@ -512,14 +528,14 @@ jQuery( function( $ ) {
 		 */
 		input_changed: function() {
 			$( this ).closest( '.woocommerce_variation' ).addClass( 'variation-needs-update' );
-			$( '.save-variation-changes' ).removeAttr( 'disabled' );
+			$( 'button.cancel-variation-changes, button.save-variation-changes' ).removeAttr( 'disabled' );
 		},
 
 		/**
 		 * Bulk edit actions
 		 */
 		bulk_edit: function() {
-			if ( ! wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
+			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
 				return false;
 			}
 
@@ -664,12 +680,12 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * Check button if enabled and if don't have editions
+		 * Check button if enabled and if don't have changes
 		 *
 		 * @return {bool}
 		 */
 		check_is_enabled: function( current ) {
-			return ! $( current ).hasClass( 'disabled' ) && wc_meta_boxes_product_variations_ajax.check_for_editions();
+			return ! $( current ).hasClass( 'disabled' ) && wc_meta_boxes_product_variations_ajax.check_for_changes();
 		},
 
 		/**
@@ -726,7 +742,7 @@ jQuery( function( $ ) {
 			var selected = parseInt( $( this ).val(), 10 ),
 				wrapper  = $( '#variable_product_options .woocommerce_variations' );
 
-			if ( wc_meta_boxes_product_variations_ajax.check_for_editions() ) {
+			if ( wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
 				wc_meta_boxes_product_variations_pagenav.change_classes( selected, parseInt( wrapper.attr( 'data-total_pages' ), 10 ) );
 				wc_meta_boxes_product_variations_ajax.load_variations( selected );
 			} else {

@@ -770,7 +770,8 @@ class WC_Meta_Box_Product_Data {
 				</div>
 
 				<p class="toolbar">
-					<button type="button" class="button button-primary save-variation-changes" disabled="disabled"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
+					<button type="button" class="button-primary save-variation-changes" disabled="disabled"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
+					<button type="button" class="button cancel-variation-changes" disabled="disabled"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 
 					<button type="button" class="button link_all_variations" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Link All Variations', 'woocommerce' ); ?></button>
 
