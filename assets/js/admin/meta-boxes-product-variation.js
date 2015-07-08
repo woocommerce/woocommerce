@@ -57,7 +57,10 @@ jQuery( function( $ ) {
 		 * Run actions when variations is loaded
 		 */
 		variations_loaded: function() {
+			// Show/hide downloadable, virtual and stock fields
 			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock', $( this ) ).change();
+
+			// Open sale schedule fields when have some sale price date
 			$( '.woocommerce_variation', $( this ) ).each( function( index, el ) {
 				var $el       = $( el ),
 					date_from = $( '.sale_price_dates_from', $el ).val(),
@@ -67,8 +70,22 @@ jQuery( function( $ ) {
 					$( 'a.sale_schedule', $el ).click();
 				}
 			});
+
+			// Remove variation-needs-update classes
 			$( '.woocommerce_variations .variation-needs-update', $( this ) ).removeClass( 'variation-needs-update' );
+
+			// Disable save button
 			$( 'button.save-variation-changes', $( this ) ).attr( 'disabled', 'disabled' );
+
+			// Init TipTip
+			$( '#tiptip_holder' ).removeAttr( 'style' );
+			$( '#tiptip_arrow' ).removeAttr( 'style' );
+			$( '.woocommerce_variations .tips' ).tipTip({
+				'attribute': 'data-tip',
+				'fadeIn': 50,
+				'fadeOut': 50,
+				'delay': 200
+			});
 		}
 	};
 

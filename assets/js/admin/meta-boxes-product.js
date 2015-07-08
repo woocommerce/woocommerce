@@ -19,14 +19,14 @@ jQuery( function( $ ) {
 	});
 
 	// Prevent enter submitting post form
-	$( '#upsell_product_data' ).bind( 'keypress', function(e) {
+	$( '#upsell_product_data' ).bind( 'keypress', function( e ) {
 		if ( e.keyCode === 13 ) {
 			return false;
 		}
 	});
 
 	// Type box
-	$('.type_box').appendTo( '#woocommerce-product-data h3.hndle span' );
+	$( '.type_box' ).appendTo( '#woocommerce-product-data h3.hndle span' );
 
 	$( function() {
 		// Prevent inputs in meta box headings opening/closing contents
@@ -51,8 +51,8 @@ jQuery( function( $ ) {
 		}
 		return false;
 	});
-	$('#catalog-visibility .save-post-visibility').click(function () {
-		$('#catalog-visibility-select').slideUp('fast');
+	$('#catalog-visibility .save-post-visibility').click( function () {
+		$('#catalog-visibility-select').slideUp( 'fast' );
 		$('#catalog-visibility .edit-catalog-visibility').show();
 
 		var label = $( 'input[name=_visibility]:checked' ).attr( 'data-label' );
@@ -75,9 +75,9 @@ jQuery( function( $ ) {
 		$( 'input[name=_visibility]' ).removeAttr( 'checked' );
 		$( 'input[name=_visibility][value=' + current_visibility + ']' ).attr( 'checked', 'checked' );
 
-		var label = $('input[name=_visibility]:checked').attr('data-label');
+		var label = $( 'input[name=_visibility]:checked' ).attr( 'data-label' );
 
-		if ( current_featured === 'yes' ) {
+		if ( 'yes' === current_featured ) {
 			label = label + ', ' + woocommerce_admin_meta_boxes.featured_label;
 			$( 'input[name=_featured]' ).attr( 'checked', 'checked' );
 		} else {
@@ -108,7 +108,7 @@ jQuery( function( $ ) {
 
 		show_and_hide_panels();
 
-		$( 'ul.wc-tabs li:visible' ).eq(0).find( 'a' ).click();
+		$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).click();
 
 		$( document.body ).trigger( 'woocommerce-product-type-change', select_val, $( this ) );
 
@@ -195,9 +195,9 @@ jQuery( function( $ ) {
 		return false;
 	});
 	$( '#woocommerce-product-data' ).on( 'click', '.cancel_sale_schedule', function() {
-		var $wrap = $(this).closest( 'div, table' );
+		var $wrap = $( this ).closest( 'div, table' );
 
-		$(this).hide();
+		$( this ).hide();
 		$wrap.find( '.sale_schedule' ).show();
 		$wrap.find( '.sale_price_dates_fields' ).hide();
 		$wrap.find( '.sale_price_dates_fields' ).find( 'input' ).val('');
@@ -273,13 +273,19 @@ jQuery( function( $ ) {
 		var $wrapper     = $( this ).closest( '#product_attributes' ).find( '.product_attributes' );
 		var product_type = $( 'select#product-type' ).val();
 		var data         = {
-			action : 'woocommerce_add_attribute',
-			taxonomy : attribute,
-			i : size,
-			security : woocommerce_admin_meta_boxes.add_attribute_nonce
+			action:   'woocommerce_add_attribute',
+			taxonomy: attribute,
+			i:        size,
+			security: woocommerce_admin_meta_boxes.add_attribute_nonce
 		};
 
-		$wrapper.block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
+		$wrapper.block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 			$wrapper.append( response );
@@ -303,7 +309,7 @@ jQuery( function( $ ) {
 		return false;
 	});
 
-	$( '.product_attributes' ).on('blur', 'input.attribute_name', function() {
+	$( '.product_attributes' ).on( 'blur', 'input.attribute_name', function() {
 		$( this ).closest( '.woocommerce_attribute' ).find( 'strong.attribute_name' ).text( $( this ).val() );
 	});
 
@@ -551,7 +557,7 @@ jQuery( function( $ ) {
 					var attachment_ids   = attachment_ids ? attachment_ids + ',' + attachment.id : attachment.id;
 					var attachment_image = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
-					$product_images.append('<li class="image" data-attachment_id="' + attachment.id + '"><img src="' + attachment_image + '" /><ul class="actions"><li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li></ul></li>');
+					$product_images.append( '<li class="image" data-attachment_id="' + attachment.id + '"><img src="' + attachment_image + '" /><ul class="actions"><li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li></ul></li>' );
 				}
 			});
 
