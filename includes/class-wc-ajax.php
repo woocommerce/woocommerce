@@ -2853,10 +2853,15 @@ class WC_AJAX {
 				$field = str_replace( 'variable', '', $bulk_action );
 
 				foreach ( $variations as $variation_id ) {
+					// Price fields
 					$regular_price = '_regular_price' === $field ? $data['value'] : get_post_meta( $variation_id, '_regular_price', true );
 					$sale_price    = '_sale_price' === $field ? $data['value'] : get_post_meta( $variation_id, '_sale_price', true );
-					$date_from     = date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_from', true ) );
-					$date_to       = date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_to', true ) );
+
+					// Date fields
+					$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+					$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+					$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
+					$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
 
 					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
 				}
@@ -2931,10 +2936,15 @@ class WC_AJAX {
 				$operator = 'increase' === substr( $bulk_action, -8 ) ? +1 : -1;
 
 				foreach ( $variations as $variation_id ) {
+					// Price fields
 					$regular_price = get_post_meta( $variation_id, '_regular_price', true );
 					$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-					$date_from     = date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_from', true ) );
-					$date_to       = date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_to', true ) );
+
+					// Date fields
+					$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+					$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+					$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
+					$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
 
 					if ( '%' === substr( $data['value'], -1 ) ) {
 						$percent = wc_format_decimal( substr( $data['value'], 0, -1 ) );
@@ -2962,10 +2972,25 @@ class WC_AJAX {
 				}
 
 				foreach ( $variations as $variation_id ) {
+					// Price fields
 					$regular_price = get_post_meta( $variation_id, '_regular_price', true );
 					$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-					$date_from     = 'false' === $data['date_from'] ? date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_from', true ) ) : $data['date_from'];
-					$date_to       = 'false' === $data['date_to'] ? date( 'Y-m-d', get_post_meta( $variation_id, '_sale_price_dates_to', true ) ) : $data['date_to'];
+
+					// Date fields
+					$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+					$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+
+					if ( 'false' === $data['date_from'] ) {
+						$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
+					} else {
+						$date_from = $data['date_from'];
+					}
+
+					if ( 'false' === $data['date_to'] ) {
+						$date_to = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
+					} else {
+						$date_to = $data['date_to'];
+					}
 
 					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
 				}
