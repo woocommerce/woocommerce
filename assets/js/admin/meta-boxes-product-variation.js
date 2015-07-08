@@ -241,7 +241,9 @@ jQuery( function( $ ) {
 				.on( 'click', 'button.remove_variation', this.remove_variation )
 				.on( 'click', 'button.link_all_variations', this.link_all_variations );
 
-			$( 'body' ).on( 'change', '#variable_product_options .woocommerce_variations :input', this.input_changed );
+			$( document.body ).on( 'change', '#variable_product_options .woocommerce_variations :input', this.input_changed );
+
+			$( 'form#post' ).on( 'submit', this.save_on_submit );
 
 			$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.bulk_edit', this.bulk_edit );
 		},
@@ -361,13 +363,12 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * Save variations
+		 * Save variations changes
 		 *
-		 * @return {bool}
+		 * @param {Function} callback
 		 */
-		save_variations: function() {
-			var button      = $( this ),
-				wrapper     = $( '#variable_product_options .woocommerce_variations' ),
+		save_changes: function( callback ) {
+			var wrapper     = $( '#variable_product_options .woocommerce_variations' ),
 				need_update = $( '.variation-needs-update', wrapper ),
 				data        = {};
 
@@ -387,15 +388,34 @@ jQuery( function( $ ) {
 					success: function() {
 						// Allow change page, delete and add new variations
 						need_update.removeClass( 'variation-needs-update' );
-						button.attr( 'disabled', 'disabled' );
-						$( 'button.cancel-variation-changes' ).attr( 'disabled', 'disabled' );
+						$( 'button.cancel-variation-changes, button.save-variation-changes' ).attr( 'disabled', 'disabled' );
+
+						if ( typeof callback === 'function' ) {
+							callback();
+						}
 
 						wc_meta_boxes_product_variations_ajax.unblock();
 					}
 				});
 			}
+		},
+
+		/**
+		 * Save variations
+		 *
+		 * @return {bool}
+		 */
+		save_variations: function() {
+			wc_meta_boxes_product_variations_ajax.save_changes();
 
 			return false;
+		},
+
+		/**
+		 * Save on post form submit
+		 */
+		save_on_submit: function() {
+			wc_meta_boxes_product_variations_ajax.save_changes();
 		},
 
 		/**
