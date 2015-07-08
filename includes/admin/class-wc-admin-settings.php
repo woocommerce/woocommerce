@@ -464,6 +464,7 @@ class WC_Admin_Settings {
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								type="checkbox"
+								class="<?php echo esc_attr($value['class']); ?>"
 								value="1"
 								<?php checked( $option_value, 'yes'); ?>
 								<?php echo implode( ' ', $custom_attributes ); ?>
