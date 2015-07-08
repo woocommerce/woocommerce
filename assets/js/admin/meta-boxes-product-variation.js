@@ -636,7 +636,7 @@ jQuery( function( $ ) {
 		 * Set page
 		 */
 		set_page: function( page ) {
-			$( '.variations-pagenav .page-selector:first' ).val( page ).change();
+			$( '.variations-pagenav .page-selector' ).val( page ).first().change();
 		},
 
 		/**
