@@ -80,11 +80,29 @@ jQuery( function( $ ) {
 			// Init TipTip
 			$( '#tiptip_holder' ).removeAttr( 'style' );
 			$( '#tiptip_arrow' ).removeAttr( 'style' );
-			$( '.woocommerce_variations .tips' ).tipTip({
+			$( '.woocommerce_variations .tips', $( this ) ).tipTip({
 				'attribute': 'data-tip',
-				'fadeIn': 50,
-				'fadeOut': 50,
-				'delay': 200
+				'fadeIn':    50,
+				'fadeOut':   50,
+				'delay':     200
+			});
+
+			// Datepicker fields
+			$( '.sale_price_dates_fields', $( this ) ).each( function() {
+				var dates = $( this ).find( 'input' ).datepicker({
+					defaultDate:     '',
+					dateFormat:      'yy-mm-dd',
+					numberOfMonths:  1,
+					showButtonPanel: true,
+					onSelect:        function( selectedDate ) {
+						var option   = $( this ).is( '.sale_price_dates_from' ) ? 'minDate' : 'maxDate',
+							instance = $( this ).data( 'datepicker' ),
+							date     = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+
+						dates.not( this ).datepicker( 'option', option, date );
+						$( this ).change();
+					}
+				});
 			});
 		}
 	};
