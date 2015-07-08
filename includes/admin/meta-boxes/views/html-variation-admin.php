@@ -16,7 +16,7 @@ extract( $variation_data );
 	<h3>
 		<a href="#" class="remove_variation delete" rel="<?php echo esc_attr( $variation_id ); ?>"><?php _e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php _e( 'Click to toggle', 'woocommerce' ); ?>"></div>
-		<strong>#<?php echo esc_html( $variation_id ); ?> &mdash; </strong>
+		<strong>#<?php echo esc_html( $variation_id ); ?>: </strong>
 		<?php
 			foreach ( $parent_data['attributes'] as $attribute ) {
 
