@@ -642,13 +642,14 @@ jQuery( function( $ ) {
 		 * @param {int} qty
 		 */
 		set_paginav: function( qty ) {
-			var wrapper        = $( '#variable_product_options .woocommerce_variations' ),
-				total          = parseInt( wrapper.attr( 'data-total' ), 10 ),
-				new_qty        = total + qty,
-				page_nav       = $( '.variations-pagenav' ),
-				displaying_num = $( '.displaying-num', page_nav ),
-				total_pages    = Math.ceil( new_qty / woocommerce_admin_meta_boxes_variations.variations_per_page ),
-				options        = '';
+			var wrapper          = $( '#variable_product_options .woocommerce_variations' ),
+				total            = parseInt( wrapper.attr( 'data-total' ), 10 ),
+				new_qty          = total + qty,
+				page_nav         = $( '.variations-pagenav' ),
+				displaying_num   = $( '.displaying-num', page_nav ),
+				displaying_links = $( '.pagination-links', page_nav ),
+				total_pages      = Math.ceil( new_qty / woocommerce_admin_meta_boxes_variations.variations_per_page ),
+				options          = '';
 
 			// Set the new total of variations
 			wrapper.attr( 'data-total', new_qty );
@@ -671,11 +672,18 @@ jQuery( function( $ ) {
 
 			$( '.page-selector', page_nav ).empty().html( options );
 
-			// Show hide pagenav
+			// Show/hide pagenav
 			if ( 0 === new_qty ) {
 				page_nav.closest( '.toolbar' ).hide();
 			} else {
 				page_nav.closest( '.toolbar' ).show();
+
+				// Show/hide links
+				if ( 1 === total_pages ) {
+					displaying_links.hide();
+				} else {
+					displaying_links.show();
+				}
 			}
 		},
 
