@@ -406,7 +406,9 @@ jQuery( function( $ ) {
 		 * @return {bool}
 		 */
 		save_variations: function() {
-			wc_meta_boxes_product_variations_ajax.save_changes();
+			wc_meta_boxes_product_variations_ajax.save_changes( function() {
+				$( '#variable_product_options .woocommerce_variations .wc-metabox-content' ).stop().slideUp();
+			});
 
 			return false;
 		},
