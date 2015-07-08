@@ -1081,6 +1081,28 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Get a formatted billing full name.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return string
+	 */
+	public function get_formatted_billing_full_name() {
+		return sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ),  $this->billing_first_name, $this->billing_last_name );
+	}
+
+	/**
+	 * Get a formatted shipping full name.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return string
+	 */
+	public function get_formatted_shipping_full_name() {
+		return sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ),  $this->shipping_first_name, $this->shipping_last_name );
+	}
+
+	/**
 	 * Return an array of items/products within this order.
 	 *
 	 * @param string|array $type Types of line items to get (array or string)
