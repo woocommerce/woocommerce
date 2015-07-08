@@ -185,7 +185,7 @@ class WC_Admin_Assets {
 				'i18n_remove_variation'               => esc_js( __( 'Are you sure you want to remove this variation?', 'woocommerce' ) ),
 				'i18n_scheduled_sale_start'           => esc_js( __( 'Sale start date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
 				'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date  (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
-				'i18n_edited_variations'              => esc_js( __( 'You have some editions in your variations, data you have entered will not be saved if you continue.', 'woocommerce' ) ),
+				'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
 				'i18n_item'                           => esc_js( __( '%qty% item', 'woocommerce' ) ),
 				'i18n_items'                          => esc_js( __( '%qty% items', 'woocommerce' ) ),
 				'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 10 ) )

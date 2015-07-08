@@ -258,9 +258,9 @@ jQuery( function( $ ) {
 
 			if ( 0 < need_update.length ) {
 				if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_edited_variations ) ) {
-					need_update.removeClass( 'variation-needs-update' );
-					$( 'button.cancel-variation-changes, button.save-variation-changes' ).removeAttr( 'disabled' );
+					wc_meta_boxes_product_variations_ajax.save_changes();
 				} else {
+					need_update.removeClass( 'variation-needs-update' );
 					return false;
 				}
 			}
@@ -438,10 +438,7 @@ jQuery( function( $ ) {
 		 * @return {bool}
 		 */
 		add_variation: function() {
-			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
-				return false;
-			}
-
+			wc_meta_boxes_product_variations_ajax.check_for_changes();
 			wc_meta_boxes_product_variations_ajax.block();
 
 			var data = {
@@ -467,9 +464,7 @@ jQuery( function( $ ) {
 		 * @return {bool}
 		 */
 		remove_variation: function() {
-			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
-				return false;
-			}
+			wc_meta_boxes_product_variations_ajax.check_for_changes();
 
 			if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_remove_variation ) ) {
 				var variation     = $( this ).attr( 'rel' ),
@@ -506,9 +501,7 @@ jQuery( function( $ ) {
 		 * @return {bool}
 		 */
 		link_all_variations: function() {
-			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
-				return false;
-			}
+			wc_meta_boxes_product_variations_ajax.check_for_changes();
 
 			if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_link_all_variations ) ) {
 				wc_meta_boxes_product_variations_ajax.block();
@@ -555,9 +548,7 @@ jQuery( function( $ ) {
 		 * Bulk edit actions
 		 */
 		bulk_edit: function() {
-			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
-				return false;
-			}
+			wc_meta_boxes_product_variations_ajax.check_for_changes();
 
 			var bulk_edit  = $( 'select#field_to_edit' ).val(),
 				product_id = $( '#variable_product_options .woocommerce_variations' ).data( 'product_id' ),
@@ -713,7 +704,7 @@ jQuery( function( $ ) {
 		 * @return {bool}
 		 */
 		check_is_enabled: function( current ) {
-			return ! $( current ).hasClass( 'disabled' ) && wc_meta_boxes_product_variations_ajax.check_for_changes();
+			return ! $( current ).hasClass( 'disabled' );
 		},
 
 		/**
@@ -752,8 +743,8 @@ jQuery( function( $ ) {
 		/**
 		 * Navigate on variations pages
 		 *
-		 * @param  {int} page
-		 * @param  {int} qty
+		 * @param {int} page
+		 * @param {int} qty
 		 */
 		go_to_page: function( page, qty ) {
 			page = page || 1;
@@ -770,12 +761,9 @@ jQuery( function( $ ) {
 			var selected = parseInt( $( this ).val(), 10 ),
 				wrapper  = $( '#variable_product_options .woocommerce_variations' );
 
-			if ( wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
-				wc_meta_boxes_product_variations_pagenav.change_classes( selected, parseInt( wrapper.attr( 'data-total_pages' ), 10 ) );
-				wc_meta_boxes_product_variations_ajax.load_variations( selected );
-			} else {
-				$( this ).val( parseInt( wrapper.attr( 'data-page' ), 10 ) );
-			}
+			wc_meta_boxes_product_variations_ajax.check_for_changes();
+			wc_meta_boxes_product_variations_pagenav.change_classes( selected, parseInt( wrapper.attr( 'data-total_pages' ), 10 ) );
+			wc_meta_boxes_product_variations_ajax.load_variations( selected );
 		},
 
 		/**
