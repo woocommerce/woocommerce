@@ -2941,16 +2941,15 @@ img.help_tip {
 			border-bottom: 0;
 		}
 
-		.link_all_variations,
 		.add_variation {
-			float: left;
-			margin-right: 5px;
+			float: right;
+			margin-left: 5px;
 		}
 
 		.save-variation-changes,
 		.cancel-variation-changes {
-			float: right;
-			margin-left: 5px;
+			float: left;
+			margin-right: 5px;
 		}
 	}
 
@@ -3130,36 +3129,28 @@ img.help_tip {
 			}
 		}
 	}
-
-	.expand_all,
-	.close_all {
-		float: right;
-		margin-left: 14px;
-		line-height: 22px;
-		text-decoration: none;
-
-		&:before {
-			@include iconbefore( "\e036" );
-			font-size: .8em;
-			color: #999;
-		}
-	}
-
-	.expand_all {
-		&:before {
-			content: "\e035";
-		}
-	}
 }
 
 .variations-pagenav {
 	float: right;
 
 	.displaying-num {
+		color: #777;
+		font-size: 12px;
+		font-style: italic;
+	}
+
+	.expand-close {
 		margin-right: 2px;
 		color: #777;
 		font-size: 12px;
 		font-style: italic;
+		a {
+			background: none;
+			padding: 0;
+			font-size: 12px;
+			text-decoration: none;
+		}
 	}
 
 	a {
