@@ -66,7 +66,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		add_shortcode( 'fee', array( $this, 'fee' ) );
 		$this->fee_cost = $args['cost'];
 
-		$sum = do_shortcode( str_replace(
+		$sum = rtrim( ltrim( do_shortcode( str_replace(
 			array(
 				'[qty]',
 				'[cost]'
@@ -76,7 +76,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$args['cost']
 			),
 			$sum
-		) );
+		) ), "\t\n\r\0\x0B+*/" ), "\t\n\r\0\x0B+-*/" );
 
 		remove_shortcode( 'fee', array( $this, 'fee' ) );
 
