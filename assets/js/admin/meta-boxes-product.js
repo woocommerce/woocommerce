@@ -320,8 +320,7 @@ jQuery( function( $ ) {
 	});
 
 	$( '.product_attributes' ).on( 'click', 'button.remove_row', function() {
-		var answer = confirm( woocommerce_admin_meta_boxes.remove_attribute );
-		if ( answer ){
+		if ( window.confirm( woocommerce_admin_meta_boxes.remove_attribute ) ) {
 			var $parent = $( this ).parent().parent();
 
 			if ( $parent.is( '.taxonomy' ) ) {
@@ -364,7 +363,7 @@ jQuery( function( $ ) {
 
 		var $wrapper           = $( this ).closest( '.woocommerce_attribute' );
 		var attribute          = $wrapper.data( 'taxonomy' );
-		var new_attribute_name = prompt( woocommerce_admin_meta_boxes.new_attribute_prompt );
+		var new_attribute_name = window.prompt( woocommerce_admin_meta_boxes.new_attribute_prompt );
 
 		if ( new_attribute_name ) {
 
@@ -379,7 +378,7 @@ jQuery( function( $ ) {
 
 				if ( response.error ) {
 					// Error
-					alert( response.error );
+					window.alert( response.error );
 				} else if ( response.slug ) {
 					// Success
 					$wrapper.find( 'select.attribute_values' ).append( '<option value="' + response.slug + '" selected="selected">' + response.name + '</option>' );
@@ -399,7 +398,13 @@ jQuery( function( $ ) {
 	// Save attributes and update variations
 	$( '.save_attributes' ).on( 'click', function() {
 
-		$( '.product_attributes' ).block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
+		$( '.product_attributes' ).block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
 
 		var data = {
 			post_id:  woocommerce_admin_meta_boxes.post_id,
@@ -408,7 +413,7 @@ jQuery( function( $ ) {
 			security: woocommerce_admin_meta_boxes.save_attributes_nonce
 		};
 
-		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
 			var this_page = window.location.toString();
 			this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_admin_meta_boxes.post_id + '&action=edit&' );
 
@@ -426,9 +431,8 @@ jQuery( function( $ ) {
 	var downloadable_file_frame;
 	var file_path_field;
 
-	jQuery(  document).on( 'click', '.upload_file_button', function( event ) {
-
-		var $el = $(this);
+	jQuery( document.body ).on( 'click', '.upload_file_button', function( event ) {
+		var $el = $( this );
 
 		file_path_field = $el.closest( 'tr' ).find( 'td.file_url input' );
 
@@ -547,15 +551,8 @@ jQuery( function( $ ) {
 					var attachment_ids   = attachment_ids ? attachment_ids + ',' + attachment.id : attachment.id;
 					var attachment_image = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
-					$product_images.append('\
-						<li class="image" data-attachment_id="' + attachment.id + '">\
-							<img src="' + attachment_image + '" />\
-							<ul class="actions">\
-								<li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li>\
-							</ul>\
-						</li>');
+					$product_images.append('<li class="image" data-attachment_id="' + attachment.id + '"><img src="' + attachment_image + '" /><ul class="actions"><li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li></ul></li>');
 				}
-
 			});
 
 			$image_gallery_ids.val( attachment_ids );
