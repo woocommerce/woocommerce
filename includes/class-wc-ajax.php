@@ -2469,46 +2469,47 @@ class WC_AJAX {
 		check_ajax_referer( 'save-variations', 'security' );
 
 		// Check permissions again and make sure we have what we need
-		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['data'] ) || empty( $_POST['product_id'] ) ) {
+		if ( ! current_user_can( 'edit_products' ) || empty( $_POST ) || empty( $_POST['product_id'] ) ) {
 			die( -1 );
 		}
 
 		global $wpdb;
 
-		parse_str( $_POST['data'], $data );
 		$product_id = absint( $_POST['product_id'] );
 		$attributes = (array) maybe_unserialize( get_post_meta( $product_id, '_product_attributes', true ) );
 
-		if ( isset( $data['variable_sku'] ) ) {
-			$variable_post_id               = $data['variable_post_id'];
-			$variable_sku                   = $data['variable_sku'];
-			$variable_regular_price         = $data['variable_regular_price'];
-			$variable_sale_price            = $data['variable_sale_price'];
-			$upload_image_id                = $data['upload_image_id'];
-			$variable_download_limit        = $data['variable_download_limit'];
-			$variable_download_expiry       = $data['variable_download_expiry'];
-			$variable_shipping_class        = $data['variable_shipping_class'];
-			$variable_tax_class             = isset( $data['variable_tax_class'] ) ? $data['variable_tax_class'] : array();
-			$variable_menu_order            = $data['variation_menu_order'];
-			$variable_sale_price_dates_from = $data['variable_sale_price_dates_from'];
-			$variable_sale_price_dates_to   = $data['variable_sale_price_dates_to'];
+		die();
 
-			$variable_weight                = isset( $data['variable_weight'] ) ? $data['variable_weight'] : array();
-			$variable_length                = isset( $data['variable_length'] ) ? $data['variable_length'] : array();
-			$variable_width                 = isset( $data['variable_width'] ) ? $data['variable_width'] : array();
-			$variable_height                = isset( $data['variable_height'] ) ? $data['variable_height'] : array();
-			$variable_enabled               = isset( $data['variable_enabled'] ) ? $data['variable_enabled'] : array();
-			$variable_is_virtual            = isset( $data['variable_is_virtual'] ) ? $data['variable_is_virtual'] : array();
-			$variable_is_downloadable       = isset( $data['variable_is_downloadable'] ) ? $data['variable_is_downloadable'] : array();
+		if ( isset( $_POST['variable_sku'] ) ) {
+			$variable_post_id               = $_POST['variable_post_id'];
+			$variable_sku                   = $_POST['variable_sku'];
+			$variable_regular_price         = $_POST['variable_regular_price'];
+			$variable_sale_price            = $_POST['variable_sale_price'];
+			$upload_image_id                = $_POST['upload_image_id'];
+			$variable_download_limit        = $_POST['variable_download_limit'];
+			$variable_download_expiry       = $_POST['variable_download_expiry'];
+			$variable_shipping_class        = $_POST['variable_shipping_class'];
+			$variable_tax_class             = isset( $_POST['variable_tax_class'] ) ? $_POST['variable_tax_class'] : array();
+			$variable_menu_order            = $_POST['variation_menu_order'];
+			$variable_sale_price_dates_from = $_POST['variable_sale_price_dates_from'];
+			$variable_sale_price_dates_to   = $_POST['variable_sale_price_dates_to'];
 
-			$variable_manage_stock          = isset( $data['variable_manage_stock'] ) ? $data['variable_manage_stock'] : array();
-			$variable_stock                 = isset( $data['variable_stock'] ) ? $data['variable_stock'] : array();
-			$variable_backorders            = isset( $data['variable_backorders'] ) ? $data['variable_backorders'] : array();
-			$variable_stock_status          = isset( $data['variable_stock_status'] ) ? $data['variable_stock_status'] : array();
+			$variable_weight                = isset( $_POST['variable_weight'] ) ? $_POST['variable_weight'] : array();
+			$variable_length                = isset( $_POST['variable_length'] ) ? $_POST['variable_length'] : array();
+			$variable_width                 = isset( $_POST['variable_width'] ) ? $_POST['variable_width'] : array();
+			$variable_height                = isset( $_POST['variable_height'] ) ? $_POST['variable_height'] : array();
+			$variable_enabled               = isset( $_POST['variable_enabled'] ) ? $_POST['variable_enabled'] : array();
+			$variable_is_virtual            = isset( $_POST['variable_is_virtual'] ) ? $_POST['variable_is_virtual'] : array();
+			$variable_is_downloadable       = isset( $_POST['variable_is_downloadable'] ) ? $_POST['variable_is_downloadable'] : array();
 
-			$variable_description           = isset( $data['variable_description'] ) ? $data['variable_description'] : array();
+			$variable_manage_stock          = isset( $_POST['variable_manage_stock'] ) ? $_POST['variable_manage_stock'] : array();
+			$variable_stock                 = isset( $_POST['variable_stock'] ) ? $_POST['variable_stock'] : array();
+			$variable_backorders            = isset( $_POST['variable_backorders'] ) ? $_POST['variable_backorders'] : array();
+			$variable_stock_status          = isset( $_POST['variable_stock_status'] ) ? $_POST['variable_stock_status'] : array();
 
-			$max_loop = max( array_keys( $data['variable_post_id'] ) );
+			$variable_description           = isset( $_POST['variable_description'] ) ? $_POST['variable_description'] : array();
+
+			$max_loop = max( array_keys( $_POST['variable_post_id'] ) );
 
 			for ( $i = 0; $i <= $max_loop; $i ++ ) {
 
@@ -2660,8 +2661,8 @@ class WC_AJAX {
 					update_post_meta( $variation_id, '_download_expiry', wc_clean( $variable_download_expiry[ $i ] ) );
 
 					$files              = array();
-					$file_names         = isset( $data['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'wc_clean', $data['_wc_variation_file_names'][ $variation_id ] ) : array();
-					$file_urls          = isset( $data['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'wc_clean', $data['_wc_variation_file_urls'][ $variation_id ] ) : array();
+					$file_names         = isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_names'][ $variation_id ] ) : array();
+					$file_urls          = isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? array_map( 'wc_clean', $_POST['_wc_variation_file_urls'][ $variation_id ] ) : array();
 					$file_url_size      = sizeof( $file_urls );
 					$allowed_file_types = get_allowed_mime_types();
 
@@ -2732,9 +2733,9 @@ class WC_AJAX {
 
 						if ( $attribute['is_taxonomy'] ) {
 							// Don't use wc_clean as it destroys sanitized characters
-							$value = isset( $data[ $attribute_key ][ $i ] ) ? sanitize_title( stripslashes( $data[ $attribute_key ][ $i ] ) ) : '';
+							$value = isset( $_POST[ $attribute_key ][ $i ] ) ? sanitize_title( stripslashes( $_POST[ $attribute_key ][ $i ] ) ) : '';
 						} else {
-							$value = isset( $data[ $attribute_key ][ $i ] ) ? wc_clean( stripslashes( $data[ $attribute_key ][ $i ] ) ) : '';
+							$value = isset( $_POST[ $attribute_key ][ $i ] ) ? wc_clean( stripslashes( $_POST[ $attribute_key ][ $i ] ) ) : '';
 						}
 
 						update_post_meta( $variation_id, $attribute_key, $value );
@@ -2763,8 +2764,8 @@ class WC_AJAX {
 			if ( $attribute['is_variation'] ) {
 
 				// Don't use wc_clean as it destroys sanitized characters
-				if ( isset( $data[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) {
-					$value = sanitize_title( trim( stripslashes( $data[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+				if ( isset( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) {
+					$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
 				} else {
 					$value = '';
 				}

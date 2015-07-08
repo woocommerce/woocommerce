@@ -295,6 +295,34 @@ jQuery( function( $ ) {
 		},
 
 		/**
+		 * Ger variations fields and convert to object
+		 *
+		 * @param  {object} fields
+		 *
+		 * @return {object}
+		 */
+		get_variations_fields: function( fields ) {
+			var data = {},
+				index = 0;
+
+			fields.each( function( i, element ) {
+				$.each( $( ':input', element ).serializeArray(), function( key, input ) {
+					var name = input.name.replace( /\[.*\]/g, '' );
+
+					if ( ! data.hasOwnProperty( name ) ) {
+						data[ name ] = {};
+					}
+
+					data[ name ][ index ] = input.value;
+				});
+
+				index++;
+			});
+
+			return data;
+		},
+
+		/**
 		 * Save variations
 		 *
 		 * @return {bool}
@@ -302,20 +330,21 @@ jQuery( function( $ ) {
 		save_variations: function() {
 			var button      = $( this ),
 				wrapper     = $( '#variable_product_options .woocommerce_variations' ),
-				need_update = $( '.variation-needs-update', wrapper );
+				need_update = $( '.variation-needs-update', wrapper ),
+				data        = {};
 
 			// Save only with products need update.
 			if ( 0 < need_update.length ) {
 				wc_meta_boxes_product_variations_ajax.block();
 
+				data            = wc_meta_boxes_product_variations_ajax.get_variations_fields( need_update );
+				data.action     = 'woocommerce_save_variations';
+				data.security   = woocommerce_admin_meta_boxes_variations.save_variations_nonce;
+				data.product_id = wrapper.data( 'product_id' );
+
 				$.ajax({
 					url: woocommerce_admin_meta_boxes_variations.ajax_url,
-					data: {
-						action:     'woocommerce_save_variations',
-						security:   woocommerce_admin_meta_boxes_variations.save_variations_nonce,
-						product_id: wrapper.data( 'product_id' ),
-						data:       $( ':input', need_update ).serialize()
-					},
+					data: data,
 					type: 'POST',
 					success: function() {
 						// Allow change page, delete and add new variations
