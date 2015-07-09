@@ -1463,7 +1463,7 @@ class WC_AJAX {
 		$country        = strtoupper( esc_attr( $_POST['country'] ) );
 		$state          = strtoupper( esc_attr( $_POST['state'] ) );
 		$postcode       = strtoupper( esc_attr( $_POST['postcode'] ) );
-		$city           = sanitize_title( esc_attr( $_POST['city'] ) );
+		$city           = strtoupper(wc_clean( esc_attr( $_POST['city'] ) ) );
 		$order          = wc_get_order( $order_id );
 		$taxes          = array();
 		$shipping_taxes = array();
