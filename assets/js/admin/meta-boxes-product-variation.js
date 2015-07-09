@@ -561,7 +561,6 @@ jQuery( function( $ ) {
 				case 'link_all_variations' :
 					wc_meta_boxes_product_variations_ajax.link_all_variations();
 					return;
-				break;
 				case 'delete_all' :
 					if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_delete_all_variations ) ) {
 						if ( window.confirm( woocommerce_admin_meta_boxes_variations.i18n_last_warning ) ) {
