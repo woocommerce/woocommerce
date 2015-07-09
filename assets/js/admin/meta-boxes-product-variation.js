@@ -240,7 +240,9 @@ jQuery( function( $ ) {
 				.on( 'click', 'button.add_variation', this.add_variation )
 				.on( 'click', '.remove_variation', this.remove_variation );
 
-			$( document.body ).on( 'change', '#variable_product_options .woocommerce_variations :input', this.input_changed );
+			$( document.body )
+				.on( 'change', '#variable_product_options .woocommerce_variations :input', this.input_changed )
+				.on( 'change', '.variations-defaults select', this.defaults_changed );
 
 			$( 'form#post' ).on( 'submit', this.save_on_submit );
 
@@ -341,7 +343,7 @@ jQuery( function( $ ) {
 		 * @return {object}
 		 */
 		get_variations_fields: function( fields ) {
-			var data = {},
+			var data  = {},
 				index = 0;
 
 			fields.each( function( i, element ) {
@@ -356,6 +358,12 @@ jQuery( function( $ ) {
 				});
 
 				index++;
+			});
+
+			$( '.variations-defaults select' ).each( function( index, element ) {
+				var select = $( element );
+
+				data[ select.attr( 'name' ) ] = select.val();
 			});
 
 			return data;
@@ -541,7 +549,22 @@ jQuery( function( $ ) {
 		 * Add new class when have changes in some input
 		 */
 		input_changed: function() {
-			$( this ).closest( '.woocommerce_variation' ).addClass( 'variation-needs-update' );
+			$( this )
+				.closest( '.woocommerce_variation' )
+				.addClass( 'variation-needs-update' );
+
+			$( 'button.cancel-variation-changes, button.save-variation-changes' ).removeAttr( 'disabled' );
+		},
+
+		/**
+		 * Added new .variation-needs-update class when defaults is changed
+		 */
+		defaults_changed: function() {
+			$( this )
+				.closest( '#variable_product_options' )
+				.find( '.woocommerce_variation:first' )
+				.addClass( 'variation-needs-update' );
+
 			$( 'button.cancel-variation-changes, button.save-variation-changes' ).removeAttr( 'disabled' );
 		},
 
