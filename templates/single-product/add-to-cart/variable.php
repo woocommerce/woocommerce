@@ -20,7 +20,7 @@ global $product, $post;
 
 	<?php do_action( 'woocommerce_before_variations_form' ); ?>
 
-	<?php if ( 1 || ! empty( $available_variations ) ) : ?>
+	<?php if ( ! empty( $available_variations ) || false === $available_variations ) : ?>
 		<table class="variations" cellspacing="0">
 			<tbody>
 				<?php $loop = 0; foreach ( $attributes as $name => $options ) : $loop++; ?>
