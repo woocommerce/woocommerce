@@ -413,24 +413,62 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array
 	 */
 	public function get_variation_default_attributes() {
-
 		$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
-
 		return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
 	}
 
 	/**
+	 * Match a variation to a given set of attributes using a WP_Query
+	 * @since  2.4.0
+	 * @param  $match_attributes
+	 * @return int Variation ID which matched, 0 is no match was found
+	 */
+	public function get_matching_variation( $match_attributes = array() ) {
+		$query_args = array(
+			'post_parent' => $this->id,
+			'post_type'   => 'product_variation',
+			'orderby'     => 'menu_order',
+			'order'       => 'ASC',
+			'fields'      => 'ids',
+			'post_status' => 'publish',
+			'numberposts' => 1,
+			'meta_query'  => array()
+		);
+
+		foreach ( $this->get_attributes() as $attribute ) {
+			if ( ! $attribute['is_variation'] ) {
+				continue;
+			}
+
+			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
+
+			if ( empty( $match_attributes[ $attribute_field_name ] ) ) {
+				return 0;
+			}
+
+			$query_args['meta_query'][] = array(
+				'key'   => $attribute_field_name,
+				'value' => wc_clean( $match_attributes[ $attribute_field_name ] )
+			);
+		}
+
+		$matches = get_posts( $query_args );
+
+		if ( $matches && ! is_wp_error( $matches ) ) {
+			return current( $matches );
+		} else {
+			return 0;
+		}
+	}
+
+	/**
 	 * Get an array of available variations for the current product.
-	 *
-	 * @access public
 	 * @return array
 	 */
 	public function get_available_variations() {
-
 		$available_variations = array();
 
 		foreach ( $this->get_children() as $child_id ) {
-
 			$variation = $this->get_child( $child_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked
@@ -443,55 +481,64 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			$variation_attributes = $variation->get_variation_attributes();
-			$availability         = $variation->get_availability();
-			$availability_html    = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . wp_kses_post( $availability['availability'] ) . '</p>';
-			$availability_html    = apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $variation );
-
-			if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-				$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
-
-				$attachment    = wp_get_attachment_image_src( $attachment_id, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' )  );
-				$image         = $attachment ? current( $attachment ) : '';
-
-				$attachment    = wp_get_attachment_image_src( $attachment_id, 'full'  );
-				$image_link    = $attachment ? current( $attachment ) : '';
-
-				$image_title   = get_the_title( $attachment_id );
-				$image_alt     = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
-			} else {
-				$image = $image_link = $image_title = $image_alt = '';
-			}
-
-			$available_variations[] = apply_filters( 'woocommerce_available_variation', array(
-				'variation_id'          => $child_id,
-				'variation_is_visible'  => $variation->variation_is_visible(),
-				'variation_is_active'   => $variation->variation_is_active(),
-				'is_purchasable'        => $variation->is_purchasable(),
-				'display_price'         => $variation->get_display_price(),
-				'display_regular_price' => $variation->get_display_price( $variation->get_regular_price() ),
-				'attributes'            => $variation_attributes,
-				'image_src'             => $image,
-				'image_link'            => $image_link,
-				'image_title'           => $image_title,
-				'image_alt'             => $image_alt,
-				'price_html'            => $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
-				'availability_html'     => $availability_html,
-				'sku'                   => $variation->get_sku(),
-				'weight'                => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
-				'dimensions'            => $variation->get_dimensions(),
-				'min_qty'               => 1,
-				'max_qty'               => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
-				'backorders_allowed'    => $variation->backorders_allowed(),
-				'is_in_stock'           => $variation->is_in_stock(),
-				'is_downloadable'       => $variation->is_downloadable() ,
-				'is_virtual'            => $variation->is_virtual(),
-				'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
-				'variation_description' => $variation->get_variation_description(),
-			), $this, $variation );
+			$available_variations[] = $this->get_available_variation( $variation );
 		}
 
 		return $available_variations;
+	}
+
+	/**
+	 * Returns an array of date for a variation. Used in the add to cart form.
+	 * @since  2.4.0
+	 * @param  $variation Variation product object or ID
+	 * @return array
+	 */
+	public function get_available_variation( $variation ) {
+		if ( is_numeric( $variation ) ) {
+			$variation = $this->get_child( $variation );
+		}
+
+		if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
+			$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
+			$attachment    = wp_get_attachment_image_src( $attachment_id, 'full'  );
+			$image         = $attachment ? current( $attachment ) : '';
+			$image_link    = $attachment ? current( $attachment ) : '';
+			$image_title   = get_the_title( $attachment_id );
+			$image_alt     = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+		} else {
+			$image = $image_link = $image_title = $image_alt = '';
+		}
+
+		$availability      = $variation->get_availability();
+		$availability_html = empty( $availability['availability'] ) ? '' : '<p class="stock ' . esc_attr( $availability['class'] ) . '">' . wp_kses_post( $availability['availability'] ) . '</p>';
+		$availability_html = apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $variation );
+
+		return apply_filters( 'woocommerce_available_variation', array(
+			'variation_id'          => $variation->variation_id,
+			'variation_is_visible'  => $variation->variation_is_visible(),
+			'variation_is_active'   => $variation->variation_is_active(),
+			'is_purchasable'        => $variation->is_purchasable(),
+			'display_price'         => $variation->get_display_price(),
+			'display_regular_price' => $variation->get_display_price( $variation->get_regular_price() ),
+			'attributes'            => $variation->get_variation_attributes(),
+			'image_src'             => $image,
+			'image_link'            => $image_link,
+			'image_title'           => $image_title,
+			'image_alt'             => $image_alt,
+			'price_html'            => $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+			'availability_html'     => $availability_html,
+			'sku'                   => $variation->get_sku(),
+			'weight'                => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+			'dimensions'            => $variation->get_dimensions(),
+			'min_qty'               => 1,
+			'max_qty'               => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
+			'backorders_allowed'    => $variation->backorders_allowed(),
+			'is_in_stock'           => $variation->is_in_stock(),
+			'is_downloadable'       => $variation->is_downloadable() ,
+			'is_virtual'            => $variation->is_virtual(),
+			'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
+			'variation_description' => $variation->get_variation_description(),
+		), $this, $variation );
 	}
 
 	/**

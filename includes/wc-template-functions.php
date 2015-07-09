@@ -881,10 +881,10 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 
 		// Load the template
 		wc_get_template( 'single-product/add-to-cart/variable.php', array(
-				'available_variations'  => $product->get_available_variations(),
-				'attributes'   			=> $product->get_variation_attributes(),
-				'selected_attributes' 	=> $product->get_variation_default_attributes()
-			) );
+			'available_variations' => sizeof( $product->get_children() ) <= apply_filters( 'woocommerce_max_variations', 20 ) ? $product->get_available_variations() : false,
+			'attributes'           => $product->get_variation_attributes(),
+			'selected_attributes'  => $product->get_variation_default_attributes()
+		) );
 	}
 }
 if ( ! function_exists( 'woocommerce_external_add_to_cart' ) ) {

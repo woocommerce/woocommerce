@@ -84,6 +84,7 @@ class WC_AJAX {
 			'update_order_review'                              => true,
 			'add_to_cart'                                      => true,
 			'checkout'                                         => true,
+			'get_variation'                                    => true,
 			'feature_product'                                  => false,
 			'mark_order_status'                                => false,
 			'add_attribute'                                    => false,
@@ -431,6 +432,29 @@ class WC_AJAX {
 		WC()->checkout()->process_checkout();
 
 		die(0);
+	}
+
+	/**
+	 * Get a matching variation based on posted attributes
+	 */
+	public static function get_variation() {
+		ob_start();
+
+		if ( empty( $_POST['product_id'] ) || ! ( $variable_product = wc_get_product( absint( $_POST['product_id'] ), array( 'product_type' => 'variable' ) ) ) ) {
+			die();
+		}
+
+		$variation_id = $variable_product->get_matching_variation( $_POST );
+
+		if ( $variation_id ) {
+			$variation = $variable_product->get_available_variation( $variation_id );
+		} else {
+			$variation = false;
+		}
+
+		wp_send_json( $variation );
+
+		die();
 	}
 
 	/**

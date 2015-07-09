@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Product_Variation extends WC_Product {
 
-	/** @public int ID of the variable product. */
+	/** @public int ID of the variation itself. */
 	public $variation_id;
 
 	/** @public object Parent Variable product object. */

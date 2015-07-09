@@ -241,7 +241,7 @@ jQuery( function( $ ) {
 
 			wc_checkout_form.xhr = $.ajax({
 				type:		'POST',
-				url:		wc_checkout_params.wc_ajax_url + 'update_order_review',
+				url:		wc_checkout_params.wc_ajax_url + 'update_order_review/',
 				data:		data,
 				success:	function( data ) {
 					// Always update the fragments
@@ -408,7 +408,7 @@ jQuery( function( $ ) {
 
 			$.ajax({
 				type:		'POST',
-				url:		wc_checkout_params.wc_ajax_url + 'apply_coupon',
+				url:		wc_checkout_params.wc_ajax_url + 'apply_coupon/',
 				data:		data,
 				success:	function( code ) {
 					$( '.woocommerce-error, .woocommerce-message' ).remove();
@@ -447,7 +447,7 @@ jQuery( function( $ ) {
 
 			$.ajax({
 				type:    'POST',
-				url:     wc_checkout_params.wc_ajax_url + 'remove_coupon',
+				url:     wc_checkout_params.wc_ajax_url + 'remove_coupon/',
 				data:    data,
 				success: function( code ) {
 					$( '.woocommerce-error, .woocommerce-message' ).remove();
