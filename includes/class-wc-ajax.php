@@ -955,6 +955,9 @@ class WC_AJAX {
 				update_post_meta( $variation_id, $key, $value );
 			}
 
+			// Save stock status
+			update_post_meta( $variation_id, '_stock_status', 'instock' );
+
 			$added++;
 
 			do_action( 'product_variation_linked', $variation_id );
