@@ -487,7 +487,14 @@ abstract class WC_Abstract_Order {
 
 		// method cost
 		if ( isset( $args['cost'] ) ) {
+			// Get old cost before updating
+			$old_cost = wc_get_order_item_meta( $item_id, 'cost' );
+
+			// Update
 			wc_update_order_item_meta( $item_id, 'cost', wc_format_decimal( $args['cost'] ) );
+
+			// Update total
+			$this->set_total( $this->order_shipping - wc_format_decimal( $old_cost ) + wc_format_decimal( $args['cost'] ), 'shipping' );
 		}
 
 		do_action( 'woocommerce_order_update_shipping', $this->id, $item_id, $args );
