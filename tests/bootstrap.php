@@ -69,6 +69,7 @@ class WC_Unit_Tests_Bootstrap {
 		include( $this->plugin_dir . '/uninstall.php' );
 
 		WC_Install::install();
+		update_option( 'woocommerce_calc_shipping', 'yes' ); // Needed for tests cart and shipping methods
 
 		// reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374
 		$GLOBALS['wp_roles']->reinit();
