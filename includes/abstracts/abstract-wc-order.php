@@ -1963,10 +1963,7 @@ abstract class WC_Abstract_Order {
 			'show_image'            => $show_image,
 			'image_size'            => $image_size
 		) );
-
-		$return = apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
-
-		return $return;
+		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
 	}
 
 	/**
