@@ -6,8 +6,6 @@ jQuery( function( $ ) {
     __slice = [].slice,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  $ = jQuery;
-
   $.payment = {};
 
   $.payment.fn = {};
@@ -58,7 +56,7 @@ jQuery( function( $ ) {
       luhn: true
     }, {
       type: 'mastercard',
-      pattern: /^5[0-5]/,
+      pattern: /^(5[0-5]|2[2-7])/,
       format: defaultFormat,
       length: [16],
       cvcLength: [3],
@@ -73,7 +71,7 @@ jQuery( function( $ ) {
     }, {
       type: 'dinersclub',
       pattern: /^3[0689]/,
-      format: defaultFormat,
+      format: /(\d{1,4})(\d{1,6})?(\d{1,4})?/,
       length: [14],
       cvcLength: [3],
       luhn: true
@@ -578,10 +576,14 @@ jQuery( function( $ ) {
     mon = parts[1] || '';
     sep = parts[2] || '';
     year = parts[3] || '';
-    if (year.length > 0 || (sep.length > 0 && !(/\ \/?\ ?/.test(sep)))) {
+    if (year.length > 0) {
       sep = ' / ';
-    }
-    if (mon.length === 1 && (mon !== '0' && mon !== '1')) {
+    } else if (sep === ' /') {
+      mon = mon.substring(0, 1);
+      sep = '';
+    } else if (mon.length === 2 || sep.length > 0) {
+      sep = ' / ';
+    } else if (mon.length === 1 && (mon !== '0' && mon !== '1')) {
       mon = "0" + mon;
       sep = ' / ';
     }
