@@ -430,6 +430,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'g'   => __( 'g', 'woocommerce' ),
 						'lbs' => __( 'lbs', 'woocommerce' ),
 						'oz'  => __( 'oz', 'woocommerce' ),
+						'ml'  => __( 'ml','woocommerce' ),
 					),
 					'desc_tip' =>  true,
 				),
