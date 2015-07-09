@@ -2831,6 +2831,8 @@ class WC_AJAX {
 
 		update_post_meta( $product_id, '_default_attributes', $default_attributes );
 
+		do_action( 'woocommerce_ajax_save_product_variations', $product_id );
+
 		// Clear cache/transients
 		wc_delete_product_transients( $product_id );
 	}
