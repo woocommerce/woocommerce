@@ -425,12 +425,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'      => 'min-width:300px;',
 					'default'  => 'kg',
 					'type'     => 'select',
-					'options'  => array(
+					'options'  => apply_filters( 'woocommerce_default_product_weight_unit_options', array(
 						'kg'  => __( 'kg', 'woocommerce' ),
 						'g'   => __( 'g', 'woocommerce' ),
 						'lbs' => __( 'lbs', 'woocommerce' ),
 						'oz'  => __( 'oz', 'woocommerce' ),
-					),
+					) ),
 					'desc_tip' =>  true,
 				),
 
@@ -442,13 +442,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'css'      => 'min-width:300px;',
 					'default'  => 'cm',
 					'type'     => 'select',
-					'options'  => array(
+					'options'  => apply_filters( 'woocommerce_default_product_dimensions_unit_options', array(
 						'm'  => __( 'm', 'woocommerce' ),
 						'cm' => __( 'cm', 'woocommerce' ),
 						'mm' => __( 'mm', 'woocommerce' ),
 						'in' => __( 'in', 'woocommerce' ),
 						'yd' => __( 'yd', 'woocommerce' ),
-					),
+					) ),
 					'desc_tip' =>  true,
 				),
 
