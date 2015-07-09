@@ -525,7 +525,7 @@ class WC_Product_Variable extends WC_Product {
 			'image_link'            => $image_link,
 			'image_title'           => $image_title,
 			'image_alt'             => $image_alt,
-			'price_html'            => $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => $availability_html,
 			'sku'                   => $variation->get_sku(),
 			'weight'                => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
