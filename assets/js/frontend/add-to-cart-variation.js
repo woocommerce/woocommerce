@@ -465,7 +465,9 @@
 
 	$( function() {
 		if ( typeof wc_add_to_cart_variation_params !== 'undefined' ) {
-			$( '.variations_form' ).wc_variation_form().find('.variations select:eq(0)').change();
+			$( '.variations_form' ).each( function() {
+				$( this ).wc_variation_form().find('.variations select:eq(0)').change();
+			});
 		}
 	});
 
