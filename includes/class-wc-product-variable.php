@@ -131,7 +131,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_children( $visible_only = false ) {
 		$key            = $visible_only ? 'visible' : 'all';
-		$transient_name = 'wc_product_children' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+		$transient_name = 'wc_product_children_' . $this->id;
 
 		// Get value of transient
 		if ( ! is_array( $this->children ) ) {
