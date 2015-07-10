@@ -2320,7 +2320,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * Clear product
 	 */
 	protected function clear_product( $product_id ) {
-		if ( 0 >= $product_id ) {
+		if ( ! is_numeric( $product_id ) || 0 >= $product_id ) {
 			return;
 		}
 
