@@ -222,7 +222,7 @@ class WC_Admin_Welcome {
 						</div>
 						<div>
 							<h4><?php _e( 'Frontend Variation Performance', 'woocommerce' ); ?></h4>
-							<p><?php _e( 'If your products have many variations (25+) they will use an ajax powered add-to-cart form. Select all options and the matching variation will be found via AJAX. This improves performance on the product page.', 'woocommerce' ); ?></p>
+							<p><?php _e( 'If your products have many variations (20+) they will use an ajax powered add-to-cart form. Select all options and the matching variation will be found via AJAX. This improves performance on the product page.', 'woocommerce' ); ?></p>
 						</div>
 						<div class="last-feature">
 							<h4><?php _e( 'Flat Rate Shipping, Simplified', 'woocommerce' ); ?></h4>
