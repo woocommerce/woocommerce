@@ -455,7 +455,6 @@ jQuery( function( $ ) {
 		 * @return {bool}
 		 */
 		add_variation: function() {
-			wc_meta_boxes_product_variations_ajax.check_for_changes();
 			wc_meta_boxes_product_variations_ajax.block();
 
 			var data = {
