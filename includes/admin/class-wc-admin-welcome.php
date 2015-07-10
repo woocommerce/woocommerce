@@ -116,6 +116,14 @@ class WC_Admin_Welcome {
 				top: 0;
 				<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
 			}
+			.about-wrap .feature-section {
+				margin-bottom: 40px;
+			}
+			.about-wrap .last-feature-section {
+				border-bottom: 0;
+				padding-bottom: 0;
+				margin-bottom: 0;
+			}
 			.about-wrap .wc-feature {
 				overflow: visible !important;
 				*zoom:1;
@@ -131,42 +139,18 @@ class WC_Admin_Welcome {
 			.about-wrap .wc-feature:after {
 				clear: both;
 			}
-			.about-wrap .feature-rest div {
-				width: 50% !important;
-				padding-<?php echo is_rtl() ? 'left' : 'right'; ?>: 100px;
-				-moz-box-sizing: border-box;
-				box-sizing: border-box;
-				margin: 0 !important;
-			}
-			.about-wrap .feature-rest div.last-feature {
-				padding-<?php echo is_rtl() ? 'right' : 'left'; ?>: 100px;
-				padding-<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
-			}
 			.about-wrap div.icon {
 				width: 0 !important;
 				padding: 0;
 				margin: 20px 0 !important;
 			}
-			.about-wrap .feature-rest div.icon:before {
-				font-family: WooCommerce !important;
-				font-weight: normal;
-				width: 100%;
-				font-size: 170px;
-				line-height: 125px;
-				color: #9c5d90;
-				display: inline-block;
-				position: relative;
-				text-align: center;
-				speak: none;
-				margin: <?php echo is_rtl() ? '0 -100px 0 0' : '0 0 0 -100px'; ?>;
-				content: "\e01d";
-				-webkit-font-smoothing: antialiased;
-				-moz-osx-font-smoothing: grayscale;
-			}
 			.about-integrations {
 				background: #fff;
 				margin: 20px 0;
 				padding: 1px 20px 10px;
+			}
+			.about-integrations .feature-section {
+				padding: 20px 0;
 			}
 			.changelog h4 {
 				line-height: 1.4;
@@ -229,25 +213,20 @@ class WC_Admin_Welcome {
 
 			<?php $this->intro(); ?>
 
-			<!--<div class="changelog point-releases"></div>-->
-
 			<div class="changelog">
-				<h4><?php _e( 'UI Overhaul', 'woocommerce' ); ?></h4>
-				<p><?php _e( 'We\'ve updated the user interface on both the front and backend of WooCommerce 2.3 "Handsome Hippo".', 'woocommerce' ); ?></p>
-
 				<div class="changelog about-integrations">
-					<div class="wc-feature feature-section col three-col">
+					<div class="wc-feature feature-section last-feature-section col three-col">
 						<div>
-							<h4><?php _e( 'Frontend UI Improvements', 'woocommerce' ); ?></h4>
-							<p><?php _e( 'On the frontend there are several UX enhancements such as the undo-remove-from cart link and responsive table design as well as a fresh, modern look which meshes more fluidly with the current design trends of default WordPress themes.', 'woocommerce' ); ?></p>
+							<h4><?php _e( 'Improved Product Variation Editor', 'woocommerce' ); ?></h4>
+							<p><?php _e( 'When editing product variations in the backend, we have added a new, paginated interface to make the process of adding complex product variations both quicker and more reliable.', 'woocommerce' ); ?></p>
 						</div>
 						<div>
-							<h4><?php _e( 'Backend UI Improvements', 'woocommerce' ); ?></h4>
-							<p><?php _e( 'On the backend, settings have been re-organised and perform better on hand-held devices for an all round improved user experience. ', 'woocommerce' ); ?></p>
+							<h4><?php _e( 'Frontend Variation Performance', 'woocommerce' ); ?></h4>
+							<p><?php _e( 'If your products have many variations (25+) they will use an ajax powered add-to-cart form. Select all options and the matching variation will be found via AJAX. This improves performance on the product page.', 'woocommerce' ); ?></p>
 						</div>
 						<div class="last-feature">
-							<h4><?php _e( 'Webhooks UI', 'woocommerce' ); ?></h4>
-						<p><?php printf( __( 'As part of the API, we\'ve introduced a UI for the Webhook system in WooCommerce 2.3. This makes it easier for 3rd party apps to integrate with WooCommerce. Read more in our %sdocs%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/webhooks/">', '</a>' ); ?></p>
+							<h4><?php _e( 'Flat Rate Shipping, Simplified', 'woocommerce' ); ?></h4>
+							<p><?php _e( 'Flat Rate Shipping was overly complex in previous versions of WooCommerce. We have simplified the interface (without losing the flexibility) making Flat Rate and International Shipping much more intuitive.', 'woocommerce' ); ?></p>
 						</div>
 					</div>
 				</div>
@@ -255,30 +234,30 @@ class WC_Admin_Welcome {
 			<div class="changelog">
 				<div class="feature-section col three-col">
 					<div>
-						<h4><?php _e( 'Geo-locating Customer Location', 'woocommerce' ); ?></h4>
-						<p><?php printf( __( 'We have added a new option to geolocate the "Default Customer Location". Coupled with ability to show taxes in your store based on this location, you can show relevant prices store-wide. Enable this in the %ssettings%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '">', '</a>' ); ?></p>
+						<h4><?php _e( 'Geolocation with Caching', 'woocommerce' ); ?></h4>
+						<p><?php printf( __( 'If you use static caching you may have found geolocation did not work for non-logged in customers. We have now introduced a new javascript based Geocaching solution to help. Enable this in the %ssettings%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '">', '</a>' ); ?></p>
 					</div>
 					<div>
-						<h4><?php _e( 'Color Customization', 'woocommerce' ); ?></h4>
-						<p><?php printf( __( 'If you\'re looking to customise the look and feel of the frontend in 2.3, take a look at the free %sWooCommerce Colors plugin%s. This lets you change the colors with a live preview.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-colors/">', '</a>' ); ?></p>
+						<h4><?php _e( 'Onboarding Experience', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'We have added our "WooCommerce 101" tutorial videos to the help tabs throughout admin if you need some help understanding how to use WooCommerce. New installs will also see the new setup wizard to help guide through initial setup.', 'woocommerce' ); ?></p>
 					</div>
 					<div class="last-feature">
-						<h4><?php _e( 'Improved Reports', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Sales reports can now show net and gross amounts, we\'ve added a print stylesheet, and added extra data on refunds to reports.', 'woocommerce' ); ?></p>
+						<h4><?php _e( 'Custom AJAX Endpoints', 'woocommerce' ); ?></h4>
+						<p><?php printf( __( 'To improve performance on the frontend, we\'ve introduced new AJAX endpoints which avoid the overhead of making calls to admin-ajax.php for events such as adding products to the cart.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-colors/">', '</a>' ); ?></p>
 					</div>
 				</div>
-				<div class="feature-section col three-col">
+				<div class="feature-section last-feature-section col three-col">
 					<div>
-						<h4><?php _e( 'Improved Simplify Gateway', 'woocommerce' ); ?></h4>
-						<p><?php printf( __( 'The built in Simplify Commerce Gateway (available in the US) now supports %sHosted Payments%s - a PCI Compliant hosted payment platform.', 'woocommerce' ), '<a href="https://www.simplify.com/commerce/docs/tools/hosted-payments">', '</a>' ); ?></p>
+						<h4><?php _e( 'Visual API Authentication', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Services which integrate with the REST API can now use the visual authentication endpoint so a user can login and grant API permission from a single page before being redirected back.', 'woocommerce' ); ?></p>
 					</div>
 					<div>
-						<h4><?php _e( 'Email Template Improvements', 'woocommerce' ); ?></h4>
-						<p><?php printf( __( 'To make email customization simpler, we\'ve included a CSS Inliner in this release, some new template files for styling emails, and some additional hooks for developers. Read more on our %sdeveloper blog%s.', 'woocommerce' ), '<a href="http://develop.woothemes.com/woocommerce/2014/10/2-3-emails/">', '</a>' ); ?></p>
+						<h4><?php _e( 'Email Notification Improvements', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'Email templates have been improved to support a wider array of email clients, and extra notifications, such as partial refund notifications, have been included.', 'woocommerce' ); ?></p>
 					</div>
 					<div class="last-feature">
-						<h4><?php _e( 'Simplified Coupon System', 'woocommerce' ); ?></h4>
-						<p><?php printf( __( 'We have simplified the coupon system to ensure discounts are never applied to taxes, and we\'ve improved support for discounting products inclusive of tax. Read more on our %sdevelop blog%s.', 'woocommerce' ), '<a href="http://develop.woothemes.com/woocommerce/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/">', '</a>' ); ?></p>
+						<h4><?php _e( 'Shipping Method Priorities', 'woocommerce' ); ?></h4>
+						<p><?php _e( 'To give more control over which shipping method is selected by default for customers, each method can now be given a numeric priority.', 'woocommerce' ); ?></p>
 					</div>
 				</div>
 			</div>
