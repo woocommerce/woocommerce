@@ -291,11 +291,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			return $this->get_product( $id );
 		} catch ( WC_API_Exception $e ) {
-			// Remove the product when fails (and post actually created)
-		    if ( is_int( $id ) ) {
-    			$this->clear_product( $id );
-		    }
-
+			$this->clear_product( $id );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -2322,7 +2318,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * Clear product
 	 */
 	protected function clear_product( $product_id ) {
-	   if ( !is_int( $product_id ) || 0 >= $product_id ) {
+		if ( ! is_numeric( $product_id ) || 0 >= $product_id ) {
             return;
         }
 
