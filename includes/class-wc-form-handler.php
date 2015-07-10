@@ -148,7 +148,6 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$update       = true;
 		$errors       = new WP_Error();
 		$user         = new stdClass();
 
@@ -212,7 +211,7 @@ class WC_Form_Handler {
 		}
 
 		// Allow plugins to return their own errors.
-		do_action_ref_array( 'user_profile_update_errors', array( &$errors, $update, &$user ) );
+		do_action_ref_array( 'woocommerce_save_account_details_errors', array( &$errors, &$user ) );
 
 		if ( $errors->get_error_messages() ) {
 			foreach ( $errors->get_error_messages() as $error ) {
