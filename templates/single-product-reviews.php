@@ -68,6 +68,7 @@ if ( ! comments_open() ) {
 							            '<input id="email" name="email" type="text" value="' . esc_attr(  $commenter['comment_author_email'] ) . '" size="30" aria-required="true" /></p>',
 						),
 						'label_submit'  => __( 'Submit', 'woocommerce' ),
+						'must_log_in'   => '<p class="must-log-in">' . sprintf( __( 'You must be <a href="%s">logged in</a> to post a comment.' ), get_permalink( get_option('woocommerce_myaccount_page_id') ) ) . '</p>',
 						'logged_in_as'  => '',
 						'comment_field' => ''
 					);
