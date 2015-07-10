@@ -609,7 +609,7 @@ class WC_Meta_Box_Product_Data {
 
 			<?php else : ?>
 
-				<div class="toolbar">
+				<div class="toolbar toolbar-top">
 					<select id="field_to_edit">
 						<option value=""><?php _e( 'Bulk Actions', 'woocommerce' ); ?></option>
 						<option value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
@@ -738,7 +738,7 @@ class WC_Meta_Box_Product_Data {
 					<div class="clear"></div>
 				</div>
 
-				<p class="toolbar">
+				<p class="toolbar toolbar-buttons">
 					<button type="button" class="button-primary save-variation-changes" disabled="disabled"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
 					<button type="button" class="button cancel-variation-changes" disabled="disabled"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
 					<button type="button" class="button button-primary add_variation" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Add Variation', 'woocommerce' ); ?></button>

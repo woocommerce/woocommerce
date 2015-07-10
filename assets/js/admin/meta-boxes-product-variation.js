@@ -691,6 +691,8 @@ jQuery( function( $ ) {
 			var wrapper          = $( '#variable_product_options .woocommerce_variations' ),
 				total            = parseInt( wrapper.attr( 'data-total' ), 10 ),
 				new_qty          = total + qty,
+				toolbar          = $( '#variable_product_options .toolbar' ),
+				field_to_edit    = $( '#field_to_edit' ),
 				page_nav         = $( '.variations-pagenav' ),
 				displaying_num   = $( '.displaying-num', page_nav ),
 				displaying_links = $( '.pagination-links', page_nav ),
@@ -720,9 +722,15 @@ jQuery( function( $ ) {
 
 			// Show/hide pagenav
 			if ( 0 === new_qty ) {
-				page_nav.closest( '.toolbar' ).hide();
+				toolbar.not( '.toolbar-top, .toolbar-buttons' ).hide();
+				page_nav.hide();
+				$( 'option, optgroup', field_to_edit ).hide();
+				$( 'option', field_to_edit ).slice( 0, 2 ).show();
+
 			} else {
-				page_nav.closest( '.toolbar' ).show();
+				toolbar.show();
+				page_nav.show();
+				$( 'option, optgroup', field_to_edit ).show();
 
 				// Show/hide links
 				if ( 1 === total_pages ) {
