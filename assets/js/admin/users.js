@@ -49,7 +49,7 @@ jQuery( function ( $ ) {
 
 				$states_select.append( $( '<option value="">' + wc_users_params.i18n_select_state_text + '</option>' ) );
 
-				$.each( state, function( index, name ) {
+				$.each( state, function( index ) {
 					$states_select.append( $( '<option value="' + index + '">' + state[ index ] + '</option>' ) );
 				} );
 
@@ -73,8 +73,8 @@ jQuery( function ( $ ) {
 				country  = $country.val();
 
 			$country.data( 'woocommerce.stickState-' + country, state );
-		},
-	}
+		}
+	};
 
 	wc_users_fields.init();
 

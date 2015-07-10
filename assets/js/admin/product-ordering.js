@@ -1,10 +1,11 @@
+/*global ajaxurl */
+
 /**
  * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/)
  *
  * Modified - products have no children (non hierarchical)
  */
-( function( $ ) {
-$( document ).ready( function() {
+jQuery( function( $ ) {
 	$( 'table.widefat tbody th, table.widefat tbody td' ).css( 'cursor', 'move' );
 
 	$( 'table.widefat tbody' ).sortable({
@@ -71,4 +72,3 @@ $( document ).ready( function() {
 		}
 	});
 });
-}( jQuery ) );

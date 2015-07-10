@@ -1,3 +1,4 @@
+/*global wc_setup_params */
 jQuery(function( $ ) {
 
 	var locale_info = $.parseJSON( wc_setup_params.locale_info );
@@ -12,7 +13,7 @@ jQuery(function( $ ) {
 			$.each( country_locale_info, function( index, value) {
 				$(':input[name="' + index + '"]').val( value ).change();
 
-				if ( -1 != $.inArray( index, hide_if_set ) ) {
+				if ( -1 !== $.inArray( index, hide_if_set ) ) {
 					$(':input[name="' + index + '"]').closest('tr').hide();
 				}
 			} );

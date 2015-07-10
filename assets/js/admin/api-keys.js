@@ -2,13 +2,32 @@
 (function( $ ) {
 
 	var APIView = Backbone.View.extend({
+		/**
+		 * Element
+		 *
+		 * @param {Object} '#key-fields'
+		 */
 		el: $( '#key-fields' ),
+
+		/**
+		 * Events
+		 *
+		 * @type {Object}
+		 */
 		events: {
 			'click input#update_api_key': 'saveKey'
 		},
+
+		/**
+		 * Initialize actions
+		 */
 		initialize: function(){
 			_.bindAll( this, 'saveKey' );
 		},
+
+		/**
+		 * Init jQuery.BlockUI
+		 */
 		block: function() {
 			$( this.el ).block({
 				message: null,
@@ -18,9 +37,17 @@
 				}
 			});
 		},
+
+		/**
+		 * Remove jQuery.BlockUI
+		 */
 		unblock: function() {
 			$( this.el ).unblock();
 		},
+
+		/**
+		 * Init TipTip
+		 */
 		initTipTip: function() {
 			$( '.copy-key', this.el ).tipTip({
 				'attribute':  'data-tip',
@@ -36,6 +63,13 @@
 				e.preventDefault();
 			});
 		},
+
+		/**
+		 * Create qrcode
+		 *
+		 * @param {string} consumer_key
+		 * @param {string} consumer_secret
+		 */
 		createQRCode: function( consumer_key, consumer_secret ) {
 			$( '#keys-qrcode' ).qrcode({
 				text: consumer_key + '|' + consumer_secret,
@@ -43,6 +77,12 @@
 				height: 120
 			});
 		},
+
+		/**
+		 * Save API Key using ajax
+		 *
+		 * @param {Object} e
+		 */
 		saveKey: function( e ) {
 			e.preventDefault();
 
