@@ -22,6 +22,8 @@ module.exports = function( grunt ) {
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
 				'!<%= dirs.js %>/admin/jquery.flot*',
+				'!<%= dirs.js %>/admin/accounting.js',
+				'!<%= dirs.js %>/admin/round.js',
 				'<%= dirs.js %>/frontend/*.js',
 				'!<%= dirs.js %>/frontend/*.min.js',
 				'includes/gateways/simplify-commerce/assets/js/*.js',
@@ -138,7 +140,7 @@ module.exports = function( grunt ) {
 					'!<%= dirs.js %>/admin/*.min.js',
 					'!<%= dirs.js %>/frontend/*.min.js'
 				],
-				tasks: ['uglify']
+				tasks: ['jshint', 'uglify']
 			}
 		},
 
@@ -250,8 +252,9 @@ module.exports = function( grunt ) {
 
 	// Register tasks
 	grunt.registerTask( 'default', [
-		'css',
-		'uglify'
+		'jshint',
+		'uglify',
+		'css'
 	]);
 
 	grunt.registerTask( 'css', [
