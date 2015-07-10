@@ -31,7 +31,7 @@ jQuery( function( $ ) {
 	};
 
 	var $geolocate_customer = {
-		url: wc_geolocation_params.wc_ajax_url + 'get_customer_location',
+		url: wc_geolocation_params.wc_ajax_url + 'get_customer_location/',
 		type: 'GET',
 		success: function( response ) {
 			if ( response.success && response.data.hash && response.data.hash !== wc_geolocation_params.hash ) {

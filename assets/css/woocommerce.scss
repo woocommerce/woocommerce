@@ -188,7 +188,6 @@ p.demo_store {
 
 			del {
 				opacity: 0.5;
-				display: block;
 			}
 		}
 
@@ -204,7 +203,7 @@ p.demo_store {
 			color: red;
 		}
 
-		.woocommerce-product-rating{
+		.woocommerce-product-rating {
 			margin-bottom: 1.618em;
 		}
 
@@ -403,6 +402,20 @@ p.demo_store {
 				td {
 					vertical-align: top;
 				}
+			}
+
+			.woocommerce-variation-description {
+				p {
+					margin-bottom: 1em;
+				}
+			}
+
+			.reset_variations {
+				visibility: hidden;
+			}
+
+			.wc-no-matching-variations {
+				display: none;
 			}
 
 			.button {
