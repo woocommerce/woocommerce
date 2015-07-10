@@ -75,6 +75,8 @@ global $product, $post;
 
 			<div class="single_variation"></div>
 
+			<?php do_action( 'woocommerce_before_variations_button' ); ?>
+
 			<div class="variations_button">
 				<?php woocommerce_quantity_input( array(
 					'input_value' => ( isset( $_POST['quantity'] ) ? wc_stock_amount( $_POST['quantity'] ) : 1 )
