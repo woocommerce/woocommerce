@@ -2211,7 +2211,7 @@ class WC_AJAX {
 			}
 
 			if ( $refund_amount == $max_refund ) {
-				$order->update_status( 'refunded' );
+				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order_id, $refund->id ) );
 				$response_data['status'] = 'fully_refunded';
 			}
 
