@@ -170,7 +170,9 @@ class WC_Form_Handler {
 		$user->first_name   = $account_first_name;
 		$user->last_name    = $account_last_name;
 		$user->user_email   = $account_email;
-		$user->display_name = $user->first_name;
+
+		// Prevent emails being displayed, or leave alone.
+		$user->display_name = is_email( $user->display_name ) ? $user->first_name : $user->display_name;
 
 		if ( empty( $account_first_name ) || empty( $account_last_name ) ) {
 			wc_add_notice( __( 'Please enter your name.', 'woocommerce' ), 'error' );
