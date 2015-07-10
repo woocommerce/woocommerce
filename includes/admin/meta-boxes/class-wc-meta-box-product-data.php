@@ -609,95 +609,9 @@ class WC_Meta_Box_Product_Data {
 
 			<?php else : ?>
 
-				<div class="toolbar toolbar-top">
-					<select id="field_to_edit">
-						<option value=""><?php _e( 'Bulk Actions', 'woocommerce' ); ?></option>
-						<option value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
-						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
-						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
-							<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
-							<option value="toggle_downloadable"><?php _e( 'Toggle &quot;Downloadable&quot;', 'woocommerce' ); ?></option>
-							<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
-						</optgroup>
-						<optgroup label="<?php esc_attr_e( 'Pricing', 'woocommerce' ); ?>">
-							<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
-							<option value="variable_regular_price_increase"><?php _e( 'Prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_regular_price_decrease"><?php _e( 'Prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price_increase"><?php _e( 'Sale prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price_decrease"><?php _e( 'Sale prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_schedule"><?php _e( 'Scheduled sale dates', 'woocommerce' ); ?></option>
-						</optgroup>
-						<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
-							<option value="toggle_manage_stock"><?php _e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
-							<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
-						</optgroup>
-						<optgroup label="<?php esc_attr_e( 'Shipping', 'woocommerce' ); ?>">
-							<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
-							<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
-							<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
-							<option value="variable_weight"><?php _e( 'Weight', 'woocommerce' ); ?></option>
-						</optgroup>
-						<optgroup label="<?php esc_attr_e( 'Downloadable products', 'woocommerce' ); ?>">
-							<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
-							<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
-						</optgroup>
-						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
-					</select>
-					<a class="button bulk_edit"><?php _e( 'Go', 'woocommerce' ); ?></a>
-
-					<div class="variations-pagenav">
-						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
-						<span class="expand-close">
-							(<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>)
-						</span>
-						<span class="pagination-links">
-							<a class="first-page disabled" title="<?php _e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
-							<a class="prev-page disabled" title="<?php _e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
-							<span class="paging-select">
-								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
-								<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
-									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
-										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-									<?php endfor; ?>
-								</select>
-								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
-							</span>
-							<a class="next-page" title="<?php _e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
-							<a class="last-page" title="<?php _e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
-						</span>
-					</div>
-					<div class="clear"></div>
-				</div>
-
-				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
-				</div>
-
-				<div class="toolbar">
-					<div class="variations-pagenav">
-						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
-						<span class="expand-close">
-							(<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>)
-						</span>
-						<span class="pagination-links">
-							<a class="first-page disabled" title="<?php _e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
-							<a class="prev-page disabled" title="<?php _e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
-							<span class="paging-select">
-								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
-								<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
-									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
-										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-									<?php endfor; ?>
-								</select>
-								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
-							</span>
-							<a class="next-page" title="<?php _e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
-							<a class="last-page" title="<?php _e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
-						</span>
-					</div>
-
+				<div class="toolbar toolbar-variations-defaults">
 					<div class="variations-defaults">
-						<strong><?php _e( 'Default Selection', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
+						<strong><?php _e( 'Default Form Values', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php _e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
 						<?php
 							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
 
@@ -738,11 +652,98 @@ class WC_Meta_Box_Product_Data {
 					<div class="clear"></div>
 				</div>
 
-				<p class="toolbar toolbar-buttons">
+				<div class="toolbar toolbar-top">
+					<select id="field_to_edit" class="variation_actions">
+						<option value="add_variation"><?php _e( 'Add Variation', 'woocommerce' ); ?></option>
+						<option value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
+						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
+						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
+							<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
+							<option value="toggle_downloadable"><?php _e( 'Toggle &quot;Downloadable&quot;', 'woocommerce' ); ?></option>
+							<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Pricing', 'woocommerce' ); ?>">
+							<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price_increase"><?php _e( 'Prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price_decrease"><?php _e( 'Prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price_increase"><?php _e( 'Sale prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price_decrease"><?php _e( 'Sale prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_schedule"><?php _e( 'Scheduled sale dates', 'woocommerce' ); ?></option>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
+							<option value="toggle_manage_stock"><?php _e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
+							<option value="variable_stock"><?php _e( 'Stock', 'woocommerce' ); ?></option>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Shipping', 'woocommerce' ); ?>">
+							<option value="variable_length"><?php _e( 'Length', 'woocommerce' ); ?></option>
+							<option value="variable_width"><?php _e( 'Width', 'woocommerce' ); ?></option>
+							<option value="variable_height"><?php _e( 'Height', 'woocommerce' ); ?></option>
+							<option value="variable_weight"><?php _e( 'Weight', 'woocommerce' ); ?></option>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Downloadable products', 'woocommerce' ); ?>">
+							<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
+							<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
+						</optgroup>
+						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
+					</select>
+					<a class="button do_variation_action"><?php _e( 'Go', 'woocommerce' ); ?></a>
+
+					<div class="variations-pagenav">
+						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
+						<span class="expand-close">
+							(<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>)
+						</span>
+						<span class="pagination-links">
+							<a class="first-page disabled" title="<?php _e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
+							<a class="prev-page disabled" title="<?php _e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
+							<span class="paging-select">
+								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+								<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
+									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
+										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+									<?php endfor; ?>
+								</select>
+								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
+							</span>
+							<a class="next-page" title="<?php _e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
+							<a class="last-page" title="<?php _e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
+						</span>
+					</div>
+					<div class="clear"></div>
+				</div>
+
+				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
+				</div>
+
+				<div class="toolbar">
 					<button type="button" class="button-primary save-variation-changes" disabled="disabled"><?php _e( 'Save Changes', 'woocommerce' ); ?></button>
 					<button type="button" class="button cancel-variation-changes" disabled="disabled"><?php _e( 'Cancel', 'woocommerce' ); ?></button>
-					<button type="button" class="button button-primary add_variation" <?php disabled( $variation_attribute_found, false ); ?>><?php _e( 'Add Variation', 'woocommerce' ); ?></button>
-				</p>
+
+					<div class="variations-pagenav">
+						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
+						<span class="expand-close">
+							(<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>)
+						</span>
+						<span class="pagination-links">
+							<a class="first-page disabled" title="<?php _e( 'Go to the first page', 'woocommerce' ); ?>" href="#">&laquo;</a>
+							<a class="prev-page disabled" title="<?php _e( 'Go to the previous page', 'woocommerce' ); ?>" href="#">&lsaquo;</a>
+							<span class="paging-select">
+								<label for="current-page-selector-1" class="screen-reader-text"><?php _e( 'Select Page', 'woocommerce' ); ?></label>
+								<select class="page-selector" id="current-page-selector-1" title="<?php _e( 'Current page', 'woocommerce' ); ?>">
+									<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
+										<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+									<?php endfor; ?>
+								</select>
+								 <?php _ex( 'of', 'number of pages', 'woocommerce' ); ?> <span class="total-pages"><?php echo $variations_total_pages; ?></span>
+							</span>
+							<a class="next-page" title="<?php _e( 'Go to the next page', 'woocommerce' ); ?>" href="#">&rsaquo;</a>
+							<a class="last-page" title="<?php _e( 'Go to the last page', 'woocommerce' ); ?>" href="#">&raquo;</a>
+						</span>
+					</div>
+
+					<div class="clear"></div>
+				</div>
 
 			<?php endif; ?>
 		</div></div>

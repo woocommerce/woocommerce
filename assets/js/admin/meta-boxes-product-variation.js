@@ -237,7 +237,6 @@ jQuery( function( $ ) {
 			$( '#variable_product_options' )
 				.on( 'click', 'button.save-variation-changes', this.save_variations )
 				.on( 'click', 'button.cancel-variation-changes', this.cancel_variations )
-				.on( 'click', 'button.add_variation', this.add_variation )
 				.on( 'click', '.remove_variation', this.remove_variation );
 
 			$( document.body )
@@ -246,7 +245,7 @@ jQuery( function( $ ) {
 
 			$( 'form#post' ).on( 'submit', this.save_on_submit );
 
-			$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.bulk_edit', this.bulk_edit );
+			$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.do_variation_action', this.do_variation_action );
 		},
 
 		/**
@@ -593,17 +592,18 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * Bulk edit actions
+		 * Actions
 		 */
-		bulk_edit: function() {
-			wc_meta_boxes_product_variations_ajax.check_for_changes();
-
-			var bulk_edit  = $( 'select#field_to_edit' ).val(),
+		do_variation_action: function() {
+			var do_variation_action = $( 'select.variation_actions' ).val(),
 				data       = {},
 				changes    = 0,
 				value;
 
-			switch ( bulk_edit ) {
+			switch ( do_variation_action ) {
+				case 'add_variation' :
+					wc_meta_boxes_product_variations_ajax.add_variation();
+					return;
 				case 'link_all_variations' :
 					wc_meta_boxes_product_variations_ajax.link_all_variations();
 					return;
@@ -657,10 +657,11 @@ jQuery( function( $ ) {
 					}
 				break;
 				default :
-					$( 'select#field_to_edit' ).trigger( bulk_edit );
+					$( 'select.variation_actions' ).trigger( do_variation_action );
 				break;
 			}
 
+			wc_meta_boxes_product_variations_ajax.check_for_changes();
 			wc_meta_boxes_product_variations_ajax.block();
 
 			$.ajax({
@@ -669,7 +670,7 @@ jQuery( function( $ ) {
 					action:      'woocommerce_bulk_edit_variations',
 					security:    woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
 					product_id:  woocommerce_admin_meta_boxes_variations.post_id,
-					bulk_action: bulk_edit,
+					bulk_action: do_variation_action,
 					data:        data
 				},
 				type: 'POST',
@@ -735,7 +736,8 @@ jQuery( function( $ ) {
 				wc_meta_boxes_product_variations_pagenav.update_variations_count( qty );
 
 				if ( page_nav.is( ':hidden' ) ) {
-					$( 'option, optgroup', '#field_to_edit' ).show();
+					$( 'option, optgroup', '.variation_actions' ).show();
+					$( '.variation_actions' ).val( 'add_variation' );
 					$( '#variable_product_options .toolbar' ).show();
 					page_nav.show();
 					$( '.pagination-links', page_nav ).hide();
@@ -752,7 +754,7 @@ jQuery( function( $ ) {
 			var wrapper          = $( '#variable_product_options .woocommerce_variations' ),
 				new_qty          = wc_meta_boxes_product_variations_pagenav.update_variations_count( qty ),
 				toolbar          = $( '#variable_product_options .toolbar' ),
-				field_to_edit    = $( '#field_to_edit' ),
+				variation_action = $( '.variation_actions' ),
 				page_nav         = $( '.variations-pagenav' ),
 				displaying_links = $( '.pagination-links', page_nav ),
 				total_pages      = Math.ceil( new_qty / woocommerce_admin_meta_boxes_variations.variations_per_page ),
@@ -774,13 +776,15 @@ jQuery( function( $ ) {
 			if ( 0 === new_qty ) {
 				toolbar.not( '.toolbar-top, .toolbar-buttons' ).hide();
 				page_nav.hide();
-				$( 'option, optgroup', field_to_edit ).hide();
-				$( 'option', field_to_edit ).slice( 0, 2 ).show();
+				$( 'option, optgroup', variation_action ).hide();
+				$( '.variation_actions' ).val( 'add_variation' );
+				$( 'option', variation_action ).slice( 0, 2 ).show();
 
 			} else {
 				toolbar.show();
 				page_nav.show();
-				$( 'option, optgroup', field_to_edit ).show();
+				$( 'option, optgroup', variation_action ).show();
+				$( '.variation_actions' ).val( 'add_variation' );
 
 				// Show/hide links
 				if ( 1 === total_pages ) {
