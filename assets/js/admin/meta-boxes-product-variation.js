@@ -502,10 +502,20 @@ jQuery( function( $ ) {
 					data.security      = woocommerce_admin_meta_boxes_variations.delete_variations_nonce;
 
 					$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function() {
-						var current = parseInt( $( '#variable_product_options .woocommerce_variations' ).attr( 'data-page' ), 10 );
+						var wrapper      = $( '#variable_product_options .woocommerce_variations' ),
+							current_page = parseInt( wrapper.attr( 'data-page' ), 10 ),
+							total_pages  = Math.ceil( ( parseInt( wrapper.attr( 'data-total' ), 10 ) - 1 ) / woocommerce_admin_meta_boxes_variations.variations_per_page ),
+							page         = 1;
 
 						$( '#woocommerce-product-data' ).trigger( 'woocommerce_variations_removed' );
-						wc_meta_boxes_product_variations_pagenav.go_to_page( current, -1 );
+
+						if ( current_page === total_pages ) {
+							page = current_page;
+						} else if ( current_page > total_pages && 0 !== total_pages ) {
+							page = total_pages;
+						}
+
+						wc_meta_boxes_product_variations_pagenav.go_to_page( page, -1 );
 					});
 
 				} else {
@@ -698,20 +708,19 @@ jQuery( function( $ ) {
 		 */
 		update_variations_count: function( qty ) {
 			var wrapper        = $( '#variable_product_options .woocommerce_variations' ),
-				total          = parseInt( wrapper.attr( 'data-total' ), 10 ),
-				new_qty        = total + qty,
+				total          = parseInt( wrapper.attr( 'data-total' ), 10 ) + qty,
 				displaying_num = $( '.variations-pagenav .displaying-num' );
 
 			// Set the new total of variations
-			wrapper.attr( 'data-total', new_qty );
+			wrapper.attr( 'data-total', total );
 
-			if ( 1 === new_qty ) {
-				displaying_num.text( woocommerce_admin_meta_boxes_variations.i18n_variation_count_single.replace( '%qty%', new_qty ) );
+			if ( 1 === total ) {
+				displaying_num.text( woocommerce_admin_meta_boxes_variations.i18n_variation_count_single.replace( '%qty%', total ) );
 			} else {
-				displaying_num.text( woocommerce_admin_meta_boxes_variations.i18n_variation_count_plural.replace( '%qty%', new_qty ) );
+				displaying_num.text( woocommerce_admin_meta_boxes_variations.i18n_variation_count_plural.replace( '%qty%', total ) );
 			}
 
-			return new_qty;
+			return total;
 		},
 
 		/**
