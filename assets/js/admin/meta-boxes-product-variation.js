@@ -465,8 +465,12 @@ jQuery( function( $ ) {
 				security: woocommerce_admin_meta_boxes_variations.add_variation_nonce
 			};
 
-			$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function( variation ) {
+			$.post( woocommerce_admin_meta_boxes_variations.ajax_url, data, function( response ) {
+				var variation = $( response );
+				variation.addClass( 'variation-needs-update' );
+
 				$( '#variable_product_options .woocommerce_variations' ).prepend( variation );
+				$( 'button.cancel-variation-changes, button.save-variation-changes' ).removeAttr( 'disabled' );
 				$( '#variable_product_options' ).trigger( 'woocommerce_variations_added', 1 );
 				wc_meta_boxes_product_variations_ajax.unblock();
 			});
