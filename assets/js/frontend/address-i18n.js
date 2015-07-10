@@ -1,7 +1,8 @@
+/*global wc_address_i18n_params */
 jQuery( function( $ ) {
 
 	// wc_address_i18n_params is required to continue, ensure the object exists
-	if (typeof wc_address_i18n_params === "undefined") {
+	if ( typeof wc_address_i18n_params === 'undefined' ) {
     	return false;
 	}
 

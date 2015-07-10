@@ -18,7 +18,7 @@ jQuery( function( $ ) {
 			formatNoMatches: function() {
 				return wc_country_select_params.i18n_no_matches;
 			},
-			formatAjaxError: function( jqXHR, textStatus, errorThrown ) {
+			formatAjaxError: function() {
 				return wc_country_select_params.i18n_ajax_error;
 			},
 			formatInputTooShort: function( input, min ) {
@@ -46,7 +46,7 @@ jQuery( function( $ ) {
 
 				return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
 			},
-			formatLoadMore: function( pageNumber ) {
+			formatLoadMore: function() {
 				return wc_country_select_params.i18n_load_more;
 			},
 			formatSearching: function() {

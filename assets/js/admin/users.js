@@ -7,7 +7,7 @@ jQuery( function ( $ ) {
 	var wc_users_fields = {
 		states: null,
 		init: function() {
-			if ( ! ( typeof wc_users_params.countries === 'undefined' ) ) {
+			if ( typeof wc_users_params.countries !== 'undefined' ) {
 				/* State/Country select boxes */
 				this.states = $.parseJSON( wc_users_params.countries.replace( /&quot;/g, '"' ) );
 			}

@@ -138,6 +138,7 @@ jQuery(function( $ ) {
 		var groupby       = $( this ) .data( 'groupby' );
 		var export_format = $( this ).data( 'export' );
 		var csv_data      = 'data:application/csv;charset=utf-8,';
+		var s, series_data, d;
 
 		if ( 'table' === export_format ) {
 
@@ -183,7 +184,7 @@ jQuery(function( $ ) {
 			});
 
 			// CSV Headers
-			for ( var s = 0; s < series.length; ++s ) {
+			for ( s = 0; s < series.length; ++s ) {
 				csv_data += series[s].label + ',';
 			}
 
@@ -193,9 +194,9 @@ jQuery(function( $ ) {
 			// Get x axis values
 			var xaxis = {};
 
-			for ( var s = 0; s < series.length; ++s ) {
-				var series_data = series[s].data;
-				for ( var d = 0; d < series_data.length; ++d ) {
+			for ( s = 0; s < series.length; ++s ) {
+				series_data = series[s].data;
+				for ( d = 0; d < series_data.length; ++d ) {
 					xaxis[series_data[d][0]] = [];
 					// Zero values to start
 					for ( var i = 0; i < series.length; ++i ) {
@@ -205,9 +206,9 @@ jQuery(function( $ ) {
 			}
 
 			// Add chart data
-			for ( var s = 0; s < series.length; ++s ) {
-				var series_data = series[s].data;
-				for ( var d = 0; d < series_data.length; ++d ) {
+			for ( s = 0; s < series.length; ++s ) {
+				series_data = series[s].data;
+				for ( d = 0; d < series_data.length; ++d ) {
 					xaxis[series_data[d][0]][s] = series_data[d][1];
 				}
 			}

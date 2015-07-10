@@ -1,25 +1,26 @@
+/*global wc_geolocation_params */
 jQuery( function( $ ) {
 
 	var this_page = window.location.toString();
 
 	var $append_hashes = function() {
 		if ( wc_geolocation_params.hash ) {
-			$( "a[href^='" + wc_geolocation_params.home_url + "']:not(a[href*='v=']), a[href^='/']:not(a[href*='v='])").each( function() {
-				var $this = $(this);
-				var href  = $this.attr('href');
+			$( 'a[href^="' + wc_geolocation_params.home_url + '"]:not(a[href*="v="]), a[href^="/"]:not(a[href*="v="])' ).each( function() {
+				var $this = $( this );
+				var href  = $this.attr( 'href' );
 
 				if ( href.indexOf( '?' ) > 0 ) {
-					$this.attr( "href", href + '&v=' + wc_geolocation_params.hash );
+					$this.attr( 'href', href + '&v=' + wc_geolocation_params.hash );
 				} else {
-					$this.attr( "href", href + '?v=' + wc_geolocation_params.hash );
+					$this.attr( 'href', href + '?v=' + wc_geolocation_params.hash );
 				}
 			});
 		}
-	}
+	};
 
 	var $geolocation_redirect = function( hash ) {
 		if ( this_page.indexOf( '?v=' ) > 0 || this_page.indexOf( '&v=' ) > 0 ) {
-			this_page = this_page.replace( /v=[^&]+/,"v=" + hash );
+			this_page = this_page.replace( /v=[^&]+/, 'v=' + hash );
 		} else if ( this_page.indexOf( '?' ) > 0 ) {
 			this_page = this_page + '&v=' + hash;
 		} else {
@@ -27,7 +28,7 @@ jQuery( function( $ ) {
 		}
 
 		window.location = this_page;
-	}
+	};
 
 	var $geolocate_customer = {
 		url: wc_geolocation_params.wc_ajax_url + 'get_customer_location',
