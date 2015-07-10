@@ -419,6 +419,10 @@ jQuery( function( $ ) {
 			wc_meta_boxes_product_variations_ajax.save_changes( function() {
 				var current = $( '#variable_product_options .woocommerce_variations' ).attr( 'data-page' );
 
+				$( '.variations-defaults select' ).each( function() {
+					$( this ).attr( 'data-current', $( this ).val() );
+				});
+
 				wc_meta_boxes_product_variations_pagenav.go_to_page( current );
 			});
 
@@ -443,6 +447,10 @@ jQuery( function( $ ) {
 			var current = parseInt( $( '#variable_product_options .woocommerce_variations' ).attr( 'data-page' ), 10 );
 
 			$( '#variable_product_options .woocommerce_variations .variation-needs-update' ).removeClass( 'variation-needs-update' );
+			$( '.variations-defaults select' ).each( function() {
+				$( this ).val( $( this ).attr( 'data-current' ) );
+			});
+
 			wc_meta_boxes_product_variations_pagenav.go_to_page( current );
 
 			return false;
