@@ -687,7 +687,7 @@ class WC_Meta_Box_Product_Data {
 						</optgroup>
 						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					</select>
-					<a class="button do_variation_action"><?php _e( 'Go', 'woocommerce' ); ?></a>
+					<a class="button bulk_edit do_variation_action"><?php _e( 'Go', 'woocommerce' ); ?></a>
 
 					<div class="variations-pagenav">
 						<span class="displaying-num"><?php printf( _n( '%s item', '%s items', $variations_count, 'woocommerce' ), $variations_count ); ?></span>
