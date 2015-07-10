@@ -77,7 +77,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 						$new_filter      = array_map( 'absint', explode( ',', $current_filter ) );
 						$new_filter      = array_diff( $new_filter, array( $term_id ) );
 
-						$link = remove_query_arg( 'filter_' . $taxonomy_filter );
+						$link = remove_query_arg( array( 'add-to-cart', 'filter_' . $taxonomy_filter ) );
 
 						if ( sizeof( $new_filter ) > 0 ) {
 							$link = add_query_arg( 'filter_' . $taxonomy_filter, implode( ',', $new_filter ), $link );
