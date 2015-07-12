@@ -677,6 +677,27 @@ function wc_format_content( $raw_string ) {
 }
 
 /**
+ * Format product short description
+ * Adds support for Jetpack Markdown
+ *
+ * @since  2.4.0
+ * @param  string $content
+ * @return string
+ */
+function wc_format_product_short_description( $content ) {
+	// Add support for Jetpack Markdown
+	if ( class_exists( 'WPCom_Markdown' ) ) {
+		$markdown = WPCom_Markdown::get_instance();
+
+		return wpautop( $markdown->transform( $content ) );
+	}
+
+	return $content;
+}
+
+add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
+
+/**
  * Formats curency symbols when saved in settings
  * @param  string $value
  * @param  array $option
