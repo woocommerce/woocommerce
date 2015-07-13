@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Downloads the last language pack.
  *
  * @class    WC_Language_Pack_Upgrader
- * @version  2.2.0
+ * @version  2.4.0
  * @package  WooCommerce/Classes/Language
  * @category Class
  * @author   WooThemes
@@ -56,13 +56,15 @@ class WC_Language_Pack_Upgrader {
 	 */
 	public function check_for_update( $data ) {
 		if ( $this->has_available_update() ) {
+			$locale = get_locale();
+
 			$data->translations[] = array(
 				'type'       => 'plugin',
 				'slug'       => 'woocommerce',
-				'language'   => get_locale(),
+				'language'   => $locale,
 				'version'    => WC_VERSION,
 				'updated'    => date( 'Y-m-d H:i:s' ),
-				'package'    => $this->get_language_package_uri(),
+				'package'    => $this->get_language_package_uri( $locale ),
 				'autoupdate' => 1
 			);
 		}
@@ -72,8 +74,9 @@ class WC_Language_Pack_Upgrader {
 
 	/**
 	 * Triggered when WPLANG is changed
-	 * @param  string $old
-	 * @param  string $new
+	 *
+	 * @param string $old
+	 * @param string $new
 	 */
 	public function updated_language_option( $old, $new ) {
 		$this->has_available_update( $new );
@@ -122,8 +125,8 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @return bool
 	 */
-	public function check_if_language_pack_exists() {
-		$response = wp_safe_remote_get( $this->get_language_package_uri(), array( 'timeout' => 60 ) );
+	public function check_if_language_pack_exists( $locale ) {
+		$response = wp_safe_remote_get( $this->get_language_package_uri( $locale ), array( 'timeout' => 60 ) );
 
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 			return true;
