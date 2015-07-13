@@ -625,8 +625,8 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
-			$cart_page_id = wc_get_page_id( 'cart' );
-			return apply_filters( 'woocommerce_get_cart_url', $cart_page_id ? get_permalink( $cart_page_id ) : '' );
+			$cart_page_url = wc_get_page_permalink( 'cart' );
+			return apply_filters( 'woocommerce_get_cart_url', $cart_page_url ? $cart_page_url : '' );
 		}
 
 		/**
@@ -635,19 +635,13 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
-			$checkout_page_id = wc_get_page_id( 'checkout' );
-			$checkout_url     = '';
-			if ( $checkout_page_id ) {
-
-				// Get the checkout URL
-				$checkout_url = get_permalink( $checkout_page_id );
-
+			$checkout_url   = wc_get_page_permalink( 'checkout' );
+			if ( $checkout_url ) {
 				// Force SSL if needed
 				if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
 					$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 				}
 			}
-
 			return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 		}
 
