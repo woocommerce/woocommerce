@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Product_Variation extends WC_Product {
 
-	/** @public int ID of the variable product. */
+	/** @public int ID of the variation itself. */
 	public $variation_id;
 
 	/** @public object Parent Variable product object. */
@@ -142,11 +142,32 @@ class WC_Product_Variation extends WC_Product {
 
 			// Get the variation attributes from meta
 			foreach ( $all_meta as $name => $value ) {
-				if ( ! strstr( $name, 'attribute_' ) ) {
+				if ( 0 !== strpos( $name, 'attribute_' ) ) {
 					continue;
 				}
-				$this->variation_data[ $name ] = sanitize_title( $value[0] );
+				/**
+				 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+				 * Attempt to get full version of the text attribute from the parent.
+				 */
+				if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
+					$attributes = $this->parent->get_attributes();
+
+					foreach ( $attributes as $attribute ) {
+						if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+							continue;
+						}
+						$text_attributes = wc_get_text_attributes( $attribute['value'] );
+
+						foreach ( $text_attributes as $text_attribute ) {
+							if ( sanitize_title( $text_attribute ) === $value[0] ) {
+								$value[0] = $text_attribute;
+							}
+						}
+					}
+				}
+				$this->variation_data[ $name ] = $value[0];
 			}
+
 			return $this->variation_data;
 
 		} elseif ( 'variation_has_stock' === $key ) {
@@ -429,13 +450,13 @@ class WC_Product_Variation extends WC_Product {
 			// Update stock in DB directly
 			switch ( $mode ) {
 				case 'add' :
-					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + {$amount} WHERE post_id = {$this->variation_id} AND meta_key='_stock'" );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->variation_id ) );
 				break;
 				case 'subtract' :
-					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - {$amount} WHERE post_id = {$this->variation_id} AND meta_key='_stock'" );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->variation_id ) );
 				break;
 				default :
-					$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = {$amount} WHERE post_id = {$this->variation_id} AND meta_key='_stock'" );
+					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $amount, $this->variation_id ) );
 				break;
 			}
 
@@ -443,7 +464,7 @@ class WC_Product_Variation extends WC_Product {
 			wp_cache_delete( $this->variation_id, 'post_meta' );
 
 			// Clear total stock transient
-			delete_transient( 'wc_product_total_stock_' . $this->id );
+			delete_transient( 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' ) );
 
 			// Stock status
 			$this->check_stock_status();
@@ -660,5 +681,14 @@ class WC_Product_Variation extends WC_Product {
 		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . wc_price( $this->get_price() );
 
 		return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
+	}
+
+	/**
+	 * Get product variation description
+	 *
+	 * @return string
+	 */
+	public function get_variation_description() {
+		return wpautop( wp_kses_post( get_post_meta( $this->variation_id, '_variation_description', true ) ) );
 	}
 }

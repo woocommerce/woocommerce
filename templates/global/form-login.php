@@ -43,7 +43,7 @@ if ( is_user_logged_in() ) {
 		</label>
 	</p>
 	<p class="lost_password">
-		<a href="<?php echo esc_url( wc_lostpassword_url() ); ?>"><?php _e( 'Lost your password?', 'woocommerce' ); ?></a>
+		<a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php _e( 'Lost your password?', 'woocommerce' ); ?></a>
 	</p>
 
 	<div class="clear"></div>

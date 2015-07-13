@@ -1,7 +1,8 @@
+/*global wc_address_i18n_params */
 jQuery( function( $ ) {
 
 	// wc_address_i18n_params is required to continue, ensure the object exists
-	if (typeof wc_address_i18n_params === "undefined") {
+	if ( typeof wc_address_i18n_params === 'undefined' ) {
     	return false;
 	}
 
@@ -43,7 +44,8 @@ jQuery( function( $ ) {
 
 			// Re-order postcode/city
 			if ( thislocale.postcode_before_city ) {
-				$postcodefield.add( $cityfield ).add( $statefield ).removeClass( 'form-row-first form-row-last' ).addClass( 'form-row-wide' );
+				$postcodefield.add( $cityfield ).add( $statefield ).removeClass( 'form-row-first form-row-last' ).addClass( 'form-row-first' );
+				$cityfield.removeClass( 'form-row-wide form-row-first' ).addClass( 'form-row-last' );
 				$postcodefield.insertBefore( $cityfield );
 			} else {
 				// Default

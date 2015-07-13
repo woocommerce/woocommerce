@@ -23,7 +23,7 @@ $current_tab = ! empty( $_REQUEST['tab'] ) ? sanitize_title( $_REQUEST['tab'] ) 
 				echo '">' . $label . '</a>';
 			}
 		?>
-	</h2><br/>
+	</h2>
 	<?php
 		switch ( $current_tab ) {
 			case "tools" :

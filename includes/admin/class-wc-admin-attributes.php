@@ -177,11 +177,10 @@ class WC_Admin_Attributes {
 			$old_attribute_name_length = strlen( $old_attribute_name ) + 3;
 			$attribute_name_length     = strlen( $attribute['attribute_name'] ) + 3;
 
-			$wpdb->query( "
-				UPDATE {$wpdb->postmeta}
-				SET meta_value = REPLACE( meta_value, 's:{$old_attribute_name_length}:\"pa_{$old_attribute_name}\"', 's:{$attribute_name_length}:\"pa_{$attribute['attribute_name']}\"' )
-				WHERE meta_key = '_product_attributes'"
-			);
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = REPLACE( meta_value, %s, %s ) WHERE meta_key = '_product_attributes'",
+				's:' . $old_attribute_name_length . ':"pa_' . $old_attribute_name . '"',
+				's:' . $attribute_name_length . ':"pa_' . $attribute['attribute_name'] . '"'
+			) );
 
 			// Update variations which use this taxonomy
 			$wpdb->update(
@@ -242,87 +241,97 @@ class WC_Admin_Attributes {
 
 		$attribute_to_edit = $wpdb->get_row( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'" );
 
-		$att_type    = $attribute_to_edit->attribute_type;
-		$att_label   = $attribute_to_edit->attribute_label;
-		$att_name    = $attribute_to_edit->attribute_name;
-		$att_orderby = $attribute_to_edit->attribute_orderby;
-		$att_public  = $attribute_to_edit->attribute_public;
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
 			<h2><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h2>
-			<form action="edit.php?post_type=product&amp;page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
-				<table class="form-table">
-					<tbody>
-						<tr class="form-field form-required">
-							<th scope="row" valign="top">
-								<label for="attribute_label"><?php _e( 'Name', 'woocommerce' ); ?></label>
-							</th>
-							<td>
-								<input name="attribute_label" id="attribute_label" type="text" value="<?php echo esc_attr( $att_label ); ?>" />
-								<p class="description"><?php _e( 'Name for the attribute (shown on the front-end).', 'woocommerce' ); ?></p>
-							</td>
-						</tr>
-						<tr class="form-field form-required">
-							<th scope="row" valign="top">
-								<label for="attribute_name"><?php _e( 'Slug', 'woocommerce' ); ?></label>
-							</th>
-							<td>
-								<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
-								<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
-							</td>
-						</tr>
-						<tr class="form-field form-required">
-							<th scope="row" valign="top">
-								<label for="attribute_public"><?php _e( 'Enable Archives?', 'woocommerce' ); ?></label>
-							</th>
-							<td>
-								<input name="attribute_public" id="attribute_public" type="checkbox" value="1" <?php checked( $att_public, 1 ); ?> />
-								<p class="description"><?php _e( 'Enable this if you want this attribute to have product archives in your store.', 'woocommerce' ); ?></p>
-							</td>
-						</tr>
-						<tr class="form-field form-required">
-							<th scope="row" valign="top">
-								<label for="attribute_type"><?php _e( 'Type', 'woocommerce' ); ?></label>
-							</th>
-							<td>
-								<select name="attribute_type" id="attribute_type">
-									<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
-										<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $att_type, $key ); ?>><?php echo esc_attr( $value ); ?></option>
-									<?php endforeach; ?>
 
-									<?php
+			<?php
 
-										/**
-										 * Deprecated action in favor of product_attributes_type_selector filter
-										 *
-										 * @deprecated 2.4.0
-										 */
-										do_action( 'woocommerce_admin_attribute_types' );
-									?>
-								</select>
-								<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
-							</td>
-						</tr>
-						<tr class="form-field form-required">
-							<th scope="row" valign="top">
-								<label for="attribute_orderby"><?php _e( 'Default sort order', 'woocommerce' ); ?></label>
-							</th>
-							<td>
-								<select name="attribute_orderby" id="attribute_orderby">
-									<option value="menu_order" <?php selected( $att_orderby, 'menu_order' ); ?>><?php _e( 'Custom ordering', 'woocommerce' ); ?></option>
-									<option value="name" <?php selected( $att_orderby, 'name' ); ?>><?php _e( 'Name', 'woocommerce' ); ?></option>
-									<option value="name_num" <?php selected( $att_orderby, 'name_num' ); ?>><?php _e( 'Name (numeric)', 'woocommerce' ); ?></option>
-									<option value="id" <?php selected( $att_orderby, 'id' ); ?>><?php _e( 'Term ID', 'woocommerce' ); ?></option>
-								</select>
-								<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php _e( 'Update', 'woocommerce' ); ?>"></p>
-				<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
-			</form>
+				if ( ! $attribute_to_edit ) {
+					echo '<div id="woocommerce_errors" class="error"><p>' . __( 'Error: non-existing attribute ID.', 'woocommerce' ) . '</p></div>';
+				} else {
+					$att_type    = $attribute_to_edit->attribute_type;
+					$att_label   = $attribute_to_edit->attribute_label;
+					$att_name    = $attribute_to_edit->attribute_name;
+					$att_orderby = $attribute_to_edit->attribute_orderby;
+					$att_public  = $attribute_to_edit->attribute_public;
+
+				?>
+
+				<form action="edit.php?post_type=product&amp;page=product_attributes&amp;edit=<?php echo absint( $edit ); ?>" method="post">
+					<table class="form-table">
+						<tbody>
+							<tr class="form-field form-required">
+								<th scope="row" valign="top">
+									<label for="attribute_label"><?php _e( 'Name', 'woocommerce' ); ?></label>
+								</th>
+								<td>
+									<input name="attribute_label" id="attribute_label" type="text" value="<?php echo esc_attr( $att_label ); ?>" />
+									<p class="description"><?php _e( 'Name for the attribute (shown on the front-end).', 'woocommerce' ); ?></p>
+								</td>
+							</tr>
+							<tr class="form-field form-required">
+								<th scope="row" valign="top">
+									<label for="attribute_name"><?php _e( 'Slug', 'woocommerce' ); ?></label>
+								</th>
+								<td>
+									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
+									<p class="description"><?php _e( 'Unique slug/reference for the attribute; must be shorter than 28 characters.', 'woocommerce' ); ?></p>
+								</td>
+							</tr>
+							<tr class="form-field form-required">
+								<th scope="row" valign="top">
+									<label for="attribute_public"><?php _e( 'Enable Archives?', 'woocommerce' ); ?></label>
+								</th>
+								<td>
+									<input name="attribute_public" id="attribute_public" type="checkbox" value="1" <?php checked( $att_public, 1 ); ?> />
+									<p class="description"><?php _e( 'Enable this if you want this attribute to have product archives in your store.', 'woocommerce' ); ?></p>
+								</td>
+							</tr>
+							<tr class="form-field form-required">
+								<th scope="row" valign="top">
+									<label for="attribute_type"><?php _e( 'Type', 'woocommerce' ); ?></label>
+								</th>
+								<td>
+									<select name="attribute_type" id="attribute_type">
+										<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
+											<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $att_type, $key ); ?>><?php echo esc_attr( $value ); ?></option>
+										<?php endforeach; ?>
+
+										<?php
+
+											/**
+											 * Deprecated action in favor of product_attributes_type_selector filter
+											 *
+											 * @deprecated 2.4.0
+											 */
+											do_action( 'woocommerce_admin_attribute_types' );
+										?>
+									</select>
+									<p class="description"><?php _e( 'Determines how you select attributes for products. Under admin panel -> products -> product data -> attributes -> values, <strong>Text</strong> allows manual entry whereas <strong>select</strong> allows pre-configured terms in a drop-down list.', 'woocommerce' ); ?></p>
+								</td>
+							</tr>
+							<tr class="form-field form-required">
+								<th scope="row" valign="top">
+									<label for="attribute_orderby"><?php _e( 'Default sort order', 'woocommerce' ); ?></label>
+								</th>
+								<td>
+									<select name="attribute_orderby" id="attribute_orderby">
+										<option value="menu_order" <?php selected( $att_orderby, 'menu_order' ); ?>><?php _e( 'Custom ordering', 'woocommerce' ); ?></option>
+										<option value="name" <?php selected( $att_orderby, 'name' ); ?>><?php _e( 'Name', 'woocommerce' ); ?></option>
+										<option value="name_num" <?php selected( $att_orderby, 'name_num' ); ?>><?php _e( 'Name (numeric)', 'woocommerce' ); ?></option>
+										<option value="id" <?php selected( $att_orderby, 'id' ); ?>><?php _e( 'Term ID', 'woocommerce' ); ?></option>
+									</select>
+									<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php _e( 'Update', 'woocommerce' ); ?>"></p>
+					<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
+				</form>
+			<?php } ?>
 		</div>
 		<?php
 	}

@@ -66,13 +66,18 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 				foreach ( $_chosen_attributes as $taxonomy => $data ) {
 
 					foreach ( $data['terms'] as $term_id ) {
-						$term            = get_term( $term_id, $taxonomy );
+						$term = get_term( $term_id, $taxonomy );
+
+						if ( ! isset( $term->name ) ) {
+							continue;
+						}
+
 						$taxonomy_filter = str_replace( 'pa_', '', $taxonomy );
 						$current_filter  = ! empty( $_GET[ 'filter_' . $taxonomy_filter ] ) ? $_GET[ 'filter_' . $taxonomy_filter ] : '';
 						$new_filter      = array_map( 'absint', explode( ',', $current_filter ) );
 						$new_filter      = array_diff( $new_filter, array( $term_id ) );
 
-						$link = remove_query_arg( 'filter_' . $taxonomy_filter );
+						$link = remove_query_arg( array( 'add-to-cart', 'filter_' . $taxonomy_filter ) );
 
 						if ( sizeof( $new_filter ) > 0 ) {
 							$link = add_query_arg( 'filter_' . $taxonomy_filter, implode( ',', $new_filter ), $link );

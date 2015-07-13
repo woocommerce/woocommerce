@@ -881,11 +881,11 @@ ul.wc_coupon_list_block {
 			text-align: left;
 			color: #555;
 			-webkit-touch-callout: none;
-		    -webkit-user-select: none;
-		    -khtml-user-select: none;
-		    -moz-user-select: none;
-		    -ms-user-select: none;
-		    user-select: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
 			&:last-child {
 				padding-right: 12px;
 			}
@@ -2060,6 +2060,14 @@ img.help_tip {
 }
 
 .woocommerce {
+	.woo-nav-tab-wrapper {
+		margin-bottom: 16px;
+	}
+
+	.subsubsub {
+		margin: -8px 0 0;
+	}
+
 	#template div {
 		margin: 0;
 
@@ -2158,45 +2166,6 @@ img.help_tip {
 			}
 		}
 
-		.color_box {
-			float: left;
-			width: 90px;
-			padding: 4px 6px;
-			margin: 0 10px 0 0;
-			border: 1px solid #ccc;
-			border-radius: 3px;
-			box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-
-			strong {
-				display: block;
-				text-align: left;
-				padding: 0 0 2px;
-				font-size: 0.92em;
-
-				img {
-					float: right;
-					margin: 1px 0 0 0;
-				}
-			}
-
-			input.colorpick {
-				margin: 0;
-				width: 100%;
-				font-family: monospace;
-				box-sizing: border-box;
-			}
-
-			.iris-picker {
-				margin: 15px 0 0 -7px;
-			}
-		}
-
-		.color_box_clear {
-			clear: both;
-			display: block;
-			padding-bottom: 10px;
-		}
-
 		.iris-picker {
 			z-index: 100;
 			display: none;
@@ -2216,6 +2185,17 @@ img.help_tip {
 					margin-bottom: 0 !important;
 				}
 			}
+		}
+
+		.colorpickpreview {
+			padding: 3px;
+			padding-left: 20px;
+			border: 1px solid #ddd;
+			border-right: 0;
+		}
+
+		.colorpick {
+			border-left: 0;
 		}
 
 		.image_width_settings {
@@ -2961,10 +2941,15 @@ img.help_tip {
 			border-bottom: 0;
 		}
 
-		.link_all_variations,
 		.add_variation {
 			float: right;
 			margin-left: 5px;
+		}
+
+		.save-variation-changes,
+		.cancel-variation-changes {
+			float: left;
+			margin-right: 5px;
 		}
 	}
 
@@ -3034,24 +3019,33 @@ img.help_tip {
 			zoom: 1;
 			cursor: move;
 
-			button {
+			button, a.delete {
 				float: right;
+			}
+
+			a.delete {
+				color: red;
+				font-weight: normal;
+				line-height: 26px;
+				display: none;
+				text-decoration: none;
 			}
 
 			strong {
 				font-weight: normal;
-				line-height: 24px;
+				line-height: 26px;
 				font-weight: 700;
 			}
 
 			select {
 				font-family: sans-serif;
+				margin: 0 1px;
 			}
 
 			.handlediv {
 				background-position: 6px 5px !important;
 				display: none;
-				height: 24px;
+				height: 26px;
 			}
 
 			&.fixed {
@@ -3059,8 +3053,10 @@ img.help_tip {
 			}
 		}
 
-		h3:hover .handlediv {
-			display: block;
+		h3:hover {
+			a.delete, .handlediv {
+				display: block;
+			}
 		}
 
 		table {
@@ -3133,26 +3129,50 @@ img.help_tip {
 			}
 		}
 	}
+}
 
-	.expand_all,
-	.close_all {
-		float: right;
-		margin-left: 14px;
-		line-height: 22px;
+.variations-pagenav {
+	float: right;
+	line-height: 24px;
+
+	.displaying-num {
+		color: #777;
+		font-size: 12px;
+		font-style: italic;
+	}
+
+	.expand-close {
+		margin-right: 2px;
+		color: #777;
+		font-size: 12px;
+		font-style: italic;
+		a {
+			background: none;
+			padding: 0;
+			font-size: 12px;
+			text-decoration: none;
+		}
+	}
+
+	a {
+		padding: 0px 10px 3px;
+		background: rgba(0, 0, 0, 0.05);
+		font-size: 16px;
+		font-weight: 400;
 		text-decoration: none;
-
-		&:before {
-			@include iconbefore( "\e036" );
-			font-size: .8em;
-			color: #999;
-		}
 	}
 
-	.expand_all {
-		&:before {
-			content: "\e035";
-		}
+	a.disabled,
+	a.disabled:active,
+	a.disabled:focus,
+	a.disabled:hover {
+		color: #A0A5AA;
+		background: rgba(0, 0, 0, 0.05);
 	}
+}
+
+.variations-defaults {
+	float: left;
 }
 
 .woocommerce_variable_attributes {
@@ -4062,6 +4082,31 @@ table.bar_chart {
 
 	#woocommerce-product-data .checkbox {
 		width: 25px;
+	}
+
+	.variations-pagenav {
+		float: none;
+		text-align: center;
+		font-size: 18px;
+
+		.displaying-num {
+			font-size: 16px;
+		}
+
+		a {
+			padding: 8px 20px 11px;
+			font-size: 18px;
+		}
+
+		select {
+			padding: 0 20px;
+		}
+	}
+
+	.variations-defaults {
+		float: none;
+		text-align: center;
+		margin-top: 10px;
 	}
 }
 

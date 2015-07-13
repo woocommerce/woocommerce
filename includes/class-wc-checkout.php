@@ -406,7 +406,7 @@ class WC_Checkout {
 			foreach ( $this->checkout_fields as $fieldset_key => $fieldset ) {
 
 				// Skip shipping if not needed
-				if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ! WC()->cart->needs_shipping() ) ) {
+				if ( $fieldset_key == 'shipping' && ( $this->posted['ship_to_different_address'] == false || ! WC()->cart->needs_shipping_address() ) ) {
 					$skipped_shipping = true;
 					continue;
 				}

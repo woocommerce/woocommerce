@@ -161,27 +161,27 @@ class WC_Admin_Post_Types {
 	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
 
 		$bulk_messages['product'] = array(
-			'updated'   => _n( '%s product updated.', '%s products updated.', $bulk_counts['updated'] ),
-			'locked'    => _n( '%s product not updated, somebody is editing it.', '%s products not updated, somebody is editing them.', $bulk_counts['locked'] ),
-			'deleted'   => _n( '%s product permanently deleted.', '%s products permanently deleted.', $bulk_counts['deleted'] ),
-			'trashed'   => _n( '%s product moved to the Trash.', '%s products moved to the Trash.', $bulk_counts['trashed'] ),
-			'untrashed' => _n( '%s product restored from the Trash.', '%s products restored from the Trash.', $bulk_counts['untrashed'] ),
+			'updated'   => _n( '%s product updated.', '%s products updated.', $bulk_counts['updated'], 'woocommerce' ),
+			'locked'    => _n( '%s product not updated, somebody is editing it.', '%s products not updated, somebody is editing them.', $bulk_counts['locked'], 'woocommerce' ),
+			'deleted'   => _n( '%s product permanently deleted.', '%s products permanently deleted.', $bulk_counts['deleted'], 'woocommerce' ),
+			'trashed'   => _n( '%s product moved to the Trash.', '%s products moved to the Trash.', $bulk_counts['trashed'], 'woocommerce' ),
+			'untrashed' => _n( '%s product restored from the Trash.', '%s products restored from the Trash.', $bulk_counts['untrashed'], 'woocommerce' ),
 		);
 
 		$bulk_messages['shop_order'] = array(
-			'updated'   => _n( '%s order updated.', '%s orders updated.', $bulk_counts['updated'] ),
-			'locked'    => _n( '%s order not updated, somebody is editing it.', '%s orders not updated, somebody is editing them.', $bulk_counts['locked'] ),
-			'deleted'   => _n( '%s order permanently deleted.', '%s orders permanently deleted.', $bulk_counts['deleted'] ),
-			'trashed'   => _n( '%s order moved to the Trash.', '%s orders moved to the Trash.', $bulk_counts['trashed'] ),
-			'untrashed' => _n( '%s order restored from the Trash.', '%s orders restored from the Trash.', $bulk_counts['untrashed'] ),
+			'updated'   => _n( '%s order updated.', '%s orders updated.', $bulk_counts['updated'], 'woocommerce' ),
+			'locked'    => _n( '%s order not updated, somebody is editing it.', '%s orders not updated, somebody is editing them.', $bulk_counts['locked'], 'woocommerce' ),
+			'deleted'   => _n( '%s order permanently deleted.', '%s orders permanently deleted.', $bulk_counts['deleted'], 'woocommerce' ),
+			'trashed'   => _n( '%s order moved to the Trash.', '%s orders moved to the Trash.', $bulk_counts['trashed'], 'woocommerce' ),
+			'untrashed' => _n( '%s order restored from the Trash.', '%s orders restored from the Trash.', $bulk_counts['untrashed'], 'woocommerce' ),
 		);
 
 		$bulk_messages['shop_coupon'] = array(
-			'updated'   => _n( '%s coupon updated.', '%s coupons updated.', $bulk_counts['updated'] ),
-			'locked'    => _n( '%s coupon not updated, somebody is editing it.', '%s coupons not updated, somebody is editing them.', $bulk_counts['locked'] ),
-			'deleted'   => _n( '%s coupon permanently deleted.', '%s coupons permanently deleted.', $bulk_counts['deleted'] ),
-			'trashed'   => _n( '%s coupon moved to the Trash.', '%s coupons moved to the Trash.', $bulk_counts['trashed'] ),
-			'untrashed' => _n( '%s coupon restored from the Trash.', '%s coupons restored from the Trash.', $bulk_counts['untrashed'] ),
+			'updated'   => _n( '%s coupon updated.', '%s coupons updated.', $bulk_counts['updated'], 'woocommerce' ),
+			'locked'    => _n( '%s coupon not updated, somebody is editing it.', '%s coupons not updated, somebody is editing them.', $bulk_counts['locked'], 'woocommerce' ),
+			'deleted'   => _n( '%s coupon permanently deleted.', '%s coupons permanently deleted.', $bulk_counts['deleted'], 'woocommerce' ),
+			'trashed'   => _n( '%s coupon moved to the Trash.', '%s coupons moved to the Trash.', $bulk_counts['trashed'], 'woocommerce' ),
+			'untrashed' => _n( '%s coupon restored from the Trash.', '%s coupons restored from the Trash.', $bulk_counts['untrashed'], 'woocommerce' ),
 		);
 
 		return $bulk_messages;
@@ -268,7 +268,7 @@ class WC_Admin_Post_Types {
 	 * @param  string $column
 	 */
 	public function render_product_columns( $column ) {
-		global $post;
+		global $post, $the_product;
 
 		if ( empty( $the_product ) || $the_product->id != $post->ID ) {
 			$the_product = wc_get_product( $post );
@@ -574,7 +574,7 @@ class WC_Admin_Post_Types {
 			break;
 			case 'customer_message' :
 				if ( $the_order->customer_message ) {
-					echo '<span class="note-on tips" data-tip="' . esc_attr( wc_sanitize_tooltip( $the_order->customer_message ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->customer_message ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
 					echo '<span class="na">&ndash;</span>';
 				}
@@ -597,9 +597,9 @@ class WC_Admin_Post_Types {
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
 							<td class="name">
 								<?php  if ( $product ) : ?>
-									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?></a>
+									<?php echo ( wc_product_sku_enabled() && $product->get_sku() ) ? $product->get_sku() . ' - ' : ''; ?><a href="<?php echo get_edit_post_link( $product->id ); ?>" title="<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?>"><?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?></a>
 								<?php else : ?>
-									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item ); ?>
+									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?>
 								<?php endif; ?>
 								<?php if ( ! empty( $item_meta_html ) ) : ?>
 									<a class="tips" href="#" data-tip="<?php echo esc_attr( $item_meta_html ); ?>">[?]</a>
@@ -642,11 +642,11 @@ class WC_Admin_Post_Types {
 					$latest_note = current( $latest_notes );
 
 					if ( $post->comment_count == 1 ) {
-						echo '<span class="note-on tips" data-tip="' . esc_attr( wc_sanitize_tooltip( $latest_note->comment_content ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					} elseif ( isset( $latest_note->comment_content ) ) {
+						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} else {
-						$note_tip = isset( $latest_note->comment_content ) ? esc_attr( wc_sanitize_tooltip( $latest_note->comment_content ) . '<small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), ( $post->comment_count - 1 ) ) . '</small>' ) : sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count );
-
-						echo '<span class="note-on tips" data-tip="' . $note_tip . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $post->comment_count, 'woocommerce' ), $post->comment_count ) ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					}
 
 				} else {
@@ -667,17 +667,17 @@ class WC_Admin_Post_Types {
 			break;
 			case 'order_title' :
 
-				$customer_tip = '';
+				$customer_tip = array();
 
 				if ( $address = $the_order->get_formatted_billing_address() ) {
-					$customer_tip .= __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
+					$customer_tip[] = __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
 				}
 
 				if ( $the_order->billing_phone ) {
-					$customer_tip .= __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
+					$customer_tip[] = __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
 				}
 
-				echo '<div class="tips" data-tip="' . esc_attr( wc_sanitize_tooltip( $customer_tip ) ) . '">';
+				echo '<div class="tips" data-tip="' . wc_sanitize_tooltip( implode( "<br/>", $customer_tip ) ) . '">';
 
 				if ( $the_order->user_id ) {
 					$user_info = get_userdata( $the_order->user_id );
@@ -1307,14 +1307,14 @@ class WC_Admin_Post_Types {
 			?>
 			<script type="text/javascript">
 			jQuery(function() {
-				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action']");
-				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo("select[name='action2']");
+				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo('select[name="action"]');
+				jQuery('<option>').val('mark_processing').text('<?php _e( 'Mark processing', 'woocommerce' )?>').appendTo('select[name="action2"]');
 
-				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo("select[name='action']");
-				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo("select[name='action2']");
+				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo('select[name="action"]');
+				jQuery('<option>').val('mark_on-hold').text('<?php _e( 'Mark on-hold', 'woocommerce' )?>').appendTo('select[name="action2"]');
 
-				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo("select[name='action']");
-				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo("select[name='action2']");
+				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo('select[name="action"]');
+				jQuery('<option>').val('mark_completed').text('<?php _e( 'Mark complete', 'woocommerce' )?>').appendTo('select[name="action2"]');
 			});
 			</script>
 			<?php
@@ -1351,6 +1351,7 @@ class WC_Admin_Post_Types {
 		foreach ( $post_ids as $post_id ) {
 			$order = wc_get_order( $post_id );
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ) );
+			do_action( 'woocommerce_order_edit_status', $post_id, $new_status );
 			$changed++;
 		}
 
@@ -1621,7 +1622,7 @@ class WC_Admin_Post_Types {
 			$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
 		}
 		?>
-		<input type="hidden" class="wc-customer-search" name="_customer_user" data-placeholder="<?php _e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
+		<input type="hidden" class="wc-customer-search" name="_customer_user" data-placeholder="<?php _e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo htmlspecialchars( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
 		<?php
 	}
 
@@ -1767,7 +1768,7 @@ class WC_Admin_Post_Types {
 		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
 
 		if ( sizeof( $search_ids ) > 0 ) {
-			$where = str_replace( ')))', ") OR ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . "))))", $where );
+			$where = str_replace( 'AND (((', "AND ( ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . ")) OR ((", $where );
 		}
 
 		return $where;

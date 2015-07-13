@@ -13,22 +13,20 @@ jQuery( window ).load( function() {
 	// Color picker
 	jQuery( '.colorpick' ).iris({
 		change: function( event, ui ) {
-			jQuery( this ).css({ backgroundColor: ui.color.toString() });
+			jQuery( this ).parent().find( '.colorpickpreview' ).css({ backgroundColor: ui.color.toString() });
 		},
 		hide: true,
 		border: true
-	}).each( function() {
-		jQuery( this ).css({ backgroundColor: jQuery( this ).val() });
 	}).click( function() {
 		jQuery( '.iris-picker' ).hide();
-		jQuery( this ).closest( '.color_box, td' ).find( '.iris-picker' ).show();
+		jQuery( this ).closest( 'td' ).find( '.iris-picker' ).show();
 	});
 
 	jQuery( 'body' ).click( function() {
 		jQuery( '.iris-picker' ).hide();
 	});
 
-	jQuery( '.color_box, .colorpick' ).click( function( event ) {
+	jQuery( '.colorpick' ).click( function( event ) {
 		event.stopPropagation();
 	});
 

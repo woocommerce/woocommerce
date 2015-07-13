@@ -148,7 +148,6 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$update       = true;
 		$errors       = new WP_Error();
 		$user         = new stdClass();
 
@@ -170,7 +169,9 @@ class WC_Form_Handler {
 		$user->first_name   = $account_first_name;
 		$user->last_name    = $account_last_name;
 		$user->user_email   = $account_email;
-		$user->display_name = $user->first_name;
+
+		// Prevent emails being displayed, or leave alone.
+		$user->display_name = is_email( $user->display_name ) ? $user->first_name : $user->display_name;
 
 		if ( empty( $account_first_name ) || empty( $account_last_name ) ) {
 			wc_add_notice( __( 'Please enter your name.', 'woocommerce' ), 'error' );
@@ -210,7 +211,7 @@ class WC_Form_Handler {
 		}
 
 		// Allow plugins to return their own errors.
-		do_action_ref_array( 'user_profile_update_errors', array( &$errors, $update, &$user ) );
+		do_action_ref_array( 'woocommerce_save_account_details_errors', array( &$errors, &$user ) );
 
 		if ( $errors->get_error_messages() ) {
 			foreach ( $errors->get_error_messages() as $error ) {
@@ -609,28 +610,33 @@ class WC_Form_Handler {
 				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
 
 					// Get value from post data
-					// Don't use wc_clean as it destroys sanitized characters
-					$value = sanitize_title( trim( stripslashes( $_REQUEST[ $taxonomy ] ) ) );
+					if ( $attribute['is_taxonomy'] ) {
+						// Don't use wc_clean as it destroys sanitized characters
+						$value = sanitize_title( stripslashes( $_REQUEST[ $taxonomy ] ) );
+					} else {
+						$value = wc_clean( stripslashes( $_REQUEST[ $taxonomy ] ) );
+					}
 
 					// Get valid value from variation
 					$valid_value = $variation->variation_data[ $taxonomy ];
 
 					// Allow if valid
-					if ( $valid_value == '' || $valid_value == $value ) {
-						if ( $attribute['is_taxonomy'] ) {
-							$variations[ $taxonomy ] = $value;
-						}
-						else {
-							// For custom attributes, get the name from the slug
-							$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
-							foreach ( $options as $option ) {
-								if ( sanitize_title( $option ) == $value ) {
-									$value = $option;
-									break;
+					if ( '' === $valid_value || $valid_value === $value ) {
+
+						// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
+						if ( ! $attribute['is_taxonomy'] ) {
+							if ( $value === sanitize_title( $value ) && version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
+								$text_attributes = wc_get_text_attributes( $attribute['value'] );
+								foreach ( $text_attributes as $text_attribute ) {
+									if ( sanitize_title( $text_attribute ) === $value ) {
+										$value = $text_attribute;
+										break;
+									}
 								}
 							}
-							 $variations[ $taxonomy ] = $value;
 						}
+
+						$variations[ $taxonomy ] = $value;
 						continue;
 					}
 
@@ -789,7 +795,9 @@ class WC_Form_Handler {
 				$user                   = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), $secure_cookie );
 
 				if ( is_wp_error( $user ) ) {
-					throw new Exception( $user->get_error_message() );
+					$message = $user->get_error_message();
+					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $_POST['username'] ) . '</strong>', $message );
+					throw new Exception( $message );
 				} else {
 
 					if ( ! empty( $_POST['redirect'] ) ) {

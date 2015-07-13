@@ -86,7 +86,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 
 	// Transients that include an ID
 	$post_transient_names = array(
-		'wc_product_children_ids_',
+		'wc_product_children_',
 		'wc_product_total_stock_'
 	);
 
@@ -475,8 +475,9 @@ add_filter( 'wp_prepare_attachment_for_js', 'wc_prepare_attachment_for_js' );
  * Track product views
  */
 function wc_track_product_view() {
-	if ( ! is_singular( 'product' ) )
+	if ( ! is_singular( 'product' ) || ! is_active_widget( false, false, 'woocommerce_recently_viewed_products', true ) ) {
 		return;
+	}
 
 	global $post;
 
@@ -485,11 +486,13 @@ function wc_track_product_view() {
 	else
 		$viewed_products = (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] );
 
-	if ( ! in_array( $post->ID, $viewed_products ) )
+	if ( ! in_array( $post->ID, $viewed_products ) ) {
 		$viewed_products[] = $post->ID;
+	}
 
-	if ( sizeof( $viewed_products ) > 15 )
+	if ( sizeof( $viewed_products ) > 15 ) {
 		array_shift( $viewed_products );
+	}
 
 	// Store for session only
 	wc_setcookie( 'woocommerce_recently_viewed', implode( '|', $viewed_products ) );
@@ -560,4 +563,54 @@ function wc_get_product_id_by_sku( $sku ) {
 	 ", $sku ) );
 
 	return ( $product_id ) ? intval( $product_id ) : 0;
+}
+
+/**
+ * Save product price
+ *
+ * This is a private function (internal use ONLY) used until a data manipulation api is built
+ *
+ * @since 2.4.0
+ * @todo  look into Data manipulation API
+ *
+ * @param int $product_id
+ * @param float $regular_price
+ * @param float $sale_price
+ * @param string $date_from
+ * @param string $date_to
+ */
+function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', $date_from = '', $date_to = '' ) {
+	$product_id  = absint( $product_id );
+	$regular_price = wc_format_decimal( $regular_price );
+	$sale_price    = $sale_price === '' ? '' : wc_format_decimal( $sale_price );
+	$date_from     = wc_clean( $date_from );
+	$date_to       = wc_clean( $date_to );
+
+	update_post_meta( $product_id, '_regular_price', $regular_price );
+	update_post_meta( $product_id, '_sale_price', $sale_price );
+
+	// Save Dates
+	update_post_meta( $product_id, '_sale_price_dates_from', $date_from ? strtotime( $date_from ) : '' );
+	update_post_meta( $product_id, '_sale_price_dates_to', $date_to ? strtotime( $date_to ) : '' );
+
+	if ( $date_to && ! $date_from ) {
+		update_post_meta( $product_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
+	}
+
+	// Update price if on sale
+	if ( '' !== $sale_price && '' === $date_to && '' === $date_from ) {
+		update_post_meta( $product_id, '_price', $sale_price );
+	} else {
+		update_post_meta( $product_id, '_price', $regular_price );
+	}
+
+	if ( '' !== $sale_price && $date_from && strtotime( $date_from ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+		update_post_meta( $product_id, '_price', $sale_price );
+	}
+
+	if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+		update_post_meta( $product_id, '_price', $regular_price );
+		update_post_meta( $product_id, '_sale_price_dates_from', '' );
+		update_post_meta( $product_id, '_sale_price_dates_to', '' );
+	}
 }

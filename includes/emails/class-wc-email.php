@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Email Class
  *
@@ -221,7 +222,6 @@ class WC_Email extends WC_Settings_API {
 		// Find/replace
 		$this->find['blogname']      = '{blogname}';
 		$this->find['site-title']    = '{site_title}';
-
 		$this->replace['blogname']   = $this->get_blogname();
 		$this->replace['site-title'] = $this->get_blogname();
 
@@ -240,7 +240,6 @@ class WC_Email extends WC_Settings_API {
 		if ( $this->sending && $this->get_email_type() == 'multipart' ) {
 
 			$mailer->AltBody = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) ) );
-			//$mailer->AltBody = wordwrap( html_entity_decode( strip_tags( $this->get_content_plain() ) ), 70 );
 			$this->sending = false;
 		}
 
@@ -254,7 +253,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( $this->find, $this->replace, $string );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
 	}
 
 	/**
@@ -479,14 +478,14 @@ class WC_Email extends WC_Settings_API {
 				'default'       => 'yes'
 			),
 			'subject' => array(
-				'title'         => __( 'Email subject', 'woocommerce' ),
+				'title'         => __( 'Email Subject', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
 				'placeholder'   => '',
 				'default'       => ''
 			),
 			'heading' => array(
-				'title'         => __( 'Email heading', 'woocommerce' ),
+				'title'         => __( 'Email Heading', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
@@ -534,8 +533,12 @@ class WC_Email extends WC_Settings_API {
 		parent::process_admin_options();
 
 		// Save templates
-		$this->save_template( $_POST['template_html_code'], $this->template_html );
-		$this->save_template( $_POST['template_plain_code'], $this->template_plain );
+		if ( isset( $_POST['template_html_code'] ) ) {
+			$this->save_template( $_POST['template_html_code'], $this->template_html );
+		}
+		if ( isset( $_POST['template_plain_code'] ) ) {
+			$this->save_template( $_POST['template_plain_code'], $this->template_plain );
+		}
 	}
 
 	/**
@@ -560,12 +563,12 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Save the email templates
 	 *
+	 * @since 2.4.0
 	 * @param string $template_code
 	 * @param string $template_path
-	 * @return void
 	 */
 	protected function save_template( $template_code, $template_path ) {
-		if ( ! empty( $template_code ) && ! empty( $template_path ) ) {
+		if ( current_user_can( 'edit_themes' ) && ! empty( $template_code ) && ! empty( $template_path ) ) {
 			$saved  = false;
 			$file   = get_stylesheet_directory() . '/woocommerce/' . $template_path;
 			$code   = stripslashes( $template_code );
@@ -669,7 +672,18 @@ class WC_Email extends WC_Settings_API {
 	 */
 	protected function admin_actions() {
 		// Handle any actions
-		if ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) {
+		if (
+			( ! empty( $this->template_html ) || ! empty( $this->template_plain ) )
+			&& ( ! empty( $_GET['move_template'] ) || ! empty( $_GET['delete_template'] ) )
+			&& 'GET' == $_SERVER['REQUEST_METHOD']
+		) {
+			if ( empty( $_GET['_wc_email_nonce'] ) || ! wp_verify_nonce( $_GET['_wc_email_nonce'], 'woocommerce_email_template_nonce' ) ) {
+				wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+			}
+
+			if ( ! current_user_can( 'edit_themes' ) ) {
+				wp_die( __( 'Cheatin&#8217; huh?', 'woocommerce' ) );
+			}
 
 			if ( ! empty( $_GET['move_template'] ) ) {
 				$this->move_template_action( $_GET['move_template'] );
@@ -720,7 +734,7 @@ class WC_Email extends WC_Settings_API {
 			do_action( 'woocommerce_email_settings_after', $this );
 		?>
 
-		<?php if ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) { ?>
+		<?php if ( current_user_can( 'edit_themes' ) && ( ! empty( $this->template_html ) || ! empty( $this->template_plain ) ) ) { ?>
 			<div id="template">
 			<?php
 				$templates = array(
@@ -750,7 +764,7 @@ class WC_Email extends WC_Settings_API {
 								<a href="#" class="button toggle_editor"></a>
 
 								<?php if ( is_writable( $local_file ) ) : ?>
-									<a href="<?php echo esc_url( remove_query_arg( array( 'move_template', 'saved' ), add_query_arg( 'delete_template', $template_type ) ) ); ?>" class="delete_template button"><?php _e( 'Delete template file', 'woocommerce' ); ?></a>
+									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'move_template', 'saved' ), add_query_arg( 'delete_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="delete_template button"><?php _e( 'Delete template file', 'woocommerce' ); ?></a>
 								<?php endif; ?>
 
 								<?php printf( __( 'This template has been overridden by your theme and can be found in: <code>%s</code>.', 'woocommerce' ), 'yourtheme/' . $template_dir . '/' . $template ); ?>
@@ -766,7 +780,7 @@ class WC_Email extends WC_Settings_API {
 								<a href="#" class="button toggle_editor"></a>
 
 								<?php if ( ( is_dir( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) && is_writable( get_stylesheet_directory() . '/' . $template_dir . '/emails/' ) ) || is_writable( get_stylesheet_directory() ) ) { ?>
-									<a href="<?php echo esc_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
+									<a href="<?php echo esc_url( wp_nonce_url( remove_query_arg( array( 'delete_template', 'saved' ), add_query_arg( 'move_template', $template_type ) ), 'woocommerce_email_template_nonce', '_wc_email_nonce' ) ); ?>" class="button"><?php _e( 'Copy file to theme', 'woocommerce' ); ?></a>
 								<?php } ?>
 
 								<?php printf( __( 'To override and edit this email template copy <code>%s</code> to your theme folder: <code>%s</code>.', 'woocommerce' ), plugin_basename( $template_file ) , 'yourtheme/' . $template_dir . '/' . $template ); ?>

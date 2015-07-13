@@ -43,7 +43,7 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rate_locations" );
 
 	// Delete options
-	$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce_%';");
+	$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';");
 
 	// Delete posts + data
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );

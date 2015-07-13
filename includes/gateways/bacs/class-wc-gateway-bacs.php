@@ -24,7 +24,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
-		
+
 		$this->id                 = 'bacs';
 		$this->icon               = apply_filters('woocommerce_bacs_icon', '');
 		$this->has_fields         = false;
@@ -74,7 +74,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable Bank Transfer', 'woocommerce' ),
-				'default' => 'yes'
+				'default' => 'no'
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
@@ -269,7 +269,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Get the order country and country $locale
 		$country 	= $order->billing_country;
 		$locale		= $this->get_country_locale();
-		
+
 		// Get sortcode label in the $locale array and use appropriate one
 		$sortcode = isset( $locale[ $country ]['sortcode']['label'] ) ? $locale[ $country ]['sortcode']['label'] : __( 'Sort Code', 'woocommerce' );
 

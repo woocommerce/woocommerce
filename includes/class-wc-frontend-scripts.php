@@ -119,7 +119,7 @@ class WC_Frontend_Scripts {
 
 		// Register any scripts for later use, or used as dependencies
 		self::register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70' );
-		self::register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.2.1' );
+		self::register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.2.4' );
 		self::register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.4.1' );
 		self::register_script( 'wc-credit-card-form', $frontend_script_path . 'credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ) );
 		self::register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js' );
@@ -154,6 +154,9 @@ class WC_Frontend_Scripts {
 		}
 		if ( is_product() ) {
 			self::enqueue_script( 'wc-single-product' );
+		}
+		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
+			self::enqueue_script( 'wc-geolocation', $frontend_script_path . 'geolocation' . $suffix . '.js', array( 'jquery' ) );
 		}
 
 		// Global frontend scripts
@@ -196,6 +199,14 @@ class WC_Frontend_Scripts {
 				return array(
 					'ajax_url'    => WC()->ajax_url(),
 					'wc_ajax_url' => WC_AJAX::get_endpoint()
+				);
+			break;
+			case 'wc-geolocation' :
+				return array(
+					'wc_ajax_url' => WC_AJAX::get_endpoint(),
+					'home_url'    => home_url(),
+					'is_checkout' => is_checkout() ? '1' : '0',
+					'hash'        => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
 				);
 			break;
 			case 'wc-single-product' :
@@ -244,7 +255,7 @@ class WC_Frontend_Scripts {
 					'ajax_url'                => WC()->ajax_url(),
 					'wc_ajax_url'             => WC_AJAX::get_endpoint(),
 					'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
-					'cart_url'                => wc_get_page_permalink( 'cart' ),
+					'cart_url'                => apply_filters( 'woocommerce_add_to_cart_redirect', WC()->cart->get_cart_url() ),
 					'is_cart'                 => is_cart(),
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' )
 				);

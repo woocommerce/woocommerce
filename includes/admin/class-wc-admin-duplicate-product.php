@@ -168,13 +168,11 @@ class WC_Admin_Duplicate_Product {
 		$this->duplicate_post_meta( $post->ID, $new_post_id );
 
 		// Copy the children (variations)
-		if ( $children_products = get_children( 'post_parent='.$post->ID.'&post_type=product_variation' ) ) {
+		$exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $post ) );
 
-			if ( $children_products ) {
-
-				foreach ( $children_products as $child ) {
-					$this->duplicate_product( $this->get_product_to_duplicate( $child->ID ), $new_post_id, $child->post_status );
-				}
+		if ( ! $exclude && ( $children_products = get_children( 'post_parent=' . $post->ID . '&post_type=product_variation' ) ) ) {
+			foreach ( $children_products as $child ) {
+				$this->duplicate_product( $this->get_product_to_duplicate( $child->ID ), $new_post_id, $child->post_status );
 			}
 		}
 
@@ -216,16 +214,15 @@ class WC_Admin_Duplicate_Product {
 	 * @param mixed $post_type
 	 */
 	private function duplicate_post_taxonomies( $id, $new_id, $post_type ) {
-
-		$taxonomies = get_object_taxonomies( $post_type );
+		$exclude    = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_taxonomies', array() ) );
+		$taxonomies = array_diff( get_object_taxonomies( $post_type ), $exclude );
 
 		foreach ( $taxonomies as $taxonomy ) {
-
-			$post_terms = wp_get_object_terms( $id, $taxonomy );
+			$post_terms       = wp_get_object_terms( $id, $taxonomy );
 			$post_terms_count = sizeof( $post_terms );
 
-			for ( $i=0; $i<$post_terms_count; $i++ ) {
-				wp_set_object_terms( $new_id, $post_terms[$i]->slug, $taxonomy, true );
+			for ( $i = 0; $i < $post_terms_count; $i++ ) {
+				wp_set_object_terms( $new_id, $post_terms[ $i ]->slug, $taxonomy, true );
 			}
 		}
 	}
@@ -239,24 +236,26 @@ class WC_Admin_Duplicate_Product {
 	private function duplicate_post_meta( $id, $new_id ) {
 		global $wpdb;
 
-		$post_meta_infos = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d AND meta_key NOT IN ( 'total_sales' );", absint( $id ) ) );
+		$exclude = array_map( 'esc_sql', array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array( 'total_sales' ) ) ) );
 
-		if ( count( $post_meta_infos ) != 0 ) {
+		if ( sizeof( $exclude ) ) {
+			$post_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d AND meta_key NOT IN ( '" . implode( "','", $exclude ) . "' );", absint( $id ) ) );
+		} else {
+			$post_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d;", absint( $id ) ) );
+		}
 
+		if ( sizeof( $post_meta ) ) {
 			$sql_query_sel = array();
-			$sql_query = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";
+			$sql_query     = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";
 
-			foreach ( $post_meta_infos as $meta_info ) {
-				$meta_key = $meta_info->meta_key;
-				$meta_value = addslashes( $meta_info->meta_value );
-				$sql_query_sel[]= "SELECT $new_id, '$meta_key', '$meta_value'";
+			foreach ( $post_meta as $post_meta_row ) {
+				$sql_query_sel[] = $wpdb->prepare( "SELECT %d, %s, %s", $new_id, $post_meta_row->meta_key, $post_meta_row->meta_value );
 			}
 
-			$sql_query.= implode( " UNION ALL ", $sql_query_sel );
-			$wpdb->query($sql_query);
+			$sql_query .= implode( " UNION ALL ", $sql_query_sel );
+			$wpdb->query( $sql_query );
 		}
 	}
-
 }
 
 endif;

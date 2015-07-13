@@ -13,6 +13,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Gets text attributes from a string
+ *
+ * @since  2.4
+ * @return array
+ */
+function wc_get_text_attributes( $raw_attributes ) {
+	return array_map( 'trim', explode( WC_DELIMITER, $raw_attributes ) );
+}
+
+/**
  * Get attribute taxonomies.
  *
  * @return object

@@ -229,19 +229,16 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 						}
 
-						echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( isset( $_GET[ 'filter_' . $taxonomy_filter ] ) ? $_GET[ 'filter_' .$taxonomy_filter ] : '' , $term->term_id, false ) . '>' . esc_html( $term->name ) . '</option>';
+						echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( isset( $_GET[ 'filter_' . $taxonomy_filter ] ) ? $_GET[ 'filter_' . $taxonomy_filter ] : '' , $term->term_id, false ) . '>' . esc_html( $term->name ) . '</option>';
 					}
 
 					echo '</select>';
 
 					wc_enqueue_js( "
-
-						jQuery('.dropdown_layered_nav_$taxonomy_filter').change(function(){
-
-							location.href = '" . esc_url_raw( preg_replace( '%\/page/[0-9]+%', '', add_query_arg( 'filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) ) . "&filter_$taxonomy_filter=' + jQuery(this).val();
-
+						jQuery( '.dropdown_layered_nav_$taxonomy_filter' ).change( function() {
+							var term_id = parseInt( jQuery( this ).val(), 10 );
+							location.href = '" . str_replace( array( '%\/page/[0-9]+%', '&amp;', '%2C' ), array( '', '&', ',' ), esc_js( add_query_arg( 'filtering', '1', remove_query_arg( array( 'page', 'filter_' . $taxonomy_filter ) ) ) ) ) . "&filter_$taxonomy_filter=' + ( isNaN( term_id ) ? '' : term_id );
 						});
-
 					" );
 
 				}

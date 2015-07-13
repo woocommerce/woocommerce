@@ -230,20 +230,24 @@ class WC_Post_types {
 			apply_filters( 'woocommerce_register_post_type_product',
 				array(
 					'labels'              => array(
-							'name'               => __( 'Products', 'woocommerce' ),
-							'singular_name'      => __( 'Product', 'woocommerce' ),
-							'menu_name'          => _x( 'Products', 'Admin menu name', 'woocommerce' ),
-							'add_new'            => __( 'Add Product', 'woocommerce' ),
-							'add_new_item'       => __( 'Add New Product', 'woocommerce' ),
-							'edit'               => __( 'Edit', 'woocommerce' ),
-							'edit_item'          => __( 'Edit Product', 'woocommerce' ),
-							'new_item'           => __( 'New Product', 'woocommerce' ),
-							'view'               => __( 'View Product', 'woocommerce' ),
-							'view_item'          => __( 'View Product', 'woocommerce' ),
-							'search_items'       => __( 'Search Products', 'woocommerce' ),
-							'not_found'          => __( 'No Products found', 'woocommerce' ),
-							'not_found_in_trash' => __( 'No Products found in trash', 'woocommerce' ),
-							'parent'             => __( 'Parent Product', 'woocommerce' )
+							'name'                  => __( 'Products', 'woocommerce' ),
+							'singular_name'         => __( 'Product', 'woocommerce' ),
+							'menu_name'             => _x( 'Products', 'Admin menu name', 'woocommerce' ),
+							'add_new'               => __( 'Add Product', 'woocommerce' ),
+							'add_new_item'          => __( 'Add New Product', 'woocommerce' ),
+							'edit'                  => __( 'Edit', 'woocommerce' ),
+							'edit_item'             => __( 'Edit Product', 'woocommerce' ),
+							'new_item'              => __( 'New Product', 'woocommerce' ),
+							'view'                  => __( 'View Product', 'woocommerce' ),
+							'view_item'             => __( 'View Product', 'woocommerce' ),
+							'search_items'          => __( 'Search Products', 'woocommerce' ),
+							'not_found'             => __( 'No Products found', 'woocommerce' ),
+							'not_found_in_trash'    => __( 'No Products found in trash', 'woocommerce' ),
+							'parent'                => __( 'Parent Product', 'woocommerce' ),
+							'featured_image'        => __( 'Product Image', 'woocommerce' ),
+							'set_featured_image'    => __( 'Set product image', 'woocommerce' ),
+							'remove_featured_image' => __( 'Remove product image', 'woocommerce' ),
+							'use_featured_image'    => __( 'Use as product image', 'woocommerce' ),
 						),
 					'description'         => __( 'This is where you can add new products to your store.', 'woocommerce' ),
 					'public'              => true,
@@ -268,7 +272,8 @@ class WC_Post_types {
 					'label'        => __( 'Variations', 'woocommerce' ),
 					'public'       => false,
 					'hierarchical' => false,
-					'supports'     => false
+					'supports'     => false,
+					'capability_type' => 'product'
 				)
 			)
 		);
@@ -412,12 +417,12 @@ class WC_Post_types {
 	 */
 	public static function register_post_status() {
 		register_post_status( 'wc-pending', array(
-			'label'                     => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+			'label'                     => _x( 'Pending Payment', 'Order status', 'woocommerce' ),
 			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
-			'label_count'               => _n_noop( 'Pending payment <span class="count">(%s)</span>', 'Pending payment <span class="count">(%s)</span>', 'woocommerce' )
+			'label_count'               => _n_noop( 'Pending Payment <span class="count">(%s)</span>', 'Pending Payment <span class="count">(%s)</span>', 'woocommerce' )
 		) );
 		register_post_status( 'wc-processing', array(
 			'label'                     => _x( 'Processing', 'Order status', 'woocommerce' ),
@@ -428,12 +433,12 @@ class WC_Post_types {
 			'label_count'               => _n_noop( 'Processing <span class="count">(%s)</span>', 'Processing <span class="count">(%s)</span>', 'woocommerce' )
 		) );
 		register_post_status( 'wc-on-hold', array(
-			'label'                     => _x( 'On hold', 'Order status', 'woocommerce' ),
+			'label'                     => _x( 'On Hold', 'Order status', 'woocommerce' ),
 			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
-			'label_count'               => _n_noop( 'On hold <span class="count">(%s)</span>', 'On hold <span class="count">(%s)</span>', 'woocommerce' )
+			'label_count'               => _n_noop( 'On Hold <span class="count">(%s)</span>', 'On Hold <span class="count">(%s)</span>', 'woocommerce' )
 		) );
 		register_post_status( 'wc-completed', array(
 			'label'                     => _x( 'Completed', 'Order status', 'woocommerce' ),

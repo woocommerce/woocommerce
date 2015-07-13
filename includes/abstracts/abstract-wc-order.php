@@ -172,6 +172,45 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Returns the requested address in raw, non-formatted way
+	 * @since  2.4.0
+	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address
+	 * @return array The stored address after filter
+	 */
+	public function get_address( $type = 'billing' ) {
+
+		if ( 'billing' === $type ) {
+			$address = array(
+				'first_name' => $this->billing_first_name,
+				'last_name'  => $this->billing_last_name,
+				'company'    => $this->billing_company,
+				'address_1'  => $this->billing_address_1,
+				'address_2'  => $this->billing_address_2,
+				'city'       => $this->billing_city,
+				'state'      => $this->billing_state,
+				'postcode'   => $this->billing_postcode,
+				'country'    => $this->billing_country,
+				'email'      => $this->billing_email,
+				'phone'      => $this->billing_phone,
+			);
+		} else {
+			$address = array(
+				'first_name' => $this->shipping_first_name,
+				'last_name'  => $this->shipping_last_name,
+				'company'    => $this->shipping_company,
+				'address_1'  => $this->shipping_address_1,
+				'address_2'  => $this->shipping_address_2,
+				'city'       => $this->shipping_city,
+				'state'      => $this->shipping_state,
+				'postcode'   => $this->shipping_postcode,
+				'country'    => $this->shipping_country,
+			);
+		}
+
+		return apply_filters( 'woocommerce_get_order_address', $address, $type, $this );
+	}
+
+	/**
 	 * Add a product line item to the order
 	 *
 	 * @since 2.2
@@ -448,7 +487,14 @@ abstract class WC_Abstract_Order {
 
 		// method cost
 		if ( isset( $args['cost'] ) ) {
+			// Get old cost before updating
+			$old_cost = wc_get_order_item_meta( $item_id, 'cost' );
+
+			// Update
 			wc_update_order_item_meta( $item_id, 'cost', wc_format_decimal( $args['cost'] ) );
+
+			// Update total
+			$this->set_total( $this->order_shipping - wc_format_decimal( $old_cost ) + wc_format_decimal( $args['cost'] ), 'shipping' );
 		}
 
 		do_action( 'woocommerce_order_update_shipping', $this->id, $item_id, $args );
@@ -762,7 +808,7 @@ abstract class WC_Abstract_Order {
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		if ( $and_taxes ) {
+		if ( $and_taxes && wc_tax_enabled() ) {
 			$this->calculate_taxes();
 		}
 
@@ -1039,6 +1085,28 @@ abstract class WC_Abstract_Order {
 	public function get_shipping_address() {
 		_deprecated_function( 'get_shipping_address', '2.3', 'get_formatted_shipping_address' );
 		return $this->get_formatted_shipping_address();
+	}
+
+	/**
+	 * Get a formatted billing full name.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return string
+	 */
+	public function get_formatted_billing_full_name() {
+		return sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ),  $this->billing_first_name, $this->billing_last_name );
+	}
+
+	/**
+	 * Get a formatted shipping full name.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return string
+	 */
+	public function get_formatted_shipping_full_name() {
+		return sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ),  $this->shipping_first_name, $this->shipping_last_name );
 	}
 
 	/**
@@ -1622,7 +1690,7 @@ abstract class WC_Abstract_Order {
 			$subtotal = wc_price( $subtotal, array('currency' => $this->get_order_currency()) );
 
 			if ( $tax_display == 'excl' && $this->prices_include_tax ) {
-				$subtotal .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 
 		} else {
@@ -1902,10 +1970,7 @@ abstract class WC_Abstract_Order {
 			'show_image'            => $show_image,
 			'image_size'            => $image_size
 		) );
-
-		$return = apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
-
-		return $return;
+		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
 	}
 
 	/**
@@ -2065,6 +2130,13 @@ abstract class WC_Abstract_Order {
 
 		$product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
 		$product      = wc_get_product( $product_id );
+		if ( ! $product ) {
+			/**
+			 * $product can be `false`. Example: checking an old order, when a product or variation has been deleted
+			 * @see \WC_Product_Factory::get_product
+			 */
+			return array();
+		}
 		$download_ids = $wpdb->get_col( $wpdb->prepare("
 			SELECT download_id
 			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -2550,16 +2622,16 @@ abstract class WC_Abstract_Order {
 		}
 
 		$hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
-		$needs = false;
+		$needs_address = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
 			if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
-				$needs = true;
+				$needs_address = true;
 				break;
 			}
 		}
 
-		return $needs;
+		return apply_filters( 'woocommerce_order_needs_shipping_address', $needs_address, $hide, $this );
 	}
 
 	/**

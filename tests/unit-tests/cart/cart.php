@@ -442,7 +442,7 @@ class Cart extends \WC_Unit_Test_Case {
 	 */
 	public function test_shipping_total() {
 		// Create product
-		$product =\WC_Helper_Product::create_simple_product();
+		$product = \WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->id, '_price', '10' );
 		update_post_meta( $product->id, '_regular_price', '10' );
 

@@ -4,7 +4,7 @@
  *
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.4.0
+ * @version 2.3.8
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,7 +44,13 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 					<td class="product-remove">
 						<?php
-							echo apply_filters( 'woocommerce_cart_item_remove_link', sprintf( '<a href="%s" class="remove" title="%s">&times;</a>', esc_url( WC()->cart->get_remove_url( $cart_item_key ) ), __( 'Remove this item', 'woocommerce' ) ), $cart_item_key );
+							echo apply_filters( 'woocommerce_cart_item_remove_link', sprintf(
+								'<a href="%s" class="remove" title="%s" data-product_id="%s" data-product_sku="%s">&times;</a>',
+								esc_url( WC()->cart->get_remove_url( $cart_item_key ) ),
+								__( 'Remove this item', 'woocommerce' ),
+								esc_attr( $product_id ),
+								esc_attr( $_product->get_sku() )
+							), $cart_item_key );
 						?>
 					</td>
 
@@ -63,9 +69,9 @@ do_action( 'woocommerce_before_cart' ); ?>
 					<td class="product-name">
 						<?php
 							if ( ! $_product->is_visible() ) {
-								echo apply_filters( 'woocommerce_cart_item_name', esc_html( $_product->get_title() ), $cart_item, $cart_item_key ) . '&nbsp;';
+								echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
 							} else {
-								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', esc_url( $_product->get_permalink( $cart_item ) ), esc_html( $_product->get_title() ) ), $cart_item, $cart_item_key );
+								echo apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s </a>', esc_url( $_product->get_permalink( $cart_item ) ), $_product->get_title() ), $cart_item, $cart_item_key );
 							}
 
 							// Meta data

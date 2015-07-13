@@ -98,7 +98,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			$customer = Simplify_Customer::createCustomer( array(
 				'token'     => $cart_token,
 				'email'     => $order->billing_email,
-				'name'      => trim( $order->billing_first_name . ' ' . $order->billing_last_name ),
+				'name'      => trim( $order->get_formatted_billing_full_name() ),
 				'reference' => $order->id
 			) );
 
@@ -178,7 +178,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				$customer = Simplify_Customer::createCustomer( array(
 					'token'     => $cart_token,
 					'email'     => $order->billing_email,
-					'name'      => trim( $order->billing_first_name . ' ' . $order->billing_last_name ),
+					'name'      => trim( $order->get_formatted_billing_full_name() ),
 					'reference' => $order->id
 				) );
 

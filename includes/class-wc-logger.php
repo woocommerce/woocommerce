@@ -35,7 +35,7 @@ class WC_Logger {
 	 */
 	public function __destruct() {
 		foreach ( $this->_handles as $handle ) {
-	       @fclose( escapeshellarg( $handle ) );
+			@fclose( $handle );
 		}
 	}
 
@@ -73,6 +73,8 @@ class WC_Logger {
 			$time = date_i18n( 'm-d-Y @ H:i:s -' ); // Grab Time
 			@fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
 		}
+		
+		do_action( 'woocommerce_log_add', $handle, $message );
 	}
 
 
@@ -87,6 +89,8 @@ class WC_Logger {
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
 			@ftruncate( $this->_handles[ $handle ], 0 );
 		}
+		
+		do_action( 'woocommerce_log_clear', $handle );
 	}
 
 }

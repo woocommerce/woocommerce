@@ -97,7 +97,7 @@ function wc_format_list_of_items( $items ) {
 	$item_string = '';
 
 	foreach ( $items as $key => $item ) {
-		$item_string .= sprintf( _x( '&ldquo;%s&ldquo;', 'Item name in quotes' ), $item );
+		$item_string .= sprintf( _x( '&ldquo;%s&ldquo;', 'Item name in quotes', 'woocommerce' ), $item );
 
 		if ( $key + 2 === sizeof( $items ) ) {
 			$item_string .= ' ' . __( 'and', 'woocommerce' ) . ' ';
@@ -280,12 +280,12 @@ function wc_cart_totals_shipping_method_label( $method ) {
 		if ( WC()->cart->tax_display_cart == 'excl' ) {
 			$label .= ': ' . wc_price( $method->cost );
 			if ( $method->get_shipping_tax() > 0 && WC()->cart->prices_include_tax ) {
-				$label .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+				$label .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
 			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
 			if ( $method->get_shipping_tax() > 0 && ! WC()->cart->prices_include_tax ) {
-				$label .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
+				$label .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
 		}
 	} elseif ( $method->id !== 'free_shipping' ) {

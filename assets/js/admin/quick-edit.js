@@ -1,4 +1,4 @@
-/*global inlineEditPost */
+/*global ajaxurl, inlineEditPost, inlineEditL10n */
 jQuery(function( $ ) {
 	$( '#the-list' ).on( 'click', '.editinline', function() {
 

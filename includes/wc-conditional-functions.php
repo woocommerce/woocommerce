@@ -289,7 +289,7 @@ if ( ! function_exists( 'wc_tax_enabled' ) ) {
 	 * @return bool
 	 */
 	function wc_tax_enabled() {
-		return get_option( 'woocommerce_calc_taxes' ) === 'yes';
+		return apply_filters( 'wc_tax_enabled', get_option( 'woocommerce_calc_taxes' ) === 'yes' );
 	}
 }
 

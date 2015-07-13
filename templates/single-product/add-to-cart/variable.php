@@ -20,7 +20,7 @@ global $product, $post;
 
 	<?php do_action( 'woocommerce_before_variations_form' ); ?>
 
-	<?php if ( ! empty( $available_variations ) ) : ?>
+	<?php if ( ! empty( $available_variations ) || false === $available_variations ) : ?>
 		<table class="variations" cellspacing="0">
 			<tbody>
 				<?php $loop = 0; foreach ( $attributes as $name => $options ) : $loop++; ?>
@@ -52,11 +52,9 @@ global $product, $post;
 										}
 
 									} else {
-
 										foreach ( $options as $option ) {
-											echo '<option value="' . esc_attr( sanitize_title( $option ) ) . '" ' . selected( sanitize_title( $selected_value ), sanitize_title( $option ), false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+											echo '<option value="' . esc_attr( $option ) . '" ' . selected( $selected_value, $option, false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
 										}
-
 									}
 								}
 							?>
@@ -77,8 +75,12 @@ global $product, $post;
 
 			<div class="single_variation"></div>
 
+			<?php do_action( 'woocommerce_before_variations_button' ); ?>
+
 			<div class="variations_button">
-				<?php woocommerce_quantity_input(); ?>
+				<?php woocommerce_quantity_input( array(
+					'input_value' => ( isset( $_POST['quantity'] ) ? wc_stock_amount( $_POST['quantity'] ) : 1 )
+				) ); ?>
 				<button type="submit" class="single_add_to_cart_button button alt"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
 			</div>
 

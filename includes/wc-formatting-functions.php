@@ -254,21 +254,24 @@ function wc_clean( $var ) {
 }
 
 /**
- * Sanitize a string destined to be a tooltip. Prevents XSS.
+ * Sanitize a string destined to be a tooltip.
+ *
+ * @since 2.3.10 Tooltips are encoded with htmlspecialchars to prevent XSS. Should not be used in conjunction with esc_attr()
  * @param string $var
  * @return string
  */
 function wc_sanitize_tooltip( $var ) {
-	return wp_kses( html_entity_decode( $var ), array(
+	return htmlspecialchars( wp_kses( html_entity_decode( $var ), array(
 		'br'     => array(),
 		'em'     => array(),
 		'strong' => array(),
+		'small'  => array(),
 		'span'   => array(),
 		'ul'     => array(),
 		'li'     => array(),
 		'ol'     => array(),
 		'p'      => array(),
-    ) );
+    ) ) );
 }
 
 /**
@@ -308,6 +311,7 @@ function wc_stock_amount( $amount ) {
  */
 function get_woocommerce_price_format() {
 	$currency_pos = get_option( 'woocommerce_currency_pos' );
+	$format = '%1$s%2$s';
 
 	switch ( $currency_pos ) {
 		case 'left' :
@@ -333,7 +337,7 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_get_price_thousand_separator() {
-	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_thousand_sep' ) ), ENT_QUOTES );
+	$separator = stripslashes( get_option( 'woocommerce_price_thousand_sep' ) );
 	return $separator;
 }
 
@@ -343,7 +347,7 @@ function wc_get_price_thousand_separator() {
  * @return string
  */
 function wc_get_price_decimal_separator() {
-	$separator = wp_specialchars_decode( stripslashes( get_option( 'woocommerce_price_decimal_sep' ) ), ENT_QUOTES );
+	$separator = stripslashes( get_option( 'woocommerce_price_decimal_sep' ) );
 	return $separator ? $separator : '.';
 }
 
@@ -385,7 +389,7 @@ function wc_price( $price, $args = array() ) {
 	$return          = '<span class="amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && wc_tax_enabled() ) {
-		$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+		$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
 	return apply_filters( 'wc_price', $return, $price, $args );
@@ -671,3 +675,69 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
 function wc_format_content( $raw_string ) {
 	return apply_filters( 'woocommerce_format_content', do_shortcode( shortcode_unautop( wpautop( $raw_string ) ) ), $raw_string );
 }
+
+/**
+ * Format product short description
+ * Adds support for Jetpack Markdown
+ *
+ * @since  2.4.0
+ * @param  string $content
+ * @return string
+ */
+function wc_format_product_short_description( $content ) {
+	// Add support for Jetpack Markdown
+	if ( class_exists( 'WPCom_Markdown' ) ) {
+		$markdown = WPCom_Markdown::get_instance();
+
+		return wpautop( $markdown->transform( $content ) );
+	}
+
+	return $content;
+}
+
+add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
+
+/**
+ * Formats curency symbols when saved in settings
+ * @param  string $value
+ * @param  array $option
+ * @param  string $raw_value
+ * @return string
+ */
+function wc_format_option_price_separators( $value, $option, $raw_value ) {
+	return wp_kses_post( $raw_value );
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_decimal_sep', 'wc_format_option_price_separators', 10, 3 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousand_sep', 'wc_format_option_price_separators', 10, 3 );
+
+/**
+ * Formats decimals when saved in settings
+ * @param  string $value
+ * @param  array $option
+ * @param  string $raw_value
+ * @return string
+ */
+function wc_format_option_price_num_decimals( $value, $option, $raw_value ) {
+	return is_null( $raw_value ) ? 2 : absint( $raw_value );
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_decimals', 'wc_format_option_price_num_decimals', 10, 3 );
+
+/**
+ * Formats hold stock option and sets cron event up.
+ * @param  string $value
+ * @param  array $option
+ * @param  string $raw_value
+ * @return string
+ */
+function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
+	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''
+
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+
+	if ( '' !== $value ) {
+		wp_schedule_single_event( time() + ( absint( $value ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+	}
+
+	return $value;
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_minutes', 'wc_format_option_hold_stock_minutes', 10, 3 );

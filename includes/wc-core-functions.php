@@ -257,6 +257,7 @@ function get_woocommerce_currencies() {
 		apply_filters( 'woocommerce_currencies',
 			array(
 				'AED' => __( 'United Arab Emirates Dirham', 'woocommerce' ),
+				'ARS' => __( 'Argentine Peso', 'woocommerce' ),
 				'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 				'BDT' => __( 'Bangladeshi Taka', 'woocommerce' ),
 				'BRL' => __( 'Brazilian Real', 'woocommerce' ),
@@ -301,7 +302,7 @@ function get_woocommerce_currencies() {
 				'UAH' => __( 'Ukrainian Hryvnia', 'woocommerce' ),
 				'USD' => __( 'US Dollars', 'woocommerce' ),
 				'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
-				'EGP' => __( 'Egyptian Pound', 'woocommerce' ),
+				'EGP' => __( 'Egyptian Pound', 'woocommerce' )
 			)
 		)
 	);
@@ -322,6 +323,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = 'د.إ';
 			break;
 		case 'AUD' :
+		case 'ARS' :
 		case 'CAD' :
 		case 'CLP' :
 		case 'COP' :
@@ -353,7 +355,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = '&#75;&#269;';
 			break;
 		case 'DKK' :
-			$currency_symbol = 'kr.';
+			$currency_symbol = 'DKK';
 			break;
 		case 'DOP' :
 			$currency_symbol = 'RD&#36;';
@@ -749,12 +751,16 @@ function wc_get_base_location() {
 
 /**
  * Get the customer's default location. Filtered, and set to base location or left blank.
+ *
+ * If cache-busting, this should only be used when 'location' is set in the querystring.
+ *
  * @todo should the woocommerce_default_country option be renamed to contain 'base'?
  * @since 2.3.0
  * @return array
  */
 function wc_get_customer_default_location() {
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
+		case 'geolocation_ajax' :
 		case 'geolocation' :
 			$location = WC_Geolocation::geolocate_ip();
 
@@ -803,3 +809,28 @@ if ( ! function_exists( 'hash_equals' ) ) :
 		return $result === 0;
 	}
 endif;
+
+/**
+ * Generate a rand hash
+ *
+ * @since  2.4.0
+ * @return string
+ */
+function wc_rand_hash() {
+	if ( function_exists( 'openssl_random_pseudo_bytes' ) ) {
+		return bin2hex( openssl_random_pseudo_bytes( 20 ) );
+	} else {
+		return sha1( wp_rand() );
+	}
+}
+
+/**
+ * WC API - Hash
+ *
+ * @since  2.4.0
+ * @param  string $data
+ * @return string
+ */
+function wc_api_hash( $data ) {
+	return hash_hmac( 'sha256', $data, 'wc-api' );
+}

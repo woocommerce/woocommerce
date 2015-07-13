@@ -567,32 +567,27 @@ class WC_Cart {
 				}
 			}
 
-			// Other data - returned as array with name/value values
-			$other_data = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
+			// Filter item data to allow 3rd parties to add more to the array
+			$item_data = apply_filters( 'woocommerce_get_item_data', $item_data, $cart_item );
 
-			if ( $other_data && is_array( $other_data ) && sizeof( $other_data ) > 0 ) {
-
-				foreach ( $other_data as $data ) {
-					// Set hidden to true to not display meta on cart.
-					if ( empty( $data['hidden'] ) ) {
-						$display_value = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
-
-						$item_data[] = array(
-							'key'   => $data['name'],
-							'value' => $display_value
-						);
-					}
+			// Format item data ready to display
+			foreach ( $item_data as $key => $data ) {
+				// Set hidden to true to not display meta on cart.
+				if ( ! empty( $data['hidden'] ) ) {
+					unset( $item_data[ $key ] );
+					continue;
 				}
+				$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
+				$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
 			}
 
 			// Output flat or in list format
 			if ( sizeof( $item_data ) > 0 ) {
-
 				ob_start();
 
 				if ( $flat ) {
 					foreach ( $item_data as $data ) {
-						echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['value'] ) . "\n";
+						echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
 					}
 				} else {
 					wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
@@ -630,8 +625,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
-			$cart_page_id = wc_get_page_id( 'cart' );
-			return apply_filters( 'woocommerce_get_cart_url', $cart_page_id ? get_permalink( $cart_page_id ) : '' );
+			return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
 		}
 
 		/**
@@ -640,19 +634,13 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
-			$checkout_page_id = wc_get_page_id( 'checkout' );
-			$checkout_url     = '';
-			if ( $checkout_page_id ) {
-
-				// Get the checkout URL
-				$checkout_url = get_permalink( $checkout_page_id );
-
+			$checkout_url   = wc_get_page_permalink( 'checkout' );
+			if ( $checkout_url ) {
 				// Force SSL if needed
 				if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
 					$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 				}
 			}
-
 			return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 		}
 
@@ -1532,7 +1520,7 @@ class WC_Cart {
 						$return = wc_price( $this->shipping_total );
 
 						if ( $this->shipping_tax_total > 0 && $this->prices_include_tax ) {
-							$return .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+							$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 						}
 
 						return $return;
@@ -1542,7 +1530,7 @@ class WC_Cart {
 						$return = wc_price( $this->shipping_total + $this->shipping_tax_total );
 
 						if ( $this->shipping_tax_total > 0 && ! $this->prices_include_tax ) {
-							$return .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
+							$return .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 						}
 
 						return $return;
@@ -1788,17 +1776,21 @@ class WC_Cart {
 		 */
 		public function remove_coupon( $coupon_code ) {
 			// Coupons are globally disabled
-			if ( ! $this->coupons_enabled() )
+			if ( ! $this->coupons_enabled() ) {
 				return false;
+			}
 
 			// Get the coupon
 			$coupon_code  = apply_filters( 'woocommerce_coupon_code', $coupon_code );
 			$position     = array_search( $coupon_code, $this->applied_coupons );
 
-			if ( $position !== false )
+			if ( $position !== false ) {
 				unset( $this->applied_coupons[ $position ] );
+			}
 
 			WC()->session->set( 'applied_coupons', $this->applied_coupons );
+
+			do_action( 'woocommerce_removed_coupon', $coupon_code );
 
 			return true;
 		}
@@ -1832,14 +1824,15 @@ class WC_Cart {
 							$total_discount     = $discount_amount * $values['quantity'];
 							$total_discount_tax = 0;
 
-							// Calc discounted tax
-							$tax_rates           = WC_Tax::get_rates( $product->get_tax_class() );
-							$taxes               = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
-							$total_discount_tax  = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
-							$total_discount      = $this->prices_include_tax ? $total_discount - $total_discount_tax : $total_discount;
+							if ( wc_tax_enabled() ) {
+								$tax_rates          = WC_Tax::get_rates( $product->get_tax_class() );
+								$taxes              = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
+								$total_discount_tax = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
+								$total_discount     = $this->prices_include_tax ? $total_discount - $total_discount_tax : $total_discount;
+								$this->discount_cart_tax += $total_discount_tax;
+							}
 
 							$this->discount_cart     += $total_discount;
-							$this->discount_cart_tax += $total_discount_tax;
 							$this->increase_coupon_discount_amount( $code, $total_discount, $total_discount_tax );
 							$this->increase_coupon_applied_count( $code, $values['quantity'] );
 						}
@@ -2022,7 +2015,7 @@ class WC_Cart {
 					$cart_subtotal = wc_price( $this->subtotal_ex_tax );
 
 					if ( $this->tax_total > 0 && $this->prices_include_tax ) {
-						$cart_subtotal .= ' <small>' . WC()->countries->ex_tax_or_vat() . '</small>';
+						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 					}
 
 				} else {
@@ -2030,7 +2023,7 @@ class WC_Cart {
 					$cart_subtotal = wc_price( $this->subtotal );
 
 					if ( $this->tax_total > 0 && !$this->prices_include_tax ) {
-						$cart_subtotal .= ' <small>' . WC()->countries->inc_tax_or_vat() . '</small>';
+						$cart_subtotal .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 					}
 
 				}

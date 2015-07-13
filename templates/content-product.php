@@ -6,7 +6,7 @@
  *
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.4.0
+ * @version 1.6.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -58,7 +58,7 @@ if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] ) {
 			do_action( 'woocommerce_before_shop_loop_item_title' );
 		?>
 
-		<h3><?php echo esc_html( get_the_title() ); ?></h3>
+		<h3><?php the_title(); ?></h3>
 
 		<?php
 			/**

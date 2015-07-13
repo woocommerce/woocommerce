@@ -28,6 +28,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 
 		$expected_currencies = array(
 			'AED' => __( 'United Arab Emirates Dirham', 'woocommerce' ),
+			'ARS' => __( 'Argentine Peso', 'woocommerce' ),
 			'AUD' => __( 'Australian Dollars', 'woocommerce' ),
 			'BDT' => __( 'Bangladeshi Taka', 'woocommerce' ),
 			'BRL' => __( 'Brazilian Real', 'woocommerce' ),
@@ -107,10 +108,22 @@ class Core_Functions extends \WC_Unit_Test_Case {
 		$base_uri = get_home_url();
 
 		// base uri
-		$this->assertEquals( "$base_uri/wc-api/v2/", get_woocommerce_api_url( null ) );
+		$this->assertEquals( "$base_uri/wc-api/v3/", get_woocommerce_api_url( null ) );
 
 		// path
-		$this->assertEquals( "$base_uri/wc-api/v2/orders", get_woocommerce_api_url( 'orders' ) );
+		$this->assertEquals( "$base_uri/wc-api/v3/orders", get_woocommerce_api_url( 'orders' ) );
+	}
+
+	/**
+	 * Test wc_get_log_file_path()
+	 *
+	 * @since 2.4
+	 */
+	public function test_wc_get_log_file_path() {
+		$log_dir   = trailingslashit( WC_LOG_DIR );
+		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
+
+		$this->assertEquals( $log_dir . 'unit-tests-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
 	}
 
 	/**

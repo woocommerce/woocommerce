@@ -74,7 +74,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'title'         => __( 'Shipping Calculations', 'woocommerce' ),
 				'desc'          => __( 'Enable shipping', 'woocommerce' ),
 				'id'            => 'woocommerce_calc_shipping',
-				'default'       => 'yes',
+				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start'
 			),
@@ -120,7 +120,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'options' => array(
 					'shipping'     => __( 'Default to shipping address', 'woocommerce' ),
 					'billing'      => __( 'Default to billing address', 'woocommerce' ),
-					'billing_only' => __( 'Only ship to the users billing address', 'woocommerce' ),
+					'billing_only' => __( 'Only ship to the customer\'s billing address', 'woocommerce' ),
 				),
 				'autoload'        => false,
 				'desc_tip'        =>  true,
@@ -251,18 +251,18 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	public function save() {
 		global $current_section;
 
+		$wc_shipping = WC_Shipping::instance();
+
 		if ( ! $current_section ) {
+			WC_Admin_Settings::save_fields( $this->get_settings() );
+			$wc_shipping->process_admin_options();
 
-			$settings = $this->get_settings();
-
-			WC_Admin_Settings::save_fields( $settings );
-			WC()->shipping->process_admin_options();
-
-		} elseif ( class_exists( $current_section ) ) {
-
-			$current_section_class = new $current_section();
-
-			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section_class->id );
+		} else {
+			foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
+				if ( $current_section === sanitize_title( get_class( $method ) ) ) {
+					do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
+				}
+			}
 		}
 
 		// Increments the transient version to invalidate cache

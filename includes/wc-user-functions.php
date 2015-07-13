@@ -235,7 +235,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			$customer_data[] = $customer_email;
 		}
 
-		$customer_data = array_filter( array_unique( $customer_data ) );
+		$customer_data = array_map( 'esc_sql', array_filter( array_unique( $customer_data ) ) );
 
 		if ( sizeof( $customer_data ) == 0 ) {
 			return false;

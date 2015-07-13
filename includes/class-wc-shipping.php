@@ -362,7 +362,7 @@ class WC_Shipping {
 		$package_hash   = 'wc_ship_' . md5( json_encode( $package ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
 		$status_options = get_option( 'woocommerce_status_options', array() );
 
-		if ( false === ( $stored_rates = get_transient( $package_hash ) ) || ( ! empty( $status_options['shipping_debug_mode'] ) && current_user_can( 'manage_options' ) ) ) {
+		if ( false === ( $stored_rates = get_transient( $package_hash ) ) || ! empty( $status_options['shipping_debug_mode'] ) ) {
 
 			// Calculate shipping method rates
 			$package['rates'] = array();

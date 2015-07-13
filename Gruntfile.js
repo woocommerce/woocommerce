@@ -22,6 +22,8 @@ module.exports = function( grunt ) {
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
 				'!<%= dirs.js %>/admin/jquery.flot*',
+				'!<%= dirs.js %>/admin/accounting.js',
+				'!<%= dirs.js %>/admin/round.js',
 				'<%= dirs.js %>/frontend/*.js',
 				'!<%= dirs.js %>/frontend/*.min.js',
 				'includes/gateways/simplify-commerce/assets/js/*.js',
@@ -62,6 +64,7 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/jquery-blockui/jquery.blockUI.min.js': ['<%= dirs.js %>/jquery-blockui/jquery.blockUI.js'],
 					'<%= dirs.js %>/jquery-cookie/jquery.cookie.min.js': ['<%= dirs.js %>/jquery-cookie/jquery.cookie.js'],
 					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js'],
+					'<%= dirs.js %>/jquery-qrcode/jquery.qrcode.min.js': ['<%= dirs.js %>/jquery-qrcode/jquery.qrcode.js'],
 					'<%= dirs.js %>/jquery-tiptip/jquery.tipTip.min.js': ['<%= dirs.js %>/jquery-tiptip/jquery.tipTip.js'],
 					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.js'],
 					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.js'],
@@ -137,7 +140,7 @@ module.exports = function( grunt ) {
 					'!<%= dirs.js %>/admin/*.min.js',
 					'!<%= dirs.js %>/frontend/*.min.js'
 				],
-				tasks: ['uglify']
+				tasks: ['jshint', 'uglify']
 			}
 		},
 
@@ -249,8 +252,9 @@ module.exports = function( grunt ) {
 
 	// Register tasks
 	grunt.registerTask( 'default', [
-		'css',
-		'uglify'
+		'jshint',
+		'uglify',
+		'css'
 	]);
 
 	grunt.registerTask( 'css', [

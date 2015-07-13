@@ -14,9 +14,9 @@ extract( $variation_data );
 ?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
-		<button type="button" class="remove_variation button" rel="<?php echo esc_attr( $variation_id ); ?>"><?php _e( 'Remove', 'woocommerce' ); ?></button>
+		<a href="#" class="remove_variation delete" rel="<?php echo esc_attr( $variation_id ); ?>"><?php _e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php _e( 'Click to toggle', 'woocommerce' ); ?>"></div>
-		<strong>#<?php echo esc_html( $variation_id ); ?> &mdash; </strong>
+		<strong>#<?php echo esc_html( $variation_id ); ?>: </strong>
 		<?php
 			foreach ( $parent_data['attributes'] as $attribute ) {
 
@@ -26,7 +26,7 @@ extract( $variation_data );
 				}
 
 				// Get current value for variation (if set)
-				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ][0] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ][0] : '';
+				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute['name'] ) ] : '';
 
 				// Name will be something like attribute_pa_color
 				echo '<select name="attribute_' . sanitize_title( $attribute['name'] ) . '[' . $loop . ']"><option value="">' . __( 'Any', 'woocommerce' ) . ' ' . esc_html( wc_attribute_label( $attribute['name'] ) ) . '&hellip;</option>';
@@ -42,10 +42,10 @@ extract( $variation_data );
 
 				} else {
 
-					$options = array_map( 'trim', explode( WC_DELIMITER, $attribute['value'] ) );
+					$options = wc_get_text_attributes( $attribute['value'] );
 
 					foreach ( $options as $option ) {
-						echo '<option ' . selected( sanitize_title( $variation_selected_value ), sanitize_title( $option ), false ) . ' value="' . esc_attr( sanitize_title( $option ) ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+						echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
 					}
 
 				}
@@ -56,7 +56,7 @@ extract( $variation_data );
 		<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
 		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo $loop; ?>" />
 	</h3>
-	<div class="woocommerce_variable_attributes wc-metabox-content">
+	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<p class="form-row form-row-first upload_image">
 				<a href="#" class="upload_image_button tips <?php if ( $_thumbnail_id > 0 ) echo 'remove'; ?>" data-tip="<?php if ( $_thumbnail_id > 0 ) { echo __( 'Remove this image', 'woocommerce' ); } else { echo __( 'Upload an image', 'woocommerce' ); } ?>" rel="<?php echo esc_attr( $variation_id ); ?>"><img src="<?php if ( ! empty( $image ) ) echo esc_attr( $image ); else echo esc_attr( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo $loop; ?>]" class="upload_image_id" value="<?php echo esc_attr( $_thumbnail_id ); ?>" /></a>
@@ -103,7 +103,7 @@ extract( $variation_data );
 					</p>
 					<p class="form-row form-row-last">
 						<label><?php _e( 'Sale end date:', 'woocommerce' ); ?></label>
-						<input type="text" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
+						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo _x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 					</p>
 				</div>
 			</div>
@@ -112,7 +112,7 @@ extract( $variation_data );
 				<div class="show_if_variation_manage_stock" style="display: none;">
 					<p class="form-row form-row-first">
 						<label><?php _e( 'Stock Qty:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php _e( 'Enter a quantity to enable stock management at variation level, or leave blank to use the parent product\'s options.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-						<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( $_stock ); ?>" step="any" />
+						<input type="number" size="5" name="variable_stock[<?php echo $loop; ?>]" value="<?php if ( isset( $_stock ) ) echo esc_attr( wc_stock_amount( $_stock ) ); ?>" step="any" />
 					</p>
 					<p class="form-row form-row-last">
 						<label><?php _e( 'Allow Backorders?', 'woocommerce' ); ?></label>
@@ -175,16 +175,22 @@ extract( $variation_data );
 
 					echo wp_dropdown_categories( $args );
 				?></p>
+
+				<?php if ( wc_tax_enabled() ) : ?>
+					<p class="form-row form-row-full">
+						<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
+						<select name="variable_tax_class[<?php echo $loop; ?>]">
+							<option value="parent" <?php selected( is_null( $_tax_class ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
+							<?php
+							foreach ( $parent_data['tax_class_options'] as $key => $value )
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class, true, false ) . '>' . esc_html( $value ) . '</option>';
+						?></select>
+					</p>
+				<?php endif; ?>
+
 				<p class="form-row form-row-full">
-					<?php if ( wc_tax_enabled() ) : ?>
-					<label><?php _e( 'Tax class:', 'woocommerce' ); ?></label>
-					<select name="variable_tax_class[<?php echo $loop; ?>]">
-						<option value="parent" <?php selected( is_null( $_tax_class ), true ); ?>><?php _e( 'Same as parent', 'woocommerce' ); ?></option>
-						<?php
-						foreach ( $parent_data['tax_class_options'] as $key => $value )
-							echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class, true, false ) . '>' . esc_html( $value ) . '</option>';
-					?></select>
-					<?php endif; ?>
+					<label><?php _e( 'Variation Description:', 'woocommerce' ); ?></label>
+					<textarea name="variable_description[<?php echo $loop; ?>]" rows="3" style="width:100%;"><?php echo isset( $variation_data['_variation_description'] ) ? esc_textarea( $variation_data['_variation_description'] ) : ''; ?></textarea>
 				</p>
 			</div>
 			<div class="show_if_variation_downloadable" style="display: none;">
@@ -194,7 +200,7 @@ extract( $variation_data );
 						<thead>
 							<div>
 								<th><?php _e( 'Name', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the name of the download shown to the customer.', 'woocommerce' ); ?>">[?]</span></th>
-								<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to.', 'woocommerce' ); ?>">[?]</span></th>
+								<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php _e( 'This is the URL or absolute path to the file which customers will get access to. URLs entered here should already be encoded.', 'woocommerce' ); ?>">[?]</span></th>
 								<th>&nbsp;</th>
 							</div>
 						</thead>
