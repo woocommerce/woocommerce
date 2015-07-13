@@ -625,8 +625,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
-			$cart_page_url = wc_get_page_permalink( 'cart' );
-			return apply_filters( 'woocommerce_get_cart_url', $cart_page_url ? $cart_page_url : '' );
+			return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
 		}
 
 		/**
