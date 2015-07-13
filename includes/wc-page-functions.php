@@ -64,8 +64,8 @@ function wc_get_page_id( $page ) {
  * @return string
  */
 function wc_get_page_permalink( $page ) {
-	$permalink = get_permalink( wc_get_page_id( $page ) );
-
+	$page_id   = wc_get_page_id( $page );
+	$permalink = $page_id ? get_permalink( $page_id ) : '';
 	return apply_filters( 'woocommerce_get_' . $page . '_page_permalink', $permalink );
 }
 
