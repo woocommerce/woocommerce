@@ -70,7 +70,7 @@ foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 
 		// Save settings
 		foreach ( $math_cost_strings as $option_id => $math_cost_string ) {
-			$shipping_method->settings[ $option_id ] = implode( ' + ', $math_cost_string );
+			$shipping_method->settings[ $option_id ] = implode( ' + ', array_filter( $math_cost_string ) );
 		}
 
 		$shipping_method->settings['version'] = '2.4.0';
