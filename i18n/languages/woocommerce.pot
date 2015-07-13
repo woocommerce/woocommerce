@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.4.0-dev Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-07-10 10:36:55+00:00\n"
+"POT-Creation-Date: 2015-07-13 14:03:08+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5098,7 +5098,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-order.php:1771
 #: includes/abstracts/abstract-wc-product.php:967
 #: includes/abstracts/abstract-wc-product.php:973
-#: includes/class-wc-cart.php:1548 includes/class-wc-product-variable.php:328
+#: includes/class-wc-cart.php:1541 includes/class-wc-product-variable.php:328
 #: includes/class-wc-product-variation.php:339
 msgid "Free!"
 msgstr ""
@@ -5335,7 +5335,7 @@ msgstr ""
 #: includes/api/class-wc-api-orders.php:1307
 #: includes/api/class-wc-api-orders.php:1598
 #: includes/api/class-wc-api-products.php:210
-#: includes/api/class-wc-api-products.php:2085
+#: includes/api/class-wc-api-products.php:2087
 #: includes/api/class-wc-api-webhooks.php:169
 #: includes/api/v2/class-wc-api-coupons.php:213
 #: includes/api/v2/class-wc-api-customers.php:346
@@ -5356,7 +5356,7 @@ msgstr ""
 #: includes/api/class-wc-api-coupons.php:227
 #: includes/api/class-wc-api-customers.php:360
 #: includes/api/class-wc-api-products.php:224
-#: includes/api/class-wc-api-products.php:2049
+#: includes/api/class-wc-api-products.php:2051
 #: includes/api/class-wc-api-server.php:427
 #: includes/api/v1/class-wc-api-server.php:409
 #: includes/api/v2/class-wc-api-coupons.php:227
@@ -5386,8 +5386,8 @@ msgstr ""
 #: includes/api/class-wc-api-orders.php:528
 #: includes/api/class-wc-api-orders.php:1364
 #: includes/api/class-wc-api-orders.php:1675
-#: includes/api/class-wc-api-products.php:310
-#: includes/api/class-wc-api-products.php:2166
+#: includes/api/class-wc-api-products.php:312
+#: includes/api/class-wc-api-products.php:2168
 #: includes/api/class-wc-api-webhooks.php:245
 #: includes/api/v2/class-wc-api-coupons.php:329
 #: includes/api/v2/class-wc-api-customers.php:401
@@ -5408,7 +5408,7 @@ msgstr ""
 #: includes/api/class-wc-api-coupons.php:517
 #: includes/api/class-wc-api-customers.php:790
 #: includes/api/class-wc-api-orders.php:1788
-#: includes/api/class-wc-api-products.php:2353
+#: includes/api/class-wc-api-products.php:2355
 #: includes/api/v2/class-wc-api-coupons.php:517
 #: includes/api/v2/class-wc-api-customers.php:790
 #: includes/api/v2/class-wc-api-orders.php:1788
@@ -5419,7 +5419,7 @@ msgstr ""
 #: includes/api/class-wc-api-coupons.php:525
 #: includes/api/class-wc-api-customers.php:798
 #: includes/api/class-wc-api-orders.php:1796
-#: includes/api/class-wc-api-products.php:2361
+#: includes/api/class-wc-api-products.php:2363
 #: includes/api/v2/class-wc-api-coupons.php:525
 #: includes/api/v2/class-wc-api-customers.php:798
 #: includes/api/v2/class-wc-api-orders.php:1796
@@ -5754,44 +5754,44 @@ msgid "You do not have permission to create products"
 msgstr ""
 
 #: includes/api/class-wc-api-products.php:239
-#: includes/api/class-wc-api-products.php:356
+#: includes/api/class-wc-api-products.php:358
 #: includes/api/v2/class-wc-api-products.php:239
 #: includes/api/v2/class-wc-api-products.php:358
 msgid "Invalid product type - the product type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:490
-#: includes/api/class-wc-api-products.php:526
+#: includes/api/class-wc-api-products.php:492
+#: includes/api/class-wc-api-products.php:528
 #: includes/api/v2/class-wc-api-products.php:492
 #: includes/api/v2/class-wc-api-products.php:528
 msgid "You do not have permission to read product categories"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:521
+#: includes/api/class-wc-api-products.php:523
 #: includes/api/v2/class-wc-api-products.php:523
 msgid "Invalid product category ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:532
+#: includes/api/class-wc-api-products.php:534
 #: includes/api/v2/class-wc-api-products.php:534
 msgid "A product category with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:823
-#: includes/api/class-wc-api-products.php:1282
+#: includes/api/class-wc-api-products.php:825
+#: includes/api/class-wc-api-products.php:1284
 #: includes/api/v2/class-wc-api-products.php:825
 #: includes/api/v2/class-wc-api-products.php:1284
 msgid "The SKU already exists on another product"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1235
+#: includes/api/class-wc-api-products.php:1237
 #: includes/api/v2/class-wc-api-products.php:1237
 #: includes/class-wc-ajax.php:2609
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1716
-#: includes/api/class-wc-api-products.php:1717
+#: includes/api/class-wc-api-products.php:1718
+#: includes/api/class-wc-api-products.php:1719
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
 #: includes/api/v2/class-wc-api-products.php:1718
@@ -5801,95 +5801,95 @@ msgstr ""
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1791
+#: includes/api/class-wc-api-products.php:1793
 #: includes/api/v2/class-wc-api-products.php:1793
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1803
+#: includes/api/class-wc-api-products.php:1805
 #: includes/api/v2/class-wc-api-products.php:1805
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1832
+#: includes/api/class-wc-api-products.php:1834
 #: includes/api/v2/class-wc-api-products.php:1834
 msgid "Zero size file downloaded"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1964
-#: includes/api/class-wc-api-products.php:2008
+#: includes/api/class-wc-api-products.php:1966
+#: includes/api/class-wc-api-products.php:2010
 #: includes/api/v2/class-wc-api-products.php:1966
 #: includes/api/v2/class-wc-api-products.php:2010
 msgid "You do not have permission to read product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2003
+#: includes/api/class-wc-api-products.php:2005
 #: includes/api/v2/class-wc-api-products.php:2005
 msgid "Invalid product attribute ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2018
-#: includes/api/class-wc-api-products.php:2259
+#: includes/api/class-wc-api-products.php:2020
+#: includes/api/class-wc-api-products.php:2261
 #: includes/api/v2/class-wc-api-products.php:2020
 #: includes/api/v2/class-wc-api-products.php:2261
 msgid "A product attribute with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2053
+#: includes/api/class-wc-api-products.php:2055
 #: includes/api/v2/class-wc-api-products.php:2055
 msgid "Slug \"%s\" is too long (28 characters max). Shorten it, please."
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2055
+#: includes/api/class-wc-api-products.php:2057
 #: includes/api/v2/class-wc-api-products.php:2057
 msgid "Slug \"%s\" is not allowed because it is a reserved term. Change it, please."
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2057
+#: includes/api/class-wc-api-products.php:2059
 #: includes/api/v2/class-wc-api-products.php:2059
 msgid "Slug \"%s\" is already in use. Change it, please."
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2062
+#: includes/api/class-wc-api-products.php:2064
 #: includes/api/v2/class-wc-api-products.php:2064
 msgid ""
 "Invalid product attribute type - the product attribute type must be any of "
 "these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2067
+#: includes/api/class-wc-api-products.php:2069
 #: includes/api/v2/class-wc-api-products.php:2069
 msgid ""
 "Invalid product attribute order_by type - the product attribute order_by "
 "type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2092
+#: includes/api/class-wc-api-products.php:2094
 #: includes/api/v2/class-wc-api-products.php:2094
 msgid "You do not have permission to create product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2174
+#: includes/api/class-wc-api-products.php:2176
 #: includes/api/v2/class-wc-api-products.php:2176
 msgid "You do not have permission to edit product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2220
+#: includes/api/class-wc-api-products.php:2222
 #: includes/api/v2/class-wc-api-products.php:2222
 msgid "Could not edit the attribute"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2247
+#: includes/api/class-wc-api-products.php:2249
 #: includes/api/v2/class-wc-api-products.php:2249
 msgid "You do not have permission to delete product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2269
+#: includes/api/class-wc-api-products.php:2271
 #: includes/api/v2/class-wc-api-products.php:2271
 msgid "Could not delete the attribute"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2287
+#: includes/api/class-wc-api-products.php:2289
 #: includes/api/class-wc-api-resource.php:386
 #: includes/api/v1/class-wc-api-resource.php:325
 #: includes/api/v2/class-wc-api-products.php:2289
@@ -5897,7 +5897,7 @@ msgstr ""
 msgid "Deleted %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2308
+#: includes/api/class-wc-api-products.php:2310
 #: includes/api/v2/class-wc-api-products.php:2310
 msgid "Invalid product SKU"
 msgstr ""
@@ -6330,37 +6330,37 @@ msgid ""
 "apologise for any inconvenience caused."
 msgstr ""
 
-#: includes/class-wc-cart.php:688
+#: includes/class-wc-cart.php:681
 msgid "Get cart should not be called before the wp_loaded action."
 msgstr ""
 
-#: includes/class-wc-cart.php:895 includes/class-wc-cart.php:930
+#: includes/class-wc-cart.php:888 includes/class-wc-cart.php:923
 #: includes/class-wc-frontend-scripts.php:257 includes/wc-cart-functions.php:85
 #: templates/cart/mini-cart.php:76
 msgid "View Cart"
 msgstr ""
 
-#: includes/class-wc-cart.php:895
+#: includes/class-wc-cart.php:888
 msgid "You cannot add another &quot;%s&quot; to your cart."
 msgstr ""
 
-#: includes/class-wc-cart.php:901
+#: includes/class-wc-cart.php:894
 msgid "Sorry, this product cannot be purchased."
 msgstr ""
 
-#: includes/class-wc-cart.php:906
+#: includes/class-wc-cart.php:899
 msgid ""
 "You cannot add &quot;%s&quot; to the cart because the product is out of "
 "stock."
 msgstr ""
 
-#: includes/class-wc-cart.php:910
+#: includes/class-wc-cart.php:903
 msgid ""
 "You cannot add that amount of &quot;%s&quot; to the cart because there is "
 "not enough stock (%s remaining)."
 msgstr ""
 
-#: includes/class-wc-cart.php:931
+#: includes/class-wc-cart.php:924
 msgid ""
 "You cannot add that amount to the cart &mdash; we have %s in stock and you "
 "already have %s in your cart."
@@ -9854,7 +9854,7 @@ msgstr ""
 msgid "Checkout"
 msgstr ""
 
-#: templates/cart/proceed-to-checkout-button.php:21
+#: templates/cart/proceed-to-checkout-button.php:16
 msgid "Proceed to Checkout"
 msgstr ""
 
@@ -10457,7 +10457,7 @@ msgstr ""
 msgid "Clear selection"
 msgstr ""
 
-#: templates/single-product/add-to-cart/variable.php:96
+#: templates/single-product/add-to-cart/variable.php:98
 msgid "This product is currently out of stock and unavailable."
 msgstr ""
 
