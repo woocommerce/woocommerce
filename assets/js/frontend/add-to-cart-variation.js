@@ -25,7 +25,7 @@
 		// On clicking the reset variation button
 		.on( 'click', '.reset_variations', function() {
 			$form.find( '.variations select' ).val( '' ).change();
-			$form.triggerHandler( 'reset_data' );
+			$form.trigger( 'reset_data' );
 			return false;
 		} )
 
@@ -43,8 +43,8 @@
 				}
 			});
 			$form.find( '.woocommerce-variation-description' ).remove();
-			$form.triggerHandler( 'reset_image' );
-			$form.find( '.single_variation_wrap' ).slideUp( 200 ).triggerHandler( 'hide_variation' );
+			$form.trigger( 'reset_image' );
+			$form.find( '.single_variation_wrap' ).slideUp( 200 ).trigger( 'hide_variation' );
 		} )
 
 		// Reset product image
@@ -110,16 +110,16 @@
 								$form.find( 'input[name="variation_id"], input.variation_id' )
 									.val( variation.variation_id )
 									.change();
-								$form.triggerHandler( 'found_variation', [ variation ] );
+								$form.trigger( 'found_variation', [ variation ] );
 							} else {
-								$form.triggerHandler( 'reset_data' );
+								$form.trigger( 'reset_data' );
 								$form.find( '.single_variation_wrap' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
 								$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
 							}
 						}
 					} );
 				} else {
-					$form.triggerHandler( 'reset_data' );
+					$form.trigger( 'reset_data' );
 				}
 				if ( some_attributes_chosen ) {
 					if ( $reset_variations.css( 'visibility' ) === 'hidden' ) {
@@ -129,20 +129,20 @@
 					$reset_variations.css( 'visibility', 'hidden' );
 				}
 			} else {
-				$form.triggerHandler( 'woocommerce_variation_select_change' );
-				$form.triggerHandler( 'check_variations', [ '', false ] );
+				$form.trigger( 'woocommerce_variation_select_change' );
+				$form.trigger( 'check_variations', [ '', false ] );
 				$( this ).blur();
 			}
 
 			// Custom event for when variation selection has been changed
-			$form.triggerHandler( 'woocommerce_variation_has_changed' );
+			$form.trigger( 'woocommerce_variation_has_changed' );
 		} )
 
 		// Upon gaining focus
 		.on( 'focusin touchstart', '.variations select', function() {
 			if ( ! $use_ajax ) {
-				$form.triggerHandler( 'woocommerce_variation_select_focusin' );
-				$form.triggerHandler( 'check_variations', [ $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' ), true ] );
+				$form.trigger( 'woocommerce_variation_select_focusin' );
+				$form.trigger( 'check_variations', [ $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' ), true ] );
 			}
 		} )
 
@@ -269,7 +269,7 @@
 				$form.find( '.single_variation_wrap' ).prepend( '<div class="woocommerce-variation-description">' + variation.variation_description + '</div>' );
 			}
 
-			$single_variation_wrap.slideDown( 200 ).triggerHandler( 'show_variation', [ variation ] );
+			$single_variation_wrap.slideDown( 200 ).trigger( 'show_variation', [ variation ] );
 		})
 
 		// Check variations
@@ -312,13 +312,13 @@
 					$form.find( 'input[name="variation_id"], input.variation_id' )
 						.val( variation.variation_id )
 						.change();
-					$form.triggerHandler( 'found_variation', [ variation ] );
+					$form.trigger( 'found_variation', [ variation ] );
 				} else {
 					// Nothing found - reset fields
 					$form.find( '.variations select' ).val( '' );
 
 					if ( ! focus ) {
-						$form.triggerHandler( 'reset_data' );
+						$form.trigger( 'reset_data' );
 					}
 
 					window.alert( wc_add_to_cart_variation_params.i18n_no_matching_variations_text );
@@ -326,14 +326,14 @@
 
 			} else {
 
-				$form.triggerHandler( 'update_variation_values', [ matching_variations ] );
+				$form.trigger( 'update_variation_values', [ matching_variations ] );
 
 				if ( ! focus ) {
-					$form.triggerHandler( 'reset_data' );
+					$form.trigger( 'reset_data' );
 				}
 
 				if ( ! exclude ) {
-					$form.find( '.single_variation_wrap' ).slideUp( 200 ).triggerHandler( 'hide_variation' );
+					$form.find( '.single_variation_wrap' ).slideUp( 200 ).trigger( 'hide_variation' );
 				}
 			}
 			if ( some_attributes_chosen ) {
@@ -424,10 +424,10 @@
 			});
 
 			// Custom event for when variations have been updated
-			$form.triggerHandler( 'woocommerce_update_variation_values' );
+			$form.trigger( 'woocommerce_update_variation_values' );
 		});
 
-		$form.triggerHandler( 'wc_variation_form' );
+		$form.trigger( 'wc_variation_form' );
 
 		return $form;
 	};
