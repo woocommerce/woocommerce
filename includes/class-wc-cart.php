@@ -651,8 +651,8 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_remove_url( $cart_item_key ) {
-			$cart_page_id = wc_get_page_id('cart');
-			return apply_filters( 'woocommerce_get_remove_url', $cart_page_id ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' );
+			$cart_page_url = wc_get_page_permalink('cart');
+			return apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' );
 		}
 
 		/**
@@ -662,13 +662,13 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_undo_url( $cart_item_key ) {
-			$cart_page_id = wc_get_page_id( 'cart' );
+			$cart_page_url = wc_get_page_permalink( 'cart' );
 
 			$query_args = array(
 				'undo_item' => $cart_item_key,
 			);
 
-			return apply_filters( 'woocommerce_get_undo_url', $cart_page_id ? wp_nonce_url( add_query_arg( $query_args, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' );
+			return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '' );
 		}
 
 		/**
