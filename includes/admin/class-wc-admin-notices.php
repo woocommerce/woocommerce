@@ -160,6 +160,10 @@ class WC_Admin_Notices {
 	public function translation_upgrade_notice() {
 		$screen = get_current_screen();
 
+		if ( 'en_US' === get_locale() ) {
+			self::hide_translation_upgrade_notice();
+		}
+
 		if ( 'update-core' !== $screen->id ) {
 			include( 'views/html-notice-translation-upgrade.php' );
 		}
