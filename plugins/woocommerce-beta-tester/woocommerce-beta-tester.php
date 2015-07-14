@@ -21,13 +21,11 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 	 * WC_Beta_Tester Main Class
 	 */
 	class WC_Beta_Tester {
-		/**
-		 * @var $config the config for the updater
-		 * @access public
-		 */
-		var $config;
 
-		/** @var WC_Beta_Tester The single instance of the class */
+		/** Config */
+		private $config = array();
+
+		/** Github Data */
 		protected static $_instance = null;
 
 		/**
@@ -38,34 +36,50 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		}
 
 		/**
+		 * Ran on activation to flush update cache
+		 */
+		public static function activate() {
+			delete_site_transient( 'update_plugins' );
+		}
+
+		/**
 		 * Constructor
 		 */
 		public function __construct() {
 			if ( is_admin() ) {
-				$plugin_data  = $this->get_plugin_data();
 				$this->config = array(
-					'slug'               => 'woocommerce',
+					'slug'               => 'woocommerce/woocommerce.php',
 					'proper_folder_name' => 'woocommerce',
 					'api_url'            => 'https://api.github.com/repos/woothemes/woocommerce',
-					'raw_url'            => 'https://raw.github.com/woothemes/woocommerce/master',
 					'github_url'         => 'https://github.com/woothemes/woocommerce',
 					'requires'           => '4.2',
 					'tested'             => '4.2',
-					'readme'             => 'readme.txt',
-					'new_version'        => $this->get_new_version(),
-					'last_updated'       => $this->get_date(),
-					'description'        => $this->get_description(),
-					'zip_url'            => 'https://github.com/woothemes/woocommerce/zipball/' . $this->config['new_version'],
-					'plugin_name'        => $plugin_data['Name'],
-					'version'            => $plugin_data['Version'],
-					'author'             => $plugin_data['Author'],
-					'homepage'           => $plugin_data['PluginURI']
+					'readme'             => 'readme.txt'
 				);
+				$this->set_update_args();
+
+					var_dump($this->config);
 
 				add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
 				add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
 				add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 			}
+		}
+
+		/**
+		 * Update args
+		 * @return array
+		 */
+		public function set_update_args() {
+			$plugin_data                    = $this->get_plugin_data();
+			$this->config[ 'plugin_name' ]  = $plugin_data['Name'];
+			$this->config[ 'version' ]      = $plugin_data['Version'];
+			$this->config[ 'author' ]       = $plugin_data['Author'];
+			$this->config[ 'homepage' ]     = $plugin_data['PluginURI'];
+			$this->config[ 'new_version' ]  = $this->get_latest_tag();
+			$this->config[ 'last_updated' ] = $this->get_date();
+			$this->config[ 'description' ]  = $this->get_description();
+			$this->config[ 'zip_url' ]      = 'https://github.com/woothemes/woocommerce/zipball/' . $this->config[ 'new_version' ];
 		}
 
 		/**
@@ -83,12 +97,12 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 * @since 1.0
 		 * @return int $version the version number
 		 */
-		public function get_new_version() {
+		public function get_latest_tag() {
 			$tagged_version = get_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
 
 			if ( $this->overrule_transients() || empty( $tagged_version ) ) {
 
-				$raw_response = $this->remote_get( trailingslashit( $this->config['api_url'] ) . '/tags/' );
+				$raw_response = $this->remote_get( trailingslashit( $this->config['api_url'] ) . 'tags' );
 
 				if ( is_wp_error( $raw_response ) ) {
 					return false;
@@ -129,7 +143,7 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 * @return array $github_data the data
 		 */
 		public function get_github_data() {
-			if ( isset( $this->github_data ) && ! empty( $this->github_data ) ) {
+			if ( ! empty( $this->github_data ) ) {
 				$github_data = $this->github_data;
 			} else {
 				$github_data = get_site_transient( md5( $this->config['slug'] ) . '_github_data' );
@@ -182,7 +196,7 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 * @return object $data the data
 		 */
 		public function get_plugin_data() {
-			return get_plugin_data( WP_PLUGIN_DIR.'/'.$this->config['slug'] );
+			return get_plugin_data( WP_PLUGIN_DIR . '/' . $this->config['slug'] );
 		}
 
 		/**
@@ -198,6 +212,12 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 			if ( empty( $transient->checked ) ) {
 				return $transient;
 			}
+
+			// Clear our transient
+			delete_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
+
+			// Update tags
+			$this->set_update_args();
 
 			// check the version and decide if it's new
 			$update = version_compare( $this->config['new_version'], $this->config['version'] );
@@ -275,6 +295,8 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		}
 	}
 
-	add_action( 'init', array( 'WC_Beta_Tester', 'instance' ) );
+	register_activation_hook( __FILE__, array( 'WC_Beta_Tester', 'activate' ) );
+
+	add_action( 'admin_init', array( 'WC_Beta_Tester', 'instance' ) );
 
 endif;
