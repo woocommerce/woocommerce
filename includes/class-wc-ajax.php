@@ -734,8 +734,11 @@ class WC_AJAX {
 			die(-1);
 		}
 
+		global $post;
+
 		$post_id = intval( $_POST['post_id'] );
-		$loop = intval( $_POST['loop'] );
+		$post    = get_post( $post_id ); // Set $post global so its available like within the admin screens
+		$loop    = intval( $_POST['loop'] );
 
 		$variation = array(
 			'post_title'   => 'Product #' . $post_id . ' Variation',
