@@ -606,7 +606,7 @@ jQuery( function( $ ) {
 							changes      = parseInt( $( '#variable_product_options .woocommerce_variations' ).attr( 'data-total' ), 10 ) * -1;
 						}
 					}
-				break;
+					break;
 				case 'variable_regular_price_increase' :
 				case 'variable_regular_price_decrease' :
 				case 'variable_sale_price_increase' :
@@ -620,7 +620,7 @@ jQuery( function( $ ) {
 							data.value = accounting.unformat( value, woocommerce_admin.mon_decimal_point );
 						}
 					}
-				break;
+					break;
 				case 'variable_regular_price' :
 				case 'variable_sale_price' :
 				case 'variable_stock' :
@@ -635,7 +635,7 @@ jQuery( function( $ ) {
 					if ( value != null ) {
 						data.value = value;
 					}
-				break;
+					break;
 				case 'variable_sale_schedule' :
 					data.date_from = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_start );
 					data.date_to   = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_end );
@@ -647,13 +647,18 @@ jQuery( function( $ ) {
 					if ( null === data.date_to ) {
 						data.date_to = false;
 					}
-				break;
+					break;
 				default :
 					$( 'select.variation_actions' ).trigger( do_variation_action );
-				break;
+					break;
 			}
 
-			wc_meta_boxes_product_variations_ajax.check_for_changes();
+			if ( 'delete_all' === do_variation_action && data.allowed ) {
+				$( '#variable_product_options .variation-needs-update' ).removeClass( 'variation-needs-update' );
+			} else {
+				wc_meta_boxes_product_variations_ajax.check_for_changes();
+			}
+
 			wc_meta_boxes_product_variations_ajax.block();
 
 			$.ajax({
