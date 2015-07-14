@@ -634,7 +634,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
-			$checkout_url   = wc_get_page_permalink( 'checkout' );
+			$checkout_url = wc_get_page_permalink( 'checkout' );
 			if ( $checkout_url ) {
 				// Force SSL if needed
 				if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
@@ -651,7 +651,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_remove_url( $cart_item_key ) {
-			$cart_page_url = wc_get_page_permalink('cart');
+			$cart_page_url = wc_get_page_permalink( 'cart' );
 			return apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' );
 		}
 
