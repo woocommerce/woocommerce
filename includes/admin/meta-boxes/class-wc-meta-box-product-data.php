@@ -654,7 +654,7 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="toolbar toolbar-top">
 					<select id="field_to_edit" class="variation_actions">
-						<option value="add_variation"><?php _e( 'Add Variation', 'woocommerce' ); ?></option>
+						<option value="add_variation"><?php _e( 'Add variation', 'woocommerce' ); ?></option>
 						<option value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
 						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
@@ -663,13 +663,13 @@ class WC_Meta_Box_Product_Data {
 							<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
 						</optgroup>
 						<optgroup label="<?php esc_attr_e( 'Pricing', 'woocommerce' ); ?>">
-							<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
-							<option value="variable_regular_price_increase"><?php _e( 'Prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_regular_price_decrease"><?php _e( 'Prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price_increase"><?php _e( 'Sale prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price_decrease"><?php _e( 'Sale prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_schedule"><?php _e( 'Scheduled sale dates', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price"><?php _e( 'Set regular prices', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price_increase"><?php _e( 'Increase regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price_decrease"><?php _e( 'Decrease regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price"><?php _e( 'Set sale prices', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price_increase"><?php _e( 'Increase sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price_decrease"><?php _e( 'Decrease sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_schedule"><?php _e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>
 						</optgroup>
 						<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
 							<option value="toggle_manage_stock"><?php _e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
@@ -683,7 +683,7 @@ class WC_Meta_Box_Product_Data {
 						</optgroup>
 						<optgroup label="<?php esc_attr_e( 'Downloadable products', 'woocommerce' ); ?>">
 							<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
-							<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
+							<option value="variable_download_expiry"><?php _e( 'Download expiry', 'woocommerce' ); ?></option>
 						</optgroup>
 						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					</select>
