@@ -2377,7 +2377,10 @@ class WC_AJAX {
 			die( -1 );
 		}
 
+		global $post;
+
 		$product_id = absint( $_POST['product_id'] );
+		$post       = get_post( $product_id ); // Set $post global so its available like within the admin screens
 		$per_page   = ! empty( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
 		$page       = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
 
