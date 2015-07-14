@@ -342,26 +342,10 @@ jQuery( function( $ ) {
 		 * @return {object}
 		 */
 		get_variations_fields: function( fields ) {
-			var data  = {},
-				index = 0;
-
-			fields.each( function( i, element ) {
-				$.each( $( ':input', element ).serializeArray(), function( key, input ) {
-					var name = input.name.replace( /\[.*\]/g, '' );
-
-					if ( ! data.hasOwnProperty( name ) ) {
-						data[ name ] = {};
-					}
-
-					data[ name ][ index ] = input.value;
-				});
-
-				index++;
-			});
+			var data = $( ':input', fields ).serializeJSON();
 
 			$( '.variations-defaults select' ).each( function( index, element ) {
 				var select = $( element );
-
 				data[ select.attr( 'name' ) ] = select.val();
 			});
 
