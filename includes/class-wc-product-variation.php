@@ -410,6 +410,15 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Returns the tax status. Always use parent data.
+	 *
+	 * @return string
+	 */
+	public function get_tax_status() {
+		return $this->parent->get_tax_status();
+	}
+
+	/**
 	 * Returns whether or not the product is in stock.
 	 *
 	 * @return bool

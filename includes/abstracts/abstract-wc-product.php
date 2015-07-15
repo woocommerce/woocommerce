@@ -488,7 +488,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_taxable() {
-		$taxable = $this->tax_status == 'taxable' && wc_tax_enabled() ? true : false;
+		$taxable = $this->get_tax_status() === 'taxable' && wc_tax_enabled() ? true : false;
 		return apply_filters( 'woocommerce_product_is_taxable', $taxable, $this );
 	}
 
@@ -498,7 +498,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_shipping_taxable() {
-		return $this->tax_status=='taxable' || $this->tax_status=='shipping' ? true : false;
+		return $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping' ? true : false;
 	}
 
 	/**
