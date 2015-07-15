@@ -63,7 +63,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		$url = admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&edit-key=' . $key['key_id'] );
 
 		$output = '<strong>';
-		$output .= '<a href="' . esc_url( $url ) . '">';
+		$output .= '<a href="' . esc_url( $url ) . '" class="row-title">';
 		if ( empty( $key['description'] ) ) {
 			$output .= esc_html__( 'API Key', 'woocommerce' );
 		} else {

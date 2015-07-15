@@ -453,7 +453,7 @@ class WC_Admin_Post_Types {
 				$title            = _draft_or_post_title();
 				$post_type_object = get_post_type_object( $post->post_type );
 
-				echo '<a href="' . esc_attr( $edit_link ) . '">' . esc_html( $title ). '</a>';
+				echo '<strong><a href="' . esc_attr( $edit_link ) . '" class="row-title">' . esc_html( $title ). '</a></strong>';
 
 				_post_states( $post );
 
@@ -703,7 +703,7 @@ class WC_Admin_Post_Types {
 					}
 				}
 
-				printf( _x( '%s by %s', 'Order number by X', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
+				printf( _x( '%s by %s', 'Order number by X', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '" class="row-title"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
 
 				if ( $the_order->billing_email ) {
 					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
