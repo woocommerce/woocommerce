@@ -338,11 +338,11 @@ class WC_Download_Handler {
 	 * Check and set certain server config variables to ensure downloads work as intended.
 	 */
 	private static function check_server_config() {
-		if ( ! ini_get('safe_mode') ) {
-			@set_time_limit(0);
+		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
+			set_time_limit( 0 );
 		}
-		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() ) {
-			@set_magic_quotes_runtime(0);
+		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() && version_compare( phpversion(), '5.4', '<' ) ) {
+			set_magic_quotes_runtime( 0 );
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 );
