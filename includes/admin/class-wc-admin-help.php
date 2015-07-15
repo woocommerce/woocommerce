@@ -69,7 +69,7 @@ class WC_Admin_Help {
 				'title' => __( 'Email Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/svcaftq4xv?videoFoam=true'
 			),
-			'wc-settings-webhooks' => array(
+			'wc-settings-api' => array(
 				'title' => __( 'Webhook Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq?videoFoam=true'
 			),
@@ -109,7 +109,7 @@ class WC_Admin_Help {
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
 			),
-			'product_page_product_attributes' => array(
+			'product_attributes' => array(
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
 			),
