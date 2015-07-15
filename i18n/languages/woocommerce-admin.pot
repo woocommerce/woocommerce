@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.4.0-dev Admin\n"
+"Project-Id-Version: WooCommerce 2.4.0-beta-3 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-07-13 14:03:09+00:00\n"
+"POT-Creation-Date: 2015-07-15 19:40:51+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -106,133 +106,133 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:137
+#: includes/admin/class-wc-admin-assets.php:138
 msgid "Please enter in decimal (%s) format without thousand separators."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:138
+#: includes/admin/class-wc-admin-assets.php:139
 msgid ""
 "Please enter in monetary decimal (%s) format without thousand separators "
 "and currency symbols."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:139
+#: includes/admin/class-wc-admin-assets.php:140
 msgid "Please enter in country code with two capital letters."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:140
+#: includes/admin/class-wc-admin-assets.php:141
 msgid "Please enter in a value less than the regular price."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:175
+#: includes/admin/class-wc-admin-assets.php:176
 msgid ""
 "Are you sure you want to link all variations? This will create a new "
 "variation for each and every possible combination of variation attributes "
 "(max 50 per run)."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:176
+#: includes/admin/class-wc-admin-assets.php:177
 msgid "Enter a value"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:177
+#: includes/admin/class-wc-admin-assets.php:178
 msgid "Enter a value (fixed or %)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:178
+#: includes/admin/class-wc-admin-assets.php:179
 msgid "Are you sure you want to delete all variations? This cannot be undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:179
+#: includes/admin/class-wc-admin-assets.php:180
 msgid "Last warning, are you sure?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:180
+#: includes/admin/class-wc-admin-assets.php:181
 #: includes/admin/class-wc-admin-taxonomies.php:129
 #: includes/admin/class-wc-admin-taxonomies.php:220
 msgid "Choose an image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:181
+#: includes/admin/class-wc-admin-assets.php:182
 msgid "Set variation image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:182
+#: includes/admin/class-wc-admin-assets.php:183
 msgid "variation added"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:183
+#: includes/admin/class-wc-admin-assets.php:184
 msgid "variations added"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:184
+#: includes/admin/class-wc-admin-assets.php:185
 msgid "No variations added"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:185
+#: includes/admin/class-wc-admin-assets.php:186
 msgid "Are you sure you want to remove this variation?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:186
+#: includes/admin/class-wc-admin-assets.php:187
 msgid "Sale start date (YYYY-MM-DD format or leave blank)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:187
+#: includes/admin/class-wc-admin-assets.php:188
 msgid "Sale end date  (YYYY-MM-DD format or leave blank)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:188
+#: includes/admin/class-wc-admin-assets.php:189
 msgid "Save changes before changing page?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:189
+#: includes/admin/class-wc-admin-assets.php:190
 msgid "%qty% variation"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:190
+#: includes/admin/class-wc-admin-assets.php:191
 msgid "%qty% variations"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:202
-#: includes/admin/class-wc-admin-assets.php:323
+#: includes/admin/class-wc-admin-assets.php:203
+#: includes/admin/class-wc-admin-assets.php:324
 #: includes/admin/settings/views/html-webhooks-edit.php:50
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:212
+#: includes/admin/class-wc-admin-assets.php:213
 msgid ""
 "Are you sure you want to remove the selected items? If you have previously "
 "reduced this item's stock, or this order was submitted by a customer, you "
 "will need to manually restore the item's stock."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:213
+#: includes/admin/class-wc-admin-assets.php:214
 msgid "Please select some items."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:214
+#: includes/admin/class-wc-admin-assets.php:215
 msgid "Are you sure you wish to process this refund? This action cannot be undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:215
+#: includes/admin/class-wc-admin-assets.php:216
 msgid "Are you sure you wish to delete this refund? This action cannot be undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:216
+#: includes/admin/class-wc-admin-assets.php:217
 msgid ""
 "Are you sure you wish to delete this tax column? This action cannot be "
 "undone."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:217
+#: includes/admin/class-wc-admin-assets.php:218
 msgid "Remove this item meta?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:218
+#: includes/admin/class-wc-admin-assets.php:219
 msgid "Remove this attribute?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:219
+#: includes/admin/class-wc-admin-assets.php:220
 #: includes/admin/class-wc-admin-attributes.php:267
 #: includes/admin/class-wc-admin-attributes.php:322
 #: includes/admin/class-wc-admin-attributes.php:356
@@ -251,71 +251,71 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:220
+#: includes/admin/class-wc-admin-assets.php:221
 #: includes/admin/meta-boxes/views/html-product-attribute.php:3
 #: includes/admin/meta-boxes/views/html-variation-admin.php:17
 msgid "Remove"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:221
+#: includes/admin/class-wc-admin-assets.php:222
 #: includes/admin/meta-boxes/views/html-order-download-permission.php:11
 #: includes/admin/meta-boxes/views/html-product-attribute.php:4
 #: includes/admin/meta-boxes/views/html-variation-admin.php:18
 msgid "Click to toggle"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:222
+#: includes/admin/class-wc-admin-assets.php:223
 #: includes/admin/meta-boxes/views/html-product-attribute.php:25
 msgid "Value(s)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:223
+#: includes/admin/class-wc-admin-assets.php:224
 msgid "Enter some text, or some attributes by pipe (|) separating values."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:224
+#: includes/admin/class-wc-admin-assets.php:225
 #: includes/admin/meta-boxes/views/html-product-attribute.php:66
 msgid "Visible on the product page"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:225
+#: includes/admin/class-wc-admin-assets.php:226
 #: includes/admin/meta-boxes/views/html-product-attribute.php:72
 msgid "Used for variations"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:226
+#: includes/admin/class-wc-admin-assets.php:227
 msgid "Enter a name for the new attribute term:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:227
+#: includes/admin/class-wc-admin-assets.php:228
 msgid "Calculate totals based on order items, discounts, and shipping?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:228
+#: includes/admin/class-wc-admin-assets.php:229
 msgid ""
 "Calculate line taxes? This will calculate taxes based on the customers "
 "country. If no billing/shipping is set it will use the store base country."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:229
+#: includes/admin/class-wc-admin-assets.php:230
 msgid ""
 "Copy billing information to shipping information? This will remove any "
 "currently entered shipping information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:230
+#: includes/admin/class-wc-admin-assets.php:231
 msgid ""
 "Load the customer's billing information? This will remove any currently "
 "entered billing information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:231
+#: includes/admin/class-wc-admin-assets.php:232
 msgid ""
 "Load the customer's shipping information? This will remove any currently "
 "entered shipping information."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:232
+#: includes/admin/class-wc-admin-assets.php:233
 #: includes/admin/class-wc-admin-post-types.php:218
 #: includes/admin/class-wc-admin-post-types.php:2013
 #: includes/admin/views/html-bulk-edit-product.php:197
@@ -323,26 +323,26 @@ msgstr ""
 msgid "Featured"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:235
+#: includes/admin/class-wc-admin-assets.php:236
 msgid "No customer selected"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:259
+#: includes/admin/class-wc-admin-assets.php:260
 msgid ""
 "Could not grant access - the user may already have permission for this file "
 "or billing email is not set. Ensure the billing email is set, and the order "
 "has been saved."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:260
+#: includes/admin/class-wc-admin-assets.php:261
 msgid "Are you sure you want to revoke access to this download?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:261
+#: includes/admin/class-wc-admin-assets.php:262
 msgid "You cannot add the same tax rate twice!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:262
+#: includes/admin/class-wc-admin-assets.php:263
 msgid ""
 "Your product has variations! Before changing the product type, it is a good "
 "idea to delete the variations to avoid errors in the stock reports."
@@ -1025,7 +1025,6 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-pointers.php:141
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:666
 msgid "Prices"
 msgstr ""
 
@@ -1507,7 +1506,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:645
 #: includes/admin/class-wc-admin-post-types.php:647
 #: includes/admin/class-wc-admin-post-types.php:649
-#: includes/admin/settings/class-wc-settings-checkout.php:287
+#: includes/admin/settings/class-wc-settings-checkout.php:285
 #: includes/admin/settings/class-wc-settings-shipping.php:225
 #: includes/admin/views/html-bulk-edit-product.php:203
 #: includes/admin/views/html-bulk-edit-product.php:240
@@ -2903,70 +2902,70 @@ msgstr ""
 msgid "Thank you for selling with WooCommerce."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:102
+#: includes/admin/importers/class-wc-tax-rate-importer.php:104
 msgid "The file does not exist, please try again."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:137
+#: includes/admin/importers/class-wc-tax-rate-importer.php:139
 msgid "The CSV is invalid."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:145
+#: includes/admin/importers/class-wc-tax-rate-importer.php:147
 msgid "Import complete - imported <strong>%s</strong> tax rates."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:155
+#: includes/admin/importers/class-wc-tax-rate-importer.php:157
 msgid "All done!"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:155
+#: includes/admin/importers/class-wc-tax-rate-importer.php:157
 msgid "View Tax Rates"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:191
+#: includes/admin/importers/class-wc-tax-rate-importer.php:193
 msgid "Import Tax Rates"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:207
+#: includes/admin/importers/class-wc-tax-rate-importer.php:209
 msgid ""
 "Hi there! Upload a CSV file containing tax rates to import the contents "
 "into your shop. Choose a .csv file to upload, then click \"Upload file and "
 "import\"."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:209
+#: includes/admin/importers/class-wc-tax-rate-importer.php:211
 msgid ""
 "Tax rates need to be defined with columns in a specific order (10 columns). "
 "<a href=\"%s\">Click here to download a sample</a>."
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:217
+#: includes/admin/importers/class-wc-tax-rate-importer.php:219
 msgid ""
 "Before you can upload your import file, you will need to fix the following "
 "error:"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:226
+#: includes/admin/importers/class-wc-tax-rate-importer.php:228
 msgid "Choose a file from your computer:"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:232
+#: includes/admin/importers/class-wc-tax-rate-importer.php:234
 msgid "Maximum size: %s"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:237
+#: includes/admin/importers/class-wc-tax-rate-importer.php:239
 msgid "OR enter path to file:"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:244
+#: includes/admin/importers/class-wc-tax-rate-importer.php:246
 msgid "Delimiter"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:250
+#: includes/admin/importers/class-wc-tax-rate-importer.php:252
 msgid "Upload file and import"
 msgstr ""
 
-#: includes/admin/importers/class-wc-tax-rate-importer.php:264
+#: includes/admin/importers/class-wc-tax-rate-importer.php:266
 msgid "Sorry, there has been an error."
 msgstr ""
 
@@ -3481,7 +3480,6 @@ msgid "Leave blank for unlimited re-downloads."
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:234
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:686
 msgid "Download Expiry"
 msgstr ""
 
@@ -3694,7 +3692,6 @@ msgid ""
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:490
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:510
 msgid "Cross-Sells"
 msgstr ""
 
@@ -3702,6 +3699,10 @@ msgstr ""
 msgid ""
 "Cross-sells are products which you promote in the cart, based on the "
 "current product."
+msgstr ""
+
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:510
+msgid "Grouping"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:519
@@ -3751,7 +3752,7 @@ msgid "No default"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:657
-msgid "Add Variation"
+msgid "Add variation"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:658
@@ -3778,28 +3779,32 @@ msgstr ""
 msgid "Pricing"
 msgstr ""
 
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:666
+msgid "Set regular prices"
+msgstr ""
+
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:667
-msgid "Prices increase by (fixed amount or %)"
+msgid "Increase regular prices (fixed amount or percentage)"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:668
-msgid "Prices decrease by (fixed amount or %)"
+msgid "Decrease regular prices (fixed amount or percentage)"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:669
-msgid "Sale prices"
+msgid "Set sale prices"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:670
-msgid "Sale prices increase by (fixed amount or %)"
+msgid "Increase sale prices (fixed amount or percentage)"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:671
-msgid "Sale prices decrease by (fixed amount or %)"
+msgid "Decrease sale prices (fixed amount or percentage)"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:672
-msgid "Scheduled sale dates"
+msgid "Set scheduled sale dates"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:675
@@ -3812,6 +3817,10 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:685
 msgid "Download limit"
+msgstr ""
+
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:686
+msgid "Download expiry"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:690
@@ -6836,21 +6845,6 @@ msgstr ""
 msgid "Sold Individually?"
 msgstr ""
 
-#: includes/admin/views/html-notice-frontend-colors.php:20
-msgid ""
-"<strong>The Frontend Style options are deprecated</strong> &#8211; If you "
-"want to continue editing the colors of your store we recommended that you "
-"install the replacement WooCommerce Colors plugin from WordPress.org."
-msgstr ""
-
-#: includes/admin/views/html-notice-frontend-colors.php:21
-msgid "Install the new WooCommerce Colors plugin"
-msgstr ""
-
-#: includes/admin/views/html-notice-frontend-colors.php:21
-msgid "Hide this notice"
-msgstr ""
-
 #: includes/admin/views/html-notice-install.php:12
 msgid ""
 "<strong>Welcome to WooCommerce</strong> &#8211; You&lsquo;re almost ready "
@@ -6958,73 +6952,73 @@ msgstr ""
 msgid "http://woothemes.com"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:102
+#: includes/admin/class-wc-admin-assets.php:103
 #: includes/admin/class-wc-admin-setup-wizard.php:97
 msgctxt "enhanced select"
 msgid "One result is available, press enter to select it."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:103
+#: includes/admin/class-wc-admin-assets.php:104
 #: includes/admin/class-wc-admin-setup-wizard.php:98
 msgctxt "enhanced select"
 msgid "%qty% results are available, use up and down arrow keys to navigate."
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:104
+#: includes/admin/class-wc-admin-assets.php:105
 #: includes/admin/class-wc-admin-setup-wizard.php:99
 msgctxt "enhanced select"
 msgid "No matches found"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:105
+#: includes/admin/class-wc-admin-assets.php:106
 #: includes/admin/class-wc-admin-setup-wizard.php:100
 msgctxt "enhanced select"
 msgid "Loading failed"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:106
+#: includes/admin/class-wc-admin-assets.php:107
 #: includes/admin/class-wc-admin-setup-wizard.php:101
 msgctxt "enhanced select"
 msgid "Please enter 1 or more characters"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:107
+#: includes/admin/class-wc-admin-assets.php:108
 #: includes/admin/class-wc-admin-setup-wizard.php:102
 msgctxt "enhanced select"
 msgid "Please enter %qty% or more characters"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:108
+#: includes/admin/class-wc-admin-assets.php:109
 #: includes/admin/class-wc-admin-setup-wizard.php:103
 msgctxt "enhanced select"
 msgid "Please delete 1 character"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:109
+#: includes/admin/class-wc-admin-assets.php:110
 #: includes/admin/class-wc-admin-setup-wizard.php:104
 msgctxt "enhanced select"
 msgid "Please delete %qty% characters"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:110
+#: includes/admin/class-wc-admin-assets.php:111
 #: includes/admin/class-wc-admin-setup-wizard.php:105
 msgctxt "enhanced select"
 msgid "You can only select 1 item"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:111
+#: includes/admin/class-wc-admin-assets.php:112
 #: includes/admin/class-wc-admin-setup-wizard.php:106
 msgctxt "enhanced select"
 msgid "You can only select %qty% items"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:112
+#: includes/admin/class-wc-admin-assets.php:113
 #: includes/admin/class-wc-admin-setup-wizard.php:107
 msgctxt "enhanced select"
 msgid "Loading more results&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-assets.php:113
+#: includes/admin/class-wc-admin-assets.php:114
 #: includes/admin/class-wc-admin-setup-wizard.php:108
 msgctxt "enhanced select"
 msgid "Searching&hellip;"
