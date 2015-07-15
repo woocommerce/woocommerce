@@ -55,6 +55,28 @@ jQuery( function( $ ) {
 			}
 		},
 
+		load_datepicker: function() {
+			var wrapper = $( '#woocommerce-product-data' );
+			
+			// Datepicker fields
+			$( '.sale_price_dates_fields', wrapper ).each( function() {
+				var dates = $( this ).find( 'input' ).datepicker({
+					defaultDate:     '',
+					dateFormat:      'yy-mm-dd',
+					numberOfMonths:  1,
+					showButtonPanel: true,
+					onSelect:        function( selectedDate ) {
+						var option   = $( this ).is( '.sale_price_dates_from' ) ? 'minDate' : 'maxDate',
+							instance = $( this ).data( 'datepicker' ),
+							date     = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+
+						dates.not( this ).datepicker( 'option', option, date );
+						$( this ).change();
+					}
+				});
+			});
+		},
+
 		/**
 		 * Run actions when variations is loaded
 		 */
@@ -91,23 +113,7 @@ jQuery( function( $ ) {
 				'delay':     200
 			});
 
-			// Datepicker fields
-			$( '.sale_price_dates_fields', wrapper ).each( function() {
-				var dates = $( this ).find( 'input' ).datepicker({
-					defaultDate:     '',
-					dateFormat:      'yy-mm-dd',
-					numberOfMonths:  1,
-					showButtonPanel: true,
-					onSelect:        function( selectedDate ) {
-						var option   = $( this ).is( '.sale_price_dates_from' ) ? 'minDate' : 'maxDate',
-							instance = $( this ).data( 'datepicker' ),
-							date     = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
-
-						dates.not( this ).datepicker( 'option', option, date );
-						$( this ).change();
-					}
-				});
-			});
+			wc_meta_boxes_product_variations_actions.load_datepicker();
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
 		},
@@ -691,6 +697,8 @@ jQuery( function( $ ) {
 					wc_meta_boxes_product_variations_pagenav.go_to_page( 1, changes );
 				}
 			});
+
+			wc_meta_boxes_product_variations_actions.load_datepicker();
 		}
 	};
 
