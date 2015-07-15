@@ -185,7 +185,7 @@ class WC_Geolocation {
 				$handle   = @fopen( self::get_local_database_path( $tmp_database_version ), 'w' );
 
 				if ( $gzhandle && $handle ) {
-					while ( ( $string = gzread( $gzhandle, 4096 ) ) != false ) {
+					while ( $string = gzread( $gzhandle, 4096 ) ) {
 						fwrite( $handle, $string, strlen( $string ) );
 					}
 					gzclose( $gzhandle );
