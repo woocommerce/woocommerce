@@ -298,9 +298,6 @@ class WC_Shipping {
 
 		// Get chosen methods for each package
 		foreach ( $this->packages as $i => $package ) {
-
-			$_cheapest_cost   = false;
-			$_cheapest_method = false;
 			$chosen_method    = false;
 			$method_count     = false;
 
