@@ -27,7 +27,7 @@ GitHub is for *bug reports and contributions only* - if you have a support quest
 * When committing, reference your issue (#1234) and include a note about the fix.
 * Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository. Existing maintenance branches will be maintained of by WooCommerce developers.
 * Please **don't** modify the changelog - this will be maintained by the WooCommerce developers.
-* Please **don't** add your localizations or update the .pot files - this will be maintanied by the WooCommerce developers. To contribute to the localization of WooCommerce, please join the [WooCommerce Transifex project](https://www.transifex.com/projects/p/woocommerce/).
+* Please **don't** add your localizations or update the .pot files - this will be maintained by the WooCommerce developers. To contribute to the localization of WooCommerce, please join the [WooCommerce Transifex project](https://www.transifex.com/projects/p/woocommerce/).
 
 At this point you're waiting on us to merge your pull request. We'll review all pull requests, and make suggestions and changes if necessary.
 
