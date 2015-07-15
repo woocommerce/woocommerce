@@ -608,7 +608,7 @@ class WC_Admin_Setup_Wizard {
 						'tax_rate_order'    => $loop ++,
 						'tax_rate_class'    => ''
 					);
-					$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+					WC_Tax::_insert_tax_rate( $tax_rate );
 				}
 			}
 		}
