@@ -507,7 +507,7 @@ class WC_Meta_Box_Product_Data {
 				<div class="options_group grouping show_if_simple show_if_external">
 
 					<p class="form-field">
-						<label for="parent_id"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
+						<label for="parent_id"><?php _e( 'Grouping', 'woocommerce' ); ?></label>
 						<input type="hidden" class="wc-product-search" style="width: 50%;" id="parent_id" name="parent_id" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_grouped_products" data-multiple="false" data-selected="<?php
 							$parent_id = absint( $post->post_parent );
 							$parent    = wc_get_product( $parent_id );
