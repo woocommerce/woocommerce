@@ -46,24 +46,18 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 * Constructor
 		 */
 		public function __construct() {
-			if ( is_admin() ) {
-				$this->config = array(
-					'slug'               => 'woocommerce/woocommerce.php',
-					'proper_folder_name' => 'woocommerce',
-					'api_url'            => 'https://api.github.com/repos/woothemes/woocommerce',
-					'github_url'         => 'https://github.com/woothemes/woocommerce',
-					'requires'           => '4.2',
-					'tested'             => '4.2',
-					'readme'             => 'readme.txt'
-				);
-				$this->set_update_args();
-
-					var_dump($this->config);
-
-				add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
-				add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
-				add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
-			}
+			$this->config = array(
+				'plugin_file'        => 'woocommerce/woocommerce.php',
+				'slug'               => 'woocommerce',
+				'proper_folder_name' => 'woocommerce',
+				'api_url'            => 'https://api.github.com/repos/woothemes/woocommerce',
+				'github_url'         => 'https://github.com/woothemes/woocommerce',
+				'requires'           => '4.2',
+				'tested'             => '4.2'
+			);
+			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
+			add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
+			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		}
 
 		/**
@@ -102,7 +96,7 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 
 			if ( $this->overrule_transients() || empty( $tagged_version ) ) {
 
-				$raw_response = $this->remote_get( trailingslashit( $this->config['api_url'] ) . 'tags' );
+				$raw_response = wp_remote_get( trailingslashit( $this->config['api_url'] ) . 'tags' );
 
 				if ( is_wp_error( $raw_response ) ) {
 					return false;
@@ -125,18 +119,6 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		}
 
 		/**
-		 * Interact with GitHub
-		 *
-		 * @param string $query
-		 *
-		 * @since 1.6
-		 * @return mixed
-		 */
-		public function remote_get( $query ) {
-			return wp_remote_get( $query );
-		}
-
-		/**
 		 * Get GitHub Data from the specified repository
 		 *
 		 * @since 1.0
@@ -149,7 +131,7 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 				$github_data = get_site_transient( md5( $this->config['slug'] ) . '_github_data' );
 
 				if ( $this->overrule_transients() || ( ! isset( $github_data ) || ! $github_data || '' == $github_data ) ) {
-					$github_data = $this->remote_get( $this->config['api_url'] );
+					$github_data = wp_remote_get( $this->config['api_url'] );
 
 					if ( is_wp_error( $github_data ) ) {
 						return false;
@@ -175,7 +157,7 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 */
 		public function get_date() {
 			$_date = $this->get_github_data();
-			return ( ! empty( $_date->updated_at ) ) ? date( 'Y-m-d', strtotime( $_date->updated_at ) ) : false;
+			return ! empty( $_date->updated_at ) ? date( 'Y-m-d', strtotime( $_date->updated_at ) ) : false;
 		}
 
 		/**
@@ -186,7 +168,7 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 */
 		public function get_description() {
 			$_description = $this->get_github_data();
-			return ( ! empty( $_description->description ) ) ? $_description->description : false;
+			return ! empty( $_description->description ) ? $_description->description : false;
 		}
 
 		/**
@@ -196,7 +178,7 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 * @return object $data the data
 		 */
 		public function get_plugin_data() {
-			return get_plugin_data( WP_PLUGIN_DIR . '/' . $this->config['slug'] );
+			return get_plugin_data( WP_PLUGIN_DIR . '/' . $this->config['plugin_file'] );
 		}
 
 		/**
@@ -220,18 +202,19 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 			$this->set_update_args();
 
 			// check the version and decide if it's new
-			$update = version_compare( $this->config['new_version'], $this->config['version'] );
+			$update = version_compare( $this->config['new_version'], $this->config['version'], '>' );
 
-			if ( 1 === $update ) {
+			if ( $update ) {
 				$response              = new stdClass;
+				$response->plugin      = $this->config['slug'];
 				$response->new_version = $this->config['new_version'];
-				$response->slug        = $this->config['proper_folder_name'];
+				$response->slug        = $this->config['slug'];
 				$response->url         = $this->config['github_url'];
 				$response->package     = $this->config['zip_url'];
 
 				// If response is false, don't alter the transient
 				if ( false !== $response ) {
-					$transient->response[ $this->config['slug'] ] = $response;
+					$transient->response[ $this->config['plugin_file'] ] = $response;
 				}
 			}
 
@@ -253,7 +236,12 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 				return false;
 			}
 
+			// Update tags
+			$this->set_update_args();
+
 			$response->slug          = $this->config['slug'];
+			$response->plugin        = $this->config['slug'];
+			$response->name          = $this->config['plugin_name'];
 			$response->plugin_name   = $this->config['plugin_name'];
 			$response->version       = $this->config['new_version'];
 			$response->author        = $this->config['author'];
@@ -269,29 +257,22 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		}
 
 		/**
-		 * Upgrader/Updater
-		 * Move & activate the plugin, echo the update message
-		 *
-		 * @since 1.0
-		 * @param boolean $true       always true
-		 * @param mixed   $hook_extra not used
-		 * @param array   $result     the result of the move
-		 * @return array $result the result of the move
+		 * Rename the downloaded zip
 		 */
-		public function upgrader_post_install( $true, $hook_extra, $result ) {
+		public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
 			global $wp_filesystem;
 
-			// Move & Activate
-			$proper_destination    = WP_PLUGIN_DIR . '/' . $this->config['proper_folder_name'];
-			$wp_filesystem->move( $result['destination'], $proper_destination );
-			$result['destination'] = $proper_destination;
-			$activate              = activate_plugin( WP_PLUGIN_DIR . '/' . $this->config['slug'] );
+			if ( strstr( $source, '/woothemes-woocommerce-' ) ) {
+				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->config[ 'proper_folder_name' ] );
 
-			// Output the update message
-			$fail    = __( 'The plugin has been updated, but could not be reactivated. Please reactivate it manually.' );
-			$success = __( 'Plugin reactivated successfully.' );
-			echo is_wp_error( $activate ) ? $fail : $success;
-			return $result;
+				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
+					return $corrected_source;
+				} else {
+					return new WP_Error();
+				}
+			}
+
+			return $source;
 		}
 	}
 
