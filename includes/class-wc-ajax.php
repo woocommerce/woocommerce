@@ -2333,7 +2333,8 @@ class WC_AJAX {
 					'description'     => $description,
 					'permissions'     => $permissions,
 					'consumer_key'    => wc_api_hash( $consumer_key ),
-					'consumer_secret' => $consumer_secret
+					'consumer_secret' => $consumer_secret,
+					'truncated_key'   => substr( $consumer_key, -7 )
 				);
 
 				$wpdb->insert(
@@ -2341,6 +2342,7 @@ class WC_AJAX {
 					$data,
 					array(
 						'%d',
+						'%s',
 						'%s',
 						'%s',
 						'%s',

@@ -55,6 +55,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</select>
 				</td>
 			</tr>
+
+			<?php if ( 0 !== $key_id ) : ?>
+				<tr valign="top">
+					<th scope="row" class="titledesc">
+						<?php _e( 'Truncated Consumer Key', 'woocommerce' ); ?>
+					</th>
+					<td class="forminp">
+						<code>&hellip;<?php echo esc_html( $key_data['truncated_key'] ); ?></code>
+					</td>
+				</tr>
+				<tr valign="top">
+					<th scope="row" class="titledesc">
+						<?php _e( 'Last Access', 'woocommerce' ); ?>
+					</th>
+					<td class="forminp">
+						<span><?php
+							if ( ! empty( $key_data['last_access'] ) ) {
+								$date = sprintf( _x( '%1$s at %2$s', 'date and time', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key_data['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key_data['last_access'] ) ) );
+
+								echo apply_filters( 'woocommerce_api_key_last_access_datetime', $date, $key_data['last_access'] );
+							} else {
+								_e( 'Unknown', 'woocommerce' );
+							}
+						?></span>
+					</td>
+				</tr>
+			<?php endif ?>
 		</tbody>
 	</table>
 
@@ -87,7 +114,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="key_consumer_secret"><?php _e( 'Consumer Secret', 'woocommerce' ); ?></label>
+					<?php _e( 'Consumer Secret', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
 					<code id="key_consumer_secret"><%- consumer_secret %></code> <button type="button" class="button-secondary copy-key" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>

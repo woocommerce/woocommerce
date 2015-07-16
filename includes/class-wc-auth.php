@@ -204,7 +204,8 @@ class WC_Auth {
 				'description'     => $description,
 				'permissions'     => $permissions,
 				'consumer_key'    => wc_api_hash( $consumer_key ),
-				'consumer_secret' => $consumer_secret
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 )
 			),
 			array(
 				'%d',
@@ -279,7 +280,7 @@ class WC_Auth {
 	/**
 	 * Auth endpoint
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 *
 	 * @param string $route
 	 */

@@ -36,10 +36,12 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 */
 	public function get_columns() {
 		return array(
-			'cb'          => '<input type="checkbox" />',
-			'description' => __( 'Description', 'woocommerce' ),
-			'user'        => __( 'User', 'woocommerce' ),
-			'permissions' => __( 'Permissions', 'woocommerce' )
+			'cb'            => '<input type="checkbox" />',
+			'description'   => __( 'Description', 'woocommerce' ),
+			'truncated_key' => __( 'Truncated Consumer Key', 'woocommerce' ),
+			'user'          => __( 'User', 'woocommerce' ),
+			'permissions'   => __( 'Permissions', 'woocommerce' ),
+			'last_access'   => __( 'Last Access', 'woocommerce' )
 		);
 	}
 
@@ -91,6 +93,16 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Return truncated consumer key column
+	 *
+	 * @param  array $key
+	 * @return string
+	 */
+	public function column_truncated_key( $key ) {
+		return '<code>&hellip;' . esc_html( $key['truncated_key'] ) . '</code>';
+	}
+
+	/**
 	 * Return user column
 	 *
 	 * @param  array $key
@@ -134,6 +146,22 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Return last access column
+	 *
+	 * @param  array $key
+	 * @return string
+	 */
+	public function column_last_access( $key ) {
+		if ( ! empty( $key['last_access'] ) ) {
+			$date = sprintf( _x( '%1$s at %2$s', 'date and time', 'woocommerce' ), date_i18n( wc_date_format(), strtotime( $key['last_access'] ) ), date_i18n( wc_time_format(), strtotime( $key['last_access'] ) ) );
+
+			return apply_filters( 'woocommerce_api_key_last_access_datetime', $date, $key['last_access'] );
+		}
+
+		return __( 'Unknown' );
+	}
+
+	/**
 	 * Get bulk actions
 	 *
 	 * @return array
@@ -172,7 +200,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 
 		// Get the API keys
 		$keys = $wpdb->get_results( $wpdb->prepare( "
-			SELECT *
+			SELECT key_id, user_id, description, permissions, truncated_key, last_access
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE 1 = 1
 			$search
@@ -181,7 +209,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			OFFSET %d
 		 ", $per_page, $offset ), ARRAY_A );
 
-		$count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 $search" );
+		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 $search" );
 
 		$this->items = $keys;
 

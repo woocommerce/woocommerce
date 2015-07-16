@@ -357,6 +357,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   consumer_key char(64) NOT NULL,
   consumer_secret char(43) NOT NULL,
   nonces longtext NULL,
+  truncated_key char(7) NOT NULL,
+  last_access datetime NULL default null,
   PRIMARY KEY  (key_id),
   KEY consumer_key (consumer_key),
   KEY consumer_secret (consumer_secret)
