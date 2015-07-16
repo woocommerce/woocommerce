@@ -3189,9 +3189,9 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Meta
 	 * @access private
-	 * @param  array $variations
-	 * @param string meta key
-	 * @param string meta value
+	 * @param array $variations
+	 * @param string $field
+	 * @param string $value
 	 */
 	private static function variation_bulk_set_meta( $variations, $field, $value ) {
 		foreach ( $variations as $variation_id ) {

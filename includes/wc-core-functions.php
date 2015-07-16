@@ -681,7 +681,7 @@ add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
  * WooCommerce Core Supported Themes
  *
  * @since 2.2
- * @return array
+ * @return string[]
  */
 function wc_get_core_supported_themes() {
 	return array( 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
