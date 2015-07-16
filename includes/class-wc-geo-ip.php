@@ -1614,7 +1614,7 @@ class WC_Geo_IP {
 	/**
 	 * Encode string
 	 *
-	 * @param  srting $string
+	 * @param  string $string
 	 * @param  int $start
 	 * @param  int $length
 	 *
