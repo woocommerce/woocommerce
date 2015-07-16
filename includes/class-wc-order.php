@@ -18,7 +18,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @return string
 	 */
-	public function get_formatted_order_total() {
+	public function get_formatted_order_total( $tax_display = '' ) {
 		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_order_currency() ) );
 		$order_total    = $this->get_total();
 		$total_refunded = $this->get_total_refunded();

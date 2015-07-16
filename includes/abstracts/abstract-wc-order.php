@@ -1903,7 +1903,7 @@ abstract class WC_Abstract_Order {
 
 		$total_rows['order_total'] = array(
 			'label' => __( 'Total:', 'woocommerce' ),
-			'value'	=> $this->get_formatted_order_total()
+			'value'	=> $this->get_formatted_order_total( $tax_display )
 		);
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );
