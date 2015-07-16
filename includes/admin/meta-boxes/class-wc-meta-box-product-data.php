@@ -517,7 +517,7 @@ class WC_Meta_Box_Product_Data {
 							}
 							echo esc_attr( $parent_title );
 						    }
-						?>" value="<?php echo $parent_id>0?$parent_id:''; ?>" /> <img class="help_tip" data-tip='<?php _e( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+						?>" value="<?php echo $parent_id>0?$parent_id:""; ?>" /> <img class="help_tip" data-tip='<?php _e( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 					</p>
 
 					<?php
