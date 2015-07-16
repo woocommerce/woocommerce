@@ -113,7 +113,6 @@ function wc_format_list_of_items( $items ) {
  * Clear cart after payment.
  *
  * @access public
- * @return void
  */
 function wc_clear_cart_after_payment() {
 	global $wp;
@@ -159,7 +158,6 @@ function wc_cart_totals_subtotal_html() {
  * Get shipping methods
  *
  * @access public
- * @return void
  */
 function wc_cart_totals_shipping_html() {
 	$packages = WC()->shipping->get_packages();
@@ -175,7 +173,6 @@ function wc_cart_totals_shipping_html() {
  * Get taxes total
  *
  * @access public
- * @return void
  */
 function wc_cart_totals_taxes_total_html() {
 	echo apply_filters( 'woocommerce_cart_totals_taxes_total_html', wc_price( WC()->cart->get_taxes_total() ) );
@@ -186,7 +183,6 @@ function wc_cart_totals_taxes_total_html() {
  *
  * @access public
  * @param string $coupon
- * @return void
  */
 function wc_cart_totals_coupon_label( $coupon ) {
 	if ( is_string( $coupon ) )
@@ -200,7 +196,6 @@ function wc_cart_totals_coupon_label( $coupon ) {
  *
  * @access public
  * @param string $coupon
- * @return void
  */
 function wc_cart_totals_coupon_html( $coupon ) {
 	if ( is_string( $coupon ) ) {
@@ -232,7 +227,6 @@ function wc_cart_totals_coupon_html( $coupon ) {
  * Get order total html including inc tax if needed
  *
  * @access public
- * @return void
  */
 function wc_cart_totals_order_total_html() {
 	$value = '<strong>' . WC()->cart->get_total() . '</strong> ';
@@ -260,7 +254,6 @@ function wc_cart_totals_order_total_html() {
  * Get the fee value
  *
  * @param object $fee
- * @return void
  */
 function wc_cart_totals_fee_html( $fee ) {
 	$cart_totals_fee_html = ( 'excl' == WC()->cart->tax_display_cart ) ? wc_price( $fee->amount ) : wc_price( $fee->amount + $fee->tax );

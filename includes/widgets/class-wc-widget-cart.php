@@ -48,8 +48,6 @@ class WC_Widget_Cart extends WC_Widget {
 	 *
 	 * @param array $args
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		if ( is_cart() || is_checkout() ) {

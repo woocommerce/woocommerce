@@ -49,8 +49,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @see WP_Widget->form
 	 *
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	public function form( $instance ) {
 		$this->init_settings();
@@ -60,8 +58,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
 	 * Init settings after post types are registered
-	 *
-	 * @return void
 	 */
 	public function init_settings() {
 		$attribute_array      = array();
@@ -115,8 +111,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 *
 	 * @param array $args
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		global $_chosen_attributes;

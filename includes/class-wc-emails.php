@@ -367,8 +367,6 @@ class WC_Emails {
 
 	/**
 	 * Get the email addresses.
-	 *
-	 * @return void
 	 */
 	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
 		if ( $plain_text ) {

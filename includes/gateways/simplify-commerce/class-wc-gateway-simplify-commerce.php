@@ -67,8 +67,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 	/**
 	 * Init Simplify SDK.
-	 *
-	 * @return void
 	 */
 	protected function init_simplify_sdk() {
 		// Include lib
@@ -82,9 +80,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	/**
 	 * Admin Panel Options
 	 * - Options for bits like 'title' and availability on a country-by-country basis
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function admin_options() {
 		?>

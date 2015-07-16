@@ -33,8 +33,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
 	/**
 	 * init function.
-	 *
-	 * @return void
 	 */
 	public function init() {
 

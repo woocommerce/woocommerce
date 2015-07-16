@@ -203,9 +203,7 @@ class WC_Query {
 	/**
 	 * Hook into pre_get_posts to do the main product query
 	 *
-	 * @access public
 	 * @param mixed $q query object
-	 * @return void
 	 */
 	public function pre_get_posts( $q ) {
 		// We only want to affect the main query
@@ -410,9 +408,7 @@ class WC_Query {
 	/**
 	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
 	 *
-	 * @access public
 	 * @param mixed $q
-	 * @return void
 	 */
 	public function product_query( $q ) {
 
@@ -450,9 +446,6 @@ class WC_Query {
 
 	/**
 	 * Remove the query
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function remove_product_query() {
 		remove_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
@@ -468,9 +461,6 @@ class WC_Query {
 
 	/**
 	 * Remove the posts_where filter
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function remove_posts_where() {
 		remove_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
@@ -479,9 +469,6 @@ class WC_Query {
 
 	/**
 	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function get_products_in_view() {
 		global $wp_the_query;

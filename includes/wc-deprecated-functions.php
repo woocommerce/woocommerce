@@ -90,7 +90,6 @@ function woocommerce_get_formatted_product_name( $product ) {
  * Handle IPN requests for the legacy paypal gateway by calling gateways manually if needed.
  *
  * @access public
- * @return void
  */
 function woocommerce_legacy_paypal_ipn() {
 	if ( ! empty( $_GET['paypalListener'] ) && $_GET['paypalListener'] == 'paypal_standard_IPN' ) {
@@ -671,7 +670,6 @@ function woocommerce_track_product_view() {
  *
  * @since 2.2
  * @param WP_Query $q
- * @return void
  */
 function wc_shop_order_status_backwards_compatibility( $q ) {
 	if ( $q->is_main_query() ) {
@@ -719,7 +717,6 @@ add_action( 'pre_get_posts', 'wc_shop_order_status_backwards_compatibility' );
 /**
  * @since 2.3
  * @deprecated has no replacement
- * @return void
  */
 function woocommerce_compile_less_styles() {
 	_deprecated_function( 'woocommerce_compile_less_styles', '2.3' );

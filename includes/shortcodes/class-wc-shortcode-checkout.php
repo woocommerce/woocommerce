@@ -14,7 +14,6 @@ class WC_Shortcode_Checkout {
 	/**
 	 * Get the shortcode content.
 	 *
-	 * @access public
 	 * @param array $atts
 	 * @return string
 	 */
@@ -25,9 +24,7 @@ class WC_Shortcode_Checkout {
 	/**
 	 * Output the shortcode.
 	 *
-	 * @access public
 	 * @param array $atts
-	 * @return void
 	 */
 	public static function output( $atts ) {
 		global $wp;

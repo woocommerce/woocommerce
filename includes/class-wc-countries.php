@@ -308,10 +308,9 @@ class WC_Countries {
 
 	/**
 	 * Outputs the list of countries and states for use in dropdown boxes.
-	 * @param  string $selected_country (default: '')
-	 * @param  string $selected_state (default: '')
-	 * @param  bool   $escape (default: false)
-	 * @return void
+	 * @param string $selected_country (default: '')
+	 * @param string $selected_state (default: '')
+	 * @param bool   $escape (default: false)
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
 		if ( $this->countries ) foreach ( $this->countries as $key => $value ) :
@@ -320,14 +319,18 @@ class WC_Countries {
 					foreach ( $states as $state_key => $state_value ) :
 						echo '<option value="' . esc_attr( $key ) . ':' . $state_key . '"';
 
-						if ( $selected_country == $key && $selected_state == $state_key ) echo ' selected="selected"';
+						if ( $selected_country == $key && $selected_state == $state_key ) {
+							echo ' selected="selected"';
+						}
 
 						echo '>' . $value . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>';
 					endforeach;
 				echo '</optgroup>';
 			else :
 				echo '<option';
-				if ( $selected_country == $key && $selected_state == '*' ) echo ' selected="selected"';
+				if ( $selected_country == $key && $selected_state == '*' ) {
+					echo ' selected="selected"';
+				}
 				echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';
 			endif;
 		endforeach;

@@ -110,10 +110,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * set_stock_status function.
-	 *
-	 * @access public
-	 * @return void
+	 * Set stock status.
 	 */
 	public function set_stock_status( $status ) {
 		$status = 'outofstock' === $status ? 'outofstock' : 'instock';

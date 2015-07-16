@@ -84,8 +84,6 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	 *
 	 * @param array $args
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		global $wp_query, $post;

@@ -113,8 +113,6 @@ class WC_Language_Pack_Upgrader {
 
 	/**
 	 * Configure the WooCommerce translation upgrade notice
-	 *
-	 * @return void
 	 */
 	public function configure_woocommerce_upgrade_notice() {
 		WC_Admin_Notices::add_notice( 'translation_upgrade' );
@@ -156,8 +154,6 @@ class WC_Language_Pack_Upgrader {
 
 	/**
 	 * Save language version
-	 *
-	 * @return void
 	 */
 	protected function save_language_version() {
 		// Update the language pack version
@@ -171,8 +167,6 @@ class WC_Language_Pack_Upgrader {
 
 	/**
 	 * Manual language update
-	 *
-	 * @return void
 	 */
 	public function manual_language_update() {
 		if (

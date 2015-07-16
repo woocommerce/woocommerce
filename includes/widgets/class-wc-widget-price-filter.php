@@ -43,8 +43,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	 *
 	 * @param array $args
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		global $_chosen_attributes, $wpdb, $wp;

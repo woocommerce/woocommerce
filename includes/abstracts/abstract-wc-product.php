@@ -274,7 +274,6 @@ class WC_Product {
 	 * set_stock_status function.
 	 *
 	 * @param string $status
-	 * @return void
 	 */
 	public function set_stock_status( $status ) {
 
@@ -755,7 +754,6 @@ class WC_Product {
 	 * Set a products price dynamically.
 	 *
 	 * @param float $price Price to set.
-	 * @return void
 	 */
 	public function set_price( $price ) {
 		$this->price = $price;
@@ -765,7 +763,6 @@ class WC_Product {
 	 * Adjust a products price dynamically.
 	 *
 	 * @param mixed $price
-	 * @return void
 	 */
 	public function adjust_price( $price ) {
 		$this->price = $this->price + $price;

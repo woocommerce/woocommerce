@@ -1894,8 +1894,6 @@ class WC_AJAX {
 	/**
 	 * Search for downloadable product variations and return json
 	 *
-	 * @access public
-	 * @return void
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_downloadable_products_and_variations() {

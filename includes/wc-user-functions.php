@@ -120,8 +120,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 /**
  * Login a customer (set auth cookie and set global user object)
  *
- * @param  int $customer_id
- * @return void
+ * @param int $customer_id
  */
 function wc_set_customer_auth_cookie( $customer_id ) {
 	global $current_user;
@@ -188,7 +187,6 @@ function wc_update_new_customer_past_orders( $customer_id ) {
  *
  * @access public
  * @param int $order_id
- * @return void
  */
 function wc_paying_customer( $order_id ) {
 	$order = wc_get_order( $order_id );

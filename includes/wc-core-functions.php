@@ -137,7 +137,6 @@ function wc_update_order( $args ) {
  * @access public
  * @param mixed $slug
  * @param string $name (default: '')
- * @return void
  */
 function wc_get_template_part( $slug, $name = '' ) {
 	$template = '';
@@ -175,7 +174,6 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param array $args (default: array())
  * @param string $template_path (default: '')
  * @param string $default_path (default: '')
- * @return void
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	if ( $args && is_array( $args ) ) {

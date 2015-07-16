@@ -299,7 +299,6 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id the customer ID
 	 * @param array $data
-	 * @return void
 	 */
 	protected function update_customer_data( $id, $data ) {
 		// Customer first name.

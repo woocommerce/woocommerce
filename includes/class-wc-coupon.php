@@ -247,9 +247,7 @@ class WC_Coupon {
 	/**
 	 * Increase usage count for current coupon.
 	 *
-	 * @access public
-	 * @param  string $used_by Either user ID or billing email
-	 * @return void
+	 * @param string $used_by Either user ID or billing email
 	 */
 	public function inc_usage_count( $used_by = '' ) {
 		if ( $this->id ) {
@@ -265,9 +263,7 @@ class WC_Coupon {
 	/**
 	 * Decrease usage count for current coupon.
 	 *
-	 * @access public
-	 * @param  string $used_by Either user ID or billing email
-	 * @return void
+	 * @param string $used_by Either user ID or billing email
 	 */
 	public function dcr_usage_count( $used_by = '' ) {
 		if ( $this->id ) {

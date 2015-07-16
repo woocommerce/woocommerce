@@ -137,9 +137,6 @@ class WC_Checkout {
 
 	/**
 	 * Output the billing information form
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function checkout_form_billing() {
 		wc_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
@@ -147,9 +144,6 @@ class WC_Checkout {
 
 	/**
 	 * Output the shipping information form
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function checkout_form_shipping() {
 		wc_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
@@ -343,9 +337,6 @@ class WC_Checkout {
 
 	/**
 	 * Process the checkout after the confirm order button is pressed
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function process_checkout() {
 		try {

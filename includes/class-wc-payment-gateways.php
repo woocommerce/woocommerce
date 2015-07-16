@@ -56,10 +56,7 @@ class WC_Payment_Gateways {
 	}
 
 	/**
-	 * __construct function.
-	 *
-	 * @access public
-	 * @return void
+	 * Initialize payment gateways.
 	 */
 	public function __construct() {
 		$this->init();
@@ -67,9 +64,6 @@ class WC_Payment_Gateways {
 
 	/**
 	 * Load gateways and hook in functions.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function init() {
 		$load_gateways = array(
@@ -167,9 +161,6 @@ class WC_Payment_Gateways {
 
 	/**
 	 * Save options in admin.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function process_admin_options() {
 

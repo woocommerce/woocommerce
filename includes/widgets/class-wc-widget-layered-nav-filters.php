@@ -41,8 +41,6 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 	 *
 	 * @param array $args
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		global $_chosen_attributes;

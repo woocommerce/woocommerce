@@ -14,7 +14,6 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Get the shortcode content.
 	 *
-	 * @access public
 	 * @param array $atts
 	 * @return string
 	 */
@@ -25,9 +24,7 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Output the shortcode.
 	 *
-	 * @access public
 	 * @param array $atts
-	 * @return void
 	 */
 	public static function output( $atts ) {
 		global $wp;
@@ -335,10 +332,8 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Handles resetting the user's password.
 	 *
-	 * @access public
 	 * @param object $user The user
 	 * @param string $new_pass New password for the user in plaintext
-	 * @return void
 	 */
 	public static function reset_password( $user, $new_pass ) {
 		do_action( 'password_reset', $user, $new_pass );

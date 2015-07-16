@@ -49,10 +49,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	}
 
 	/**
-	 * trigger function.
-	 *
-	 * @access public
-	 * @return void
+	 * Trigger.
 	 */
 	function trigger( $order_id ) {
 
@@ -89,9 +86,8 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	function get_content_plain() {
@@ -106,10 +102,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	}
 
 	/**
-	 * Initialise Settings Form Fields
-	 *
-	 * @access public
-	 * @return void
+	 * Initialise settings form fields.
 	 */
 	function init_form_fields() {
 		$this->form_fields = array(
