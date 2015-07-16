@@ -38,7 +38,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		return array(
 			'cb'            => '<input type="checkbox" />',
 			'description'   => __( 'Description', 'woocommerce' ),
-			'truncated_key' => __( 'Truncated Consumer Key', 'woocommerce' ),
+			'truncated_key' => __( 'Consumer Key Ending In', 'woocommerce' ),
 			'user'          => __( 'User', 'woocommerce' ),
 			'permissions'   => __( 'Permissions', 'woocommerce' ),
 			'last_access'   => __( 'Last Access', 'woocommerce' )

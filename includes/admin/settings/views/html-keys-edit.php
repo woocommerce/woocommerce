@@ -59,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php if ( 0 !== $key_id ) : ?>
 				<tr valign="top">
 					<th scope="row" class="titledesc">
-						<?php _e( 'Truncated Consumer Key', 'woocommerce' ); ?>
+						<?php _e( 'Consumer Key Ending In', 'woocommerce' ); ?>
 					</th>
 					<td class="forminp">
 						<code>&hellip;<?php echo esc_html( $key_data['truncated_key'] ); ?></code>
