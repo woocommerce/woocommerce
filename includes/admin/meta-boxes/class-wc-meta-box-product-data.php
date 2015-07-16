@@ -901,6 +901,19 @@ class WC_Meta_Box_Product_Data {
 
 					// Update post terms
 					if ( taxonomy_exists( $attribute_names[ $i ] ) ) {
+
+            foreach( $values as $key => $value ) {
+              $term = get_term_by( 'name', trim( $value ), $attribute_names[ $i ] );
+              if ( $term ) {
+                $values[ $key ] = intval( $term->term_id );
+              } else {
+                $term = wp_insert_term( trim( $value ), $attribute_names[ $i ] );
+                if ( isset( $term->term_id ) ) {
+                  $values[ $key ] = intval($term->term_id);
+                }
+              }
+            }
+
 						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
 					}
 
