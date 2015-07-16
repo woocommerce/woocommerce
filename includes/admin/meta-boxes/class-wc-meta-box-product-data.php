@@ -508,15 +508,18 @@ class WC_Meta_Box_Product_Data {
 
 					<p class="form-field">
 						<label for="parent_id"><?php _e( 'Grouping', 'woocommerce' ); ?></label>
-						<input type="hidden" class="wc-product-search" style="width: 50%;" id="parent_id" name="parent_id" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_grouped_products" data-multiple="false" data-selected="<?php
+						<input type="hidden" class="wc-product-search" style="width: 50%;" id="parent_id" name="parent_id" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_grouped_products" data-allow_clear="true" data-multiple="false" data-selected="<?php
 							$parent_id = absint( $post->post_parent );
-							$parent    = wc_get_product( $parent_id );
-							if ( is_object( $parent ) ) {
-								$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name() ) );
-							}
 
-							echo esc_attr( $parent_title );
-						?>" value="<?php echo $parent_id; ?>" /> <img class="help_tip" data-tip='<?php _e( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+							if ( $parent_id ) {
+								$parent    = wc_get_product( $parent_id );
+								if ( is_object( $parent ) ) {
+									$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name() ) );
+								}
+
+								echo esc_attr( $parent_title );
+							}
+						?>" value="<?php echo $parent_id ? $parent_id : ''; ?>" /> <img class="help_tip" data-tip='<?php _e( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 					</p>
 
 					<?php
