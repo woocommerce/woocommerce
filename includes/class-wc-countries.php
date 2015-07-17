@@ -55,6 +55,7 @@ class WC_Countries {
 		$states = array(
 			'AF' => array(),
 			'AT' => array(),
+			'AX' => array(),
 			'BE' => array(),
 			'BI' => array(),
 			'CZ' => array(),
@@ -595,6 +596,12 @@ class WC_Countries {
 						'label'       => __( 'State', 'woocommerce' ),
 						//'placeholder' => __( 'State', 'woocommerce' ),
 					)
+				),
+				'AX' => array(
+					'postcode_before_city' => true,
+					'state' => array(
+						'required' => false,
+					),
 				),
 				'BD' => array(
 					'postcode' => array(
