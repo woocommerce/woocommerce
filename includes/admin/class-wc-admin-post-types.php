@@ -30,6 +30,9 @@ class WC_Admin_Post_Types {
 
 		// Disable Auto Save
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
+		
+		//Disable Distraction Free Writing Pointer
+		add_action( 'in_admin_footer', array( $this, 'disable_dfw_pointer') );
 
 		// WP List table columns. Defined here so they are always available for events such as inline editing.
 		add_filter( 'manage_product_posts_columns', array( $this, 'product_columns' ) );
@@ -1983,6 +1986,15 @@ class WC_Admin_Post_Types {
 		}
 
 		return $strings;
+	}
+	
+	/**
+		* Disable distraction free writing prompt
+	**/
+	public function disable_dfw_pointer() {
+		global $post;
+		if( 'product' != $post->post_type ) return;
+		remove_action( 'admin_print_footer_scripts', array('WP_Internal_Pointers', 'pointer_wp390_widgets') );
 	}
 
 	/**
