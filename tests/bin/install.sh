@@ -12,13 +12,24 @@ DB_PASS=$3
 DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
 
-# TODO: allow environment vars for WP_TESTS_DIR & WP_CORE_DIR
-WP_TESTS_DIR="${PWD}/tmp/wordpress-tests-lib"
-WP_CORE_DIR="${PWD}/tmp/wordpress/"
+WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wordpress-tests-lib}
+WP_CORE_DIR=${WP_CORE_DIR-/tmp/wordpress/}
 
 set -ex
 
+download() {
+	if [ `which curl` ]; then
+		curl -s "$1" > "$2";
+	elif [ `which wget` ]; then
+		wget -nv -O "$2" "$1"
+	fi
+}
+
 install_wp() {
+	if [ -d $WP_CORE_DIR ]; then
+		return;
+	fi
+
 	mkdir -p $WP_CORE_DIR
 
 	if [ $WP_VERSION == 'latest' ]; then
@@ -27,11 +38,10 @@ install_wp() {
 		local ARCHIVE_NAME="wordpress-$WP_VERSION"
 	fi
 
-	curl https://wordpress.org/${ARCHIVE_NAME}.tar.gz --output /tmp/wordpress.tar.gz --silent
-
+	download https://wordpress.org/${ARCHIVE_NAME}.tar.gz  /tmp/wordpress.tar.gz
 	tar --strip-components=1 -zxmf /tmp/wordpress.tar.gz -C $WP_CORE_DIR
 
-	curl https://raw.github.com/markoheijnen/wp-mysqli/master/db.php --output $WP_CORE_DIR/wp-content/db.php --silent
+	download https://raw.github.com/markoheijnen/wp-mysqli/master/db.php $WP_CORE_DIR/wp-content/db.php
 }
 
 install_test_suite() {
@@ -42,22 +52,27 @@ install_test_suite() {
 		local ioption='-i'
 	fi
 
-	# set up testing suite
-	mkdir -p $WP_TESTS_DIR
+	# set up testing suite if it doesn't yet exist
+	if [ ! -d $WP_TESTS_DIR ]; then
+		# set up testing suite
+		mkdir -p $WP_TESTS_DIR
+		svn co --quiet https://develop.svn.wordpress.org/trunk/tests/phpunit/includes/ $WP_TESTS_DIR/includes
+	fi
+
 	cd $WP_TESTS_DIR
-	svn co --quiet http://develop.svn.wordpress.org/trunk/tests/phpunit/includes/
 
-	curl http://develop.svn.wordpress.org/trunk/wp-tests-config-sample.php --output wp-tests-config.php --silent
-
-	sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR':" wp-tests-config.php
-	sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" wp-tests-config.php
-	sed $ioption "s/yourusernamehere/$DB_USER/" wp-tests-config.php
-	sed $ioption "s/yourpasswordhere/$DB_PASS/" wp-tests-config.php
-	sed $ioption "s|localhost|${DB_HOST}|" wp-tests-config.php
-	sed $ioption "s/wptests_/wctests_/" wp-tests-config.php
-	sed $ioption "s/example.org/woocommerce.com/" wp-tests-config.php
-	sed $ioption "s/admin@example.org/tests@woocommerce.com/" wp-tests-config.php
-	sed $ioption "s/Test Blog/WooCommerce Unit Tests/" wp-tests-config.php
+	if [ ! -f wp-tests-config.php ]; then
+		download https://develop.svn.wordpress.org/trunk/wp-tests-config-sample.php wp-tests-config.php
+		sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR':" wp-tests-config.php
+		sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" wp-tests-config.php
+		sed $ioption "s/yourusernamehere/$DB_USER/" wp-tests-config.php
+		sed $ioption "s/yourpasswordhere/$DB_PASS/" wp-tests-config.php
+		sed $ioption "s|localhost|${DB_HOST}|" wp-tests-config.php
+		sed $ioption "s/wptests_/wctests_/" wp-tests-config.php
+		sed $ioption "s/example.org/woocommerce.com/" wp-tests-config.php
+		sed $ioption "s/admin@example.org/tests@woocommerce.com/" wp-tests-config.php
+		sed $ioption "s/Test Blog/WooCommerce Unit Tests/" wp-tests-config.php
+	fi
 }
 
 install_db() {
@@ -68,7 +83,7 @@ install_db() {
 	local EXTRA=""
 
 	if ! [ -z $DB_HOSTNAME ] ; then
-		if [[ "$DB_SOCK_OR_PORT" =~ ^[0-9]+$ ]] ; then
+		if [ $(echo $DB_SOCK_OR_PORT | grep -e '^[0-9]\{1,\}$') ]; then
 			EXTRA=" --host=$DB_HOSTNAME --port=$DB_SOCK_OR_PORT --protocol=tcp"
 		elif ! [ -z $DB_SOCK_OR_PORT ] ; then
 			EXTRA=" --socket=$DB_SOCK_OR_PORT"
