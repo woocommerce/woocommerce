@@ -53,7 +53,8 @@ global $product, $post;
 
 									} else {
 										foreach ( $options as $option ) {
-											echo '<option value="' . esc_attr( $option ) . '" ' . selected( $selected_value, $option, false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+											$selected = sanitize_title( $selected_value ) === $selected_value ? selected( sanitize_title( $selected_value ), sanitize_title( $option ), false ) : selected( $selected_value, $option, false );
+											echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
 										}
 									}
 								}
