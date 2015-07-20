@@ -1,10 +1,10 @@
 <?php
 /**
- * Single Product title
+ * Product loop title
  *
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.3.14
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

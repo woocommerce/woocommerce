@@ -1,13 +1,14 @@
+
 <?php
 /**
  * WooCommerce Template
  *
  * Functions for the templating system.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Core
+ * @package  WooCommerce/Functions
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -508,6 +509,7 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 	}
 }
 if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
+
 	/**
 	 * Show the product title in the product loop. By default this is an H3
 	 */
