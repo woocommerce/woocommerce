@@ -1761,25 +1761,28 @@ class WC_AJAX {
 
 		if ( is_numeric( $term ) ) {
 
-			$args2 = array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'post__in'       => array( 0, $term ),
-				'fields'         => 'ids',
-				'exclude'        => $exclude
-			);
+			if ( false === array_search( $term, $exclude ) ) {
+				$posts2 = get_posts( array(
+					'post_type'      => $post_types,
+					'post_status'    => 'publish',
+					'posts_per_page' => -1,
+					'post__in'       => array( 0, $term ),
+					'fields'         => 'ids'
+				) );
+			} else {
+				$posts2 = array();
+			}
 
-			$args3 = array(
+			$posts3 = get_posts( array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
 				'post_parent'    => $term,
 				'fields'         => 'ids',
 				'exclude'        => $exclude
-			);
+			) );
 
-			$args4 = array(
+			$posts4 = get_posts( array(
 				'post_type'      => $post_types,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
@@ -1792,9 +1795,9 @@ class WC_AJAX {
 				),
 				'fields'         => 'ids',
 				'exclude'        => $exclude
-			);
+			) );
 
-			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ), get_posts( $args4 ) ) );
+			$posts = array_unique( array_merge( get_posts( $args ), $posts2, $posts3, $posts4 ) );
 
 		} else {
 
