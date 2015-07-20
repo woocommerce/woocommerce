@@ -100,7 +100,7 @@ if ( WC()->shipping->get_shipping_classes() ) {
 	);
 }
 
-if ( $this->get_option( 'options', false ) ) {
+if ( apply_filers( 'woocommerce_enable_deprecated_additional_flat_rates', $this->get_option( 'options', false ) ) ) {
 	$settings[ 'additional_rates' ] = array(
 		'title'			=> __( 'Additional Rates', 'woocommerce' ),
 		'type'			=> 'title',
