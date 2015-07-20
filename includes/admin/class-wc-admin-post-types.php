@@ -2,10 +2,10 @@
 /**
  * Post Types Admin
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.3.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -93,6 +93,9 @@ class WC_Admin_Post_Types {
 
 		// Download permissions
 		add_action( 'woocommerce_process_product_file_download_paths', array( $this, 'process_product_file_download_paths' ), 10, 3 );
+
+		// Disable DFW feature pointer
+		add_action( 'admin_footer', array( $this, 'disable_dfw_feature_pointer' ) );
 	}
 
 	/**
@@ -2128,6 +2131,18 @@ class WC_Admin_Post_Types {
 					}
 				}
 			}
+		}
+	}
+
+
+	/**
+	 * Disable DFW feature pointer
+	 */
+	public function disable_dfw_feature_pointer() {
+		$screen = get_current_screen();
+
+		if ( 'product' === $screen->id && 'post' === $screen->base ) {
+			remove_action( 'admin_print_footer_scripts', array( 'WP_Internal_Pointers', 'pointer_wp410_dfw' ) );
 		}
 	}
 }
