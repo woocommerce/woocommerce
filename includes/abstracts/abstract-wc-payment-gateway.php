@@ -205,9 +205,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Set as current gateway.
 	 *
 	 * Set this as the current gateway.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function set_current() {
 		$this->chosen = true;

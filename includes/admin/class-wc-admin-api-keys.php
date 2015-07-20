@@ -83,12 +83,12 @@ class WC_Admin_API_Keys {
 		global $wpdb;
 
 		$empty = array(
-			'key_id'          => 0,
-			'user_id'         => '',
-			'description'     => '',
-			'permissions'     => '',
-			'consumer_key'    => '',
-			'consumer_secret' => ''
+			'key_id'        => 0,
+			'user_id'       => '',
+			'description'   => '',
+			'permissions'   => '',
+			'truncated_key' => '',
+			'last_access'   => ''
 		);
 
 		if ( 0 == $key_id ) {
@@ -96,7 +96,7 @@ class WC_Admin_API_Keys {
 		}
 
 		$key = $wpdb->get_row( $wpdb->prepare( "
-			SELECT key_id, user_id, description, permissions, consumer_key, consumer_secret
+			SELECT key_id, user_id, description, permissions, truncated_key, last_access
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE key_id = %d
 		", $key_id ), ARRAY_A );

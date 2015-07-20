@@ -85,8 +85,9 @@ class Cart extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_get_cart_url() {
-		$cart_page_id = wc_get_page_id( 'cart' );
-		$this->assertEquals( apply_filters( 'woocommerce_get_cart_url', $cart_page_id ? get_permalink( $cart_page_id ) : '' ), WC()->cart->get_cart_url() );
+		$cart_page_url = wc_get_page_permalink( 'cart' );
+
+		$this->assertEquals( apply_filters( 'woocommerce_get_cart_url', $cart_page_url ? $cart_page_url : '' ), WC()->cart->get_cart_url() );
 	}
 
 	/**
@@ -96,13 +97,13 @@ class Cart extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_remove_url() {
 		// Get the cart page id
-		$cart_page_id = wc_get_page_id( 'cart' );
+		$cart_page_url = wc_get_page_permalink( 'cart' );
 
 		// Test cart item key
 		$cart_item_key = 'test';
 
 		// Do the check
-		$this->assertEquals( apply_filters( 'woocommerce_get_remove_url', $cart_page_id ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' ), WC()->cart->get_remove_url( $cart_item_key ) );
+		$this->assertEquals( apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' ), WC()->cart->get_remove_url( $cart_item_key ) );
 	}
 
 	/**

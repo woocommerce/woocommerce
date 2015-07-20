@@ -55,7 +55,7 @@ abstract class WC_Abstract_Order {
 	public $post                        = null;
 
 	/** @public string Order type */
-	public $order_type                  = 'simple';
+	public $order_type                  = false;
 
 	/** @public string Order Date */
 	public $order_date                  = '';
@@ -1653,10 +1653,8 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_formatted_order_total() {
 		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_order_currency() ) );
-
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
-
 
 	/**
 	 * Gets subtotal - subtotal is shown before discounts, but with localised taxes.
@@ -1903,41 +1901,9 @@ abstract class WC_Abstract_Order {
 			);
 		}
 
-		// Order total display
-		$order_total    = $this->get_total();
-		$total_refunded = $this->get_total_refunded();
-		$total_string   = '';
-		$tax_string     = '';
-
-		// Tax for inclusive prices
-		if ( wc_tax_enabled() && 'incl' == $tax_display ) {
-			$tax_string_array = array();
-
-			if ( 'itemized' == get_option( 'woocommerce_tax_total_display' ) ) {
-				foreach ( $this->get_tax_totals() as $code => $tax ) {
-					$tax_amount         = $total_refunded ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_order_currency() ) ) : $tax->formatted_amount;
-					$tax_string_array[] = sprintf( '%s %s', $tax_amount, $tax->label );
-				}
-			} else {
-				$tax_string_array[] = sprintf( '%s %s', wc_price( $this->get_total_tax() - $this->get_total_tax_refunded(), array( 'currency' => $this->get_order_currency() ) ), WC()->countries->tax_or_vat() );
-			}
-			if ( ! empty( $tax_string_array ) ) {
-				$tax_string = ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) );
-			}
-		}
-
-		if ( $total_refunded ) {
-			$total_string  = '<del>' . strip_tags( $this->get_formatted_order_total() ) . '</del> <ins>';
-			$total_string .= wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_order_currency() ) );
-			$total_string .= $tax_string;
-			$total_string .= '</ins>';
-		} else {
-			$total_string  = $this->get_formatted_order_total() . $tax_string;
-		}
-
 		$total_rows['order_total'] = array(
 			'label' => __( 'Total:', 'woocommerce' ),
-			'value'	=> $total_string
+			'value'	=> $this->get_formatted_order_total( $tax_display )
 		);
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this );

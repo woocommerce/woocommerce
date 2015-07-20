@@ -157,10 +157,9 @@ class WC_Widget_Products extends WC_Widget {
 	 * widget function.
 	 *
 	 * @see WP_Widget
-	 * @access public
+	 *
 	 * @param array $args
 	 * @param array $instance
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		if ( $this->get_cached_widget( $args ) ) {

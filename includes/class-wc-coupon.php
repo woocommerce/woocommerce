@@ -247,9 +247,7 @@ class WC_Coupon {
 	/**
 	 * Increase usage count for current coupon.
 	 *
-	 * @access public
-	 * @param  string $used_by Either user ID or billing email
-	 * @return void
+	 * @param string $used_by Either user ID or billing email
 	 */
 	public function inc_usage_count( $used_by = '' ) {
 		if ( $this->id ) {
@@ -265,9 +263,7 @@ class WC_Coupon {
 	/**
 	 * Decrease usage count for current coupon.
 	 *
-	 * @access public
-	 * @param  string $used_by Either user ID or billing email
-	 * @return void
+	 * @param string $used_by Either user ID or billing email
 	 */
 	public function dcr_usage_count( $used_by = '' ) {
 		if ( $this->id ) {
@@ -401,10 +397,14 @@ class WC_Coupon {
 		if ( 'yes' === $this->exclude_sale_items && $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
 			$valid_for_cart      = false;
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
+
 			if ( ! WC()->cart->is_empty() ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( sizeof( array_intersect( array( absint( $cart_item['product_id'] ), absint( $cart_item['variation_id'] ), $cart_item['data']->get_parent() ), $product_ids_on_sale ) ) === 0 ) {
-						// not on sale
+					if ( ! empty( $cart_item['variation_id'] ) ) {
+						if ( ! in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) ) {
+							$valid_for_cart = true;
+						}
+					} elseif ( ! in_array( $cart_item['product_id'], $product_ids_on_sale, true ) ) {
 						$valid_for_cart = true;
 					}
 				}

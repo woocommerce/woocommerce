@@ -507,16 +507,19 @@ class WC_Meta_Box_Product_Data {
 				<div class="options_group grouping show_if_simple show_if_external">
 
 					<p class="form-field">
-						<label for="parent_id"><?php _e( 'Cross-Sells', 'woocommerce' ); ?></label>
-						<input type="hidden" class="wc-product-search" style="width: 50%;" id="parent_id" name="parent_id" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_grouped_products" data-multiple="false" data-selected="<?php
+						<label for="parent_id"><?php _e( 'Grouping', 'woocommerce' ); ?></label>
+						<input type="hidden" class="wc-product-search" style="width: 50%;" id="parent_id" name="parent_id" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_grouped_products" data-allow_clear="true" data-multiple="false" data-selected="<?php
 							$parent_id = absint( $post->post_parent );
-							$parent    = wc_get_product( $parent_id );
-							if ( is_object( $parent ) ) {
-								$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name() ) );
-							}
 
-							echo esc_attr( $parent_title );
-						?>" value="<?php echo $parent_id; ?>" /> <img class="help_tip" data-tip='<?php _e( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+							if ( $parent_id ) {
+								$parent    = wc_get_product( $parent_id );
+								if ( is_object( $parent ) ) {
+									$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name() ) );
+								}
+
+								echo esc_attr( $parent_title );
+							}
+						?>" value="<?php echo $parent_id ? $parent_id : ''; ?>" /> <img class="help_tip" data-tip='<?php _e( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 					</p>
 
 					<?php
@@ -654,7 +657,7 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="toolbar toolbar-top">
 					<select id="field_to_edit" class="variation_actions">
-						<option value="add_variation"><?php _e( 'Add Variation', 'woocommerce' ); ?></option>
+						<option value="add_variation"><?php _e( 'Add variation', 'woocommerce' ); ?></option>
 						<option value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
 						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
@@ -663,13 +666,13 @@ class WC_Meta_Box_Product_Data {
 							<option value="toggle_virtual"><?php _e( 'Toggle &quot;Virtual&quot;', 'woocommerce' ); ?></option>
 						</optgroup>
 						<optgroup label="<?php esc_attr_e( 'Pricing', 'woocommerce' ); ?>">
-							<option value="variable_regular_price"><?php _e( 'Prices', 'woocommerce' ); ?></option>
-							<option value="variable_regular_price_increase"><?php _e( 'Prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_regular_price_decrease"><?php _e( 'Prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price"><?php _e( 'Sale prices', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price_increase"><?php _e( 'Sale prices increase by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_price_decrease"><?php _e( 'Sale prices decrease by (fixed amount or %)', 'woocommerce' ); ?></option>
-							<option value="variable_sale_schedule"><?php _e( 'Scheduled sale dates', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price"><?php _e( 'Set regular prices', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price_increase"><?php _e( 'Increase regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
+							<option value="variable_regular_price_decrease"><?php _e( 'Decrease regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price"><?php _e( 'Set sale prices', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price_increase"><?php _e( 'Increase sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_price_decrease"><?php _e( 'Decrease sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
+							<option value="variable_sale_schedule"><?php _e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>
 						</optgroup>
 						<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
 							<option value="toggle_manage_stock"><?php _e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
@@ -683,7 +686,7 @@ class WC_Meta_Box_Product_Data {
 						</optgroup>
 						<optgroup label="<?php esc_attr_e( 'Downloadable products', 'woocommerce' ); ?>">
 							<option value="variable_download_limit"><?php _e( 'Download limit', 'woocommerce' ); ?></option>
-							<option value="variable_download_expiry"><?php _e( 'Download Expiry', 'woocommerce' ); ?></option>
+							<option value="variable_download_expiry"><?php _e( 'Download expiry', 'woocommerce' ); ?></option>
 						</optgroup>
 						<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					</select>
@@ -898,6 +901,19 @@ class WC_Meta_Box_Product_Data {
 
 					// Update post terms
 					if ( taxonomy_exists( $attribute_names[ $i ] ) ) {
+
+						foreach( $values as $key => $value ) {
+							$term = get_term_by( 'name', trim( $value ), $attribute_names[ $i ] );
+							if ( $term ) {
+								$values[ $key ] = intval( $term->term_id );
+							} else {
+								$term = wp_insert_term( trim( $value ), $attribute_names[ $i ] );
+								if ( isset( $term->term_id ) ) {
+									$values[ $key ] = intval($term->term_id);
+								}
+							}
+						}
+
 						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
 					}
 

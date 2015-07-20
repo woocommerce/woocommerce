@@ -22,6 +22,7 @@ class WC_Cache_Helper {
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'before_woocommerce_init', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
+		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ) );
 	}
 
 	/**
@@ -102,10 +103,17 @@ class WC_Cache_Helper {
 	 *
 	 * @since  2.3.10
 	 */
-	private static function delete_version_transients( $version ) {
+	public static function delete_version_transients( $version = '' ) {
 		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
 			global $wpdb;
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s;", "\_transient\_%" . $version ) );
+
+			$limit    = 1000;
+			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", "\_transient\_%" . $version, $limit ) );
+
+			// If affected rows is equal to limit, there are more rows to delete. Delete in 10 secs.
+			if ( $affected === $limit ) {
+				wp_schedule_single_event( time() + 10, 'delete_version_transients', array( $version ) );
+			}
 		}
 	}
 

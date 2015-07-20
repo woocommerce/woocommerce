@@ -562,6 +562,7 @@ class WC_Webhook {
 				'woocommerce_process_shop_order_meta',
 				'woocommerce_api_edit_order',
 				'woocommerce_order_edit_status',
+				'woocommerce_order_status_changed'
 			),
 			'order.deleted' => array(
 				'wp_trash_post',

@@ -237,11 +237,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	/**
 	 * Add content to the WC emails.
 	 *
-	 * @access public
 	 * @param WC_Order $order
 	 * @param bool $sent_to_admin
 	 * @param bool $plain_text
-	 * @return void
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
 

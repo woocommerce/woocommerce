@@ -341,7 +341,6 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
  * Function which handles the start and end of scheduled sales via cron.
  *
  * @access public
- * @return void
  */
 function wc_scheduled_sales() {
 	global $wpdb;

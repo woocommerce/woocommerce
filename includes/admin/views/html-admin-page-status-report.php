@@ -687,7 +687,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$theme_file = false;
 					}
 
-					if ( $theme_file ) {
+					if ( ! empty( $theme_file ) ) {
 						$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
 						$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 

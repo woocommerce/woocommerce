@@ -26,10 +26,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	}
 
 	/**
-	 * Initialise Gateway Settings Form Fields
-	 *
-	 * @access public
-	 * @return void
+	 * Initialise settings form fields
 	 */
 	public function init_form_fields() {
 		parent::init_form_fields();

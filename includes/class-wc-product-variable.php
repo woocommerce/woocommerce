@@ -110,10 +110,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * set_stock_status function.
-	 *
-	 * @access public
-	 * @return void
+	 * Set stock status.
 	 */
 	public function set_stock_status( $status ) {
 		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
@@ -490,7 +487,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns an array of date for a variation. Used in the add to cart form.
 	 * @since  2.4.0
-	 * @param  $variation Variation product object or ID
+	 * @param  WC_Product|int $variation Variation product object or ID
 	 * @return array
 	 */
 	public function get_available_variation( $variation ) {

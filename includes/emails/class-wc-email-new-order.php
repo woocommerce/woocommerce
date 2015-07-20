@@ -53,10 +53,7 @@ class WC_Email_New_Order extends WC_Email {
 	}
 
 	/**
-	 * trigger function.
-	 *
-	 * @access public
-	 * @return void
+	 * Trigger.
 	 */
 	function trigger( $order_id ) {
 
@@ -112,10 +109,7 @@ class WC_Email_New_Order extends WC_Email {
 	}
 
 	/**
-	 * Initialise Settings Form Fields
-	 *
-	 * @access public
-	 * @return void
+	 * Initialise settings form fields
 	 */
 	function init_form_fields() {
 		$this->form_fields = array(

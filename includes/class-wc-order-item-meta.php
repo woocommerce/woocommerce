@@ -26,7 +26,7 @@ class WC_Order_Item_Meta {
 	/**
 	 * Constructor
 	 *
-	 * @param array $item_meta defaults to array()
+	 * @param array $item defaults to array()
 	 * @param \WC_Product $product defaults to null
 	 * @return \WC_Order_Item_Meta instance
 	 */
@@ -139,7 +139,7 @@ class WC_Order_Item_Meta {
 	 * Handles @deprecated args
 	 * @return array
 	 */
-	public function get_formatted_legacy() {
+	public function get_formatted_legacy( $hideprefix = '_' ) {
 		_deprecated_function( 'get_formatted_legacy', '2.4', 'Item Meta Data is being called with legacy arguments' );
 
 		$formatted_meta = array();

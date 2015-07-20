@@ -734,8 +734,11 @@ class WC_AJAX {
 			die(-1);
 		}
 
+		global $post;
+
 		$post_id = intval( $_POST['post_id'] );
-		$loop = intval( $_POST['loop'] );
+		$post    = get_post( $post_id ); // Set $post global so its available like within the admin screens
+		$loop    = intval( $_POST['loop'] );
 
 		$variation = array(
 			'post_title'   => 'Product #' . $post_id . ' Variation',
@@ -841,7 +844,9 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		@set_time_limit(0);
+		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
+			set_time_limit( 0 );
+		}
 
 		$post_id = intval( $_POST['post_id'] );
 
@@ -1889,8 +1894,6 @@ class WC_AJAX {
 	/**
 	 * Search for downloadable product variations and return json
 	 *
-	 * @access public
-	 * @return void
 	 * @see WC_AJAX::json_search_products()
 	 */
 	public static function json_search_downloadable_products_and_variations() {
@@ -2328,7 +2331,8 @@ class WC_AJAX {
 					'description'     => $description,
 					'permissions'     => $permissions,
 					'consumer_key'    => wc_api_hash( $consumer_key ),
-					'consumer_secret' => $consumer_secret
+					'consumer_secret' => $consumer_secret,
+					'truncated_key'   => substr( $consumer_key, -7 )
 				);
 
 				$wpdb->insert(
@@ -2336,6 +2340,7 @@ class WC_AJAX {
 					$data,
 					array(
 						'%d',
+						'%s',
 						'%s',
 						'%s',
 						'%s',
@@ -2377,7 +2382,10 @@ class WC_AJAX {
 			die( -1 );
 		}
 
+		global $post;
+
 		$product_id = absint( $_POST['product_id'] );
+		$post       = get_post( $product_id ); // Set $post global so its available like within the admin screens
 		$per_page   = ! empty( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 10;
 		$page       = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
 
@@ -2865,6 +2873,332 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Toggle Enabled
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_toggle_enabled( $variations, $data ) {
+		global $wpdb;
+
+		foreach ( $variations as $variation_id ) {
+			$post_status = get_post_status( $variation_id );
+			$new_status  = 'private' === $post_status ? 'publish' : 'private';
+			$wpdb->update( $wpdb->posts, array( 'post_status' => $new_status ), array( 'ID' => $variation_id ) );
+		}
+	}
+
+	/**
+	 * Bulk action - Toggle Downloadable Checkbox
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_toggle_downloadable( $variations, $data ) {
+		foreach ( $variations as $variation_id ) {
+			$_downloadable   = get_post_meta( $variation_id, '_downloadable', true );
+			$is_downloadable = 'no' === $_downloadable ? 'yes' : 'no';
+			update_post_meta( $variation_id, '_downloadable', wc_clean( $is_downloadable ) );
+		}
+	}
+
+	/**
+	 * Bulk action - Toggle Virtual Checkbox
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_toggle_virtual( $variations, $data ) {
+		foreach ( $variations as $variation_id ) {
+			$_virtual   = get_post_meta( $variation_id, '_virtual', true );
+			$is_virtual = 'no' === $_virtual ? 'yes' : 'no';
+			update_post_meta( $variation_id, '_virtual', wc_clean( $is_virtual ) );
+		}
+	}
+
+	/**
+	 * Bulk action - Toggle Manage Stock Checkbox
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_toggle_manage_stock( $variations, $data ) {
+		foreach ( $variations as $variation_id ) {
+			$_manage_stock   = get_post_meta( $variation_id, '_manage_stock', true );
+			$is_manage_stock = 'no' === $_manage_stock ? 'yes' : 'no';
+			update_post_meta( $variation_id, '_manage_stock', wc_clean( $is_manage_stock ) );
+		}
+	}
+
+	/**
+	 * Bulk action - Set Regular Prices
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_regular_price( $variations, $data ) {
+		if ( empty( $data['value'] ) ) {
+			break;
+		}
+
+		foreach ( $variations as $variation_id ) {
+			// Price fields
+			$regular_price = wc_clean( $data['value'] );
+			$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+
+			// Date fields
+			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+			$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
+			$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
+
+			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+		}
+	}
+
+	/**
+	 * Bulk action - Set Sale Prices
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_sale_price( $variations, $data ) {
+		if ( empty( $data['value'] ) ) {
+			break;
+		}
+
+		foreach ( $variations as $variation_id ) {
+			// Price fields
+			$regular_price = get_post_meta( $variation_id, '_regular_price', true );
+			$sale_price    = wc_clean( $data['value'] );
+
+			// Date fields
+			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+			$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
+			$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
+
+			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+		}
+	}
+
+	/**
+	 * Bulk action - Set Stock
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_stock( $variations, $data ) {
+		if ( empty( $data['value'] ) ) {
+			break;
+		}
+
+		$value = wc_clean( $data['value'] );
+
+		if ( $value ) {
+			foreach ( $variations as $variation_id ) {
+				if ( 'yes' === get_post_meta( $variation_id, '_manage_stock', true ) ) {
+					wc_update_product_stock( $variation_id, wc_stock_amount( $value ) );
+				} else {
+					delete_post_meta( $variation_id, '_stock' );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Bulk action - Set Weight
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_weight( $variations, $data ) {
+		self::variation_bulk_set_meta( $variations, '_weight', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Set Length
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_length( $variations, $data ) {
+		self::variation_bulk_set_meta( $variations, '_length', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Set Width
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_width( $variations, $data ) {
+		self::variation_bulk_set_meta( $variations, '_width', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Set Height
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_height( $variations, $data ) {
+		self::variation_bulk_set_meta( $variations, '_height', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Set Download Limit
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_download_limit( $variations, $data ) {
+		self::variation_bulk_set_meta( $variations, '_download_limit', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Set Download Expiry
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_download_expiry( $variations, $data ) {
+		self::variation_bulk_set_meta( $variations, '_download_expiry', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Delete all
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_delete_all( $variations, $data ) {
+		if ( isset( $data['allowed'] ) && 'true' === $data['allowed'] ) {
+			foreach ( $variations as $variation_id ) {
+				wp_delete_post( $variation_id );
+			}
+		}
+	}
+
+	/**
+	 * Bulk action - Sale Schedule
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_sale_schedule( $variations, $data ) {
+		if ( ! isset( $data['date_from'] ) && ! isset( $data['date_to'] ) ) {
+			break;
+		}
+
+		foreach ( $variations as $variation_id ) {
+			// Price fields
+			$regular_price = get_post_meta( $variation_id, '_regular_price', true );
+			$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+
+			// Date fields
+			$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+			$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+
+			if ( 'false' === $data['date_from'] ) {
+				$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
+			} else {
+				$date_from = $data['date_from'];
+			}
+
+			if ( 'false' === $data['date_to'] ) {
+				$date_to = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
+			} else {
+				$date_to = $data['date_to'];
+			}
+
+			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
+		}
+	}
+
+	/**
+	 * Bulk action - Increase Regular Prices
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_regular_price_increase( $variations, $data ) {
+		self::variation_bulk_adjust_price( $variations, '_regular_price', '+', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Decrease Regular Prices
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_regular_price_decrease( $variations, $data ) {
+		self::variation_bulk_adjust_price( $variations, '_regular_price', '-', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Increase Sale Prices
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_sale_price_increase( $variations, $data ) {
+		self::variation_bulk_adjust_price( $variations, '_sale_price', '+', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Decrease Sale Prices
+	 * @access private
+	 * @param  array $variations
+	 * @param  array $data
+	 */
+	private static function variation_bulk_action_variable_sale_price_decrease( $variations, $data ) {
+		self::variation_bulk_adjust_price( $variations, '_sale_price', '-', wc_clean( $data['value'] ) );
+	}
+
+	/**
+	 * Bulk action - Set Price
+	 * @access private
+	 * @param  array $variations
+	 * @param string $operator + or -
+	 * @param string $field price being adjusted
+	 * @param string $value Price or Percent
+	 */
+	private static function variation_bulk_adjust_price( $variations, $field, $operator, $value ) {
+		foreach ( $variations as $variation_id ) {
+			// Get existing data
+			$_regular_price = get_post_meta( $variation_id, '_regular_price', true );
+			$_sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+			$date_from      = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+			$date_to        = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+			$date_from      = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
+			$date_to        = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
+
+			if ( '%' === substr( $value, -1 ) ) {
+				$percent = wc_format_decimal( substr( $value, 0, -1 ) );
+				$$field  += ( ( $$field / 100 ) * $percent ) * "{$operator}1";
+			} else {
+				$$field  += $value * "{$operator}1";
+			}
+			_wc_save_product_price( $variation_id, $_regular_price, $_sale_price, $date_from, $date_to );
+		}
+	}
+
+	/**
+	 * Bulk action - Set Meta
+	 * @access private
+	 * @param array $variations
+	 * @param string $field
+	 * @param string $value
+	 */
+	private static function variation_bulk_set_meta( $variations, $field, $value ) {
+		foreach ( $variations as $variation_id ) {
+			update_post_meta( $variation_id, $field, $value );
+		}
+	}
+
+
+	/**
 	 * Bulk edit variations via AJAX
 	 */
 	public static function bulk_edit_variations() {
@@ -2877,14 +3211,12 @@ class WC_AJAX {
 			die( -1 );
 		}
 
-		global $wpdb;
-
 		$product_id  = absint( $_POST['product_id'] );
 		$bulk_action = wc_clean( $_POST['bulk_action'] );
 		$data        = ! empty( $_POST['data'] ) ? array_map( 'wc_clean', $_POST['data'] ) : array();
 		$variations  = array();
 
-		if ( apply_filters( 'woocommerce_bulk_edit_variations_need_children', ! in_array( $bulk_action, array( 'variable_weight', 'variable_length', 'variable_width', 'variable_height' ) ) ) ) {
+		if ( apply_filters( 'woocommerce_bulk_edit_variations_need_children', true ) ) {
 			$variations = get_posts( array(
 				'post_parent'    => $product_id,
 				'posts_per_page' => -1,
@@ -2894,194 +3226,10 @@ class WC_AJAX {
 			) );
 		}
 
-		switch ( $bulk_action ) {
-			case 'toggle_enabled' :
-				foreach ( $variations as $variation_id ) {
-					$post_status = get_post_status( $variation_id );
-					$new_status  = 'private' === $post_status ? 'publish' : 'private';
-
-					$wpdb->update( $wpdb->posts, array( 'post_status' => $new_status ), array( 'ID' => $variation_id ) );
-				}
-				break;
-			case 'toggle_downloadable' :
-				foreach ( $variations as $variation_id ) {
-					$_downloadable   = get_post_meta( $variation_id, '_downloadable', true );
-					$is_downloadable = 'no' === $_downloadable ? 'yes' : 'no';
-
-					update_post_meta( $variation_id, '_downloadable', wc_clean( $is_downloadable ) );
-				}
-				break;
-			case 'toggle_virtual' :
-				foreach ( $variations as $variation_id ) {
-					$_virtual   = get_post_meta( $variation_id, '_virtual', true );
-					$is_virtual = 'no' === $_virtual ? 'yes' : 'no';
-
-					update_post_meta( $variation_id, '_virtual', wc_clean( $is_virtual ) );
-				}
-				break;
-			case 'toggle_manage_stock' :
-				foreach ( $variations as $variation_id ) {
-					$_manage_stock   = get_post_meta( $variation_id, '_manage_stock', true );
-					$is_manage_stock = 'no' === $_manage_stock ? 'yes' : 'no';
-
-					update_post_meta( $variation_id, '_manage_stock', wc_clean( $is_manage_stock ) );
-				}
-				break;
-			case 'variable_regular_price' :
-			case 'variable_sale_price' :
-				if ( empty( $data['value'] ) ) {
-					break;
-				}
-
-				$field = str_replace( 'variable', '', $bulk_action );
-
-				foreach ( $variations as $variation_id ) {
-					// Price fields
-					$regular_price = '_regular_price' === $field ? $data['value'] : get_post_meta( $variation_id, '_regular_price', true );
-					$sale_price    = '_sale_price' === $field ? $data['value'] : get_post_meta( $variation_id, '_sale_price', true );
-
-					// Date fields
-					$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-					$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-					$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-					$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-
-					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
-				}
-				break;
-			case 'variable_stock' :
-				if ( empty( $data['value'] ) ) {
-					break;
-				}
-
-				$value = wc_clean( $data['value'] );
-
-				foreach ( $variations as $variation_id ) {
-					if ( 'yes' === get_post_meta( $variation_id, '_manage_stock', true ) ) {
-						wc_update_product_stock( $variation_id, wc_stock_amount( $value ) );
-					} else {
-						delete_post_meta( $variation_id, '_stock' );
-					}
-				}
-				break;
-			case 'variable_weight' :
-			case 'variable_length' :
-			case 'variable_width' :
-			case 'variable_height' :
-				if ( empty( $data['value'] ) ) {
-					break;
-				}
-
-				$value = wc_clean( $data['value'] );
-				$field = str_replace( 'variable', '', $bulk_action );
-
-				$wpdb->query( $wpdb->prepare( "
-					UPDATE $wpdb->postmeta AS postmeta
-					INNER JOIN $wpdb->posts AS posts ON posts.post_parent = %d
-					SET postmeta.meta_value = %s
-					WHERE postmeta.meta_key = '%s'
-					AND postmeta.post_id = posts.ID
-				 ", $product_id, $value, $field ) );
-				break;
-			case 'variable_download_limit' :
-			case 'variable_download_expiry' :
-				if ( empty( $data['value'] ) ) {
-					break;
-				}
-
-				$value = wc_clean( $data['value'] );
-				$field = str_replace( 'variable', '', $bulk_action );
-
-				foreach ( $variations as $variation_id ) {
-					if ( 'yes' === get_post_meta( $variation_id, '_downloadable', true ) ) {
-						update_post_meta( $variation_id, $field, $value );
-					} else {
-						update_post_meta( $variation_id, $field, '' );
-					}
-				}
-				break;
-			case 'delete_all' :
-				if ( isset( $data['allowed'] ) && 'true' === $data['allowed'] ) {
-					foreach ( $variations as $variation_id ) {
-						wp_delete_post( $variation_id );
-					}
-				}
-				break;
-			case 'variable_regular_price_increase' :
-			case 'variable_regular_price_decrease' :
-			case 'variable_sale_price_increase' :
-			case 'variable_sale_price_decrease' :
-				if ( empty( $data['value'] ) ) {
-					break;
-				}
-
-				$field    = str_replace( array( 'variable', '_increase', '_decrease' ), '', $bulk_action );
-				$operator = 'increase' === substr( $bulk_action, -8 ) ? +1 : -1;
-
-				foreach ( $variations as $variation_id ) {
-					// Price fields
-					$regular_price = get_post_meta( $variation_id, '_regular_price', true );
-					$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-
-					// Date fields
-					$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-					$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-					$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-					$date_to   = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-
-					if ( '%' === substr( $data['value'], -1 ) ) {
-						$percent = wc_format_decimal( substr( $data['value'], 0, -1 ) );
-
-						if ( '_regular_price' === $field ) {
-							$regular_price += ( ( $regular_price / 100 ) * $percent ) * $operator;
-						} else {
-							$sale_price += ( ( $sale_price / 100 ) * $percent ) * $operator;
-						}
-					} else {
-						if ( '_regular_price' === $field ) {
-							$regular_price += $data['value'];
-						} else {
-							$sale_price    += $data['value'];
-						}
-					}
-
-					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
-				}
-
-				break;
-			case 'variable_sale_schedule' :
-				if ( ! isset( $data['date_from'] ) && ! isset( $data['date_to'] ) ) {
-					break;
-				}
-
-				foreach ( $variations as $variation_id ) {
-					// Price fields
-					$regular_price = get_post_meta( $variation_id, '_regular_price', true );
-					$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
-
-					// Date fields
-					$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-					$date_to   = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-
-					if ( 'false' === $data['date_from'] ) {
-						$date_from = ! empty( $date_from ) ? date( 'Y-m-d', $date_from ) : '';
-					} else {
-						$date_from = $data['date_from'];
-					}
-
-					if ( 'false' === $data['date_to'] ) {
-						$date_to = ! empty( $date_to ) ? date( 'Y-m-d', $date_to ) : '';
-					} else {
-						$date_to = $data['date_to'];
-					}
-
-					_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
-				}
-				break;
-
-			default :
-				do_action( 'woocommerce_bulk_edit_variations_default', $bulk_action, $data, $product_id, $variations );
-				break;
+		if ( method_exists( __CLASS__, "variation_bulk_action_$bulk_action" ) ) {
+			call_user_func( array( __CLASS__, "variation_bulk_action_$bulk_action" ), $variations, $data );
+		} else {
+			do_action( 'woocommerce_bulk_edit_variations_default', $bulk_action, $data, $product_id, $variations );
 		}
 
 		do_action( 'woocommerce_bulk_edit_variations', $bulk_action, $data, $product_id, $variations );
@@ -3089,7 +3237,6 @@ class WC_AJAX {
 		// Sync and update transients
 		WC_Product_Variable::sync( $product_id );
 		wc_delete_product_transients( $product_id );
-
 		die();
 	}
 }

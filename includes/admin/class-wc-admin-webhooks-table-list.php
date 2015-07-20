@@ -86,7 +86,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		if ( 'trash' == $post_status ) {
 			$output .= esc_html( $title );
 		} else {
-			$output .= '<a href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
+			$output .= '<a href="' . esc_url( $edit_link ) . '" class="row-title">' . esc_html( $title ) . '</a>';
 		}
 		$output .= '</strong>';
 

@@ -252,8 +252,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					</thead>
 					<tbody>
 						<?php
-						$default_gateway = get_option( 'woocommerce_default_gateway' );
-
 						foreach ( WC()->payment_gateways->payment_gateways() as $gateway ) {
 
 							echo '<tr>';

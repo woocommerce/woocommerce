@@ -300,7 +300,6 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
  *
  * @access public
  * @param int $order_id
- * @return void
  */
 function wc_downloadable_product_permissions( $order_id ) {
 	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 ) {
@@ -482,7 +481,6 @@ function wc_get_order_item_meta( $item_id, $key, $single = true ) {
  * Cancel all unpaid orders after held duration to prevent stock lock for those products
  *
  * @access public
- * @return void
  */
 function wc_cancel_unpaid_orders() {
 	global $wpdb;
@@ -721,11 +719,11 @@ function wc_create_refund( $args = array() ) {
 
 		// Figure out if this is just a partial refund
 		$max_remaining_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
-	
+
 		if ( $max_remaining_refund > 0 ) {
 			do_action( 'woocommerce_order_partially_refunded', $args['order_id'], true, $refund_id );
 		}
-		
+
 		do_action( 'woocommerce_refund_created', $refund_id, $args );
 	}
 

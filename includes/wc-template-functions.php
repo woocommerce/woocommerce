@@ -16,8 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Handle redirects before content is output - hooked into template_redirect so is_page works.
- *
- * @return void
  */
 function wc_template_redirect() {
 	global $wp_query, $wp;
@@ -123,7 +121,6 @@ add_filter( 'loop_end', 'woocommerce_reset_loop' );
  * Products RSS Feed.
  *
  * @access public
- * @return void
  */
 function wc_products_rss_feed() {
 	// Product RSS
@@ -156,7 +153,6 @@ function wc_products_rss_feed() {
  * Output generator tag to aid debugging.
  *
  * @access public
- * @return void
  */
 function wc_generator_tag( $gen, $type ) {
 	switch ( $type ) {
@@ -423,14 +419,17 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 	 *
 	 */
 	function woocommerce_demo_store() {
-		if ( !is_store_notice_showing() )
+		if ( ! is_store_notice_showing() ) {
 			return;
+		}
 
 		$notice = get_option( 'woocommerce_demo_store_notice' );
-		if ( empty( $notice ) )
-			$notice = __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' );
 
-		echo apply_filters( 'woocommerce_demo_store', '<p class="demo_store">' . $notice . '</p>'  );
+		if ( empty( $notice ) ) {
+			$notice = __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' );
+		}
+
+		echo apply_filters( 'woocommerce_demo_store', '<p class="demo_store">' . wp_kses_post( $notice ) . '</p>'  );
 	}
 }
 

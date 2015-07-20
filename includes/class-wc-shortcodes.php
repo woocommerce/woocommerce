@@ -47,7 +47,7 @@ class WC_Shortcodes {
 	/**
 	 * Shortcode Wrapper
 	 *
-	 * @param mixed $function
+	 * @param string[] $function
 	 * @param array $atts (default: array())
 	 * @return string
 	 */

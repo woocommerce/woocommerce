@@ -5,6 +5,7 @@ filter:
   - dummy-data/*
   - i18n/*
   - includes/api/v1/*
+  - includes/api/v2/*
   - includes/libraries/*
   - includes/updates/*
   - includes/gateways/simplify-commerce/includes/*
