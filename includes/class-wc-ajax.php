@@ -1739,10 +1739,15 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
+		$term    = (string) wc_clean( stripslashes( $_GET['term'] ) );
+		$exclude = array();
 
 		if ( empty( $term ) ) {
 			die();
+		}
+
+		if ( ! empty( $_GET['exclude'] ) ) {
+			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
 		}
 
 		$args = array(
@@ -1750,7 +1755,8 @@ class WC_AJAX {
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 			's'              => $term,
-			'fields'         => 'ids'
+			'fields'         => 'ids',
+			'exclude'        => $exclude
 		);
 
 		if ( is_numeric( $term ) ) {
@@ -1760,7 +1766,8 @@ class WC_AJAX {
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
 				'post__in'       => array( 0, $term ),
-				'fields'         => 'ids'
+				'fields'         => 'ids',
+				'exclude'        => $exclude
 			);
 
 			$args3 = array(
@@ -1768,7 +1775,8 @@ class WC_AJAX {
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
 				'post_parent'    => $term,
-				'fields'         => 'ids'
+				'fields'         => 'ids',
+				'exclude'        => $exclude
 			);
 
 			$args4 = array(
@@ -1782,7 +1790,8 @@ class WC_AJAX {
 						'compare' => 'LIKE'
 					)
 				),
-				'fields'         => 'ids'
+				'fields'         => 'ids',
+				'exclude'        => $exclude
 			);
 
 			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ), get_posts( $args3 ), get_posts( $args4 ) ) );
@@ -1800,7 +1809,8 @@ class WC_AJAX {
 					'compare' => 'LIKE'
 					)
 				),
-				'fields'         => 'ids'
+				'fields'         => 'ids',
+				'exclude'        => $exclude
 			);
 
 			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ) ) );
@@ -1843,10 +1853,15 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
+		$term    = (string) wc_clean( stripslashes( $_GET['term'] ) );
+		$exclude = array();
 
 		if ( empty( $term ) ) {
 			die();
+		}
+
+		if ( ! empty( $_GET['exclude'] ) ) {
+			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
 		}
 
 		$found_products = array();
@@ -1867,7 +1882,8 @@ class WC_AJAX {
 					'suppress_filters' => 0,
 					'include'          => $posts_in,
 					's'                => $term,
-					'fields'           => 'ids'
+					'fields'           => 'ids',
+					'exclude'          => $exclude
 				);
 
 				$posts = get_posts( $args );
@@ -1901,7 +1917,12 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
+		$term    = (string) wc_clean( stripslashes( $_GET['term'] ) );
+		$exclude = array();
+
+		if ( ! empty( $_GET['exclude'] ) ) {
+			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
+		}
 
 		$args = array(
 			'post_type'      => array( 'product', 'product_variation' ),
@@ -1915,7 +1936,8 @@ class WC_AJAX {
 					'value' => 'yes'
 				)
 			),
-			's'              => $term
+			's'              => $term,
+			'exclude'        => $exclude
 		);
 
 		$posts = get_posts( $args );
