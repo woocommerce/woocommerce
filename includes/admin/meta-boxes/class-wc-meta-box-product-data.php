@@ -1163,7 +1163,10 @@ class WC_Meta_Box_Product_Data {
 
 						// Validate the file exists
 						if ( 'relative' === $file_is ) {
-							$_file_url = '..' === substr( $file_url, 0, 2 ) ? realpath( ABSPATH . $file_url ) : $file_url;
+							$_file_url = $file_url;
+							if ( '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 ) ) {
+								$_file_url = realpath( ABSPATH . $file_url );
+							}
 
 							if ( ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $_file_url ), $file_url ) ) {
 								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
