@@ -507,6 +507,14 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 			return ob_get_clean();
 	}
 }
+if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
+	/**
+	 * Show the product title in the product loop. By default this is an H3
+	 */
+	function woocommerce_template_loop_product_title() {
+		wc_get_template( 'loop/title.php' );
+	}
+}
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
 	/**
