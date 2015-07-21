@@ -303,7 +303,7 @@ function wc_cart_round_discount( $value, $precision ) {
 		$value = $value * pow( 10 , $precision ) - 0.5;
 		$value = ceil( $value ) * pow( 10, -$precision );
 
-		return $is_negative ? $value * ( -1 ) : $value;;
+		return $is_negative ? $value * ( -1 ) : $value;
 	} else {
 		return round( $value, $precision );
 	}
