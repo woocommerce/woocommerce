@@ -32,6 +32,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'subscription_suspension',
 			'subscription_amount_changes',
 			'subscription_payment_method_change',
+			'subscription_payment_method_change_admin',
 			'subscription_date_changes',
 			'default_credit_card_form',
 			'refunds',
