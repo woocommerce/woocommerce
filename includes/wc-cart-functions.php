@@ -290,20 +290,14 @@ function wc_cart_totals_shipping_method_label( $method ) {
 
 /**
  * Round discount
- * This function is an alternative to round() mode for PHP 5.2
  *
  * @param  float $value
  * @param  int $precision
  * @return float
  */
 function wc_cart_round_discount( $value, $precision ) {
-	if ( in_array( WC_DISCOUNT_ROUNDING_MODE, array( 2, 4 ), true ) ) {
-		$is_negative = 0 > $value;
-		$value = $is_negative ? $value * ( -1 ) : $value;
-		$value = $value * pow( 10 , $precision ) - 0.5;
-		$value = ceil( $value ) * pow( 10, -$precision );
-
-		return $is_negative ? $value * ( -1 ) : $value;
+	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
+		return round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE );
 	} else {
 		return round( $value, $precision );
 	}
