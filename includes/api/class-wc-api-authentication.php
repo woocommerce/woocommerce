@@ -226,7 +226,7 @@ class WC_API_Authentication {
 		$server_path = WC()->api->server->path;
 
 		// if the requested URL has a trailingslash, make sure our base URL does as well
-		if ( '/' === substr( $_SERVER['REDIRECT_URL'], -1 ) ) {
+		if ( isset( $_SERVER['REDIRECT_URL'] ) && '/' === substr( $_SERVER['REDIRECT_URL'], -1 ) ) {
 			$server_path .= '/';
 		}
 
