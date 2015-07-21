@@ -143,14 +143,13 @@ class WC_Download_Handler {
 
 	/**
 	 * Log the download + increase counts
-	 * @param  object $download_data
-	 * @access private
+	 * @param object $download_data
 	 */
-	private static function count_download( $download_data ) {
+	public static function count_download( $download_data ) {
 		global $wpdb;
 
 		$wpdb->update(
-			$wpdb->prefix . "woocommerce_downloadable_product_permissions",
+			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
 			array(
 				'download_count'      => $download_data->download_count + 1,
 				'downloads_remaining' => $download_data->downloads_remaining > 0 ? $download_data->downloads_remaining - 1 : $download_data->downloads_remaining,
