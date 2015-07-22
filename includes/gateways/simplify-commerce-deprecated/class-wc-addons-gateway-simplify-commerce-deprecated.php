@@ -24,6 +24,7 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 
 		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
 			add_action( 'scheduled_subscription_payment_' . $this->id, array( $this, 'process_scheduled_subscription_payment' ), 10, 3 );
+			add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'remove_renewal_order_meta' ), 10, 4 );
 		}
 	}
 
@@ -130,5 +131,22 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 		} else {
 			WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
 		}
+	}
+
+	/**
+	 * Don't transfer customer meta when creating a parent renewal order.
+	 *
+	 * @param string $order_meta_query MySQL query for pulling the metadata
+	 * @param int $original_order_id Post ID of the order being used to purchased the subscription being renewed
+	 * @param int $renewal_order_id Post ID of the order created for renewing the subscription
+	 * @param string $new_order_role The role the renewal order is taking, one of 'parent' or 'child'
+	 * @return string
+	 */
+	public function remove_renewal_order_meta( $order_meta_query, $original_order_id, $renewal_order_id, $new_order_role ) {
+		if ( 'parent' == $new_order_role ) {
+			$order_meta_query .= " AND `meta_key` NOT LIKE '_simplify_customer_id' ";
+		}
+
+		return $order_meta_query;
 	}
 }

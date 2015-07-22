@@ -24,8 +24,9 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
 			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, array( $this, 'scheduled_subscription_payment' ), 10, 2 );
-			add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'remove_renewal_order_meta' ), 10, 4 );
 			add_action( 'woocommerce_subscriptions_changed_failing_payment_method_' . $this->id, array( $this, 'update_failing_payment_method' ), 10, 3 );
+
+			add_action( 'wcs_resubscribe_order_created', array( $this, 'delete_resubscribe_meta' ), 10 );
 
 			// Allow store managers to manually set Simplify as the payment method on a subscription
 			add_filter( 'woocommerce_subscription_payment_meta', array( $this, 'add_subscription_payment_meta' ), 10, 2 );
@@ -358,23 +359,6 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Don't transfer customer meta when creating a parent renewal order.
-	 *
-	 * @param string $order_meta_query MySQL query for pulling the metadata
-	 * @param int $original_order_id Post ID of the order being used to purchased the subscription being renewed
-	 * @param int $renewal_order_id Post ID of the order created for renewing the subscription
-	 * @param string $new_order_role The role the renewal order is taking, one of 'parent' or 'child'
-	 * @return string
-	 */
-	public function remove_renewal_order_meta( $order_meta_query, $original_order_id, $renewal_order_id, $new_order_role ) {
-		if ( 'parent' == $new_order_role ) {
-			$order_meta_query .= " AND `meta_key` NOT LIKE '_simplify_customer_id' ";
-		}
-
-		return $order_meta_query;
-	}
-
-	/**
 	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for
 	 * an automatic renewal payment which previously failed.
 	 *
@@ -426,6 +410,17 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				throw new Exception( 'A "_simplify_customer_id" value is required.' );
 			}
 		}
+	}
+
+	/**
+	 * Don't transfer customer meta to resubscribe orders.
+	 *
+	 * @access public
+	 * @param int $resubscribe_order The order created for the customer to resubscribe to the old expired/cancelled subscription
+	 * @return void
+	 */
+	public function delete_resubscribe_meta( $resubscribe_order ) {
+		delete_post_meta( $resubscribe_order->id, '_simplify_customer_id' );
 	}
 
 	/**
