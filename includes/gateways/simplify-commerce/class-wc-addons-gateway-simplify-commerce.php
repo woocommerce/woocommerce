@@ -23,7 +23,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		parent::__construct();
 
 		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
-			add_action( 'scheduled_subscription_payment_' . $this->id, array( $this, 'scheduled_subscription_payment' ), 10, 3 );
+			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, array( $this, 'scheduled_subscription_payment' ), 10, 2 );
 			add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'remove_renewal_order_meta' ), 10, 4 );
 			add_action( 'woocommerce_subscriptions_changed_failing_payment_method_' . $this->id, array( $this, 'update_failing_payment_method' ), 10, 3 );
 
@@ -107,18 +107,14 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			) );
 
 			if ( is_object( $customer ) && '' != $customer->id ) {
-				$customer_id = wc_clean( $customer->id );
-
-				// Store the customer ID in the order
-				update_post_meta( $order->id, '_simplify_customer_id', $customer_id );
+				$this->save_subscription_meta( $order->id, $customer->id );
 			} else {
 				$error_msg = __( 'Error creating user in Simplify Commerce.', 'woocommerce' );
 
 				throw new Simplify_ApiException( $error_msg );
 			}
 
-			$initial_payment  = WC_Subscriptions_Order::get_total_initial_payment( $order );
-			$payment_response = $this->process_subscription_payment( $order, $initial_payment );
+			$payment_response = $this->process_subscription_payment( $order, $order->get_total() );
 
 			if ( is_wp_error( $payment_response ) ) {
 				throw new Exception( $payment_response->get_error_message() );
@@ -146,6 +142,24 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				'result'   => 'fail',
 				'redirect' => ''
 			);
+		}
+	}
+
+	/**
+	 * Store the customer and card IDs on the order and subscriptions in the order
+	 *
+	 * @param int $order_id
+	 * @param string $customer_id
+	 */
+	protected function save_subscription_meta( $order_id, $customer_id ) {
+
+		$customer_id = wc_clean( $customer_id );
+
+		update_post_meta( $order_id, '_simplify_customer_id', $customer_id );
+
+		// Also store it on the subscriptions being purchased in the order
+		foreach( wcs_get_subscriptions_for_order( $order_id ) as $subscription ) {
+			update_post_meta( $subscription->id, '_simplify_customer_id', $customer_id );
 		}
 	}
 
@@ -276,10 +290,6 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			return new WP_Error( 'simplify_error', __( 'Sorry, the minimum allowed order total is 0.50 to use this payment method.', 'woocommerce' ) );
 		}
 
-		$order_items       = $order->get_items();
-		$order_item        = array_shift( $order_items );
-		$subscription_name = sprintf( __( '%s - Subscription for "%s"', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order_item['name'] ) . ' ' . sprintf( __( '(Order #%s)', 'woocommerce' ), $order->get_order_number() );
-
 		$customer_id = get_post_meta( $order->id, '_simplify_customer_id', true );
 
 		if ( ! $customer_id ) {
@@ -291,7 +301,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			$payment = Simplify_Payment::createPayment( array(
 				'amount'              => $amount * 100, // In cents
 				'customer'            => $customer_id,
-				'description'         => trim( substr( $subscription_name, 0, 1024 ) ),
+				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
 				'reference'           => $order->id,
 				'card.addressCity'    => $order->billing_city,
@@ -337,16 +347,13 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * scheduled_subscription_payment function.
 	 *
 	 * @param float $amount_to_charge The amount to charge.
-	 * @param WC_Order $order The WC_Order object of the order which the subscription was purchased in.
-	 * @param int $product_id The ID of the subscription product for which this payment relates.
+	 * @param WC_Order $renewal_order A WC_Order object created to record the renewal payment.
 	 */
-	public function scheduled_subscription_payment( $amount_to_charge, $order, $product_id ) {
-		$result = $this->process_subscription_payment( $order, $amount_to_charge );
+	public function scheduled_subscription_payment( $amount_to_charge, $renewal_order ) {
+		$result = $this->process_subscription_payment( $renewal_order, $amount_to_charge );
 
 		if ( is_wp_error( $result ) ) {
-			WC_Subscriptions_Manager::process_subscription_payment_failure_on_order( $order, $product_id );
-		} else {
-			WC_Subscriptions_Manager::process_subscription_payments_on_order( $order );
+			$renewal_order->update_status( 'failed', sprintf( __( 'Simplify Transaction Failed (%s)', 'woocommerce' ), $result->get_error_message() ) );
 		}
 	}
 
