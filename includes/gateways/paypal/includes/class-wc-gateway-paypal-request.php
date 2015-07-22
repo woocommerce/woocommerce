@@ -350,7 +350,7 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
-	 * Round prices
+	 * Format prices
 	 *
 	 * @param  float|int $price
 	 * @param  WC_Order $order
