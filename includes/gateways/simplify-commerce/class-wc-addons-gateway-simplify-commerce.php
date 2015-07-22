@@ -24,7 +24,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
 			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, array( $this, 'scheduled_subscription_payment' ), 10, 2 );
-			add_action( 'woocommerce_subscriptions_changed_failing_payment_method_' . $this->id, array( $this, 'update_failing_payment_method' ), 10, 3 );
+			add_action( 'woocommerce_subscription_failing_payment_method_updated_' . $this->id, array( $this, 'update_failing_payment_method' ), 10, 2 );
 
 			add_action( 'wcs_resubscribe_order_created', array( $this, 'delete_resubscribe_meta' ), 10 );
 
@@ -258,7 +258,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		$order      = wc_get_order( $order_id );
 
 		// Processing subscription
-		if ( 'standard' == $this->mode && $this->order_contains_subscription( $order->id ) ) {
+		if ( 'standard' == $this->mode && ( $this->order_contains_subscription( $order->id ) || ( function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $order_id ) ) ) ) {
 			return $this->process_subscription( $order, $cart_token );
 
 		// Processing pre-order
@@ -362,14 +362,11 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for
 	 * an automatic renewal payment which previously failed.
 	 *
-	 * @param WC_Order $original_order The original order in which the subscription was purchased.
+	 * @param WC_Subscription $subscription The subscription for which the failing payment method relates.
 	 * @param WC_Order $renewal_order The order which recorded the successful payment (to make up for the failed automatic payment).
-	 * @param string $subscription_key A subscription key of the form created by @see WC_Subscriptions_Manager::get_subscription_key()
 	 */
-	public function update_failing_payment_method( $original_order, $renewal_order, $subscription_key ) {
-		$new_customer_id = get_post_meta( $renewal_order->id, '_simplify_customer_id', true );
-
-		update_post_meta( $original_order->id, '_simplify_customer_id', $new_customer_id );
+	public function update_failing_payment_method( $subscription, $renewal_order ) {
+		update_post_meta( $original_order->id, '_simplify_customer_id', get_post_meta( $renewal_order->id, '_simplify_customer_id', true ) );
 	}
 
 	/**

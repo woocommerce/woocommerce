@@ -25,6 +25,7 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 		if ( class_exists( 'WC_Subscriptions_Order' ) ) {
 			add_action( 'scheduled_subscription_payment_' . $this->id, array( $this, 'process_scheduled_subscription_payment' ), 10, 3 );
 			add_filter( 'woocommerce_subscriptions_renewal_order_meta_query', array( $this, 'remove_renewal_order_meta' ), 10, 4 );
+			add_action( 'woocommerce_subscriptions_changed_failing_payment_method_' . $this->id, array( $this, 'change_failing_payment_method' ), 10, 3 );
 		}
 	}
 
@@ -158,5 +159,19 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 	 */
 	protected function order_contains_subscription( $order_id ) {
 		return class_exists( 'WC_Subscriptions_Order' ) && ( WC_Subscriptions_Order::order_contains_subscription( $order_id ) || WC_Subscriptions_Renewal_Order::is_renewal( $order_id ) );
+	}
+
+	/**
+	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for
+	 * an automatic renewal payment which previously failed.
+	 *
+	 * @param WC_Order $original_order The original order in which the subscription was purchased.
+	 * @param WC_Order $renewal_order The order which recorded the successful payment (to make up for the failed automatic payment).
+	 * @param string $subscription_key A subscription key of the form created by @see WC_Subscriptions_Manager::get_subscription_key()
+	 */
+	public function change_failing_payment_method( $original_order, $renewal_order, $subscription_key ) {
+		$new_customer_id = get_post_meta( $renewal_order->id, '_simplify_customer_id', true );
+
+		update_post_meta( $original_order->id, '_simplify_customer_id', $new_customer_id );
 	}
 }
