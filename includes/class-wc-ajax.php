@@ -872,7 +872,7 @@ class WC_AJAX {
 				$options = explode( WC_DELIMITER, $attribute['value'] );
 			}
 
-			$options = array_map( 'sanitize_title', array_map( 'trim', $options ) );
+			$options = array_map( 'trim', $options );
 
 			$variations[ $attribute_field_name ] = $options;
 		}
