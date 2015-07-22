@@ -149,4 +149,14 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 
 		return $order_meta_query;
 	}
+
+	/**
+	 * Check if order contains subscriptions.
+	 *
+	 * @param  int $order_id
+	 * @return bool
+	 */
+	protected function order_contains_subscription( $order_id ) {
+		return class_exists( 'WC_Subscriptions_Order' ) && ( WC_Subscriptions_Order::order_contains_subscription( $order_id ) || WC_Subscriptions_Renewal_Order::is_renewal( $order_id ) );
+	}
 }
