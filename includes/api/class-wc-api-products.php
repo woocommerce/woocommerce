@@ -1518,11 +1518,15 @@ class WC_API_Products extends WC_API_Resource {
 					$_attribute = $attributes[ $taxonomy ];
 
 					if ( $_attribute['is_variation'] ) {
-						// Don't use wc_clean as it destroys sanitized characters
+						$value = '';
+
 						if ( isset( $default_attr['option'] ) ) {
-							$value = sanitize_title( trim( stripslashes( $default_attr['option'] ) ) );
-						} else {
-							$value = '';
+							if ( $_attribute['is_taxonomy'] ) {
+								// Don't use wc_clean as it destroys sanitized characters
+								$value = sanitize_title( trim( stripslashes( $default_attr['option'] ) ) );
+							} else {
+								$value = wc_clean( trim( stripslashes( $default_attr['option'] ) ) );
+							}
 						}
 
 						if ( $value ) {
