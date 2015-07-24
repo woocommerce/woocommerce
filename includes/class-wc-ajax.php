@@ -59,12 +59,15 @@ class WC_AJAX {
 		global $wp_query;
 
 		if ( ! empty( $_GET['wc-ajax'] ) ) {
-			 $wp_query->set( 'wc-ajax', sanitize_text_field( $_GET['wc-ajax'] ) );
+			$wp_query->set( 'wc-ajax', sanitize_text_field( $_GET['wc-ajax'] ) );
 		}
 
 		if ( $action = $wp_query->get( 'wc-ajax' ) ) {
 			if ( ! defined( 'DOING_AJAX' ) ) {
 				define( 'DOING_AJAX', true );
+			}
+			if ( ! defined( 'WC_DOING_AJAX' ) ) {
+				define( 'WC_DOING_AJAX', true );
 			}
 			do_action( 'wc_ajax_' . sanitize_text_field( $action ) );
 			die();
