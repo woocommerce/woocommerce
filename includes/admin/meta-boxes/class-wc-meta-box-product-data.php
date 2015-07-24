@@ -1208,9 +1208,6 @@ class WC_Meta_Box_Product_Data {
 
 		// Save variations
 		if ( 'variable' == $product_type ) {
-			// Deprecated since WooCommerce 2.4.0 in favor to WC_AJAX::save_variations()
-			// self::save_variations( $post_id, $post );
-
 			// Update parent if variable so price sorting works and stays in sync with the cheapest child
 			WC_Product_Variable::sync( $post_id );
 		}
@@ -1228,7 +1225,6 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Save meta box data
 	 *
-	 * @deprecated 2.4.0 Deprecated in favor to WC_AJAX::save_variations()
 	 */
 	public static function save_variations( $post_id, $post ) {
 		global $wpdb;
@@ -1236,7 +1232,6 @@ class WC_Meta_Box_Product_Data {
 		$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
 
 		if ( isset( $_POST['variable_sku'] ) ) {
-
 			$variable_post_id               = $_POST['variable_post_id'];
 			$variable_sku                   = $_POST['variable_sku'];
 			$variable_regular_price         = $_POST['variable_regular_price'];
@@ -1276,10 +1271,10 @@ class WC_Meta_Box_Product_Data {
 				$variation_id = absint( $variable_post_id[ $i ] );
 
 				// Checkboxes
-				$is_virtual          = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
-				$is_downloadable     = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
-				$post_status         = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
-				$manage_stock        = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
+				$is_virtual      = isset( $variable_is_virtual[ $i ] ) ? 'yes' : 'no';
+				$is_downloadable = isset( $variable_is_downloadable[ $i ] ) ? 'yes' : 'no';
+				$post_status     = isset( $variable_enabled[ $i ] ) ? 'publish' : 'private';
+				$manage_stock    = isset( $variable_manage_stock[ $i ] ) ? 'yes' : 'no';
 
 				// Generate a useful post title
 				$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), absint( $variation_id ), esc_html( get_the_title( $post_id ) ) );
@@ -1518,12 +1513,15 @@ class WC_Meta_Box_Product_Data {
 		foreach ( $attributes as $attribute ) {
 
 			if ( $attribute['is_variation'] ) {
+				$value = '';
 
-				// Don't use wc_clean as it destroys sanitized characters
 				if ( isset( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) {
-					$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
-				} else {
-					$value = '';
+					if ( $attribute['is_taxonomy'] ) {
+						// Don't use wc_clean as it destroys sanitized characters
+						$value = sanitize_title( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+					} else {
+						$value = wc_clean( trim( stripslashes( $_POST[ 'default_attribute_' . sanitize_title( $attribute['name'] ) ] ) ) );
+					}
 				}
 
 				if ( $value ) {
