@@ -1208,9 +1208,6 @@ class WC_Meta_Box_Product_Data {
 
 		// Save variations
 		if ( 'variable' == $product_type ) {
-			// Deprecated since WooCommerce 2.4.0 in favor to WC_AJAX::save_variations()
-			// self::save_variations( $post_id, $post );
-
 			// Update parent if variable so price sorting works and stays in sync with the cheapest child
 			WC_Product_Variable::sync( $post_id );
 		}
@@ -1228,7 +1225,6 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Save meta box data
 	 *
-	 * @deprecated 2.4.0 Deprecated in favor to WC_AJAX::save_variations()
 	 */
 	public static function save_variations( $post_id, $post ) {
 		global $wpdb;
