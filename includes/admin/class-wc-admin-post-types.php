@@ -1563,7 +1563,7 @@ class WC_Admin_Post_Types {
 					break;
 			}
 
-			$output .= " ($term->count)</option>";
+			$output .= '</option>';
 
 			if ( 'simple' == $term->name ) {
 
