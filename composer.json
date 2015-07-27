@@ -1,0 +1,7 @@
+{
+  "name": "woothemes/woocommerce",
+  "description": "WooCommerce - excelling eCommerce",
+  "type": "wordpress-plugin",
+  "license": "GPLv3",
+  "require": {}
+}
