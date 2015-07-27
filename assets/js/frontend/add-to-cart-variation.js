@@ -102,7 +102,7 @@
 					data.product_id = $product_id;
 
 					$xhr = $.ajax( {
-						url: wc_cart_fragments_params.wc_ajax_url + 'get_variation/',
+						url: wc_cart_fragments_params.wc_ajax_url.toString().replace( "%%endpoint%%", "get_variation" ),
 						type: 'POST',
 						data: data,
 						success: function( variation ) {

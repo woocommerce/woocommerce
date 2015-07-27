@@ -47,7 +47,7 @@ class WC_AJAX {
 		} elseif ( get_option( 'permalink_structure' ) ) {
 			$endpoint = trailingslashit( home_url( '/wc-ajax/' . $request, 'relative' ) );
 		} else {
-			$endpoint = add_query_arg( 'wc-ajax=', $request, trailingslashit( home_url( '', 'relative' ) ) );
+			$endpoint = add_query_arg( $request ? 'wc-ajax' : 'wc-ajax=', $request, trailingslashit( home_url( '', 'relative' ) ) );
 		}
 		return esc_url_raw( $endpoint );
 	}
