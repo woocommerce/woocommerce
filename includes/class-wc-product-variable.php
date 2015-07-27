@@ -249,7 +249,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array()
 	 */
 	public function get_variation_prices( $display = false ) {
-		$cache_key = 'var_prices_' . md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array(
+		$cache_key = 'wc_var_prices' . md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array(
 			$this->id,
 			$display ? WC_Tax::get_rates() : '',
 			WC_Cache_Helper::get_transient_version( 'product' )
