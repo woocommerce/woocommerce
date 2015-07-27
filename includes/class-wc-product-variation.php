@@ -135,16 +135,31 @@ class WC_Product_Variation extends WC_Product {
 			}
 
 		} elseif ( 'variation_data' === $key ) {
-			$all_meta = get_post_meta( $this->variation_id );
+			// Build variation data from meta
+			$all_meta                = get_post_meta( $this->variation_id );
+			$parent_attributes       = $this->parent->get_attributes();
+			$found_parent_attributes = array();
 
 			// The variation data array
 			$this->variation_data = array();
 
+			// Compare to parent variable product attributes and ensure they match
+			foreach ( $parent_attributes as $attribute_name => $options ) {
+				$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
+				$found_parent_attributes[] = $attribute;
+				if ( ! array_key_exists( $attribute, $this->variation_data ) ) {
+					$this->variation_data[ $attribute ] = ''; // Add it - 'any' will be asumed
+				}
+			}
+
 			// Get the variation attributes from meta
 			foreach ( $all_meta as $name => $value ) {
-				if ( 0 !== strpos( $name, 'attribute_' ) ) {
+				// Only look at valid attribute meta, and also compare variation level attributes and remove any which do not exist at parent level
+				if ( 0 !== strpos( $name, 'attribute_' ) || ! in_array( $name, $found_parent_attributes ) ) {
+					unset( $this->variation_data[ $name ] );
 					continue;
 				}
+
 				/**
 				 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
 				 * Attempt to get full version of the text attribute from the parent.
