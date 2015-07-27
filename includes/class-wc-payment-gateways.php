@@ -75,7 +75,11 @@ class WC_Payment_Gateways {
 
 		if ( 'US' === WC()->countries->get_base_country() ) {
 			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
-				$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';
+				if ( ! function_exists( 'wcs_create_renewal_order' ) ) { // Subscriptions < 2.0
+					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce_Deprecated';
+				} else {
+					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';
+				}
 			} else {
 				$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 			}
