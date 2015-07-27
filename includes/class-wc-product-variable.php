@@ -373,7 +373,7 @@ class WC_Product_Variable extends WC_Product {
 			if ( in_array( '', $values ) ) {
 				$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
 
-			// Order custom attributes (non taxonomy) as defined
+			// Get custom attributes (non taxonomy) as defined
 			} elseif ( ! $attribute['is_taxonomy'] ) {
 				$text_attributes          = wc_get_text_attributes( $attribute['value'] );
 				$assigned_text_attributes = $values;
@@ -412,6 +412,18 @@ class WC_Product_Variable extends WC_Product {
 	public function get_variation_default_attributes() {
 		$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
 		return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
+	}
+
+	/**
+	 * If set, get the default attributes for a variable product.
+	 *
+	 * @param string $attribute_name
+	 * @return string
+	 */
+	public function get_variation_default_attribute( $attribute_name ) {
+		$defaults       = $this->get_variation_default_attributes();
+		$attribute_name = sanitize_title( $attribute_name );
+		return isset( $defaults[ $attribute_name ] ) ? $defaults[ $attribute_name ] : '';
 	}
 
 	/**

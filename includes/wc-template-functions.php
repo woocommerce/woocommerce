@@ -1865,3 +1865,59 @@ if ( ! function_exists( 'woocommerce_output_auth_footer' ) ) {
 		wc_get_template( 'auth/footer.php' );
 	}
 }
+
+if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
+
+	/**
+	 * Output a list of variation attributes for use in the cart forms.
+	 *
+	 * @param array $args
+	 * @since 2.4.0
+	 */
+	function wc_dropdown_variation_attribute_options( $args = array() ) {
+		$args = wp_parse_args( $args, array(
+			'options'          => false,
+			'attribute'        => false,
+			'product'          => false,
+			'selected' 	       => false,
+			'name'             => '',
+			'id'               => '',
+			'show_option_none' => __( 'Choose an option', 'woocommerce' )
+		) );
+
+		extract( $args );
+
+		if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {
+			$attributes = $product->get_variation_attributes();
+			$options    = $attributes[ $attribute ];
+		}
+
+		$name = $name ? $name : 'attribute_' . sanitize_title( $attribute );
+		$id   = $id ? $id     : sanitize_title( $attribute );
+
+		echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">';
+
+		if ( $show_option_none ) {
+			echo '<option value="">' . esc_html( $show_option_none ) . '</option>';
+		}
+
+		if ( ! empty( $options ) ) {
+			if ( $product && taxonomy_exists( $attribute ) ) {
+				// Get terms if this is a taxonomy - ordered. We need the names too.
+				$terms = wc_get_product_terms( $product->id, $attribute, array( 'fields' => 'all' ) );
+
+				foreach ( $terms as $term ) {
+					if ( in_array( $term->slug, $options ) ) {
+						echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $selected ), $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
+					}
+				}
+			} else {
+				foreach ( $options as $option ) {
+					// This handles < 2.4.0 bw compatibility where text attributes were not sanitized.
+					$selected = sanitize_title( $selected ) === $selected ? selected( $selected, sanitize_title( $option ), false ) : selected( $selected, $option, false );
+					echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+				}
+			}
+		}
+	}
+}
