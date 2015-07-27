@@ -2591,6 +2591,9 @@ class WC_AJAX {
 			die( -1 );
 		}
 
+		// Remove previous meta box errors
+		WC_Admin_Meta_Boxes::$meta_box_errors = array();
+
 		$product_id = absint( $_POST['product_id'] );
 		WC_Meta_Box_Product_Data::save_variations( $product_id, get_post( $product_id ) );
 
@@ -2598,6 +2601,20 @@ class WC_AJAX {
 
 		// Clear cache/transients
 		wc_delete_product_transients( $product_id );
+
+		if ( $errors = WC_Admin_Meta_Boxes::$meta_box_errors ) {
+			echo '<div id="woocommerce_errors" class="error">';
+
+			foreach ( $errors as $error ) {
+				echo '<p>' . wp_kses_post( $error ) . '</p>';
+			}
+
+			echo '</div>';
+
+			delete_option( 'woocommerce_meta_box_errors' );
+		}
+
+		die();
 	}
 
 	/**

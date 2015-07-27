@@ -1322,7 +1322,7 @@ class WC_Meta_Box_Product_Data {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 
 						if ( ! $unique_sku ) {
-							WC_Admin_Meta_Boxes::add_error( __( 'Variation SKU must be unique.', 'woocommerce' ) );
+							WC_Admin_Meta_Boxes::add_error( sprintf( __( '#%s &ndash; Variation SKU must be unique.', 'woocommerce' ), $variation_id ) );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -1442,14 +1442,14 @@ class WC_Meta_Box_Product_Data {
 								$extension  = pathinfo( $parsed_url, PATHINFO_EXTENSION );
 
 								if ( ! empty( $extension ) && ! in_array( $file_type['type'], $allowed_file_types ) ) {
-									WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not have an allowed file type. Allowed types include: %s', 'woocommerce' ), '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
+									WC_Admin_Meta_Boxes::add_error( sprintf( __( '#%s &ndash; The downloadable file %s cannot be used as it does not have an allowed file type. Allowed types include: %s', 'woocommerce' ), $variation_id, '<code>' . basename( $file_url ) . '</code>', '<code>' . implode( ', ', array_keys( $allowed_file_types ) ) . '</code>' ) );
 									continue;
 								}
 							}
 
 							// Validate the file exists
 							if ( 'relative' === $file_is && ! apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $file_url ) ) {
-								WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), '<code>' . $file_url . '</code>' ) );
+								WC_Admin_Meta_Boxes::add_error( sprintf( __( '#%s &ndash; The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ), $variation_id, '<code>' . $file_url . '</code>' ) );
 								continue;
 							}
 

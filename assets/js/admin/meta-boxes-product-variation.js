@@ -391,7 +391,7 @@ jQuery( function( $ ) {
 					url: woocommerce_admin_meta_boxes_variations.ajax_url,
 					data: data,
 					type: 'POST',
-					success: function() {
+					success: function( response ) {
 						// Allow change page, delete and add new variations
 						need_update.removeClass( 'variation-needs-update' );
 						$( 'button.cancel-variation-changes, button.save-variation-changes' ).attr( 'disabled', 'disabled' );
@@ -399,7 +399,7 @@ jQuery( function( $ ) {
 						$( '#woocommerce-product-data' ).trigger( 'woocommerce_variations_saved' );
 
 						if ( typeof callback === 'function' ) {
-							callback();
+							callback( response );
 						}
 
 						wc_meta_boxes_product_variations_ajax.unblock();
@@ -416,8 +416,15 @@ jQuery( function( $ ) {
 		save_variations: function() {
 			$( '#variable_product_options' ).trigger( 'woocommerce_variations_save_variations_button' );
 
-			wc_meta_boxes_product_variations_ajax.save_changes( function() {
-				var current = $( '#variable_product_options .woocommerce_variations' ).attr( 'data-page' );
+			wc_meta_boxes_product_variations_ajax.save_changes( function( error ) {
+				var wrapper = $( '#variable_product_options .woocommerce_variations' ),
+					current = wrapper.attr( 'data-page' );
+
+				$( '#variable_product_options #woocommerce_errors' ).remove();
+
+				if ( error ) {
+					wrapper.before( error );
+				}
 
 				$( '.variations-defaults select' ).each( function() {
 					$( this ).attr( 'data-current', $( this ).val() );
