@@ -15,7 +15,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Beta_Tester' ) ) :
+/**
+ * Confirm woocommerce is at least installed before doing anything
+ * Curiously, developers are discouraged from using WP_PLUGIN_DIR and not given a
+ * function with which to get the plugin directory, so this is what we have to do
+ */
+if ( ! file_exists( trailingslashit( dirname( dirname( __FILE__ ) ) ) . 'woocommerce/woocommerce.php' ) ) :
+
+	add_action( 'admin_notices', 'wcbt_woocoommerce_not_installed' );
+
+elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 
 	/**
 	 * WC_Beta_Tester Main Class
@@ -281,3 +290,17 @@ if ( ! class_exists( 'WC_Beta_Tester' ) ) :
 	add_action( 'admin_init', array( 'WC_Beta_Tester', 'instance' ) );
 
 endif;
+
+
+/**
+* WooCommerce Not Installed Notice
+**/
+if ( ! function_exists( 'wcbt_woocoommerce_not_installed' ) ) {
+
+	function wcbt_woocoommerce_not_installed() {
+
+		echo '<div class="error"><p>' . sprintf( __( 'WooCommerce Beta Tester requires %s to be installed.', 'woocommerce-beta-tester' ), '<a href="http://www.woothemes.com/woocommerce/" target="_blank">WooCommerce</a>' ) . '</p></div>';
+
+	}
+
+}
