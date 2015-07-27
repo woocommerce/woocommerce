@@ -88,7 +88,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Performed after a stock level change at product level
 	 */
-	protected function check_stock_status() {
+	public function check_stock_status() {
 		$set_child_stock_status = '';
 
 		if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
