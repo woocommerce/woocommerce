@@ -1919,5 +1919,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 				}
 			}
 		}
+
+		echo '</select>';
 	}
 }
