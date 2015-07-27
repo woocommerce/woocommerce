@@ -169,7 +169,7 @@ class WC_Post_Data {
 	 * @param  mixed $_meta_value
 	 */
 	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
-		if ( '_stock_status' === $meta_key && 'product' !== get_post_type( $object_id ) ) {
+		if ( '_stock' === $meta_key && 'product' !== get_post_type( $object_id ) ) {
 			$product = wc_get_product( $object_id );
 			$product->check_stock_status();
 		}
