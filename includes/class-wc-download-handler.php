@@ -246,19 +246,17 @@ class WC_Download_Handler {
 	public static function download_file_xsendfile( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
 
-		extract( $parsed_file_path );
-
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules() ) ) {
-			self::download_headers( $file_path, $filename );
-			header( "X-Sendfile: $file_path" );
+			self::download_headers( $parsed_file_path['file_path'], $filename );
+			header( "X-Sendfile: " . $parsed_file_path['file_path'] );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'lighttpd' ) ) {
-			self::download_headers( $file_path, $filename );
-			header( "X-Lighttpd-Sendfile: $file_path" );
+			self::download_headers( $parsed_file_path['file_path'], $filename );
+			header( "X-Lighttpd-Sendfile: " . $parsed_file_path['file_path'] );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'nginx' ) || stristr( getenv( 'SERVER_SOFTWARE' ), 'cherokee' ) ) {
-			self::download_headers( $file_path, $filename );
-			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $file_path ), '/' );
+			self::download_headers( $parsed_file_path['file_path'], $filename );
+			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $parsed_file_path['file_path'] ), '/' );
 			header( "X-Accel-Redirect: /$xsendfile_path" );
 			exit;
 		}
@@ -275,12 +273,10 @@ class WC_Download_Handler {
 	public static function download_file_force( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
 
-		extract( $parsed_file_path );
+		self::download_headers( $parsed_file_path['file_path'], $filename );
 
-		self::download_headers( $file_path, $filename );
-
-		if ( ! self::readfile_chunked( $file_path ) ) {
-			if ( $remote_file ) {
+		if ( ! self::readfile_chunked( $parsed_file_path['file_path'] ) ) {
+			if ( $parsed_file_path['remote_file'] ) {
 				self::download_file_redirect( $file_path );
 			} else {
 				self::download_error( __( 'File not found', 'woocommerce' ) );
