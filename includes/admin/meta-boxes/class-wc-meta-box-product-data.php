@@ -643,7 +643,8 @@ class WC_Meta_Box_Product_Data {
 									$options = wc_get_text_attributes( $attribute['value'] );
 
 									foreach ( $options as $option ) {
-										echo '<option ' . selected( $variation_selected_value, $option, false ) . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
+										$selected = sanitize_title( $variation_selected_value ) === $variation_selected_value ? selected( sanitize_title( $variation_selected_value ), sanitize_title( $option ), false ) : selected( $variation_selected_value, $option, false );
+										echo '<option ' . $selected . ' value="' . esc_attr( $option ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) )  . '</option>';
 									}
 
 								}
