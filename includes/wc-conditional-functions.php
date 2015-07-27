@@ -271,7 +271,7 @@ if ( ! function_exists( 'meta_is_product_attribute' ) ) {
 	function meta_is_product_attribute( $name, $value, $product_id ) {
 		$product = wc_get_product( $product_id );
 
-		if ( $product->product_type != 'variable' ) {
+		if ( ! in_array( $product->product_type, apply_filters( 'meta_is_product_attribute_product_types', array( 'variable' ) ) ) ) {
 			return false;
 		}
 
