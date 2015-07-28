@@ -211,7 +211,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string
 	 */
 	public function get_permalink( $cart_item = null ) {
-		return add_query_arg( array_filter( isset( $cart_item['variation'] ) ? $cart_item['variation'] : $this->variation_data ), get_permalink( $this->id ) );
+		return add_query_arg( array_map( 'urlencode', array_filter( isset( $cart_item['variation'] ) ? $cart_item['variation'] : $this->variation_data ) ), get_permalink( $this->id ) );
 	}
 
 	/**
