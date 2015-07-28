@@ -29,6 +29,12 @@
 			return false;
 		} )
 
+		// Reload product variations data
+		.on( 'reload_product_variations', function() {
+			$product_variations = $form.data( 'product_variations' );
+			$use_ajax           = $product_variations === false;
+		} )
+
 		// Reset product data
 		.on( 'reset_data', function() {
 			var to_reset = {
