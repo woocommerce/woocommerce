@@ -177,7 +177,8 @@ class WC_Gateway_Paypal_Request {
 
 			$this->delete_line_items();
 
-			$this->add_line_item( $this->get_order_item_names( $order ), 1, $this->number_format( $order->get_total() - $this->round( $order->get_total_shipping() + $order->get_shipping_tax(), $order ), $order ), $order->get_order_number() );
+			$all_items_name = $this->get_order_item_names( $order );
+			$this->add_line_item( $all_items_name ? $all_items_name : __( 'Order', 'woocommerce' ), 1, $this->number_format( $order->get_total() - $this->round( $order->get_total_shipping() + $order->get_shipping_tax(), $order ), $order ), $order->get_order_number() );
 			$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), ucwords( $order->get_shipping_method() ) ), 1, $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) );
 
 			$line_item_args = $this->get_line_items();
@@ -284,11 +285,11 @@ class WC_Gateway_Paypal_Request {
 	protected function add_line_item( $item_name, $quantity = 1, $amount = 0, $item_number = '' ) {
 		$index = ( sizeof( $this->line_items ) / 4 ) + 1;
 
-		if ( ! $item_name || $amount < 0 || $index > 9 ) {
+		if ( $amount < 0 || $index > 9 ) {
 			return false;
 		}
 
-		$this->line_items[ 'item_name_' . $index ]   = html_entity_decode( wc_trim_string( $item_name, 127 ), ENT_NOQUOTES, 'UTF-8' );
+		$this->line_items[ 'item_name_' . $index ]   = html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' );
 		$this->line_items[ 'quantity_' . $index ]    = $quantity;
 		$this->line_items[ 'amount_' . $index ]      = $amount;
 		$this->line_items[ 'item_number_' . $index ] = $item_number;
