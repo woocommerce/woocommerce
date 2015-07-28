@@ -135,55 +135,7 @@ class WC_Product_Variation extends WC_Product {
 			}
 
 		} elseif ( 'variation_data' === $key ) {
-			// Build variation data from meta
-			$all_meta                = get_post_meta( $this->variation_id );
-			$parent_attributes       = $this->parent->get_attributes();
-			$found_parent_attributes = array();
-
-			// The variation data array
-			$this->variation_data = array();
-
-			// Compare to parent variable product attributes and ensure they match
-			foreach ( $parent_attributes as $attribute_name => $options ) {
-				$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
-				$found_parent_attributes[] = $attribute;
-				if ( ! array_key_exists( $attribute, $this->variation_data ) ) {
-					$this->variation_data[ $attribute ] = ''; // Add it - 'any' will be asumed
-				}
-			}
-
-			// Get the variation attributes from meta
-			foreach ( $all_meta as $name => $value ) {
-				// Only look at valid attribute meta, and also compare variation level attributes and remove any which do not exist at parent level
-				if ( 0 !== strpos( $name, 'attribute_' ) || ! in_array( $name, $found_parent_attributes ) ) {
-					unset( $this->variation_data[ $name ] );
-					continue;
-				}
-
-				/**
-				 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-				 * Attempt to get full version of the text attribute from the parent.
-				 */
-				if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
-					$attributes = $this->parent->get_attributes();
-
-					foreach ( $attributes as $attribute ) {
-						if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
-							continue;
-						}
-						$text_attributes = wc_get_text_attributes( $attribute['value'] );
-
-						foreach ( $text_attributes as $text_attribute ) {
-							if ( sanitize_title( $text_attribute ) === $value[0] ) {
-								$value[0] = $text_attribute;
-							}
-						}
-					}
-				}
-				$this->variation_data[ $name ] = $value[0];
-			}
-
-			return $this->variation_data;
+			return $this->variation_data = wc_get_product_variation_attributes( $this->variation_id );
 
 		} elseif ( 'variation_has_stock' === $key ) {
 			return $this->managing_stock();

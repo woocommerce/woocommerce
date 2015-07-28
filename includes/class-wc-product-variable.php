@@ -604,6 +604,53 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Sync the variable product's attributes with the variations
+	 */
+	public static function sync_attributes( $product_id, $children = false ) {
+		if ( ! $children ) {
+			$children = get_posts( array(
+				'post_parent' 	=> $product_id,
+				'posts_per_page'=> -1,
+				'post_type' 	=> 'product_variation',
+				'fields' 		=> 'ids',
+				'post_status'	=> 'any'
+			) );
+		}
+
+		/**
+		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+		 * Attempt to get full version of the text attribute from the parent and UPDATE meta.
+		 */
+		if ( version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
+			$parent_attributes = array_filter( (array) get_post_meta( $product_id, '_product_attributes', true ) );
+
+			foreach ( $children as $child_id ) {
+				$all_meta = get_post_meta( $child_id );
+
+				foreach ( $all_meta as $name => $value ) {
+					if ( 0 !== strpos( $name, 'attribute_' ) ) {
+						continue;
+					}
+					if ( sanitize_title( $value[0] ) === $value[0] ) {
+						foreach ( $parent_attributes as $attribute ) {
+							if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+								continue;
+							}
+							$text_attributes = wc_get_text_attributes( $attribute['value'] );
+							foreach ( $text_attributes as $text_attribute ) {
+								if ( sanitize_title( $text_attribute ) === $value[0] ) {
+									update_post_meta( $child_id, $name, $text_attribute );
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Sync the variable product with it's children
 	 */
 	public static function sync( $product_id ) {
@@ -627,40 +674,6 @@ class WC_Product_Variable extends WC_Product {
 
 		// Loop the variations
 		} else {
-
-			/**
-			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-			 * Attempt to get full version of the text attribute from the parent and UPDATE meta.
-			 */
-			if ( version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
-				$parent_attributes = array_filter( (array) get_post_meta( $product_id, '_product_attributes', true ) );
-
-				foreach ( $children as $child_id ) {
-					$all_meta = get_post_meta( $child_id );
-
-					foreach ( $all_meta as $name => $value ) {
-						if ( 0 !== strpos( $name, 'attribute_' ) ) {
-							continue;
-						}
-						if ( sanitize_title( $value[0] ) === $value[0] ) {
-							foreach ( $parent_attributes as $attribute ) {
-								if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
-									continue;
-								}
-								$text_attributes = wc_get_text_attributes( $attribute['value'] );
-
-								foreach ( $text_attributes as $text_attribute ) {
-									if ( sanitize_title( $text_attribute ) === $value[0] ) {
-										$value[0] = $text_attribute;
-									}
-								}
-							}
-
-							update_post_meta( $child_id, $name, $value[0] );
-						}
-					}
-				}
-			}
 
 			// Set the variable product to be virtual/downloadable if all children are virtual/downloadable
 			foreach ( array( '_downloadable', '_virtual' ) as $meta_key ) {
@@ -736,6 +749,9 @@ class WC_Product_Variable extends WC_Product {
 			// The VARIABLE PRODUCT price should equal the min price of any type
 			update_post_meta( $product_id, '_price', $min_price );
 			delete_transient( 'wc_products_onsale' );
+
+			// Sync attributes
+			self::sync_attributes( $product_id, $children );
 
 			do_action( 'woocommerce_variable_product_sync', $product_id, $children );
 		}

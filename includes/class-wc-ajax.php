@@ -2527,31 +2527,7 @@ class WC_AJAX {
 				}
 
 				// Add the variation attributes
-				foreach ( $variation_meta as $key => $value ) {
-					if ( 0 !== strpos( $key, 'attribute_' ) ) {
-						continue;
-					}
-
-					/**
-					 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-					 * Attempt to get full version of the text attribute from the parent.
-					 */
-					if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
-						foreach ( $attributes as $attribute ) {
-							if ( $key !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
-								continue;
-							}
-							$text_attributes = wc_get_text_attributes( $attribute['value'] );
-
-							foreach ( $text_attributes as $text_attribute ) {
-								if ( sanitize_title( $text_attribute ) === $value[0] ) {
-									$value[0] = $text_attribute;
-								}
-							}
-						}
-					}
-					$variation_data[ $key ] = $value[0];
-				}
+				$variation_data = array_merge( $variation_data, wc_get_product_variation_attributes( $variation_id ) );
 
 				// Formatting
 				$variation_data['_regular_price'] = wc_format_localized_price( $variation_data['_regular_price'] );
