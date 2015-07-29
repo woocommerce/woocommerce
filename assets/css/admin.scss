@@ -3053,6 +3053,10 @@ img.help_tip {
 			}
 		}
 
+		&.woocommerce_variation h3 {
+			cursor: pointer;
+		}
+
 		h3:hover {
 			a.delete, .handlediv {
 				display: block;
