@@ -2582,12 +2582,13 @@ class WC_AJAX {
 		wc_delete_product_transients( $product_id );
 
 		if ( $errors = WC_Admin_Meta_Boxes::$meta_box_errors ) {
-			echo '<div id="woocommerce_errors" class="error">';
+			echo '<div class="error notice is-dismissible">';
 
 			foreach ( $errors as $error ) {
 				echo '<p>' . wp_kses_post( $error ) . '</p>';
 			}
 
+			echo '<button type="button" class="notice-dismiss"><span class="screen-reader-text">' . __( 'Dismiss this notice.', 'woocommerce' ) . '</span></button>';
 			echo '</div>';
 
 			delete_option( 'woocommerce_meta_box_errors' );

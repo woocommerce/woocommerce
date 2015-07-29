@@ -13,7 +13,8 @@ jQuery( function( $ ) {
 			$( '#variable_product_options' )
 				.on( 'change', 'input.variable_is_downloadable', this.variable_is_downloadable )
 				.on( 'change', 'input.variable_is_virtual', this.variable_is_virtual )
-				.on( 'change', 'input.variable_manage_stock', this.variable_manage_stock );
+				.on( 'change', 'input.variable_manage_stock', this.variable_manage_stock )
+				.on( 'click', 'button.notice-dismiss', this.notice_dismiss );
 
 			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
 
@@ -53,6 +54,13 @@ jQuery( function( $ ) {
 			if ( $( this ).is( ':checked' ) ) {
 				$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).show();
 			}
+		},
+
+		/**
+		 * Notice dismiss
+		 */
+		notice_dismiss: function() {
+			$( this ).closest( 'div.notice' ).remove();
 		},
 
 		/**
