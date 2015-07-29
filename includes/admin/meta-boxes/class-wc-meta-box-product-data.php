@@ -882,15 +882,18 @@ class WC_Meta_Box_Product_Data {
 
 				if ( $is_taxonomy ) {
 
+					$values_are_slugs = false;
+
 					if ( isset( $attribute_values[ $i ] ) ) {
 
 						// Select based attributes - Format values (posted values are slugs)
 						if ( is_array( $attribute_values[ $i ] ) ) {
-							$values = array_map( 'sanitize_title', $attribute_values[ $i ] );
+							$values           = array_map( 'sanitize_title', $attribute_values[ $i ] );
+							$values_are_slugs = true;
 
 						// Text based attributes - Posted values are term names - don't change to slugs
 						} else {
-							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+							$values           = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
 						}
 
 						// Remove empty items in the array
@@ -904,7 +907,8 @@ class WC_Meta_Box_Product_Data {
 					if ( taxonomy_exists( $attribute_names[ $i ] ) ) {
 
 						foreach( $values as $key => $value ) {
-							$term = get_term_by( 'name', trim( $value ), $attribute_names[ $i ] );
+							$term = get_term_by( $values_are_slugs ? 'slug' : 'name', trim( $value ), $attribute_names[ $i ] );
+
 							if ( $term ) {
 								$values[ $key ] = intval( $term->term_id );
 							} else {
