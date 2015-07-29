@@ -1180,36 +1180,27 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
-	 * Gets order total - formatted for display.
+	 * Gets the count of order items of a certain type.
 	 *
-	 * @param string $type
-	 *
+	 * @param string $item_type
 	 * @return string
 	 */
-	public function get_item_count( $type = '' ) {
-
-		if ( empty( $type ) ) {
-			$type = array( 'line_item' );
+	public function get_item_count( $item_type = '' ) {
+		if ( empty( $item_type ) ) {
+			$item_type = array( 'line_item' );
+		}
+		if ( ! is_array( $item_type ) ) {
+			$item_type = array( $item_type );
 		}
 
-		if ( ! is_array( $type ) ) {
-			$type = array( $type );
-		}
-
-		$items = $this->get_items( $type );
-
+		$items = $this->get_items( $item_type );
 		$count = 0;
 
 		foreach ( $items as $item ) {
-
-			if ( ! empty( $item['qty'] ) ) {
-				$count += $item['qty'];
-			} else {
-				$count ++;
-			}
+			$count += empty( $item['qty'] ) ? 1 : $item['qty'];
 		}
 
-		return apply_filters( 'woocommerce_get_item_count', $count, $type, $this );
+		return apply_filters( 'woocommerce_get_item_count', $count, $item_type, $this );
 	}
 
 	/**
