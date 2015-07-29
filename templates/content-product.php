@@ -6,7 +6,7 @@
  *
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 1.6.4
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -56,11 +56,14 @@ if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] ) {
 			 * @hooked woocommerce_template_loop_product_thumbnail - 10
 			 */
 			do_action( 'woocommerce_before_shop_loop_item_title' );
-		?>
 
-		<h3><?php the_title(); ?></h3>
+			/**
+			 * woocommerce_shop_loop_item_title hook
+			 *
+			 * @hooked woocommerce_template_loop_product_title - 10
+			 */
+			do_action( 'woocommerce_shop_loop_item_title' );
 
-		<?php
 			/**
 			 * woocommerce_after_shop_loop_item_title hook
 			 *

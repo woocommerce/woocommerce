@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Meta_Boxes {
 
 	private static $saved_meta_boxes = false;
-	private static $meta_box_errors  = array();
+	public static $meta_box_errors  = array();
 
 	/**
 	 * Constructor

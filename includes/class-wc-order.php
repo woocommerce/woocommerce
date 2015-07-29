@@ -141,6 +141,48 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Gets the count of order items of a certain type that have been refunded.
+	 * @since  2.4.0
+	 * @param string $item_type
+	 * @return string
+	 */
+	public function get_item_count_refunded( $item_type = '' ) {
+		if ( empty( $item_type ) ) {
+			$item_type = array( 'line_item' );
+		}
+		if ( ! is_array( $item_type ) ) {
+			$item_type = array( $item_type );
+		}
+		$count = 0;
+
+		foreach ( $this->get_refunds() as $refund ) {
+			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
+				$count += empty( $refunded_item['qty'] ) ? 0 : $refunded_item['qty'];
+			}
+		}
+
+		return apply_filters( 'woocommerce_get_item_count_refunded', $count, $item_type, $this );
+	}
+
+	/**
+	 * Get the total number of items refunded.
+	 *
+	 * @since  2.4.0
+	 * @param  int $item_id ID of the item we're checking
+	 * @param  string $item_type type of the item we're checking, if not a line_item
+	 * @return integer
+	 */
+	public function get_total_qty_refunded( $item_type = 'line_item' ) {
+		$qty = 0;
+		foreach ( $this->get_refunds() as $refund ) {
+			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
+				$qty += $refunded_item['qty'];
+			}
+		}
+		return $qty;
+	}
+
+	/**
 	 * Get the refunded amount for a line item
 	 *
 	 * @param  int $item_id ID of the item we're checking

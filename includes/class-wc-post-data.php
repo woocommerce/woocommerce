@@ -35,6 +35,7 @@ class WC_Post_Data {
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_action( 'pre_post_update', array( __CLASS__, 'pre_post_update' ) );
+		add_action( 'update_post_meta', array( __CLASS__, 'sync_product_stock_status' ), 10, 4 );
 	}
 
 	/**
@@ -158,6 +159,20 @@ class WC_Post_Data {
 			return true;
 		}
 		return $check;
+	}
+
+	/**
+	 * When setting stock level, ensure the stock status is kept in sync
+	 * @param  int $meta_id
+	 * @param  int $object_id
+	 * @param  string $meta_key
+	 * @param  mixed $_meta_value
+	 */
+	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
+		if ( '_stock' === $meta_key && 'product' !== get_post_type( $object_id ) ) {
+			$product = wc_get_product( $object_id );
+			$product->check_stock_status();
+		}
 	}
 
 	/**

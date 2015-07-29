@@ -31,7 +31,7 @@ jQuery( function( $ ) {
 			$( document.body ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
 
 			// Ajax action
-			$.post( wc_add_to_cart_params.wc_ajax_url + 'add_to_cart/', data, function( response ) {
+			$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ), data, function( response ) {
 
 				if ( ! response ) {
 					return;

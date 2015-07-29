@@ -237,7 +237,7 @@ if ( wc_tax_enabled() ) {
 		<?php if ( wc_tax_enabled() && $order->is_editable() ) : ?>
 			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
-		<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
+		<?php if ( 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ) ) : ?>
 			<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<?php
@@ -261,7 +261,7 @@ if ( wc_tax_enabled() ) {
 		do_action( 'woocommerce_order_item_add_line_buttons', $order );
 	?>
 </div>
-<?php if ( ( $order->get_total() - $order->get_total_refunded() ) > 0 ) : ?>
+<?php if ( 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ) ) : ?>
 <div class="wc-order-data-row wc-order-refund-items" style="display: none;">
 	<table class="wc-order-totals">
 		<tr style="display:none;">

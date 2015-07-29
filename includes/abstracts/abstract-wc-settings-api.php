@@ -3,7 +3,7 @@
  * Admin Settings API used by Shipping Methods and Payment Gateways
  *
  * @class    WC_Settings_API
- * @version  2.3.0
+ * @version  2.4.0
  * @package  WooCommerce/Abstracts
  * @category Abstract Class
  * @author   WooThemes
@@ -849,12 +849,13 @@ abstract class WC_Settings_API {
 
 		$text  = $this->get_option( $key );
 		$field = $this->get_field_key( $key );
+		$value = trim( stripslashes( $_POST[ $field ] ) );
 
 		if ( isset( $_POST[ $field ] ) ) {
-			$text = wc_clean( stripslashes( $_POST[ $field ] ) );
+			$text = wp_kses_post( $value );
 		}
 
-		return $text;
+		return $text === $value ? $text : '';
 	}
 
 	/**

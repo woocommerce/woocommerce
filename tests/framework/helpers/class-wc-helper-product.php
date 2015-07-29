@@ -93,8 +93,8 @@ class WC_Helper_Product {
 		// Attributes
 		update_post_meta( $product_id, '_default_attributes', array() );
 		update_post_meta( $product_id, '_product_attributes', array(
-			'pa_dummyattribute' => array(
-				'name'         => 'pa_dummyattribute',
+			'pa_size' => array(
+				'name'         => 'pa_size',
 				'value'        => '',
 				'position'     => '1',
 				'is_visible'   => 0,

@@ -88,7 +88,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Performed after a stock level change at product level
 	 */
-	protected function check_stock_status() {
+	public function check_stock_status() {
 		$set_child_stock_status = '';
 
 		if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
@@ -249,7 +249,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array()
 	 */
 	public function get_variation_prices( $display = false ) {
-		$cache_key = 'var_prices_' . md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array(
+		$cache_key = 'wc_var_prices' . md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array(
 			$this->id,
 			$display ? WC_Tax::get_rates() : '',
 			WC_Cache_Helper::get_transient_version( 'product' )
@@ -373,7 +373,7 @@ class WC_Product_Variable extends WC_Product {
 			if ( in_array( '', $values ) ) {
 				$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
 
-			// Order custom attributes (non taxonomy) as defined
+			// Get custom attributes (non taxonomy) as defined
 			} elseif ( ! $attribute['is_taxonomy'] ) {
 				$text_attributes          = wc_get_text_attributes( $attribute['value'] );
 				$assigned_text_attributes = $values;
@@ -412,6 +412,18 @@ class WC_Product_Variable extends WC_Product {
 	public function get_variation_default_attributes() {
 		$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
 		return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
+	}
+
+	/**
+	 * If set, get the default attributes for a variable product.
+	 *
+	 * @param string $attribute_name
+	 * @return string
+	 */
+	public function get_variation_default_attribute( $attribute_name ) {
+		$defaults       = $this->get_variation_default_attributes();
+		$attribute_name = sanitize_title( $attribute_name );
+		return isset( $defaults[ $attribute_name ] ) ? $defaults[ $attribute_name ] : '';
 	}
 
 	/**
@@ -592,6 +604,53 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Sync the variable product's attributes with the variations
+	 */
+	public static function sync_attributes( $product_id, $children = false ) {
+		if ( ! $children ) {
+			$children = get_posts( array(
+				'post_parent' 	=> $product_id,
+				'posts_per_page'=> -1,
+				'post_type' 	=> 'product_variation',
+				'fields' 		=> 'ids',
+				'post_status'	=> 'any'
+			) );
+		}
+
+		/**
+		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+		 * Attempt to get full version of the text attribute from the parent and UPDATE meta.
+		 */
+		if ( version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
+			$parent_attributes = array_filter( (array) get_post_meta( $product_id, '_product_attributes', true ) );
+
+			foreach ( $children as $child_id ) {
+				$all_meta = get_post_meta( $child_id );
+
+				foreach ( $all_meta as $name => $value ) {
+					if ( 0 !== strpos( $name, 'attribute_' ) ) {
+						continue;
+					}
+					if ( sanitize_title( $value[0] ) === $value[0] ) {
+						foreach ( $parent_attributes as $attribute ) {
+							if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+								continue;
+							}
+							$text_attributes = wc_get_text_attributes( $attribute['value'] );
+							foreach ( $text_attributes as $text_attribute ) {
+								if ( sanitize_title( $text_attribute ) === $value[0] ) {
+									update_post_meta( $child_id, $name, $text_attribute );
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Sync the variable product with it's children
 	 */
 	public static function sync( $product_id ) {
@@ -690,6 +749,9 @@ class WC_Product_Variable extends WC_Product {
 			// The VARIABLE PRODUCT price should equal the min price of any type
 			update_post_meta( $product_id, '_price', $min_price );
 			delete_transient( 'wc_products_onsale' );
+
+			// Sync attributes
+			self::sync_attributes( $product_id, $children );
 
 			do_action( 'woocommerce_variable_product_sync', $product_id, $children );
 		}

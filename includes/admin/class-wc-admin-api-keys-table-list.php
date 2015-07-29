@@ -158,7 +158,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			return apply_filters( 'woocommerce_api_key_last_access_datetime', $date, $key['last_access'] );
 		}
 
-		return __( 'Unknown' );
+		return __( 'Unknown', 'woocommerce' );
 	}
 
 	/**

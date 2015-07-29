@@ -155,16 +155,17 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_line_item_args( $order ) {
+
 		/**
 		 * Try passing a line item per product if supported
 		 */
 		if ( ( ! wc_tax_enabled() || ! wc_prices_include_tax() ) && $this->prepare_line_items( $order ) ) {
 
 			$line_item_args             = $this->get_line_items();
-			$line_item_args['tax_cart'] = $order->get_total_tax();
+			$line_item_args['tax_cart'] = $this->number_format( $order->get_total_tax(), $order );
 
 			if ( $order->get_total_discount() > 0 ) {
-				$line_item_args['discount_amount_cart'] = round( $order->get_total_discount(), 2 );
+				$line_item_args['discount_amount_cart'] = $this->round( $order->get_total_discount(), $order );
 			}
 
 		/**
@@ -176,8 +177,9 @@ class WC_Gateway_Paypal_Request {
 
 			$this->delete_line_items();
 
-			$this->add_line_item( $this->get_order_item_names( $order ), 1, number_format( $order->get_total() - round( $order->get_total_shipping() + $order->get_shipping_tax(), 2 ), 2, '.', '' ), $order->get_order_number() );
-			$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), ucwords( $order->get_shipping_method() ) ), 1, number_format( $order->get_total_shipping() + $order->get_shipping_tax(), 2, '.', '' ) );
+			$all_items_name = $this->get_order_item_names( $order );
+			$this->add_line_item( $all_items_name ? $all_items_name : __( 'Order', 'woocommerce' ), 1, $this->number_format( $order->get_total() - $this->round( $order->get_total_shipping() + $order->get_shipping_tax(), $order ), $order ), $order->get_order_number() );
+			$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), ucwords( $order->get_shipping_method() ) ), 1, $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) );
 
 			$line_item_args = $this->get_line_items();
 		}
@@ -244,12 +246,14 @@ class WC_Gateway_Paypal_Request {
 		// Products
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			if ( 'fee' === $item['type'] ) {
-				$line_item        = $this->add_line_item( $item['name'], 1, $item['line_total'] );
-				$calculated_total += $item['line_total'];
+				$item_line_total  = $this->number_format( $item['line_total'], $order );
+				$line_item        = $this->add_line_item( $item['name'], 1, $item_line_total );
+				$calculated_total += $item_line_total;
 			} else {
 				$product          = $order->get_product_from_item( $item );
-				$line_item        = $this->add_line_item( $this->get_order_item_name( $order, $item ), $item['qty'], $order->get_item_subtotal( $item, false ), $product->get_sku() );
-				$calculated_total += $order->get_item_subtotal( $item, false ) * $item['qty'];
+				$item_line_total  = $this->number_format( $order->get_item_subtotal( $item, false ), $order );
+				$line_item        = $this->add_line_item( $this->get_order_item_name( $order, $item ), $item['qty'], $item_line_total, $product->get_sku() );
+				$calculated_total += $item_line_total * $item['qty'];
 			}
 
 			if ( ! $line_item ) {
@@ -258,12 +262,12 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
-		if ( $order->get_total_shipping() > 0 && ! $this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, round( $order->get_total_shipping(), 2 ) ) ) {
+		if ( $order->get_total_shipping() > 0 && ! $this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->round( $order->get_total_shipping(), $order ) ) ) {
 			return false;
 		}
 
 		// Check for mismatched totals
-		if ( wc_format_decimal( $calculated_total + $order->get_total_tax() + round( $order->get_total_shipping(), 2 ) - round( $order->get_total_discount(), 2 ), 2 ) != wc_format_decimal( $order->get_total(), 2 ) ) {
+		if ( $this->number_format( $calculated_total + $order->get_total_tax() + $this->round( $order->get_total_shipping(), $order ) - $this->round( $order->get_total_discount(), $order ), $order ) != $this->number_format( $order->get_total(), $order ) ) {
 			return false;
 		}
 
@@ -281,11 +285,11 @@ class WC_Gateway_Paypal_Request {
 	protected function add_line_item( $item_name, $quantity = 1, $amount = 0, $item_number = '' ) {
 		$index = ( sizeof( $this->line_items ) / 4 ) + 1;
 
-		if ( ! $item_name || $amount < 0 || $index > 9 ) {
+		if ( $amount < 0 || $index > 9 ) {
 			return false;
 		}
 
-		$this->line_items[ 'item_name_' . $index ]   = html_entity_decode( wc_trim_string( $item_name, 127 ), ENT_NOQUOTES, 'UTF-8' );
+		$this->line_items[ 'item_name_' . $index ]   = html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' );
 		$this->line_items[ 'quantity_' . $index ]    = $quantity;
 		$this->line_items[ 'amount_' . $index ]      = $amount;
 		$this->line_items[ 'item_number_' . $index ] = $item_number;
@@ -311,5 +315,56 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return $state;
+	}
+
+	/**
+	 * Check if currency has decimals
+	 *
+	 * @param  string $currency
+	 *
+	 * @return bool
+	 */
+	protected function currency_has_decimals( $currency ) {
+		if ( in_array( $currency, array( 'HUF', 'JPY', 'TWD' ) ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Round prices
+	 *
+	 * @param  float|int $price
+	 * @param  WC_Order $order
+	 *
+	 * @return float|int
+	 */
+	protected function round( $price, $order ) {
+		$precision = 2;
+
+		if ( ! $this->currency_has_decimals( $order->get_order_currency() ) ) {
+			$precision = 0;
+		}
+
+		return round( $price, $precision );
+	}
+
+	/**
+	 * Format prices
+	 *
+	 * @param  float|int $price
+	 * @param  WC_Order $order
+	 *
+	 * @return float|int
+	 */
+	protected function number_format( $price, $order ) {
+		$decimals = 2;
+
+		if ( ! $this->currency_has_decimals( $order->get_order_currency() ) ) {
+			$decimals = 0;
+		}
+
+		return number_format( $price, $decimals, '.', '' );
 	}
 }

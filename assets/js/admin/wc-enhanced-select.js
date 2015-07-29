@@ -94,7 +94,8 @@ jQuery( function( $ ) {
 				            return {
 								term:     term,
 								action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
-								security: wc_enhanced_select_params.search_products_nonce
+								security: wc_enhanced_select_params.search_products_nonce,
+								exclude:  $( this ).data( 'exclude' )
 				            };
 				        },
 				        results: function( data ) {
@@ -104,7 +105,9 @@ jQuery( function( $ ) {
 									terms.push( { id: id, text: text } );
 								});
 							}
-				            return { results: terms };
+				            return {
+				            	results: terms
+			            	};
 				        },
 				        cache: true
 				    }
@@ -117,7 +120,10 @@ jQuery( function( $ ) {
 						var selected = [];
 
 						$( element.val().split( ',' ) ).each( function( i, val ) {
-							selected.push( { id: val, text: data[ val ] } );
+							selected.push({
+								id: val,
+								text: data[ val ]
+							});
 						});
 						return callback( selected );
 					};
@@ -127,7 +133,10 @@ jQuery( function( $ ) {
 				} else {
 					select2_args.multiple = false;
 					select2_args.initSelection = function( element, callback ) {
-						var data = {id: element.val(), text: element.attr( 'data-selected' )};
+						var data = {
+							id: element.val(),
+							text: element.attr( 'data-selected' )
+						};
 						return callback( data );
 					};
 				}
@@ -161,7 +170,10 @@ jQuery( function( $ ) {
 				        	var terms = [];
 					        if ( data ) {
 								$.each( data, function( id, text ) {
-									terms.push( { id: id, text: text } );
+									terms.push({
+										id: id,
+										text: text
+									});
 								});
 							}
 				            return { results: terms };
@@ -176,7 +188,10 @@ jQuery( function( $ ) {
 						var selected = [];
 
 						$( element.val().split( ',' ) ).each( function( i, val ) {
-							selected.push( { id: val, text: data[ val ] } );
+							selected.push({
+								id: val,
+								text: data[ val ]
+							});
 						});
 						return callback( selected );
 					};
@@ -186,7 +201,10 @@ jQuery( function( $ ) {
 				} else {
 					select2_args.multiple = false;
 					select2_args.initSelection = function( element, callback ) {
-						var data = {id: element.val(), text: element.attr( 'data-selected' )};
+						var data = {
+							id: element.val(),
+							text: element.attr( 'data-selected' )
+						};
 						return callback( data );
 					};
 				}

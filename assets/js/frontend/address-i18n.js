@@ -95,11 +95,21 @@ jQuery( function( $ ) {
 						}
 					}
 
-					if ( key !== 'state' ) {
+					if ( 'state' !== key ) {
 						if ( typeof locale['default'][ key ].hidden === 'undefined' || locale['default'][ key ].hidden === false ) {
 							field.show();
 						} else if ( locale['default'][ key ].hidden === true ) {
 							field.hide().find( 'input' ).val( '' );
+						}
+					}
+
+					if ( 'postcode' === key ) {
+						if ( locale['default'][ key ].label ) {
+							field.find( 'label' ).html( locale['default'][ key ].label );
+						}
+
+						if ( locale['default'][ key ].placeholder ) {
+							field.find( 'input' ).attr( 'placeholder', locale['default'][ key ].placeholder );
 						}
 					}
 				}

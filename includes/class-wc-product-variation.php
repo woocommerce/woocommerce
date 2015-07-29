@@ -135,40 +135,7 @@ class WC_Product_Variation extends WC_Product {
 			}
 
 		} elseif ( 'variation_data' === $key ) {
-			$all_meta = get_post_meta( $this->variation_id );
-
-			// The variation data array
-			$this->variation_data = array();
-
-			// Get the variation attributes from meta
-			foreach ( $all_meta as $name => $value ) {
-				if ( 0 !== strpos( $name, 'attribute_' ) ) {
-					continue;
-				}
-				/**
-				 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-				 * Attempt to get full version of the text attribute from the parent.
-				 */
-				if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
-					$attributes = $this->parent->get_attributes();
-
-					foreach ( $attributes as $attribute ) {
-						if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
-							continue;
-						}
-						$text_attributes = wc_get_text_attributes( $attribute['value'] );
-
-						foreach ( $text_attributes as $text_attribute ) {
-							if ( sanitize_title( $text_attribute ) === $value[0] ) {
-								$value[0] = $text_attribute;
-							}
-						}
-					}
-				}
-				$this->variation_data[ $name ] = $value[0];
-			}
-
-			return $this->variation_data;
+			return $this->variation_data = wc_get_product_variation_attributes( $this->variation_id );
 
 		} elseif ( 'variation_has_stock' === $key ) {
 			return $this->managing_stock();
@@ -196,7 +163,7 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string
 	 */
 	public function get_permalink( $cart_item = null ) {
-		return add_query_arg( array_filter( isset( $cart_item['variation'] ) ? $cart_item['variation'] : $this->variation_data ), get_permalink( $this->id ) );
+		return add_query_arg( array_map( 'urlencode', array_filter( isset( $cart_item['variation'] ) ? $cart_item['variation'] : $this->variation_data ) ), get_permalink( $this->id ) );
 	}
 
 	/**
