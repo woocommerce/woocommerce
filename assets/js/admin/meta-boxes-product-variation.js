@@ -879,6 +879,8 @@ jQuery( function( $ ) {
 			var selected = parseInt( $( this ).val(), 10 ),
 				wrapper  = $( '#variable_product_options .woocommerce_variations' );
 
+			$( '.variations-pagenav .page-selector' ).val( selected );
+
 			wc_meta_boxes_product_variations_ajax.check_for_changes();
 			wc_meta_boxes_product_variations_pagenav.change_classes( selected, parseInt( wrapper.attr( 'data-total_pages' ), 10 ) );
 			wc_meta_boxes_product_variations_ajax.load_variations( selected );
