@@ -84,11 +84,6 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'delete_product_attribute' ), WC_API_Server::DELETABLE ),
 		);
 
-		# GET /products/sku/<product sku>
-		$routes[ $this->base . '/sku/(?P<sku>\w[\w\s\-]*)' ] = array(
-			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
-		);
-
 		# POST|PUT /products/bulk
 		$routes[ $this->base . '/bulk' ] = array(
 			array( array( $this, 'bulk' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
@@ -2295,30 +2290,6 @@ class WC_API_Products extends WC_API_Resource {
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
-		} catch ( WC_API_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-	}
-
-	/**
-	 * Get product by SKU
-	 *
-	 * @deprecated 2.4.0
-	 *
-	 * @since  2.3.0
-	 * @param  int    $sku the product SKU
-	 * @param  string $fields
-	 * @return array
-	 */
-	public function get_product_by_sku( $sku, $fields = null ) {
-		try {
-			$id = wc_get_product_id_by_sku( $sku );
-
-			if ( empty( $id ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_product_sku', __( 'Invalid product SKU', 'woocommerce' ), 404 );
-			}
-
-			return $this->get_product( $id, $fields );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
