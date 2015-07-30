@@ -126,19 +126,20 @@ extract( $variation_data );
 						</select>
 					</p>
 				</div>
-				<div class="">
-					<p class="form-row form-row-full">
-						<label><?php _e( 'Stock status', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ); ?>" href="#">[?]</a></label>
-						<select name="variable_stock_status[<?php echo $loop; ?>]">
-							<?php
-								foreach ( $parent_data['stock_status_options'] as $key => $value ) {
-									echo '<option value="' . esc_attr( $key === $_stock_status ? '' : $key ) . '" ' . selected( $key === $_stock_status, true, false ) . '>' . esc_html( $value ) . '</option>';
-								}
-							?>
-						</select>
-					</p>
-				</div>
 			<?php endif; ?>
+
+			<div class="">
+				<p class="form-row form-row-full">
+					<label><?php _e( 'Stock status', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ); ?>" href="#">[?]</a></label>
+					<select name="variable_stock_status[<?php echo $loop; ?>]">
+						<?php
+							foreach ( $parent_data['stock_status_options'] as $key => $value ) {
+								echo '<option value="' . esc_attr( $key === $_stock_status ? '' : $key ) . '" ' . selected( $key === $_stock_status, true, false ) . '>' . esc_html( $value ) . '</option>';
+							}
+						?>
+					</select>
+				</p>
+			</div>
 
 			<?php if ( wc_product_weight_enabled() || wc_product_dimensions_enabled() ) : ?>
 				<div>

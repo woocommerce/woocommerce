@@ -321,7 +321,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		// Total orders and discounts also includes those which have been refunded at some point
 		$this->report_data->total_orders          = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) );
-		$this->report_data->total_coupons         = number_format( array_sum( wp_list_pluck( $this->report_data->coupons, 'discount_amount' ) ), 2 );
+		$this->report_data->total_coupons         = number_format( array_sum( wp_list_pluck( $this->report_data->coupons, 'discount_amount' ) ), 2, '.', '' );
 		$this->report_data->total_refunded_orders = absint( count( $this->report_data->full_refunds ) );
 
 		// Item counts
