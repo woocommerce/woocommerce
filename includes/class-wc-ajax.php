@@ -2481,7 +2481,7 @@ class WC_AJAX {
 		}
 
 		// Get variations
-		$args = array(
+		$args = apply_filters( 'woocommerce_ajax_admin_get_variations_args', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => array( 'private', 'publish' ),
 			'posts_per_page' => $per_page,
@@ -2489,7 +2489,7 @@ class WC_AJAX {
 			'orderby'        => 'ID',
 			'order'          => 'DESC',
 			'post_parent'    => $product_id
-		);
+		), $product_id );
 
 		$variations = get_posts( $args );
 		$loop = 0;
