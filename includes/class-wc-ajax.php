@@ -21,6 +21,7 @@ class WC_AJAX {
 	 * Hook in ajax handlers
 	 */
 	public static function init() {
+		add_action( 'init', array( __CLASS__, 'define_ajax'), 0 );
 		add_action( 'template_redirect', array( __CLASS__, 'do_wc_ajax'), 0 );
 		self::add_ajax_events();
 	}
@@ -35,6 +36,21 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Set AJAX defines.
+	 */
+	public static function define_ajax() {
+
+		if ( ! empty( $_GET['wc-ajax'] ) ) {
+			if ( ! defined( 'DOING_AJAX' ) ) {
+				define( 'DOING_AJAX', true );
+			}
+			if ( ! defined( 'WC_DOING_AJAX' ) ) {
+				define( 'WC_DOING_AJAX', true );
+			}
+		}
+	}
+
+	/**
 	 * Check for WC Ajax request and fire action
 	 */
 	public static function do_wc_ajax() {
@@ -45,12 +61,6 @@ class WC_AJAX {
 		}
 
 		if ( $action = $wp_query->get( 'wc-ajax' ) ) {
-			if ( ! defined( 'DOING_AJAX' ) ) {
-				define( 'DOING_AJAX', true );
-			}
-			if ( ! defined( 'WC_DOING_AJAX' ) ) {
-				define( 'WC_DOING_AJAX', true );
-			}
 			do_action( 'wc_ajax_' . sanitize_text_field( $action ) );
 			die();
 		}
