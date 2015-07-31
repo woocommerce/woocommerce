@@ -2735,6 +2735,40 @@ img.help_tip {
 		}
 	}
 }
+.woocommerce_variation {
+	h3 {
+		.sort {
+			cursor: move;
+			text-align: center;
+			vertical-align: middle;
+			float: right;
+			height: 26px;
+			width: 17px;
+			display: none;
+			vertical-align: middle;
+			margin-right: .5em;
+			color: #a0a5aa;
+			&:before {
+				content: "\e032";
+				font-family: 'WooCommerce';
+				text-align: center;
+				cursor: move;
+				line-height: 1;
+				display: block;
+				width: 17px;
+				line-height: 28px;
+			}
+			&:hover {
+				color: #777;
+			}
+		}
+	}
+	h3:hover, &.ui-sortable-helper {
+		.sort {
+			display: block;
+		}
+	}
+}
 
 .woocommerce_options_panel {
 	box-sizing: border-box;
@@ -3057,7 +3091,7 @@ img.help_tip {
 			cursor: pointer;
 		}
 
-		h3:hover {
+		h3:hover, &.ui-sortable-helper {
 			a.delete, .handlediv {
 				display: block;
 			}

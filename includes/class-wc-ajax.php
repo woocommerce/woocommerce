@@ -749,7 +749,8 @@ class WC_AJAX {
 			'post_status'  => 'publish',
 			'post_author'  => get_current_user_id(),
 			'post_parent'  => $post_id,
-			'post_type'    => 'product_variation'
+			'post_type'    => 'product_variation',
+			'menu_order'   => -1
 		);
 
 		$variation_id = wp_insert_post( $variation );
@@ -2486,8 +2487,8 @@ class WC_AJAX {
 			'post_status'    => array( 'private', 'publish' ),
 			'posts_per_page' => $per_page,
 			'paged'          => $page,
-			'orderby'        => 'ID',
-			'order'          => 'DESC',
+			'orderby'        => 'menu_order',
+			'order'          => 'ASC',
 			'post_parent'    => $product_id
 		), $product_id );
 
@@ -2542,6 +2543,7 @@ class WC_AJAX {
 				$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
 				$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
 				$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
+				$variation_data['menu_order']     = $variation->menu_order;
 
 				// Stock BW compat
 				if ( '' !== $variation_data['_stock'] ) {

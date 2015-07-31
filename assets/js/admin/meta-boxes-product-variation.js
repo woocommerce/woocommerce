@@ -14,7 +14,8 @@ jQuery( function( $ ) {
 				.on( 'change', 'input.variable_is_downloadable', this.variable_is_downloadable )
 				.on( 'change', 'input.variable_is_virtual', this.variable_is_virtual )
 				.on( 'change', 'input.variable_manage_stock', this.variable_manage_stock )
-				.on( 'click', 'button.notice-dismiss', this.notice_dismiss );
+				.on( 'click', 'button.notice-dismiss', this.notice_dismiss )
+				.on( 'click', 'h3 .sort', this.set_menu_order );
 
 			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
 
@@ -117,6 +118,21 @@ jQuery( function( $ ) {
 				});
 			});
 
+			// Allow sorting
+			jQuery( '.woocommerce_variations' ).sortable({
+				items               : '.woocommerce_variation',
+				cursor              : 'move',
+				axis                : 'y',
+				handle              : '.sort',
+				scrollSensitivity   : 40,
+				forcePlaceholderSize: true,
+				helper              : 'clone',
+				opacity             : 0.65,
+				stop                : function () {
+				    wc_meta_boxes_product_variations_actions.variation_row_indexes();
+				}
+			});
+
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
 		},
 
@@ -130,6 +146,34 @@ jQuery( function( $ ) {
 			if ( 1 === qty ) {
 				wc_meta_boxes_product_variations_actions.variations_loaded();
 			}
+		},
+
+		/**
+		 * Lets the user manually input menu order to move items around pages
+		 */
+		set_menu_order: function( event ) {
+			event.preventDefault();
+			var $menu_order  = $( this ).closest( '.woocommerce_variation' ).find('.variation_menu_order');
+			var value        = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_menu_order, $menu_order.val() );
+
+			if ( value != null ) {
+				// Set value, save changes and reload view
+				$menu_order.val( parseInt( value, 10 ) ).change();
+				wc_meta_boxes_product_variations_ajax.save_variations();
+			}
+		},
+
+		/**
+		 * Set menu order
+		 */
+		variation_row_indexes: function() {
+			var wrapper      = $( '#variable_product_options .woocommerce_variations' ),
+				current_page = parseInt( wrapper.attr( 'data-page' ), 10 ),
+				offset       = parseInt( ( current_page - 1 ) * woocommerce_admin_meta_boxes_variations.variations_per_page, 10 );
+
+			$( '.woocommerce_variations .woocommerce_variation' ).each( function ( index, el ) {
+				$( '.variation_menu_order', el ).val( parseInt( $( el ).index( '.woocommerce_variations .woocommerce_variation' ), 10 ) + 1 + offset ).change();
+			});
 		}
 	};
 
