@@ -161,7 +161,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// add the parent product data to an individual variation
-		if ( $product->is_type( 'variation' ) ) {
+		if ( $product->is_type( 'variation' ) && $product->parent ) {
 
 			$product_data['parent'] = $this->get_product_data( $product->parent );
 		}
