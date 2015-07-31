@@ -48,7 +48,7 @@
 					$el.text( $el.attr( 'data-' + data_attribute ) );
 				}
 			});
-			$form.find( '.woocommerce-variation-description' ).remove();
+			$form.wc_variations_description_update( '' );
 			$form.trigger( 'reset_image' );
 			$form.find( '.single_variation_wrap' ).slideUp( 200 ).trigger( 'hide_variation' );
 		} )
@@ -165,7 +165,6 @@
 				variation_caption = variation.image_caption,
 				variation_title = variation.image_title;
 
-			$form.find( '.variations_button' ).show();
 			$form.find( '.single_variation' ).html( variation.price_html + variation.availability_html );
 
 			if ( o_src === undefined ) {
@@ -241,10 +240,11 @@
 				$dimensions.text( $dimensions.attr( 'data-o_dimensions' ) );
 			}
 
-			$single_variation_wrap.find( '.quantity' ).show();
+			var hide_qty        = false;
+			var hide_qty_button = false;
 
 			if ( ! variation.is_purchasable || ! variation.is_in_stock || ! variation.variation_is_visible ) {
-				$form.find( '.variations_button' ).hide();
+				hide_qty_button = true;
 			}
 
 			if ( ! variation.variation_is_visible ) {
@@ -265,15 +265,36 @@
 
 			if ( variation.is_sold_individually === 'yes' ) {
 				$single_variation_wrap.find( '.quantity input.qty' ).val( '1' );
+				hide_qty = true;
+			}
+
+			// Show/hide qty container
+			if ( hide_qty ) {
 				$single_variation_wrap.find( '.quantity' ).hide();
+			} else {
+				// No need to hide it when hiding its container
+				if ( ! hide_qty_button ) {
+					$single_variation_wrap.find( '.quantity' ).show();
+				}
 			}
 
-			// display variation description
-			$form.find( '.woocommerce-variation-description' ).remove();
-
-			if ( variation.variation_description ) {
-				$form.find( '.single_variation_wrap' ).prepend( '<div class="woocommerce-variation-description">' + variation.variation_description + '</div>' );
+			// Show/hide qty & button container
+			if ( hide_qty_button ) {
+				if ( $single_variation_wrap.is( ':visible' ) ) {
+					$form.find( '.variations_button' ).slideUp( 200 );
+				} else {
+					$form.find( '.variations_button' ).hide();
+				}
+			} else {
+				if ( $single_variation_wrap.is( ':visible' ) ) {
+					$form.find( '.variations_button' ).slideDown( 200 );
+				} else {
+					$form.find( '.variations_button' ).show();
+				}
 			}
+
+			// Refresh variation description
+			$form.wc_variations_description_update( variation.variation_description );
 
 			$single_variation_wrap.slideDown( 200 ).trigger( 'show_variation', [ variation ] );
 		})
@@ -466,6 +487,48 @@
 				}
 			}
 			return match;
+		}
+	};
+
+	/**
+	 * Performs animated variation description refreshes
+	 */
+	$.fn.wc_variations_description_update = function( variation_description ) {
+		var $form                   = this;
+		var $variations_description = $form.find( '.woocommerce-variation-description' );
+
+		if ( $variations_description.length === 0 ) {
+			if ( variation_description ) {
+				// add transparent border to allow correct height measurement when children have top/bottom margins
+				$form.find( '.single_variation_wrap' ).prepend( $( '<div class="woocommerce-variation-description" style="border:1px solid transparent;">' + variation_description + '</div>' ).hide() );
+				$form.find( '.woocommerce-variation-description' ).slideDown( 200 );
+			}
+		} else {
+			var load_height    = $variations_description.outerHeight( true );
+			var new_height     = 0;
+			var animate_height = false;
+
+			// lock height
+			$variations_description.css( 'height', load_height );
+			// replace html
+			$variations_description.html( variation_description );
+			// measure height
+			$variations_description.css( 'height', 'auto' );
+
+			new_height = $variations_description.outerHeight( true );
+
+			if ( Math.abs( new_height - load_height ) > 1 ) {
+				animate_height = true;
+				// lock height
+				$variations_description.css( 'height', load_height );
+			}
+
+			// animate height
+			if ( animate_height ) {
+				$variations_description.animate( { 'height' : new_height }, { duration: 200, queue: false, always: function() {
+					$variations_description.css( { 'height' : 'auto' } );
+				} } );
+			}
 		}
 	};
 
