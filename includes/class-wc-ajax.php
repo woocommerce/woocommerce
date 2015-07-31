@@ -21,19 +21,8 @@ class WC_AJAX {
 	 * Hook in ajax handlers
 	 */
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'add_endpoint') );
 		add_action( 'template_redirect', array( __CLASS__, 'do_wc_ajax'), 0 );
-
 		self::add_ajax_events();
-	}
-
-	/**
-	 * Add our endpoint for frontend ajax requests
-	 */
-	public static function add_endpoint() {
-		add_rewrite_tag( '%wc-ajax%', '([^/]*)' );
-		add_rewrite_rule( 'wc-ajax/([^/]*)/?', 'index.php?wc-ajax=$matches[1]', 'top' );
-		add_rewrite_rule( 'index.php/wc-ajax/([^/]*)/?', 'index.php?wc-ajax=$matches[1]', 'top' );
 	}
 
 	/**
@@ -42,14 +31,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		if ( strstr( get_option( 'permalink_structure' ), '/index.php/' ) ) {
-			$endpoint = trailingslashit( home_url( '/index.php/wc-ajax/' . $request, 'relative' ) );
-		} elseif ( get_option( 'permalink_structure' ) ) {
-			$endpoint = trailingslashit( home_url( '/wc-ajax/' . $request, 'relative' ) );
-		} else {
-			$endpoint = add_query_arg( $request ? 'wc-ajax' : 'wc-ajax=', $request, trailingslashit( home_url( '', 'relative' ) ) );
-		}
-		return esc_url_raw( $endpoint );
+		return esc_url_raw( add_query_arg( 'wc-ajax', $request ) );
 	}
 
 	/**
