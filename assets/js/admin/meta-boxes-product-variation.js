@@ -434,10 +434,11 @@ jQuery( function( $ ) {
 			if ( 0 < need_update.length ) {
 				wc_meta_boxes_product_variations_ajax.block();
 
-				data            = wc_meta_boxes_product_variations_ajax.get_variations_fields( need_update );
-				data.action     = 'woocommerce_save_variations';
-				data.security   = woocommerce_admin_meta_boxes_variations.save_variations_nonce;
-				data.product_id = woocommerce_admin_meta_boxes_variations.post_id;
+				data                 = wc_meta_boxes_product_variations_ajax.get_variations_fields( need_update );
+				data.action          = 'woocommerce_save_variations';
+				data.security        = woocommerce_admin_meta_boxes_variations.save_variations_nonce;
+				data.product_id      = woocommerce_admin_meta_boxes_variations.post_id;
+				data['product-type'] = $( '#product-type' ).val();
 
 				$.ajax({
 					url: woocommerce_admin_meta_boxes_variations.ajax_url,

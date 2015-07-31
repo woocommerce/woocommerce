@@ -2557,7 +2557,16 @@ class WC_AJAX {
 		// Remove previous meta box errors
 		WC_Admin_Meta_Boxes::$meta_box_errors = array();
 
-		$product_id = absint( $_POST['product_id'] );
+		$product_id   = absint( $_POST['product_id'] );
+		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
+
+		$product_type_terms = wp_get_object_terms( $product_id, 'product_type' );
+
+		// If the product type hasn't been set or it has changed, update it before saving variations
+		if ( empty( $product_type_terms ) || $product_type !== sanitize_title( current( $product_type_terms )->name ) ) {
+			wp_set_object_terms( $product_id, $product_type, 'product_type' );
+		}
+
 		WC_Meta_Box_Product_Data::save_variations( $product_id, get_post( $product_id ) );
 
 		do_action( 'woocommerce_ajax_save_product_variations', $product_id );
