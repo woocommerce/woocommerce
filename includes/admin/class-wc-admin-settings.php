@@ -488,12 +488,11 @@ class WC_Admin_Settings {
 				// Image width settings
 				case 'image_width' :
 
-					$image_size = str_replace( '_image_size', '', $value[ 'id' ] );
-					$size   = wc_get_image_size( $image_size );
-					$width  = isset( $size[ 'width' ] )  ? $size[ 'width' ]  : $value[ 'default' ][ 'width' ];
-					$height = isset( $size[ 'height' ] ) ? $size[ 'height' ] : $value[ 'default' ][ 'height' ];
-					$crop   = isset( $size[ 'crop' ] )   ? $size[ 'crop' ]   : $value[ 'default' ][ 'crop' ];
-
+					$image_size       = str_replace( '_image_size', '', $value[ 'id' ] );
+					$size             = wc_get_image_size( $image_size );
+					$width            = isset( $size[ 'width' ] ) ? $size[ 'width' ] : $value[ 'default' ][ 'width' ];
+					$height           = isset( $size[ 'height' ] ) ? $size[ 'height' ] : $value[ 'default' ][ 'height' ];
+					$crop             = isset( $size[ 'crop' ] ) ? $size[ 'crop' ] : $value[ 'default' ][ 'crop' ];
 					$disabled_attr    = '';
 					$disabled_message = '';
 
@@ -691,14 +690,14 @@ class WC_Admin_Settings {
 					$value = array_filter( array_map( 'wc_clean', (array) $raw_value ) );
 					break;
 				case 'image_width' :
-					if ( isset( $option_value['width'] ) ) {
-						$update_options[ $option['id'] ]['width']  = wc_clean( $value['width'] );
-						$update_options[ $option['id'] ]['height'] = wc_clean( $value['height'] );
-						$update_options[ $option['id'] ]['crop']   = isset( $value['crop'] ) ? 1 : 0;
+					if ( isset( $raw_value['width'] ) ) {
+						$value['width']  = wc_clean( $raw_value['width'] );
+						$value['height'] = wc_clean( $raw_value['height'] );
+						$value['crop']   = isset( $raw_value['crop'] ) ? 1 : 0;
 					} else {
-						$update_options[ $option['id'] ]['width']  = $option['default']['width'];
-						$update_options[ $option['id'] ]['height'] = $option['default']['height'];
-						$update_options[ $option['id'] ]['crop']   = $option['default']['crop'];
+						$value['width']  = $option['default']['width'];
+						$value['height'] = $option['default']['height'];
+						$value['crop']   = $option['default']['crop'];
 					}
 					break;
 				default :

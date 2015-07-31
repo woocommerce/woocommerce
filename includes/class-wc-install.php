@@ -92,7 +92,6 @@ class WC_Install {
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
-		WC_AJAX::add_endpoint();
 
 		self::create_terms();
 		self::create_cron_jobs();

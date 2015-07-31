@@ -765,7 +765,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 
 	if ( ! is_object( $order ) ) {
 		$order_id = absint( $order );
-		$order    = new WC_Order( $order_id );
+		$order    = wc_get_order( $order_id );
 	}
 
 	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;

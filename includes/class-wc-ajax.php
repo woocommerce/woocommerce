@@ -21,19 +21,8 @@ class WC_AJAX {
 	 * Hook in ajax handlers
 	 */
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'add_endpoint') );
 		add_action( 'template_redirect', array( __CLASS__, 'do_wc_ajax'), 0 );
-
 		self::add_ajax_events();
-	}
-
-	/**
-	 * Add our endpoint for frontend ajax requests
-	 */
-	public static function add_endpoint() {
-		add_rewrite_tag( '%wc-ajax%', '([^/]*)' );
-		add_rewrite_rule( 'wc-ajax/([^/]*)/?', 'index.php?wc-ajax=$matches[1]', 'top' );
-		add_rewrite_rule( 'index.php/wc-ajax/([^/]*)/?', 'index.php?wc-ajax=$matches[1]', 'top' );
 	}
 
 	/**
@@ -42,14 +31,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		if ( strstr( get_option( 'permalink_structure' ), '/index.php/' ) ) {
-			$endpoint = trailingslashit( home_url( '/index.php/wc-ajax/' . $request, 'relative' ) );
-		} elseif ( get_option( 'permalink_structure' ) ) {
-			$endpoint = trailingslashit( home_url( '/wc-ajax/' . $request, 'relative' ) );
-		} else {
-			$endpoint = add_query_arg( $request ? 'wc-ajax' : 'wc-ajax=', $request, trailingslashit( home_url( '', 'relative' ) ) );
-		}
-		return esc_url_raw( $endpoint );
+		return esc_url_raw( add_query_arg( 'wc-ajax', $request ) );
 	}
 
 	/**
@@ -749,7 +731,8 @@ class WC_AJAX {
 			'post_status'  => 'publish',
 			'post_author'  => get_current_user_id(),
 			'post_parent'  => $post_id,
-			'post_type'    => 'product_variation'
+			'post_type'    => 'product_variation',
+			'menu_order'   => -1
 		);
 
 		$variation_id = wp_insert_post( $variation );
@@ -2481,15 +2464,15 @@ class WC_AJAX {
 		}
 
 		// Get variations
-		$args = array(
+		$args = apply_filters( 'woocommerce_ajax_admin_get_variations_args', array(
 			'post_type'      => 'product_variation',
 			'post_status'    => array( 'private', 'publish' ),
 			'posts_per_page' => $per_page,
 			'paged'          => $page,
-			'orderby'        => 'ID',
-			'order'          => 'DESC',
+			'orderby'        => 'menu_order',
+			'order'          => 'ASC',
 			'post_parent'    => $product_id
-		);
+		), $product_id );
 
 		$variations = get_posts( $args );
 		$loop = 0;
@@ -2542,6 +2525,7 @@ class WC_AJAX {
 				$variation_data['_thumbnail_id']  = absint( $variation_data['_thumbnail_id'] );
 				$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
 				$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
+				$variation_data['menu_order']     = $variation->menu_order;
 
 				// Stock BW compat
 				if ( '' !== $variation_data['_stock'] ) {
@@ -2582,12 +2566,13 @@ class WC_AJAX {
 		wc_delete_product_transients( $product_id );
 
 		if ( $errors = WC_Admin_Meta_Boxes::$meta_box_errors ) {
-			echo '<div id="woocommerce_errors" class="error">';
+			echo '<div class="error notice is-dismissible">';
 
 			foreach ( $errors as $error ) {
 				echo '<p>' . wp_kses_post( $error ) . '</p>';
 			}
 
+			echo '<button type="button" class="notice-dismiss"><span class="screen-reader-text">' . __( 'Dismiss this notice.', 'woocommerce' ) . '</span></button>';
 			echo '</div>';
 
 			delete_option( 'woocommerce_meta_box_errors' );
