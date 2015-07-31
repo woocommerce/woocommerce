@@ -374,7 +374,7 @@ return array(
 			)
 		)
 	),
-		'TR' => array(
+	'TR' => array(
 		'currency_code'  => 'TRY',
 		'currency_pos'   => 'left_space',
 		'thousand_sep'   => '.',
