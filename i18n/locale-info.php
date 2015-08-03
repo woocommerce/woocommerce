@@ -374,6 +374,26 @@ return array(
 			)
 		)
 	),
+	'TR' => array(
+		'currency_code'  => 'TRY',
+		'currency_pos'   => 'left_space',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'TR',
+					'state'    => '',
+					'rate'     => '18.0000',
+					'name'     => 'KDV',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'US' => array(
 		'currency_code'  => 'USD',
 		'currency_pos'	=> 'left',
