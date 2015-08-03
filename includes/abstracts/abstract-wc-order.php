@@ -1138,6 +1138,25 @@ abstract class WC_Abstract_Order {
 
 		$items = array();
 
+		// Loop items
+		foreach ( $line_items as $item ) {
+			$items[ $item->order_item_id ]['name']            = $item->order_item_name;
+			$items[ $item->order_item_id ]['type']            = $item->order_item_type;
+			$items[ $item->order_item_id ]['item_meta']       = $this->get_item_meta( $item->order_item_id );
+			$items[ $item->order_item_id ]['item_meta_array'] = $this->get_item_meta_array( $item->order_item_id );
+			$items[ $item->order_item_id ]                    = $this->expand_item_meta( $items[ $item->order_item_id ] );
+		}
+
+		return apply_filters( 'woocommerce_order_get_items', $items, $this );
+	}
+
+	/**
+	 * Expand item meta into the $item array.
+	 * @since 2.4.0
+	 * @param array $item before expansion
+	 * @return array
+	 */
+	public function expand_item_meta( $item ) {
 		// Reserved meta keys
 		$reserved_item_meta_keys = array(
 			'name',
@@ -1154,29 +1173,20 @@ abstract class WC_Abstract_Order {
 			'line_subtotal_tax'
 		);
 
-		// Loop items
-		foreach ( $line_items as $item ) {
-			$items[ $item->order_item_id ]['name']            = $item->order_item_name;
-			$items[ $item->order_item_id ]['type']            = $item->order_item_type;
-			$items[ $item->order_item_id ]['item_meta']       = $this->get_item_meta( $item->order_item_id );
-			$items[ $item->order_item_id ]['item_meta_array'] = $this->get_item_meta_array( $item->order_item_id );
-
-			// Expand meta data into the array
-			if ( $items[ $item->order_item_id ]['item_meta'] ) {
-				foreach ( $items[ $item->order_item_id ]['item_meta'] as $name => $value ) {
-					if ( in_array( $name, $reserved_item_meta_keys ) ) {
-						continue;
-					}
-					if ( '_' === substr( $name, 0, 1 ) ) {
-						$items[ $item->order_item_id ][ substr( $name, 1 ) ] = $value[0];
-					} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
-						$items[ $item->order_item_id ][ $name ] = make_clickable( $value[0] );
-					}
+		// Expand item meta if set
+		if ( ! empty( $item['item_meta'] ) ) {
+			foreach ( $item['item_meta'] as $name => $value ) {
+				if ( in_array( $name, $reserved_item_meta_keys ) ) {
+					continue;
+				}
+				if ( '_' === substr( $name, 0, 1 ) ) {
+					$item[ substr( $name, 1 ) ] = $value[0];
+				} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
+					$item[ $name ] = make_clickable( $value[0] );
 				}
 			}
 		}
-
-		return apply_filters( 'woocommerce_order_get_items', $items, $this );
+		return $item;
 	}
 
 	/**

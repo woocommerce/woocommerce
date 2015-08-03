@@ -1146,6 +1146,7 @@ class WC_AJAX {
 		$item['line_subtotal_tax'] = '';
 		$item['line_total']        = wc_format_decimal( $_product->get_price_excluding_tax() );
 		$item['line_tax']          = '';
+		$item['type']              = 'line_item';
 
 		// Add line item
 		$item_id = wc_add_order_item( $order_id, array(
@@ -1177,7 +1178,10 @@ class WC_AJAX {
 			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 		}
 
-		$item          = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
+		$item['item_meta']       = $order->get_item_meta( $item_id );
+		$item['item_meta_array'] = $order->get_item_meta_array( $item_id );
+		$item                    = $order->expand_item_meta( $item );
+		$item                    = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
 
 		include( 'admin/meta-boxes/views/html-order-item.php' );
 
