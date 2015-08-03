@@ -13,9 +13,9 @@ GitHub and Transifex are for *bug reports and contributions only* - if you have 
 
 ## Contribute to the core
 
-### Report issues
+### Reporting issues
 
-Reporting issues is an easy way to became a contributor. It does not need technical skills, you don't need to know any programming language and you don't need to check the code. You only need to make sure that everything works as expected
+Reporting issues is an easy way to became a contributor. It does not need technical skills, you don't need to know any programming language and you don't need to check the code. You only need to make sure that everything works as expected.
 
 #### How to
 
@@ -50,12 +50,12 @@ At this point you're waiting on us to merge your pull request. We review all pul
 
 Localisation is a very important part of WooCommerce. When you localise WooCommerce, you are helping hundreds of people in the world, all the people who speak your language.
 
-### Translate the core
+### Translating the core
 
 We have a [public project on Transifex](https://www.transifex.com/projects/p/woocommerce/). You can join the localisation team of your language and help by translating WooCommerce.
 If WooCommerce is already 100% translated for your language, don't worry, join the team anyway, we regularly update our language files, there will be need of your help soon.
 
-### Translate the video tutorials
+### Translating the video tutorials
 
 You can also help by translating our video tutorials. Check our [Video SRTs project](https://www.transifex.com/projects/p/video-srts/) and join the team for your language. If it's not available, please request the new language and we will add it for you.
 
