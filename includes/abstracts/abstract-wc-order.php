@@ -2457,17 +2457,13 @@ abstract class WC_Abstract_Order {
 		}
 	}
 
-
 	/**
-	 * Reduce stock levels
+	 * Reduce stock levels for all line items in the order.
+	 * Runs if stock management is enabled, but can be disabled on per-order basis by extensions @since 2.4.0 via woocommerce_can_reduce_order_stock hook.
 	 */
 	public function reduce_order_stock() {
-
-		if ( 'yes' == get_option('woocommerce_manage_stock') && sizeof( $this->get_items() ) > 0 ) {
-
-			// Reduce stock levels and do any other actions with products in the cart
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && apply_filters( 'woocommerce_can_reduce_order_stock', true, $this ) && sizeof( $this->get_items() ) > 0 ) {
 			foreach ( $this->get_items() as $item ) {
-
 				if ( $item['product_id'] > 0 ) {
 					$_product = $this->get_product_from_item( $item );
 
@@ -2476,16 +2472,13 @@ abstract class WC_Abstract_Order {
 						$new_stock = $_product->reduce_stock( $qty );
 
 						if ( isset( $item['variation_id'] ) && $item['variation_id'] ) {
-							$this->add_order_note( sprintf( __( 'Item\'s #%s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $item['variation_id'], $new_stock + $qty, $new_stock) );
+							$this->add_order_note( sprintf( __( 'Item #%s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $item['variation_id'], $new_stock + $qty, $new_stock) );
 						} else {
 							$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $new_stock + $qty, $new_stock) );
 						}
-
 						$this->send_stock_notifications( $_product, $new_stock, $item['qty'] );
 					}
-
 				}
-
 			}
 
 			do_action( 'woocommerce_reduce_order_stock', $this );
