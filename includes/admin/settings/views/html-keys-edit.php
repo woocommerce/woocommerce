@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="key_permissions"><?php _e( 'Permissons', 'woocommerce' ); ?></label>
+					<label for="key_permissions"><?php _e( 'Permissions', 'woocommerce' ); ?></label>
 					<img class="help_tip" data-tip="<?php _e( 'Select the access type of these keys.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">

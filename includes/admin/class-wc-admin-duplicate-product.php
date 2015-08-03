@@ -168,7 +168,7 @@ class WC_Admin_Duplicate_Product {
 		$this->duplicate_post_meta( $post->ID, $new_post_id );
 
 		// Copy the children (variations)
-		$exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $post ) );
+		$exclude = apply_filters( 'woocommerce_duplicate_product_exclude_children', false );
 
 		if ( ! $exclude && ( $children_products = get_children( 'post_parent=' . $post->ID . '&post_type=product_variation' ) ) ) {
 			foreach ( $children_products as $child ) {

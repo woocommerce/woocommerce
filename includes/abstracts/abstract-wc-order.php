@@ -1138,6 +1138,25 @@ abstract class WC_Abstract_Order {
 
 		$items = array();
 
+		// Loop items
+		foreach ( $line_items as $item ) {
+			$items[ $item->order_item_id ]['name']            = $item->order_item_name;
+			$items[ $item->order_item_id ]['type']            = $item->order_item_type;
+			$items[ $item->order_item_id ]['item_meta']       = $this->get_item_meta( $item->order_item_id );
+			$items[ $item->order_item_id ]['item_meta_array'] = $this->get_item_meta_array( $item->order_item_id );
+			$items[ $item->order_item_id ]                    = $this->expand_item_meta( $items[ $item->order_item_id ] );
+		}
+
+		return apply_filters( 'woocommerce_order_get_items', $items, $this );
+	}
+
+	/**
+	 * Expand item meta into the $item array.
+	 * @since 2.4.0
+	 * @param array $item before expansion
+	 * @return array
+	 */
+	public function expand_item_meta( $item ) {
 		// Reserved meta keys
 		$reserved_item_meta_keys = array(
 			'name',
@@ -1154,29 +1173,20 @@ abstract class WC_Abstract_Order {
 			'line_subtotal_tax'
 		);
 
-		// Loop items
-		foreach ( $line_items as $item ) {
-			$items[ $item->order_item_id ]['name']            = $item->order_item_name;
-			$items[ $item->order_item_id ]['type']            = $item->order_item_type;
-			$items[ $item->order_item_id ]['item_meta']       = $this->get_item_meta( $item->order_item_id );
-			$items[ $item->order_item_id ]['item_meta_array'] = $this->get_item_meta_array( $item->order_item_id );
-
-			// Expand meta data into the array
-			if ( $items[ $item->order_item_id ]['item_meta'] ) {
-				foreach ( $items[ $item->order_item_id ]['item_meta'] as $name => $value ) {
-					if ( in_array( $name, $reserved_item_meta_keys ) ) {
-						continue;
-					}
-					if ( '_' === substr( $name, 0, 1 ) ) {
-						$items[ $item->order_item_id ][ substr( $name, 1 ) ] = $value[0];
-					} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
-						$items[ $item->order_item_id ][ $name ] = make_clickable( $value[0] );
-					}
+		// Expand item meta if set
+		if ( ! empty( $item['item_meta'] ) ) {
+			foreach ( $item['item_meta'] as $name => $value ) {
+				if ( in_array( $name, $reserved_item_meta_keys ) ) {
+					continue;
+				}
+				if ( '_' === substr( $name, 0, 1 ) ) {
+					$item[ substr( $name, 1 ) ] = $value[0];
+				} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
+					$item[ $name ] = make_clickable( $value[0] );
 				}
 			}
 		}
-
-		return apply_filters( 'woocommerce_order_get_items', $items, $this );
+		return $item;
 	}
 
 	/**
@@ -2457,17 +2467,13 @@ abstract class WC_Abstract_Order {
 		}
 	}
 
-
 	/**
-	 * Reduce stock levels
+	 * Reduce stock levels for all line items in the order.
+	 * Runs if stock management is enabled, but can be disabled on per-order basis by extensions @since 2.4.0 via woocommerce_can_reduce_order_stock hook.
 	 */
 	public function reduce_order_stock() {
-
-		if ( 'yes' == get_option('woocommerce_manage_stock') && sizeof( $this->get_items() ) > 0 ) {
-
-			// Reduce stock levels and do any other actions with products in the cart
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && apply_filters( 'woocommerce_can_reduce_order_stock', true, $this ) && sizeof( $this->get_items() ) > 0 ) {
 			foreach ( $this->get_items() as $item ) {
-
 				if ( $item['product_id'] > 0 ) {
 					$_product = $this->get_product_from_item( $item );
 
@@ -2476,16 +2482,13 @@ abstract class WC_Abstract_Order {
 						$new_stock = $_product->reduce_stock( $qty );
 
 						if ( isset( $item['variation_id'] ) && $item['variation_id'] ) {
-							$this->add_order_note( sprintf( __( 'Item\'s #%s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $item['variation_id'], $new_stock + $qty, $new_stock) );
+							$this->add_order_note( sprintf( __( 'Item #%s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $item['variation_id'], $new_stock + $qty, $new_stock) );
 						} else {
 							$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $new_stock + $qty, $new_stock) );
 						}
-
 						$this->send_stock_notifications( $_product, $new_stock, $item['qty'] );
 					}
-
 				}
-
 			}
 
 			do_action( 'woocommerce_reduce_order_stock', $this );
