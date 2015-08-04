@@ -190,6 +190,8 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	// Allow 3rd party plugin filter template file from their plugin
 	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
 
+	if ( ! file_exists( $located ) ) return;
+
 	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
 
 	include( $located );
