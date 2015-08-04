@@ -937,17 +937,17 @@ class WC_Product {
 		$display_price         = $this->get_display_price();
 		$display_regular_price = $this->get_display_price( $this->get_regular_price() );
 
+		$display_suffix = apply_filters( 'woocommerce_price_suffix', $this->get_price_suffix(), $this );
+
 		if ( $this->get_price() > 0 ) {
 
 			if ( $this->is_on_sale() && $this->get_regular_price() ) {
-
-				$price .= $this->get_price_html_from_to( $display_regular_price, $display_price ) . $this->get_price_suffix();
+				$price .= $this->get_price_html_from_to( $display_regular_price, $display_price ) . $display_suffix;
 
 				$price = apply_filters( 'woocommerce_sale_price_html', $price, $this );
 
 			} else {
-
-				$price .= wc_price( $display_price ) . $this->get_price_suffix();
+				$price .= wc_price( $display_price ) . $display_suffix;
 
 				$price = apply_filters( 'woocommerce_price_html', $price, $this );
 
