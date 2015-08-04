@@ -34,6 +34,8 @@ $args = array(
 
 $products = new WP_Query( $args );
 
+if ( apply_filters( 'woocommerce_upsell_display_products', $products ) ) return;
+
 $woocommerce_loop['columns'] = $columns;
 
 if ( $products->have_posts() ) : ?>
