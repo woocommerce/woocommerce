@@ -303,7 +303,7 @@ class WC_Product_Variation extends WC_Product {
 			if ( $this->is_on_sale() ) {
 				$price = apply_filters( 'woocommerce_variation_sale_price_html', '<del>' . wc_price( $display_regular_price ) . '</del> <ins>' . wc_price( $display_sale_price ) . '</ins>' . $this->get_price_suffix(), $this );
 			} elseif ( $this->get_price() > 0 ) {
-				$price = apply_filters( 'woocommerce_variation_price_html', wc_price( $display_price ) . $display_suffix(), $this );
+				$price = apply_filters( 'woocommerce_variation_price_html', wc_price( $display_price ) . $display_suffix, $this );
 			} else {
 				$price = apply_filters( 'woocommerce_variation_free_price_html', __( 'Free!', 'woocommerce' ), $this );
 			}
