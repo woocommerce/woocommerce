@@ -193,7 +193,7 @@ class WC_Product_Grouped extends WC_Product {
 				$display_price = sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), $from, $to );
 			}
 
-			$price .= $display_price . $this->get_price_suffix();
+			$price .= $display_price . apply_filters( 'woocommerce_grouped_price_suffix', $this->get_price_suffix(), $this );
 
 			$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
 		} else {

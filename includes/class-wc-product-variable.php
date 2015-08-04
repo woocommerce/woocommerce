@@ -324,7 +324,8 @@ class WC_Product_Variable extends WC_Product {
 			} elseif ( $is_free ) {
 				$price = apply_filters( 'woocommerce_variable_free_price_html', __( 'Free!', 'woocommerce' ), $this );
 			} else {
-				$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
+				$suffix = apply_filters( 'woocommerce_variable_price_suffix', $this->get_price_suffix(), $this );
+				$price = apply_filters( 'woocommerce_variable_price_html', $price . $suffix, $this );
 			}
 		}
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
