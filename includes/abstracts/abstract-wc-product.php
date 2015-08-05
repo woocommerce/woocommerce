@@ -1152,7 +1152,7 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_upsells() {
-		return (array) maybe_unserialize( $this->upsell_ids );
+		return apply_filters( 'woocommerce_product_upsell_ids', (array) maybe_unserialize( $this->upsell_ids ) );
 	}
 
 	/**
@@ -1161,7 +1161,7 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_cross_sells() {
-		return (array) maybe_unserialize( $this->crosssell_ids );
+		return apply_filters( 'woocommerce_product_crosssell_ids', (array) maybe_unserialize( $this->crosssell_ids ) );
 	}
 
 	/**
