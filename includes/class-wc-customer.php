@@ -14,13 +14,13 @@
  * @property string $state
  * @property string $postcode
  * @property string $city
- * @property string $address
+ * @property string $address_1
  * @property string $address_2
  * @property string $shipping_country
  * @property string $shipping_state
  * @property string $shipping_postcode
  * @property string $shipping_city
- * @property string $shipping_address
+ * @property string $shipping_address_1
  * @property string $shipping_address_2
  * @property string $is_vat_exempt
  * @property string $calculated_shipping
@@ -73,6 +73,12 @@ class WC_Customer {
 	 * @return bool
 	 */
 	public function __isset( $property ) {
+		if ( 'address' === $property ) {
+			$property = 'address_1';
+		}
+		if ( 'shipping_address' === $property ) {
+			$property = 'shipping_address_1';
+		}
 		return isset( $this->_data[ $property ] );
 	}
 
@@ -83,6 +89,12 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function __get( $property ) {
+		if ( 'address' === $property ) {
+			$property = 'address_1';
+		}
+		if ( 'shipping_address' === $property ) {
+			$property = 'shipping_address_1';
+		}
 		return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : '';
 	}
 
@@ -93,6 +105,12 @@ class WC_Customer {
 	 * @param mixed $value
 	 */
 	public function __set( $property, $value ) {
+		if ( 'address' === $property ) {
+			$property = 'address_1';
+		}
+		if ( 'shipping_address' === $property ) {
+			$property = 'shipping_address_1';
+		}
 		$this->_data[ $property ] = $value;
 		$this->_changed = true;
 	}
@@ -231,7 +249,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_address() {
-		return $this->address;
+		return $this->address_1;
 	}
 
 	/**
@@ -285,7 +303,7 @@ class WC_Customer {
 	 * @return string
 	 */
 	public function get_shipping_address() {
-		return $this->shipping_address;
+		return $this->shipping_address_1;
 	}
 
 	/**
@@ -340,13 +358,13 @@ class WC_Customer {
 		$this->_data = array(
 			'postcode'            => '',
 			'city'                => '',
-			'address'             => '',
+			'address_1'           => '',
 			'address_2'           => '',
 			'state'               => '',
 			'country'             => '',
 			'shipping_postcode'   => '',
 			'shipping_city'       => '',
-			'shipping_address'    => '',
+			'shipping_address_1'  => '',
 			'shipping_address_2'  => '',
 			'shipping_state'      => '',
 			'shipping_country'    => '',
@@ -435,16 +453,16 @@ class WC_Customer {
 	 * @param mixed $address
 	 */
 	public function set_address( $address ) {
-		$this->address = $address;
+		$this->address_1 = $address;
 	}
 
 	/**
-	 * Sets session data for the address_2.
+	 * Sets session data for the $address.
 	 *
-	 * @param mixed $address_2
+	 * @param mixed $address
 	 */
-	public function set_address_2( $address_2 ) {
-		$this->address_2 = $address_2;
+	public function set_address_2( $address ) {
+		$this->address_2 = $address;
 	}
 
 	/**
@@ -504,16 +522,16 @@ class WC_Customer {
 	 * @param string $address
 	 */
 	public function set_shipping_address( $address ) {
-		$this->shipping_address = $address;
+		$this->shipping_address_1 = $address;
 	}
 
 	/**
 	 * Sets session data for the address_2.
 	 *
-	 * @param string $address_2
+	 * @param string $address
 	 */
-	public function set_shipping_address_2( $address_2 ) {
-		$this->shipping_address_2 = $address_2;
+	public function set_shipping_address_2( $address ) {
+		$this->shipping_address_2 = $address;
 	}
 
 	/**
