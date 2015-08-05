@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+wp_enqueue_script( 'wp-util' );
 ?>
 <h3><?php printf( __( 'Tax Rates for the "%s" Class', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 <p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available alpha-2 country codes.', 'woocommerce' ), 'http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes' ); ?></p>
@@ -122,6 +123,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</tfoot>
 </table>
+<script type="text/html" id="tmpl-tax-table-row">
+	<tr class="new">
+		<td class="sort">&nbsp;</td>
+		<td class="country" width="8%">
+			<input type="text" placeholder="*" name="tax_rate_country[{{{ data.nameKey }}}]" class="wc_input_country_iso" />
+		</td>
+		<td class="state" width="8%">
+			<input type="text" placeholder="*" name="tax_rate_state[{{{ data.nameKey }}}" />
+		</td>
+		<td class="postcode">
+			<input type="text" placeholder="*" name="tax_rate_postcode[{{{ data.nameKey }}}]" />
+		</td>
+		<td class="city">
+			<input type="text" placeholder="*" name="tax_rate_city[{{{ data.nameKey }}}]" />
+		</td>
+		<td class="rate" width="8%">
+			<input type="number" step="any" min="0" placeholder="0" name="tax_rate[{{{ data.nameKey }}}]" />
+		</td>
+		<td class="name" width="8%">
+			<input type="text" name="tax_rate_name[{{{ data.nameKey }}}]" />
+		</td>
+		<td class="priority" width="8%">
+			<input type="number" step="1" min="1" value="1" name="tax_rate_priority[{{{ data.nameKey }}}]" />
+		</td>
+		<td class="compound" width="8%">
+			<input type="checkbox" class="checkbox" name="tax_rate_compound[{{{ data.nameKey }}}]" />
+		</td>
+		<td class="apply_to_shipping" width="8%">
+			<input type="checkbox" class="checkbox" name="tax_rate_shipping[{{{ data.nameKey }}}]" checked="checked" />
+		</td>
+	</tr>
+</script>
 <script type="text/javascript">
 	jQuery( function() {
 		jQuery('.wc_tax_rates .remove_tax_rates').click(function() {
@@ -193,36 +226,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		jQuery('.wc_tax_rates .insert').click(function() {
 			var $tbody = jQuery('.wc_tax_rates').find('tbody');
 			var size = $tbody.find('tr').size();
-			var code = '<tr class="new">\
-					<td class="sort">&nbsp;</td>\
-					<td class="country" width="8%">\
-						<input type="text" placeholder="*" name="tax_rate_country[new-' + size + ']" class="wc_input_country_iso" />\
-					</td>\
-					<td class="state" width="8%">\
-						<input type="text" placeholder="*" name="tax_rate_state[new-' + size + ']" />\
-					</td>\
-					<td class="postcode">\
-						<input type="text" placeholder="*" name="tax_rate_postcode[new-' + size + ']" />\
-					</td>\
-					<td class="city">\
-						<input type="text" placeholder="*" name="tax_rate_city[new-' + size + ']" />\
-					</td>\
-					<td class="rate" width="8%">\
-						<input type="number" step="any" min="0" placeholder="0" name="tax_rate[new-' + size + ']" />\
-					</td>\
-					<td class="name" width="8%">\
-						<input type="text" name="tax_rate_name[new-' + size + ']" />\
-					</td>\
-					<td class="priority" width="8%">\
-						<input type="number" step="1" min="1" value="1" name="tax_rate_priority[new-' + size + ']" />\
-					</td>\
-					<td class="compound" width="8%">\
-						<input type="checkbox" class="checkbox" name="tax_rate_compound[new-' + size + ']" />\
-					</td>\
-					<td class="apply_to_shipping" width="8%">\
-						<input type="checkbox" class="checkbox" name="tax_rate_shipping[new-' + size + ']" checked="checked" />\
-					</td>\
-				</tr>';
+			var code = wp.template( 'tax-table-row' )( { nameKey : ( 'new-' + size ) } );
 
 			if ( $tbody.find('tr.current').size() > 0 ) {
 				$tbody.find('tr.current').after( code );
