@@ -634,16 +634,18 @@ class WC_Coupon {
 
 		// Handle the limit_usage_to_x_items option
 		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
-			if ( '' === $this->limit_usage_to_x_items ) {
-				$limit_usage_qty = $cart_item_qty;
-			} else {
-				$limit_usage_qty              = min( $this->limit_usage_to_x_items, $cart_item_qty );
-				$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $limit_usage_qty );
-			}
-			if ( $single ) {
-				$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
-			} else {
-				$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
+			if ( $discounting_amount ) {
+				if ( '' === $this->limit_usage_to_x_items ) {
+					$limit_usage_qty = $cart_item_qty;
+				} else {
+					$limit_usage_qty              = min( $this->limit_usage_to_x_items, $cart_item_qty );
+					$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $limit_usage_qty );
+				}
+				if ( $single ) {
+					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
+				} else {
+					$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
+				}
 			}
 		}
 
