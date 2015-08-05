@@ -14,7 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 <script type="text/javascript">
 	jQuery( '.wc-update-now' ).click( 'click', function() {
-		var answer = confirm( '<?php echo esc_js( __( 'It is strongly recommended that you backup your database before proceeding. Are you sure you wish to run the updater now?', 'woocommerce' ) ); ?>' );
-		return answer;
+		return window.confirm( '<?php echo esc_js( __( 'It is strongly recommended that you backup your database before proceeding. Are you sure you wish to run the updater now?', 'woocommerce' ) ); ?>' );
 	});
 </script>
