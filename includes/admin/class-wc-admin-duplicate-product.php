@@ -44,7 +44,7 @@ class WC_Admin_Duplicate_Product {
 			return $actions;
 		}
 
-		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __( 'Make a duplicate from this product', 'woocommerce' )
+		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . esc_attr__( 'Make a duplicate from this product', 'woocommerce' )
 			. '" rel="permalink">' .  __( 'Duplicate', 'woocommerce' ) . '</a>';
 
 		return $actions;

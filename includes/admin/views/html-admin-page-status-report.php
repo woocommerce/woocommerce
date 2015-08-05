@@ -338,7 +338,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$plugin_name = esc_html( $plugin_data['Name'] );
 
 				if ( ! empty( $plugin_data['PluginURI'] ) ) {
-					$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
+					$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . esc_attr__( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
 				}
 
 				if ( strstr( $dirname, 'woocommerce-' ) && strstr( $plugin_data['PluginURI'], 'woothemes.com' ) ) {
