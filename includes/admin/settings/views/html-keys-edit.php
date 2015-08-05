@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$user           = get_user_by( 'id', $user_id );
 						$user_string    = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 					?>
-					<input type="hidden" class="wc-customer-search" id="key_user" data-placeholder="<?php esc_html_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo esc_attr( $user_id ); ?>" data-allow_clear="true" />
+					<input type="hidden" class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo esc_attr( $user_id ); ?>" data-allow_clear="true" />
 				</td>
 			</tr>
 			<tr valign="top">
