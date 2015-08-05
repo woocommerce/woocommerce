@@ -56,7 +56,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<p>
 		<?php wp_nonce_field( 'save_account_details' ); ?>
-		<input type="submit" class="button" name="save_account_details" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" />
+		<input type="submit" class="button" name="save_account_details" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" />
 		<input type="hidden" name="action" value="save_account_details" />
 	</p>
 
