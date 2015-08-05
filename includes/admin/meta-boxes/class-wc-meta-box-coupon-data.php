@@ -97,7 +97,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Product ids
 				?>
 				<p class="form-field"><label><?php _e( 'Products', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="product_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
+				<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="product_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
 					$product_ids = array_filter( array_map( 'absint', explode( ',', get_post_meta( $post->ID, 'product_ids', true ) ) ) );
 					$json_ids    = array();
 
@@ -115,7 +115,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Exclude Product ids
 				?>
 				<p class="form-field"><label><?php _e( 'Exclude products', 'woocommerce' ); ?></label>
-				<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="exclude_product_ids" data-placeholder="<?php _e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
+				<input type="hidden" class="wc-product-search" data-multiple="true" style="width: 50%;" name="exclude_product_ids" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-selected="<?php
 					$product_ids = array_filter( array_map( 'absint', explode( ',', get_post_meta( $post->ID, 'exclude_product_ids', true ) ) ) );
 					$json_ids    = array();
 
@@ -135,7 +135,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Categories
 				?>
 				<p class="form-field"><label for="product_categories"><?php _e( 'Product categories', 'woocommerce' ); ?></label>
-				<select id="product_categories" name="product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php _e( 'Any category', 'woocommerce' ); ?>">
+				<select id="product_categories" name="product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'Any category', 'woocommerce' ); ?>">
 					<?php
 						$category_ids = (array) get_post_meta( $post->ID, 'product_categories', true );
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
@@ -150,7 +150,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Exclude Categories
 				?>
 				<p class="form-field"><label for="exclude_product_categories"><?php _e( 'Exclude categories', 'woocommerce' ); ?></label>
-				<select id="exclude_product_categories" name="exclude_product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php _e( 'No categories', 'woocommerce' ); ?>">
+				<select id="exclude_product_categories" name="exclude_product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'No categories', 'woocommerce' ); ?>">
 					<?php
 						$category_ids = (array) get_post_meta( $post->ID, 'exclude_product_categories', true );
 						$categories   = get_terms( 'product_cat', 'orderby=name&hide_empty=0' );
