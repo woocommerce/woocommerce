@@ -128,7 +128,7 @@ function wc_products_rss_feed() {
 
 		$feed = get_post_type_archive_feed_link( 'product' );
 
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . __( 'New products', 'woocommerce' ) . '" href="' . esc_url( $feed ) . '" />';
+		echo '<link rel="alternate" type="application/rss+xml"  title="' . esc_attr__( 'New products', 'woocommerce' ) . '" href="' . esc_url( $feed ) . '" />';
 
 	} elseif ( is_tax( 'product_cat' ) ) {
 
@@ -1679,7 +1679,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 					$field .= '</select>';
 
-					$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . __( 'Update country', 'woocommerce' ) . '" /></noscript>';
+					$field .= '<noscript><input type="submit" name="woocommerce_checkout_update_totals" value="' . esc_attr__( 'Update country', 'woocommerce' ) . '" /></noscript>';
 
 				}
 

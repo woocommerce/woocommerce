@@ -207,7 +207,8 @@ class WC_Admin_Post_Types {
 
 		$columns          = array();
 		$columns['cb']    = '<input type="checkbox" />';
-		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . __( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
+		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
+		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
 		$columns['name']  = __( 'Name', 'woocommerce' );
 
 		if ( wc_product_sku_enabled() ) {
@@ -221,8 +222,8 @@ class WC_Admin_Post_Types {
 		$columns['price']        = __( 'Price', 'woocommerce' );
 		$columns['product_cat']  = __( 'Categories', 'woocommerce' );
 		$columns['product_tag']  = __( 'Tags', 'woocommerce' );
-		$columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . __( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
-		$columns['product_type'] = '<span class="wc-type parent-tips" data-tip="' . __( 'Type', 'woocommerce' ) . '">' . __( 'Type', 'woocommerce' ) . '</span>';
+		$columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
+		$columns['product_type'] = '<span class="wc-type parent-tips" data-tip="' . esc_attr__( 'Type', 'woocommerce' ) . '">' . __( 'Type', 'woocommerce' ) . '</span>';
 		$columns['date']         = __( 'Date', 'woocommerce' );
 
 		return array_merge( $columns, $existing_columns );
@@ -339,21 +340,21 @@ class WC_Admin_Post_Types {
 				break;
 			case 'product_type' :
 				if ( 'grouped' == $the_product->product_type ) {
-					echo '<span class="product-type tips grouped" data-tip="' . __( 'Grouped', 'woocommerce' ) . '"></span>';
+					echo '<span class="product-type tips grouped" data-tip="' . esc_attr__( 'Grouped', 'woocommerce' ) . '"></span>';
 				} elseif ( 'external' == $the_product->product_type ) {
-					echo '<span class="product-type tips external" data-tip="' . __( 'External/Affiliate', 'woocommerce' ) . '"></span>';
+					echo '<span class="product-type tips external" data-tip="' . esc_attr__( 'External/Affiliate', 'woocommerce' ) . '"></span>';
 				} elseif ( 'simple' == $the_product->product_type ) {
 
 					if ( $the_product->is_virtual() ) {
-						echo '<span class="product-type tips virtual" data-tip="' . __( 'Virtual', 'woocommerce' ) . '"></span>';
+						echo '<span class="product-type tips virtual" data-tip="' . esc_attr__( 'Virtual', 'woocommerce' ) . '"></span>';
 					} elseif ( $the_product->is_downloadable() ) {
-						echo '<span class="product-type tips downloadable" data-tip="' . __( 'Downloadable', 'woocommerce' ) . '"></span>';
+						echo '<span class="product-type tips downloadable" data-tip="' . esc_attr__( 'Downloadable', 'woocommerce' ) . '"></span>';
 					} else {
-						echo '<span class="product-type tips simple" data-tip="' . __( 'Simple', 'woocommerce' ) . '"></span>';
+						echo '<span class="product-type tips simple" data-tip="' . esc_attr__( 'Simple', 'woocommerce' ) . '"></span>';
 					}
 
 				} elseif ( 'variable' == $the_product->product_type ) {
-					echo '<span class="product-type tips variable" data-tip="' . __( 'Variable', 'woocommerce' ) . '"></span>';
+					echo '<span class="product-type tips variable" data-tip="' . esc_attr__( 'Variable', 'woocommerce' ) . '"></span>';
 				} else {
 					// Assuming that we have other types in future
 					echo '<span class="product-type tips ' . $the_product->product_type . '" data-tip="' . ucfirst( $the_product->product_type ) . '"></span>';
@@ -379,9 +380,9 @@ class WC_Admin_Post_Types {
 				$url = wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_feature_product&product_id=' . $post->ID ), 'woocommerce-feature-product' );
 				echo '<a href="' . esc_url( $url ) . '" title="'. __( 'Toggle featured', 'woocommerce' ) . '">';
 				if ( $the_product->is_featured() ) {
-					echo '<span class="wc-featured tips" data-tip="' . __( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+					echo '<span class="wc-featured tips" data-tip="' . esc_attr__( 'Yes', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
-					echo '<span class="wc-featured not-featured tips" data-tip="' . __( 'No', 'woocommerce' ) . '">' . __( 'No', 'woocommerce' ) . '</span>';
+					echo '<span class="wc-featured not-featured tips" data-tip="' . esc_attr__( 'No', 'woocommerce' ) . '">' . __( 'No', 'woocommerce' ) . '</span>';
 				}
 				echo '</a>';
 				break;
