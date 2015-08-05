@@ -1490,7 +1490,7 @@ abstract class WC_Abstract_Order {
 			$price = ( $item['line_subtotal'] / max( 1, $item['qty'] ) );
 		}
 
-		$price = $round ? number_format( (float) $price, 2, '.', '' ) : $price;
+		$price = $round ? number_format( (float) $price, wc_get_price_decimals(), '.', '' ) : $price;
 
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this, $item, $inc_tax, $round );
 	}
@@ -1504,14 +1504,13 @@ abstract class WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
-
 		if ( $inc_tax ) {
 			$price = $item['line_subtotal'] + $item['line_subtotal_tax'];
 		} else {
 			$price = $item['line_subtotal'];
 		}
 
-		$price = $round ? round( $price, 2 ) : $price;
+		$price = $round ? round( $price, wc_get_price_decimals() ) : $price;
 
 		return apply_filters( 'woocommerce_order_amount_line_subtotal', $price, $this, $item, $inc_tax, $round );
 	}
@@ -1534,7 +1533,7 @@ abstract class WC_Abstract_Order {
 			$price = $item['line_total'] / max( 1, $qty );
 		}
 
-		$price = $round ? round( $price, 2 ) : $price;
+		$price = $round ? round( $price, wc_get_price_decimals() ) : $price;
 
 		return apply_filters( 'woocommerce_order_amount_item_total', $price, $this, $item, $inc_tax, $round );
 	}
@@ -1553,7 +1552,7 @@ abstract class WC_Abstract_Order {
 		$line_total = $inc_tax ? $item['line_total'] + $item['line_tax'] : $item['line_total'];
 
 		// Check if we need to round
-		$line_total = $round ? round( $line_total, 2 ) : $line_total;
+		$line_total = $round ? round( $line_total, wc_get_price_decimals() ) : $line_total;
 
 		return apply_filters( 'woocommerce_order_amount_line_total', $line_total, $this, $item, $inc_tax, $round );
 	}
