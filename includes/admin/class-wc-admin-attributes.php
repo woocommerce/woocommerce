@@ -328,7 +328,7 @@ class WC_Admin_Attributes {
 							</tr>
 						</tbody>
 					</table>
-					<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php _e( 'Update', 'woocommerce' ); ?>"></p>
+					<p class="submit"><input type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"></p>
 					<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
 				</form>
 			<?php } ?>
@@ -414,7 +414,7 @@ class WC_Admin_Attributes {
 														echo '<span class="na">&ndash;</span>';
 													}
 												?></td>
-												<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php _e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
+												<td class="attribute-actions"><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="button alignright tips configure-terms" data-tip="<?php esc_attr_e( 'Configure terms', 'woocommerce' ); ?>"><?php _e( 'Configure terms', 'woocommerce' ); ?></a></td>
 											</tr><?php
 										endforeach;
 									else :
@@ -480,7 +480,7 @@ class WC_Admin_Attributes {
 									<p class="description"><?php _e( 'Determines the sort order of the terms on the frontend shop product pages. If using custom ordering, you can drag and drop the terms in this attribute.', 'woocommerce' ); ?></p>
 								</div>
 
-								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php _e( 'Add Attribute', 'woocommerce' ); ?>"></p>
+								<p class="submit"><input type="submit" name="add_new_attribute" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Add Attribute', 'woocommerce' ); ?>"></p>
 								<?php wp_nonce_field( 'woocommerce-add-new_attribute' ); ?>
 							</form>
 						</div>

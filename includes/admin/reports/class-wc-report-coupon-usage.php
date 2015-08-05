@@ -187,7 +187,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 						if ( ! is_null( $used_coupons ) ) :
 					?>
-						<select id="coupon_codes" name="coupon_codes" class="wc-enhanced-select" data-placeholder="<?php _e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
+						<select id="coupon_codes" name="coupon_codes" class="wc-enhanced-select" data-placeholder="<?php esc_attr_e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
 							<option value=""><?php _e( 'All coupons', 'woocommerce' ); ?></option>
 							<?php
 								foreach ( $used_coupons as $coupon ) {
@@ -195,7 +195,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 								}
 							 ?>
 						</select>
-						<input type="submit" class="submit button" value="<?php _e( 'Show', 'woocommerce' ); ?>" />
+						<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce' ); ?>" />
 						<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) echo esc_attr( $_GET['range'] ) ?>" />
 						<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) ) echo esc_attr( $_GET['start_date'] ) ?>" />
 						<input type="hidden" name="end_date" value="<?php if ( ! empty( $_GET['end_date'] ) ) echo esc_attr( $_GET['end_date'] ) ?>" />
@@ -338,7 +338,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			download="report-<?php echo esc_attr( $current_range ); ?>-<?php echo date_i18n( 'Y-m-d', current_time('timestamp') ); ?>.csv"
 			class="export_csv"
 			data-export="chart"
-			data-xaxes="<?php _e( 'Date', 'woocommerce' ); ?>"
+			data-xaxes="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>"
 			data-groupby="<?php echo $this->chart_groupby; ?>"
 		>
 			<?php _e( 'Export CSV', 'woocommerce' ); ?>

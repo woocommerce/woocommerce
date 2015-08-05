@@ -32,14 +32,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<label>
 				<span class="title"><?php _e( 'Price', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
-					<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php _e( 'Regular Price', 'woocommerce' ); ?>" value="">
+					<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php esc_attr_e( 'Regular Price', 'woocommerce' ); ?>" value="">
 				</span>
 			</label>
 			<br class="clear" />
 			<label>
 				<span class="title"><?php _e( 'Sale', 'woocommerce' ); ?></span>
 				<span class="input-text-wrap">
-					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php _e( 'Sale Price', 'woocommerce' ); ?>" value="">
+					<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php esc_attr_e( 'Sale Price', 'woocommerce' ); ?>" value="">
 				</span>
 			</label>
 			<br class="clear" />
@@ -106,9 +106,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div>
 						<span class="title"><?php _e( 'L/W/H', 'woocommerce' ); ?></span>
 						<span class="input-text-wrap">
-							<input type="text" name="_length" class="text length" placeholder="<?php _e( 'Length', 'woocommerce' ); ?>" value="">
-							<input type="text" name="_width" class="text width" placeholder="<?php _e( 'Width', 'woocommerce' ); ?>" value="">
-							<input type="text" name="_height" class="text height" placeholder="<?php _e( 'Height', 'woocommerce' ); ?>" value="">
+							<input type="text" name="_length" class="text length" placeholder="<?php esc_attr_e( 'Length', 'woocommerce' ); ?>" value="">
+							<input type="text" name="_width" class="text width" placeholder="<?php esc_attr_e( 'Width', 'woocommerce' ); ?>" value="">
+							<input type="text" name="_height" class="text height" placeholder="<?php esc_attr_e( 'Height', 'woocommerce' ); ?>" value="">
 						</span>
 					</div>
 				</div>

@@ -222,7 +222,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 								</td>
 								<td class="status">
 									<?php if ( 'yes' === $method->enabled ) : ?>
-										<span class="status-enabled tips" data-tip="<?php _e( 'Yes', 'woocommerce' ); ?>"><?php _e( 'Yes', 'woocommerce' ); ?></span>
+										<span class="status-enabled tips" data-tip="<?php esc_attr_e( 'Yes', 'woocommerce' ); ?>"><?php _e( 'Yes', 'woocommerce' ); ?></span>
 									<?php else : ?>
 										<span class="na">-</span>
 									<?php endif; ?>

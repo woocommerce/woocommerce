@@ -20,9 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php echo ! empty( $item['name'] ) ? esc_html( $item['name'] ) : __( 'Shipping', 'woocommerce' ); ?>
 		</div>
 		<div class="edit" style="display: none;">
-			<input type="text" placeholder="<?php _e( 'Shipping Name', 'woocommerce' ); ?>" name="shipping_method_title[<?php echo $item_id; ?>]" value="<?php echo ( isset( $item['name'] ) ) ? esc_attr( $item['name'] ) : ''; ?>" />
+			<input type="text" placeholder="<?php esc_attr_e( 'Shipping Name', 'woocommerce' ); ?>" name="shipping_method_title[<?php echo $item_id; ?>]" value="<?php echo ( isset( $item['name'] ) ) ? esc_attr( $item['name'] ) : ''; ?>" />
 			<select name="shipping_method[<?php echo $item_id; ?>]">
-				<optgroup label="<?php _e( 'Shipping Method', 'woocommerce' ); ?>">
+				<optgroup label="<?php esc_attr_e( 'Shipping Method', 'woocommerce' ); ?>">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 					<?php
 						$found_method = false;

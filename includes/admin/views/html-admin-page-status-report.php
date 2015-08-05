@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<a class="button-secondary docs" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
-		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
+		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php esc_attr_e( 'Copy for Support', 'woocommerce' ); ?></button></p>
 	</div>
 </div>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
