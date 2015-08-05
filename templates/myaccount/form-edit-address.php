@@ -42,7 +42,7 @@ get_currentuserinfo();
 		<?php do_action( "woocommerce_after_edit_address_form_{$load_address}" ); ?>
 
 		<p>
-			<input type="submit" class="button" name="save_address" value="<?php _e( 'Save Address', 'woocommerce' ); ?>" />
+			<input type="submit" class="button" name="save_address" value="<?php esc_attr_e( 'Save Address', 'woocommerce' ); ?>" />
 			<?php wp_nonce_field( 'woocommerce-edit_address' ); ?>
 			<input type="hidden" name="action" value="edit_address" />
 		</p>

@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_status"><?php _e( 'Status', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php _e( 'The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; (does not deliver), or &quot;Disabled&quot; (does not deliver due delivery failures).', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<img class="help_tip" data-tip="<?php esc_attr_e( 'The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; (does not deliver), or &quot;Disabled&quot; (does not deliver due delivery failures).', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
 					<select name="webhook_status" id="webhook_status" class="wc-enhanced-select">
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_topic"><?php _e( 'Topic', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php _e( 'Select when the webhook will fire.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<img class="help_tip" data-tip="<?php esc_attr_e( 'Select when the webhook will fire.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
 					<select name="webhook_topic" id="webhook_topic" class="wc-enhanced-select">
@@ -73,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" id="webhook-action-event-wrap">
 				<th scope="row" class="titledesc">
 					<label for="webhook_action_event"><?php _e( 'Action Event', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php _e( 'Enter the Action that will trigger this webhook.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<img class="help_tip" data-tip="<?php esc_attr_e( 'Enter the Action that will trigger this webhook.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
 					<input name="webhook_action_event" id="webhook_action_event" type="text" class="input-text regular-input" value="<?php echo esc_attr( $topic_data['event'] ); ?>" />
@@ -82,7 +82,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" id="webhook-custom-topic-wrap">
 				<th scope="row" class="titledesc">
 					<label for="webhook_custom_topic"><?php _e( 'Custom Topic', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php _e( 'Enter the Custom Topic that will trigger this webhook.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<img class="help_tip" data-tip="<?php esc_attr_e( 'Enter the Custom Topic that will trigger this webhook.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
 					<input name="webhook_custom_topic" id="webhook_custom_topic" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_topic() ); ?>" />
@@ -91,7 +91,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_delivery_url"><?php _e( 'Delivery URL', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php _e( 'URL where the webhook payload is delivered.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<img class="help_tip" data-tip="<?php esc_attr_e( 'URL where the webhook payload is delivered.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
 					<input name="webhook_delivery_url" id="webhook_delivery_url" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_delivery_url() ); ?>" />
@@ -100,7 +100,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_secret"><?php _e( 'Secret', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php _e( 'The Secret Key is used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user\'s consumer secret if not provided.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<img class="help_tip" data-tip="<?php esc_attr_e( 'The Secret Key is used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user\'s consumer secret if not provided.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
 				</th>
 				<td class="forminp">
 					<input name="webhook_secret" id="webhook_secret" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_secret() ); ?>" />
@@ -148,7 +148,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<td colspan="2" scope="row" style="padding-left: 0;">
 					<p class="submit">
-						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php _e( 'Save Webhook', 'woocommerce' ); ?>" />
+						<input type="submit" class="button button-primary button-large" name="save" id="publish" accesskey="p" value="<?php esc_attr_e( 'Save Webhook', 'woocommerce' ); ?>" />
 						<?php if ( current_user_can( 'delete_post', $webhook->id ) ) : ?>
 							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( get_delete_post_link( $webhook->id ) ); ?>"><?php echo ( ! EMPTY_TRASH_DAYS ) ? __( 'Delete Permanently', 'woocommerce' ) : __( 'Move to Trash', 'woocommerce' ); ?></a>
 						<?php endif; ?>

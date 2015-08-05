@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</p>
 	<p class="wc-auth-actions">
 		<?php wp_nonce_field( 'woocommerce-login' ); ?>
-		<input type="submit" class="button button-large button-primary wc-auth-login-button" name="login" value="<?php _e( 'Login', 'woocommerce' ); ?>" />
+		<input type="submit" class="button button-large button-primary wc-auth-login-button" name="login" value="<?php esc_attr_e( 'Login', 'woocommerce' ); ?>" />
 		<input type="hidden" name="redirect" value="<?php echo esc_url( $redirect_url ); ?>" />
 	</p>
 </form>
