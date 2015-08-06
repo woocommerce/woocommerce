@@ -15,7 +15,7 @@ GitHub and Transifex are for *bug reports and contributions only* - if you have 
 
 ### Reporting Issues
 
-Reporting issues is a great way to became a contributor as it doesn't require technical skills. In fact you don't even need to know a programming language or to be able to check the code itself, you just need to make sure that everything works as expected and report an issue report if you spot a bug. Sound like something you're up for? Go for it!
+Reporting issues is a great way to became a contributor as it doesn't require technical skills. In fact you don't even need to know a programming language or to be able to check the code itself, you just need to make sure that everything works as expected and report an issue if you spot a bug. Sound like something you're up for? Go for it!
 
 #### How To Submit An Issue Report
 
