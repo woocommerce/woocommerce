@@ -12,57 +12,78 @@ WooCommerce is a powerful, extendable eCommerce plugin that helps you sell anyth
 
 == Description ==
 
-Transform your WordPress website into a thoroughbred eCommerce store. Delivering enterprise-level quality and features, backed by a name you can trust. Say "hello" to the WooCommerce eCommerce plugin.
+WooCommerce is a free eCommerce plugin that allows you to sell anything, beautifully. Built to integrate seamlessly with WordPress, WooCommerce is the world’s favorite eCommerce solution that gives both store owners and developers complete control.
 
-WooCommerce is built by the experienced folk at WooThemes who also offer premium [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") and [extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes") to further enhance your shopfront.
+With endless flexibility and access to hundreds of free and premium WordPress extensions, WooCommerce now powers 30% of all online stores -- more than any other platform.
 
 [youtube https://www.youtube.com/watch?v=1KahlicghaE]
 
-= Strength & flexibility =
-WooCommerce is built using WordPress best practises both on the front and the back end. This results in an efficient, robust and intuitive plugin.
+= Sell anything, anywhere =
+With WooCommerce, you can sell both physical and digital goods in all shapes and sizes, offer product variations, multiple configurations, and instant downloads to shoppers, and even sell affiliate goods from online marketplaces.
 
-= Smart dashboard widgets & reports =
-Keep a birds-eye view of incoming sales and reviews, stock levels and general store performance and statistics all from the WordPress dashboard or go to the reports section to view stats in more detail.
+With premium extensions, you can offer bookings, memberships, and recurring subscriptions. Perhaps you’d like to sell monthly subscriptions for physical goods, or offer your members a discount on digital downloads? It’s all possible.
 
-= Customizable =
-Your business is unique, your online store should be too. Choose one of our [eCommerce themes](http://www.woothemes.com/product-category/themes/woocommerce/ "eCommerce themes from WooThemes") or build your own and give it a personal touch using the built in shortcodes and widgets.
+= Ship wherever you like =
+Offer free shipping, flat rate shipping, or make real-time calculations. Limit your shipments to specific countries, or open your store up to the world. Shipping is highly configurable, and WooCommerce even supports drop shipping.
 
-WooCommerce works with any theme, including the default WordPress themes. If you need help getting your theme working nicely with WooCommerce please read our [theming docs](http://docs.woothemes.com/document/third-party-custom-theme-compatibility/) to discover your options.
+= Extensive payment options =
+WooCommerce comes bundled with the ability to accept major credit cards, PayPal, BACS (bank transfers), and cash on delivery. Need additional options? More than 140 region-specific gateways integrate with WooCommerce, including popular choices like Stripe, Authorize.Net, and Amazon Payments.
 
-If you're looking for a tailored WordPress eCommerce theme designed specifically to be used with WooCommerce be sure to browse the official [WooCommerce Themes](http://www.woothemes.com/product-category/themes/woocommerce/).
+= You control it all -- forever =
+WooCommerce gives you complete control of your store, from taxes to stock levels to customer accounts. Add and remove extensions, change your design, and switch settings as you please. It’s all under your control.
 
-= Features =
-Whether you're operating a superstore selling thousands of products, or a just a sole trader selling hand made arts and crafts WooCommerce has you covered. You can read all about WooCommerce' features on the [WooCommerce website](http://www.woothemes.com/woocommerce/ "WooCommerce: An open-source eCommerce plugin for WordPress").
+One of the biggest risks of using a hosted eCommerce platform is what happens to your store if the provider closes up shop. With WooCommerce, you have complete control, so there’s never any reason to worry. Your data belongs to you -- and it’s kept secure, thanks to regular audits by industry leaders.
 
-Payment Gateways and Shipping Methods are important to any store - WooCommerce comes bundled with several popular options including PayPal Standard (for accepting Credit Card and PayPal account payments), Simplify Commerce (a US gateway backed by Mastercard), BACS, Cash on Delivery, flat rate shipping, and free shipping.
+= Define your style with Storefront =
 
-= Premium Extensions =
+[Storefront](https://wordpress.org/themes/storefront/) is a free WordPress theme available to any WooCommerce store. Along with deep WooCommerce integration, Storefront prioritizes speed and uptime while eliminating theme and plugin conflicts during major updates.
 
-Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a [plethora of eCommerce extensions available to provide just that](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
+Define your style even further by customizing Storefront to your liking or choosing from one of our several [Storefront child themes](http://www.woothemes.com/product-category/themes/storefront-child-theme-themes/). It’s all up to you, and all open source.
 
-Some of our popular extensions include **[Product Addons](http://www.woothemes.com/extension/product-addons/)**, **[Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/)**, **[Product CSV Import Suite](http://www.woothemes.com/extension/product-csv-import-suite/)**, **[WooCommerce Subscriptions](http://www.woothemes.com/products/woocommerce-subscriptions/)**, **[Dynamic Pricing](http://www.woothemes.com/extension/dynamic-pricing/)** and [Bookings](http://www.woothemes.com/products/woocommerce-bookings/).
+= Built with developers in mind =
 
-Want to see more?
+Extendable, adaptable, and open source -- WooCommerce was created with developers in mind. With its strong, robust framework, you can scale your client’s store all the way from basic to high-end (infinity and beyond).
 
-* [View Payment Gateways](http://www.woothemes.com/product-category/woocommerce-extensions/payment-gateways/ "Payment gateways for WooCommerce from WooThemes").
-* [View Shipping Methods](http://www.woothemes.com/product-category/woocommerce-extensions/shipping-methods/ "Shipping methods for WooCommerce from WooThemes").
-* [View all extensions](http://www.woothemes.com/product-category/woocommerce-extensions/ "View all WooCommerce extensions").
+Built with a REST API, WooCommerce can integrate with virtually any service. Your store’s data can be accessed anywhere, anytime, 100% securely. WooCommerce allows developers to easily create, modify, and grow a store that meets their specifications.
 
-= Free Extensions =
+No matter the size of the store you want to build, WooCommerce will scale to meet your requirements. With a growing collection of more than 300 extensions, you can enhance each store’s features to meet your client’s unique needs -- or even create your own solution.
 
-WordPress.org is home to many cool free extensions for WooCommerce made by other developers including the **[Admin Bar Addition](http://wordpress.org/extend/plugins/woocommerce-admin-bar-addition/)**, **[Delivery Notes](http://wordpress.org/extend/plugins/woocommerce-delivery-notes/)**, **[Affiliates Integration Light](http://wordpress.org/extend/plugins/affiliates-woocommerce-light/)**, **[Custom Product Tabs Lite](http://wordpress.org/extend/plugins/woocommerce-custom-product-tabs-lite/)**, **[PDF Invoices and Packing Slips](http://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips/)**, **[Sequential Order Numbers](https://wordpress.org/plugins/woocommerce-sequential-order-numbers/)**, **[New Product Badges](http://wordpress.org/support/view/plugin-reviews/woocommerce-new-product-badge)**, **[Google Analytics](http://wordpress.org/plugins/woocommerce-google-analytics-integration/)** and the **[WooCommerce Customizer](http://wordpress.org/extend/plugins/woocommerce-customizer/)**.
+If security is a concern, rest easy. WooCommerce is audited by Sucuri, the industry leader in WordPress plugin safety and security. We’ve also got a dedicated team of developers working around the clock to identify and patch any and all discovered bugs.
 
-[Search WordPress.org for WooCommerce](http://wordpress.org/extend/plugins/search.php?q=woocommerce) to see everything that is available.
+We also support WooCommerce and all its extensions with comprehensive, easily-accessible documentation. With our docs, you’ll learn how to create the exact site your client needs.
 
-= Storefront - the official WooCommerce theme =
+= Extensions galore =
 
-Storefront is an intuitive & flexible, free WordPress theme built by WooThemes. It offers deep integration with WooCommerce and several of the most popular WooCommerce extensions. If you're looking for a theme for your next WooCommerce project, we highly recommend you check out [Storefront](http://www.woothemes.com/storefront/) and it's own suite of [extensions](http://www.woothemes.com/product-category/storefront-extensions/)!
+WordPress.org is home to some amazing extensions for WooCommerce, including:
 
-= Get involved =
+[Google Analytics](https://wordpress.org/plugins/woocommerce-google-analytics-integration/)
+[Delivery Notes](https://wordpress.org/plugins/woocommerce-delivery-notes/)
+[PDF Invoices and Packing Slips](https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips/)
+[Affiliates Integration Light](https://wordpress.org/plugins/affiliates-woocommerce-light/)
+[New Product Badges](https://wordpress.org/plugins/woocommerce-new-product-badge/)
 
-Developers can contribute to the source code on the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md).
+Keen to see them all? Search WordPress.org for ‘WooCommerce’ to dive in.
 
-Translators can contribute new languages to WooCommerce through [Transifex](https://www.transifex.com/projects/p/woocommerce/).
+If you’re looking for something endorsed and maintained by the developers who built WooCommerce, there are a plethora of premium eCommerce extensions, the most popular of which include:
+
+[WooCommerce Subscriptions](http://www.woothemes.com/products/woocommerce-subscriptions/)
+[WooCommerce Memberships](http://www.woothemes.com/products/woocommerce-memberships/)
+[WooCommerce Bookings](http://www.woothemes.com/products/woocommerce-bookings/)
+[Dynamic Pricing](http://www.woothemes.com/products/dynamic-pricing/)
+[Table Rate Shipping](http://www.woothemes.com/products/table-rate-shipping/)
+[Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)
+
+And there’s plenty more where they came from. Visit our [extensions page](http://www.woothemes.com/product-category/woocommerce-extensions/) to find out everything you’re capable of and all that's possible with premium WooCommerce extensions.
+
+= Join our growing community =
+
+When you download WooCommerce, you join a community of more than a million store owners, developers, and WordPress enthusiasts. We’re one of the fastest-growing open source communities online, and whether you’re a n00b or a Ninja, we’d love to have you!
+
+If you’re interested in contributing to WooCommerce we’ve got more than 350 contributors, and there’s always room for more. Head over to the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce) to find out how you can pitch in.
+
+Want to add a new language to WooCommerce? Swell! You can contribute through [Transifex](https://www.transifex.com/woothemes/woocommerce/).
+
+And, finally, consider joining or spearheading a WooCommerce Meetup locally, more about those [here](http://www.woothemes.com/woocommerce/meetups/).
 
 == Installation ==
 
