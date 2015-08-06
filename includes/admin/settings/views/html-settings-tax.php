@@ -127,31 +127,31 @@ wp_enqueue_script( 'wp-util' );
 	<tr class="new">
 		<td class="sort"></td>
 		<td class="country" width="8%">
-			<input type="text" placeholder="*" name="tax_rate_country[{{{ data.nameKey }}}]" class="wc_input_country_iso" />
+			<input type="text" placeholder="*" name="tax_rate_country[{{ data.nameKey }}]" class="wc_input_country_iso" />
 		</td>
 		<td class="state" width="8%">
 			<input type="text" placeholder="*" name="tax_rate_state[{{{ data.nameKey }}}" />
 		</td>
 		<td class="postcode">
-			<input type="text" placeholder="*" name="tax_rate_postcode[{{{ data.nameKey }}}]" />
+			<input type="text" placeholder="*" name="tax_rate_postcode[{{ data.nameKey }}]" />
 		</td>
 		<td class="city">
-			<input type="text" placeholder="*" name="tax_rate_city[{{{ data.nameKey }}}]" />
+			<input type="text" placeholder="*" name="tax_rate_city[{{ data.nameKey }}]" />
 		</td>
 		<td class="rate" width="8%">
-			<input type="number" step="any" min="0" placeholder="0" name="tax_rate[{{{ data.nameKey }}}]" />
+			<input type="number" step="any" min="0" placeholder="0" name="tax_rate[{{ data.nameKey }}]" />
 		</td>
 		<td class="name" width="8%">
-			<input type="text" name="tax_rate_name[{{{ data.nameKey }}}]" />
+			<input type="text" name="tax_rate_name[{{ data.nameKey }}]" />
 		</td>
 		<td class="priority" width="8%">
-			<input type="number" step="1" min="1" value="1" name="tax_rate_priority[{{{ data.nameKey }}}]" />
+			<input type="number" step="1" min="1" value="1" name="tax_rate_priority[{{ data.nameKey }}]" />
 		</td>
 		<td class="compound" width="8%">
-			<input type="checkbox" class="checkbox" name="tax_rate_compound[{{{ data.nameKey }}}]" />
+			<input type="checkbox" class="checkbox" name="tax_rate_compound[{{ data.nameKey }}]" />
 		</td>
 		<td class="apply_to_shipping" width="8%">
-			<input type="checkbox" class="checkbox" name="tax_rate_shipping[{{{ data.nameKey }}}]" checked="checked" />
+			<input type="checkbox" class="checkbox" name="tax_rate_shipping[{{ data.nameKey }}]" checked="checked" />
 		</td>
 	</tr>
 </script>
