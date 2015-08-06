@@ -194,7 +194,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			var $tbody = jQuery('.wc_tax_rates').find('tbody');
 			var size = $tbody.find('tr').size();
 			var code = '<tr class="new">\
-					<td class="sort">&nbsp;</td>\
+					<td class="sort"></td>\
 					<td class="country" width="8%">\
 						<input type="text" placeholder="*" name="tax_rate_country[new-' + size + ']" class="wc_input_country_iso" />\
 					</td>\
