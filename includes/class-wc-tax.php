@@ -854,7 +854,7 @@ class WC_Tax {
 	 * @return string[] Array of postcodes with wildcards
 	 */
 	private static function _get_wildcard_postcodes( $postcode ) {
-		$postcodes         = array( '*', strtoupper( $postcode ) );
+		$postcodes         = array( '*', strtoupper( $postcode ), strtoupper( $postcode ) . '*' );
 		$postcode_length   = strlen( $postcode );
 		$wildcard_postcode = strtoupper( $postcode );
 
