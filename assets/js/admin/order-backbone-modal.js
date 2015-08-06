@@ -59,7 +59,9 @@
 			this.render();
 		},
 		render: function() {
-			this.$el.attr( 'tabindex' , '0' ).append( $( this._target ).html() );
+			var template = wp.template( this._target );
+
+			this.$el.attr( 'tabindex' , '0' ).append( template );
 
 			$( document.body ).css({
 				'overflow': 'hidden'
