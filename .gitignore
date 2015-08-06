@@ -8,6 +8,9 @@ project.properties
 sftp-config.json
 .idea
 
+# Browser-sync
+bs-config.js
+
 # Grunt
 /node_modules/
 /deploy/
