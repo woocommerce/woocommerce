@@ -1,3 +1,4 @@
+/* global htmlSettingsTaxLocalizeScript */
 /**
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
  */
@@ -15,18 +16,19 @@
 
 	$('.wc_tax_rates .remove_tax_rates').click(function() {
 		if ( $tbody.find('tr.current').size() > 0 ) {
-			$current = $tbody.find('tr.current');
+			var $current = $tbody.find('tr.current');
 			$current.find('input').val('');
 			$current.find('input.remove_tax_rate').val('1');
 
 			$current.each(function(){
-				if ( $(this).is('.new') )
-					$(this).remove();
-				else
-					$(this).hide();
+				if ( $(this).is('.new') ) {
+					$( this ).remove();
+				} else {
+					$( this ).hide();
+				}
 			});
 		} else {
-			alert( data.strings.no_rows_selected );
+			window.alert( data.strings.no_rows_selected );
 		}
 		return false;
 	});
@@ -38,28 +40,25 @@
 		$('#rates tr:visible').each(function() {
 			var row = '';
 			$(this).find('td:not(.sort) input').each(function() {
+				var val = '';
 
 				if ( $(this).is('.checkbox') ) {
-
 					if ( $(this).is(':checked') ) {
 						val = 1;
 					} else {
 						val = 0;
 					}
-
 				} else {
-
-					var val = $(this).val();
-
-					if ( ! val )
-						val = $(this).attr('placeholder');
+					val = $(this).val();
+					if ( ! val ) {
+						val = $( this ).attr( 'placeholder' );
+					}
 				}
-
 				row = row + val + ',';
 			});
 			row = row + data.current_class;
 			//row.substring( 0, row.length - 1 );
-			csv_data = csv_data + row + "\n";
+			csv_data = csv_data + row + '\n';
 		});
 
 		$(this).attr( 'href', encodeURI( csv_data ) );
@@ -73,7 +72,7 @@
 			tax_rate_id       : 'new-' + size,
 			tax_rate_priority : 1,
 			tax_rate_shipping : 1,
-			new               : true
+			newRow            : true
 		} );
 
 		if ( $tbody.find('tr.current').size() > 0 ) {
@@ -82,13 +81,13 @@
 			$tbody.append( code );
 		}
 
-		$( "td.country input" ).autocomplete({
-			source: availableCountries,
+		$( 'td.country input' ).autocomplete({
+			source: data.countries,
 			minLength: 3
 		});
 
-		$( "td.state input" ).autocomplete({
-			source: availableStates,
+		$( 'td.state input' ).autocomplete({
+			source: data.states,
 			minLength: 3
 		});
 
@@ -99,12 +98,12 @@
 		$(this).attr( 'name', $(this).attr( 'data-name' ) );
 	});
 
-	$( "td.country input" ).autocomplete({
+	$( 'td.country input' ).autocomplete({
 		source: data.countries,
 		minLength: 3
 	});
 
-	$( "td.state input" ).autocomplete({
+	$( 'td.state input' ).autocomplete({
 		source: data.states,
 		minLength: 3
 	});

@@ -113,7 +113,7 @@ wp_enqueue_script( 'wc-settings-tax' );
 <script type="text/html" id="tmpl-wc-tax-table-row">
 	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>">
 		<td class="sort">
-			<# if ( ! data.new ) { #>
+			<# if ( ! data.newRow ) { #>
 				<input type="hidden" class="remove_tax_rate" name="remove_tax_rate[{{ data.tax_rate_id }}]" value="0" />
 			<# } #>
 		</td>
