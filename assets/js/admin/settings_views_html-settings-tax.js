@@ -3,7 +3,7 @@
  */
 
 (function($, data, wp){
-	var rowTemplate = wp.template( 'tax-table-row' ),
+	var rowTemplate = wp.template( 'wc-tax-table-row' ),
 		$ratesTbody = $('#rates');
 
 	$(function() {

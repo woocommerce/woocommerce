@@ -79,7 +79,7 @@ wp_enqueue_script( 'htmlSettingsTaxLocalizeScript' );
 	</tbody>
 </table>
 
-<script type="text/html" id="tmpl-tax-table-row">
+<script type="text/html" id="tmpl-wc-tax-table-row">
 	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>">
 		<td class="sort">
 			<# if ( ! data.new ) { #>
@@ -196,7 +196,7 @@ wp_enqueue_script( 'htmlSettingsTaxLocalizeScript' );
 		jQuery('.wc_tax_rates .insert').click(function() {
 			var $tbody = jQuery('.wc_tax_rates').find('tbody');
 			var size = $tbody.find('tr').size();
-			var code = wp.template( 'tax-table-row' )( {
+			var code = wp.template( 'wc-tax-table-row' )( {
 					tax_rate_id       : 'new-' + size,
 					tax_rate_priority : 1,
 					tax_rate_shipping : 1,
