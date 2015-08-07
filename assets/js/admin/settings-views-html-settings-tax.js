@@ -33,6 +33,11 @@
 				source: data.states,
 				minLength: 3
 			});
+
+			// Postcode and city don't have `name` values by default. They're only created if the contents changes, to save on database queries (I think)
+			$tbody.find( 'td.postcode input, td.city input').change(function() {
+				$(this).attr( 'name', $(this).data( 'name' ) );
+			});
 		}
 
 		renderTableContents( data.rates );
@@ -123,13 +128,6 @@
 			});
 
 			return false;
-		});
-
-		/**
-		 * Postcode and city don't have `name` values by default. They're only created if the contents changes, to save on database queries (I think)
-		 */
-		$('.wc_tax_rates td.postcode, .wc_tax_rates td.city').find('input').change(function() {
-			$(this).attr( 'name', $(this).attr( 'data-name' ) );
 		});
 
 	});
