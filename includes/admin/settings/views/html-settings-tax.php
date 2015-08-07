@@ -64,6 +64,7 @@ wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 wp_enqueue_script( 'wc-settings-tax' );
 
 ?>
+
 <h3><?php printf( __( 'Tax Rates for the "%s" Class', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 <p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available alpha-2 country codes.', 'woocommerce' ), 'http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes' ); ?></p>
 <table class="wc_tax_rates wc_input_table sortable widefat">
