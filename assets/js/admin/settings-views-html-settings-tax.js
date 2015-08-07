@@ -84,6 +84,9 @@
 			event.preventDefault();
 			renderPage( $( event.currentTarget ).data('goto') );
 		} );
+		$pagination.on( 'change', 'input', function(event) {
+			renderPage( $( event.currentTarget ).val() );
+		} );
 
 		$('.wc_tax_rates .remove_tax_rates').click(function() {
 			if ( $tbody.find('tr.current').length > 0 ) {
