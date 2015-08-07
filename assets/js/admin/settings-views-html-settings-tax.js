@@ -34,7 +34,6 @@
 	});
 
 	$('.wc_tax_rates .export').click(function() {
-
 		var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
 
 		$('#rates tr:visible').each(function() {
