@@ -106,9 +106,71 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function output_tax_rates() {
 		global $wpdb;
 
-		$page          = ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1;
-		$limit         = 100;
 		$current_class = $this->get_current_tax_class();
+
+		// Get all the rates and locations. Snagging all at once should significantly cut down on the number of queries.
+		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $current_class ) ) );
+		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
+
+		// Set the rates keys equal to their ids.
+		$rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
+
+		// Drop the locations into the rates array.
+		foreach ( $locations as $location ) {
+			// Don't set them for unexistent rates.
+			if ( ! isset( $rates[ $location->tax_rate_id ] ) ) {
+				continue;
+			}
+			// If the rate exists, initialize the array before appending to it.
+			if ( ! isset( $rates[ $location->tax_rate_id ]->{$location->location_type} ) ) {
+				$rates[ $location->tax_rate_id ]->{$location->location_type} = array();
+			}
+			$rates[ $location->tax_rate_id ]->{$location->location_type}[] = $location->location_code;
+		}
+
+		$countries = array();
+		foreach ( WC()->countries->get_allowed_countries() as $value => $label ) {
+			$countries[] = array(
+				'label' => $label,
+				'value' => $value,
+			);
+		}
+
+		$states = array();
+		foreach ( WC()->countries->get_allowed_country_states() as $label ) {
+			foreach ( $label as $code => $state ) {
+				$states[] = array(
+					'label' => $state,
+					'value' => $code,
+				);
+			}
+		}
+
+		// Localize and enqueue our js.
+		wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
+			'current_class' => $current_class,
+			'rates'         => array_values( $rates ),
+			'page'          => ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1,
+			'limit'         => 100,
+			'countries'     => $countries,
+			'states'        => $states,
+			'strings'       => array(
+				'no_rows_selected' => __( 'No row(s) selected', 'woocommerce' ),
+				'csv_data_cols' => array(
+					__( 'Country Code', 'woocommerce' ),
+					__( 'State Code', 'woocommerce' ),
+					__( 'ZIP/Postcode', 'woocommerce' ),
+					__( 'City', 'woocommerce' ),
+					__( 'Rate %', 'woocommerce' ),
+					__( 'Tax Name', 'woocommerce' ),
+					__( 'Priority', 'woocommerce' ),
+					__( 'Compound', 'woocommerce' ),
+					__( 'Shipping', 'woocommerce' ),
+					__( 'Tax Class', 'woocommerce' ),
+				),
+			),
+		) );
+		wp_enqueue_script( 'wc-settings-tax' );
 
 		include( 'views/html-settings-tax.php' );
 	}
