@@ -13,18 +13,18 @@
 		} );
 	});
 
-	jQuery('.wc_tax_rates .remove_tax_rates').click(function() {
-		var $tbody = jQuery('.wc_tax_rates').find('tbody');
+	$('.wc_tax_rates .remove_tax_rates').click(function() {
+		var $tbody = $('.wc_tax_rates').find('tbody');
 		if ( $tbody.find('tr.current').size() > 0 ) {
 			$current = $tbody.find('tr.current');
 			$current.find('input').val('');
 			$current.find('input.remove_tax_rate').val('1');
 
 			$current.each(function(){
-				if ( jQuery(this).is('.new') )
-					jQuery(this).remove();
+				if ( $(this).is('.new') )
+					$(this).remove();
 				else
-					jQuery(this).hide();
+					$(this).hide();
 			});
 		} else {
 			alert( data.strings.no_rows_selected );
@@ -32,17 +32,17 @@
 		return false;
 	});
 
-	jQuery('.wc_tax_rates .export').click(function() {
+	$('.wc_tax_rates .export').click(function() {
 
 		var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
 
-		jQuery('#rates tr:visible').each(function() {
+		$('#rates tr:visible').each(function() {
 			var row = '';
-			jQuery(this).find('td:not(.sort) input').each(function() {
+			$(this).find('td:not(.sort) input').each(function() {
 
-				if ( jQuery(this).is('.checkbox') ) {
+				if ( $(this).is('.checkbox') ) {
 
-					if ( jQuery(this).is(':checked') ) {
+					if ( $(this).is(':checked') ) {
 						val = 1;
 					} else {
 						val = 0;
@@ -50,10 +50,10 @@
 
 				} else {
 
-					var val = jQuery(this).val();
+					var val = $(this).val();
 
 					if ( ! val )
-						val = jQuery(this).attr('placeholder');
+						val = $(this).attr('placeholder');
 				}
 
 				row = row + val + ',';
@@ -63,13 +63,13 @@
 			csv_data = csv_data + row + "\n";
 		});
 
-		jQuery(this).attr( 'href', encodeURI( csv_data ) );
+		$(this).attr( 'href', encodeURI( csv_data ) );
 
 		return true;
 	});
 
-	jQuery('.wc_tax_rates .insert').click(function() {
-		var $tbody = jQuery('.wc_tax_rates').find('tbody');
+	$('.wc_tax_rates .insert').click(function() {
+		var $tbody = $('.wc_tax_rates').find('tbody');
 		var size = $tbody.find('tr').size();
 		var code = wp.template( 'wc-tax-table-row' )( {
 			tax_rate_id       : 'new-' + size,
@@ -84,12 +84,12 @@
 			$tbody.append( code );
 		}
 
-		jQuery( "td.country input" ).autocomplete({
+		$( "td.country input" ).autocomplete({
 			source: availableCountries,
 			minLength: 3
 		});
 
-		jQuery( "td.state input" ).autocomplete({
+		$( "td.state input" ).autocomplete({
 			source: availableStates,
 			minLength: 3
 		});
@@ -97,16 +97,16 @@
 		return false;
 	});
 
-	jQuery('.wc_tax_rates td.postcode, .wc_tax_rates td.city').find('input').change(function() {
-		jQuery(this).attr( 'name', jQuery(this).attr( 'data-name' ) );
+	$('.wc_tax_rates td.postcode, .wc_tax_rates td.city').find('input').change(function() {
+		$(this).attr( 'name', $(this).attr( 'data-name' ) );
 	});
 
-	jQuery( "td.country input" ).autocomplete({
+	$( "td.country input" ).autocomplete({
 		source: data.countries,
 		minLength: 3
 	});
 
-	jQuery( "td.state input" ).autocomplete({
+	$( "td.state input" ).autocomplete({
 		source: data.states,
 		minLength: 3
 	});
