@@ -194,8 +194,9 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 		}
 
 		$search = '';
+
 		if ( ! empty( $_REQUEST['s'] ) ) {
-			$search = "AND description LIKE '" . $wpdb->esc_like( $_REQUEST['s'] ) . "'";
+			$search = "AND description LIKE '" . $wpdb->esc_like( esc_sql( wc_clean( $_REQUEST['s'] ) ) ) . "'";
 		}
 
 		// Get the API keys
