@@ -46,6 +46,7 @@ wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 	'countries'     => $countries,
 	'states'        => $states,
 	'strings'       => array(
+		'no_rows_selected' => __( 'No row(s) selected', 'woocommerce' ),
 		'csv_data_cols' => array(
 			__( 'Country Code', 'woocommerce' ),
 			__( 'State Code', 'woocommerce' ),
