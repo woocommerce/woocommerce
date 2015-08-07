@@ -40,8 +40,19 @@
 			});
 		}
 
-		renderTableContents( data.rates );
+		/**
+		 * Handle the initial display.
+		 */
+		if ( data.rates.length <= data.limit ) {
+			renderTableContents( data.rates );
+		} else {
+			var first_index = data.limit * ( data.page - 1),
+				last_index  = data.limit * data.page;
 
+			renderTableContents( data.rates.slice( first_index, last_index ) );
+
+			// We've now displayed our initial page, time to render the pagination box.
+		}
 
 		$('.wc_tax_rates .remove_tax_rates').click(function() {
 			if ( $tbody.find('tr.current').length > 0 ) {
