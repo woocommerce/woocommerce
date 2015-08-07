@@ -26,8 +26,20 @@ wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 	'page'          => $page,
 	'limit'         => $limit,
 	'strings'       => array(
-
+		'csv_data_cols' => array(
+			__( 'Country Code', 'woocommerce' ),
+			__( 'State Code', 'woocommerce' ),
+			__( 'ZIP/Postcode', 'woocommerce' ),
+			__( 'City', 'woocommerce' ),
+			__( 'Rate %', 'woocommerce' ),
+			__( 'Tax Name', 'woocommerce' ),
+			__( 'Priority', 'woocommerce' ),
+			__( 'Compound', 'woocommerce' ),
+			__( 'Shipping', 'woocommerce' ),
+			__( 'Tax Class', 'woocommerce' ),
+		),
 	),
+
 ) );
 wp_enqueue_script( 'wc-settings-tax' );
 

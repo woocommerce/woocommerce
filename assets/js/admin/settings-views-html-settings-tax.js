@@ -34,18 +34,7 @@
 
 	jQuery('.wc_tax_rates .export').click(function() {
 
-		var csv_data = "data:application/csv;charset=utf-8,<?php echo esc_js( implode( ',', array(
-		__( 'Country Code', 'woocommerce' ),
-			__( 'State Code', 'woocommerce' ),
-			__( 'ZIP/Postcode', 'woocommerce' ),
-			__( 'City', 'woocommerce' ),
-			__( 'Rate %', 'woocommerce' ),
-			__( 'Tax Name', 'woocommerce' ),
-			__( 'Priority', 'woocommerce' ),
-			__( 'Compound', 'woocommerce' ),
-			__( 'Shipping', 'woocommerce' ),
-			__( 'Tax Class', 'woocommerce' ),
-		) ) ); ?>\n";
+		var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
 
 		jQuery('#rates tr:visible').each(function() {
 			var row = '';
