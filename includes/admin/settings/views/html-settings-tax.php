@@ -19,12 +19,32 @@ foreach ( $locations as $location ) {
 	$rates[ $location->tax_rate_id ]->{$location->location_type}[] = $location->location_code;
 }
 
+$countries = array();
+foreach ( WC()->countries->get_allowed_countries() as $value => $label ) {
+	$countries[] = array(
+		'label' => $label,
+		'value' => $value,
+	);
+}
+
+$states = array();
+foreach ( WC()->countries->get_allowed_country_states() as $label ) {
+	foreach ( $label as $code => $state ) {
+		$states[] = array(
+			'label' => $state,
+			'value' => $code,
+		);
+	}
+}
+
 // Localize and enqueue our js.
 wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 	'current_class' => $current_class,
 	'rates'         => $rates,
 	'page'          => $page,
 	'limit'         => $limit,
+	'countries'     => $countries,
+	'states'        => $states,
 	'strings'       => array(
 		'csv_data_cols' => array(
 			__( 'Country Code', 'woocommerce' ),
