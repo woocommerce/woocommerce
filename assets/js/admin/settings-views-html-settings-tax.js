@@ -27,7 +27,7 @@
 					jQuery(this).hide();
 			});
 		} else {
-			alert('<?php echo esc_js( __( 'No row(s) selected', 'woocommerce' ) ); ?>');
+			alert( data.strings.no_rows_selected );
 		}
 		return false;
 	});
