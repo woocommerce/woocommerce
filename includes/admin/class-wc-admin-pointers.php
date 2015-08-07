@@ -2,10 +2,10 @@
 /**
  * Adds and controls pointers for contextual help/tutorials.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.4.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -89,7 +89,7 @@ class WC_Admin_Pointers {
 					'options'  => array(
 						'content'  => 	'<h3>' . esc_html__( 'Choose Product Type', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Choose a type for this product. Simple is suitable for most physical goods and services (we recommend setting up a simple product for now).', 'woocommerce' ) . '</p>' .
-										'<p>' . esc_html__( 'Variable is for more complex products such as t-shirts with multiple sizes', 'woocommerce' ) . '</p>' .
+										'<p>' . esc_html__( 'Variable is for more complex products such as t-shirts with multiple sizes.', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Grouped products are for grouping several simple products into one.', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Finally, external products are for linking off-site.', 'woocommerce' ) . '</p>',
 						'position' => array(
