@@ -20,8 +20,7 @@ foreach ( $locations as $location ) {
 }
 
 // Localize and enqueue our js.
-wp_register_script( 'htmlSettingsTaxLocalizeScript', WC()->plugin_url() . '/assets/js/admin/settings_views_html-settings-tax.js', array( 'jquery', 'wp-util' ), WC_VERSION );
-wp_localize_script( 'htmlSettingsTaxLocalizeScript', 'htmlSettingsTaxLocalizeScript', array(
+wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 	'current_class' => $current_class,
 	'rates'         => $rates,
 	'page'          => $page,
@@ -30,7 +29,7 @@ wp_localize_script( 'htmlSettingsTaxLocalizeScript', 'htmlSettingsTaxLocalizeScr
 
 	),
 ) );
-wp_enqueue_script( 'htmlSettingsTaxLocalizeScript' );
+wp_enqueue_script( 'wc-settings-tax' );
 
 ?>
 <h3><?php printf( __( 'Tax Rates for the "%s" Class', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
