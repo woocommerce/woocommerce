@@ -1126,15 +1126,9 @@ abstract class WC_Abstract_Order {
 			$type = array( $type );
 		}
 
-		$line_items = $wpdb->get_results( $wpdb->prepare( "
-			SELECT      order_item_id, order_item_name, order_item_type
-			FROM        {$wpdb->prefix}woocommerce_order_items
-			WHERE       order_id = %d
-			AND         order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', $type ) ) . "' )
-			ORDER BY    order_item_id
-		", $this->id ) );
-
-		$items = array();
+		$get_items_sql  = $wpdb->prepare( "SELECT order_item_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->id );
+		$get_items_sql .= "AND order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', $type ) ) . "' ) ORDER BY order_item_id;";
+		$line_items     = $wpdb->get_results( $get_items_sql );
 
 		// Loop items
 		foreach ( $line_items as $item ) {
