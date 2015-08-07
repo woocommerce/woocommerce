@@ -7,6 +7,7 @@
 	$(function() {
 
 		var rowTemplate = wp.template( 'wc-tax-table-row' ),
+			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
 			$tbody = $('#rates');
 
 		/**
@@ -52,6 +53,11 @@
 			renderTableContents( data.rates.slice( first_index, last_index ) );
 
 			// We've now displayed our initial page, time to render the pagination box.
+			$('#rates-pagination' ).html( paginationTemplate( {
+				qty_rates    : data.rates.length,
+				current_page : data.page,
+				qty_pages    : Math.ceil( data.rates.length / data.limit )
+			} ) );
 		}
 
 		$('.wc_tax_rates .remove_tax_rates').click(function() {
