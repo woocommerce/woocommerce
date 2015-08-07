@@ -12,6 +12,18 @@
 		$.each( data.rates, function ( id, rowData ) {
 			$tbody.append( rowTemplate( rowData ) );
 		} );
+
+		// Initialize autocomplete for countries.
+		$tbody.find( 'td.country input' ).autocomplete({
+			source: data.countries,
+			minLength: 3
+		});
+
+		// Initialize autocomplete for states.
+		$tbody.find( 'td.state input' ).autocomplete({
+			source: data.states,
+			minLength: 3
+		});
 	});
 
 	$('.wc_tax_rates .remove_tax_rates').click(function() {
@@ -97,13 +109,4 @@
 		$(this).attr( 'name', $(this).attr( 'data-name' ) );
 	});
 
-	$( 'td.country input' ).autocomplete({
-		source: data.countries,
-		minLength: 3
-	});
-
-	$( 'td.state input' ).autocomplete({
-		source: data.states,
-		minLength: 3
-	});
 })(jQuery, htmlSettingsTaxLocalizeScript, wp);
