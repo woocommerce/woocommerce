@@ -59,7 +59,6 @@ wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 			__( 'Tax Class', 'woocommerce' ),
 		),
 	),
-
 ) );
 wp_enqueue_script( 'wc-settings-tax' );
 
