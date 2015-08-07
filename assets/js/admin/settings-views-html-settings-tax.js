@@ -14,7 +14,6 @@
 	});
 
 	$('.wc_tax_rates .remove_tax_rates').click(function() {
-		var $tbody = $('.wc_tax_rates').find('tbody');
 		if ( $tbody.find('tr.current').size() > 0 ) {
 			$current = $tbody.find('tr.current');
 			$current.find('input').val('');
@@ -69,7 +68,6 @@
 	});
 
 	$('.wc_tax_rates .insert').click(function() {
-		var $tbody = $('.wc_tax_rates').find('tbody');
 		var size = $tbody.find('tr').size();
 		var code = wp.template( 'wc-tax-table-row' )( {
 			tax_rate_id       : 'new-' + size,
