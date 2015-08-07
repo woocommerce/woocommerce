@@ -262,50 +262,46 @@ class WC_Tax {
 	private static function get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes ) {
 		global $wpdb;
 
-		$valid_postcodes = array_map( 'esc_sql', $valid_postcodes );
-		$found_rates = $wpdb->get_results(
-			$wpdb->prepare( "
-				SELECT tax_rates.*
-				FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
-				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
-				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
-				WHERE tax_rate_country IN ( %s, '' )
-				AND tax_rate_state IN ( %s, '' )
-				AND tax_rate_class = %s
-				AND (
-					locations.location_type IS NULL
-					OR (
-						locations.location_type = 'postcode'
-						AND locations.location_code IN ('" . implode( "','", $valid_postcodes ) . "')
-						AND (
-							locations2.location_type = 'city' AND locations2.location_code = %s
-							OR 0 = (
-								SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
-								WHERE sublocations.location_type = 'city'
-								AND sublocations.tax_rate_id = tax_rates.tax_rate_id
-							)
+		$valid_postcodes = array_map( 'esc_sql', array_map( 'wc_clean', $valid_postcodes ) );
+		$match_country   = esc_sql( strtoupper( wc_clean( $country ) ) );
+		$match_state     = esc_sql( strtoupper( wc_clean( $state ) ) );
+		$match_tax_class = esc_sql( sanitize_title( $tax_class ) );
+		$match_city      = esc_sql( strtoupper( wc_clean( $city ) ) );
+		$found_rates     = $wpdb->get_results( "
+			SELECT tax_rates.*
+			FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
+			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
+			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
+			WHERE tax_rate_country IN ( '{$match_country}', '' )
+			AND tax_rate_state IN ( '{$match_state}', '' )
+			AND tax_rate_class = '{$match_tax_class}'
+			AND (
+				locations.location_type IS NULL
+				OR (
+					locations.location_type = 'postcode'
+					AND locations.location_code IN ('" . implode( "','", $valid_postcodes ) . "')
+					AND (
+						locations2.location_type = 'city' AND locations2.location_code = '{$match_city}'
+						OR 0 = (
+							SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
+							WHERE sublocations.location_type = 'city'
+							AND sublocations.tax_rate_id = tax_rates.tax_rate_id
 						)
 					)
-					OR (
-						locations.location_type = 'city'
-						AND locations.location_code = %s
-						AND 0 = (
-								SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
-								WHERE sublocations.location_type = 'postcode'
-								AND sublocations.tax_rate_id = tax_rates.tax_rate_id
-							)
-					)
 				)
-				GROUP BY tax_rate_id
-				ORDER BY tax_rate_priority, tax_rate_order
-				",
-				strtoupper( $country ),
-				strtoupper( $state ),
-				sanitize_title( $tax_class ),
-				strtoupper( $city ),
-				strtoupper( $city )
+				OR (
+					locations.location_type = 'city'
+					AND locations.location_code = '{$match_city}'
+					AND 0 = (
+							SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
+							WHERE sublocations.location_type = 'postcode'
+							AND sublocations.tax_rate_id = tax_rates.tax_rate_id
+						)
+				)
 			)
-		);
+			GROUP BY tax_rate_id
+			ORDER BY tax_rate_priority, tax_rate_order
+		" );
 
 		$matched_tax_rates = array();
 		$found_priority    = array();

@@ -236,14 +236,15 @@ class WC_Admin_Duplicate_Product {
 	private function duplicate_post_meta( $id, $new_id ) {
 		global $wpdb;
 
+		$sql     = $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id = %d", absint( $id ) );
 		$exclude = array_map( 'esc_sql', array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array( 'total_sales' ) ) ) );
 
 		if ( sizeof( $exclude ) ) {
-			$post_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d AND meta_key NOT IN ( '" . implode( "','", $exclude ) . "' );", absint( $id ) ) );
-		} else {
-			$post_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d;", absint( $id ) ) );
+			$sql .= " AND meta_key NOT IN ( '" . implode( "','", $exclude ) . "' )";
 		}
 
+		$post_meta = $wpdb->get_results( $sql );
+		
 		if ( sizeof( $post_meta ) ) {
 			$sql_query_sel = array();
 			$sql_query     = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";
