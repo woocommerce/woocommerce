@@ -15,7 +15,7 @@
 	});
 
 	$('.wc_tax_rates .remove_tax_rates').click(function() {
-		if ( $tbody.find('tr.current').size() > 0 ) {
+		if ( $tbody.find('tr.current').length > 0 ) {
 			var $current = $tbody.find('tr.current');
 			$current.find('input').val('');
 			$current.find('input.remove_tax_rate').val('1');
@@ -67,7 +67,7 @@
 	});
 
 	$('.wc_tax_rates .insert').click(function() {
-		var size = $tbody.find('tr').size();
+		var size = $tbody.find('tr').length;
 		var code = wp.template( 'wc-tax-table-row' )( {
 			tax_rate_id       : 'new-' + size,
 			tax_rate_priority : 1,
@@ -75,7 +75,7 @@
 			newRow            : true
 		} );
 
-		if ( $tbody.find('tr.current').size() > 0 ) {
+		if ( $tbody.find('tr.current').length > 0 ) {
 			$tbody.find('tr.current').after( code );
 		} else {
 			$tbody.append( code );
