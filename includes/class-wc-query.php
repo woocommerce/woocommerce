@@ -861,17 +861,17 @@ class WC_Query {
 					$min_class = $min - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $min, $tax_rates ) );
 					$max_class = $max - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $max, $tax_rates ) );
 
-					$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( '
-						SELECT DISTINCT ID, post_parent, post_type FROM %1$s
-						INNER JOIN %2$s pm1 ON ID = pm1.post_id
-						INNER JOIN %2$s pm2 ON ID = pm2.post_id
-						WHERE post_type IN ( "product", "product_variation" )
-						AND post_status = "publish"
-						AND pm1.meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) . '")
-						AND pm1.meta_value BETWEEN %3$d AND %4$d
-						AND pm2.meta_key = "_tax_class"
-						AND pm2.meta_value = "%5$s"
-					', $wpdb->posts, $wpdb->postmeta, $min_class, $max_class, sanitize_title( $tax_class ) ), OBJECT_K ), $min_class, $max_class );
+					$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( "
+						SELECT DISTINCT ID, post_parent, post_type FROM {$wpdb->posts}
+						INNER JOIN {$wpdb->postmeta} pm1 ON ID = pm1.post_id
+						INNER JOIN {$wpdb->postmeta} pm2 ON ID = pm2.post_id
+						WHERE post_type IN ( 'product', 'product_variation' )
+						AND post_status = 'publish'
+						AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
+						AND pm1.meta_value BETWEEN %d AND %d
+						AND pm2.meta_key = '_tax_class'
+						AND pm2.meta_value = %s
+					", $min_class, $max_class, sanitize_title( $tax_class ) ), OBJECT_K ), $min_class, $max_class );
 
 					if ( $matched_products_query ) {
 						foreach ( $matched_products_query as $product ) {
@@ -885,14 +885,14 @@ class WC_Query {
 					}
 				}
 			} else {
-				$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( '
-					SELECT DISTINCT ID, post_parent, post_type FROM %1$s
-					INNER JOIN %2$s pm1 ON ID = post_id
-					WHERE post_type IN ( "product", "product_variation" )
-					AND post_status = "publish"
-					AND pm1.meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) . '")
-					AND pm1.meta_value BETWEEN %3$d AND %4$d
-				', $wpdb->posts, $wpdb->postmeta, $min, $max, $tax_class ), OBJECT_K ), $min, $max );
+				$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( "
+					SELECT DISTINCT ID, post_parent, post_type FROM {$wpdb->posts}
+					INNER JOIN {$wpdb->postmeta} pm1 ON ID = pm1.post_id
+					WHERE post_type IN ( 'product', 'product_variation' )
+					AND post_status = 'publish'
+					AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
+					AND pm1.meta_value BETWEEN %d AND %d
+				", $min, $max ), OBJECT_K ), $min, $max );
 
 				if ( $matched_products_query ) {
 					foreach ( $matched_products_query as $product ) {

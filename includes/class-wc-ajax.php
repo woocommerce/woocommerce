@@ -2075,13 +2075,13 @@ class WC_AJAX {
 		$nextid  = isset( $_POST['nextid'] ) ? $_POST['nextid'] : false;
 		$new_pos = array(); // store new positions for ajax
 
-		$siblings = $wpdb->get_results( $wpdb->prepare('
-			SELECT ID, menu_order FROM %1$s AS posts
-			WHERE 	posts.post_type 	= \'product\'
-			AND 	posts.post_status 	IN ( \'publish\', \'pending\', \'draft\', \'future\', \'private\' )
-			AND 	posts.ID			NOT IN (%2$d)
+		$siblings = $wpdb->get_results( $wpdb->prepare( "
+			SELECT ID, menu_order FROM {$wpdb->posts} AS posts
+			WHERE 	posts.post_type 	= 'product'
+			AND 	posts.post_status 	IN ( 'publish', 'pending', 'draft', 'future', 'private' )
+			AND 	posts.ID			NOT IN (%d)
 			ORDER BY posts.menu_order ASC, posts.ID DESC
-		', $wpdb->posts, $post->ID) );
+		", $post->ID ) );
 
 		$menu_order = 0;
 
