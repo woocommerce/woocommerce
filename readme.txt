@@ -38,9 +38,9 @@ Payment Gateways and Shipping Methods are important to any store - WooCommerce c
 
 = Premium Extensions =
 
-Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a [plethora of eCommerce extensions available to provide just that](http://www.woothemes.com/extensions/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
+Need a specific payment gateway? Perhaps additional shipping methods? WooCommerce has a [plethora of eCommerce extensions available to provide just that](http://www.woothemes.com/product-category/woocommerce-extensions/ "eCommerce extensions for WooCommerce from WooThemes").
 
-Some of our popular extensions include **[Product Addons](http://www.woothemes.com/extension/product-addons/)**, **[Table rate shipping](http://www.woothemes.com/extension/table-rate-shipping/)**, **[Product CSV Import Suite](http://www.woothemes.com/extension/product-csv-import-suite/)**, **[WooCommerce Subscriptions](http://www.woothemes.com/products/woocommerce-subscriptions/)**, **[Dynamic Pricing](http://www.woothemes.com/extension/dynamic-pricing/)** and [Bookings](http://www.woothemes.com/products/woocommerce-bookings/).
+Some of our popular extensions include **[Product Addons](http://www.woothemes.com/products/product-add-ons/)**, **[Table rate shipping](http://www.woothemes.com/products/table-rate-shipping/)**, **[Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)**, **[WooCommerce Subscriptions](http://www.woothemes.com/products/woocommerce-subscriptions/)**, **[Dynamic Pricing](http://www.woothemes.com/products/dynamic-pricing/)** and [Bookings](http://www.woothemes.com/products/woocommerce-bookings/).
 
 Want to see more?
 
