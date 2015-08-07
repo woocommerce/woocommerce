@@ -91,7 +91,7 @@ foreach ( $api_users as $_user ) {
 	$user = get_userdata( $_user->user_id );
 	$apps_keys[] = array(
 		'user_id'         => $user->ID,
-		'permission'      => $user->woocommerce_api_key_permissions,
+		'permissions'     => $user->woocommerce_api_key_permissions,
 		'consumer_key'    => wc_api_hash( $user->woocommerce_api_consumer_key ),
 		'consumer_secret' => $user->woocommerce_api_consumer_secret,
 		'truncated_key'   => substr( $user->woocommerce_api_consumer_secret, -7 )
