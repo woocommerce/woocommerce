@@ -166,3 +166,39 @@ wp_enqueue_script( 'wc-settings-tax' );
 		</td>
 	</tr>
 </script>
+
+<script type="text/html" id="tmpl-wc-tax-table-pagination">
+<div class="tablenav">
+	<div class="tablenav-pages">
+		<span class="displaying-num"><?php printf( _x( '%s items', '%s will be a number eventually, but must be a string for now.', 'woocommerce' ), '{{ data.qty_rates }}' ); ?></span>
+		<span class="pagination-links">
+
+			<a class="tablenav-pages-navspan">
+				<span class="screen-reader-text"><?php esc_html_e( 'First page', 'woocommerce' ); ?></span>
+				<span aria-hidden="true">&laquo;</span>
+			</a>
+			<a class="tablenav-pages-navspan">
+				<span class="screen-reader-text"><?php esc_html_e( 'Previous page', 'woocommerce' ); ?></span>
+				<span aria-hidden="true">&lsaquo;</span>
+			</a>
+
+			<span class="paging-input">
+				<label for="current-page-selector" class="screen-reader-text"><?php esc_html_e( 'Current Page', 'woocommerce' ); ?></label>
+				<?php printf( esc_html_x( '%1$s of %2$s', 'Pagination, like `1 of 3`', 'woocommerce' ),
+								'<input class="current-page" id="current-page-selector" type="text" name="paged" value="{{ data.current_page }}" size="<# print( data.qty_pages.toString().length ) #>" aria-describedby="table-paging">',
+								'<span class="total-pages">{{ data.qty_pages }}</span>' ); ?>
+			</span>
+
+			<a class="tablenav-pages-navspan">
+				<span class="screen-reader-text"><?php esc_html_e( 'Next page', 'woocommerce' ); ?></span>
+				<span aria-hidden="true">&rsaquo;</span>
+			</a>
+			<a class="tablenav-pages-navspan">
+				<span class="screen-reader-text"><?php esc_html_e( 'Last page', 'woocommerce' ); ?></span>
+				<span aria-hidden="true">&raquo;</span>
+			</a>
+
+		</span>
+	</div>
+</div>
+</script>
