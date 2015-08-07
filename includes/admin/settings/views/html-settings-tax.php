@@ -99,21 +99,6 @@ wp_enqueue_script( 'wc-settings-tax' );
 			<th colspan="10">
 				<a href="#" class="button plus insert"><?php _e( 'Insert row', 'woocommerce' ); ?></a>
 				<a href="#" class="button minus remove_tax_rates"><?php _e( 'Remove selected row(s)', 'woocommerce' ); ?></a>
-				<div class="pagination">
-					<?php
-					echo str_replace( 'page-numbers', 'page-numbers button', paginate_links( array(
-						'base'      => esc_url_raw( add_query_arg( 'p', '%#%', remove_query_arg( 'p' ) ) ),
-						'format'    => '',
-						'add_args'  => '',
-						'type'      => 'plain',
-						'prev_text' => '&laquo;',
-						'next_text' => '&raquo;',
-						'current'   => $page,
-						'total'     => ceil( absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", sanitize_title( $current_class ) ) ) ) / $limit )
-					) ) );
-					?>
-				</div>
-
 				<a href="#" download="tax_rates.csv" class="button export"><?php _e( 'Export CSV', 'woocommerce' ); ?></a>
 				<a href="<?php echo admin_url( 'admin.php?import=woocommerce_tax_rate_csv' ); ?>" class="button import"><?php _e( 'Import CSV', 'woocommerce' ); ?></a>
 			</th>
