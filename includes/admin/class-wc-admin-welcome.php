@@ -235,7 +235,7 @@ class WC_Admin_Welcome {
 				<div class="feature-section col three-col">
 					<div>
 						<h4><?php _e( 'Geolocation with Caching', 'woocommerce' ); ?></h4>
-						<p><?php printf( __( 'If you use static caching you may have found geolocation did not work for non-logged in customers. We have now introduced a new javascript based Geocaching solution to help. Enable this in the %ssettings%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '">', '</a>' ); ?></p>
+						<p><?php printf( __( 'If you use static caching you may have found geolocation did not work for non-logged-in customers. We have now introduced a new javascript based Geocaching solution to help. Enable this in the %ssettings%s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '">', '</a>' ); ?></p>
 					</div>
 					<div>
 						<h4><?php _e( 'Onboarding Experience', 'woocommerce' ); ?></h4>
@@ -249,7 +249,7 @@ class WC_Admin_Welcome {
 				<div class="feature-section last-feature-section col three-col">
 					<div>
 						<h4><?php _e( 'Visual API Authentication', 'woocommerce' ); ?></h4>
-						<p><?php _e( 'Services which integrate with the REST API can now use the visual authentication endpoint so a user can login and grant API permission from a single page before being redirected back.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'Services which integrate with the REST API can now use the visual authentication endpoint so a user can log in and grant API permission from a single page before being redirected back.', 'woocommerce' ); ?></p>
 					</div>
 					<div>
 						<h4><?php _e( 'Email Notification Improvements', 'woocommerce' ); ?></h4>
