@@ -13,6 +13,11 @@ $rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
 
 // Drop the locations into the rates array.
 foreach ( $locations as $location ) {
+	// Don't set them for unexistent rates.
+	if ( ! isset( $rates[ $location->tax_rate_id ] ) ) {
+		continue;
+	}
+	// If the rate exists, initialize the array before appending to it.
 	if ( ! isset( $rates[ $location->tax_rate_id ]->{$location->location_type} ) ) {
 		$rates[ $location->tax_rate_id ]->{$location->location_type} = array();
 	}
