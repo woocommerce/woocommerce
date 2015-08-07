@@ -115,7 +115,7 @@ class WC_Auth {
 				$permissions[] = __( 'View and manage products', 'woocommerce' );
 			break;
 		}
-		return $permissions;
+		return apply_filters( 'woocommerce_api_permissions_in_scope', $permissions, $scope );
 	}
 
 	/**
