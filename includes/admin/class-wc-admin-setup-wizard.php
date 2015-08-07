@@ -202,8 +202,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_introduction() {
 		?>
-		<h1><?php _e( 'Welcome to the world of WooCommerce!
-', 'woocommerce' ); ?></h1>
+		<h1><?php _e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Thank you for choosing WooCommerce to power your online store! This quick setup wizard will help you configure the basic settings. <strong>It’s completely optional and shouldn’t take longer than five minutes.</strong>', 'woocommerce' ); ?></p>
 		<p><?php _e( 'No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard. Come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
