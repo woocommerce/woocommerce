@@ -9,25 +9,34 @@
 		var rowTemplate = wp.template( 'wc-tax-table-row' ),
 			$tbody = $('#rates');
 
-		// Blank out the contents.
-		$tbody.innerHTML = '';
+		/**
+		 * Build the table contents.
+		 * @param rates
+		 */
+		function renderTableContents( rates ) {
+			// Blank out the contents.
+			$tbody.empty();
 
-		// Populate $tbody with the current page of results.
-		$.each( data.rates, function ( id, rowData ) {
-			$tbody.append( rowTemplate( rowData ) );
-		} );
+			// Populate $tbody with the current page of results.
+			$.each( rates, function ( id, rowData ) {
+				$tbody.append( rowTemplate( rowData ) );
+			} );
 
-		// Initialize autocomplete for countries.
-		$tbody.find( 'td.country input' ).autocomplete({
-			source: data.countries,
-			minLength: 3
-		});
+			// Initialize autocomplete for countries.
+			$tbody.find( 'td.country input' ).autocomplete({
+				source: data.countries,
+				minLength: 3
+			});
 
-		// Initialize autocomplete for states.
-		$tbody.find( 'td.state input' ).autocomplete({
-			source: data.states,
-			minLength: 3
-		});
+			// Initialize autocomplete for states.
+			$tbody.find( 'td.state input' ).autocomplete({
+				source: data.states,
+				minLength: 3
+			});
+		}
+
+		renderTableContents( data.rates );
+
 
 		$('.wc_tax_rates .remove_tax_rates').click(function() {
 			if ( $tbody.find('tr.current').length > 0 ) {
