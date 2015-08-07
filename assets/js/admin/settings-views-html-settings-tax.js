@@ -58,7 +58,7 @@
 
 				row = row + val + ',';
 			});
-			row = row + '<?php echo $current_class; ?>';
+			row = row + data.current_class;
 			//row.substring( 0, row.length - 1 );
 			csv_data = csv_data + row + "\n";
 		});
