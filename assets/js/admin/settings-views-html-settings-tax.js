@@ -8,7 +8,10 @@
 		$tbody = $('#rates');
 
 	$(function() {
+		// Blank out the contents.
 		$tbody.innerHTML = '';
+
+		// Populate $tbody with the current page of results.
 		$.each( data.rates, function ( id, rowData ) {
 			$tbody.append( rowTemplate( rowData ) );
 		} );
@@ -45,6 +48,11 @@
 		return false;
 	});
 
+	/**
+	 * Handle the exporting of tax rates.
+	 *
+	 * As an aside: Why is this being handled in Javascript instead of being built by php? -George
+	 */
 	$('.wc_tax_rates .export').click(function() {
 		var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
 
@@ -77,6 +85,9 @@
 		return true;
 	});
 
+	/**
+	 * Add a new blank row to the table for the user to fill out and save.
+	 */
 	$('.wc_tax_rates .insert').click(function() {
 		var size = $tbody.find('tr').length;
 		var code = wp.template( 'wc-tax-table-row' )( {
