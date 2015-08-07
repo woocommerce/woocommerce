@@ -40,7 +40,7 @@ foreach ( WC()->countries->get_allowed_country_states() as $label ) {
 // Localize and enqueue our js.
 wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 	'current_class' => $current_class,
-	'rates'         => $rates,
+	'rates'         => array_values( $rates ),
 	'page'          => $page,
 	'limit'         => $limit,
 	'countries'     => $countries,
