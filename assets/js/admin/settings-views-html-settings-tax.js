@@ -4,12 +4,12 @@
 
 (function($, data, wp){
 	var rowTemplate = wp.template( 'wc-tax-table-row' ),
-		$ratesTbody = $('#rates');
+		$tbody = $('#rates');
 
 	$(function() {
-		$ratesTbody.innerHTML = '';
+		$tbody.innerHTML = '';
 		$.each( data.rates, function ( id, rowData ) {
-			$ratesTbody.append( rowTemplate( rowData ) );
+			$tbody.append( rowTemplate( rowData ) );
 		} );
 	});
 })(jQuery, htmlSettingsTaxLocalizeScript, wp);
