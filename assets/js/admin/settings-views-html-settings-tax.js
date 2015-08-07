@@ -101,28 +101,13 @@
 		jQuery(this).attr( 'name', jQuery(this).attr( 'data-name' ) );
 	});
 
-	var availableCountries = [<?php
-		$countries = array();
-	foreach ( WC()->countries->get_allowed_countries() as $value => $label )
-	$countries[] = '{ label: "' . esc_attr( $label ) . '", value: "' . $value . '" }';
-	echo implode( ', ', $countries );
-	?>];
-
-	var availableStates = [<?php
-		$countries = array();
-	foreach ( WC()->countries->get_allowed_country_states() as $value => $label )
-	foreach ( $label as $code => $state )
-	$countries[] = '{ label: "' . esc_attr( $state ) . '", value: "' . $code . '" }';
-	echo implode( ', ', $countries );
-	?>];
-
 	jQuery( "td.country input" ).autocomplete({
-		source: availableCountries,
+		source: data.countries,
 		minLength: 3
 	});
 
 	jQuery( "td.state input" ).autocomplete({
-		source: availableStates,
+		source: data.states,
 		minLength: 3
 	});
 })(jQuery, htmlSettingsTaxLocalizeScript, wp);
