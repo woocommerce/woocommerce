@@ -82,11 +82,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 
 		<td class="compound">
-			<input type="checkbox" class="checkbox" name="tax_rate_compound[{{ data.tax_rate_id }}]" <# if ( 1 === data.tax_rate_compound ) { #> checked="checked" <# } #> />
+			<input type="checkbox" class="checkbox" name="tax_rate_compound[{{ data.tax_rate_id }}]" <# if ( '1' === data.tax_rate_compound ) { #> checked="checked" <# } #> />
 		</td>
 
 		<td class="apply_to_shipping">
-			<input type="checkbox" class="checkbox" name="tax_rate_shipping[{{ data.tax_rate_id }}]" <# if ( 1 === data.tax_rate_shipping ) { #> checked="checked" <# } #> />
+			<input type="checkbox" class="checkbox" name="tax_rate_shipping[{{ data.tax_rate_id }}]" <# if ( '1' === data.tax_rate_shipping ) { #> checked="checked" <# } #> />
 		</td>
 	</tr>
 </script>
