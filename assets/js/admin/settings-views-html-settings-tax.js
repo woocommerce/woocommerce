@@ -6,10 +6,10 @@
 (function($, data, wp){
 	$(function() {
 
-		var rowTemplate = wp.template( 'wc-tax-table-row' ),
+		var rowTemplate        = wp.template( 'wc-tax-table-row' ),
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
-			$tbody = $('#rates' ),
-			$pagination = $( '#rates-pagination' );
+			$tbody             = $( '#rates' ),
+			$pagination        = $( '#rates-pagination' );
 
 		/**
 		 * Build the table contents.
@@ -22,7 +22,7 @@
 			// Populate $tbody with the current page of results.
 			$.each( rates, function ( id, rowData ) {
 				$tbody.append( rowTemplate( rowData ) );
-			} );
+			});
 
 			// Initialize autocomplete for countries.
 			$tbody.find( 'td.country input' ).autocomplete({
