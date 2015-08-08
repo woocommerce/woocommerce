@@ -10,66 +10,77 @@
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
 			$table             = $( '.wc_tax_rates' ),
 			$tbody             = $( '#rates' ),
-			$pagination        = $( '#rates-pagination' );
+			$pagination        = $( '#rates-pagination' ),
+			WCTaxTableModelConstructor = Backbone.Model.extend( {} ),
+			WCTaxTableViewConstructor  = Backbone.View.extend({
+				rowTemplate : rowTemplate,
+				per_page    : data.limit,
+				page        : data.page,
+				render      : function() {
+					var rates       = this.model.get( 'rates' ),
+						qty_rates   = rates.length,
+						qty_pages   = Math.ceil( qty_rates / this.per_page ),
+						first_index = this.per_page * ( this.page - 1),
+						last_index  = this.per_page * this.page,
+						paged_rates = rates.slice( first_index, last_index ),
+						view        = this;
 
-		/**
-		 * Build the table contents.
-		 * @param rates
-		 */
-		function renderTableContents( rates ) {
-			// Blank out the contents.
-			$tbody.empty();
+					// Blank out the contents.
+					this.$el.empty();
 
-			// Populate $tbody with the current page of results.
-			$.each( rates, function ( id, rowData ) {
-				$tbody.append( rowTemplate( rowData ) );
-			});
+					// Populate $tbody with the current page of results.
+					$.each( paged_rates, function ( id, rowData ) {
+						view.$el.append( view.rowTemplate( rowData ) );
+					});
 
-			// Initialize autocomplete for countries.
-			$tbody.find( 'td.country input' ).autocomplete({
-				source: data.countries,
-				minLength: 3
-			});
+					// Initialize autocomplete for countries.
+					this.$el.find( 'td.country input' ).autocomplete({
+						source: data.countries,
+						minLength: 3
+					});
 
-			// Initialize autocomplete for states.
-			$tbody.find( 'td.state input' ).autocomplete({
-				source: data.states,
-				minLength: 3
-			});
+					// Initialize autocomplete for states.
+					this.$el.find( 'td.state input' ).autocomplete({
+						source: data.states,
+						minLength: 3
+					});
 
-			// Postcode and city don't have `name` values by default. They're only created if the contents changes, to save on database queries (I think)
-			$tbody.find( 'td.postcode input, td.city input').change(function() {
-				$(this).attr( 'name', $(this).data( 'name' ) );
-			});
-		}
+					// Postcode and city don't have `name` values by default. They're only created if the contents changes, to save on database queries (I think)
+					this.$el.find( 'td.postcode input, td.city input' ).change(function() {
+						$(this).attr( 'name', $(this).data( 'name' ) );
+					});
 
-		/**
-		 * Renders table contents by page.
-		 */
-		function renderPage( page_num ) {
-			var qty_pages = Math.ceil( data.rates.length / data.limit );
-
-			page_num = parseInt( page_num, 10 );
-			if ( page_num < 1 ) {
-				page_num = 1;
-			} else if ( page_num > qty_pages ) {
-				page_num = qty_pages;
-			}
-
-			var first_index = data.limit * ( page_num - 1),
-				last_index  = data.limit * page_num;
-
-			renderTableContents( data.rates.slice( first_index, last_index ) );
-
-			if ( data.rates.length > data.limit ) {
-				// We've now displayed our initial page, time to render the pagination box.
-				$pagination.html( paginationTemplate( {
-					qty_rates    : data.rates.length,
-					current_page : page_num,
-					qty_pages    : qty_pages
-				} ) );
-			}
-		}
+					if ( qty_pages > 1 ) {
+						// We've now displayed our initial page, time to render the pagination box.
+						$pagination.html( paginationTemplate( {
+							qty_rates    : qty_rates,
+							current_page : this.page,
+							qty_pages    : qty_pages
+						} ) );
+					}
+				},
+				initialize : function() {
+					this.qty_pages = Math.ceil( this.model.get( 'rates' ).length / this.per_page );
+				},
+				sanitizePage : function( page_num ) {
+					page_num = parseInt( page_num, 10 );
+					if ( page_num < 1 ) {
+						page_num = 1;
+					} else if ( page_num > this.qty_pages ) {
+						page_num = this.qty_pages;
+					}
+					return page_num;
+				}
+			} ),
+			WCTaxTableModelInstance = new WCTaxTableModelConstructor({
+				rates : data.rates,
+			} ),
+			WCTaxTableInstance = new WCTaxTableViewConstructor({
+				model    : WCTaxTableModelInstance,
+			//	page     : data.page,  // I'd prefer to have these two specified down here in the instance,
+			//	per_page : data.limit, // but it doesn't seem to recognize them in render if I do. :\
+				el       : '#rates'
+			} );
 
 		/**
 		 * Handle the initial display.
