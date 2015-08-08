@@ -8,7 +8,7 @@
 
 		var rowTemplate        = wp.template( 'wc-tax-table-row' ),
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
-			$table             = $( '.wc_tax_rates' );
+			$table             = $( '.wc_tax_rates' ),
 			$tbody             = $( '#rates' ),
 			$pagination        = $( '#rates-pagination' );
 
