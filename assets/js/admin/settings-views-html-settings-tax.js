@@ -108,35 +108,28 @@
 		});
 
 		/**
-		 * Handle the exporting of tax rates.
+		 * Handle the exporting of tax rates, and build it off the global `data.rates` object.
 		 *
-		 * As an aside: Why is this being handled in Javascript instead of being built by php? -George
+		 * @todo: Have the `export` button save the current form and generate this from php, so there's no chance the current page is out of date.
 		 */
 		$('.wc_tax_rates .export').click(function() {
 			var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
 
-			$('#rates tr:visible').each(function() {
+			$.each( data.rates, function( id, rowData ) {
 				var row = '';
-				$(this).find('td:not(.sort) input').each(function() {
-					var val = '';
 
-					if ( $(this).is('.checkbox') ) {
-						if ( $(this).is(':checked') ) {
-							val = 1;
-						} else {
-							val = 0;
-						}
-					} else {
-						val = $(this).val();
-						if ( ! val ) {
-							val = $( this ).attr( 'placeholder' );
-						}
-					}
-					row = row + val + ',';
-				});
-				row = row + data.current_class;
-				//row.substring( 0, row.length - 1 );
-				csv_data = csv_data + row + '\n';
+				row += rowData.tax_rate_country  + ',';
+				row += rowData.tax_rate_state    + ',';
+				row += rowData.tax_rate_postcode ? rowData.tax_rate_postcode.join( '; ' ) : '' + ',';
+				row += rowData.tax_rate_city     ? rowData.tax_rate_city.join( '; ' )     : '' + ',';
+				row += rowData.tax_rate          + ',';
+				row += rowData.tax_rate_name     + ',';
+				row += rowData.tax_rate_priority + ',';
+				row += rowData.tax_rate_compound + ',';
+				row += rowData.tax_rate_shipping + ',';
+				row += data.current_class;
+
+				csv_data += row + '\n';
 			});
 
 			$(this).attr( 'href', encodeURI( csv_data ) );
