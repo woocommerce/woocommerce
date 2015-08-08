@@ -8,6 +8,7 @@
 
 		var rowTemplate        = wp.template( 'wc-tax-table-row' ),
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
+			$table             = $( '.wc_tax_rates' );
 			$tbody             = $( '#rates' ),
 			$pagination        = $( '#rates-pagination' );
 
@@ -88,7 +89,7 @@
 			renderPage( $( event.currentTarget ).val() );
 		} );
 
-		$('.wc_tax_rates .remove_tax_rates').click(function() {
+		$table.find('.remove_tax_rates').click(function() {
 			if ( $tbody.find('tr.current').length > 0 ) {
 				var $current = $tbody.find('tr.current');
 				$current.find('input').val('');
@@ -112,7 +113,7 @@
 		 *
 		 * @todo: Have the `export` button save the current form and generate this from php, so there's no chance the current page is out of date.
 		 */
-		$('.wc_tax_rates .export').click(function() {
+		$table.find('.export').click(function() {
 			var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
 
 			$.each( data.rates, function( id, rowData ) {
@@ -140,7 +141,7 @@
 		/**
 		 * Add a new blank row to the table for the user to fill out and save.
 		 */
-		$('.wc_tax_rates .insert').click(function() {
+		$table.find('.insert').click(function() {
 			var size = $tbody.find('tr').length;
 			var code = wp.template( 'wc-tax-table-row' )( {
 				tax_rate_id       : 'new-' + size,
