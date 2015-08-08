@@ -82,10 +82,7 @@
 				el       : '#rates'
 			} );
 
-		/**
-		 * Handle the initial display.
-		 */
-		renderPage( data.page );
+		WCTaxTableInstance.render();
 
 		/**
 		 * Handle clicks on the pagination links.
@@ -94,10 +91,12 @@
 		 */
 		$pagination.on( 'click', 'a', function(event){
 			event.preventDefault();
-			renderPage( $( event.currentTarget ).data('goto') );
+			WCTaxTableInstance.page = WCTaxTableInstance.sanitizePage( $( event.currentTarget ).data('goto') );
+			WCTaxTableInstance.render();
 		} );
 		$pagination.on( 'change', 'input', function(event) {
-			renderPage( $( event.currentTarget ).val() );
+			WCTaxTableInstance.page = WCTaxTableInstance.sanitizePage( $( event.currentTarget ).val() );
+			WCTaxTableInstance.render();
 		} );
 
 		$table.find('.remove_tax_rates').click(function() {
