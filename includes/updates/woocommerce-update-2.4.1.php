@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
+// Select variations that don't have any _stock_status implemented on WooCommerce 2.2
 $update_variations = $wpdb->get_results( "
 	SELECT DISTINCT posts.ID AS variation_id, posts.post_parent AS variation_parent
 	FROM {$wpdb->posts} as posts
@@ -22,16 +23,16 @@ $update_variations = $wpdb->get_results( "
 	AND postmeta.meta_value IS NULL
 " );
 
-$rates = WC_Tax::get_rates();
-$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
-
 foreach ( $update_variations as $variation ) {
+	// Get the parent _stock_status
 	$parent_stock_status = get_post_meta( $variation->variation_parent, '_stock_status', true );
+
+	// Set the _stock_status
 	add_post_meta( $variation->variation_id, '_stock_status', $parent_stock_status ? $parent_stock_status : 'instock', true );
+
+	// Delete old product children array
 	delete_transient( 'wc_product_children_' . $variation->variation_parent );
-	delete_transient( 'wc_var_prices' . md5( json_encode( array(
-		$variation->variation_parent,
-		$rates,
-		$transient_version
-	) ) ) );
 }
+
+// Invalid old transients like wc_var_price
+WC_Cache_Helper::get_transient_version( 'product', true );
