@@ -71,9 +71,9 @@
 				clearUnloadConfirmation : function() {
 					this.needsUnloadConfirm = false;
 				},
-				unloadConfirmation : function(e) {
-					if ( e.data.view.needsUnloadConfirm ) {
-						e.returnValue = data.strings.unload_confirmation_msg;
+				unloadConfirmation : function(event) {
+					if ( event.data.view.needsUnloadConfirm ) {
+						event.returnValue = data.strings.unload_confirmation_msg;
 						window.event.returnValue = data.strings.unload_confirmation_msg;
 						return data.strings.unload_confirmation_msg;
 					}
