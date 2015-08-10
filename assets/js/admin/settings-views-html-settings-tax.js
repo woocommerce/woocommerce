@@ -52,7 +52,7 @@
 					// Initialize autocomplete for countries.
 					this.$el.find( 'td.country input' ).autocomplete({
 						source: data.countries,
-						minLength: 3
+						minLength: 2
 					});
 
 					// Initialize autocomplete for states.
