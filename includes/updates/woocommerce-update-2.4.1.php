@@ -34,5 +34,5 @@ foreach ( $update_variations as $variation ) {
 	delete_transient( 'wc_product_children_' . $variation->variation_parent );
 }
 
-// Invalid old transients like wc_var_price
+// Invalidate old transients such as wc_var_price
 WC_Cache_Helper::get_transient_version( 'product', true );
