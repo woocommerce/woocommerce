@@ -169,7 +169,7 @@
 		 * Add a new blank row to the table for the user to fill out and save.
 		 */
 		$table.find('.insert').click(function() {
-			var size = $tbody.find('tr').length;
+			var size = Object.keys( WCTaxTableModelInstance.get( 'rates' ) ).length;
 			var code = wp.template( 'wc-tax-table-row' )( {
 				tax_rate_id       : 'new-' + size,
 				tax_rate_priority : 1,
