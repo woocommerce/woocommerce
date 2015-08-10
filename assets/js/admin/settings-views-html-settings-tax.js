@@ -16,6 +16,7 @@
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
 			$table             = $( '.wc_tax_rates' ),
 			$tbody             = $( '#rates' ),
+			$p_unsaved_msg     = $( '#unsaved-changes' ),
 			$pagination        = $( '#rates-pagination' ),
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				setRateAttribute : function( rateID, attribute, value ) {
@@ -85,9 +86,11 @@
 				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
+					$p_unsaved_msg.show();
 				},
 				clearUnloadConfirmation : function() {
 					this.needsUnloadConfirm = false;
+					$p_unsaved_msg.hide();
 				},
 				unloadConfirmation : function(event) {
 					if ( event.data.view.needsUnloadConfirm ) {

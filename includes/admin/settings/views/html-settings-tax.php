@@ -45,6 +45,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tbody>
 </table>
 
+<p id="unsaved-changes" style="display:none;"><?php _e( 'There are unsaved changes.', 'woocommerce' ); ?></p>
+
 <script type="text/html" id="tmpl-wc-tax-table-row">
 	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>" data-id="{{ data.tax_rate_id }}">
 		<td class="sort">
