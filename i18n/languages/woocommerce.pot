@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.4.0 Frontend\n"
+"Project-Id-Version: WooCommerce 2.4.1 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-08-10 15:39:27+00:00\n"
+"POT-Creation-Date: 2015-08-10 21:29:57+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5082,7 +5082,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-integration.php:29
 #: includes/abstracts/abstract-wc-settings-api.php:77
-#: includes/class-wc-install.php:687 includes/emails/class-wc-email.php:711
+#: includes/class-wc-install.php:688 includes/emails/class-wc-email.php:711
 msgid "Settings"
 msgstr ""
 
@@ -6906,39 +6906,39 @@ msgstr ""
 msgid "Select an option&hellip;"
 msgstr ""
 
-#: includes/class-wc-install.php:460
+#: includes/class-wc-install.php:461
 msgid "Customer"
 msgstr ""
 
-#: includes/class-wc-install.php:467
+#: includes/class-wc-install.php:468
 msgid "Shop Manager"
 msgstr ""
 
-#: includes/class-wc-install.php:687
+#: includes/class-wc-install.php:688
 msgid "View WooCommerce Settings"
 msgstr ""
 
-#: includes/class-wc-install.php:703
+#: includes/class-wc-install.php:704
 msgid "View WooCommerce Documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:703
+#: includes/class-wc-install.php:704
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:704
+#: includes/class-wc-install.php:705
 msgid "View WooCommerce API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:704
+#: includes/class-wc-install.php:705
 msgid "API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:705
+#: includes/class-wc-install.php:706
 msgid "Visit Premium Customer Support Forum"
 msgstr ""
 
-#: includes/class-wc-install.php:705
+#: includes/class-wc-install.php:706
 msgid "Premium Support"
 msgstr ""
 
@@ -8701,20 +8701,20 @@ msgstr ""
 msgid "Cost"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:69
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:71
 msgid "Shipping Class Costs"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:71
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:73
 msgid "These costs can optionally be added based on the %sproduct shipping class%s."
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:75
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:80
 msgid "\"%s\" Shipping Class Cost"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:77
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:86
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:82
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:91
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:100
 #: templates/order/order-details-customer.php:52
 #: templates/order/order-details-customer.php:63
@@ -8722,41 +8722,41 @@ msgstr ""
 msgid "N/A"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:84
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:89
 msgid "No Shipping Class Cost"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:92
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:97
 msgid "Calculation Type"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:97
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:102
 msgid "Per Class: Charge shipping for each shipping class individually"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:98
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:103
 msgid "Per Order: Charge shipping for the most expensive shipping class"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:105
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:110
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:115
 msgid "Additional Rates"
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:107
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:112
 msgid ""
 "These rates are extra shipping options with additional costs (based on the "
 "flat rate)."
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:112
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:117
 msgid ""
 "One per line: Option Name | Additional Cost [+- Percents] | Per Cost Type "
 "(order, class, or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | "
 "order</code>."
 msgstr ""
 
-#: includes/shipping/flat-rate/includes/settings-flat-rate.php:115
+#: includes/shipping/flat-rate/includes/settings-flat-rate.php:120
 msgid ""
 "Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, "
 "or item)"
@@ -8993,7 +8993,7 @@ msgstr ""
 msgid "Sorry, we could not find that order ID in our database."
 msgstr ""
 
-#: includes/updates/woocommerce-update-2.4.php:164
+#: includes/updates/woocommerce-update-2.4.php:170
 #: includes/wc-order-functions.php:793
 msgid "Order Fully Refunded"
 msgstr ""
@@ -10727,42 +10727,42 @@ msgctxt "enhanced select"
 msgid "Searching&hellip;"
 msgstr ""
 
-#: includes/class-wc-install.php:216
+#: includes/class-wc-install.php:217
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:221
+#: includes/class-wc-install.php:222
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:226
+#: includes/class-wc-install.php:227
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:231
+#: includes/class-wc-install.php:232
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""
 
-#: includes/class-wc-install.php:217
+#: includes/class-wc-install.php:218
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
-#: includes/class-wc-install.php:222
+#: includes/class-wc-install.php:223
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
-#: includes/class-wc-install.php:227
+#: includes/class-wc-install.php:228
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:232
+#: includes/class-wc-install.php:233
 msgctxt "Page title"
 msgid "My Account"
 msgstr ""

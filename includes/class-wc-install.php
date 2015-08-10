@@ -2,10 +2,10 @@
 /**
  * Installation related functions and actions.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Classes
- * @version     2.3.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Classes
+ * @version  2.4.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
