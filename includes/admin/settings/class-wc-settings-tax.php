@@ -156,6 +156,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			'states'        => $states,
 			'strings'       => array(
 				'no_rows_selected' => __( 'No row(s) selected', 'woocommerce' ),
+				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'csv_data_cols' => array(
 					__( 'Country Code', 'woocommerce' ),
 					__( 'State Code', 'woocommerce' ),
