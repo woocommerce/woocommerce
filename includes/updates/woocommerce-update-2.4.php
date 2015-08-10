@@ -148,6 +148,12 @@ $refunded_orders = get_posts( array(
 	'post_status'    => array( 'wc-refunded' )
 ) );
 
+// Ensure emails are disabled during this update routine
+remove_all_actions( 'woocommerce_order_status_refunded_notification' );
+remove_all_actions( 'woocommerce_order_partially_refunded_notification' );
+remove_action( 'woocommerce_order_status_refunded', array( 'WC_Emails', 'send_transactional_email' ) );
+remove_action( 'woocommerce_order_partially_refunded', array( 'WC_Emails', 'send_transactional_email' ) );
+
 foreach ( $refunded_orders as $refunded_order ) {
 	$order_total    = get_post_meta( $refunded_order->ID, '_order_total', true );
 	$refunded_total = $wpdb->get_var( $wpdb->prepare( "

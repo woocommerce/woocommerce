@@ -159,6 +159,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.4.1 - 10/08/2015 =
+* Fix - Tweaked the 2.4 upgrade routine to disable refund emails during update.
+
 = 2.4.0 - 10/08/2015 =
 * Feature - Onboarding/setup wizard for new users to handle basic store settings and installation.
 * Feature - Improved help tabs with inline video tutorials where applicable.
