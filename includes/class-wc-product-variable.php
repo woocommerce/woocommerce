@@ -201,7 +201,7 @@ class WC_Product_Variable extends WC_Product {
 	public function is_on_sale() {
 		$is_on_sale = false;
 		$prices     = $this->get_variation_prices();
-		if ( $prices['regular_price'] !== $prices['sale_price'] ) {
+		if ( $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'] ) {
 			$is_on_sale = true;
 		}
 		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale, $this );
@@ -262,7 +262,11 @@ class WC_Product_Variable extends WC_Product {
 			$tax_display_mode  = get_option( 'woocommerce_tax_display_shop' );
 
 			foreach ( $this->get_children( true ) as $variation_id ) {
-				$variation     = $this->get_child( $variation_id );
+
+				if ( ! $variation = $this->get_child( $variation_id ) ) {
+					continue;
+				}
+
 				$price         = $variation->get_price();
 				$regular_price = $variation->get_regular_price();
 				$sale_price    = $variation->get_sale_price();
