@@ -17,7 +17,16 @@
 			$table             = $( '.wc_tax_rates' ),
 			$tbody             = $( '#rates' ),
 			$pagination        = $( '#rates-pagination' ),
-			WCTaxTableModelConstructor = Backbone.Model.extend( {} ),
+			WCTaxTableModelConstructor = Backbone.Model.extend({
+				setRateAttribute : function( rateID, attribute, value ) {
+					var rates = this.get( 'rates' );
+
+					if ( rates[ rateID ][ attribute ] !== value ) {
+						rates[ rateID ][ attribute ] = value;
+						this.set( 'rates', rates );
+					}
+				}
+			} ),
 			WCTaxTableViewConstructor  = Backbone.View.extend({
 				rowTemplate : rowTemplate,
 				per_page    : data.limit,
