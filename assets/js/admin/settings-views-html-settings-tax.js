@@ -63,7 +63,7 @@
 					this.qty_pages = Math.ceil( this.model.get( 'rates' ).length / this.per_page );
 					this.listenTo( this.model, 'change', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved', this.clearUnloadConfirmation );
-					window.addEventListener( 'beforeunload', this.unloadConfirmation );
+					$(window).on( 'beforeunload', this.unloadConfirmation );
 				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
