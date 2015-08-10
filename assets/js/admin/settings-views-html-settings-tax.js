@@ -76,7 +76,6 @@
 					}
 				},
 				initialize : function() {
-					this.per_page = 3;
 					this.qty_pages = Math.ceil( $.map( this.model.get( 'rates' ), function(v){return [v]} ).length / this.per_page );
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 				//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
