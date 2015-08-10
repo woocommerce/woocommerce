@@ -552,9 +552,11 @@ class WC_Admin_Setup_Wizard {
 			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_domestic_item'] ) ) {
 				$costs[] = $item_cost . ' * [qty]';
 			}
-			$shipping_method->settings['cost']    = implode( ' + ', array_filter( $costs ) );
-			$shipping_method->settings['enabled'] = 'yes';
-			$shipping_method->settings['type']    = 'order';
+			$shipping_method->settings['cost']         = implode( ' + ', array_filter( $costs ) );
+			$shipping_method->settings['enabled']      = 'yes';
+			$shipping_method->settings['type']         = 'order';
+			$shipping_method->settings['availability'] = 'specific';
+			$shipping_method->settings['countries']    = array( WC()->countries->get_base_country() );
 
 			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
 		}
@@ -570,9 +572,13 @@ class WC_Admin_Setup_Wizard {
 			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_international_item'] ) ) {
 				$costs[] = $item_cost . ' * [qty]';
 			}
-			$shipping_method->settings['cost']    = implode( ' + ', array_filter( $costs ) );
-			$shipping_method->settings['enabled'] = 'yes';
-			$shipping_method->settings['type']    = 'order';
+			$shipping_method->settings['cost']         = implode( ' + ', array_filter( $costs ) );
+			$shipping_method->settings['enabled']      = 'yes';
+			$shipping_method->settings['type']         = 'order';
+			if ( ! empty( $_POST['shipping_cost_domestic'] ) ) {
+				$shipping_method->settings['availability'] = 'excluding';
+				$shipping_method->settings['countries']    = array( WC()->countries->get_base_country() );
+			}
 
 			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
 		}
