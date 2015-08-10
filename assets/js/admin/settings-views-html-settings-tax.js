@@ -78,10 +78,11 @@
 				initialize : function() {
 					this.per_page = 3;
 					this.qty_pages = Math.ceil( $.map( this.model.get( 'rates' ), function(v){return [v]} ).length / this.per_page );
-					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 				//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
+
+					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
