@@ -24,6 +24,7 @@
 					if ( rates[ rateID ][ attribute ] !== value ) {
 						rates[ rateID ][ attribute ] = value;
 						this.set( 'rates', rates );
+						this.trigger( 'change:rates' ); // Why is this necessary?  Shouldn't the previous line trigger it?
 					}
 				}
 			} ),
