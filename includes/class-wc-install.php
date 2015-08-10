@@ -24,7 +24,8 @@ class WC_Install {
 		'2.1.0' => 'updates/woocommerce-update-2.1.php',
 		'2.2.0' => 'updates/woocommerce-update-2.2.php',
 		'2.3.0' => 'updates/woocommerce-update-2.3.php',
-		'2.4.0' => 'updates/woocommerce-update-2.4.php'
+		'2.4.0' => 'updates/woocommerce-update-2.4.php',
+		'2.4.1' => 'updates/woocommerce-update-2.4.1.php'
 	);
 
 	/**
