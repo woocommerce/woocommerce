@@ -3,8 +3,8 @@ Contributors: woothemes, automattic, mikejolley, jameskoster, claudiosanches, ro
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
-Tested up to: 4.1
-Stable tag: 2.3.8
+Tested up to: 4.3
+Stable tag: 2.4.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,18 +159,18 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.4.0 - X =
+= 2.4.0 - 10/08/2015 =
 * Feature - Onboarding/setup wizard for new users to handle basic store settings and installation.
 * Feature - Improved help tabs with inline video tutorials where applicable.
 * Feature - New AJAX powered variations interface to improve edit product page loading times and posting large amounts of data.
 * Feature - For products with many variations, on the frontend switch to AJAX to load matching variations based on user input attributes, instead of doing it all inline.
 * Feature - Show full category hierarchy in permalinks.
 * Feature - Added priorities for shipping methods to give more control over defaults.
-* Feature - [Added a new geolocation option to support static page caching using AJAX and a querystring.](http://develop.woothemes.com/woocommerce/2015/07/making-geolocation-static-cache-friendly-in-2-4/)
+* Feature - [Added a new geolocation option to support static page caching using AJAX and a querystring.](https://woocommerce.wordpress.com/2015/07/02/making-geolocation-static-cache-friendly-in-2-4/)
 * Feature - Email notifications for partial refunds.
 * Feature - Visual API authentication endpoint for 3rd party use.
 * Feature - API key generation changes. Secret keys no longer stored in database.
-* Feature - [Refactored Flat Rate Shipping for simplicity.](http://develop.woothemes.com/woocommerce/2015/06/simplifying-flat-rate-shipping-in-wc-2-4/)
+* Feature - [Refactored Flat Rate Shipping for simplicity.](https://woocommerce.wordpress.com/2015/06/simplifying-flat-rate-shipping-in-wc-2-4/)
 * Feature - Made international shipping UI the same as flat rate.
 * Feature - New ajax endpoints to improve performance by avoiding admin overhead.
 * Fix - Ensure coupon taxes are reset when calculating totals.
@@ -1485,4 +1485,4 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Upgrade Notice ==
 
 = 2.4.0 =
-2.4.0 is a major update so it is important that you make backups, and ensure themes and extensions are 2.4 compatible. Developers should catch up with [develop.woothemes.com](http://develop.woothemes.com/) to see what has been happening in core.
+2.4.0 is a major update so it is important that you make backups, and ensure themes and extensions are 2.4 compatible. Developers should catch up with [the development blog](https://woocommerce.wordpress.com/) to see what has been happening in core.
