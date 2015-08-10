@@ -80,6 +80,7 @@
 					this.listenTo( this.model, 'change', this.setUnloadConfirmation );
 				//	this.listenTo( this.model, 'saved', this.clearUnloadConfirmation );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
+					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
 				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
@@ -93,6 +94,30 @@
 						window.event.returnValue = data.strings.unload_confirmation_msg;
 						return data.strings.unload_confirmation_msg;
 					}
+				},
+				updateModelOnChange : function( event ) {
+					var model     = event.data.view.model,
+						$target   = $( event.target ),
+						id        = $target.closest('tr').data('id'),
+						attribute = $target.data('attribute'),
+						val       = $target.val();
+
+					if ( 'city' === attribute || 'postcode' === attribute ) {
+						val = val.split(';');
+						val = $.map( val, function( thing ) {
+							return thing.trim();
+						});
+					}
+
+					if ( 'tax_rate_compound' === attribute || 'tax_rate_shipping' === attribute ) {
+						if ( $target.is(':checked') ) {
+							val = 1;
+						} else {
+							val = 0;
+						}
+					}
+
+					model.setRateAttribute( id, attribute, val );
 				},
 				sanitizePage : function( page_num ) {
 					page_num = parseInt( page_num, 10 );
