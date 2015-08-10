@@ -101,7 +101,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<span class="screen-reader-text"><?php esc_html_e( 'First page', 'woocommerce' ); ?></span>
 				<span aria-hidden="true">&laquo;</span>
 			</a>
-			<a class="tablenav-pages-navspan" data-goto="<# print( parseInt( data.current_page, 10 ) - 1 ) #>">
+			<a class="tablenav-pages-navspan" data-goto="<# print( Math.max( 1, parseInt( data.current_page, 10 ) - 1 ) ) #>">
 				<span class="screen-reader-text"><?php esc_html_e( 'Previous page', 'woocommerce' ); ?></span>
 				<span aria-hidden="true">&lsaquo;</span>
 			</a>
@@ -113,7 +113,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								'<span class="total-pages">{{ data.qty_pages }}</span>' ); ?>
 			</span>
 
-			<a class="tablenav-pages-navspan" data-goto="<# print( parseInt( data.current_page, 10 ) + 1 ) #>">
+			<a class="tablenav-pages-navspan" data-goto="<# print( Math.min( data.qty_pages, parseInt( data.current_page, 10 ) + 1 ) ) #>">
 				<span class="screen-reader-text"><?php esc_html_e( 'Next page', 'woocommerce' ); ?></span>
 				<span aria-hidden="true">&rsaquo;</span>
 			</a>
