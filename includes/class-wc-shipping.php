@@ -210,9 +210,9 @@ class WC_Shipping {
 	 */
 	public function get_shipping_classes() {
 		if ( empty( $this->shipping_classes ) ) {
-			$this->shipping_classes = ( $classes = get_terms( 'product_shipping_class', array( 'hide_empty' => '0' ) ) ) ? $classes : array();
+			$classes                = get_terms( 'product_shipping_class', array( 'hide_empty' => '0' ) );
+			$this->shipping_classes = $classes && ! is_wp_error( $classes ) ? $classes : array();
 		}
-
 		return $this->shipping_classes;
 	}
 
