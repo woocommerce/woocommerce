@@ -17,7 +17,7 @@
 				per_page    : data.limit,
 				page        : data.page,
 				render      : function() {
-					var rates       = this.model.get( 'rates' ),
+					var rates       = $.map( this.model.get( 'rates' ), function(v){return [v]} ),
 						qty_rates   = rates.length,
 						qty_pages   = Math.ceil( qty_rates / this.per_page ),
 						first_index = this.per_page * ( this.page - 1),
@@ -60,7 +60,8 @@
 					}
 				},
 				initialize : function() {
-					this.qty_pages = Math.ceil( this.model.get( 'rates' ).length / this.per_page );
+					this.per_page = 3;
+					this.qty_pages = Math.ceil( $.map( this.model.get( 'rates' ), function(v){return [v]} ).length / this.per_page );
 					this.listenTo( this.model, 'change', this.setUnloadConfirmation );
 				//	this.listenTo( this.model, 'saved', this.clearUnloadConfirmation );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
