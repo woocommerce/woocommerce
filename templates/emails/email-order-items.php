@@ -37,7 +37,7 @@ foreach ( $items as $item_id => $item ) :
 				do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
 				// Variation
-				if ( $item_meta->meta ) {
+				if ( ! empty( $item_meta->meta ) ) {
 					echo '<br/><small>' . nl2br( $item_meta->display( true, true, '_', "\n" ) ) . '</small>';
 				}
 

@@ -232,9 +232,7 @@ class WC_Eval_Math {
 			} elseif ( $token == "_" ) {
 				$stack->push( -1*$stack->pop() );
 				// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
-			} elseif ( preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) { // it's a function!
-				// if the token is a number or variable, push it on the stack
-			} else {
+			} elseif ( ! preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) {
 				if ( is_numeric( $token ) ) {
 					$stack->push( $token );
 				} elseif ( array_key_exists( $token, self::$v ) ) {
