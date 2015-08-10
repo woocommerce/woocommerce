@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.4.0-RC1 Admin\n"
+"Project-Id-Version: WooCommerce 2.4.0 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-08-07 13:37:50+00:00\n"
+"POT-Creation-Date: 2015-08-10 15:39:28+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -654,7 +654,7 @@ msgid "Webhook Settings"
 msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:77
-#: includes/admin/class-wc-admin-setup-wizard.php:634
+#: includes/admin/class-wc-admin-setup-wizard.php:640
 msgid "PayPal Standard"
 msgstr ""
 
@@ -1966,7 +1966,7 @@ msgid "Shipping &amp; Tax"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:81
-#: includes/admin/class-wc-admin-setup-wizard.php:628
+#: includes/admin/class-wc-admin-setup-wizard.php:634
 msgid "Payments"
 msgstr ""
 
@@ -2048,14 +2048,14 @@ msgstr ""
 #: includes/admin/class-wc-admin-setup-wizard.php:257
 #: includes/admin/class-wc-admin-setup-wizard.php:366
 #: includes/admin/class-wc-admin-setup-wizard.php:523
-#: includes/admin/class-wc-admin-setup-wizard.php:670
+#: includes/admin/class-wc-admin-setup-wizard.php:676
 msgid "Continue"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:258
 #: includes/admin/class-wc-admin-setup-wizard.php:367
 #: includes/admin/class-wc-admin-setup-wizard.php:524
-#: includes/admin/class-wc-admin-setup-wizard.php:671
+#: includes/admin/class-wc-admin-setup-wizard.php:677
 msgid "Skip this step"
 msgstr ""
 
@@ -2265,62 +2265,62 @@ msgid ""
 "more about taxes in %2$sour documentation%3$s."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:630
+#: includes/admin/class-wc-admin-setup-wizard.php:636
 msgid ""
 "WooCommerce comes with some payment gateways pre-installed. %2$sAdditonal "
 "gateways%3$s can be installed later. Payment Gateways can be setup, enabled "
 "and disabled from the %1$scheckout settings%3$s screen."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:635
+#: includes/admin/class-wc-admin-setup-wizard.php:641
 msgid ""
 "To accept payments via PayPal on your store, simply enter your PayPal email "
 "address below."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:639
+#: includes/admin/class-wc-admin-setup-wizard.php:645
 msgid "PayPal Email Address:"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:646
+#: includes/admin/class-wc-admin-setup-wizard.php:652
 msgid "Offline Payments"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:647
+#: includes/admin/class-wc-admin-setup-wizard.php:653
 msgid ""
 "Offline gateways require manual processing, but can be useful in certain "
 "circumstances or for testing payments."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:651
+#: includes/admin/class-wc-admin-setup-wizard.php:657
 msgid "Cheque Payments"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:653
+#: includes/admin/class-wc-admin-setup-wizard.php:659
 msgid "Enable payment via Cheques"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:657
+#: includes/admin/class-wc-admin-setup-wizard.php:663
 msgid "Cash on Delivery"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:659
+#: includes/admin/class-wc-admin-setup-wizard.php:665
 msgid "Enable cash on delivery"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:663
+#: includes/admin/class-wc-admin-setup-wizard.php:669
 msgid "Bank Transfer (BACS)"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:665
+#: includes/admin/class-wc-admin-setup-wizard.php:671
 msgid "Enable BACS payments"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:732
+#: includes/admin/class-wc-admin-setup-wizard.php:738
 msgid "Your Store is Ready!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:736
+#: includes/admin/class-wc-admin-setup-wizard.php:742
 #: includes/admin/views/html-notice-tracking.php:11
 msgid ""
 "Want to help make WooCommerce even more awesome? Allow WooThemes to collect "
@@ -2328,7 +2328,7 @@ msgid ""
 "your next WooThemes purchase. %sFind out more%s."
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:738
+#: includes/admin/class-wc-admin-setup-wizard.php:744
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:316
 #: includes/admin/views/html-bulk-edit-product.php:282
 #: includes/admin/views/html-notice-tracking.php:13
@@ -2336,35 +2336,35 @@ msgstr ""
 msgid "Allow"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:739
+#: includes/admin/class-wc-admin-setup-wizard.php:745
 msgid "No thanks"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:746
+#: includes/admin/class-wc-admin-setup-wizard.php:752
 msgid "Next Steps"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:748
+#: includes/admin/class-wc-admin-setup-wizard.php:754
 msgid "Create your first product!"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:752
+#: includes/admin/class-wc-admin-setup-wizard.php:758
 msgid "Learn More"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:754
+#: includes/admin/class-wc-admin-setup-wizard.php:760
 msgid "Watch the WC 101 video walkthroughs"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:755
+#: includes/admin/class-wc-admin-setup-wizard.php:761
 msgid "Get eCommerce advice in your inbox"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:756
+#: includes/admin/class-wc-admin-setup-wizard.php:762
 msgid "Follow Sidekick interactive walkthroughs"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:757
+#: includes/admin/class-wc-admin-setup-wizard.php:763
 msgid "Read more about getting started"
 msgstr ""
 
@@ -2824,7 +2824,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-welcome.php:238
 msgid ""
 "If you use static caching you may have found geolocation did not work for "
-"non-logged in customers. We have now introduced a new javascript based "
+"non-logged-in customers. We have now introduced a new javascript based "
 "Geocaching solution to help. Enable this in the %ssettings%s."
 msgstr ""
 
@@ -2858,8 +2858,8 @@ msgstr ""
 #: includes/admin/class-wc-admin-welcome.php:252
 msgid ""
 "Services which integrate with the REST API can now use the visual "
-"authentication endpoint so a user can login and grant API permission from a "
-"single page before being redirected back."
+"authentication endpoint so a user can log in and grant API permission from "
+"a single page before being redirected back."
 msgstr ""
 
 #: includes/admin/class-wc-admin-welcome.php:255
