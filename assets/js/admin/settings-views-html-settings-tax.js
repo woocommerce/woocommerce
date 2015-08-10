@@ -62,7 +62,7 @@
 				initialize : function() {
 					this.qty_pages = Math.ceil( this.model.get( 'rates' ).length / this.per_page );
 					this.listenTo( this.model, 'change', this.setUnloadConfirmation );
-					this.listenTo( this.model, 'saved', this.clearUnloadConfirmation );
+				//	this.listenTo( this.model, 'saved', this.clearUnloadConfirmation );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 				},
 				setUnloadConfirmation : function() {
