@@ -89,7 +89,7 @@
 				}
 			} ),
 			WCTaxTableModelInstance = new WCTaxTableModelConstructor({
-				rates : data.rates,
+				rates : data.rates
 			} ),
 			WCTaxTableInstance = new WCTaxTableViewConstructor({
 				model    : WCTaxTableModelInstance,
