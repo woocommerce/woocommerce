@@ -6,6 +6,12 @@
 (function($, data, wp){
 	$(function() {
 
+		if ( ! String.prototype.trim ) {
+			String.prototype.trim = function () {
+				return this.replace( /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '' );
+			};
+		}
+
 		var rowTemplate        = wp.template( 'wc-tax-table-row' ),
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
 			$table             = $( '.wc_tax_rates' ),
