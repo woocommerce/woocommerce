@@ -19,6 +19,7 @@
 			$p_unsaved_msg     = $( '#unsaved-changes' ),
 			$pagination        = $( '#rates-pagination' ),
 			WCTaxTableModelConstructor = Backbone.Model.extend({
+				changes : {},
 				setRateAttribute : function( rateID, attribute, value ) {
 					var rates = this.get( 'rates' );
 
@@ -26,6 +27,10 @@
 						rates[ rateID ][ attribute ] = value;
 						this.set( 'rates', rates );
 						this.trigger( 'change:rates' ); // Why is this necessary?  Shouldn't the previous line trigger it?
+
+						// Store it in a changes array to potentially simplify saving?
+						this.changes[ rateID ] = this.changes[ rateID ] || {};
+						this.changes[ rateID ][ attribute ] = value;
 					}
 				}
 			} ),
