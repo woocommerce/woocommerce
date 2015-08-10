@@ -63,7 +63,7 @@
 					this.qty_pages = Math.ceil( this.model.get( 'rates' ).length / this.per_page );
 					this.listenTo( this.model, 'change', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved', this.clearUnloadConfirmation );
-					$(window).on( 'beforeunload', this.unloadConfirmation );
+					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
@@ -72,8 +72,7 @@
 					this.needsUnloadConfirm = false;
 				},
 				unloadConfirmation : function(e) {
-					// @todo: Find a way to stop needing to refer to the specific instance from the abstract class.
-					if ( WCTaxTableInstance.needsUnloadConfirm ) {
+					if ( e.data.view.needsUnloadConfirm ) {
 						e.returnValue = data.strings.unload_confirmation_msg;
 						window.event.returnValue = data.strings.unload_confirmation_msg;
 						return data.strings.unload_confirmation_msg;
