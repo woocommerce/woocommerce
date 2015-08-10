@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </table>
 
 <script type="text/html" id="tmpl-wc-tax-table-row">
-	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>">
+	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>" data-id="{{ data.tax_rate_id }}">
 		<td class="sort">
 			<# if ( ! data.newRow ) { #>
 				<input type="hidden" class="remove_tax_rate" name="remove_tax_rate[{{ data.tax_rate_id }}]" value="0" />
@@ -54,39 +54,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 
 		<td class="country">
-			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" />
+			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" />
 		</td>
 
 		<td class="state">
-			<input type="text" value="{{ data.tax_rate_state }}" placeholder="*" name="tax_rate_state[{{ data.tax_rate_id }}]" />
+			<input type="text" value="{{ data.tax_rate_state }}" placeholder="*" name="tax_rate_state[{{ data.tax_rate_id }}]" data-attribute="tax_rate_state" />
 		</td>
 
 		<td class="postcode">
-			<input type="text" value="<# if ( data.postcode ) print( data.postcode.join( '; ' ) ); #>" placeholder="*" data-name="tax_rate_postcode[{{ data.tax_rate_id }}]" />
+			<input type="text" value="<# if ( data.postcode ) print( data.postcode.join( '; ' ) ); #>" placeholder="*" data-name="tax_rate_postcode[{{ data.tax_rate_id }}]" data-attribute="postcode" />
 		</td>
 
 		<td class="city">
-			<input type="text" value="<# if ( data.city ) print( data.city.join( '; ' ) ); #>" placeholder="*" data-name="tax_rate_city[{{ data.tax_rate_id }}]" />
+			<input type="text" value="<# if ( data.city ) print( data.city.join( '; ' ) ); #>" placeholder="*" data-name="tax_rate_city[{{ data.tax_rate_id }}]" data-attribute="city" />
 		</td>
 
 		<td class="rate">
-			<input type="number" step="any" min="0" value="{{ data.tax_rate }}" placeholder="0" name="tax_rate[{{ data.tax_rate_id }}]" />
+			<input type="number" step="any" min="0" value="{{ data.tax_rate }}" placeholder="0" name="tax_rate[{{ data.tax_rate_id }}]" data-attribute="tax_rate" />
 		</td>
 
 		<td class="name">
-			<input type="text" value="{{ data.tax_rate_name }}" name="tax_rate_name[{{ data.tax_rate_id }}]" />
+			<input type="text" value="{{ data.tax_rate_name }}" name="tax_rate_name[{{ data.tax_rate_id }}]" data-attribute="tax_rate_name" />
 		</td>
 
 		<td class="priority">
-			<input type="number" step="1" min="1" value="{{ data.tax_rate_priority }}" name="tax_rate_priority[{{ data.tax_rate_id }}]" />
+			<input type="number" step="1" min="1" value="{{ data.tax_rate_priority }}" name="tax_rate_priority[{{ data.tax_rate_id }}]" data-attribute="tax_rate_priority" />
 		</td>
 
 		<td class="compound">
-			<input type="checkbox" class="checkbox" name="tax_rate_compound[{{ data.tax_rate_id }}]" <# if ( '1' === data.tax_rate_compound ) { #> checked="checked" <# } #> />
+			<input type="checkbox" class="checkbox" name="tax_rate_compound[{{ data.tax_rate_id }}]" <# if ( '1' === data.tax_rate_compound ) { #> checked="checked" <# } #> data-attribute="tax_rate_compound" />
 		</td>
 
 		<td class="apply_to_shipping">
-			<input type="checkbox" class="checkbox" name="tax_rate_shipping[{{ data.tax_rate_id }}]" <# if ( '1' === data.tax_rate_shipping ) { #> checked="checked" <# } #> />
+			<input type="checkbox" class="checkbox" name="tax_rate_shipping[{{ data.tax_rate_id }}]" <# if ( '1' === data.tax_rate_shipping ) { #> checked="checked" <# } #> data-attribute="tax_rate_shipping" />
 		</td>
 	</tr>
 </script>
