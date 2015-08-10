@@ -188,6 +188,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Ajaxified the grouped product option.
 * Tweak - Email template improvements and wider email client compatibility.
 * Dev - Created a template file for the Proceed to Checkout button.
+* Dev - API version v3.
+* Dev - API - Implemented full support for Basic Authentication for v3, following the RFC 2617 specs.
+* Dev - API - Fixed Oauth 1.0a to strictly follow all specs from RFC 5849 for v3.
+* Dev - API - Added an endpoint to handle product attributes.
+* Dev - API - Auto generete passwords for new customers only when enabled the generate_password option.
+* Dev - API - Added display and image on product categories response.
+* Dev - API - Added endpoint for bulk update/insert coupons, customers, products and orders.
+* Dev - API - Deprecated /product/sku endpoint from v3.
+* Dev - API - Created the /products/id/orders endpoint to fetch orders containing a specific product.
+* Localisation - Added Argentine currency and provinces.
 * [Various other small fixes and enhancements.](https://github.com/woothemes/woocommerce/issues?q=is%3Aissue+milestone%3A%222.4+Helpful+Hedgehog%22+is%3Aclosed)
 
 = 2.3.13 - 07/07/2015 =
