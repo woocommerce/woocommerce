@@ -44,6 +44,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// Define user set variables
 		$this->title          = $this->get_option( 'title' );
 		$this->description    = $this->get_option( 'description' );
+		if (empty($this->description)){
+			$this->description    = __( "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.", 'woocommerce' );
+		}
 		$this->testmode       = 'yes' === $this->get_option( 'testmode', 'no' );
 		$this->debug          = 'yes' === $this->get_option( 'debug', 'no' );
 		$this->email          = $this->get_option( 'email' );
