@@ -273,7 +273,7 @@ class WC_Product_Variable extends WC_Product {
 				}
 
 				// If we are getting prices for display, we need to account for taxes
-				if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
+				if ( $display && $variation ) {
 					$price         = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
 					$regular_price = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $regular_price ) : $variation->get_price_excluding_tax( 1, $regular_price );
 					$sale_price    = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price );
