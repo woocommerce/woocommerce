@@ -66,7 +66,6 @@
 					window.addEventListener( 'beforeunload', this.unloadConfirmation );
 				},
 				setUnloadConfirmation : function() {
-					console.log( data.strings.unload_confirmation_msg );
 					this.needsUnloadConfirm = true;
 				},
 				clearUnloadConfirmation : function() {
@@ -78,7 +77,6 @@
 						window.event.returnValue = data.strings.unload_confirmation_msg;
 						return data.strings.unload_confirmation_msg;
 					}
-					return null;
 				},
 				sanitizePage : function( page_num ) {
 					page_num = parseInt( page_num, 10 );
