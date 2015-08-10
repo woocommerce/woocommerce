@@ -159,7 +159,6 @@ class WC_Eval_Math {
 			} elseif ( $op == '(' and !$expecting_op ) {
 				$stack->push( '(' ); // that was easy
 				$index++;
-				$allow_neg = true;
 				//===============
 			} elseif ( $ex and !$expecting_op ) { // do we now have a function/variable/number?
 				$expecting_op = true;
@@ -234,7 +233,6 @@ class WC_Eval_Math {
 				$stack->push( -1*$stack->pop() );
 				// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
 			} elseif ( preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) { // it's a function!
-				$fnn = $matches[1];
 				// if the token is a number or variable, push it on the stack
 			} else {
 				if ( is_numeric( $token ) ) {
