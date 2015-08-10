@@ -262,25 +262,27 @@ class WC_Product_Variable extends WC_Product {
 			$tax_display_mode  = get_option( 'woocommerce_tax_display_shop' );
 
 			foreach ( $this->get_children( true ) as $variation_id ) {
-				$price         = get_post_meta( $variation_id, '_price', true );
-				$regular_price = get_post_meta( $variation_id, '_regular_price', true );
-				$sale_price    = get_post_meta( $variation_id, '_sale_price', true );
+				if ( $variation = $this->get_child( $variation_id ) ) {
+					$price         = $variation->get_price();
+					$regular_price = $variation->get_regular_price();
+					$sale_price    = $variation->get_sale_price();
 
-				// If sale price does not equal price, the product is not yet on sale
-				if ( $price != $sale_price ) {
-					$sale_price = $regular_price;
+					// If sale price does not equal price, the product is not yet on sale
+					if ( ! $variation->is_on_sale() ) {
+						$sale_price = $regular_price;
+					}
+
+					// If we are getting prices for display, we need to account for taxes
+					if ( $display ) {
+						$price         = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
+						$regular_price = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $regular_price ) : $variation->get_price_excluding_tax( 1, $regular_price );
+						$sale_price    = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price );
+					}
+
+					$prices[ $variation_id ]         = $price;
+					$regular_prices[ $variation_id ] = $regular_price;
+					$sale_prices[ $variation_id ]    = $sale_price;
 				}
-
-				// If we are getting prices for display, we need to account for taxes
-				if ( $display && ( $variation = $this->get_child( $variation_id ) ) ) {
-					$price         = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
-					$regular_price = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $regular_price ) : $variation->get_price_excluding_tax( 1, $regular_price );
-					$sale_price    = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price );
-				}
-
-				$prices[ $variation_id ]         = $price;
-				$regular_prices[ $variation_id ] = $regular_price;
-				$sale_prices[ $variation_id ]    = $sale_price;
 			}
 
 			asort( $prices );
