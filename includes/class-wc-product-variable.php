@@ -201,7 +201,7 @@ class WC_Product_Variable extends WC_Product {
 	public function is_on_sale() {
 		$is_on_sale = false;
 		$prices     = $this->get_variation_prices();
-		if ( $prices['regular_price'] !== $prices['price'] ) {
+		if ( $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'] ) {
 			$is_on_sale = true;
 		}
 		return apply_filters( 'woocommerce_product_is_on_sale', $is_on_sale, $this );
