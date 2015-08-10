@@ -11,13 +11,13 @@
  */
 class WC_Order_Item_Meta {
 
-	/** @var For handling backwards comp */
+	/** @var bool For handling backwards comp */
 	private $legacy = false;
 
 	/** @var Array Order item */
 	private $item   = null;
 
-	/** @var Post meta data */
+	/** @var Array Post meta data */
 	public $meta    = null;
 
 	/** @var Product object */
