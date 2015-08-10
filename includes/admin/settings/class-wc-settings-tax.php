@@ -149,7 +149,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// Localize and enqueue our js.
 		wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 			'current_class' => $current_class,
-			'rates'         => array_values( $rates ),
+			'rates'         => $rates,
 			'page'          => ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1,
 			'limit'         => 100,
 			'countries'     => $countries,
