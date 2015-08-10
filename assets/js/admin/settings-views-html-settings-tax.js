@@ -72,7 +72,8 @@
 					this.needsUnloadConfirm = false;
 				},
 				unloadConfirmation : function(e) {
-					if ( this.needsUnloadConfirm ) {
+					// @todo: Find a way to stop needing to refer to the specific instance from the abstract class.
+					if ( WCTaxTableInstance.needsUnloadConfirm ) {
 						e.returnValue = data.strings.unload_confirmation_msg;
 						window.event.returnValue = data.strings.unload_confirmation_msg;
 						return data.strings.unload_confirmation_msg;
