@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.4.1 Admin\n"
+"Project-Id-Version: WooCommerce 2.4.2 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-08-10 21:29:57+00:00\n"
+"POT-Creation-Date: 2015-08-11 17:22:18+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -168,8 +168,8 @@ msgid "Last warning, are you sure?"
 msgstr ""
 
 #: includes/admin/class-wc-admin-assets.php:182
-#: includes/admin/class-wc-admin-taxonomies.php:129
-#: includes/admin/class-wc-admin-taxonomies.php:220
+#: includes/admin/class-wc-admin-taxonomies.php:131
+#: includes/admin/class-wc-admin-taxonomies.php:222
 msgid "Choose an image"
 msgstr ""
 
@@ -952,8 +952,8 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-permalink-settings.php:116
-#: includes/admin/class-wc-admin-taxonomies.php:93
-#: includes/admin/class-wc-admin-taxonomies.php:182
+#: includes/admin/class-wc-admin-taxonomies.php:95
+#: includes/admin/class-wc-admin-taxonomies.php:184
 msgid "Default"
 msgstr ""
 
@@ -1303,7 +1303,7 @@ msgstr[1] ""
 
 #: includes/admin/class-wc-admin-post-types.php:210
 #: includes/admin/class-wc-admin-post-types.php:211
-#: includes/admin/class-wc-admin-taxonomies.php:298
+#: includes/admin/class-wc-admin-taxonomies.php:300
 msgid "Image"
 msgstr ""
 
@@ -2558,51 +2558,51 @@ msgid ""
 "upgrade for your language if a translation is available."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:91
-#: includes/admin/class-wc-admin-taxonomies.php:179
+#: includes/admin/class-wc-admin-taxonomies.php:93
+#: includes/admin/class-wc-admin-taxonomies.php:181
 msgid "Display type"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:94
-#: includes/admin/class-wc-admin-taxonomies.php:183
+#: includes/admin/class-wc-admin-taxonomies.php:96
+#: includes/admin/class-wc-admin-taxonomies.php:185
 #: includes/admin/meta-boxes/class-wc-meta-box-coupon-data.php:99
 #: includes/admin/settings/class-wc-settings-products.php:28
 #: includes/admin/views/html-admin-page-addons.php:32
 msgid "Products"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:95
-#: includes/admin/class-wc-admin-taxonomies.php:184
+#: includes/admin/class-wc-admin-taxonomies.php:97
+#: includes/admin/class-wc-admin-taxonomies.php:186
 msgid "Subcategories"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:96
-#: includes/admin/class-wc-admin-taxonomies.php:185
+#: includes/admin/class-wc-admin-taxonomies.php:98
+#: includes/admin/class-wc-admin-taxonomies.php:187
 msgid "Both"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:100
-#: includes/admin/class-wc-admin-taxonomies.php:190
-#: includes/admin/class-wc-admin-taxonomies.php:329
+#: includes/admin/class-wc-admin-taxonomies.php:102
+#: includes/admin/class-wc-admin-taxonomies.php:192
+#: includes/admin/class-wc-admin-taxonomies.php:331
 msgid "Thumbnail"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:104
-#: includes/admin/class-wc-admin-taxonomies.php:195
+#: includes/admin/class-wc-admin-taxonomies.php:106
+#: includes/admin/class-wc-admin-taxonomies.php:197
 msgid "Upload/Add image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:105
-#: includes/admin/class-wc-admin-taxonomies.php:196
+#: includes/admin/class-wc-admin-taxonomies.php:107
+#: includes/admin/class-wc-admin-taxonomies.php:198
 msgid "Remove image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:131
-#: includes/admin/class-wc-admin-taxonomies.php:222
+#: includes/admin/class-wc-admin-taxonomies.php:133
+#: includes/admin/class-wc-admin-taxonomies.php:224
 msgid "Use image"
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:272
+#: includes/admin/class-wc-admin-taxonomies.php:274
 msgid ""
 "Product categories for your store can be managed here. To change the order "
 "of categories on the front-end you can drag and drop to sort them. To see "
@@ -2610,14 +2610,14 @@ msgid ""
 "page."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:279
+#: includes/admin/class-wc-admin-taxonomies.php:281
 msgid ""
 "Shipping classes can be used to group products of similar type. These "
 "groups can then be used by certain shipping methods to provide different "
 "rates to different products."
 msgstr ""
 
-#: includes/admin/class-wc-admin-taxonomies.php:286
+#: includes/admin/class-wc-admin-taxonomies.php:288
 msgid ""
 "Attribute terms can be assigned to products and "
 "variations.<br/><br/><b>Note</b>: Deleting a term will remove it from all "

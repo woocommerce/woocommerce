@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.3
-Stable tag: 2.4.1
+Stable tag: 2.4.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.4.2 - 11/08/2015 =
 * Fix - If all variations are out of stock, maintain pricing display.
 * Fix - Prevent double add to cart due to ajax endpoints.
 * Fix - ordering_args in product_category shortcode.
