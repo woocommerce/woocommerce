@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - If all variations are out of stock, maintain pricing display.
 * Fix - Prevent double add to cart due to ajax endpoints.
 * Fix - ordering_args in product_category shortcode.
+* Fix - Tax inclusive prices rounding case.
 * Tweak - If no variation prices are found, show no price label rather than free.
 * Tweak - Made tab panel selector more specific to avoid theme conflicts.
 * Tweak - Made checkout make use of new ajax endpoints.

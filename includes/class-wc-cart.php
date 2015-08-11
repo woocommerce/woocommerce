@@ -1297,9 +1297,6 @@ class WC_Cart {
 				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $discounted_taxes, 'subtotal' => $taxes );
 			}
 
-			// Round cart contents
-			$this->cart_contents_total = round( $this->cart_contents_total, $this->dp );
-
 			// Only calculate the grand total + shipping if on the cart/checkout
 			if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT') || defined('WOOCOMMERCE_CART') ) {
 
