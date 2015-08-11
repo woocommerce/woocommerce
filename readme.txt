@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 * Fix - If all variations are out of stock, maintain pricing display.
+* Fix - Prevent double add to cart due to ajax endpoints.
 * Tweak - If no variation prices are found, show no price label rather than free.
 * Tweak - Made tab panel selector more specific to avoid theme conflicts.
 * Tweak - Made checkout make use of new ajax endpoints.
