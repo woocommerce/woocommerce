@@ -140,7 +140,9 @@ class WC_Order_Item_Meta {
 	 * @return array
 	 */
 	public function get_formatted_legacy( $hideprefix = '_' ) {
-		_deprecated_function( 'get_formatted_legacy', '2.4', 'Item Meta Data is being called with legacy arguments' );
+		if ( ! is_ajax() ) {
+			_deprecated_function( 'get_formatted_legacy', '2.4', 'Item Meta Data is being called with legacy arguments' );
+		}
 
 		$formatted_meta = array();
 
