@@ -162,6 +162,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - If all variations are out of stock, maintain pricing display.
 * Tweak - If no variation prices are found, show no price label rather than free.
 * Tweak - Made tab panel selector more specific to avoid theme conflicts.
+* Tweak - Made checkout make use of new ajax endpoints.
+* Tweak - woocommerce_force_ssl_checkout no longer needs to check for admin-ajax actions.
 
 = 2.4.1 - 10/08/2015 =
 * Fix - Tweaked the 2.4 upgrade routine to disable refund emails during update.
