@@ -159,6 +159,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Tweak - If all variations are out of stock, maintain pricing.
+* Tweak - If no variation prices are found, show no price label rather than free.
+
 = 2.4.1 - 10/08/2015 =
 * Fix - Tweaked the 2.4 upgrade routine to disable refund emails during update.
 * Fix - Notices when calling get_shipping_classes().

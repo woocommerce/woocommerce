@@ -154,14 +154,16 @@ class WC_Product_Variable extends WC_Product {
 						'key'     => '_price',
 						'value'   => '',
 						'compare' => '!=',
-					),
-					// Must be in stock
-					array(
+					)
+				);
+				// Must be in stock?
+				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+					$args['meta_query'][] = array(
 						'key'     => '_stock_status',
 						'value'   => 'instock',
 						'compare' => '=',
-					)
-				);
+					);
+				}
 			}
 			$this->children[ $key ] = get_posts( $args );
 			set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
@@ -309,10 +311,12 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function get_price_html( $price = '' ) {
-		if ( $this->get_price() === '' ) {
+		$prices = $this->get_variation_prices( true );
+
+		// No variations, or no active variation prices
+		if ( $this->get_price() === '' || empty( $prices['price'] ) ) {
 			$price = apply_filters( 'woocommerce_variable_empty_price_html', '', $this );
 		} else {
-			$prices    = $this->get_variation_prices( true );
 			$min_price = current( $prices['price'] );
 			$max_price = end( $prices['price'] );
 			$price     = $min_price !== $max_price ? sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) : wc_price( $min_price );
