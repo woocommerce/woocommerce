@@ -9,7 +9,7 @@ jQuery( function( $ ) {
 	// Tabs
 	$( '.wc-tabs-wrapper, .woocommerce-tabs' )
 		.on( 'init', function() {
-			$( '.wc-tab, .panel:not(.panel .panel)' ).hide();
+			$( '.wc-tab, .woocommerce-tabs .panel:not(.panel .panel)' ).hide();
 
 			var hash  = window.location.hash;
 			var url   = window.location.href;
@@ -29,7 +29,7 @@ jQuery( function( $ ) {
 			var $tabs         = $tabs_wrapper.find( '.wc-tabs, ul.tabs' );
 
 			$tabs.find( 'li' ).removeClass( 'active' );
-			$tabs_wrapper.find( '.wc-tab, .panel:not(.panel .panel)' ).hide();
+			$tabs_wrapper.find( '.wc-tab, .woocommerce-tabs .panel:not(.panel .panel)' ).hide();
 
 			$tab.closest( 'li' ).addClass( 'active' );
 			$tabs_wrapper.find( $tab.attr( 'href' ) ).show();
