@@ -168,7 +168,10 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$query_args = array(
+		// Default ordering args
+		$ordering_args = WC()->query->get_catalog_ordering_args( $atts['orderby'], $atts['order'] );
+		$meta_query    = WC()->query->get_meta_query();
+		$query_args    = array(
 			'post_type'				=> 'product',
 			'post_status' 			=> 'publish',
 			'ignore_sticky_posts'	=> 1,
@@ -190,10 +193,7 @@ class WC_Shortcodes {
 			$query_args['meta_key'] = $ordering_args['meta_key'];
 		}
 
-		// Default ordering args
-		$ordering_args = WC()->query->get_catalog_ordering_args( $atts['orderby'], $atts['order'] );
-		$meta_query    = WC()->query->get_meta_query();
-		$return        = self::product_loop( $query_args, $atts, 'product_cat' );
+		$return = self::product_loop( $query_args, $atts, 'product_cat' );
 
 		// Remove ordering query arguments
 		WC()->query->remove_ordering_args();
