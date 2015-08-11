@@ -58,10 +58,11 @@ foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 
 		if ( 'item' === $shipping_method->type ) {
 			foreach ( $math_cost_strings as $key => $math_cost_string ) {
-				$math_cost_strings[ $key ] = array_filter( $math_cost_strings[ $key ] );
-				if ( $math_cost_strings[ $key ] ) {
-					$math_cost_strings[ $key ][0] = '( ' . $math_cost_strings[ $key ][0];
-					$math_cost_strings[ $key ][ sizeof( $math_cost_strings[ $key ] ) - 1 ] .= ' ) * [qty]';
+				$math_cost_strings[ $key ] = array_filter( array_map( 'trim', $math_cost_strings[ $key ] ) );
+				if ( ! empty( $math_cost_strings[ $key ] ) ) {
+					$last_key                                = max( 0, sizeof( $math_cost_strings[ $key ] ) - 1 );
+					$math_cost_strings[ $key ][0]            = '( ' . $math_cost_strings[ $key ][0];
+					$math_cost_strings[ $key ][ $last_key ] .= ' ) * [qty]';
 				}
 			}
 		}
