@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'wc-ajax', $request ) ) );
+		return esc_url_raw( add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ) );
 	}
 
 	/**
