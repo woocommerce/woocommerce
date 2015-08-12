@@ -133,9 +133,9 @@
 					var $target  = $( event.currentTarget );
 
 					event.preventDefault();
-					view.page = $target.data('goto') ? $target.data('goto') : $target.val();
-					view.render();
-					view.updateUrl();
+					event.data.view.page = $target.data('goto') ? $target.data('goto') : $target.val();
+					event.data.view.render();
+					event.data.view.updateUrl();
 				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
