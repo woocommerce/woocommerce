@@ -318,8 +318,10 @@ class WC_Shipping {
 					// Merge cost and taxes - label and ID will be the same
 					$this->shipping_total += $rate->cost;
 
-					foreach ( array_keys( $this->shipping_taxes + $rate->taxes ) as $key ) {
-					    $this->shipping_taxes[ $key ] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $this->shipping_taxes[$key] ) ? $this->shipping_taxes[$key] : 0 );
+					if ( ! empty( $rate->taxes ) && is_array( $rate->taxes ) ) {
+						foreach ( array_keys( $this->shipping_taxes + $rate->taxes ) as $key ) {
+							$this->shipping_taxes[ $key ] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $this->shipping_taxes[$key] ) ? $this->shipping_taxes[$key] : 0 );
+						}
 					}
 				}
 			}
