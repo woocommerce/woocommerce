@@ -33,6 +33,19 @@
 						this.changes[ rateID ] = this.changes[ rateID ] || {};
 						this.changes[ rateID ][ attribute ] = value;
 					}
+				},
+				getFilteredRates : function() {
+					var rates  = this.get( 'rates' ),
+						search = $search_field.val().toLowerCase();
+
+					if ( search.length ) {
+						rates = _.filter( rates, function( rate ) {
+							var search_text = rate.join( ' ' ).toLowerCase();
+							return ( -1 !== search_text.indexOf( search ) );
+						} );
+					}
+
+					return rates;
 				}
 			} ),
 			WCTaxTableViewConstructor  = Backbone.View.extend({
@@ -40,7 +53,7 @@
 				per_page    : data.limit,
 				page        : data.page,
 				render      : function() {
-					var rates       = $.map( this.model.get( 'rates' ), function(v){return [v]} ),
+					var rates       = $.map( this.model.getFilteredRates(), function(v){return [v]} ),
 						qty_rates   = rates.length,
 						qty_pages   = Math.ceil( qty_rates / this.per_page ),
 						first_index = this.per_page * ( this.page - 1),
