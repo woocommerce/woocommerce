@@ -120,8 +120,22 @@
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 				//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
-
+					$search_field.on( 'keyup search', { view : this }, this.onSearchField );
+					$pagination.on( 'click', 'a', { view : this }, this.onPageChange );
+					$pagination.on( 'change', 'input', { view : this }, this.onPageChange );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
+				},
+				onSearchField : function( event ){
+					event.data.view.updateUrl();
+					event.data.view.render();
+				},
+				onPageChange : function( event ) {
+					var $target  = $( event.currentTarget );
+
+					event.preventDefault();
+					view.page = $target.data('goto') ? $target.data('goto') : $target.val();
+					view.render();
+					view.updateUrl();
 				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
@@ -183,29 +197,6 @@
 			} );
 
 		WCTaxTableInstance.render();
-
-		/**
-		 * Handle clicks on the pagination links.
-		 *
-		 * Abstracting it out here instead of re-running it after each render.
-		 */
-		$pagination.on( 'click', 'a', function(event){
-			event.preventDefault();
-			WCTaxTableInstance.page = WCTaxTableInstance.sanitizePage( $( event.currentTarget ).data('goto') );
-			WCTaxTableInstance.render();
-			WCTaxTableInstance.updateUrl();
-		} );
-		$pagination.on( 'change', 'input', function(event) {
-			WCTaxTableInstance.page = WCTaxTableInstance.sanitizePage( $( event.currentTarget ).val() );
-			WCTaxTableInstance.render();
-			WCTaxTableInstance.updateUrl();
-		} );
-
-		/**
-		 * Handle searches.
-		 */
-		$search_field.on( 'keyup search', WCTaxTableInstance.updateUrl() );
-		$search_field.on( 'keyup search', WCTaxTableInstance.render() );
 
 		/**
 		 * Handle the exporting of tax rates, and build it off the global `data.rates` object.
