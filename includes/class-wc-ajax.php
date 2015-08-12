@@ -39,7 +39,6 @@ class WC_AJAX {
 	 * Set AJAX defines.
 	 */
 	public static function define_ajax() {
-
 		if ( ! empty( $_GET['wc-ajax'] ) ) {
 			if ( ! defined( 'DOING_AJAX' ) ) {
 				define( 'DOING_AJAX', true );
@@ -47,6 +46,8 @@ class WC_AJAX {
 			if ( ! defined( 'WC_DOING_AJAX' ) ) {
 				define( 'WC_DOING_AJAX', true );
 			}
+			// Turn off error_reporting during AJAX events to prevent malformed JSON
+			error_reporting(0);
 		}
 	}
 
