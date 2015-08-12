@@ -53,7 +53,7 @@
 				per_page    : data.limit,
 				page        : data.page,
 				render      : function() {
-					var rates       = $.map( this.model.getFilteredRates(), function(v){return [v]} ),
+					var rates       = _.toArray( this.model.getFilteredRates() ),
 						qty_rates   = rates.length,
 						qty_pages   = Math.ceil( qty_rates / this.per_page ),
 						first_index = this.per_page * ( this.page - 1),
@@ -114,7 +114,7 @@
 					window.history.replaceState( {}, '', url );
 				},
 				initialize : function() {
-					this.qty_pages = Math.ceil( $.map( this.model.get( 'rates' ), function(v){return [v]} ).length / this.per_page );
+					this.qty_pages = Math.ceil( _.toArray( this.model.get( 'rates' ) ).length / this.per_page );
 					this.page = this.sanitizePage( data.page );
 
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
