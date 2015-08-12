@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Ajax variations: stripslashes to fix attributes with quotes.
 * Fix - No longer returns to the first variation list page when deleting one variation.
 * Fix - Refund subjects when order contains downloadable product.
+* Fix - wc_get_product_variation_attributes should only get parent attributes which are for variations.
 * Tweak - Disable display_errors during ajax requests to prevent malformed JSON.
 * Tweak - When merging shipping taxes with a shipping rate taxes, ensure shipping rate taxes is not malformed.
 
