@@ -159,7 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.4.3 - xx/08/2015 =
+= 2.4.3 - 12/08/2015 =
 * Fix - Query within wc_customer_bought_product().
 * Fix - Tab hiding with some theme markup.
 * Fix - Ajax variations: stripslashes to fix attributes with quotes.
