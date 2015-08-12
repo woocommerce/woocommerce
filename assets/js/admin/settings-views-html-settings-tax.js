@@ -40,7 +40,7 @@
 
 					if ( search.length ) {
 						rates = _.filter( rates, function( rate ) {
-							var search_text = rate.join( ' ' ).toLowerCase();
+							var search_text = _.toArray( rate ).join( ' ' ).toLowerCase();
 							return ( -1 !== search_text.indexOf( search ) );
 						} );
 					}
