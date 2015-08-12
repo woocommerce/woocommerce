@@ -121,9 +121,6 @@
 				//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
 
-					$search_field.on( 'keyup search', this.updateUrl() );
-					$search_field.on( 'keyup search', this.render() );
-
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 				},
 				setUnloadConfirmation : function() {
@@ -222,6 +219,11 @@
 			}
 			return false;
 		});
+		/**
+		 * Handle searches.
+		 */
+		$search_field.on( 'keyup search', WCTaxTableInstance.updateUrl() );
+		$search_field.on( 'keyup search', WCTaxTableInstance.render() );
 
 		/**
 		 * Handle the exporting of tax rates, and build it off the global `data.rates` object.
