@@ -103,10 +103,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * @return string
 	 */
 	function get_subject() {
-		if ( ! empty( $this->object ) && $this->object->has_downloadable_item() )
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $this->subject_downloadable ), $this->object );
-		else
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $this->subject ), $this->object );
+		return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $this->subject ), $this->object );
 	}
 
 	/**
@@ -116,10 +113,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * @return string
 	 */
 	function get_heading() {
-		if ( ! empty( $this->object ) && $this->object->has_downloadable_item() )
-			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $this->heading_downloadable ), $this->object );
-		else
-			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $this->heading ), $this->object );
+		return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $this->heading ), $this->object );
 	}
 
 	/**
