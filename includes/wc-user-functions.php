@@ -241,7 +241,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 
 		$result = $wpdb->get_var(
 			$wpdb->prepare( "
-				SELECT 1 FROM {$wpdb->posts} AS p
+				SELECT COUNT( i.order_item_id ) FROM {$wpdb->posts} AS p
 				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
 				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
 				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id

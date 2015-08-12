@@ -159,6 +159,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Query within wc_customer_bought_product().
+
 = 2.4.2 - 11/08/2015 =
 * Fix - If all variations are out of stock, maintain pricing display.
 * Fix - Prevent double add to cart due to ajax endpoints.
