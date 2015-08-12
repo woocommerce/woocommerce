@@ -82,6 +82,24 @@
 						} ) );
 					}
 				},
+				updateUrl : function() {
+					if ( ! window.history.replaceState ) {
+						return;
+					}
+
+					var url    = data.base_url,
+						search = $search_field.val();
+
+					if ( 1 < this.page ) {
+						url += '&p=' + encodeURIComponent( this.page );
+					}
+
+					if ( search.length ) {
+						url += '&s=' + encodeURIComponent( search );
+					}
+
+					window.history.replaceState( {}, '', url );
+				},
 				initialize : function() {
 					this.qty_pages = Math.ceil( $.map( this.model.get( 'rates' ), function(v){return [v]} ).length / this.per_page );
 					this.page = this.sanitizePage( data.page );
@@ -89,6 +107,8 @@
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 				//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
+
+					$search_field.on( 'change search', this.updateUrl() );
 
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 				},
@@ -162,10 +182,12 @@
 			event.preventDefault();
 			WCTaxTableInstance.page = WCTaxTableInstance.sanitizePage( $( event.currentTarget ).data('goto') );
 			WCTaxTableInstance.render();
+			WCTaxTableInstance.updateUrl();
 		} );
 		$pagination.on( 'change', 'input', function(event) {
 			WCTaxTableInstance.page = WCTaxTableInstance.sanitizePage( $( event.currentTarget ).val() );
 			WCTaxTableInstance.render();
+			WCTaxTableInstance.updateUrl();
 		} );
 
 		$table.find('.remove_tax_rates').click(function() {
