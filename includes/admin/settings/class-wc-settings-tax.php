@@ -104,7 +104,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables
 	 */
 	public function output_tax_rates() {
-		global $wpdb;
+		global $wpdb,
+				$current_section;
 
 		$current_class = $this->get_current_tax_class();
 
@@ -146,9 +147,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			}
 		}
 
+		$base_url = admin_url( add_query_arg( array(
+			'page'    => 'wc-settings',
+			'tab'     => 'tax',
+			'section' => $current_section,
+		), 'admin.php' ) );
+
 		// Localize and enqueue our js.
 		wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 			'current_class' => $current_class,
+			'base_url'      => $base_url,
 			'rates'         => $rates,
 			'page'          => ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1,
 			'limit'         => 100,
