@@ -108,7 +108,8 @@
 				//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
 
-					$search_field.on( 'change search', this.updateUrl() );
+					$search_field.on( 'keyup search', this.updateUrl() );
+					$search_field.on( 'keyup search', this.render() );
 
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 				},
