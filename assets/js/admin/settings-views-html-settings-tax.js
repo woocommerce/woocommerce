@@ -35,6 +35,34 @@
 						this.changes[ rateID ][ attribute ] = value;
 					}
 				},
+				updateSelectRates : function( selectRates ) {
+					var rates   = _.indexBy( this.get( 'rates' ), 'tax_rate_id' ),
+						changed = false;
+
+					_.each( selectRates, function( newRate ) {
+						var rateID = newRate.tax_rate_id;
+						if ( rates[ rateID ] ) {
+							var originalRate = rates[ rateID ];
+							_.each( newRate, function ( newValue, attribute ) {
+								if ( originalRate[ attribute ] !== newValue ) {
+									changed = true;
+									rates[ rateID ][ attribute ] = newValue;
+
+									this.changes[ rateID ] = this.changes[ rateID ] || {};
+									this.changes[ rateID ][ attribute ] = newValue;
+								}
+							} );
+						} else {
+							// We are adding a new rate! Isn't that lovely.
+							// Something something code code code.
+						}
+					} );
+
+					if ( changed ) {
+						this.set( 'rates', rates );
+						this.trigger( 'change:rates' ); // Why is this necessary?  Shouldn't the previous line trigger it?
+					}
+				},
 				getFilteredRates : function() {
 					var rates  = this.get( 'rates' ),
 						search = $search_field.val().toLowerCase();
@@ -127,6 +155,7 @@
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 				//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
+					$tbody.on( 'sortupdate', { view : this }, this.updateModelOnSort );
 					$search_field.on( 'keyup search', { view : this }, this.onSearchField );
 					$pagination.on( 'click', 'a', { view : this }, this.onPageChange );
 					$pagination.on( 'change', 'input', { view : this }, this.onPageChange );
@@ -182,6 +211,55 @@
 					}
 
 					model.setRateAttribute( id, attribute, val );
+				},
+				updateModelOnSort : function( event, ui ) {
+					var view         = event.data.view,
+						model        = view.model,
+						$tr          = ui.item,
+						tax_rate_id  = $tr.data( 'id' ),
+						rates        = _.indexBy( model.get('rates'), 'tax_rate_id' ),
+						old_position = rates[ tax_rate_id ].tax_rate_order,
+						new_position = $tr.index() + ( ( view.page - 1 ) * view.per_page ),
+						which_way    = ( new_position > old_position ) ? 'higher' : 'lower',
+						rates_to_reorder, reordered_rates;
+
+					rates_to_reorder = _.filter( rates, function( rate ) {
+						var order  = parseInt( rate.tax_rate_order, 10 ),
+							limits = [ old_position, new_position ];
+
+						if ( parseInt( rate.tax_rate_id, 10 ) === parseInt( tax_rate_id, 10 ) ) {
+							return true;
+						} else if ( order > _.min( limits ) && order < _.max( limits ) ) {
+							return true;
+						} else if ( 'higher' === which_way && order === _.max( limits ) ) {
+							return true;
+						} else if ( 'lower' === which_way && order === _.min( limits ) ) {
+							return true;
+						}
+						return false;
+					} );
+
+					console.log( rates_to_reorder );
+
+					reordered_rates = _.map( rates_to_reorder, function( rate ) {
+						var order = parseInt( rate.tax_rate_order, 10 );
+
+						if ( parseInt( rate.tax_rate_id, 10 ) === parseInt( tax_rate_id, 10 ) ) {
+							rate.tax_rate_order = new_position;
+							console.log( rate );
+						} else if ( 'higher' === which_way ) {
+							rate.tax_rate_order = order - 1;
+						} else if ( 'lower' === which_way ) {
+							rate.tax_rate_order = order + 1;
+						}
+
+						return rate;
+					} );
+
+
+
+					model.updateSelectRates( reordered_rates );
+					view.render();
 				},
 				sanitizePage : function( page_num ) {
 					page_num = parseInt( page_num, 10 );
