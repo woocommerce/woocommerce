@@ -164,7 +164,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Tab hiding with some theme markup.
 * Fix - Ajax variations: stripslashes to fix attributes with quotes.
 * Fix - No longer returns to the first variation list page when deleting one variation.
-* Tweak - Disable error_reporting during ajax requests to prevent malformed JSON.
+* Tweak - Disable display_errors during ajax requests to prevent malformed JSON.
 * Tweak - When merging shipping taxes with a shipping rate taxes, ensure shipping rate taxes is not malformed.
 
 = 2.4.2 - 11/08/2015 =
