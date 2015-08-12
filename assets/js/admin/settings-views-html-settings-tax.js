@@ -53,12 +53,12 @@
 				per_page    : data.limit,
 				page        : data.page,
 				render      : function() {
-					var rates       = _.toArray( this.model.getFilteredRates() ),
+					var rates       = this.model.getFilteredRates(),
 						qty_rates   = rates.length,
 						qty_pages   = Math.ceil( qty_rates / this.per_page ),
 						first_index = this.per_page * ( this.page - 1),
 						last_index  = this.per_page * this.page,
-						paged_rates = rates.slice( first_index, last_index ),
+						paged_rates = _.toArray( rates ).slice( first_index, last_index ),
 						view        = this;
 
 					// Blank out the contents.
