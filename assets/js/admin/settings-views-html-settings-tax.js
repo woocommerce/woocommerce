@@ -23,7 +23,7 @@
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes : {},
 				setRateAttribute : function( rateID, attribute, value ) {
-					var rates = this.get( 'rates' );
+					var rates = _.indexBy( this.get( 'rates' ), 'tax_rate_id' );
 
 					if ( rates[ rateID ][ attribute ] !== value ) {
 						rates[ rateID ][ attribute ] = value;
