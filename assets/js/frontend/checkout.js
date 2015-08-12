@@ -20,7 +20,7 @@ jQuery( function( $ ) {
 			$( document.body ).bind( 'init_checkout', this.init_checkout );
 
 			// Payment methods
-			this.$order_review.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
+			this.$checkout_form.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
 
 			// Form submission
 			this.$checkout_form.on( 'submit', this.submit );
@@ -38,7 +38,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.$order_review.find( 'input[name=payment_method]:checked' ).trigger( 'click' );
+			this.$checkout_form.find( 'input[name=payment_method]:checked' ).trigger( 'click' );
 			this.$checkout_form.find( '#ship-to-different-address input' ).change();
 
 			// Update on page load
@@ -182,7 +182,7 @@ jQuery( function( $ ) {
 				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
 
-			var payment_method = $( '#order_review input[name=payment_method]:checked' ).val(),
+			var payment_method = $( 'input[name=payment_method]:checked' ).val(),
 				country			= $( '#billing_country' ).val(),
 				state			= $( '#billing_state' ).val(),
 				postcode		= $( 'input#billing_postcode' ).val(),
@@ -302,7 +302,7 @@ jQuery( function( $ ) {
 			}
 
 			// Trigger a handler to let gateways manipulate the checkout if needed
-			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + $( '#order_review input[name=payment_method]:checked' ).val() ) !== false ) {
+			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + $( 'input[name=payment_method]:checked' ).val() ) !== false ) {
 
 				$form.addClass( 'processing' );
 
