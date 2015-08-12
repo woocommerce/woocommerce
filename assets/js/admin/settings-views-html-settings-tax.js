@@ -13,6 +13,7 @@
 		}
 
 		var rowTemplate        = wp.template( 'wc-tax-table-row' ),
+			rowTemplateEmpty   = wp.template( 'wc-tax-table-row-empty' ),
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
 			$table             = $( '.wc_tax_rates' ),
 			$tbody             = $( '#rates' ),
@@ -64,10 +65,14 @@
 					// Blank out the contents.
 					this.$el.empty();
 
-					// Populate $tbody with the current page of results.
-					$.each( paged_rates, function ( id, rowData ) {
-						view.$el.append( view.rowTemplate( rowData ) );
-					});
+					if ( paged_rates.length ) {
+						// Populate $tbody with the current page of results.
+						$.each( paged_rates, function ( id, rowData ) {
+							view.$el.append( view.rowTemplate( rowData ) );
+						} );
+					} else {
+						view.$el.append( rowTemplateEmpty() );
+					}
 
 					// Initialize autocomplete for countries.
 					this.$el.find( 'td.country input' ).autocomplete({

@@ -93,6 +93,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tr>
 </script>
 
+<script type="text/html" id="tmpl-wc-tax-table-row-empty">
+	<tr>
+		<th colspan="10" style="text-align:center"><?php esc_html_e( 'No Matching Tax Rates Found.', 'woocommerce' ); ?></th>
+	</tr>
+</script>
+
 <script type="text/html" id="tmpl-wc-tax-table-pagination">
 	<div class="tablenav">
 		<div class="tablenav-pages">
