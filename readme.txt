@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 * Fix - Query within wc_customer_bought_product().
 * Fix - Tab hiding with some theme markup.
+* Fix - Ajax variations: stripslashes to fix attributes with quotes.
 * Tweak - Disable error_reporting during ajax requests to prevent malformed JSON.
 * Tweak - When merging shipping taxes with a shipping rate taxes, ensure shipping rate taxes is not malformed.
 

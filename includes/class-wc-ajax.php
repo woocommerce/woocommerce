@@ -440,7 +440,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$variation_id = $variable_product->get_matching_variation( $_POST );
+		$variation_id = $variable_product->get_matching_variation( stripslashes_deep( $_POST ) );
 
 		if ( $variation_id ) {
 			$variation = $variable_product->get_available_variation( $variation_id );
