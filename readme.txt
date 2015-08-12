@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.3
-Stable tag: 2.4.2
+Stable tag: 2.4.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,14 +159,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.4.3 - xx/08/2015 =
+= 2.4.3 - 12/08/2015 =
 * Fix - Query within wc_customer_bought_product().
 * Fix - Tab hiding with some theme markup.
 * Fix - Ajax variations: stripslashes to fix attributes with quotes.
 * Fix - No longer returns to the first variation list page when deleting one variation.
 * Fix - Refund subjects when order contains downloadable product.
+* Fix - wc_get_product_variation_attributes should only get parent attributes which are for variations.
 * Tweak - Disable display_errors during ajax requests to prevent malformed JSON.
 * Tweak - When merging shipping taxes with a shipping rate taxes, ensure shipping rate taxes is not malformed.
+* Tweak - Improved refund email events and woocommerce_order_fully_refunded hook.
 
 = 2.4.2 - 11/08/2015 =
 * Fix - If all variations are out of stock, maintain pricing display.
