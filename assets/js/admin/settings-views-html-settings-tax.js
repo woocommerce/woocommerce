@@ -18,6 +18,7 @@
 			$tbody             = $( '#rates' ),
 			$p_unsaved_msg     = $( '#unsaved-changes' ),
 			$pagination        = $( '#rates-pagination' ),
+			$search_field      = $( '#rates-search input[type=search]' ),
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes : {},
 				setRateAttribute : function( rateID, attribute, value ) {
