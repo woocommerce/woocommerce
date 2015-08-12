@@ -575,7 +575,7 @@ jQuery( function( $ ) {
 
 						$( '#woocommerce-product-data' ).trigger( 'woocommerce_variations_removed' );
 
-						if ( current_page === total_pages ) {
+						if ( current_page === total_pages || current_page <= total_pages ) {
 							page = current_page;
 						} else if ( current_page > total_pages && 0 !== total_pages ) {
 							page = total_pages;
