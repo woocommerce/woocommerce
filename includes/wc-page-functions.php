@@ -128,18 +128,19 @@ function wc_edit_address_i18n( $id, $flip = false ) {
  * Returns the url to the lost password endpoint url
  *
  * @access public
+ * @param  string $default_url
  * @return string
  */
-function wc_lostpassword_url( $default_password_reset_url ) {
+function wc_lostpassword_url( $default_url = '' ) {
 	$wc_password_reset_url = wc_get_page_permalink( 'myaccount' );
+
 	if ( false !== $wc_password_reset_url ) {
     	return wc_get_endpoint_url( 'lost-password', '', $wc_password_reset_url );
 	} else {
-		return $default_password_reset_url;
+		return $default_url;
 	}
 }
 add_filter( 'lostpassword_url',  'wc_lostpassword_url', 10, 1 );
-
 
 /**
  * Get the link to the edit account details page
