@@ -258,10 +258,10 @@
 						return rate;
 					} );
 
-
-
-					model.updateSelectRates( reordered_rates );
-					view.render();
+					if ( reordered_rates.length ) {
+						model.updateSelectRates( reordered_rates );
+						view.render(); // temporary, probably should get yanked.
+					}
 				},
 				sanitizePage : function( page_num ) {
 					page_num = parseInt( page_num, 10 );
