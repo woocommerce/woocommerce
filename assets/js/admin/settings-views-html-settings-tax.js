@@ -46,6 +46,8 @@
 						} );
 					}
 
+					rates = _.sortBy( rates, 'tax_rate_order' );
+
 					return rates;
 				}
 			} ),
