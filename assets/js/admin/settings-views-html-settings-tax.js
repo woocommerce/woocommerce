@@ -54,7 +54,7 @@
 				page        : data.page,
 				render      : function() {
 					var rates       = this.model.getFilteredRates(),
-						qty_rates   = rates.length,
+						qty_rates   = _.size( rates ),
 						qty_pages   = Math.ceil( qty_rates / this.per_page ),
 						first_index = this.per_page * ( this.page - 1),
 						last_index  = this.per_page * this.page,
