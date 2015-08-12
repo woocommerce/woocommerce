@@ -201,24 +201,6 @@
 			WCTaxTableInstance.updateUrl();
 		} );
 
-		$table.find('.remove_tax_rates').click(function() {
-			if ( $tbody.find('tr.current').length > 0 ) {
-				var $current = $tbody.find('tr.current');
-				$current.find('input').val('');
-				$current.find('input.remove_tax_rate').val('1');
-
-				$current.each(function(){
-					if ( $(this).is('.new') ) {
-						$( this ).remove();
-					} else {
-						$( this ).hide();
-					}
-				});
-			} else {
-				window.alert( data.strings.no_rows_selected );
-			}
-			return false;
-		});
 		/**
 		 * Handle searches.
 		 */
@@ -283,6 +265,28 @@
 				minLength: 3
 			});
 
+			return false;
+		});
+
+		/**
+		 * Removals.
+		 */
+		$table.find('.remove_tax_rates').click(function() {
+			if ( $tbody.find('tr.current').length > 0 ) {
+				var $current = $tbody.find('tr.current');
+				$current.find('input').val('');
+				$current.find('input.remove_tax_rate').val('1');
+
+				$current.each(function(){
+					if ( $(this).is('.new') ) {
+						$( this ).remove();
+					} else {
+						$( this ).hide();
+					}
+				});
+			} else {
+				window.alert( data.strings.no_rows_selected );
+			}
 			return false;
 		});
 
