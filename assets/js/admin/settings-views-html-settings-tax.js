@@ -74,7 +74,9 @@
 						} );
 					}
 
-					rates = _.sortBy( rates, 'tax_rate_order' );
+					rates = _.sortBy( rates, function( rate ) {
+						return parseInt( rate.tax_rate_order, 10 );
+					} );
 
 					return rates;
 				}
