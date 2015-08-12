@@ -159,8 +159,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.4.3 - xx/08/2015 =
 * Fix - Query within wc_customer_bought_product().
 * Fix - Tab hiding with some theme markup.
+* Fix - No longer returns to the first variation list page when deleting one variation.
 * Tweak - Disable error_reporting during ajax requests to prevent malformed JSON.
 * Tweak - When merging shipping taxes with a shipping rate taxes, ensure shipping rate taxes is not malformed.
 
