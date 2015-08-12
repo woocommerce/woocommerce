@@ -308,7 +308,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 
 	$order = wc_get_order( $order_id );
 
-	if ( $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
+	if ( $order && $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
 	}
 
