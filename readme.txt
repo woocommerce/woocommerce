@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - wc_get_product_variation_attributes should only get parent attributes which are for variations.
 * Tweak - Disable display_errors during ajax requests to prevent malformed JSON.
 * Tweak - When merging shipping taxes with a shipping rate taxes, ensure shipping rate taxes is not malformed.
+* Tweak - Improved refund email events and woocommerce_order_fully_refunded hook.
 
 = 2.4.2 - 11/08/2015 =
 * Fix - If all variations are out of stock, maintain pricing display.

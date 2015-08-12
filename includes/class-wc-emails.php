@@ -69,7 +69,7 @@ class WC_Emails {
 			'woocommerce_order_status_on-hold_to_processing',
 			'woocommerce_order_status_on-hold_to_cancelled',
 			'woocommerce_order_status_completed',
-			'woocommerce_order_status_refunded',
+			'woocommerce_order_fully_refunded',
 			'woocommerce_order_partially_refunded',
 			'woocommerce_new_customer_note',
 			'woocommerce_created_customer'
