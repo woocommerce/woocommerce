@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available alpha-2 country codes.', 'woocommerce' ), 'http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes' ); ?></p>
 
 <div class="wc-tax-rates-search" id="rates-search">
-	<input type="search" class="wc-tax-rates-search-field" placeholder="<?php esc_attr_e( 'Search…', 'woocommerce' ); ?>" />
+	<input type="search" class="wc-tax-rates-search-field" placeholder="<?php esc_attr_e( 'Search…', 'woocommerce' ); ?>" value="<?php if ( isset( $_GET['s'] ) ) { echo esc_attr( $_GET['s'] ); } ?>" />
 </div>
 
 <div class="wc-tax-rates-pagination" id="rates-pagination"></div>
