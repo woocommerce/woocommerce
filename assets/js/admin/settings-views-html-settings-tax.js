@@ -83,6 +83,8 @@
 				},
 				initialize : function() {
 					this.qty_pages = Math.ceil( $.map( this.model.get( 'rates' ), function(v){return [v]} ).length / this.per_page );
+					this.page = this.sanitizePage( data.page );
+
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 				//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
