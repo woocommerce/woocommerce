@@ -126,7 +126,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Get the order total in checkout and pay_for_order.
 	 *
-	 * @return bool
+	 * @return float
 	 */
 	protected function get_order_total() {
 
