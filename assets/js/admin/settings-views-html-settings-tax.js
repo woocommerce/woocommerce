@@ -224,14 +224,11 @@
 						return false;
 					} );
 
-					console.log( rates_to_reorder );
-
 					reordered_rates = _.map( rates_to_reorder, function( rate ) {
 						var order = parseInt( rate.tax_rate_order, 10 );
 
 						if ( parseInt( rate.tax_rate_id, 10 ) === parseInt( tax_rate_id, 10 ) ) {
 							rate.tax_rate_order = new_position;
-							console.log( rate );
 						} else if ( 'higher' === which_way ) {
 							rate.tax_rate_order = order - 1;
 						} else if ( 'lower' === which_way ) {
