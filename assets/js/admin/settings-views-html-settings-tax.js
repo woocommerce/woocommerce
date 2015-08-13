@@ -79,7 +79,7 @@
 					$pagination.on( 'change', 'input', { view : this }, this.onPageChange );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 				},
-				render      : function() {
+				render : function() {
 					var rates       = this.model.getFilteredRates(),
 						qty_rates   = _.size( rates ),
 						qty_pages   = Math.ceil( qty_rates / this.per_page ),
