@@ -63,8 +63,7 @@
 					return rates;
 				},
 				save : function() {
-					$.post( ajaxurl + '?action=wc_tax_rates_save_changes', {
-						//	action        : 'wc_tax_rates_save_changes',
+					$.post( ajaxurl + '?action=woocommerce_tax_rates_save_changes', {
 							current_class : data.current_class,
 							wc_tax_nonce  : data.wc_tax_nonce,
 							changes       : this.changes

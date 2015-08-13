@@ -755,7 +755,10 @@ class WC_Tax {
 	 * @return string
 	 */
 	public static function _update_tax_rate_postcodes( $tax_rate_id, $postcodes ) {
-		$postcodes = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_postcode' ), explode( ';', $postcodes ) ), array( '*' ) ) );
+		if ( ! is_array( $postcodes ) ) {
+			$postcodes = explode( ';', $postcodes );
+		}
+		$postcodes = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_postcode' ), $postcodes ), array( '*' ) ) );
 		$postcodes = self::_get_expanded_numeric_ranges_from_array( $postcodes );
 
 		self::_update_tax_rate_locations( $tax_rate_id, $postcodes, 'postcode' );
@@ -774,7 +777,10 @@ class WC_Tax {
 	 * @return string
 	 */
 	public static function _update_tax_rate_cities( $tax_rate_id, $cities ) {
-		$cities = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_city' ), explode( ';', $cities ) ), array( '*' ) ) );
+		if ( ! is_array( $cities ) ) {
+			$cities = explode( ';', $cities );
+		}
+		$cities = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_city' ), $cities ), array( '*' ) ) );
 
 		self::_update_tax_rate_locations( $tax_rate_id, $cities, 'city' );
 	}
@@ -863,6 +869,39 @@ class WC_Tax {
 			$postcodes[] = $wildcard_postcode . '*';
 		}
 		return $postcodes;
+	}
+
+	/**
+	 * Used by admin settings page.
+	 *
+	 * @param $tax_class
+	 *
+	 * @return array|null|object
+	 */
+	public static function get_rates_for_tax_class( $tax_class ) {
+		global $wpdb;
+
+		// Get all the rates and locations. Snagging all at once should significantly cut down on the number of queries.
+		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $tax_class ) ) );
+		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
+
+		// Set the rates keys equal to their ids.
+		$rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
+
+		// Drop the locations into the rates array.
+		foreach ( $locations as $location ) {
+			// Don't set them for unexistent rates.
+			if ( ! isset( $rates[ $location->tax_rate_id ] ) ) {
+				continue;
+			}
+			// If the rate exists, initialize the array before appending to it.
+			if ( ! isset( $rates[ $location->tax_rate_id ]->{$location->location_type} ) ) {
+				$rates[ $location->tax_rate_id ]->{$location->location_type} = array();
+			}
+			$rates[ $location->tax_rate_id ]->{$location->location_type}[] = $location->location_code;
+		}
+
+		return $rates;
 	}
 }
 WC_Tax::init();
