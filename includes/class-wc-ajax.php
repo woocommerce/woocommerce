@@ -47,7 +47,9 @@ class WC_AJAX {
 				define( 'WC_DOING_AJAX', true );
 			}
 			// Turn off display_errors during AJAX events to prevent malformed JSON
-			@ini_set( 'display_errors', 0 );
+			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
+				@ini_set( 'display_errors', 0 );
+			}
 		}
 	}
 
