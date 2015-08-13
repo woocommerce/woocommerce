@@ -652,67 +652,70 @@ class WC_Product_Variation extends WC_Product {
 		$description    = array();
 		$return         = '';
 
-		if ( ! $flat ) {
-			$return = '<dl class="variation">';
-		}
+		if ( is_array( $variation_data ) ) {
 
-		foreach ( $attributes as $attribute ) {
-
-			// Only deal with attributes that are variations
-			if ( ! $attribute[ 'is_variation' ] ) {
-				continue;
+			if ( ! $flat ) {
+				$return = '<dl class="variation">';
 			}
 
-			$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute[ 'name' ] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute[ 'name' ] ) ] : '';
-			$description_name         = esc_html( wc_attribute_label( $attribute[ 'name' ] ) );
-			$description_value        = __( 'Any', 'woocommerce' );
+			foreach ( $attributes as $attribute ) {
 
-			// Get terms for attribute taxonomy or value if its a custom attribute
-			if ( $attribute[ 'is_taxonomy' ] ) {
+				// Only deal with attributes that are variations
+				if ( ! $attribute[ 'is_variation' ] ) {
+					continue;
+				}
 
-				$post_terms = wp_get_post_terms( $this->id, $attribute[ 'name' ] );
+				$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute[ 'name' ] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute[ 'name' ] ) ] : '';
+				$description_name         = esc_html( wc_attribute_label( $attribute[ 'name' ] ) );
+				$description_value        = __( 'Any', 'woocommerce' );
 
-				foreach ( $post_terms as $term ) {
-					if ( $variation_selected_value === $term->slug ) {
-						$description_value = apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) );
+				// Get terms for attribute taxonomy or value if its a custom attribute
+				if ( $attribute[ 'is_taxonomy' ] ) {
+
+					$post_terms = wp_get_post_terms( $this->id, $attribute[ 'name' ] );
+
+					foreach ( $post_terms as $term ) {
+						if ( $variation_selected_value === $term->slug ) {
+							$description_value = apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) );
+						}
+					}
+
+				} else {
+
+					$options = wc_get_text_attributes( $attribute[ 'value' ] );
+
+					foreach ( $options as $option ) {
+
+						if ( sanitize_title( $variation_selected_value ) === $variation_selected_value ) {
+							if ( $variation_selected_value !== sanitize_title( $option ) ) {
+								continue;
+							}
+						} else {
+							if ( $variation_selected_value !== $option ) {
+								continue;
+							}
+						}
+
+						$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) );
 					}
 				}
 
-			} else {
-
-				$options = wc_get_text_attributes( $attribute[ 'value' ] );
-
-				foreach ( $options as $option ) {
-
-					if ( sanitize_title( $variation_selected_value ) === $variation_selected_value ) {
-						if ( $variation_selected_value !== sanitize_title( $option ) ) {
-							continue;
-						}
-					} else {
-						if ( $variation_selected_value !== $option ) {
-							continue;
-						}
-					}
-
-					$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) );
+				if ( $flat ) {
+					$description[] = $description_name . ': ' . rawurldecode( $description_value );
+				} else {
+					$description[] = '<dt>' . $description_name . ':</dt><dd>' . rawurldecode( $description_value ) . '</dd>';
 				}
 			}
 
 			if ( $flat ) {
-				$description[] = $description_name . ': ' . rawurldecode( $description_value );
+				$return .= implode( ', ', $description );
 			} else {
-				$description[] = '<dt>' . $description_name . ':</dt><dd>' . rawurldecode( $description_value ) . '</dd>';
+				$return .= implode( '', $description );
 			}
-		}
 
-		if ( $flat ) {
-			$return .= implode( ', ', $description );
-		} else {
-			$return .= implode( '', $description );
-		}
-
-		if ( ! $flat ) {
-			$return .= '</dl>';
+			if ( ! $flat ) {
+				$return .= '</dl>';
+			}
 		}
 
 		return $return;
