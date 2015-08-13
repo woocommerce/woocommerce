@@ -165,7 +165,7 @@
 							tax_rate_id : 'new-' + size + '-' + Date.now(),
 							newRow      : true
 						} ),
-						current_id, current_order;
+						$current, current_id, current_order, rates_to_reorder, reordered_rates;
 
 					event.preventDefault();
 
@@ -209,7 +209,7 @@
 						model   = view.model,
 						rates   = _.indexBy( model.get('rates'), 'tax_rate_id' ),
 						changes = {},
-						current_id, current_order;
+						$current, current_id, current_order, rates_to_reorder, reordered_rates;
 
 					event.preventDefault();
 
