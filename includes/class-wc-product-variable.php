@@ -462,8 +462,9 @@ class WC_Product_Variable extends WC_Product {
 			}
 
 			$query_args['meta_query'][] = array(
-				'key'   => $attribute_field_name,
-				'value' => wc_clean( $match_attributes[ $attribute_field_name ] )
+				'key'     => $attribute_field_name,
+				'value'   => array( '', wc_clean( $match_attributes[ $attribute_field_name ] ) ),
+				'compare' => 'IN'
 			);
 		}
 

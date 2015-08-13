@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Ajax variation handling when 'any' attribute is set.
 * Fix - Run html_entity_decode over text attributes to fix problems with quote characters.
 * Tweak - Order variations by menu_order by fallback to ID.
 
