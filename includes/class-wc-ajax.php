@@ -442,7 +442,7 @@ class WC_AJAX {
 			die();
 		}
 
-		$variation_id = $variable_product->get_matching_variation( stripslashes_deep( $_POST ) );
+		$variation_id = $variable_product->get_matching_variation( wp_unslash( $_POST ) );
 
 		if ( $variation_id ) {
 			$variation = $variable_product->get_available_variation( $variation_id );
@@ -689,7 +689,7 @@ class WC_AJAX {
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
 					// Text based, separate by pipe
-					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', wc_get_text_attributes( $attribute_values[ $i ] ) ) );
+					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, wp_unslash( $attribute_values[ $i ] ) ) ) );
 
 					// Custom attribute - Add attribute to array and set the values
 					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -2422,7 +2422,7 @@ class WC_AJAX {
 
 		// Get attributes
 		$attributes        = array();
-		$posted_attributes = stripslashes_deep( $_POST['attributes'] );
+		$posted_attributes = wp_unslash( $_POST['attributes'] );
 
 		foreach ( $posted_attributes as $key => $value ) {
 			$attributes[ wc_clean( $key ) ] = array_map( 'wc_clean', $value );
