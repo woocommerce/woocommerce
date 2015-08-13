@@ -717,7 +717,10 @@ class WC_Meta_Box_Product_Data {
 					<div class="clear"></div>
 				</div>
 
-				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo esc_attr( json_encode( $attributes ) ); ?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
+				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php 
+					// esc_attr does not double encode - htmlspecialchars does
+					echo htmlspecialchars( json_encode( $attributes ) );
+				?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
 				</div>
 
 				<div class="toolbar">
