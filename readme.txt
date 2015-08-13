@@ -159,6 +159,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+
+* Tweak - Order variations by menu_order by fallback to ID.
+
 = 2.4.3 - 12/08/2015 =
 * Fix - Query within wc_customer_bought_product().
 * Fix - Tab hiding with some theme markup.
