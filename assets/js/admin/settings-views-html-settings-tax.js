@@ -3,7 +3,7 @@
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
  */
 
-(function($, data, wp){
+(function($, data, wp, ajaxurl){
 	$(function() {
 
 		if ( ! String.prototype.trim ) {
@@ -20,6 +20,7 @@
 			$unsaved_msg       = $( '#unsaved-changes' ),
 			$pagination        = $( '#rates-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
+			$submit            = $( '.submit .button-primary[type=submit]' ),
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes : {},
 				setRateAttribute : function( rateID, attribute, value ) {
@@ -60,6 +61,20 @@
 					} );
 
 					return rates;
+				},
+				save : function() {
+					$.post( ajaxurl + '?action=wc_tax_rates_save_changes', {
+						//	action        : 'wc_tax_rates_save_changes',
+							current_class : data.current_class,
+							wc_tax_nonce  : data.wc_tax_nonce,
+							changes       : this.changes
+						}, this.onSaveResponse, 'json' );
+				},
+				onSaveResponse : function( response, textStatus ) {
+					console.log( response );
+					console.log( textStatus );
+					this.changes = {};
+					this.trigger( 'saved:rates' );
 				}
 			} ),
 			WCTaxTableViewConstructor  = Backbone.View.extend({
@@ -71,13 +86,14 @@
 					this.page = this.sanitizePage( data.page );
 
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
-					//	this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
+					this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
 					$tbody.on( 'sortupdate', { view : this }, this.updateModelOnSort );
 					$search_field.on( 'keyup search', { view : this }, this.onSearchField );
 					$pagination.on( 'click', 'a', { view : this }, this.onPageChange );
 					$pagination.on( 'change', 'input', { view : this }, this.onPageChange );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
+					$submit.on( 'click', { view : this }, this.onSubmit );
 
 					// Can bind these directly to the buttons, as they won't get overwritten.
 					$table.find('.insert').on( 'click', { view : this }, this.onAddNewRow );
@@ -155,6 +171,10 @@
 					}
 
 					window.history.replaceState( {}, '', url );
+				},
+				onSubmit : function( event ) {
+					event.data.view.model.save();
+					event.preventDefault();
 				},
 				onAddNewRow : function( event ) {
 					var view    = event.data.view,
@@ -393,4 +413,4 @@
 		WCTaxTableInstance.render();
 
 	});
-})(jQuery, htmlSettingsTaxLocalizeScript, wp);
+})(jQuery, htmlSettingsTaxLocalizeScript, wp, ajaxurl);

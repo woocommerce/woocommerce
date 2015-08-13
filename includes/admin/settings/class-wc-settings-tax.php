@@ -25,6 +25,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
+		add_action( 'wp_ajax_wc_tax_rates_save_changes', array( __CLASS__, 'wp_ajax_wc_tax_rates_save_changes' ) );
+
 		$this->label = __( 'Tax', 'woocommerce' );
 		parent::__construct();
 	}
@@ -100,17 +102,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_tax_rates_%') OR `option_name` LIKE ('_transient_timeout_wc_tax_rates_%')" );
 	}
 
-	/**
-	 * Output tax rate tables
-	 */
-	public function output_tax_rates() {
-		global $wpdb,
-				$current_section;
-
-		$current_class = $this->get_current_tax_class();
+	public static function get_rates_for_tax_class( $tax_class ) {
+		global $wpdb;
 
 		// Get all the rates and locations. Snagging all at once should significantly cut down on the number of queries.
-		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $current_class ) ) );
+		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $tax_class ) ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
 		// Set the rates keys equal to their ids.
@@ -128,6 +124,18 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			}
 			$rates[ $location->tax_rate_id ]->{$location->location_type}[] = $location->location_code;
 		}
+
+		return $rates;
+	}
+
+	/**
+	 * Output tax rate tables
+	 */
+	public function output_tax_rates() {
+		global $wpdb,
+				$current_section;
+
+		$current_class = $this->get_current_tax_class();
 
 		$countries = array();
 		foreach ( WC()->countries->get_allowed_countries() as $value => $label ) {
@@ -156,8 +164,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// Localize and enqueue our js.
 		wp_localize_script( 'wc-settings-tax', 'htmlSettingsTaxLocalizeScript', array(
 			'current_class' => $current_class,
+			'wc_tax_nonce'  => wp_create_nonce( 'wc_tax_nonce-class:' . $current_class ),
 			'base_url'      => $base_url,
-			'rates'         => array_values( $rates ),
+			'rates'         => array_values( self::get_rates_for_tax_class( $current_class ) ),
 			'page'          => ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1,
 			'limit'         => 100,
 			'countries'     => $countries,
@@ -197,10 +206,80 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
+	 * Handle ajax tax rate submissions.
+	 */
+	private static function wp_ajax_wc_tax_rates_save_changes() {
+		global $wpdb;
+
+		if ( ! isset( $_POST['current_class'], $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		$current_class = $_POST['current_class']; // This is sanitized seven lines later.
+
+		if ( ! wp_verify_nonce( $_POST['wc_tax_nonce'], 'wc_tax_nonce-class:' . $current_class ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		$current_class = WC_Tax::format_tax_rate_class( $current_class );
+
+		// Check User Caps
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$changes = $_POST['changes'];
+		foreach ( $changes as $tax_rate_id => $data ) {
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					// So the user added and deleted a new row.
+					// That's fine, it's not in the database anyways. NEXT!
+					continue;
+				}
+				WC_Tax::_delete_tax_rate( $tax_rate_id );
+			}
+
+			$tax_rate = array_intersect_key( $data, array(
+				'tax_rate_country'  => 1,
+				'tax_rate_state'    => 1,
+				'tax_rate'          => 1,
+				'tax_rate_name'     => 1,
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 1,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+			) );
+
+			if ( isset( $data['newRow'] ) ) {
+				// Hurrah, shiny and new!
+				$tax_rate['tax_rate_class'] = $current_class;
+				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+			} else {
+				// Updating an existing rate ...
+				WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
+			}
+
+			if ( isset( $data['postcode'] ) ) {
+				WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, wc_clean( $data['postcode'] ) );
+			}
+			if ( isset( $data['city'] ) ) {
+				WC_Tax::_update_tax_rate_cities( $tax_rate_id, wc_clean( $data['postcode'] ) );
+			}
+		}
+
+		wp_send_json_success( array(
+			'rates' => self::get_rates_for_tax_class( $current_class ),
+		) );
+	}
+
+	/**
 	 * Get tax class being edited
 	 * @return string
 	 */
-	private function get_current_tax_class() {
+	private static function get_current_tax_class() {
 		global $current_section;
 
 		$tax_classes   = WC_Tax::get_tax_classes();
