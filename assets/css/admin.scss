@@ -1895,14 +1895,17 @@ table.wc_input_table {
 		}
 	}
 
-	.ui-sortable:not(.ui-sortable-disabled) {
-		th.sort {
-			width: 17px;
-			padding: 0;
-		}
+	th.sort {
+		width: 17px;
+		padding: 0 4px;
+	}
 
+	td.sort {
+		padding: 0 4px;
+	}
+
+	.ui-sortable:not(.ui-sortable-disabled) {
 		td.sort {
-			padding: 0 4px;
 			cursor: move;
 			background: #f9f9f9;
 			text-align: center;
