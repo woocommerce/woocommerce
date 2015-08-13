@@ -642,6 +642,83 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Get formatted variation data with WC < 2.4 back compat and proper formatting of text-based attribute names.
+	 *
+	 * @return string
+	 */
+	public function get_formatted_variation_attributes( $flat = false ) {
+		$variation_data = $this->get_variation_attributes();
+		$attributes     = $this->parent->get_attributes();
+		$description    = array();
+		$return         = '';
+
+		if ( ! $flat ) {
+			$return = '<dl class="variation">';
+		}
+
+		foreach ( $attributes as $attribute ) {
+
+			// Only deal with attributes that are variations
+			if ( ! $attribute[ 'is_variation' ] ) {
+				continue;
+			}
+
+			$variation_selected_value = isset( $variation_data[ 'attribute_' . sanitize_title( $attribute[ 'name' ] ) ] ) ? $variation_data[ 'attribute_' . sanitize_title( $attribute[ 'name' ] ) ] : '';
+			$description_name         = esc_html( wc_attribute_label( $attribute[ 'name' ] ) );
+			$description_value        = __( 'Any', 'woocommerce' );
+
+			// Get terms for attribute taxonomy or value if its a custom attribute
+			if ( $attribute[ 'is_taxonomy' ] ) {
+
+				$post_terms = wp_get_post_terms( $this->id, $attribute[ 'name' ] );
+
+				foreach ( $post_terms as $term ) {
+					if ( $variation_selected_value === $term->slug ) {
+						$description_value = apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) );
+					}
+				}
+
+			} else {
+
+				$options = wc_get_text_attributes( $attribute[ 'value' ] );
+
+				foreach ( $options as $option ) {
+
+					if ( sanitize_title( $variation_selected_value ) === $variation_selected_value ) {
+						if ( $variation_selected_value !== sanitize_title( $option ) ) {
+							continue;
+						}
+					} else {
+						if ( $variation_selected_value !== $option ) {
+							continue;
+						}
+					}
+
+					$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) );
+				}
+			}
+
+			if ( $flat ) {
+				$description[] = $description_name . ': ' . rawurldecode( $description_value );
+			} else {
+				$description[] = '<dt>' . $description_name . ':</dt><dd>' . rawurldecode( $description_value ) . '</dd>';
+			}
+		}
+
+		if ( $flat ) {
+			$return .= implode( ', ', $description );
+		} else {
+			$return .= implode( '', $description );
+		}
+
+		if ( ! $flat ) {
+			$return .= '</dl>';
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Get product name with extra details such as SKU, price and attributes. Used within admin.
 	 *
 	 * @return string Formatted product name, including attributes and price
@@ -653,8 +730,8 @@ class WC_Product_Variation extends WC_Product {
 			$identifier = '#' . $this->variation_id;
 		}
 
-		$attributes = $this->get_variation_attributes();
-		$extra_data = ' &ndash; ' . implode( ', ', $attributes ) . ' &ndash; ' . wc_price( $this->get_price() );
+		$formatted_attributes = $this->get_formatted_variation_attributes( true );
+		$extra_data           = ' &ndash; ' . $formatted_attributes . ' &ndash; ' . wc_price( $this->get_price() );
 
 		return sprintf( __( '%s &ndash; %s%s', 'woocommerce' ), $identifier, $this->get_title(), $extra_data );
 	}
