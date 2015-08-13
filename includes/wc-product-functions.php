@@ -632,7 +632,7 @@ function wc_get_product_variation_attributes( $variation_id ) {
 	foreach ( $parent_attributes as $attribute_name => $options ) {
 		$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
 		$found_parent_attributes[] = $attribute;
-		if ( $options['is_variation'] && ! array_key_exists( $attribute, $variation_attributes ) ) {
+		if ( ! empty( $options['is_variation'] ) && ! array_key_exists( $attribute, $variation_attributes ) ) {
 			$variation_attributes[ $attribute ] = ''; // Add it - 'any' will be asumed
 		}
 	}
