@@ -2421,8 +2421,10 @@ class WC_AJAX {
 		$page       = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
 
 		// Get attributes
-		$attributes = array();
-		foreach ( $_POST['attributes'] as $key => $value ) {
+		$attributes        = array();
+		$posted_attributes = stripslashes_deep( $_POST['attributes'] );
+
+		foreach ( $posted_attributes as $key => $value ) {
 			$attributes[ wc_clean( $key ) ] = array_map( 'wc_clean', $value );
 		}
 
