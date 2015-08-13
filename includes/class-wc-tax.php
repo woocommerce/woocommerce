@@ -654,6 +654,10 @@ class WC_Tax {
 	 */
 	private static function format_tax_rate_class( $class ) {
 		$class = sanitize_title( $class );
+		$sanitized_classes = array_map( 'sanitize_title', self::get_tax_classes() );
+		if ( ! in_array( $class, $sanitized_classes ) ) {
+			$class = '';
+		}
 		return $class === 'standard' ? '' : $class;
 	}
 
