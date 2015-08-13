@@ -18,7 +18,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @return string
 	 */
-	public function get_formatted_order_total( $tax_display = '' ) {
+	public function get_formatted_order_total( $tax_display = '', $display_refunded = true ) {
 		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_order_currency() ) );
 		$order_total    = $this->get_total();
 		$total_refunded = $this->get_total_refunded();
@@ -30,18 +30,19 @@ class WC_Order extends WC_Abstract_Order {
 
 			if ( 'itemized' == get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $this->get_tax_totals() as $code => $tax ) {
-					$tax_amount         = $total_refunded ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_order_currency() ) ) : $tax->formatted_amount;
+					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_order_currency() ) ) : $tax->formatted_amount;
 					$tax_string_array[] = sprintf( '%s %s', $tax_amount, $tax->label );
 				}
 			} else {
-				$tax_string_array[] = sprintf( '%s %s', wc_price( $this->get_total_tax() - $this->get_total_tax_refunded(), array( 'currency' => $this->get_order_currency() ) ), WC()->countries->tax_or_vat() );
+				$tax_amount         = ( $total_refunded && $display_refunded ) ? $this->get_total_tax() - $this->get_total_tax_refunded() : $this->get_total_tax();
+				$tax_string_array[] = sprintf( '%s %s', wc_price( $tax_amount, array( 'currency' => $this->get_order_currency() ) ), WC()->countries->tax_or_vat() );
 			}
 			if ( ! empty( $tax_string_array ) ) {
 				$tax_string = ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) );
 			}
 		}
 
-		if ( $total_refunded ) {
+		if ( $total_refunded && $display_refunded ) {
 			$formatted_total = '<del>' . strip_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_order_currency() ) ) . $tax_string . '</ins>';
 		} else {
 			$formatted_total .= $tax_string;
