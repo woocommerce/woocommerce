@@ -23,17 +23,16 @@
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes : {},
 				setRateAttribute : function( rateID, attribute, value ) {
-					var rates = _.indexBy( this.get( 'rates' ), 'tax_rate_id' );
+					var rates   = _.indexBy( this.get( 'rates' ), 'tax_rate_id' ),
+						changes = {};
 
 					if ( rates[ rateID ][ attribute ] !== value ) {
-						rates[ rateID ][ attribute ] = value;
-						this.set( 'rates', rates );
-						this.trigger( 'change:rates' ); // Why is this necessary?  Shouldn't the previous line trigger it?
-
-						// Store it in a changes array to potentially simplify saving?
-						this.changes[ rateID ] = this.changes[ rateID ] || {};
-						this.changes[ rateID ][ attribute ] = value;
+						changes[ rateID ] = {};
+						changes[ rateID ][ attribute ] = value;
+						rates[ rateID ][ attribute ]   = value;
 					}
+
+					this.logChanges( changes );
 				},
 				logChanges : function( changedRows ) {
 					var changes = this.changes || {};
