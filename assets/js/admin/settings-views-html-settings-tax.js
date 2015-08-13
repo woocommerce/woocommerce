@@ -155,32 +155,54 @@
 
 					window.history.replaceState( {}, '', url );
 				},
-				onAddNewRow : function() {
-					var size = Object.keys( WCTaxTableModelInstance.get( 'rates' ) ).length;
-					var code = wp.template( 'wc-tax-table-row' )( {
-						tax_rate_id       : 'new-' + size,
-						tax_rate_priority : 1,
-						tax_rate_shipping : 1,
-						newRow            : true
-					} );
+				onAddNewRow : function( event ) {
+					var view    = event.data.view,
+						model   = view.model,
+						rates   = _.indexBy( model.get('rates'), 'tax_rate_id' ),
+						changes = {},
+						size    = _.size( rates ),
+						newRow  = _.extend( {}, data.default_rate, {
+							tax_rate_id : 'new-' + size + '-' + Date.now(),
+							newRow      : true
+						} ),
+						current_id, current_order;
 
-					if ( $tbody.find('tr.current').length > 0 ) {
-						$tbody.find('tr.current').after( code );
+					event.preventDefault();
+
+					if ( $current = $tbody.children( '.current' ) ) {
+						current_id    = $current.last().data( 'id' );
+						current_order = parseInt( rates[ current_id ].tax_rate_order, 10 );
+						newRow.tax_rate_order = 1 + current_order;
+
+						rates_to_reorder = _.filter( rates, function( rate ) {
+							if ( parseInt( rate.tax_rate_order, 10 ) > current_order ) {
+								return true;
+							}
+							return false;
+						} );
+
+						reordered_rates = _.map( rates_to_reorder, function( rate ) {
+							rate.tax_rate_order++;
+							changes[ rate.tax_rate_id ] = _.extend( changes[ rate.tax_rate_id ] || {}, { tax_rate_order : rate.tax_rate_order } );
+							return rate;
+						} );
 					} else {
-						$tbody.append( code );
+						newRow.tax_rate_order = 1 + _.max(
+							_.pluck( rates, 'tax_rate_order' ),
+							function ( val ) {
+								// Cast them all to integers, because strings compare funky. Sighhh.
+								return parseInt( val, 10 );
+							}
+						);
 					}
 
-					$( 'td.country input' ).autocomplete({
-						source: data.countries,
-						minLength: 3
-					});
+					rates[ newRow.tax_rate_id ]   = newRow;
+					changes[ newRow.tax_rate_id ] = newRow;
 
-					$( 'td.state input' ).autocomplete({
-						source: data.states,
-						minLength: 3
-					});
+					model.set( 'rates', rates );
+					model.logChanges( changes );
 
-					return false;
+					view.render();
 				},
 				onDeleteRow : function() {
 					if ( $tbody.find('tr.current').length > 0 ) {

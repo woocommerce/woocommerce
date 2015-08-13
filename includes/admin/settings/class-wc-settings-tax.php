@@ -162,6 +162,18 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			'limit'         => 100,
 			'countries'     => $countries,
 			'states'        => $states,
+			'default_rate'  => array(
+				'tax_rate_id'       => 0,
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '',
+				'tax_rate_name'     => '',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => null,
+				'tax_rate_class'    => $current_class,
+			),
 			'strings'       => array(
 				'no_rows_selected' => __( 'No row(s) selected', 'woocommerce' ),
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
