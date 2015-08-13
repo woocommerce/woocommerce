@@ -280,7 +280,7 @@
 					$(this).attr( 'href', encodeURI( csv_data ) );
 
 					return true;
-				}
+				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
 					$unsaved_msg.show();
