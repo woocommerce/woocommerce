@@ -35,33 +35,15 @@
 						this.changes[ rateID ][ attribute ] = value;
 					}
 				},
-				updateSelectRates : function( selectRates ) {
-					var rates   = _.indexBy( this.get( 'rates' ), 'tax_rate_id' ),
-						changed = false;
+				logChanges : function( changedRows ) {
+					var changes = this.changes || {};
 
-					_.each( selectRates, function( newRate ) {
-						var rateID = newRate.tax_rate_id;
-						if ( rates[ rateID ] ) {
-							var originalRate = rates[ rateID ];
-							_.each( newRate, function ( newValue, attribute ) {
-								if ( originalRate[ attribute ] !== newValue ) {
-									changed = true;
-									rates[ rateID ][ attribute ] = newValue;
-
-									this.changes[ rateID ] = this.changes[ rateID ] || {};
-									this.changes[ rateID ][ attribute ] = newValue;
-								}
-							} );
-						} else {
-							// We are adding a new rate! Isn't that lovely.
-							// Something something code code code.
-						}
+					_.each( changedRows, function( row, id ) {
+						changes[ id ] = _.extend( changes[ id ] || { tax_rate_id : id }, row );
 					} );
 
-					if ( changed ) {
-						this.set( 'rates', rates );
-						this.trigger( 'change:rates' ); // Why is this necessary?  Shouldn't the previous line trigger it?
-					}
+					this.changes = changes;
+					this.trigger( 'change:rates' );
 				},
 				getFilteredRates : function() {
 					var rates  = this.get( 'rates' ),
@@ -224,6 +206,7 @@
 						old_position = rates[ tax_rate_id ].tax_rate_order,
 						new_position = $tr.index() + ( ( view.page - 1 ) * view.per_page ),
 						which_way    = ( new_position > old_position ) ? 'higher' : 'lower',
+						changes      = {},
 						rates_to_reorder, reordered_rates;
 
 					rates_to_reorder = _.filter( rates, function( rate ) {
@@ -256,11 +239,13 @@
 							rate.tax_rate_order = order + 1;
 						}
 
+						changes[ rate.tax_rate_id ] = _.extend( changes[ rate.tax_rate_id ] || {}, { tax_rate_order : rate.tax_rate_order } );
+
 						return rate;
 					} );
 
 					if ( reordered_rates.length ) {
-						model.updateSelectRates( reordered_rates );
+						model.logChanges( changes );
 						view.render(); // temporary, probably should get yanked.
 					}
 				},
