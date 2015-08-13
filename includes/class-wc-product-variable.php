@@ -146,6 +146,7 @@ class WC_Product_Variable extends WC_Product {
 				'post_status' => 'publish',
 				'numberposts' => -1
 			);
+
 			if ( $visible_only ) {
 				$args['meta_query'] = array(
 					'relation' => 'AND',
@@ -166,7 +167,9 @@ class WC_Product_Variable extends WC_Product {
 				}
 			}
 
-			$this->children[ $key ] = get_posts( apply_filters('woocommerce_variable_children_args', $args, $this, $visible_only ) );
+			$args                   = apply_filters( 'woocommerce_variable_children_args', $args, $this, $visible_only );
+			$this->children[ $key ] = get_posts( $args );
+
 			set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
 		}
 
