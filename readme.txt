@@ -159,7 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-
+* Fix - Run html_entity_decode over text attributes to fix problems with quote characters.
 * Tweak - Order variations by menu_order by fallback to ID.
 
 = 2.4.3 - 12/08/2015 =
