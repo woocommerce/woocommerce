@@ -204,23 +204,45 @@
 
 					view.render();
 				},
-				onDeleteRow : function() {
-					if ( $tbody.find('tr.current').length > 0 ) {
-						var $current = $tbody.find('tr.current');
-						$current.find('input').val('');
-						$current.find('input.remove_tax_rate').val('1');
+				onDeleteRow : function( event ) {
+					var view    = event.data.view,
+						model   = view.model,
+						rates   = _.indexBy( model.get('rates'), 'tax_rate_id' ),
+						changes = {},
+						current_id, current_order;
 
+					event.preventDefault();
+
+					if ( $current = $tbody.children( '.current' ) ) {
 						$current.each(function(){
-							if ( $(this).is('.new') ) {
-								$( this ).remove();
-							} else {
-								$( this ).hide();
-							}
+							current_id    = $( this ).data('id');
+							current_order = parseInt( rates[ current_id ].tax_rate_order, 10 );
+
+							rates_to_reorder = _.filter( rates, function( rate ) {
+								if ( parseInt( rate.tax_rate_order, 10 ) > current_order ) {
+									return true;
+								}
+								return false;
+							} );
+
+							reordered_rates = _.map( rates_to_reorder, function( rate ) {
+								rate.tax_rate_order--;
+								changes[ rate.tax_rate_id ] = _.extend( changes[ rate.tax_rate_id ] || {}, { tax_rate_order : rate.tax_rate_order } );
+								return rate;
+							} );
+
+							delete rates[ current_id ];
+
+							changes[ current_id ] = _.extend( changes[ current_id ] || {}, { deleted : 'deleted' } );
 						});
+
+						model.set( 'rates', rates );
+						model.logChanges( changes );
+
+						view.render();
 					} else {
 						window.alert( data.strings.no_rows_selected );
 					}
-					return false;
 				},
 				onSearchField : function( event ){
 					event.data.view.updateUrl();
