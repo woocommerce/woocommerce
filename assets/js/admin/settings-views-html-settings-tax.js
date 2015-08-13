@@ -112,6 +112,13 @@
 							qty_pages    : qty_pages
 						} ) );
 					}
+
+					// Disable sorting if there is a search term filtering the items.
+					if ( $search_field.val() ) {
+						$tbody.sortable( 'disable' );
+					} else {
+						$tbody.sortable( 'enable' );
+					}
 				},
 				updateUrl : function() {
 					if ( ! window.history.replaceState ) {
