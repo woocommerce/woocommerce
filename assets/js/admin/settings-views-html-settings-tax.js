@@ -166,7 +166,7 @@
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
 					$unsaved_msg.show();
-					$unsaved_msg.find( 'pre' ).text( JSON.stringify( this.model.changes, null, "\t" ) );
+					$unsaved_msg.find( 'pre' ).text( JSON.stringify( this.model.changes, null, '\t' ) );
 				},
 				clearUnloadConfirmation : function() {
 					this.needsUnloadConfirm = false;
