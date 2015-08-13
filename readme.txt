@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 * Fix - Ajax variation handling when 'any' attribute is set.
 * Fix - Run html_entity_decode over text attributes to fix problems with quote characters.
+* Fix - COD: remove shipping check if the cart is 100% virtual.
 * Tweak - Order variations by menu_order by fallback to ID.
 * Tweak - Include attribute archives support in the breadcrumbs.
 * Tweak - woocommerce_variable_children_args hook.
