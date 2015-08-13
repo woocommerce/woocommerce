@@ -548,7 +548,7 @@ class WC_Admin_Setup_Wizard {
 			// Init rate and settings
 			$shipping_method = new WC_Shipping_Flat_Rate();
 			$costs           = array();
-			$costs[]         = woocommerce_format_decimal( sanitize_text_field( $_POST['shipping_cost_domestic'] ) );
+			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_domestic'] ) );
 			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_domestic_item'] ) ) {
 				$costs[] = $item_cost . ' * [qty]';
 			}
@@ -568,7 +568,7 @@ class WC_Admin_Setup_Wizard {
 			// Init rate and settings
 			$shipping_method = new WC_Shipping_International_Delivery();
 			$costs           = array();
-			$costs[]         = woocommerce_format_decimal( sanitize_text_field( $_POST['shipping_cost_international'] ) );
+			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_international'] ) );
 			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_international_item'] ) ) {
 				$costs[] = $item_cost . ' * [qty]';
 			}
