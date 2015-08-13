@@ -515,12 +515,13 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-			$attachment_id = get_post_thumbnail_id( $variation->get_variation_id() );
-			$attachment    = wp_get_attachment_image_src( $attachment_id, 'shop_single'  );
-			$image         = $attachment ? current( $attachment ) : '';
-			$image_link    = $attachment ? current( $attachment ) : '';
-			$image_title   = get_the_title( $attachment_id );
-			$image_alt     = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+			$attachment_id   = get_post_thumbnail_id( $variation->get_variation_id() );
+			$attachment      = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+			$full_attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$image           = $attachment ? current( $attachment ) : '';
+			$image_link      = $full_attachment ? current( $full_attachment ) : '';
+			$image_title     = get_the_title( $attachment_id );
+			$image_alt       = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
 		} else {
 			$image = $image_link = $image_title = $image_alt = '';
 		}
