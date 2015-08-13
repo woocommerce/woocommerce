@@ -82,6 +82,7 @@
 					// Can bind these directly to the buttons, as they won't get overwritten.
 					$table.find('.insert').on( 'click', { view : this }, this.onAddNewRow );
 					$table.find('.remove_tax_rates').on( 'click', { view : this }, this.onDeleteRow );
+					$table.find('.export').on( 'click', { view : this }, this.onExport );
 				},
 				render : function() {
 					var rates       = this.model.getFilteredRates(),
@@ -256,6 +257,30 @@
 					event.data.view.render();
 					event.data.view.updateUrl();
 				},
+				onExport : function( event ) {
+					var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
+
+					$.each( event.data.view.model.rates, function( id, rowData ) {
+						var row = '';
+
+						row += rowData.tax_rate_country  + ',';
+						row += rowData.tax_rate_state    + ',';
+						row += ( rowData.postcode        ? rowData.postcode.join( '; ' ) : '' ) + ',';
+						row += ( rowData.city            ? rowData.city.join( '; ' )     : '' ) + ',';
+						row += rowData.tax_rate          + ',';
+						row += rowData.tax_rate_name     + ',';
+						row += rowData.tax_rate_priority + ',';
+						row += rowData.tax_rate_compound + ',';
+						row += rowData.tax_rate_shipping + ',';
+						row += data.current_class;
+
+						csv_data += row + '\n';
+					});
+
+					$(this).attr( 'href', encodeURI( csv_data ) );
+
+					return true;
+				}
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
 					$unsaved_msg.show();
@@ -366,36 +391,6 @@
 			} );
 
 		WCTaxTableInstance.render();
-
-		/**
-		 * Handle the exporting of tax rates, and build it off the global `data.rates` object.
-		 *
-		 * @todo: Have the `export` button save the current form and generate this from php, so there's no chance the current page is out of date.
-		 */
-		$table.find('.export').click(function() {
-			var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
-
-			$.each( data.rates, function( id, rowData ) {
-				var row = '';
-
-				row += rowData.tax_rate_country  + ',';
-				row += rowData.tax_rate_state    + ',';
-				row += rowData.tax_rate_postcode ? rowData.tax_rate_postcode.join( '; ' ) : '' + ',';
-				row += rowData.tax_rate_city     ? rowData.tax_rate_city.join( '; ' )     : '' + ',';
-				row += rowData.tax_rate          + ',';
-				row += rowData.tax_rate_name     + ',';
-				row += rowData.tax_rate_priority + ',';
-				row += rowData.tax_rate_compound + ',';
-				row += rowData.tax_rate_shipping + ',';
-				row += data.current_class;
-
-				csv_data += row + '\n';
-			});
-
-			$(this).attr( 'href', encodeURI( csv_data ) );
-
-			return true;
-		});
 
 	});
 })(jQuery, htmlSettingsTaxLocalizeScript, wp);
