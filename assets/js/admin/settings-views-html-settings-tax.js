@@ -78,6 +78,10 @@
 					$pagination.on( 'click', 'a', { view : this }, this.onPageChange );
 					$pagination.on( 'change', 'input', { view : this }, this.onPageChange );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
+
+					// Can bind these directly to the buttons, as they won't get overwritten.
+					$table.find('.insert').on( 'click', { view : this }, this.onAddNewRow );
+					$table.find('.remove_tax_rates').on( 'click', { view : this }, this.onDeleteRow );
 				},
 				render : function() {
 					var rates       = this.model.getFilteredRates(),
@@ -150,6 +154,51 @@
 					}
 
 					window.history.replaceState( {}, '', url );
+				},
+				onAddNewRow : function() {
+					var size = Object.keys( WCTaxTableModelInstance.get( 'rates' ) ).length;
+					var code = wp.template( 'wc-tax-table-row' )( {
+						tax_rate_id       : 'new-' + size,
+						tax_rate_priority : 1,
+						tax_rate_shipping : 1,
+						newRow            : true
+					} );
+
+					if ( $tbody.find('tr.current').length > 0 ) {
+						$tbody.find('tr.current').after( code );
+					} else {
+						$tbody.append( code );
+					}
+
+					$( 'td.country input' ).autocomplete({
+						source: data.countries,
+						minLength: 3
+					});
+
+					$( 'td.state input' ).autocomplete({
+						source: data.states,
+						minLength: 3
+					});
+
+					return false;
+				},
+				onDeleteRow : function() {
+					if ( $tbody.find('tr.current').length > 0 ) {
+						var $current = $tbody.find('tr.current');
+						$current.find('input').val('');
+						$current.find('input.remove_tax_rate').val('1');
+
+						$current.each(function(){
+							if ( $(this).is('.new') ) {
+								$( this ).remove();
+							} else {
+								$( this ).hide();
+							}
+						});
+					} else {
+						window.alert( data.strings.no_rows_selected );
+					}
+					return false;
 				},
 				onSearchField : function( event ){
 					event.data.view.updateUrl();
@@ -302,59 +351,6 @@
 			$(this).attr( 'href', encodeURI( csv_data ) );
 
 			return true;
-		});
-
-		/**
-		 * Add a new blank row to the table for the user to fill out and save.
-		 */
-		$table.find('.insert').click(function() {
-			var size = Object.keys( WCTaxTableModelInstance.get( 'rates' ) ).length;
-			var code = wp.template( 'wc-tax-table-row' )( {
-				tax_rate_id       : 'new-' + size,
-				tax_rate_priority : 1,
-				tax_rate_shipping : 1,
-				newRow            : true
-			} );
-
-			if ( $tbody.find('tr.current').length > 0 ) {
-				$tbody.find('tr.current').after( code );
-			} else {
-				$tbody.append( code );
-			}
-
-			$( 'td.country input' ).autocomplete({
-				source: data.countries,
-				minLength: 3
-			});
-
-			$( 'td.state input' ).autocomplete({
-				source: data.states,
-				minLength: 3
-			});
-
-			return false;
-		});
-
-		/**
-		 * Removals.
-		 */
-		$table.find('.remove_tax_rates').click(function() {
-			if ( $tbody.find('tr.current').length > 0 ) {
-				var $current = $tbody.find('tr.current');
-				$current.find('input').val('');
-				$current.find('input.remove_tax_rate').val('1');
-
-				$current.each(function(){
-					if ( $(this).is('.new') ) {
-						$( this ).remove();
-					} else {
-						$( this ).hide();
-					}
-				});
-			} else {
-				window.alert( data.strings.no_rows_selected );
-			}
-			return false;
 		});
 
 	});
