@@ -1765,8 +1765,13 @@ class WC_Admin_Post_Types {
 
 			// Filter the orders by the posted customer.
 			if ( isset( $_GET['_customer_user'] ) && $_GET['_customer_user'] > 0 ) {
-				$vars['meta_key'] = '_customer_user';
-				$vars['meta_value'] = (int) $_GET['_customer_user'];
+				$vars['meta_query'] = array(
+					array(
+						'key'   => '_customer_user',
+						'value' => (int) $_GET['_customer_user'],
+						'compare' => '='
+					)
+				);
 			}
 
 			// Sorting
