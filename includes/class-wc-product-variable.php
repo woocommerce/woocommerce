@@ -165,7 +165,8 @@ class WC_Product_Variable extends WC_Product {
 					);
 				}
 			}
-			$this->children[ $key ] = get_posts( $args );
+
+			$this->children[ $key ] = get_posts( apply_filters('woocommerce_variable_children_args', $args, $this, $visible_only ) );
 			set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
 		}
 
