@@ -70,10 +70,14 @@
 						}, this.onSaveResponse, 'json' );
 				},
 				onSaveResponse : function( response, textStatus ) {
-					console.log( response );
-					console.log( textStatus );
-					this.changes = {};
-					this.trigger( 'saved:rates' );
+					if ( 'success' === textStatus ) {
+						WCTaxTableModelInstance.set( rates, response.data.rates );
+						WCTaxTableModelInstance.trigger( 'change:rates' );
+
+						WCTaxTableModelInstance.changes = {};
+						WCTaxTableModelInstance.trigger( 'saved:rates' );
+						WCTaxTableModelInstance.trigger( 'change:rates' );
+					}
 				}
 			} ),
 			WCTaxTableViewConstructor  = Backbone.View.extend({
