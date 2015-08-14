@@ -27,10 +27,8 @@ jQuery( function ( $ ) {
 		}
 	});
 
-	$( function() {
-		$( '.wc-metabox > h3' ).click( function() {
-			$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
-		});
+	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function( event ) {
+		$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
 	});
 
 	// Tabbed Panels
