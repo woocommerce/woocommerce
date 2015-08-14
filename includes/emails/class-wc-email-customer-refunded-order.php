@@ -19,10 +19,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
  */
 class WC_Email_Customer_Refunded_Order extends WC_Email {
 	
-	/** @var boolean */
 	public $refund;
-	
-	/** @var boolean */
 	public $partial_refund;
 
 	/**
