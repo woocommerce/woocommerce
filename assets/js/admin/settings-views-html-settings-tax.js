@@ -71,7 +71,7 @@
 				},
 				onSaveResponse : function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
-						WCTaxTableModelInstance.set( rates, response.data.rates );
+						WCTaxTableModelInstance.set( 'rates', response.data.rates );
 						WCTaxTableModelInstance.trigger( 'change:rates' );
 
 						WCTaxTableModelInstance.changes = {};
