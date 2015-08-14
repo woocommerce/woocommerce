@@ -76,7 +76,6 @@
 
 						WCTaxTableModelInstance.changes = {};
 						WCTaxTableModelInstance.trigger( 'saved:rates' );
-						WCTaxTableModelInstance.trigger( 'change:rates' );
 					}
 				}
 			} ),
