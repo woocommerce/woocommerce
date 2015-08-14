@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div id="unsaved-changes" style="display:none;">
 	<?php _e( 'There are unsaved changes.', 'woocommerce' ); ?>
-	<pre></pre>
+	<pre style="display:none;"></pre>
 </div>
 
 <script type="text/html" id="tmpl-wc-tax-table-row">
