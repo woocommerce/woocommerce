@@ -741,3 +741,14 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	return $value;
 }
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_minutes', 'wc_format_option_hold_stock_minutes', 10, 3 );
+
+/**
+ * Sanitize terms from an attribute text based.
+ *
+ * @since  2.4.5
+ * @param  string $term
+ * @return string
+ */
+function wc_sanitize_term_text_based( $term ) {
+	return trim( wp_unslash( strip_tags( $term ) ) );
+}

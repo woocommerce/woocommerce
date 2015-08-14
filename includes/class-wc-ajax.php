@@ -646,7 +646,7 @@ class WC_AJAX {
 						// Text based attributes - Posted values are term names, wp_set_object_terms wants ids or slugs.
 						} else {
 							$values     = array();
-							$raw_values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+							$raw_values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute_values[ $i ] ) );
 
 							foreach ( $raw_values as $value ) {
 								$term = get_term_by( 'name', $value, $attribute_names[ $i ] );
