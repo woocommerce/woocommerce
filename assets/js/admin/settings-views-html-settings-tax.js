@@ -1,4 +1,4 @@
-/* global htmlSettingsTaxLocalizeScript */
+/* global htmlSettingsTaxLocalizeScript, ajaxurl */
 /**
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
  */
