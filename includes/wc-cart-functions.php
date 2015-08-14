@@ -97,7 +97,7 @@ function wc_format_list_of_items( $items ) {
 	$item_string = '';
 
 	foreach ( $items as $key => $item ) {
-		$item_string .= sprintf( _x( '&ldquo;%s&ldquo;', 'Item name in quotes', 'woocommerce' ), $item );
+		$item_string .= sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $item );
 
 		if ( $key + 2 === sizeof( $items ) ) {
 			$item_string .= ' ' . __( 'and', 'woocommerce' ) . ' ';
