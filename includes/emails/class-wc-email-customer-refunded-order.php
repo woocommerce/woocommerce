@@ -18,6 +18,12 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
  * @extends  WC_Email
  */
 class WC_Email_Customer_Refunded_Order extends WC_Email {
+	
+	/** @var string */
+	public $refund;
+	
+	/** @var string */
+	public $partial_refund;
 
 	/**
 	 * Constructor
