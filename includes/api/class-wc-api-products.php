@@ -859,7 +859,7 @@ class WC_API_Products extends WC_API_Resource {
 
 						// Text based attributes - Posted values are term names - don't change to slugs
 						} else {
-							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute['options'] ) ) );
+							$values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute['options'] ) );
 						}
 
 						$values = array_filter( $values, 'strlen' );
