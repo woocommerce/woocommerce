@@ -821,6 +821,7 @@ class WC_AJAX {
 			$image_id            = 0;
 			$_thumbnail_id       = '';
 			$variation           = get_post( $variation_id ); // Get the variation object
+			$menu_order          = 0;
 
 			include( 'admin/meta-boxes/views/html-variation-admin.php' );
 		}
