@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Global text based attribute saving on product page.
 * Fix - save_account_details should check display name of current user.
 * Tweak - Allowed Zip/Post Codes description for Local Delivery.
+* Tweak - Improve display_item_downloads numbering and use same function in emails.
 
 = 2.4.4 - 14/08/2015 =
 * Fix - Ajax variation handling when 'any' attribute is set.
