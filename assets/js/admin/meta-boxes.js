@@ -27,7 +27,7 @@ jQuery( function ( $ ) {
 		}
 	});
 
-	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function( event ) {
+	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function() {
 		$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
 	});
 

@@ -159,7 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-* Fix - Global text based attribute salving on product page.
+* Fix - Global text based attribute saving on product page.
 * Tweak - Allowed Zip/Post Codes description for Local Delivery.
 
 = 2.4.4 - 14/08/2015 =
