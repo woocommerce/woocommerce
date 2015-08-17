@@ -609,15 +609,7 @@ class WC_API_Server {
 	 * @return string
 	 */
 	public function get_raw_data() {
-		global $HTTP_RAW_POST_DATA;
-
-		// A bug in PHP < 5.2.2 makes $HTTP_RAW_POST_DATA not set by default,
-		// but we can do it ourself.
-		if ( !isset( $HTTP_RAW_POST_DATA ) ) {
-			$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
-		}
-
-		return $HTTP_RAW_POST_DATA;
+		return file_get_contents( 'php://input' );
 	}
 
 	/**
