@@ -354,6 +354,26 @@ return array(
 			)
 		)
 	),
+	'NP' => array(
+		'currency_code'  => 'NPR',
+		'currency_pos'   => 'left_space',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'NP',
+					'state'    => '',
+					'rate'     => '13.0000',
+					'name'     => 'VAT',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'PL' => array(
 		'currency_code'  => 'PLN',
 		'currency_pos'   => 'right',
