@@ -294,6 +294,26 @@ return array(
 			)
 		)
 	),
+	'JP' => array(
+		'currency_code'  => 'JPY',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'JP',
+					'state'    => '',
+					'rate'     => '8.0000',
+					'name'     => __( 'Consumption tax', 'woocommerce' ),
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'NL' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left',
