@@ -107,7 +107,7 @@ class WC_Cache_Helper {
 		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
 			global $wpdb;
 
-			$limit    = 1000;
+			$limit    = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
 			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", "\_transient\_%" . $version, $limit ) );
 
 			// If affected rows is equal to limit, there are more rows to delete. Delete in 10 secs.
