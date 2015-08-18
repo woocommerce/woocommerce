@@ -274,6 +274,26 @@ return array(
 			)
 		)
 	),
+	'HU' => array(
+		'currency_code'  => 'HUF',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => ' ',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'HU',
+					'state'    => '',
+					'rate'     => '27.0000',
+					'name'     => 'ÁFA',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'IT' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right',
