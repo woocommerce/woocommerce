@@ -20,6 +20,26 @@ return array(
 			)
 		)
 	),
+	'BD' => array(
+		'currency_code'  => 'BDT',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'in',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'BD',
+					'state'    => '',
+					'rate'     => '15.0000',
+					'name'     => 'VAT',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'BE' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left',
