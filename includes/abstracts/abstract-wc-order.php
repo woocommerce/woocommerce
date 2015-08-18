@@ -2201,8 +2201,9 @@ abstract class WC_Abstract_Order {
 	 *
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add
+	 * @param bool $manual is this a manual order status change?
 	 */
-	public function update_status( $new_status, $note = '' ) {
+	public function update_status( $new_status, $note = '', $manual = false ) {
 		if ( ! $this->id ) {
 			return;
 		}
@@ -2218,7 +2219,7 @@ abstract class WC_Abstract_Order {
 			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
 			$this->post_status = 'wc-' . $new_status;
 
-			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ) );
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
 
 			// Status was changed
 			do_action( 'woocommerce_order_status_' . $new_status, $this->id );
