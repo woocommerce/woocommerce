@@ -66,29 +66,36 @@ jQuery( function( $ ) {
 
 		/**
 		 * Run actions when variations is loaded
+		 *
+		 * @param {Object} event
+		 * @param {Int} needsUpdate
 		 */
-		variations_loaded: function() {
+		variations_loaded: function( event, needsUpdate ) {
+			needsUpdate = needsUpdate || false;
+
 			var wrapper = $( '#woocommerce-product-data' );
 
-			// Show/hide downloadable, virtual and stock fields
-			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock', wrapper ).change();
+			if ( ! needsUpdate ) {
+				// Show/hide downloadable, virtual and stock fields
+				$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock', wrapper ).change();
 
-			// Open sale schedule fields when have some sale price date
-			$( '.woocommerce_variation', wrapper ).each( function( index, el ) {
-				var $el       = $( el ),
-					date_from = $( '.sale_price_dates_from', $el ).val(),
-					date_to   = $( '.sale_price_dates_to', $el ).val();
+				// Open sale schedule fields when have some sale price date
+				$( '.woocommerce_variation', wrapper ).each( function( index, el ) {
+					var $el       = $( el ),
+						date_from = $( '.sale_price_dates_from', $el ).val(),
+						date_to   = $( '.sale_price_dates_to', $el ).val();
 
-				if ( '' !== date_from || '' !== date_to ) {
-					$( 'a.sale_schedule', $el ).click();
-				}
-			});
+					if ( '' !== date_from || '' !== date_to ) {
+						$( 'a.sale_schedule', $el ).click();
+					}
+				});
 
-			// Remove variation-needs-update classes
-			$( '.woocommerce_variations .variation-needs-update', wrapper ).removeClass( 'variation-needs-update' );
+				// Remove variation-needs-update classes
+				$( '.woocommerce_variations .variation-needs-update', wrapper ).removeClass( 'variation-needs-update' );
 
-			// Disable cancel and save buttons
-			$( 'button.cancel-variation-changes, button.save-variation-changes', wrapper ).attr( 'disabled', 'disabled' );
+				// Disable cancel and save buttons
+				$( 'button.cancel-variation-changes, button.save-variation-changes', wrapper ).attr( 'disabled', 'disabled' );
+			}
 
 			// Init TipTip
 			$( '#tiptip_holder' ).removeAttr( 'style' );
@@ -119,16 +126,16 @@ jQuery( function( $ ) {
 			});
 
 			// Allow sorting
-			jQuery( '.woocommerce_variations' ).sortable({
-				items               : '.woocommerce_variation',
-				cursor              : 'move',
-				axis                : 'y',
-				handle              : '.sort',
-				scrollSensitivity   : 40,
+			$( '.woocommerce_variations', wrapper ).sortable({
+				items:                '.woocommerce_variation',
+				cursor:               'move',
+				axis:                 'y',
+				handle:               '.sort',
+				scrollSensitivity:    40,
 				forcePlaceholderSize: true,
-				helper              : 'clone',
-				opacity             : 0.65,
-				stop                : function () {
+				helper:               'clone',
+				opacity:              0.65,
+				stop:                 function() {
 				    wc_meta_boxes_product_variations_actions.variation_row_indexes();
 				}
 			});
@@ -139,12 +146,12 @@ jQuery( function( $ ) {
 		/**
 		 * Run actions when added a variation
 		 *
-		 * @param {Object} event [description]
+		 * @param {Object} event
 		 * @param {Int} qty
 		 */
 		variation_added: function( event, qty ) {
 			if ( 1 === qty ) {
-				wc_meta_boxes_product_variations_actions.variations_loaded();
+				wc_meta_boxes_product_variations_actions.variations_loaded( null, true );
 			}
 		},
 
