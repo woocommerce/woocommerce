@@ -2460,7 +2460,7 @@ class WC_AJAX {
 		$posted_attributes = wp_unslash( $_POST['attributes'] );
 
 		foreach ( $posted_attributes as $key => $value ) {
-			$attributes[ wc_clean( $key ) ] = array_map( 'wc_clean', $value );
+			$attributes[ $key ] = array_map( 'wc_clean', $value );
 		}
 
 		// Get tax classes
