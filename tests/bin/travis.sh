@@ -17,9 +17,9 @@ elif [ $1 == 'after' ]; then
 
 	# send coverage data to coveralls
 	php vendor/bin/coveralls --verbose --exclude-no-stmt
-	
-	# get scrutinizer and run it
-	wget https://scrutinizer-ci.com/ocular.phar 
-	ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml 
+
+	# get scrutinizer ocular and run it
+	wget https://scrutinizer-ci.com/ocular.phar
+	ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
 
 fi
