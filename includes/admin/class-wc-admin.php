@@ -111,13 +111,7 @@ class WC_Admin {
 
 		// If the user needs to install, send them to the setup wizard
 		if ( WC_Admin_Notices::has_notice( 'install' ) ) {
-			if ( 'en_US' === $locale ) {
-				$url = admin_url( 'index.php?page=wc-setup' );
-			} else {
-				$url = wp_nonce_url( admin_url( 'index.php?page=wc-setup&action=translation_upgrade' ), 'setup_language' );
-			}
-
-			wp_safe_redirect( $url );
+			wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
 			exit;
 
 		// Otherwise, the welcome page
