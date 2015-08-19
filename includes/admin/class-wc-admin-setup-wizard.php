@@ -201,6 +201,10 @@ class WC_Admin_Setup_Wizard {
 	 * Introduction step
 	 */
 	public function wc_setup_introduction() {
+		if ( isset( $_GET['translation_updated'] ) ) {
+			WC_Language_Pack_Upgrader::language_update_messages();
+		}
+
 		?>
 		<h1><?php _e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Thank you for choosing WooCommerce to power your online store! This quick setup wizard will help you configure the basic settings. <strong>It’s completely optional and shouldn’t take longer than five minutes.</strong>', 'woocommerce' ); ?></p>
