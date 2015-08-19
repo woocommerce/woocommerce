@@ -2992,8 +2992,26 @@ img.help_tip {
 		zoom: 1;
 	}
 
-	select.attribute_taxonomy,
-	button.add_attribute,
+	.expand-close {
+		margin-right: 2px;
+		color: #777;
+		font-size: 12px;
+		font-style: italic;
+		a {
+			background: none;
+			padding: 0;
+			font-size: 12px;
+			text-decoration: none;
+		}
+	}
+
+	&#product_attributes {
+		.expand-close {
+			float: right;
+			line-height: 28px;
+		}
+	}
+
 	button.add_variable_attribute,
 	.fr {
 		float: right;
@@ -3177,19 +3195,6 @@ img.help_tip {
 		color: #777;
 		font-size: 12px;
 		font-style: italic;
-	}
-
-	.expand-close {
-		margin-right: 2px;
-		color: #777;
-		font-size: 12px;
-		font-style: italic;
-		a {
-			background: none;
-			padding: 0;
-			font-size: 12px;
-			text-decoration: none;
-		}
 	}
 
 	a {
