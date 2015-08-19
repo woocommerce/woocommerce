@@ -690,6 +690,7 @@ class WC_Admin_Settings {
 					$value = array_filter( array_map( 'wc_clean', (array) $raw_value ) );
 					break;
 				case 'image_width' :
+					$value = array();
 					if ( isset( $raw_value['width'] ) ) {
 						$value['width']  = wc_clean( $raw_value['width'] );
 						$value['height'] = wc_clean( $raw_value['height'] );
