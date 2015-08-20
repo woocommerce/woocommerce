@@ -132,7 +132,7 @@ class WC_Admin_Setup_Wizard {
 
 	public function get_next_step_link() {
 		$keys = array_keys( $this->steps );
-		return esc_url( add_query_arg( 'step', $keys[ array_search( $this->step, array_keys( $this->steps ) ) + 1 ], remove_query_arg( 'translation_updated' ) ) );
+		return add_query_arg( 'step', $keys[ array_search( $this->step, array_keys( $this->steps ) ) + 1 ], remove_query_arg( 'translation_updated' ) );
 	}
 
 	/**
@@ -283,7 +283,7 @@ class WC_Admin_Setup_Wizard {
 		check_admin_referer( 'wc-setup' );
 
 		WC_Install::create_pages();
-		wp_redirect( $this->get_next_step_link() );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -407,7 +407,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
-		wp_redirect( $this->get_next_step_link() );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -632,7 +632,7 @@ class WC_Admin_Setup_Wizard {
 			}
 		}
 
-		wp_redirect( $this->get_next_step_link() );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -720,7 +720,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_cod_settings', $cod_settings );
 		update_option( 'woocommerce_bacs_settings', $bacs_settings );
 
-		wp_redirect( $this->get_next_step_link() );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
