@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Allowed Zip/Post Codes description for Local Delivery.
 * Tweak - Improve display_item_downloads numbering and use same function in emails.
 * Tweak - API - Fixes notices about deprecated `$HTTP_RAW_POST_DATA` on PHP 5.6.
+* Tweak - In add_to_cart_action, check is_purchasable rather than post status.
 
 = 2.4.4 - 14/08/2015 =
 * Fix - Ajax variation handling when 'any' attribute is set.
