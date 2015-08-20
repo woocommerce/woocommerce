@@ -162,6 +162,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Global text based attribute saving on product page.
 * Fix - save_account_details should check display name of current user.
 * Fix - Show the right 'no shipping available' message when a country does not have states.
+* Fix - Add required postcode marker after label replace.
+* Fix - Flush product cache so prices are regenerated after scheduled sale ends.
 * Tweak - Allowed Zip/Post Codes description for Local Delivery.
 * Tweak - Improve display_item_downloads numbering and use same function in emails.
 * Tweak - API - Fixes notices about deprecated `$HTTP_RAW_POST_DATA` on PHP 5.6.
@@ -169,7 +171,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Add expand/close links for attributes and match variation UI.
 * Tweak - Added locale info for BD, NP, JP and HU
 * Tweak - woocommerce_delete_version_transients_limit filter.
-* Tweak - Supress errors when calling set_time_limit to avoid hosting conflicts.
+* Tweak - Suppress errors when calling set_time_limit to avoid hosting conflicts.
+* Tweak - Keep new variation in sync so actions can modify data.
+* Tweak - Improved download numbering in emails and order page.
 
 = 2.4.4 - 14/08/2015 =
 * Fix - Ajax variation handling when 'any' attribute is set.

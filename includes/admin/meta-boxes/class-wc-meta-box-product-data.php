@@ -410,6 +410,11 @@ class WC_Meta_Box_Product_Data {
 					<select name="attribute_taxonomy" class="attribute_taxonomy">
 						<option value=""><?php _e( 'Custom product attribute', 'woocommerce' ); ?></option>
 						<?php
+							global $wc_product_attributes;
+
+							// Array of defined attribute taxonomies
+							$attribute_taxonomies = wc_get_attribute_taxonomies();
+
 							if ( $attribute_taxonomies ) {
 								foreach ( $attribute_taxonomies as $tax ) {
 									$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
@@ -423,11 +428,6 @@ class WC_Meta_Box_Product_Data {
 				</div>
 				<div class="product_attributes wc-metaboxes">
 					<?php
-						global $wc_product_attributes;
-
-						// Array of defined attribute taxonomies
-						$attribute_taxonomies = wc_get_attribute_taxonomies();
-
 						// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
 						$attributes           = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );
 
