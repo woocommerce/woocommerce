@@ -30,7 +30,7 @@ class WC_Language_Pack_Upgrader {
 	public function __construct() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_update' ) );
 		add_filter( 'upgrader_pre_download', array( $this, 'version_update' ), 10, 2 );
-		add_action( 'woocommerce_installed', array( $this, 'has_available_update' ) );
+		add_action( 'woocommerce_installed', array( __CLASS__, 'has_available_update' ) );
 		add_action( 'update_option_WPLANG', array( $this, 'updated_language_option' ), 10, 2 );
 		add_filter( 'admin_init', array( $this, 'manual_language_update' ), 10 );
 	}
@@ -55,7 +55,7 @@ class WC_Language_Pack_Upgrader {
 	 * @return object
 	 */
 	public function check_for_update( $data ) {
-		if ( $this->has_available_update() ) {
+		if ( self::has_available_update() ) {
 			$locale = get_locale();
 
 			$data->translations[] = array(
@@ -64,7 +64,7 @@ class WC_Language_Pack_Upgrader {
 				'language'   => $locale,
 				'version'    => WC_VERSION,
 				'updated'    => date( 'Y-m-d H:i:s' ),
-				'package'    => $this->get_language_package_uri( $locale ),
+				'package'    => self::get_language_package_uri( $locale ),
 				'autoupdate' => 1
 			);
 		}
@@ -79,7 +79,7 @@ class WC_Language_Pack_Upgrader {
 	 * @param string $new
 	 */
 	public function updated_language_option( $old, $new ) {
-		$this->has_available_update( $new );
+		self::has_available_update( $new );
 	}
 
 	/**
@@ -145,7 +145,7 @@ class WC_Language_Pack_Upgrader {
 	 * @return bool
 	 */
 	public function version_update( $reply, $package ) {
-		if ( $package === $this->get_language_package_uri() ) {
+		if ( $package === self::get_language_package_uri() ) {
 			$this->save_language_version();
 		}
 
@@ -205,7 +205,7 @@ class WC_Language_Pack_Upgrader {
 			}
 
 			// Download the language pack
-			$response = wp_safe_remote_get( $this->get_language_package_uri(), array( 'timeout' => 60 ) );
+			$response = wp_safe_remote_get( self::get_language_package_uri(), array( 'timeout' => 60 ) );
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				global $wp_filesystem;
 
