@@ -126,7 +126,7 @@ extract( $variation_data );
 							?>
 						</select>
 					</p>
-			<?php do_action( 'woocommerce_product_options_stock_fields' ); ?>
+			<?php do_action( 'woocommerce_product_variation_options_stock_fields' ); ?>
 				</div>
 			<?php endif; ?>
 
