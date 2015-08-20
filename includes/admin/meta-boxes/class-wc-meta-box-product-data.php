@@ -256,7 +256,7 @@ class WC_Meta_Box_Product_Data {
 							'taxable' 	=> __( 'Taxable', 'woocommerce' ),
 							'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
 							'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
-						) ) );
+						), 'desc_tip' => 'true', 'description' => __( 'The tax status specifies which part of your product tax will be calculated on.', 'woocommerce' ) ) );
 
 						$tax_classes         = WC_Tax::get_tax_classes();
 						$classes_options     = array();
@@ -269,7 +269,7 @@ class WC_Meta_Box_Product_Data {
 							}
 						}
 
-						woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
+						woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options, 'desc_tip' => 'true', 'description' => __( 'The tax class specifies what tax rate your product will be calculated with.', 'woocommerce' ) ) );
 
 						do_action( 'woocommerce_product_options_tax' );
 
