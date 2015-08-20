@@ -22,7 +22,7 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @var string
 	 */
-	protected $repo = 'https://github.com/woothemes/woocommerce-language-packs/raw/v';
+	protected static $repo = 'https://github.com/woothemes/woocommerce-language-packs/raw/v';
 
 	/**
 	 * Initialize the language pack upgrader
@@ -40,11 +40,11 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @return string
 	 */
-	public function get_language_package_uri( $locale = null ) {
+	public static function get_language_package_uri( $locale = null ) {
 		if ( is_null( $locale ) ) {
 			$locale = get_locale();
 		}
-		return $this->repo . WC_VERSION . '/packages/' . $locale . '.zip';
+		return self::$repo . WC_VERSION . '/packages/' . $locale . '.zip';
 	}
 
 	/**
@@ -87,7 +87,7 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @return bool
 	 */
-	public function has_available_update( $locale = null ) {
+	public static function has_available_update( $locale = null ) {
 		if ( is_null( $locale ) ) {
 			$locale = get_locale();
 		}
@@ -99,8 +99,8 @@ class WC_Language_Pack_Upgrader {
 		$version = get_option( 'woocommerce_language_pack_version', array( '0', $locale ) );
 
 		if ( ! is_array( $version ) || version_compare( $version[0], WC_VERSION, '<' ) || $version[1] !== $locale ) {
-			if ( $this->check_if_language_pack_exists( $locale ) ) {
-				$this->configure_woocommerce_upgrade_notice();
+			if ( self::check_if_language_pack_exists( $locale ) ) {
+				self::configure_woocommerce_upgrade_notice();
 				return true;
 			} else {
 				// Updated the woocommerce_language_pack_version to avoid searching translations for this release again
@@ -114,7 +114,7 @@ class WC_Language_Pack_Upgrader {
 	/**
 	 * Configure the WooCommerce translation upgrade notice
 	 */
-	public function configure_woocommerce_upgrade_notice() {
+	public static function configure_woocommerce_upgrade_notice() {
 		WC_Admin_Notices::add_notice( 'translation_upgrade' );
 	}
 
@@ -123,8 +123,8 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @return bool
 	 */
-	public function check_if_language_pack_exists( $locale ) {
-		$response = wp_safe_remote_get( $this->get_language_package_uri( $locale ), array( 'timeout' => 60 ) );
+	public static function check_if_language_pack_exists( $locale ) {
+		$response = wp_safe_remote_get( self::get_language_package_uri( $locale ), array( 'timeout' => 60 ) );
 
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 			return true;
