@@ -1328,7 +1328,9 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 	 * @subpackage	Checkout
 	 */
 	function woocommerce_checkout_coupon_form() {
-		wc_get_template( 'checkout/form-coupon.php', array( 'checkout' => WC()->checkout() ) );
+		if ( WC()->cart->needs_payment() ) {
+			wc_get_template( 'checkout/form-coupon.php', array( 'checkout' => WC()->checkout() ) );
+		}
 	}
 }
 
