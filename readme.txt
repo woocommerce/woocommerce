@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Suppress errors when calling set_time_limit to avoid hosting conflicts.
 * Tweak - Keep new variation in sync so actions can modify data.
 * Tweak - Improved download numbering in emails and order page.
+* Tweak - Allows install translation for the current language in the Setup Wizard.
 
 = 2.4.4 - 14/08/2015 =
 * Fix - Ajax variation handling when 'any' attribute is set.
