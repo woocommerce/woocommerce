@@ -1,10 +1,10 @@
 === WooCommerce - excelling eCommerce ===
-Contributors: woothemes, automattic, mikejolley, jameskoster, claudiosanches, royho
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.3
-Stable tag: 2.4.4
+Stable tag: 2.4.5
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,11 +159,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.4.5 - 20/08/2015 =
 * Fix - Global text based attribute saving on product page.
 * Fix - save_account_details should check display name of current user.
 * Fix - Show the right 'no shipping available' message when a country does not have states.
 * Fix - Add required postcode marker after label replace.
 * Fix - Flush product cache so prices are regenerated after scheduled sale ends.
+* Fix - Removed /page/ when using layered nav dropdown.
 * Tweak - Allowed Zip/Post Codes description for Local Delivery.
 * Tweak - Improve display_item_downloads numbering and use same function in emails.
 * Tweak - API - Fixes notices about deprecated `$HTTP_RAW_POST_DATA` on PHP 5.6.
@@ -174,7 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Suppress errors when calling set_time_limit to avoid hosting conflicts.
 * Tweak - Keep new variation in sync so actions can modify data.
 * Tweak - Improved download numbering in emails and order page.
-* Tweak - Allows install translation for the current language in the Setup Wizard.
+* Tweak - Allowed users to install translations for the current language during the Setup Wizard.
 
 = 2.4.4 - 14/08/2015 =
 * Fix - Ajax variation handling when 'any' attribute is set.
