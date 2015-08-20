@@ -132,7 +132,7 @@ class WC_Admin_Setup_Wizard {
 
 	public function get_next_step_link() {
 		$keys = array_keys( $this->steps );
-		return add_query_arg( 'step', $keys[ array_search( $this->step, array_keys( $this->steps ) ) + 1 ] );
+		return add_query_arg( 'step', $keys[ array_search( $this->step, array_keys( $this->steps ) ) + 1 ], remove_query_arg( 'translation_updated' ) );
 	}
 
 	/**
@@ -201,6 +201,20 @@ class WC_Admin_Setup_Wizard {
 	 * Introduction step
 	 */
 	public function wc_setup_introduction() {
+		$locale = get_locale();
+
+		if ( isset( $_GET['translation_updated'] ) ) {
+			WC_Language_Pack_Upgrader::language_update_messages();
+		} elseif( 'en_US' !== $locale && WC_Language_Pack_Upgrader::has_available_update( $locale ) ) {
+			?>
+			<div class="woocommerce-message woocommerce-language-pack">
+				<p><?php printf( esc_html__( 'WooCommerce is available in %s. Would you like to use this translation?', 'woocommerce' ), $locale ); ?></p>
+				<p class="submit">
+					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'index.php?page=wc-setup&action=translation_upgrade' ), 'setup_language' ) ); ?>" class="button-primary"><?php _e( 'Install Translation', 'woocommerce' ); ?></a>
+				</p>
+			</div>
+			<?php
+		}
 		?>
 		<h1><?php _e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Thank you for choosing WooCommerce to power your online store! This quick setup wizard will help you configure the basic settings. <strong>It’s completely optional and shouldn’t take longer than five minutes.</strong>', 'woocommerce' ); ?></p>
@@ -269,7 +283,7 @@ class WC_Admin_Setup_Wizard {
 		check_admin_referer( 'wc-setup' );
 
 		WC_Install::create_pages();
-		wp_redirect( $this->get_next_step_link() );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -393,7 +407,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
-		wp_redirect( $this->get_next_step_link() );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -618,7 +632,7 @@ class WC_Admin_Setup_Wizard {
 			}
 		}
 
-		wp_redirect( $this->get_next_step_link() );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
@@ -706,7 +720,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_cod_settings', $cod_settings );
 		update_option( 'woocommerce_bacs_settings', $bacs_settings );
 
-		wp_redirect( $this->get_next_step_link() );
+		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
 	}
 
