@@ -2,16 +2,16 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.4.4 Frontend\n"
+"Project-Id-Version: WooCommerce 2.4.5 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-08-17 10:28:10+00:00\n"
+"POT-Creation-Date: 2015-08-20 16:47:26+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n 0.5.2\n"
+"X-Generator: grunt-wp-i18n 0.5.3\n"
 
 #: i18n/countries.php:18
 msgid "Afghanistan"
@@ -987,6 +987,10 @@ msgstr ""
 
 #: i18n/countries.php:261
 msgid "Zimbabwe"
+msgstr ""
+
+#: i18n/locale-info.php:351
+msgid "Consumption tax"
 msgstr ""
 
 #: i18n/states/AR.php:13
@@ -5131,24 +5135,30 @@ msgstr ""
 msgid "Total:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2134
-msgid "Download file%s"
+#: includes/abstracts/abstract-wc-order.php:2135
+#: templates/emails/plain/email-order-items.php:49
+msgid "Download %d"
+msgstr ""
+
+#: includes/abstracts/abstract-wc-order.php:2135
+#: templates/emails/plain/email-order-items.php:51
+msgid "Download"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2219
+#: includes/abstracts/abstract-wc-order.php:2222
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2477
+#: includes/abstracts/abstract-wc-order.php:2480
 msgid "Item #%s variation #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2479
-#: includes/class-wc-ajax.php:1375
+#: includes/abstracts/abstract-wc-order.php:2482
+#: includes/class-wc-ajax.php:1409
 msgid "Item #%s stock reduced from %s to %s."
 msgstr ""
 
@@ -5186,7 +5196,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-product.php:626
 #: includes/abstracts/abstract-wc-product.php:637
 #: includes/abstracts/abstract-wc-product.php:659
-#: includes/class-wc-ajax.php:782 includes/class-wc-ajax.php:2452
+#: includes/class-wc-ajax.php:823 includes/class-wc-ajax.php:2486
 #: includes/class-wc-product-variation.php:527
 #: includes/class-wc-product-variation.php:537
 #: includes/class-wc-product-variation.php:553
@@ -5217,7 +5227,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-wc-product.php:664
 #: includes/abstracts/abstract-wc-product.php:670
-#: includes/class-wc-ajax.php:783 includes/class-wc-ajax.php:2453
+#: includes/class-wc-ajax.php:824 includes/class-wc-ajax.php:2487
 #: includes/class-wc-product-variation.php:556
 #: includes/class-wc-product-variation.php:560
 msgid "Out of stock"
@@ -6063,92 +6073,92 @@ msgstr ""
 msgid "Return to homepage"
 msgstr ""
 
-#: includes/class-wc-ajax.php:767 includes/class-wc-ajax.php:2435
+#: includes/class-wc-ajax.php:806 includes/class-wc-ajax.php:2469
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:210
 msgid "Standard"
 msgstr ""
 
-#: includes/class-wc-ajax.php:776 includes/class-wc-ajax.php:2445
+#: includes/class-wc-ajax.php:816 includes/class-wc-ajax.php:2479
 msgid "Do not allow"
 msgstr ""
 
-#: includes/class-wc-ajax.php:777 includes/class-wc-ajax.php:2446
+#: includes/class-wc-ajax.php:817 includes/class-wc-ajax.php:2480
 msgid "Allow, but notify customer"
 msgstr ""
 
-#: includes/class-wc-ajax.php:778 includes/class-wc-ajax.php:2447
+#: includes/class-wc-ajax.php:818 includes/class-wc-ajax.php:2481
 msgid "Allow"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1076
+#: includes/class-wc-ajax.php:1110
 msgid "File %d"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1386
+#: includes/class-wc-ajax.php:1420
 msgid ""
 "No products had their stock reduced - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1427 includes/class-wc-ajax.php:2238
+#: includes/class-wc-ajax.php:1461 includes/class-wc-ajax.php:2272
 msgid "Item #%s stock increased from %s to %s."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1437
+#: includes/class-wc-ajax.php:1471
 msgid ""
 "No products had their stock increased - they may not have stock management "
 "enabled."
 msgstr ""
 
-#: includes/class-wc-ajax.php:1456
+#: includes/class-wc-ajax.php:1490
 #: includes/widgets/class-wc-widget-product-categories.php:52
 #: templates/single-product-reviews.php:65
 msgid "Name"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1456
+#: includes/class-wc-ajax.php:1490
 msgid "Value"
 msgstr ""
 
-#: includes/class-wc-ajax.php:1706
+#: includes/class-wc-ajax.php:1740
 msgid "Delete note"
 msgstr ""
 
-#: includes/class-wc-ajax.php:2178
+#: includes/class-wc-ajax.php:2212
 msgid "Invalid refund amount"
 msgstr ""
 
-#: includes/class-wc-ajax.php:2223
+#: includes/class-wc-ajax.php:2257
 msgid "Refund failed"
 msgstr ""
 
-#: includes/class-wc-ajax.php:2320
+#: includes/class-wc-ajax.php:2354
 msgid "Description is missing."
 msgstr ""
 
-#: includes/class-wc-ajax.php:2323
+#: includes/class-wc-ajax.php:2357
 msgid "User is missing."
 msgstr ""
 
-#: includes/class-wc-ajax.php:2326
+#: includes/class-wc-ajax.php:2360
 msgid "Permissions is missing."
 msgstr ""
 
-#: includes/class-wc-ajax.php:2355
+#: includes/class-wc-ajax.php:2389
 msgid "API Key updated successfully."
 msgstr ""
 
-#: includes/class-wc-ajax.php:2386
+#: includes/class-wc-ajax.php:2420
 msgid ""
 "API Key generated successfully. Make sure to copy your new API keys now. "
 "You won't be able to see it again!"
 msgstr ""
 
-#: includes/class-wc-ajax.php:2387
+#: includes/class-wc-ajax.php:2421
 msgid "Revoke Key"
 msgstr ""
 
-#: includes/class-wc-ajax.php:2603
+#: includes/class-wc-ajax.php:2637
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -6940,6 +6950,30 @@ msgstr ""
 
 #: includes/class-wc-install.php:706
 msgid "Premium Support"
+msgstr ""
+
+#: includes/class-wc-language-pack-upgrader.php:254
+#: includes/class-wc-language-pack-upgrader.php:257
+#: includes/class-wc-language-pack-upgrader.php:260
+msgid "Failed to install/update the translation:"
+msgstr ""
+
+#: includes/class-wc-language-pack-upgrader.php:254
+msgid "Seems you don't have permission to do this!"
+msgstr ""
+
+#: includes/class-wc-language-pack-upgrader.php:257
+msgid ""
+"An authentication error occurred while updating the translation. Please try "
+"again or configure your %sUpgrade Constants%s."
+msgstr ""
+
+#: includes/class-wc-language-pack-upgrader.php:260
+msgid "Sorry but there is no translation available for your language =/"
+msgstr ""
+
+#: includes/class-wc-language-pack-upgrader.php:267
+msgid "Translations installed/updated successfully!"
 msgstr ""
 
 #: includes/class-wc-order.php:40 includes/wc-cart-functions.php:246
@@ -9285,19 +9319,19 @@ msgstr ""
 msgid "Refund &ndash; %s"
 msgstr ""
 
-#: includes/wc-product-functions.php:510
+#: includes/wc-product-functions.php:508
 msgid "Simple product"
 msgstr ""
 
-#: includes/wc-product-functions.php:511
+#: includes/wc-product-functions.php:509
 msgid "Grouped product"
 msgstr ""
 
-#: includes/wc-product-functions.php:512
+#: includes/wc-product-functions.php:510
 msgid "External/Affiliate product"
 msgstr ""
 
-#: includes/wc-product-functions.php:513
+#: includes/wc-product-functions.php:511
 msgid "Variable product"
 msgstr ""
 
@@ -10129,16 +10163,6 @@ msgstr ""
 #: templates/emails/email-addresses.php:30
 #: templates/emails/plain/email-addresses.php:18
 msgid "Shipping address"
-msgstr ""
-
-#: templates/emails/email-order-items.php:54
-#: templates/emails/plain/email-order-items.php:49
-msgid "Download %d"
-msgstr ""
-
-#: templates/emails/email-order-items.php:56
-#: templates/emails/plain/email-order-items.php:51
-msgid "Download"
 msgstr ""
 
 #: templates/emails/plain/admin-cancelled-order.php:21
