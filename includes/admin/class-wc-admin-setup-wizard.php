@@ -26,10 +26,8 @@ class WC_Admin_Setup_Wizard {
 
 	/** @var array Tweets user can optionally send after install */
 	private $tweets = array(
-		'WooCommerce kickstarts online stores. It\'s free and has been downloaded over 6 million times.',
-		'Building an online store? WooCommerce is the leading #eCommerce plugin for WordPress (and it\'s free).',
-		'WooCommerce is a free #eCommerce plugin for #WordPress for selling #allthethings online, beautifully.',
-		'Ready to ship your idea? WooCommerce is the fastest growing #eCommerce plugin for WordPress on the web'
+		'Someone give me woo-t, I just set up a new store with #WordPress and @WooCommerce!',
+		'Someone give me high five, I just set up a new store with #WordPress and @WooCommerce!'
 	);
 
 	/**
