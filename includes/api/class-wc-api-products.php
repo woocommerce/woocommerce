@@ -677,6 +677,7 @@ class WC_API_Products extends WC_API_Resource {
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
 			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
+			'featured_thumb_src' => wp_get_attachment_image_src( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) )[0],
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => (int) $product->download_limit,
