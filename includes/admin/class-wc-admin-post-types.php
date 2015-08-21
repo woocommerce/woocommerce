@@ -2037,7 +2037,6 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Change title boxes in admin.
-	 *
 	 * @param  string $text
 	 * @param  object $post
 	 * @return string
@@ -2056,11 +2055,10 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Print coupon description textarea field
-	 *
+	 * Print coupon description textarea field.
 	 * @param WP_Post $post
 	 */
-	public function edit_form_after_title(  $post ) {
+	public function edit_form_after_title( $post ) {
 		if ( 'shop_coupon' === $post->post_type ) {
 			?>
 			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
@@ -2070,8 +2068,7 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Change label for insert buttons.
-	 *
-	 * @param array $strings
+	 * @param  array $strings
 	 * @return array
 	 */
 	public function change_insert_into_post( $strings ) {
