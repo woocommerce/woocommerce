@@ -102,13 +102,15 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param int $page
 	 * @return array
 	 */
-	public function get_products( $fields = null, $type = null, $filter = array(), $page = 1 ) {
+	public function get_products( $fields = null, $type = null, $filter = array(), $page = 1, $limit = 10 ) {
 
 		if ( ! empty( $type ) ) {
 			$filter['type'] = $type;
 		}
 
 		$filter['page'] = $page;
+
+		$filter['limit'] = $limit;
 
 		$query = $this->query_products( $filter );
 
@@ -588,6 +590,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			unset( $args['type'] );
 		}
+
 		// Filter products by category
 		if ( ! empty( $args['category'] ) ) {
 			$query_args['tax_query'] = array(
