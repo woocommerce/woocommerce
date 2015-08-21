@@ -102,13 +102,15 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param int $page
 	 * @return array
 	 */
-	public function get_products( $fields = null, $type = null, $filter = array(), $page = 1 ) {
+	public function get_products( $fields = null, $type = null, $filter = array(), $page = 1, $limit = 10 ) {
 
 		if ( ! empty( $type ) ) {
 			$filter['type'] = $type;
 		}
 
 		$filter['page'] = $page;
+
+		$filter['limit'] = $limit;
 
 		$query = $this->query_products( $filter );
 
@@ -591,7 +593,13 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Filter products by category
 		if ( ! empty( $args['category'] ) ) {
-			$query_args['product_cat'] = $args['category'];
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' 		=> 'product_cat',
+					'terms' 		=> $args['category'],
+					'field' 		=> 'term_id'
+				)
+			);
 		}
 
 		// Filter by specific sku
@@ -620,7 +628,8 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
-		$prices_precision = wc_get_price_decimals();
+		$prices_precision  = wc_get_price_decimals();
+		$product_thumbnail = wp_get_attachment_image_src( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) );
 
 		return array(
 			'title'              => $product->get_title(),
@@ -677,6 +686,7 @@ class WC_API_Products extends WC_API_Resource {
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
 			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
+			'featured_thumb_src' => $product_thumbnail[0],
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => (int) $product->download_limit,
