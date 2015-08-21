@@ -646,7 +646,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php _e( 'Payments', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php printf( __( 'WooCommerce comes with some payment gateways pre-installed. %2$sAdditonal gateways%3$s can be installed later. Payment Gateways can be setup, enabled and disabled from the %1$scheckout settings%3$s screen.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout' ) . '" target="_blank">', '<a href="' . admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php printf( __( 'WooCommerce can accept both online and offline payments. %2$sAdditional payment methods%3$s can be installed later and managed from the %1$scheckout settings%3$s screen.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout' ) . '" target="_blank">', '<a href="' . admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) . '" target="_blank">', '</a>' ); ?></p>
 			<table class="form-table">
 				<tr class="section_title">
 					<td colspan="2">
