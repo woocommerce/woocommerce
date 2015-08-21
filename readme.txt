@@ -161,7 +161,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 * Fix - menu_order notices on IIS.
 * Fix - Subscriptions 2.0 compatibility.
-* Fix - WC Setup wizard: site icon display on WP 4.3
+* Fix - WC Setup wizard: site icon display on WP 4.3.
+* Fix - WC Setup wizard: multi-line step styling.
 
 = 2.4.5 - 20/08/2015 =
 * Fix - Global text based attribute saving on product page.
