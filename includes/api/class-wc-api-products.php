@@ -588,10 +588,15 @@ class WC_API_Products extends WC_API_Resource {
 
 			unset( $args['type'] );
 		}
-
 		// Filter products by category
 		if ( ! empty( $args['category'] ) ) {
-			$query_args['product_cat'] = $args['category'];
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' 		=> 'product_cat',
+					'terms' 		=> $args['category'],
+					'field' 		=> 'term_id'
+				)
+			);
 		}
 
 		// Filter by specific sku
