@@ -160,9 +160,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 * Fix - menu_order notices on IIS.
-* Fix - Subscriptions 2.0 compatibility.
-* Fix - WC Setup wizard: site icon display on WP 4.3.
-* Fix - WC Setup wizard: multi-line step styling.
+* Fix - Grouped product is_purchasable check during add to cart.
+* Fix - Subscriptions 2.0 (unreleased) compatibility.
+* Tweak - WC Setup wizard: multi-line step styling.
+* Tweak - WC Setup wizard: site icon display on WP 4.3.
 
 = 2.4.5 - 20/08/2015 =
 * Fix - Global text based attribute saving on product page.
