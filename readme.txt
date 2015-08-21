@@ -162,7 +162,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - menu_order notices on IIS.
 * Fix - Grouped product is_purchasable check during add to cart.
 * Fix - Subscriptions 2.0 (unreleased) compatibility.
-* Fix - Added BW compatibility for themes using 'uniform'.
 * Fix - Encode variation data in add_to_cart_url method.
 * Fix - Bulk update variation: Set manage stock when _manage_stock meta data is missing.
 * Fix - Bulk update variation: Allow stock to be set to 0.
