@@ -81,6 +81,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'media_view_strings', array( $this, 'change_insert_into_post' ) );
+		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
 		// Uploads
@@ -2084,6 +2085,20 @@ class WC_Admin_Post_Types {
 		}
 
 		return $strings;
+	}
+
+	/**
+	 * Hidden default Meta-Boxes.
+	 * @param  array  $hidden
+	 * @param  object $screen
+	 * @return array
+	 */
+	public function hidden_meta_boxes( $hidden, $screen ) {
+		if ( 'product' === $screen->post_type && 'post' === $screen->base ) {
+			$hidden = array_merge( $hidden, array( 'postcustom' ) );
+		}
+
+		return $hidden;
 	}
 
 	/**
