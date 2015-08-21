@@ -164,7 +164,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Subscriptions 2.0 (unreleased) compatibility.
 * Fix - Added BW compatibility for themes using 'uniform'.
 * Fix - Encode variation data in add_to_cart_url method.
-* Fix - Bulk update variation manage stock when _manage_stock meta data is missing.
+* Fix - Bulk update variation: Set manage stock when _manage_stock meta data is missing.
+* Fix - Bulk update variation: Allow stock to be set to 0.
 * Tweak - Add tooltips for tax status and tax class options.
 * Tweak - WC Setup wizard: multi-line step styling.
 * Tweak - WC Setup wizard: site icon display on WP 4.3.
