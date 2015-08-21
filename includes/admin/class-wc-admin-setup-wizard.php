@@ -147,7 +147,8 @@ class WC_Admin_Setup_Wizard {
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 			<title><?php _e( 'WooCommerce &rsaquo; Setup Wizard', 'woocommerce' ); ?></title>
 			<?php wp_print_scripts( 'wc-setup' ); ?>
-			<?php do_action( 'admin_print_styles' );  ?>
+			<?php do_action( 'admin_print_styles' ); ?>
+			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wc-setup wp-core-ui">
 			<h1 id="wc-logo"><a href="http://woothemes.com/woocommerce"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
