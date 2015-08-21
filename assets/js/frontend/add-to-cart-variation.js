@@ -140,6 +140,10 @@
 				$( this ).blur();
 			}
 
+			if( $().uniform && $.isFunction( $.uniform.update ) ) {
+				$.uniform.update();
+			}
+
 			// Custom event for when variation selection has been changed
 			$form.trigger( 'woocommerce_variation_has_changed' );
 		} )

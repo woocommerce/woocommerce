@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - menu_order notices on IIS.
 * Fix - Grouped product is_purchasable check during add to cart.
 * Fix - Subscriptions 2.0 (unreleased) compatibility.
+* Fix - Added BW compatibility for themes using 'uniform'.
 * Tweak - Add tooltips for tax status and tax class options.
 * Tweak - WC Setup wizard: multi-line step styling.
 * Tweak - WC Setup wizard: site icon display on WP 4.3.
