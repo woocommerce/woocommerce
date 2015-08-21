@@ -291,18 +291,20 @@ body {
 .wc-setup-steps {
 	padding: 0 0 24px;
 	margin: 0;
+	width: 100%;
+	display: inline-flex;
 	list-style: none outside;
 	overflow: hidden;
 	color: #ccc;
 	li {
 		width: 20%;
 		float: left;
-		padding: 0 0 1em;
+		padding: 0 0 0.8em;
 		margin: 0;
 		text-align: center;
 		position: relative;
 		border-bottom: 4px solid #ccc;
-		line-height: 1;
+		line-height: 1.4em;
 	}
 	li:before {
 		content: "";
