@@ -169,6 +169,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Add tooltips for tax status and tax class options.
 * Tweak - WC Setup wizard: multi-line step styling.
 * Tweak - WC Setup wizard: site icon display on WP 4.3.
+* Tweak - WC Setup wizard: tweaked wording.
+* Tweak - WC Setup wizard: Add spinner/loading indication between onboarding steps.
 
 = 2.4.5 - 20/08/2015 =
 * Fix - Global text based attribute saving on product page.
