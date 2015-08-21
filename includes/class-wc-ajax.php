@@ -2696,8 +2696,8 @@ class WC_AJAX {
 	private static function variation_bulk_action_toggle_manage_stock( $variations, $data ) {
 		foreach ( $variations as $variation_id ) {
 			$_manage_stock   = get_post_meta( $variation_id, '_manage_stock', true );
-			$is_manage_stock = 'no' === $_manage_stock ? 'yes' : 'no';
-			update_post_meta( $variation_id, '_manage_stock', wc_clean( $is_manage_stock ) );
+			$is_manage_stock = 'no' === $_manage_stock || '' === $_manage_stock ? 'yes' : 'no';
+			update_post_meta( $variation_id, '_manage_stock', $is_manage_stock );
 		}
 	}
 
