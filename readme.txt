@@ -159,6 +159,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - menu_order notices on IIS.
+
 = 2.4.5 - 20/08/2015 =
 * Fix - Global text based attribute saving on product page.
 * Fix - save_account_details should check display name of current user.
