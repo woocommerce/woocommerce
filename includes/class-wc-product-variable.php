@@ -465,9 +465,18 @@ class WC_Product_Variable extends WC_Product {
 				return 0;
 			}
 
+			$value = wc_clean( $match_attributes[ $attribute_field_name ] );
+
+			/**
+			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+			 */
+			if ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
+				$value = sanitize_title( $value );
+			}
+
 			$query_args['meta_query'][] = array(
 				'key'     => $attribute_field_name,
-				'value'   => array( '', wc_clean( $match_attributes[ $attribute_field_name ] ) ),
+				'value'   => array( '', $value ),
 				'compare' => 'IN'
 			);
 		}
