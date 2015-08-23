@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Bulk update variation: Set manage stock when _manage_stock meta data is missing.
 * Fix - Bulk update variation: Allow stock to be set to 0.
 * Fix - Ajax variation < 2.4 attribute name handling.
+* Tweak - Set ajax/nocache headers for ajax requests.
 * Tweak - Add tooltips for tax status and tax class options.
 * Tweak - WC Setup wizard: multi-line step styling.
 * Tweak - WC Setup wizard: site icon display on WP 4.3.
