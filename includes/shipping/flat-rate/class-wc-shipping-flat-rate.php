@@ -63,10 +63,15 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	protected function evaluate_cost( $sum, $args = array() ) {
 		include_once( 'includes/class-wc-eval-math.php' );
 
-		add_shortcode( 'fee', array( $this, 'fee' ) );
+		$locale   = localeconv();
+		$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
+
 		$this->fee_cost = $args['cost'];
 
-		$sum = rtrim( ltrim( do_shortcode( str_replace(
+		// Expand shortcodes
+		add_shortcode( 'fee', array( $this, 'fee' ) );
+
+		$sum = do_shortcode( str_replace(
 			array(
 				'[qty]',
 				'[cost]'
@@ -76,10 +81,20 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$args['cost']
 			),
 			$sum
-		) ), "\t\n\r\0\x0B+*/" ), "\t\n\r\0\x0B+-*/" );
+		) );
 
 		remove_shortcode( 'fee', array( $this, 'fee' ) );
 
+		// Remove whitespace from string
+		$sum = preg_replace( '/\s+/', '', $sum );
+
+		// Remove locale from string
+		$sum = str_replace( $decimals, '.', $sum );
+
+		// Trim invalid start/end characters
+		$sum = rtrim( ltrim( $sum, "\t\n\r\0\x0B+*/" ), "\t\n\r\0\x0B+-*/" );
+
+		// Do the math
 		return $sum ? WC_Eval_Math::evaluate( $sum ) : 0;
 	}
 

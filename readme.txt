@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.3
-Stable tag: 2.4.5
+Stable tag: 2.4.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.4.6 - 24/08/2015 =
 * Fix - menu_order notices on IIS.
 * Fix - Grouped product is_purchasable check during add to cart.
 * Fix - Subscriptions 2.0 (unreleased) compatibility.
@@ -167,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Bulk update variation: Allow stock to be set to 0.
 * Fix - Ajax variation < 2.4 attribute name handling.
 * Fix - During updates, only recreate .htaccess if not using redirect download method.
+* Fix - Handle non standard decimals in flat rate costs.
 * Tweak - WC Setup wizard: Fix manual setting of decimal/thousand separator.
 * Tweak - Set ajax/nocache headers for ajax requests.
 * Tweak - Add tooltips for tax status and tax class options.
