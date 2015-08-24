@@ -768,7 +768,7 @@ class WC_Admin_Settings {
 	public static function check_download_folder_protection() {
 		$upload_dir      = wp_upload_dir();
 		$downloads_url   = $upload_dir['basedir'] . '/woocommerce_uploads';
-		$download_method = get_option('woocommerce_file_download_method');
+		$download_method = get_option( 'woocommerce_file_download_method' );
 
 		if ( 'redirect' == $download_method ) {
 
