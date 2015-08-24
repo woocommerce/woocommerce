@@ -580,6 +580,11 @@ class WC_Form_Handler {
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
 		$adding_to_cart      = wc_get_product( $product_id );
+
+		if ( ! $adding_to_cart ) {
+			return;
+		}
+
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
 		// Variable product handling
