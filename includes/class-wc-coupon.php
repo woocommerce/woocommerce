@@ -172,10 +172,19 @@ class WC_Coupon {
 			'customer_email'             => array()
 		);
 
+		if ( ! empty( $this->id ) ) {
+			$postmeta = get_post_meta( $this->id );
+		}
+
 		foreach ( $defaults as $key => $value ) {
 			// Try to load from meta if an ID is present
-			if ( $this->id ) {
-				$this->$key = get_post_meta( $this->id, $key, true );
+			if ( ! empty( $this->id ) ) {
+				/**
+				 * By not calling `get_post_meta()` individually, we may be breaking compatibility with
+				 * some plugins that filter on `get_post_metadata` and erroneously override based solely
+				 * on $meta_key -- but don't override when querying for all as $meta_key is empty().
+				 */
+				$this->$key = isset( $postmeta[ $key ] ) ? array_shift( $postmeta[ $key ] ) : '';
 			} else {
 				$this->$key = ! empty( $data[ $key ] ) ? wc_clean( $data[ $key ] ) : '';
 
