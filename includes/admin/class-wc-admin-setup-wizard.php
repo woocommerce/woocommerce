@@ -299,8 +299,8 @@ class WC_Admin_Setup_Wizard {
 		// Defaults
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
 		$currency_pos   = get_option( 'woocommerce_currency_pos', 'left' );
-		$decimal_sep    = get_option( 'woocommerce_decimal_sep', '.' );
-		$thousand_sep   = get_option( 'woocommerce_thousand_sep', ',' );
+		$decimal_sep    = get_option( 'woocommerce_price_decimal_sep', '.' );
+		$thousand_sep   = get_option( 'woocommerce_price_thousand_sep', ',' );
 		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
 		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
 		?>
@@ -402,8 +402,8 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_default_country', $store_location );
 		update_option( 'woocommerce_currency', $currency_code );
 		update_option( 'woocommerce_currency_pos', $currency_pos );
-		update_option( 'woocommerce_decimal_sep', $decimal_sep );
-		update_option( 'woocommerce_thousand_sep', $thousand_sep );
+		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
 
