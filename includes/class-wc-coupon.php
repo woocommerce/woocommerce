@@ -271,7 +271,10 @@ class WC_Coupon {
 			$this->usage_count--;
 			update_post_meta( $this->id, 'usage_count', $this->usage_count );
 
-			// Delete 1 used by meta
+			/**
+			 * We're doing this the long way because `delete_post_meta( $id, $key, $value )` deletes
+			 * all instances where the key and value match, and we only want to delete one.
+			 */
 			$meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE meta_key = '_used_by' AND meta_value = %s AND post_id = %d LIMIT 1;", $used_by, $this->id ) );
 			if ( $meta_id ) {
 				delete_metadata_by_mid( 'post', $meta_id );
