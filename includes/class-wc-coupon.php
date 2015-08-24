@@ -184,7 +184,7 @@ class WC_Coupon {
 				 * some plugins that filter on `get_post_metadata` and erroneously override based solely
 				 * on $meta_key -- but don't override when querying for all as $meta_key is empty().
 				 */
-				$this->$key = isset( $postmeta[ $key ] ) ? array_shift( $postmeta[ $key ] ) : '';
+				$this->$key = isset( $postmeta[ $key ] ) ? maybe_unserialize( array_shift( $postmeta[ $key ] ) ) : '';
 			} else {
 				$this->$key = ! empty( $data[ $key ] ) ? wc_clean( $data[ $key ] ) : '';
 
