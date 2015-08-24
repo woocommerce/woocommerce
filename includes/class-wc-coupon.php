@@ -285,6 +285,18 @@ class WC_Coupon {
 	}
 
 	/**
+	 * Get records of all users who have used the current coupon.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_used_by() {
+		$_used_by = (array) get_post_meta( $this->id, '_used_by' );
+		// Strip out any null values.
+		return array_filter( $_used_by );
+	}
+
+	/**
 	 * Returns the error_message string
 	 *
 	 * @access public
