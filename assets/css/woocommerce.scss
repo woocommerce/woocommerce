@@ -30,6 +30,9 @@ p.demo_store {
 	color: $primarytext;
 	z-index: 99998;
 	box-shadow: 0 1px 1em rgba(0,0,0,0.2);
+	a {
+		color: $primarytext;
+	}
 }
 
 .admin-bar {
