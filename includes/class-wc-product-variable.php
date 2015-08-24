@@ -461,7 +461,7 @@ class WC_Product_Variable extends WC_Product {
 
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
-			if ( empty( $match_attributes[ $attribute_field_name ] ) ) {
+			if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
 				return 0;
 			}
 
