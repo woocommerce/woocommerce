@@ -479,9 +479,7 @@ class WC_Product_Variation extends WC_Product {
 		if ( update_post_meta( $this->variation_id, '_stock_status', $status ) ) {
 			do_action( 'woocommerce_variation_set_stock_status', $this->variation_id, $status );
 
-			if ( true === $this->managing_stock() ) {
-				WC_Product_Variable::sync_stock_status( $this->id );
-			}
+			WC_Product_Variable::sync_stock_status( $this->id );
 		}
 	}
 

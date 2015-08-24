@@ -1123,7 +1123,7 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $post_id, '_stock', '' );
 			}
 
-		} else {
+		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}
 
