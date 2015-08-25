@@ -132,7 +132,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 	if ( ! is_array( $args ) ) {
 		_deprecated_argument( 'wc_product_dropdown_categories()', '2.1', 'show_counts, hierarchical, show_uncategorized and orderby arguments are invalid - pass a single array of values instead.' );
 
-		$args['show_counts']        = $args;
+		$args['show_count']         = $args;
 		$args['hierarchical']       = $deprecated_hierarchical;
 		$args['show_uncategorized'] = $deprecated_show_uncategorized;
 		$args['orderby']            = $deprecated_orderby;
@@ -141,7 +141,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 	$current_product_cat = isset( $wp_query->query['product_cat'] ) ? $wp_query->query['product_cat'] : '';
 	$defaults            = array(
 		'pad_counts'         => 1,
-		'show_counts'        => 1,
+		'show_count'         => 1,
 		'hierarchical'       => 1,
 		'hide_empty'         => 1,
 		'show_uncategorized' => 1,
