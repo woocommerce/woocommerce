@@ -73,7 +73,7 @@ class WC_Payment_Gateways {
 			'WC_Gateway_Paypal',
 		);
 
-		$simplify_countries = array( 'US', 'IE' ); // USA and Ireland
+		$simplify_countries = (array)apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) );
 
 		if ( in_array( WC()->countries->get_base_country(), $simplify_countries ) ) {
 			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
