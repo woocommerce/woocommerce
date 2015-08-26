@@ -159,6 +159,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Removed extra ob_start() in class-wc-shortcodes.php.
+* Fix - Show counts in category dropdown.
+* Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
+
 = 2.4.6 - 24/08/2015 =
 * Fix - menu_order notices on IIS.
 * Fix - Grouped product is_purchasable check during add to cart.
