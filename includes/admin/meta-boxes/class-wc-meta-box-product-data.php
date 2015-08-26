@@ -605,7 +605,7 @@ class WC_Meta_Box_Product_Data {
 
 		if ( $attributes ) {
 			foreach ( $attributes as $attribute ) {
-				if ( isset( $attribute['is_variation'] ) ) {
+				if ( $attribute['is_variation'] === 1 ) {
 					$variation_attribute_found = true;
 					break;
 				}
