@@ -1234,6 +1234,7 @@ class WC_Meta_Box_Product_Data {
 		if ( 'variable' == $product_type ) {
 			// Update parent if variable so price sorting works and stays in sync with the cheapest child
 			WC_Product_Variable::sync( $post_id );
+		//	WC_Product_Variable::sync_stock_status( $post_id );
 		}
 
 		// Update version after saving
