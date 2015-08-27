@@ -172,7 +172,8 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
-		$url = $this->is_purchasable() && $this->is_in_stock() ? remove_query_arg( 'added-to-cart', add_query_arg( array_merge( array( 'variation_id' => $this->variation_id, 'add-to-cart' => $this->id ), $this->variation_data ) ) ) : get_permalink( $this->id );
+		$variation_data = array_map( 'urlencode', $this->variation_data );
+		$url            = $this->is_purchasable() && $this->is_in_stock() ? remove_query_arg( 'added-to-cart', add_query_arg( array_merge( array( 'variation_id' => $this->variation_id, 'add-to-cart' => $this->id ), $variation_data ) ) ) : get_permalink( $this->id );
 
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
 	}
@@ -478,9 +479,7 @@ class WC_Product_Variation extends WC_Product {
 		if ( update_post_meta( $this->variation_id, '_stock_status', $status ) ) {
 			do_action( 'woocommerce_variation_set_stock_status', $this->variation_id, $status );
 
-			if ( true === $this->managing_stock() ) {
-				WC_Product_Variable::sync_stock_status( $this->id );
-			}
+			WC_Product_Variable::sync_stock_status( $this->id );
 		}
 	}
 

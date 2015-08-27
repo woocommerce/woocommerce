@@ -255,13 +255,16 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array()
 	 */
 	public function get_variation_prices( $display = false ) {
-		$cache_key = 'wc_var_prices' . md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array(
-			$this->id,
-			$display ? WC_Tax::get_rates() : '',
-			WC_Cache_Helper::get_transient_version( 'product' )
-		), $this, $display ) ) );
+		/**
+		 * Create unique cache key based on the tax location (affects displayed/cached prices) and product version.
+		 * Max transient length is 45, -10 for get_transient_version.
+		 * @var string
+		 */
+		$hash         = substr( md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array( $this->id, $display ? WC_Tax::get_rates() : '' ), $this, $display ) ) ), 0, 22 );
+		$cache_key    = 'wc_var_prices' . $hash . WC_Cache_Helper::get_transient_version( 'product' );
+		$prices_array = get_transient( $cache_key );
 
-		if ( false === ( $prices_array = get_transient( $cache_key ) ) ) {
+		if ( empty( $prices_array ) ) {
 			$prices            = array();
 			$regular_prices    = array();
 			$sale_prices       = array();
@@ -295,7 +298,7 @@ class WC_Product_Variable extends WC_Product {
 			asort( $regular_prices );
 			asort( $sale_prices );
 
-			$prices_array  = array(
+			$prices_array = array(
 				'price'         => $prices,
 				'regular_price' => $regular_prices,
 				'sale_price'    => $sale_prices
@@ -461,13 +464,22 @@ class WC_Product_Variable extends WC_Product {
 
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
 
-			if ( empty( $match_attributes[ $attribute_field_name ] ) ) {
+			if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
 				return 0;
+			}
+
+			$value = wc_clean( $match_attributes[ $attribute_field_name ] );
+
+			/**
+			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+			 */
+			if ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
+				$value = sanitize_title( $value );
 			}
 
 			$query_args['meta_query'][] = array(
 				'key'     => $attribute_field_name,
-				'value'   => array( '', wc_clean( $match_attributes[ $attribute_field_name ] ) ),
+				'value'   => array( '', $value ),
 				'compare' => 'IN'
 			);
 		}

@@ -210,12 +210,14 @@ class WC_Post_Data {
 	 * @param int $post_id
 	 */
 	public static function pre_post_update( $post_id ) {
+		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
+
 		if ( isset( $_POST['_visibility'] ) ) {
 			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
 				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
 			}
 		}
-		if ( isset( $_POST['_stock_status'] ) ) {
+		if ( isset( $_POST['_stock_status'] ) && 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}
 	}

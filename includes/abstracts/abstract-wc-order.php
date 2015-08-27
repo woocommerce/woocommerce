@@ -1830,14 +1830,14 @@ abstract class WC_Abstract_Order {
 		if ( $this->get_total_discount() > 0 ) {
 			$total_rows['discount'] = array(
 				'label' => __( 'Discount:', 'woocommerce' ),
-				'value'	=> '-' . $this->get_discount_to_display()
+				'value'	=> '-' . $this->get_discount_to_display( $tax_display )
 			);
 		}
 
 		if ( $this->get_shipping_method() ) {
 			$total_rows['shipping'] = array(
 				'label' => __( 'Shipping:', 'woocommerce' ),
-				'value'	=> $this->get_shipping_to_display()
+				'value'	=> $this->get_shipping_to_display( $tax_display )
 			);
 		}
 

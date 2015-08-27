@@ -579,163 +579,164 @@ class WC_Form_Handler {
 
 		$product_id          = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 		$was_added_to_cart   = false;
-		$added_to_cart       = array();
 		$adding_to_cart      = wc_get_product( $product_id );
-		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
-		// Check if the product is published
-		if ( ! $adding_to_cart->is_purchasable() ) {
-			wc_add_notice( __( 'Sorry, this product is unavailable.', 'woocommerce' ), 'error' );
+		if ( ! $adding_to_cart ) {
 			return;
 		}
+
+		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->product_type, $adding_to_cart );
 
 		// Variable product handling
 		if ( 'variable' === $add_to_cart_handler ) {
-
-			$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
-			$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
-			$missing_attributes = array();
-			$variations         = array();
-			$attributes         = $adding_to_cart->get_attributes();
-			$variation          = wc_get_product( $variation_id );
-
-			// Verify all attributes
-			foreach ( $attributes as $attribute ) {
-				if ( ! $attribute['is_variation'] ) {
-					continue;
-				}
-
-				$taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
-
-				if ( isset( $_REQUEST[ $taxonomy ] ) ) {
-
-					// Get value from post data
-					if ( $attribute['is_taxonomy'] ) {
-						// Don't use wc_clean as it destroys sanitized characters
-						$value = sanitize_title( stripslashes( $_REQUEST[ $taxonomy ] ) );
-					} else {
-						$value = wc_clean( stripslashes( $_REQUEST[ $taxonomy ] ) );
-					}
-
-					// Get valid value from variation
-					$valid_value = $variation->variation_data[ $taxonomy ];
-
-					// Allow if valid
-					if ( '' === $valid_value || $valid_value === $value ) {
-						$variations[ $taxonomy ] = $value;
-						continue;
-					}
-
-				} else {
-					$missing_attributes[] = wc_attribute_label( $attribute['name'] );
-				}
-			}
-
-			if ( $missing_attributes ) {
-				wc_add_notice( sprintf( _n( '%s is a required field', '%s are required fields', sizeof( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ), 'error' );
-				return;
-			} elseif ( empty( $variation_id ) ) {
-				wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
-				return;
-			} else {
-				// Add to cart validation
-				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
-
-				if ( $passed_validation ) {
-					if ( WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
-						wc_add_to_cart_message( $product_id );
-						$was_added_to_cart = true;
-						$added_to_cart[]   = $product_id;
-					}
-				}
-			}
+			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id );
 
 		// Grouped Products
 		} elseif ( 'grouped' === $add_to_cart_handler ) {
-
-			if ( ! empty( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ) {
-
-				$quantity_set = false;
-
-				foreach ( $_REQUEST['quantity'] as $item => $quantity ) {
-					if ( $quantity <= 0 ) {
-						continue;
-					}
-
-					$quantity_set = true;
-
-					// Add to cart validation
-					$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
-
-					if ( $passed_validation ) {
-						if ( WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
-							$was_added_to_cart = true;
-							$added_to_cart[] = $item;
-						}
-					}
-				}
-
-				if ( $was_added_to_cart ) {
-					wc_add_to_cart_message( $added_to_cart );
-				}
-
-				if ( ! $was_added_to_cart && ! $quantity_set ) {
-					wc_add_notice( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ), 'error' );
-					return;
-				}
-
-			} elseif ( $product_id ) {
-
-				/* Link on product archives */
-				wc_add_notice( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ), 'error' );
-				return;
-
-			}
+			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 
 		// Custom Handler
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ){
-
 			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url );
-			return;
 
 		// Simple Products
 		} else {
-
-			$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
-
-			// Add to cart validation
-			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
-
-			if ( $passed_validation ) {
-				// Add the product to the cart
-				if ( WC()->cart->add_to_cart( $product_id, $quantity ) !== false ) {
-					wc_add_to_cart_message( $product_id );
-					$was_added_to_cart = true;
-					$added_to_cart[] = $product_id;
-				}
-			}
-
+			$was_added_to_cart = self::add_to_cart_handler_simple( $product_id );
 		}
 
 		// If we added the product to the cart we can now optionally do a redirect.
-		if ( $was_added_to_cart && wc_notice_count( 'error' ) == 0 ) {
-
-			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url );
-
+		if ( $was_added_to_cart && wc_notice_count( 'error' ) === 0 ) {
 			// If has custom URL redirect there
-			if ( $url ) {
+			if ( $url = apply_filters( 'woocommerce_add_to_cart_redirect', $url ) ) {
 				wp_safe_redirect( $url );
 				exit;
-			}
-
-			// Redirect to cart option
-			elseif ( get_option('woocommerce_cart_redirect_after_add') == 'yes' ) {
+			} elseif ( get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes' ) {
 				wp_safe_redirect( WC()->cart->get_cart_url() );
 				exit;
 			}
+		}
+	}
 
+	/**
+	 * Handle adding simple products to the cart
+	 * @since 2.4.6 Split from add_to_cart_action
+	 * @param int $product_id
+	 * @return bool success or not
+	 */
+	private static function add_to_cart_handler_simple( $product_id ) {
+		$quantity 			= empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
+		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+
+		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) !== false ) {
+			wc_add_to_cart_message( $product_id );
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Handle adding grouped products to the cart
+	 * @since 2.4.6 Split from add_to_cart_action
+	 * @param int $product_id
+	 * @return bool success or not
+	 */
+	private static function add_to_cart_handler_grouped( $product_id ) {
+		$was_added_to_cart = false;
+		$added_to_cart     = array();
+
+		if ( ! empty( $_REQUEST['quantity'] ) && is_array( $_REQUEST['quantity'] ) ) {
+			$quantity_set = false;
+
+			foreach ( $_REQUEST['quantity'] as $item => $quantity ) {
+				if ( $quantity <= 0 ) {
+					continue;
+				}
+				$quantity_set = true;
+
+				// Add to cart validation
+				$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
+
+				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
+					$was_added_to_cart = true;
+					$added_to_cart[]   = $item;
+				}
+			}
+
+			if ( ! $was_added_to_cart && ! $quantity_set ) {
+				wc_add_notice( __( 'Please choose the quantity of items you wish to add to your cart&hellip;', 'woocommerce' ), 'error' );
+			} elseif ( $was_added_to_cart ) {
+				wc_add_to_cart_message( $added_to_cart );
+				return true;
+			}
+
+		} elseif ( $product_id ) {
+			/* Link on product archives */
+			wc_add_notice( __( 'Please choose a product to add to your cart&hellip;', 'woocommerce' ), 'error' );
+		}
+		return false;
+	}
+
+	/**
+	 * Handle adding variable products to the cart
+	 * @since 2.4.6 Split from add_to_cart_action
+	 * @param int $product_id
+	 * @return bool success or not
+	 */
+	private static function add_to_cart_handler_variable( $product_id ) {
+		$adding_to_cart     = wc_get_product( $product_id );
+		$variation_id       = empty( $_REQUEST['variation_id'] ) ? '' : absint( $_REQUEST['variation_id'] );
+		$quantity           = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( $_REQUEST['quantity'] );
+		$missing_attributes = array();
+		$variations         = array();
+		$attributes         = $adding_to_cart->get_attributes();
+		$variation          = wc_get_product( $variation_id );
+
+		// Verify all attributes
+		foreach ( $attributes as $attribute ) {
+			if ( ! $attribute['is_variation'] ) {
+				continue;
+			}
+
+			$taxonomy = 'attribute_' . sanitize_title( $attribute['name'] );
+
+			if ( isset( $_REQUEST[ $taxonomy ] ) ) {
+
+				// Get value from post data
+				if ( $attribute['is_taxonomy'] ) {
+					// Don't use wc_clean as it destroys sanitized characters
+					$value = sanitize_title( stripslashes( $_REQUEST[ $taxonomy ] ) );
+				} else {
+					$value = wc_clean( stripslashes( $_REQUEST[ $taxonomy ] ) );
+				}
+
+				// Get valid value from variation
+				$valid_value = $variation->variation_data[ $taxonomy ];
+
+				// Allow if valid
+				if ( '' === $valid_value || $valid_value === $value ) {
+					$variations[ $taxonomy ] = $value;
+					continue;
+				}
+
+			} else {
+				$missing_attributes[] = wc_attribute_label( $attribute['name'] );
+			}
 		}
 
+		if ( $missing_attributes ) {
+			wc_add_notice( sprintf( _n( '%s is a required field', '%s are required fields', sizeof( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ), 'error' );
+		} elseif ( empty( $variation_id ) ) {
+			wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );
+		} else {
+			// Add to cart validation
+			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
+
+			if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
+				wc_add_to_cart_message( $product_id );
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

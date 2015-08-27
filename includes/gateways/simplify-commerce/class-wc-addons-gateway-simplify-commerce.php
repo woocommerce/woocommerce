@@ -366,7 +366,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * @param WC_Order $renewal_order The order which recorded the successful payment (to make up for the failed automatic payment).
 	 */
 	public function update_failing_payment_method( $subscription, $renewal_order ) {
-		update_post_meta( $original_order->id, '_simplify_customer_id', get_post_meta( $renewal_order->id, '_simplify_customer_id', true ) );
+		update_post_meta( $subscription->id, '_simplify_customer_id', get_post_meta( $renewal_order->id, '_simplify_customer_id', true ) );
 	}
 
 	/**

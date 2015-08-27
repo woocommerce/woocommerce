@@ -36,7 +36,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Set AJAX defines.
+	 * Set WC AJAX constant and headers.
 	 */
 	public static function define_ajax() {
 		if ( ! empty( $_GET['wc-ajax'] ) ) {
@@ -50,6 +50,12 @@ class WC_AJAX {
 			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
 				@ini_set( 'display_errors', 0 );
 			}
+			// Send headers like admin-ajax.php
+			send_origin_headers();
+			@header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+			@header( 'X-Robots-Tag: noindex' );
+			send_nosniff_header();
+			nocache_headers();
 		}
 	}
 
@@ -2696,8 +2702,8 @@ class WC_AJAX {
 	private static function variation_bulk_action_toggle_manage_stock( $variations, $data ) {
 		foreach ( $variations as $variation_id ) {
 			$_manage_stock   = get_post_meta( $variation_id, '_manage_stock', true );
-			$is_manage_stock = 'no' === $_manage_stock ? 'yes' : 'no';
-			update_post_meta( $variation_id, '_manage_stock', wc_clean( $is_manage_stock ) );
+			$is_manage_stock = 'no' === $_manage_stock || '' === $_manage_stock ? 'yes' : 'no';
+			update_post_meta( $variation_id, '_manage_stock', $is_manage_stock );
 		}
 	}
 
@@ -2760,19 +2766,17 @@ class WC_AJAX {
 	 * @param  array $data
 	 */
 	private static function variation_bulk_action_variable_stock( $variations, $data ) {
-		if ( empty( $data['value'] ) ) {
+		if ( ! isset( $data['value'] ) ) {
 			return;
 		}
 
 		$value = wc_clean( $data['value'] );
 
-		if ( $value ) {
-			foreach ( $variations as $variation_id ) {
-				if ( 'yes' === get_post_meta( $variation_id, '_manage_stock', true ) ) {
-					wc_update_product_stock( $variation_id, wc_stock_amount( $value ) );
-				} else {
-					delete_post_meta( $variation_id, '_stock' );
-				}
+		foreach ( $variations as $variation_id ) {
+			if ( 'yes' === get_post_meta( $variation_id, '_manage_stock', true ) ) {
+				wc_update_product_stock( $variation_id, wc_stock_amount( $value ) );
+			} else {
+				delete_post_meta( $variation_id, '_stock' );
 			}
 		}
 	}

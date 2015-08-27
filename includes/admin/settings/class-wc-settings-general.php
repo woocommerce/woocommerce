@@ -112,8 +112,8 @@ class WC_Settings_General extends WC_Settings_Page {
 				'desc'     => '',
 				'id'       => 'woocommerce_demo_store_notice',
 				'default'  => __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' ),
-				'type'     => 'text',
-				'css'      => 'min-width:300px;',
+				'type'     => 'textarea',
+				'css'     => 'width:350px; height: 65px;',
 				'autoload' => false
 			),
 

@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.3
-Stable tag: 2.4.5
+Stable tag: 2.4.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -124,7 +124,7 @@ For extending or theming WooCommerce, see our [codex](http://docs.woothemes.com/
 
 = Where can I get support or talk to other users? =
 
-If you get stuck you can ask for help on the [WooThemes Community Forum](https://support.woothemes.com/hc/communities/public/topics).
+If you get stuck, you can ask for help in the [WooCommerce Plugin Forum](https://wordpress.org/support/plugin/woocommerce).
 
 For help with premium add-ons from WooThemes, use [our helpdesk](http://support.woothemes.com/).
 
@@ -158,6 +158,29 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+* Fix - Removed extra ob_start() in class-wc-shortcodes.php.
+* Fix - Show counts in category dropdown.
+* Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
+
+= 2.4.6 - 24/08/2015 =
+* Fix - menu_order notices on IIS.
+* Fix - Grouped product is_purchasable check during add to cart.
+* Fix - Subscriptions 2.0 (unreleased) compatibility.
+* Fix - Encode variation data in add_to_cart_url method.
+* Fix - Bulk update variation: Set manage stock when _manage_stock meta data is missing.
+* Fix - Bulk update variation: Allow stock to be set to 0.
+* Fix - Ajax variation < 2.4 attribute name handling.
+* Fix - During updates, only recreate .htaccess if not using redirect download method.
+* Fix - Handle non standard decimals in flat rate costs.
+* Tweak - WC Setup wizard: Fix manual setting of decimal/thousand separator.
+* Tweak - Set ajax/nocache headers for ajax requests.
+* Tweak - Add tooltips for tax status and tax class options.
+* Tweak - WC Setup wizard: multi-line step styling.
+* Tweak - WC Setup wizard: site icon display on WP 4.3.
+* Tweak - WC Setup wizard: tweaked wording.
+* Tweak - WC Setup wizard: Add spinner/loading indication between onboarding steps.
+* Tweak - Allow HTML in store notice.
 
 = 2.4.5 - 20/08/2015 =
 * Fix - Global text based attribute saving on product page.

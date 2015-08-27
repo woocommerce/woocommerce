@@ -594,14 +594,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	 */
 	private static function create_files() {
 		// Install files and folders for uploading files and prevent hotlinking
-		$upload_dir =  wp_upload_dir();
+		$upload_dir      = wp_upload_dir();
+		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
 
 		$files = array(
-			array(
-				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
-				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
-			),
 			array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> 'index.html',
@@ -618,6 +614,14 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 				'content' 	=> ''
 			)
 		);
+
+		if ( 'redirect' !== $download_method ) {
+			$files[] = array(
+				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
+				'file' 		=> '.htaccess',
+				'content' 	=> 'deny from all'
+			);
+		}
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
