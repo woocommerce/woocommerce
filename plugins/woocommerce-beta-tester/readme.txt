@@ -1,7 +1,7 @@
 === WooCommerce Beta Tester ===
 Author URI: http://woothemes.com/
 Plugin URI: https://github.com/woothemes/woocommerce-beta-tester
-Contributors: woothemes, mikejolley claudiosanches
+Contributors: woothemes, mikejolley, claudiosanches
 Tags: woocommerce, wc, beta, beta tester, bleeding edge
 Requires at least: 4.2
 Tested up to: 4.2
