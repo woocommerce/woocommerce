@@ -805,6 +805,7 @@ class WC_AJAX {
 			$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
 			$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
 			$variation_data['menu_order']     = $variation->menu_order;
+			$variation_data['_stock']         = wc_stock_amount( $variation_data['_stock'] );
 
 			// Get tax classes
 			$tax_classes           = WC_Tax::get_tax_classes();
