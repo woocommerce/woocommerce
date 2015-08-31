@@ -494,7 +494,7 @@ class WC_Meta_Box_Product_Data {
 							foreach ( $product_ids as $product_id ) {
 								$product = wc_get_product( $product_id );
 								if ( is_object( $product ) ) {
-									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
+									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 								}
 							}
 
@@ -511,7 +511,7 @@ class WC_Meta_Box_Product_Data {
 							foreach ( $product_ids as $product_id ) {
 								$product = wc_get_product( $product_id );
 								if ( is_object( $product ) ) {
-									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
+									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 								}
 							}
 
@@ -530,7 +530,7 @@ class WC_Meta_Box_Product_Data {
 							if ( $parent_id ) {
 								$parent    = wc_get_product( $parent_id );
 								if ( is_object( $parent ) ) {
-									$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name() ) );
+									$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 								}
 
 								echo esc_attr( $parent_title );
