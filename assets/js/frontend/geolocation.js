@@ -44,6 +44,21 @@ jQuery( function( $ ) {
 		$.ajax( $geolocate_customer );
 	}
 
+	// Support forms
+	$( 'form' ).each(function(){
+		$this = $(this);
+		if ( 'get' === $this.attr( 'method' ).toLowerCase() ) {
+			$this.append( '<input type="hidden" name="v" value="' + wc_geolocation_params.hash + '" />' );
+		} else {
+			var href = $this.attr( 'action' );
+			if ( href.indexOf( '?' ) > 0 ) {
+				$this.attr( 'action', href + '&v=' + wc_geolocation_params.hash );
+			} else {
+				$this.attr( 'action', href + '?v=' + wc_geolocation_params.hash );
+			}
+		}
+	});
+
 	$( document.body ).on( 'added_to_cart', function() {
 		$append_hashes();
 	});
