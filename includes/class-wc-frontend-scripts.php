@@ -203,10 +203,12 @@ class WC_Frontend_Scripts {
 			break;
 			case 'wc-geolocation' :
 				return array(
-					'wc_ajax_url' => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'home_url'    => home_url(),
-					'is_checkout' => is_checkout() ? '1' : '0',
-					'hash'        => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
+					'wc_ajax_url'     => WC_AJAX::get_endpoint( "%%endpoint%%" ),
+					'home_url'        => home_url(),
+					'is_cart'         => is_cart() ? '1' : '0',
+					'is_account_page' => is_account_page() ? '1' : '0',
+					'is_checkout'     => is_checkout() ? '1' : '0',
+					'hash'            => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
 				);
 			break;
 			case 'wc-single-product' :

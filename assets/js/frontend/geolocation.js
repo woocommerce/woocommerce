@@ -40,7 +40,7 @@ jQuery( function( $ ) {
 		}
 	};
 
-	if ( '1' !== wc_geolocation_params.is_checkout ) {
+	if ( '1' !== wc_geolocation_params.is_checkout && '1' !== wc_geolocation_params.is_cart && '1' !== wc_geolocation_params.is_account_page ) {
 		$.ajax( $geolocate_customer );
 	}
 
