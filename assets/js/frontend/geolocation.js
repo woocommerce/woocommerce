@@ -42,26 +42,28 @@ jQuery( function( $ ) {
 
 	if ( '1' !== wc_geolocation_params.is_checkout && '1' !== wc_geolocation_params.is_cart && '1' !== wc_geolocation_params.is_account_page ) {
 		$.ajax( $geolocate_customer );
-	}
 
-	// Support forms
-	$( 'form' ).each(function(){
-		$this = $(this);
-		if ( 'get' === $this.attr( 'method' ).toLowerCase() ) {
-			$this.append( '<input type="hidden" name="v" value="' + wc_geolocation_params.hash + '" />' );
-		} else {
-			var href = $this.attr( 'action' );
-			if ( href.indexOf( '?' ) > 0 ) {
-				$this.attr( 'action', href + '&v=' + wc_geolocation_params.hash );
+		// Support form elements
+		$( 'form' ).each(function(){
+			$this = $(this);
+			if ( 'get' === $this.attr( 'method' ).toLowerCase() ) {
+				$this.append( '<input type="hidden" name="v" value="' + wc_geolocation_params.hash + '" />' );
 			} else {
-				$this.attr( 'action', href + '?v=' + wc_geolocation_params.hash );
+				var href = $this.attr( 'action' );
+				if ( href ) {
+					if ( href.indexOf( '?' ) > 0 ) {
+						$this.attr( 'action', href + '&v=' + wc_geolocation_params.hash );
+					} else {
+						$this.attr( 'action', href + '?v=' + wc_geolocation_params.hash );
+					}
+				}
 			}
-		}
-	});
+		});
+	}
 
 	$( document.body ).on( 'added_to_cart', function() {
 		$append_hashes();
 	});
 
-	$append_hashes();
+
 });
