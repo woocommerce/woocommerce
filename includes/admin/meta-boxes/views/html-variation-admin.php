@@ -22,7 +22,7 @@ extract( $variation_data );
 			foreach ( $parent_data['attributes'] as $attribute ) {
 
 				// Only deal with attributes that are variations
-				if ( ! $attribute['is_variation'] ) {
+				if ( ! $attribute['is_variation'] || 'false' === $attribute['is_variation'] ) {
 					continue;
 				}
 
