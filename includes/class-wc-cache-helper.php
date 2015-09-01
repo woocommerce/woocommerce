@@ -147,7 +147,7 @@ class WC_Cache_Helper {
 			self::nocache();
 		} elseif ( is_array( $wc_page_uris ) ) {
 			foreach( $wc_page_uris as $uri ) {
-				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
+				if ( stristr( $_SERVER['REQUEST_URI'], $uri ) ) {
 					self::nocache();
 					break;
 				}
