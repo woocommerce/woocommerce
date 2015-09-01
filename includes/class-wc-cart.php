@@ -1055,6 +1055,21 @@ class WC_Cart {
 		}
 
 		/**
+		 * Sort by subtotal
+		 * @param  array $a
+		 * @param  array $b
+		 * @return int
+		 */
+		private function sort_by_subtotal( $a, $b ) {
+			$first_item_subtotal  = isset( $a['line_subtotal'] ) ? $a['line_subtotal'] : 0;
+			$second_item_subtotal = isset( $b['line_subtotal'] ) ? $b['line_subtotal'] : 0;
+			if ( $first_item_subtotal === $second_item_subtotal ) {
+				return 0;
+			}
+			return ( $first_item_subtotal < $second_item_subtotal ) ? 1 : -1;
+		}
+
+		/**
 		 * Calculate totals for the items in the cart.
 		 */
 		public function calculate_totals() {
@@ -1070,11 +1085,12 @@ class WC_Cart {
 
 			$tax_rates      = array();
 			$shop_tax_rates = array();
+			$cart           = $this->get_cart();
 
 			/**
 			 * Calculate subtotals for items. This is done first so that discount logic can use the values.
 			 */
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			foreach ( $cart as $cart_item_key => $values ) {
 
 				$_product = $values['data'];
 
@@ -1176,10 +1192,13 @@ class WC_Cart {
 				$this->subtotal_ex_tax += $line_subtotal;
 			}
 
+			// Order cart items by price so coupon logic is 'fair' for customers and not based on order added to cart.
+			uasort( $cart, array( $this, 'sort_by_subtotal' ) );
+
 			/**
 			 * Calculate totals for items
 			 */
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			foreach ( $cart as $cart_item_key => $values ) {
 
 				$_product = $values['data'];
 
