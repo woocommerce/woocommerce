@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+* Fix - Handle Switzerland in get_european_union_countries.
 * Fix - For geolocation with static cache support, ensure hash is appended during form submission.
 * Fix - To prevent discounts being applied in 'random' order (based on order added to cart), sort cart items based on subtotal during calculate_totals.
 * Fix - Removed extra ob_start() in class-wc-shortcodes.php.
