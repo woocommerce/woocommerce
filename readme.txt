@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - To prevent discounts being applied in 'random' order (based on order added to cart), sort cart items based on subtotal during calculate_totals.
 * Fix - Removed extra ob_start() in class-wc-shortcodes.php.
 * Fix - Show counts in category dropdown.
+* Fix - Escape add to cart messages to stop translations from breaking cart events.
 * Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
 
 = 2.4.6 - 24/08/2015 =

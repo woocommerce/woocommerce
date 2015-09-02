@@ -80,9 +80,9 @@ function wc_add_to_cart_message( $product_id ) {
 	// Output success messages
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wp_get_referer() ? wp_get_referer() : home_url() );
-		$message   = sprintf('<a href="%s" class="button wc-forward">%s</a> %s', $return_to, __( 'Continue Shopping', 'woocommerce' ), $added_text );
+		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue Shopping', 'woocommerce' ), esc_html( $added_text ) );
 	} else {
-		$message   = sprintf('<a href="%s" class="button wc-forward">%s</a> %s', wc_get_page_permalink( 'cart' ), __( 'View Cart', 'woocommerce' ), $added_text );
+		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View Cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
 	wc_add_notice( apply_filters( 'wc_add_to_cart_message', $message, $product_id ) );
@@ -302,4 +302,3 @@ function wc_cart_round_discount( $value, $precision ) {
 		return round( $value, $precision );
 	}
 }
-
