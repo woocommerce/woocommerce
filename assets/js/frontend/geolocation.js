@@ -44,8 +44,9 @@ jQuery( function( $ ) {
 		$.ajax( $geolocate_customer );
 
 		// Support form elements
-		$( 'form' ).each(function(){
-			$this = $(this);
+		$( 'form' ).each( function() {
+			var $this = $( this );
+
 			if ( 'get' === $this.attr( 'method' ).toLowerCase() ) {
 				$this.append( '<input type="hidden" name="v" value="' + wc_geolocation_params.hash + '" />' );
 			} else {
@@ -64,6 +65,5 @@ jQuery( function( $ ) {
 	$( document.body ).on( 'added_to_cart', function() {
 		$append_hashes();
 	});
-
 
 });
