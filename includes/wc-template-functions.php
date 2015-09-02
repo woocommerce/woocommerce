@@ -1904,7 +1904,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 	 * @since 2.4.0
 	 */
 	function wc_dropdown_variation_attribute_options( $args = array() ) {
-		$args = wp_parse_args( $args, array(
+		$args = wp_parse_args( apply_filters( 'woocommerce_dropdown_variation_attribute_options_args', $args ), array(
 			'options'          => false,
 			'attribute'        => false,
 			'product'          => false,
