@@ -859,7 +859,7 @@ jQuery( function( $ ) {
 				page_nav.hide();
 				$( 'option, optgroup', variation_action ).hide();
 				$( '.variation_actions' ).val( 'add_variation' );
-				$( 'option', variation_action ).slice( 0, 2 ).show();
+				$( 'option[data-global="true"]', variation_action ).show();
 
 			} else {
 				toolbar.show();

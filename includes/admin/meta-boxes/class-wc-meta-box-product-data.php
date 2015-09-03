@@ -674,8 +674,8 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="toolbar toolbar-top">
 					<select id="field_to_edit" class="variation_actions">
-						<option value="add_variation"><?php _e( 'Add variation', 'woocommerce' ); ?></option>
-						<option value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
+						<option data-global="true" value="add_variation"><?php _e( 'Add variation', 'woocommerce' ); ?></option>
+						<option data-global="true" value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
 						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
 							<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
