@@ -452,6 +452,20 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function send( $to, $subject, $message, $headers, $attachments ) {
 
+		/**
+		 * An action to short-circuit the sending of the emails.
+		 */
+		$short_circuit = apply_filters( 'woocommerce_send_email_alternate_provider', null, $this, array(
+			'to'          => $to,
+			'subject'     => $subject,
+			'message'     => $message,
+			'headers'     => $headers,
+			'attachments' => $attachments,
+		) );
+		if ( ! empty( $short_circuit ) ) {
+			return $short_circuit;
+		}
+
 		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
