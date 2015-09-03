@@ -38,6 +38,7 @@ class WC_Install {
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
+		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 	}
 
 	/**
@@ -179,6 +180,19 @@ class WC_Install {
 		}
 
 		self::update_db_version();
+	}
+
+	/**
+	 * Add more cron schedules
+	 * @param  array $schedules
+	 * @return array
+	 */
+	public static function cron_schedules( $schedules ) {
+		$schedules['monthly'] = array(
+			'interval' => 2635200,
+			'display'  => __( 'Monthly', 'woocommerce' )
+		);
+		return $schedules;
 	}
 
 	/**
