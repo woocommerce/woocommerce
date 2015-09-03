@@ -1732,15 +1732,13 @@ abstract class WC_Abstract_Order {
 
 		if ( $this->order_shipping != 0 ) {
 
-			$tax_text = '';
-
 			if ( $tax_display == 'excl' ) {
 
 				// Show shipping excluding tax
 				$shipping = wc_price( $this->order_shipping, array('currency' => $this->get_order_currency()) );
 
 				if ( $this->order_shipping_tax != 0 && $this->prices_include_tax ) {
-					$tax_text = WC()->countries->ex_tax_or_vat() . ' ';
+					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 
 			} else {
@@ -1749,12 +1747,12 @@ abstract class WC_Abstract_Order {
 				$shipping = wc_price( $this->order_shipping + $this->order_shipping_tax, array('currency' => $this->get_order_currency()) );
 
 				if ( $this->order_shipping_tax != 0 && ! $this->prices_include_tax ) {
-					$tax_text = WC()->countries->inc_tax_or_vat() . ' ';
+					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 
 			}
 
-			$shipping .= sprintf( __( '&nbsp;<small>%svia %s</small>', 'woocommerce' ), $tax_text, $this->get_shipping_method() );
+			$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_shipped_via', '&nbsp;<small class="shipped_via">' . sprintf( __( 'via %s', 'woocommerce' ), $this->get_shipping_method() ) . '</small>', $this );
 
 		} elseif ( $this->get_shipping_method() ) {
 			$shipping = $this->get_shipping_method();
