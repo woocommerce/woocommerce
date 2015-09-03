@@ -15,13 +15,22 @@ jQuery( function( $ ) {
 				.on( 'change', 'input.variable_is_virtual', this.variable_is_virtual )
 				.on( 'change', 'input.variable_manage_stock', this.variable_manage_stock )
 				.on( 'click', 'button.notice-dismiss', this.notice_dismiss )
-				.on( 'click', 'h3 .sort', this.set_menu_order );
+				.on( 'click', 'h3 .sort', this.set_menu_order )
+				.on( 'reload', this.reload );
 
 			$( 'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock' ).change();
-
 			$( '#woocommerce-product-data' ).on( 'woocommerce_variations_loaded', this.variations_loaded );
-
 			$( document.body ).on( 'woocommerce_variations_added', this.variation_added );
+		},
+
+		/**
+		 * Reload UI
+		 *
+		 * @param {Object} event
+		 * @param {Int} qty
+		 */
+		reload: function() {
+			wc_meta_boxes_product_variations_ajax.load_variations( 1 );
 		},
 
 		/**
