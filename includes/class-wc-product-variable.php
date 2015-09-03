@@ -272,20 +272,20 @@ class WC_Product_Variable extends WC_Product {
 
 			foreach ( $this->get_children( true ) as $variation_id ) {
 				if ( $variation = $this->get_child( $variation_id ) ) {
-					$price         = $variation->get_price();
-					$regular_price = $variation->get_regular_price();
-					$sale_price    = $variation->get_sale_price();
+					$price         = $variation->price;
+					$regular_price = $variation->regular_price;
+					$sale_price    = $variation->sale_price;
 
 					// If sale price does not equal price, the product is not yet on sale
-					if ( ! $variation->is_on_sale() ) {
+					if ( $sale_price === $regular_price || $sale_price !== $price ) {
 						$sale_price = $regular_price;
 					}
 
 					// If we are getting prices for display, we need to account for taxes
 					if ( $display ) {
-						$price         = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price );
-						$regular_price = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $regular_price ) : $variation->get_price_excluding_tax( 1, $regular_price );
-						$sale_price    = $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price );
+						$price         = $price !== '' ? ( $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price ) ) : '';
+						$regular_price = $regular_price !== '' ? ( $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $regular_price ) : $variation->get_price_excluding_tax( 1, $regular_price ) ) : '';
+						$sale_price    = $sale_price !== '' ? ( $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price ) ) : '';
 					}
 
 					$prices[ $variation_id ]         = $price;
