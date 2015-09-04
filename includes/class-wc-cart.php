@@ -1143,7 +1143,7 @@ class WC_Cart {
 					/**
 					 * ADJUST TAX - Calculations when base tax is not equal to the item tax
 					 */
-					if ( $item_tax_rates !== $base_tax_rates ) {
+					if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 
 						// Work out a new base price without the shop's base tax
 						$taxes                 = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
@@ -1233,7 +1233,7 @@ class WC_Cart {
 					/**
 					 * ADJUST TAX - Calculations when base tax is not equal to the item tax
 					 */
-					if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', false ) ) {
+					if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 
 						// Work out a new base price without the shop's base tax
 						$taxes             = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );

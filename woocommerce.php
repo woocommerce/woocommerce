@@ -22,6 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WooCommerce' ) ) :
 
+add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
 /**
  * Main WooCommerce Class
  *
