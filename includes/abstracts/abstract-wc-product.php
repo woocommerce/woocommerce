@@ -861,7 +861,7 @@ class WC_Product {
 			$price = $this->get_price();
 		}
 
-		if ( $this->is_taxable() && 'yes' === get_option( 'woocommerce_prices_include_tax' ) && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+		if ( $this->is_taxable() && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) {
 			$tax_rates  = WC_Tax::get_base_tax_rates( $this->tax_class );
 			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
