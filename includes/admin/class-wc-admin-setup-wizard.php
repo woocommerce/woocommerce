@@ -221,7 +221,7 @@ class WC_Admin_Setup_Wizard {
 		<p><?php _e( 'No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard. Come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
-			<a href="<?php echo esc_url( admin_url( 'plugins.php' ) ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( wp_get_referer() ? wp_get_referer() : admin_url( 'plugins.php' ) ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
 		<?php
 	}
