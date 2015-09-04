@@ -94,7 +94,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="hidden" name="woocommerce_pay" value="1" />
 		</div>
 
-		<div class="clear"></div>
 	</div>
 
 </form>

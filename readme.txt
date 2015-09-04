@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Show counts in category dropdown.
 * Fix - Escape add to cart messages to stop translations from breaking cart events.
 * Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
+* Template - Removed 'Payment' heading in `templates/checkout/form-pay.php`.
 
 = 2.4.6 - 24/08/2015 =
 * Fix - menu_order notices on IIS.
