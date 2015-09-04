@@ -967,7 +967,7 @@ class WC_Product {
 
 			} else {
 
-				$price = __( 'Free!', 'woocommerce' );
+				$price = '<span class="amount">' . __( 'Free!', 'woocommerce' ) . '</span>';
 
 				$price = apply_filters( 'woocommerce_free_price_html', $price, $this );
 
