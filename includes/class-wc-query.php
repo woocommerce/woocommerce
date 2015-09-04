@@ -691,7 +691,7 @@ class WC_Query {
 	 */
 	public function layered_nav_init( ) {
 
-		if ( is_active_widget( false, false, 'woocommerce_layered_nav', true ) && ! is_admin() ) {
+		if ( apply_filters( 'woocommerce_is_layered_nav_active', is_active_widget( false, false, 'woocommerce_layered_nav', true ) ) && ! is_admin() ) {
 
 			global $_chosen_attributes;
 
