@@ -59,7 +59,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	</div>
 
-	<div class="clear"></div>
 </div>
 
 <?php if ( ! is_ajax() ) : ?>
