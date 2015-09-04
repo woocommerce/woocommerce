@@ -620,10 +620,11 @@ class WC_Meta_Box_Product_Data {
 
 			<?php if ( ! $variation_attribute_found ) : ?>
 
-				<div id="message" class="inline woocommerce-message">
-					<p><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
-
-					<p class="submit"><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
+				<div id="message" class="inline notice woocommerce-message">
+					<p><?php _e( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
+					<p>
+						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
+					</p>
 				</div>
 
 			<?php else : ?>
@@ -955,8 +956,9 @@ class WC_Meta_Box_Product_Data {
 
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
-					// Text based, separate by pipe
-					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', wc_get_text_attributes( $attribute_values[ $i ] ) ) );
+					// Text based, possibly separated by pipes (WC_DELIMITER). Preserve line breaks in non-variation attributes.
+					$values = $is_variation ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
+					$values = implode( ' ' . WC_DELIMITER . ' ', wc_get_text_attributes( $values ) );
 
 					// Custom attribute - Add attribute to array and set the values
 					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(

@@ -694,8 +694,9 @@ class WC_AJAX {
 
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
-					// Text based, separate by pipe
-					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, wp_unslash( $attribute_values[ $i ] ) ) ) );
+					// Text based, possibly separated by pipes (WC_DELIMITER). Preserve line breaks in non-variation attributes.
+					$values = $is_variation ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
+					$values = implode( ' ' . WC_DELIMITER . ' ', wc_get_text_attributes( $values ) );
 
 					// Custom attribute - Add attribute to array and set the values
 					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
