@@ -227,7 +227,7 @@ class WC_Query {
 		// Fix for endpoints on the homepage
 		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') != $q->get('page_id') ) {
 			$_query = wp_parse_args( $q->query );
-			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
+			if ( ! empty( $_query ) && array_merge( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
 				$q->is_page     = true;
 				$q->is_home     = false;
 				$q->is_singular = true;

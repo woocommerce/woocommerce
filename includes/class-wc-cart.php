@@ -1577,7 +1577,7 @@ class WC_Cart {
 							$check_emails[] = $posted['billing_email'];
 							$check_emails   = array_map( 'sanitize_email', array_map( 'strtolower', $check_emails ) );
 
-							if ( 0 == sizeof( array_intersect( $check_emails, $coupon->customer_email ) ) ) {
+							if ( 0 == sizeof( array_merge( $check_emails, $coupon->customer_email ) ) ) {
 								$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 
 								// Remove the coupon
