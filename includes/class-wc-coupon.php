@@ -379,7 +379,7 @@ class WC_Coupon {
 			if ( ! WC()->cart->is_empty() ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
-					if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) {
+					if ( sizeof( array_merge( $product_cats, $this->product_categories ) ) > 0 ) {
 						$valid_for_cart = true;
 					}
 				}
@@ -457,7 +457,7 @@ class WC_Coupon {
 
 					$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
 
-					if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
+					if ( sizeof( array_merge( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
 						$valid_for_cart = false;
 					}
 				}
@@ -553,7 +553,7 @@ class WC_Coupon {
 
 		// Category discounts
 		if ( sizeof( $this->product_categories ) > 0 ) {
-			if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) {
+			if ( sizeof( array_merge( $product_cats, $this->product_categories ) ) > 0 ) {
 				$valid = true;
 			}
 		}
@@ -572,7 +572,7 @@ class WC_Coupon {
 
 		// Specific categories excluded from the discount
 		if ( sizeof( $this->exclude_product_categories ) > 0 ) {
-			if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
+			if ( sizeof( array_merge( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
 				$valid = false;
 			}
 		}
