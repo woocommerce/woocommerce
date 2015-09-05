@@ -173,7 +173,9 @@ class WC_Form_Handler {
 		// Prevent emails being displayed, or leave alone.
 		$user->display_name = is_email( $current_user->display_name ) ? $user->first_name : $current_user->display_name;
 
-		if ( empty( $account_first_name ) || empty( $account_last_name ) ) {
+        $is_invalid_user_full_name = apply_filters( 'woocommerce_is_invalid_user_full_name', ( empty( $account_first_name ) || empty( $account_last_name ) ) ? true : false, $account_first_name, $account_last_name );
+
+		if ( $is_invalid_user_full_name ) {
 			wc_add_notice( __( 'Please enter your name.', 'woocommerce' ), 'error' );
 		}
 
