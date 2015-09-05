@@ -266,9 +266,7 @@ class WC_Form_Handler {
 			$order_id   = absint( $wp->query_vars['order-pay'] );
 			$order      = wc_get_order( $order_id );
 
-			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
-
-			if ( $order->id == $order_id && $order->order_key == $order_key && $order->has_status( $valid_order_statuses ) ) {
+			if ( $order->id == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
 
 				// Set customer location to order location
 				if ( $order->billing_country ) {
