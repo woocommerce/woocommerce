@@ -303,7 +303,16 @@ function wc_array_overlay( $a1, $a2 ) {
  * @return array
  */
 function wc_array_intersect( $a1, $a2 ) {
-	return array_keys( array_intersect_key( array_fill_keys( $a1, true), array_fill_keys( $a2, true ) ) );
+	$intersect = array();
+
+	$a2_k = array_fill_keys( $a2, true);
+	foreach( $a1 as $v ) {
+		if( isset( $a2_k[$v] ) ) {
+			array_push( $intersect, $v );
+		}
+	}
+
+	return $intersect;
 }
 
 /**
