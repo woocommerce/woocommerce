@@ -296,7 +296,7 @@ function wc_array_overlay( $a1, $a2 ) {
 }
 
 /**
- * Intersect two arrays
+ * Intersect two one-dimensional arrays in faster way
  *
  * @param array $a1
  * @param array $a2
