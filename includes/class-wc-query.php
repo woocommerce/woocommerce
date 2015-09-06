@@ -227,7 +227,7 @@ class WC_Query {
 		// Fix for endpoints on the homepage
 		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') != $q->get('page_id') ) {
 			$_query = wp_parse_args( $q->query );
-			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
+			if ( ! empty( $_query ) && wc_array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
 				$q->is_page     = true;
 				$q->is_home     = false;
 				$q->is_singular = true;
@@ -396,7 +396,7 @@ class WC_Query {
 		$this->filtered_product_ids   = $queried_post_ids;
 
 		if ( sizeof( $this->layered_nav_post__in ) > 0 ) {
-			$this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
+			$this->layered_nav_product_ids = wc_array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
 		} else {
 			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
 		}
@@ -512,14 +512,14 @@ class WC_Query {
 
 		// Also store filtered posts ids...
 		if ( sizeof( $this->post__in ) > 0 ) {
-			$this->filtered_product_ids = array_intersect( $this->unfiltered_product_ids, $this->post__in );
+			$this->filtered_product_ids = wc_array_intersect( $this->unfiltered_product_ids, $this->post__in );
 		} else {
 			$this->filtered_product_ids = $this->unfiltered_product_ids;
 		}
 
 		// And filtered post ids which just take layered nav into consideration (to find max price in the price widget)
 		if ( sizeof( $this->layered_nav_post__in ) > 0 ) {
-			$this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
+			$this->layered_nav_product_ids = wc_array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
 		} else {
 			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
 		}
@@ -770,7 +770,7 @@ class WC_Query {
 						if ( ! is_wp_error( $posts ) ) {
 
 							if ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) {
-								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $posts, $matched_products_from_attribute ) : array_intersect( $posts, $matched_products_from_attribute );
+								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $posts, $matched_products_from_attribute ) : wc_array_intersect( $posts, $matched_products_from_attribute );
 							} else {
 								$matched_products_from_attribute = $posts;
 							}
@@ -781,7 +781,7 @@ class WC_Query {
 				}
 
 				if ( sizeof( $matched_products[ $data['query_type'] ] ) > 0 || $filtered_attribute[ $data['query_type'] ] === true ) {
-					$matched_products[ $data['query_type'] ] = ( $data['query_type'] == 'or' ) ? array_merge( $matched_products_from_attribute, $matched_products[ $data['query_type'] ] ) : array_intersect( $matched_products_from_attribute, $matched_products[ $data['query_type'] ] );
+					$matched_products[ $data['query_type'] ] = ( $data['query_type'] == 'or' ) ? array_merge( $matched_products_from_attribute, $matched_products[ $data['query_type'] ] ) : wc_array_intersect( $matched_products_from_attribute, $matched_products[ $data['query_type'] ] );
 				} else {
 					$matched_products[ $data['query_type'] ] = $matched_products_from_attribute;
 				}
@@ -793,7 +793,7 @@ class WC_Query {
 
 			// Combine our AND and OR result sets
 			if ( $filtered_attribute['and'] && $filtered_attribute['or'] )
-				$results = array_intersect( $matched_products[ 'and' ], $matched_products[ 'or' ] );
+				$results = wc_array_intersect( $matched_products[ 'and' ], $matched_products[ 'or' ] );
 			else
 				$results = array_merge( $matched_products[ 'and' ], $matched_products[ 'or' ] );
 
@@ -806,7 +806,7 @@ class WC_Query {
 					$filtered_posts   = $results;
 					$filtered_posts[] = 0;
 				} else {
-					$filtered_posts   = array_intersect( $filtered_posts, $results );
+					$filtered_posts   = wc_array_intersect( $filtered_posts, $results );
 					$filtered_posts[] = 0;
 				}
 
@@ -912,7 +912,7 @@ class WC_Query {
 			if ( 0 === sizeof( $filtered_posts ) ) {
 				$filtered_posts = $matched_products;
 			} else {
-				$filtered_posts = array_intersect( $filtered_posts, $matched_products );
+				$filtered_posts = wc_array_intersect( $filtered_posts, $matched_products );
 			}
 			$filtered_posts[] = 0;
 		}
