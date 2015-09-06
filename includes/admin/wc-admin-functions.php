@@ -81,20 +81,14 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 	$page_found = apply_filters( 'woocommerce_create_page_id', $page_found, $slug, $page_content );
 
-
-	if ( $page_found && ! $page_found_trash ) {
-		if ( ! $option_value ) {
-			update_option( $option, $page_found );
-		}
-
-		return $page_found;
-	}
-	elseif ( ! $page_found && $page_found_trash ) {
-		// Page was found in trash but it did not have the correct shortcode (so just recreate it)
+	// Page was found in trash but it did not have the correct shortcode (so just recreate it)
+	if ( ! $page_found && $page_found_trash ) {
 		$page_found_trash = false;
-	}
+	} elseif ( $page_found && $page_found > 0 ){
+        $page_found_trash = true;
+    }
 
-	if ( ! $page_found_trash ) {
+	if ( ! $page_found_trash ) { 
 		$page_data = array(
 			'post_status'    => 'publish',
 			'post_type'      => 'page',
