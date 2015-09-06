@@ -73,21 +73,20 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page with the specified page content (typically a shortcode)
-		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
+		$page_found = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->posts WHERE post_type='page' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
 	} else {
 		// Search for an existing page with the specified page slug
-		$page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
+		$page_found = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->posts WHERE post_type='page' AND post_name = %s LIMIT 1;", $slug ) );
 	}
 
 	$page_found = apply_filters( 'woocommerce_create_page_id', $page_found, $slug, $page_content );
 
-
-	if ( $page_found && ! $page_found_trash ) {
+	if ( $page_found && ! $page_found_trash && 'trash' != $page_found->post_status ) {
 		if ( ! $option_value ) {
-			update_option( $option, $page_found );
+			update_option( $option, $page_found->ID );
 		}
 
-		return $page_found;
+		return $page_found->ID;
 	}
 	elseif ( ! $page_found && $page_found_trash ) {
 		// Page was found in trash but it did not have the correct shortcode (so just recreate it)
@@ -108,7 +107,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 		$page_id   = wp_insert_post( $page_data );
 	} else {
 		$page_data = array(
-			'ID'             => $page_found,
+			'ID'             => $page_found->ID,
 			'post_status'    => 'publish',
 		);
 		$page_id = wp_update_post( $page_data );
