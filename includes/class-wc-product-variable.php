@@ -255,12 +255,27 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array()
 	 */
 	public function get_variation_prices( $display = false ) {
+		global $wp_filter;
 		/**
-		 * Create unique cache key based on the tax location (affects displayed/cached prices) and product version.
+		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
 		 * Max transient length is 45, -10 for get_transient_version.
 		 * @var string
 		 */
-		$hash         = substr( md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array( $this->id, $display ? WC_Tax::get_rates() : '' ), $this, $display ) ) ), 0, 22 );
+		$variation_price_filters = array();
+
+		foreach ( $wp_filter as $key => $val ) {
+			if ( false !== strpos( $key, 'woocommerce_variation_price_in_transient' ) ) {
+				$variation_price_filters[ 'price' ][] = $val;
+			}
+			if ( false !== strpos( $key, 'woocommerce_variation_regular_price_in_transient' ) ) {
+				$variation_price_filters[ 'regular_price' ][] = $val;
+			}
+			if ( false !== strpos( $key, 'woocommerce_variation_sale_price_in_transient' ) ) {
+				$variation_price_filters[ 'sale_price' ][] = $val;
+			}
+		}
+
+		$hash         = substr( md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array( $this->id, $display ? WC_Tax::get_rates() : '', $variation_price_filters ), $this, $display ) ) ), 0, 22 );
 		$cache_key    = 'wc_var_prices' . $hash . WC_Cache_Helper::get_transient_version( 'product' );
 		$prices_array = get_transient( $cache_key );
 
@@ -272,9 +287,9 @@ class WC_Product_Variable extends WC_Product {
 
 			foreach ( $this->get_children( true ) as $variation_id ) {
 				if ( $variation = $this->get_child( $variation_id ) ) {
-					$price         = $variation->price;
-					$regular_price = $variation->regular_price;
-					$sale_price    = $variation->sale_price;
+					$price         = apply_filters( 'woocommerce_variation_price_in_transient', $variation->price, $variation, $this );
+					$regular_price = apply_filters( 'woocommerce_variation_regular_price_in_transient', $variation->regular_price, $variation, $this );
+					$sale_price    = apply_filters( 'woocommerce_variation_sale_price_in_transient', $variation->sale_price, $variation, $this );
 
 					// If sale price does not equal price, the product is not yet on sale
 					if ( $sale_price === $regular_price || $sale_price !== $price ) {
