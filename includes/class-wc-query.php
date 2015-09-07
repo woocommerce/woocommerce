@@ -212,7 +212,7 @@ class WC_Query {
 		}
 
 		// Fix for verbose page rules
-		if ( $GLOBALS['wp_rewrite']->use_verbose_page_rules && isset( $q->queried_object_id ) && $q->queried_object_id === wc_get_page_id('shop') ) {
+		if ( $GLOBALS['wp_rewrite']->use_verbose_page_rules && isset( $q->queried_object->ID ) && $q->queried_object->ID === wc_get_page_id('shop') ) {
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page', '' );
 			$q->set( 'pagename', '' );
