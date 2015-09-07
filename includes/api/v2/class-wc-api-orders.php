@@ -232,7 +232,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
-					'key' => $meta_key,
+					'key'   => $formatted_meta['key'],
 					'label' => $formatted_meta['label'],
 					'value' => $formatted_meta['value'],
 				);
