@@ -721,8 +721,6 @@ class WC_Admin_Post_Types {
 					$customer_tip[] = __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
 				}
 
-				echo '<div class="tips" data-tip="' . wc_sanitize_tooltip( implode( "<br/>", $customer_tip ) ) . '">';
-
 				if ( $the_order->user_id ) {
 					$user_info = get_userdata( $the_order->user_id );
 				}
@@ -753,7 +751,7 @@ class WC_Admin_Post_Types {
 					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
 				}
 
-				echo '</div>';
+				echo '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details', 'woocommerce' ) . '</span></button>';
 
 			break;
 			case 'order_actions' :
