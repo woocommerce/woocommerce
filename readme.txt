@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Removed extra ob_start() in class-wc-shortcodes.php.
 * Fix - Show counts in category dropdown.
 * Fix - Escape add to cart messages to stop translations from breaking cart events.
+* Fix - Display of product/order tables in the dashboard when viewed on handheld devices.
 * Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
 * Template - Removed 'Payment' heading in `templates/checkout/form-pay.php`.
 * Template - Removed unnecessary clearing div in `templates/checkout/payment.php`.
