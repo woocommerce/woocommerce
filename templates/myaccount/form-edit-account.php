@@ -23,17 +23,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<label for="account_first_name"><?php _e( 'First name', 'woocommerce' ); ?> <span class="required">*</span></label>
 		<input type="text" class="input-text" name="account_first_name" id="account_first_name" value="<?php echo esc_attr( $user->first_name ); ?>" />
 	</p>
+<?php 
+
+	$is_last_name_required = apply_filters( 'woocommerce_is_last_name_required', true );
+	if( $is_last_name_required ):
+ ?>
 	<p class="form-row form-row-last">
 		<label for="account_last_name"><?php _e( 'Last name', 'woocommerce' ); ?> <span class="required">*</span></label>
 		<input type="text" class="input-text" name="account_last_name" id="account_last_name" value="<?php echo esc_attr( $user->last_name ); ?>" />
 	</p>
 	<div class="clear"></div>
-
+<?php endif; ?>
 	<p class="form-row form-row-wide">
 		<label for="account_email"><?php _e( 'Email address', 'woocommerce' ); ?> <span class="required">*</span></label>
 		<input type="email" class="input-text" name="account_email" id="account_email" value="<?php echo esc_attr( $user->user_email ); ?>" />
 	</p>
-
+<?php do_action( 'woocommerce_after_my_account_user_info' ); ?>
 	<fieldset>
 		<legend><?php _e( 'Password Change', 'woocommerce' ); ?></legend>
 
