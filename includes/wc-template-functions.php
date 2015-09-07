@@ -1793,7 +1793,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field_html .= $field;
 
 			if ( $args['description'] ) {
-				$field_html .= '<span class="description">' . esc_attr( $args['description'] ) . '</span>';
+				$field_html .= '<span class="description">' . esc_html( $args['description'] ) . '</span>';
 			}
 
 			$container_class = 'form-row ' . esc_attr( implode( ' ', $args['class'] ) );
