@@ -73,51 +73,41 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param array $args (default: array())
 	 */
 	public function add_rate( $args = array() ) {
-		$defaults = array(
+		$args = wp_parse_args( $args, array(
 			'id'        => '',          // ID for the rate
 			'label'     => '',          // Label for the rate
 			'cost'      => '0',         // Amount or array of costs (per item shipping)
 			'taxes'     => '',          // Pass taxes, nothing to have it calculated for you, or 'false' to calc no tax
 			'calc_tax'  => 'per_order'  // Calc tax per_order or per_item. Per item needs an array of costs
-		);
-
-		$args = wp_parse_args( $args, $defaults );
-
-		extract( $args );
+		) );
 
 		// Id and label are required
-		if ( ! $id || ! $label ) {
+		if ( ! $args['id'] || ! $args['label'] ) {
 			return;
 		}
 
 		// Handle cost
-		$total_cost = is_array( $cost ) ? array_sum( $cost ) : $cost;
+		$total_cost = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
+		$taxes      = $args['taxes'];
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable
 		// This saves shipping methods having to do complex tax calculations
 		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && $this->is_taxable() ) {
-
 			$taxes = array();
 
-			switch ( $calc_tax ) {
-
+			switch ( $args['calc_tax'] ) {
 				case "per_item" :
-
 					// If we have an array of costs we can look up each items tax class and add tax accordingly
-					if ( is_array( $cost ) ) {
+					if ( is_array( $args['cost'] ) ) {
 
 						$cart = WC()->cart->get_cart();
 
-						foreach ( $cost as $cost_key => $amount ) {
-
+						foreach ( $args['cost'] as $cost_key => $amount ) {
 							if ( ! isset( $cart[ $cost_key ] ) ) {
 								continue;
 							}
 
-							$_product = $cart[	$cost_key ]['data'];
-
-							$rates = WC_Tax::get_shipping_tax_rates( $_product->get_tax_class() );
-							$item_taxes = WC_Tax::calc_shipping_tax( $amount, $rates );
+							$item_taxes = WC_Tax::calc_shipping_tax( $amount, WC_Tax::get_shipping_tax_rates( $cart[ $cost_key ]['data']->get_tax_class() ) );
 
 							// Sum the item taxes
 							foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
@@ -126,10 +116,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 						}
 
 						// Add any cost for the order - order costs are in the key 'order'
-						if ( isset( $cost['order'] ) ) {
-
-							$rates = WC_Tax::get_shipping_tax_rates();
-							$item_taxes = WC_Tax::calc_shipping_tax( $cost['order'], $rates );
+						if ( isset( $args['cost']['order'] ) ) {
+							$item_taxes = WC_Tax::calc_shipping_tax( $args['cost']['order'], WC_Tax::get_shipping_tax_rates() );
 
 							// Sum the item taxes
 							foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
@@ -137,19 +125,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 							}
 						}
 					}
-
 				break;
-
 				default :
-
-					$rates = WC_Tax::get_shipping_tax_rates();
-					$taxes = WC_Tax::calc_shipping_tax( $total_cost, $rates );
-
+					$taxes = WC_Tax::calc_shipping_tax( $total_cost, WC_Tax::get_shipping_tax_rates() );
 				break;
 			}
 		}
 
-		$this->rates[] = new WC_Shipping_Rate( $id, $label, $total_cost, $taxes, $this->id );
+		$this->rates[] = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );
 	}
 
 	/**
