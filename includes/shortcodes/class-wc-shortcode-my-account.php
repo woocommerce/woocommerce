@@ -246,7 +246,6 @@ class WC_Shortcode_My_Account {
 
 		// redefining user_login ensures we return the right case in the email
 		$user_login = $user_data->user_login;
-		$user_email = $user_data->user_email;
 
 		do_action( 'retrieve_password', $user_login );
 
