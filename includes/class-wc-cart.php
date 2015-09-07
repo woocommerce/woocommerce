@@ -169,7 +169,7 @@ class WC_Cart {
 	 * Will set cart cookies if needed, once, during WP hook
 	 */
 	public function maybe_set_cart_cookies() {
-		if ( ! headers_sent() ) {
+		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
 			if ( ! $this->is_empty() ) {
 				$this->set_cart_cookies( true );
 			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
