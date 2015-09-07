@@ -306,9 +306,9 @@ function wc_array_intersect( $a1, $a2 ) {
 	$intersect = array();
 
 	$a2_k = array_fill_keys( $a2, true);
-	foreach( $a1 as $v ) {
+	foreach( $a1 as $k => $v ) {
 		if( isset( $a2_k[$v] ) ) {
-			array_push( $intersect, $v );
+			$intersect[$k] = $v;
 		}
 	}
 
