@@ -166,7 +166,21 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Show counts in category dropdown.
 * Fix - Escape add to cart messages to stop translations from breaking cart events.
 * Fix - Display of product/order tables in the dashboard when viewed on handheld devices.
+* Fix - API order item 'key' value.
+* Fix - Check specifically for Post IDs in WC Query verbose rules fix.
+* Fix - Only run maybe_set_cart_cookies if cart was loaded to prevent notices.
+* Fix - Variation loading/refresh after attribute saving.
+* Fix - Add monthly cron schedule.
+* Tweak - Add filters to control "shipped via" text.
+* Tweak - Allow line breaks in non-variation attributes.
 * Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
+* Tweak - woocommerce_save_account_details_required_fields hook.
+* Tweak - Only 'count' published variations.
+* Tweak - Display of order total in admin with refunds.
+* Tweak - Use Geolocation class for customer IP detection.
+* Tweak - Use the needs_payment function (DRY).
+* Tweak - Tweak wc_create_page to work with trashed pages.
+* Tweak - Redirect 'not right now' to referer in onboarding wizard.
 * Template - Removed 'Payment' heading in `templates/checkout/form-pay.php`.
 * Template - Removed unnecessary clearing div in `templates/checkout/payment.php`.
 
