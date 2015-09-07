@@ -53,6 +53,10 @@ class WC_Cache_Helper {
 
 				$redirect_url = trailingslashit( home_url( $wp->request ) );
 
+				if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+					$redirect_url = add_query_arg( $_SERVER['QUERY_STRING'], '', $redirect_url );
+				}
+
 				if ( ! get_option( 'permalink_structure' ) ) {
 					$redirect_url = add_query_arg( $wp->query_string, '', $redirect_url );
 				}

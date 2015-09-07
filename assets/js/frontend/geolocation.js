@@ -61,6 +61,9 @@ jQuery( function( $ ) {
 				}
 			}
 		});
+
+		// Append hashes on load
+		$append_hashes();
 	}
 
 	$( document.body ).on( 'added_to_cart', function() {
