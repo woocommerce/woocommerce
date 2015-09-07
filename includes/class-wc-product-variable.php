@@ -266,11 +266,9 @@ class WC_Product_Variable extends WC_Product {
 		foreach ( $wp_filter as $key => $val ) {
 			if ( false !== strpos( $key, 'woocommerce_variation_price_in_transient' ) ) {
 				$variation_price_filters[ 'price' ][] = $val;
-			}
-			if ( false !== strpos( $key, 'woocommerce_variation_regular_price_in_transient' ) ) {
+			} elseif ( false !== strpos( $key, 'woocommerce_variation_regular_price_in_transient' ) ) {
 				$variation_price_filters[ 'regular_price' ][] = $val;
-			}
-			if ( false !== strpos( $key, 'woocommerce_variation_sale_price_in_transient' ) ) {
+			} elseif ( false !== strpos( $key, 'woocommerce_variation_sale_price_in_transient' ) ) {
 				$variation_price_filters[ 'sale_price' ][] = $val;
 			}
 		}
