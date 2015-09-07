@@ -1789,6 +1789,7 @@ p.demo_store {
 				text-align: left;
 				margin: 0;
 				font-weight: normal;
+				@include clearfix;
 
 				input {
 					margin: 0 1em 0 0;
