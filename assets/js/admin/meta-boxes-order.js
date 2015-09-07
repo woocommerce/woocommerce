@@ -316,8 +316,8 @@ jQuery( function ( $ ) {
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					$( '#woocommerce-order-items .inside' ).empty();
-					$( '#woocommerce-order-items .inside' ).append( response );
+					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+					$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
 					wc_meta_boxes_order_items.stupidtable.init();
@@ -384,7 +384,7 @@ jQuery( function ( $ ) {
 			$( 'div.wc-order-refund-items' ).slideDown();
 			$( 'div.wc-order-bulk-actions' ).slideUp();
 			$( 'div.wc-order-totals-items' ).slideUp();
-			$( '#woocommerce-order-items div.refund' ).show();
+			$( '#woocommerce-order-items' ).find( 'div.refund' ).show();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).hide();
 			return false;
 		},
@@ -393,7 +393,7 @@ jQuery( function ( $ ) {
 			$( this ).closest( 'div.wc-order-data-row' ).slideUp();
 			$( 'div.wc-order-bulk-actions' ).slideDown();
 			$( 'div.wc-order-totals-items' ).slideDown();
-			$( '#woocommerce-order-items div.refund' ).hide();
+			$( '#woocommerce-order-items' ).find( 'div.refund' ).hide();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).show();
 
 			// Reload the items
@@ -506,8 +506,8 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						$( '#woocommerce-order-items .inside' ).empty();
-						$( '#woocommerce-order-items .inside' ).append( response );
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+						$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 						wc_meta_boxes_order.init_tiptip();
 						wc_meta_boxes_order_items.unblock();
 						wc_meta_boxes_order_items.stupidtable.init();
@@ -556,8 +556,8 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						$( '#woocommerce-order-items .inside' ).empty();
-						$( '#woocommerce-order-items .inside' ).append( response );
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+						$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 						wc_meta_boxes_order.init_tiptip();
 						wc_meta_boxes_order_items.unblock();
 						wc_meta_boxes_order_items.stupidtable.init();
@@ -626,8 +626,8 @@ jQuery( function ( $ ) {
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					$( '#woocommerce-order-items .inside' ).empty();
-					$( '#woocommerce-order-items .inside' ).append( response );
+					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+					$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
 					wc_meta_boxes_order_items.stupidtable.init();
@@ -1083,8 +1083,8 @@ jQuery( function ( $ ) {
 						data: data,
 						type: 'POST',
 						success: function( response ) {
-							$( '#woocommerce-order-items .inside' ).empty();
-							$( '#woocommerce-order-items .inside' ).append( response );
+							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+							$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 							wc_meta_boxes_order.init_tiptip();
 							wc_meta_boxes_order_items.unblock();
 							wc_meta_boxes_order_items.stupidtable.init();

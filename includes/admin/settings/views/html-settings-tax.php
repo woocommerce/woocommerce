@@ -158,7 +158,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					 __( 'Tax Class', 'woocommerce' ),
 				) ) ); ?>\n";
 
-			jQuery('#rates tr:visible').each(function() {
+			jQuery('#rates').find('tr:visible').each(function() {
 				var row = '';
 				jQuery(this).find('td:not(.sort) input').each(function() {
 

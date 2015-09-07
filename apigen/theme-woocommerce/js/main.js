@@ -40,7 +40,7 @@ $(window).load(function() {
 	// Search autocompletion
 	var autocompleteFound = false;
 	var autocompleteFiles = {'c': 'class', 'co': 'constant', 'f': 'function', 'm': 'class', 'mm': 'class', 'p': 'class', 'mp': 'class', 'cc': 'class'};
-	var $search = $('#search input[name=q]');
+	var $search = $('#search').find('input[name=q]');
 	$search
 		.autocomplete(ApiGen.elements, {
 			matchContains: true,
@@ -92,7 +92,7 @@ $(window).load(function() {
 				if ('' === query) {
 					return false;
 				}
-				return !autocompleteFound && '' !== $('#search input[name=cx]').val();
+				return !autocompleteFound && '' !== $('#search').find('input[name=cx]').val();
 			});
 
 	// Save natural order

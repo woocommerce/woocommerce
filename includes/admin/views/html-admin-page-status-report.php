@@ -776,7 +776,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		try {
 			jQuery( '#debug-report' ).slideDown();
-			jQuery( '#debug-report textarea' ).val( report ).focus().select();
+			jQuery( '#debug-report' ).find( 'textarea' ).val( report ).focus().select();
 			jQuery( this ).fadeOut();
 			return false;
 		} catch( e ){
@@ -797,7 +797,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		$( document.body ).on( 'copy', '#copy-for-support', function( e ) {
 			e.clipboardData.clearData();
-			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
+			e.clipboardData.setData( 'text/plain', $( '#debug-report' ).find( 'textarea' ).val() );
 			e.preventDefault();
 		});
 

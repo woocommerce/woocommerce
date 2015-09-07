@@ -140,7 +140,7 @@ class WC_Admin_Taxonomies {
 						var attachment = file_frame.state().get( 'selection' ).first().toJSON();
 
 						jQuery( '#product_cat_thumbnail_id' ).val( attachment.id );
-						jQuery( '#product_cat_thumbnail img' ).attr( 'src', attachment.sizes.thumbnail.url );
+						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', attachment.sizes.thumbnail.url );
 						jQuery( '.remove_image_button' ).show();
 					});
 
@@ -149,7 +149,7 @@ class WC_Admin_Taxonomies {
 				});
 
 				jQuery( document ).on( 'click', '.remove_image_button', function() {
-					jQuery( '#product_cat_thumbnail img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+					jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
 					jQuery( '#product_cat_thumbnail_id' ).val( '' );
 					jQuery( '.remove_image_button' ).hide();
 					return false;
@@ -231,7 +231,7 @@ class WC_Admin_Taxonomies {
 							var attachment = file_frame.state().get( 'selection' ).first().toJSON();
 
 							jQuery( '#product_cat_thumbnail_id' ).val( attachment.id );
-							jQuery( '#product_cat_thumbnail img' ).attr( 'src', attachment.sizes.thumbnail.url );
+							jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', attachment.sizes.thumbnail.url );
 							jQuery( '.remove_image_button' ).show();
 						});
 
@@ -240,7 +240,7 @@ class WC_Admin_Taxonomies {
 					});
 
 					jQuery( document ).on( 'click', '.remove_image_button', function() {
-						jQuery( '#product_cat_thumbnail img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
 						jQuery( '#product_cat_thumbnail_id' ).val( '' );
 						jQuery( '.remove_image_button' ).hide();
 						return false;
