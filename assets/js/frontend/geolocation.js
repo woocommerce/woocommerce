@@ -45,9 +45,10 @@ jQuery( function( $ ) {
 
 		// Support form elements
 		$( 'form' ).each( function() {
-			var $this = $( this );
+			var $this  = $( this );
+			var method = $this.attr( 'method' );
 
-			if ( 'get' === $this.attr( 'method' ).toLowerCase() ) {
+			if ( method && 'get' === method.toLowerCase() ) {
 				$this.append( '<input type="hidden" name="v" value="' + wc_geolocation_params.hash + '" />' );
 			} else {
 				var href = $this.attr( 'action' );
@@ -60,6 +61,9 @@ jQuery( function( $ ) {
 				}
 			}
 		});
+
+		// Append hashes on load
+		$append_hashes();
 	}
 
 	$( document.body ).on( 'added_to_cart', function() {
