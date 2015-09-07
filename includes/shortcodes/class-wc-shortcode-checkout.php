@@ -84,8 +84,7 @@ class WC_Shortcode_Checkout {
 			// Pay for existing order
 			$order_key            = $_GET[ 'key' ];
 			$order                = wc_get_order( $order_id );
-			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
-
+			
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
 				echo '<div class="woocommerce-error">' . __( 'Invalid order. If you have an account please log in and try again.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
 				return;
@@ -93,7 +92,7 @@ class WC_Shortcode_Checkout {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				if ( $order->has_status( $valid_order_statuses ) ) {
+				if ( $order->needs_payment() ) {
 
 					// Set customer location to order location
 					if ( $order->billing_country )
@@ -118,11 +117,10 @@ class WC_Shortcode_Checkout {
 			// Pay for order after checkout step
 			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 			$order                = wc_get_order( $order_id );
-			$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order );
-
+			
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
-				if ( $order->has_status( $valid_order_statuses ) ) {
+				if ( $order->needs_payment() ) {
 
 					?>
 					<ul class="order_details">
