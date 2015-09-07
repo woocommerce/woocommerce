@@ -104,7 +104,17 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_order_key', 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
 		update_post_meta( $order_id, '_order_currency', get_woocommerce_currency() );
 		update_post_meta( $order_id, '_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) );
-		update_post_meta( $order_id, '_customer_ip_address', isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
+
+		// Account for multiple IP addresses
+		if ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$ip_address = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
+			$ip_address = end( $ip_address );
+			$ip_address = trim( $ip_address );
+		} else {
+			$ip_address = $_SERVER['REMOTE_ADDR'];
+		}
+		update_post_meta( $order_id, '_customer_ip_address', $ip_address );
+
 		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 		update_post_meta( $order_id, '_customer_user', 0 );
 		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
