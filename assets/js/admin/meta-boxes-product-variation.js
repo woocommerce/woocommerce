@@ -439,7 +439,7 @@ jQuery( function( $ ) {
 		/**
 		 * Save variations changes
 		 *
-		 * @param {Function} callback
+		 * @param {Function} callback Called once saving is complete
 		 */
 		save_changes: function( callback ) {
 			var wrapper     = $( '#variable_product_options' ).find( '.woocommerce_variations' ),
@@ -508,10 +508,21 @@ jQuery( function( $ ) {
 		/**
 		 * Save on post form submit
 		 */
-		save_on_submit: function() {
-			$( '#variable_product_options' ).trigger( 'woocommerce_variations_save_variations_on_submit' );
+		save_on_submit: function( e ) {
+			var need_update = $( '#variable_product_options' ).find( '.woocommerce_variations .variation-needs-update' );
 
-			wc_meta_boxes_product_variations_ajax.save_changes();
+			if ( 0 < need_update.length ) {
+				e.preventDefault();
+				$( '#variable_product_options' ).trigger( 'woocommerce_variations_save_variations_on_submit' );
+				wc_meta_boxes_product_variations_ajax.save_changes( wc_meta_boxes_product_variations_ajax.save_on_submit_done );
+			}
+		},
+
+		/**
+		 * After saved, continue with form submission
+		 */
+		save_on_submit_done: function() {
+			$( 'form#post' ).submit();
 		},
 
 		/**
