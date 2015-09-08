@@ -36,6 +36,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_completed_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_action_send_customer_completed_order', array( $this, 'trigger' ) );
 
 		// Other settings
 		$this->heading_downloadable = $this->get_option( 'heading_downloadable', __( 'Your order is complete - download your files', 'woocommerce' ) );

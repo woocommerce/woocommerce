@@ -44,11 +44,16 @@ class WC_Meta_Box_Order_Actions {
 						$mailer           = WC()->mailer();
 						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice', 'customer_refunded_order' ) );
 						$mails            = $mailer->get_emails();
+						$mails_class_id   = wp_list_pluck( $mails, 'id' );
 
-						if ( ! empty( $mails ) ) {
-							foreach ( $mails as $mail ) {
-								if ( in_array( $mail->id, $available_emails ) ) {
-									echo '<option value="send_email_'. esc_attr( $mail->id ) .'">' . esc_html( $mail->title ) . '</option>';
+						if ( ! empty( $available_emails ) ) {
+							foreach ( $available_emails as $key => $mail ) {
+								if ( false !== $mail_class = array_search( $mail, $mails_class_id ) ) {
+									echo '<option value="send_email_'. esc_attr( $mails[ $mail_class ]->id ) .'">' . esc_html( $mails[ $mail_class ]->title ) . '</option>';
+								} elseif ( ! is_numeric( $key ) ) {
+									echo '<option value="send_email_'. esc_attr( $key ) .'">' . esc_html( $mail ) . '</option>';
+								} else {
+									echo '<option value="send_email_'. sanitize_key( $mail ) .'">' . esc_html( $mail ) . '</option>';
 								}
 							}
 						}
@@ -112,17 +117,9 @@ class WC_Meta_Box_Order_Actions {
 				// Load mailer
 				$mailer = WC()->mailer();
 
+				// Hook to send the email
 				$email_to_send = str_replace( 'send_email_', '', $action );
-
-				$mails = $mailer->get_emails();
-
-				if ( ! empty( $mails ) ) {
-					foreach ( $mails as $mail ) {
-						if ( $mail->id == $email_to_send ) {
-							$mail->trigger( $order->id );
-						}
-					}
-				}
+				do_action( 'woocommerce_order_action_send_' . $email_to_send, $order->id );
 
 				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
 

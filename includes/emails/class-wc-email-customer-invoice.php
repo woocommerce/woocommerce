@@ -40,6 +40,9 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		$this->subject_paid   = __( 'Your {site_title} order from {order_date}', 'woocommerce');
 		$this->heading_paid   = __( 'Order {order_number} details', 'woocommerce');
 
+		// Triggers for this email
+		add_action( 'woocommerce_order_action_send_customer_invoice', array( $this, 'trigger' ) );
+
 		// Call parent constructor
 		parent::__construct();
 
