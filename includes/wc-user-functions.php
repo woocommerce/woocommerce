@@ -164,6 +164,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 	if ( $customer_orders ) {
 		foreach ( $customer_orders as $order_id ) {
 			update_post_meta( $order_id, '_customer_user', $customer->ID );
+			do_action('woocommerce_order_linked_to_customer',$customer,$order_id);
 
 			if ( get_post_status( $order_id ) === 'wc-completed' ) {
 				$complete ++;
