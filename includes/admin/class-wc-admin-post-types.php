@@ -699,11 +699,7 @@ class WC_Admin_Post_Types {
 
 			break;
 			case 'order_total' :
-				if ( $the_order->get_total_refunded() > 0 ) {
-					echo '<del>' . strip_tags( $the_order->get_formatted_order_total() ) . '</del> <ins>' . wc_price( $the_order->get_total() - $the_order->get_total_refunded(), array( 'currency' => $the_order->get_order_currency() ) ) . '</ins>';
-				} else {
-					echo esc_html( strip_tags( $the_order->get_formatted_order_total() ) );
-				}
+				echo $the_order->get_formatted_order_total();
 
 				if ( $the_order->payment_method_title ) {
 					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
