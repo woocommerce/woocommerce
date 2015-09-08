@@ -215,20 +215,21 @@ class WC_Shortcode_My_Account {
 	public static function retrieve_password() {
 		global $wpdb, $wp_hasher;
 
-		if ( empty( $_POST['user_login'] ) ) {
+		$login = trim( $_POST['user_login'] );
+
+		if ( empty( $login ) ) {
 
 			wc_add_notice( __( 'Enter a username or e-mail address.', 'woocommerce' ), 'error' );
 			return false;
 
 		} else {
 			// Check on username first, as customers can use emails as usernames.
-			$login = trim( $_POST['user_login'] );
 			$user_data = get_user_by( 'login', $login );
 		}
 
 		// If no user found, check if it login is email and lookup user based on email.
-		if ( ! $user_data && is_email( $_POST['user_login'] ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
-			$user_data = get_user_by( 'email', trim( $_POST['user_login'] ) );
+		if ( ! $user_data && is_email( $login ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
+			$user_data = get_user_by( 'email', $login );
 		}
 
 		do_action( 'lostpassword_post' );
@@ -245,7 +246,6 @@ class WC_Shortcode_My_Account {
 
 		// redefining user_login ensures we return the right case in the email
 		$user_login = $user_data->user_login;
-		$user_email = $user_data->user_email;
 
 		do_action( 'retrieve_password', $user_login );
 
@@ -254,13 +254,11 @@ class WC_Shortcode_My_Account {
 		if ( ! $allow ) {
 
 			wc_add_notice( __( 'Password reset is not allowed for this user', 'woocommerce' ), 'error' );
-
 			return false;
 
 		} elseif ( is_wp_error( $allow ) ) {
 
 			wc_add_notice( $allow->get_error_message(), 'error' );
-
 			return false;
 		}
 
