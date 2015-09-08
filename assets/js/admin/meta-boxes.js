@@ -16,7 +16,7 @@ jQuery( function ( $ ) {
 	runTipTip();
 
 	// Allow Tabbing
-	$( '#titlediv #title' ).keyup( function( event ) {
+	$( '#titlediv' ).find( '#title' ).keyup( function( event ) {
 		var code = event.keyCode || event.which;
 
 		// Tab key

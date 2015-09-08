@@ -182,7 +182,7 @@ jQuery( function( $ ) {
 				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
 
-			var payment_method = $( '#order_review input[name=payment_method]:checked' ).val(),
+			var payment_method = $( '#order_review' ).find( 'input[name=payment_method]:checked' ).val(),
 				country			= $( '#billing_country' ).val(),
 				state			= $( '#billing_state' ).val(),
 				postcode		= $( 'input#billing_postcode' ).val(),
@@ -196,7 +196,7 @@ jQuery( function( $ ) {
 				s_address,
 				s_address_2;
 
-			if ( $( '#ship-to-different-address input' ).is( ':checked' ) ) {
+			if ( $( '#ship-to-different-address' ).find( 'input' ).is( ':checked' ) ) {
 				s_country		= $( '#shipping_country' ).val();
 				s_state			= $( '#shipping_state' ).val();
 				s_postcode		= $( 'input#shipping_postcode' ).val();
@@ -302,7 +302,7 @@ jQuery( function( $ ) {
 			}
 
 			// Trigger a handler to let gateways manipulate the checkout if needed
-			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + $( '#order_review input[name=payment_method]:checked' ).val() ) !== false ) {
+			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + $( '#order_review' ).find( 'input[name=payment_method]:checked' ).val() ) !== false ) {
 
 				$form.addClass( 'processing' );
 
