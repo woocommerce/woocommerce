@@ -71,6 +71,19 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
 		);
 
+		# GET/POST /products/shipping_classes
+		$routes[ $this->base . '/shipping_classes' ] = array(
+			array( array( $this, 'get_product_shipping_classes' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product_shipping_class' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
+		# GET/PUT/DELETE /products/shipping_classes/<id>
+		$routes[ $this->base . '/shipping_classes/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_shipping_class' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_shipping_class' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_shipping_class' ), WC_API_Server::DELETABLE ),
+		);
+
 		# GET/POST /products/attributes
 		$routes[ $this->base . '/attributes' ] = array(
 			array( array( $this, 'get_product_attributes' ), WC_API_Server::READABLE ),
@@ -2390,6 +2403,213 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			return array( 'products' => apply_filters( 'woocommerce_api_products_bulk_response', $products, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get a listing of product shipping classes.
+	 *
+	 * @since  2.5.0
+	 * @param  string|null    $fields Fields to limit response to
+	 * @return array|WP_Error         List of product shipping classes if succeed,
+	 *                                otherwise WP_Error will be returned
+	 */
+	public function get_product_shipping_classes( $fields = null ) {
+		try {
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_shipping_classes', __( 'You do not have permission to read product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$product_shipping_classes = array();
+
+			$terms = get_terms( 'product_shipping_class', array( 'hide_empty' => false, 'fields' => 'ids' ) );
+
+			foreach ( $terms as $term_id ) {
+				$product_shipping_classes[] = current( $this->get_product_shipping_class( $term_id, $fields ) );
+			}
+
+			return array( 'product_shipping_classes' => apply_filters( 'woocommerce_api_product_shipping_classes_response', $product_shipping_classes, $terms, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the product shipping class for the given ID.
+	 *
+	 * @since  2.5.0
+	 * @param  string         $id     Product shipping class term ID
+	 * @param  string|null    $fields Fields to limit response to
+	 * @return array|WP_Error         Product shipping class if succeed, otherwise
+	 *                                WP_Error will be returned
+	 */
+	public function get_product_shipping_class( $id, $fields = null ) {
+		try {
+			$id = absint( $id );
+			if ( ! $id ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_shipping_class_id', __( 'Invalid product shipping class ID', 'woocommerce' ), 400 );
+			}
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_shipping_classes', __( 'You do not have permission to read product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$term = get_term( $id, 'product_shipping_class' );
+
+			if ( is_wp_error( $term ) || is_null( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_shipping_class_id', __( 'A product shipping class with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$term_id = intval( $term->term_id );
+
+			$product_shipping_class = array(
+				'id'          => $term_id,
+				'name'        => $term->name,
+				'slug'        => $term->slug,
+				'parent'      => $term->parent,
+				'description' => $term->description,
+				'count'       => intval( $term->count )
+			);
+
+			return array( 'product_shipping_class' => apply_filters( 'woocommerce_api_product_shipping_class_response', $product_shipping_class, $id, $fields, $term, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Create a new product shipping class.
+	 *
+	 * @since  2.5.0
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product shipping class if succeed, otherwise
+	 *                              WP_Error will be returned
+	 */
+	public function create_product_shipping_class( $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_shipping_class'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_shipping_class_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_shipping_class' ), 400 );
+			}
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_shipping_class', __( 'You do not have permission to create product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$defaults = array(
+				'name'        => '',
+				'slug'        => '',
+				'description' => '',
+				'parent'      => 0,
+			);
+
+			$data = wp_parse_args( $data['product_shipping_class'], $defaults );
+			$data = apply_filters( 'woocommerce_api_create_product_shipping_class_data', $data, $this );
+
+			$name = $data['name'];
+			unset( $data['name'] );
+
+			// Check parent.
+			$data['parent'] = absint( $data['parent'] );
+			if ( $data['parent'] ) {
+				$parent = get_term_by( 'term_taxonomy_id', $data['parent'], 'product_shipping_class' );
+				if ( ! $parent ) {
+					throw new WC_API_Exception( 'woocommerce_api_invalid_product_shipping_class_parent', __( 'Product shipping class parent is invalid', 'woocommerce' ), 400 );
+				}
+			}
+
+			$insert = wp_insert_term( $name, 'product_shipping_class', $data );
+			if ( is_wp_error( $insert ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_shipping_class', $insert->get_error_message(), 400 );
+			}
+
+			do_action( 'woocommerce_api_create_product_shipping_class', $insert['term_taxonomy_id'], $data );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_product_shipping_class( $insert['term_taxonomy_id'] );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product shipping class.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id   Product shipping class term ID
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product shipping class if succeed, otherwise
+	 *                              WP_Error will be returned
+	 */
+	public function edit_product_shipping_class( $id, $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_shipping_class'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_shipping_class', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_shipping_class' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_shipping_class'];
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_shipping_class', __( 'You do not have permission to edit product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$data           = apply_filters( 'woocommerce_api_edit_product_shipping_class_data', $data, $this );
+			$shipping_class = $this->get_product_shipping_class( $id );
+
+			if ( is_wp_error( $shipping_class ) ) {
+				return $shipping_class;
+			}
+
+			$update = wp_update_term( $id, 'product_shipping_class', $data );
+			if ( is_wp_error( $update ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_shipping_class', __( 'Could not edit the shipping class', 'woocommerce' ), 400 );
+			}
+
+			do_action( 'woocommerce_api_edit_product_shipping_class', $id, $data );
+
+			return $this->get_product_shipping_class( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product shipping class.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id Product shipping class term ID
+	 * @return array|WP_Error     Success message if succeed, otherwise WP_Error
+	 *                            will be returned
+	 */
+	public function delete_product_shipping_class( $id ) {
+		global $wpdb;
+
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_shipping_class', __( 'You do not have permission to delete product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$id      = absint( $id );
+			$deleted = wp_delete_term( $id, 'product_shipping_class' );
+			if ( ! $deleted || is_wp_error( $deleted ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_shipping_class', __( 'Could not delete the shipping class', 'woocommerce' ), 401 );
+			}
+
+			do_action( 'woocommerce_api_delete_product_shipping_class', $id, $this );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_shipping_class' ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
