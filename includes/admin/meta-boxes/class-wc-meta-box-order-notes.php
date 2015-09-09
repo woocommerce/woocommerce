@@ -44,7 +44,8 @@ class WC_Meta_Box_Order_Notes {
 			foreach( $notes as $note ) {
 
 				$note_classes = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? array( 'customer-note', 'note' ) : array( 'note' );
-
+				$note_classes = apply_filters('woocommerce_order_notes_note_classes',$note_classes,$note);
+				
 				?>
 				<li rel="<?php echo absint( $note->comment_ID ) ; ?>" class="<?php echo implode( ' ', $note_classes ); ?>">
 					<div class="note_content">
