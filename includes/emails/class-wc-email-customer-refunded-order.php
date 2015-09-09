@@ -83,7 +83,8 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	public function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
 		$this->partial_refund = $partial_refund;
 		$this->set_email_strings( $partial_refund );
-
+		$this->refund = wc_get_order( $refund_id );
+		
 		if ( $order_id ) {
 			$this->object    = wc_get_order( $order_id );
 			$this->recipient = $this->object->billing_email;
@@ -93,12 +94,6 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 			$this->replace['order-number'] = $this->object->get_order_number();
-		}
-
-		if ( $refund_id ) {
-			$this->refund = wc_get_order( $refund_id );
-		} else {
-			$this->refund = false;
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
