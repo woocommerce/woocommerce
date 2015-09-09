@@ -250,9 +250,13 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Get an array of all sale and regular prices from all variations.
-	 * @param  bool Are prices for display? If so, taxes will be calculated.
-	 * @return array()
+	 * Get an array of all sale and regular prices from all variations. This is used for example when displaying the price range at variable product level or seeing if the variable product is on sale.
+	 *
+	 * Can be filtered by plugins which modify costs, but otherwise will include the raw meta costs unlike get_price() which runs costs through the woocommerce_get_price filter.
+	 * This is to ensure modified prices are not cached, unless intended.
+	 *
+	 * @param  bool $display Are prices for display? If so, taxes will be calculated.
+	 * @return array() Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
 	public function get_variation_prices( $display = false ) {
 		global $wp_filter;
@@ -261,19 +265,18 @@ class WC_Product_Variable extends WC_Product {
 		 * Max transient length is 45, -10 for get_transient_version.
 		 * @var string
 		 */
-		$variation_price_filters = array();
+		$hash   = array();
+		$hash[] = $this->id;
+		$hash[] = $display;
+		$hash[] = $display ? WC_Tax::get_rates() : array();
 
 		foreach ( $wp_filter as $key => $val ) {
-			if ( false !== strpos( $key, 'woocommerce_variation_price_in_transient' ) ) {
-				$variation_price_filters[ 'price' ][] = $val;
-			} elseif ( false !== strpos( $key, 'woocommerce_variation_regular_price_in_transient' ) ) {
-				$variation_price_filters[ 'regular_price' ][] = $val;
-			} elseif ( false !== strpos( $key, 'woocommerce_variation_sale_price_in_transient' ) ) {
-				$variation_price_filters[ 'sale_price' ][] = $val;
+			if ( in_array( $key, array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' ) ) ) {
+				$hash[ $key ] = $val;
 			}
 		}
 
-		$hash         = substr( md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', array( $this->id, $display ? WC_Tax::get_rates() : '', $variation_price_filters ), $this, $display ) ) ), 0, 22 );
+		$hash         = substr( md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $hash ) ) ), 0, 22 );
 		$cache_key    = 'wc_var_prices' . $hash . WC_Cache_Helper::get_transient_version( 'product' );
 		$prices_array = get_transient( $cache_key );
 
@@ -285,9 +288,9 @@ class WC_Product_Variable extends WC_Product {
 
 			foreach ( $this->get_children( true ) as $variation_id ) {
 				if ( $variation = $this->get_child( $variation_id ) ) {
-					$price         = apply_filters( 'woocommerce_variation_price_in_transient', $variation->price, $variation, $this );
-					$regular_price = apply_filters( 'woocommerce_variation_regular_price_in_transient', $variation->regular_price, $variation, $this );
-					$sale_price    = apply_filters( 'woocommerce_variation_sale_price_in_transient', $variation->sale_price, $variation, $this );
+					$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
+					$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
+					$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->sale_price, $variation, $this );
 
 					// If sale price does not equal price, the product is not yet on sale
 					if ( $sale_price === $regular_price || $sale_price !== $price ) {
@@ -320,6 +323,9 @@ class WC_Product_Variable extends WC_Product {
 			set_transient( $cache_key, $prices_array, DAY_IN_SECONDS * 30 );
 		}
 
+		/**
+		 * Give plugins one last chance to filter the variation prices array.
+		 */
 		return apply_filters( 'woocommerce_variation_prices', $prices_array, $this, $display );
 	}
 
