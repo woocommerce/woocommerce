@@ -61,14 +61,17 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_orders' ), WC_API_Server::READABLE ),
 		);
 
-		# GET /products/categories
+		# GET/POST /products/categories
 		$routes[ $this->base . '/categories' ] = array(
 			array( array( $this, 'get_product_categories' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product_category' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
-		# GET /products/categories/<id>
+		# GET/PUT/DELETE /products/categories/<id>
 		$routes[ $this->base . '/categories/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_category' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_category' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET/POST /products/shipping_classes
@@ -565,6 +568,198 @@ class WC_API_Products extends WC_API_Resource {
 			);
 
 			return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $id, $fields, $term, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Create a new product category.
+	 *
+	 * @since  2.5.0
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product category if succeed, otherwise WP_Error
+	 *                              will be returned
+	 */
+	public function create_product_category( $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_category'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_category_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_category' ), 400 );
+			}
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_category', __( 'You do not have permission to create product categories', 'woocommerce' ), 401 );
+			}
+
+			$defaults = array(
+				'name'        => '',
+				'slug'        => '',
+				'description' => '',
+				'parent'      => 0,
+				'display'     => 'default',
+				'image'       => '',
+			);
+
+			$data = wp_parse_args( $data['product_category'], $defaults );
+			$data = apply_filters( 'woocommerce_api_create_product_category_data', $data, $this );
+
+			$name = $data['name'];
+			unset( $data['name'] );
+
+			// Check parent.
+			$data['parent'] = absint( $data['parent'] );
+			if ( $data['parent'] ) {
+				$parent = get_term_by( 'term_taxonomy_id', $data['parent'], 'product_cat' );
+				if ( ! $parent ) {
+					throw new WC_API_Exception( 'woocommerce_api_invalid_product_category_parent', __( 'Product category parent is invalid', 'woocommerce' ), 400 );
+				}
+			}
+
+			$display_type = $data['display'];
+			unset( $data['display'] );
+
+			// If value of image is numeric, assume value as image_id.
+			$image = $data['image'];
+			if ( is_numeric( $image ) ) {
+				$image_id = absint( $image );
+			} else if ( ! empty( $image ) ) {
+				$upload   = $this->upload_product_image( esc_url_raw( $image ) );
+				$image_id = $this->set_product_category_image_as_attachment( $upload );
+			}
+			unset( $data['image'] );
+
+			$insert = wp_insert_term( $name, 'product_cat', $data );
+			if ( is_wp_error( $insert ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_category', $insert->get_error_message(), 400 );
+			}
+
+			update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+
+			// Check if image_id is a valid image attachment before updating the term meta.
+			if ( wp_attachment_is_image( $image_id ) ) {
+				update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'thumbnail_id', $image_id );
+			}
+
+			do_action( 'woocommerce_api_create_product_category', $insert['term_taxonomy_id'], $data );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_product_category( $insert['term_taxonomy_id'] );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product category.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id   Product category term ID
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product category if succeed, otherwise WP_Error
+	 *                              will be returned
+	 */
+	public function edit_product_category( $id, $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_category'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_category', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_category' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_category'];
+
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_category', __( 'You do not have permission to edit product categories', 'woocommerce' ), 401 );
+			}
+
+			$data     = apply_filters( 'woocommerce_api_edit_product_category_data', $data, $this );
+			$category = $this->get_product_category( $id );
+
+			if ( is_wp_error( $category ) ) {
+				return $category;
+			}
+
+			$display_type = '';
+			if ( isset( $data['display'] ) ) {
+				$display_type = $data['display'];
+				unset( $data['display'] );
+			}
+
+			if ( isset( $data['image'] ) ) {
+				// If value of image is numeric, assume value as image_id.
+				$image = $data['image'];
+				if ( is_numeric( $image ) ) {
+					$image_id = absint( $image );
+				} else if ( ! empty( $image ) ) {
+					$upload   = $this->upload_product_image( esc_url_raw( $image ) );
+					$image_id = $this->set_product_category_image_as_attachment( $upload );
+				}
+
+				// In case client supplies invalid image or wants to unset category
+				// image.
+				if ( ! wp_attachment_is_image( $image_id ) ) {
+					$image_id = '';
+				}
+
+				unset( $data['image'] );
+			}
+
+			$update = wp_update_term( $id, 'product_cat', $data );
+			if ( is_wp_error( $update ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_catgory', __( 'Could not edit the category', 'woocommerce' ), 400 );
+			}
+
+			if ( ! empty( $display_type ) ) {
+				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+			}
+
+			if ( isset( $image_id ) ) {
+				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'thumbnail_id', $image_id );
+			}
+
+			do_action( 'woocommerce_api_edit_product_category', $id, $data );
+
+			return $this->get_product_category( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product category.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id Product category term ID
+	 * @return array|WP_Error     Success message if succeed, otherwise WP_Error
+	 *                            will be returned
+	 */
+	public function delete_product_category( $id ) {
+		global $wpdb;
+
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_category', __( 'You do not have permission to delete product category', 'woocommerce' ), 401 );
+			}
+
+			$id      = absint( $id );
+			$deleted = wp_delete_term( $id, 'product_cat' );
+			if ( ! $deleted || is_wp_error( $deleted ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_category', __( 'Could not delete the category', 'woocommerce' ), 401 );
+			}
+
+			// When a term is deleted, delete its meta.
+			$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $id ), array( '%d' ) );
+
+			do_action( 'woocommerce_api_delete_product_category', $id, $this );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_category' ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1800,13 +1995,38 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return int|WP_Error attachment id
 	 */
 	public function upload_product_image( $image_url ) {
+		return $this->upload_image_from_url( $image_url );
+	}
+
+	/**
+	 * Upload product category image from URL.
+	 *
+	 * @since  2.5.0
+	 * @param  string $image_url
+	 * @return int|WP_Error attachment id
+	 */
+	public function upload_product_category_image( $image_url ) {
+		return $this->upload_image_from_url( $image_url, 'product_category_image' );
+	}
+
+	/**
+	 * Upload image from URL.
+	 *
+	 * @throws WC_API_Exception
+	 *
+	 * @since  2.5.0
+	 * @param  string       $image_url
+	 * @param  string       $upload_for
+	 * @return int|WP_Error Attachment id
+	 */
+	protected function upload_image_from_url( $image_url, $upload_for = 'product_image' ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );
 		$wp_filetype 	= wp_check_filetype( $file_name, null );
 		$parsed_url 	= @parse_url( $image_url );
 
-		// Check parsed URL
+		// Check parsed URL.
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure url is valid
@@ -1818,7 +2038,7 @@ class WC_API_Products extends WC_API_Resource {
 		) );
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure we have a file name and type
@@ -1838,7 +2058,7 @@ class WC_API_Products extends WC_API_Resource {
 		$upload = wp_upload_bits( $file_name, '', wp_remote_retrieve_body( $response ) );
 
 		if ( $upload['error'] ) {
-			throw new WC_API_Exception( 'woocommerce_api_product_image_upload_error', $upload['error'], 400 );
+			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_error', $upload['error'], 400 );
 		}
 
 		// Get filesize
@@ -1847,7 +2067,7 @@ class WC_API_Products extends WC_API_Resource {
 		if ( 0 == $filesize ) {
 			@unlink( $upload['file'] );
 			unset( $upload );
-			throw new WC_API_Exception( 'woocommerce_api_product_image_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ), 400 );
 		}
 
 		unset( $response );
@@ -1856,7 +2076,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get product image as attachment
+	 * Sets product image as attachment and returns the attachment ID.
 	 *
 	 * @since 2.2
 	 * @param integer $upload
@@ -1864,6 +2084,29 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return int
 	 */
 	protected function set_product_image_as_attachment( $upload, $id ) {
+		return $this->set_uploaded_image_as_attachment( $upload, $id );
+	}
+
+	/**
+	 * Sets uploaded category image as attachment and returns the attachment ID.
+	 *
+	 * @since  2.5.0
+	 * @param  integer $upload Upload information from wp_upload_bits
+	 * @return int             Attachment ID
+	 */
+	protected function set_product_category_image_as_attachment( $upload ) {
+		return $this->set_uploaded_image_as_attachment( $upload );
+	}
+
+	/**
+	 * Set uploaded image as attachment.
+	 *
+	 * @since  2.5.0
+	 * @param  array $upload Upload information from wp_upload_bits
+	 * @param  int   $id     Post ID. Default to 0.
+	 * @return int           Attachment ID
+	 */
+	protected function set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 		$info    = wp_check_filetype( $upload['file'] );
 		$title   = '';
 		$content = '';
