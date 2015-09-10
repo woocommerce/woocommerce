@@ -74,6 +74,19 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'delete_product_category' ), WC_API_Server::DELETABLE ),
 		);
 
+		# GET/POST /products/tags
+		$routes[ $this->base . '/tags' ] = array(
+			array( array( $this, 'get_product_tags' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product_tag' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
+		# GET/PUT/DELETE /products/tags/<id>
+		$routes[ $this->base . '/tags/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_tag' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_tag' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_tag' ), WC_API_Server::DELETABLE ),
+		);
+
 		# GET/POST /products/shipping_classes
 		$routes[ $this->base . '/shipping_classes' ] = array(
 			array( array( $this, 'get_product_shipping_classes' ), WC_API_Server::READABLE ),
@@ -760,6 +773,196 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_delete_product_category', $id, $this );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_category' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get a listing of product tags.
+	 *
+	 * @since  2.5.0
+	 * @param  string|null $fields Fields to limit response to
+	 * @return array               Product tags
+	 */
+	public function get_product_tags( $fields = null ) {
+		try {
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_tags', __( 'You do not have permission to read product tags', 'woocommerce' ), 401 );
+			}
+
+			$product_tags = array();
+
+			$terms = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'ids' ) );
+
+			foreach ( $terms as $term_id ) {
+				$product_tags[] = current( $this->get_product_tag( $term_id, $fields ) );
+			}
+
+			return array( 'product_tags' => apply_filters( 'woocommerce_api_product_tags_response', $product_tags, $terms, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the product tag for the given ID.
+	 *
+	 * @since  2.5.0
+	 * @param  string $id          Product tag term ID
+	 * @param  string|null $fields Fields to limit response to
+	 * @return array               Product tag
+	 */
+	public function get_product_tag( $id, $fields = null ) {
+		try {
+			$id = absint( $id );
+
+			// Validate ID
+			if ( empty( $id ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_tag_id', __( 'Invalid product tag ID', 'woocommerce' ), 400 );
+			}
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_tags', __( 'You do not have permission to read product tags', 'woocommerce' ), 401 );
+			}
+
+			$term = get_term( $id, 'product_tag' );
+
+			if ( is_wp_error( $term ) || is_null( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_tag_id', __( 'A product tag with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$term_id = intval( $term->term_id );
+
+			$tag = array(
+				'id'          => $term_id,
+				'name'        => $term->name,
+				'slug'        => $term->slug,
+				'description' => $term->description,
+				'count'       => intval( $term->count )
+			);
+
+			return array( 'product_tag' => apply_filters( 'woocommerce_api_product_tag_response', $tag, $id, $fields, $term, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Create a new product tag.
+	 *
+	 * @since  2.5.0
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product tag if succeed, otherwise WP_Error
+	 *                              will be returned
+	 */
+	public function create_product_tag( $data ) {
+		try {
+			if ( ! isset( $data['product_tag'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_tag_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_tag' ), 400 );
+			}
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_tag', __( 'You do not have permission to create product tags', 'woocommerce' ), 401 );
+			}
+
+			$defaults = array(
+				'name'        => '',
+				'slug'        => '',
+				'description' => '',
+			);
+
+			$data = wp_parse_args( $data['product_tag'], $defaults );
+			$data = apply_filters( 'woocommerce_api_create_product_tag_data', $data, $this );
+
+			$name = $data['name'];
+			unset( $data['name'] );
+
+			$insert = wp_insert_term( $name, 'product_tag', $data );
+			if ( is_wp_error( $insert ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_tag', $insert->get_error_message(), 400 );
+			}
+
+			do_action( 'woocommerce_api_create_product_tag', $insert['term_taxonomy_id'], $data );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_product_tag( $insert['term_taxonomy_id'] );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product tag.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id   Product tag term ID
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product tag if succeed, otherwise WP_Error
+	 *                              will be returned
+	 */
+	public function edit_product_tag( $id, $data ) {
+		try {
+			if ( ! isset( $data['product_tag'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_tag', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_tag' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_tag'];
+
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_tag', __( 'You do not have permission to edit product tags', 'woocommerce' ), 401 );
+			}
+
+			$data = apply_filters( 'woocommerce_api_edit_product_tag_data', $data, $this );
+			$tag  = $this->get_product_tag( $id );
+
+			if ( is_wp_error( $tag ) ) {
+				return $tag;
+			}
+
+			$update = wp_update_term( $id, 'product_tag', $data );
+			if ( is_wp_error( $update ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_tag', __( 'Could not edit the tag', 'woocommerce' ), 400 );
+			}
+
+			do_action( 'woocommerce_api_edit_product_tag', $id, $data );
+
+			return $this->get_product_tag( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product tag.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id Product tag term ID
+	 * @return array|WP_Error     Success message if succeed, otherwise WP_Error
+	 *                            will be returned
+	 */
+	public function delete_product_tag( $id ) {
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_tag', __( 'You do not have permission to delete product tag', 'woocommerce' ), 401 );
+			}
+
+			$id      = absint( $id );
+			$deleted = wp_delete_term( $id, 'product_tag' );
+			if ( ! $deleted || is_wp_error( $deleted ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_tag', __( 'Could not delete the tag', 'woocommerce' ), 401 );
+			}
+
+			do_action( 'woocommerce_api_delete_product_tag', $id, $this );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_tag' ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
