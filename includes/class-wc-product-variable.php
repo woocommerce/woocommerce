@@ -393,7 +393,7 @@ class WC_Product_Variable extends WC_Product {
 				$values                   = array();
 
 				// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
-				if ( $assigned_text_attributes === array_map( 'sanitize_title', $assigned_text_attributes ) && version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
+				if ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
 					$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
 
 					foreach ( $text_attributes as $text_attribute ) {
