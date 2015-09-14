@@ -190,7 +190,7 @@ class WC_Admin_Assets {
 				'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
 				'i18n_variation_count_single'         => esc_js( __( '%qty% variation', 'woocommerce' ) ),
 				'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
-				'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 10 ) )
+				'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) )
 			);
 
 			wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );
