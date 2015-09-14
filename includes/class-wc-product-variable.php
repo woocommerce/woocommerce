@@ -504,13 +504,6 @@ class WC_Product_Variable extends WC_Product {
 
 			$value = wc_clean( $match_attributes[ $attribute_field_name ] );
 
-			/**
-			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-			 */
-			if ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
-				$value = sanitize_title( $value );
-			}
-
 			$query_args['meta_query'][] = array(
 				'key'     => $attribute_field_name,
 				'value'   => array( '', $value ),
@@ -522,6 +515,14 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( $matches && ! is_wp_error( $matches ) ) {
 			return current( $matches );
+
+		/**
+		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes
+		 */
+	 	} elseif ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
+			return $match_attributes === array_map( 'sanitize_title', $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
+
 		} else {
 			return 0;
 		}
