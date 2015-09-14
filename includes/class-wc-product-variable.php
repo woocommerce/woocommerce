@@ -23,6 +23,9 @@ class WC_Product_Variable extends WC_Product {
 	/** @public string The product's total stock, including that of its children. */
 	public $total_stock;
 
+	/** @private array Array of variation prices. */
+	private $prices_array;
+
 	/**
 	 * Constructor
 	 *
@@ -260,15 +263,17 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_variation_prices( $display = false ) {
 		global $wp_filter;
+
+		if ( ! empty( $this->prices_array ) ) {
+			return $this->prices_array;
+		}
+
 		/**
 		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
 		 * Max transient length is 45, -10 for get_transient_version.
 		 * @var string
 		 */
-		$hash   = array();
-		$hash[] = $this->id;
-		$hash[] = $display;
-		$hash[] = $display ? WC_Tax::get_rates() : array();
+		$hash = array( $this->id, $display, $display ? WC_Tax::get_rates() : array() );
 
 		foreach ( $wp_filter as $key => $val ) {
 			if ( in_array( $key, array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' ) ) ) {
@@ -276,17 +281,21 @@ class WC_Product_Variable extends WC_Product {
 			}
 		}
 
-		$hash         = substr( md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $hash ) ) ), 0, 22 );
-		$cache_key    = 'wc_var_prices' . $hash . WC_Cache_Helper::get_transient_version( 'product' );
-		$prices_array = get_transient( $cache_key );
+		/**
+		 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
+		 */
+		$hash               = apply_filters( 'woocommerce_get_variation_prices_hash', $hash, $this, $display );
+		$cache_key          = 'wc_var_prices' . substr( md5( json_encode( $hash ) ), 0, 22 ) . WC_Cache_Helper::get_transient_version( 'product' );
+		$this->prices_array = get_transient( $cache_key );
 
-		if ( empty( $prices_array ) ) {
-			$prices            = array();
-			$regular_prices    = array();
-			$sale_prices       = array();
-			$tax_display_mode  = get_option( 'woocommerce_tax_display_shop' );
+		if ( empty( $this->prices_array ) ) {
+			$prices           = array();
+			$regular_prices   = array();
+			$sale_prices      = array();
+			$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+			$variation_ids    = $this->get_children( true );
 
-			foreach ( $this->get_children( true ) as $variation_id ) {
+			foreach ( $variation_ids as $variation_id ) {
 				if ( $variation = $this->get_child( $variation_id ) ) {
 					$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
 					$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
@@ -299,9 +308,15 @@ class WC_Product_Variable extends WC_Product {
 
 					// If we are getting prices for display, we need to account for taxes
 					if ( $display ) {
-						$price         = $price !== '' ? ( $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $price ) : $variation->get_price_excluding_tax( 1, $price ) ) : '';
-						$regular_price = $regular_price !== '' ? ( $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $regular_price ) : $variation->get_price_excluding_tax( 1, $regular_price ) ) : '';
-						$sale_price    = $sale_price !== '' ? ( $tax_display_mode == 'incl' ? $variation->get_price_including_tax( 1, $sale_price ) : $variation->get_price_excluding_tax( 1, $sale_price ) ) : '';
+						if ( 'incl' === $tax_display_mode ) {
+							$price         = '' === $price ? ''         : $variation->get_price_including_tax( 1, $price );
+							$regular_price = '' === $regular_price ? '' : $variation->get_price_including_tax( 1, $regular_price );
+							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_including_tax( 1, $sale_price );
+						} else {
+							$price         = '' === $price ? ''         : $variation->get_price_excluding_tax( 1, $price );
+							$regular_price = '' === $regular_price ? '' : $variation->get_price_excluding_tax( 1, $regular_price );
+							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_excluding_tax( 1, $sale_price );
+						}
 					}
 
 					$prices[ $variation_id ]         = $price;
@@ -314,19 +329,19 @@ class WC_Product_Variable extends WC_Product {
 			asort( $regular_prices );
 			asort( $sale_prices );
 
-			$prices_array = array(
+			$this->prices_array = array(
 				'price'         => $prices,
 				'regular_price' => $regular_prices,
 				'sale_price'    => $sale_prices
 			);
 
-			set_transient( $cache_key, $prices_array, DAY_IN_SECONDS * 30 );
+			set_transient( $cache_key, $this->prices_array, DAY_IN_SECONDS * 30 );
 		}
 
 		/**
 		 * Give plugins one last chance to filter the variation prices array.
 		 */
-		return apply_filters( 'woocommerce_variation_prices', $prices_array, $this, $display );
+		return $this->prices_array = apply_filters( 'woocommerce_variation_prices', $this->prices_array, $this, $display );
 	}
 
 	/**
