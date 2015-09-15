@@ -2285,8 +2285,7 @@ abstract class WC_Abstract_Order {
 	 *
 	 * @param $transaction_id string Optional transaction id to store in post meta
 	 */
-	public function payment_complete( $transaction_id = '' ) {
-
+	public function payment_complete( $transaction_id = '', $reduce_stock = true ) {
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
 
 		if ( null !== WC()->session ) {
@@ -2296,57 +2295,43 @@ abstract class WC_Abstract_Order {
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this );
 
 		if ( $this->id && $this->has_status( $valid_order_statuses ) ) {
-
-			$order_needs_processing = true;
+			$order_needs_processing = false;
 
 			if ( sizeof( $this->get_items() ) > 0 ) {
-
 				foreach ( $this->get_items() as $item ) {
+					if ( $_product = $this->get_product_from_item( $item ) ) {
+						$virtual_downloadable_item = $_product->is_downloadable() && $_product->is_virtual();
 
-					if ( $item['product_id'] > 0 ) {
-
-						$_product = $this->get_product_from_item( $item );
-
-							if ( false !== $_product && ! apply_filters( 'woocommerce_order_item_needs_processing', ! ( $_product->is_downloadable() && $_product->is_virtual() ), $_product, $this->id ) ) {
-							$order_needs_processing = false;
-							continue;
+						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $_product, $this->id ) ) {
+							$order_needs_processing = true;
+							break;
 						}
 					}
-
-					$order_needs_processing = true;
-					break;
 				}
 			}
 
-			$new_order_status = $order_needs_processing ? 'processing' : 'completed';
+			$this->update_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->id ) );
 
-			$new_order_status = apply_filters( 'woocommerce_payment_complete_order_status', $new_order_status, $this->id );
-
-			$this->update_status( $new_order_status );
-
-			add_post_meta( $this->id, '_paid_date', current_time('mysql'), true );
+			add_post_meta( $this->id, '_paid_date', current_time( 'mysql' ), true );
 
 			if ( ! empty( $transaction_id ) ) {
 				add_post_meta( $this->id, '_transaction_id', $transaction_id, true );
 			}
 
-			$this_order = array(
-				'ID' => $this->id,
-				'post_date' => current_time( 'mysql', 0 ),
+			wp_update_post( array(
+				'ID'            => $this->id,
+				'post_date'     => current_time( 'mysql', 0 ),
 				'post_date_gmt' => current_time( 'mysql', 1 )
-			);
-			wp_update_post( $this_order );
+			) );
 
-			if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', true, $this->id ) ) {
-				$this->reduce_order_stock(); // Payment is complete so reduce stock levels
+			// Payment is complete so reduce stock levels
+			if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $this->id, '_order_stock_reduced', true ), $this->id ) ) {
+				$this->reduce_order_stock();
 			}
 
 			do_action( 'woocommerce_payment_complete', $this->id );
-
 		} else {
-
 			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->id );
-
 		}
 	}
 
@@ -2355,8 +2340,7 @@ abstract class WC_Abstract_Order {
 	 * Record sales
 	 */
 	public function record_product_sales() {
-
-		if ( 'yes' == get_post_meta( $this->id, '_recorded_sales', true ) ) {
+		if ( 'yes' === get_post_meta( $this->id, '_recorded_sales', true ) ) {
 			return;
 		}
 
@@ -2401,7 +2385,6 @@ abstract class WC_Abstract_Order {
 	 * Increase applied coupon counts
 	 */
 	public function increase_coupon_usage_counts() {
-
 		if ( 'yes' == get_post_meta( $this->id, '_recorded_coupon_usage_counts', true ) ) {
 			return;
 		}
@@ -2483,6 +2466,8 @@ abstract class WC_Abstract_Order {
 					}
 				}
 			}
+
+			add_post_meta( $this->id, '_order_stock_reduced', '1', true );
 
 			do_action( 'woocommerce_reduce_order_stock', $this );
 		}
