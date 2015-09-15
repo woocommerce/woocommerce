@@ -29,7 +29,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'blur input change', '.input-text, select', this.validate_field );
 
 			// Inputs/selects which update totals
-			this.$checkout_form.on( 'input change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type=radio]', this.trigger_update_checkout );
+			this.$checkout_form.on( 'input change', 'select.shipping_method, input[name^=shipping_method], [name^=update_order], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type=radio]', this.trigger_update_checkout );
 			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed );
 			this.$checkout_form.on( 'input change', '.address-field select', this.input_changed );
 			this.$checkout_form.on( 'input keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
