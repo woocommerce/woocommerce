@@ -2285,7 +2285,7 @@ abstract class WC_Abstract_Order {
 	 *
 	 * @param $transaction_id string Optional transaction id to store in post meta
 	 */
-	public function payment_complete( $transaction_id = '', $reduce_stock = true ) {
+	public function payment_complete( $transaction_id = '' ) {
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
 
 		if ( null !== WC()->session ) {
