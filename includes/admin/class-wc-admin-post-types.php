@@ -81,6 +81,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'media_view_strings', array( $this, 'change_insert_into_post' ) );
+		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
 		// Uploads
@@ -2030,7 +2031,6 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Change title boxes in admin.
-	 *
 	 * @param  string $text
 	 * @param  object $post
 	 * @return string
@@ -2049,11 +2049,10 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Print coupon description textarea field
-	 *
+	 * Print coupon description textarea field.
 	 * @param WP_Post $post
 	 */
-	public function edit_form_after_title(  $post ) {
+	public function edit_form_after_title( $post ) {
 		if ( 'shop_coupon' === $post->post_type ) {
 			?>
 			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
@@ -2063,8 +2062,7 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Change label for insert buttons.
-	 *
-	 * @param array $strings
+	 * @param  array $strings
 	 * @return array
 	 */
 	public function change_insert_into_post( $strings ) {
@@ -2078,6 +2076,20 @@ class WC_Admin_Post_Types {
 		}
 
 		return $strings;
+	}
+
+	/**
+	 * Hidden default Meta-Boxes.
+	 * @param  array  $hidden
+	 * @param  object $screen
+	 * @return array
+	 */
+	public function hidden_meta_boxes( $hidden, $screen ) {
+		if ( 'product' === $screen->post_type && 'post' === $screen->base ) {
+			$hidden = array_merge( $hidden, array( 'postcustom' ) );
+		}
+
+		return $hidden;
 	}
 
 	/**
