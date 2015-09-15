@@ -1768,6 +1768,16 @@ class WC_API_Products extends WC_API_Resource {
 						$gallery[] = $attachment_id;
 					}
 				}
+
+				// Set the image alt if present.
+				if ( ! empty( $image['alt'] ) ) {
+					update_post_meta( $attachment_id, '_wp_attachment_image_alt', $image['alt'] );
+				}
+
+				// Set the image title if present.
+				if ( ! empty( $image['title'] ) ) {
+					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['title'] ) );
+				}
 			}
 
 			if ( ! empty( $gallery ) ) {
