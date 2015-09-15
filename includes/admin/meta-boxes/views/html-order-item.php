@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo '<br/>' . wc_get_formatted_variation( $_product->variation_data, true );
 				}
 
-			?>"><?php echo $_product->get_image( 'shop_thumbnail', array( 'title' => '' ) ); ?></a>
+			?>"><?php echo apply_filters( 'woocommerce_admin_order_item_thumbnail', $_product->get_image( 'shop_thumbnail', array( 'title' => '' ) ), $item_id, $item ); ?></a>
 		<?php else : ?>
 			<?php echo wc_placeholder_img( 'shop_thumbnail' ); ?>
 		<?php endif; ?>
