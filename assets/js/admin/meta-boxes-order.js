@@ -406,7 +406,7 @@ jQuery( function ( $ ) {
 
 		add_item: function() {
 			$( this ).WCBackboneModal({
-				template: '#wc-modal-add-products'
+				template: 'wc-modal-add-products'
 			});
 
 			return false;
@@ -448,7 +448,7 @@ jQuery( function ( $ ) {
 
 		add_tax: function() {
 			$( this ).WCBackboneModal({
-				template: '#wc-modal-add-tax'
+				template: 'wc-modal-add-tax'
 			});
 			return false;
 		},
@@ -1001,13 +1001,13 @@ jQuery( function ( $ ) {
 		backbone: {
 
 			init: function( e, target ) {
-				if ( '#wc-modal-add-products' === target ) {
+				if ( 'wc-modal-add-products' === target ) {
 					$( document.body ).trigger( 'wc-enhanced-select-init' );
 				}
 			},
 
 			response: function( e, target, data ) {
-				if ( '#wc-modal-add-tax' === target ) {
+				if ( 'wc-modal-add-tax' === target ) {
 					var rate_id = data.add_order_tax;
 					var manual_rate_id = '';
 
@@ -1017,7 +1017,7 @@ jQuery( function ( $ ) {
 
 					wc_meta_boxes_order_items.backbone.add_tax( rate_id, manual_rate_id );
 				}
-				if ( '#wc-modal-add-products' === target ) {
+				if ( 'wc-modal-add-products' === target ) {
 					wc_meta_boxes_order_items.backbone.add_item( data.add_order_items );
 				}
 			},
