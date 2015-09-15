@@ -2198,7 +2198,7 @@ class WC_API_Products extends WC_API_Resource {
 
 				// Set the image alt if present.
 				if ( ! empty( $image['alt'] ) ) {
-					update_post_meta( $attachment_id, '_wp_attachment_image_alt', $image['alt'] );
+					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
 				}
 
 				// Set the image title if present.
