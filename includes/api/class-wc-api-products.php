@@ -985,24 +985,40 @@ class WC_API_Products extends WC_API_Resource {
 			'meta_query'  => array(),
 		);
 
-		if ( ! empty( $args['type'] ) ) {
+		// Taxonomy query to filter products by type, category, tag, shipping class, and
+		// attribute.
+		$tax_query = array();
 
-			$types = explode( ',', $args['type'] );
+		// Map between taxonomy name and arg's key.
+		$taxonomies_arg_map = array(
+			'product_type'           => 'type',
+			'product_cat'            => 'category',
+			'product_tag'            => 'tag',
+			'product_shipping_class' => 'shipping_class',
+		);
 
-			$query_args['tax_query'] = array(
-				array(
-					'taxonomy' => 'product_type',
-					'field'    => 'slug',
-					'terms'    => $types,
-				),
-			);
-
-			unset( $args['type'] );
+		// Add attribute taxonomy names into the map.
+		foreach ( wc_get_attribute_taxonomy_names() as $attribute_name ) {
+			$taxonomies_arg_map[ $attribute_name ] = $attribute_name;
 		}
 
-		// Filter products by category
-		if ( ! empty( $args['category'] ) ) {
-			$query_args['product_cat'] = $args['category'];
+		// Set tax_query for each passed arg.
+		foreach ( $taxonomies_arg_map as $tax_name => $arg ) {
+			if ( ! empty( $args[ $arg ] ) ) {
+				$terms = explode( ',', $args[ $arg ] );
+
+				$tax_query[] = array(
+					'taxonomy' => $tax_name,
+					'field'    => 'slug',
+					'terms'    => $terms,
+				);
+
+				unset( $args[ $arg ] );
+			}
+		}
+
+		if ( ! empty( $tax_query ) ) {
+			$query_args['tax_query'] = $tax_query;
 		}
 
 		// Filter by specific sku
