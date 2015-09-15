@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_filter( 'body_class', 'wc_body_class' );
 add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+add_filter( 'post_class', 'wc_product_post_display_class', 25, 3 );
 
 /**
  * WP Header

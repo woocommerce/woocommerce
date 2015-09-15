@@ -318,6 +318,36 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 	return $classes;
 }
 
+function wc_product_post_display_class( $classes, $class = '', $post_id = '' ) {
+	if ( ! $post_id || 'product' !== get_post_type( $post_id ) ) {
+		return $classes;
+	}
+
+	$product = wc_get_product( $post_id );
+
+	// Ensure visibility
+	if ( ! $product || ! $product->is_visible() ) {
+		return;
+	}
+
+	$woocommerce_loop['loop'] = $wp_query->current_post;
+	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
+
+	// Increase loop count
+	$woocommerce_loop['loop']++;
+
+	if ( 0 == ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 == $woocommerce_loop['columns'] ) {
+		$classes[] = 'first';
+	}
+
+	if ( 0 == $woocommerce_loop['loop'] % $woocommerce_loop['columns'] ) {
+		$classes[] = 'last';
+	}
+
+	return $classes;
+
+}
+
 /** Template pages ********************************************************/
 
 if ( ! function_exists( 'woocommerce_content' ) ) {
