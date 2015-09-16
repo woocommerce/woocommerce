@@ -88,7 +88,7 @@ abstract class WC_Session {
 	 *
 	 * @param string $key
 	 */
-	public function delete( $key ) {
+	public function unset( $key ) {
 		if ( isset( $this->_data[ $key ] ) ) {
 			unset( $this->_data[ $key ] );
 			$this->_dirty = true;
