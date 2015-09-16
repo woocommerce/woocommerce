@@ -55,7 +55,7 @@ abstract class WC_Session {
 	 * @param mixed $key
 	 */
 	public function __unset( $key ) {
-		$this->delete( $key );
+		$this->unset( $key );
 	}
 
 	/**
