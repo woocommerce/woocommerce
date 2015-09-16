@@ -2498,6 +2498,8 @@ abstract class WC_Abstract_Order {
 		if ( ! $notification_sent && 'yes' == get_option( 'woocommerce_notify_low_stock' ) && get_option( 'woocommerce_notify_low_stock_amount' ) >= $new_stock ) {
 			do_action( 'woocommerce_low_stock', $product );
 		}
+		
+		do_action( 'woocommerce_after_send_stock_notifications', $product, $new_stock, $qty_ordered );
 	}
 
 
