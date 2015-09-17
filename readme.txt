@@ -172,6 +172,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Variation loading/refresh after attribute saving.
 * Fix - Added monthly cron schedule.
 * Fix - Remove use of 'input' event in checkout scripts to prevent IE11 triggering updates on placeholder change.
+* Fix - AJAX variations not being found in some cases when product version was < 2.4, but attributes were updated after sync(). 
 * Tweak - Allow bulk edit price to 0 .
 * Tweak - Add filters to control "shipped via" text.
 * Tweak - Allow line breaks in non-variation attributes.
