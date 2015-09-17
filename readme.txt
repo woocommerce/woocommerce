@@ -1,9 +1,9 @@
 === WooCommerce - excelling eCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
-Requires at least: 4.0
+Requires at least: 4.1
 Tested up to: 4.3
-Stable tag: 2.4.6
+Stable tag: 2.4.7
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,6 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.4.7 - 21/09/2015 =
 * Fix - Handle Switzerland in get_european_union_countries.
 * Fix - For geolocation with static cache support, ensure hash is appended during form submission.
 * Fix - To prevent discounts being applied in 'random' order (based on order added to cart), sort cart items based on subtotal during calculate_totals.
@@ -169,7 +170,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Check specifically for Post IDs in WC Query verbose rules fix.
 * Fix - Only run maybe_set_cart_cookies if cart was loaded to prevent notices.
 * Fix - Variation loading/refresh after attribute saving.
-* Fix - Add monthly cron schedule.
+* Fix - Added monthly cron schedule.
+* Fix - Remove use of 'input' event in checkout scripts to prevent IE11 triggering updates on placeholder change.
+* Tweak - Allow bulk edit price to 0 .
 * Tweak - Add filters to control "shipped via" text.
 * Tweak - Allow line breaks in non-variation attributes.
 * Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
@@ -180,6 +183,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Use the needs_payment function (DRY).
 * Tweak - Tweak wc_create_page to work with trashed pages.
 * Tweak - Redirect 'not right now' to referer in onboarding wizard.
+* Tweak - woocommerce_update_new_customer_past_order action.
 * Template - Removed 'Payment' heading in `templates/checkout/form-pay.php`.
 * Template - Removed unnecessary clearing div in `templates/checkout/payment.php`.
 
