@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( $breadcrumb ) {
+if ( ! empty( $breadcrumb ) ) {
 
 	echo $wrap_before;
 

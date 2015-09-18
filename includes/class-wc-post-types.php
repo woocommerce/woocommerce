@@ -209,9 +209,9 @@ class WC_Post_types {
 					register_taxonomy( $name, apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ), apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data ) );
 				}
 			}
-
-			do_action( 'woocommerce_after_register_taxonomy' );
 		}
+
+		do_action( 'woocommerce_after_register_taxonomy' );
 	}
 
 	/**

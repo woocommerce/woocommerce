@@ -311,8 +311,9 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 			// If this is a term slug, get the term's nice name
 			if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
 				$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
-				if ( ! is_wp_error( $term ) && $term->name )
+				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
 					$value = $term->name;
+				}
 			} else {
 				$value = ucwords( str_replace( '-', ' ', $value ) );
 			}

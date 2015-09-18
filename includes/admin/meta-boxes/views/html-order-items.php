@@ -300,7 +300,7 @@ if ( wc_tax_enabled() ) {
 </div>
 <?php endif; ?>
 
-<script type="text/template" id="wc-modal-add-products">
+<script type="text/template" id="tmpl-wc-modal-add-products">
 	<div class="wc-backbone-modal">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
@@ -326,7 +326,7 @@ if ( wc_tax_enabled() ) {
 	<div class="wc-backbone-modal-backdrop modal-close"></div>
 </script>
 
-<script type="text/template" id="wc-modal-add-tax">
+<script type="text/template" id="tmpl-wc-modal-add-tax">
 	<div class="wc-backbone-modal">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">

@@ -358,7 +358,7 @@ class WC_Product_Variation extends WC_Product {
 	public function managing_stock() {
 		if ( 'yes' === get_option( 'woocommerce_manage_stock', 'yes' ) ) {
 			if ( 'no' === $this->manage_stock ) {
-				if ( $this->parent->managing_stock() ) {
+				if ( $this->parent && $this->parent->managing_stock() ) {
 					return 'parent';
 				}
 			} else {

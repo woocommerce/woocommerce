@@ -167,10 +167,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/javascript">
 	jQuery( function ( $ ) {
-		$( '#webhook-options #webhook_topic' ).on( 'change', function() {
+		$( '#webhook-options' ).find( '#webhook_topic' ).on( 'change', function() {
 			var current            = $( this ).val(),
-				action_event_field = $( '#webhook-options #webhook-action-event-wrap' ),
-				custom_topic_field = $( '#webhook-options #webhook-custom-topic-wrap' );
+				action_event_field = $( '#webhook-options' ).find( '#webhook-action-event-wrap' ),
+				custom_topic_field = $( '#webhook-options' ).find( '#webhook-custom-topic-wrap' );
 
 			action_event_field.hide();
 			custom_topic_field.hide();

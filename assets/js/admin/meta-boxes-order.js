@@ -316,8 +316,8 @@ jQuery( function ( $ ) {
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					$( '#woocommerce-order-items .inside' ).empty();
-					$( '#woocommerce-order-items .inside' ).append( response );
+					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+					$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
 					wc_meta_boxes_order_items.stupidtable.init();
@@ -384,7 +384,7 @@ jQuery( function ( $ ) {
 			$( 'div.wc-order-refund-items' ).slideDown();
 			$( 'div.wc-order-bulk-actions' ).slideUp();
 			$( 'div.wc-order-totals-items' ).slideUp();
-			$( '#woocommerce-order-items div.refund' ).show();
+			$( '#woocommerce-order-items' ).find( 'div.refund' ).show();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).hide();
 			return false;
 		},
@@ -393,7 +393,7 @@ jQuery( function ( $ ) {
 			$( this ).closest( 'div.wc-order-data-row' ).slideUp();
 			$( 'div.wc-order-bulk-actions' ).slideDown();
 			$( 'div.wc-order-totals-items' ).slideDown();
-			$( '#woocommerce-order-items div.refund' ).hide();
+			$( '#woocommerce-order-items' ).find( 'div.refund' ).hide();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).show();
 
 			// Reload the items
@@ -406,7 +406,7 @@ jQuery( function ( $ ) {
 
 		add_item: function() {
 			$( this ).WCBackboneModal({
-				template: '#wc-modal-add-products'
+				template: 'wc-modal-add-products'
 			});
 
 			return false;
@@ -448,7 +448,7 @@ jQuery( function ( $ ) {
 
 		add_tax: function() {
 			$( this ).WCBackboneModal({
-				template: '#wc-modal-add-tax'
+				template: 'wc-modal-add-tax'
 			});
 			return false;
 		},
@@ -506,8 +506,8 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						$( '#woocommerce-order-items .inside' ).empty();
-						$( '#woocommerce-order-items .inside' ).append( response );
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+						$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 						wc_meta_boxes_order.init_tiptip();
 						wc_meta_boxes_order_items.unblock();
 						wc_meta_boxes_order_items.stupidtable.init();
@@ -556,8 +556,8 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						$( '#woocommerce-order-items .inside' ).empty();
-						$( '#woocommerce-order-items .inside' ).append( response );
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+						$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 						wc_meta_boxes_order.init_tiptip();
 						wc_meta_boxes_order_items.unblock();
 						wc_meta_boxes_order_items.stupidtable.init();
@@ -626,8 +626,8 @@ jQuery( function ( $ ) {
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					$( '#woocommerce-order-items .inside' ).empty();
-					$( '#woocommerce-order-items .inside' ).append( response );
+					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+					$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
 					wc_meta_boxes_order_items.stupidtable.init();
@@ -1001,13 +1001,13 @@ jQuery( function ( $ ) {
 		backbone: {
 
 			init: function( e, target ) {
-				if ( '#wc-modal-add-products' === target ) {
+				if ( 'wc-modal-add-products' === target ) {
 					$( document.body ).trigger( 'wc-enhanced-select-init' );
 				}
 			},
 
 			response: function( e, target, data ) {
-				if ( '#wc-modal-add-tax' === target ) {
+				if ( 'wc-modal-add-tax' === target ) {
 					var rate_id = data.add_order_tax;
 					var manual_rate_id = '';
 
@@ -1017,7 +1017,7 @@ jQuery( function ( $ ) {
 
 					wc_meta_boxes_order_items.backbone.add_tax( rate_id, manual_rate_id );
 				}
-				if ( '#wc-modal-add-products' === target ) {
+				if ( 'wc-modal-add-products' === target ) {
 					wc_meta_boxes_order_items.backbone.add_item( data.add_order_items );
 				}
 			},
@@ -1083,8 +1083,8 @@ jQuery( function ( $ ) {
 						data: data,
 						type: 'POST',
 						success: function( response ) {
-							$( '#woocommerce-order-items .inside' ).empty();
-							$( '#woocommerce-order-items .inside' ).append( response );
+							$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+							$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 							wc_meta_boxes_order.init_tiptip();
 							wc_meta_boxes_order_items.unblock();
 							wc_meta_boxes_order_items.stupidtable.init();

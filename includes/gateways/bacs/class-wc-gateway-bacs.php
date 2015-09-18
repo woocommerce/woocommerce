@@ -163,7 +163,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					jQuery(function() {
 						jQuery('#bacs_accounts').on( 'click', 'a.add', function(){
 
-							var size = jQuery('#bacs_accounts tbody .account').size();
+							var size = jQuery('#bacs_accounts').find('tbody .account').size();
 
 							jQuery('<tr class="account">\
 									<td class="sort"></td>\

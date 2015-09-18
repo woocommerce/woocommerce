@@ -81,6 +81,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'media_view_strings', array( $this, 'change_insert_into_post' ) );
+		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
 		// Uploads
@@ -2030,7 +2031,6 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Change title boxes in admin.
-	 *
 	 * @param  string $text
 	 * @param  object $post
 	 * @return string
@@ -2049,11 +2049,10 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Print coupon description textarea field
-	 *
+	 * Print coupon description textarea field.
 	 * @param WP_Post $post
 	 */
-	public function edit_form_after_title(  $post ) {
+	public function edit_form_after_title( $post ) {
 		if ( 'shop_coupon' === $post->post_type ) {
 			?>
 			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
@@ -2063,8 +2062,7 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Change label for insert buttons.
-	 *
-	 * @param array $strings
+	 * @param  array $strings
 	 * @return array
 	 */
 	public function change_insert_into_post( $strings ) {
@@ -2078,6 +2076,20 @@ class WC_Admin_Post_Types {
 		}
 
 		return $strings;
+	}
+
+	/**
+	 * Hidden default Meta-Boxes.
+	 * @param  array  $hidden
+	 * @param  object $screen
+	 * @return array
+	 */
+	public function hidden_meta_boxes( $hidden, $screen ) {
+		if ( 'product' === $screen->post_type && 'post' === $screen->base ) {
+			$hidden = array_merge( $hidden, array( 'postcustom' ) );
+		}
+
+		return $hidden;
 	}
 
 	/**
@@ -2117,7 +2129,7 @@ class WC_Admin_Post_Types {
 				<input type="hidden" name="current_featured" id="current_featured" value="<?php echo esc_attr( $current_featured ); ?>" />
 
 				<?php
-					echo '<p>' . __( 'Define the loops this product should be visible in. The product will still be accessible directly.', 'woocommerce' ) . '</p>';
+					echo '<p>' . __( 'Choose where this product should be displayed in your catalog. The product will always be accessible directly.', 'woocommerce' ) . '</p>';
 
 					foreach ( $visibility_options as $name => $label ) {
 						echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
@@ -2199,7 +2211,7 @@ class WC_Admin_Post_Types {
 			foreach ( $existing_permissions as $existing_permission ) {
 				$order = wc_get_order( $existing_permission->order_id );
 
-				if ( $order->id ) {
+				if ( ! empty( $order->id ) ) {
 					// Remove permissions
 					if ( ! empty( $removed_download_ids ) ) {
 						foreach ( $removed_download_ids as $download_id ) {
@@ -2215,7 +2227,7 @@ class WC_Admin_Post_Types {
 
 							if ( apply_filters( 'woocommerce_process_product_file_download_paths_grant_access_to_new_file', true, $download_id, $product_id, $order ) ) {
 								// grant permission if it doesn't already exist
-								if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) ) ) {
+								if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1=1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) ) ) {
 									wc_downloadable_file_permission( $download_id, $product_id, $order );
 								}
 							}
