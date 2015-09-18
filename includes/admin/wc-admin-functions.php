@@ -253,8 +253,7 @@ function wc_save_order_items( $order_id, $items ) {
 		// Delele blank item meta entries
 		if ( $meta_key === '' && $meta_value === '' ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $id ) );
-		}
-		else {
+		} else {
 
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_order_itemmeta',
@@ -277,7 +276,7 @@ function wc_save_order_items( $order_id, $items ) {
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			$item_id      = absint( $item_id );
 			$method_id    = isset( $items['shipping_method'][ $item_id ] ) ? wc_clean( $items['shipping_method'][ $item_id ] ) : '';
-			$method_title = isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( $items['shipping_method_title'][ $item_id ] ) : '';
+			$method_title = isset( $items['shipping_method_title'][ $item_id ] ) ? wc_clean( wp_unslash( $items['shipping_method_title'][ $item_id ] ) ) : '';
 			$cost         = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : '';
 			$ship_taxes   = isset( $items['shipping_taxes'][ $item_id ] ) ? array_map( 'wc_format_decimal', $items['shipping_taxes'][ $item_id ] ) : array();
 
