@@ -161,7 +161,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// add the parent product data to an individual variation
-		if ( $product->is_type( 'variation' ) ) {
+		if ( $product->is_type( 'variation' ) && $product->parent ) {
 
 			$product_data['parent'] = $this->get_product_data( $product->parent );
 		}
@@ -864,7 +864,7 @@ class WC_API_Products extends WC_API_Resource {
 
 						// Text based attributes - Posted values are term names - don't change to slugs
 						} else {
-							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute['options'] ) ) );
+							$values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute['options'] ) );
 						}
 
 						$values = array_filter( $values, 'strlen' );
@@ -1455,11 +1455,14 @@ class WC_API_Products extends WC_API_Resource {
 						continue;
 					}
 
-					$taxonomy   = sanitize_title( $attribute['name'] );
 					$_attribute = array();
 
 					if ( isset( $attribute['slug'] ) ) {
 						$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
+					}
+
+					if ( ! $taxonomy ) {
+						$taxonomy = sanitize_title( $attribute['name'] );
 					}
 
 					if ( isset( $attributes[ $taxonomy ] ) ) {
@@ -1467,11 +1470,17 @@ class WC_API_Products extends WC_API_Resource {
 					}
 
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
-						$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
-						$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
-						$updated_attribute_keys[] = $attribute_key;
+						$_attribute_key           = 'attribute_' . sanitize_title( $_attribute['name'] );
+						$updated_attribute_keys[] = $_attribute_key;
 
-						update_post_meta( $variation_id, $attribute_key, $attribute_value );
+						if ( isset( $_attribute['is_taxonomy'] ) && $_attribute['is_taxonomy'] ) {
+							// Don't use wc_clean as it destroys sanitized characters
+							$_attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
+						} else {
+							$_attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+						}
+
+						update_post_meta( $variation_id, $_attribute_key, $_attribute_value );
 					}
 				}
 
@@ -1512,11 +1521,15 @@ class WC_API_Products extends WC_API_Resource {
 					$_attribute = $attributes[ $taxonomy ];
 
 					if ( $_attribute['is_variation'] ) {
-						// Don't use wc_clean as it destroys sanitized characters
+						$value = '';
+
 						if ( isset( $default_attr['option'] ) ) {
-							$value = sanitize_title( trim( stripslashes( $default_attr['option'] ) ) );
-						} else {
-							$value = '';
+							if ( $_attribute['is_taxonomy'] ) {
+								// Don't use wc_clean as it destroys sanitized characters
+								$value = sanitize_title( trim( stripslashes( $default_attr['option'] ) ) );
+							} else {
+								$value = wc_clean( trim( stripslashes( $default_attr['option'] ) ) );
+							}
 						}
 
 						if ( $value ) {
@@ -1538,7 +1551,6 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id
 	 * @param array $data
-	 * @return void
 	 */
 	private function save_product_shipping_data( $id, $data ) {
 		if ( isset( $data['weight'] ) ) {
@@ -1588,7 +1600,6 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param int $product_id
 	 * @param array $downloads
 	 * @param int $variation_id
-	 * @return void
 	 */
 	private function save_downloadable_files( $product_id, $downloads, $variation_id = 0 ) {
 		$files = array();
@@ -2320,7 +2331,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * Clear product
 	 */
 	protected function clear_product( $product_id ) {
-		if ( 0 >= $product_id ) {
+		if ( ! is_numeric( $product_id ) || 0 >= $product_id ) {
 			return;
 		}
 

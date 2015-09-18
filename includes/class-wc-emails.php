@@ -69,7 +69,7 @@ class WC_Emails {
 			'woocommerce_order_status_on-hold_to_processing',
 			'woocommerce_order_status_on-hold_to_cancelled',
 			'woocommerce_order_status_completed',
-			'woocommerce_order_status_refunded',
+			'woocommerce_order_fully_refunded',
 			'woocommerce_order_partially_refunded',
 			'woocommerce_new_customer_note',
 			'woocommerce_created_customer'
@@ -213,11 +213,12 @@ class WC_Emails {
 	 * @param mixed $message
 	 * @param string $headers (default: "Content-Type: text/html\r\n")
 	 * @param string $attachments (default: "")
+	 * @return bool
 	 */
 	public function send( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
 		// Send
 		$email = new WC_Email();
-		$email->send( $to, $subject, $message, $headers, $attachments );
+		return $email->send( $to, $subject, $message, $headers, $attachments );
 	}
 
 	/**
@@ -366,8 +367,6 @@ class WC_Emails {
 
 	/**
 	 * Get the email addresses.
-	 *
-	 * @return void
 	 */
 	public function email_addresses( $order, $sent_to_admin = false, $plain_text = false ) {
 		if ( $plain_text ) {
@@ -392,7 +391,7 @@ class WC_Emails {
 	 */
 	public function low_stock( $product ) {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
-		$message = sprintf( __( '%s is low in stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ) ) ) . ' ' . sprintf( __( 'There are %d left', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_total_stock() ) ) );
+		$message = sprintf( __( '%s is low in stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) ) . ' ' . sprintf( __( 'There are %d left', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_total_stock() ) ) );
 
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_low_stock', get_option( 'woocommerce_stock_email_recipient' ), $product ),
@@ -410,7 +409,7 @@ class WC_Emails {
 	 */
 	public function no_stock( $product ) {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
-		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ) ) );
+		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_no_stock', get_option( 'woocommerce_stock_email_recipient' ), $product ),
@@ -440,7 +439,7 @@ class WC_Emails {
 		}
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product Backorder', 'woocommerce' ) );
-		$message = sprintf( __( '%s units of %s have been backordered in order #%s.', 'woocommerce' ), $quantity, html_entity_decode( strip_tags( $product->get_formatted_name() ) ), $order->get_order_number() );
+		$message = sprintf( __( '%s units of %s have been backordered in order #%s.', 'woocommerce' ), $quantity, html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
 
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_backorder', get_option( 'woocommerce_stock_email_recipient' ), $args ),

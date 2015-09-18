@@ -33,8 +33,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
 	/**
 	 * init function.
-	 *
-	 * @return void
 	 */
 	public function init() {
 
@@ -63,7 +61,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 				'type' 			=> 'checkbox',
 				'label' 		=> __( 'Enable Free Shipping', 'woocommerce' ),
-				'default' 		=> 'yes'
+				'default' 		=> 'no'
 			),
 			'title' => array(
 				'title' 		=> __( 'Method Title', 'woocommerce' ),

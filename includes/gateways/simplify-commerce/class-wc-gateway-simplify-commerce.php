@@ -31,8 +31,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'subscription_reactivation',
 			'subscription_suspension',
 			'subscription_amount_changes',
-			'subscription_payment_method_change',
+			'subscription_payment_method_change', // Subscriptions 1.n compatibility
+			'subscription_payment_method_change_customer',
+			'subscription_payment_method_change_admin',
 			'subscription_date_changes',
+			'multiple_subscriptions',
 			'default_credit_card_form',
 			'refunds',
 			'pre-orders'
@@ -67,8 +70,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 	/**
 	 * Init Simplify SDK.
-	 *
-	 * @return void
 	 */
 	protected function init_simplify_sdk() {
 		// Include lib
@@ -82,13 +83,10 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	/**
 	 * Admin Panel Options
 	 * - Options for bits like 'title' and availability on a country-by-country basis
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function admin_options() {
 		?>
-		<h3><?php _e( 'Simplify Commerce by Mastercard', 'woocommerce' ); ?></h3>
+		<h3><?php _e( 'Simplify Commerce by MasterCard', 'woocommerce' ); ?></h3>
 
 		<?php if ( empty( $this->public_key ) ) : ?>
 			<div class="simplify-commerce-banner updated">
@@ -199,7 +197,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'title'       => __( 'Description', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
-				'default'     => 'Pay with your credit card via Simplify Commerce by Mastercard.',
+				'default'     => 'Pay with your credit card via Simplify Commerce by MasterCard.',
 				'desc_tip'    => true
 			),
 			'mode' => array(
@@ -544,7 +542,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		$icon  = '<img src="' . WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/icons/credit-cards/visa.png' ) . '" alt="Visa" />';
-		$icon .= '<img src="' . WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/icons/credit-cards/mastercard.png' ) . '" alt="Mastercard" />';
+		$icon .= '<img src="' . WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/icons/credit-cards/mastercard.png' ) . '" alt="MasterCard" />';
 		$icon .= '<img src="' . WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/icons/credit-cards/discover.png' ) . '" alt="Discover" />';
 		$icon .= '<img src="' . WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/icons/credit-cards/amex.png' ) . '" alt="Amex" />';
 		$icon .= '<img src="' . WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/icons/credit-cards/jcb.png' ) . '" alt="JCB" />';

@@ -86,7 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php else : ?>
 				<tr class="tax-total">
 					<th><?php echo esc_html( WC()->countries->tax_or_vat() ); ?></th>
-					<td><?php echo wc_price( WC()->cart->get_taxes_total() ); ?></td>
+					<td><?php wc_cart_totals_taxes_total_html(); ?></td>
 				</tr>
 			<?php endif; ?>
 		<?php endif; ?>

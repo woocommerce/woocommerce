@@ -2,13 +2,13 @@
 /**
  * Pay for order form
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     1.6.4
+ * @author   WooThemes
+ * @package  WooCommerce/Templates
+ * @version  2.4.7
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 ?>
@@ -52,13 +52,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div id="payment">
 		<?php if ( $order->needs_payment() ) : ?>
-		<h3><?php _e( 'Payment', 'woocommerce' ); ?></h3>
 		<ul class="payment_methods methods">
 			<?php
 				if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateways() ) {
 					// Chosen Method
-					if ( sizeof( $available_gateways ) )
+					if ( sizeof( $available_gateways ) ) {
 						current( $available_gateways )->set_current();
+					}
 
 					foreach ( $available_gateways as $gateway ) {
 						?>

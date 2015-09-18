@@ -7,7 +7,7 @@
  * @author 	 WooThemes
  * @category Admin
  * @package  WooCommerce/Classes
- * @version  2.3.1
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -1104,6 +1104,12 @@ class WC_Geo_IP {
 		'--'
 	);
 
+	/**
+	 * Open geoip file
+	 *
+	 * @param  string $filename
+	 * @param  int $flags
+	 */
 	public function geoip_open( $filename, $flags ) {
 		$this->flags = $flags;
 		if ( $this->flags & self::GEOIP_SHARED_MEMORY ) {
@@ -1119,6 +1125,11 @@ class WC_Geo_IP {
 		$this->_setup_segments();
 	}
 
+	/**
+	 * Setup segments
+	 *
+	 * @return WC_Geo_IP instance
+	 */
 	private function _setup_segments() {
 		$this->databaseType  = self::GEOIP_COUNTRY_EDITION;
 		$this->record_length = self::STANDARD_RECORD_LENGTH;
@@ -1269,6 +1280,11 @@ class WC_Geo_IP {
 		return $this;
 	}
 
+	/**
+	 * Close geoip file
+	 *
+	 * @return bool
+	 */
 	public function geoip_close() {
 		if ( $this->flags & self::GEOIP_SHARED_MEMORY ) {
 			return true;
@@ -1277,6 +1293,12 @@ class WC_Geo_IP {
 		return fclose( $this->filehandle );
 	}
 
+	/**
+	 * Common get record
+	 *
+	 * @param  string $seek_country
+	 * @return WC_Geo_IP_Record instance
+	 */
 	private function _common_get_record( $seek_country ) {
 		// workaround php's broken substr, strpos, etc handling with
 		// mbstring.func_overload and mbstring.internal_encoding
@@ -1386,6 +1408,12 @@ class WC_Geo_IP {
 		return $record;
 	}
 
+	/**
+	 * Get record
+	 *
+	 * @param  int $ipnum
+	 * @return WC_Geo_IP_Record instance
+	 */
 	private function _get_record( $ipnum ) {
 		$seek_country = $this->_geoip_seek_country( $ipnum );
 		if ( $seek_country == $this->databaseSegments ) {
@@ -1395,6 +1423,12 @@ class WC_Geo_IP {
 		return $this->_common_get_record( $seek_country );
 	}
 
+	/**
+	 * Seek country IPv6
+	 *
+	 * @param  int $ipnum [description]
+	 * @return bool|int
+	 */
 	function _geoip_seek_country_v6( $ipnum ) {
 		// arrays from unpack start with offset 1
 		// yet another php mystery. array_merge work around
@@ -1449,6 +1483,12 @@ class WC_Geo_IP {
 		return false;
 	}
 
+	/**
+	 * Seek country
+	 *
+	 * @param  int $ipnum
+	 * @return bool|int
+	 */
 	private function _geoip_seek_country( $ipnum ) {
 		$offset = 0;
 		for ( $depth = 31; $depth >= 0; --$depth ) {
@@ -1497,6 +1537,12 @@ class WC_Geo_IP {
 		return false;
 	}
 
+	/**
+	 * Record by addr
+	 *
+	 * @param  string $addr
+	 * @return int
+	 */
 	public function geoip_record_by_addr( $addr ) {
 		if ( $addr == null ) {
 			return 0;
@@ -1506,16 +1552,34 @@ class WC_Geo_IP {
 		return $this->_get_record( $ipnum );
 	}
 
+	/**
+	 * Country ID by addr IPv6
+	 *
+	 * @param  string $addr
+	 * @return int
+	 */
 	public function geoip_country_id_by_addr_v6( $addr ) {
 		$ipnum = inet_pton( $addr );
 		return $this->_geoip_seek_country_v6( $ipnum ) - self::GEOIP_COUNTRY_BEGIN;
 	}
 
+	/**
+	 * Country ID by addr
+	 *
+	 * @param  string $addr
+	 * @return int
+	 */
 	public function geoip_country_id_by_addr( $addr ) {
 		$ipnum = ip2long( $addr );
 		return $this->_geoip_seek_country( $ipnum ) - self::GEOIP_COUNTRY_BEGIN;
 	}
 
+	/**
+	 * Country code by addr IPv6
+	 *
+	 * @param  string $addr
+	 * @return bool|int
+	 */
 	public function geoip_country_code_by_addr_v6( $addr ) {
 		$country_id = $this->geoip_country_id_by_addr_v6( $addr );
 		if ( $country_id !== false ) {
@@ -1525,6 +1589,12 @@ class WC_Geo_IP {
 		return false;
 	}
 
+	/**
+	 * Country code by addr
+	 *
+	 * @param  string $addr
+	 * @return bool|int
+	 */
 	public function geoip_country_code_by_addr( $addr ) {
 		if ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1 ) {
 			$record = $this->geoip_record_by_addr( $addr);
@@ -1541,6 +1611,15 @@ class WC_Geo_IP {
 		return false;
 	}
 
+	/**
+	 * Encode string
+	 *
+	 * @param  string $string
+	 * @param  int $start
+	 * @param  int $length
+	 *
+	 * @return string
+	 */
 	private function _safe_substr( $string, $start, $length ) {
 		// workaround php's broken substr, strpos, etc handling with
 		// mbstring.func_overload and mbstring.internal_encoding
@@ -1561,6 +1640,9 @@ class WC_Geo_IP {
 	}
 }
 
+/**
+ * Geo IP Record class
+ */
 class WC_Geo_IP_Record {
 	public $country_code;
 	public $country_code3;
@@ -1571,7 +1653,7 @@ class WC_Geo_IP_Record {
 	public $latitude;
 	public $longitude;
 	public $area_code;
-	public $dma_code; # metro and dma code are the same. use metro_code
+	public $dma_code; // metro and dma code are the same. use metro_code
 	public $metro_code;
 	public $continent_code;
 }

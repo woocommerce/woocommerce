@@ -19,33 +19,30 @@ class WC_HTTPS {
 	 * Hook in our HTTPS functions if we're on the frontend. This will ensure any links output to a page (when viewing via HTTPS) are also served over HTTPS.
 	 */
 	public static function init() {
-		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) ) {
-			if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'woocommerce_get_refreshed_fragments', 'woocommerce_checkout', 'woocommerce_update_order_review', 'woocommerce_update_shipping_method', 'woocommerce_apply_coupon' ) ) ) ) {
+		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) && ! is_admin() ) {
+			// HTTPS urls with SSL on
+			$filters = array(
+				'post_thumbnail_html',
+				'wp_get_attachment_image_attributes',
+				'wp_get_attachment_url',
+				'option_stylesheet_url',
+				'option_template_url',
+				'script_loader_src',
+				'style_loader_src',
+				'template_directory_uri',
+				'stylesheet_directory_uri',
+				'site_url'
+			);
 
-				// HTTPS urls with SSL on
-				$filters = array(
-					'post_thumbnail_html',
-					'wp_get_attachment_image_attributes',
-					'wp_get_attachment_url',
-					'option_stylesheet_url',
-					'option_template_url',
-					'script_loader_src',
-					'style_loader_src',
-					'template_directory_uri',
-					'stylesheet_directory_uri',
-					'site_url'
-				);
+			foreach ( $filters as $filter ) {
+				add_filter( $filter, array( __CLASS__, 'force_https_url' ), 999 );
+			}
 
-				foreach ( $filters as $filter ) {
-					add_filter( $filter, array( __CLASS__, 'force_https_url' ), 999 );
-				}
+			add_filter( 'page_link', array( __CLASS__, 'force_https_page_link' ), 10, 2 );
+			add_action( 'template_redirect', array( __CLASS__, 'force_https_template_redirect' ) );
 
-				add_filter( 'page_link', array( __CLASS__, 'force_https_page_link' ), 10, 2 );
-				add_action( 'template_redirect', array( __CLASS__, 'force_https_template_redirect' ) );
-
-				if ( 'yes' == get_option( 'woocommerce_unforce_ssl_checkout' ) ) {
-					add_action( 'template_redirect', array( __CLASS__, 'unforce_https_template_redirect' ) );
-				}
+			if ( 'yes' == get_option( 'woocommerce_unforce_ssl_checkout' ) ) {
+				add_action( 'template_redirect', array( __CLASS__, 'unforce_https_template_redirect' ) );
 			}
 		}
 	}

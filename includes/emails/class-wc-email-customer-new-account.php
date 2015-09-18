@@ -22,12 +22,10 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	public $user_login;
 	public $user_email;
 	public $user_pass;
+	public $password_generated;
 
 	/**
 	 * Constructor
-	 *
-	 * @access public
-	 * @return void
 	 */
 	function __construct() {
 
@@ -46,10 +44,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	}
 
 	/**
-	 * trigger function.
-	 *
-	 * @access public
-	 * @return void
+	 * Trigger.
 	 */
 	function trigger( $user_id, $user_pass = '', $password_generated = false ) {
 

@@ -90,7 +90,6 @@ function woocommerce_get_formatted_product_name( $product ) {
  * Handle IPN requests for the legacy paypal gateway by calling gateways manually if needed.
  *
  * @access public
- * @return void
  */
 function woocommerce_legacy_paypal_ipn() {
 	if ( ! empty( $_GET['paypalListener'] ) && $_GET['paypalListener'] == 'paypal_standard_IPN' ) {
@@ -671,7 +670,6 @@ function woocommerce_track_product_view() {
  *
  * @since 2.2
  * @param WP_Query $q
- * @return void
  */
 function wc_shop_order_status_backwards_compatibility( $q ) {
 	if ( $q->is_main_query() ) {
@@ -705,11 +703,11 @@ function wc_shop_order_status_backwards_compatibility( $q ) {
 			$q->set( 'post_status', $order_status );
 			$q->set( 'tax_query', $tax_query );
 
-			_doing_it_wrong( 'WP_Query', sprintf( __( 'The shop_order_status taxonomy is no more in WooCommerce 2.2! You should use the new WooCommerce post_status instead, <a href="%s">read more...</a>', 'woocommerce' ), 'http://develop.woothemes.com/woocommerce/2014/08/wc-2-2-order-statuses-plugin-compatibility/' ), 'WooCommerce 2.2' );
+			_doing_it_wrong( 'WP_Query', sprintf( __( 'The shop_order_status taxonomy is no more in WooCommerce 2.2! You should use the new WooCommerce post_status instead, <a href="%s">read more...</a>', 'woocommerce' ), 'https://woocommerce.wordpress.com/2014/08/wc-2-2-order-statuses-plugin-compatibility/' ), 'WooCommerce 2.2' );
 		} else {
 			$q->set( 'post_status', array_keys( wc_get_order_statuses() ) );
 
-			_doing_it_wrong( 'WP_Query', sprintf( __( 'The "publish" order status is no more in WooCommerce 2.2! You should use the new WooCommerce post_status instead, <a href="%s">read more...</a>', 'woocommerce' ), 'http://develop.woothemes.com/woocommerce/2014/08/wc-2-2-order-statuses-plugin-compatibility/' ), 'WooCommerce 2.2' );
+			_doing_it_wrong( 'WP_Query', sprintf( __( 'The "publish" order status is no more in WooCommerce 2.2! You should use the new WooCommerce post_status instead, <a href="%s">read more...</a>', 'woocommerce' ), 'https://woocommerce.wordpress.com/2014/08/wc-2-2-order-statuses-plugin-compatibility/' ), 'WooCommerce 2.2' );
 		}
 	}
 }
@@ -719,7 +717,6 @@ add_action( 'pre_get_posts', 'wc_shop_order_status_backwards_compatibility' );
 /**
  * @since 2.3
  * @deprecated has no replacement
- * @return void
  */
 function woocommerce_compile_less_styles() {
 	_deprecated_function( 'woocommerce_compile_less_styles', '2.3' );

@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<p class="submit">
 			<?php if ( ! isset( $GLOBALS['hide_save_button'] ) ) : ?>
-				<input name="save" class="button-primary" type="submit" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" />
+				<input name="save" class="button-primary" type="submit" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" />
 			<?php endif; ?>
 			<input type="hidden" name="subtab" id="last_tab" />
 			<?php wp_nonce_field( 'woocommerce-settings' ); ?>

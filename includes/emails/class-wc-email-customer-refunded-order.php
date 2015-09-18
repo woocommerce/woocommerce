@@ -18,26 +18,25 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
  * @extends  WC_Email
  */
 class WC_Email_Customer_Refunded_Order extends WC_Email {
+	
+	public $refund;
+	public $partial_refund;
 
 	/**
 	 * Constructor
 	 */
-	function __construct() {
-
+	public function __construct() {
 		$this->set_email_strings();
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_refunded_notification', array( $this, 'trigger' ), null, 3 );
-		add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger' ), null, 3 );
-
+		add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
+		add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger_partial' ), 10, 2 );
 
 		// Call parent constuctor
 		parent::__construct();
 	}
 
-	function set_email_strings( $partial_refund = false ) {
-
-
+	public function set_email_strings( $partial_refund = false ) {
 		$this->subject_partial     = $this->get_option( 'subject_partial', __( 'Your {site_title} order from {order_date} has been partially refunded', 'woocommerce' ) );
 		$this->subject_full        = $this->get_option( 'subject_full', __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' ) );
 
@@ -65,13 +64,23 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	}
 
 	/**
-	 * trigger function.
-	 *
-	 * @access public
-	 * @return void
+	 * Full refund notification
 	 */
-	function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
+	public function trigger_full( $order_id, $refund_id = null ) {
+		$this->trigger( $order_id, false, $refund_id );
+	}
 
+	/**
+	 * Partial refund notification
+	 */
+	public function trigger_partial( $order_id, $refund_id = null ) {
+		$this->trigger( $order_id, true, $refund_id );
+	}
+
+	/**
+	 * Trigger.
+	 */
+	public function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
 		$this->partial_refund = $partial_refund;
 		$this->set_email_strings( $partial_refund );
 
@@ -105,11 +114,8 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_subject() {
-		if ( ! empty( $this->object ) && $this->object->has_downloadable_item() )
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $this->subject_downloadable ), $this->object );
-		else
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $this->subject ), $this->object );
+	public function get_subject() {
+		return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $this->subject ), $this->object );
 	}
 
 	/**
@@ -118,11 +124,8 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_heading() {
-		if ( ! empty( $this->object ) && $this->object->has_downloadable_item() )
-			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $this->heading_downloadable ), $this->object );
-		else
-			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $this->heading ), $this->object );
+	public function get_heading() {
+		return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $this->heading ), $this->object );
 	}
 
 	/**
@@ -131,7 +134,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_content_html() {
+	public function get_content_html() {
 		ob_start();
 		wc_get_template( $this->template_html, array(
 			'order'          => $this->object,
@@ -145,12 +148,11 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
-	 * @access public
 	 * @return string
 	 */
-	function get_content_plain() {
+	public function get_content_plain() {
 		ob_start();
 		wc_get_template( $this->template_plain, array(
 			'order'          => $this->object,
@@ -164,12 +166,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	}
 
 	/**
-	 * Initialise Settings Form Fields
-	 *
-	 * @access public
-	 * @return void
+	 * Initialise settings form fields.
 	 */
-	function init_form_fields() {
+	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),

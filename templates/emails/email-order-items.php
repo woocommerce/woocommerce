@@ -22,7 +22,7 @@ foreach ( $items as $item_id => $item ) :
 
 				// Show title/image etc
 				if ( $show_image ) {
-					echo apply_filters( 'woocommerce_order_item_thumbnail', '<div style="margin-bottom: 5px"><img src="' . ( $_product->get_image_id() ? current( wp_get_attachment_image_src( $_product->get_image_id(), 'thumbnail') ) : wc_placeholder_img_src() ) .'" alt="' . __( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" /></div>', $item );
+					echo apply_filters( 'woocommerce_order_item_thumbnail', '<div style="margin-bottom: 5px"><img src="' . ( $_product->get_image_id() ? current( wp_get_attachment_image_src( $_product->get_image_id(), 'thumbnail') ) : wc_placeholder_img_src() ) .'" alt="' . esc_attr__( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" /></div>', $item );
 				}
 
 				// Product name
@@ -37,27 +37,13 @@ foreach ( $items as $item_id => $item ) :
 				do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
 				// Variation
-				if ( $item_meta->meta ) {
+				if ( ! empty( $item_meta->meta ) ) {
 					echo '<br/><small>' . nl2br( $item_meta->display( true, true, '_', "\n" ) ) . '</small>';
 				}
 
 				// File URLs
-				if ( $show_download_links && is_object( $_product ) && $_product->exists() && $_product->is_downloadable() ) {
-
-					$download_files = $order->get_item_downloads( $item );
-					$i              = 0;
-
-					foreach ( $download_files as $download_id => $file ) {
-						$i++;
-
-						if ( count( $download_files ) > 1 ) {
-							$prefix = sprintf( __( 'Download %d', 'woocommerce' ), $i );
-						} elseif ( $i == 1 ) {
-							$prefix = __( 'Download', 'woocommerce' );
-						}
-
-						echo '<br/><small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
-					}
+				if ( $show_download_links ) {
+					$order->display_item_downloads( $item );
 				}
 
 				// allow other plugins to add additional product information here

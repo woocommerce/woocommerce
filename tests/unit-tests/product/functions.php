@@ -127,11 +127,11 @@ class Functions extends \WC_Unit_Test_Case {
 		);
 
 		foreach ( $sizes as $size => $values ) {
-			$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="' . $values['width'] . '" class="woocommerce-placeholder wp-post-image" height="' . $values['height'] . '" />';
+			$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . $values['width'] . '" class="woocommerce-placeholder wp-post-image" height="' . $values['height'] . '" />';
 			$this->assertEquals( apply_filters( 'woocommerce_placeholder_img', $img ), wc_placeholder_img( $size ) );
 		}
 
-		$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="180" class="woocommerce-placeholder wp-post-image" height="180" />';
+		$img = '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="180" class="woocommerce-placeholder wp-post-image" height="180" />';
 		$this->assertEquals( apply_filters( 'woocommerce_placeholder_img', $img ), wc_placeholder_img() );
 	}
 

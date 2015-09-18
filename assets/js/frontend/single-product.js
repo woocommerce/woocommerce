@@ -1,3 +1,4 @@
+/*global wc_single_product_params */
 jQuery( function( $ ) {
 
 	// wc_single_product_params is required to continue, ensure the object exists
@@ -6,20 +7,20 @@ jQuery( function( $ ) {
 	}
 
 	// Tabs
-	$('.wc-tabs-wrapper, .woocommerce-tabs')
+	$( '.wc-tabs-wrapper, .woocommerce-tabs' )
 		.on( 'init', function() {
-			$('.wc-tab, .panel:not(.panel .panel)').hide();
+			$( '.wc-tab, .woocommerce-tabs .panel:not(.panel .panel)' ).hide();
 
 			var hash  = window.location.hash;
 			var url   = window.location.href;
-			var $tabs = $( this ).find('.wc-tabs, ul.tabs').first();
+			var $tabs = $( this ).find( '.wc-tabs, ul.tabs' ).first();
 
-			if ( hash.toLowerCase().indexOf( "comment-" ) >= 0 || hash == '#reviews' ) {
-				$tabs.find('li.reviews_tab a').click();
-			} else if ( url.indexOf( "comment-page-" ) > 0 || url.indexOf( "cpage=" ) > 0 ) {
-				$tabs.find('li.reviews_tab a').click();
+			if ( hash.toLowerCase().indexOf( 'comment-' ) >= 0 || hash === '#reviews' ) {
+				$tabs.find( 'li.reviews_tab a' ).click();
+			} else if ( url.indexOf( 'comment-page-' ) > 0 || url.indexOf( 'cpage=' ) > 0 ) {
+				$tabs.find( 'li.reviews_tab a' ).click();
 			} else {
-				$tabs.find('li:first a').click();
+				$tabs.find( 'li:first a' ).click();
 			}
 		})
 		.on( 'click', '.wc-tabs li a, ul.tabs li a', function() {
@@ -27,15 +28,15 @@ jQuery( function( $ ) {
 			var $tabs_wrapper = $tab.closest( '.wc-tabs-wrapper, .woocommerce-tabs' );
 			var $tabs         = $tabs_wrapper.find( '.wc-tabs, ul.tabs' );
 
-			$tabs.find('li').removeClass( 'active' );
-			$tabs_wrapper.find('.wc-tab, .panel:not(.panel .panel)').hide();
+			$tabs.find( 'li' ).removeClass( 'active' );
+			$tabs_wrapper.find( '.wc-tab, .panel:not(.panel .panel)' ).hide();
 
-			$tab.closest('li').addClass( 'active' );
+			$tab.closest( 'li' ).addClass( 'active' );
 			$tabs_wrapper.find( $tab.attr( 'href' ) ).show();
 
 			return false;
 		})
-		.trigger('init');
+		.trigger( 'init' );
 
 	$( 'a.woocommerce-review-link' ).click( function() {
 		$( '.reviews_tab a' ).click();
@@ -61,7 +62,7 @@ jQuery( function( $ ) {
 				rating  = $rating.val();
 
 			if ( $rating.size() > 0 && ! rating && wc_single_product_params.review_rating_required === 'yes' ) {
-				alert( wc_single_product_params.i18n_required_rating_text );
+				window.alert( wc_single_product_params.i18n_required_rating_text );
 
 				return false;
 			}

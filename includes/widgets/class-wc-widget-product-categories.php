@@ -84,8 +84,6 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	 *
 	 * @param array $args
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		global $wp_query, $post;
@@ -209,9 +207,9 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			wc_enqueue_js( "
 				jQuery( '.dropdown_product_cat' ).change( function() {
 					if ( jQuery(this).val() != '' ) {
-						var this_page = location.href.toString();
+						var this_page = '';
 						var home_url  = '" . esc_js( home_url( '/' ) ) . "';
-						if ( this_page.indexOf( '?' ) > 0 ) {
+						if ( home_url.indexOf( '?' ) > 0 ) {
 							this_page = home_url + '&product_cat=' + jQuery(this).val();
 						} else {
 							this_page = home_url + '?product_cat=' + jQuery(this).val();

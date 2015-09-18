@@ -104,7 +104,7 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_order_key', 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
 		update_post_meta( $order_id, '_order_currency', get_woocommerce_currency() );
 		update_post_meta( $order_id, '_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) );
-		update_post_meta( $order_id, '_customer_ip_address', isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
+		update_post_meta( $order_id, '_customer_ip_address', WC_Geolocation::get_ip_address() );
 		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 		update_post_meta( $order_id, '_customer_user', 0 );
 		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
@@ -116,7 +116,7 @@ function wc_create_order( $args = array() ) {
 
 	update_post_meta( $order_id, '_order_version', WC_VERSION );
 
-	return new WC_Order( $order_id );
+	return wc_get_order( $order_id );
 }
 
 /**
@@ -137,7 +137,6 @@ function wc_update_order( $args ) {
  * @access public
  * @param mixed $slug
  * @param string $name (default: '')
- * @return void
  */
 function wc_get_template_part( $slug, $name = '' ) {
 	$template = '';
@@ -175,7 +174,6 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param array $args (default: array())
  * @param string $template_path (default: '')
  * @param string $default_path (default: '')
- * @return void
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	if ( $args && is_array( $args ) ) {
@@ -681,7 +679,7 @@ add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
  * WooCommerce Core Supported Themes
  *
  * @since 2.2
- * @return array
+ * @return string[]
  */
 function wc_get_core_supported_themes() {
 	return array( 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );

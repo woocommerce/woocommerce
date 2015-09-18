@@ -44,25 +44,25 @@ if ( $customer_orders ) : ?>
 				$item_count = $order->get_item_count();
 
 				?><tr class="order">
-					<td class="order-number" data-title="<?php _e( 'Order Number', 'woocommerce' ); ?>">
+					<td class="order-number" data-title="<?php esc_attr_e( 'Order Number', 'woocommerce' ); ?>">
 						<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>">
 							<?php echo _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number(); ?>
 						</a>
 					</td>
-					<td class="order-date" data-title="<?php _e( 'Date', 'woocommerce' ); ?>">
+					<td class="order-date" data-title="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>">
 						<time datetime="<?php echo date( 'Y-m-d', strtotime( $order->order_date ) ); ?>" title="<?php echo esc_attr( strtotime( $order->order_date ) ); ?>"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ); ?></time>
 					</td>
-					<td class="order-status" data-title="<?php _e( 'Status', 'woocommerce' ); ?>" style="text-align:left; white-space:nowrap;">
+					<td class="order-status" data-title="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>" style="text-align:left; white-space:nowrap;">
 						<?php echo wc_get_order_status_name( $order->get_status() ); ?>
 					</td>
-					<td class="order-total" data-title="<?php _e( 'Total', 'woocommerce' ); ?>">
+					<td class="order-total" data-title="<?php esc_attr_e( 'Total', 'woocommerce' ); ?>">
 						<?php echo sprintf( _n( '%s for %s item', '%s for %s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); ?>
 					</td>
 					<td class="order-actions">
 						<?php
 							$actions = array();
 
-							if ( in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order ) ) ) {
+							if ( $order->needs_payment() ) {
 								$actions['pay'] = array(
 									'url'  => $order->get_checkout_payment_url(),
 									'name' => __( 'Pay', 'woocommerce' )

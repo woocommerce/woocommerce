@@ -177,7 +177,7 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_stock_quantity() {
-		return $this->managing_stock() ? wc_stock_amount( $this->stock ) : '';
+		return apply_filters( 'woocommerce_get_stock_quantity', $this->managing_stock() ? wc_stock_amount( $this->stock ) : '', $this );
 	}
 
 	/**
@@ -192,14 +192,15 @@ class WC_Product {
 	/**
 	 * Check if the stock status needs changing
 	 */
-	protected function check_stock_status() {
-
-		// Update stock status
+	public function check_stock_status() {
 		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$this->set_stock_status( 'outofstock' );
-
+			if ( $this->stock_status !== 'outofstock' ) {
+				$this->set_stock_status( 'outofstock' );
+			}
 		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$this->set_stock_status( 'instock' );
+			if ( $this->stock_status !== 'instock' ) {
+				$this->set_stock_status( 'instock' );
+			}
 		}
 	}
 
@@ -274,7 +275,6 @@ class WC_Product {
 	 * set_stock_status function.
 	 *
 	 * @param string $status
-	 * @return void
 	 */
 	public function set_stock_status( $status ) {
 
@@ -488,7 +488,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_taxable() {
-		$taxable = $this->tax_status == 'taxable' && wc_tax_enabled() ? true : false;
+		$taxable = $this->get_tax_status() === 'taxable' && wc_tax_enabled() ? true : false;
 		return apply_filters( 'woocommerce_product_is_taxable', $taxable, $this );
 	}
 
@@ -498,7 +498,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_shipping_taxable() {
-		return $this->tax_status=='taxable' || $this->tax_status=='shipping' ? true : false;
+		return $this->get_tax_status() === 'taxable' || $this->get_tax_status() === 'shipping' ? true : false;
 	}
 
 	/**
@@ -561,7 +561,6 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-
 		if ( $this->managing_stock() && $this->backorders_allowed() ) {
 			return true;
 		} elseif ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
@@ -755,7 +754,6 @@ class WC_Product {
 	 * Set a products price dynamically.
 	 *
 	 * @param float $price Price to set.
-	 * @return void
 	 */
 	public function set_price( $price ) {
 		$this->price = $price;
@@ -765,7 +763,6 @@ class WC_Product {
 	 * Adjust a products price dynamically.
 	 *
 	 * @param mixed $price
-	 * @return void
 	 */
 	public function adjust_price( $price ) {
 		$this->price = $this->price + $price;
@@ -830,7 +827,12 @@ class WC_Product {
 					$base_tax_amount    = array_sum( $base_taxes );
 					$price              = round( $price * $qty - $base_tax_amount, wc_get_price_decimals() );
 
-				} elseif ( $tax_rates !== $base_tax_rates ) {
+				/**
+				 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
+				 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
+				 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
+				 */
+				} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 
 					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
 					$modded_taxes       = WC_Tax::calc_tax( ( $price * $qty ) - array_sum( $base_taxes ), $tax_rates, false );
@@ -864,7 +866,7 @@ class WC_Product {
 			$price = $this->get_price();
 		}
 
-		if ( $this->is_taxable() && get_option( 'woocommerce_prices_include_tax' ) === 'yes' ) {
+		if ( $this->is_taxable() && 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) {
 			$tax_rates  = WC_Tax::get_base_tax_rates( $this->tax_class );
 			$taxes      = WC_Tax::calc_tax( $price * $qty, $tax_rates, true );
 			$price      = WC_Tax::round( $price * $qty - array_sum( $taxes ) );
@@ -970,7 +972,7 @@ class WC_Product {
 
 			} else {
 
-				$price = __( 'Free!', 'woocommerce' );
+				$price = '<span class="amount">' . __( 'Free!', 'woocommerce' ) . '</span>';
 
 				$price = apply_filters( 'woocommerce_free_price_html', $price, $this );
 
@@ -1155,7 +1157,7 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_upsells() {
-		return (array) maybe_unserialize( $this->upsell_ids );
+		return apply_filters( 'woocommerce_product_upsell_ids', (array) maybe_unserialize( $this->upsell_ids ), $this );
 	}
 
 	/**
@@ -1164,7 +1166,7 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_cross_sells() {
-		return (array) maybe_unserialize( $this->crosssell_ids );
+		return apply_filters( 'woocommerce_product_crosssell_ids', (array) maybe_unserialize( $this->crosssell_ids ), $this );
 	}
 
 	/**

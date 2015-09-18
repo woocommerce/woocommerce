@@ -1,4 +1,4 @@
-/*global inlineEditPost */
+/*global ajaxurl, inlineEditPost, inlineEditL10n */
 jQuery(function( $ ) {
 	$( '#the-list' ).on( 'click', '.editinline', function() {
 
@@ -100,8 +100,8 @@ jQuery(function( $ ) {
 
 	$( '#wpbody' ).on( 'click', '#doaction, #doaction2', function() {
 		$( 'input.text', '.inline-edit-row' ).val( '' );
-		$( '#woocommerce-fields select' ).prop( 'selectedIndex', 0 );
-		$( '#woocommerce-fields-bulk .inline-edit-group .change-input' ).hide();
+		$( '#woocommerce-fields' ).find( 'select' ).prop( 'selectedIndex', 0 );
+		$( '#woocommerce-fields-bulk' ).find( '.inline-edit-group .change-input' ).hide();
 
 		// Autosuggest product tags on bulk edit
 		var tax = 'product_tag';

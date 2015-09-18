@@ -53,7 +53,6 @@ abstract class WC_Session {
 	 * __unset function.
 	 *
 	 * @param mixed $key
-	 * @return void
 	 */
 	public function __unset( $key ) {
 		if ( isset( $this->_data[ $key ] ) ) {

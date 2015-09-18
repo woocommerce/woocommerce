@@ -300,7 +300,6 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
  *
  * @access public
  * @param int $order_id
- * @return void
  */
 function wc_downloadable_product_permissions( $order_id ) {
 	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 ) {
@@ -309,7 +308,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 
 	$order = wc_get_order( $order_id );
 
-	if ( $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
+	if ( $order && $order->has_status( 'processing' ) && get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'no' ) {
 		return;
 	}
 
@@ -482,7 +481,6 @@ function wc_get_order_item_meta( $item_id, $key, $single = true ) {
  * Cancel all unpaid orders after held duration to prevent stock lock for those products
  *
  * @access public
- * @return void
  */
 function wc_cancel_unpaid_orders() {
 	global $wpdb;
@@ -721,11 +719,20 @@ function wc_create_refund( $args = array() ) {
 
 		// Figure out if this is just a partial refund
 		$max_remaining_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
-	
-		if ( $max_remaining_refund > 0 ) {
-			do_action( 'woocommerce_order_partially_refunded', $args['order_id'], true, $refund_id );
+		$max_remaining_items  = absint( $order->get_item_count() - $order->get_item_count_refunded() );
+
+		if ( $max_remaining_refund > 0 || $max_remaining_items > 0 ) {
+			/**
+			 * woocommerce_order_partially_refunded
+			 *
+			 * @since 2.4.0
+			 * Note: 3rd arg was added in err. Kept for bw compat. 2.4.3
+			 */
+			do_action( 'woocommerce_order_partially_refunded', $args['order_id'], $refund_id, $refund_id );
+		} else {
+			do_action( 'woocommerce_order_fully_refunded', $args['order_id'], $refund_id );
 		}
-		
+
 		do_action( 'woocommerce_refund_created', $refund_id, $args );
 	}
 
@@ -766,7 +773,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 
 	if ( ! is_object( $order ) ) {
 		$order_id = absint( $order );
-		$order    = new WC_Order( $order_id );
+		$order    = wc_get_order( $order_id );
 	}
 
 	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
@@ -797,7 +804,5 @@ function wc_order_fully_refunded( $order_id ) {
 	) );
 
 	wc_delete_shop_order_transients( $order_id );
-
-	do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->id );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );

@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<a class="button-secondary docs" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
-		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php _e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
+		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
 	</div>
 </div>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
@@ -338,7 +338,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$plugin_name = esc_html( $plugin_data['Name'] );
 
 				if ( ! empty( $plugin_data['PluginURI'] ) ) {
-					$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . __( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
+					$plugin_name = '<a href="' . esc_url( $plugin_data['PluginURI'] ) . '" title="' . esc_attr__( 'Visit plugin homepage' , 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
 				}
 
 				if ( strstr( $dirname, 'woocommerce-' ) && strstr( $plugin_data['PluginURI'], 'woothemes.com' ) ) {
@@ -389,16 +389,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
-			<td data-export-label="API Enabled"><?php _e( 'API Enabled', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have REST API enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo 'yes' === get_option( 'woocommerce_api_enabled' ) ? '<mark class="yes">'.'&#10004;'.'</mark>' : '<mark class="no">'.'&ndash;'.'</mark>'; ?></td>
-		</tr>
-		<tr>
-			<td data-export-label="API Version"><?php _e( 'API Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What version of the REST API does your site use?', 'woocommerce' ) . '">[?]</a>'; ?></td>
-			<td><?php echo WC_API::VERSION ?></td>
-		</tr>
 		<tr>
 			<td data-export-label="Force SSL"><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) . '">[?]</a>'; ?></td>
@@ -687,7 +677,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$theme_file = false;
 					}
 
-					if ( $theme_file ) {
+					if ( ! empty( $theme_file ) ) {
 						$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
 						$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
@@ -728,7 +718,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tr>
 					<td>&nbsp;</td>
 					<td class="help">&nbsp;</td>
-					<td><a href="http://speakinginbytes.com/2014/02/woocommerce-2-1-outdated-templates/" target="_blank"><?php _e( 'Learn how to update outdated templates', 'woocommerce' ) ?></a></td>
+					<td><a href="http://docs.woothemes.com/document/fix-outdated-templates-woocommerce/" target="_blank"><?php _e( 'Learn how to update outdated templates', 'woocommerce' ) ?></a></td>
 				</tr>
 				<?php
 			}
@@ -786,7 +776,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		try {
 			jQuery( '#debug-report' ).slideDown();
-			jQuery( '#debug-report textarea' ).val( report ).focus().select();
+			jQuery( '#debug-report' ).find( 'textarea' ).val( report ).focus().select();
 			jQuery( this ).fadeOut();
 			return false;
 		} catch( e ){
@@ -807,7 +797,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		$( document.body ).on( 'copy', '#copy-for-support', function( e ) {
 			e.clipboardData.clearData();
-			e.clipboardData.setData( 'text/plain', $( '#debug-report textarea' ).val() );
+			e.clipboardData.setData( 'text/plain', $( '#debug-report' ).find( 'textarea' ).val() );
 			e.preventDefault();
 		});
 

@@ -677,6 +677,27 @@ function wc_format_content( $raw_string ) {
 }
 
 /**
+ * Format product short description
+ * Adds support for Jetpack Markdown
+ *
+ * @since  2.4.0
+ * @param  string $content
+ * @return string
+ */
+function wc_format_product_short_description( $content ) {
+	// Add support for Jetpack Markdown
+	if ( class_exists( 'WPCom_Markdown' ) ) {
+		$markdown = WPCom_Markdown::get_instance();
+
+		return wpautop( $markdown->transform( $content, array( 'unslash' => false ) ) );
+	}
+
+	return $content;
+}
+
+add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
+
+/**
  * Formats curency symbols when saved in settings
  * @param  string $value
  * @param  array $option
@@ -720,3 +741,14 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	return $value;
 }
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_minutes', 'wc_format_option_hold_stock_minutes', 10, 3 );
+
+/**
+ * Sanitize terms from an attribute text based.
+ *
+ * @since  2.4.5
+ * @param  string $term
+ * @return string
+ */
+function wc_sanitize_term_text_based( $term ) {
+	return trim( wp_unslash( strip_tags( $term ) ) );
+}

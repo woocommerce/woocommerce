@@ -14,7 +14,7 @@ class WC_Helper_Order {
 	 */
 	public static function delete_order( $order_id ) {
 
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		// Delete all products in the order
 		foreach ( $order->get_items() as $item ) :
@@ -85,6 +85,6 @@ class WC_Helper_Order {
 		$order->set_total( 0, 'shipping_tax' );
 		$order->set_total( 40, 'total' ); // 4 x $10 simple helper product
 
-		return new WC_Order( $order->id );
+		return wc_get_order( $order->id );
 	}
 }

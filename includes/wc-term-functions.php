@@ -132,7 +132,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 	if ( ! is_array( $args ) ) {
 		_deprecated_argument( 'wc_product_dropdown_categories()', '2.1', 'show_counts, hierarchical, show_uncategorized and orderby arguments are invalid - pass a single array of values instead.' );
 
-		$args['show_counts']        = $args;
+		$args['show_count']         = $args;
 		$args['hierarchical']       = $deprecated_hierarchical;
 		$args['show_uncategorized'] = $deprecated_show_uncategorized;
 		$args['orderby']            = $deprecated_orderby;
@@ -141,7 +141,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 	$current_product_cat = isset( $wp_query->query['product_cat'] ) ? $wp_query->query['product_cat'] : '';
 	$defaults            = array(
 		'pad_counts'         => 1,
-		'show_counts'        => 1,
+		'show_count'         => 1,
 		'hierarchical'       => 1,
 		'hide_empty'         => 1,
 		'show_uncategorized' => 1,
@@ -198,8 +198,6 @@ function wc_walk_category_dropdown_tree() {
 
 /**
  * WooCommerce Term/Order item Meta API - set table name
- *
- * @return void
  */
 function wc_taxonomy_metadata_wpdbfix() {
 	global $wpdb;
@@ -458,11 +456,11 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 
 /**
  * Function for recounting product terms, ignoring hidden products.
+ *
  * @param  array  $terms
  * @param  string  $taxonomy
  * @param  boolean $callback
  * @param  boolean $terms_are_term_taxonomy_ids
- * @return void
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
 	global $wpdb;
@@ -554,8 +552,8 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 
 /**
  * Recount terms after the stock amount changes
- * @param  int $product_id
- * @return void
+ *
+ * @param int $product_id
  */
 function wc_recount_after_stock_change( $product_id ) {
 	if ( get_option( 'woocommerce_hide_out_of_stock_items' ) != 'yes' )

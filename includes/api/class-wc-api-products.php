@@ -61,14 +61,43 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_orders' ), WC_API_Server::READABLE ),
 		);
 
-		# GET /products/categories
+		# GET/POST /products/categories
 		$routes[ $this->base . '/categories' ] = array(
 			array( array( $this, 'get_product_categories' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product_category' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
-		# GET /products/categories/<id>
+		# GET/PUT/DELETE /products/categories/<id>
 		$routes[ $this->base . '/categories/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product_category' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_category' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_category' ), WC_API_Server::DELETABLE ),
+		);
+
+		# GET/POST /products/tags
+		$routes[ $this->base . '/tags' ] = array(
+			array( array( $this, 'get_product_tags' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product_tag' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
+		# GET/PUT/DELETE /products/tags/<id>
+		$routes[ $this->base . '/tags/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_tag' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_tag' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_tag' ), WC_API_Server::DELETABLE ),
+		);
+
+		# GET/POST /products/shipping_classes
+		$routes[ $this->base . '/shipping_classes' ] = array(
+			array( array( $this, 'get_product_shipping_classes' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product_shipping_class' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
+		# GET/PUT/DELETE /products/shipping_classes/<id>
+		$routes[ $this->base . '/shipping_classes/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_shipping_class' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_shipping_class' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_shipping_class' ), WC_API_Server::DELETABLE ),
 		);
 
 		# GET/POST /products/attributes
@@ -82,11 +111,6 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_attribute' ), WC_API_Server::READABLE ),
 			array( array( $this, 'edit_product_attribute' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 			array( array( $this, 'delete_product_attribute' ), WC_API_Server::DELETABLE ),
-		);
-
-		# GET /products/sku/<product sku>
-		$routes[ $this->base . '/sku/(?P<sku>\w[\w\s\-]*)' ] = array(
-			array( array( $this, 'get_product_by_sku' ), WC_API_Server::READABLE ),
 		);
 
 		# POST|PUT /products/bulk
@@ -161,7 +185,7 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		// add the parent product data to an individual variation
-		if ( $product->is_type( 'variation' ) ) {
+		if ( $product->is_type( 'variation' ) && $product->parent ) {
 
 			$product_data['parent'] = $this->get_product_data( $product->parent );
 		}
@@ -563,6 +587,388 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
+	 * Create a new product category.
+	 *
+	 * @since  2.5.0
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product category if succeed, otherwise WP_Error
+	 *                              will be returned
+	 */
+	public function create_product_category( $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_category'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_category_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_category' ), 400 );
+			}
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_category', __( 'You do not have permission to create product categories', 'woocommerce' ), 401 );
+			}
+
+			$defaults = array(
+				'name'        => '',
+				'slug'        => '',
+				'description' => '',
+				'parent'      => 0,
+				'display'     => 'default',
+				'image'       => '',
+			);
+
+			$data = wp_parse_args( $data['product_category'], $defaults );
+			$data = apply_filters( 'woocommerce_api_create_product_category_data', $data, $this );
+
+			$name = $data['name'];
+			unset( $data['name'] );
+
+			// Check parent.
+			$data['parent'] = absint( $data['parent'] );
+			if ( $data['parent'] ) {
+				$parent = get_term_by( 'term_taxonomy_id', $data['parent'], 'product_cat' );
+				if ( ! $parent ) {
+					throw new WC_API_Exception( 'woocommerce_api_invalid_product_category_parent', __( 'Product category parent is invalid', 'woocommerce' ), 400 );
+				}
+			}
+
+			$display_type = $data['display'];
+			unset( $data['display'] );
+
+			// If value of image is numeric, assume value as image_id.
+			$image = $data['image'];
+			if ( is_numeric( $image ) ) {
+				$image_id = absint( $image );
+			} else if ( ! empty( $image ) ) {
+				$upload   = $this->upload_product_image( esc_url_raw( $image ) );
+				$image_id = $this->set_product_category_image_as_attachment( $upload );
+			}
+			unset( $data['image'] );
+
+			$insert = wp_insert_term( $name, 'product_cat', $data );
+			if ( is_wp_error( $insert ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_category', $insert->get_error_message(), 400 );
+			}
+
+			update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+
+			// Check if image_id is a valid image attachment before updating the term meta.
+			if ( wp_attachment_is_image( $image_id ) ) {
+				update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'thumbnail_id', $image_id );
+			}
+
+			do_action( 'woocommerce_api_create_product_category', $insert['term_taxonomy_id'], $data );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_product_category( $insert['term_taxonomy_id'] );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product category.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id   Product category term ID
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product category if succeed, otherwise WP_Error
+	 *                              will be returned
+	 */
+	public function edit_product_category( $id, $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_category'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_category', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_category' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_category'];
+
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_category', __( 'You do not have permission to edit product categories', 'woocommerce' ), 401 );
+			}
+
+			$data     = apply_filters( 'woocommerce_api_edit_product_category_data', $data, $this );
+			$category = $this->get_product_category( $id );
+
+			if ( is_wp_error( $category ) ) {
+				return $category;
+			}
+
+			$display_type = '';
+			if ( isset( $data['display'] ) ) {
+				$display_type = $data['display'];
+				unset( $data['display'] );
+			}
+
+			if ( isset( $data['image'] ) ) {
+				// If value of image is numeric, assume value as image_id.
+				$image = $data['image'];
+				if ( is_numeric( $image ) ) {
+					$image_id = absint( $image );
+				} else if ( ! empty( $image ) ) {
+					$upload   = $this->upload_product_image( esc_url_raw( $image ) );
+					$image_id = $this->set_product_category_image_as_attachment( $upload );
+				}
+
+				// In case client supplies invalid image or wants to unset category
+				// image.
+				if ( ! wp_attachment_is_image( $image_id ) ) {
+					$image_id = '';
+				}
+
+				unset( $data['image'] );
+			}
+
+			$update = wp_update_term( $id, 'product_cat', $data );
+			if ( is_wp_error( $update ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_catgory', __( 'Could not edit the category', 'woocommerce' ), 400 );
+			}
+
+			if ( ! empty( $display_type ) ) {
+				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+			}
+
+			if ( isset( $image_id ) ) {
+				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'thumbnail_id', $image_id );
+			}
+
+			do_action( 'woocommerce_api_edit_product_category', $id, $data );
+
+			return $this->get_product_category( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product category.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id Product category term ID
+	 * @return array|WP_Error     Success message if succeed, otherwise WP_Error
+	 *                            will be returned
+	 */
+	public function delete_product_category( $id ) {
+		global $wpdb;
+
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_category', __( 'You do not have permission to delete product category', 'woocommerce' ), 401 );
+			}
+
+			$id      = absint( $id );
+			$deleted = wp_delete_term( $id, 'product_cat' );
+			if ( ! $deleted || is_wp_error( $deleted ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_category', __( 'Could not delete the category', 'woocommerce' ), 401 );
+			}
+
+			// When a term is deleted, delete its meta.
+			$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $id ), array( '%d' ) );
+
+			do_action( 'woocommerce_api_delete_product_category', $id, $this );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_category' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get a listing of product tags.
+	 *
+	 * @since  2.5.0
+	 * @param  string|null $fields Fields to limit response to
+	 * @return array               Product tags
+	 */
+	public function get_product_tags( $fields = null ) {
+		try {
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_tags', __( 'You do not have permission to read product tags', 'woocommerce' ), 401 );
+			}
+
+			$product_tags = array();
+
+			$terms = get_terms( 'product_tag', array( 'hide_empty' => false, 'fields' => 'ids' ) );
+
+			foreach ( $terms as $term_id ) {
+				$product_tags[] = current( $this->get_product_tag( $term_id, $fields ) );
+			}
+
+			return array( 'product_tags' => apply_filters( 'woocommerce_api_product_tags_response', $product_tags, $terms, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the product tag for the given ID.
+	 *
+	 * @since  2.5.0
+	 * @param  string $id          Product tag term ID
+	 * @param  string|null $fields Fields to limit response to
+	 * @return array               Product tag
+	 */
+	public function get_product_tag( $id, $fields = null ) {
+		try {
+			$id = absint( $id );
+
+			// Validate ID
+			if ( empty( $id ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_tag_id', __( 'Invalid product tag ID', 'woocommerce' ), 400 );
+			}
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_tags', __( 'You do not have permission to read product tags', 'woocommerce' ), 401 );
+			}
+
+			$term = get_term( $id, 'product_tag' );
+
+			if ( is_wp_error( $term ) || is_null( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_tag_id', __( 'A product tag with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$term_id = intval( $term->term_id );
+
+			$tag = array(
+				'id'          => $term_id,
+				'name'        => $term->name,
+				'slug'        => $term->slug,
+				'description' => $term->description,
+				'count'       => intval( $term->count )
+			);
+
+			return array( 'product_tag' => apply_filters( 'woocommerce_api_product_tag_response', $tag, $id, $fields, $term, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Create a new product tag.
+	 *
+	 * @since  2.5.0
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product tag if succeed, otherwise WP_Error
+	 *                              will be returned
+	 */
+	public function create_product_tag( $data ) {
+		try {
+			if ( ! isset( $data['product_tag'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_tag_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_tag' ), 400 );
+			}
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_tag', __( 'You do not have permission to create product tags', 'woocommerce' ), 401 );
+			}
+
+			$defaults = array(
+				'name'        => '',
+				'slug'        => '',
+				'description' => '',
+			);
+
+			$data = wp_parse_args( $data['product_tag'], $defaults );
+			$data = apply_filters( 'woocommerce_api_create_product_tag_data', $data, $this );
+
+			$name = $data['name'];
+			unset( $data['name'] );
+
+			$insert = wp_insert_term( $name, 'product_tag', $data );
+			if ( is_wp_error( $insert ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_tag', $insert->get_error_message(), 400 );
+			}
+
+			do_action( 'woocommerce_api_create_product_tag', $insert['term_taxonomy_id'], $data );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_product_tag( $insert['term_taxonomy_id'] );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product tag.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id   Product tag term ID
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product tag if succeed, otherwise WP_Error
+	 *                              will be returned
+	 */
+	public function edit_product_tag( $id, $data ) {
+		try {
+			if ( ! isset( $data['product_tag'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_tag', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_tag' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_tag'];
+
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_tag', __( 'You do not have permission to edit product tags', 'woocommerce' ), 401 );
+			}
+
+			$data = apply_filters( 'woocommerce_api_edit_product_tag_data', $data, $this );
+			$tag  = $this->get_product_tag( $id );
+
+			if ( is_wp_error( $tag ) ) {
+				return $tag;
+			}
+
+			$update = wp_update_term( $id, 'product_tag', $data );
+			if ( is_wp_error( $update ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_tag', __( 'Could not edit the tag', 'woocommerce' ), 400 );
+			}
+
+			do_action( 'woocommerce_api_edit_product_tag', $id, $data );
+
+			return $this->get_product_tag( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product tag.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id Product tag term ID
+	 * @return array|WP_Error     Success message if succeed, otherwise WP_Error
+	 *                            will be returned
+	 */
+	public function delete_product_tag( $id ) {
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_tag', __( 'You do not have permission to delete product tag', 'woocommerce' ), 401 );
+			}
+
+			$id      = absint( $id );
+			$deleted = wp_delete_term( $id, 'product_tag' );
+			if ( ! $deleted || is_wp_error( $deleted ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_tag', __( 'Could not delete the tag', 'woocommerce' ), 401 );
+			}
+
+			do_action( 'woocommerce_api_delete_product_tag', $id, $this );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_tag' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
 	 * Helper method to get product post objects
 	 *
 	 * @since 2.1
@@ -579,24 +985,40 @@ class WC_API_Products extends WC_API_Resource {
 			'meta_query'  => array(),
 		);
 
-		if ( ! empty( $args['type'] ) ) {
+		// Taxonomy query to filter products by type, category, tag, shipping class, and
+		// attribute.
+		$tax_query = array();
 
-			$types = explode( ',', $args['type'] );
+		// Map between taxonomy name and arg's key.
+		$taxonomies_arg_map = array(
+			'product_type'           => 'type',
+			'product_cat'            => 'category',
+			'product_tag'            => 'tag',
+			'product_shipping_class' => 'shipping_class',
+		);
 
-			$query_args['tax_query'] = array(
-				array(
-					'taxonomy' => 'product_type',
-					'field'    => 'slug',
-					'terms'    => $types,
-				),
-			);
-
-			unset( $args['type'] );
+		// Add attribute taxonomy names into the map.
+		foreach ( wc_get_attribute_taxonomy_names() as $attribute_name ) {
+			$taxonomies_arg_map[ $attribute_name ] = $attribute_name;
 		}
 
-		// Filter products by category
-		if ( ! empty( $args['category'] ) ) {
-			$query_args['product_cat'] = $args['category'];
+		// Set tax_query for each passed arg.
+		foreach ( $taxonomies_arg_map as $tax_name => $arg ) {
+			if ( ! empty( $args[ $arg ] ) ) {
+				$terms = explode( ',', $args[ $arg ] );
+
+				$tax_query[] = array(
+					'taxonomy' => $tax_name,
+					'field'    => 'slug',
+					'terms'    => $terms,
+				);
+
+				unset( $args[ $arg ] );
+			}
+		}
+
+		if ( ! empty( $tax_query ) ) {
+			$query_args['tax_query'] = $tax_query;
 		}
 
 		// Filter by specific sku
@@ -864,7 +1286,7 @@ class WC_API_Products extends WC_API_Resource {
 
 						// Text based attributes - Posted values are term names - don't change to slugs
 						} else {
-							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute['options'] ) ) );
+							$values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute['options'] ) );
 						}
 
 						$values = array_filter( $values, 'strlen' );
@@ -1455,11 +1877,14 @@ class WC_API_Products extends WC_API_Resource {
 						continue;
 					}
 
-					$taxonomy   = sanitize_title( $attribute['name'] );
 					$_attribute = array();
 
 					if ( isset( $attribute['slug'] ) ) {
 						$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
+					}
+
+					if ( ! $taxonomy ) {
+						$taxonomy = sanitize_title( $attribute['name'] );
 					}
 
 					if ( isset( $attributes[ $taxonomy ] ) ) {
@@ -1467,11 +1892,17 @@ class WC_API_Products extends WC_API_Resource {
 					}
 
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
-						$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
-						$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
-						$updated_attribute_keys[] = $attribute_key;
+						$_attribute_key           = 'attribute_' . sanitize_title( $_attribute['name'] );
+						$updated_attribute_keys[] = $_attribute_key;
 
-						update_post_meta( $variation_id, $attribute_key, $attribute_value );
+						if ( isset( $_attribute['is_taxonomy'] ) && $_attribute['is_taxonomy'] ) {
+							// Don't use wc_clean as it destroys sanitized characters
+							$_attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
+						} else {
+							$_attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+						}
+
+						update_post_meta( $variation_id, $_attribute_key, $_attribute_value );
 					}
 				}
 
@@ -1512,11 +1943,15 @@ class WC_API_Products extends WC_API_Resource {
 					$_attribute = $attributes[ $taxonomy ];
 
 					if ( $_attribute['is_variation'] ) {
-						// Don't use wc_clean as it destroys sanitized characters
+						$value = '';
+
 						if ( isset( $default_attr['option'] ) ) {
-							$value = sanitize_title( trim( stripslashes( $default_attr['option'] ) ) );
-						} else {
-							$value = '';
+							if ( $_attribute['is_taxonomy'] ) {
+								// Don't use wc_clean as it destroys sanitized characters
+								$value = sanitize_title( trim( stripslashes( $default_attr['option'] ) ) );
+							} else {
+								$value = wc_clean( trim( stripslashes( $default_attr['option'] ) ) );
+							}
 						}
 
 						if ( $value ) {
@@ -1538,7 +1973,6 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id
 	 * @param array $data
-	 * @return void
 	 */
 	private function save_product_shipping_data( $id, $data ) {
 		if ( isset( $data['weight'] ) ) {
@@ -1588,7 +2022,6 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param int $product_id
 	 * @param array $downloads
 	 * @param int $variation_id
-	 * @return void
 	 */
 	private function save_downloadable_files( $product_id, $downloads, $variation_id = 0 ) {
 		$files = array();
@@ -1765,6 +2198,16 @@ class WC_API_Products extends WC_API_Resource {
 						$gallery[] = $attachment_id;
 					}
 				}
+
+				// Set the image alt if present.
+				if ( ! empty( $image['alt'] ) ) {
+					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
+				}
+
+				// Set the image title if present.
+				if ( ! empty( $image['title'] ) ) {
+					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['title'] ) );
+				}
 			}
 
 			if ( ! empty( $gallery ) ) {
@@ -1784,13 +2227,38 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return int|WP_Error attachment id
 	 */
 	public function upload_product_image( $image_url ) {
+		return $this->upload_image_from_url( $image_url );
+	}
+
+	/**
+	 * Upload product category image from URL.
+	 *
+	 * @since  2.5.0
+	 * @param  string $image_url
+	 * @return int|WP_Error attachment id
+	 */
+	public function upload_product_category_image( $image_url ) {
+		return $this->upload_image_from_url( $image_url, 'product_category_image' );
+	}
+
+	/**
+	 * Upload image from URL.
+	 *
+	 * @throws WC_API_Exception
+	 *
+	 * @since  2.5.0
+	 * @param  string       $image_url
+	 * @param  string       $upload_for
+	 * @return int|WP_Error Attachment id
+	 */
+	protected function upload_image_from_url( $image_url, $upload_for = 'product_image' ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );
 		$wp_filetype 	= wp_check_filetype( $file_name, null );
 		$parsed_url 	= @parse_url( $image_url );
 
-		// Check parsed URL
+		// Check parsed URL.
 		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure url is valid
@@ -1802,7 +2270,7 @@ class WC_API_Products extends WC_API_Resource {
 		) );
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure we have a file name and type
@@ -1822,7 +2290,7 @@ class WC_API_Products extends WC_API_Resource {
 		$upload = wp_upload_bits( $file_name, '', wp_remote_retrieve_body( $response ) );
 
 		if ( $upload['error'] ) {
-			throw new WC_API_Exception( 'woocommerce_api_product_image_upload_error', $upload['error'], 400 );
+			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_error', $upload['error'], 400 );
 		}
 
 		// Get filesize
@@ -1831,7 +2299,7 @@ class WC_API_Products extends WC_API_Resource {
 		if ( 0 == $filesize ) {
 			@unlink( $upload['file'] );
 			unset( $upload );
-			throw new WC_API_Exception( 'woocommerce_api_product_image_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ), 400 );
 		}
 
 		unset( $response );
@@ -1840,7 +2308,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get product image as attachment
+	 * Sets product image as attachment and returns the attachment ID.
 	 *
 	 * @since 2.2
 	 * @param integer $upload
@@ -1848,6 +2316,29 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return int
 	 */
 	protected function set_product_image_as_attachment( $upload, $id ) {
+		return $this->set_uploaded_image_as_attachment( $upload, $id );
+	}
+
+	/**
+	 * Sets uploaded category image as attachment and returns the attachment ID.
+	 *
+	 * @since  2.5.0
+	 * @param  integer $upload Upload information from wp_upload_bits
+	 * @return int             Attachment ID
+	 */
+	protected function set_product_category_image_as_attachment( $upload ) {
+		return $this->set_uploaded_image_as_attachment( $upload );
+	}
+
+	/**
+	 * Set uploaded image as attachment.
+	 *
+	 * @since  2.5.0
+	 * @param  array $upload Upload information from wp_upload_bits
+	 * @param  int   $id     Post ID. Default to 0.
+	 * @return int           Attachment ID
+	 */
+	protected function set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 		$info    = wp_check_filetype( $upload['file'] );
 		$title   = '';
 		$content = '';
@@ -2293,34 +2784,10 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get product by SKU
-	 *
-	 * @deprecated 2.4.0
-	 *
-	 * @since  2.3.0
-	 * @param  int    $sku the product SKU
-	 * @param  string $fields
-	 * @return array
-	 */
-	public function get_product_by_sku( $sku, $fields = null ) {
-		try {
-			$id = wc_get_product_id_by_sku( $sku );
-
-			if ( empty( $id ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_product_sku', __( 'Invalid product SKU', 'woocommerce' ), 404 );
-			}
-
-			return $this->get_product( $id, $fields );
-		} catch ( WC_API_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-	}
-
-	/**
 	 * Clear product
 	 */
 	protected function clear_product( $product_id ) {
-		if ( 0 >= $product_id ) {
+		if ( ! is_numeric( $product_id ) || 0 >= $product_id ) {
 			return;
 		}
 
@@ -2411,6 +2878,213 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			return array( 'products' => apply_filters( 'woocommerce_api_products_bulk_response', $products, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get a listing of product shipping classes.
+	 *
+	 * @since  2.5.0
+	 * @param  string|null    $fields Fields to limit response to
+	 * @return array|WP_Error         List of product shipping classes if succeed,
+	 *                                otherwise WP_Error will be returned
+	 */
+	public function get_product_shipping_classes( $fields = null ) {
+		try {
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_shipping_classes', __( 'You do not have permission to read product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$product_shipping_classes = array();
+
+			$terms = get_terms( 'product_shipping_class', array( 'hide_empty' => false, 'fields' => 'ids' ) );
+
+			foreach ( $terms as $term_id ) {
+				$product_shipping_classes[] = current( $this->get_product_shipping_class( $term_id, $fields ) );
+			}
+
+			return array( 'product_shipping_classes' => apply_filters( 'woocommerce_api_product_shipping_classes_response', $product_shipping_classes, $terms, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the product shipping class for the given ID.
+	 *
+	 * @since  2.5.0
+	 * @param  string         $id     Product shipping class term ID
+	 * @param  string|null    $fields Fields to limit response to
+	 * @return array|WP_Error         Product shipping class if succeed, otherwise
+	 *                                WP_Error will be returned
+	 */
+	public function get_product_shipping_class( $id, $fields = null ) {
+		try {
+			$id = absint( $id );
+			if ( ! $id ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_shipping_class_id', __( 'Invalid product shipping class ID', 'woocommerce' ), 400 );
+			}
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_shipping_classes', __( 'You do not have permission to read product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$term = get_term( $id, 'product_shipping_class' );
+
+			if ( is_wp_error( $term ) || is_null( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_shipping_class_id', __( 'A product shipping class with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$term_id = intval( $term->term_id );
+
+			$product_shipping_class = array(
+				'id'          => $term_id,
+				'name'        => $term->name,
+				'slug'        => $term->slug,
+				'parent'      => $term->parent,
+				'description' => $term->description,
+				'count'       => intval( $term->count )
+			);
+
+			return array( 'product_shipping_class' => apply_filters( 'woocommerce_api_product_shipping_class_response', $product_shipping_class, $id, $fields, $term, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Create a new product shipping class.
+	 *
+	 * @since  2.5.0
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product shipping class if succeed, otherwise
+	 *                              WP_Error will be returned
+	 */
+	public function create_product_shipping_class( $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_shipping_class'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_shipping_class_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_shipping_class' ), 400 );
+			}
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_shipping_class', __( 'You do not have permission to create product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$defaults = array(
+				'name'        => '',
+				'slug'        => '',
+				'description' => '',
+				'parent'      => 0,
+			);
+
+			$data = wp_parse_args( $data['product_shipping_class'], $defaults );
+			$data = apply_filters( 'woocommerce_api_create_product_shipping_class_data', $data, $this );
+
+			$name = $data['name'];
+			unset( $data['name'] );
+
+			// Check parent.
+			$data['parent'] = absint( $data['parent'] );
+			if ( $data['parent'] ) {
+				$parent = get_term_by( 'term_taxonomy_id', $data['parent'], 'product_shipping_class' );
+				if ( ! $parent ) {
+					throw new WC_API_Exception( 'woocommerce_api_invalid_product_shipping_class_parent', __( 'Product shipping class parent is invalid', 'woocommerce' ), 400 );
+				}
+			}
+
+			$insert = wp_insert_term( $name, 'product_shipping_class', $data );
+			if ( is_wp_error( $insert ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_shipping_class', $insert->get_error_message(), 400 );
+			}
+
+			do_action( 'woocommerce_api_create_product_shipping_class', $insert['term_taxonomy_id'], $data );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_product_shipping_class( $insert['term_taxonomy_id'] );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product shipping class.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id   Product shipping class term ID
+	 * @param  array          $data Posted data
+	 * @return array|WP_Error       Product shipping class if succeed, otherwise
+	 *                              WP_Error will be returned
+	 */
+	public function edit_product_shipping_class( $id, $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_shipping_class'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_shipping_class', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_shipping_class' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_shipping_class'];
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_shipping_class', __( 'You do not have permission to edit product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$data           = apply_filters( 'woocommerce_api_edit_product_shipping_class_data', $data, $this );
+			$shipping_class = $this->get_product_shipping_class( $id );
+
+			if ( is_wp_error( $shipping_class ) ) {
+				return $shipping_class;
+			}
+
+			$update = wp_update_term( $id, 'product_shipping_class', $data );
+			if ( is_wp_error( $update ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_shipping_class', __( 'Could not edit the shipping class', 'woocommerce' ), 400 );
+			}
+
+			do_action( 'woocommerce_api_edit_product_shipping_class', $id, $data );
+
+			return $this->get_product_shipping_class( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product shipping class.
+	 *
+	 * @since  2.5.0
+	 * @param  int            $id Product shipping class term ID
+	 * @return array|WP_Error     Success message if succeed, otherwise WP_Error
+	 *                            will be returned
+	 */
+	public function delete_product_shipping_class( $id ) {
+		global $wpdb;
+
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_shipping_class', __( 'You do not have permission to delete product shipping classes', 'woocommerce' ), 401 );
+			}
+
+			$id      = absint( $id );
+			$deleted = wp_delete_term( $id, 'product_shipping_class' );
+			if ( ! $deleted || is_wp_error( $deleted ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_shipping_class', __( 'Could not delete the shipping class', 'woocommerce' ), 401 );
+			}
+
+			do_action( 'woocommerce_api_delete_product_shipping_class', $id, $this );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_shipping_class' ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}

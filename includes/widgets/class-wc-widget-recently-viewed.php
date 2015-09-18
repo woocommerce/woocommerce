@@ -49,8 +49,6 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 	 *
 	 * @param array $args
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	function widget( $args, $instance ) {
 

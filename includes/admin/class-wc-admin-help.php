@@ -69,7 +69,7 @@ class WC_Admin_Help {
 				'title' => __( 'Email Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/svcaftq4xv?videoFoam=true'
 			),
-			'wc-settings-webhooks' => array(
+			'wc-settings-api' => array(
 				'title' => __( 'Webhook Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/1q0ny74vvq?videoFoam=true'
 			),
@@ -109,7 +109,7 @@ class WC_Admin_Help {
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
 			),
-			'product_page_product_attributes' => array(
+			'product_attributes' => array(
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
 			),
@@ -164,7 +164,7 @@ class WC_Admin_Help {
 				'title'     => __( 'WooCommerce 101', 'woocommerce' ),
 				'content'   =>
 					'<h2><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommerce&utm_medium=Wizard&utm_content=Videos&utm_campaign=Onboarding">' . __( 'WooCommerce 101', 'woocommerce' ) . '</a> &ndash; ' . esc_html( $video_map[ $video_key ]['title'] ) . '</h2>' .
-					'<iframe class="wistia_embed" name="wistia_embed" src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" allowtransparency="true" frameborder="0" scrolling="no" width="480" height="298"></iframe>'
+					'<iframe src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="480" height="298"></iframe>'
 			) );
 		}
 

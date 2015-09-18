@@ -266,7 +266,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_stock" class="text stock" placeholder="<?php _e( 'Stock Qty', 'woocommerce' ); ?>" step="any" value="">
+					<input type="text" name="_stock" class="text stock" placeholder="<?php esc_attr_e( 'Stock Qty', 'woocommerce' ); ?>" step="any" value="">
 				</label>
 			</div>
 

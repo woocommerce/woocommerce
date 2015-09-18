@@ -2735,6 +2735,40 @@ img.help_tip {
 		}
 	}
 }
+.woocommerce_variation {
+	h3 {
+		.sort {
+			cursor: move;
+			text-align: center;
+			vertical-align: middle;
+			float: right;
+			height: 26px;
+			width: 17px;
+			visibility: hidden;
+			vertical-align: middle;
+			margin-right: .5em;
+			color: #a0a5aa;
+			&:before {
+				content: "\e032";
+				font-family: 'WooCommerce';
+				text-align: center;
+				cursor: move;
+				line-height: 1;
+				display: block;
+				width: 17px;
+				line-height: 28px;
+			}
+			&:hover {
+				color: #777;
+			}
+		}
+	}
+	h3:hover, &.ui-sortable-helper {
+		.sort {
+			visibility: visible;
+		}
+	}
+}
 
 .woocommerce_options_panel {
 	box-sizing: border-box;
@@ -2941,11 +2975,15 @@ img.help_tip {
 			border-bottom: 0;
 		}
 
-		.link_all_variations,
-		.add_variation,
-		.save-variation-changes {
+		.add_variation {
 			float: right;
 			margin-left: 5px;
+		}
+
+		.save-variation-changes,
+		.cancel-variation-changes {
+			float: left;
+			margin-right: 5px;
 		}
 	}
 
@@ -2954,8 +2992,26 @@ img.help_tip {
 		zoom: 1;
 	}
 
-	select.attribute_taxonomy,
-	button.add_attribute,
+	.expand-close {
+		margin-right: 2px;
+		color: #777;
+		font-size: 12px;
+		font-style: italic;
+		a {
+			background: none;
+			padding: 0;
+			font-size: 12px;
+			text-decoration: none;
+		}
+	}
+
+	&#product_attributes {
+		.expand-close {
+			float: right;
+			line-height: 28px;
+		}
+	}
+
 	button.add_variable_attribute,
 	.fr {
 		float: right;
@@ -3015,24 +3071,35 @@ img.help_tip {
 			zoom: 1;
 			cursor: move;
 
-			button {
+			button, a.delete {
 				float: right;
+			}
+
+			a.delete {
+				color: red;
+				font-weight: normal;
+				line-height: 26px;
+				text-decoration: none;
+				position: relative;
+				visibility: hidden;
 			}
 
 			strong {
 				font-weight: normal;
-				line-height: 24px;
+				line-height: 26px;
 				font-weight: 700;
 			}
 
 			select {
 				font-family: sans-serif;
+				max-width: 20%;
+				margin: .25em .25em .25em 0;
 			}
 
 			.handlediv {
 				background-position: 6px 5px !important;
-				display: none;
-				height: 24px;
+				visibility: hidden;
+				height: 26px;
 			}
 
 			&.fixed {
@@ -3040,8 +3107,18 @@ img.help_tip {
 			}
 		}
 
-		h3:hover .handlediv {
-			display: block;
+		&.woocommerce_variation h3 {
+			cursor: pointer;
+			padding: .5em .75em .5em 1em !important;
+			a.delete, .handlediv, .sort {
+				margin-top: .25em;
+			}
+		}
+
+		h3:hover, &.ui-sortable-helper {
+			a.delete, .handlediv {
+				visibility: visible;
+			}
 		}
 
 		table {
@@ -3114,33 +3191,13 @@ img.help_tip {
 			}
 		}
 	}
-
-	.expand_all,
-	.close_all {
-		float: right;
-		margin-left: 14px;
-		line-height: 22px;
-		text-decoration: none;
-
-		&:before {
-			@include iconbefore( "\e036" );
-			font-size: .8em;
-			color: #999;
-		}
-	}
-
-	.expand_all {
-		&:before {
-			content: "\e035";
-		}
-	}
 }
 
 .variations-pagenav {
 	float: right;
+	line-height: 24px;
 
 	.displaying-num {
-		margin-right: 2px;
 		color: #777;
 		font-size: 12px;
 		font-style: italic;
@@ -3165,6 +3222,9 @@ img.help_tip {
 
 .variations-defaults {
 	float: left;
+	select {
+		margin: .25em .25em .25em 0;
+	}
 }
 
 .woocommerce_variable_attributes {
@@ -3999,7 +4059,7 @@ table.bar_chart {
 				width: 94%;
 
 				.sort {
-					display: none;
+					visibility: hidden;
 				}
 			}
 		}
@@ -4099,6 +4159,78 @@ table.bar_chart {
 		float: none;
 		text-align: center;
 		margin-top: 10px;
+	}
+
+	.post-type-product {
+		.wp-list-table {
+			.column-thumb {
+				display: none;
+				text-align: left;
+				padding-bottom: 0;
+
+				&:before {
+					display: none !important;
+				}
+
+				img {
+					max-width: 32px;
+				}
+			}
+
+			.is-expanded {
+				td {
+					&:not(.hidden) {
+						overflow: visible;
+					}
+				}
+			}
+
+			.toggle-row {
+				top: -28px;
+			}
+		}
+	}
+
+	.post-type-shop_order {
+		.wp-list-table {
+			.column-order_status {
+				display: none;
+				text-align: left;
+				padding-bottom: 0;
+
+				mark {
+					margin: 0;
+				}
+
+				&:before {
+					display: none !important;
+				}
+			}
+
+			.column-customer_message,
+			.column-order_notes {
+				text-align: inherit;
+			}
+
+			.column-order_notes {
+				.note-on {
+					font-size: 1.3em;
+					margin: 0;
+				}
+			}
+
+			.is-expanded {
+				td {
+					&:not(.hidden) {
+						overflow: visible;
+					}
+				}
+			}
+
+			.toggle-row {
+				top: -15px;
+			}
+		}
 	}
 }
 

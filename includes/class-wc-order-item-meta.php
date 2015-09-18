@@ -11,13 +11,13 @@
  */
 class WC_Order_Item_Meta {
 
-	/** @var For handling backwards comp */
+	/** @var bool For handling backwards comp */
 	private $legacy = false;
 
 	/** @var Array Order item */
 	private $item   = null;
 
-	/** @var Post meta data */
+	/** @var Array Post meta data */
 	public $meta    = null;
 
 	/** @var Product object */
@@ -26,7 +26,7 @@ class WC_Order_Item_Meta {
 	/**
 	 * Constructor
 	 *
-	 * @param array $item_meta defaults to array()
+	 * @param array $item defaults to array()
 	 * @param \WC_Product $product defaults to null
 	 * @return \WC_Order_Item_Meta instance
 	 */
@@ -110,7 +110,7 @@ class WC_Order_Item_Meta {
 		$formatted_meta = array();
 
 		foreach ( $this->item['item_meta_array'] as $meta_id => $meta ) {
-			if ( empty( $meta->value ) || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
+			if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
 				continue;
 			}
 
@@ -139,8 +139,10 @@ class WC_Order_Item_Meta {
 	 * Handles @deprecated args
 	 * @return array
 	 */
-	public function get_formatted_legacy() {
-		_deprecated_function( 'get_formatted_legacy', '2.4', 'Item Meta Data is being called with legacy arguments' );
+	public function get_formatted_legacy( $hideprefix = '_' ) {
+		if ( ! is_ajax() ) {
+			_deprecated_function( 'get_formatted_legacy', '2.4', 'Item Meta Data is being called with legacy arguments' );
+		}
 
 		$formatted_meta = array();
 

@@ -21,7 +21,8 @@ class Log extends \WC_Unit_Test_Case {
 
 		$log->add( 'unit-tests', 'this is a message' );
 
-		$this->assertEquals( date( 'm-d-Y @ H:i:s' ) . ' - this is a message' . PHP_EOL, $this->read_content( 'unit-tests' ) );
+		$this->assertStringMatchesFormat( '%d-%d-%d @ %d:%d:%d - %s', $this->read_content( 'unit-tests' ) );
+		$this->assertStringEndsWith( ' - this is a message' . PHP_EOL, $this->read_content( 'unit-tests' ) );
 	}
 
 	/**

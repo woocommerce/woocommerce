@@ -53,6 +53,8 @@ class WC_API_Authentication {
 
 			$user = $this->get_user_by_id( $keys['user_id'] );
 
+			$this->update_api_key_last_access( $keys['key_id'] );
+
 		} catch ( Exception $e ) {
 			$user = new WP_Error( 'woocommerce_api_authentication_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -169,7 +171,7 @@ class WC_API_Authentication {
 		$consumer_key = wc_api_hash( sanitize_text_field( $consumer_key ) );
 
 		$keys = $wpdb->get_row( $wpdb->prepare( "
-			SELECT *
+			SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE consumer_key = '%s'
 		", $consumer_key ), ARRAY_A );
@@ -224,7 +226,7 @@ class WC_API_Authentication {
 		$server_path = WC()->api->server->path;
 
 		// if the requested URL has a trailingslash, make sure our base URL does as well
-		if ( '/' === substr( $_SERVER['REDIRECT_URL'], -1 ) ) {
+		if ( isset( $_SERVER['REDIRECT_URL'] ) && '/' === substr( $_SERVER['REDIRECT_URL'], -1 ) ) {
 			$server_path .= '/';
 		}
 
@@ -388,5 +390,24 @@ class WC_API_Authentication {
 				}
 				break;
 		}
+	}
+
+	/**
+	 * Updated API Key last access datetime
+	 *
+	 * @since 2.4.0
+	 *
+	 * @param int $key_id
+	 */
+	private function update_api_key_last_access( $key_id ) {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array( 'last_access' => current_time( 'mysql' ) ),
+			array( 'key_id' => $key_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
 	}
 }

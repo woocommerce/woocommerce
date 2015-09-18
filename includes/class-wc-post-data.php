@@ -35,6 +35,7 @@ class WC_Post_Data {
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_action( 'pre_post_update', array( __CLASS__, 'pre_post_update' ) );
+		add_action( 'update_post_meta', array( __CLASS__, 'sync_product_stock_status' ), 10, 4 );
 	}
 
 	/**
@@ -161,6 +162,20 @@ class WC_Post_Data {
 	}
 
 	/**
+	 * When setting stock level, ensure the stock status is kept in sync
+	 * @param  int $meta_id
+	 * @param  int $object_id
+	 * @param  string $meta_key
+	 * @param  mixed $_meta_value
+	 */
+	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
+		if ( '_stock' === $meta_key && 'product' !== get_post_type( $object_id ) ) {
+			$product = wc_get_product( $object_id );
+			$product->check_stock_status();
+		}
+	}
+
+	/**
 	 * Forces the order posts to have a title in a certain format (containing the date).
 	 * Forces certain product data based on the product's type, e.g. grouped products cannot have a parent.
 	 *
@@ -195,12 +210,14 @@ class WC_Post_Data {
 	 * @param int $post_id
 	 */
 	public static function pre_post_update( $post_id ) {
+		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
+
 		if ( isset( $_POST['_visibility'] ) ) {
 			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
 				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
 			}
 		}
-		if ( isset( $_POST['_stock_status'] ) ) {
+		if ( isset( $_POST['_stock_status'] ) && 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}
 	}

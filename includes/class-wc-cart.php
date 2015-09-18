@@ -149,7 +149,7 @@ class WC_Cart {
 				$this->tax = new WC_Tax();
 			return $this->tax;
 			case 'discount_total':
-				_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: http://develop.woothemes.com/woocommerce/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
+				_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
 			return 0;
 		}
 	}
@@ -169,7 +169,7 @@ class WC_Cart {
 	 * Will set cart cookies if needed, once, during WP hook
 	 */
 	public function maybe_set_cart_cookies() {
-		if ( ! headers_sent() ) {
+		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
 			if ( ! $this->is_empty() ) {
 				$this->set_cart_cookies( true );
 			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
@@ -625,8 +625,7 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
-			$cart_page_id = wc_get_page_id( 'cart' );
-			return apply_filters( 'woocommerce_get_cart_url', $cart_page_id ? get_permalink( $cart_page_id ) : '' );
+			return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
 		}
 
 		/**
@@ -635,19 +634,13 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
-			$checkout_page_id = wc_get_page_id( 'checkout' );
-			$checkout_url     = '';
-			if ( $checkout_page_id ) {
-
-				// Get the checkout URL
-				$checkout_url = get_permalink( $checkout_page_id );
-
+			$checkout_url = wc_get_page_permalink( 'checkout' );
+			if ( $checkout_url ) {
 				// Force SSL if needed
 				if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
 					$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 				}
 			}
-
 			return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 		}
 
@@ -658,8 +651,8 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_remove_url( $cart_item_key ) {
-			$cart_page_id = wc_get_page_id('cart');
-			return apply_filters( 'woocommerce_get_remove_url', $cart_page_id ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' );
+			$cart_page_url = wc_get_page_permalink( 'cart' );
+			return apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' );
 		}
 
 		/**
@@ -669,13 +662,13 @@ class WC_Cart {
 		 * @return string url to page
 		 */
 		public function get_undo_url( $cart_item_key ) {
-			$cart_page_id = wc_get_page_id( 'cart' );
+			$cart_page_url = wc_get_page_permalink( 'cart' );
 
 			$query_args = array(
 				'undo_item' => $cart_item_key,
 			);
 
-			return apply_filters( 'woocommerce_get_undo_url', $cart_page_id ? wp_nonce_url( add_query_arg( $query_args, get_permalink( $cart_page_id ) ), 'woocommerce-cart' ) : '' );
+			return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '' );
 		}
 
 		/**
@@ -1062,6 +1055,21 @@ class WC_Cart {
 		}
 
 		/**
+		 * Sort by subtotal
+		 * @param  array $a
+		 * @param  array $b
+		 * @return int
+		 */
+		private function sort_by_subtotal( $a, $b ) {
+			$first_item_subtotal  = isset( $a['line_subtotal'] ) ? $a['line_subtotal'] : 0;
+			$second_item_subtotal = isset( $b['line_subtotal'] ) ? $b['line_subtotal'] : 0;
+			if ( $first_item_subtotal === $second_item_subtotal ) {
+				return 0;
+			}
+			return ( $first_item_subtotal < $second_item_subtotal ) ? 1 : -1;
+		}
+
+		/**
 		 * Calculate totals for the items in the cart.
 		 */
 		public function calculate_totals() {
@@ -1077,11 +1085,12 @@ class WC_Cart {
 
 			$tax_rates      = array();
 			$shop_tax_rates = array();
+			$cart           = $this->get_cart();
 
 			/**
 			 * Calculate subtotals for items. This is done first so that discount logic can use the values.
 			 */
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			foreach ( $cart as $cart_item_key => $values ) {
 
 				$_product = $values['data'];
 
@@ -1133,8 +1142,12 @@ class WC_Cart {
 
 					/**
 					 * ADJUST TAX - Calculations when base tax is not equal to the item tax
-					 */
-					if ( $item_tax_rates !== $base_tax_rates ) {
+					 *
+ 					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
+ 					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
+ 					 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
+ 					 */
+					if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 
 						// Work out a new base price without the shop's base tax
 						$taxes                 = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
@@ -1183,10 +1196,13 @@ class WC_Cart {
 				$this->subtotal_ex_tax += $line_subtotal;
 			}
 
+			// Order cart items by price so coupon logic is 'fair' for customers and not based on order added to cart.
+			uasort( $cart, array( $this, 'sort_by_subtotal' ) );
+
 			/**
 			 * Calculate totals for items
 			 */
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			foreach ( $cart as $cart_item_key => $values ) {
 
 				$_product = $values['data'];
 
@@ -1220,8 +1236,12 @@ class WC_Cart {
 
 					/**
 					 * ADJUST TAX - Calculations when base tax is not equal to the item tax
-					 */
-					if ( $item_tax_rates !== $base_tax_rates ) {
+					 *
+ 					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
+ 					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
+ 					 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
+ 					 */
+					if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 
 						// Work out a new base price without the shop's base tax
 						$taxes             = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
@@ -1303,9 +1323,6 @@ class WC_Cart {
 				// Store rates ID and costs - Since 2.2
 				$this->cart_contents[ $cart_item_key ]['line_tax_data']     = array( 'total' => $discounted_taxes, 'subtotal' => $taxes );
 			}
-
-			// Round cart contents
-			$this->cart_contents_total = round( $this->cart_contents_total, $this->dp );
 
 			// Only calculate the grand total + shipping if on the cart/checkout
 			if ( is_checkout() || is_cart() || defined('WOOCOMMERCE_CHECKOUT') || defined('WOOCOMMERCE_CART') ) {
@@ -1598,7 +1615,7 @@ class WC_Cart {
 						// Usage limits per user - check against billing and user email and user ID
 						if ( $coupon->usage_limit_per_user > 0 ) {
 							$check_emails = array();
-							$used_by      = array_filter( (array) get_post_meta( $coupon->id, '_used_by' ) );
+							$used_by      = $coupon->get_used_by();
 
 							if ( is_user_logged_in() ) {
 								$current_user   = wp_get_current_user();
@@ -1753,7 +1770,7 @@ class WC_Cart {
 				$discount_amount += $this->get_coupon_discount_tax_amount( $code );
 			}
 
-			return round( $discount_amount, $this->dp, WC_DISCOUNT_ROUNDING_MODE );
+			return wc_cart_round_discount( $discount_amount, $this->dp );
 		}
 
 		/**
@@ -1763,7 +1780,7 @@ class WC_Cart {
 		 * @return float discount amount
 		 */
 		public function get_coupon_discount_tax_amount( $code ) {
-			return round( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp, WC_DISCOUNT_ROUNDING_MODE );
+			return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp );
 		}
 
 		/**
@@ -2163,7 +2180,7 @@ class WC_Cart {
 		 * @return float
 		 */
 		public function get_cart_discount_total() {
-			return round( $this->discount_cart, $this->dp, WC_DISCOUNT_ROUNDING_MODE );
+			return wc_cart_round_discount( $this->discount_cart, $this->dp );
 		}
 
 		/**
@@ -2172,7 +2189,7 @@ class WC_Cart {
 		 * @return float
 		 */
 		public function get_cart_discount_tax_total() {
-			return round( $this->discount_cart_tax, $this->dp, WC_DISCOUNT_ROUNDING_MODE );
+			return wc_cart_round_discount( $this->discount_cart_tax, $this->dp );
 		}
 
 		/**

@@ -172,10 +172,19 @@ class WC_Coupon {
 			'customer_email'             => array()
 		);
 
+		if ( ! empty( $this->id ) ) {
+			$postmeta = get_post_meta( $this->id );
+		}
+
 		foreach ( $defaults as $key => $value ) {
 			// Try to load from meta if an ID is present
-			if ( $this->id ) {
-				$this->$key = get_post_meta( $this->id, $key, true );
+			if ( ! empty( $this->id ) ) {
+				/**
+				 * By not calling `get_post_meta()` individually, we may be breaking compatibility with
+				 * some plugins that filter on `get_post_metadata` and erroneously override based solely
+				 * on $meta_key -- but don't override when querying for all as $meta_key is empty().
+				 */
+				$this->$key = isset( $postmeta[ $key ] ) ? maybe_unserialize( array_shift( $postmeta[ $key ] ) ) : '';
 			} else {
 				$this->$key = ! empty( $data[ $key ] ) ? wc_clean( $data[ $key ] ) : '';
 
@@ -247,9 +256,7 @@ class WC_Coupon {
 	/**
 	 * Increase usage count for current coupon.
 	 *
-	 * @access public
-	 * @param  string $used_by Either user ID or billing email
-	 * @return void
+	 * @param string $used_by Either user ID or billing email
 	 */
 	public function inc_usage_count( $used_by = '' ) {
 		if ( $this->id ) {
@@ -265,22 +272,37 @@ class WC_Coupon {
 	/**
 	 * Decrease usage count for current coupon.
 	 *
-	 * @access public
-	 * @param  string $used_by Either user ID or billing email
-	 * @return void
+	 * @param string $used_by Either user ID or billing email
 	 */
 	public function dcr_usage_count( $used_by = '' ) {
-		if ( $this->id ) {
+		if ( $this->id && $this->usage_count > 0 ) {
 			global $wpdb;
 			$this->usage_count--;
 			update_post_meta( $this->id, 'usage_count', $this->usage_count );
 
-			// Delete 1 used by meta
-			$meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE meta_key = '_used_by' AND meta_value = %s AND post_id = %d LIMIT 1;", $used_by, $this->id ) );
-			if ( $meta_id ) {
-				delete_metadata_by_mid( 'post', $meta_id );
+			if ( $used_by ) {
+				/**
+				 * We're doing this the long way because `delete_post_meta( $id, $key, $value )` deletes
+				 * all instances where the key and value match, and we only want to delete one.
+				 */
+				$meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE meta_key = '_used_by' AND meta_value = %s AND post_id = %d LIMIT 1;", $used_by, $this->id ) );
+				if ( $meta_id ) {
+					delete_metadata_by_mid( 'post', $meta_id );
+				}
 			}
 		}
+	}
+
+	/**
+	 * Get records of all users who have used the current coupon.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_used_by() {
+		$_used_by = (array) get_post_meta( $this->id, '_used_by' );
+		// Strip out any null values.
+		return array_filter( $_used_by );
 	}
 
 	/**
@@ -316,11 +338,20 @@ class WC_Coupon {
 	 *
 	 * Per user usage limit - check here if user is logged in (against user IDs)
 	 * Checked again for emails later on in WC_Cart::check_customer_coupons()
+	 *
+	 * @param  int  $user_id
 	 */
-	private function validate_user_usage_limit() {
+	private function validate_user_usage_limit( $user_id = null ) {
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
 		if ( $this->usage_limit_per_user > 0 && is_user_logged_in() && $this->id ) {
-			$used_by     = (array) get_post_meta( $this->id, '_used_by' );
-			$usage_count = sizeof( array_keys( $used_by, get_current_user_id() ) );
+			global $wpdb;
+			$wpdb->get_var( $wpdb->prepare( "SELECT COUNT( `meta_id` )
+											 FROM   {$wpdb->postmeta}
+											 WHERE  `post_id`    = %d
+											   AND  `meta_key`   = '_used_by'
+											   AND  `meta_value` = %d", $this->id, $user_id ) );
 
 			if ( $usage_count >= $this->usage_limit_per_user ) {
 				throw new Exception( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
@@ -401,10 +432,14 @@ class WC_Coupon {
 		if ( 'yes' === $this->exclude_sale_items && $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
 			$valid_for_cart      = false;
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
+
 			if ( ! WC()->cart->is_empty() ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					if ( sizeof( array_intersect( array( absint( $cart_item['product_id'] ), absint( $cart_item['variation_id'] ), $cart_item['data']->get_parent() ), $product_ids_on_sale ) ) === 0 ) {
-						// not on sale
+					if ( ! empty( $cart_item['variation_id'] ) ) {
+						if ( ! in_array( $cart_item['variation_id'], $product_ids_on_sale, true ) ) {
+							$valid_for_cart = true;
+						}
+					} elseif ( ! in_array( $cart_item['product_id'], $product_ids_on_sale, true ) ) {
 						$valid_for_cart = true;
 					}
 				}
@@ -634,16 +669,18 @@ class WC_Coupon {
 
 		// Handle the limit_usage_to_x_items option
 		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
-			if ( '' === $this->limit_usage_to_x_items ) {
-				$limit_usage_qty = $cart_item_qty;
-			} else {
-				$limit_usage_qty              = min( $this->limit_usage_to_x_items, $cart_item_qty );
-				$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $limit_usage_qty );
-			}
-			if ( $single ) {
-				$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
-			} else {
-				$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
+			if ( $discounting_amount ) {
+				if ( '' === $this->limit_usage_to_x_items ) {
+					$limit_usage_qty = $cart_item_qty;
+				} else {
+					$limit_usage_qty              = min( $this->limit_usage_to_x_items, $cart_item_qty );
+					$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $limit_usage_qty );
+				}
+				if ( $single ) {
+					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
+				} else {
+					$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
+				}
 			}
 		}
 

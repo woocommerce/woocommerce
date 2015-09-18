@@ -143,14 +143,13 @@ class WC_Download_Handler {
 
 	/**
 	 * Log the download + increase counts
-	 * @param  object $download_data
-	 * @access private
+	 * @param object $download_data
 	 */
-	private static function count_download( $download_data ) {
+	public static function count_download( $download_data ) {
 		global $wpdb;
 
 		$wpdb->update(
-			$wpdb->prefix . "woocommerce_downloadable_product_permissions",
+			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
 			array(
 				'download_count'      => $download_data->download_count + 1,
 				'downloads_remaining' => $download_data->downloads_remaining > 0 ? $download_data->downloads_remaining - 1 : $download_data->downloads_remaining,
@@ -247,19 +246,17 @@ class WC_Download_Handler {
 	public static function download_file_xsendfile( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
 
-		extract( $parsed_file_path );
-
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules() ) ) {
-			self::download_headers( $file_path, $filename );
-			header( "X-Sendfile: $file_path" );
+			self::download_headers( $parsed_file_path['file_path'], $filename );
+			header( "X-Sendfile: " . $parsed_file_path['file_path'] );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'lighttpd' ) ) {
-			self::download_headers( $file_path, $filename );
-			header( "X-Lighttpd-Sendfile: $file_path" );
+			self::download_headers( $parsed_file_path['file_path'], $filename );
+			header( "X-Lighttpd-Sendfile: " . $parsed_file_path['file_path'] );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'nginx' ) || stristr( getenv( 'SERVER_SOFTWARE' ), 'cherokee' ) ) {
-			self::download_headers( $file_path, $filename );
-			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $file_path ), '/' );
+			self::download_headers( $parsed_file_path['file_path'], $filename );
+			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $parsed_file_path['file_path'] ), '/' );
 			header( "X-Accel-Redirect: /$xsendfile_path" );
 			exit;
 		}
@@ -276,12 +273,10 @@ class WC_Download_Handler {
 	public static function download_file_force( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
 
-		extract( $parsed_file_path );
+		self::download_headers( $parsed_file_path['file_path'], $filename );
 
-		self::download_headers( $file_path, $filename );
-
-		if ( ! self::readfile_chunked( $file_path ) ) {
-			if ( $remote_file ) {
+		if ( ! self::readfile_chunked( $parsed_file_path['file_path'] ) ) {
+			if ( $parsed_file_path['remote_file'] ) {
 				self::download_file_redirect( $file_path );
 			} else {
 				self::download_error( __( 'File not found', 'woocommerce' ) );
@@ -338,11 +333,11 @@ class WC_Download_Handler {
 	 * Check and set certain server config variables to ensure downloads work as intended.
 	 */
 	private static function check_server_config() {
-		if ( ! ini_get('safe_mode') ) {
-			@set_time_limit(0);
+		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
+			@set_time_limit( 0 );
 		}
-		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() ) {
-			@set_magic_quotes_runtime(0);
+		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() && version_compare( phpversion(), '5.4', '<' ) ) {
+			set_magic_quotes_runtime( 0 );
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 );

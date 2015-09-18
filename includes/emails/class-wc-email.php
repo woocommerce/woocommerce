@@ -803,45 +803,47 @@ class WC_Email extends WC_Settings_API {
 			</div>
 			<?php
 			wc_enqueue_js( "
-				jQuery('select.email_type').change(function() {
+				jQuery( 'select.email_type' ).change( function() {
 
 					var val = jQuery( this ).val();
 
-					jQuery('.template_plain, .template_html').show();
+					jQuery( '.template_plain, .template_html' ).show();
 
-					if ( val != 'multipart' && val != 'html' )
+					if ( val != 'multipart' && val != 'html' ) {
 						jQuery('.template_html').hide();
+					}
 
-					if ( val != 'multipart' && val != 'plain' )
+					if ( val != 'multipart' && val != 'plain' ) {
 						jQuery('.template_plain').hide();
+					}
 
 				}).change();
 
 				var view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
 				var hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
 
-				jQuery('a.toggle_editor').text( view ).toggle( function() {
-					jQuery( this ).text( hide ).closest('.template').find('.editor').slideToggle();
+				jQuery( 'a.toggle_editor' ).text( view ).toggle( function() {
+					jQuery( this ).text( hide ).closest(' .template' ).find( '.editor' ).slideToggle();
 					return false;
 				}, function() {
-					jQuery( this ).text( view ).closest('.template').find('.editor').slideToggle();
+					jQuery( this ).text( view ).closest( '.template' ).find( '.editor' ).slideToggle();
 					return false;
 				} );
 
-				jQuery('a.delete_template').click(function(){
-					var answer = confirm('" . esc_js( __( 'Are you sure you want to delete this template file?', 'woocommerce' ) ) . "');
-
-					if (answer)
+				jQuery( 'a.delete_template' ).click( function() {
+					if ( window.confirm('" . esc_js( __( 'Are you sure you want to delete this template file?', 'woocommerce' ) ) . "') ) {
 						return true;
+					}
 
 					return false;
 				});
 
-				jQuery('.editor textarea').change(function(){
-					var name = jQuery(this).attr( 'data-name' );
+				jQuery( '.editor textarea' ).change( function() {
+					var name = jQuery( this ).attr( 'data-name' );
 
-					if ( name )
-						jQuery(this).attr( 'name', name );
+					if ( name ) {
+						jQuery( this ).attr( 'name', name );
+					}
 				});
 			" );
 		}

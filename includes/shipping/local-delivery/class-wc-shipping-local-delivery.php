@@ -81,10 +81,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 	}
 
 	/**
-	 * init_form_fields function.
-	 *
-	 * @access public
-	 * @return void
+	 * Init form fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
@@ -125,7 +122,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 			'codes' => array(
 				'title'       => __( 'Allowed Zip/Post Codes', 'woocommerce' ),
 				'type'        => 'text',
-				'desc_tip'    => __( 'What zip/post codes are available for local pickup?', 'woocommerce' ),
+				'desc_tip'    => __( 'What zip/post codes are available for local delivery?', 'woocommerce' ),
 				'default'     => '',
 				'description' => __( 'Separate codes with a comma. Accepts wildcards, e.g. <code>P*</code> will match a postcode of PE30. Also accepts a pattern, e.g. <code>NG1___</code> would match NG1 1AA but not NG10 1AA', 'woocommerce' ),
 				'placeholder' => 'e.g. 12345, 56789'

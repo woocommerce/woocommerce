@@ -86,7 +86,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 
 	// Transients that include an ID
 	$post_transient_names = array(
-		'wc_product_children',
+		'wc_product_children_',
 		'wc_product_total_stock_'
 	);
 
@@ -280,7 +280,7 @@ function wc_placeholder_img_src() {
 function wc_placeholder_img( $size = 'shop_thumbnail' ) {
 	$dimensions = wc_get_image_size( $size );
 
-	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
+	return apply_filters('woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src() . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
 }
 
 /**
@@ -311,8 +311,9 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 			// If this is a term slug, get the term's nice name
 			if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
 				$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
-				if ( ! is_wp_error( $term ) && $term->name )
+				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
 					$value = $term->name;
+				}
 			} else {
 				$value = ucwords( str_replace( '-', ' ', $value ) );
 			}
@@ -341,7 +342,6 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
  * Function which handles the start and end of scheduled sales via cron.
  *
  * @access public
- * @return void
  */
 function wc_scheduled_sales() {
 	global $wpdb;
@@ -416,9 +416,6 @@ function wc_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force variable product price to sync up by removing their min price meta
-				delete_post_meta( $parent, '_min_variation_price' );
-
 				// Grouped products need syncing via a function
 				$this_product = wc_get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) ) {
@@ -427,6 +424,7 @@ function wc_scheduled_sales() {
 			}
 		}
 
+		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
 	}
 }
@@ -613,4 +611,60 @@ function _wc_save_product_price( $product_id, $regular_price, $sale_price = '', 
 		update_post_meta( $product_id, '_sale_price_dates_from', '' );
 		update_post_meta( $product_id, '_sale_price_dates_to', '' );
 	}
+}
+
+/**
+ * Get attibutes/data for an individual variation from the database and maintain it's integrity.
+ * @since  2.4.0
+ * @param  int $variation_id
+ * @return array
+ */
+function wc_get_product_variation_attributes( $variation_id ) {
+	// Build variation data from meta
+	$all_meta                = get_post_meta( $variation_id );
+	$parent_id               = wp_get_post_parent_id( $variation_id );
+	$parent_attributes       = array_filter( (array) get_post_meta( $parent_id, '_product_attributes', true ) );
+	$found_parent_attributes = array();
+	$variation_attributes    = array();
+
+	// Compare to parent variable product attributes and ensure they match
+	foreach ( $parent_attributes as $attribute_name => $options ) {
+		$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
+		$found_parent_attributes[] = $attribute;
+		if ( ! empty( $options['is_variation'] ) && ! array_key_exists( $attribute, $variation_attributes ) ) {
+			$variation_attributes[ $attribute ] = ''; // Add it - 'any' will be asumed
+		}
+	}
+
+	// Get the variation attributes from meta
+	foreach ( $all_meta as $name => $value ) {
+		// Only look at valid attribute meta, and also compare variation level attributes and remove any which do not exist at parent level
+		if ( 0 !== strpos( $name, 'attribute_' ) || ! in_array( $name, $found_parent_attributes ) ) {
+			unset( $variation_attributes[ $name ] );
+			continue;
+		}
+		/**
+		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+		 * Attempt to get full version of the text attribute from the parent.
+		 */
+		if ( sanitize_title( $value[0] ) === $value[0] && version_compare( get_post_meta( $parent_id, '_product_version', true ), '2.4.0', '<' ) ) {
+			foreach ( $parent_attributes as $attribute ) {
+				if ( $name !== 'attribute_' . sanitize_title( $attribute['name'] ) ) {
+					continue;
+				}
+				$text_attributes = wc_get_text_attributes( $attribute['value'] );
+
+				foreach ( $text_attributes as $text_attribute ) {
+					if ( sanitize_title( $text_attribute ) === $value[0] ) {
+						$value[0] = $text_attribute;
+						break;
+					}
+				}
+			}
+		}
+
+		$variation_attributes[ $name ] = $value[0];
+	}
+
+	return $variation_attributes;
 }

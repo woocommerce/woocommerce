@@ -1,7 +1,8 @@
+/*global wc_address_i18n_params */
 jQuery( function( $ ) {
 
 	// wc_address_i18n_params is required to continue, ensure the object exists
-	if (typeof wc_address_i18n_params === "undefined") {
+	if ( typeof wc_address_i18n_params === 'undefined' ) {
     	return false;
 	}
 
@@ -88,17 +89,28 @@ jQuery( function( $ ) {
 					}
 
 				} else if ( locale['default'][ key ] ) {
-					if ( locale['default'][ key ].required === true ) {
-						if ( field.find( 'label abbr' ).size() === 0 ) {
-							field_is_required( field, true );
-						}
-					}
 
-					if ( key !== 'state' ) {
+					if ( 'state' !== key ) {
 						if ( typeof locale['default'][ key ].hidden === 'undefined' || locale['default'][ key ].hidden === false ) {
 							field.show();
 						} else if ( locale['default'][ key ].hidden === true ) {
 							field.hide().find( 'input' ).val( '' );
+						}
+					}
+
+					if ( 'postcode' === key ) {
+						if ( locale['default'][ key ].label ) {
+							field.find( 'label' ).html( locale['default'][ key ].label );
+						}
+
+						if ( locale['default'][ key ].placeholder ) {
+							field.find( 'input' ).attr( 'placeholder', locale['default'][ key ].placeholder );
+						}
+					}
+
+					if ( locale['default'][ key ].required === true ) {
+						if ( field.find( 'label abbr' ).size() === 0 ) {
+							field_is_required( field, true );
 						}
 					}
 				}

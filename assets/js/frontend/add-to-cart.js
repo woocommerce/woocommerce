@@ -1,19 +1,22 @@
+/*global wc_add_to_cart_params */
 jQuery( function( $ ) {
 
 	// wc_add_to_cart_params is required to continue, ensure the object exists
-	if ( typeof wc_add_to_cart_params === 'undefined' )
+	if ( typeof wc_add_to_cart_params === 'undefined' ) {
 		return false;
+	}
 
 	// Ajax add to cart
-	$( document ).on( 'click', '.add_to_cart_button', function(e) {
+	$( document ).on( 'click', '.add_to_cart_button', function() {
 
 		// AJAX add to cart request
 		var $thisbutton = $( this );
 
 		if ( $thisbutton.is( '.product_type_simple' ) ) {
 
-			if ( ! $thisbutton.attr( 'data-product_id' ) )
+			if ( ! $thisbutton.attr( 'data-product_id' ) ) {
 				return true;
+			}
 
 			$thisbutton.removeClass( 'added' );
 			$thisbutton.addClass( 'loading' );
@@ -28,10 +31,11 @@ jQuery( function( $ ) {
 			$( document.body ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
 
 			// Ajax action
-			$.post( wc_add_to_cart_params.wc_ajax_url + 'add_to_cart', data, function( response ) {
+			$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ), data, function( response ) {
 
-				if ( ! response )
+				if ( ! response ) {
 					return;
+				}
 
 				var this_page = window.location.toString();
 
@@ -52,12 +56,12 @@ jQuery( function( $ ) {
 
 					$thisbutton.removeClass( 'loading' );
 
-					fragments = response.fragments;
-					cart_hash = response.cart_hash;
+					var fragments = response.fragments;
+					var cart_hash = response.cart_hash;
 
 					// Block fragments class
 					if ( fragments ) {
-						$.each( fragments, function( key, value ) {
+						$.each( fragments, function( key ) {
 							$( key ).addClass( 'updating' );
 						});
 					}

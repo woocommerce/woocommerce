@@ -2067,7 +2067,7 @@ I'm ordering mine next week";s:7:"POST__n";s:10:"a80bd2f042";s:21:"POST__wp_http
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_regular_price</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[20]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sale_price</wp:meta_key>
@@ -2865,7 +2865,7 @@ I'm ordering mine next week";s:7:"POST__n";s:10:"a80bd2f042";s:21:"POST__wp_http
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_regular_price</wp:meta_key>
-			<wp:meta_value><![CDATA[]]></wp:meta_value>
+			<wp:meta_value><![CDATA[30]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_sale_price</wp:meta_key>

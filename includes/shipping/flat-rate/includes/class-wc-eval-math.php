@@ -9,9 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Based on EvalMath by Miles Kaufman Copyright (C) 2005 Miles Kaufmann http://www.twmagic.com/
  */
 class WC_Eval_Math {
-	/** @var bool */
-	public static $suppress_errors = false;
-
 	/** @var string */
 	public static $last_error = null;
 
@@ -73,7 +70,12 @@ class WC_Eval_Math {
 		}
 	}
 
-	// Convert infix to postfix notation
+	/**
+	 * Convert infix to postfix notation
+	 *
+	 * @param  string $expr
+	 * @return string
+	 */
 	private static function nfx( $expr ) {
 
 		$index = 0;
@@ -154,7 +156,6 @@ class WC_Eval_Math {
 			} elseif ( $op == '(' and !$expecting_op ) {
 				$stack->push( '(' ); // that was easy
 				$index++;
-				$allow_neg = true;
 				//===============
 			} elseif ( $ex and !$expecting_op ) { // do we now have a function/variable/number?
 				$expecting_op = true;
@@ -228,10 +229,7 @@ class WC_Eval_Math {
 			} elseif ( $token == "_" ) {
 				$stack->push( -1*$stack->pop() );
 				// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
-			} elseif ( preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) { // it's a function!
-				$fnn = $matches[1];
-				// if the token is a number or variable, push it on the stack
-			} else {
+			} elseif ( ! preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) {
 				if ( is_numeric( $token ) ) {
 					$stack->push( $token );
 				} elseif ( array_key_exists( $token, self::$v ) ) {
@@ -251,7 +249,7 @@ class WC_Eval_Math {
 	// trigger an error, but nicely, if need be
 	private static function trigger( $msg ) {
 		self::$last_error = $msg;
-		if ( ! self::$suppress_errors ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			echo "\nError found in:";
 			self::debugPrintCallingFunction();
 			trigger_error( $msg, E_USER_WARNING );

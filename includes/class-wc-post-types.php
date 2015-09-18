@@ -28,6 +28,7 @@ class WC_Post_types {
 		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_status' ), 9 );
 		add_action( 'init', array( __CLASS__, 'support_jetpack_omnisearch' ) );
+		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
 	}
 
 	/**
@@ -208,9 +209,9 @@ class WC_Post_types {
 					register_taxonomy( $name, apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ), apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data ) );
 				}
 			}
-
-			do_action( 'woocommerce_after_register_taxonomy' );
 		}
+
+		do_action( 'woocommerce_after_register_taxonomy' );
 	}
 
 	/**
@@ -284,7 +285,7 @@ class WC_Post_types {
 				array(
 					'labels'              => array(
 							'name'               => __( 'Orders', 'woocommerce' ),
-							'singular_name'      => __( 'Order', 'woocommerce' ),
+							'singular_name'      => _x( 'Order', 'shop_order post type singular name', 'woocommerce' ),
 							'add_new'            => __( 'Add Order', 'woocommerce' ),
 							'add_new_item'       => __( 'Add New Order', 'woocommerce' ),
 							'edit'               => __( 'Edit', 'woocommerce' ),
@@ -481,6 +482,18 @@ class WC_Post_types {
 		if ( class_exists( 'Jetpack_Omnisearch_Posts' ) ) {
 			new Jetpack_Omnisearch_Posts( 'product' );
 		}
+	}
+
+	/**
+	 * Added product for Jetpack related posts
+	 *
+	 * @param  array $post_types
+	 * @return array
+	 */
+	public static function rest_api_allowed_post_types( $post_types ) {
+		$post_types[] = 'product';
+
+		return $post_types;
 	}
 }
 

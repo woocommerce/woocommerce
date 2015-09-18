@@ -44,7 +44,7 @@ class WC_Admin_Duplicate_Product {
 			return $actions;
 		}
 
-		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . __( 'Make a duplicate from this product', 'woocommerce' )
+		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" title="' . esc_attr__( 'Make a duplicate from this product', 'woocommerce' )
 			. '" rel="permalink">' .  __( 'Duplicate', 'woocommerce' ) . '</a>';
 
 		return $actions;
@@ -168,7 +168,7 @@ class WC_Admin_Duplicate_Product {
 		$this->duplicate_post_meta( $post->ID, $new_post_id );
 
 		// Copy the children (variations)
-		$exclude = array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $post ) );
+		$exclude = apply_filters( 'woocommerce_duplicate_product_exclude_children', false );
 
 		if ( ! $exclude && ( $children_products = get_children( 'post_parent=' . $post->ID . '&post_type=product_variation' ) ) ) {
 			foreach ( $children_products as $child ) {
@@ -236,14 +236,15 @@ class WC_Admin_Duplicate_Product {
 	private function duplicate_post_meta( $id, $new_id ) {
 		global $wpdb;
 
+		$sql     = $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id = %d", absint( $id ) );
 		$exclude = array_map( 'esc_sql', array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array( 'total_sales' ) ) ) );
 
 		if ( sizeof( $exclude ) ) {
-			$post_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d AND meta_key NOT IN ( '" . implode( "','", $exclude ) . "' );", absint( $id ) ) );
-		} else {
-			$post_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id=%d;", absint( $id ) ) );
+			$sql .= " AND meta_key NOT IN ( '" . implode( "','", $exclude ) . "' )";
 		}
 
+		$post_meta = $wpdb->get_results( $sql );
+		
 		if ( sizeof( $post_meta ) ) {
 			$sql_query_sel = array();
 			$sql_query     = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";

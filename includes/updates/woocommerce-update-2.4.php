@@ -2,10 +2,10 @@
 /**
  * Update WC to 2.4.0
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Admin/Updates
- * @version     2.4.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin/Updates
+ * @version  2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -58,10 +58,11 @@ foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 
 		if ( 'item' === $shipping_method->type ) {
 			foreach ( $math_cost_strings as $key => $math_cost_string ) {
-				$math_cost_strings[ $key ] = array_filter( $math_cost_strings[ $key ] );
-				if ( $math_cost_strings[ $key ] ) {
-					$math_cost_strings[ $key ][0] = '( ' . $math_cost_strings[ $key ][0];
-					$math_cost_strings[ $key ][ sizeof( $math_cost_strings[ $key ] ) - 1 ] .= ' ) * [qty]';
+				$math_cost_strings[ $key ] = array_filter( array_map( 'trim', $math_cost_strings[ $key ] ) );
+				if ( ! empty( $math_cost_strings[ $key ] ) ) {
+					$last_key                                = max( 0, sizeof( $math_cost_strings[ $key ] ) - 1 );
+					$math_cost_strings[ $key ][0]            = '( ' . $math_cost_strings[ $key ][0];
+					$math_cost_strings[ $key ][ $last_key ] .= ' ) * [qty]';
 				}
 			}
 		}
@@ -70,7 +71,7 @@ foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 
 		// Save settings
 		foreach ( $math_cost_strings as $option_id => $math_cost_string ) {
-			$shipping_method->settings[ $option_id ] = implode( ' + ', $math_cost_string );
+			$shipping_method->settings[ $option_id ] = implode( ' + ', array_filter( $math_cost_string ) );
 		}
 
 		$shipping_method->settings['version'] = '2.4.0';
@@ -91,9 +92,10 @@ foreach ( $api_users as $_user ) {
 	$user = get_userdata( $_user->user_id );
 	$apps_keys[] = array(
 		'user_id'         => $user->ID,
-		'permission'      => $user->woocommerce_api_key_permissions,
+		'permissions'     => $user->woocommerce_api_key_permissions,
 		'consumer_key'    => wc_api_hash( $user->woocommerce_api_consumer_key ),
-		'consumer_secret' => $user->woocommerce_api_consumer_secret
+		'consumer_secret' => $user->woocommerce_api_consumer_secret,
+		'truncated_key'   => substr( $user->woocommerce_api_consumer_secret, -7 )
 	);
 }
 
@@ -105,6 +107,7 @@ if ( ! empty( $apps_keys ) ) {
 			$app,
 			array(
 				'%d',
+				'%s',
 				'%s',
 				'%s',
 				'%s'
@@ -145,6 +148,12 @@ $refunded_orders = get_posts( array(
 	'post_type'      => 'shop_order',
 	'post_status'    => array( 'wc-refunded' )
 ) );
+
+// Ensure emails are disabled during this update routine
+remove_all_actions( 'woocommerce_order_status_refunded_notification' );
+remove_all_actions( 'woocommerce_order_partially_refunded_notification' );
+remove_action( 'woocommerce_order_status_refunded', array( 'WC_Emails', 'send_transactional_email' ) );
+remove_action( 'woocommerce_order_partially_refunded', array( 'WC_Emails', 'send_transactional_email' ) );
 
 foreach ( $refunded_orders as $refunded_order ) {
 	$order_total    = get_post_meta( $refunded_order->ID, '_order_total', true );

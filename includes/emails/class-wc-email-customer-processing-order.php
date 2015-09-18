@@ -43,10 +43,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	}
 
 	/**
-	 * trigger function.
-	 *
-	 * @access public
-	 * @return void
+	 * Trigger.
 	 */
 	function trigger( $order_id ) {
 

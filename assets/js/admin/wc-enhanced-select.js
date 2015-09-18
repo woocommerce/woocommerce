@@ -13,7 +13,7 @@ jQuery( function( $ ) {
 			formatNoMatches: function() {
 				return wc_enhanced_select_params.i18n_no_matches;
 			},
-			formatAjaxError: function( jqXHR, textStatus, errorThrown ) {
+			formatAjaxError: function() {
 				return wc_enhanced_select_params.i18n_ajax_error;
 			},
 			formatInputTooShort: function( input, min ) {
@@ -41,7 +41,7 @@ jQuery( function( $ ) {
 
 				return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
 			},
-			formatLoadMore: function( pageNumber ) {
+			formatLoadMore: function() {
 				return wc_enhanced_select_params.i18n_load_more;
 			},
 			formatSearching: function() {
@@ -90,21 +90,24 @@ jQuery( function( $ ) {
 				        url:         wc_enhanced_select_params.ajax_url,
 				        dataType:    'json',
 				        quietMillis: 250,
-				        data: function( term, page ) {
+				        data: function( term ) {
 				            return {
 								term:     term,
 								action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
-								security: wc_enhanced_select_params.search_products_nonce
+								security: wc_enhanced_select_params.search_products_nonce,
+								exclude:  $( this ).data( 'exclude' )
 				            };
 				        },
-				        results: function( data, page ) {
+				        results: function( data ) {
 				        	var terms = [];
 					        if ( data ) {
 								$.each( data, function( id, text ) {
 									terms.push( { id: id, text: text } );
 								});
 							}
-				            return { results: terms };
+				            return {
+				            	results: terms
+			            	};
 				        },
 				        cache: true
 				    }
@@ -116,8 +119,11 @@ jQuery( function( $ ) {
 						var data     = $.parseJSON( element.attr( 'data-selected' ) );
 						var selected = [];
 
-						$( element.val().split( "," ) ).each( function( i, val ) {
-							selected.push( { id: val, text: data[ val ] } );
+						$( element.val().split( ',' ) ).each( function( i, val ) {
+							selected.push({
+								id: val,
+								text: data[ val ]
+							});
 						});
 						return callback( selected );
 					};
@@ -127,7 +133,10 @@ jQuery( function( $ ) {
 				} else {
 					select2_args.multiple = false;
 					select2_args.initSelection = function( element, callback ) {
-						var data = {id: element.val(), text: element.attr( 'data-selected' )};
+						var data = {
+							id: element.val(),
+							text: element.attr( 'data-selected' )
+						};
 						return callback( data );
 					};
 				}
@@ -150,18 +159,21 @@ jQuery( function( $ ) {
 				        url:         wc_enhanced_select_params.ajax_url,
 				        dataType:    'json',
 				        quietMillis: 250,
-				        data: function( term, page ) {
+				        data: function( term ) {
 				            return {
 								term:     term,
 								action:   'woocommerce_json_search_customers',
 								security: wc_enhanced_select_params.search_customers_nonce
 				            };
 				        },
-				        results: function( data, page ) {
+				        results: function( data ) {
 				        	var terms = [];
 					        if ( data ) {
 								$.each( data, function( id, text ) {
-									terms.push( { id: id, text: text } );
+									terms.push({
+										id: id,
+										text: text
+									});
 								});
 							}
 				            return { results: terms };
@@ -176,7 +188,10 @@ jQuery( function( $ ) {
 						var selected = [];
 
 						$( element.val().split( ',' ) ).each( function( i, val ) {
-							selected.push( { id: val, text: data[ val ] } );
+							selected.push({
+								id: val,
+								text: data[ val ]
+							});
 						});
 						return callback( selected );
 					};
@@ -186,7 +201,10 @@ jQuery( function( $ ) {
 				} else {
 					select2_args.multiple = false;
 					select2_args.initSelection = function( element, callback ) {
-						var data = {id: element.val(), text: element.attr( 'data-selected' )};
+						var data = {
+							id: element.val(),
+							text: element.attr( 'data-selected' )
+						};
 						return callback( data );
 					};
 				}

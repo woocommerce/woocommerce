@@ -134,7 +134,7 @@ $attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "
 foreach ( $attribute_taxonomies as $attribute_taxonomy ) {
 	$sanitized_attribute_name = wc_sanitize_taxonomy_name( $attribute_taxonomy->attribute_name );
 	if ( $sanitized_attribute_name !== $attribute_taxonomy->attribute_name ) {
-		if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $sanitized_attribute_name ) ) ) {
+		if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1=1 FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $sanitized_attribute_name ) ) ) {
 			// Update attribute
 			$wpdb->update(
 				"{$wpdb->prefix}woocommerce_attribute_taxonomies",

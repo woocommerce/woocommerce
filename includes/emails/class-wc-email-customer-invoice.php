@@ -48,10 +48,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	}
 
 	/**
-	 * trigger function.
-	 *
-	 * @access public
-	 * @return void
+	 * Trigger.
 	 */
 	function trigger( $order ) {
 
@@ -140,10 +137,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	}
 
 	/**
-	 * Initialise Settings Form Fields
-	 *
-	 * @access public
-	 * @return void
+	 * Initialise settings form fields
 	 */
 	function init_form_fields() {
 		$this->form_fields = array(

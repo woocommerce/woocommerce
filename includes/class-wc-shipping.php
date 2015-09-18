@@ -75,10 +75,7 @@ class WC_Shipping {
 	}
 
 	/**
-	 * __construct function.
-	 *
-	 * @access public
-	 * @return void
+	 * Initialize shipping.
 	 */
 	public function __construct() {
 		$this->init();
@@ -86,8 +83,6 @@ class WC_Shipping {
 
     /**
      * init function.
-     *
-     * @access public
      */
     public function init() {
 		do_action( 'woocommerce_shipping_init' );
@@ -134,9 +129,7 @@ class WC_Shipping {
 	/**
 	 * Register a shipping method for use in calculations.
 	 *
-	 * @access public
-	 * @param  object|string $method Either the name of the method's class, or an instance of the method's class
-	 * @return void
+	 * @param object|string $method Either the name of the method's class, or an instance of the method's class
 	 */
 	public function register_shipping_method( $method ) {
 		if ( ! is_object( $method ) ) {
@@ -149,21 +142,17 @@ class WC_Shipping {
 	}
 
 	/**
-	 * unregister_shipping_methods function.
-	 *
-	 * @access public
-	 * @return void
+	 * Unregister shipping methods.
 	 */
 	public function unregister_shipping_methods() {
 		unset( $this->shipping_methods );
 	}
 
 	/**
-	 * sort_shipping_methods function.
+	 * Sort shipping methods.
 	 *
 	 * Sorts shipping methods into the user defined order.
 	 *
-	 * @access public
 	 * @return array
 	 */
 	public function sort_shipping_methods() {
@@ -221,9 +210,9 @@ class WC_Shipping {
 	 */
 	public function get_shipping_classes() {
 		if ( empty( $this->shipping_classes ) ) {
-			$this->shipping_classes = ( $classes = get_terms( 'product_shipping_class', array( 'hide_empty' => '0' ) ) ) ? $classes : array();
+			$classes                = get_terms( 'product_shipping_class', array( 'hide_empty' => '0' ) );
+			$this->shipping_classes = $classes && ! is_wp_error( $classes ) ? $classes : array();
 		}
-
 		return $this->shipping_classes;
 	}
 
@@ -298,9 +287,6 @@ class WC_Shipping {
 
 		// Get chosen methods for each package
 		foreach ( $this->packages as $i => $package ) {
-
-			$_cheapest_cost   = false;
-			$_cheapest_method = false;
 			$chosen_method    = false;
 			$method_count     = false;
 
@@ -332,8 +318,10 @@ class WC_Shipping {
 					// Merge cost and taxes - label and ID will be the same
 					$this->shipping_total += $rate->cost;
 
-					foreach ( array_keys( $this->shipping_taxes + $rate->taxes ) as $key ) {
-					    $this->shipping_taxes[ $key ] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $this->shipping_taxes[$key] ) ? $this->shipping_taxes[$key] : 0 );
+					if ( ! empty( $rate->taxes ) && is_array( $rate->taxes ) ) {
+						foreach ( array_keys( $this->shipping_taxes + $rate->taxes ) as $key ) {
+							$this->shipping_taxes[ $key ] = ( isset( $rate->taxes[$key] ) ? $rate->taxes[$key] : 0 ) + ( isset( $this->shipping_taxes[$key] ) ? $this->shipping_taxes[$key] : 0 );
+						}
 					}
 				}
 			}
@@ -401,6 +389,7 @@ class WC_Shipping {
 
 	/**
 	 * Get packages
+	 *
 	 * @return array
 	 */
 	public  function get_packages() {
@@ -408,12 +397,9 @@ class WC_Shipping {
 	}
 
 	/**
-	 * reset_shipping function.
+	 * Reset shipping.
 	 *
 	 * Reset the totals for shipping as a whole.
-	 *
-	 * @access public
-	 * @return void
 	 */
 	public function reset_shipping() {
 		unset( WC()->session->chosen_shipping_methods );
@@ -423,7 +409,7 @@ class WC_Shipping {
 	}
 
 	/**
-	 * process_admin_options function.
+	 * Process admin options.
 	 *
 	 * Saves options on the shipping setting page.
 	 */

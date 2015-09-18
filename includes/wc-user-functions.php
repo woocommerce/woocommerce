@@ -120,8 +120,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 /**
  * Login a customer (set auth cookie and set global user object)
  *
- * @param  int $customer_id
- * @return void
+ * @param int $customer_id
  */
 function wc_set_customer_auth_cookie( $customer_id ) {
 	global $current_user;
@@ -166,11 +165,13 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 		foreach ( $customer_orders as $order_id ) {
 			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
+			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
+
 			if ( get_post_status( $order_id ) === 'wc-completed' ) {
-				$complete ++;
+				$complete++;
 			}
 
-			$linked ++;
+			$linked++;
 		}
 	}
 
@@ -188,7 +189,6 @@ function wc_update_new_customer_past_orders( $customer_id ) {
  *
  * @access public
  * @param int $order_id
- * @return void
  */
 function wc_paying_customer( $order_id ) {
 	$order = wc_get_order( $order_id );
@@ -243,17 +243,16 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 
 		$result = $wpdb->get_var(
 			$wpdb->prepare( "
-				SELECT 1 FROM {$wpdb->posts} AS p
+				SELECT COUNT( i.order_item_id ) FROM {$wpdb->posts} AS p
 				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
 				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
 				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
 				WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
 				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
 				AND im.meta_key IN ( '_product_id', '_variation_id' )
-				AND im.meta_value = %s
+				AND im.meta_value = %d
 				", $product_id
-			)
+			) . " AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )"
 		);
 
 		set_transient( $transient_name, $result ? 1 : 0, DAY_IN_SECONDS * 30 );

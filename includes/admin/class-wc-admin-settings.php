@@ -464,6 +464,7 @@ class WC_Admin_Settings {
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								type="checkbox"
+							 	class="<?php echo esc_attr(isset($value['class']) ? $value['class'] : ''); ?>"
 								value="1"
 								<?php checked( $option_value, 'yes'); ?>
 								<?php echo implode( ' ', $custom_attributes ); ?>
@@ -487,12 +488,11 @@ class WC_Admin_Settings {
 				// Image width settings
 				case 'image_width' :
 
-					$image_size = str_replace( '_image_size', '', $value[ 'id' ] );
-					$size   = wc_get_image_size( $image_size );
-					$width  = isset( $size[ 'width' ] )  ? $size[ 'width' ]  : $value[ 'default' ][ 'width' ];
-					$height = isset( $size[ 'height' ] ) ? $size[ 'height' ] : $value[ 'default' ][ 'height' ];
-					$crop   = isset( $size[ 'crop' ] )   ? $size[ 'crop' ]   : $value[ 'default' ][ 'crop' ];
-
+					$image_size       = str_replace( '_image_size', '', $value[ 'id' ] );
+					$size             = wc_get_image_size( $image_size );
+					$width            = isset( $size[ 'width' ] ) ? $size[ 'width' ] : $value[ 'default' ][ 'width' ];
+					$height           = isset( $size[ 'height' ] ) ? $size[ 'height' ] : $value[ 'default' ][ 'height' ];
+					$crop             = isset( $size[ 'crop' ] ) ? $size[ 'crop' ] : $value[ 'default' ][ 'crop' ];
 					$disabled_attr    = '';
 					$disabled_message = '';
 
@@ -534,7 +534,7 @@ class WC_Admin_Settings {
 					?><tr valign="top" class="single_select_page">
 						<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ) ?> <?php echo $tooltip_html; ?></th>
 						<td class="forminp">
-							<?php echo str_replace(' id=', " data-placeholder='" . __( 'Select a page&hellip;', 'woocommerce' ) .  "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); ?> <?php echo $description; ?>
+							<?php echo str_replace(' id=', " data-placeholder='" . esc_attr__( 'Select a page&hellip;', 'woocommerce' ) .  "' style='" . $value['css'] . "' class='" . $value['class'] . "' id=", wp_dropdown_pages( $args ) ); ?> <?php echo $description; ?>
 						</td>
 					</tr><?php
 					break;
@@ -556,7 +556,7 @@ class WC_Admin_Settings {
 							<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
 							<?php echo $tooltip_html; ?>
 						</th>
-						<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php _e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
+						<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" title="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
 							<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 						</select> <?php echo $description; ?>
 						</td>
@@ -581,7 +581,7 @@ class WC_Admin_Settings {
 							<?php echo $tooltip_html; ?>
 						</th>
 						<td class="forminp">
-							<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php _e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php _e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
+							<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries&hellip;', 'woocommerce' ); ?>" title="<?php esc_attr_e( 'Country', 'woocommerce' ) ?>" class="wc-enhanced-select">
 								<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {
@@ -690,14 +690,15 @@ class WC_Admin_Settings {
 					$value = array_filter( array_map( 'wc_clean', (array) $raw_value ) );
 					break;
 				case 'image_width' :
-					if ( isset( $option_value['width'] ) ) {
-						$update_options[ $option['id'] ]['width']  = wc_clean( $value['width'] );
-						$update_options[ $option['id'] ]['height'] = wc_clean( $value['height'] );
-						$update_options[ $option['id'] ]['crop']   = isset( $value['crop'] ) ? 1 : 0;
+					$value = array();
+					if ( isset( $raw_value['width'] ) ) {
+						$value['width']  = wc_clean( $raw_value['width'] );
+						$value['height'] = wc_clean( $raw_value['height'] );
+						$value['crop']   = isset( $raw_value['crop'] ) ? 1 : 0;
 					} else {
-						$update_options[ $option['id'] ]['width']  = $option['default']['width'];
-						$update_options[ $option['id'] ]['height'] = $option['default']['height'];
-						$update_options[ $option['id'] ]['crop']   = $option['default']['crop'];
+						$value['width']  = $option['default']['width'];
+						$value['height'] = $option['default']['height'];
+						$value['crop']   = $option['default']['crop'];
 					}
 					break;
 				default :
@@ -709,7 +710,11 @@ class WC_Admin_Settings {
 			 * Fire an action when a certain 'type' of field is being saved.
 			 * @deprecated 2.4.0 - doesn't allow manipulation of values!
 			 */
-			do_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ), $option );
+			if ( has_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ) ) ) {
+				_deprecated_function( 'The woocommerce_update_option_X action', '2.4.0', 'woocommerce_admin_settings_sanitize_option filter' );
+				do_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ), $option );
+				continue;
+			}
 
 			/**
 			 * Sanitize the value of an option
@@ -763,7 +768,7 @@ class WC_Admin_Settings {
 	public static function check_download_folder_protection() {
 		$upload_dir      = wp_upload_dir();
 		$downloads_url   = $upload_dir['basedir'] . '/woocommerce_uploads';
-		$download_method = get_option('woocommerce_file_download_method');
+		$download_method = get_option( 'woocommerce_file_download_method' );
 
 		if ( 'redirect' == $download_method ) {
 

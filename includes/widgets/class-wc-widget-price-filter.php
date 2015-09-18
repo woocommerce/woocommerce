@@ -43,8 +43,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	 *
 	 * @param array $args
 	 * @param array $instance
-	 *
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		global $_chosen_attributes, $wpdb, $wp;
@@ -98,55 +96,47 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		}
 
 		if ( 0 === sizeof( WC()->query->layered_nav_product_ids ) ) {
-			$min = floor( $wpdb->get_var(
-				$wpdb->prepare('
-					SELECT min(meta_value + 0)
-					FROM %1$s
-					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price', '_min_variation_price' ) ) ) . '")
-					AND meta_value != ""
-				', $wpdb->posts, $wpdb->postmeta )
-			) );
-			$max = ceil( $wpdb->get_var(
-				$wpdb->prepare('
-					SELECT max(meta_value + 0)
-					FROM %1$s
-					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) . '")
-				', $wpdb->posts, $wpdb->postmeta, '_price' )
-			) );
+			$min = floor( $wpdb->get_var( "
+				SELECT min(meta_value + 0)
+				FROM {$wpdb->posts} as posts
+				LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+				WHERE meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price', '_min_variation_price' ) ) ) ) . "')
+				AND meta_value != ''
+			" ) );
+			$max = ceil( $wpdb->get_var( "
+				SELECT max(meta_value + 0)
+				FROM {$wpdb->posts} as posts
+				LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+				WHERE meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
+			" ) );
 		} else {
-			$min = floor( $wpdb->get_var(
-				$wpdb->prepare('
-					SELECT min(meta_value + 0)
-					FROM %1$s
-					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price', '_min_variation_price' ) ) ) . '")
-					AND meta_value != ""
-					AND (
-						%1$s.ID IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
-						OR (
-							%1$s.post_parent IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
-							AND %1$s.post_parent != 0
-						)
+			$min = floor( $wpdb->get_var( "
+				SELECT min(meta_value + 0)
+				FROM {$wpdb->posts} as posts
+				LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+				WHERE meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price', '_min_variation_price' ) ) ) ) . "')
+				AND meta_value != ''
+				AND (
+					posts.ID IN (" . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ")
+					OR (
+						posts.post_parent IN (" . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ")
+						AND posts.post_parent != 0
 					)
-				', $wpdb->posts, $wpdb->postmeta
-			) ) );
-			$max = ceil( $wpdb->get_var(
-				$wpdb->prepare('
-					SELECT max(meta_value + 0)
-					FROM %1$s
-					LEFT JOIN %2$s ON %1$s.ID = %2$s.post_id
-					WHERE meta_key IN ("' . implode( '","', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) . '")
-					AND (
-						%1$s.ID IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
-						OR (
-							%1$s.post_parent IN (' . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ')
-							AND %1$s.post_parent != 0
-						)
+				)
+			" ) );
+			$max = ceil( $wpdb->get_var( "
+				SELECT max(meta_value + 0)
+				FROM {$wpdb->posts} as posts
+				LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+				WHERE meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
+				AND (
+					posts.ID IN (" . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ")
+					OR (
+						posts.post_parent IN (" . implode( ',', array_map( 'absint', WC()->query->layered_nav_product_ids ) ) . ")
+						AND posts.post_parent != 0
 					)
-				', $wpdb->posts, $wpdb->postmeta
-			) ) );
+				)
+			" ) );
 		}
 
 		if ( $min == $max ) {
@@ -183,8 +173,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">
-					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $min_price ) . '" data-min="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ) ) . '" placeholder="' . __('Min price', 'woocommerce' ) . '" />
-					<input type="text" id="max_price" name="max_price" value="' . esc_attr( $max_price ) . '" data-max="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ) ) . '" placeholder="' . __( 'Max price', 'woocommerce' ) . '" />
+					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $min_price ) . '" data-min="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ) ) . '" placeholder="' . esc_attr__('Min price', 'woocommerce' ) . '" />
+					<input type="text" id="max_price" name="max_price" value="' . esc_attr( $max_price ) . '" data-max="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ) ) . '" placeholder="' . esc_attr__( 'Max price', 'woocommerce' ) . '" />
 					<button type="submit" class="button">' . __( 'Filter', 'woocommerce' ) . '</button>
 					<div class="price_label" style="display:none;">
 						' . __( 'Price:', 'woocommerce' ) . ' <span class="from"></span> &mdash; <span class="to"></span>

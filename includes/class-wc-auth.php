@@ -115,7 +115,7 @@ class WC_Auth {
 				$permissions[] = __( 'View and manage products', 'woocommerce' );
 			break;
 		}
-		return $permissions;
+		return apply_filters( 'woocommerce_api_permissions_in_scope', $permissions, $scope );
 	}
 
 	/**
@@ -204,10 +204,12 @@ class WC_Auth {
 				'description'     => $description,
 				'permissions'     => $permissions,
 				'consumer_key'    => wc_api_hash( $consumer_key ),
-				'consumer_secret' => $consumer_secret
+				'consumer_secret' => $consumer_secret,
+				'truncated_key'   => substr( $consumer_key, -7 )
 			),
 			array(
 				'%d',
+				'%s',
 				'%s',
 				'%s',
 				'%s',
@@ -239,7 +241,7 @@ class WC_Auth {
 			'body'      => json_encode( $consumer_data ),
 			'timeout'   => 60,
 			'headers'   => array(
-				'Content-Type' => 'application/xml;charset=' . get_bloginfo( 'charset' ),
+				'Content-Type' => 'application/json;charset=' . get_bloginfo( 'charset' ),
 			)
 		);
 
@@ -279,7 +281,7 @@ class WC_Auth {
 	/**
 	 * Auth endpoint
 	 *
-	 * @since  2.4.0
+	 * @since 2.4.0
 	 *
 	 * @param string $route
 	 */

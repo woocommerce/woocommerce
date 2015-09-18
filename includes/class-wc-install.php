@@ -2,10 +2,10 @@
 /**
  * Installation related functions and actions.
  *
- * @author 		WooThemes
- * @category 	Admin
- * @package 	WooCommerce/Classes
- * @version     2.3.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Classes
+ * @version  2.4.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,7 +24,8 @@ class WC_Install {
 		'2.1.0' => 'updates/woocommerce-update-2.1.php',
 		'2.2.0' => 'updates/woocommerce-update-2.2.php',
 		'2.3.0' => 'updates/woocommerce-update-2.3.php',
-		'2.4.0' => 'updates/woocommerce-update-2.4.php'
+		'2.4.0' => 'updates/woocommerce-update-2.4.php',
+		'2.4.1' => 'updates/woocommerce-update-2.4.1.php'
 	);
 
 	/**
@@ -37,6 +38,7 @@ class WC_Install {
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
+		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 	}
 
 	/**
@@ -92,7 +94,6 @@ class WC_Install {
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
-		WC_AJAX::add_endpoint();
 
 		self::create_terms();
 		self::create_cron_jobs();
@@ -179,6 +180,19 @@ class WC_Install {
 		}
 
 		self::update_db_version();
+	}
+
+	/**
+	 * Add more cron schedules
+	 * @param  array $schedules
+	 * @return array
+	 */
+	public static function cron_schedules( $schedules ) {
+		$schedules['monthly'] = array(
+			'interval' => 2635200,
+			'display'  => __( 'Monthly', 'woocommerce' )
+		);
+		return $schedules;
 	}
 
 	/**
@@ -302,8 +316,6 @@ class WC_Install {
 	 *		woocommerce_order_itemmeta - Order line item meta is stored in a table for storing extra data.
 	 *		woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
 	 *		woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
-	 *
-	 * @return void
 	 */
 	private static function create_tables() {
 		global $wpdb;
@@ -357,6 +369,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   consumer_key char(64) NOT NULL,
   consumer_secret char(43) NOT NULL,
   nonces longtext NULL,
+  truncated_key char(7) NOT NULL,
+  last_access datetime NULL default null,
   PRIMARY KEY  (key_id),
   KEY consumer_key (consumer_key),
   KEY consumer_secret (consumer_secret)
@@ -594,14 +608,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	 */
 	private static function create_files() {
 		// Install files and folders for uploading files and prevent hotlinking
-		$upload_dir =  wp_upload_dir();
+		$upload_dir      = wp_upload_dir();
+		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
 
 		$files = array(
-			array(
-				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
-				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
-			),
 			array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> 'index.html',
@@ -618,6 +628,14 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 				'content' 	=> ''
 			)
 		);
+
+		if ( 'redirect' !== $download_method ) {
+			$files[] = array(
+				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
+				'file' 		=> '.htaccess',
+				'content' 	=> 'deny from all'
+			);
+		}
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {

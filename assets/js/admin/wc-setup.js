@@ -1,3 +1,4 @@
+/*global wc_setup_params */
 jQuery(function( $ ) {
 
 	var locale_info = $.parseJSON( wc_setup_params.locale_info );
@@ -12,7 +13,7 @@ jQuery(function( $ ) {
 			$.each( country_locale_info, function( index, value) {
 				$(':input[name="' + index + '"]').val( value ).change();
 
-				if ( -1 != $.inArray( index, hide_if_set ) ) {
+				if ( -1 !== $.inArray( index, hide_if_set ) ) {
 					$(':input[name="' + index + '"]').closest('tr').hide();
 				}
 			} );
@@ -51,5 +52,16 @@ jQuery(function( $ ) {
 			$('.importing-tax-rates').hide();
 		}
 	}).change();
+
+	$('.button-next').on( 'click', function() {
+		$('.wc-setup-content').block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+		return true;
+	});
 
 });
