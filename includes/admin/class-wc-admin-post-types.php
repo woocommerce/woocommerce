@@ -2044,7 +2044,7 @@ class WC_Admin_Post_Types {
 				WHERE order_id = %d
 			", $postid ) );
 
-			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
+			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
 		}
 	}
 
