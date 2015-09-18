@@ -177,12 +177,68 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 
 	if ( $complete ) {
 		update_user_meta( $customer_id, 'paying_customer', 1 );
-		update_user_meta( $customer_id, '_order_count', '' );
-		update_user_meta( $customer_id, '_money_spent', '' );
+		
+		delete_user_meta( $customer_id, '_money_spent' );
+		wc_get_customer_total_spent( $customer_id );
+		
+		delete_user_meta( $customer_id, '_order_count' );
+		wc_get_customer_order_count( $customer_id );
 	}
 
 	return $linked;
 }
+
+/**
+ * Get orders (by customer) and change the customer
+ *
+ * @param  int $old_user_id
+ * @param  int $new_user_id
+ */
+function wc_reassign_customer_orders( $old_user_id, $new_user_id ) {
+
+	$customer_orders = get_posts( array(
+		'numberposts' => -1,
+		'post_type'   => wc_get_order_types(),
+		'post_status' => array_keys( wc_get_order_statuses() ),
+		'fields'      => 'ids',
+		'meta_query' => array(
+			array(
+				'key'     => '_customer_user',
+				'value'   => $old_user_id
+			)
+		),
+	) );
+
+	$linked   = 0;
+	$complete = 0;
+
+	if ( $customer_orders ) {
+		foreach ( $customer_orders as $order_id ) {
+			update_post_meta( $order_id, '_customer_user', $new_user_id );
+
+			do_action( 'woocommerce_reassign_customer_order', $order_id, $old_user_id, $new_user_id );
+
+			if ( get_post_status( $order_id ) === 'wc-completed' ) {
+				$complete++;
+			}
+
+			$linked++;
+		}
+	}
+
+	if ( $complete ) {
+		update_user_meta( $new_user_id, 'paying_customer', 1 );
+		
+		delete_user_meta( $new_user_id, '_money_spent' );
+		wc_get_customer_total_spent( $new_user_id );
+		
+		delete_user_meta( $new_user_id, '_order_count' );
+		wc_get_customer_order_count( $new_user_id );
+	}
+
+	return $linked;
+}
+add_action('deleted_user','wc_reassign_customer_orders',10,2);
 
 /**
  * Order Status completed - This is a paying customer
@@ -537,3 +593,20 @@ function wc_get_customer_order_count( $user_id ) {
 
 	return absint( $count );
 }
+
+/**
+ * Update orders to belong to a different customer
+ *
+ * Note that if $new_user_id is NULL, $wpdb will enter it as a 0
+ * The effect of this is that the order becomes a guest order
+ *
+ * @param  int $old_user_id
+ * @param  int $new_user_id
+ */
+function wc_reassign_customer_orders( $old_user_id, $new_user_id ) {			
+	global $wpdb;
+	$wpdb->query( $wpdb->prepare("UPDATE {$wpdb->postmeta} SET meta_value=%d WHERE meta_key='_customer_user' and meta_value=%d", $new_user_id, $old_user_id ) );
+	wc_update_new_customer_past_orders($new_user_id);
+}
+add_action('deleted_user','wc_reassign_customer_orders',10,2);
+	
