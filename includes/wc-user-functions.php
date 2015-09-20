@@ -185,7 +185,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 }
 
 /**
- * Get orders (by customer) and change the customer
+ * Get orders (belonging to an old customer) and change to an existing customer
  *
  * @param  int $old_customer_id
  * @param  int $customer_id
