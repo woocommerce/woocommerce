@@ -177,12 +177,8 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 
 	if ( $complete ) {
 		update_user_meta( $customer_id, 'paying_customer', 1 );
-		
-		delete_user_meta( $customer_id, '_money_spent' );
-		wc_get_customer_total_spent( $customer_id );
-		
-		delete_user_meta( $customer_id, '_order_count' );
-		wc_get_customer_order_count( $customer_id );
+		wc_get_customer_total_spent( $new_user_id, TRUE );
+		wc_get_customer_order_count( $new_user_id, TRUE );
 	}
 
 	return $linked;
@@ -228,12 +224,8 @@ function wc_reassign_customer_orders( $old_user_id, $new_user_id ) {
 
 	if ( $complete ) {
 		update_user_meta( $new_user_id, 'paying_customer', 1 );
-		
-		delete_user_meta( $new_user_id, '_money_spent' );
-		wc_get_customer_total_spent( $new_user_id );
-		
-		delete_user_meta( $new_user_id, '_order_count' );
-		wc_get_customer_order_count( $new_user_id );
+		wc_get_customer_total_spent( $new_user_id, TRUE );
+		wc_get_customer_order_count( $new_user_id, TRUE );
 	}
 
 	return $linked;
@@ -545,8 +537,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
  * @param  int $user_id
  * @return string
  */
-function wc_get_customer_total_spent( $user_id ) {
-	if ( ! $spent = get_user_meta( $user_id, '_money_spent', true ) ) {
+function wc_get_customer_total_spent( $user_id, $force_update = FALSE ) {
+	if ( $force_update || ! $spent = get_user_meta( $user_id, '_money_spent', true ) ) {
 		global $wpdb;
 
 		$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
@@ -573,8 +565,8 @@ function wc_get_customer_total_spent( $user_id ) {
  * @param  int $user_id
  * @return int
  */
-function wc_get_customer_order_count( $user_id ) {
-	if ( ! $count = get_user_meta( $user_id, '_order_count', true ) ) {
+function wc_get_customer_order_count( $user_id, $force_update = FALSE ) {
+	if ( $force_update || ! $count = get_user_meta( $user_id, '_order_count', true ) ) {
 		global $wpdb;
 
 		$count = $wpdb->get_var( "SELECT COUNT(*)
