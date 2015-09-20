@@ -593,20 +593,4 @@ function wc_get_customer_order_count( $user_id ) {
 
 	return absint( $count );
 }
-
-/**
- * Update orders to belong to a different customer
- *
- * Note that if $new_user_id is NULL, $wpdb will enter it as a 0
- * The effect of this is that the order becomes a guest order
- *
- * @param  int $old_user_id
- * @param  int $new_user_id
- */
-function wc_reassign_customer_orders( $old_user_id, $new_user_id ) {			
-	global $wpdb;
-	$wpdb->query( $wpdb->prepare("UPDATE {$wpdb->postmeta} SET meta_value=%d WHERE meta_key='_customer_user' and meta_value=%d", $new_user_id, $old_user_id ) );
-	wc_update_new_customer_past_orders($new_user_id);
-}
-add_action('deleted_user','wc_reassign_customer_orders',10,2);
 	
