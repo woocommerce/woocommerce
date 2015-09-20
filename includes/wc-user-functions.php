@@ -187,10 +187,10 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 /**
  * Get orders (by customer) and change the customer
  *
- * @param  int $old_user_id
- * @param  int $new_user_id
+ * @param  int $old_customer_id
+ * @param  int $customer_id
  */
-function wc_reassign_customer_orders( $old_user_id, $new_user_id ) {
+function wc_reassign_customer_orders( $old_customer_id, $customer_id ) {
 
 	$customer_orders = get_posts( array(
 		'numberposts' => -1,
@@ -200,7 +200,7 @@ function wc_reassign_customer_orders( $old_user_id, $new_user_id ) {
 		'meta_query' => array(
 			array(
 				'key'     => '_customer_user',
-				'value'   => $old_user_id
+				'value'   => $old_customer_id
 			)
 		),
 	) );
@@ -210,9 +210,9 @@ function wc_reassign_customer_orders( $old_user_id, $new_user_id ) {
 
 	if ( $customer_orders ) {
 		foreach ( $customer_orders as $order_id ) {
-			update_post_meta( $order_id, '_customer_user', $new_user_id );
+			update_post_meta( $order_id, '_customer_user', $customer_id );
 
-			do_action( 'woocommerce_reassign_customer_order', $order_id, $old_user_id, $new_user_id );
+			do_action( 'woocommerce_reassign_customer_order', $order_id, $old_customer_id, $customer_id );
 
 			if ( get_post_status( $order_id ) === 'wc-completed' ) {
 				$complete++;
@@ -223,9 +223,9 @@ function wc_reassign_customer_orders( $old_user_id, $new_user_id ) {
 	}
 
 	if ( $complete ) {
-		update_user_meta( $new_user_id, 'paying_customer', 1 );
-		wc_get_customer_total_spent( $new_user_id, TRUE );
-		wc_get_customer_order_count( $new_user_id, TRUE );
+		update_user_meta( $customer_id, 'paying_customer', 1 );
+		wc_get_customer_total_spent( $customer_id, TRUE );
+		wc_get_customer_order_count( $customer_id, TRUE );
 	}
 
 	return $linked;
