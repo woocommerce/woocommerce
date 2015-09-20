@@ -585,4 +585,3 @@ function wc_get_customer_order_count( $user_id, $force_update = FALSE ) {
 
 	return absint( $count );
 }
-	
