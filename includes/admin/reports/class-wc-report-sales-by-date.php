@@ -350,13 +350,13 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'title'            => sprintf( __( '%s gross sales in this period', 'woocommerce' ), '<strong>' . wc_price( $data->total_sales ) . '</strong>' ),
 			'placeholder'      => __( 'This is the sum of the order totals after any refunds and including shipping and taxes.', 'woocommerce' ),
 			'color'            => $this->chart_colours['sales_amount'],
-			'highlight_series' => 6
+			'highlight_series' => 5
 		);
 		$legend[] = array(
 			'title'            => sprintf( __( '%s net sales in this period', 'woocommerce' ), '<strong>' . wc_price( $data->net_sales ) . '</strong>' ),
 			'placeholder'      => __( 'This is the sum of the order totals after any refunds and excluding shipping and taxes.', 'woocommerce' ),
 			'color'            => $this->chart_colours['net_sales_amount'],
-			'highlight_series' => 7
+			'highlight_series' => 6
 		);
 		if ( $data->average_sales > 0 ) {
 			$legend[] = array(
@@ -379,12 +379,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$legend[] = array(
 			'title' => sprintf( _n( '%s refunded %d order', '%s refunded %d orders', $this->report_data->total_refunded_orders, 'woocommerce' ), '<strong>' . wc_price( $data->total_refunds ) . '</strong>', $this->report_data->total_refunded_orders ) . ' (' . sprintf( _n( '%d item', '%d items', $this->report_data->refunded_order_items, 'woocommerce' ), $this->report_data->refunded_order_items ) . ')',
 			'color' => $this->chart_colours['refund_amount'],
-			'highlight_series' => 4
+			'highlight_series' => 7
 		);
 		$legend[] = array(
 			'title' => sprintf( __( '%s charged for shipping', 'woocommerce' ), '<strong>' . wc_price( $data->total_shipping ) . '</strong>' ),
 			'color' => $this->chart_colours['shipping_amount'],
-			'highlight_series' => 5
+			'highlight_series' => 4
 		);
 		$legend[] = array(
 			'title' => sprintf( __( '%s worth of coupons used', 'woocommerce' ), '<strong>' . wc_price( $data->total_coupons ) . '</strong>' ),
