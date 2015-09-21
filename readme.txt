@@ -174,6 +174,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Remove use of 'input' event in checkout scripts to prevent IE11 triggering updates on placeholder change.
 * Fix - AJAX variations not being found in some cases when product version was < 2.4, but attributes were updated after sync().
 * Fix - Changed the way variable product prices get cached for greater plugin compatibility. See http://wp.me/p6wtcw-5x
+* Fix - Highlighting of reports chart.
+* Fix - Network activated plugins not showing up in system status report.
+* Fix - Tax fields showing on bulk/quick edit when disabled the tax system.
+* Fix - Tax status and tax class values within bulk edit.
 * Tweak - Allow bulk edit price to 0 .
 * Tweak - Add filters to control "shipped via" text.
 * Tweak - Allow line breaks in non-variation attributes.
@@ -186,6 +190,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Tweak wc_create_page to work with trashed pages.
 * Tweak - Redirect 'not right now' to referer in onboarding wizard.
 * Tweak - woocommerce_update_new_customer_past_order action.
+* Tweak - Prevent empty terms when using `wc_get_formatted_variation()`.
+* Tweak - Unslash shipping label on orders admin screen.
+* Tweak - Prevent wrong phone numbers on PayPal for CA and US when users add the prefix `+1`.
 * Template - Removed 'Payment' heading in `templates/checkout/form-pay.php`.
 * Template - Removed unnecessary clearing div in `templates/checkout/payment.php`.
 
