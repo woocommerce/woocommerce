@@ -42,11 +42,10 @@ jQuery(function( $ ) {
 		$( 'input[name="_stock"]', '.inline-edit-row' ).val( stock );
 		$( 'input[name="menu_order"]', '.inline-edit-row' ).val( menu_order );
 
+		$( 'select[name="_tax_status"] option, select[name="_tax_class"] option, select[name="_visibility"] option, select[name="_stock_status"] option, select[name="_backorders"] option' ).removeAttr( 'selected' );
+
 		$( 'select[name="_tax_status"] option[value="' + tax_status + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 		$( 'select[name="_tax_class"] option[value="' + tax_class + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
-
-		$( 'select[name="_visibility"] option, select[name="_stock_status"] option, select[name="_backorders"] option' ).removeAttr( 'selected' );
-
 		$( 'select[name="_visibility"] option[value="' + visibility + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 		$( 'select[name="_stock_status"] option[value="' + stock_status + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 		$( 'select[name="_backorders"] option[value="' + backorders + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
