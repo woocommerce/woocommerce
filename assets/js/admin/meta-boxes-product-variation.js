@@ -109,7 +109,7 @@ jQuery( function( $ ) {
 			// Init TipTip
 			$( '#tiptip_holder' ).removeAttr( 'style' );
 			$( '#tiptip_arrow' ).removeAttr( 'style' );
-			$( '.woocommerce_variations .tips', wrapper ).tipTip({
+			$( '.woocommerce_variations .tips, .woocommerce_variations .help_tip', wrapper ).tipTip({
 				'attribute': 'data-tip',
 				'fadeIn':    50,
 				'fadeOut':   50,
