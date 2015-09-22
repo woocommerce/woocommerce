@@ -664,6 +664,6 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string
 	 */
 	public function get_variation_description() {
-		return wpautop( wp_kses_post( get_post_meta( $this->variation_id, '_variation_description', true ) ) );
+		return wpautop( do_shortcode( wp_kses_post( get_post_meta( $this->variation_id, '_variation_description', true ) ) ) );
 	}
 }
