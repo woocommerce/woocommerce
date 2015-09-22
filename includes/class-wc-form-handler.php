@@ -722,7 +722,7 @@ class WC_Form_Handler {
 				}
 
 				// Get valid value from variation
-				$valid_value = $variation->variation_data[ $taxonomy ];
+				$valid_value = isset( $variation->variation_data[ $taxonomy ] ) ? $variation->variation_data[ $taxonomy ] : '';
 
 				// Allow if valid
 				if ( '' === $valid_value || $valid_value === $value ) {
