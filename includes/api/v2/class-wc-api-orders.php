@@ -1554,18 +1554,19 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 
 				$line_items[] = array(
-					'id'           => $item_id,
-					'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
-					'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], 2 ),
-					'total'        => wc_format_decimal( $order->get_line_total( $item ), 2 ),
-					'total_tax'    => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
-					'price'        => wc_format_decimal( $order->get_item_total( $item ), 2 ),
-					'quantity'     => (int) $item['qty'],
-					'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
-					'name'         => $item['name'],
-					'product_id'   => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
-					'sku'          => is_object( $product ) ? $product->get_sku() : null,
-					'meta'         => $item_meta,
+					'id'               => $item_id,
+					'subtotal'         => wc_format_decimal( $order->get_line_subtotal( $item ), 2 ),
+					'subtotal_tax'     => wc_format_decimal( $item['line_subtotal_tax'], 2 ),
+					'total'            => wc_format_decimal( $order->get_line_total( $item ), 2 ),
+					'total_tax'        => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
+					'price'            => wc_format_decimal( $order->get_item_total( $item ), 2 ),
+					'quantity'         => (int) $item['qty'],
+					'tax_class'        => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
+					'name'             => $item['name'],
+					'product_id'       => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
+					'sku'              => is_object( $product ) ? $product->get_sku() : null,
+					'meta'             => $item_meta,
+					'refunded_item_id' => (int) $item['refunded_item_id'],
 				);
 			}
 
