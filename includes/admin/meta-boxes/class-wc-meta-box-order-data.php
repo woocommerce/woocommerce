@@ -450,16 +450,15 @@ class WC_Meta_Box_Order_Data {
 			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
 		}
 
+		$date = date_i18n( 'Y-m-d H:i:s', $date );
+
+		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
+
 		// Order data saved, now get it so we can manipulate status
 		$order = wc_get_order( $post_id );
 
 		// Order status
 		$order->update_status( $_POST['order_status'], '', true );
-
-		// Finally, set the date
-		$date = date_i18n( 'Y-m-d H:i:s', $date );
-
-		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
 
 		wc_delete_shop_order_transients( $post_id );
 	}
