@@ -2131,7 +2131,7 @@ abstract class WC_Abstract_Order {
 			foreach ( $download_files as $download_id => $file ) {
 				$i++;
 				$prefix  = count( $download_files ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
-				$links[] = '<small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
+				$links[] = '<small class="download-url">' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
 			}
 
 			echo '<br/>' . implode( '<br/>', $links );
@@ -2498,7 +2498,7 @@ abstract class WC_Abstract_Order {
 		if ( ! $notification_sent && 'yes' == get_option( 'woocommerce_notify_low_stock' ) && get_option( 'woocommerce_notify_low_stock_amount' ) >= $new_stock ) {
 			do_action( 'woocommerce_low_stock', $product );
 		}
-		
+
 		do_action( 'woocommerce_after_send_stock_notifications', $product, $new_stock, $qty_ordered );
 	}
 

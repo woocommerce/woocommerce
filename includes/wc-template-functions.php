@@ -1133,15 +1133,17 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 * Output product up sells.
 	 *
 	 * @param int $posts_per_page (default: -1)
-	 * @param int $columns (default: 2)
+	 * @param int $columns (default: 4)
 	 * @param string $orderby (default: 'rand')
 	 */
 	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 4, $orderby = 'rand' ) {
-		wc_get_template( 'single-product/up-sells.php', array(
-				'posts_per_page'	=> $posts_per_page,
-				'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
-				'columns'			=> $columns
-			) );
+		$args = apply_filters( 'woocommerce_upsell_display_args', array(
+			'posts_per_page'	=> $posts_per_page,
+			'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
+			'columns'			=> $columns
+		) );
+
+		wc_get_template( 'single-product/up-sells.php', $args );
 	}
 }
 
