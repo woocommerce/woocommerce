@@ -1,4 +1,21 @@
-<?php global $product; ?>
+<?php
+/**
+ * The template for displaying product widget entries.
+ *
+ * Override this template by copying it to yourtheme/woocommerce/content-widget-product.php
+ *
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 1.0.0
+ */
+ 
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+global $product; ?>
+
 <li>
 	<a href="<?php echo esc_url( get_permalink( $product->id ) ); ?>" title="<?php echo esc_attr( $product->get_title() ); ?>">
 		<?php echo $product->get_image(); ?>
