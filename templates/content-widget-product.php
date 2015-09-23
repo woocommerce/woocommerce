@@ -6,9 +6,9 @@
  *
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 1.0.0
+ * @version 2.5.0
  */
- 
+
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -21,6 +21,8 @@ global $product; ?>
 		<?php echo $product->get_image(); ?>
 		<span class="product-title"><?php echo $product->get_title(); ?></span>
 	</a>
-	<?php if ( ! empty( $show_rating ) ) echo $product->get_rating_html(); ?>
+	<?php if ( ! empty( $show_rating ) ) : ?>
+		<?php echo $product->get_rating_html(); ?>
+	<?php endif; ?>
 	<?php echo $product->get_price_html(); ?>
 </li>
