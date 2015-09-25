@@ -264,10 +264,6 @@ class WC_Product_Variable extends WC_Product {
 	public function get_variation_prices( $display = false ) {
 		global $wp_filter;
 
-		if ( ! empty( $this->prices_array ) ) {
-			return $this->prices_array;
-		}
-
 		/**
 		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
 		 * Max transient length is 45, -10 for get_transient_version.
