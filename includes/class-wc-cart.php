@@ -1875,19 +1875,21 @@ class WC_Cart {
 		 */
 		public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 
-			$new_fee_id = sanitize_title( $name );
+			$new_fee_id     = sanitize_title( $name );
+			$new_fee_amount = esc_attr( $amount );
 
-			// Only add each fee once
+			// Add fees with the same ID
 			foreach ( $this->fees as $fee ) {
 				if ( $fee->id == $new_fee_id ) {
+					$fee->amount = $new_fee_amount + $fee->amount;
 					return;
-				}
+				} 
 			}
 
 			$new_fee            = new stdClass();
 			$new_fee->id        = $new_fee_id;
 			$new_fee->name      = esc_attr( $name );
-			$new_fee->amount    = (float) esc_attr( $amount );
+			$new_fee->amount    = (float) $new_fee_amount;
 			$new_fee->tax_class = $tax_class;
 			$new_fee->taxable   = $taxable ? true : false;
 			$new_fee->tax       = 0;
