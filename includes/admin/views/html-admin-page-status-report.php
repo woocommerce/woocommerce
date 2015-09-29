@@ -679,7 +679,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					}
 
 					if ( ! empty( $theme_file ) ) {
-						$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+						$core_version  = WC_Admin_Status::get_file_version( $template_path . $file );
 						$theme_version = WC_Admin_Status::get_file_version( $theme_file );
 
 						if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
