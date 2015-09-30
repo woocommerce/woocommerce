@@ -532,6 +532,7 @@ class WC_API_Customers extends WC_API_Resource {
 		if ( ! empty( $args['role'] ) ) {
 			$query_args['role'] = $args['role'];
 
+			// Show users on all roles
 			if ( 'all' === $query_args['role'] ) {
 				unset( $query_args['role'] );
 			}
