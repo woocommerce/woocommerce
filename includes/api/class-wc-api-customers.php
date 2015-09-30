@@ -531,6 +531,10 @@ class WC_API_Customers extends WC_API_Resource {
 		// Custom Role
 		if ( ! empty( $args['role'] ) ) {
 			$query_args['role'] = $args['role'];
+
+			if ( 'all' === $query_args['role'] ) {
+				unset( $query_args['role'] );
+			}
 		}
 
 		// Search
