@@ -513,7 +513,7 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H3
 	 */
 	function woocommerce_template_loop_product_title() {
-		wc_get_template( 'loop/title.php' );
+		echo '<h3>' . get_the_title() . '</h3>';
 	}
 }
 if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
