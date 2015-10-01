@@ -296,6 +296,26 @@ function wc_array_overlay( $a1, $a2 ) {
 }
 
 /**
+ * Intersect two one-dimensional arrays in faster way
+ *
+ * @param array $a1
+ * @param array $a2
+ * @return array
+ */
+function wc_array_intersect( $a1, $a2 ) {
+	$intersect = array();
+
+	$a2_k = array_fill_keys( $a2, true);
+	foreach( $a1 as $k => $v ) {
+		if( isset( $a2_k[$v] ) ) {
+			$intersect[$k] = $v;
+		}
+	}
+
+	return $intersect;
+}
+
+/**
  * Formats a stock amount by running it through a filter
  * @param  int|float $amount
  * @return int|float

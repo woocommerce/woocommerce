@@ -202,7 +202,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						// If this is an AND query, only show options with count > 0
 						if ( 'and' == $query_type ) {
 
-							$count = sizeof( array_intersect( $_products_in_term, WC()->query->filtered_product_ids ) );
+							$count = sizeof( wc_array_intersect( $_products_in_term, WC()->query->filtered_product_ids ) );
 
 							if ( 0 < $count ) {
 								$found = true;
@@ -215,7 +215,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						// If this is an OR query, show all options so search can be expanded
 						} else {
 
-							$count = sizeof( array_intersect( $_products_in_term, WC()->query->unfiltered_product_ids ) );
+							$count = sizeof( wc_array_intersect( $_products_in_term, WC()->query->unfiltered_product_ids ) );
 
 							if ( 0 < $count ) {
 								$found = true;
@@ -264,7 +264,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					// If this is an AND query, only show options with count > 0
 					if ( 'and' == $query_type ) {
 
-						$count = sizeof( array_intersect( $_products_in_term, WC()->query->filtered_product_ids ) );
+						$count = sizeof( wc_array_intersect( $_products_in_term, WC()->query->filtered_product_ids ) );
 
 						if ( 0 < $count && $current_term !== $term->term_id ) {
 							$found = true;
@@ -277,7 +277,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					// If this is an OR query, show all options so search can be expanded
 					} else {
 
-						$count = sizeof( array_intersect( $_products_in_term, WC()->query->unfiltered_product_ids ) );
+						$count = sizeof( wc_array_intersect( $_products_in_term, WC()->query->unfiltered_product_ids ) );
 
 						if ( 0 < $count ) {
 							$found = true;
