@@ -160,15 +160,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 *
 	 * ## AVAILABLE FIELDS
 	 *
-	 * * download_url
-	 * * download_id
-	 * * product_id
-	 * * download_name
-	 * * order_id
-	 * * order_key
-	 * * downloads_remaining
-	 * * access_expires
-	 * * file
+	 * See
 	 *
 	 * ## EXAMPLES
 	 *
@@ -391,11 +383,36 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	/**
 	 * View customer orders.
 	 *
-	 * @todo  gedex
+	 * ## OPTIONS
+	 *
+	 * <customer>
+	 * : The customer ID, email, or username to delete.
+	 *
+	 * [--field=<field>]
+	 * : Instead of returning the whole customer fields, returns the value of a single fields.
+	 *
+	 * [--fields=<fields>]
+	 * : Get a specific subset of the customer's fields.
+	 *
+	 * [--format=<format>]
+	 * : Accepted values: table, json, csv. Default: table.
+	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * For more fields, see: wp wc order list --help
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc customer orders 123
+	 *
 	 * @since 2.5.0
 	 */
 	public function orders( $args, $assoc_args ) {
-		WP_CLI::error( __( 'Not implemented yet', 'woocommerce' ) );
+		try {
+			WP_CLI::run_command( array( 'wc', 'order', 'list' ), array( 'customer_id' => $args[0] ) );
+		} catch ( WC_CLI_Exception $e ) {
+			WP_CLI::error( $e->getMessage() );
+		}
 	}
 
 	/**
