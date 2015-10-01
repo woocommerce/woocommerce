@@ -566,6 +566,16 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$query_args['post_status'] = $statuses;
 		}
 
+		if ( ! empty( $args['customer_id'] ) ) {
+			$query_args['meta_query'] = array(
+				array(
+					'key'   => '_customer_user',
+					'value' => (int) $args['customer_id'],
+					'compare' => '='
+				)
+			);
+		}
+
 		return $query_args;
 	}
 
