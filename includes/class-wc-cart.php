@@ -1899,12 +1899,12 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 
 		/**
-		 * add_fee function.
+		 * Add additional fee to the cart
 		 *
-		 * @param mixed $name
-		 * @param mixed $amount
-		 * @param bool $taxable (default: false)
-		 * @param string $tax_class (default: '')
+		 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
+		 * @param float $amount Fee amount.
+		 * @param bool $taxable (default: false) Is the fee taxable?
+		 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
 		 */
 		public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 
