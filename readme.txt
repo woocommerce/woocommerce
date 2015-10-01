@@ -189,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Template - Removed 'Payment' heading in `templates/checkout/form-pay.php`.
 * Template - Removed unnecessary clearing div in `templates/checkout/payment.php`.
 * Template - Anchors and titles are now hooked in, rather than hard coded into `templates/content-product.php` and `templates/content-product_cat.php`
+* Template - Removed the product loop title template. (`templates/loop/title.php`).
 
 = 2.4.6 - 24/08/2015 =
 * Fix - menu_order notices on IIS.
