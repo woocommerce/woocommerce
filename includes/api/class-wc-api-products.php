@@ -180,14 +180,22 @@ class WC_API_Products extends WC_API_Resource {
 
 		// add variations to variable products
 		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
-
 			$product_data['variations'] = $this->get_variation_data( $product );
 		}
 
 		// add the parent product data to an individual variation
 		if ( $product->is_type( 'variation' ) && $product->parent ) {
-
 			$product_data['parent'] = $this->get_product_data( $product->parent );
+		}
+
+		// Add grouped products data
+		if ( $product->is_type( 'grouped' ) && $product->has_child() ) {
+			$product_data['grouped_products'] = $this->get_grouped_products_data( $product );
+		}
+
+		if ( $product->is_type( 'simple' ) && ! empty( $product->post->post_parent ) ) {
+			$_product = wc_get_product( $product->post->post_parent );
+			$product_data['parent'] = $this->get_product_data( $_product );
 		}
 
 		return array( 'product' => apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields, $this->server ) );
@@ -1113,6 +1121,7 @@ class WC_API_Products extends WC_API_Resource {
 			'total_sales'        => metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0,
 			'variations'         => array(),
 			'parent'             => array(),
+			'grouped_products'   => array(),
 		);
 	}
 
@@ -1174,6 +1183,31 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return $variations;
+	}
+
+	/**
+	 * Get grouped products data
+	 *
+	 * @since  2.5.0
+	 * @param  WC_Product $product
+	 *
+	 * @return array
+	 */
+	private function get_grouped_products_data( $product ) {
+		$products = array();
+
+		foreach ( $product->get_children() as $child_id ) {
+			$_product = $product->get_child( $child_id );
+
+			if ( ! $_product->exists() ) {
+				continue;
+			}
+
+			$products[] = $this->get_product_data( $_product );
+
+		}
+
+		return $products;
 	}
 
 	/**
