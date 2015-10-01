@@ -228,10 +228,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php
 								if ( '' != $tax_item_total ) {
 									if ( isset( $tax_item_subtotal ) && $tax_item_subtotal != $tax_item_total ) {
-										echo '<del>' . wc_price( wc_round_tax_total( $tax_item_subtotal ), array( 'currency' => $order->get_order_currency() ) ) . '</del> ';
+										echo '<del>' . wc_price( wc_round_tax( $tax_item_subtotal ), array( 'currency' => $order->get_order_currency() ) ) . '</del> ';
 									}
 
-									echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_order_currency() ) );
+									echo wc_price( wc_round_tax( $tax_item_total ), array( 'currency' => $order->get_order_currency() ) );
 								} else {
 									echo '&ndash;';
 								}
