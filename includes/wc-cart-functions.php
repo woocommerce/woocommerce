@@ -263,11 +263,11 @@ function wc_cart_totals_fee_html( $fee ) {
 
 /**
  * Get a shipping methods full label including price
- * @param  object $method
+ * @param  WC_Shipping_Rate $method
  * @return string
  */
 function wc_cart_totals_shipping_method_label( $method ) {
-	$label = $method->label;
+	$label = $method->get_label();
 
 	if ( $method->cost > 0 ) {
 		if ( WC()->cart->tax_display_cart == 'excl' ) {
