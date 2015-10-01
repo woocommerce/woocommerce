@@ -521,7 +521,7 @@ if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
 	/**
 	 * Show the subcategory title in the product loop.
 	 */
-	function woocommerce_template_loop_subcategory_title( $category ) {
+	function woocommerce_template_loop_category_title( $category ) {
 		?>
 		<h3>
 			<?php
@@ -538,12 +538,24 @@ if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
  * Insert the opening anchor tag for products in the loop.
  */
 function woocommerce_template_loop_product_link_open() {
-	echo '<a href="' . the_permalink() . '">';
+	echo '<a href="' . get_the_permalink() . '">';
 }
 /**
  * Insert the opening anchor tag for products in the loop.
  */
 function woocommerce_template_loop_product_link_close() {
+	echo '</a>';
+}
+/**
+ * Insert the opening anchor tag for categories in the loop.
+ */
+function woocommerce_template_loop_category_link_open( $category ) {
+	echo '<a href="' . get_term_link( $category->slug, 'product_cat' ) . '">';
+}
+/**
+ * Insert the opening anchor tag for categories in the loop.
+ */
+function woocommerce_template_loop_category_link_close() {
 	echo '</a>';
 }
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
