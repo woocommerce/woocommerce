@@ -534,23 +534,17 @@ if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
 		<?php
 	}
 }
-if (  ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
-
-	/**
-	 * Insert the opening anchor tag for products in the loop.
-	 */
-	function woocommerce_template_loop_product_link_open() {
-		wc_get_template( 'loop/product-link-open.php' );
-	}
+/**
+ * Insert the opening anchor tag for products in the loop.
+ */
+function woocommerce_template_loop_product_link_open() {
+	echo '<a href="' . the_permalink() . '">';
 }
-if (  ! function_exists( 'woocommerce_template_loop_product_link_close' ) ) {
-
-	/**
-	 * Insert the opening anchor tag for products in the loop.
-	 */
-	function woocommerce_template_loop_product_link_close() {
-		wc_get_template( 'loop/product-link-close.php' );
-	}
+/**
+ * Insert the opening anchor tag for products in the loop.
+ */
+function woocommerce_template_loop_product_link_close() {
+	echo '</a>';
 }
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
