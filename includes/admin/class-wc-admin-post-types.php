@@ -1608,7 +1608,7 @@ class WC_Admin_Post_Types {
 	 * Filters for post types
 	 */
 	public function restrict_manage_posts() {
-		global $typenow, $wp_query;
+		global $typenow;
 
 		if ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ) ) ) {
 			$this->shop_order_filters();
