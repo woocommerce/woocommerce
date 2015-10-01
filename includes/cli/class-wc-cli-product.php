@@ -21,9 +21,122 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * [--porcelain]
 	 * : Outputs just the new product id.
 	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * Required fields:
+	 *
+	 * * title
+	 *
+	 * These fields are optionally available for create command:
+	 *
+	 * * type
+	 * * status
+	 * * downloadable
+	 * * virtual
+	 * * sku
+	 * * regular_price
+	 * * sale_price
+	 * * sale_price_dates_from
+	 * * sale_price_dates_to
+	 * * tax_status
+	 * * tax_class
+	 * * managing_stock
+	 * * stock_quantity
+	 * * in_stock
+	 * * backorders
+	 * * sold_individually
+	 * * featured
+	 * * shipping_class
+	 * * description
+	 * * enable_html_description
+	 * * short_description
+	 * * enable_html_short_description
+	 * * reviews_allowed
+	 * * upsell_ids
+	 * * cross_sell_ids
+	 * * parent_id
+	 * * categories
+	 * * tags
+	 *
+	 * Dimensions fields:
+	 *
+	 * * dimensions.length
+	 * * dimensions.width
+	 * * dimensions.height
+	 * * dimensions.unit
+	 *
+	 * Images is an array in which element can be set by specifying its index:
+	 *
+	 * * images
+	 * * images.size
+	 * * images.0.id
+	 * * images.0.created_at
+	 * * images.0.updated_at
+	 * * images.0.src
+	 * * images.0.title
+	 * * images.0.alt
+	 * * images.0.position
+	 *
+	 * Attributes is an array in which element can be set by specifying its index:
+	 *
+	 * * attributes
+	 * * attributes.size
+	 * * attributes.0.name
+	 * * attributes.0.slug
+	 * * attributes.0.position
+	 * * attributes.0.visible
+	 * * attributes.0.variation
+	 * * attributes.0.options
+	 *
+	 * Downloads is an array in which element can be accessed by specifying its index:
+	 *
+	 * * downloads
+	 * * downloads.size
+	 * * downloads.0.id
+	 * * downloads.0.name
+	 * * downloads.0.file
+	 *
+	 * Variations is an array in which element can be accessed by specifying its index:
+	 *
+	 * * variations
+	 * * variations.size
+	 * * variations.0.id
+	 * * variations.0.created_at
+	 * * variations.0.updated_at
+	 * * variations.0.downloadable
+	 * * variations.0.virtual
+	 * * variations.0.permalink
+	 * * variations.0.sku
+	 * * variations.0.price
+	 * * variations.0.regular_price
+	 * * variations.0.sale_price
+	 * * variations.0.sale_price_dates_from
+	 * * variations.0.sale_price_dates_to
+	 * * variations.0.taxable
+	 * * variations.0.tax_status
+	 * * variations.0.tax_class
+	 * * variations.0.managing_stock
+	 * * variations.0.stock_quantity
+	 * * variations.0.in_stock
+	 * * variations.0.backordered
+	 * * variations.0.purchaseable
+	 * * variations.0.visible
+	 * * variations.0.on_sale
+	 * * variations.0.weight
+	 * * variations.0.dimensions -- See dimensions fields
+	 * * variations.0.shipping_class
+	 * * variations.0.shipping_class_id
+	 * * variations.0.images -- See images fields
+	 * * variations.0.attributes -- See attributes fields
+	 * * variations.0.downloads -- See downloads fields
+	 * * variations.0.download_limit
+	 * * variations.0.download_expiry
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product create --title="Product Name"
+	 *
+	 *     wp wc product create --title="Product Name" --
 	 *
 	 * @since 2.5.0
 	 */
@@ -450,7 +563,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 *
 	 * @since 2.5.0
 	 */
-	public function types( $__, $__ ) {
+	public function types( $__, $___ ) {
 		$product_types = wc_get_product_types();
 		foreach ( $product_types as $type => $label ) {
 			WP_CLI::line( sprintf( '%s: %s', $label, $type ) );
@@ -470,7 +583,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 *
 	 * ## AVAILABLE_FIELDS
 	 *
-	 * For more fields, see: wp wc product list --help
+	 * For more fields, see: wp wc product create --help
 	 *
 	 * ## EXAMPLES
 	 *
