@@ -516,6 +516,24 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 		wc_get_template( 'loop/title.php' );
 	}
 }
+if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
+
+	/**
+	 * Show the subcategory title in the product loop.
+	 */
+	function woocommerce_template_loop_subcategory_title( $category ) {
+		?>
+		<h3>
+			<?php
+				echo $category->name;
+
+				if ( $category->count > 0 )
+					echo apply_filters( 'woocommerce_subcategory_count_html', ' <mark class="count">(' . $category->count . ')</mark>', $category );
+			?>
+		</h3>
+		<?php
+	}
+}
 if (  ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
 
 	/**
