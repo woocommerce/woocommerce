@@ -470,12 +470,6 @@ class WC_API_Orders extends WC_API_Resource {
 				update_post_meta( $order->id, '_order_currency', $data['currency'] );
 			}
 
-			// set order number
-			if ( isset( $data['order_number'] ) ) {
-
-				update_post_meta( $order->id, '_order_number', $data['order_number'] );
-			}
-
 			// set order meta
 			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
 				$this->set_order_meta( $order->id, $data['order_meta'] );
@@ -638,12 +632,6 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 
 				update_post_meta( $order->id, '_order_currency', $data['currency'] );
-			}
-
-			// set order number
-			if ( isset( $data['order_number'] ) ) {
-
-				update_post_meta( $order->id, '_order_number', $data['order_number'] );
 			}
 
 			// if items have changed, recalculate order totals
