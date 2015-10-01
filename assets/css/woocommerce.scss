@@ -223,6 +223,11 @@ p.demo_store {
 			div.thumbnails {
 				padding-top: 1em;
 			}
+			
+			/* added to get around variation image flicker issue */
+			.image[data-attr="has-default-attributes"] { 
+				opacity: 0;
+			}
 		}
 
 		div.summary {
@@ -458,6 +463,7 @@ p.demo_store {
 		color: $highlightext;
 		font-size: .857em;
 		-webkit-font-smoothing: antialiased;
+		z-index:1000;
 	}
 
 	/**

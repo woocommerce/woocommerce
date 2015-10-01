@@ -4,7 +4,7 @@
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.0.14
+ * @version     2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,8 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $post, $woocommerce, $product;
 
+// add a special attr if default attributes are set
+$attr = $product->has_default_attributes() ? 'has-default-attributes' : '';
 ?>
-<div class="images">
+<div class="images" data-attr="<?php echo esc_attr( $attr ); ?>">
 
 	<?php
 		if ( has_post_thumbnail() ) {
