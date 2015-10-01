@@ -37,6 +37,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 		// Triggers for this email
 		add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ) );
 		add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_action_send_cancelled_order', array( $this, 'trigger' ) );
 
 		// Call parent constructor
 		parent::__construct();

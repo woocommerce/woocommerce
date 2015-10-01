@@ -41,6 +41,7 @@ class WC_Email_New_Order extends WC_Email {
 		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ) );
 		add_action( 'woocommerce_order_status_failed_to_completed_notification', array( $this, 'trigger' ) );
 		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_action_send_new_order', array( $this, 'trigger' ) );
 
 		// Call parent constructor
 		parent::__construct();
