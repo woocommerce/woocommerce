@@ -516,6 +516,24 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 		wc_get_template( 'loop/title.php' );
 	}
 }
+if (  ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
+
+	/**
+	 * Insert the opening anchor tag for products in the loop.
+	 */
+	function woocommerce_template_loop_product_link_open() {
+		wc_get_template( 'loop/product-link-open.php' );
+	}
+}
+if (  ! function_exists( 'woocommerce_template_loop_product_link_close' ) ) {
+
+	/**
+	 * Insert the opening anchor tag for products in the loop.
+	 */
+	function woocommerce_template_loop_product_link_close() {
+		wc_get_template( 'loop/product-link-close.php' );
+	}
+}
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
 	/**
