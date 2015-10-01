@@ -19,3 +19,4 @@ WP_CLI::add_command( 'wc order',            'WC_CLI_Order' );
 WP_CLI::add_command( 'wc product',          'WC_CLI_Product' );
 WP_CLI::add_command( 'wc product category', 'WC_CLI_Product_Category' );
 WP_CLI::add_command( 'wc report',           'WC_CLI_Report' );
+WP_CLI::add_command( 'wc tool',             'WC_CLI_Tool' );
