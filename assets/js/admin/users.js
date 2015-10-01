@@ -62,7 +62,9 @@ jQuery( function ( $ ) {
 				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" />' );
 			}
 
+			// This event has a typo - deprecated in 2.5.0
 			$( document.body ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
+			$( document.body ).trigger( 'country-change.woocommerce', [country, $( this ).closest( 'div' )] );
 		},
 
 		change_state: function() {
