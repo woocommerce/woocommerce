@@ -1552,7 +1552,12 @@ class WC_API_Products extends WC_API_Resource {
 
 				// Stock quantity
 				if ( isset( $data['stock_quantity'] ) ) {
-					wc_update_product_stock( $product_id, intval( $data['stock_quantity'] ) );
+					wc_update_product_stock( $product_id, wc_stock_amount( $data['stock_quantity'] ) );
+				} else if ( isset( $data['inventory_delta'] ) ) {
+					$stock_quantity  = wc_stock_amount( get_post_meta( $product_id, '_stock', true ) );
+					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
+
+					wc_update_product_stock( $product_id, wc_stock_amount( $stock_quantity ) );
 				}
 			} else {
 
@@ -1810,6 +1815,11 @@ class WC_API_Products extends WC_API_Resource {
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
+				}  else if ( isset( $data['inventory_delta'] ) ) {
+					$stock_quantity  = wc_stock_amount( get_post_meta( $variation_id, '_stock', true ) );
+					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
+
+					wc_update_product_stock( $variation_id, wc_stock_amount( $stock_quantity ) );
 				}
 			} else {
 				delete_post_meta( $variation_id, '_backorders' );
