@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Manage Reports.
+ * Show Reports.
  *
  * @since    2.5.0
  * @package  WooCommerce/CLI
