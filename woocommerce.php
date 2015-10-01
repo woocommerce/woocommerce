@@ -243,6 +243,10 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
 		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			include_once( 'includes/class-wc-cli.php' );
+		}
 	}
 
 	/**
