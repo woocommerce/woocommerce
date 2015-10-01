@@ -2,9 +2,17 @@
 /**
  * Order Item Details
  *
+ * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
+ * will need to copy the new files to your theme to maintain compatibility. We try to do this
+ * as little as possible, but it does happen. When this occurs the version of the template file will
+ * be bumped and the readme will list any important changes.
+ *
+ * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.4.0
+ * @version 2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,7 +43,7 @@ if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 		<?php echo $order->get_formatted_line_subtotal( $item ); ?>
 	</td>
 </tr>
-<?php if ( $order->has_status( array( 'completed', 'processing' ) ) && ( $purchase_note = get_post_meta( $product->id, '_purchase_note', true ) ) ) : ?>
+<?php if ( $show_purchase_note && $purchase_note ) : ?>
 <tr class="product-purchase-note">
 	<td colspan="3"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); ?></td>
 </tr>

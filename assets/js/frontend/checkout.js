@@ -15,7 +15,6 @@ jQuery( function( $ ) {
 		$order_review: $( '#order_review' ),
 		$checkout_form: $( 'form.checkout' ),
 		init: function() {
-			$( document.body ).bind( 'update_checkout', this.reset_update_checkout_timer );
 			$( document.body ).bind( 'update_checkout', this.update_checkout );
 			$( document.body ).bind( 'init_checkout', this.init_checkout );
 
@@ -26,13 +25,13 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'submit', this.submit );
 
 			// Inline validation
-			this.$checkout_form.on( 'blur input change', '.input-text, select', this.validate_field );
+			this.$checkout_form.on( 'blur change', '.input-text, select', this.validate_field );
 
 			// Inputs/selects which update totals
-			this.$checkout_form.on( 'input change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type=radio]', this.trigger_update_checkout );
+			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type=radio]', this.trigger_update_checkout );
+			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
 			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed );
-			this.$checkout_form.on( 'input change', '.address-field select', this.input_changed );
-			this.$checkout_form.on( 'input keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
+			this.$checkout_form.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
 
 			// Address fields
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
@@ -182,7 +181,7 @@ jQuery( function( $ ) {
 				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
 
-			var payment_method = $( '#order_review input[name=payment_method]:checked' ).val(),
+			var payment_method = $( '#order_review' ).find( 'input[name=payment_method]:checked' ).val(),
 				country			= $( '#billing_country' ).val(),
 				state			= $( '#billing_state' ).val(),
 				postcode		= $( 'input#billing_postcode' ).val(),
@@ -196,7 +195,7 @@ jQuery( function( $ ) {
 				s_address,
 				s_address_2;
 
-			if ( $( '#ship-to-different-address input' ).is( ':checked' ) ) {
+			if ( $( '#ship-to-different-address' ).find( 'input' ).is( ':checked' ) ) {
 				s_country		= $( '#shipping_country' ).val();
 				s_state			= $( '#shipping_state' ).val();
 				s_postcode		= $( 'input#shipping_postcode' ).val();
@@ -302,7 +301,7 @@ jQuery( function( $ ) {
 			}
 
 			// Trigger a handler to let gateways manipulate the checkout if needed
-			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + $( '#order_review input[name=payment_method]:checked' ).val() ) !== false ) {
+			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + $( '#order_review' ).find( 'input[name=payment_method]:checked' ).val() ) !== false ) {
 
 				$form.addClass( 'processing' );
 

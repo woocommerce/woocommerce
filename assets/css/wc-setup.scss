@@ -274,10 +274,18 @@ body {
 			}
 		}
 	}
-	.woocommerce-tracker {
+	.woocommerce-tracker, .woocommerce-language-pack, .updated {
 		padding: 24px 24px 0;
 		margin: 0 0 24px 0;
+		overflow: hidden;
 		background: #f5f5f5;
+		p {
+			padding: 0;
+			margin: 0 0 12px;
+		}
+		p:last-child {
+			margin: 0 0 24px 0;
+		}
 	}
 }
 .wc-setup-steps {
@@ -286,15 +294,19 @@ body {
 	list-style: none outside;
 	overflow: hidden;
 	color: #ccc;
+	width:100%;
+	display: -webkit-inline-flex;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
 	li {
 		width: 20%;
 		float: left;
-		padding: 0 0 1em;
+		padding: 0 0 0.8em;
 		margin: 0;
 		text-align: center;
 		position: relative;
 		border-bottom: 4px solid #ccc;
-		line-height: 1;
+		line-height: 1.4em;
 	}
 	li:before {
 		content: "";

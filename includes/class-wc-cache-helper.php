@@ -45,13 +45,17 @@ class WC_Cache_Helper {
 	 * This prevents caching of the wrong data for this request.
 	 */
 	public static function geolocation_ajax_redirect() {
-		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_ajax() ) {
+		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_ajax() && empty( $_POST ) ) {
 			$location_hash = self::geolocation_ajax_get_location_hash();
 			$current_hash  = isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : '';
 			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
 				global $wp;
 
 				$redirect_url = trailingslashit( home_url( $wp->request ) );
+
+				if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+					$redirect_url = add_query_arg( $_SERVER['QUERY_STRING'], '', $redirect_url );
+				}
 
 				if ( ! get_option( 'permalink_structure' ) ) {
 					$redirect_url = add_query_arg( $wp->query_string, '', $redirect_url );
@@ -107,7 +111,7 @@ class WC_Cache_Helper {
 		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
 			global $wpdb;
 
-			$limit    = 1000;
+			$limit    = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
 			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", "\_transient\_%" . $version, $limit ) );
 
 			// If affected rows is equal to limit, there are more rows to delete. Delete in 10 secs.
@@ -147,7 +151,7 @@ class WC_Cache_Helper {
 			self::nocache();
 		} elseif ( is_array( $wc_page_uris ) ) {
 			foreach( $wc_page_uris as $uri ) {
-				if ( strstr( $_SERVER['REQUEST_URI'], $uri ) ) {
+				if ( stristr( $_SERVER['REQUEST_URI'], $uri ) ) {
 					self::nocache();
 					break;
 				}

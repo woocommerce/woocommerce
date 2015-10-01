@@ -30,6 +30,9 @@ p.demo_store {
 	color: $primarytext;
 	z-index: 99998;
 	box-shadow: 0 1px 1em rgba(0,0,0,0.2);
+	a {
+		color: $primarytext;
+	}
 }
 
 .admin-bar {
@@ -1786,6 +1789,7 @@ p.demo_store {
 				text-align: left;
 				margin: 0;
 				font-weight: normal;
+				@include clearfix;
 
 				input {
 					margin: 0 1em 0 0;
@@ -1811,8 +1815,9 @@ p.demo_store {
 
 		div.payment_box {
 			position: relative;
-			width: 96%;
-			padding: 1em 2%;
+			box-sizing: border-box;
+			width: 100%;
+			padding: 1em;
 			margin: 1em 0 1em 0;
 			font-size: 0.92em;
 			border-radius: 2px;
@@ -1891,15 +1896,15 @@ p.demo_store {
 				margin-bottom: 0;
 			}
 
-			&:after {
+			&:before {
 				content: "";
 				display: block;
-				border: 8px solid darken( $secondary, 5% ); /* arrow size / color */
+				border: 1em solid darken( $secondary, 5% ); /* arrow size / color */
 				border-right-color: transparent;
 				border-left-color: transparent;
 				border-top-color: transparent;
 				position: absolute;
-				top: -3px;
+				top: -.75em;
 				left: 0;
 				margin: -1em 0 0 2em;
 			}

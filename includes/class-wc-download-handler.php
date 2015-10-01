@@ -334,7 +334,7 @@ class WC_Download_Handler {
 	 */
 	private static function check_server_config() {
 		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
-			set_time_limit( 0 );
+			@set_time_limit( 0 );
 		}
 		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() && version_compare( phpversion(), '5.4', '<' ) ) {
 			set_magic_quotes_runtime( 0 );

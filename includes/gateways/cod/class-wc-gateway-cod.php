@@ -113,42 +113,39 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		$order = null;
+		$order          = null;
+		$needs_shipping = false;
 
-		if ( ! $this->enable_for_virtual ) {
-			if ( WC()->cart && ! WC()->cart->needs_shipping() ) {
-				return false;
-			}
+		// Test if shipping is needed first
+		if ( WC()->cart && WC()->cart->needs_shipping() ) {
+			$needs_shipping = true;
+		} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
+			$order_id = absint( get_query_var( 'order-pay' ) );
+			$order    = wc_get_order( $order_id );
 
-			if ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
-				$order_id = absint( get_query_var( 'order-pay' ) );
-				$order    = wc_get_order( $order_id );
-
-				// Test if order needs shipping.
-				$needs_shipping = false;
-
-				if ( 0 < sizeof( $order->get_items() ) ) {
-					foreach ( $order->get_items() as $item ) {
-						$_product = $order->get_product_from_item( $item );
-
-						if ( $_product->needs_shipping() ) {
-							$needs_shipping = true;
-							break;
-						}
+			// Test if order needs shipping.
+			if ( 0 < sizeof( $order->get_items() ) ) {
+				foreach ( $order->get_items() as $item ) {
+					$_product = $order->get_product_from_item( $item );
+					if ( $_product->needs_shipping() ) {
+						$needs_shipping = true;
+						break;
 					}
-				}
-
-				$needs_shipping = apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
-
-				if ( $needs_shipping ) {
-					return false;
 				}
 			}
 		}
 
-		if ( ! empty( $this->enable_for_methods ) ) {
+		$needs_shipping = apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
 
-			// Only apply if all packages are being shipped via local pickup
+		// Virtual order, with virtual disabled
+		if ( ! $this->enable_for_virtual && ! $needs_shipping ) {
+			return false;
+		}
+
+		// Check methods
+		if ( ! empty( $this->enable_for_methods ) && $needs_shipping ) {
+
+			// Only apply if all packages are being shipped via chosen methods, or order is virtual
 			$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
 
 			if ( isset( $chosen_shipping_methods_session ) ) {

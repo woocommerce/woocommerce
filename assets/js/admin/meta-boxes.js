@@ -16,7 +16,7 @@ jQuery( function ( $ ) {
 	runTipTip();
 
 	// Allow Tabbing
-	$( '#titlediv #title' ).keyup( function( event ) {
+	$( '#titlediv' ).find( '#title' ).keyup( function( event ) {
 		var code = event.keyCode || event.which;
 
 		// Tab key
@@ -27,22 +27,20 @@ jQuery( function ( $ ) {
 		}
 	});
 
-	$( function() {
-		$( '.wc-metabox > h3' ).click( function() {
-			$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
-		});
+	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function() {
+		$( this ).parent( '.wc-metabox' ).toggleClass( 'closed' ).toggleClass( 'open' );
 	});
 
 	// Tabbed Panels
 	$( document.body ).on( 'wc-init-tabbed-panels', function() {
 		$( 'ul.wc-tabs' ).show();
-		$( 'ul.wc-tabs a' ).click( function() {
+		$( 'ul.wc-tabs a' ).click( function( e ) {
+			e.preventDefault();
 			var panel_wrap = $( this ).closest( 'div.panel-wrap' );
 			$( 'ul.wc-tabs li', panel_wrap ).removeClass( 'active' );
 			$( this ).parent().addClass( 'active' );
 			$( 'div.panel', panel_wrap ).hide();
 			$( $( this ).attr( 'href' ) ).show();
-			return false;
 		});
 		$( 'div.panel-wrap' ).each( function() {
 			$( this ).find( 'ul.wc-tabs li' ).eq( 0 ).find( 'a' ).click();

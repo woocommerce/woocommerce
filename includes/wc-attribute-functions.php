@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_text_attributes( $raw_attributes ) {
-	return array_map( 'trim', array_map( 'html_entity_decode', explode( WC_DELIMITER, $raw_attributes ) ) );
+	return array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) );
 }
 
 /**

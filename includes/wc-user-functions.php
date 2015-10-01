@@ -165,11 +165,13 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 		foreach ( $customer_orders as $order_id ) {
 			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
+			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
+
 			if ( get_post_status( $order_id ) === 'wc-completed' ) {
-				$complete ++;
+				$complete++;
 			}
 
-			$linked ++;
+			$linked++;
 		}
 	}
 

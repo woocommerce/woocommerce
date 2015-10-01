@@ -16,13 +16,13 @@ extract( $variation_data );
 	<h3>
 		<a href="#" class="remove_variation delete" rel="<?php echo esc_attr( $variation_id ); ?>"><?php _e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
-		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop, or click to set menu order manually', 'woocommerce' ); ?>"></div>
+		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop, or click to set admin variation order', 'woocommerce' ); ?>"></div>
 		<strong>#<?php echo esc_html( $variation_id ); ?>: </strong>
 		<?php
 			foreach ( $parent_data['attributes'] as $attribute ) {
 
 				// Only deal with attributes that are variations
-				if ( ! $attribute['is_variation'] ) {
+				if ( ! $attribute['is_variation'] || 'false' === $attribute['is_variation'] ) {
 					continue;
 				}
 
@@ -56,7 +56,7 @@ extract( $variation_data );
 			}
 		?>
 		<input type="hidden" name="variable_post_id[<?php echo $loop; ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
-		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo absint( $menu_order ); ?>" />
+		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo $loop; ?>]" value="<?php echo isset( $menu_order ) ? absint( $menu_order ) : 0; ?>" />
 	</h3>
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
@@ -108,6 +108,19 @@ extract( $variation_data );
 						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[<?php echo $loop; ?>]" value="<?php echo ! empty( $_sale_price_dates_to ) ? date_i18n( 'Y-m-d', $_sale_price_dates_to ) : ''; ?>" placeholder="<?php echo esc_attr_x('To&hellip;', 'placeholder', 'woocommerce') ?> YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 					</p>
 				</div>
+
+				<?php
+					/**
+					 * woocommerce_variation_options_pricing action
+					 *
+					 * @since 2.5.0
+					 *
+					 * @param int     $loop
+					 * @param array   $variation_data
+					 * @param WP_Post $variation
+					 */
+					do_action( 'woocommerce_variation_options_pricing', $loop, $variation_data, $variation );
+				?>
 			</div>
 
 			<?php if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) : ?>
@@ -126,6 +139,19 @@ extract( $variation_data );
 							?>
 						</select>
 					</p>
+
+					<?php
+						/**
+						 * woocommerce_product_options_inventory action
+						 *
+						 * @since 2.5.0
+						 *
+						 * @param int     $loop
+						 * @param array   $variation_data
+						 * @param WP_Post $variation
+						 */
+						do_action( 'woocommerce_product_options_inventory', $loop, $variation_data, $variation );
+					?>
 				</div>
 			<?php endif; ?>
 
@@ -162,6 +188,19 @@ extract( $variation_data );
 					<?php else : ?>
 						<p>&nbsp;</p>
 					<?php endif; ?>
+
+					<?php
+						/**
+						 * woocommerce_product_options_dimensions action
+						 *
+						 * @since 2.5.0
+						 *
+						 * @param int     $loop
+						 * @param array   $variation_data
+						 * @param WP_Post $variation
+						 */
+						do_action( 'woocommerce_product_options_dimensions', $loop, $variation_data, $variation );
+					?>
 				</div>
 			<?php endif; ?>
 			<div>
@@ -189,6 +228,19 @@ extract( $variation_data );
 								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $key === $_tax_class, true, false ) . '>' . esc_html( $value ) . '</option>';
 						?></select>
 					</p>
+
+					<?php
+						/**
+						 * woocommerce_product_options_tax action
+						 *
+						 * @since 2.5.0
+						 *
+						 * @param int     $loop
+						 * @param array   $variation_data
+						 * @param WP_Post $variation
+						 */
+						do_action( 'woocommerce_product_options_tax', $loop, $variation_data, $variation );
+					?>
 				<?php endif; ?>
 
 				<p class="form-row form-row-full">
@@ -249,6 +301,19 @@ extract( $variation_data );
 					<label><?php _e( 'Download Expiry:', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'Enter the number of days before a download link expires, or leave blank.', 'woocommerce' ); ?>" href="#">[?]</a></label>
 					<input type="number" size="5" name="variable_download_expiry[<?php echo $loop; ?>]" value="<?php if ( isset( $_download_expiry ) ) echo esc_attr( $_download_expiry ); ?>" placeholder="<?php esc_attr_e( 'Unlimited', 'woocommerce' ); ?>" step="1" min="0" />
 				</p>
+
+				<?php
+					/**
+					 * woocommerce_product_options_download action
+					 *
+					 * @since 2.5.0
+					 *
+					 * @param int     $loop
+					 * @param array   $variation_data
+					 * @param WP_Post $variation
+					 */
+					do_action( 'woocommerce_product_options_download', $loop, $variation_data, $variation );
+				?>
 			</div>
 			<?php do_action( 'woocommerce_product_after_variable_attributes', $loop, $variation_data, $variation ); ?>
 		</div>

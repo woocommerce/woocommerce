@@ -250,6 +250,7 @@ class WC_Countries {
 		if ( 'eu_vat' === $type ) {
 			$countries[] = 'MC';
 			$countries[] = 'IM';
+			$countries[] = 'CH';
 		}
 
 		return $countries;

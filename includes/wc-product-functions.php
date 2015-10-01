@@ -311,8 +311,9 @@ function wc_get_formatted_variation( $variation, $flat = false ) {
 			// If this is a term slug, get the term's nice name
 			if ( taxonomy_exists( esc_attr( str_replace( 'attribute_', '', $name ) ) ) ) {
 				$term = get_term_by( 'slug', $value, esc_attr( str_replace( 'attribute_', '', $name ) ) );
-				if ( ! is_wp_error( $term ) && $term->name )
+				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
 					$value = $term->name;
+				}
 			} else {
 				$value = ucwords( str_replace( '-', ' ', $value ) );
 			}
@@ -415,9 +416,6 @@ function wc_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force variable product price to sync up by removing their min price meta
-				delete_post_meta( $parent, '_min_variation_price' );
-
 				// Grouped products need syncing via a function
 				$this_product = wc_get_product( $product_id );
 				if ( $this_product->is_type( 'simple' ) ) {
@@ -426,6 +424,7 @@ function wc_scheduled_sales() {
 			}
 		}
 
+		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
 	}
 }
@@ -632,7 +631,7 @@ function wc_get_product_variation_attributes( $variation_id ) {
 	foreach ( $parent_attributes as $attribute_name => $options ) {
 		$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
 		$found_parent_attributes[] = $attribute;
-		if ( $options['is_variation'] && ! array_key_exists( $attribute, $variation_attributes ) ) {
+		if ( ! empty( $options['is_variation'] ) && ! array_key_exists( $attribute, $variation_attributes ) ) {
 			$variation_attributes[ $attribute ] = ''; // Add it - 'any' will be asumed
 		}
 	}

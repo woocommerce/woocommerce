@@ -2,6 +2,14 @@
 /**
  * Email Order Items
  *
+ * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
+ * will need to copy the new files to your theme to maintain compatibility. We try to do this
+ * as little as possible, but it does happen. When this occurs the version of the template file will
+ * be bumped and the readme will list any important changes.
+ *
+ * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
  * @version     2.1.2
@@ -42,22 +50,8 @@ foreach ( $items as $item_id => $item ) :
 				}
 
 				// File URLs
-				if ( $show_download_links && is_object( $_product ) && $_product->exists() && $_product->is_downloadable() ) {
-
-					$download_files = $order->get_item_downloads( $item );
-					$i              = 0;
-
-					foreach ( $download_files as $download_id => $file ) {
-						$i++;
-
-						if ( count( $download_files ) > 1 ) {
-							$prefix = sprintf( __( 'Download %d', 'woocommerce' ), $i );
-						} elseif ( $i == 1 ) {
-							$prefix = __( 'Download', 'woocommerce' );
-						}
-
-						echo '<br/><small>' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
-					}
+				if ( $show_download_links ) {
+					$order->display_item_downloads( $item );
 				}
 
 				// allow other plugins to add additional product information here

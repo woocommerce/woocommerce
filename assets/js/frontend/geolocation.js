@@ -40,13 +40,34 @@ jQuery( function( $ ) {
 		}
 	};
 
-	if ( '1' !== wc_geolocation_params.is_checkout ) {
+	if ( '1' !== wc_geolocation_params.is_checkout && '1' !== wc_geolocation_params.is_cart && '1' !== wc_geolocation_params.is_account_page ) {
 		$.ajax( $geolocate_customer );
+
+		// Support form elements
+		$( 'form' ).each( function() {
+			var $this  = $( this );
+			var method = $this.attr( 'method' );
+
+			if ( method && 'get' === method.toLowerCase() ) {
+				$this.append( '<input type="hidden" name="v" value="' + wc_geolocation_params.hash + '" />' );
+			} else {
+				var href = $this.attr( 'action' );
+				if ( href ) {
+					if ( href.indexOf( '?' ) > 0 ) {
+						$this.attr( 'action', href + '&v=' + wc_geolocation_params.hash );
+					} else {
+						$this.attr( 'action', href + '?v=' + wc_geolocation_params.hash );
+					}
+				}
+			}
+		});
+
+		// Append hashes on load
+		$append_hashes();
 	}
 
 	$( document.body ).on( 'added_to_cart', function() {
 		$append_hashes();
 	});
 
-	$append_hashes();
 });

@@ -22,7 +22,7 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @var string
 	 */
-	protected $repo = 'https://github.com/woothemes/woocommerce-language-packs/raw/v';
+	protected static $repo = 'https://github.com/woothemes/woocommerce-language-packs/raw/v';
 
 	/**
 	 * Initialize the language pack upgrader
@@ -30,9 +30,9 @@ class WC_Language_Pack_Upgrader {
 	public function __construct() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_update' ) );
 		add_filter( 'upgrader_pre_download', array( $this, 'version_update' ), 10, 2 );
-		add_action( 'woocommerce_installed', array( $this, 'has_available_update' ) );
+		add_action( 'woocommerce_installed', array( __CLASS__, 'has_available_update' ) );
 		add_action( 'update_option_WPLANG', array( $this, 'updated_language_option' ), 10, 2 );
-		add_filter( 'admin_init', array( $this, 'manual_language_update' ), 999 );
+		add_filter( 'admin_init', array( $this, 'manual_language_update' ), 10 );
 	}
 
 	/**
@@ -40,11 +40,11 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @return string
 	 */
-	public function get_language_package_uri( $locale = null ) {
+	public static function get_language_package_uri( $locale = null ) {
 		if ( is_null( $locale ) ) {
 			$locale = get_locale();
 		}
-		return $this->repo . WC_VERSION . '/packages/' . $locale . '.zip';
+		return self::$repo . WC_VERSION . '/packages/' . $locale . '.zip';
 	}
 
 	/**
@@ -55,7 +55,7 @@ class WC_Language_Pack_Upgrader {
 	 * @return object
 	 */
 	public function check_for_update( $data ) {
-		if ( $this->has_available_update() ) {
+		if ( self::has_available_update() ) {
 			$locale = get_locale();
 
 			$data->translations[] = array(
@@ -64,7 +64,7 @@ class WC_Language_Pack_Upgrader {
 				'language'   => $locale,
 				'version'    => WC_VERSION,
 				'updated'    => date( 'Y-m-d H:i:s' ),
-				'package'    => $this->get_language_package_uri( $locale ),
+				'package'    => self::get_language_package_uri( $locale ),
 				'autoupdate' => 1
 			);
 		}
@@ -79,7 +79,7 @@ class WC_Language_Pack_Upgrader {
 	 * @param string $new
 	 */
 	public function updated_language_option( $old, $new ) {
-		$this->has_available_update( $new );
+		self::has_available_update( $new );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @return bool
 	 */
-	public function has_available_update( $locale = null ) {
+	public static function has_available_update( $locale = null ) {
 		if ( is_null( $locale ) ) {
 			$locale = get_locale();
 		}
@@ -99,8 +99,8 @@ class WC_Language_Pack_Upgrader {
 		$version = get_option( 'woocommerce_language_pack_version', array( '0', $locale ) );
 
 		if ( ! is_array( $version ) || version_compare( $version[0], WC_VERSION, '<' ) || $version[1] !== $locale ) {
-			if ( $this->check_if_language_pack_exists( $locale ) ) {
-				$this->configure_woocommerce_upgrade_notice();
+			if ( self::check_if_language_pack_exists( $locale ) ) {
+				self::configure_woocommerce_upgrade_notice();
 				return true;
 			} else {
 				// Updated the woocommerce_language_pack_version to avoid searching translations for this release again
@@ -114,7 +114,7 @@ class WC_Language_Pack_Upgrader {
 	/**
 	 * Configure the WooCommerce translation upgrade notice
 	 */
-	public function configure_woocommerce_upgrade_notice() {
+	public static function configure_woocommerce_upgrade_notice() {
 		WC_Admin_Notices::add_notice( 'translation_upgrade' );
 	}
 
@@ -123,8 +123,8 @@ class WC_Language_Pack_Upgrader {
 	 *
 	 * @return bool
 	 */
-	public function check_if_language_pack_exists( $locale ) {
-		$response = wp_safe_remote_get( $this->get_language_package_uri( $locale ), array( 'timeout' => 60 ) );
+	public static function check_if_language_pack_exists( $locale ) {
+		$response = wp_safe_remote_get( self::get_language_package_uri( $locale ), array( 'timeout' => 60 ) );
 
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 			return true;
@@ -145,7 +145,7 @@ class WC_Language_Pack_Upgrader {
 	 * @return bool
 	 */
 	public function version_update( $reply, $package ) {
-		if ( $package === $this->get_language_package_uri() ) {
+		if ( $package === self::get_language_package_uri() ) {
 			$this->save_language_version();
 		}
 
@@ -173,15 +173,21 @@ class WC_Language_Pack_Upgrader {
 			is_admin()
 			&& current_user_can( 'update_plugins' )
 			&& isset( $_GET['page'] )
-			&& 'wc-status' == $_GET['page']
+			&& in_array( $_GET['page'], array( 'wc-status', 'wc-setup' ) )
 			&& isset( $_GET['action'] )
 			&& 'translation_upgrade' == $_GET['action']
 		) {
+			$page    = 'wc-status&tab=tools';
+			$wpnonce = 'debug_action';
+			if ( 'wc-setup' == $_GET['page'] ) {
+				$page    = 'wc-setup';
+				$wpnonce = 'setup_language';
+			}
 
-			$url       = wp_nonce_url( admin_url( 'admin.php?page=wc-status&tab=tools&action=translation_upgrade' ), 'language_update' );
-			$tools_url = admin_url( 'admin.php?page=wc-status&tab=tools' );
+			$url       = wp_nonce_url( admin_url( 'admin.php?page=' . $page . '&action=translation_upgrade' ), 'language_update' );
+			$tools_url = admin_url( 'admin.php?page=' . $page );
 
-			if ( ! isset( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+			if ( ! isset( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], $wpnonce ) ) {
 				wp_redirect( add_query_arg( array( 'translation_updated' => 2 ), $tools_url ) );
 				exit;
 			}
@@ -199,7 +205,7 @@ class WC_Language_Pack_Upgrader {
 			}
 
 			// Download the language pack
-			$response = wp_safe_remote_get( $this->get_language_package_uri(), array( 'timeout' => 60 ) );
+			$response = wp_safe_remote_get( self::get_language_package_uri(), array( 'timeout' => 60 ) );
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				global $wp_filesystem;
 
@@ -237,6 +243,31 @@ class WC_Language_Pack_Upgrader {
 		}
 	}
 
+	/**
+	 * Language update messages
+	 *
+	 * @since 2.4.5
+	 */
+	public static function language_update_messages() {
+		switch ( $_GET['translation_updated'] ) {
+			case 2 :
+				echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . __( 'Seems you don\'t have permission to do this!', 'woocommerce' ) . '</p></div>';
+				break;
+			case 3 :
+				echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . sprintf( __( 'An authentication error occurred while updating the translation. Please try again or configure your %sUpgrade Constants%s.', 'woocommerce' ), '<a href="http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants">', '</a>' ) . '</p></div>';
+				break;
+			case 4 :
+				echo '<div class="error"><p>' . __( 'Failed to install/update the translation:', 'woocommerce' ) . ' ' . __( 'Sorry but there is no translation available for your language =/', 'woocommerce' ) . '</p></div>';
+				break;
+
+			default :
+				// Force WordPress find for new updates and hide the WooCommerce translation update
+				set_site_transient( 'update_plugins', null );
+
+				echo '<div class="updated"><p>' . __( 'Translations installed/updated successfully!', 'woocommerce' ) . '</p></div>';
+				break;
+		}
+	}
 }
 
 new WC_Language_Pack_Upgrader();

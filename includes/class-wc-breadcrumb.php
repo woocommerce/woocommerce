@@ -70,7 +70,8 @@ class WC_Breadcrumb {
 			'is_category',
 			'is_tag',
 			'is_author',
-			'is_date'
+			'is_date',
+			'is_tax'
 		);
 
 		if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
@@ -274,6 +275,23 @@ class WC_Breadcrumb {
 		if ( is_day() ) {
 			$this->add_crumb( get_the_time( 'd' ) );
 		}
+	}
+
+	/**
+	 * Add crumbs for date based archives
+	 */
+	private function add_crumbs_tax() {
+		$this_term = $GLOBALS['wp_query']->get_queried_object();
+		$taxonomy  = get_taxonomy( $this_term->taxonomy );
+
+		$this->add_crumb( $taxonomy->labels->name );
+
+		if ( 0 != $this_term->parent ) {
+			$this->term_ancestors( $this_term->parent, 'post_category' );
+			$this->add_crumb( $this_term->name, get_term_link( $this_term->term_id, $this_term->taxonomy ) );
+		}
+
+		$this->add_crumb( single_term_title( '', false ), get_term_link( $this_term->term_id, $this_term->taxonomy ) );
 	}
 
 	/**

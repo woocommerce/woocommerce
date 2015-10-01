@@ -52,7 +52,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $key ) {
-		return sprintf( '<input type="checkbox" name="%1$s[]" value="%2$s" />', $this->_args['singular'], $key['key_id'] );
+		return sprintf( '<input type="checkbox" name="key[]" value="%1$s" />', $key['key_id'] );
 	}
 
 	/**

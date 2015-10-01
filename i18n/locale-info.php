@@ -20,6 +20,26 @@ return array(
 			)
 		)
 	),
+	'BD' => array(
+		'currency_code'  => 'BDT',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'in',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'BD',
+					'state'    => '',
+					'rate'     => '15.0000',
+					'name'     => 'VAT',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'BE' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'left',
@@ -274,6 +294,26 @@ return array(
 			)
 		)
 	),
+	'HU' => array(
+		'currency_code'  => 'HUF',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => ' ',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'HU',
+					'state'    => '',
+					'rate'     => '27.0000',
+					'name'     => 'ÁFA',
+					'shipping' => true
+				)
+			)
+		)
+	),
 	'IT' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right',
@@ -289,6 +329,26 @@ return array(
 					'state'    => '',
 					'rate'     => '22.0000',
 					'name'     => 'IVA',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'JP' => array(
+		'currency_code'  => 'JPY',
+		'currency_pos'   => 'left',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 0,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'JP',
+					'state'    => '',
+					'rate'     => '8.0000',
+					'name'     => __( 'Consumption tax', 'woocommerce' ),
 					'shipping' => true
 				)
 			)
@@ -329,6 +389,26 @@ return array(
 					'state'    => '',
 					'rate'     => '25.0000',
 					'name'     => 'MVA',
+					'shipping' => true
+				)
+			)
+		)
+	),
+	'NP' => array(
+		'currency_code'  => 'NPR',
+		'currency_pos'   => 'left_space',
+		'thousand_sep'   => ',',
+		'decimal_sep'    => '.',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => 'NP',
+					'state'    => '',
+					'rate'     => '13.0000',
+					'name'     => 'VAT',
 					'shipping' => true
 				)
 			)

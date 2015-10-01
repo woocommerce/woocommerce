@@ -1,10 +1,9 @@
 === WooCommerce - excelling eCommerce ===
-Contributors: woothemes, automattic, mikejolley, jameskoster, claudiosanches, royho
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@woothemes.com&item_name=Donation+for+WooCommerce
 Requires at least: 4.0
 Tested up to: 4.3
-Stable tag: 2.4.3
+Stable tag: 2.4.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -124,7 +123,7 @@ For extending or theming WooCommerce, see our [codex](http://docs.woothemes.com/
 
 = Where can I get support or talk to other users? =
 
-If you get stuck you can ask for help on the [WooThemes Community Forum](https://support.woothemes.com/hc/communities/public/topics).
+If you get stuck, you can ask for help in the [WooCommerce Plugin Forum](https://wordpress.org/support/plugin/woocommerce).
 
 For help with premium add-ons from WooThemes, use [our helpdesk](http://support.woothemes.com/).
 
@@ -159,8 +158,82 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.5.0 - TBD =
+* Dev - API - Added /products/shipping_classes endpoint.
+* Dev - API - Added support to POST, PUT, and DELETE categories and tags.
+* Dev - API - Added support to filter products by tag, category, shipping class, and attribute.
+
+* Fix - Handle Switzerland in get_european_union_countries.
+* Fix - For geolocation with static cache support, ensure hash is appended during form submission.
+* Fix - To prevent discounts being applied in 'random' order (based on order added to cart), sort cart items based on subtotal during calculate_totals.
+* Fix - Removed extra ob_start() in class-wc-shortcodes.php.
+* Fix - Show counts in category dropdown.
+* Fix - Escape add to cart messages to stop translations from breaking cart events.
+* Fix - Display of product/order tables in the dashboard when viewed on handheld devices.
+* Fix - API order item 'key' value.
+* Fix - Check specifically for Post IDs in WC Query verbose rules fix.
+* Fix - Only run maybe_set_cart_cookies if cart was loaded to prevent notices.
+* Fix - Variation loading/refresh after attribute saving.
+* Fix - Add monthly cron schedule.
+* Tweak - Add filters to control "shipped via" text.
+* Tweak - Allow line breaks in non-variation attributes.
+* Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
+* Tweak - woocommerce_save_account_details_required_fields hook.
+* Tweak - Only 'count' published variations.
+* Tweak - Display of order total in admin with refunds.
+* Tweak - Use Geolocation class for customer IP detection.
+* Tweak - Use the needs_payment function (DRY).
+* Tweak - Tweak wc_create_page to work with trashed pages.
+* Tweak - Redirect 'not right now' to referer in onboarding wizard.
+* Template - Removed 'Payment' heading in `templates/checkout/form-pay.php`.
+* Template - Removed unnecessary clearing div in `templates/checkout/payment.php`.
+* Template - Anchors and titles are now hooked in, rather than hard coded into `templates/content-product.php` and `templates/content-product_cat.php`
+
+= 2.4.6 - 24/08/2015 =
+* Fix - menu_order notices on IIS.
+* Fix - Grouped product is_purchasable check during add to cart.
+* Fix - Subscriptions 2.0 (unreleased) compatibility.
+* Fix - Encode variation data in add_to_cart_url method.
+* Fix - Bulk update variation: Set manage stock when _manage_stock meta data is missing.
+* Fix - Bulk update variation: Allow stock to be set to 0.
+* Fix - Ajax variation < 2.4 attribute name handling.
+* Fix - During updates, only recreate .htaccess if not using redirect download method.
+* Fix - Handle non standard decimals in flat rate costs.
+* Tweak - WC Setup wizard: Fix manual setting of decimal/thousand separator.
+* Tweak - Set ajax/nocache headers for ajax requests.
+* Tweak - Add tooltips for tax status and tax class options.
+* Tweak - WC Setup wizard: multi-line step styling.
+* Tweak - WC Setup wizard: site icon display on WP 4.3.
+* Tweak - WC Setup wizard: tweaked wording.
+* Tweak - WC Setup wizard: Add spinner/loading indication between onboarding steps.
+* Tweak - Allow HTML in store notice.
+
+= 2.4.5 - 20/08/2015 =
+* Fix - Global text based attribute saving on product page.
+* Fix - save_account_details should check display name of current user.
+* Fix - Show the right 'no shipping available' message when a country does not have states.
+* Fix - Add required postcode marker after label replace.
+* Fix - Flush product cache so prices are regenerated after scheduled sale ends.
+* Fix - Removed /page/ when using layered nav dropdown.
+* Tweak - Allowed Zip/Post Codes description for Local Delivery.
+* Tweak - Improve display_item_downloads numbering and use same function in emails.
+* Tweak - API - Fixes notices about deprecated `$HTTP_RAW_POST_DATA` on PHP 5.6.
+* Tweak - In add_to_cart_action, check is_purchasable rather than post status.
+* Tweak - Add expand/close links for attributes and match variation UI.
+* Tweak - Added locale info for BD, NP, JP and HU
+* Tweak - woocommerce_delete_version_transients_limit filter.
+* Tweak - Suppress errors when calling set_time_limit to avoid hosting conflicts.
+* Tweak - Keep new variation in sync so actions can modify data.
+* Tweak - Improved download numbering in emails and order page.
+* Tweak - Allowed users to install translations for the current language during the Setup Wizard.
+
+= 2.4.4 - 14/08/2015 =
+* Fix - Ajax variation handling when 'any' attribute is set.
 * Fix - Run html_entity_decode over text attributes to fix problems with quote characters.
+* Fix - COD: remove shipping check if the cart is 100% virtual.
 * Tweak - Order variations by menu_order by fallback to ID.
+* Tweak - Include attribute archives support in the breadcrumbs.
+* Tweak - woocommerce_variable_children_args hook.
 
 = 2.4.3 - 12/08/2015 =
 * Fix - Query within wc_customer_bought_product().
@@ -319,7 +392,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.3.8 - 20/04/2015 =
 * Fix - Ensure coupon taxes are reset when calculating totals.
 * Fix - Downloads url sanitization to work correctly with shortcodes and urls.
-* Fix - State/Contry select2 issues with Internet Explorer.
+* Fix - State/Country select2 issues with Internet Explorer.
 * Fix - Flat rate per item and per class if no additional costs added.
 * Fix - Simplify Commerce compatibility with free trial subscriptions.
 * Fix - Select2 z-index in the admin.

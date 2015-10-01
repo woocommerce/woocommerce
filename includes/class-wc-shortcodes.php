@@ -2,11 +2,11 @@
 /**
  * WC_Shortcodes class.
  *
- * @class 		WC_Shortcodes
- * @version		2.1.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @class       WC_Shortcodes
+ * @version     2.1.0
+ * @package     WooCommerce/Classes
+ * @category    Class
+ * @author      WooThemes
  */
 class WC_Shortcodes {
 
@@ -172,22 +172,16 @@ class WC_Shortcodes {
 		$ordering_args = WC()->query->get_catalog_ordering_args( $atts['orderby'], $atts['order'] );
 		$meta_query    = WC()->query->get_meta_query();
 		$query_args    = array(
-			'post_type'				=> 'product',
-			'post_status' 			=> 'publish',
-			'ignore_sticky_posts'	=> 1,
-			'orderby' 				=> $ordering_args['orderby'],
-			'order' 				=> $ordering_args['order'],
-			'posts_per_page' 		=> $atts['per_page'],
-			'meta_query' 			=> $meta_query,
-			'tax_query' 			=> array(
-				array(
-					'taxonomy' 		=> 'product_cat',
-					'terms' 		=> array_map( 'sanitize_title', explode( ',', $atts['category'] ) ),
-					'field' 		=> 'slug',
-					'operator' 		=> $atts['operator']
-				)
-			)
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => 1,
+			'orderby'             => $ordering_args['orderby'],
+			'order'               => $ordering_args['order'],
+			'posts_per_page'      => $atts['per_page'],
+			'meta_query'          => $meta_query
 		);
+
+		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
 
 		if ( isset( $ordering_args['meta_key'] ) ) {
 			$query_args['meta_key'] = $ordering_args['meta_key'];
@@ -291,10 +285,12 @@ class WC_Shortcodes {
 	 */
 	public static function recent_products( $atts ) {
 		$atts = shortcode_atts( array(
-			'per_page' 	=> '12',
-			'columns' 	=> '4',
-			'orderby' 	=> 'date',
-			'order' 	=> 'desc'
+			'per_page' => '12',
+			'columns'  => '4',
+			'orderby'  => 'date',
+			'order'    => 'desc',
+			'category' => '',  // Slugs
+			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 		), $atts );
 
 		$query_args = array(
@@ -306,6 +302,8 @@ class WC_Shortcodes {
 			'order'               => $atts['order'],
 			'meta_query'          => WC()->query->get_meta_query()
 		);
+
+		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
 
 		return self::product_loop( $query_args, $atts, 'recent_products' );
 	}
@@ -373,9 +371,9 @@ class WC_Shortcodes {
 
 		if ( isset( $atts['sku'] ) ) {
 			$args['meta_query'][] = array(
-				'key' 		=> '_sku',
-				'value' 	=> $atts['sku'],
-				'compare' 	=> '='
+				'key'     => '_sku',
+				'value'   => $atts['sku'],
+				'compare' => '='
 			);
 		}
 
@@ -513,14 +511,14 @@ class WC_Shortcodes {
 		), $atts );
 
 		$query_args = array(
-			'posts_per_page'	=> $atts['per_page'],
-			'orderby' 			=> $atts['orderby'],
-			'order' 			=> $atts['order'],
-			'no_found_rows' 	=> 1,
-			'post_status' 		=> 'publish',
-			'post_type' 		=> 'product',
-			'meta_query' 		=> WC()->query->get_meta_query(),
-			'post__in'			=> array_merge( array( 0 ), wc_get_product_ids_on_sale() )
+			'posts_per_page' => $atts['per_page'],
+			'orderby'        => $atts['orderby'],
+			'order'          => $atts['order'],
+			'no_found_rows'  => 1,
+			'post_status'    => 'publish',
+			'post_type'      => 'product',
+			'meta_query'     => WC()->query->get_meta_query(),
+			'post__in'       => array_merge( array( 0 ), wc_get_product_ids_on_sale() )
 		);
 
 		return self::product_loop( $query_args, $atts, 'sale_products' );
@@ -535,7 +533,9 @@ class WC_Shortcodes {
 	public static function best_selling_products( $atts ) {
 		$atts = shortcode_atts( array(
 			'per_page' => '12',
-			'columns'  => '4'
+			'columns'  => '4',
+			'category' => '',  // Slugs
+			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 		), $atts );
 
 		$query_args = array(
@@ -547,6 +547,8 @@ class WC_Shortcodes {
 			'orderby'             => 'meta_value_num',
 			'meta_query'          => WC()->query->get_meta_query()
 		);
+
+		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
 
 		return self::product_loop( $query_args, $atts, 'best_selling_products' );
 	}
@@ -562,7 +564,9 @@ class WC_Shortcodes {
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
-			'order'    => 'asc'
+			'order'    => 'asc',
+			'category' => '',  // Slugs
+			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 		), $atts );
 
 		$query_args = array(
@@ -574,6 +578,8 @@ class WC_Shortcodes {
 			'posts_per_page'      => $atts['per_page'],
 			'meta_query'          => WC()->query->get_meta_query()
 		);
+
+		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
 
 		ob_start();
 
@@ -597,7 +603,9 @@ class WC_Shortcodes {
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'date',
-			'order'    => 'desc'
+			'order'    => 'desc',
+			'category' => '',  // Slugs
+			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 		), $atts );
 
 		$meta_query   = WC()->query->get_meta_query();
@@ -615,6 +623,8 @@ class WC_Shortcodes {
 			'order'               => $atts['order'],
 			'meta_query'          => $meta_query
 		);
+
+		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
 
 		return self::product_loop( $query_args, $atts, 'featured_products' );
 	}
@@ -781,7 +791,7 @@ class WC_Shortcodes {
 	 */
 	public static function related_products( $atts ) {
 		$atts = shortcode_atts( array(
-			'posts_per_page' => '4',
+			'per_page' => '4',
 			'columns'        => '4',
 			'orderby'        => 'rand'
 		), $atts );
@@ -791,5 +801,29 @@ class WC_Shortcodes {
 		woocommerce_related_products( $atts );
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Adds a tax_query index to the query to filter by category.
+	 *
+	 * @param array $args
+	 * @param string $category
+	 * @param string $operator
+	 * @return array;
+	 * @access private
+	 */
+	private static function _maybe_add_category_args( $args, $category, $operator ) {
+		if ( ! empty( $category ) ) {
+			$args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_cat',
+					'terms'    => array_map( 'sanitize_title', explode( ',', $category ) ),
+					'field'    => 'slug',
+					'operator' => $operator
+				)
+			);
+		}
+
+		return $args;
 	}
 }

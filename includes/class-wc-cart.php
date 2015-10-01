@@ -169,7 +169,7 @@ class WC_Cart {
 	 * Will set cart cookies if needed, once, during WP hook
 	 */
 	public function maybe_set_cart_cookies() {
-		if ( ! headers_sent() ) {
+		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
 			if ( ! $this->is_empty() ) {
 				$this->set_cart_cookies( true );
 			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
@@ -1055,6 +1055,21 @@ class WC_Cart {
 		}
 
 		/**
+		 * Sort by subtotal
+		 * @param  array $a
+		 * @param  array $b
+		 * @return int
+		 */
+		private function sort_by_subtotal( $a, $b ) {
+			$first_item_subtotal  = isset( $a['line_subtotal'] ) ? $a['line_subtotal'] : 0;
+			$second_item_subtotal = isset( $b['line_subtotal'] ) ? $b['line_subtotal'] : 0;
+			if ( $first_item_subtotal === $second_item_subtotal ) {
+				return 0;
+			}
+			return ( $first_item_subtotal < $second_item_subtotal ) ? 1 : -1;
+		}
+
+		/**
 		 * Calculate totals for the items in the cart.
 		 */
 		public function calculate_totals() {
@@ -1070,11 +1085,12 @@ class WC_Cart {
 
 			$tax_rates      = array();
 			$shop_tax_rates = array();
+			$cart           = $this->get_cart();
 
 			/**
 			 * Calculate subtotals for items. This is done first so that discount logic can use the values.
 			 */
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			foreach ( $cart as $cart_item_key => $values ) {
 
 				$_product = $values['data'];
 
@@ -1126,8 +1142,12 @@ class WC_Cart {
 
 					/**
 					 * ADJUST TAX - Calculations when base tax is not equal to the item tax
-					 */
-					if ( $item_tax_rates !== $base_tax_rates ) {
+					 *
+ 					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
+ 					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
+ 					 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
+ 					 */
+					if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 
 						// Work out a new base price without the shop's base tax
 						$taxes                 = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
@@ -1176,10 +1196,13 @@ class WC_Cart {
 				$this->subtotal_ex_tax += $line_subtotal;
 			}
 
+			// Order cart items by price so coupon logic is 'fair' for customers and not based on order added to cart.
+			uasort( $cart, array( $this, 'sort_by_subtotal' ) );
+
 			/**
 			 * Calculate totals for items
 			 */
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			foreach ( $cart as $cart_item_key => $values ) {
 
 				$_product = $values['data'];
 
@@ -1213,8 +1236,12 @@ class WC_Cart {
 
 					/**
 					 * ADJUST TAX - Calculations when base tax is not equal to the item tax
-					 */
-					if ( $item_tax_rates !== $base_tax_rates ) {
+					 *
+ 					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
+ 					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
+ 					 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
+ 					 */
+					if ( $item_tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 
 						// Work out a new base price without the shop's base tax
 						$taxes             = WC_Tax::calc_tax( $line_price, $base_tax_rates, true, true );
@@ -1588,7 +1615,7 @@ class WC_Cart {
 						// Usage limits per user - check against billing and user email and user ID
 						if ( $coupon->usage_limit_per_user > 0 ) {
 							$check_emails = array();
-							$used_by      = array_filter( (array) get_post_meta( $coupon->id, '_used_by' ) );
+							$used_by      = $coupon->get_used_by();
 
 							if ( is_user_logged_in() ) {
 								$current_user   = wp_get_current_user();
@@ -1872,12 +1899,12 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 
 		/**
-		 * add_fee function.
+		 * Add additional fee to the cart
 		 *
-		 * @param mixed $name
-		 * @param mixed $amount
-		 * @param bool $taxable (default: false)
-		 * @param string $tax_class (default: '')
+		 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
+		 * @param float $amount Fee amount.
+		 * @param bool $taxable (default: false) Is the fee taxable?
+		 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
 		 */
 		public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 

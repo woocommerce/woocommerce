@@ -10,6 +10,7 @@ php:
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
+  - WP_VERSION=4.3 WP_MULTISITE=0
   - WP_VERSION=4.2 WP_MULTISITE=0
   - WP_VERSION=4.1 WP_MULTISITE=0
   - WP_VERSION=4.0 WP_MULTISITE=0
@@ -27,5 +28,3 @@ script: phpunit -c phpunit.xml.dist
 
 after_script:
   - bash tests/bin/travis.sh after
-  - wget https://scrutinizer-ci.com/ocular.phar
-  - php ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml

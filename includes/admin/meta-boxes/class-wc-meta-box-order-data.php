@@ -164,7 +164,7 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $post->post_status ); ?>" />
 			<div id="order_data" class="panel">
 
-				<h2><?php echo esc_html( sprintf( __( '%s %s details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
+				<h2><?php echo esc_html( sprintf( _x( '%s #%s details', 'Order #123 details', 'woocommerce' ), $order_type_object->labels->singular_name, $order->get_order_number() ) ); ?></h2>
 				<p class="order_number"><?php
 
 					if ( $payment_method ) {
@@ -222,7 +222,7 @@ class WC_Meta_Box_Order_Data {
 							if ( ! empty( $order->customer_user ) ) {
 								$user_id     = absint( $order->customer_user );
 								$user        = get_user_by( 'id', $user_id );
-								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
+								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 							}
 							?>
 							<input type="hidden" class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-selected="<?php echo htmlspecialchars( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
@@ -450,16 +450,15 @@ class WC_Meta_Box_Order_Data {
 			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
 		}
 
+		$date = date_i18n( 'Y-m-d H:i:s', $date );
+
+		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
+
 		// Order data saved, now get it so we can manipulate status
 		$order = wc_get_order( $post_id );
 
 		// Order status
-		$order->update_status( $_POST['order_status'] );
-
-		// Finally, set the date
-		$date = date_i18n( 'Y-m-d H:i:s', $date );
-
-		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
+		$order->update_status( $_POST['order_status'], '', true );
 
 		wc_delete_shop_order_transients( $post_id );
 	}

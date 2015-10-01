@@ -73,7 +73,9 @@ class WC_Payment_Gateways {
 			'WC_Gateway_Paypal',
 		);
 
-		if ( 'US' === WC()->countries->get_base_country() ) {
+		$simplify_countries = (array) apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) );
+
+		if ( in_array( WC()->countries->get_base_country(), $simplify_countries ) ) {
 			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
 				if ( ! function_exists( 'wcs_create_renewal_order' ) ) { // Subscriptions < 2.0
 					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce_Deprecated';

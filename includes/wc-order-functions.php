@@ -804,7 +804,5 @@ function wc_order_fully_refunded( $order_id ) {
 	) );
 
 	wc_delete_shop_order_transients( $order_id );
-
-	do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->id );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );

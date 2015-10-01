@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.4.3
+ * Version: 2.5.0-dev
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 4.1
@@ -33,7 +33,7 @@ final class WooCommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.4.3';
+	public $version = '2.4.6';
 
 	/**
 	 * @var WooCommerce The single instance of the class
@@ -243,6 +243,10 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
 		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			include_once( 'includes/class-wc-cli.php' );
+		}
 	}
 
 	/**

@@ -184,7 +184,10 @@ class WC_Post_types {
 								'add_new_item'      => sprintf( __( 'Add New %s', 'woocommerce' ), $label ),
 								'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label )
 							),
-						'show_ui'           => false,
+						'show_ui'           => true,
+						'show_in_menu'      => false,
+						'show_in_nav_menus' => false,
+						'meta_box_cb'       => false,
 						'query_var'         => 1 === $tax->attribute_public,
 						'rewrite'           => false,
 						'sort'              => false,
@@ -209,9 +212,9 @@ class WC_Post_types {
 					register_taxonomy( $name, apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ), apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data ) );
 				}
 			}
-
-			do_action( 'woocommerce_after_register_taxonomy' );
 		}
+
+		do_action( 'woocommerce_after_register_taxonomy' );
 	}
 
 	/**
@@ -285,7 +288,7 @@ class WC_Post_types {
 				array(
 					'labels'              => array(
 							'name'               => __( 'Orders', 'woocommerce' ),
-							'singular_name'      => __( 'Order', 'woocommerce' ),
+							'singular_name'      => _x( 'Order', 'shop_order post type singular name', 'woocommerce' ),
 							'add_new'            => __( 'Add Order', 'woocommerce' ),
 							'add_new_item'       => __( 'Add New Order', 'woocommerce' ),
 							'edit'               => __( 'Edit', 'woocommerce' ),

@@ -241,7 +241,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 			$query = $this->query_customers( $filter );
 
-			return array( 'count' => count( $query->get_results() ) );
+			return array( 'count' => $query->get_total() );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -461,37 +461,20 @@ class WC_API_Customers extends WC_API_Resource {
 	 * @since 2.1
 	 * @param int $id the customer ID
 	 * @param string $fields fields to include in response
+	 * @param array $filter filters
 	 * @return array
 	 */
-	public function get_customer_orders( $id, $fields = null ) {
-		global $wpdb;
-
+	public function get_customer_orders( $id, $fields = null, $filter = array() ) {
 		$id = $this->validate_request( $id, 'customer', 'read' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
 
-		$order_ids = $wpdb->get_col( $wpdb->prepare( "SELECT id
-						FROM $wpdb->posts AS posts
-						LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-						WHERE meta.meta_key = '_customer_user'
-						AND   meta.meta_value = '%s'
-						AND   posts.post_type = 'shop_order'
-						AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
-					", $id ) );
+		$filter['customer_id'] = $id;
+		$orders = WC()->api->WC_API_Orders->get_orders( $fields, $filter, null, -1 );
 
-		if ( empty( $order_ids ) ) {
-			return array( 'orders' => array() );
-		}
-
-		$orders = array();
-
-		foreach ( $order_ids as $order_id ) {
-			$orders[] = current( WC()->api->WC_API_Orders->get_order( $order_id, $fields ) );
-		}
-
-		return array( 'orders' => apply_filters( 'woocommerce_api_customer_orders_response', $orders, $id, $fields, $order_ids, $this->server ) );
+		return $orders;
 	}
 
 	/**
@@ -548,6 +531,11 @@ class WC_API_Customers extends WC_API_Resource {
 		// Custom Role
 		if ( ! empty( $args['role'] ) ) {
 			$query_args['role'] = $args['role'];
+
+			// Show users on all roles
+			if ( 'all' === $query_args['role'] ) {
+				unset( $query_args['role'] );
+			}
 		}
 
 		// Search

@@ -65,49 +65,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</label>
 		</div>
 
-		<label>
-			<span class="title"><?php _e( 'Tax Status', 'woocommerce' ); ?></span>
-			<span class="input-text-wrap">
-				<select class="tax_status" name="_tax_status">
-				<?php
-					$options = array(
-						''         => __( '— No Change —', 'woocommerce' ),
-						'taxable'  => __( 'Taxable', 'woocommerce' ),
-						'shipping' => __( 'Shipping only', 'woocommerce' ),
-						'none'     => _x( 'None', 'Tax status', 'woocommerce' )
-					);
-					foreach ($options as $key => $value) {
-						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
-					}
-				?>
-				</select>
-			</span>
-		</label>
-
-		<label>
-			<span class="title"><?php _e( 'Tax Class', 'woocommerce' ); ?></span>
-			<span class="input-text-wrap">
-				<select class="tax_class" name="_tax_class">
-				<?php
-					$options = array(
-						''         => __( '— No Change —', 'woocommerce' ),
-						'standard' => __( 'Standard', 'woocommerce' )
-					);
-
-					$tax_classes = WC_Tax::get_tax_classes();
-
-					if ( $tax_classes )
-						foreach ( $tax_classes as $class ) {
-							$options[ sanitize_title( $class ) ] = esc_html( $class );
+		<?php if ( wc_tax_enabled() ) : ?>
+			<label>
+				<span class="title"><?php _e( 'Tax Status', 'woocommerce' ); ?></span>
+				<span class="input-text-wrap">
+					<select class="tax_status" name="_tax_status">
+					<?php
+						$options = array(
+							''         => __( '— No Change —', 'woocommerce' ),
+							'taxable'  => __( 'Taxable', 'woocommerce' ),
+							'shipping' => __( 'Shipping only', 'woocommerce' ),
+							'none'     => _x( 'None', 'Tax status', 'woocommerce' )
+						);
+						foreach ($options as $key => $value) {
+							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
 						}
+					?>
+					</select>
+				</span>
+			</label>
 
-					foreach ( $options as $key => $value ) {
-						echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
-					}
-				?>
-				</select>
-			</span>
-		</label>
+			<label>
+				<span class="title"><?php _e( 'Tax Class', 'woocommerce' ); ?></span>
+				<span class="input-text-wrap">
+					<select class="tax_class" name="_tax_class">
+					<?php
+						$options = array(
+							''         => __( '— No Change —', 'woocommerce' ),
+							'standard' => __( 'Standard', 'woocommerce' )
+						);
+
+						$tax_classes = WC_Tax::get_tax_classes();
+
+						if ( $tax_classes )
+							foreach ( $tax_classes as $class ) {
+								$options[ sanitize_title( $class ) ] = esc_html( $class );
+							}
+
+						foreach ( $options as $key => $value ) {
+							echo '<option value="' . esc_attr( $key ) . '">' . $value . '</option>';
+						}
+					?>
+					</select>
+				</span>
+			</label>
+		<?php endif; ?>
 
 		<?php if ( wc_product_weight_enabled() ) : ?>
 			<div class="inline-edit-group">

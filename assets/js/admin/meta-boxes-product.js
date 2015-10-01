@@ -30,7 +30,7 @@ jQuery( function( $ ) {
 
 	$( function() {
 		// Prevent inputs in meta box headings opening/closing contents
-		$( '#woocommerce-product-data h3.hndle' ).unbind( 'click.postboxes' );
+		$( '#woocommerce-product-data' ).find( 'h3.hndle' ).unbind( 'click.postboxes' );
 
 		jQuery( '#woocommerce-product-data' ).on( 'click', 'h3.hndle', function( event ) {
 
@@ -44,16 +44,16 @@ jQuery( function( $ ) {
 	});
 
 	// Catalog Visibility
-	$( '#catalog-visibility .edit-catalog-visibility' ).click( function () {
-		if ( $( '#catalog-visibility-select').is( ':hidden' ) ) {
+	$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).click( function () {
+		if ( $( '#catalog-visibility-select' ).is( ':hidden' ) ) {
 			$( '#catalog-visibility-select' ).slideDown( 'fast' );
 			$( this ).hide();
 		}
 		return false;
 	});
-	$('#catalog-visibility .save-post-visibility').click( function () {
-		$('#catalog-visibility-select').slideUp( 'fast' );
-		$('#catalog-visibility .edit-catalog-visibility').show();
+	$( '#catalog-visibility' ).find( '.save-post-visibility' ).click( function () {
+		$( '#catalog-visibility-select' ).slideUp( 'fast' );
+		$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).show();
 
 		var label = $( 'input[name=_visibility]:checked' ).attr( 'data-label' );
 
@@ -65,9 +65,9 @@ jQuery( function( $ ) {
 		$( '#catalog-visibility-display' ).text( label );
 		return false;
 	});
-	$( '#catalog-visibility .cancel-post-visibility' ).click( function () {
+	$( '#catalog-visibility' ).find( '.cancel-post-visibility' ).click( function () {
 		$( '#catalog-visibility-select' ).slideUp( 'fast' );
-		$( '#catalog-visibility .edit-catalog-visibility' ).show();
+		$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).show();
 
 		var current_visibility = $( '#current_visibility' ).val();
 		var current_featured   = $( '#current_featured' ).val();
@@ -115,7 +115,7 @@ jQuery( function( $ ) {
 	}).change();
 
 	$( document.body ).on( 'woocommerce-product-type-change', function( e, select_val ) {
-		if ( 'variable' !== select_val && 0 < $( '#variable_product_options input[name^=variable_sku]' ).length && $( document.body ).triggerHandler( 'woocommerce-display-product-type-alert', select_val ) !== false ) {
+		if ( 'variable' !== select_val && 0 < $( '#variable_product_options' ).find( 'input[name^=variable_sku]' ).length && $( document.body ).triggerHandler( 'woocommerce-display-product-type-alert', select_val ) !== false ) {
 			window.alert( woocommerce_admin_meta_boxes.i18n_product_type_alert );
 		}
 	});
@@ -404,7 +404,7 @@ jQuery( function( $ ) {
 	// Save attributes and update variations
 	$( '.save_attributes' ).on( 'click', function() {
 
-		$( '.product_attributes' ).block({
+		$( '#woocommerce-product-data' ).block({
 			message: null,
 			overlayCSS: {
 				background: '#fff',
@@ -420,16 +420,14 @@ jQuery( function( $ ) {
 		};
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
+			// Reload variations panel
 			var this_page = window.location.toString();
 			this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_admin_meta_boxes.post_id + '&action=edit&' );
 
 			// Load variations panel
-			$( '#variable_product_options' ).block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } });
 			$( '#variable_product_options' ).load( this_page + ' #variable_product_options_inner', function() {
-				$( '#variable_product_options' ).unblock();
+				$( '#variable_product_options' ).trigger( 'reload' );
 			});
-
-			$( '.product_attributes' ).unblock();
 		});
 	});
 
@@ -516,7 +514,7 @@ jQuery( function( $ ) {
 	// Product gallery file uploads
 	var product_gallery_frame;
 	var $image_gallery_ids = $( '#product_image_gallery' );
-	var $product_images    = $( '#product_images_container ul.product_images' );
+	var $product_images    = $( '#product_images_container' ).find( 'ul.product_images' );
 
 	jQuery( '.add_product_images' ).on( 'click', 'a', function( event ) {
 		var $el = $( this );
@@ -555,7 +553,7 @@ jQuery( function( $ ) {
 
 				if ( attachment.id ) {
 					attachment_ids   = attachment_ids ? attachment_ids + ',' + attachment.id : attachment.id;
-					var attachment_image = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+					var attachment_image = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
 					$product_images.append( '<li class="image" data-attachment_id="' + attachment.id + '"><img src="' + attachment_image + '" /><ul class="actions"><li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li></ul></li>' );
 				}
@@ -587,7 +585,7 @@ jQuery( function( $ ) {
 		update: function() {
 			var attachment_ids = '';
 
-			$( '#product_images_container ul li.image' ).css( 'cursor', 'default' ).each( function() {
+			$( '#product_images_container' ).find( 'ul li.image' ).css( 'cursor', 'default' ).each( function() {
 				var attachment_id = jQuery( this ).attr( 'data-attachment_id' );
 				attachment_ids = attachment_ids + attachment_id + ',';
 			});
@@ -602,7 +600,7 @@ jQuery( function( $ ) {
 
 		var attachment_ids = '';
 
-		$( '#product_images_container ul li.image' ).css( 'cursor', 'default' ).each( function() {
+		$( '#product_images_container' ).find( 'ul li.image' ).css( 'cursor', 'default' ).each( function() {
 			var attachment_id = jQuery( this ).attr( 'data-attachment_id' );
 			attachment_ids = attachment_ids + attachment_id + ',';
 		});

@@ -516,6 +516,48 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 		wc_get_template( 'loop/title.php' );
 	}
 }
+if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
+
+	/**
+	 * Show the subcategory title in the product loop.
+	 */
+	function woocommerce_template_loop_category_title( $category ) {
+		?>
+		<h3>
+			<?php
+				echo $category->name;
+
+				if ( $category->count > 0 )
+					echo apply_filters( 'woocommerce_subcategory_count_html', ' <mark class="count">(' . $category->count . ')</mark>', $category );
+			?>
+		</h3>
+		<?php
+	}
+}
+/**
+ * Insert the opening anchor tag for products in the loop.
+ */
+function woocommerce_template_loop_product_link_open() {
+	echo '<a href="' . get_the_permalink() . '">';
+}
+/**
+ * Insert the opening anchor tag for products in the loop.
+ */
+function woocommerce_template_loop_product_link_close() {
+	echo '</a>';
+}
+/**
+ * Insert the opening anchor tag for categories in the loop.
+ */
+function woocommerce_template_loop_category_link_open( $category ) {
+	echo '<a href="' . get_term_link( $category->slug, 'product_cat' ) . '">';
+}
+/**
+ * Insert the opening anchor tag for categories in the loop.
+ */
+function woocommerce_template_loop_category_link_close() {
+	echo '</a>';
+}
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
 	/**
@@ -888,7 +930,7 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 		wp_enqueue_script( 'wc-add-to-cart-variation' );
 
 		// Get Available variations?
-		$get_variations = sizeof( $product->get_children() ) <= apply_filters( 'woocommerce_ajax_variation_threshold', 20, $product );
+		$get_variations = sizeof( $product->get_children() ) <= apply_filters( 'woocommerce_ajax_variation_threshold', 30, $product );
 
 		// Load the template
 		wc_get_template( 'single-product/add-to-cart/variable.php', array(
@@ -1133,15 +1175,17 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 	 * Output product up sells.
 	 *
 	 * @param int $posts_per_page (default: -1)
-	 * @param int $columns (default: 2)
+	 * @param int $columns (default: 4)
 	 * @param string $orderby (default: 'rand')
 	 */
 	function woocommerce_upsell_display( $posts_per_page = '-1', $columns = 4, $orderby = 'rand' ) {
-		wc_get_template( 'single-product/up-sells.php', array(
-				'posts_per_page'	=> $posts_per_page,
-				'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
-				'columns'			=> $columns
-			) );
+		$args = apply_filters( 'woocommerce_upsell_display_args', array(
+			'posts_per_page'	=> $posts_per_page,
+			'orderby'			=> apply_filters( 'woocommerce_upsells_orderby', $orderby ),
+			'columns'			=> $columns
+		) );
+
+		wc_get_template( 'single-product/up-sells.php', $args );
 	}
 }
 
@@ -1793,7 +1837,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field_html .= $field;
 
 			if ( $args['description'] ) {
-				$field_html .= '<span class="description">' . esc_attr( $args['description'] ) . '</span>';
+				$field_html .= '<span class="description">' . esc_html( $args['description'] ) . '</span>';
 			}
 
 			$container_class = 'form-row ' . esc_attr( implode( ' ', $args['class'] ) );
@@ -1904,7 +1948,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 	 * @since 2.4.0
 	 */
 	function wc_dropdown_variation_attribute_options( $args = array() ) {
-		$args = wp_parse_args( $args, array(
+		$args = wp_parse_args( apply_filters( 'woocommerce_dropdown_variation_attribute_options_args', $args ), array(
 			'options'          => false,
 			'attribute'        => false,
 			'product'          => false,

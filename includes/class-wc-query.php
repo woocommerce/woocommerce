@@ -212,7 +212,7 @@ class WC_Query {
 		}
 
 		// Fix for verbose page rules
-		if ( $GLOBALS['wp_rewrite']->use_verbose_page_rules && isset( $q->queried_object_id ) && $q->queried_object_id === wc_get_page_id('shop') ) {
+		if ( $GLOBALS['wp_rewrite']->use_verbose_page_rules && isset( $q->queried_object->ID ) && $q->queried_object->ID === wc_get_page_id('shop') ) {
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page', '' );
 			$q->set( 'pagename', '' );
@@ -691,7 +691,7 @@ class WC_Query {
 	 */
 	public function layered_nav_init( ) {
 
-		if ( is_active_widget( false, false, 'woocommerce_layered_nav', true ) && ! is_admin() ) {
+		if ( apply_filters( 'woocommerce_is_layered_nav_active', is_active_widget( false, false, 'woocommerce_layered_nav', true ) ) && ! is_admin() ) {
 
 			global $_chosen_attributes;
 
@@ -823,7 +823,7 @@ class WC_Query {
 
 			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-			wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/frontend/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
+			wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
 			wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch' ), WC_VERSION, true );
 
 			wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(

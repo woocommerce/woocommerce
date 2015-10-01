@@ -252,24 +252,35 @@ class WC_Meta_Box_Product_Data {
 					echo '<div class="options_group show_if_simple show_if_external show_if_variable">';
 
 						// Tax
-						woocommerce_wp_select( array( 'id' => '_tax_status', 'label' => __( 'Tax Status', 'woocommerce' ), 'options' => array(
-							'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-							'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
-							'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
-						) ) );
+						woocommerce_wp_select( array(
+							'id'      => '_tax_status',
+							'label'   => __( 'Tax Status', 'woocommerce' ),
+							'options' => array(
+								'taxable' 	=> __( 'Taxable', 'woocommerce' ),
+								'shipping' 	=> __( 'Shipping only', 'woocommerce' ),
+								'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
+							),
+							'desc_tip'    => 'true',
+							'description' => __( 'Define whether or not the entire product is taxable, or just the cost of shipping it.', 'woocommerce' )
+						) );
 
 						$tax_classes         = WC_Tax::get_tax_classes();
 						$classes_options     = array();
 						$classes_options[''] = __( 'Standard', 'woocommerce' );
 
 						if ( ! empty( $tax_classes ) ) {
-
 							foreach ( $tax_classes as $class ) {
 								$classes_options[ sanitize_title( $class ) ] = esc_html( $class );
 							}
 						}
 
-						woocommerce_wp_select( array( 'id' => '_tax_class', 'label' => __( 'Tax Class', 'woocommerce' ), 'options' => $classes_options ) );
+						woocommerce_wp_select( array(
+							'id'          => '_tax_class',
+							'label'       => __( 'Tax Class', 'woocommerce' ),
+							'options'     => $classes_options,
+							'desc_tip'    => 'true',
+							'description' => __( 'Choose a tax class for this product. Tax classes are used to apply different tax rates specific to certain types of product.', 'woocommerce' )
+						) );
 
 						do_action( 'woocommerce_product_options_tax' );
 
@@ -403,14 +414,31 @@ class WC_Meta_Box_Product_Data {
 			</div>
 
 			<div id="product_attributes" class="panel wc-metaboxes-wrapper">
+				<div class="toolbar toolbar-top">
+					<span class="expand-close">
+						<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>
+					</span>
+					<select name="attribute_taxonomy" class="attribute_taxonomy">
+						<option value=""><?php _e( 'Custom product attribute', 'woocommerce' ); ?></option>
+						<?php
+							global $wc_product_attributes;
+
+							// Array of defined attribute taxonomies
+							$attribute_taxonomies = wc_get_attribute_taxonomies();
+
+							if ( $attribute_taxonomies ) {
+								foreach ( $attribute_taxonomies as $tax ) {
+									$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
+									$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
+									echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
+								}
+							}
+						?>
+					</select>
+					<button type="button" class="button add_attribute"><?php _e( 'Add', 'woocommerce' ); ?></button>
+				</div>
 				<div class="product_attributes wc-metaboxes">
-
 					<?php
-						global $wc_product_attributes;
-
-						// Array of defined attribute taxonomies
-						$attribute_taxonomies = wc_get_attribute_taxonomies();
-
 						// Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set
 						$attributes           = maybe_unserialize( get_post_meta( $thepostid, '_product_attributes', true ) );
 
@@ -445,24 +473,12 @@ class WC_Meta_Box_Product_Data {
 						}
 					?>
 				</div>
-
-				<p class="toolbar">
-					<button type="button" class="button button-primary add_attribute"><?php _e( 'Add', 'woocommerce' ); ?></button>
-					<select name="attribute_taxonomy" class="attribute_taxonomy">
-						<option value=""><?php _e( 'Custom product attribute', 'woocommerce' ); ?></option>
-						<?php
-							if ( $attribute_taxonomies ) {
-								foreach ( $attribute_taxonomies as $tax ) {
-									$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
-									$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
-									echo '<option value="' . esc_attr( $attribute_taxonomy_name ) . '">' . esc_html( $label ) . '</option>';
-								}
-							}
-						?>
-					</select>
-
-					<button type="button" class="button save_attributes"><?php _e( 'Save attributes', 'woocommerce' ); ?></button>
-				</p>
+				<div class="toolbar">
+					<span class="expand-close">
+						<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>
+					</span>
+					<button type="button" class="button save_attributes button-primary"><?php _e( 'Save Attributes', 'woocommerce' ); ?></button>
+				</div>
 				<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 			</div>
 			<div id="linked_product_data" class="panel woocommerce_options_panel">
@@ -478,7 +494,7 @@ class WC_Meta_Box_Product_Data {
 							foreach ( $product_ids as $product_id ) {
 								$product = wc_get_product( $product_id );
 								if ( is_object( $product ) ) {
-									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
+									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 								}
 							}
 
@@ -495,7 +511,7 @@ class WC_Meta_Box_Product_Data {
 							foreach ( $product_ids as $product_id ) {
 								$product = wc_get_product( $product_id );
 								if ( is_object( $product ) ) {
-									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name() ) );
+									$json_ids[ $product_id ] = wp_kses_post( html_entity_decode( $product->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 								}
 							}
 
@@ -514,7 +530,7 @@ class WC_Meta_Box_Product_Data {
 							if ( $parent_id ) {
 								$parent    = wc_get_product( $parent_id );
 								if ( is_object( $parent ) ) {
-									$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name() ) );
+									$parent_title = wp_kses_post( html_entity_decode( $parent->get_formatted_name(), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 								}
 
 								echo esc_attr( $parent_title );
@@ -589,25 +605,26 @@ class WC_Meta_Box_Product_Data {
 
 		if ( $attributes ) {
 			foreach ( $attributes as $attribute ) {
-				if ( isset( $attribute['is_variation'] ) ) {
+				if ( ! empty( $attribute['is_variation'] ) ) {
 					$variation_attribute_found = true;
 					break;
 				}
 			}
 		}
 
-		$variations_count       = absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation'", $post->ID ) ) );
-		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 10 ) );
+		$variations_count       = absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(ID) FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'product_variation' AND post_status IN ('publish', 'private')", $post->ID ) ) );
+		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 		?>
 		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
 
 			<?php if ( ! $variation_attribute_found ) : ?>
 
-				<div id="message" class="inline woocommerce-message">
-					<p><?php _e( 'Before adding variations, add and save some attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
-
-					<p class="submit"><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a></p>
+				<div id="message" class="inline notice woocommerce-message">
+					<p><?php _e( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
+					<p>
+						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
+					</p>
 				</div>
 
 			<?php else : ?>
@@ -658,8 +675,8 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="toolbar toolbar-top">
 					<select id="field_to_edit" class="variation_actions">
-						<option value="add_variation"><?php _e( 'Add variation', 'woocommerce' ); ?></option>
-						<option value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
+						<option data-global="true" value="add_variation"><?php _e( 'Add variation', 'woocommerce' ); ?></option>
+						<option data-global="true" value="link_all_variations"><?php _e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
 						<option value="delete_all"><?php _e( 'Delete all variations', 'woocommerce' ); ?></option>
 						<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
 							<option value="toggle_enabled"><?php _e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
@@ -717,7 +734,7 @@ class WC_Meta_Box_Product_Data {
 					<div class="clear"></div>
 				</div>
 
-				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php 
+				<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php
 					// esc_attr does not double encode - htmlspecialchars does
 					echo htmlspecialchars( json_encode( $attributes ) );
 				?>" data-total="<?php echo $variations_count; ?>" data-total_pages="<?php echo $variations_total_pages; ?>" data-page="1" data-edited="false">
@@ -939,8 +956,9 @@ class WC_Meta_Box_Product_Data {
 
 				} elseif ( isset( $attribute_values[ $i ] ) ) {
 
-					// Text based, separate by pipe
-					$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', wc_get_text_attributes( $attribute_values[ $i ] ) ) );
+					// Text based, possibly separated by pipes (WC_DELIMITER). Preserve line breaks in non-variation attributes.
+					$values = $is_variation ? wc_clean( $attribute_values[ $i ] ) : implode( "\n", array_map( 'wc_clean', explode( "\n", $attribute_values[ $i ] ) ) );
+					$values = implode( ' ' . WC_DELIMITER . ' ', wc_get_text_attributes( $values ) );
 
 					// Custom attribute - Add attribute to array and set the values
 					$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
@@ -1107,7 +1125,7 @@ class WC_Meta_Box_Product_Data {
 				update_post_meta( $post_id, '_stock', '' );
 			}
 
-		} else {
+		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
 		}
 
@@ -1136,7 +1154,7 @@ class WC_Meta_Box_Product_Data {
 
 			if ( isset( $_POST['_wc_file_urls'] ) ) {
 				$file_names         = isset( $_POST['_wc_file_names'] ) ? $_POST['_wc_file_names'] : array();
-				$file_urls          = isset( $_POST['_wc_file_urls'] )  ? array_map( 'trim', $_POST['_wc_file_urls'] ) : array();
+				$file_urls          = isset( $_POST['_wc_file_urls'] )  ? wp_unslash( array_map( 'trim', $_POST['_wc_file_urls'] ) ) : array();
 				$file_url_size      = sizeof( $file_urls );
 				$allowed_file_types = apply_filters( 'woocommerce_downloadable_file_allowed_mime_types', get_allowed_mime_types() );
 
@@ -1218,6 +1236,7 @@ class WC_Meta_Box_Product_Data {
 		if ( 'variable' == $product_type ) {
 			// Update parent if variable so price sorting works and stays in sync with the cheapest child
 			WC_Product_Variable::sync( $post_id );
+			WC_Product_Variable::sync_stock_status( $post_id );
 		}
 
 		// Update version after saving
@@ -1307,6 +1326,8 @@ class WC_Meta_Box_Product_Data {
 				} else {
 
 					$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[ $i ] ), array( 'ID' => $variation_id ) );
+
+					clean_post_cache( $variation_id );
 
 					do_action( 'woocommerce_update_product_variation', $variation_id );
 

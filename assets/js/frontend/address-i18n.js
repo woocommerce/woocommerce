@@ -89,11 +89,6 @@ jQuery( function( $ ) {
 					}
 
 				} else if ( locale['default'][ key ] ) {
-					if ( locale['default'][ key ].required === true ) {
-						if ( field.find( 'label abbr' ).size() === 0 ) {
-							field_is_required( field, true );
-						}
-					}
 
 					if ( 'state' !== key ) {
 						if ( typeof locale['default'][ key ].hidden === 'undefined' || locale['default'][ key ].hidden === false ) {
@@ -103,13 +98,19 @@ jQuery( function( $ ) {
 						}
 					}
 
-					if ( 'postcode' === key ) {
+					if ( 'postcode' === key || 'city' === key ) {
 						if ( locale['default'][ key ].label ) {
 							field.find( 'label' ).html( locale['default'][ key ].label );
 						}
 
 						if ( locale['default'][ key ].placeholder ) {
 							field.find( 'input' ).attr( 'placeholder', locale['default'][ key ].placeholder );
+						}
+					}
+
+					if ( locale['default'][ key ].required === true ) {
+						if ( field.find( 'label abbr' ).size() === 0 ) {
+							field_is_required( field, true );
 						}
 					}
 				}

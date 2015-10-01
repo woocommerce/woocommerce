@@ -110,7 +110,7 @@ class WC_Order_Item_Meta {
 		$formatted_meta = array();
 
 		foreach ( $this->item['item_meta_array'] as $meta_id => $meta ) {
-			if ( empty( $meta->value ) || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
+			if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
 				continue;
 			}
 

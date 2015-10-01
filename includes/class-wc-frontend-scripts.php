@@ -25,6 +25,12 @@ class WC_Frontend_Scripts {
 	private static $scripts = array();
 
 	/**
+	 * Contains an array of script handles registered by WC
+	 * @var array
+	 */
+	private static $styles = array();
+
+	/**
 	 * Contains an array of script handles localized by WC
 	 * @var array
 	 */
@@ -72,11 +78,11 @@ class WC_Frontend_Scripts {
 	 *
 	 * @uses   wp_register_script()
 	 * @access private
-	 * @param  string   $handle    [description]
-	 * @param  string   $path      [description]
-	 * @param  string[] $deps      [description]
-	 * @param  string   $version   [description]
-	 * @param  boolean  $in_footer [description]
+	 * @param  string   $handle
+	 * @param  string   $path
+	 * @param  string[] $deps
+	 * @param  string   $version
+	 * @param  boolean  $in_footer
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = true ) {
 		self::$scripts[] = $handle;
@@ -88,17 +94,51 @@ class WC_Frontend_Scripts {
 	 *
 	 * @uses   wp_enqueue_script()
 	 * @access private
-	 * @param  string   $handle    [description]
-	 * @param  string   $path      [description]
-	 * @param  string[] $deps      [description]
-	 * @param  string   $version   [description]
-	 * @param  boolean  $in_footer [description]
+	 * @param  string   $handle
+	 * @param  string   $path
+	 * @param  string[] $deps
+	 * @param  string   $version
+	 * @param  boolean  $in_footer
 	 */
 	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = true ) {
 		if ( ! in_array( $handle, self::$scripts ) && $path ) {
 			self::register_script( $handle, $path, $deps, $version, $in_footer );
 		}
 		wp_enqueue_script( $handle );
+	}
+
+	/**
+	 * Register a style for use.
+	 *
+	 * @uses   wp_register_style()
+	 * @access private
+	 * @param  string   $handle
+	 * @param  string   $path
+	 * @param  string[] $deps
+	 * @param  string   $version
+	 * @param  string   $media
+	 */
+	private static function register_style( $handle, $path, $deps = array(), $version = WC_VERSION, $media = 'all' ) {
+		self::$styles[] = $handle;
+		wp_register_style( $handle, $path, $deps, $version, $media );
+	}
+
+	/**
+	 * Register and enqueue a styles for use.
+	 *
+	 * @uses   wp_enqueue_style()
+	 * @access private
+	 * @param  string   $handle
+	 * @param  string   $path
+	 * @param  string[] $deps
+	 * @param  string   $version
+	 * @param  string   $media
+	 */
+	private static function enqueue_style( $handle, $path = '', $deps = array(), $version = WC_VERSION, $media = 'all' ) {
+		if ( ! in_array( $handle, self::$styles ) && $path ) {
+			self::register_style( $handle, $path, $deps, $version, $media );
+		}
+		wp_enqueue_style( $handle );
 	}
 
 	/**
@@ -136,7 +176,7 @@ class WC_Frontend_Scripts {
 		}
 		if ( is_checkout() || is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
 			self::enqueue_script( 'select2' );
-			wp_enqueue_style( 'select2', $assets_path . 'css/select2.css' );
+			self::enqueue_style( 'select2', $assets_path . 'css/select2.css' );
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ) );
@@ -150,7 +190,7 @@ class WC_Frontend_Scripts {
 		if ( $lightbox_en && ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) ) {
 			self::enqueue_script( 'prettyPhoto', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', array( 'jquery' ), '3.1.6', true );
 			self::enqueue_script( 'prettyPhoto-init', $assets_path . 'js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js', array( 'jquery','prettyPhoto' ) );
-			wp_enqueue_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
+			self::enqueue_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
 		}
 		if ( is_product() ) {
 			self::enqueue_script( 'wc-single-product' );
@@ -166,7 +206,7 @@ class WC_Frontend_Scripts {
 		// CSS Styles
 		if ( $enqueue_styles = self::get_styles() ) {
 			foreach ( $enqueue_styles as $handle => $args ) {
-				wp_enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
+				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
 			}
 		}
 	}
@@ -203,10 +243,12 @@ class WC_Frontend_Scripts {
 			break;
 			case 'wc-geolocation' :
 				return array(
-					'wc_ajax_url' => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'home_url'    => home_url(),
-					'is_checkout' => is_checkout() ? '1' : '0',
-					'hash'        => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
+					'wc_ajax_url'     => WC_AJAX::get_endpoint( "%%endpoint%%" ),
+					'home_url'        => home_url(),
+					'is_cart'         => is_cart() ? '1' : '0',
+					'is_account_page' => is_account_page() ? '1' : '0',
+					'is_checkout'     => is_checkout() ? '1' : '0',
+					'hash'            => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
 				);
 			break;
 			case 'wc-single-product' :

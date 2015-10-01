@@ -38,6 +38,7 @@ class WC_Install {
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
+		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 	}
 
 	/**
@@ -179,6 +180,19 @@ class WC_Install {
 		}
 
 		self::update_db_version();
+	}
+
+	/**
+	 * Add more cron schedules
+	 * @param  array $schedules
+	 * @return array
+	 */
+	public static function cron_schedules( $schedules ) {
+		$schedules['monthly'] = array(
+			'interval' => 2635200,
+			'display'  => __( 'Monthly', 'woocommerce' )
+		);
+		return $schedules;
 	}
 
 	/**
@@ -594,14 +608,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	 */
 	private static function create_files() {
 		// Install files and folders for uploading files and prevent hotlinking
-		$upload_dir =  wp_upload_dir();
+		$upload_dir      = wp_upload_dir();
+		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
 
 		$files = array(
-			array(
-				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
-				'file' 		=> '.htaccess',
-				'content' 	=> 'deny from all'
-			),
 			array(
 				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file' 		=> 'index.html',
@@ -618,6 +628,14 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 				'content' 	=> ''
 			)
 		);
+
+		if ( 'redirect' !== $download_method ) {
+			$files[] = array(
+				'base' 		=> $upload_dir['basedir'] . '/woocommerce_uploads',
+				'file' 		=> '.htaccess',
+				'content' 	=> 'deny from all'
+			);
+		}
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {

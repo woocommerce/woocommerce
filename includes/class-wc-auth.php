@@ -241,7 +241,7 @@ class WC_Auth {
 			'body'      => json_encode( $consumer_data ),
 			'timeout'   => 60,
 			'headers'   => array(
-				'Content-Type' => 'application/xml;charset=' . get_bloginfo( 'charset' ),
+				'Content-Type' => 'application/json;charset=' . get_bloginfo( 'charset' ),
 			)
 		);
 

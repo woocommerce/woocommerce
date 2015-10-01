@@ -681,7 +681,7 @@ class WC_API_Products extends WC_API_Resource {
 			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
-			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
+			'featured_src'       => (string) wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => (int) $product->download_limit,
@@ -864,7 +864,7 @@ class WC_API_Products extends WC_API_Resource {
 
 						// Text based attributes - Posted values are term names - don't change to slugs
 						} else {
-							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute['options'] ) ) );
+							$values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute['options'] ) );
 						}
 
 						$values = array_filter( $values, 'strlen' );
@@ -1455,11 +1455,14 @@ class WC_API_Products extends WC_API_Resource {
 						continue;
 					}
 
-					$taxonomy   = sanitize_title( $attribute['name'] );
 					$_attribute = array();
 
 					if ( isset( $attribute['slug'] ) ) {
 						$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
+					}
+
+					if ( ! $taxonomy ) {
+						$taxonomy = sanitize_title( $attribute['name'] );
 					}
 
 					if ( isset( $attributes[ $taxonomy ] ) ) {
