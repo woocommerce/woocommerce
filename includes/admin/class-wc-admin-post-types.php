@@ -100,6 +100,12 @@ class WC_Admin_Post_Types {
 
 		// Disable DFW feature pointer
 		add_action( 'admin_footer', array( $this, 'disable_dfw_feature_pointer' ) );
+
+		// If first time editing, disable columns by default.
+		if ( false === get_user_option( 'manageedit-shop_ordercolumnshidden' ) ) {
+			$user = wp_get_current_user();
+			update_user_option( $user->ID, 'manageedit-shop_ordercolumnshidden', array( 0 => 'billing_address' ), true );
+		}
 	}
 
 	/**
@@ -261,6 +267,7 @@ class WC_Admin_Post_Types {
 		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
 		$columns['order_title']      = __( 'Order', 'woocommerce' );
 		$columns['order_items']      = __( 'Purchased', 'woocommerce' );
+		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer Message', 'woocommerce' ) . '">' . esc_attr__( 'Customer Message', 'woocommerce' ) . '</span>';
 		$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '">' . esc_attr__( 'Order Notes', 'woocommerce' ) . '</span>';
@@ -658,6 +665,19 @@ class WC_Admin_Post_Types {
 
 				} else echo '&ndash;';
 			break;
+			case 'billing_address' :
+
+				if ( $address = $the_order->get_formatted_billing_address() ) {
+					echo esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) );
+				} else {
+					echo '&ndash;';
+				}
+
+				if ( $the_order->billing_phone ) {
+					echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->billing_phone ) . '</small>';
+				}
+
+			break;
 			case 'shipping_address' :
 
 				if ( $address = $the_order->get_formatted_shipping_address() ) {
@@ -707,16 +727,6 @@ class WC_Admin_Post_Types {
 				}
 			break;
 			case 'order_title' :
-
-				$customer_tip = array();
-
-				if ( $address = $the_order->get_formatted_billing_address() ) {
-					$customer_tip[] = __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
-				}
-
-				if ( $the_order->billing_phone ) {
-					$customer_tip[] = __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
-				}
 
 				if ( $the_order->user_id ) {
 					$user_info = get_userdata( $the_order->user_id );
