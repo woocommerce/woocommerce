@@ -1770,7 +1770,7 @@ class WC_Cart {
 				$discount_amount += $this->get_coupon_discount_tax_amount( $code );
 			}
 
-			return wc_cart_round_discount( $discount_amount, $this->dp );
+			return round( $discount_amount, WC_ROUNDING_PRECISION );
 		}
 
 		/**
@@ -1780,7 +1780,7 @@ class WC_Cart {
 		 * @return float discount amount
 		 */
 		public function get_coupon_discount_tax_amount( $code ) {
-			return wc_cart_round_discount( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, $this->dp );
+			return wc_round_tax( isset( $this->coupon_discount_tax_amounts[ $code ] ) ? $this->coupon_discount_tax_amounts[ $code ] : 0, WC_ROUNDING_PRECISION );
 		}
 
 		/**
@@ -2180,7 +2180,7 @@ class WC_Cart {
 		 * @return float
 		 */
 		public function get_cart_discount_total() {
-			return wc_cart_round_discount( $this->discount_cart, $this->dp );
+			return round( $this->discount_cart, WC_ROUNDING_PRECISION );
 		}
 
 		/**
@@ -2189,7 +2189,7 @@ class WC_Cart {
 		 * @return float
 		 */
 		public function get_cart_discount_tax_total() {
-			return wc_cart_round_discount( $this->discount_cart_tax, $this->dp );
+			return wc_round_tax( $this->discount_cart_tax, WC_ROUNDING_PRECISION );
 		}
 
 		/**
