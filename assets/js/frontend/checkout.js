@@ -19,7 +19,7 @@ jQuery( function( $ ) {
 			$( document.body ).bind( 'init_checkout', this.init_checkout );
 
 			// Payment methods
-			this.$order_review.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
+			this.$checkout_form.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
 
 			// Form submission
 			this.$checkout_form.on( 'submit', this.submit );
@@ -37,7 +37,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.$order_review.find( 'input[name=payment_method]:checked' ).trigger( 'click' );
+			this.$checkout_form.find( 'input[name=payment_method]:checked' ).trigger( 'click' );
 			this.$checkout_form.find( '#ship-to-different-address input' ).change();
 
 			// Update on page load
