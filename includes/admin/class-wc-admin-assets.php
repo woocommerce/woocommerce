@@ -9,7 +9,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Assets' ) ) :
@@ -29,7 +29,7 @@ class WC_Admin_Assets {
 	}
 
 	/**
-	 * Enqueue styles
+	 * Enqueue styles.
 	 */
 	public function admin_styles() {
 		global $wp_scripts;
@@ -47,11 +47,8 @@ class WC_Admin_Assets {
 		// Sitewide menu CSS
 		wp_enqueue_style( 'woocommerce_admin_menu_styles' );
 
+		// Admin styles for WC pages only
 		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
-
-			$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
-
-			// Admin styles for WC pages only
 			wp_enqueue_style( 'woocommerce_admin_styles' );
 			wp_enqueue_style( 'jquery-ui-style' );
 			wp_enqueue_style( 'wp-color-picker' );
@@ -77,7 +74,7 @@ class WC_Admin_Assets {
 
 
 	/**
-	 * Enqueue scripts
+	 * Enqueue scripts.
 	 */
 	public function admin_scripts() {
 		global $wp_query, $post, $current_user;
@@ -137,9 +134,8 @@ class WC_Admin_Assets {
 
 		// WooCommerce admin pages
 		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
-
-			wp_enqueue_script( 'woocommerce_admin' );
 			wp_enqueue_script( 'iris' );
+			wp_enqueue_script( 'woocommerce_admin' );
 			wp_enqueue_script( 'wc-enhanced-select' );
 			wp_enqueue_script( 'jquery-ui-sortable' );
 			wp_enqueue_script( 'jquery-ui-autocomplete' );
