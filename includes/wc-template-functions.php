@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category Core
  * @package  WooCommerce/Functions
- * @version  2.4.0
+ * @version  2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -521,8 +521,50 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H3
 	 */
 	function woocommerce_template_loop_product_title() {
-		wc_get_template( 'loop/title.php' );
+		echo '<h3>' . get_the_title() . '</h3>';
 	}
+}
+if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
+
+	/**
+	 * Show the subcategory title in the product loop.
+	 */
+	function woocommerce_template_loop_category_title( $category ) {
+		?>
+		<h3>
+			<?php
+				echo $category->name;
+
+				if ( $category->count > 0 )
+					echo apply_filters( 'woocommerce_subcategory_count_html', ' <mark class="count">(' . $category->count . ')</mark>', $category );
+			?>
+		</h3>
+		<?php
+	}
+}
+/**
+ * Insert the opening anchor tag for products in the loop.
+ */
+function woocommerce_template_loop_product_link_open() {
+	echo '<a href="' . get_the_permalink() . '">';
+}
+/**
+ * Insert the opening anchor tag for products in the loop.
+ */
+function woocommerce_template_loop_product_link_close() {
+	echo '</a>';
+}
+/**
+ * Insert the opening anchor tag for categories in the loop.
+ */
+function woocommerce_template_loop_category_link_open( $category ) {
+	echo '<a href="' . get_term_link( $category->slug, 'product_cat' ) . '">';
+}
+/**
+ * Insert the opening anchor tag for categories in the loop.
+ */
+function woocommerce_template_loop_category_link_close() {
+	echo '</a>';
 }
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
