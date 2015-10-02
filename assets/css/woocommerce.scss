@@ -1929,7 +1929,7 @@ p.demo_store {
 /* added to get around variation image flicker issue */
 .woocommerce.single-product.has-default-attributes {
 	div.product {
-		.images {
+		> .images {
 			opacity: 0;
 		}
 	}
