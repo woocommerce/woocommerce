@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category Core
  * @package  WooCommerce/Functions
- * @version  2.4.0
+ * @version  2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -308,6 +308,10 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 			}
 		}
 
+		if ( is_product() && 'variable' === $product->product_type && $product->has_default_attributes() ) {
+			$classes[] = 'has-default-attributes';
+		}
+	
 		$classes[] = $product->stock_status;
 	}
 

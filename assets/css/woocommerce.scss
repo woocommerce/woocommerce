@@ -1925,6 +1925,13 @@ p.demo_store {
 	}
 }
 
+/* added to get around variation image flicker issue */
+.product.has-default-attributes {
+	> .images {
+		opacity: 0;
+	}
+}
+
 /**
  * Twenty Eleven specific styles
  */
