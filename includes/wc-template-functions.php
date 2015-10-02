@@ -173,8 +173,6 @@ function wc_generator_tag( $gen, $type ) {
  * @return array
  */
 function wc_body_class( $classes ) {
-	global $post;
-
 	$classes = (array) $classes;
 
 	if ( is_woocommerce() ) {
@@ -199,12 +197,6 @@ function wc_body_class( $classes ) {
 
 	if ( is_store_notice_showing() ) {
 		$classes[] = 'woocommerce-demo-store';
-	}
-
-	$product = wc_get_product( $post->ID );
-
-	if ( is_product() && 'variable' === $product->product_type && $product->has_default_attributes() ) {
-		$classes[] = 'has-default-attributes';
 	}
 
 	foreach ( WC()->query->query_vars as $key => $value ) {
@@ -316,6 +308,10 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 			}
 		}
 
+		if ( is_product() && 'variable' === $product->product_type && $product->has_default_attributes() ) {
+			$classes[] = 'has-default-attributes';
+		}
+	
 		$classes[] = $product->stock_status;
 	}
 

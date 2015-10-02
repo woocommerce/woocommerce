@@ -1926,11 +1926,9 @@ p.demo_store {
 }
 
 /* added to get around variation image flicker issue */
-.woocommerce.single-product.has-default-attributes {
-	div.product {
-		> .images {
-			opacity: 0;
-		}
+.product.has-default-attributes {
+	> .images {
+		opacity: 0;
 	}
 }
 
