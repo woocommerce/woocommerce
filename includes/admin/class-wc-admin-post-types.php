@@ -1863,15 +1863,17 @@ class WC_Admin_Post_Types {
 			if ( is_numeric( $term ) ) {
 				$search_ids[] = $term;
 			}
+
 			// Attempt to get a SKU
-			$sku_to_id = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%';", wc_clean( $term ) ) );
+			$sku_to_id = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_parent FROM {$wpdb->posts} LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id WHERE meta_key='_sku' AND meta_value LIKE %s;", '%' . $wpdb->esc_like( wc_clean( $term ) ) . '%' ) );
+			$sku_to_id = array_merge( wp_list_pluck( $sku_to_id, 'ID' ), wp_list_pluck( $sku_to_id, 'post_parent' ) );
 
 			if ( $sku_to_id && sizeof( $sku_to_id ) > 0 ) {
 				$search_ids = array_merge( $search_ids, $sku_to_id );
 			}
 		}
 
-		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
+		$search_ids = array_filter( array_unique( array_map( 'absint', $search_ids ) ) );
 
 		if ( sizeof( $search_ids ) > 0 ) {
 			$where = str_replace( 'AND (((', "AND ( ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . ")) OR ((", $where );
