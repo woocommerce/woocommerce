@@ -458,6 +458,20 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Check if variable product has default attributes set
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function has_default_attributes() {
+		if (  ! empty( $this->get_variation_default_attributes() ) ) {
+			return true;
+		}
+
+		return false;
+	}
+	
+	/**
 	 * If set, get the default attributes for a variable product.
 	 *
 	 * @param string $attribute_name
