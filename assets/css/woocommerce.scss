@@ -223,11 +223,6 @@ p.demo_store {
 			div.thumbnails {
 				padding-top: 1em;
 			}
-			
-			/* added to get around variation image flicker issue */
-			.image[data-attr="has-default-attributes"] { 
-				opacity: 0;
-			}
 		}
 
 		div.summary {
@@ -1927,6 +1922,15 @@ p.demo_store {
 				max-height: 52px;
 				vertical-align: middle;
 			}
+		}
+	}
+}
+
+/* added to get around variation image flicker issue */
+.woocommerce.single-product.has-default-attributes {
+	div.product {
+		.images {
+			opacity: 0;
 		}
 	}
 }
