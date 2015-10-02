@@ -1783,6 +1783,8 @@ class WC_AJAX {
 	 * @param string $post_types (default: array('product'))
 	 */
 	public static function json_search_products( $x = '', $post_types = array( 'product' ) ) {
+		global $wpdb;
+
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
@@ -1794,80 +1796,42 @@ class WC_AJAX {
 			die();
 		}
 
-		if ( ! empty( $_GET['exclude'] ) ) {
-			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
-		}
-
-		$args = array(
-			'post_type'      => $post_types,
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			's'              => $term,
-			'fields'         => 'ids',
-			'exclude'        => $exclude
-		);
+		$like_term = '%' . $wpdb->esc_like( $term ) . '%';
 
 		if ( is_numeric( $term ) ) {
-
-			if ( false === array_search( $term, $exclude ) ) {
-				$posts2 = get_posts( array(
-					'post_type'      => $post_types,
-					'post_status'    => 'publish',
-					'posts_per_page' => -1,
-					'post__in'       => array( 0, $term ),
-					'fields'         => 'ids'
-				) );
-			} else {
-				$posts2 = array();
-			}
-
-			$posts3 = get_posts( array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'post_parent'    => $term,
-				'fields'         => 'ids',
-				'exclude'        => $exclude
-			) );
-
-			$posts4 = get_posts( array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'meta_query'     => array(
-					array(
-						'key'     => '_sku',
-						'value'   => $term,
-						'compare' => 'LIKE'
+			$query = $wpdb->prepare( "
+				SELECT ID FROM {$wpdb->posts} posts LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
+				WHERE posts.post_status = 'publish'
+				AND (
+					posts.post_parent = %s
+					OR posts.ID = %s
+					OR posts.post_title LIKE %s
+					OR (
+						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
 					)
-				),
-				'fields'         => 'ids',
-				'exclude'        => $exclude
-			) );
-
-			$posts = array_unique( array_merge( get_posts( $args ), $posts2, $posts3, $posts4 ) );
-
+				)
+			", $term, $term, $term, $like_term );
 		} else {
-
-			$args2 = array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'meta_query'     => array(
-					array(
-					'key'     => '_sku',
-					'value'   => $term,
-					'compare' => 'LIKE'
+			$query = $wpdb->prepare( "
+				SELECT ID FROM {$wpdb->posts} posts LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
+				WHERE posts.post_status = 'publish'
+				AND (
+					posts.post_title LIKE %s
+					or posts.post_content LIKE %s
+					OR (
+						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
 					)
-				),
-				'fields'         => 'ids',
-				'exclude'        => $exclude
-			);
-
-			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ) ) );
-
+				)
+			", $like_term, $like_term, $like_term );
 		}
 
+		$query .= " AND posts.post_type IN ('" . implode( "','", array_map( 'esc_sql', $post_types ) ) . "')";
+
+		if ( ! empty( $_GET['exclude'] ) ) {
+			$query .= " AND posts.ID NOT IN (" . implode( ',', array_map( 'intval', explode( ',', $_GET['exclude'] ) ) ) . ")";
+		}
+
+		$posts          = array_unique( $wpdb->get_col( $query ) );
 		$found_products = array();
 
 		if ( ! empty( $posts ) ) {
