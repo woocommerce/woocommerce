@@ -458,6 +458,7 @@ p.demo_store {
 		color: $highlightext;
 		font-size: .857em;
 		-webkit-font-smoothing: antialiased;
+		z-index:1000;
 	}
 
 	/**
@@ -1921,6 +1922,15 @@ p.demo_store {
 				max-height: 52px;
 				vertical-align: middle;
 			}
+		}
+	}
+}
+
+/* added to get around variation image flicker issue */
+.woocommerce.single-product.has-default-attributes {
+	div.product {
+		> .images {
+			opacity: 0;
 		}
 	}
 }
