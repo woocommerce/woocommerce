@@ -193,7 +193,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		// Dropdown
 		if ( $d ) {
 			$dropdown_defaults = array(
-				'show_counts'        => $c,
+				'show_count'         => $c,
 				'hierarchical'       => $h,
 				'show_uncategorized' => 0,
 				'orderby'            => $o,
