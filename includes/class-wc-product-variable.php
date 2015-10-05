@@ -454,7 +454,7 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_variation_default_attributes() {
 		$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
-		return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
+		return apply_filters( 'woocommerce_product_default_attributes', array_filter( (array) maybe_unserialize( $default ) ), $this );
 	}
 
 	/**
@@ -464,13 +464,12 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_default_attributes() {
-		if (  ! empty( $this->get_variation_default_attributes() ) ) {
+		if ( ! $this->get_variation_default_attributes() ) {
 			return true;
 		}
-
 		return false;
 	}
-	
+
 	/**
 	 * If set, get the default attributes for a variable product.
 	 *
