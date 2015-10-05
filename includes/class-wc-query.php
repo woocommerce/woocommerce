@@ -819,7 +819,7 @@ class WC_Query {
 	 * Price filter Init
 	 */
 	public function price_filter_init() {
-		if ( is_active_widget( false, false, 'woocommerce_price_filter', true ) && ! is_admin() ) {
+		if ( apply_filters( 'woocommerce_is_price_filter_active', is_active_widget( false, false, 'woocommerce_price_filter', true ) ) && ! is_admin() ) {
 
 			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
