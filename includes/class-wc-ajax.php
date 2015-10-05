@@ -1538,6 +1538,7 @@ class WC_AJAX {
 		}
 
 		$tax            = new WC_Tax();
+		$tax_based_on   = get_option( 'woocommerce_tax_based_on' );
 		$order_id       = absint( $_POST['order_id'] );
 		$items          = array();
 		$country        = strtoupper( esc_attr( $_POST['country'] ) );
@@ -1547,6 +1548,15 @@ class WC_AJAX {
 		$order          = wc_get_order( $order_id );
 		$taxes          = array();
 		$shipping_taxes = array();
+
+		// Default to base
+		if ( 'base' === $tax_based_on || empty( $country ) ) {
+			$default  = wc_get_base_location();
+			$country  = $default['country'];
+			$state    = $default['state'];
+			$postcode = '';
+			$city     = '';
+		}
 
 		// Parse the jQuery serialized items
 		parse_str( $_POST['items'], $items );

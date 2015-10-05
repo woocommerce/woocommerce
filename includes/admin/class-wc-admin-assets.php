@@ -250,6 +250,7 @@ class WC_Admin_Assets {
 				'load_shipping'                 => __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
 				'featured_label'                => __( 'Featured', 'woocommerce' ),
 				'prices_include_tax'            => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
+				'tax_based_on'                  => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
 				'round_at_subtotal'             => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
 				'no_customer_selected'          => __( 'No customer selected', 'woocommerce' ),
 				'plugin_url'                    => WC()->plugin_url(),
