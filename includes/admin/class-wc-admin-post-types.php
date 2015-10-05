@@ -2056,7 +2056,7 @@ class WC_Admin_Post_Types {
 	public function edit_form_after_title(  $post ) {
 		if ( 'shop_coupon' === $post->post_type ) {
 			?>
-			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
+			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // This is already escaped in core ?></textarea>
 			<?php
 		}
 	}
