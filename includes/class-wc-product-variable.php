@@ -464,7 +464,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_default_attributes() {
-		if (  ! empty( $this->get_variation_default_attributes() ) ) {
+		$default_attributes = $this->get_variation_default_attributes();
+		if (  ! empty( $default_attributes ) ) {
 			return true;
 		}
 
