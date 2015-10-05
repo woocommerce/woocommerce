@@ -215,7 +215,6 @@ class WC_Admin_Post_Types {
 		$columns          = array();
 		$columns['cb']    = '<input type="checkbox" />';
 		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
-		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
 		$columns['name']  = __( 'Name', 'woocommerce' );
 
 		if ( wc_product_sku_enabled() ) {
