@@ -185,7 +185,7 @@ abstract class WC_Settings_API {
 			$this->settings[ $key ] = isset( $form_fields[ $key ]['default'] ) ? $form_fields[ $key ]['default'] : '';
 		}
 
-		if ( ! is_null( $empty_value ) && empty( $this->settings[ $key ] ) ) {
+		if ( ! is_null( $empty_value ) && empty( $this->settings[ $key ] ) && '' === $this->settings[ $key ] ) {
 			$this->settings[ $key ] = $empty_value;
 		}
 
