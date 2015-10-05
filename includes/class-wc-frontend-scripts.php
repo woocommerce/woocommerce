@@ -107,6 +107,10 @@ class WC_Frontend_Scripts {
 	public static function load_scripts() {
 		global $post;
 
+		if ( ! did_action( 'before_woocommerce_init' ) ) {
+			return;
+		}
+
 		$suffix               = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$lightbox_en          = 'yes' === get_option( 'woocommerce_enable_lightbox' );
 		$ajax_cart_en         = 'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart' );
