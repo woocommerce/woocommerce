@@ -846,16 +846,10 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function validate_password_field( $key ) {
-
 		$text  = $this->get_option( $key );
 		$field = $this->get_field_key( $key );
-		$value = trim( stripslashes( $_POST[ $field ] ) );
-
-		if ( isset( $_POST[ $field ] ) ) {
-			$text = wp_kses_post( $value );
-		}
-
-		return $text === $value ? $text : '';
+		$value = wp_kses_post( trim( stripslashes( $_POST[ $field ] ) ) );
+		return $value;
 	}
 
 	/**
