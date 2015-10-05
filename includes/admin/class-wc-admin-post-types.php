@@ -297,11 +297,9 @@ class WC_Admin_Post_Types {
 				$edit_link = get_edit_post_link( $post->ID );
 				$title     = _draft_or_post_title();
 
-				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) .'">' . $title .'</a>';
+				echo '<strong><a class="row-title" href="' . $edit_link .'">' . $title .'</a></strong>';
 
 				_post_states( $post );
-
-				echo '</strong>';
 
 				if ( $post->post_parent > 0 ) {
 					echo '&nbsp;&nbsp;&larr; <a href="'. get_edit_post_link( $post->post_parent ) .'">'. get_the_title( $post->post_parent ) .'</a>';
@@ -486,11 +484,13 @@ class WC_Admin_Post_Types {
 				$edit_link = get_edit_post_link( $post->ID );
 				$title     = _draft_or_post_title();
 
-				echo '<strong><a href="' . esc_attr( $edit_link ) . '" class="row-title">' . esc_html( $title ). '</a></strong>';
+				echo '<strong><a href="' . $edit_link . '" class="row-title">' . $title . '</a></strong>';
 
 				_post_states( $post );
 
 				$this->_render_shop_coupon_row_actions( $post, $title );
+
+				get_inline_data( $post );
 			break;
 			case 'type' :
 				echo esc_html( wc_get_coupon_type( get_post_meta( $post->ID, 'discount_type', true ) ) );
