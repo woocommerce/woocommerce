@@ -2,7 +2,7 @@
 /**
  * The Template for displaying product archives, including the main shop page which is a post type archive.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/archive-product.php
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
  * will need to copy the new files to your theme to maintain compatibility. We try to do this

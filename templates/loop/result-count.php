@@ -4,7 +4,7 @@
  *
  * Shows text: Showing x - x of x results
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/loop/result-count.php
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
  * will need to copy the new files to your theme to maintain compatibility. We try to do this
