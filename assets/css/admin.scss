@@ -1683,11 +1683,11 @@ table.wp-list-table {
 
 	td.column-thumb img {
 		margin: 0;
-		vertical-align: middle;
 		width: auto;
 		height: auto;
 		max-width: 40px;
 		max-height: 40px;
+		vertical-align: middle;
 	}
 
 	span.na {
@@ -2043,7 +2043,7 @@ img.help_tip {
 }
 
 .postbox img.help_tip {
-	margin-top: -4px;
+	margin-top: 0px;
 }
 
 .status-enabled,
@@ -2606,15 +2606,15 @@ img.help_tip {
 #woocommerce-order-downloads,
 #woocommerce-coupon-data {
 	.inside {
-		padding: 0;
 		margin: 0;
+		padding: 0;
 	}
 }
 
 .woocommerce_options_panel,
 .panel {
-	padding: 9px 9px 9px 9px;
-	color:  #555;
+	padding: 9px;
+	color: #555;
 }
 
 .woocommerce_page_settings .woocommerce_options_panel,
@@ -2624,8 +2624,8 @@ img.help_tip {
 
 #woocommerce-product-type-options .panel,
 #woocommerce-product-specs .inside {
-	padding: 9px;
 	margin: 0;
+	padding: 9px;
 }
 
 .woocommerce_options_panel p,
@@ -2648,8 +2648,8 @@ img.help_tip {
 .woocommerce_options_panel .checkbox,
 .woocommerce_variable_attributes .checkbox {
 	width: auto;
+	margin: 3px 0;
 	vertical-align: middle;
-	margin: 7px 0;
 }
 
 .woocommerce_variations,
@@ -2771,6 +2771,7 @@ img.help_tip {
 }
 
 .woocommerce_options_panel {
+	min-height: 175px;
 	box-sizing: border-box;
 
 	.downloadable_files {
@@ -2787,7 +2788,7 @@ img.help_tip {
 	}
 
 	p {
-		margin: 9px 0 9px;
+		margin: 9px 0;
 	}
 
 	p.form-field,
@@ -2838,9 +2839,9 @@ img.help_tip {
 	}
 
 	textarea {
-		vertical-align: top;
 		height: 3.5em;
 		line-height: 1.5em;
+		vertical-align: top;
 	}
 
 	input[type="text"],
@@ -2874,48 +2875,48 @@ img.help_tip {
 	.options_group {
 		border-top: 1px solid white;
 		border-bottom: 1px solid #eee;
-	}
 
-	.options_group:first-child {
-		border-top: 0;
-	}
-
-	.options_group:last-child {
-		border-bottom: 0;
-	}
-
-	.options_group fieldset {
-		margin: 9px 0;
-		font-size: 12px;
-		padding: 5px 9px;
-		line-height: 24px;
-
-		label {
-			width: auto;
-			float: none;
+		&:first-child {
+			border-top: 0;
 		}
 
-		ul {
-			float: left;
-			width: 50%;
-			margin: 0;
-			padding: 0;
+		&:last-child {
+			border-bottom: 0;
+		}
 
-			li {
-				margin: 0;
+		fieldset {
+			margin: 9px 0;
+			font-size: 12px;
+			padding: 5px 9px;
+			line-height: 24px;
+
+			label {
 				width: auto;
+				float: none;
+			}
 
-				input {
+			ul {
+				float: left;
+				width: 50%;
+				margin: 0;
+				padding: 0;
+
+				li {
+					margin: 0;
 					width: auto;
-					float: none;
-					margin-right: 4px;
+
+					input {
+						width: auto;
+						float: none;
+						margin-right: 4px;
+					}
 				}
 			}
-		}
 
-		ul.wc-radios {
-			label {
-				margin-left: 0;
+			ul.wc-radios {
+				label {
+					margin-left: 0;
+				}
 			}
 		}
 	}
