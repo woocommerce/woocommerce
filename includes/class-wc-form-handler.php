@@ -289,11 +289,21 @@ class WC_Form_Handler {
 					WC()->customer->set_city( $order->billing_city );
 				}
 
+				// Terms
+				if ( ! empty( $_POST['terms-field'] ) && empty( $_POST['terms'] ) ) {
+					wc_add_notice( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ), 'error' );
+					return;
+				}
+
 				// Update payment method
 				if ( $order->needs_payment() ) {
-					$payment_method = wc_clean( $_POST['payment_method'] );
-
+					$payment_method     = isset( $_POST['payment_method'] ) ? wc_clean( $_POST['payment_method'] ) : false;
 					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+					if ( ! $payment_method ) {
+						wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
+						return;
+					}
 
 					// Update meta
 					update_post_meta( $order_id, '_payment_method', $payment_method );
@@ -319,7 +329,6 @@ class WC_Form_Handler {
 							wp_redirect( $result['redirect'] );
 							exit;
 						}
-
 					}
 
 				} else {
@@ -328,7 +337,6 @@ class WC_Form_Handler {
 					wp_safe_redirect( $order->get_checkout_order_received_url() );
 					exit;
 				}
-
 			}
 
 		}
