@@ -160,8 +160,8 @@ final class WooCommerce {
 		$this->define( 'WC_VERSION', $this->version );
 		$this->define( 'WOOCOMMERCE_VERSION', $this->version );
 		$this->define( 'WC_ROUNDING_PRECISION', 4 );
-		$this->define( 'WC_DISCOUNT_ROUNDING_MODE', 2 );
-		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
+		$this->define( 'WC_DISCOUNT_ROUNDING_MODE', 2 ); // PHP_ROUND_HALF_DOWN
+		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 ); // PHP_ROUND_HALF_DOWN : PHP_ROUND_HALF_UP
 		$this->define( 'WC_DELIMITER', '|' );
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 	}
