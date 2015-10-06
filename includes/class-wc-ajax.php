@@ -2218,7 +2218,7 @@ class WC_AJAX {
 				'amount'     => $refund_amount,
 				'reason'     => $refund_reason,
 				'order_id'   => $order_id,
-				'line_items' => $line_items
+				'line_items' => $line_items,
 			) );
 
 			if ( is_wp_error( $refund ) ) {
@@ -2260,10 +2260,18 @@ class WC_AJAX {
 				}
 			}
 
-			// Check if items are refunded fully
-			$max_remaining_items = absint( $order->get_item_count() - $order->get_item_count_refunded() );
+			// Trigger notifications and status changes
+			if ( $order->get_remaining_refund_amount() > 0 || $order->get_remaining_refund_items() > 0 ) {
+				/**
+				 * woocommerce_order_partially_refunded
+				 *
+				 * @since 2.4.0
+				 * Note: 3rd arg was added in err. Kept for bw compat. 2.4.3
+				 */
+				do_action( 'woocommerce_order_partially_refunded', $order_id, $refund->id, $refund->id );
+			} else {
+				do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->id );
 
-			if ( $refund_amount == $max_refund && 0 === $max_remaining_items ) {
 				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order_id, $refund->id ) );
 				$response_data['status'] = 'fully_refunded';
 			}
@@ -2272,7 +2280,6 @@ class WC_AJAX {
 
 			// Clear transients
 			wc_delete_shop_order_transients( $order_id );
-
 			wp_send_json_success( $response_data );
 
 		} catch ( Exception $e ) {

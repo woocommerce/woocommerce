@@ -280,4 +280,20 @@ class WC_Order extends WC_Abstract_Order {
 
 		return $total;
 	}
+
+	/**
+	 * How much money is left to refund?
+	 * @return string
+	 */
+	public function get_remaining_refund_amount() {
+		return wc_format_decimal( $this->get_total() - $this->get_total_refunded() );
+	}
+
+	/**
+	 * How many items are left to refund?
+	 * @return int
+	 */
+	public function get_remaining_refund_items() {
+		return absint( $this->get_item_count() - $this->get_item_count_refunded() );
+	}
 }
