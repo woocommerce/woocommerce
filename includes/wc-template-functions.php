@@ -311,7 +311,7 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		if ( is_product() && 'variable' === $product->product_type && $product->has_default_attributes() ) {
 			$classes[] = 'has-default-attributes';
 		}
-	
+
 		$classes[] = $product->stock_status;
 	}
 
@@ -1389,14 +1389,17 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
-		if ( is_shop() )
-			return get_option( 'woocommerce_shop_page_display' ) != 'subcategories';
+		if ( is_shop() ) {
+			return 'subcategories' !== get_option( 'woocommerce_shop_page_display' ) || is_search();
+		}
 
-		if ( ! is_product_taxonomy() )
+		if ( ! is_product_taxonomy() ) {
 			return false;
+		}
 
-		if ( is_search() || is_filtered() || is_paged() )
+		if ( is_search() || is_filtered() || is_paged() ) {
 			return true;
+		}
 
 		$term = get_queried_object();
 
