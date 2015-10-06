@@ -137,9 +137,9 @@ class WC_Admin_Meta_Boxes {
 		remove_meta_box( 'pageparentdiv', 'product', 'side' );
 		remove_meta_box( 'commentstatusdiv', 'product', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'product', 'side' );
-		remove_meta_box( 'woothemes-settings', 'shop_coupon' , 'normal' );
-		remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
-		remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
+		remove_meta_box( 'woothemes-settings', 'shop_coupon', 'normal' );
+		remove_meta_box( 'commentstatusdiv', 'shop_coupon', 'normal' );
+		remove_meta_box( 'slugdiv', 'shop_coupon', 'normal' );
 
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			remove_meta_box( 'commentsdiv', $type, 'normal' );
