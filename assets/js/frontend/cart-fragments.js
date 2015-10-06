@@ -114,11 +114,11 @@ jQuery( function( $ ) {
 			}
 
 		} catch( err ) {
-			$.ajax( $fragment_refresh );
+			refresh_cart_fragment();
 		}
 
 	} else {
-		$.ajax( $fragment_refresh );
+		refresh_cart_fragment();
 	}
 
 	/* Cart Hiding */
