@@ -76,6 +76,7 @@ class WC_Admin_Post_Types {
 		add_action( 'wp_trash_post', array( $this, 'trash_post' ) );
 		add_action( 'untrash_post', array( $this, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( $this, 'delete_order_items' ) );
+		add_action( 'before_delete_post', array( $this, 'delete_order_downloadable_permissions' ) );
 
 		// Edit post screens
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
@@ -2039,6 +2040,24 @@ class WC_Admin_Post_Types {
 				" );
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
+		}
+	}
+
+	/**
+	 * Remove downloadable permissions on permanent order deletion
+	 */
+	public function delete_order_downloadable_permissions( $postid ) {
+		global $wpdb;
+
+		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
+			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
+
+			$wpdb->query( $wpdb->prepare( "
+				DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				WHERE order_id = %d
+			", $postid ) );
+
+			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
 		}
 	}
 
