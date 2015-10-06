@@ -48,8 +48,16 @@ jQuery( function( $ ) {
 		}
 	};
 
+	/* Named callback for refreshing cart fragment */
+	function refresh_cart_fragment() {
+		$.ajax( $fragment_refresh );
+	}
+
 	/* Cart Handling */
 	if ( $supports_html5_storage ) {
+
+		var cart_timeout = null,
+			day_in_ms    = ( 24 * 60 * 60 * 1000 );
 
 		$( document.body ).bind( 'added_to_cart', function( event, fragments, cart_hash ) {
 			var prev_cart_hash = sessionStorage.getItem( 'wc_cart_hash' );
@@ -62,12 +70,16 @@ jQuery( function( $ ) {
 			sessionStorage.setItem( 'wc_cart_hash', cart_hash );
 		});
 
+		$( document.body ).bind( 'wc_fragments_refreshed', function() {
+			clearTimeout( cart_timeout );
+			cart_timeout = setTimeout( refresh_cart_fragment, day_in_ms );
+		} );
+
 		try {
 			var wc_fragments = $.parseJSON( sessionStorage.getItem( wc_cart_fragments_params.fragment_name ) ),
 				cart_hash    = sessionStorage.getItem( 'wc_cart_hash' ),
 				cookie_hash  = $.cookie( 'woocommerce_cart_hash'),
-				cart_created = sessionStorage.getItem( 'wc_cart_created' ),
-				day_in_ms    = ( 24 * 60 * 60 * 1000 );
+				cart_created = sessionStorage.getItem( 'wc_cart_created' );
 
 			if ( cart_hash === null || cart_hash === undefined || cart_hash === '' ) {
 				cart_hash = '';
@@ -81,8 +93,13 @@ jQuery( function( $ ) {
 				throw 'No cart_created';
 			}
 
-			if ( cart_created && ( ( 1 * cart_created ) + day_in_ms ) < ( new Date() ).getTime() ) {
-				throw 'Fragment expired';
+			if ( cart_created ) {
+				var cart_expiration = ( ( 1 * cart_created ) + day_in_ms ),
+					timestamp_now   = ( new Date() ).getTime();
+				if ( cart_expiration < timestamp_now ) {
+					throw 'Fragment expired';
+				}
+				cart_timeout = setTimeout( refresh_cart_fragment, ( cart_expiration - timestamp_now ) );
 			}
 
 			if ( wc_fragments && wc_fragments['div.widget_shopping_cart_content'] && cart_hash === cookie_hash ) {
