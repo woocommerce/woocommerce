@@ -291,7 +291,7 @@ function woocommerce_trim_zeros( $price ) {
  * @deprecated
  */
 function woocommerce_round_tax_total( $tax ) {
-	return wc_round_tax_total( $tax );
+	return wc_round_tax( $tax );
 }
 /**
  * @deprecated

@@ -151,8 +151,11 @@ function wc_trim_zeros( $price ) {
  * @param mixed $tax
  * @return double
  */
-function wc_round_tax_total( $tax ) {
-	$dp = wc_get_price_decimals();
+function wc_round_tax( $tax, $dp = false ) {
+
+	if ( !$dp ) {
+		$dp = wc_get_price_decimals();
+	}
 
 	// @codeCoverageIgnoreStart
 	if ( version_compare( phpversion(), '5.3', '<' ) ) {

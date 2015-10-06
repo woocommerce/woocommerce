@@ -180,9 +180,9 @@ class Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_round_tax_total() {
 
-		$this->assertEquals( 1.25, wc_round_tax_total( 1.246 ) );
-		$this->assertEquals( 20, wc_round_tax_total( 19.9997 ) );
-		$this->assertEquals( 19.99, wc_round_tax_total( 19.99 ) );
+		$this->assertEquals( 1.25, wc_round_tax( 1.246 ) );
+		$this->assertEquals( 20, wc_round_tax( 19.9997 ) );
+		$this->assertEquals( 19.99, wc_round_tax( 19.99 ) );
 	}
 
 	/**

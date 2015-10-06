@@ -134,8 +134,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			}
 
 			$tax_rows[ $key ]->tax_rate            = $tax_row->tax_rate;
-			$tax_rows[ $key ]->tax_amount          += wc_round_tax_total( $tax_row->tax_amount );
-			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
+			$tax_rows[ $key ]->tax_amount          += wc_round_tax( $tax_row->tax_amount );
+			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax( $tax_row->shipping_tax_amount );
 		}
 		?>
 		<table class="widefat">
@@ -170,9 +170,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				<tfoot>
 					<tr>
 						<th scope="row" colspan="3"><?php _e( 'Total', 'woocommerce' ); ?></th>
-						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) ) ); ?></th>
-						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></th>
-						<th class="total_row"><strong><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></strong></th>
+						<th class="total_row"><?php echo wc_price( wc_round_tax( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) ) ); ?></th>
+						<th class="total_row"><?php echo wc_price( wc_round_tax( array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></th>
+						<th class="total_row"><strong><?php echo wc_price( wc_round_tax( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></strong></th>
 					</tr>
 				</tfoot>
 			<?php else : ?>

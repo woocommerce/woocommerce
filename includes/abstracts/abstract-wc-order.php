@@ -1282,7 +1282,7 @@ abstract class WC_Abstract_Order {
 			$tax_totals[ $code ]->is_compound       = $tax[ 'compound' ];
 			$tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
 			$tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
-			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array('currency' => $this->get_order_currency()) );
+			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax( $tax_totals[ $code ]->amount ), array('currency' => $this->get_order_currency()) );
 		}
 
 		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
@@ -1432,7 +1432,7 @@ abstract class WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_total_tax() {
-		return apply_filters( 'woocommerce_order_amount_total_tax', wc_round_tax_total( $this->get_cart_tax() + $this->get_shipping_tax() ), $this );
+		return apply_filters( 'woocommerce_order_amount_total_tax', wc_round_tax( $this->get_cart_tax() + $this->get_shipping_tax() ), $this );
 	}
 
 	/**
@@ -1560,7 +1560,7 @@ abstract class WC_Abstract_Order {
 	public function get_item_tax( $item, $round = true ) {
 
 		$price = $item['line_tax'] / max( 1, $item['qty'] );
-		$price = $round ? wc_round_tax_total( $price ) : $price;
+		$price = $round ? wc_round_tax( $price ) : $price;
 
 		return apply_filters( 'woocommerce_order_amount_item_tax', $price, $item, $round, $this );
 	}
@@ -1572,7 +1572,7 @@ abstract class WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_line_tax( $item ) {
-		return apply_filters( 'woocommerce_order_amount_line_tax', wc_round_tax_total( $item['line_tax'] ), $item, $this );
+		return apply_filters( 'woocommerce_order_amount_line_tax', wc_round_tax( $item['line_tax'] ), $item, $this );
 	}
 
 	/** End Total Getters *******************************************************/
