@@ -297,7 +297,7 @@ class WC_Admin_Post_Types {
 				$edit_link = get_edit_post_link( $post->ID );
 				$title     = _draft_or_post_title();
 
-				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) .'">' . esc_html( $title ) .'</a>';
+				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
 
 				_post_states( $post );
 
@@ -486,7 +486,7 @@ class WC_Admin_Post_Types {
 				$edit_link = get_edit_post_link( $post->ID );
 				$title     = _draft_or_post_title();
 
-				echo '<strong><a href="' . esc_attr( $edit_link ) . '" class="row-title">' . esc_html( $title ) . '</a>';
+				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
 
 				_post_states( $post );
 
