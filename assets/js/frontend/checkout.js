@@ -27,6 +27,9 @@ jQuery( function( $ ) {
 			// Inline validation
 			this.$checkout_form.on( 'blur change', '.input-text, select', this.validate_field );
 
+			// Manual trigger
+			this.$checkout_form.on( 'update', this.trigger_update_checkout );
+
 			// Inputs/selects which update totals
 			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type=radio]', this.trigger_update_checkout );
 			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
