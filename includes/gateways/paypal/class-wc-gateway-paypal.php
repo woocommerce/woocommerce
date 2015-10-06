@@ -266,7 +266,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( ! $this->can_refund_order( $order ) ) {
 			$this->log( 'Refund Failed: No transaction ID' );
-			return new WP_Error( 'error', 'Refund Failed: No transaction ID' );
+			return new WP_Error( 'error', __( 'Refund Failed: No transaction ID', 'woocommerce' ) );
 		}
 
 		include_once( 'includes/class-wc-gateway-paypal-refund.php' );
