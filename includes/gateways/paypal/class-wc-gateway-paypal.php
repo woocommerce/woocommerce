@@ -266,7 +266,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( ! $this->can_refund_order( $order ) ) {
 			$this->log( 'Refund Failed: No transaction ID' );
-			return false;
+			return new WP_Error( 'error', 'Refund Failed: No transaction ID' );
 		}
 
 		include_once( 'includes/class-wc-gateway-paypal-refund.php' );
@@ -279,7 +279,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( is_wp_error( $result ) ) {
 			$this->log( 'Refund Failed: ' . $result->get_error_message() );
-			return false;
+			return new WP_Error( 'error', $result->get_error_message() );
 		}
 
 		$this->log( 'Refund Result: ' . print_r( $result, true ) );
@@ -292,6 +292,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			break;
 		}
 
-		return false;
+		return isset( $result['L_LONGMESSAGE0'] ) ? new WP_Error( 'error', $result['L_LONGMESSAGE0'] ) : false;
 	}
 }
