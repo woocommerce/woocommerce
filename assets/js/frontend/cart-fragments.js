@@ -66,7 +66,8 @@ jQuery( function( $ ) {
 			var wc_fragments = $.parseJSON( sessionStorage.getItem( wc_cart_fragments_params.fragment_name ) ),
 				cart_hash    = sessionStorage.getItem( 'wc_cart_hash' ),
 				cookie_hash  = $.cookie( 'woocommerce_cart_hash'),
-				cart_created = sessionStorage.getItem( 'wc_cart_created' );
+				cart_created = sessionStorage.getItem( 'wc_cart_created' ),
+				day_in_ms    = ( 24 * 60 * 60 * 1000 );
 
 			if ( cart_hash === null || cart_hash === undefined || cart_hash === '' ) {
 				cart_hash = '';
@@ -78,6 +79,10 @@ jQuery( function( $ ) {
 
 			if ( cart_hash && ( cart_created === null || cart_created === undefined || cart_created === '' ) ) {
 				throw 'No cart_created';
+			}
+
+			if ( cart_created && ( ( 1 * cart_created ) + day_in_ms ) < ( new Date() ).getTime() ) {
+				throw 'Fragment expired';
 			}
 
 			if ( wc_fragments && wc_fragments['div.widget_shopping_cart_content'] && cart_hash === cookie_hash ) {
