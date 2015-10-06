@@ -752,7 +752,6 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @return array
 	 */
 	private function get_product_data( $product ) {
-		$prices_precision = wc_get_price_decimals();
 
 		// Add data that applies to every product type.
 		$product_data = array(
@@ -766,9 +765,9 @@ class WC_CLI_Product extends WC_CLI_Command {
 			'virtual'            => $product->is_virtual(),
 			'permalink'          => $product->get_permalink(),
 			'sku'                => $product->get_sku(),
-			'price'              => wc_format_decimal( $product->get_price(), $prices_precision ),
-			'regular_price'      => wc_format_decimal( $product->get_regular_price(), $prices_precision ),
-			'sale_price'         => $product->get_sale_price() ? wc_format_decimal( $product->get_sale_price(), $prices_precision ) : null,
+			'price'              => $product->get_price(),
+			'regular_price'      => $product->get_regular_price(),
+			'sale_price'         => $product->get_sale_price() ? $product->get_sale_price() : null,
 			'price_html'         => $product->get_price_html(),
 			'taxable'            => $product->is_taxable(),
 			'tax_status'         => $product->get_tax_status(),
@@ -786,7 +785,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 			'on_sale'            => $product->is_on_sale(),
 			'product_url'        => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'        => $product->is_type( 'external' ) ? $product->get_button_text() : '',
-			'weight'             => $product->get_weight() ? wc_format_decimal( $product->get_weight(), 2 ) : null,
+			'weight'             => $product->get_weight() ? $product->get_weight() : null,
 			'dimensions'         => array(
 				'length' => $product->length,
 				'width'  => $product->width,
@@ -995,8 +994,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @return array
 	 */
 	private function get_variation_data( $product ) {
-		$prices_precision = wc_get_price_decimals();
-		$variations       = array();
+		$variations = array();
 
 		foreach ( $product->get_children() as $child_id ) {
 
@@ -1014,9 +1012,9 @@ class WC_CLI_Product extends WC_CLI_Command {
 					'virtual'           => $variation->is_virtual(),
 					'permalink'         => $variation->get_permalink(),
 					'sku'               => $variation->get_sku(),
-					'price'             => wc_format_decimal( $variation->get_price(), $prices_precision ),
-					'regular_price'     => wc_format_decimal( $variation->get_regular_price(), $prices_precision ),
-					'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), $prices_precision ) : null,
+					'price'             => $variation->get_price(),
+					'regular_price'     => $variation->get_regular_price(),
+					'sale_price'        => $variation->get_sale_price() ? $variation->get_sale_price() : null,
 					'taxable'           => $variation->is_taxable(),
 					'tax_status'        => $variation->get_tax_status(),
 					'tax_class'         => $variation->get_tax_class(),
@@ -1027,7 +1025,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 					'purchaseable'      => $variation->is_purchasable(),
 					'visible'           => $variation->variation_is_visible(),
 					'on_sale'           => $variation->is_on_sale(),
-					'weight'            => $variation->get_weight() ? wc_format_decimal( $variation->get_weight(), 2 ) : null,
+					'weight'            => $variation->get_weight() ? $variation->get_weight() : null,
 					'dimensions'        => array(
 						'length' => $variation->length,
 						'width'  => $variation->width,
