@@ -141,11 +141,6 @@ class WC_Admin_Status {
 			}
 		}
 
-		// Manual translation update messages
-		if ( isset( $_GET['translation_updated'] ) ) {
-			WC_Language_Pack_Upgrader::language_update_messages();
-		}
-
 		// Display message if settings settings have been saved
 		if ( isset( $_REQUEST['settings-updated'] ) ) {
 			echo '<div class="updated"><p>' . __( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
@@ -201,14 +196,6 @@ class WC_Admin_Status {
 				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
 			)
 		);
-
-		if ( get_locale() !== 'en_US' ) {
-			$tools['translation_upgrade'] = array(
-				'name'    => __( 'Translation Upgrade', 'woocommerce' ),
-				'button'  => __( 'Force Translation Upgrade', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note:</strong> This option will force the translation upgrade for your language if a translation is available.', 'woocommerce' ),
-			);
-		}
 
 		return apply_filters( 'woocommerce_debug_tools', $tools );
 	}
