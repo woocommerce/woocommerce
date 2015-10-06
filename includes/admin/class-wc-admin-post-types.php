@@ -1722,7 +1722,7 @@ class WC_Admin_Post_Types {
 		if ( ! empty( $_GET['_customer_user'] ) ) {
 			$user_id     = absint( $_GET['_customer_user'] );
 			$user        = get_user_by( 'id', $user_id );
-			$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
+			$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 		}
 		?>
 		<input type="hidden" class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo htmlspecialchars( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
