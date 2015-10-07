@@ -34,7 +34,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 		# GET/POST /taxes
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_taxes' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_tax_classes' ), WC_API_Server::READABLE ),
 			array( array( $this, 'create_tax' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
@@ -59,18 +59,36 @@ class WC_API_Taxes extends WC_API_Resource {
 	}
 
 	/**
-	 * Get all taxes
+	 * Get all tax classes
 	 *
 	 * @since 2.5.0
 	 *
 	 * @param string $fields
-	 * @param array $filter
-	 * @param int $page
 	 *
 	 * @return array
 	 */
-	public function get_taxes( $fields = null, $filter = array(), $page = 1 ) {
+	public function get_tax_classes( $fields = null ) {
+		try {
+			// Permissions check
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax_classes', __( 'You do not have permission to read tax classes', 'woocommerce' ), 401 );
+			}
 
+			$tax_classes = array();
+
+			$classes = WC_Tax::get_tax_classes();
+
+			foreach ( $classes as $class ) {
+				$tax_classes[] = apply_filters( 'woocommerce_api_tax_class_response', array(
+					'id'   => sanitize_title( $class ),
+					'name' => $class
+				), $class, $fields, $this );
+			}
+
+			return array( 'tax_classes' => apply_filters( 'woocommerce_api_tax_classes_response', $tax_classes, $classes, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
