@@ -218,7 +218,7 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . $product_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
+	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
 
 	if ( false === ( $result = get_transient( $transient_name ) ) ) {
 		$customer_data = array( $user_id );
@@ -241,23 +241,22 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			return false;
 		}
 
-		$result = $wpdb->get_var(
-			$wpdb->prepare( "
-				SELECT COUNT( i.order_item_id ) FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-				WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
-				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-				AND im.meta_key IN ( '_product_id', '_variation_id' )
-				AND im.meta_value = %d
-				", $product_id
-			) . " AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )"
-		);
+		$result = $wpdb->get_col( "
+			SELECT im.meta_value FROM {$wpdb->posts} AS p
+			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+			WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
+			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+			AND im.meta_key IN ( '_product_id', '_variation_id' )
+			AND im.meta_value != 0
+			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+		" );
+		$result = array_map( 'intval', $result );
 
-		set_transient( $transient_name, $result ? 1 : 0, DAY_IN_SECONDS * 30 );
+		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
 	}
-	return (bool) $result;
+	return in_array( (int) $product_id, $result );
 }
 
 /**
