@@ -180,11 +180,17 @@ class WC_API_Taxes extends WC_API_Resource {
 
 			$tax_classes = array();
 
+			// Add standard class
+			$tax_classes[] = array(
+				'slug' => 'standard',
+				'name' => __( 'Standard Rate', 'woocommerce' )
+			);
+
 			$classes = WC_Tax::get_tax_classes();
 
 			foreach ( $classes as $class ) {
 				$tax_classes[] = apply_filters( 'woocommerce_api_tax_class_response', array(
-					'id'   => sanitize_title( $class ),
+					'slug' => sanitize_title( $class ),
 					'name' => $class
 				), $class, $fields, $this );
 			}
