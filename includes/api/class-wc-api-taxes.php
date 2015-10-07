@@ -69,14 +69,31 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @since 2.5.0
 	 *
 	 * @param string $fields
-	 * @param string $type
-	 * @param array $filter
-	 * @param int $page
+	 * @param array  $filter
+	 * @param string $class
+	 * @param int    $page
 	 *
 	 * @return array
 	 */
-	public function get_taxes( $fields = null, $type = null, $filter = array(), $page = 1 ) {
+	public function get_taxes( $fields = null, $filter = array(), $class = null, $page = 1 ) {
+		if ( ! empty( $class ) ) {
+			$filter['tax_class'] = $class;
+		}
 
+		$filter['page'] = $page;
+
+		$query = $this->query_tax_rates( $filter );
+
+		$taxes = array();
+
+		foreach ( $query['results'] as $tax ) {
+			$taxes[] = current( $this->get_tax( $tax->tax_rate_id, $fields ) );
+		}
+
+		// Set pagination headers
+		$this->server->add_pagination_headers( $query['headers'] );
+
+		return array( 'taxes' => $taxes );
 	}
 
 	/**
@@ -230,6 +247,56 @@ class WC_API_Taxes extends WC_API_Resource {
 	 */
 	public function delete_tax( $id, $force = false ) {
 
+	}
+
+	/**
+	 * Helper method to get tax rates objects
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param  array $args
+	 *
+	 * @return array
+	 */
+	protected function query_tax_rates( $args ) {
+		global $wpdb;
+
+		// Set args
+		$args = $this->merge_query_args( $args, array() );
+
+		$query = "
+			SELECT tax_rate_id
+			FROM {$wpdb->prefix}woocommerce_tax_rates
+			WHERE 1 = 1
+		";
+
+		// Filter by tax class
+		if ( ! empty( $args['tax_class'] ) ) {
+			$tax_class = 'standard' !== $args['tax_class'] ? sanitize_title( $args['tax_class'] ) : '';
+			$query .= " AND tax_rate_class = '$tax_class'";
+		}
+
+		// Order tax rates
+		$order_by = ' ORDER BY tax_rate_order';
+
+		// Pagination
+		$per_page   = isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : get_option( 'posts_per_page' );
+		$offset     = 1 < $args['paged'] ? ( $args['paged'] - 1 ) * $per_page : 0;
+		$pagination = sprintf( ' LIMIT %d, %d', $offset, $per_page );
+
+		$results = $wpdb->get_results( $query . $order_by . $pagination );
+
+		$wpdb->get_results( $query );
+		$headers              = new stdClass;
+		$headers->page        = $args['paged'];
+		$headers->total       = (int) $wpdb->num_rows;
+		$headers->is_single   = $per_page > $headers->total;
+		$headers->total_pages = ceil( $headers->total / $per_page );
+
+		return array(
+			'results' => $results,
+			'headers' => $headers
+		);
 	}
 
 	/**
