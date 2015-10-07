@@ -77,7 +77,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 */
 	public function get_taxes( $fields = null, $filter = array(), $class = null, $page = 1 ) {
 		if ( ! empty( $class ) ) {
-			$filter['tax_class'] = $class;
+			$filter['tax_rate_class'] = $class;
 		}
 
 		$filter['page'] = $page;
@@ -200,12 +200,27 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
+	 * @param string $class
 	 * @param array $filter
 	 *
 	 * @return array
 	 */
-	public function get_taxes_count( $filter = array() ) {
+	public function get_taxes_count( $class = null, $filter = array() ) {
+		try {
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_taxes_count', __( 'You do not have permission to read the taxes count', 'woocommerce' ), 401 );
+			}
 
+			if ( ! empty( $class ) ) {
+				$filter['tax_rate_class'] = $class;
+			}
+
+			$query = $this->query_tax_rates( $filter, true );
+
+			return array( 'count' => (int) $query['headers']->total );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
@@ -258,8 +273,10 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @return array
 	 */
-	protected function query_tax_rates( $args ) {
+	protected function query_tax_rates( $args, $count_only = false ) {
 		global $wpdb;
+
+		$results = '';
 
 		// Set args
 		$args = $this->merge_query_args( $args, array() );
@@ -271,9 +288,9 @@ class WC_API_Taxes extends WC_API_Resource {
 		";
 
 		// Filter by tax class
-		if ( ! empty( $args['tax_class'] ) ) {
-			$tax_class = 'standard' !== $args['tax_class'] ? sanitize_title( $args['tax_class'] ) : '';
-			$query .= " AND tax_rate_class = '$tax_class'";
+		if ( ! empty( $args['tax_rate_class'] ) ) {
+			$tax_rate_class = 'standard' !== $args['tax_rate_class'] ? sanitize_title( $args['tax_rate_class'] ) : '';
+			$query .= " AND tax_rate_class = '$tax_rate_class'";
 		}
 
 		// Order tax rates
@@ -284,7 +301,9 @@ class WC_API_Taxes extends WC_API_Resource {
 		$offset     = 1 < $args['paged'] ? ( $args['paged'] - 1 ) * $per_page : 0;
 		$pagination = sprintf( ' LIMIT %d, %d', $offset, $per_page );
 
-		$results = $wpdb->get_results( $query . $order_by . $pagination );
+		if ( ! $count_only ) {
+			$results = $wpdb->get_results( $query . $order_by . $pagination );
+		}
 
 		$wpdb->get_results( $query );
 		$headers              = new stdClass;
