@@ -44,6 +44,9 @@ class WC_Comments {
 
 		// Support avatars for `review` comment type
 		add_filter( 'get_avatar_comment_types', array( __CLASS__, 'add_avatar_for_review_comment_type' ) );
+
+		// Review of verified purchase
+		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
 	}
 
 	/**
@@ -288,6 +291,18 @@ class WC_Comments {
 	 */
 	public static function add_avatar_for_review_comment_type( $comment_types ) {
 		return array_merge( $comment_types, array( 'review' ) );
+	}
+
+	/**
+	 * Determine if a review is from a verified owner at submission.
+	 * @param int $comment_id
+	 */
+	public static function add_comment_purchase_verification( $comment_id ) {
+		$comment = get_comment( $comment_id );
+		if ( 'product' === get_post_type( $comment->comment_post_ID ) ) {
+			$verified = wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $comment->comment_post_ID );
+			add_comment_meta( $comment_id, 'verified', (int) $verified, true );
+		}
 	}
 }
 
