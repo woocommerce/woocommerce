@@ -164,6 +164,7 @@ final class WooCommerce {
 		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
 		$this->define( 'WC_DELIMITER', '|' );
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
+		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 	}
 
 	/**

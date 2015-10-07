@@ -96,10 +96,7 @@ class WC_Admin_Status {
 				break;
 				case 'clear_sessions' :
 
-					$wpdb->query( "
-						DELETE FROM {$wpdb->options}
-						WHERE option_name LIKE '_wc_session_%' OR option_name LIKE '_wc_session_expires_%'
-					" );
+					$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_sessions" );
 
 					wp_cache_flush();
 
