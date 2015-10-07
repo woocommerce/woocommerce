@@ -34,7 +34,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 		# GET/POST /taxes
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_tax_classes' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_taxes' ), WC_API_Server::READABLE ),
 			array( array( $this, 'create_tax' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
@@ -50,12 +50,99 @@ class WC_API_Taxes extends WC_API_Resource {
 			array( array( $this, 'delete_tax' ), WC_API_SERVER::DELETABLE ),
 		);
 
+		# POST|PUT /taxes/classes
+		$routes[ $this->base . '/classes' ] = array(
+			array( array( $this, 'get_tax_classes' ), WC_API_Server::READABLE ),
+		);
+
 		# POST|PUT /taxes/bulk
 		$routes[ $this->base . '/bulk' ] = array(
 			array( array( $this, 'bulk' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		return $routes;
+	}
+
+	/**
+	 * Get all taxes
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $fields
+	 * @param string $type
+	 * @param array $filter
+	 * @param int $page
+	 *
+	 * @return array
+	 */
+	public function get_taxes( $fields = null, $type = null, $filter = array(), $page = 1 ) {
+
+	}
+
+	/**
+	 * Get the tax for the given ID
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param int $id the tax ID
+	 * @param string $fields fields to include in response
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_tax( $id, $fields = null ) {
+		global $wpdb;
+
+		try {
+			$id = absint( $id );
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax_rate', __( 'You do not have permission to read tax rate', 'woocommerce' ), 401 );
+			}
+
+			// Get tax rate details
+			$tax = $wpdb->get_row( $wpdb->prepare( "
+				SELECT *
+				FROM {$wpdb->prefix}woocommerce_tax_rates
+				WHERE tax_rate_id = %d
+			", $id ) );
+
+			if ( is_wp_error( $tax ) || is_null( $tax ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_tax_rate_id', __( 'A tax rate with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$tax_data = array(
+				'id'       => $tax->tax_rate_id,
+				'country'  => $tax->tax_rate_country,
+				'state'    => $tax->tax_rate_state,
+				'postcode' => '',
+				'city'     => '',
+				'rate'     => $tax->tax_rate,
+				'name'     => $tax->tax_rate_name,
+				'priority' => (int) $tax->tax_rate_priority,
+				'compound' => (bool) $tax->tax_rate_compound,
+				'shipping' => (bool) $tax->tax_rate_shipping,
+				'order'    => (int) $tax->tax_rate_order,
+				'class'    => $tax->tax_rate_class ? $tax->tax_rate_class : 'standard'
+			);
+
+			// Get locales from a tax rate
+			$locales = $wpdb->get_results( $wpdb->prepare( "
+				SELECT location_code, location_type
+				FROM {$wpdb->prefix}woocommerce_tax_rate_locations
+				WHERE tax_rate_id = %d
+			", $id ) );
+
+			if ( ! is_wp_error( $tax ) && ! is_null( $tax ) ) {
+				foreach ( $locales as $locale ) {
+					$tax_data[ $locale->location_type ] = $locale->location_code;
+				}
+			}
+
+			return array( 'tax' => apply_filters( 'woocommerce_api_tax_response', $tax_data, $tax, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
@@ -89,20 +176,6 @@ class WC_API_Taxes extends WC_API_Resource {
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-	}
-
-	/**
-	 * Get the tax for the given ID
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param int $id the tax ID
-	 * @param string $fields fields to include in response
-	 *
-	 * @return array|WP_Error
-	 */
-	public function get_tax( $id, $fields = null ) {
-
 	}
 
 	/**
