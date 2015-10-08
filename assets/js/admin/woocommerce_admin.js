@@ -147,7 +147,7 @@ jQuery( function ( $ ) {
 				$this_row.addClass( 'selected_now' ).addClass( 'current' );
 
 				if ( $( 'tr.last_selected', $this_table ).size() > 0 ) {
-					if ( $this_row.index() > $( 'tr.last_selected, $this_table' ).index() ) {
+					if ( $this_row.index() > $( 'tr.last_selected', $this_table ).index() ) {
 						$( 'tr', $this_table ).slice( $( 'tr.last_selected', $this_table ).index(), $this_row.index() ).addClass( 'current' );
 					} else {
 						$( 'tr', $this_table ).slice( $this_row.index(), $( 'tr.last_selected', $this_table ).index() + 1 ).addClass( 'current' );

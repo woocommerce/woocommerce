@@ -130,7 +130,8 @@ class WC_AJAX {
 			'get_customer_location'                            => true,
 			'load_variations'                                  => false,
 			'save_variations'                                  => false,
-			'bulk_edit_variations'                             => false
+			'bulk_edit_variations'                             => false,
+			'tax_rates_save_changes'                           => false,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -2998,6 +2999,76 @@ class WC_AJAX {
 		WC_Product_Variable::sync( $product_id );
 		wc_delete_product_transients( $product_id );
 		die();
+	}
+
+	/**
+	 * Handle submissions from assets/js/settings-views-html-settings-tax.js Backbone model.
+	 */
+	public static function tax_rates_save_changes() {
+		if ( ! isset( $_POST['current_class'], $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		$current_class = $_POST['current_class']; // This is sanitized seven lines later.
+
+		if ( ! wp_verify_nonce( $_POST['wc_tax_nonce'], 'wc_tax_nonce-class:' . $current_class ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		$current_class = WC_Tax::format_tax_rate_class( $current_class );
+
+		// Check User Caps
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$changes = $_POST['changes'];
+		foreach ( $changes as $tax_rate_id => $data ) {
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					// So the user added and deleted a new row.
+					// That's fine, it's not in the database anyways. NEXT!
+					continue;
+				}
+				WC_Tax::_delete_tax_rate( $tax_rate_id );
+			}
+
+			$tax_rate = array_intersect_key( $data, array(
+				'tax_rate_country'  => 1,
+				'tax_rate_state'    => 1,
+				'tax_rate'          => 1,
+				'tax_rate_name'     => 1,
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 1,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+			) );
+
+			if ( isset( $data['newRow'] ) ) {
+				// Hurrah, shiny and new!
+				$tax_rate['tax_rate_class'] = $current_class;
+				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+			} else {
+				// Updating an existing rate ...
+				if ( ! empty( $tax_rate ) ) {
+					WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
+				}
+			}
+
+			if ( isset( $data['postcode'] ) ) {
+				WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, array_map( 'wc_clean', $data['postcode'] ) );
+			}
+			if ( isset( $data['city'] ) ) {
+				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', $data['city'] ) );
+			}
+		}
+
+		wp_send_json_success( array(
+			'rates' => WC_Tax::get_rates_for_tax_class( $current_class ),
+		) );
 	}
 }
 
