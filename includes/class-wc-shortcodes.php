@@ -1,12 +1,20 @@
 <?php
 /**
- * WC_Shortcodes class.
+ * WooCommerce Shortcodes.
  *
- * @class       WC_Shortcodes
- * @version     2.1.0
- * @package     WooCommerce/Classes
- * @category    Class
- * @author      WooThemes
+ * @class    WC_Shortcodes
+ * @version  2.4.8
+ * @package  WooCommerce/Classes
+ * @category Class
+ * @author   WooThemes
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Shortcodes Class
  */
 class WC_Shortcodes {
 
@@ -46,9 +54,8 @@ class WC_Shortcodes {
 
 	/**
 	 * Shortcode Wrapper
-	 *
-	 * @param string[] $function
-	 * @param array $atts (default: array())
+	 * @param  string[] $function
+	 * @param  array $atts (default: array())
 	 * @return string
 	 */
 	public static function shortcode_wrapper(
@@ -70,9 +77,9 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Loop over found products
-	 * @param  array $query_args
-	 * @param  array $atts
+	 * Loop over found products.
+	 * @param  array  $query_args
+	 * @param  array  $atts
 	 * @param  string $loop_name
 	 * @return string
 	 */
@@ -111,7 +118,6 @@ class WC_Shortcodes {
 
 	/**
 	 * Cart page shortcode.
-	 *
 	 * @return string
 	 */
 	public static function cart() {
@@ -120,8 +126,7 @@ class WC_Shortcodes {
 
 	/**
 	 * Checkout page shortcode.
-	 *
-	 * @param mixed $atts
+	 * @param  mixed $atts
 	 * @return string
 	 */
 	public static function checkout( $atts ) {
@@ -130,8 +135,7 @@ class WC_Shortcodes {
 
 	/**
 	 * Order tracking page shortcode.
-	 *
-	 * @param mixed $atts
+	 * @param  mixed $atts
 	 * @return string
 	 */
 	public static function order_tracking( $atts ) {
@@ -140,8 +144,7 @@ class WC_Shortcodes {
 
 	/**
 	 * Cart shortcode.
-	 *
-	 * @param mixed $atts
+	 * @param  mixed $atts
 	 * @return string
 	 */
 	public static function my_account( $atts ) {
@@ -149,9 +152,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List products in a category shortcode
-	 *
-	 * @param array $atts
+	 * List products in a category shortcode.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function product_category( $atts ) {
@@ -197,9 +199,8 @@ class WC_Shortcodes {
 
 
 	/**
-	 * List all (or limited) product categories
-	 *
-	 * @param array $atts
+	 * List all (or limited) product categories.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function product_categories( $atts ) {
@@ -278,9 +279,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Recent Products shortcode
-	 *
-	 * @param array $atts
+	 * Recent Products shortcode.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function recent_products( $atts ) {
@@ -309,9 +309,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List multiple products shortcode
-	 *
-	 * @param array $atts
+	 * List multiple products shortcode.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function products( $atts ) {
@@ -349,9 +348,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Display a single product
-	 *
-	 * @param array $atts
+	 * Display a single product.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function product( $atts ) {
@@ -411,9 +409,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Display a single product price + cart button
-	 *
-	 * @param array $atts
+	 * Display a single product price + cart button.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function product_add_to_cart( $atts ) {
@@ -466,9 +463,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Get the add to cart URL for a product
-	 *
-	 * @param array $atts
+	 * Get the add to cart URL for a product.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function product_add_to_cart_url( $atts ) {
@@ -497,9 +493,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List all products on sale
-	 *
-	 * @param array $atts
+	 * List all products on sale.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function sale_products( $atts ) {
@@ -525,9 +520,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List best selling products on sale
-	 *
-	 * @param array $atts
+	 * List best selling products on sale.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function best_selling_products( $atts ) {
@@ -554,9 +548,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List top rated products on sale
-	 *
-	 * @param array $atts
+	 * List top rated products on sale.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function top_rated_products( $atts ) {
@@ -593,9 +586,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Output featured products
-	 *
-	 * @param array $atts
+	 * Output featured products.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function featured_products( $atts ) {
@@ -630,9 +622,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Show a single product page
-	 *
-	 * @param array $atts
+	 * Show a single product page.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function product_page( $atts ) {
@@ -670,7 +661,7 @@ class WC_Shortcodes {
 
 		$preselected_id = '0';
 
-		// check if sku is a variation
+		// Check if sku is a variation
 		if ( isset( $atts['sku'] ) && $single_product->have_posts() && $single_product->post->post_type === 'product_variation' ) {
 
 			$variation = new WC_Product_Variation( $single_product->post->ID );
@@ -721,8 +712,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Show messages
-	 *
+	 * Show messages.
 	 * @return string
 	 */
 	public static function shop_messages() {
@@ -733,8 +723,7 @@ class WC_Shortcodes {
 
 	/**
 	 * woocommerce_order_by_rating_post_clauses function.
-	 *
-	 * @param array $args
+	 * @param  array $args
 	 * @return array
 	 */
 	public static function order_by_rating_post_clauses( $args ) {
@@ -749,10 +738,10 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List products with an attribute shortcode
+	 * List products with an attribute shortcode.
 	 * Example [product_attribute attribute='color' filter='black']
 	 *
-	 * @param array $atts
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function product_attribute( $atts ) {
@@ -786,14 +775,15 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * @param array $atts
+	 * List related products.
+	 * @param  array $atts
 	 * @return string
 	 */
 	public static function related_products( $atts ) {
 		$atts = shortcode_atts( array(
 			'per_page' => '4',
-			'columns'        => '4',
-			'orderby'        => 'rand'
+			'columns'  => '4',
+			'orderby'  => 'rand'
 		), $atts );
 
 		ob_start();
@@ -805,11 +795,10 @@ class WC_Shortcodes {
 
 	/**
 	 * Adds a tax_query index to the query to filter by category.
-	 *
-	 * @param array $args
-	 * @param string $category
-	 * @param string $operator
-	 * @return array;
+	 * @param  array  $args
+	 * @param  string $category
+	 * @param  string $operator
+	 * @return array
 	 * @access private
 	 */
 	private static function _maybe_add_category_args( $args, $category, $operator ) {
