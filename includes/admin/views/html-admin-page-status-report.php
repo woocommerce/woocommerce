@@ -288,6 +288,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<?php
 			$tables = array(
+				'woocommerce_sessions',
 				'woocommerce_api_keys',
 				'woocommerce_attribute_taxonomies',
 				'woocommerce_termmeta',
