@@ -208,7 +208,6 @@ class WC_API_Taxes extends WC_API_Resource {
 
 				if ( isset( $data[ $_key ] ) ) {
 					if ( in_array( $_key, array( 'compound', 'shipping' ) ) ) {
-						error_log( print_r( array( $_key, $data[ $_key ] ), true ) );
 						$tax_data[ $key ] = $data[ $_key ] ? 1 : 0;
 					} else {
 						$tax_data[ $key ] = $data[ $_key ];
