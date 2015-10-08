@@ -43,7 +43,7 @@ class WC_API_Resource {
 
 		$response_names = array( 'order', 'coupon', 'customer', 'product', 'report',
 			'customer_orders', 'customer_downloads', 'order_note', 'order_refund',
-			'product_reviews', 'product_category'
+			'product_reviews', 'product_category', 'tax', 'tax_class'
 		);
 
 		foreach ( $response_names as $name ) {

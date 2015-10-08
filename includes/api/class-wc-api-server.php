@@ -560,7 +560,7 @@ class WC_API_Server {
 	 * Send pagination headers for resources
 	 *
 	 * @since 2.1
-	 * @param WP_Query|WP_User_Query $query
+	 * @param WP_Query|WP_User_Query|stdClass $query
 	 */
 	public function add_pagination_headers( $query ) {
 
@@ -577,6 +577,11 @@ class WC_API_Server {
 				$page = 1;
 				$total_pages = 1;
 			}
+		} else if ( is_a( $query, 'stdClass' ) ) {
+			$page        = $query->page;
+			$single      = $query->is_single;
+			$total       = $query->total;
+			$total_pages = $query->total_pages;
 
 		// WP_Query
 		} else {
