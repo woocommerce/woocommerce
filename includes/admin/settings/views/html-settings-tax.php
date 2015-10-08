@@ -50,15 +50,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" />
 		</td>
 
-<<<<<<< HEAD
-			jQuery('#rates').find('tr:visible').each(function() {
-				var row = '';
-				jQuery(this).find('td:not(.sort) input').each(function() {
-=======
 		<td class="state">
 			<input type="text" value="{{ data.tax_rate_state }}" placeholder="*" name="tax_rate_state[{{ data.tax_rate_id }}]" data-attribute="tax_rate_state" />
 		</td>
->>>>>>> issue/8587
 
 		<td class="postcode">
 			<input type="text" value="<# if ( data.postcode ) print( data.postcode.join( '; ' ) ); #>" placeholder="*" data-name="tax_rate_postcode[{{ data.tax_rate_id }}]" data-attribute="postcode" />
