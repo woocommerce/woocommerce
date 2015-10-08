@@ -17,7 +17,7 @@
 			paginationTemplate = wp.template( 'wc-tax-table-pagination' ),
 			$table             = $( '.wc_tax_rates' ),
 			$tbody             = $( '#rates' ),
-			$unsaved_msg       = $( '#unsaved-changes' ),
+			$save_button       = $( 'input[name="save"]' ),
 			$pagination        = $( '#rates-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
 			$submit            = $( '.submit .button-primary[type=submit]' ),
@@ -96,6 +96,7 @@
 					$pagination.on( 'change', 'input', { view : this }, this.onPageChange );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 					$submit.on( 'click', { view : this }, this.onSubmit );
+					$save_button.attr('disabled','disabled');
 
 					// Can bind these directly to the buttons, as they won't get overwritten.
 					$table.find('.insert').on( 'click', { view : this }, this.onAddNewRow );
@@ -282,7 +283,7 @@
 				onExport : function( event ) {
 					var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
 
-					$.each( event.data.view.model.rates, function( id, rowData ) {
+					$.each( event.data.view.model.getFilteredRates(), function( id, rowData ) {
 						var row = '';
 
 						row += rowData.tax_rate_country  + ',';
@@ -305,12 +306,11 @@
 				},
 				setUnloadConfirmation : function() {
 					this.needsUnloadConfirm = true;
-					$unsaved_msg.show();
-					$unsaved_msg.find( 'pre' ).text( JSON.stringify( this.model.changes, null, '\t' ) );
+					$save_button.removeAttr('disabled');
 				},
 				clearUnloadConfirmation : function() {
 					this.needsUnloadConfirm = false;
-					$unsaved_msg.hide();
+					$save_button.attr('disabled','disabled');
 				},
 				unloadConfirmation : function(event) {
 					if ( event.data.view.needsUnloadConfirm ) {

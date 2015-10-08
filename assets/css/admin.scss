@@ -1842,6 +1842,14 @@ a.import_rates {
 	margin-bottom: 0;
 }
 
+#rates-search {
+	float: right;
+	input.wc-tax-rates-search-field {
+		padding: 4px 8px;
+		font-size: 1.2em;
+	}
+}
+
 table.wc_tax_rates,
 table.wc_input_table {
 	width: 100%;

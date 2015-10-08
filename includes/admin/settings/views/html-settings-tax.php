@@ -4,20 +4,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h3><?php printf( __( 'Tax Rates for the "%s" Class', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
-<p><?php printf( __( 'Define tax rates for countries and states below. <a href="%s">See here</a> for available alpha-2 country codes.', 'woocommerce' ), 'http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes' ); ?></p>
-
 <div class="wc-tax-rates-search" id="rates-search">
 	<input type="search" class="wc-tax-rates-search-field" placeholder="<?php esc_attr_e( 'Search…', 'woocommerce' ); ?>" value="<?php if ( isset( $_GET['s'] ) ) { echo esc_attr( $_GET['s'] ); } ?>" />
 </div>
 
-<div class="wc-tax-rates-pagination" id="rates-pagination"></div>
+<h3><?php printf( __( '"%s" Tax Rates', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 
 <table class="wc_tax_rates wc_input_table sortable widefat">
 	<thead>
 		<tr>
 			<th class="sort">&nbsp;</th>
-			<th width="8%"><?php _e( 'Country&nbsp;Code', 'woocommerce' ); ?>&nbsp;<span class="tips" data-tip="<?php esc_attr_e('A 2 digit country code, e.g. US. Leave blank to apply to all.', 'woocommerce'); ?>">[?]</span></th>
+			<th width="8%"><a href="http://en.wikipedia.org/wiki/ISO_3166-1#Current_codes" target="_blank"><?php _e( 'Country&nbsp;Code', 'woocommerce' ); ?></a>&nbsp;<span class="tips" data-tip="<?php esc_attr_e('A 2 digit country code, e.g. US. Leave blank to apply to all.', 'woocommerce'); ?>">[?]</span></th>
 			<th width="8%"><?php _e( 'State&nbsp;Code', 'woocommerce' ); ?>&nbsp;<span class="tips" data-tip="<?php esc_attr_e('A 2 digit state code, e.g. AL. Leave blank to apply to all.', 'woocommerce'); ?>">[?]</span></th>
 			<th><?php _e( 'ZIP/Postcode', 'woocommerce' ); ?>&nbsp;<span class="tips" data-tip="<?php esc_attr_e('Postcode for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all areas. Wildcards (*) can be used. Ranges for numeric postcodes (e.g. 12345-12350) will be expanded into individual postcodes.', 'woocommerce'); ?>">[?]</span></th>
 			<th><?php _e( 'City', 'woocommerce' ); ?>&nbsp;<span class="tips" data-tip="<?php esc_attr_e('Cities for this rule. Semi-colon (;) separate multiple values. Leave blank to apply to all cities.', 'woocommerce'); ?>">[?]</span></th>
@@ -44,11 +41,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</tbody>
 </table>
-
-<div id="unsaved-changes" style="display:none;">
-	<?php _e( 'There are unsaved changes.', 'woocommerce' ); ?>
-	<pre style="display:none;"></pre>
-</div>
 
 <script type="text/html" id="tmpl-wc-tax-table-row">
 	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>" data-id="{{ data.tax_rate_id }}">
