@@ -44,11 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-tax-table-row">
 	<tr class="tips" data-tip="<?php echo esc_attr( sprintf( __( 'Tax rate ID: %s', 'woocommerce' ), '{{ data.tax_rate_id }}' ) ); ?>" data-id="{{ data.tax_rate_id }}">
-		<td class="sort">
-			<# if ( ! data.newRow ) { #>
-				<input type="hidden" class="remove_tax_rate" name="remove_tax_rate[{{ data.tax_rate_id }}]" value="0" />
-			<# } #>
-		</td>
+		<td class="sort"></td>
 
 		<td class="country">
 			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" />
