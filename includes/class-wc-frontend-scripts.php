@@ -213,6 +213,7 @@ class WC_Frontend_Scripts {
 				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
 			}
 		}
+		wp_enqueue_script( 'password-strength-meter' );
 	}
 
 	/**

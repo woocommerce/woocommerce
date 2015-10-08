@@ -18,11 +18,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
-
-/**
- * password-strength-meter js included for check password strength
- */
-	wp_enqueue_script( 'password-strength-meter' );
 ?>
 
 <?php wc_print_notices(); ?>
@@ -56,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p class="form-row form-row-wide">
 			<label for="password_1"><?php _e( 'New Password (leave blank to leave unchanged)', 'woocommerce' ); ?></label>
 			<input type="password" class="input-text" name="password_1" id="password_1" />
-			<div id="pass-strength-result" aria-live="polite"></div>
+			
 		</p>
 		<p class="form-row form-row-wide">
 			<label for="password_2"><?php _e( 'Confirm New Password', 'woocommerce' ); ?></label>
