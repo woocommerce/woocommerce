@@ -262,12 +262,30 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @since 2.5.0
 	 *
 	 * @param int $id the tax ID
-	 * @param bool $force true to permanently delete tax, false to move to trash
 	 *
 	 * @return array
 	 */
-	public function delete_tax( $id, $force = false ) {
+	public function delete_tax( $id ) {
+		global $wpdb;
 
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_tax_rate', __( 'You do not have permission to delete tax rates', 'woocommerce' ), 401 );
+			}
+
+			$id = absint( $id );
+
+			WC_Tax::_delete_tax_rate( $id );
+
+			if ( 0 === $wpdb->rows_affected ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_tax_rate', __( 'Could not delete the tax rate', 'woocommerce' ), 401 );
+			}
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'tax_rate' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
