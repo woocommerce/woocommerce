@@ -183,7 +183,63 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @return array
 	 */
 	public function create_tax( $data ) {
+		try {
+			if ( ! isset( $data['tax'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_tax_rate_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'tax' ), 400 );
+			}
 
+			// Check permissions
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_tax_rate', __( 'You do not have permission to create tax rates', 'woocommerce' ), 401 );
+			}
+
+			$data = $data['tax'];
+
+			$tax_data = array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '',
+				'tax_rate_name'     => '',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 0,
+				'tax_rate_class'    => '',
+			);
+
+			foreach ( $tax_data as $key => $value ) {
+				$_key = str_replace( 'tax_rate_', '', $key );
+
+				if ( isset( $data[ $_key ] ) ) {
+					if ( in_array( $_key, array( 'compound', 'shipping' ) ) ) {
+						error_log( print_r( array( $_key, $data[ $_key ] ), true ) );
+						$tax_data[ $key ] = $data[ $_key ] ? 1 : 0;
+					} else {
+						$tax_data[ $key ] = $data[ $_key ];
+					}
+				}
+			}
+
+			// Create tax rate
+			$id = WC_Tax::_insert_tax_rate( $tax_data );
+
+			// Add locales
+			if ( ! empty( $data['postcode'] ) ) {
+				WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $data['postcode'] ) );
+			}
+
+			if ( ! empty( $data['city'] ) ) {
+				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
+			}
+
+			do_action( 'woocommerce_api_create_tax_rate', $id, $data );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_tax( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
@@ -197,7 +253,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @return array
 	 */
 	public function edit_tax( $id, $data ) {
-
+		// WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate )
 	}
 
 	/**
