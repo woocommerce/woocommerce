@@ -104,7 +104,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		// Set pagination headers
 		$this->server->add_pagination_headers( $query['headers'] );
 
-		return array( 'tax_rates' => $taxes );
+		return array( 'taxes' => $taxes );
 	}
 
 	/**
@@ -125,14 +125,14 @@ class WC_API_Taxes extends WC_API_Resource {
 
 			// Permissions check
 			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax_rate', __( 'You do not have permission to read tax rate', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax', __( 'You do not have permission to read tax rate', 'woocommerce' ), 401 );
 			}
 
 			// Get tax rate details
 			$tax = WC_Tax::_get_tax_rate( $id );
 
 			if ( is_wp_error( $tax ) || empty( $tax ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_tax_rate_id', __( 'A tax rate with the provided ID could not be found', 'woocommerce' ), 404 );
+				throw new WC_API_Exception( 'woocommerce_api_invalid_tax_id', __( 'A tax rate with the provided ID could not be found', 'woocommerce' ), 404 );
 			}
 
 			$tax_data = array(
@@ -163,7 +163,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				}
 			}
 
-			return array( 'tax_rate' => apply_filters( 'woocommerce_api_tax_response', $tax_data, $tax, $fields, $this ) );
+			return array( 'tax' => apply_filters( 'woocommerce_api_tax_response', $tax_data, $tax, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -180,16 +180,16 @@ class WC_API_Taxes extends WC_API_Resource {
 	 */
 	public function create_tax( $data ) {
 		try {
-			if ( ! isset( $data['tax_rate'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_tax_rate_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'tax_rate' ), 400 );
+			if ( ! isset( $data['tax'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_tax_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'tax' ), 400 );
 			}
 
 			// Check permissions
 			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_tax_rate', __( 'You do not have permission to create tax rates', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_tax', __( 'You do not have permission to create tax rates', 'woocommerce' ), 401 );
 			}
 
-			$data = apply_filters( 'woocommerce_api_create_tax_rate_data', $data['tax_rate'], $this );
+			$data = apply_filters( 'woocommerce_api_create_tax_data', $data['tax'], $this );
 
 			$tax_data = array(
 				'tax_rate_country'  => '',
@@ -250,16 +250,16 @@ class WC_API_Taxes extends WC_API_Resource {
 	 */
 	public function edit_tax( $id, $data ) {
 		try {
-			if ( ! isset( $data['tax_rate'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_tax_rate_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'tax_rate' ), 400 );
+			if ( ! isset( $data['tax'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_tax_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'tax' ), 400 );
 			}
 
 			// Check permissions
 			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_tax_rate', __( 'You do not have permission to edit tax rates', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_tax', __( 'You do not have permission to edit tax rates', 'woocommerce' ), 401 );
 			}
 
-			$data = $data['tax_rate'];
+			$data = $data['tax'];
 
 			// Get current tax rate data
 			$tax = $this->get_tax( $id );
@@ -269,8 +269,8 @@ class WC_API_Taxes extends WC_API_Resource {
 				throw new WC_API_Exception( $tax->get_error_code(), $tax->get_error_message(), $error_data['status'] );
 			}
 
-			$current_data   = $tax['tax_rate'];
-			$data           = apply_filters( 'woocommerce_api_edit_tax_rate_data', $data, $this );
+			$current_data   = $tax['tax'];
+			$data           = apply_filters( 'woocommerce_api_edit_tax_data', $data, $this );
 			$tax_data       = array();
 			$default_fields = array(
 				'tax_rate_country',
@@ -343,7 +343,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		try {
 			// Check permissions
 			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_tax_rate', __( 'You do not have permission to delete tax rates', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_tax', __( 'You do not have permission to delete tax rates', 'woocommerce' ), 401 );
 			}
 
 			$id = absint( $id );
@@ -351,10 +351,10 @@ class WC_API_Taxes extends WC_API_Resource {
 			WC_Tax::_delete_tax_rate( $id );
 
 			if ( 0 === $wpdb->rows_affected ) {
-				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_tax_rate', __( 'Could not delete the tax rate', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_tax', __( 'Could not delete the tax rate', 'woocommerce' ), 401 );
 			}
 
-			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'tax_rate' ) );
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'tax' ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -455,16 +455,16 @@ class WC_API_Taxes extends WC_API_Resource {
 	 */
 	public function bulk( $data ) {
 		try {
-			if ( ! isset( $data['tax_rates'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_tax_rates_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'tax_rates' ), 400 );
+			if ( ! isset( $data['taxes'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_taxes_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'taxes' ), 400 );
 			}
 
-			$data  = $data['tax_rates'];
-			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'tax_rates' );
+			$data  = $data['taxes'];
+			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'taxes' );
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_tax_rates_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_taxes_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$taxes = array();
@@ -479,7 +479,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 				// Tax rate exists / edit tax rate
 				if ( $tax_id ) {
-					$edit = $this->edit_tax( $tax_id, array( 'tax_rate' => $_tax ) );
+					$edit = $this->edit_tax( $tax_id, array( 'tax' => $_tax ) );
 
 					if ( is_wp_error( $edit ) ) {
 						$taxes[] = array(
@@ -487,13 +487,13 @@ class WC_API_Taxes extends WC_API_Resource {
 							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
 						);
 					} else {
-						$taxes[] = $edit['tax_rate'];
+						$taxes[] = $edit['tax'];
 					}
 				}
 
 				// Tax rate don't exists / create tax rate
 				else {
-					$new = $this->create_tax( array( 'tax_rate' => $_tax ) );
+					$new = $this->create_tax( array( 'tax' => $_tax ) );
 
 					if ( is_wp_error( $new ) ) {
 						$taxes[] = array(
@@ -501,12 +501,12 @@ class WC_API_Taxes extends WC_API_Resource {
 							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
 						);
 					} else {
-						$taxes[] = $new['tax_rate'];
+						$taxes[] = $new['tax'];
 					}
 				}
 			}
 
-			return array( 'tax_rates' => apply_filters( 'woocommerce_api_tax_rates_bulk_response', $orders, $this ) );
+			return array( 'taxes' => apply_filters( 'woocommerce_api_taxes_bulk_response', $orders, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
