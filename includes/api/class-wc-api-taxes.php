@@ -129,29 +129,25 @@ class WC_API_Taxes extends WC_API_Resource {
 			}
 
 			// Get tax rate details
-			$tax = $wpdb->get_row( $wpdb->prepare( "
-				SELECT *
-				FROM {$wpdb->prefix}woocommerce_tax_rates
-				WHERE tax_rate_id = %d
-			", $id ) );
+			$tax = WC_Tax::_get_tax_rate( $id );
 
-			if ( is_wp_error( $tax ) || is_null( $tax ) ) {
+			if ( is_wp_error( $tax ) || empty( $tax ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_tax_rate_id', __( 'A tax rate with the provided ID could not be found', 'woocommerce' ), 404 );
 			}
 
 			$tax_data = array(
-				'id'       => $tax->tax_rate_id,
-				'country'  => $tax->tax_rate_country,
-				'state'    => $tax->tax_rate_state,
+				'id'       => $tax['tax_rate_id'],
+				'country'  => $tax['tax_rate_country'],
+				'state'    => $tax['tax_rate_state'],
 				'postcode' => '',
 				'city'     => '',
-				'rate'     => $tax->tax_rate,
-				'name'     => $tax->tax_rate_name,
-				'priority' => (int) $tax->tax_rate_priority,
-				'compound' => (bool) $tax->tax_rate_compound,
-				'shipping' => (bool) $tax->tax_rate_shipping,
-				'order'    => (int) $tax->tax_rate_order,
-				'class'    => $tax->tax_rate_class ? $tax->tax_rate_class : 'standard'
+				'rate'     => $tax['tax_rate'],
+				'name'     => $tax['tax_rate_name'],
+				'priority' => (int) $tax['tax_rate_priority'],
+				'compound' => (bool) $tax['tax_rate_compound'],
+				'shipping' => (bool) $tax['tax_rate_shipping'],
+				'order'    => (int) $tax['tax_rate_order'],
+				'class'    => $tax['tax_rate_class'] ? $tax['tax_rate_class'] : 'standard'
 			);
 
 			// Get locales from a tax rate

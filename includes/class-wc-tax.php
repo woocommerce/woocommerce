@@ -682,7 +682,8 @@ class WC_Tax {
 	 * @access private
 	 *
 	 * @param  array $tax_rate
-	 * @return  int tax rate id
+	 *
+	 * @return int tax rate id
 	 */
 	public static function _insert_tax_rate( $tax_rate ) {
 		global $wpdb;
@@ -695,6 +696,28 @@ class WC_Tax {
 	}
 
 	/**
+	 * Get tax rate
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.5.0
+	 * @access private
+	 *
+	 * @param  int $tax_rate_id
+	 *
+	 * @return array
+	 */
+	public static function _get_tax_rate( $tax_rate_id ) {
+		global $wpdb;
+
+		return $wpdb->get_row( $wpdb->prepare( "
+			SELECT *
+			FROM {$wpdb->prefix}woocommerce_tax_rates
+			WHERE tax_rate_id = %d
+		", $tax_rate_id ), ARRAY_A );
+	}
+
+	/**
 	 * Update a tax rate
 	 *
 	 * Internal use only.
@@ -702,8 +725,8 @@ class WC_Tax {
 	 * @since 2.3.0
 	 * @access private
 	 *
-	 * @param  int $tax_rate_id
-	 * @param  array $tax_rate
+	 * @param int $tax_rate_id
+	 * @param array $tax_rate
 	 */
 	public static function _update_tax_rate( $tax_rate_id, $tax_rate ) {
 		global $wpdb;
