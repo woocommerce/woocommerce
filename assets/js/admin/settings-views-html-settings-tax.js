@@ -190,11 +190,11 @@
 						} ),
 						$current, current_id, current_order, rates_to_reorder, reordered_rates;
 
-					event.preventDefault();
+					$current = $tbody.children( '.current' );
 
-					if ( $current = $tbody.children( '.current' ) ) {
-						current_id    = $current.last().data( 'id' );
-						current_order = parseInt( rates[ current_id ].tax_rate_order, 10 );
+					if ( $current.length ) {
+						current_id            = $current.last().data( 'id' );
+						current_order         = parseInt( rates[ current_id ].tax_rate_order, 10 );
 						newRow.tax_rate_order = 1 + current_order;
 
 						rates_to_reorder = _.filter( rates, function( rate ) {
