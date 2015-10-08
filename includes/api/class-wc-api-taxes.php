@@ -163,7 +163,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				}
 			}
 
-			return array( 'tax' => apply_filters( 'woocommerce_api_tax_response', $tax_data, $tax, $fields, $this ) );
+			return array( 'tax_rate' => apply_filters( 'woocommerce_api_tax_response', $tax_data, $tax, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -180,8 +180,8 @@ class WC_API_Taxes extends WC_API_Resource {
 	 */
 	public function create_tax( $data ) {
 		try {
-			if ( ! isset( $data['tax'] ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_missing_tax_rate_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'tax' ), 400 );
+			if ( ! isset( $data['tax_rate'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_tax_rate_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'tax_rate' ), 400 );
 			}
 
 			// Check permissions
@@ -189,7 +189,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_tax_rate', __( 'You do not have permission to create tax rates', 'woocommerce' ), 401 );
 			}
 
-			$data = $data['tax'];
+			$data = $data['tax_rate'];
 
 			$tax_data = array(
 				'tax_rate_country'  => '',
