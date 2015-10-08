@@ -379,7 +379,6 @@ class WC_API_Taxes extends WC_API_Resource {
 	 */
 	public function create_tax_class( $data ) {
 		try {
-			error_log( print_r( $data, true ) );
 			if ( ! isset( $data['tax_class'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_tax_class_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'tax_class' ), 400 );
 			}
