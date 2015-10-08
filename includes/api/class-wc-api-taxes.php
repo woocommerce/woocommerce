@@ -104,7 +104,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		// Set pagination headers
 		$this->server->add_pagination_headers( $query['headers'] );
 
-		return array( 'taxes' => $taxes );
+		return array( 'tax_rates' => $taxes );
 	}
 
 	/**
@@ -454,7 +454,62 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @return array
 	 */
 	public function bulk( $data ) {
+		try {
+			if ( ! isset( $data['tax_rates'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_tax_rates_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'tax_rates' ), 400 );
+			}
 
+			$data  = $data['tax_rates'];
+			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'tax_rates' );
+
+			// Limit bulk operation
+			if ( count( $data ) > $limit ) {
+				throw new WC_API_Exception( 'woocommerce_api_tax_rates_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+			}
+
+			$taxes = array();
+
+			foreach ( $data as $_tax ) {
+				$tax_id = 0;
+
+				// Try to get the tax rate ID
+				if ( isset( $_tax['id'] ) ) {
+					$tax_id = intval( $_tax['id'] );
+				}
+
+				// Tax rate exists / edit tax rate
+				if ( $tax_id ) {
+					$edit = $this->edit_tax( $tax_id, array( 'tax_rate' => $_tax ) );
+
+					if ( is_wp_error( $edit ) ) {
+						$taxes[] = array(
+							'id'    => $tax_id,
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+						);
+					} else {
+						$taxes[] = $edit['tax_rate'];
+					}
+				}
+
+				// Tax rate don't exists / create tax rate
+				else {
+					$new = $this->create_tax( array( 'tax_rate' => $_tax ) );
+
+					if ( is_wp_error( $new ) ) {
+						$taxes[] = array(
+							'id'    => $tax_id,
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+						);
+					} else {
+						$taxes[] = $new['tax_rate'];
+					}
+				}
+			}
+
+			return array( 'tax_rates' => apply_filters( 'woocommerce_api_tax_rates_bulk_response', $orders, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
