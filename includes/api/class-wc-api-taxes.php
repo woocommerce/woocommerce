@@ -189,7 +189,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_tax_rate', __( 'You do not have permission to create tax rates', 'woocommerce' ), 401 );
 			}
 
-			$data = $data['tax_rate'];
+			$data = apply_filters( 'woocommerce_api_create_tax_rate_data', $data['tax_rate'], $this );
 
 			$tax_data = array(
 				'tax_rate_country'  => '',
