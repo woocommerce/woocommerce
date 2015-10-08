@@ -50,15 +50,19 @@ class WC_API_Taxes extends WC_API_Resource {
 			array( array( $this, 'delete_tax' ), WC_API_SERVER::DELETABLE ),
 		);
 
-		# POST|PUT /taxes/classes
+		# GET/POST /taxes/classes
 		$routes[ $this->base . '/classes' ] = array(
 			array( array( $this, 'get_tax_classes' ), WC_API_Server::READABLE ),
+			// array( array( $this, 'create_tax_class' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
-		# GET/PUT/DELETE /taxes/classes/<slug>
+		# GET /taxes/classes/count
+		$routes[ $this->base . '/classes/count'] = array(
+			array( array( $this, 'get_tax_classes_count' ), WC_API_Server::READABLE ),
+		);
+
+		# GET /taxes/classes/<slug>
 		$routes[ $this->base . '/classes/(?P<slug>\w[\w\s\-]*)' ] = array(
-			// array( array( $this, 'get_tax_class' ), WC_API_Server::READABLE ),
-			// array( array( $this, 'edit_tax_class' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
 			array( array( $this, 'delete_tax_class' ), WC_API_SERVER::DELETABLE ),
 		);
 
@@ -359,6 +363,27 @@ class WC_API_Taxes extends WC_API_Resource {
 			}
 
 			return array( 'tax_classes' => apply_filters( 'woocommerce_api_tax_classes_response', $tax_classes, $classes, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the total number of tax classes
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array
+	 */
+	public function get_tax_classes_count() {
+		try {
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax_classes_count', __( 'You do not have permission to read the tax classes count', 'woocommerce' ), 401 );
+			}
+
+			$total = count( WC_Tax::get_tax_classes() ) + 1; // +1 for Standard Rate
+
+			return array( 'count' => $total );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
