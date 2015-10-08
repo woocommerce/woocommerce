@@ -224,7 +224,7 @@ jQuery( function ( $ ) {
 	
 	// Add js validation for product quick edit
 	
-	jQuery( ".regular_price, .sale_price" ).keyup(function() {
+	jQuery( ".quick-edit-row #woocommerce-fields.inline-edit-col .regular_price,.quick-edit-row #woocommerce-fields.inline-edit-col .sale_price" ).keyup(function() {
 			var value    = jQuery( this ).val();
 			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 			var newvalue = value.replace( regex, '' );
