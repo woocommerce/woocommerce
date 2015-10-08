@@ -53,7 +53,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		# GET/POST /taxes/classes
 		$routes[ $this->base . '/classes' ] = array(
 			array( array( $this, 'get_tax_classes' ), WC_API_Server::READABLE ),
-			// array( array( $this, 'create_tax_class' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'create_tax_class' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /taxes/classes/count
@@ -174,34 +174,6 @@ class WC_API_Taxes extends WC_API_Resource {
 	}
 
 	/**
-	 * Get the total number of taxes
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param string $class
-	 * @param array $filter
-	 *
-	 * @return array
-	 */
-	public function get_taxes_count( $class = null, $filter = array() ) {
-		try {
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_taxes_count', __( 'You do not have permission to read the taxes count', 'woocommerce' ), 401 );
-			}
-
-			if ( ! empty( $class ) ) {
-				$filter['tax_rate_class'] = $class;
-			}
-
-			$query = $this->query_tax_rates( $filter, true );
-
-			return array( 'count' => (int) $query['headers']->total );
-		} catch ( WC_API_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-	}
-
-	/**
 	 * Create a tax
 	 *
 	 * @since 2.5.0
@@ -255,6 +227,34 @@ class WC_API_Taxes extends WC_API_Resource {
 			}
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'tax_rate' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the total number of taxes
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $class
+	 * @param array $filter
+	 *
+	 * @return array
+	 */
+	public function get_taxes_count( $class = null, $filter = array() ) {
+		try {
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_taxes_count', __( 'You do not have permission to read the taxes count', 'woocommerce' ), 401 );
+			}
+
+			if ( ! empty( $class ) ) {
+				$filter['tax_rate_class'] = $class;
+			}
+
+			$query = $this->query_tax_rates( $filter, true );
+
+			return array( 'count' => (int) $query['headers']->total );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -369,21 +369,65 @@ class WC_API_Taxes extends WC_API_Resource {
 	}
 
 	/**
-	 * Get the total number of tax classes
+	 * Create a tax class
 	 *
 	 * @since 2.5.0
 	 *
+	 * @param array $data
+	 *
 	 * @return array
 	 */
-	public function get_tax_classes_count() {
+	public function create_tax_class( $data ) {
 		try {
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax_classes_count', __( 'You do not have permission to read the tax classes count', 'woocommerce' ), 401 );
+			error_log( print_r( $data, true ) );
+			if ( ! isset( $data['tax_class'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_tax_class_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'tax_class' ), 400 );
 			}
 
-			$total = count( WC_Tax::get_tax_classes() ) + 1; // +1 for Standard Rate
+			// Check permissions
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_tax_class', __( 'You do not have permission to create tax classes', 'woocommerce' ), 401 );
+			}
 
-			return array( 'count' => $total );
+			$data = $data['tax_class'];
+
+			if ( empty( $data['name'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_tax_class_name', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'name' ), 400 );
+			}
+
+			$name    = sanitize_text_field( $data['name'] );
+			$slug    = sanitize_title( $name );
+			$classes = WC_Tax::get_tax_classes();
+			$exists  = false;
+
+			// Check if class exists
+			foreach ( $classes as $key => $class ) {
+				if ( sanitize_title( $class ) === $slug ) {
+					$exists = true;
+					break;
+				}
+			}
+
+			// Return error if tax class already exists
+			if ( $exists ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_tax_class', __( 'Tax class already exists', 'woocommerce' ), 401 );
+			}
+
+			// Add the new class
+			$classes[] = $name;
+
+			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
+
+			do_action( 'woocommerce_api_create_tax_class', $slug, $data );
+
+			$this->server->send_status( 201 );
+
+			return array(
+				'tax_class' => array(
+					'slug' => $slug,
+					'name' => $name
+				)
+			);
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -410,9 +454,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			$deleted = false;
 
 			foreach ( $classes as $key => $class ) {
-				$_slug = sanitize_title( $class );
-
-				if ( $_slug === $slug ) {
+				if ( sanitize_title( $class ) === $slug ) {
 					unset( $classes[ $key ] );
 					$deleted = true;
 					break;
@@ -426,6 +468,27 @@ class WC_API_Taxes extends WC_API_Resource {
 			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'tax_class' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the total number of tax classes
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array
+	 */
+	public function get_tax_classes_count() {
+		try {
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax_classes_count', __( 'You do not have permission to read the tax classes count', 'woocommerce' ), 401 );
+			}
+
+			$total = count( WC_Tax::get_tax_classes() ) + 1; // +1 for Standard Rate
+
+			return array( 'count' => $total );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
