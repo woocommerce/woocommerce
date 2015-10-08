@@ -55,6 +55,13 @@ class WC_API_Taxes extends WC_API_Resource {
 			array( array( $this, 'get_tax_classes' ), WC_API_Server::READABLE ),
 		);
 
+		# GET/PUT/DELETE /taxes/classes/<slug>
+		$routes[ $this->base . '/classes/(?P<slug>\w[\w\s\-]*)' ] = array(
+			// array( array( $this, 'get_tax_class' ), WC_API_Server::READABLE ),
+			// array( array( $this, 'edit_tax_class' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'delete_tax_class' ), WC_API_SERVER::DELETABLE ),
+		);
+
 		# POST|PUT /taxes/bulk
 		$routes[ $this->base . '/bulk' ] = array(
 			array( array( $this, 'bulk' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
@@ -101,7 +108,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param int $id the tax ID
+	 * @param int $id The tax ID
 	 * @param string $fields fields to include in response
 	 *
 	 * @return array|WP_Error
@@ -163,45 +170,6 @@ class WC_API_Taxes extends WC_API_Resource {
 	}
 
 	/**
-	 * Get all tax classes
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param string $fields
-	 *
-	 * @return array
-	 */
-	public function get_tax_classes( $fields = null ) {
-		try {
-			// Permissions check
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax_classes', __( 'You do not have permission to read tax classes', 'woocommerce' ), 401 );
-			}
-
-			$tax_classes = array();
-
-			// Add standard class
-			$tax_classes[] = array(
-				'slug' => 'standard',
-				'name' => __( 'Standard Rate', 'woocommerce' )
-			);
-
-			$classes = WC_Tax::get_tax_classes();
-
-			foreach ( $classes as $class ) {
-				$tax_classes[] = apply_filters( 'woocommerce_api_tax_class_response', array(
-					'slug' => sanitize_title( $class ),
-					'name' => $class
-				), $class, $fields, $this );
-			}
-
-			return array( 'tax_classes' => apply_filters( 'woocommerce_api_tax_classes_response', $tax_classes, $classes, $fields, $this ) );
-		} catch ( WC_API_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-	}
-
-	/**
 	 * Get the total number of taxes
 	 *
 	 * @since 2.5.0
@@ -247,7 +215,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param int $id the tax ID
+	 * @param int $id The tax ID
 	 * @param array $data
 	 *
 	 * @return array
@@ -261,7 +229,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param int $id the tax ID
+	 * @param int $id The tax ID
 	 *
 	 * @return array
 	 */
@@ -355,5 +323,86 @@ class WC_API_Taxes extends WC_API_Resource {
 	 */
 	public function bulk( $data ) {
 
+	}
+
+	/**
+	 * Get all tax classes
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $fields
+	 *
+	 * @return array
+	 */
+	public function get_tax_classes( $fields = null ) {
+		try {
+			// Permissions check
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_tax_classes', __( 'You do not have permission to read tax classes', 'woocommerce' ), 401 );
+			}
+
+			$tax_classes = array();
+
+			// Add standard class
+			$tax_classes[] = array(
+				'slug' => 'standard',
+				'name' => __( 'Standard Rate', 'woocommerce' )
+			);
+
+			$classes = WC_Tax::get_tax_classes();
+
+			foreach ( $classes as $class ) {
+				$tax_classes[] = apply_filters( 'woocommerce_api_tax_class_response', array(
+					'slug' => sanitize_title( $class ),
+					'name' => $class
+				), $class, $fields, $this );
+			}
+
+			return array( 'tax_classes' => apply_filters( 'woocommerce_api_tax_classes_response', $tax_classes, $classes, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a tax class
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param int $slug The tax class slug
+	 *
+	 * @return array
+	 */
+	public function delete_tax_class( $slug ) {
+		try {
+			// Check permissions
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_tax_class', __( 'You do not have permission to delete tax classes', 'woocommerce' ), 401 );
+			}
+
+			$slug    = sanitize_title( $slug );
+			$classes = WC_Tax::get_tax_classes();
+			$deleted = false;
+
+			foreach ( $classes as $key => $class ) {
+				$_slug = sanitize_title( $class );
+
+				if ( $_slug === $slug ) {
+					unset( $classes[ $key ] );
+					$deleted = true;
+					break;
+				}
+			}
+
+			if ( ! $deleted ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_tax_class', __( 'Could not delete the tax class', 'woocommerce' ), 401 );
+			}
+
+			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'tax_class' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 }
