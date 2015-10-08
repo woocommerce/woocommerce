@@ -204,14 +204,14 @@ class WC_API_Taxes extends WC_API_Resource {
 			);
 
 			foreach ( $tax_data as $key => $value ) {
-				$_key = str_replace( 'tax_rate_', '', $key );
-				$_key = 'tax_rate' === $_key ? 'rate' : $_key;
+				$new_key = str_replace( 'tax_rate_', '', $key );
+				$new_key = 'tax_rate' === $new_key ? 'rate' : $new_key;
 
-				if ( isset( $data[ $_key ] ) ) {
-					if ( in_array( $_key, array( 'compound', 'shipping' ) ) ) {
-						$tax_data[ $key ] = $data[ $_key ] ? 1 : 0;
+				if ( isset( $data[ $new_key ] ) ) {
+					if ( in_array( $new_key, array( 'compound', 'shipping' ) ) ) {
+						$tax_data[ $key ] = $data[ $new_key ] ? 1 : 0;
 					} else {
-						$tax_data[ $key ] = $data[ $_key ];
+						$tax_data[ $key ] = $data[ $new_key ];
 					}
 				}
 			}
@@ -249,7 +249,83 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @return array
 	 */
 	public function edit_tax( $id, $data ) {
-		// WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate )
+		try {
+			if ( ! isset( $data['tax_rate'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_tax_rate_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'tax_rate' ), 400 );
+			}
+
+			// Check permissions
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_tax_rate', __( 'You do not have permission to edit tax rates', 'woocommerce' ), 401 );
+			}
+
+			$data = $data['tax_rate'];
+
+			// Get current tax rate data
+			$tax = $this->get_tax( $id );
+
+			if ( is_wp_error( $tax ) ) {
+				$error_data = $tax->get_error_data();
+				throw new WC_API_Exception( $tax->get_error_code(), $tax->get_error_message(), $error_data['status'] );
+			}
+
+			$current_data   = $tax['tax_rate'];
+			$data           = apply_filters( 'woocommerce_api_edit_tax_rate_data', $data, $this );
+			$tax_data       = array();
+			$default_fields = array(
+				'tax_rate_country',
+				'tax_rate_state',
+				'tax_rate',
+				'tax_rate_name',
+				'tax_rate_priority',
+				'tax_rate_compound',
+				'tax_rate_shipping',
+				'tax_rate_order',
+				'tax_rate_class'
+			);
+
+			foreach ( $data as $key => $value ) {
+				$new_key = 'rate' === $key ? 'tax_rate' : 'tax_rate_' . $key;
+
+				// Check if the key is valid
+				if ( ! in_array( $new_key, $default_fields ) ) {
+					continue;
+				}
+
+				// Test new data against current data
+				if ( $value === $current_data[ $key ] ) {
+					continue;
+				}
+
+				// Fix compund and shipping values
+				if ( in_array( $key, array( 'compound', 'shipping' ) ) ) {
+					$value = $value ? 1 : 0;
+				}
+
+				$tax_data[ $new_key ] = $value;
+			}
+
+			// Update tax rate
+			WC_Tax::_update_tax_rate( $id, $tax_data );
+
+			// Update locales
+			if ( ! empty( $data['postcode'] ) && $current_data['postcode'] != $data['postcode'] ) {
+				WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $data['postcode'] ) );
+			}
+
+			if ( ! empty( $data['city'] ) && $current_data['city'] != $data['city'] ) {
+				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
+			}
+
+			do_action( 'woocommerce_api_edit_product', $id, $data );
+
+			// Clear cache/transients
+			wc_delete_product_transients( $id );
+
+			return $this->get_tax( $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 	}
 
 	/**
