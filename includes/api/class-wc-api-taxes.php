@@ -205,6 +205,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 			foreach ( $tax_data as $key => $value ) {
 				$_key = str_replace( 'tax_rate_', '', $key );
+				$_key = 'tax_rate' === $_key ? 'rate' : $_key;
 
 				if ( isset( $data[ $_key ] ) ) {
 					if ( in_array( $_key, array( 'compound', 'shipping' ) ) ) {
