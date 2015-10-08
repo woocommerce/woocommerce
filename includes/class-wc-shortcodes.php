@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shortcodes {
 
 	/**
-	 * Init shortcodes
+	 * Init shortcodes.
 	 */
 	public static function init() {
 		$shortcodes = array(
