@@ -10,7 +10,11 @@ jQuery( function( $ ) {
 		 * Initialize strength meter actions
 		 */
 		init: function() {
-			$( document.body ).on( 'keyup', 'form.register #reg_password, form.checkout #account_password', this.strengthMeter );
+			$( document.body )
+				.on( 'keyup', 'form.register #reg_password, form.checkout #account_password', this.strengthMeter )
+				.on( 'change', 'form.checkout #createaccount', this.checkoutNeedsRegistration );
+
+			$( 'form.checkout #createaccount' ).change();
 		},
 
 		/**
@@ -82,6 +86,19 @@ jQuery( function( $ ) {
 			}
 
 			return strength;
+		},
+
+		/**
+		 * Check if user wants register on checkout.
+		 */
+		checkoutNeedsRegistration: function() {
+			var submit = $( 'form.checkout input[type="submit"]' );
+
+			if ( $( this ).is( ':checked' ) ) {
+				submit.attr( 'disabled', 'disabled' );
+			} else {
+				submit.removeAttr( 'disabled' );
+			}
 		}
 	};
 
