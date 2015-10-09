@@ -184,6 +184,11 @@ class WC_Frontend_Scripts {
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ) );
+			
+			// Password strength meter js called for checkout page.
+			if ( !is_user_logged_in() ) {
+				wp_enqueue_script( 'password-strength-meter' );		
+			}
 		}
 		if ( is_add_payment_method_page() ) {
 			self::enqueue_script( 'wc-add-payment-method', $frontend_script_path . 'add-payment-method' . $suffix . '.js', array( 'jquery', 'woocommerce' ) );
@@ -213,7 +218,13 @@ class WC_Frontend_Scripts {
 				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
 			}
 		}
-		wp_enqueue_script( 'password-strength-meter' );
+		
+		// Password strength meter js called for my account page.
+		if ( is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
+			if ( is_user_logged_in() ) {
+				wp_enqueue_script( 'password-strength-meter' );		
+			}
+		}
 	}
 
 	/**
