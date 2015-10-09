@@ -222,9 +222,9 @@ jQuery( function ( $ ) {
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 	
-	// Add js validation for product quick edit
+	// Add js validation for product quick edit panel.
 	
-	jQuery( ".quick-edit-row #woocommerce-fields.inline-edit-col .regular_price,.quick-edit-row #woocommerce-fields.inline-edit-col .sale_price" ).keyup(function() {
+	$('#woocommerce-fields .regular_price[type=text], #woocommerce-fields .sale_price[type=text] ').keyup(function() {
 			var value    = jQuery( this ).val();
 			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 			var newvalue = value.replace( regex, '' );
@@ -234,5 +234,5 @@ jQuery( function ( $ ) {
 			} else {
 				jQuery( document.body ).triggerHandler( 'wc_remove_error_tip', [ jQuery( this ), 'i18n_mon_decimal_error' ] );
 			}
-		});
+	})
 });
