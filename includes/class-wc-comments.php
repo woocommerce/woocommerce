@@ -296,13 +296,16 @@ class WC_Comments {
 	/**
 	 * Determine if a review is from a verified owner at submission.
 	 * @param int $comment_id
+	 * @return bool
 	 */
 	public static function add_comment_purchase_verification( $comment_id ) {
-		$comment = get_comment( $comment_id );
+		$comment  = get_comment( $comment_id );
+		$verified = false;
 		if ( 'product' === get_post_type( $comment->comment_post_ID ) ) {
 			$verified = wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $comment->comment_post_ID );
 			add_comment_meta( $comment_id, 'verified', (int) $verified, true );
 		}
+		return $verified;
 	}
 }
 
