@@ -1672,6 +1672,8 @@ class WC_AJAX {
 			$items['order_taxes'][ $tax_id ] = absint( $tax_item['rate_id'] );
 		}
 
+		$items = apply_filters( 'woocommerce_ajax_after_calc_line_taxes', $items, $order_id, $country, $_POST );
+
 		// Save order items
 		wc_save_order_items( $order_id, $items );
 
