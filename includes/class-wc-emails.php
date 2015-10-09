@@ -341,24 +341,9 @@ class WC_Emails {
 			$heading = apply_filters( 'woocommerce_email_custom_details_header', $heading, $sent_to_admin, $order );
 
 			if ( $plain_text ) {
-
-				echo strtoupper( $heading ) . "\n\n";
-
-				foreach ( $fields as $field ) {
-					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo $field['label'] . ': ' . $field['value'] . "\n";
-					}
-				}
-
+				wc_get_template( 'emails/plain/email-customer-details.php', array( 'order' => $order, 'heading' => $heading ) );
 			} else {
-
-				echo '<h2>' . $heading . '</h2>';
-
-				foreach ( $fields as $field ) {
-					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo '<p><strong>' . $field['label'] . ':</strong> <span class="text">' . $field['value'] . '</span></p>';
-					}
-				}
+				wc_get_template( 'emails/email-customer-details.php', array( 'order' => $order, 'heading' => $heading ) );
 			}
 
 		}
