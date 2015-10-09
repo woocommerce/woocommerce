@@ -221,4 +221,18 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+	
+	// Add js validation for product quick edit panel.
+	
+	$('#woocommerce-fields .regular_price[type=text], #woocommerce-fields .sale_price[type=text] ').keyup(function() {
+			var value    = jQuery( this ).val();
+			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+			var newvalue = value.replace( regex, '' );
+			if ( value !== newvalue ) {
+				jQuery( this ).val( newvalue );
+				jQuery( document.body ).triggerHandler( 'wc_add_error_tip', [ jQuery( this ), 'i18n_mon_decimal_error' ] );
+			} else {
+				jQuery( document.body ).triggerHandler( 'wc_remove_error_tip', [ jQuery( this ), 'i18n_mon_decimal_error' ] );
+			}
+	})
 });
