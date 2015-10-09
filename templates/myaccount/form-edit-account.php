@@ -51,7 +51,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p class="form-row form-row-wide">
 			<label for="password_1"><?php _e( 'New Password (leave blank to leave unchanged)', 'woocommerce' ); ?></label>
 			<input type="password" class="input-text" name="password_1" id="password_1" />
-			
 		</p>
 		<p class="form-row form-row-wide">
 			<label for="password_2"><?php _e( 'Confirm New Password', 'woocommerce' ); ?></label>
