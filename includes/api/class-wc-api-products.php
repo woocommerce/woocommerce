@@ -1040,6 +1040,8 @@ class WC_API_Products extends WC_API_Resource {
 				'value'   => $args['sku'],
 				'compare' => '='
 			);
+
+			$query_args['post_type'] = array( 'product', 'product_variation' );
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );
