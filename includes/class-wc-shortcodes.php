@@ -786,14 +786,15 @@ class WC_Shortcodes {
 	}
 
 	/**
+	 * List related products.
 	 * @param array $atts
 	 * @return string
 	 */
 	public static function related_products( $atts ) {
 		$atts = shortcode_atts( array(
 			'per_page' => '4',
-			'columns'        => '4',
-			'orderby'        => 'rand'
+			'columns'  => '4',
+			'orderby'  => 'rand'
 		), $atts );
 
 		ob_start();
