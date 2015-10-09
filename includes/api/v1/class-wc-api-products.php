@@ -216,7 +216,7 @@ class WC_API_Products extends WC_API_Resource {
 				'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
 				'reviewer_name'  => $comment->comment_author,
 				'reviewer_email' => $comment->comment_author_email,
-				'verified'       => (bool) get_comment_meta( $comment->comment_ID, 'verified', true ),
+				'verified'       => wc_review_is_from_verified_owner( $comment->comment_ID ),
 			);
 		}
 
