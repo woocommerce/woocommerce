@@ -170,6 +170,7 @@ class WC_Frontend_Scripts {
 		self::register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js' );
 		self::register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js' );
 		self::register_script( 'wc-address-i18n', $frontend_script_path . 'address-i18n' . $suffix . '.js' );
+		self::register_script( 'wc-password-strength-meter', $frontend_script_path . 'password-strength-meter' . $suffix . '.js', array( 'jquery', 'password-strength-meter' ) );
 
 		// Register frontend scripts conditionally
 		if ( $ajax_cart_en ) {
@@ -183,8 +184,8 @@ class WC_Frontend_Scripts {
 			self::enqueue_style( 'select2', $assets_path . 'css/select2.css' );
 
 			// Password strength meter js called for checkout page.
-			if ( ! is_user_logged_in() ) {
-				wp_enqueue_script( 'password-strength-meter' );
+			if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) {
+				self::enqueue_script( 'wc-password-strength-meter' );
 			}
 		}
 		if ( is_checkout() ) {
