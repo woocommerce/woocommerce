@@ -147,7 +147,7 @@ p.demo_store {
 		margin-top: 10px;
 	}
 
-	.woocommerce-breadcrumb{
+	.woocommerce-breadcrumb {
 		@include clearfix();
 		margin: 0 0 1em;
 		padding: 0;
@@ -1496,6 +1496,39 @@ p.demo_store {
 
 		.ui-slider-horizontal .ui-slider-range-max {
 			right: -1px;
+		}
+	}
+
+	/**
+	 *  Password strength meter
+	 */
+	#pass-strength-result {
+		text-align: center;
+		font-weight: 600;
+		padding: 3px 0px 3px 0px;
+
+		&.strong {
+			background-color: #c1e1b9;
+			border-color: #83c373;
+			opacity: 1;
+		}
+
+		&.short {
+			background-color: #f1adad;
+			border-color: #e35b5b;
+			opacity: 1;
+		}
+
+		&.bad {
+			background-color: #fbc5a9;
+			border-color: #f78b53;
+			opacity: 1;
+		}
+
+		&.good {
+			background-color: #ffe399;
+			border-color: #ffc733;
+			opacity: 1;
 		}
 	}
 }

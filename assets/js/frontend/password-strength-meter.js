@@ -47,7 +47,7 @@ jQuery( function( $ ) {
 			var meter = wrapper.find( '#pass-strength-result' );
 
 			if ( 0 === meter.length ) {
-				field.after( '<div id="pass-strength-result" aria-live="polite">CARALHo!</div>' );
+				field.after( '<div id="pass-strength-result" aria-live="polite"></div>' );
 			} else if ( '' === field.val() ) {
 				meter.remove();
 			}
