@@ -178,17 +178,17 @@ class WC_Frontend_Scripts {
 		if ( is_cart() ) {
 			self::enqueue_script( 'wc-cart', $frontend_script_path . 'cart' . $suffix . '.js', array( 'jquery', 'wc-country-select', 'wc-address-i18n' ) );
 		}
-		if ( is_checkout() || is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
+		if ( is_checkout() || is_account_page() ) {
 			self::enqueue_script( 'select2' );
 			self::enqueue_style( 'select2', $assets_path . 'css/select2.css' );
+
+			// Password strength meter js called for checkout page.
+			if ( ! is_user_logged_in() ) {
+				wp_enqueue_script( 'password-strength-meter' );
+			}
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ) );
-			
-			// Password strength meter js called for checkout page.
-			if ( !is_user_logged_in() ) {
-				wp_enqueue_script( 'password-strength-meter' );		
-			}
 		}
 		if ( is_add_payment_method_page() ) {
 			self::enqueue_script( 'wc-add-payment-method', $frontend_script_path . 'add-payment-method' . $suffix . '.js', array( 'jquery', 'woocommerce' ) );
@@ -216,13 +216,6 @@ class WC_Frontend_Scripts {
 		if ( $enqueue_styles = self::get_styles() ) {
 			foreach ( $enqueue_styles as $handle => $args ) {
 				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
-			}
-		}
-		
-		// Password strength meter js called for my account page.
-		if ( is_page( get_option( 'woocommerce_myaccount_page_id' ) ) ) {
-			if ( is_user_logged_in() ) {
-				wp_enqueue_script( 'password-strength-meter' );		
 			}
 		}
 	}
