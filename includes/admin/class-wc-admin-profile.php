@@ -153,6 +153,7 @@ class WC_Admin_Profile {
 
 		foreach ( $show_fields as $fieldset ) :
 			?>
+			<div class="woocommerce-user-fset">
 			<h3><?php echo $fieldset['title']; ?></h3>
 			<table class="form-table">
 				<?php
@@ -180,6 +181,7 @@ class WC_Admin_Profile {
 				endforeach;
 				?>
 			</table>
+			</div>
 			<?php
 		endforeach;
 	}
