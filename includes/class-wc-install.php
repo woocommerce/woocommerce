@@ -481,9 +481,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 
 		// Customer role
 		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-			'read' 						=> true,
-			'edit_posts' 				=> false,
-			'delete_posts' 				=> false
+			'read' 					=> true
 		) );
 
 		// Shop manager role
