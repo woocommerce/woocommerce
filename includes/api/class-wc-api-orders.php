@@ -874,7 +874,8 @@ class WC_API_Orders extends WC_API_Resource {
 	 */
 	protected function set_line_item( $order, $item, $action ) {
 
-		$creating = ( 'create' === $action );
+		$creating  = ( 'create' === $action );
+		$item_args = array();
 
 		// product is always required
 		if ( ! isset( $item['product_id'] ) && ! isset( $item['sku'] ) ) {
@@ -926,8 +927,6 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( $creating && ! isset( $item['quantity'] ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_quantity', __( 'Product quantity is required', 'woocommerce' ), 400 );
 		}
-
-		$item_args = array();
 
 		// quantity
 		if ( isset( $item['quantity'] ) ) {
