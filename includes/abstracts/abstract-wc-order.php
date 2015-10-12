@@ -665,8 +665,8 @@ abstract class WC_Abstract_Order {
 					'tax_class' => $tax_class
 				) );
 
-				$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal, $tax_rates, false );
-				$line_taxes          = WC_Tax::calc_tax( $line_total, $tax_rates, false );
+				$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal, $tax_rates, $this->prices_include_tax );
+				$line_taxes          = WC_Tax::calc_tax( $line_total, $tax_rates, $this->prices_include_tax );
 				$line_subtotal_tax   = max( 0, array_sum( $line_subtotal_taxes ) );
 				$line_tax            = max( 0, array_sum( $line_taxes ) );
 				$tax_total           += $line_tax;
