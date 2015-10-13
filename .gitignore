@@ -5,12 +5,10 @@ project.properties
 .buildpath
 .project
 .settings*
-sftp-config.json
 .idea
 
 # Grunt
 /node_modules/
-/deploy/
 
 # Sass
 .sass-cache/
