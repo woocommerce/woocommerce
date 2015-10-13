@@ -165,7 +165,13 @@ function wc_cart_totals_shipping_html() {
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
-		wc_get_template( 'cart/cart-shipping.php', array( 'package' => $package, 'available_methods' => $package['rates'], 'show_package_details' => ( sizeof( $packages ) > 1 ), 'index' => $i, 'chosen_method' => $chosen_method ) );
+		wc_get_template( 'cart/cart-shipping.php', array(
+			'package'              => $package,
+			'available_methods'    => $package['rates'],
+			'show_package_details' => sizeof( $packages ) > 1,
+			'index'                => $i,
+			'chosen_method'        => $chosen_method
+		) );
 	}
 }
 
