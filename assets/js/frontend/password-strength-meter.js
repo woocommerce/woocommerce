@@ -44,10 +44,10 @@ jQuery( function( $ ) {
 		 * @param {Object} field
 		 */
 		includeMeter: function( wrapper, field ) {
-			var meter = wrapper.find( '#pass-strength-result' );
+			var meter = wrapper.find( '.woocommerce-password-strength' );
 
 			if ( 0 === meter.length ) {
-				field.after( '<div id="pass-strength-result" aria-live="polite"></div>' );
+				field.after( '<div class="woocommerce-password-strength" aria-live="polite"></div>' );
 			} else if ( '' === field.val() ) {
 				meter.remove();
 			}
@@ -61,7 +61,7 @@ jQuery( function( $ ) {
 		 * @return {Int}
 		 */
 		checkPasswordStrength: function( field ) {
-			var meter = $( '#pass-strength-result' );
+			var meter = $( '.woocommerce-password-strength' );
 			var strength = wp.passwordStrength.meter( field.val(), wp.passwordStrength.userInputBlacklist() );
 
 			// Reset classes
