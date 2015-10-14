@@ -149,29 +149,9 @@ class WC_Admin_Profile {
 			return;
 		}
 
-		$show_fields = $this->get_customer_meta_fields();
-		?>
-		<style>
-		@media (min-width: 75em) {
-			.woocommerce-user-fset {
-				float: left;
-				width: 50%;
-				box-sizing: border-box;
-			}
-			.woocommerce-user-fset-container:after {
-				content: "";
-				zoom: 1;
-				clear: both;
-				display: block;
-				width: 100%;
-				display: table;
-			}
-		}
-		</style>
+		$show_fields = $this->get_customer_meta_fields();?>
 		<div class="woocommerce-user-fset-container">
-		<?php
-		foreach ( $show_fields as $fieldset ) :
-			?>
+		<?php foreach ( $show_fields as $fieldset ) : ?>
 			<div class="woocommerce-user-fset">
 			<h3><?php echo $fieldset['title']; ?></h3>
 			<table class="form-table">
