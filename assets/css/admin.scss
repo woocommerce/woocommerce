@@ -4399,3 +4399,25 @@ table.bar_chart {
 	line-height: 1.85em;
 	font-size: 14px;
 }
+
+/**
+ * Admin Profile CSS
+ */
+@media (min-width: 75em) {
+	.woocommerce-user-fset-container {
+		&:after {
+			content: "";
+			zoom: 1;
+			clear: both;
+			display: block;
+			width: 100%;
+			display: table;
+		}
+		
+		& .woocommerce-user-fset {
+			float: left;
+			width: 50em;
+			box-sizing: border-box;
+		}
+	}
+}
