@@ -240,7 +240,9 @@ class WC_Shipping {
 			$prioritized_methods = array();
 
 			foreach ( $available_methods as $method_id => $method ) {
-				$priority                         = isset( $selection_priority[ $method_id ] ) ? absint( $selection_priority[ $method_id ] ) : 1;
+				// Some IDs contain : if they have multiple rates
+				$method_id = current( explode( ':', $method_id ) );
+				$priority  = isset( $selection_priority[ $method_id ] ) ? absint( $selection_priority[ $method_id ] ): 1;
 				if ( empty( $prioritized_methods[ $priority ] ) ) {
 					$prioritized_methods[ $priority ] = array();
 				}

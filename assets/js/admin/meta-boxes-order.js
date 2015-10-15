@@ -523,20 +523,20 @@ jQuery( function ( $ ) {
 			if ( window.confirm( woocommerce_admin_meta_boxes.calc_line_taxes ) ) {
 				wc_meta_boxes_order_items.block();
 
-				var shipping_country = $( '#_shipping_country' ).val();
-				var billing_country  = $( '#_billing_country' ).val();
-				var country          = woocommerce_admin_meta_boxes.base_country;
+				var country          = '';
 				var state            = '';
 				var postcode         = '';
 				var city             = '';
 
-				if ( shipping_country ) {
-					country  = shipping_country;
+				if ( 'shipping' === woocommerce_admin_meta_boxes.tax_based_on ) {
+					country  = $( '#_shipping_country' ).val();
 					state    = $( '#_shipping_state' ).val();
 					postcode = $( '#_shipping_postcode' ).val();
 					city     = $( '#_shipping_city' ).val();
-				} else if ( billing_country ) {
-					country  = billing_country;
+				}
+
+				if ( 'billing' === woocommerce_admin_meta_boxes.tax_based_on || ! country ) {
+					country  = $( '#_billing_country' ).val();
 					state    = $( '#_billing_state' ).val();
 					postcode = $( '#_billing_postcode' ).val();
 					city     = $( '#_billing_city' ).val();

@@ -9,7 +9,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Assets' ) ) :
@@ -29,7 +29,7 @@ class WC_Admin_Assets {
 	}
 
 	/**
-	 * Enqueue styles
+	 * Enqueue styles.
 	 */
 	public function admin_styles() {
 		global $wp_scripts;
@@ -47,11 +47,8 @@ class WC_Admin_Assets {
 		// Sitewide menu CSS
 		wp_enqueue_style( 'woocommerce_admin_menu_styles' );
 
+		// Admin styles for WC pages only
 		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
-
-			$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
-
-			// Admin styles for WC pages only
 			wp_enqueue_style( 'woocommerce_admin_styles' );
 			wp_enqueue_style( 'jquery-ui-style' );
 			wp_enqueue_style( 'wp-color-picker' );
@@ -77,7 +74,7 @@ class WC_Admin_Assets {
 
 
 	/**
-	 * Enqueue scripts
+	 * Enqueue scripts.
 	 */
 	public function admin_scripts() {
 		global $wp_query, $post, $current_user;
@@ -104,6 +101,7 @@ class WC_Admin_Assets {
 		wp_register_script( 'flot-time', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot.time' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 		wp_register_script( 'flot-pie', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot.pie' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 		wp_register_script( 'flot-stack', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
+		wp_register_script( 'wc-settings-tax', WC()->plugin_url() . '/assets/js/admin/settings-views-html-settings-tax' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), WC_VERSION );
 
 		// Chosen is @deprecated (2.3) in favour of select2, but is registered for backwards compat
 		wp_register_script( 'ajax-chosen', WC()->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery' . $suffix . '.js', array( 'jquery', 'chosen' ), WC_VERSION );
@@ -137,9 +135,8 @@ class WC_Admin_Assets {
 
 		// WooCommerce admin pages
 		if ( in_array( $screen->id, wc_get_screen_ids() ) ) {
-
-			wp_enqueue_script( 'woocommerce_admin' );
 			wp_enqueue_script( 'iris' );
+			wp_enqueue_script( 'woocommerce_admin' );
 			wp_enqueue_script( 'wc-enhanced-select' );
 			wp_enqueue_script( 'jquery-ui-sortable' );
 			wp_enqueue_script( 'jquery-ui-autocomplete' );
@@ -254,6 +251,7 @@ class WC_Admin_Assets {
 				'load_shipping'                 => __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
 				'featured_label'                => __( 'Featured', 'woocommerce' ),
 				'prices_include_tax'            => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
+				'tax_based_on'                  => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
 				'round_at_subtotal'             => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
 				'no_customer_selected'          => __( 'No customer selected', 'woocommerce' ),
 				'plugin_url'                    => WC()->plugin_url(),

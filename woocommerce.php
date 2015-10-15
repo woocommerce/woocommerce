@@ -33,7 +33,7 @@ final class WooCommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.4.6';
+	public $version = '2.5.0';
 
 	/**
 	 * @var WooCommerce The single instance of the class
@@ -164,6 +164,7 @@ final class WooCommerce {
 		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
 		$this->define( 'WC_DELIMITER', '|' );
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
+		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 	}
 
 	/**
@@ -242,7 +243,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-countries.php' );                      // Defines countries and states
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
-		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( 'includes/class-wc-cli.php' );
@@ -312,25 +312,15 @@ final class WooCommerce {
 	 *
 	 * Note: the first-loaded translation file overrides any following ones if the same translation is present.
 	 *
-	 * Admin Locales are found in:
-	 * 		- WP_LANG_DIR/woocommerce/woocommerce-admin-LOCALE.mo
-	 * 		- WP_LANG_DIR/plugins/woocommerce-admin-LOCALE.mo
-	 *
-	 * Frontend/global Locales found in:
-	 * 		- WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
-	 * 	 	- woocommerce/i18n/languages/woocommerce-LOCALE.mo (which if not found falls back to:)
-	 * 	 	- WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
+	 * Locales found in:
+	 *      - WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
+	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 
-		if ( $this->is_request( 'admin' ) ) {
-			load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-admin-' . $locale . '.mo' );
-			load_textdomain( 'woocommerce', WP_LANG_DIR . '/plugins/woocommerce-admin-' . $locale . '.mo' );
-		}
-
 		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
-		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
+		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . '/i18n/languages' );
 	}
 
 	/**

@@ -2,7 +2,7 @@
 /**
  * Checkout Form
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-checkout.php
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
  * will need to copy the new files to your theme to maintain compatibility. We try to do this

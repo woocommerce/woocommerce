@@ -203,7 +203,17 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Found a bug?', 'woocommerce' ) . '</h2>' .
 				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. To help us solve your issue, please be as descriptive as possible and include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
-				'<p><a href="' . 'https://github.com/woothemes/woocommerce/issues?state=open' . '" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url('admin.php?page=wc-status') . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . 'https://github.com/woothemes/woocommerce/issues?state=open' . '" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>'
+
+		) );
+
+		$screen->add_help_tab( array(
+			'id'        => 'woocommerce_onboard_tab',
+			'title'     => __( 'Onboarding Wizard', 'woocommerce' ),
+			'content'   =>
+				'<h2>' . __( 'Onboarding Wizard', 'woocommerce' ) . '</h2>' .
+				'<p>' . __( 'If you need to access the onboarding wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
+				'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Onboarding Wizard', 'woocommerce' ) . '</a></p>'
 
 		) );
 

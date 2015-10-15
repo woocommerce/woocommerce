@@ -5,38 +5,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Handle data for the current customers session.
- * Implements the WC_Session abstract class
+ * Implements the WC_Session abstract class.
  *
- * Long term plan will be, if https://github.com/ericmann/wp-session-manager/ gains traction
- * in WP core, this will be switched out to use it and maintain backwards compatibility :)
+ * From 2.5 this uses a custom table for session storage. Based on https://github.com/kloon/woocommerce-large-sessions.
  *
- * Partly based on WP SESSION by Eric Mann.
- *
- * @class 		WC_Session_Handler
- * @version		2.0.0
- * @package		WooCommerce/Classes
- * @category	Class
- * @author 		WooThemes
+ * @class    WC_Session_Handler
+ * @version  2.5.0
+ * @package  WooCommerce/Classes
+ * @category Class
+ * @author   WooThemes
  */
 class WC_Session_Handler extends WC_Session {
 
-	/** cookie name */
+	/** @var string cookie name */
 	private $_cookie;
 
-	/** session due to expire timestamp */
+	/** @var string session due to expire timestamp */
 	private $_session_expiring;
 
-	/** session expiration timestamp */
+	/** @var string session expiration timestamp */
 	private $_session_expiration;
 
-	/** Bool based on whether a cookie exists **/
+	/** $var bool Bool based on whether a cookie exists **/
 	private $_has_cookie = false;
 
+	/** @var string Custom session table name */
+	private $_table;
+
 	/**
-	 * Constructor for the session class.
+	 * Constructor for the session class
 	 */
 	public function __construct() {
+		global $wpdb;
+
 		$this->_cookie = 'wp_woocommerce_session_' . COOKIEHASH;
+		$this->_table  = $wpdb->prefix . 'woocommerce_sessions';
 
 		if ( $cookie = $this->get_session_cookie() ) {
 			$this->_customer_id        = $cookie[0];
@@ -47,13 +50,7 @@ class WC_Session_Handler extends WC_Session {
 			// Update session if its close to expiring
 			if ( time() > $this->_session_expiring ) {
 				$this->set_session_expiration();
-				$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
-				// Check if option exists first to avoid auloading cleaned up sessions
-				if ( false === get_option( $session_expiry_option ) ) {
-					add_option( $session_expiry_option, $this->_session_expiration, '', 'no' );
-				} else {
-					update_option( $session_expiry_option, $this->_session_expiration );
-				}
+				$this->update_session_timestamp( $this->_customer_id, $this->_session_expiration );
 			}
 
 		} else {
@@ -63,57 +60,58 @@ class WC_Session_Handler extends WC_Session {
 
 		$this->_data = $this->get_session_data();
 
-    	// Actions
-    	add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
-    	add_action( 'woocommerce_cleanup_sessions', array( $this, 'cleanup_sessions' ), 10 );
-    	add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-    	add_action( 'wp_logout', array( $this, 'destroy_session' ) );
-    	if ( ! is_user_logged_in() ) {
-    		add_action( 'woocommerce_thankyou', array( $this, 'destroy_session' ) );
-    		add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
-    	}
-    }
+		// Actions
+		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
+		add_action( 'woocommerce_cleanup_sessions', array( $this, 'cleanup_sessions' ), 10 );
+		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
+		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
+		if ( ! is_user_logged_in() ) {
+			add_action( 'woocommerce_thankyou', array( $this, 'destroy_session' ) );
+			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
+		}
+	}
 
-    /**
-     * Sets the session cookie on-demand (usually after adding an item to the cart).
-     *
-     * Since the cookie name (as of 2.1) is prepended with wp, cache systems like batcache will not cache pages when set.
-     *
-     * Warning: Cookies will only be set if this is called before the headers are sent.
-     */
-    public function set_customer_session_cookie( $set ) {
-    	if ( $set ) {
-	    	// Set/renew our cookie
+	/**
+	 * Sets the session cookie on-demand (usually after adding an item to the cart)
+	 *
+	 * Since the cookie name (as of 2.1) is prepended with wp, cache systems like batcache will not cache pages when set
+	 *
+	 * Warning: Cookies will only be set if this is called before the headers are sent
+	 */
+	public function set_customer_session_cookie( $set ) {
+		if ( $set ) {
+			// Set/renew our cookie
 			$to_hash           = $this->_customer_id . $this->_session_expiration;
 			$cookie_hash       = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
 			$cookie_value      = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
 			$this->_has_cookie = true;
 
-	    	// Set the cookie
-	    	wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
-	    }
-    }
-
-    /**
-     * Return true if the current user has an active session, i.e. a cookie to retrieve values
-     * @return boolean
-     */
-    public function has_session() {
-    	return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in();
-    }
-
-    /**
-     * set_session_expiration function.
-     */
-    public function set_session_expiration() {
-	    $this->_session_expiring    = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours
-		$this->_session_expiration  = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours
-    }
+			// Set the cookie
+			wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
+		}
+	}
 
 	/**
-	 * Generate a unique customer ID for guests, or return user ID if logged in.
+	 * Return true if the current user has an active session, i.e. a cookie to retrieve values
 	 *
-	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID.
+	 * @return bool
+	 */
+	public function has_session() {
+		return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in();
+	}
+
+	/**
+	 * Set session expiration.
+	 */
+	public function set_session_expiration() {
+		$this->_session_expiring   = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours
+		$this->_session_expiration = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours
+	}
+
+	/**
+	 * Generate a unique customer ID for guests, or return user ID if logged in
+	 *
+	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID
 	 *
 	 * @return int|string
 	 */
@@ -128,7 +126,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * get_session_cookie function.
+	 * Get session cookie
 	 *
 	 * @return bool|array
 	 */
@@ -151,48 +149,87 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * get_session_data function.
+	 * Get session data
 	 *
 	 * @return array
 	 */
 	public function get_session_data() {
-		return $this->has_session() ? (array) get_option( '_wc_session_' . $this->_customer_id, array() ) : array();
+		return $this->has_session() ? (array) $this->get_session( $this->_customer_id, array() ) : array();
 	}
 
-    /**
-     * save_data function.
-     */
-    public function save_data() {
-    	// Dirty if something changed - prevents saving nothing new
-    	if ( $this->_dirty && $this->has_session() ) {
+	/**
+	 * Gets a cache prefix. This is used in session names so the entire cache can be invalidated with 1 function call
+	 *
+	 * @return string
+	 */
+	private function get_cache_prefix() {
+		$prefix_num = wp_cache_get( 'wc_session_prefix', WC_SESSION_CACHE_GROUP );
 
-			$session_option        = '_wc_session_' . $this->_customer_id;
-			$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
+		if ( $prefix_num === false ) {
+			wp_cache_set( 'wc_session_prefix', 1, WC_SESSION_CACHE_GROUP );
+		}
 
-	    	if ( false === get_option( $session_option ) ) {
-	    		add_option( $session_option, $this->_data, '', 'no' );
-		    	add_option( $session_expiry_option, $this->_session_expiration, '', 'no' );
-	    	} else {
-		    	update_option( $session_option, $this->_data );
-	    	}
-	    	// Mark session clean after saving
-	    	$this->_dirty = false;
-	    }
-    }
+		return 'wc_session_' . $prefix_num . '_';
+	}
 
-    /**
-     * Destroy all session data
-     */
-    public function destroy_session() {
+	/**
+	 * Save data
+	 */
+	public function save_data() {
+		// Dirty if something changed - prevents saving nothing new
+		if ( $this->_dirty && $this->has_session() ) {
+			global $wpdb;
+
+			$session_id = $wpdb->get_var( $wpdb->prepare( "SELECT session_id FROM $this->_table WHERE session_key = %s;", $this->_customer_id ) );
+
+			if ( $session_id ) {
+				$wpdb->update(
+					$this->_table,
+					array(
+						'session_key'    => $this->_customer_id,
+						'session_value'  => maybe_serialize( $this->_data ),
+						'session_expiry' => $this->_session_expiration
+					),
+					array( 'session_id' => $session_id ),
+					array(
+						'%s',
+						'%s',
+						'%d'
+					),
+					array( '%d' )
+				);
+			} else {
+				$wpdb->insert(
+					$this->_table,
+					array(
+						'session_key'    => $this->_customer_id,
+						'session_value'  => maybe_serialize( $this->_data ),
+						'session_expiry' => $this->_session_expiration
+					),
+					array(
+						'%s',
+						'%s',
+						'%d'
+					)
+				);
+			}
+
+			// Set cache
+			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+
+			// Mark session clean after saving
+			$this->_dirty = false;
+		}
+	}
+
+	/**
+	 * Destroy all session data
+	 */
+	public function destroy_session() {
 		// Clear cookie
 		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'wc_session_use_secure_cookie', false ) );
 
-		// Delete session
-		$session_option        = '_wc_session_' . $this->_customer_id;
-		$session_expiry_option = '_wc_session_expires_' . $this->_customer_id;
-
-		delete_option( $session_option );
-		delete_option( $session_expiry_option );
+		$this->delete_session( $this->_customer_id );
 
 		// Clear cart
 		wc_empty_cart();
@@ -204,45 +241,98 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * When a user is logged out, ensure they have a unique nonce by using the customer/session ID.
+	 * When a user is logged out, ensure they have a unique nonce by using the customer/session ID
+	 *
 	 * @return string
 	 */
 	public function nonce_user_logged_out( $uid ) {
 		return $this->has_session() && $this->_customer_id ? $this->_customer_id : $uid;
 	}
 
-    /**
-	 * cleanup_sessions function.
+	/**
+	 * Cleanup sessions
 	 */
 	public function cleanup_sessions() {
 		global $wpdb;
 
 		if ( ! defined( 'WP_SETUP_CONFIG' ) && ! defined( 'WP_INSTALLING' ) ) {
-			$now                = time();
-			$expired_sessions   = array();
-			$wc_session_expires = $wpdb->get_col( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE '\_wc\_session\_expires\_%' AND option_value < '$now'" );
 
-			foreach ( $wc_session_expires as $option_name ) {
-				$session_id         = substr( $option_name, 20 );
-				$expired_sessions[] = $option_name;  // Expires key
-				$expired_sessions[] = "_wc_session_$session_id"; // Session key
-			}
+			// Delete expired sessions
+			$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) );
 
-			if ( ! empty( $expired_sessions ) ) {
-				$expired_sessions_chunked = array_chunk( $expired_sessions, 100 );
-				foreach ( $expired_sessions_chunked as $chunk ) {
-					if ( wp_using_ext_object_cache() ) {
-						// delete from object cache first, to avoid cached but deleted options
-						foreach ( $chunk as $option ) {
-							wp_cache_delete( $option, 'options' );
-						}
-					}
-
-					// delete from options table
-					$option_names = implode( "','", $chunk );
-					$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
-				}
-			}
+			// Invalidate cache
+			wp_cache_incr( 'wc_session_prefix', 1, WC_SESSION_CACHE_GROUP );
 		}
+	}
+
+	/**
+	 * Returns the session
+	 *
+	 * @param string $customer_id
+	 * @param mixed $default
+	 * @return string|array
+	 */
+	public function get_session( $customer_id, $default = false ) {
+		global $wpdb;
+
+		if ( defined( 'WP_SETUP_CONFIG' ) ) {
+			return false;
+		}
+
+		// Try get it from the cache, it will return false if not present or if object cache not in use
+		$value = wp_cache_get( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
+
+		if ( false === $value ) {
+			$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM $this->_table WHERE session_key = %s", $customer_id ) );
+
+			if ( is_null( $value ) ) {
+				$value = $default;
+			}
+
+			wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+		}
+
+		return maybe_unserialize( $value );
+	}
+
+	/**
+	 * Delete the session from the cache and database
+	 *
+	 * @param int $customer_id
+	 */
+	public function delete_session( $customer_id ) {
+		global $wpdb;
+
+		wp_cache_delete( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
+
+		$wpdb->delete(
+			$this->_table,
+			array(
+				'session_key' => $customer_id
+			)
+		);
+	}
+
+	/**
+	 * Update the session expiry timestamp
+	 *
+	 * @param string $customer_id
+	 * @param int $timestamp
+	 */
+	public function update_session_timestamp( $customer_id, $timestamp ) {
+		global $wpdb;
+
+		$wpdb->update(
+			$this->_table,
+			array(
+				'session_expiry' => $timestamp
+			),
+			array(
+				'session_key' => $customer_id
+			),
+			array(
+				'%d'
+			)
+		);
 	}
 }

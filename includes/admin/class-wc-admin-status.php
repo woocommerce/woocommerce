@@ -96,10 +96,7 @@ class WC_Admin_Status {
 				break;
 				case 'clear_sessions' :
 
-					$wpdb->query( "
-						DELETE FROM {$wpdb->options}
-						WHERE option_name LIKE '_wc_session_%' OR option_name LIKE '_wc_session_expires_%'
-					" );
+					$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_sessions" );
 
 					wp_cache_flush();
 
@@ -139,11 +136,6 @@ class WC_Admin_Status {
 					}
 				break;
 			}
-		}
-
-		// Manual translation update messages
-		if ( isset( $_GET['translation_updated'] ) ) {
-			WC_Language_Pack_Upgrader::language_update_messages();
 		}
 
 		// Display message if settings settings have been saved
@@ -201,14 +193,6 @@ class WC_Admin_Status {
 				'desc'    => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
 			)
 		);
-
-		if ( get_locale() !== 'en_US' ) {
-			$tools['translation_upgrade'] = array(
-				'name'    => __( 'Translation Upgrade', 'woocommerce' ),
-				'button'  => __( 'Force Translation Upgrade', 'woocommerce' ),
-				'desc'    => __( '<strong class="red">Note:</strong> This option will force the translation upgrade for your language if a translation is available.', 'woocommerce' ),
-			);
-		}
 
 		return apply_filters( 'woocommerce_debug_tools', $tools );
 	}

@@ -147,7 +147,7 @@ jQuery( function ( $ ) {
 				$this_row.addClass( 'selected_now' ).addClass( 'current' );
 
 				if ( $( 'tr.last_selected', $this_table ).size() > 0 ) {
-					if ( $this_row.index() > $( 'tr.last_selected, $this_table' ).index() ) {
+					if ( $this_row.index() > $( 'tr.last_selected', $this_table ).index() ) {
 						$( 'tr', $this_table ).slice( $( 'tr.last_selected', $this_table ).index(), $this_row.index() ).addClass( 'current' );
 					} else {
 						$( 'tr', $this_table ).slice( $this_row.index(), $( 'tr.last_selected', $this_table ).index() + 1 ).addClass( 'current' );
@@ -221,4 +221,18 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+
+	// Add js validation for product quick edit panel.
+
+	$( '#woocommerce-fields .regular_price[type=text], #woocommerce-fields .sale_price[type=text]' ).keyup( function() {
+			var value    = $( this ).val();
+			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+			var newvalue = value.replace( regex, '' );
+			if ( value !== newvalue ) {
+				$( this ).val( newvalue );
+				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
+			} else {
+				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
+			}
+	});
 });

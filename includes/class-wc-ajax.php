@@ -130,7 +130,8 @@ class WC_AJAX {
 			'get_customer_location'                            => true,
 			'load_variations'                                  => false,
 			'save_variations'                                  => false,
-			'bulk_edit_variations'                             => false
+			'bulk_edit_variations'                             => false,
+			'tax_rates_save_changes'                           => false,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -1414,7 +1415,8 @@ class WC_AJAX {
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
-					$note         = sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $order_item['product_id'], $new_stock + $stock_change, $new_stock );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $order_item['product_id'];
+					$note         = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
 					$return[]     = $note;
 
 					$order->add_order_note( $note );
@@ -1463,10 +1465,11 @@ class WC_AJAX {
 				$_product = $order->get_product_from_item( $order_item );
 
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
-					$old_stock    = $_product->stock;
+					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_quantity = $_product->increase_stock( $stock_change );
-					$note         = sprintf( __( 'Item #%s stock increased from %s to %s.', 'woocommerce' ), $order_item['product_id'], $old_stock, $new_quantity );
+					$item_name    = $_product->get_sku() ? $_product->get_sku(): $order_item['product_id'];
+					$note         = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
 					$return[]     = $note;
 
 					$order->add_order_note( $note );
@@ -1536,6 +1539,7 @@ class WC_AJAX {
 		}
 
 		$tax            = new WC_Tax();
+		$tax_based_on   = get_option( 'woocommerce_tax_based_on' );
 		$order_id       = absint( $_POST['order_id'] );
 		$items          = array();
 		$country        = strtoupper( esc_attr( $_POST['country'] ) );
@@ -1545,6 +1549,15 @@ class WC_AJAX {
 		$order          = wc_get_order( $order_id );
 		$taxes          = array();
 		$shipping_taxes = array();
+
+		// Default to base
+		if ( 'base' === $tax_based_on || empty( $country ) ) {
+			$default  = wc_get_base_location();
+			$country  = $default['country'];
+			$state    = $default['state'];
+			$postcode = '';
+			$city     = '';
+		}
 
 		// Parse the jQuery serialized items
 		parse_str( $_POST['items'], $items );
@@ -1781,6 +1794,8 @@ class WC_AJAX {
 	 * @param string $post_types (default: array('product'))
 	 */
 	public static function json_search_products( $x = '', $post_types = array( 'product' ) ) {
+		global $wpdb;
+
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
@@ -1792,80 +1807,42 @@ class WC_AJAX {
 			die();
 		}
 
-		if ( ! empty( $_GET['exclude'] ) ) {
-			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
-		}
-
-		$args = array(
-			'post_type'      => $post_types,
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			's'              => $term,
-			'fields'         => 'ids',
-			'exclude'        => $exclude
-		);
+		$like_term = '%' . $wpdb->esc_like( $term ) . '%';
 
 		if ( is_numeric( $term ) ) {
-
-			if ( false === array_search( $term, $exclude ) ) {
-				$posts2 = get_posts( array(
-					'post_type'      => $post_types,
-					'post_status'    => 'publish',
-					'posts_per_page' => -1,
-					'post__in'       => array( 0, $term ),
-					'fields'         => 'ids'
-				) );
-			} else {
-				$posts2 = array();
-			}
-
-			$posts3 = get_posts( array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'post_parent'    => $term,
-				'fields'         => 'ids',
-				'exclude'        => $exclude
-			) );
-
-			$posts4 = get_posts( array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'meta_query'     => array(
-					array(
-						'key'     => '_sku',
-						'value'   => $term,
-						'compare' => 'LIKE'
+			$query = $wpdb->prepare( "
+				SELECT ID FROM {$wpdb->posts} posts LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
+				WHERE posts.post_status = 'publish'
+				AND (
+					posts.post_parent = %s
+					OR posts.ID = %s
+					OR posts.post_title LIKE %s
+					OR (
+						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
 					)
-				),
-				'fields'         => 'ids',
-				'exclude'        => $exclude
-			) );
-
-			$posts = array_unique( array_merge( get_posts( $args ), $posts2, $posts3, $posts4 ) );
-
+				)
+			", $term, $term, $term, $like_term );
 		} else {
-
-			$args2 = array(
-				'post_type'      => $post_types,
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'meta_query'     => array(
-					array(
-					'key'     => '_sku',
-					'value'   => $term,
-					'compare' => 'LIKE'
+			$query = $wpdb->prepare( "
+				SELECT ID FROM {$wpdb->posts} posts LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
+				WHERE posts.post_status = 'publish'
+				AND (
+					posts.post_title LIKE %s
+					or posts.post_content LIKE %s
+					OR (
+						postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s
 					)
-				),
-				'fields'         => 'ids',
-				'exclude'        => $exclude
-			);
-
-			$posts = array_unique( array_merge( get_posts( $args ), get_posts( $args2 ) ) );
-
+				)
+			", $like_term, $like_term, $like_term );
 		}
 
+		$query .= " AND posts.post_type IN ('" . implode( "','", array_map( 'esc_sql', $post_types ) ) . "')";
+
+		if ( ! empty( $_GET['exclude'] ) ) {
+			$query .= " AND posts.ID NOT IN (" . implode( ',', array_map( 'intval', explode( ',', $_GET['exclude'] ) ) ) . ")";
+		}
+
+		$posts          = array_unique( $wpdb->get_col( $query ) );
 		$found_products = array();
 
 		if ( ! empty( $posts ) ) {
@@ -2242,7 +2219,7 @@ class WC_AJAX {
 				'amount'     => $refund_amount,
 				'reason'     => $refund_reason,
 				'order_id'   => $order_id,
-				'line_items' => $line_items
+				'line_items' => $line_items,
 			) );
 
 			if ( is_wp_error( $refund ) ) {
@@ -2284,10 +2261,18 @@ class WC_AJAX {
 				}
 			}
 
-			// Check if items are refunded fully
-			$max_remaining_items = absint( $order->get_item_count() - $order->get_item_count_refunded() );
+			// Trigger notifications and status changes
+			if ( $order->get_remaining_refund_amount() > 0 || $order->get_remaining_refund_items() > 0 ) {
+				/**
+				 * woocommerce_order_partially_refunded
+				 *
+				 * @since 2.4.0
+				 * Note: 3rd arg was added in err. Kept for bw compat. 2.4.3
+				 */
+				do_action( 'woocommerce_order_partially_refunded', $order_id, $refund->id, $refund->id );
+			} else {
+				do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->id );
 
-			if ( $refund_amount == $max_refund && 0 === $max_remaining_items ) {
 				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order_id, $refund->id ) );
 				$response_data['status'] = 'fully_refunded';
 			}
@@ -2296,7 +2281,6 @@ class WC_AJAX {
 
 			// Clear transients
 			wc_delete_shop_order_transients( $order_id );
-
 			wp_send_json_success( $response_data );
 
 		} catch ( Exception $e ) {
@@ -3015,6 +2999,76 @@ class WC_AJAX {
 		WC_Product_Variable::sync( $product_id );
 		wc_delete_product_transients( $product_id );
 		die();
+	}
+
+	/**
+	 * Handle submissions from assets/js/settings-views-html-settings-tax.js Backbone model.
+	 */
+	public static function tax_rates_save_changes() {
+		if ( ! isset( $_POST['current_class'], $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		$current_class = $_POST['current_class']; // This is sanitized seven lines later.
+
+		if ( ! wp_verify_nonce( $_POST['wc_tax_nonce'], 'wc_tax_nonce-class:' . $current_class ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		$current_class = WC_Tax::format_tax_rate_class( $current_class );
+
+		// Check User Caps
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$changes = $_POST['changes'];
+		foreach ( $changes as $tax_rate_id => $data ) {
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					// So the user added and deleted a new row.
+					// That's fine, it's not in the database anyways. NEXT!
+					continue;
+				}
+				WC_Tax::_delete_tax_rate( $tax_rate_id );
+			}
+
+			$tax_rate = array_intersect_key( $data, array(
+				'tax_rate_country'  => 1,
+				'tax_rate_state'    => 1,
+				'tax_rate'          => 1,
+				'tax_rate_name'     => 1,
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 1,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+			) );
+
+			if ( isset( $data['newRow'] ) ) {
+				// Hurrah, shiny and new!
+				$tax_rate['tax_rate_class'] = $current_class;
+				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+			} else {
+				// Updating an existing rate ...
+				if ( ! empty( $tax_rate ) ) {
+					WC_Tax::_update_tax_rate( $tax_rate_id, $tax_rate );
+				}
+			}
+
+			if ( isset( $data['postcode'] ) ) {
+				WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, array_map( 'wc_clean', $data['postcode'] ) );
+			}
+			if ( isset( $data['city'] ) ) {
+				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', $data['city'] ) );
+			}
+		}
+
+		wp_send_json_success( array(
+			'rates' => WC_Tax::get_rates_for_tax_class( $current_class ),
+		) );
 	}
 }
 

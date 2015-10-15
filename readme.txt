@@ -80,7 +80,7 @@ When you download WooCommerce, you join a community of more than a million store
 
 If you’re interested in contributing to WooCommerce we’ve got more than 350 contributors, and there’s always room for more. Head over to the [WooCommerce GitHub Repository](https://github.com/woothemes/woocommerce) to find out how you can pitch in.
 
-Want to add a new language to WooCommerce? Swell! You can contribute through [Transifex](https://www.transifex.com/woothemes/woocommerce/).
+Want to add a new language to WooCommerce? Swell! You can contribute via [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce).
 
 And, finally, consider joining or spearheading a WooCommerce Meetup locally, more about those [here](http://www.woothemes.com/woocommerce/meetups/).
 
@@ -159,10 +159,40 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.5.0 - TBD =
+* Feature - New default session handler. Uses custom table to store data rather than the options table for performance and scalability reasons. https://woocommerce.wordpress.com/2015/10/07/new-session-handler-in-2-5/
+* Feature - New tax settings UI - faster, enhanced with ajax, searchable.
+* Feature - WP CLI Support. https://woocommerce.wordpress.com/2015/10/01/sneak-peek-wp-cli-support-in-woocommerce/
+* Feature - Added terms and conditions checkbox to pay page.
+* Fix - Check for existence of global attribute when you get_attributes() for a product.
+* Fix - Show order by template on product search.
+* Fix - Search variation skus in backend search.
+* Tweak - Default customer role capabilities.
+* Tweak - Expire mini-cart cache after 24 hours.
+* Tweak - Improved refund error messages in PayPal standard.
+* Tweak - Removed language pack downloader in favour of translate.wordpress.org.
+* Tweak - Added onboarding wizard button to the contextual help so it can be accessed again.
+* Tweak - When a WordPress user is deleted, turn any orders they have into Guest orders.
+* Tweak - When calculating order taxes, respect tax settings and default to base country.
+* Tweak - Fade in variation images to avoid flicker during load.
+* Tweak - Display 2 averages on report (net and gross).
+* Tweak - Improve product search and use WPDB instead of several get_posts queries for performance.
+* Tweak - Use SKU for stock order notes.
+* Tweak - Added order notes for manual email sends.
+* Tweak - Sanitize shipping method labels/titles.
+* Tweak - Only display the coupon form on the checkout if a coupon hasn't been applied.
+* Tweak - Added billing address column to order screen (off for new users).
 * Dev - API - Added /products/shipping_classes endpoint.
 * Dev - API - Added support to POST, PUT, and DELETE categories and tags.
 * Dev - API - Added support to filter products by tag, category, shipping class, and attribute.
+* Dev - API - Added tax and tax_class endpoints.
+* Dev - Template - New star ratings. The old one was 5 separate buttons. This new one consolidates the 5 options into one element making it leaner visually and more intuitive. Works in IE9+ with a graceful degradation for IE8.
+* Dev - Template - Added `data-title` attribute to cart table.
+* Dev - Template - Product archive anchors are now hooked into templates rather than hard coded.
+* Dev - Allow wc_clean to support arrays.
+* Dev - Added a manual update trigger for checkout.
+* Dev - Added woocommerce_is_price_filter_active filter to Query class.
 
+= 2.4.7 - 21/09/2015 =
 * Fix - Handle Switzerland in get_european_union_countries.
 * Fix - For geolocation with static cache support, ensure hash is appended during form submission.
 * Fix - To prevent discounts being applied in 'random' order (based on order added to cart), sort cart items based on subtotal during calculate_totals.
@@ -174,7 +204,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Check specifically for Post IDs in WC Query verbose rules fix.
 * Fix - Only run maybe_set_cart_cookies if cart was loaded to prevent notices.
 * Fix - Variation loading/refresh after attribute saving.
-* Fix - Add monthly cron schedule.
+* Fix - Added monthly cron schedule.
+* Fix - Remove use of 'input' event in checkout scripts to prevent IE11 triggering updates on placeholder change.
+* Fix - AJAX variations not being found in some cases when product version was < 2.4, but attributes were updated after sync().
+* Fix - Changed the way variable product prices get cached for greater plugin compatibility. See http://wp.me/p6wtcw-5x
+* Fix - Highlighting of reports chart.
+* Fix - Network activated plugins not showing up in system status report.
+* Fix - Tax fields showing on bulk/quick edit when disabled the tax system.
+* Fix - Tax status and tax class values within bulk edit.
+* Tweak - Allow bulk edit price to 0 .
 * Tweak - Add filters to control "shipped via" text.
 * Tweak - Allow line breaks in non-variation attributes.
 * Tweak - Renamed wc_var_prices transient to allow them to flush on product save.
@@ -185,9 +223,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Use the needs_payment function (DRY).
 * Tweak - Tweak wc_create_page to work with trashed pages.
 * Tweak - Redirect 'not right now' to referer in onboarding wizard.
+* Tweak - woocommerce_update_new_customer_past_order action.
+* Tweak - Prevent empty terms when using `wc_get_formatted_variation()`.
+* Tweak - Unslash shipping label on orders admin screen.
+* Tweak - Prevent wrong phone numbers on PayPal for CA and US when users add the prefix `+1`.
 * Template - Removed 'Payment' heading in `templates/checkout/form-pay.php`.
 * Template - Removed unnecessary clearing div in `templates/checkout/payment.php`.
-* Template - Anchors and titles are now hooked in, rather than hard coded into `templates/content-product.php` and `templates/content-product_cat.php`
 
 = 2.4.6 - 24/08/2015 =
 * Fix - menu_order notices on IIS.

@@ -143,11 +143,12 @@ class WC_API {
 		$this->authentication = new WC_API_Authentication();
 
 		include_once( 'api/class-wc-api-resource.php' );
-		include_once( 'api/class-wc-api-orders.php' );
-		include_once( 'api/class-wc-api-products.php' );
 		include_once( 'api/class-wc-api-coupons.php' );
 		include_once( 'api/class-wc-api-customers.php' );
+		include_once( 'api/class-wc-api-orders.php' );
+		include_once( 'api/class-wc-api-products.php' );
 		include_once( 'api/class-wc-api-reports.php' );
+		include_once( 'api/class-wc-api-taxes.php' );
 		include_once( 'api/class-wc-api-webhooks.php' );
 
 		// allow plugins to load other response handlers or resource classes
@@ -164,11 +165,12 @@ class WC_API {
 
 		$api_classes = apply_filters( 'woocommerce_api_classes',
 			array(
+				'WC_API_Coupons',
 				'WC_API_Customers',
 				'WC_API_Orders',
 				'WC_API_Products',
-				'WC_API_Coupons',
 				'WC_API_Reports',
+				'WC_API_Taxes',
 				'WC_API_Webhooks',
 			)
 		);
@@ -196,10 +198,10 @@ class WC_API {
 		$this->authentication = new WC_API_Authentication();
 
 		include_once( 'api/v1/class-wc-api-resource.php' );
-		include_once( 'api/v1/class-wc-api-orders.php' );
-		include_once( 'api/v1/class-wc-api-products.php' );
 		include_once( 'api/v1/class-wc-api-coupons.php' );
 		include_once( 'api/v1/class-wc-api-customers.php' );
+		include_once( 'api/v1/class-wc-api-orders.php' );
+		include_once( 'api/v1/class-wc-api-products.php' );
 		include_once( 'api/v1/class-wc-api-reports.php' );
 
 		// allow plugins to load other response handlers or resource classes
@@ -241,12 +243,12 @@ class WC_API {
 		$this->authentication = new WC_API_Authentication();
 
 		include_once( 'api/v2/class-wc-api-resource.php' );
-		include_once( 'api/v2/class-wc-api-orders.php' );
-		include_once( 'api/v2/class-wc-api-products.php' );
 		include_once( 'api/v2/class-wc-api-coupons.php' );
 		include_once( 'api/v2/class-wc-api-customers.php' );
+		include_once( 'api/v2/class-wc-api-orders.php' );
+		include_once( 'api/v2/class-wc-api-products.php' );
 		include_once( 'api/v2/class-wc-api-reports.php' );
-		include_once( 'api/class-wc-api-webhooks.php' );
+		include_once( 'api/v2/class-wc-api-webhooks.php' );
 
 		// allow plugins to load other response handlers or resource classes
 		do_action( 'woocommerce_api_loaded' );

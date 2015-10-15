@@ -4,7 +4,7 @@
  *
  * Sharing plugins can hook into here or you can add your own code directly.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/single-product/share.php
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
  * will need to copy the new files to your theme to maintain compatibility. We try to do this

@@ -140,6 +140,9 @@
 				$( this ).blur();
 			}
 
+			// added to get around variation image flicker issue
+			$( '.product.has-default-attributes > .images' ).fadeTo( 200, 1 );
+			
 			// Custom event for when variation selection has been changed
 			$form.trigger( 'woocommerce_variation_has_changed' );
 		} )
