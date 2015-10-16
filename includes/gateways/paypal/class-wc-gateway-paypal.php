@@ -292,6 +292,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			break;
 		}
 
-		return isset( $result['L_LONGMESSAGE0'] ) ? new WP_Error( 'error', $result['L_LONGMESSAGE0'] ) : false;
+		return isset( $result['L_LONGMESSAGE0'] ) ? new WP_Error( 'error', 'Refund Failed: Error Code: '.$result['L_ERRORCODE0'].', '.'Message: '.$result['L_LONGMESSAGE0'] ) : false;
 	}
 }
