@@ -675,7 +675,7 @@ class WC_Product_Variation extends WC_Product {
 
 					foreach ( $post_terms as $term ) {
 						if ( $variation_selected_value === $term->slug ) {
-							$description_value = apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) );
+							$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) );
 						}
 					}
 

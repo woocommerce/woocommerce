@@ -653,7 +653,7 @@ class WC_Meta_Box_Product_Data {
 									$post_terms = wp_get_post_terms( $post->ID, $attribute['name'] );
 
 									foreach ( $post_terms as $term ) {
-										echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) ) . '</option>';
+										echo '<option ' . selected( $variation_selected_value, $term->slug, false ) . ' value="' . esc_attr( $term->slug ) . '">' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
 									}
 
 								} else {
