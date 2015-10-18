@@ -1,6 +1,6 @@
 <?php
 /**
- * Login Form
+ * Admin customer details template part
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
