@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin new order email (plain text)
+ * Admin customer details template part (plain text)
  *
  * @author		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
