@@ -163,7 +163,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			return false;
 		}
 
-		if ( 'standard' == $this->mode && ! is_ssl() && 'yes' != $this->sandbox ) {
+		if ( 'standard' == $this->mode && 'yes' != $this->sandbox  && ( ( is_checkout() && ! is_ssl() ) || ( 'no' == get_option( 'woocommerce_force_ssl_checkout' ) && ! class_exists( 'WordPressHTTPS' ) ) ) ) {
 			return false;
 		}
 
