@@ -726,43 +726,41 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Validate Settings Field Data.
-	 *
 	 * Validate the data on the "Settings" form.
 	 *
 	 * @since 1.0.0
-	 * @uses  method_exists()
 	 * @param array $form_fields (default: array())
 	 */
 	public function validate_settings_fields( $form_fields = array() ) {
-
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
 		}
 
 		$this->sanitized_fields = array();
 
-		foreach ( $form_fields as $k => $v ) {
+		foreach ( $form_fields as $key => $field ) {
 
-			if ( empty( $v['type'] ) ) {
-				$v['type'] = 'text'; // Default to "text" field type.
-			}
+			// Default to "text" field type.
+			$type = empty( $field['type'] ) ? 'text' : $field['type'];
 
 			// Look for a validate_FIELDID_field method for special handling
-			if ( method_exists( $this, 'validate_' . $k . '_field' ) ) {
-				$field = $this->{'validate_' . $k . '_field'}( $k );
-				$this->sanitized_fields[ $k ] = $field;
+			if ( method_exists( $this, 'validate_' . $key . '_field' ) ) {
+				$field = $this->{'validate_' . $key . '_field'}( $key );
+
+			// Exclude certain types from saving
+			} elseif ( in_array( $type, array( 'title' ) ) ) {
+				continue;
 
 			// Look for a validate_FIELDTYPE_field method
-			} elseif ( method_exists( $this, 'validate_' . $v['type'] . '_field' ) ) {
-				$field = $this->{'validate_' . $v['type'] . '_field'}( $k );
-				$this->sanitized_fields[ $k ] = $field;
+			} elseif ( method_exists( $this, 'validate_' . $type . '_field' ) ) {
+				$field = $this->{'validate_' . $type . '_field'}( $key );
 
-			// Default to text
+			// Fallback to text
 			} else {
-				$field = $this->{'validate_text_field'}( $k );
-				$this->sanitized_fields[ $k ] = $field;
+				$field = $this->validate_text_field( $key );
 			}
+
+			$this->sanitized_fields[ $key ] = $field;
 		}
 	}
 
