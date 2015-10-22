@@ -21,7 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <tr class="shipping">
-	<th><?php echo $show_package_details && $index ? sprintf( __( 'Shipping #%d', 'woocommerce' ), $index + 1 ) : __( 'Shipping', 'woocommerce' ); ?></th>
+	<th><?php
+		if ( $show_package_details && $index ) :
+			$shipping_name = sprintf( __( 'Shipping #%d', 'woocommerce' ), $index + 1 );
+		else :
+			$shipping_name = __( 'Shipping', 'woocommerce' );
+		endif;
+		echo wp_kses_post( apply_filters( 'woocommerce_shipping_package_name', $shipping_name, $index, $package ) );
+	?></th>
 	<td>
 		<?php if ( empty( $available_methods ) ) : ?>
 
