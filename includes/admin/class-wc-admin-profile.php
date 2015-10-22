@@ -149,10 +149,13 @@ class WC_Admin_Profile {
 			return;
 		}
 
-		$show_fields = $this->get_customer_meta_fields();
-
-		foreach ( $show_fields as $fieldset ) :
-			?>
+		$show_fields = $this->get_customer_meta_fields();?>
+		
+		<div class="woocommerce-user-fset-container">
+		
+		<?php foreach ( $show_fields as $fieldset ) : ?>
+		
+			<div class="woocommerce-user-fset">
 			<h3><?php echo $fieldset['title']; ?></h3>
 			<table class="form-table">
 				<?php
@@ -180,8 +183,12 @@ class WC_Admin_Profile {
 				endforeach;
 				?>
 			</table>
+			</div>
 			<?php
-		endforeach;
+		endforeach; ?>
+		
+		</div>
+		<?php
 	}
 
 	/**
