@@ -766,7 +766,8 @@ class WC_Form_Handler {
 		if ( ! empty( $_POST['login'] ) && ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-login' ) ) {
 
 			try {
-				$creds  = array();
+				$creds    = array();
+				$username = trim( $_POST['username'] );
 
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
@@ -775,7 +776,7 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
 				}
 
-				if ( empty( $_POST['username'] ) ) {
+				if ( empty( $username ) ) {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Username is required.', 'woocommerce' ) );
 				}
 
@@ -783,17 +784,17 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Password is required.', 'woocommerce' ) );
 				}
 
-				if ( is_email( $_POST['username'] ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
-					$user = get_user_by( 'email', $_POST['username'] );
+				if ( is_email( $username ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
+					$user = get_user_by( 'email', $username );
 
 					if ( isset( $user->user_login ) ) {
-						$creds['user_login'] 	= $user->user_login;
+						$creds['user_login'] = $user->user_login;
 					} else {
 						throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
 					}
 
 				} else {
-					$creds['user_login'] 	= $_POST['username'];
+					$creds['user_login'] = $username;
 				}
 
 				$creds['user_password'] = $_POST['password'];
@@ -803,7 +804,7 @@ class WC_Form_Handler {
 
 				if ( is_wp_error( $user ) ) {
 					$message = $user->get_error_message();
-					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $_POST['username'] ) . '</strong>', $message );
+					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $username ) . '</strong>', $message );
 					throw new Exception( $message );
 				} else {
 
