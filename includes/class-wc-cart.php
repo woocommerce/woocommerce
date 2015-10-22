@@ -1850,7 +1850,7 @@ class WC_Cart {
 							$total_discount     = $discount_amount * $values['quantity'];
 							$total_discount_tax = 0;
 
-							if ( wc_tax_enabled() ) {
+							if ( wc_tax_enabled() && ! $coupon->is_type('fixed_cart') && ! $coupon->is_type('fixed_product') ) {
 								$tax_rates          = WC_Tax::get_rates( $product->get_tax_class() );
 								$taxes              = WC_Tax::calc_tax( $discount_amount, $tax_rates, $this->prices_include_tax );
 								$total_discount_tax = WC_Tax::get_tax_total( $taxes ) * $values['quantity'];
