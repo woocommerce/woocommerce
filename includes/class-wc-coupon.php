@@ -145,7 +145,15 @@ class WC_Coupon {
 	private function get_coupon_id_from_code( $code ) {
 		global $wpdb;
 
-		return absint( $wpdb->get_var( $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code ) ) );
+		$coupon_code_query = $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code );
+		$transient_name    = 'wc_cid_by_code_' . md5( $coupon_code_query . WC_Cache_Helper::get_transient_version( 'coupons' ) );
+
+		if ( false === ( $result = get_transient( $transient_name ) ) ) {
+			$result = $wpdb->get_var( $coupon_code_query );
+			set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+		}
+
+		return absint( $result );
 	}
 
 	/**
