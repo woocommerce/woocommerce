@@ -145,7 +145,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		}
 
 		// Check required fields
-		elseif ( ! $this->public_key || ! $this->private_key ) {
+		if ( 'standard' == $this->mode && 'yes' != $this->sandbox  && ( ( is_checkout() && ! is_ssl() ) || ( 'no' == get_option( 'woocommerce_force_ssl_checkout' ) && ! class_exists( 'WordPressHTTPS' ) ) ) ) {
 			echo '<div class="error"><p>' . __( 'Simplify Commerce Error: Please enter your public and private keys', 'woocommerce' ) . '</p></div>';
 		}
 
