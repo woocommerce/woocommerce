@@ -131,7 +131,7 @@ class WC_Cache_Helper {
 
 		if ( ( $page_id = wc_get_page_id( $wc_page ) ) && $page_id > 0 && ( $page = get_post( $page_id ) ) ) {
 			$wc_page_uris[] = 'p=' . $page_id;
-			$wc_page_uris[] = '/' . $page->post_name;
+			$wc_page_uris[] = '/' . $page->post_name . '/';
 		}
 
 		return $wc_page_uris;
