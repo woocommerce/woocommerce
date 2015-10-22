@@ -539,7 +539,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 					'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
 					'reviewer_name'  => $comment->comment_author,
 					'reviewer_email' => $comment->comment_author_email,
-					'verified'       => (bool) wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $id ),
+					'verified'       => (bool) get_comment_meta( $comment->comment_ID, 'verified', true ),
 				);
 			}
 
