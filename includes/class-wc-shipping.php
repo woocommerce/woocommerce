@@ -267,13 +267,13 @@ class WC_Shipping {
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
 	 */
 	public function calculate_shipping( $packages = array() ) {
-		if ( ! $this->enabled || empty( $packages ) ) {
-			return;
-		}
-
 		$this->shipping_total = null;
 		$this->shipping_taxes = array();
 		$this->packages       = array();
+
+		if ( ! $this->enabled || empty( $packages ) ) {
+			return;
+		}
 
 		// Calculate costs for passed packages
 		$package_keys 		= array_keys( $packages );
