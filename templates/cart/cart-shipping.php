@@ -22,11 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <tr class="shipping">
 	<th><?php
-		if ( $show_package_details && $index ) :
+		if ( $show_package_details && $index ) {
 			$shipping_name = sprintf( __( 'Shipping #%d', 'woocommerce' ), $index + 1 );
-		else :
+		} else {
 			$shipping_name = __( 'Shipping', 'woocommerce' );
-		endif;
+		}
+
 		echo wp_kses_post( apply_filters( 'woocommerce_shipping_package_name', $shipping_name, $index, $package ) );
 	?></th>
 	<td>
