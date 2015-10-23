@@ -171,9 +171,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Avoid potential PHP Fatals by avoiding premature script enqueues.
 * Fix - Pass mimes when checking file type .
 * Fix - Reset shipping totals before calculation to prevent totals being used incorrectly.
+* Fix - API - Corrected how attributes terms saves non-latin characters.
+* Fix - API - Variations price sync.
+* Fix - API - Fixed lost variable products data when create/edit an order.
 * Tweak - Add trailing slash in get_page_uris to reduce likelihood of conflicts.
 * Tweak - API - Added refunded_item_id on GET orders/<id>/refunds endpoint.
 * Tweak - API - Allow variable products to get retrieved by SKU.
+* Tweak - API - Allow edit variations without define the product type to variable.
 
 = 2.4.7 - 21/09/2015 =
 * Fix - Handle Switzerland in get_european_union_countries.
