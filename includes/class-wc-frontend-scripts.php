@@ -213,6 +213,16 @@ class WC_Frontend_Scripts {
 				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'] );
 			}
 		}
+		
+		// Thank you message class added.
+		if ( is_order_received_page() ) {
+			self::enqueue_script( 'wc-checkout', $frontend_script_path . 'checkout' . $suffix . '.js', array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ) );
+			// Localize the script with new data
+			$translation_array = array(
+				'thankyou_message' => __( '1', 'woocommerce' )
+			);
+			wp_localize_script( 'wc-checkout', 'obj_order_received_page', $translation_array );
+		}
 	}
 
 	/**

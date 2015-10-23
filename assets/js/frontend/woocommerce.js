@@ -12,4 +12,15 @@ jQuery( function( $ ) {
 			$( this ).val( min );
 		}
 	});
+	
+	// Class added to thank you message.
+	if (obj_order_received_page.thankyou_message == 1) {
+		$(".woocommerce p").each(function() {
+		    var message = $(this).text();
+			if (message == 'Thank you. Your order has been received.') {
+			 $(this).addClass('woocommerce-message woocommerce-order-thank-you');
+			}
+		});
+	}
+	
 });
