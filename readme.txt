@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.4.8 - XXX =
+= 2.4.8 - 26/10/2015 =
 * Fix - Help tips in variations admin.
 * Fix - API - Fixed customer count method.
 * Fix - Locale switching for city field.
@@ -170,7 +170,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Settings API default value should not apply if value of option is 0 .
 * Fix - Avoid potential PHP Fatals by avoiding premature script enqueues.
 * Fix - Pass mimes when checking file type .
+* Fix - Reset shipping totals before calculation to prevent totals being used incorrectly.
+* Tweak - Add trailing slash in get_page_uris to reduce likelihood of conflicts.
 * Tweak - API - Added refunded_item_id on GET orders/<id>/refunds endpoint.
+* Tweak - API - Allow variable products to get retrieved by SKU.
 
 = 2.4.7 - 21/09/2015 =
 * Fix - Handle Switzerland in get_european_union_countries.
