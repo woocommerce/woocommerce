@@ -172,8 +172,7 @@ class WC_Meta_Box_Product_Data {
 								<label for="_sale_price_dates_from">' . __( 'Sale Price Dates', 'woocommerce' ) . '</label>
 								<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
 								<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . _x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />
-								<a href="#" class="cancel_sale_schedule">'. __( 'Cancel', 'woocommerce' ) .'</a>
-								<img class="help_tip" style="margin-top: 21px;" data-tip="' . esc_attr__( 'The sale will end at the beginning of the set date.', 'woocommerce' ) . '" src="' . esc_url( WC()->plugin_url() ) . '/assets/images/help.png" height="16" width="16" />
+								<a href="#" class="cancel_sale_schedule">'. __( 'Cancel', 'woocommerce' ) . '</a>' . wc_add_help_tip( __( 'The sale will end at the beginning of the set date.', 'woocommerce' ) ) . '
 							</p>';
 
 					do_action( 'woocommerce_product_options_pricing' );
@@ -189,8 +188,8 @@ class WC_Meta_Box_Product_Data {
 							<thead>
 								<tr>
 									<th class="sort">&nbsp;</th>
-									<th><?php _e( 'Name', 'woocommerce' ); ?> <span class="tips" data-tip="<?php esc_attr_e( 'This is the name of the download shown to the customer.', 'woocommerce' ); ?>">[?]</span></th>
-									<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <span class="tips" data-tip="<?php esc_attr_e( 'This is the URL or absolute path to the file which customers will get access to. URLs entered here should already be encoded.', 'woocommerce' ); ?>">[?]</span></th>
+									<th><?php _e( 'Name', 'woocommerce' ); ?> <?php echo wc_add_help_tip( __( 'This is the name of the download shown to the customer.', 'woocommerce' ) ); ?></th>
+									<th colspan="2"><?php _e( 'File URL', 'woocommerce' ); ?> <?php echo wc_add_help_tip( __( 'This is the URL or absolute path to the file which customers will get access to. URLs entered here should already be encoded.', 'woocommerce' ) ); ?></th>
 									<th>&nbsp;</th>
 								</tr>
 							</thead>
@@ -377,7 +376,7 @@ class WC_Meta_Box_Product_Data {
 								<input placeholder="<?php esc_attr_e( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_width" value="<?php echo esc_attr( wc_format_localized_decimal( get_post_meta( $thepostid, '_width', true ) ) ); ?>" />
 								<input placeholder="<?php esc_attr_e( 'Height', 'woocommerce' ); ?>" class="input-text wc_input_decimal last" size="6" type="text" name="_height" value="<?php echo esc_attr( wc_format_localized_decimal( get_post_meta( $thepostid, '_height', true ) ) ); ?>" />
 							</span>
-							<img class="help_tip" data-tip="<?php esc_attr_e( 'LxWxH in decimal form', 'woocommerce' ); ?>" src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/help.png" height="16" width="16" />
+							<?php echo wc_add_help_tip( __( 'LxWxH in decimal form', 'woocommerce' ) ); ?>
 						</p><?php
 					}
 
@@ -404,7 +403,7 @@ class WC_Meta_Box_Product_Data {
 						'selected'         => $current_shipping_class,
 						'class'            => 'select short'
 					);
-					?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <img class="help_tip" data-tip="<?php esc_attr_e( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ); ?>" src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/help.png" height="16" width="16" /></p><?php
+					?><p class="form-field dimensions_field"><label for="product_shipping_class"><?php _e( 'Shipping class', 'woocommerce' ); ?></label> <?php wp_dropdown_categories( $args ); ?> <?php echo wc_add_help_tip( __( 'Shipping classes are used by certain shipping methods to group similar products.', 'woocommerce' ) ); ?></p><?php
 
 					do_action( 'woocommerce_product_options_shipping' );
 
@@ -499,7 +498,7 @@ class WC_Meta_Box_Product_Data {
 							}
 
 							echo esc_attr( json_encode( $json_ids ) );
-						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php _e( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_add_help_tip( __( 'Up-sells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ); ?>
 					</p>
 
 					<p class="form-field">
@@ -516,7 +515,7 @@ class WC_Meta_Box_Product_Data {
 							}
 
 							echo esc_attr( json_encode( $json_ids ) );
-						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <img class="help_tip" data-tip='<?php esc_attr_e( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+						?>" value="<?php echo implode( ',', array_keys( $json_ids ) ); ?>" /> <?php echo wc_add_help_tip( __( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ); ?>
 					</p>
 				</div>
 
@@ -535,7 +534,7 @@ class WC_Meta_Box_Product_Data {
 
 								echo esc_attr( $parent_title );
 							}
-						?>" value="<?php echo $parent_id ? $parent_id : ''; ?>" /> <img class="help_tip" data-tip='<?php _e( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+						?>" value="<?php echo $parent_id ? $parent_id : ''; ?>" /> <?php echo wc_add_help_tip( __( 'Set this option to make this product part of a grouped product.', 'woocommerce' ) ); ?>
 					</p>
 
 					<?php
@@ -631,7 +630,7 @@ class WC_Meta_Box_Product_Data {
 
 				<div class="toolbar toolbar-variations-defaults">
 					<div class="variations-defaults">
-						<strong><?php _e( 'Default Form Values', 'woocommerce' ); ?>: <span class="tips" data-tip="<?php esc_attr_e( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ); ?>">[?]</span></strong>
+						<strong><?php _e( 'Default Form Values', 'woocommerce' ); ?>: <?php echo wc_add_help_tip( __( 'These are the attributes that will be pre-selected on the frontend.', 'woocommerce' ) ); ?></strong>
 						<?php
 							$default_attributes = maybe_unserialize( get_post_meta( $post->ID, '_default_attributes', true ) );
 

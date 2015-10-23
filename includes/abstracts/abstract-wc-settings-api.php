@@ -260,7 +260,7 @@ abstract class WC_Settings_API {
 			$tip = '';
 		}
 
-		return $tip ? '<img class="help_tip" data-tip="' . wc_sanitize_tooltip( $tip ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />' : '';
+		return $tip ? wc_add_help_tip( $tip, true ) : '';
 	}
 
 	/**

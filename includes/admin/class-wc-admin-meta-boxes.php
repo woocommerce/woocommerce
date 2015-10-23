@@ -112,7 +112,7 @@ class WC_Admin_Meta_Boxes {
 			add_meta_box( 'woocommerce-order-data', sprintf( __( '%s Data', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
 			add_meta_box( 'woocommerce-order-items', sprintf( __( '%s Items', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
 			add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s Notes', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
-			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . ' <span class="tips" data-tip="' . esc_attr__( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) . '">[?]</span>', 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
+			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . wc_add_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
 			add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s Actions', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
 			remove_meta_box( 'submitdiv', $type, 'side' );
 		}

@@ -26,22 +26,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="Home URL"><?php _e( 'Home URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The URL of your site\'s homepage.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The URL of your site\'s homepage.', 'woocommerce' ) ); ?></td>
 			<td><?php form_option( 'home' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Site URL"><?php _e( 'Site URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The root URL of your site.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The root URL of your site.', 'woocommerce' ) ); ?></td>
 			<td><?php form_option( 'siteurl' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WC Version"><?php _e( 'WC Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The version of WooCommerce installed on your site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( WC()->version ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Log Directory Writable"><?php _e( 'Log Directory Writable', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Several WooCommerce extensions can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'Several WooCommerce extensions can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				if ( @fopen( WC_LOG_DIR . 'test-log.log', 'a' ) ) {
 					echo '<mark class="yes">&#10004; <code>' . WC_LOG_DIR . '</code></mark> ';
@@ -52,17 +52,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="WP Version"><?php _e( 'WP Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WordPress installed on your site.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The version of WordPress installed on your site.', 'woocommerce' ) ); ?></td>
 			<td><?php bloginfo('version'); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Multisite"><?php _e( 'WP Multisite', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce' ) ); ?></td>
 			<td><?php if ( is_multisite() ) echo '&#10004;'; else echo '&ndash;'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Memory Limit"><?php _e( 'WP Memory Limit', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
 
@@ -75,12 +75,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="WP Debug Mode"><?php _e( 'WP Debug Mode', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) ); ?></td>
 			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">&#10004;</mark>'; else echo '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Language"><?php _e( 'Language', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The current language used by WordPress. Default = English', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The current language used by WordPress. Default = English', 'woocommerce' ) ); ?></td>
 			<td><?php echo get_locale() ?></td>
 		</tr>
 	</tbody>
@@ -94,12 +94,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="Server Info"><?php _e( 'Server Info', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Information about the web server that is currently hosting your site.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'Information about the web server that is currently hosting your site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="PHP Version"><?php _e( 'PHP Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of PHP installed on your hosting server.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				// Check if phpversion function exists
 				if ( function_exists( 'phpversion' ) ) {
@@ -118,28 +118,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
 				<td data-export-label="PHP Post Max Size"><?php _e( 'PHP Post Max Size', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be contained in one post.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+				<td class="help"><?php echo wc_add_help_tip( __( 'The largest filesize that can be contained in one post.', 'woocommerce' ) ); ?></td>
 				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="PHP Time Limit"><?php _e( 'PHP Time Limit', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce' ) . '">[?]</a>'; ?></td>
+				<td class="help"><?php echo wc_add_help_tip( __( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce' ) ); ?></td>
 				<td><?php echo ini_get('max_execution_time'); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="PHP Max Input Vars"><?php _e( 'PHP Max Input Vars', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+				<td class="help"><?php echo wc_add_help_tip( __( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce' ) ); ?></td>
 				<td><?php echo ini_get('max_input_vars'); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="SUHOSIN Installed"><?php _e( 'SUHOSIN Installed', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+				<td class="help"><?php echo wc_add_help_tip( __( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); ?></td>
 				<td><?php echo extension_loaded( 'suhosin' ) ? '&#10004;' : '&ndash;'; ?></td>
 			</tr>
 		<?php endif; ?>
 		<tr>
 			<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				/** @global wpdb $wpdb */
@@ -150,12 +150,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Max Upload Size"><?php _e( 'Max Upload Size', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce' ) ); ?></td>
 			<td><?php echo size_format( wp_max_upload_size() ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Default Timezone is UTC"><?php _e( 'Default Timezone is UTC', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The default timezone for your server.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The default timezone for your server.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				$default_timezone = date_default_timezone_get();
 				if ( 'UTC' !== $default_timezone ) {
@@ -170,7 +170,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			// fsockopen/cURL
 			$posting['fsockopen_curl']['name'] = 'fsockopen/cURL';
-			$posting['fsockopen_curl']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Payment gateways can use cURL to communicate with remote servers to authorize payments, other plugins may also use it when communicating with remote services.', 'woocommerce' ) . '">[?]</a>';
+			$posting['fsockopen_curl']['help'] = wc_add_help_tip( __( 'Payment gateways can use cURL to communicate with remote servers to authorize payments, other plugins may also use it when communicating with remote services.', 'woocommerce' ) );
 
 			if ( function_exists( 'fsockopen' ) || function_exists( 'curl_init' ) ) {
 				$posting['fsockopen_curl']['success'] = true;
@@ -181,7 +181,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			// SOAP
 			$posting['soap_client']['name'] = 'SoapClient';
-			$posting['soap_client']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce' ) . '">[?]</a>';
+			$posting['soap_client']['help'] = wc_add_help_tip( __( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce' ) );
 
 			if ( class_exists( 'SoapClient' ) ) {
 				$posting['soap_client']['success'] = true;
@@ -192,7 +192,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			// DOMDocument
 			$posting['dom_document']['name'] = 'DOMDocument';
-			$posting['dom_document']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'HTML/Multipart emails use DOMDocument to generate inline CSS in templates.', 'woocommerce' ) . '">[?]</a>';
+			$posting['dom_document']['help'] = wc_add_help_tip( __( 'HTML/Multipart emails use DOMDocument to generate inline CSS in templates.', 'woocommerce' ) );
 
 			if ( class_exists( 'DOMDocument' ) ) {
 				$posting['dom_document']['success'] = true;
@@ -203,7 +203,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			// GZIP
 			$posting['gzip']['name'] = 'GZip';
-			$posting['gzip']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'GZip (gzopen) is used to open the GEOIP database from MaxMind.', 'woocommerce' ) . '">[?]</a>';
+			$posting['gzip']['help'] = wc_add_help_tip( __( 'GZip (gzopen) is used to open the GEOIP database from MaxMind.', 'woocommerce' ) );
 
 			if ( is_callable( 'gzopen' ) ) {
 				$posting['gzip']['success'] = true;
@@ -214,7 +214,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			// WP Remote Post Check
 			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce');
-			$posting['wp_remote_post']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) . '">[?]</a>';
+			$posting['wp_remote_post']['help'] = wc_add_help_tip( __( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) );
 
 			$response = wp_safe_remote_post( 'https://www.paypal.com/cgi-bin/webscr', array(
 				'timeout'    => 60,
@@ -238,7 +238,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			// WP Remote Get Check
 			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
-			$posting['wp_remote_get']['help'] = '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) . '">[?]</a>';
+			$posting['wp_remote_get']['help'] = wc_add_help_tip( __( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) );
 
 			$response = wp_safe_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
 
@@ -282,7 +282,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="WC Database Version"><?php _e( 'WC Database Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The version of WooCommerce that the database is formatted for. This should be the same as your WooCommerce Version.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( get_option( 'woocommerce_db_version' ) ); ?></td>
 		</tr>
 		<tr>
@@ -393,32 +393,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="Force SSL"><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) ); ?></td>
 			<td><?php echo 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ? '<mark class="yes">&#10004;</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Currency"><?php _e( 'Currency', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What currency prices are listed at in the catalog and which currency gateways will take payments in.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'What currency prices are listed at in the catalog and which currency gateways will take payments in.', 'woocommerce' ) ); ?></td>
 			<td><?php echo get_woocommerce_currency(); ?> (<?php echo get_woocommerce_currency_symbol() ?>)</td>
 		</tr>
 		<tr>
 			<td data-export-label="Currency Position"><?php _e( 'Currency Position', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The position of the currency symbol.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The position of the currency symbol.', 'woocommerce' ) ); ?></td>
 			<td><?php echo get_option( 'woocommerce_currency_pos' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Thousand Separator"><?php _e( 'Thousand Separator', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The thousand separator of displayed prices.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The thousand separator of displayed prices.', 'woocommerce' ) ); ?></td>
 			<td><?php echo wc_get_price_thousand_separator(); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Decimal Separator"><?php _e( 'Decimal Separator', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The decimal separator of displayed prices.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The decimal separator of displayed prices.', 'woocommerce' ) ); ?></td>
 			<td><?php echo wc_get_price_decimal_separator(); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Number of Decimals"><?php _e( 'Number of Decimals', 'woocommerce' ) ?></td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The number of decimal points shown in displayed prices.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The number of decimal points shown in displayed prices.', 'woocommerce' ) ); ?></td>
 			<td><?php echo wc_get_price_decimals(); ?></td>
 		</tr>
 	</tbody>
@@ -432,12 +432,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="API Enabled"><?php _e( 'API Enabled', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Does your site have REST API enabled?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'Does your site have REST API enabled?', 'woocommerce' ) ); ?></td>
 			<td><?php echo 'yes' === get_option( 'woocommerce_api_enabled' ) ? '<mark class="yes">&#10004;</mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="API Version"><?php _e( 'API Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'What version of the REST API does your site use?', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'What version of the REST API does your site use?', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( WC_API::VERSION ); ?></td>
 		</tr>
 	</tbody>
@@ -486,7 +486,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 
 				echo '<tr><td data-export-label="' . esc_attr( $page_name ) . '">' . $page_name . ':</td>';
-				echo '<td class="help"><a href="#" class="help_tip" data-tip="' . esc_attr( $values['help']  ) . '">[?]</a></td><td>';
+				echo '<td class="help">' . wc_add_help_tip( $values['help']  ) . '</td><td>';
 
 				// Page ID check
 				if ( ! $page_id ) {
@@ -523,7 +523,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Taxonomies"><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo ' <a href="#" class="help_tip" data-tip="' . esc_attr__( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) . '">[?]</a>'; ?></th>
+			<th colspan="3" data-export-label="Taxonomies"><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo wc_add_help_tip( __( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -588,12 +588,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="Name"><?php _e( 'Name', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The name of the current active theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The name of the current active theme.', 'woocommerce' ) ); ?></td>
 			<td><?php echo $active_theme->Name; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Version"><?php _e( 'Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the current active theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The installed version of the current active theme.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				echo esc_html( $theme_version );
 
@@ -604,12 +604,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Author URL"><?php _e( 'Author URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The theme developers URL.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The theme developers URL.', 'woocommerce' ) ); ?></td>
 			<td><?php echo $active_theme->{'Author URI'}; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Child Theme"><?php _e( 'Child Theme', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				echo is_child_theme() ? '<mark class="yes">&#10004;</mark>' : '&#10005; &ndash; ' . sprintf( __( 'If you\'re modifying WooCommerce or a parent theme you didn\'t build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' );
 			?></td>
@@ -620,23 +620,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 		<tr>
 			<td data-export-label="Parent Theme Name"><?php _e( 'Parent Theme Name', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The name of the parent theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The name of the parent theme.', 'woocommerce' ) ); ?></td>
 			<td><?php echo $parent_theme->Name; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Parent Theme Version"><?php _e( 'Parent Theme Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The installed version of the parent theme.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The installed version of the parent theme.', 'woocommerce' ) ); ?></td>
 			<td><?php echo  $parent_theme->Version; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Parent Theme Author URL"><?php _e( 'Parent Theme Author URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'The parent theme developers URL.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'The parent theme developers URL.', 'woocommerce' ) ); ?></td>
 			<td><?php echo $parent_theme->{'Author URI'}; ?></td>
 		</tr>
 		<?php endif ?>
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php _e( 'WooCommerce Support', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) . '">[?]</a>'; ?></td>
+			<td class="help"><?php echo wc_add_help_tip( __( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); ?></td>
 			<td><?php
 				if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( $active_theme->template, wc_get_core_supported_themes() ) ) {
 					echo '<mark class="error">' . __( 'Not Declared', 'woocommerce' ) . '</mark>';
@@ -650,7 +650,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Templates"><?php _e( 'Templates', 'woocommerce' ); ?><?php echo ' <a href="#" class="help_tip" data-tip="' . esc_attr__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) . '">[?]</a>'; ?></th>
+			<th colspan="3" data-export-label="Templates"><?php _e( 'Templates', 'woocommerce' ); ?><?php echo wc_add_help_tip( __( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -731,7 +731,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/javascript">
 
-	jQuery( 'a.help_tip' ).click( function() {
+	jQuery( 'a.help_tip, a.woocommerce-help-tip' ).click( function() {
 		return false;
 	});
 
@@ -780,7 +780,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			jQuery( '#debug-report' ).find( 'textarea' ).val( report ).focus().select();
 			jQuery( this ).fadeOut();
 			return false;
-		} catch( e ){
+		} catch ( e ) {
+			/*jshint devel: true */
 			console.log( e );
 		}
 
