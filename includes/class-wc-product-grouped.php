@@ -87,7 +87,7 @@ class WC_Product_Grouped extends WC_Product {
 	public function get_children() {
 		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
         	$transient_name = 'wc_product_children_' . $this->id;
-			$this->children = get_transient( $transient_name );
+			$this->children = array_filter( array_map( 'absint', (array) get_transient( $transient_name ) ) );
 
         	if ( empty( $this->children ) ) {
 
