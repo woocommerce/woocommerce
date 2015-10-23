@@ -203,7 +203,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 							<th class="name"><?php _e( 'Name', 'woocommerce' ); ?></th>
 							<th class="id"><?php _e( 'ID', 'woocommerce' ); ?></th>
 							<th class="status"><?php _e( 'Enabled', 'woocommerce' ); ?></th>
-							<th class="priority"><?php _e( 'Selection Priority', 'woocommerce' ); ?> <?php echo wc_add_help_tip( __( 'Available methods will be chosen by default in this order. If multiple methods have the same priority, they will be sorted by cost.', 'woocommerce' ) ); ?></th>
+							<th class="priority"><?php _e( 'Selection Priority', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Available methods will be chosen by default in this order. If multiple methods have the same priority, they will be sorted by cost.', 'woocommerce' ) ); ?></th>
 						</tr>
 					</thead>
 					<tbody>

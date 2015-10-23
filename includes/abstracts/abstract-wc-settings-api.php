@@ -260,7 +260,7 @@ abstract class WC_Settings_API {
 			$tip = '';
 		}
 
-		return $tip ? wc_add_help_tip( $tip, true ) : '';
+		return $tip ? wc_help_tip( $tip, true ) : '';
 	}
 
 	/**

@@ -634,7 +634,7 @@ class WC_Admin_Settings {
 		if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ) ) ) {
 			$tooltip_html = '<p class="description">' . $tooltip_html . '</p>';
 		} elseif ( $tooltip_html ) {
-			$tooltip_html = wc_add_help_tip( $tooltip_html );
+			$tooltip_html = wc_help_tip( $tooltip_html );
 		}
 
 		return array(

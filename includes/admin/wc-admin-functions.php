@@ -387,7 +387,7 @@ function wc_save_order_items( $order_id, $items ) {
  * @param  bool $allow_html Allow sanitized HTML if true or escape
  * @return string
  */
-function wc_add_help_tip( $tip, $allow_html = false ) {
+function wc_help_tip( $tip, $allow_html = false ) {
 	if ( $allow_html ) {
 		$tip = wc_sanitize_tooltip( $tip );
 	} else {

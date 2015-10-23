@@ -200,7 +200,7 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * @param string $desc (default: '')
 	 */
 	public function color_picker( $name, $id, $value, $desc = '' ) {
-		echo '<div class="color_box">' . wc_add_help_tip( $desc ) . '
+		echo '<div class="color_box">' . wc_help_tip( $desc ) . '
 			<input name="' . esc_attr( $id ). '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
 		</div>';
 	}

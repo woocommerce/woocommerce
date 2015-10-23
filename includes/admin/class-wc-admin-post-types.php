@@ -656,7 +656,7 @@ class WC_Admin_Post_Types {
 									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?>
 								<?php endif; ?>
 								<?php if ( ! empty( $item_meta_html ) ) : ?>
-									<?php echo wc_add_help_tip( $item_meta_html ); ?>
+									<?php echo wc_help_tip( $item_meta_html ); ?>
 								<?php endif; ?>
 							</td>
 						</tr>
