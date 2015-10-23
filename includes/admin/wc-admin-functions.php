@@ -394,5 +394,5 @@ function wc_help_tip( $tip, $allow_html = false ) {
 		$tip = esc_attr( $tip );
 	}
 
-	return '<i class="woocommerce-help-tip" data-tip="' . $tip . '"></i>';
+	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
 }
