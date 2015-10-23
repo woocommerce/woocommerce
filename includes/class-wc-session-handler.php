@@ -81,7 +81,7 @@ class WC_Session_Handler extends WC_Session {
 	public function set_customer_session_cookie( $set ) {
 		if ( $set ) {
 			// Set/renew our cookie
-			$to_hash           = $this->_customer_id . $this->_session_expiration;
+			$to_hash           = $this->_customer_id . '|' . $this->_session_expiration;
 			$cookie_hash       = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
 			$cookie_value      = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
 			$this->_has_cookie = true;
@@ -138,7 +138,7 @@ class WC_Session_Handler extends WC_Session {
 		list( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) = explode( '||', $_COOKIE[ $this->_cookie ] );
 
 		// Validate hash
-		$to_hash = $customer_id . $session_expiration;
+		$to_hash = $customer_id . '|' . $session_expiration;
 		$hash    = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
 
 		if ( ! hash_equals( $hash, $cookie_hash ) ) {
