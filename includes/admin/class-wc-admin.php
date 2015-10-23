@@ -99,13 +99,13 @@ class WC_Admin {
 	 * Transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
-		if ( ! get_transient( '_wc_activation_redirect' ) || is_network_admin() || isset( $_GET['activate-multi'] ) || ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! get_transient( '_wc_activation_redirect' ) ) {
 			return;
 		}
 
 		delete_transient( '_wc_activation_redirect' );
 
-		if ( ! empty( $_GET['page'] ) && in_array( $_GET['page'], array( 'wc-setup', 'wc-about' ) ) ) {
+		if ( ( ! empty( $_GET['page'] ) && in_array( $_GET['page'], array( 'wc-setup', 'wc-about' ) ) ) || is_network_admin() || isset( $_GET['activate-multi'] ) || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
