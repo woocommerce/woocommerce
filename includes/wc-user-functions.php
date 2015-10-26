@@ -550,7 +550,7 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
 
 /**
- * Get review verification status.
+ * Get review verification status
  * @param  int $comment_id
  * @return bool
  */
@@ -564,3 +564,22 @@ function wc_review_is_from_verified_owner( $comment_id ) {
 
 	return (bool) $verified;
 }
+
+/**
+ * Disable author archives for customers
+ *
+ * @since 2.5.0
+ */
+function wc_disable_author_archives_for_customers() {
+	global $wp_query, $author;
+
+	if ( is_author() ) {
+		$user = get_user_by( 'id', $author );
+
+		if ( isset( $user->roles[0] ) && 'customer' === $user->roles[0] ) {
+			wp_redirect( wc_get_page_permalink( 'shop' ) );
+		}
+	}
+}
+
+add_action( 'template_redirect', 'wc_disable_author_archives_for_customers' );
