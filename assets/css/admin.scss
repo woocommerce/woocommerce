@@ -184,6 +184,26 @@ mark.amount {
 	}
 }
 
+/**
+ * Help Tip
+ */
+.woocommerce-help-tip {
+	color: #666;
+	display: inline-block;
+	font-size: 13px;
+	font-style: normal;
+	height: 16px;
+	line-height: 16px;
+	position: relative;
+	vertical-align: middle;
+	width: 16px;
+
+	&:after {
+		@include icon( "\e018" );
+		cursor: help;
+	}
+}
+
 table.wc_status_table {
 	margin-bottom: 1em;
 
@@ -2051,12 +2071,16 @@ table.wc_shipping {
 }
 
 img.help_tip {
-	vertical-align: middle;
 	margin: 0 0 0 9px;
+	vertical-align: middle;
 }
 
 .postbox img.help_tip {
 	margin-top: 0px;
+}
+
+.postbox .woocommerce-help-tip {
+	margin: 0 0 0 9px;
 }
 
 .status-enabled,
@@ -2131,7 +2155,8 @@ img.help_tip {
 			width: 100%;
 		}
 
-		img.help_tip {
+		img.help_tip,
+		.woocommerce-help-tip {
 			padding: 0;
 			margin: -4px 0 0 5px;
 			vertical-align: middle;
@@ -2158,15 +2183,21 @@ img.help_tip {
 			padding-right: inherit;
 		}
 
-		th img.help_tip {
+		th img.help_tip,
+		th .woocommerce-help-tip {
 			margin: 0 -24px 0 0;
 			float: right;
+		}
+
+		.wp-list-table .woocommerce-help-tip {
+			float: none;
 		}
 
 		fieldset {
 			margin-top: 4px;
 
-			img.help_tip {
+			img.help_tip,
+			.woocommerce-help-tip {
 				margin: -3px 0 0 5px;
 			}
 

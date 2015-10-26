@@ -45,7 +45,7 @@ class WC_Meta_Box_Order_Notes {
 
 				$note_classes = get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? array( 'customer-note', 'note' ) : array( 'note' );
 				$note_classes = apply_filters( 'woocommerce_order_note_class', $note_classes, $note );
-				
+
 				?>
 				<li rel="<?php echo absint( $note->comment_ID ) ; ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 					<div class="note_content">
@@ -67,7 +67,7 @@ class WC_Meta_Box_Order_Notes {
 		echo '</ul>';
 		?>
 		<div class="add_note">
-			<h4><?php _e( 'Add note', 'woocommerce' ); ?> <img class="help_tip" data-tip='<?php esc_attr_e( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ); ?>' src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" /></h4>
+			<h4><?php _e( 'Add note', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ) ); ?></h4>
 			<p>
 				<textarea type="text" name="order_note" id="add_order_note" class="input-text" cols="20" rows="5"></textarea>
 			</p>
