@@ -2,6 +2,14 @@
 /**
  * Checkout Form
  *
+ * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-checkout.php
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
+ * will need to copy the new files to your theme to maintain compatibility. We try to do this
+ * as little as possible, but it does happen. When this occurs the version of the template file will
+ * be bumped and the readme will list any important changes.
+ *
+ * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     2.3.0
@@ -42,9 +50,9 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', WC()->cart->g
 
 		<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
 
-		<h3 id="order_review_heading"><?php _e( 'Your order', 'woocommerce' ); ?></h3>
-
 	<?php endif; ?>
+
+	<h3 id="order_review_heading"><?php _e( 'Your order', 'woocommerce' ); ?></h3>
 
 	<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
 

@@ -57,15 +57,20 @@ class WC_Install {
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
 			self::update();
-
-			// Update complete
 			WC_Admin_Notices::remove_notice( 'update' );
-
-			// What's new redirect
-			delete_transient( '_wc_activation_redirect' );
-			wp_redirect( admin_url( 'index.php?page=wc-about&wc-updated=true' ) );
-			exit;
+			add_action( 'admin_notices', array( __CLASS__, 'updated_notice' ) );
 		}
+	}
+
+	/**
+	 * Show notice stating update was successful.
+	 */
+	public static function updated_notice() {
+		?>
+		<div id="message" class="updated woocommerce-message wc-connect">
+			<p><?php _e( 'WooCommerce data update complete. Thank you for updating to the latest version!', 'woocommerce' ); ?></p>
+		</div>
+		<?php
 	}
 
 	/**
@@ -114,10 +119,6 @@ class WC_Install {
 		// No page? Let user run wizard again..
 		} elseif ( ! get_option( 'woocommerce_cart_page_id' ) ) {
 			WC_Admin_Notices::add_notice( 'install' );
-
-		// Show welcome screen for major updates only
-		} elseif ( version_compare( $current_wc_version, $major_wc_version, '<' ) ) {
-			set_transient( '_wc_activation_redirect', 1, 30 );
 		}
 
 		if ( ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( self::$db_updates ) ), '<' ) ) {
@@ -361,6 +362,14 @@ class WC_Install {
 		}
 
 		return "
+CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
+  session_id bigint(20) NOT NULL AUTO_INCREMENT,
+  session_key char(32) NOT NULL,
+  session_value longtext NOT NULL,
+  session_expiry bigint(20) NOT NULL,
+  UNIQUE KEY  session_id (session_id),
+  PRIMARY KEY  session_key (session_key)
+) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   key_id bigint(20) NOT NULL auto_increment,
   user_id bigint(20) NOT NULL,
@@ -473,9 +482,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 
 		// Customer role
 		add_role( 'customer', __( 'Customer', 'woocommerce' ), array(
-			'read' 						=> true,
-			'edit_posts' 				=> false,
-			'delete_posts' 				=> false
+			'read' 					=> true
 		) );
 
 		// Shop manager role
@@ -738,6 +745,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	public static function wpmu_drop_tables( $tables ) {
 		global $wpdb;
 
+		$tables[] = $wpdb->prefix . 'woocommerce_sessions';
 		$tables[] = $wpdb->prefix . 'woocommerce_api_keys';
 		$tables[] = $wpdb->prefix . 'woocommerce_attribute_taxonomies';
 		$tables[] = $wpdb->prefix . 'woocommerce_downloadable_product_permissions';

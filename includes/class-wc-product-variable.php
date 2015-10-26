@@ -24,7 +24,7 @@ class WC_Product_Variable extends WC_Product {
 	public $total_stock;
 
 	/** @private array Array of variation prices. */
-	private $prices_array;
+	private $prices_array = array();
 
 	/**
 	 * Constructor
@@ -264,36 +264,47 @@ class WC_Product_Variable extends WC_Product {
 	public function get_variation_prices( $display = false ) {
 		global $wp_filter;
 
-		if ( ! empty( $this->prices_array ) ) {
-			return $this->prices_array;
-		}
+		/**
+		 * Transient name for storing prices for this product.
+		 * Max transient length is 45, -10 for get_transient_version.
+		 * @var string
+		 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
+		 */
+		$transient_name = 'wc_var_prices' . $this->id . '_' . WC_Cache_Helper::get_transient_version( 'product' );
 
 		/**
 		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
-		 * Max transient length is 45, -10 for get_transient_version.
+		 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
 		 * @var string
 		 */
-		$hash = array( $this->id, $display, $display ? WC_Tax::get_rates() : array() );
+		if ( $display ) {
+			$price_hash = array( true, WC_Tax::get_rates(), get_option( 'woocommerce_tax_display_shop' ) );
+		} else {
+			$price_hash = array( false );
+		}
 
 		foreach ( $wp_filter as $key => $val ) {
 			if ( in_array( $key, array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' ) ) ) {
-				$hash[ $key ] = $val;
+				$price_hash[ $key ] = $val;
 			}
 		}
 
-		/**
-		 * DEVELOPERS should filter this hash if offering conditonal pricing to keep it unique.
-		 */
-		$hash               = apply_filters( 'woocommerce_get_variation_prices_hash', $hash, $this, $display );
-		$cache_key          = 'wc_var_prices' . substr( md5( json_encode( $hash ) ), 0, 22 ) . WC_Cache_Helper::get_transient_version( 'product' );
-		$this->prices_array = get_transient( $cache_key );
+		$price_hash = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
 
-		if ( empty( $this->prices_array ) ) {
-			$prices           = array();
-			$regular_prices   = array();
-			$sale_prices      = array();
-			$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-			$variation_ids    = $this->get_children( true );
+		// If the value has already been generated, return it now
+		if ( ! empty( $this->prices_array[ $price_hash ] ) ) {
+			return $this->prices_array[ $price_hash ];
+		}
+
+		// Get value of transient
+		$this->prices_array = array_filter( (array) get_transient( $transient_name ) );
+
+		// If the prices are not stored for this hash, generate them
+		if ( empty( $this->prices_array[ $price_hash ] ) ) {
+			$prices         = array();
+			$regular_prices = array();
+			$sale_prices    = array();
+			$variation_ids  = $this->get_children( true );
 
 			foreach ( $variation_ids as $variation_id ) {
 				if ( $variation = $this->get_child( $variation_id ) ) {
@@ -308,7 +319,7 @@ class WC_Product_Variable extends WC_Product {
 
 					// If we are getting prices for display, we need to account for taxes
 					if ( $display ) {
-						if ( 'incl' === $tax_display_mode ) {
+						if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
 							$price         = '' === $price ? ''         : $variation->get_price_including_tax( 1, $price );
 							$regular_price = '' === $regular_price ? '' : $variation->get_price_including_tax( 1, $regular_price );
 							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_including_tax( 1, $sale_price );
@@ -329,19 +340,19 @@ class WC_Product_Variable extends WC_Product {
 			asort( $regular_prices );
 			asort( $sale_prices );
 
-			$this->prices_array = array(
+			$this->prices_array[ $price_hash ] = array(
 				'price'         => $prices,
 				'regular_price' => $regular_prices,
 				'sale_price'    => $sale_prices
 			);
 
-			set_transient( $cache_key, $this->prices_array, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, $this->prices_array, DAY_IN_SECONDS * 30 );
 		}
 
 		/**
-		 * Give plugins one last chance to filter the variation prices array.
+		 * Give plugins one last chance to filter the variation prices array which is being returned.
 		 */
-		return $this->prices_array = apply_filters( 'woocommerce_variation_prices', $this->prices_array, $this, $display );
+		return $this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
 	}
 
 	/**
@@ -458,7 +469,20 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function get_variation_default_attributes() {
 		$default = isset( $this->default_attributes ) ? $this->default_attributes : '';
-		return apply_filters( 'woocommerce_product_default_attributes', (array) maybe_unserialize( $default ), $this );
+		return apply_filters( 'woocommerce_product_default_attributes', array_filter( (array) maybe_unserialize( $default ) ), $this );
+	}
+
+	/**
+	 * Check if variable product has default attributes set
+	 *
+	 * @access public
+	 * @return bool
+	 */
+	public function has_default_attributes() {
+		if ( ! $this->get_variation_default_attributes() ) {
+			return true;
+		}
+		return false;
 	}
 
 	/**

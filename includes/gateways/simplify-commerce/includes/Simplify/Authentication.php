@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2013, 2014 MasterCard International Incorporated
+ * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are 
@@ -29,18 +29,9 @@
 /**
  * Simplify_Authentication - encapsulates the credentials needed to make a request to the Simplify API.
  *
- * <p>$publicKey - this is your API public key
- * <p>$privateKey - this is your API private key
- * <p>$accessToken - Oauth access token that is needed to make API requests on behalf of another user
- * <p>
- * <p>
- * <code>new Simplify_Authentication($accessToken)</code>
- *
- * <p>
- * <code>new Simplify_Authentication($publicKey, $privateKey)</code>
- *
- * <p>
- * <code>new Simplify_Authentication($publicKey, $privateKey, $accessToken)</code>
+ * @var $publicKey - this is your API public key
+ * @var $privateKey - this is your API private key
+ * @var $accessToken - Oauth access token that is needed to make API requests on behalf of another user
  */
 class Simplify_Authentication {
 

@@ -180,14 +180,22 @@ class WC_API_Products extends WC_API_Resource {
 
 		// add variations to variable products
 		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
-
 			$product_data['variations'] = $this->get_variation_data( $product );
 		}
 
 		// add the parent product data to an individual variation
 		if ( $product->is_type( 'variation' ) && $product->parent ) {
-
 			$product_data['parent'] = $this->get_product_data( $product->parent );
+		}
+
+		// Add grouped products data
+		if ( $product->is_type( 'grouped' ) && $product->has_child() ) {
+			$product_data['grouped_products'] = $this->get_grouped_products_data( $product );
+		}
+
+		if ( $product->is_type( 'simple' ) && ! empty( $product->post->post_parent ) ) {
+			$_product = wc_get_product( $product->post->post_parent );
+			$product_data['parent'] = $this->get_product_data( $_product );
 		}
 
 		return array( 'product' => apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields, $this->server ) );
@@ -391,8 +399,14 @@ class WC_API_Products extends WC_API_Resource {
 			$this->save_product_meta( $id, $data );
 
 			// Save variations
-			if ( isset( $data['type'] ) && 'variable' == $data['type'] && isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
-				$this->save_variations( $id, $data );
+			$product = get_product( $id );
+			if ( $product->is_type( 'variable' ) ) {
+				if ( isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
+					$this->save_variations( $id, $data );
+				} else {
+					// Just sync variations
+					WC_Product_Variable::sync( $id );
+				}
 			}
 
 			do_action( 'woocommerce_api_edit_product', $id, $data );
@@ -455,7 +469,7 @@ class WC_API_Products extends WC_API_Resource {
 				'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
 				'reviewer_name'  => $comment->comment_author,
 				'reviewer_email' => $comment->comment_author_email,
-				'verified'       => (bool) wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $id ),
+				'verified'       => wc_review_is_from_verified_owner( $comment->comment_ID ),
 			);
 		}
 
@@ -1032,6 +1046,8 @@ class WC_API_Products extends WC_API_Resource {
 				'value'   => $args['sku'],
 				'compare' => '='
 			);
+
+			$query_args['post_type'] = array( 'product', 'product_variation' );
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );
@@ -1047,8 +1063,6 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
-		$prices_precision = wc_get_price_decimals();
-
 		return array(
 			'title'              => $product->get_title(),
 			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
@@ -1060,9 +1074,9 @@ class WC_API_Products extends WC_API_Resource {
 			'virtual'            => $product->is_virtual(),
 			'permalink'          => $product->get_permalink(),
 			'sku'                => $product->get_sku(),
-			'price'              => wc_format_decimal( $product->get_price(), $prices_precision ),
-			'regular_price'      => wc_format_decimal( $product->get_regular_price(), $prices_precision ),
-			'sale_price'         => $product->get_sale_price() ? wc_format_decimal( $product->get_sale_price(), $prices_precision ) : null,
+			'price'              => $product->get_price(),
+			'regular_price'      => $product->get_regular_price(),
+			'sale_price'         => $product->get_sale_price() ? $product->get_sale_price() : null,
 			'price_html'         => $product->get_price_html(),
 			'taxable'            => $product->is_taxable(),
 			'tax_status'         => $product->get_tax_status(),
@@ -1080,7 +1094,7 @@ class WC_API_Products extends WC_API_Resource {
 			'on_sale'            => $product->is_on_sale(),
 			'product_url'        => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'        => $product->is_type( 'external' ) ? $product->get_button_text() : '',
-			'weight'             => $product->get_weight() ? wc_format_decimal( $product->get_weight(), 2 ) : null,
+			'weight'             => $product->get_weight() ? $product->get_weight() : null,
 			'dimensions'         => array(
 				'length' => $product->length,
 				'width'  => $product->width,
@@ -1103,7 +1117,7 @@ class WC_API_Products extends WC_API_Resource {
 			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
-			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
+			'featured_src'       => (string) wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => (int) $product->download_limit,
@@ -1113,6 +1127,7 @@ class WC_API_Products extends WC_API_Resource {
 			'total_sales'        => metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0,
 			'variations'         => array(),
 			'parent'             => array(),
+			'grouped_products'   => array(),
 		);
 	}
 
@@ -1124,8 +1139,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_variation_data( $product ) {
-		$prices_precision = wc_get_price_decimals();
-		$variations       = array();
+		$variations = array();
 
 		foreach ( $product->get_children() as $child_id ) {
 
@@ -1143,9 +1157,9 @@ class WC_API_Products extends WC_API_Resource {
 					'virtual'           => $variation->is_virtual(),
 					'permalink'         => $variation->get_permalink(),
 					'sku'               => $variation->get_sku(),
-					'price'             => wc_format_decimal( $variation->get_price(), $prices_precision ),
-					'regular_price'     => wc_format_decimal( $variation->get_regular_price(), $prices_precision ),
-					'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), $prices_precision ) : null,
+					'price'             => $variation->get_price(),
+					'regular_price'     => $variation->get_regular_price(),
+					'sale_price'        => $variation->get_sale_price() ? $variation->get_sale_price() : null,
 					'taxable'           => $variation->is_taxable(),
 					'tax_status'        => $variation->get_tax_status(),
 					'tax_class'         => $variation->get_tax_class(),
@@ -1156,7 +1170,7 @@ class WC_API_Products extends WC_API_Resource {
 					'purchaseable'      => $variation->is_purchasable(),
 					'visible'           => $variation->variation_is_visible(),
 					'on_sale'           => $variation->is_on_sale(),
-					'weight'            => $variation->get_weight() ? wc_format_decimal( $variation->get_weight(), 2 ) : null,
+					'weight'            => $variation->get_weight() ? $variation->get_weight() : null,
 					'dimensions'        => array(
 						'length' => $variation->length,
 						'width'  => $variation->width,
@@ -1174,6 +1188,31 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		return $variations;
+	}
+
+	/**
+	 * Get grouped products data
+	 *
+	 * @since  2.5.0
+	 * @param  WC_Product $product
+	 *
+	 * @return array
+	 */
+	private function get_grouped_products_data( $product ) {
+		$products = array();
+
+		foreach ( $product->get_children() as $child_id ) {
+			$_product = $product->get_child( $child_id );
+
+			if ( ! $_product->exists() ) {
+				continue;
+			}
+
+			$products[] = $this->get_product_data( $_product );
+
+		}
+
+		return $products;
 	}
 
 	/**
@@ -1280,15 +1319,14 @@ class WC_API_Products extends WC_API_Resource {
 				if ( $is_taxonomy ) {
 
 					if ( isset( $attribute['options'] ) ) {
-						// Select based attributes - Format values (posted values are slugs)
-						if ( is_array( $attribute['options'] ) ) {
-							$values = array_map( 'sanitize_title', $attribute['options'] );
+						$options = $attribute['options'];
 
-						// Text based attributes - Posted values are term names - don't change to slugs
-						} else {
-							$values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute['options'] ) );
+						if ( ! is_array( $attribute['options'] ) ) {
+							// Text based attributes - Posted values are term names
+							$options = explode( WC_DELIMITER, $options );
 						}
 
+						$values = array_map( 'wc_sanitize_term_text_based', $options );
 						$values = array_filter( $values, 'strlen' );
 					} else {
 						$values = array();
@@ -1518,7 +1556,12 @@ class WC_API_Products extends WC_API_Resource {
 
 				// Stock quantity
 				if ( isset( $data['stock_quantity'] ) ) {
-					wc_update_product_stock( $product_id, intval( $data['stock_quantity'] ) );
+					wc_update_product_stock( $product_id, wc_stock_amount( $data['stock_quantity'] ) );
+				} else if ( isset( $data['inventory_delta'] ) ) {
+					$stock_quantity  = wc_stock_amount( get_post_meta( $product_id, '_stock', true ) );
+					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
+
+					wc_update_product_stock( $product_id, wc_stock_amount( $stock_quantity ) );
 				}
 			} else {
 
@@ -1776,6 +1819,11 @@ class WC_API_Products extends WC_API_Resource {
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
+				}  else if ( isset( $data['inventory_delta'] ) ) {
+					$stock_quantity  = wc_stock_amount( get_post_meta( $variation_id, '_stock', true ) );
+					$stock_quantity += wc_stock_amount( $data['inventory_delta'] );
+
+					wc_update_product_stock( $variation_id, wc_stock_amount( $stock_quantity ) );
 				}
 			} else {
 				delete_post_meta( $variation_id, '_backorders' );

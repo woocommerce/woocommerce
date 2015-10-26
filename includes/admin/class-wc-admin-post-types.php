@@ -76,6 +76,7 @@ class WC_Admin_Post_Types {
 		add_action( 'wp_trash_post', array( $this, 'trash_post' ) );
 		add_action( 'untrash_post', array( $this, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( $this, 'delete_order_items' ) );
+		add_action( 'before_delete_post', array( $this, 'delete_order_downloadable_permissions' ) );
 
 		// Edit post screens
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
@@ -100,6 +101,12 @@ class WC_Admin_Post_Types {
 
 		// Disable DFW feature pointer
 		add_action( 'admin_footer', array( $this, 'disable_dfw_feature_pointer' ) );
+
+		// If first time editing, disable columns by default.
+		if ( false === get_user_option( 'manageedit-shop_ordercolumnshidden' ) ) {
+			$user = wp_get_current_user();
+			update_user_option( $user->ID, 'manageedit-shop_ordercolumnshidden', array( 0 => 'billing_address' ), true );
+		}
 	}
 
 	/**
@@ -209,7 +216,6 @@ class WC_Admin_Post_Types {
 		$columns          = array();
 		$columns['cb']    = '<input type="checkbox" />';
 		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
-		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
 		$columns['name']  = __( 'Name', 'woocommerce' );
 
 		if ( wc_product_sku_enabled() ) {
@@ -261,6 +267,7 @@ class WC_Admin_Post_Types {
 		$columns['order_status']     = '<span class="status_head tips" data-tip="' . esc_attr__( 'Status', 'woocommerce' ) . '">' . esc_attr__( 'Status', 'woocommerce' ) . '</span>';
 		$columns['order_title']      = __( 'Order', 'woocommerce' );
 		$columns['order_items']      = __( 'Purchased', 'woocommerce' );
+		$columns['billing_address']  = __( 'Billing', 'woocommerce' );
 		$columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
 		$columns['customer_message'] = '<span class="notes_head tips" data-tip="' . esc_attr__( 'Customer Message', 'woocommerce' ) . '">' . esc_attr__( 'Customer Message', 'woocommerce' ) . '</span>';
 		$columns['order_notes']      = '<span class="order-notes_head tips" data-tip="' . esc_attr__( 'Order Notes', 'woocommerce' ) . '">' . esc_attr__( 'Order Notes', 'woocommerce' ) . '</span>';
@@ -291,7 +298,7 @@ class WC_Admin_Post_Types {
 				$edit_link = get_edit_post_link( $post->ID );
 				$title     = _draft_or_post_title();
 
-				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) .'">' . $title .'</a>';
+				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
 
 				_post_states( $post );
 
@@ -480,9 +487,11 @@ class WC_Admin_Post_Types {
 				$edit_link = get_edit_post_link( $post->ID );
 				$title     = _draft_or_post_title();
 
-				echo '<strong><a href="' . esc_attr( $edit_link ) . '" class="row-title">' . esc_html( $title ). '</a></strong>';
+				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
 
 				_post_states( $post );
+
+				echo '</strong>';
 
 				$this->_render_shop_coupon_row_actions( $post, $title );
 			break;
@@ -647,7 +656,7 @@ class WC_Admin_Post_Types {
 									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?>
 								<?php endif; ?>
 								<?php if ( ! empty( $item_meta_html ) ) : ?>
-									<a class="tips" href="#" data-tip="<?php echo esc_attr( $item_meta_html ); ?>">[?]</a>
+									<?php echo wc_help_tip( $item_meta_html ); ?>
 								<?php endif; ?>
 							</td>
 						</tr>
@@ -657,6 +666,19 @@ class WC_Admin_Post_Types {
 					echo '</table>';
 
 				} else echo '&ndash;';
+			break;
+			case 'billing_address' :
+
+				if ( $address = $the_order->get_formatted_billing_address() ) {
+					echo esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) );
+				} else {
+					echo '&ndash;';
+				}
+
+				if ( $the_order->billing_phone ) {
+					echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->billing_phone ) . '</small>';
+				}
+
 			break;
 			case 'shipping_address' :
 
@@ -707,16 +729,6 @@ class WC_Admin_Post_Types {
 				}
 			break;
 			case 'order_title' :
-
-				$customer_tip = array();
-
-				if ( $address = $the_order->get_formatted_billing_address() ) {
-					$customer_tip[] = __( 'Billing:', 'woocommerce' ) . ' ' . $address . '<br/><br/>';
-				}
-
-				if ( $the_order->billing_phone ) {
-					$customer_tip[] = __( 'Tel:', 'woocommerce' ) . ' ' . $the_order->billing_phone;
-				}
 
 				if ( $the_order->user_id ) {
 					$user_info = get_userdata( $the_order->user_id );
@@ -1598,7 +1610,7 @@ class WC_Admin_Post_Types {
 	 * Filters for post types
 	 */
 	public function restrict_manage_posts() {
-		global $typenow, $wp_query;
+		global $typenow;
 
 		if ( in_array( $typenow, wc_get_order_types( 'order-meta-boxes' ) ) ) {
 			$this->shop_order_filters();
@@ -1710,7 +1722,7 @@ class WC_Admin_Post_Types {
 		if ( ! empty( $_GET['_customer_user'] ) ) {
 			$user_id     = absint( $_GET['_customer_user'] );
 			$user        = get_user_by( 'id', $user_id );
-			$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
+			$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 		}
 		?>
 		<input type="hidden" class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo htmlspecialchars( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
@@ -1853,15 +1865,17 @@ class WC_Admin_Post_Types {
 			if ( is_numeric( $term ) ) {
 				$search_ids[] = $term;
 			}
+
 			// Attempt to get a SKU
-			$sku_to_id = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='_sku' AND meta_value LIKE '%%%s%%';", wc_clean( $term ) ) );
+			$sku_to_id = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_parent FROM {$wpdb->posts} LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id WHERE meta_key='_sku' AND meta_value LIKE %s;", '%' . $wpdb->esc_like( wc_clean( $term ) ) . '%' ) );
+			$sku_to_id = array_merge( wp_list_pluck( $sku_to_id, 'ID' ), wp_list_pluck( $sku_to_id, 'post_parent' ) );
 
 			if ( $sku_to_id && sizeof( $sku_to_id ) > 0 ) {
 				$search_ids = array_merge( $search_ids, $sku_to_id );
 			}
 		}
 
-		$search_ids = array_filter( array_map( 'absint', $search_ids ) );
+		$search_ids = array_filter( array_unique( array_map( 'absint', $search_ids ) ) );
 
 		if ( sizeof( $search_ids ) > 0 ) {
 			$where = str_replace( 'AND (((', "AND ( ({$wpdb->posts}.ID IN (" . implode( ',', $search_ids ) . ")) OR ((", $where );
@@ -2030,6 +2044,24 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
+	 * Remove downloadable permissions on permanent order deletion
+	 */
+	public function delete_order_downloadable_permissions( $postid ) {
+		global $wpdb;
+
+		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
+			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
+
+			$wpdb->query( $wpdb->prepare( "
+				DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				WHERE order_id = %d
+			", $postid ) );
+
+			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
+		}
+	}
+
+	/**
 	 * Change title boxes in admin.
 	 * @param  string $text
 	 * @param  object $post
@@ -2055,7 +2087,7 @@ class WC_Admin_Post_Types {
 	public function edit_form_after_title( $post ) {
 		if ( 'shop_coupon' === $post->post_type ) {
 			?>
-			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo esc_textarea( $post->post_excerpt ); ?></textarea>
+			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // This is already escaped in core ?></textarea>
 			<?php
 		}
 	}

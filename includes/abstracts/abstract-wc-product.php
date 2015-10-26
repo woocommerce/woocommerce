@@ -1310,7 +1310,19 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_attributes() {
-		return apply_filters( 'woocommerce_get_product_attributes', (array) maybe_unserialize( $this->product_attributes ) );
+		$attributes = array_filter( (array) maybe_unserialize( $this->product_attributes ) );
+		$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_name' );
+
+		// Check for any attributes which have been removed globally
+		foreach ( $attributes as $key => $attribute ) {
+			if ( $attribute['is_taxonomy'] ) {
+				if ( ! in_array( substr( $attribute['name'], 3 ), $taxonomies ) ) {
+					unset( $attributes[ $key ] );
+				}
+			}
+		}
+
+		return apply_filters( 'woocommerce_get_product_attributes', $attributes );
 	}
 
 	/**

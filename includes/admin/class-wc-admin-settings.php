@@ -634,7 +634,7 @@ class WC_Admin_Settings {
 		if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ) ) ) {
 			$tooltip_html = '<p class="description">' . $tooltip_html . '</p>';
 		} elseif ( $tooltip_html ) {
-			$tooltip_html = '<img class="help_tip" data-tip="' . esc_attr( $tooltip_html ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" />';
+			$tooltip_html = wc_help_tip( $tooltip_html );
 		}
 
 		return array(

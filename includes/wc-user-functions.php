@@ -218,7 +218,7 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . $product_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
+	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
 
 	if ( false === ( $result = get_transient( $transient_name ) ) ) {
 		$customer_data = array( $user_id );
@@ -241,23 +241,22 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			return false;
 		}
 
-		$result = $wpdb->get_var(
-			$wpdb->prepare( "
-				SELECT COUNT( i.order_item_id ) FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-				WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
-				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-				AND im.meta_key IN ( '_product_id', '_variation_id' )
-				AND im.meta_value = %d
-				", $product_id
-			) . " AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )"
-		);
+		$result = $wpdb->get_col( "
+			SELECT im.meta_value FROM {$wpdb->posts} AS p
+			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+			WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
+			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+			AND im.meta_key IN ( '_product_id', '_variation_id' )
+			AND im.meta_value != 0
+			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+		" );
+		$result = array_map( 'intval', $result );
 
-		set_transient( $transient_name, $result ? 1 : 0, DAY_IN_SECONDS * 30 );
+		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
 	}
-	return (bool) $result;
+	return in_array( (int) $product_id, $result );
 }
 
 /**
@@ -537,3 +536,50 @@ function wc_get_customer_order_count( $user_id ) {
 
 	return absint( $count );
 }
+
+/**
+ * Reset _customer_user on orders when a user is deleted.
+ * @param int $user_id
+ */
+function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
+	global $wpdb;
+
+	$wpdb->update( $wpdb->postmeta, array( '_customer_user' => 0 ), array( '_customer_user' => $user_id ) );
+}
+
+add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
+
+/**
+ * Get review verification status
+ * @param  int $comment_id
+ * @return bool
+ */
+function wc_review_is_from_verified_owner( $comment_id ) {
+	$verified = get_comment_meta( $comment_id, 'verified', true );
+
+	// If no "verified" meta is present, generate it (if this is a product review).
+	if ( '' === $verified ) {
+		$verified = WC_Comments::add_comment_purchase_verification( $comment_id );
+	}
+
+	return (bool) $verified;
+}
+
+/**
+ * Disable author archives for customers
+ *
+ * @since 2.5.0
+ */
+function wc_disable_author_archives_for_customers() {
+	global $wp_query, $author;
+
+	if ( is_author() ) {
+		$user = get_user_by( 'id', $author );
+
+		if ( isset( $user->roles[0] ) && 'customer' === $user->roles[0] ) {
+			wp_redirect( wc_get_page_permalink( 'shop' ) );
+		}
+	}
+}
+
+add_action( 'template_redirect', 'wc_disable_author_archives_for_customers' );

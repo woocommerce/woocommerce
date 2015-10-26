@@ -2456,11 +2456,12 @@ abstract class WC_Abstract_Order {
 					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
 						$qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $this, $item );
 						$new_stock = $_product->reduce_stock( $qty );
+						$item_name = $_product->get_sku() ? $_product->get_sku(): $item['product_id'];
 
 						if ( isset( $item['variation_id'] ) && $item['variation_id'] ) {
-							$this->add_order_note( sprintf( __( 'Item #%s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $item['variation_id'], $new_stock + $qty, $new_stock) );
+							$this->add_order_note( sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock) );
 						} else {
-							$this->add_order_note( sprintf( __( 'Item #%s stock reduced from %s to %s.', 'woocommerce' ), $item['product_id'], $new_stock + $qty, $new_stock) );
+							$this->add_order_note( sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock) );
 						}
 						$this->send_stock_notifications( $_product, $new_stock, $item['qty'] );
 					}

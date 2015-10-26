@@ -155,13 +155,12 @@ class WC_Payment_Gateways {
 	 * Set the current, active gateway
 	 */
 	public function set_current_gateway( $gateways ) {
-		$default = get_option( 'woocommerce_default_gateway', current( array_keys( $gateways ) ) );
-		$current = WC()->session->get( 'chosen_payment_method', $default );
+		$current = WC()->session->get( 'chosen_payment_method' );
 
 		if ( isset( $gateways[ $current ] ) ) {
 			$gateways[ $current ]->set_current();
-		} elseif ( isset( $gateways[ $default ] ) ) {
-			$gateways[ $default ]->set_current();
+		} else {
+			current( $gateways )->set_current();
 		}
 	}
 
@@ -169,11 +168,8 @@ class WC_Payment_Gateways {
 	 * Save options in admin.
 	 */
 	public function process_admin_options() {
-
-		$default_gateway = ( isset( $_POST['default_gateway'] ) ) ? esc_attr( $_POST['default_gateway'] ) : '';
-		$gateway_order = ( isset( $_POST['gateway_order'] ) ) ? $_POST['gateway_order'] : '';
-
-		$order = array();
+		$gateway_order = isset( $_POST['gateway_order'] ) ? $_POST['gateway_order'] : '';
+		$order         = array();
 
 		if ( is_array( $gateway_order ) && sizeof( $gateway_order ) > 0 ) {
 			$loop = 0;
@@ -183,7 +179,6 @@ class WC_Payment_Gateways {
 			}
 		}
 
-		update_option( 'woocommerce_default_gateway', $default_gateway );
 		update_option( 'woocommerce_gateway_order', $order );
 	}
 }

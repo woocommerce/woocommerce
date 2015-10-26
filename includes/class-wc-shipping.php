@@ -229,7 +229,7 @@ class WC_Shipping {
 
 			// Is a method already chosen?
 			if ( ! empty( $current_chosen_method ) && ! isset( $available_methods[ $current_chosen_method ] ) ) {
-				foreach ( $available_methods as $method_id => $method ) {
+				foreach ( $available_methods as $method_key => $method ) {
 					if ( strpos( $method->id, $current_chosen_method ) === 0 ) {
 						return $method->id;
 					}
@@ -239,12 +239,15 @@ class WC_Shipping {
 			// Order by priorities and costs
 			$prioritized_methods = array();
 
-			foreach ( $available_methods as $method_id => $method ) {
-				$priority                         = isset( $selection_priority[ $method_id ] ) ? absint( $selection_priority[ $method_id ] ) : 1;
+			foreach ( $available_methods as $method_key => $method ) {
+				// Some IDs contain : if they have multiple rates so use $method->method_id
+				$priority  = isset( $selection_priority[ $method->method_id ] ) ? absint( $selection_priority[ $method->method_id ] ): 1;
+
 				if ( empty( $prioritized_methods[ $priority ] ) ) {
 					$prioritized_methods[ $priority ] = array();
 				}
-				$prioritized_methods[ $priority ][ $method_id ] = $method->cost;
+
+				$prioritized_methods[ $priority ][ $method_key ] = $method->cost;
 			}
 
 			ksort( $prioritized_methods );
@@ -265,13 +268,13 @@ class WC_Shipping {
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
 	 */
 	public function calculate_shipping( $packages = array() ) {
-		if ( ! $this->enabled || empty( $packages ) ) {
-			return;
-		}
-
 		$this->shipping_total = null;
 		$this->shipping_taxes = array();
 		$this->packages       = array();
+
+		if ( ! $this->enabled || empty( $packages ) ) {
+			return;
+		}
 
 		// Calculate costs for passed packages
 		$package_keys 		= array_keys( $packages );

@@ -244,13 +244,12 @@ function wc_format_localized_decimal( $value ) {
 }
 
 /**
- * Clean variables
- *
- * @param string $var
- * @return string
+ * Clean variables using sanitize_text_field
+ * @param string|array $var
+ * @return string|array
  */
 function wc_clean( $var ) {
-	return sanitize_text_field( $var );
+	return is_array( $var ) ? array_map( 'wc_clean', $var ) : sanitize_text_field( $var );
 }
 
 /**

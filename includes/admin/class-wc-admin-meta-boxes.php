@@ -112,7 +112,7 @@ class WC_Admin_Meta_Boxes {
 			add_meta_box( 'woocommerce-order-data', sprintf( __( '%s Data', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
 			add_meta_box( 'woocommerce-order-items', sprintf( __( '%s Items', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
 			add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s Notes', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
-			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . ' <span class="tips" data-tip="' . esc_attr__( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) . '">[?]</span>', 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
+			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
 			add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s Actions', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
 			remove_meta_box( 'submitdiv', $type, 'side' );
 		}
@@ -137,9 +137,9 @@ class WC_Admin_Meta_Boxes {
 		remove_meta_box( 'pageparentdiv', 'product', 'side' );
 		remove_meta_box( 'commentstatusdiv', 'product', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'product', 'side' );
-		remove_meta_box( 'woothemes-settings', 'shop_coupon' , 'normal' );
-		remove_meta_box( 'commentstatusdiv', 'shop_coupon' , 'normal' );
-		remove_meta_box( 'slugdiv', 'shop_coupon' , 'normal' );
+		remove_meta_box( 'woothemes-settings', 'shop_coupon', 'normal' );
+		remove_meta_box( 'commentstatusdiv', 'shop_coupon', 'normal' );
+		remove_meta_box( 'slugdiv', 'shop_coupon', 'normal' );
 
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			remove_meta_box( 'commentsdiv', $type, 'normal' );

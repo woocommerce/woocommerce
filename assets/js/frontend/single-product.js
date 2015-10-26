@@ -48,12 +48,14 @@ jQuery( function( $ ) {
 
 	$( 'body' )
 		.on( 'click', '#respond p.stars a', function() {
-			var $star   = $( this ),
-				$rating = $( this ).closest( '#respond' ).find( '#rating' );
+			var $star   	= $( this ),
+				$rating 	= $( this ).closest( '#respond' ).find( '#rating' ),
+				$container 	= $( this ).closest( '.stars' );
 
 			$rating.val( $star.text() );
 			$star.siblings( 'a' ).removeClass( 'active' );
 			$star.addClass( 'active' );
+			$container.addClass( 'selected' );
 
 			return false;
 		})

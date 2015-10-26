@@ -241,7 +241,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 			$query = $this->query_customers( $filter );
 
-			return array( 'count' => count( $query->get_results() ) );
+			return array( 'count' => $query->get_total() );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -531,6 +531,11 @@ class WC_API_Customers extends WC_API_Resource {
 		// Custom Role
 		if ( ! empty( $args['role'] ) ) {
 			$query_args['role'] = $args['role'];
+
+			// Show users on all roles
+			if ( 'all' === $query_args['role'] ) {
+				unset( $query_args['role'] );
+			}
 		}
 
 		// Search

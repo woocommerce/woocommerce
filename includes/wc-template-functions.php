@@ -7,7 +7,7 @@
  * @author   WooThemes
  * @category Core
  * @package  WooCommerce/Functions
- * @version  2.4.0
+ * @version  2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -308,6 +308,10 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 			}
 		}
 
+		if ( is_product() && 'variable' === $product->product_type && $product->has_default_attributes() ) {
+			$classes[] = 'has-default-attributes';
+		}
+
 		$classes[] = $product->stock_status;
 	}
 
@@ -513,8 +517,50 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H3
 	 */
 	function woocommerce_template_loop_product_title() {
-		wc_get_template( 'loop/title.php' );
+		echo '<h3>' . get_the_title() . '</h3>';
 	}
+}
+if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
+
+	/**
+	 * Show the subcategory title in the product loop.
+	 */
+	function woocommerce_template_loop_category_title( $category ) {
+		?>
+		<h3>
+			<?php
+				echo $category->name;
+
+				if ( $category->count > 0 )
+					echo apply_filters( 'woocommerce_subcategory_count_html', ' <mark class="count">(' . $category->count . ')</mark>', $category );
+			?>
+		</h3>
+		<?php
+	}
+}
+/**
+ * Insert the opening anchor tag for products in the loop.
+ */
+function woocommerce_template_loop_product_link_open() {
+	echo '<a href="' . get_the_permalink() . '">';
+}
+/**
+ * Insert the opening anchor tag for products in the loop.
+ */
+function woocommerce_template_loop_product_link_close() {
+	echo '</a>';
+}
+/**
+ * Insert the opening anchor tag for categories in the loop.
+ */
+function woocommerce_template_loop_category_link_open( $category ) {
+	echo '<a href="' . get_term_link( $category->slug, 'product_cat' ) . '">';
+}
+/**
+ * Insert the opening anchor tag for categories in the loop.
+ */
+function woocommerce_template_loop_category_link_close() {
+	echo '</a>';
 }
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
@@ -1343,14 +1389,17 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
-		if ( is_shop() )
-			return get_option( 'woocommerce_shop_page_display' ) != 'subcategories';
+		if ( is_shop() ) {
+			return 'subcategories' !== get_option( 'woocommerce_shop_page_display' ) || is_search();
+		}
 
-		if ( ! is_product_taxonomy() )
+		if ( ! is_product_taxonomy() ) {
 			return false;
+		}
 
-		if ( is_search() || is_filtered() || is_paged() )
+		if ( is_search() || is_filtered() || is_paged() ) {
 			return true;
+		}
 
 		$term = get_queried_object();
 
@@ -1942,7 +1991,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 
 				foreach ( $terms as $term ) {
 					if ( in_array( $term->slug, $options ) ) {
-						echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
+						echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
 					}
 				}
 			} else {

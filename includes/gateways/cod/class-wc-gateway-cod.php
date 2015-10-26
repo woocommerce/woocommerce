@@ -127,7 +127,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			if ( 0 < sizeof( $order->get_items() ) ) {
 				foreach ( $order->get_items() as $item ) {
 					$_product = $order->get_product_from_item( $item );
-					if ( $_product->needs_shipping() ) {
+					if ( $_product && $_product->needs_shipping() ) {
 						$needs_shipping = true;
 						break;
 					}

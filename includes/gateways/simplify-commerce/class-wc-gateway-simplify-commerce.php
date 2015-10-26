@@ -150,7 +150,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		}
 
 		// Show message when using standard mode and no SSL on the checkout page
-		elseif ( 'standard' == $this->mode && 'no' == get_option( 'woocommerce_force_ssl_checkout' ) && ! class_exists( 'WordPressHTTPS' ) ) {
+		elseif ( 'standard' == $this->mode && ! wc_checkout_is_https() ) {
 			echo '<div class="error"><p>' . sprintf( __( 'Simplify Commerce is enabled, but the <a href="%s">force SSL option</a> is disabled; your checkout may not be secure! Please enable SSL and ensure your server has a valid SSL certificate - Simplify Commerce will only work in sandbox mode.', 'woocommerce'), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) . '</p></div>';
 		}
 	}
@@ -159,11 +159,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 * Check if this gateway is enabled
 	 */
 	public function is_available() {
-		if ( 'yes' != $this->enabled ) {
+		if ( 'yes' !== $this->enabled ) {
 			return false;
 		}
 
-		if ( 'standard' == $this->mode && ! is_ssl() && 'yes' != $this->sandbox ) {
+		if ( 'standard' === $this->mode && 'yes' !== $this->sandbox && ! wc_checkout_is_https() ) {
 			return false;
 		}
 

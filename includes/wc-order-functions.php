@@ -717,22 +717,6 @@ function wc_create_refund( $args = array() ) {
 		// Set total to total refunded which may vary from order items
 		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1, 'total' );
 
-		// Figure out if this is just a partial refund
-		$max_remaining_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
-		$max_remaining_items  = absint( $order->get_item_count() - $order->get_item_count_refunded() );
-
-		if ( $max_remaining_refund > 0 || $max_remaining_items > 0 ) {
-			/**
-			 * woocommerce_order_partially_refunded
-			 *
-			 * @since 2.4.0
-			 * Note: 3rd arg was added in err. Kept for bw compat. 2.4.3
-			 */
-			do_action( 'woocommerce_order_partially_refunded', $args['order_id'], $refund_id, $refund_id );
-		} else {
-			do_action( 'woocommerce_order_fully_refunded', $args['order_id'], $refund_id );
-		}
-
 		do_action( 'woocommerce_refund_created', $refund_id, $args );
 	}
 

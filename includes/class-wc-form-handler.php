@@ -289,11 +289,21 @@ class WC_Form_Handler {
 					WC()->customer->set_city( $order->billing_city );
 				}
 
+				// Terms
+				if ( ! empty( $_POST['terms-field'] ) && empty( $_POST['terms'] ) ) {
+					wc_add_notice( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ), 'error' );
+					return;
+				}
+
 				// Update payment method
 				if ( $order->needs_payment() ) {
-					$payment_method = wc_clean( $_POST['payment_method'] );
-
+					$payment_method     = isset( $_POST['payment_method'] ) ? wc_clean( $_POST['payment_method'] ) : false;
 					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+					if ( ! $payment_method ) {
+						wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
+						return;
+					}
 
 					// Update meta
 					update_post_meta( $order_id, '_payment_method', $payment_method );
@@ -319,7 +329,6 @@ class WC_Form_Handler {
 							wp_redirect( $result['redirect'] );
 							exit;
 						}
-
 					}
 
 				} else {
@@ -328,7 +337,6 @@ class WC_Form_Handler {
 					wp_safe_redirect( $order->get_checkout_order_received_url() );
 					exit;
 				}
-
 			}
 
 		}
@@ -722,7 +730,7 @@ class WC_Form_Handler {
 				}
 
 				// Get valid value from variation
-				$valid_value = $variation->variation_data[ $taxonomy ];
+				$valid_value = isset( $variation->variation_data[ $taxonomy ] ) ? $variation->variation_data[ $taxonomy ] : '';
 
 				// Allow if valid
 				if ( '' === $valid_value || $valid_value === $value ) {
@@ -758,7 +766,8 @@ class WC_Form_Handler {
 		if ( ! empty( $_POST['login'] ) && ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-login' ) ) {
 
 			try {
-				$creds  = array();
+				$creds    = array();
+				$username = trim( $_POST['username'] );
 
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $_POST['username'], $_POST['password'] );
@@ -767,7 +776,7 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . $validation_error->get_error_message() );
 				}
 
-				if ( empty( $_POST['username'] ) ) {
+				if ( empty( $username ) ) {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Username is required.', 'woocommerce' ) );
 				}
 
@@ -775,17 +784,17 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'Password is required.', 'woocommerce' ) );
 				}
 
-				if ( is_email( $_POST['username'] ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
-					$user = get_user_by( 'email', $_POST['username'] );
+				if ( is_email( $username ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
+					$user = get_user_by( 'email', $username );
 
 					if ( isset( $user->user_login ) ) {
-						$creds['user_login'] 	= $user->user_login;
+						$creds['user_login'] = $user->user_login;
 					} else {
 						throw new Exception( '<strong>' . __( 'Error', 'woocommerce' ) . ':</strong> ' . __( 'A user could not be found with this email address.', 'woocommerce' ) );
 					}
 
 				} else {
-					$creds['user_login'] 	= $_POST['username'];
+					$creds['user_login'] = $username;
 				}
 
 				$creds['user_password'] = $_POST['password'];
@@ -795,7 +804,7 @@ class WC_Form_Handler {
 
 				if ( is_wp_error( $user ) ) {
 					$message = $user->get_error_message();
-					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $_POST['username'] ) . '</strong>', $message );
+					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $username ) . '</strong>', $message );
 					throw new Exception( $message );
 				} else {
 

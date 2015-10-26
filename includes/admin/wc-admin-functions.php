@@ -376,3 +376,23 @@ function wc_save_order_items( $order_id, $items ) {
 	// inform other plugins that the items have been saved
 	do_action( 'woocommerce_saved_order_items', $order_id, $items );
 }
+
+/**
+ * Add help tips
+ * Display a WooCommerce help tip.
+ *
+ * @since  2.5.0
+ *
+ * @param  string $tip Help tip text
+ * @param  bool $allow_html Allow sanitized HTML if true or escape
+ * @return string
+ */
+function wc_help_tip( $tip, $allow_html = false ) {
+	if ( $allow_html ) {
+		$tip = wc_sanitize_tooltip( $tip );
+	} else {
+		$tip = esc_attr( $tip );
+	}
+
+	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
+}

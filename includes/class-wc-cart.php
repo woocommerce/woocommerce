@@ -969,6 +969,7 @@ class WC_Cart {
 		public function remove_cart_item( $cart_item_key ) {
 			if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
 				$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
+				unset( $this->removed_cart_contents[ $cart_item_key ]['data'] );
 
 				do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
 
@@ -993,6 +994,7 @@ class WC_Cart {
 		public function restore_cart_item( $cart_item_key ) {
 			if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
 				$this->cart_contents[ $cart_item_key ] = $this->removed_cart_contents[ $cart_item_key ];
+				$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $this->cart_contents[ $cart_item_key ]['variation_id'] ? $this->cart_contents[ $cart_item_key ]['variation_id'] : $this->cart_contents[ $cart_item_key ]['product_id'] );
 
 				do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
 
@@ -1899,12 +1901,12 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 
 		/**
-		 * add_fee function.
+		 * Add additional fee to the cart
 		 *
-		 * @param mixed $name
-		 * @param mixed $amount
-		 * @param bool $taxable (default: false)
-		 * @param string $tax_class (default: '')
+		 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
+		 * @param float $amount Fee amount.
+		 * @param bool $taxable (default: false) Is the fee taxable?
+		 * @param string $tax_class (default: '') The tax class for the fee if taxable. A blank string is standard tax class.
 		 */
 		public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 

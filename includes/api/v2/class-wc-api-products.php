@@ -367,8 +367,14 @@ class WC_API_Products extends WC_API_Resource {
 			$this->save_product_meta( $id, $data );
 
 			// Save variations
-			if ( isset( $data['type'] ) && 'variable' == $data['type'] && isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
-				$this->save_variations( $id, $data );
+			$product = get_product( $id );
+			if ( $product->is_type( 'variable' ) ) {
+				if ( isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
+					$this->save_variations( $id, $data );
+				} else {
+					// Just sync variations
+					WC_Product_Variable::sync( $id );
+				}
 			}
 
 			do_action( 'woocommerce_api_edit_product', $id, $data );
@@ -431,7 +437,7 @@ class WC_API_Products extends WC_API_Resource {
 				'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
 				'reviewer_name'  => $comment->comment_author,
 				'reviewer_email' => $comment->comment_author_email,
-				'verified'       => (bool) wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $id ),
+				'verified'       => wc_review_is_from_verified_owner( $comment->comment_ID ),
 			);
 		}
 
@@ -610,6 +616,8 @@ class WC_API_Products extends WC_API_Resource {
 				'value'   => $args['sku'],
 				'compare' => '='
 			);
+
+			$query_args['post_type'] = array( 'product', 'product_variation' );
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );
@@ -681,7 +689,7 @@ class WC_API_Products extends WC_API_Resource {
 			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
-			'featured_src'       => wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
+			'featured_src'       => (string) wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
 			'attributes'         => $this->get_attributes( $product ),
 			'downloads'          => $this->get_downloads( $product ),
 			'download_limit'     => (int) $product->download_limit,
@@ -858,15 +866,14 @@ class WC_API_Products extends WC_API_Resource {
 				if ( $is_taxonomy ) {
 
 					if ( isset( $attribute['options'] ) ) {
-						// Select based attributes - Format values (posted values are slugs)
-						if ( is_array( $attribute['options'] ) ) {
-							$values = array_map( 'sanitize_title', $attribute['options'] );
+						$options = $attribute['options'];
 
-						// Text based attributes - Posted values are term names - don't change to slugs
-						} else {
-							$values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute['options'] ) );
+						if ( ! is_array( $attribute['options'] ) ) {
+							// Text based attributes - Posted values are term names
+							$options = explode( WC_DELIMITER, $options );
 						}
 
+						$values = array_map( 'wc_sanitize_term_text_based', $options );
 						$values = array_filter( $values, 'strlen' );
 					} else {
 						$values = array();

@@ -19,13 +19,16 @@ jQuery( function( $ ) {
 			$( document.body ).bind( 'init_checkout', this.init_checkout );
 
 			// Payment methods
-			this.$order_review.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
+			this.$checkout_form.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
 
 			// Form submission
 			this.$checkout_form.on( 'submit', this.submit );
 
 			// Inline validation
 			this.$checkout_form.on( 'blur change', '.input-text, select', this.validate_field );
+
+			// Manual trigger
+			this.$checkout_form.on( 'update', this.trigger_update_checkout );
 
 			// Inputs/selects which update totals
 			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type=radio]', this.trigger_update_checkout );
@@ -37,7 +40,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.$order_review.find( 'input[name=payment_method]:checked' ).trigger( 'click' );
+			this.$checkout_form.find( 'input[name=payment_method]:checked' ).trigger( 'click' );
 			this.$checkout_form.find( '#ship-to-different-address input' ).change();
 
 			// Update on page load

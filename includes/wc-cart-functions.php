@@ -165,7 +165,13 @@ function wc_cart_totals_shipping_html() {
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
-		wc_get_template( 'cart/cart-shipping.php', array( 'package' => $package, 'available_methods' => $package['rates'], 'show_package_details' => ( sizeof( $packages ) > 1 ), 'index' => $i, 'chosen_method' => $chosen_method ) );
+		wc_get_template( 'cart/cart-shipping.php', array(
+			'package'              => $package,
+			'available_methods'    => $package['rates'],
+			'show_package_details' => sizeof( $packages ) > 1,
+			'index'                => $i,
+			'chosen_method'        => $chosen_method
+		) );
 	}
 }
 
@@ -263,11 +269,11 @@ function wc_cart_totals_fee_html( $fee ) {
 
 /**
  * Get a shipping methods full label including price
- * @param  object $method
+ * @param  WC_Shipping_Rate $method
  * @return string
  */
 function wc_cart_totals_shipping_method_label( $method ) {
-	$label = $method->label;
+	$label = $method->get_label();
 
 	if ( $method->cost > 0 ) {
 		if ( WC()->cart->tax_display_cart == 'excl' ) {
