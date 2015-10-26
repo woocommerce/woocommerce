@@ -11,10 +11,10 @@
  * as little as possible, but it does happen. When this occurs the version of the template file will
  * be bumped and the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @see     http://docs.woothemes.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -41,6 +41,8 @@ $verified = wc_review_is_from_verified_owner( $comment->comment_ID );
 
 			<?php endif; ?>
 
+			<?php do_action( 'woocommerce_review_before_comment_meta', $comment ); ?>
+
 			<?php if ( $comment->comment_approved == '0' ) : ?>
 
 				<p class="meta"><em><?php _e( 'Your comment is awaiting approval', 'woocommerce' ); ?></em></p>
@@ -60,5 +62,8 @@ $verified = wc_review_is_from_verified_owner( $comment->comment_ID );
 			<?php endif; ?>
 
 			<div itemprop="description" class="description"><?php comment_text(); ?></div>
+
+			<?php do_action( 'woocommerce_review_after_comment_text', $comment ); ?>
+
 		</div>
 	</div>
