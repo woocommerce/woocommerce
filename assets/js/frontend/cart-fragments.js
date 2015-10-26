@@ -10,7 +10,6 @@ jQuery( function( $ ) {
 	var $supports_html5_storage;
 	try {
 		$supports_html5_storage = ( 'sessionStorage' in window && window.sessionStorage !== null );
-
 		window.sessionStorage.setItem( 'wc', 'test' );
 		window.sessionStorage.removeItem( 'wc' );
 	} catch( err ) {
@@ -21,6 +20,14 @@ jQuery( function( $ ) {
 	function set_cart_creation_timestamp() {
 		if ( $supports_html5_storage ) {
 			sessionStorage.setItem( 'wc_cart_created', ( new Date() ).getTime() );
+		}
+	}
+
+	/** Set the cart hash in both session and local storage */
+	function set_cart_hash( cart_hash ) {
+		if ( $supports_html5_storage ) {
+			localStorage.setItem( 'wc_cart_hash', cart_hash );
+			sessionStorage.setItem( 'wc_cart_hash', cart_hash );
 		}
 	}
 
@@ -36,7 +43,7 @@ jQuery( function( $ ) {
 
 				if ( $supports_html5_storage ) {
 					sessionStorage.setItem( wc_cart_fragments_params.fragment_name, JSON.stringify( data.fragments ) );
-					sessionStorage.setItem( 'wc_cart_hash', data.cart_hash );
+					set_cart_hash( data.cart_hash );
 
 					if ( data.cart_hash ) {
 						set_cart_creation_timestamp();
@@ -67,13 +74,20 @@ jQuery( function( $ ) {
 			}
 
 			sessionStorage.setItem( wc_cart_fragments_params.fragment_name, JSON.stringify( fragments ) );
-			sessionStorage.setItem( 'wc_cart_hash', cart_hash );
+			set_cart_hash( cart_hash );
 		});
 
 		$( document.body ).bind( 'wc_fragments_refreshed', function() {
 			clearTimeout( cart_timeout );
 			cart_timeout = setTimeout( refresh_cart_fragment, day_in_ms );
 		} );
+
+		// Refresh when storage changes in another tab
+		$( window ).on( 'storage onstorage', function ( e ) {
+			if ( 'wc_cart_hash' === e.originalEvent.key && localStorage.getItem( 'wc_cart_hash' ) !== sessionStorage.getItem( 'wc_cart_hash' ) ) {
+				$.ajax( $fragment_refresh );
+			}
+		});
 
 		try {
 			var wc_fragments = $.parseJSON( sessionStorage.getItem( wc_cart_fragments_params.fragment_name ) ),
