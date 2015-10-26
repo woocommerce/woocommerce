@@ -149,7 +149,7 @@
 
 		// Upon gaining focus
 		.on( 'focusin touchstart', '.variations select', function() {
-			if ( ! $use_ajax ) {
+			if ( $use_ajax ) {
 				$form.trigger( 'woocommerce_variation_select_focusin' );
 				$form.trigger( 'check_variations', [ $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' ), true ] );
 			}
