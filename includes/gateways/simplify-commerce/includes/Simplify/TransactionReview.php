@@ -27,26 +27,19 @@
  */
 
 
-class Simplify_InvoiceItem extends Simplify_Object {
+class Simplify_TransactionReview extends Simplify_Object {
     /**
-     * Creates an Simplify_InvoiceItem object
-     * @param     array $hash a map of parameters; valid keys are:<dl style="padding-left:10px;">
-     *     <dt><tt>amount</tt></dt>    <dd>Amount of the invoice item in the smallest unit of your currency. Example: 100 = $1.00USD [min value: -9999900, max value: 9999900] <strong>required </strong></dd>
-     *     <dt><tt>description</tt></dt>    <dd>Individual items of an invoice [max length: 1024] </dd>
-     *     <dt><tt>invoice</tt></dt>    <dd>The ID of the invoice this item belongs to. </dd>
-     *     <dt><tt>product</tt></dt>    <dd>Product ID this item relates to. </dd>
-     *     <dt><tt>quantity</tt></dt>    <dd>Quantity of the item.  This total amount of the invoice item is the amount * quantity. [min value: 1, max value: 999999, default: 1] </dd>
-     *     <dt><tt>reference</tt></dt>    <dd>User defined reference field. [max length: 255] </dd>
-     *     <dt><tt>tax</tt></dt>    <dd>The tax ID of the tax charge in the invoice item. </dd></dl>
+     * Creates an Simplify_TransactionReview object
+     * @param     array $hash a map of parameters; valid keys are:<dl style="padding-left:10px;"></dl>
      * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.<i/>
-     * @return    InvoiceItem a InvoiceItem object.
+     * @return    TransactionReview a TransactionReview object.
      */
-    static public function createInvoiceItem($hash, $authentication = null) {
+    static public function createTransactionReview($hash, $authentication = null) {
 
         $args = func_get_args();
         $authentication = Simplify_PaymentsApi::buildAuthenticationObject($authentication, $args, 2);
 
-        $instance = new Simplify_InvoiceItem();
+        $instance = new Simplify_TransactionReview();
         $instance->setAll($hash);
 
         $object = Simplify_PaymentsApi::createObject($instance, $authentication);
@@ -57,11 +50,11 @@ class Simplify_InvoiceItem extends Simplify_Object {
 
 
        /**
-        * Deletes an Simplify_InvoiceItem object.
+        * Deletes an Simplify_TransactionReview object.
         *
         * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
         */
-        public function deleteInvoiceItem($authentication = null) {
+        public function deleteTransactionReview($authentication = null) {
 
             $args = func_get_args();
             $authentication = Simplify_PaymentsApi::buildAuthenticationObject($authentication, $args, 1);
@@ -72,19 +65,43 @@ class Simplify_InvoiceItem extends Simplify_Object {
         }
 
 
-        /**
-         * Retrieve a Simplify_InvoiceItem object from the API
-         *
-         * @param     string id  the id of the InvoiceItem object to retrieve
-         * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
-         * @return    InvoiceItem a InvoiceItem object
-         */
-        static public function findInvoiceItem($id, $authentication = null) {
+       /**
+        * Retrieve Simplify_TransactionReview objects.
+        * @param     array criteria a map of parameters; valid keys are:<dl style="padding-left:10px;">
+        *     <dt><tt>filter</tt></dt>    <dd>Allows for ascending or descending sorting of the list.  </dd>
+        *     <dt><tt>max</tt></dt>    <dd>Allows up to a max of 50 list items to return. [min value: 0, max value: 50, default: 20]  </dd>
+        *     <dt><tt>offset</tt></dt>    <dd>Filters to apply to the list. [min value: 0, default: 0]  </dd>
+        *     <dt><tt>sorting</tt></dt>    <dd>Used in paging of the list.  This is the start offset of the page.  The value maps properties to the sort direction (either <tt>asc</tt> for ascending or <tt>desc</tt> for descending).  Sortable properties are: <tt> dateCreated</tt><tt> status</tt>.</dd></dl>
+        * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
+        * @return    ResourceList a ResourceList object that holds the list of TransactionReview objects and the total
+        *            number of TransactionReview objects available for the given criteria.
+        * @see       ResourceList
+        */
+        static public function listTransactionReview($criteria = null, $authentication = null) {
 
             $args = func_get_args();
             $authentication = Simplify_PaymentsApi::buildAuthenticationObject($authentication, $args, 2);
 
-            $val = new Simplify_InvoiceItem();
+            $val = new Simplify_TransactionReview();
+            $list = Simplify_PaymentsApi::listObject($val, $criteria, $authentication);
+
+            return $list;
+        }
+
+
+        /**
+         * Retrieve a Simplify_TransactionReview object from the API
+         *
+         * @param     string id  the id of the TransactionReview object to retrieve
+         * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
+         * @return    TransactionReview a TransactionReview object
+         */
+        static public function findTransactionReview($id, $authentication = null) {
+
+            $args = func_get_args();
+            $authentication = Simplify_PaymentsApi::buildAuthenticationObject($authentication, $args, 2);
+
+            $val = new Simplify_TransactionReview();
             $val->id = $id;
 
             $obj = Simplify_PaymentsApi::findObject($val, $authentication);
@@ -94,19 +111,15 @@ class Simplify_InvoiceItem extends Simplify_Object {
 
 
         /**
-         * Updates an Simplify_InvoiceItem object.
+         * Updates an Simplify_TransactionReview object.
          *
          * The properties that can be updated:
          * <dl style="padding-left:10px;">
-         *     <dt><tt>amount</tt></dt>    <dd>Amount of the invoice item in the smallest unit of your currency. Example: 100 = $1.00USD [min value: 1] </dd>
-         *     <dt><tt>description</tt></dt>    <dd>Individual items of an invoice </dd>
-         *     <dt><tt>quantity</tt></dt>    <dd>Quantity of the item.  This total amount of the invoice item is the amount * quantity. [min value: 1, max value: 999999] </dd>
-         *     <dt><tt>reference</tt></dt>    <dd>User defined reference field. </dd>
-         *     <dt><tt>tax</tt></dt>    <dd>The tax ID of the tax charge in the invoice item. </dd></dl>
+         *     <dt><tt>status</tt></dt>    <dd>Status of the transaction review. </dd></dl>
          * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
-         * @return    InvoiceItem a InvoiceItem object.
+         * @return    TransactionReview a TransactionReview object.
          */
-        public function updateInvoiceItem($authentication = null)  {
+        public function updateTransactionReview($authentication = null)  {
 
             $args = func_get_args();
             $authentication = Simplify_PaymentsApi::buildAuthenticationObject($authentication, $args, 1);
@@ -119,6 +132,6 @@ class Simplify_InvoiceItem extends Simplify_Object {
      * @ignore
      */
     public function getClazz() {
-        return "InvoiceItem";
+        return "TransactionReview";
     }
 }

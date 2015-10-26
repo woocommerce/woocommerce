@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2013, 2014 MasterCard International Incorporated
+ * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are 
@@ -31,10 +31,13 @@ class Simplify_Refund extends Simplify_Object {
     /**
      * Creates an Simplify_Refund object
      * @param     array $hash a map of parameters; valid keys are:<dl style="padding-left:10px;">
-     *     <dt><tt>amount</tt></dt>    <dd>Amount of the refund in minor units. Example: 1000 = 10.00 [min value: 1, max value: 99999999] <strong>required </strong></dd>
+     *     <dt><tt>amount</tt></dt>    <dd>Amount of the refund in the smallest unit of your currency. Example: 100 = $1.00USD [min value: 1] <strong>required </strong></dd>
      *     <dt><tt>payment</tt></dt>    <dd>ID of the payment for the refund <strong>required </strong></dd>
      *     <dt><tt>reason</tt></dt>    <dd>Reason for the refund </dd>
-     *     <dt><tt>reference</tt></dt>    <dd>Custom reference field to be used with outside systems. </dd></dl>
+     *     <dt><tt>reference</tt></dt>    <dd>Custom reference field to be used with outside systems. </dd>
+     *     <dt><tt>replayId</tt></dt>    <dd>An identifier that can be sent to uniquely identify a refund request to facilitate retries due to I/O related issues. This identifier must be unique for your account (sandbox or live) across all of your refunds. If supplied, we will check for a refund on your account that matches this identifier. If found we will return an identical response to that of the original request. [max length: 50, min length: 1] </dd>
+     *     <dt><tt>statementDescription.name</tt></dt>    <dd>Merchant name. <strong>required </strong></dd>
+     *     <dt><tt>statementDescription.phoneNumber</tt></dt>    <dd>Merchant contact phone number. </dd></dl>
      * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.<i/>
      * @return    Refund a Refund object.
      */
@@ -56,11 +59,11 @@ class Simplify_Refund extends Simplify_Object {
         * Retrieve Simplify_Refund objects.
         * @param     array criteria a map of parameters; valid keys are:<dl style="padding-left:10px;">
         *     <dt><tt>filter</tt></dt>    <dd>Filters to apply to the list.  </dd>
-        *     <dt><tt>max</tt></dt>    <dd>Allows up to a max of 50 list items to return. [max value: 50, default: 20]  </dd>
-        *     <dt><tt>offset</tt></dt>    <dd>Used in paging of the list.  This is the start offset of the page. [default: 0]  </dd>
+        *     <dt><tt>max</tt></dt>    <dd>Allows up to a max of 50 list items to return. [min value: 0, max value: 50, default: 20]  </dd>
+        *     <dt><tt>offset</tt></dt>    <dd>Used in paging of the list.  This is the start offset of the page. [min value: 0, default: 0]  </dd>
         *     <dt><tt>sorting</tt></dt>    <dd>Allows for ascending or descending sorting of the list.  The value maps properties to the sort direction (either <tt>asc</tt> for ascending or <tt>desc</tt> for descending).  Sortable properties are: <tt> id</tt><tt> amount</tt><tt> description</tt><tt> dateCreated</tt><tt> paymentDate</tt>.</dd></dl>
         * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
-        * @return    Simplify_ResourceList a ResourceList object that holds the list of Refund objects and the total
+        * @return    ResourceList a ResourceList object that holds the list of Refund objects and the total
         *            number of Refund objects available for the given criteria.
         * @see       ResourceList
         */
