@@ -8,8 +8,8 @@ __Please Note:__
 
 GitHub is for *bug reports and contributions only* - if you have a support question or a request for a customization this is not the right place to post it. Use [WooThemes Support](http://support.woothemes.com) for customer support, [WordPress.org](http://wordpress.org/support/plugin/woocommerce) for community support, and for customizations we recommend one of the following services:
 
+- [Woo Experts](http://www.woothemes.com/experts/)
 - [Codeable](https://codeable.io/)
-- [Affiliated Woo Workers](http://www.woothemes.com/affiliated-woo-workers/)
 
 ## Contributing To The Core
 
