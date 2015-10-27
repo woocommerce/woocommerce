@@ -142,7 +142,7 @@
 
 			// added to get around variation image flicker issue
 			$( '.product.has-default-attributes > .images' ).fadeTo( 200, 1 );
-			
+
 			// Custom event for when variation selection has been changed
 			$form.trigger( 'woocommerce_variation_has_changed' );
 		} )
@@ -153,6 +153,8 @@
 				$form.trigger( 'woocommerce_variation_select_focusin' );
 				$form.trigger( 'check_variations', [ $( this ).data( 'attribute_name' ) || $( this ).attr( 'name' ), true ] );
 			}
+
+			$(this).find( 'option' ).first().attr( 'selected', 'selected' );
 		} )
 
 		// Show single variation details (price, stock, image)
