@@ -3,8 +3,8 @@
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
  */
 
-(function($, data, wp, ajaxurl){
-	$(function() {
+( function( $, data, wp, ajaxurl ) {
+	$( function() {
 
 		if ( ! String.prototype.trim ) {
 			String.prototype.trim = function () {
@@ -22,8 +22,8 @@
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
 			$submit            = $( '.submit .button-primary[type=submit]' ),
 			WCTaxTableModelConstructor = Backbone.Model.extend({
-				changes : {},
-				setRateAttribute : function( rateID, attribute, value ) {
+				changes: {},
+				setRateAttribute: function( rateID, attribute, value ) {
 					var rates   = _.indexBy( this.get( 'rates' ), 'tax_rate_id' ),
 						changes = {};
 
@@ -35,7 +35,7 @@
 
 					this.logChanges( changes );
 				},
-				logChanges : function( changedRows ) {
+				logChanges: function( changedRows ) {
 					var changes = this.changes || {};
 
 					_.each( changedRows, function( row, id ) {
@@ -45,7 +45,7 @@
 					this.changes = changes;
 					this.trigger( 'change:rates' );
 				},
-				getFilteredRates : function() {
+				getFilteredRates: function() {
 					var rates  = this.get( 'rates' ),
 						search = $search_field.val().toLowerCase();
 
@@ -62,14 +62,14 @@
 
 					return rates;
 				},
-				save : function() {
+				save: function() {
 					$.post( ajaxurl + '?action=woocommerce_tax_rates_save_changes', {
 							current_class : data.current_class,
 							wc_tax_nonce  : data.wc_tax_nonce,
 							changes       : this.changes
 						}, this.onSaveResponse, 'json' );
 				},
-				onSaveResponse : function( response, textStatus ) {
+				onSaveResponse: function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
 						WCTaxTableModelInstance.set( 'rates', response.data.rates );
 						WCTaxTableModelInstance.trigger( 'change:rates' );
@@ -79,11 +79,11 @@
 					}
 				}
 			} ),
-			WCTaxTableViewConstructor  = Backbone.View.extend({
-				rowTemplate : rowTemplate,
-				per_page    : data.limit,
-				page        : data.page,
-				initialize : function() {
+			WCTaxTableViewConstructor = Backbone.View.extend({
+				rowTemplate: rowTemplate,
+				per_page: data.limit,
+				page: data.page,
+				initialize: function() {
 					this.qty_pages = Math.ceil( _.toArray( this.model.get( 'rates' ) ).length / this.per_page );
 					this.page = this.sanitizePage( data.page );
 
@@ -96,14 +96,14 @@
 					$pagination.on( 'change', 'input', { view : this }, this.onPageChange );
 					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
 					$submit.on( 'click', { view : this }, this.onSubmit );
-					$save_button.attr('disabled','disabled');
+					$save_button.attr( 'disabled','disabled' );
 
 					// Can bind these directly to the buttons, as they won't get overwritten.
-					$table.find('.insert').on( 'click', { view : this }, this.onAddNewRow );
-					$table.find('.remove_tax_rates').on( 'click', { view : this }, this.onDeleteRow );
-					$table.find('.export').on( 'click', { view : this }, this.onExport );
+					$table.find( '.insert' ).on( 'click', { view : this }, this.onAddNewRow );
+					$table.find( '.remove_tax_rates' ).on( 'click', { view : this }, this.onDeleteRow );
+					$table.find( '.export' ).on( 'click', { view : this }, this.onExport );
 				},
-				render : function() {
+				render: function() {
 					var rates       = this.model.getFilteredRates(),
 						qty_rates   = _.size( rates ),
 						qty_pages   = Math.ceil( qty_rates / this.per_page ),
@@ -117,7 +117,7 @@
 
 					if ( paged_rates.length ) {
 						// Populate $tbody with the current page of results.
-						$.each( paged_rates, function ( id, rowData ) {
+						$.each( paged_rates, function( id, rowData ) {
 							view.$el.append( view.rowTemplate( rowData ) );
 						} );
 					} else {
@@ -137,16 +137,16 @@
 					});
 
 					// Postcode and city don't have `name` values by default. They're only created if the contents changes, to save on database queries (I think)
-					this.$el.find( 'td.postcode input, td.city input' ).change(function() {
-						$(this).attr( 'name', $(this).data( 'name' ) );
+					this.$el.find( 'td.postcode input, td.city input' ).change( function() {
+						$( this ).attr( 'name', $( this ).data( 'name' ) );
 					});
 
 					if ( qty_pages > 1 ) {
 						// We've now displayed our initial page, time to render the pagination box.
 						$pagination.html( paginationTemplate( {
-							qty_rates    : qty_rates,
-							current_page : this.page,
-							qty_pages    : qty_pages
+							qty_rates:    qty_rates,
+							current_page: this.page,
+							qty_pages:    qty_pages
 						} ) );
 					}
 
@@ -157,7 +157,7 @@
 						$tbody.sortable( 'enable' );
 					}
 				},
-				updateUrl : function() {
+				updateUrl: function() {
 					if ( ! window.history.replaceState ) {
 						return;
 					}
@@ -175,19 +175,19 @@
 
 					window.history.replaceState( {}, '', url );
 				},
-				onSubmit : function( event ) {
+				onSubmit: function( event ) {
 					event.data.view.model.save();
 					event.preventDefault();
 				},
-				onAddNewRow : function( event ) {
+				onAddNewRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
 						rates   = _.indexBy( model.get('rates'), 'tax_rate_id' ),
 						changes = {},
 						size    = _.size( rates ),
 						newRow  = _.extend( {}, data.default_rate, {
-							tax_rate_id : 'new-' + size + '-' + Date.now(),
-							newRow      : true
+							tax_rate_id: 'new-' + size + '-' + Date.now(),
+							newRow:      true
 						} ),
 						$current, current_id, current_order, rates_to_reorder, reordered_rates;
 
@@ -228,7 +228,7 @@
 
 					view.render();
 				},
-				onDeleteRow : function( event ) {
+				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
 						rates   = _.indexBy( model.get('rates'), 'tax_rate_id' ),
@@ -268,11 +268,11 @@
 						window.alert( data.strings.no_rows_selected );
 					}
 				},
-				onSearchField : function( event ){
+				onSearchField: function( event ){
 					event.data.view.updateUrl();
 					event.data.view.render();
 				},
-				onPageChange : function( event ) {
+				onPageChange: function( event ) {
 					var $target  = $( event.currentTarget );
 
 					event.preventDefault();
@@ -280,7 +280,7 @@
 					event.data.view.render();
 					event.data.view.updateUrl();
 				},
-				onExport : function( event ) {
+				onExport: function( event ) {
 					var csv_data = 'data:application/csv;charset=utf-8,' + data.strings.csv_data_cols.join(',') + '\n';
 
 					$.each( event.data.view.model.getFilteredRates(), function( id, rowData ) {
@@ -300,17 +300,17 @@
 						csv_data += row + '\n';
 					});
 
-					$(this).attr( 'href', encodeURI( csv_data ) );
+					$( this ).attr( 'href', encodeURI( csv_data ) );
 
 					return true;
 				},
-				setUnloadConfirmation : function() {
+				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
-					$save_button.removeAttr('disabled');
+					$save_button.removeAttr( 'disabled' );
 				},
-				clearUnloadConfirmation : function() {
+				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
-					$save_button.attr('disabled','disabled');
+					$save_button.attr( 'disabled', 'disabled' );
 				},
 				unloadConfirmation : function(event) {
 					if ( event.data.view.needsUnloadConfirm ) {
@@ -319,11 +319,11 @@
 						return data.strings.unload_confirmation_msg;
 					}
 				},
-				updateModelOnChange : function( event ) {
+				updateModelOnChange: function( event ) {
 					var model     = event.data.view.model,
 						$target   = $( event.target ),
-						id        = $target.closest('tr').data('id'),
-						attribute = $target.data('attribute'),
+						id        = $target.closest( 'tr' ).data( 'id' ),
+						attribute = $target.data( 'attribute' ),
 						val       = $target.val();
 
 					if ( 'city' === attribute || 'postcode' === attribute ) {
@@ -343,12 +343,12 @@
 
 					model.setRateAttribute( id, attribute, val );
 				},
-				updateModelOnSort : function( event, ui ) {
+				updateModelOnSort: function( event, ui ) {
 					var view         = event.data.view,
 						model        = view.model,
 						$tr          = ui.item,
 						tax_rate_id  = $tr.data( 'id' ),
-						rates        = _.indexBy( model.get('rates'), 'tax_rate_id' ),
+						rates        = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
 						old_position = rates[ tax_rate_id ].tax_rate_order,
 						new_position = $tr.index() + ( ( view.page - 1 ) * view.per_page ),
 						which_way    = ( new_position > old_position ) ? 'higher' : 'lower',
@@ -392,7 +392,7 @@
 						view.render(); // temporary, probably should get yanked.
 					}
 				},
-				sanitizePage : function( page_num ) {
+				sanitizePage: function( page_num ) {
 					page_num = parseInt( page_num, 10 );
 					if ( page_num < 1 ) {
 						page_num = 1;
@@ -403,16 +403,16 @@
 				}
 			} ),
 			WCTaxTableModelInstance = new WCTaxTableModelConstructor({
-				rates : data.rates
+				rates: data.rates
 			} ),
 			WCTaxTableInstance = new WCTaxTableViewConstructor({
-				model    : WCTaxTableModelInstance,
-			//	page     : data.page,  // I'd prefer to have these two specified down here in the instance,
-			//	per_page : data.limit, // but it doesn't seem to recognize them in render if I do. :\
-				el       : '#rates'
+				model:    WCTaxTableModelInstance,
+				// page:     data.page,  // I'd prefer to have these two specified down here in the instance,
+				// per_page: data.limit, // but it doesn't seem to recognize them in render if I do. :\
+				el:       '#rates'
 			} );
 
 		WCTaxTableInstance.render();
 
 	});
-})(jQuery, htmlSettingsTaxLocalizeScript, wp, ajaxurl);
+})( jQuery, htmlSettingsTaxLocalizeScript, wp, ajaxurl );
