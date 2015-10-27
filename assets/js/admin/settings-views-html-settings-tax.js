@@ -84,30 +84,32 @@
 				per_page: data.limit,
 				page: data.page,
 				initialize: function() {
-					this.qty_pages = Math.ceil( _.toArray( this.model.get( 'rates' ) ).length / this.per_page );
+					var qty_pages = Math.ceil( _.toArray( this.model.get( 'rates' ) ).length / this.per_page );
+
+					this.qty_pages = 0 === qty_pages ? 1 : qty_pages;
 					this.page = this.sanitizePage( data.page );
 
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
-					$tbody.on( 'change', { view : this }, this.updateModelOnChange );
-					$tbody.on( 'sortupdate', { view : this }, this.updateModelOnSort );
-					$search_field.on( 'keyup search', { view : this }, this.onSearchField );
-					$pagination.on( 'click', 'a', { view : this }, this.onPageChange );
-					$pagination.on( 'change', 'input', { view : this }, this.onPageChange );
-					$(window).on( 'beforeunload', { view : this }, this.unloadConfirmation );
-					$submit.on( 'click', { view : this }, this.onSubmit );
+					$tbody.on( 'change', { view: this }, this.updateModelOnChange );
+					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
+					$search_field.on( 'keyup search', { view: this }, this.onSearchField );
+					$pagination.on( 'click', 'a', { view: this }, this.onPageChange );
+					$pagination.on( 'change', 'input', { view: this }, this.onPageChange );
+					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
+					$submit.on( 'click', { view: this }, this.onSubmit );
 					$save_button.attr( 'disabled','disabled' );
 
 					// Can bind these directly to the buttons, as they won't get overwritten.
-					$table.find( '.insert' ).on( 'click', { view : this }, this.onAddNewRow );
-					$table.find( '.remove_tax_rates' ).on( 'click', { view : this }, this.onDeleteRow );
-					$table.find( '.export' ).on( 'click', { view : this }, this.onExport );
+					$table.find( '.insert' ).on( 'click', { view: this }, this.onAddNewRow );
+					$table.find( '.remove_tax_rates' ).on( 'click', { view: this }, this.onDeleteRow );
+					$table.find( '.export' ).on( 'click', { view: this }, this.onExport );
 				},
 				render: function() {
 					var rates       = this.model.getFilteredRates(),
 						qty_rates   = _.size( rates ),
 						qty_pages   = Math.ceil( qty_rates / this.per_page ),
-						first_index = this.per_page * ( this.page - 1),
+						first_index = 0 === qty_rates ? 0 : this.per_page * ( this.page - 1 ),
 						last_index  = this.per_page * this.page,
 						paged_rates = _.toArray( rates ).slice( first_index, last_index ),
 						view        = this;
@@ -182,7 +184,7 @@
 				onAddNewRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						rates   = _.indexBy( model.get('rates'), 'tax_rate_id' ),
+						rates   = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
 						changes = {},
 						size    = _.size( rates ),
 						newRow  = _.extend( {}, data.default_rate, {
@@ -231,7 +233,7 @@
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						rates   = _.indexBy( model.get('rates'), 'tax_rate_id' ),
+						rates   = _.indexBy( model.get( 'rates' ), 'tax_rate_id' ),
 						changes = {},
 						$current, current_id, current_order, rates_to_reorder, reordered_rates;
 
@@ -276,7 +278,7 @@
 					var $target  = $( event.currentTarget );
 
 					event.preventDefault();
-					event.data.view.page = $target.data('goto') ? $target.data('goto') : $target.val();
+					event.data.view.page = $target.data( 'goto' ) ? $target.data( 'goto' ) : $target.val();
 					event.data.view.render();
 					event.data.view.updateUrl();
 				},
@@ -312,7 +314,7 @@
 					this.needsUnloadConfirm = false;
 					$save_button.attr( 'disabled', 'disabled' );
 				},
-				unloadConfirmation : function(event) {
+				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
 						event.returnValue = data.strings.unload_confirmation_msg;
 						window.event.returnValue = data.strings.unload_confirmation_msg;
@@ -327,14 +329,14 @@
 						val       = $target.val();
 
 					if ( 'city' === attribute || 'postcode' === attribute ) {
-						val = val.split(';');
+						val = val.split( ';' );
 						val = $.map( val, function( thing ) {
 							return thing.trim();
 						});
 					}
 
 					if ( 'tax_rate_compound' === attribute || 'tax_rate_shipping' === attribute ) {
-						if ( $target.is(':checked') ) {
+						if ( $target.is( ':checked' ) ) {
 							val = 1;
 						} else {
 							val = 0;
