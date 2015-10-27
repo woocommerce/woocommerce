@@ -61,6 +61,8 @@ $verified = wc_review_is_from_verified_owner( $comment->comment_ID );
 
 			<?php endif; ?>
 
+			<?php do_action( 'woocommerce_review_before_comment_text', $comment ); ?>
+
 			<div itemprop="description" class="description"><?php comment_text(); ?></div>
 
 			<?php do_action( 'woocommerce_review_after_comment_text', $comment ); ?>
