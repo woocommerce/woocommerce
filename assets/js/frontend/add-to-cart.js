@@ -10,16 +10,22 @@ jQuery( function( $ ) {
 	$( document ).on( 'click', '.add_to_cart_button', function() {
 
 		// AJAX add to cart request
-		var $thisbutton = $( this );
+		var $thisbutton = $( this ),
+            $all_add_buttons = $( '.add_to_cart_button' );
 
 		if ( $thisbutton.is( '.product_type_simple' ) ) {
 
 			if ( ! $thisbutton.attr( 'data-product_id' ) ) {
 				return true;
 			}
+			
+			// stop request if ajax still loading
+            if ($thisbutton.hasClass( 'loading' )) {
+                return false;
+            }
 
 			$thisbutton.removeClass( 'added' );
-			$thisbutton.addClass( 'loading' );
+			$all_add_buttons.addClass( 'loading' );
 
 			var data = {};
 
@@ -54,7 +60,7 @@ jQuery( function( $ ) {
 
 				} else {
 
-					$thisbutton.removeClass( 'loading' );
+					$all_add_buttons.removeClass( 'loading' );
 
 					var fragments = response.fragments;
 					var cart_hash = response.cart_hash;
