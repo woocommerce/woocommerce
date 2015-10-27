@@ -739,7 +739,7 @@ class WC_Admin_Post_Types {
 					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
 					if ( $user_info->first_name || $user_info->last_name ) {
-						$username .= esc_html( ucfirst( $user_info->first_name ) . ' ' . ucfirst( $user_info->last_name ) );
+						$username .= esc_html( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), ucfirst( $user_info->first_name ), ucfirst( $user_info->last_name ) ) );
 					} else {
 						$username .= esc_html( ucfirst( $user_info->display_name ) );
 					}
@@ -748,7 +748,7 @@ class WC_Admin_Post_Types {
 
 				} else {
 					if ( $the_order->billing_first_name || $the_order->billing_last_name ) {
-						$username = trim( $the_order->billing_first_name . ' ' . $the_order->billing_last_name );
+						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->billing_first_name, $the_order->billing_last_name ) );
 					} else {
 						$username = __( 'Guest', 'woocommerce' );
 					}
