@@ -71,6 +71,11 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				'type'  => 'checkbox',
 				'std'   => 0,
 				'label' => __( 'Only show children of the current category', 'woocommerce' )
+			),
+			'hide_empty' => array(
+				'type'  => 'checkbox',
+				'std'   => 0,
+				'label' => __( 'Hide empty categories', 'woocommerce' )
 			)
 		);
 
@@ -88,17 +93,18 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	public function widget( $args, $instance ) {
 		global $wp_query, $post;
 
-		$c             = isset( $instance['count'] ) ? $instance['count'] : $this->settings['count']['std'];
-		$h             = isset( $instance['hierarchical'] ) ? $instance['hierarchical'] : $this->settings['hierarchical']['std'];
-		$s             = isset( $instance['show_children_only'] ) ? $instance['show_children_only'] : $this->settings['show_children_only']['std'];
-		$d             = isset( $instance['dropdown'] ) ? $instance['dropdown'] : $this->settings['dropdown']['std'];
-		$o             = isset( $instance['orderby'] ) ? $instance['orderby'] : $this->settings['orderby']['std'];
-		$dropdown_args = array( 'hide_empty' => false );
-		$list_args     = array( 'show_count' => $c, 'hierarchical' => $h, 'taxonomy' => 'product_cat', 'hide_empty' => false );
+		$count              = isset( $instance['count'] ) ? $instance['count'] : $this->settings['count']['std'];
+		$hierarchical       = isset( $instance['hierarchical'] ) ? $instance['hierarchical'] : $this->settings['hierarchical']['std'];
+		$show_children_only = isset( $instance['show_children_only'] ) ? $instance['show_children_only'] : $this->settings['show_children_only']['std'];
+		$dropdown           = isset( $instance['dropdown'] ) ? $instance['dropdown'] : $this->settings['dropdown']['std'];
+		$orderby            = isset( $instance['orderby'] ) ? $instance['orderby'] : $this->settings['orderby']['std'];
+		$hide_empty         = isset( $instance['hide_empty'] ) ? $instance['hide_empty'] : $this->settings['hide_empty']['std'];
+		$dropdown_args      = array( 'hide_empty' => $hide_empty );
+		$list_args          = array( 'show_count' => $count, 'hierarchical' => $hierarchical, 'taxonomy' => 'product_cat', 'hide_empty' => $hide_empty );
 
 		// Menu Order
 		$list_args['menu_order'] = false;
-		if ( $o == 'order' ) {
+		if ( $orderby == 'order' ) {
 			$list_args['menu_order'] = 'asc';
 		} else {
 			$list_args['orderby']    = 'title';
@@ -125,7 +131,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		}
 
 		// Show Siblings and Children Only
-		if ( $s && $this->current_cat ) {
+		if ( $show_children_only && $this->current_cat ) {
 
 			// Top level is needed
 			$top_level = get_terms(
@@ -166,7 +172,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				}
 			}
 
-			if ( $h ) {
+			if ( $hierarchical ) {
 				$include = array_merge( $top_level, $this->cat_ancestors, $siblings, $direct_children, array( $this->current_cat->term_id ) );
 			} else {
 				$include = array_merge( $direct_children );
@@ -179,7 +185,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				return;
 			}
 
-		} elseif ( $s ) {
+		} elseif ( $show_children_only ) {
 			$dropdown_args['depth']        = 1;
 			$dropdown_args['child_of']     = 0;
 			$dropdown_args['hierarchical'] = 1;
@@ -191,12 +197,12 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$this->widget_start( $args, $instance );
 
 		// Dropdown
-		if ( $d ) {
+		if ( $dropdown ) {
 			$dropdown_defaults = array(
-				'show_count'         => $c,
-				'hierarchical'       => $h,
+				'show_count'         => $count,
+				'hierarchical'       => $hierarchical,
 				'show_uncategorized' => 0,
-				'orderby'            => $o,
+				'orderby'            => $orderby,
 				'selected'           => $this->current_cat ? $this->current_cat->slug : ''
 			);
 			$dropdown_args = wp_parse_args( $dropdown_args, $dropdown_defaults );
