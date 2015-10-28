@@ -128,7 +128,7 @@ class WC_Product {
 
 		}
 
-		if ( ! empty( $value ) ) {
+		if ( false !== $value ) {
 			$this->$key = $value;
 		}
 
