@@ -285,6 +285,7 @@ function get_woocommerce_currencies() {
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
 				'NOK' => __( 'Norwegian Krone', 'woocommerce' ),
 				'NZD' => __( 'New Zealand Dollar', 'woocommerce' ),
+				'PKR' => __( 'Pakistani Rupee', 'woocommerce' ),
 				'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'PHP' => __( 'Philippine Pesos', 'woocommerce' ),
 				'PLN' => __( 'Polish Zloty', 'woocommerce' ),
@@ -406,6 +407,9 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			break;
 		case 'PHP' :
 			$currency_symbol = '&#8369;';
+			break;
+		case 'PKR' :
+			$currency_symbol = 'Rs.';
 			break;
 		case 'PLN' :
 			$currency_symbol = '&#122;&#322;';
