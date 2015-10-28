@@ -1924,7 +1924,8 @@ class WC_API_Products extends WC_API_Resource {
 					if ( ! isset( $attribute['name'] ) ) {
 						continue;
 					}
-
+					
+					$taxonomy   = null;
 					$_attribute = array();
 
 					if ( isset( $attribute['slug'] ) ) {
