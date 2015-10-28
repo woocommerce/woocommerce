@@ -1,5 +1,4 @@
-/*global wc_add_to_cart_variation_params */
-/*global wc_cart_fragments_params */
+/*global wc_add_to_cart_variation_params, wc_cart_fragments_params */
 /*!
  * Variations Plugin
  */
@@ -8,7 +7,7 @@
 	$.fn.wc_variation_form = function() {
 		var $form                  = this,
 			$single_variation      = $form.find( '.single_variation' ),
-			$product               = $form.closest('.product'),
+			$product               = $form.closest( '.product' ),
 			$product_id            = parseInt( $form.data( 'product_id' ), 10 ),
 			$product_variations    = $form.data( 'product_variations' ),
 			$use_ajax              = $product_variations === false,
