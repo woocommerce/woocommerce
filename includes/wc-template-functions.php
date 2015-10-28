@@ -1933,10 +1933,7 @@ if ( ! function_exists( 'woocommerce_single_variation_add_to_cart_button' ) ) {
 	 * Output the add to cart button for variations.
 	 */
 	function woocommerce_single_variation_add_to_cart_button() {
-		global $product;
-		?>
-		
-		<?php
+		wc_get_template( 'single-product/add-to-cart/variation-add-to-cart-button.php' );
 	}
 }
 
