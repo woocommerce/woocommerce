@@ -330,7 +330,7 @@ class WC_Cart {
 		/**
 		 * Coupons enabled function. Filterable.
 		 *
-		 * @deprecated 2.5.0
+		 * @deprecated 2.5.0 in favor to wc_is_coupons_enabled()
 		 *
 		 * @return bool
 		 */
@@ -624,7 +624,7 @@ class WC_Cart {
 		/**
 		 * Gets the url to the cart page.
 		 *
-		 * @deprecated 2.5.0
+		 * @deprecated 2.5.0 in favor to wc_get_cart_url()
 		 *
 		 * @return string url to page
 		 */
@@ -635,7 +635,7 @@ class WC_Cart {
 		/**
 		 * Gets the url to the checkout page.
 		 *
-		 * @deprecated 2.5.0
+		 * @deprecated 2.5.0 in favor to wc_get_checkout_url()
 		 *
 		 * @return string url to page
 		 */
@@ -1523,6 +1523,8 @@ class WC_Cart {
 
 		/**
 		 * Sees if we need a shipping address.
+		 *
+		 * @deprecated 2.5.0 in favor to wc_ship_to_billing_address_only()
 		 *
 		 * @return bool
 		 */
