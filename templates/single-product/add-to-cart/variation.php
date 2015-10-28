@@ -13,8 +13,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-global $product;
 ?>
 <div class="woocommerce-variation single_variation">
     <script type="text/template" id="tmpl-variation-template">
