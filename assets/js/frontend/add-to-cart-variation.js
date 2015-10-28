@@ -15,22 +15,13 @@
 			$xhr                   = false,
 			$reset_variations      = $form.find( '.reset_variations' ),
 			template               = wp.template( 'variation-template' ),
-			button_template        = wp.template( 'variation-add-to-cart-template' ),
 			unavailable_template   = wp.template( 'unavailable-variation-template' ),
-			$single_variation_wrap = $form.find( '.single_variation_wrap' ),
-			$variations_button     = $form.find( '.variations_button' );
+			$single_variation_wrap = $form.find( '.single_variation_wrap' );
 
 		// Unbind any existing events
 		$form.unbind( 'check_variations update_variation_values found_variation' );
 		$form.find( '.reset_variations' ).unbind( 'click' );
 		$form.find( '.variations select' ).unbind( 'change focusin' );
-
-		// Output button intial state
-		$variations_button.html( button_template( {
-			variation_id: 0,
-			min_qty:      '',
-			max_qty:      ''
-		} ) );
 
 		// Bind new events to form
 		$form
@@ -157,10 +148,11 @@
 
 		// Show single variation details (price, stock, image)
 		.on( 'found_variation', function( event, variation ) {
-			var $sku                   = $product.find( '.product_meta' ).find( '.sku' ),
-				$weight                = $product.find( '.product_weight' ),
-				$dimensions            = $product.find( '.product_dimensions' ),
-				purchasable            = true;
+			var $sku        = $product.find( '.product_meta' ).find( '.sku' ),
+				$weight     = $product.find( '.product_weight' ),
+				$dimensions = $product.find( '.product_dimensions' ),
+				$qty        = $single_variation_wrap.find( '.quantity' ),
+				purchasable = true;
 
 			// Display SKU
 			if ( variation.sku ) {
@@ -186,33 +178,26 @@
 			// Show images
 			$form.wc_variations_image_update( variation );
 
-			// Output correct template
+			// Output correct templates
 			if ( ! variation.variation_is_visible ) {
 				$single_variation.html( unavailable_template );
-				$variations_button.html( button_template( {
-					variation_id: 0,
-					min_qty:      '',
-					max_qty:      ''
-				} ) );
+				$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).change();
 			} else {
 				$single_variation.html( template( {
 					price:        variation.price_html,
 					availability: variation.availability_html,
 					description:  variation.variation_description
 				} ) );
-				$variations_button.html( button_template( {
-					variation_id: variation.variation_id,
-					min_qty:      variation.min_qty,
-					max_qty:      variation.max_qty
-				} ) );
+				$form.find( 'input[name="variation_id"], input.variation_id' ).val( variation.variation_id ).change();
 			}
 
 			// Hide or show qty input
 			if ( variation.is_sold_individually === 'yes' ) {
-				$single_variation_wrap.find( '.quantity input.qty' ).val( '1' );
-				$single_variation_wrap.find( '.quantity' ).hide();
+				$qty.find( 'input.qty' ).val( '1' ).attr( 'min', '1' ).attr( 'max', '' );
+				$qty.hide();
 			} else {
-				$single_variation_wrap.find( '.quantity' ).show();
+				$qty.find( 'input.qty' ).attr( 'min', variation.min_qty ).attr( 'max', variation.max_qty );
+				$qty.show();
 			}
 
 			// Enable or disable the add to cart button
@@ -261,9 +246,6 @@
 				var variation = matching_variations.shift();
 
 				if ( variation ) {
-					$form.find( 'input[name="variation_id"], input.variation_id' )
-						.val( variation.variation_id )
-						.change();
 					$form.trigger( 'found_variation', [ variation ] );
 				} else {
 					// Nothing found - reset fields
