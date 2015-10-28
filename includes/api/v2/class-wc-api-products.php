@@ -845,8 +845,8 @@ class WC_API_Products extends WC_API_Resource {
 			$attributes = array();
 
 			foreach ( $data['attributes'] as $attribute ) {
-				$is_taxonomy    = 0;
-				$taxonomy       = 0;
+				$is_taxonomy = 0;
+				$taxonomy    = 0;
 
 				if ( ! isset( $attribute['name'] ) ) {
 					continue;
@@ -1462,6 +1462,7 @@ class WC_API_Products extends WC_API_Resource {
 						continue;
 					}
 
+					$taxonomy   = 0;
 					$_attribute = array();
 
 					if ( isset( $attribute['slug'] ) ) {
