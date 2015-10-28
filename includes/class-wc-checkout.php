@@ -374,7 +374,7 @@ class WC_Checkout {
 			}
 
 			// Ship to billing only option
-			if ( WC()->cart->ship_to_billing_address_only() ) {
+			if ( wc_ship_to_billing_address_only() ) {
 				$this->posted['ship_to_different_address']  = false;
 			}
 

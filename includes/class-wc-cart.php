@@ -1492,7 +1492,7 @@ class WC_Cart {
 
 			$needs_shipping_address = false;
 
-			if ( $this->needs_shipping() === true && ! $this->ship_to_billing_address_only() ) {
+			if ( $this->needs_shipping() === true && ! wc_ship_to_billing_address_only() ) {
 				$needs_shipping_address = true;
 			}
 
