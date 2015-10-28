@@ -330,10 +330,12 @@ class WC_Cart {
 		/**
 		 * Coupons enabled function. Filterable.
 		 *
+		 * @deprecated 2.5.0
+		 *
 		 * @return bool
 		 */
 		public function coupons_enabled() {
-			return apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) == 'yes' );
+			return wc_is_coupons_enabled();
 		}
 
 		/**
@@ -622,32 +624,29 @@ class WC_Cart {
 		/**
 		 * Gets the url to the cart page.
 		 *
+		 * @deprecated 2.5.0
+		 *
 		 * @return string url to page
 		 */
 		public function get_cart_url() {
-			return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+			return wc_get_cart_url();
 		}
 
 		/**
 		 * Gets the url to the checkout page.
 		 *
+		 * @deprecated 2.5.0
+		 *
 		 * @return string url to page
 		 */
 		public function get_checkout_url() {
-			$checkout_url = wc_get_page_permalink( 'checkout' );
-			if ( $checkout_url ) {
-				// Force SSL if needed
-				if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
-					$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
-				}
-			}
-			return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
+			return wc_get_checkout_url();
 		}
 
 		/**
 		 * Gets the url to remove an item from the cart.
 		 *
-		 * @param string	cart_item_key	contains the id of the cart item
+		 * @param string cart_item_key contains the id of the cart item
 		 * @return string url to page
 		 */
 		public function get_remove_url( $cart_item_key ) {
@@ -885,7 +884,7 @@ class WC_Cart {
 					$in_cart_quantity = $cart_item_key ? $this->cart_contents[ $cart_item_key ]['quantity'] : 0;
 
 					if ( $in_cart_quantity > 0 ) {
-						throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', $this->get_cart_url(), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ) );
+						throw new Exception( sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', wc_get_cart_url(), __( 'View Cart', 'woocommerce' ), sprintf( __( 'You cannot add another &quot;%s&quot; to your cart.', 'woocommerce' ), $product_data->get_title() ) ) );
 					}
 				}
 
@@ -919,7 +918,7 @@ class WC_Cart {
 					if ( ! $product_data->has_enough_stock( $check_qty + $quantity ) ) {
 						throw new Exception( sprintf(
 							'<a href="%s" class="button wc-forward">%s</a> %s',
-							$this->get_cart_url(),
+							wc_get_cart_url(),
 							__( 'View Cart', 'woocommerce' ),
 							sprintf( __( 'You cannot add that amount to the cart &mdash; we have %s in stock and you already have %s in your cart.', 'woocommerce' ), $product_data->get_stock_quantity(), $check_qty )
 						) );
@@ -1669,7 +1668,7 @@ class WC_Cart {
 		 */
 		public function add_discount( $coupon_code ) {
 			// Coupons are globally disabled
-			if ( ! $this->coupons_enabled() ) {
+			if ( ! wc_is_coupons_enabled() ) {
 				return false;
 			}
 
@@ -1802,7 +1801,7 @@ class WC_Cart {
 		 */
 		public function remove_coupon( $coupon_code ) {
 			// Coupons are globally disabled
-			if ( ! $this->coupons_enabled() ) {
+			if ( ! wc_is_coupons_enabled() ) {
 				return false;
 			}
 

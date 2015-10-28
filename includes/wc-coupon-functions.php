@@ -41,3 +41,14 @@ function wc_get_coupon_type( $type = '' ) {
 
 	return '';
 }
+
+/**
+ * Coupons enabled function. Filterable
+ *
+ * @since  2.5.0
+ *
+ * @return bool
+ */
+function wc_is_coupons_enabled() {
+	return apply_filters( 'woocommerce_coupons_enabled', 'yes' == get_option( 'woocommerce_enable_coupons' ) );
+}
