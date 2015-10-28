@@ -235,9 +235,6 @@
 				purchasable = false;
 			}
 
-			// Refresh variation description
-			//$form.wc_variations_description_update( variation.variation_description );
-
 			// Reveal
 			$single_variation.slideDown( 200 ).trigger( 'show_variation', [ variation, purchasable ] );
 		})
@@ -492,48 +489,6 @@
 			$product_img.wc_reset_variation_attr( 'alt' );
 			$product_link.wc_reset_variation_attr( 'href' );
 			$product_link.wc_reset_variation_attr( 'title' );
-		}
-	};
-
-	/**
-	 * Performs animated variation description refreshes
-	 */
-	$.fn.wc_variations_description_update = function( variation_description ) {
-		var $form                   = this;
-		var $variations_description = $form.find( '.woocommerce-variation-description' );
-
-		if ( $variations_description.length === 0 ) {
-			if ( variation_description ) {
-				// add transparent border to allow correct height measurement when children have top/bottom margins
-				$form.find( '.single_variation_wrap' ).prepend( $( '<div class="woocommerce-variation-description" style="border:1px solid transparent;">' + variation_description + '</div>' ).hide() );
-				$form.find( '.woocommerce-variation-description' ).slideDown( 200 );
-			}
-		} else {
-			var load_height    = $variations_description.outerHeight( true );
-			var new_height     = 0;
-			var animate_height = false;
-
-			// lock height
-			$variations_description.css( 'height', load_height );
-			// replace html
-			$variations_description.html( variation_description );
-			// measure height
-			$variations_description.css( 'height', 'auto' );
-
-			new_height = $variations_description.outerHeight( true );
-
-			if ( Math.abs( new_height - load_height ) > 1 ) {
-				animate_height = true;
-				// lock height
-				$variations_description.css( 'height', load_height );
-			}
-
-			// animate height
-			if ( animate_height ) {
-				$variations_description.animate( { 'height' : new_height }, { duration: 200, queue: false, always: function() {
-					$variations_description.css( { 'height' : 'auto' } );
-				} } );
-			}
 		}
 	};
 
