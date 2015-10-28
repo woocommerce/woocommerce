@@ -206,7 +206,11 @@
 			}
 
 			// Reveal
-			$single_variation.slideDown( 200 ).trigger( 'show_variation', [ variation, purchasable ] );
+			if ( $.trim( $single_variation.text() ) ) {
+				$single_variation.slideDown( 200 ).trigger( 'show_variation', [ variation, purchasable ] );
+			} else {
+				$single_variation.show().trigger( 'show_variation', [ variation, purchasable ] );
+			}
 		})
 
 		// Check variations
