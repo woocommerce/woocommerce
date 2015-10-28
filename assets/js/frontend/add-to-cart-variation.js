@@ -6,19 +6,31 @@
 ;(function ( $, window, document, undefined ) {
 
 	$.fn.wc_variation_form = function() {
-		var $form               = this,
-			$single_variation   = $form.find( '.single_variation' ),
-			$product            = $form.closest('.product'),
-			$product_id         = parseInt( $form.data( 'product_id' ), 10 ),
-			$product_variations = $form.data( 'product_variations' ),
-			$use_ajax           = $product_variations === false,
-			$xhr                = false,
-			$reset_variations   = $form.find( '.reset_variations' );
+		var $form                  = this,
+			$single_variation      = $form.find( '.single_variation' ),
+			$product               = $form.closest('.product'),
+			$product_id            = parseInt( $form.data( 'product_id' ), 10 ),
+			$product_variations    = $form.data( 'product_variations' ),
+			$use_ajax              = $product_variations === false,
+			$xhr                   = false,
+			$reset_variations      = $form.find( '.reset_variations' ),
+			template               = wp.template( 'variation-template' ),
+			button_template        = wp.template( 'variation-add-to-cart-template' ),
+			unavailable_template   = wp.template( 'unavailable-variation-template' ),
+			$single_variation_wrap = $form.find( '.single_variation_wrap' ),
+			$variations_button     = $form.find( '.variations_button' );
 
 		// Unbind any existing events
 		$form.unbind( 'check_variations update_variation_values found_variation' );
 		$form.find( '.reset_variations' ).unbind( 'click' );
 		$form.find( '.variations select' ).unbind( 'change focusin' );
+
+		// Output button intial state
+		$variations_button.html( button_template( {
+			variation_id: 0,
+			min_qty:      '',
+			max_qty:      ''
+		} ) );
 
 		// Bind new events to form
 		$form
@@ -145,14 +157,9 @@
 
 		// Show single variation details (price, stock, image)
 		.on( 'found_variation', function( event, variation ) {
-			var template               = wp.template( 'variation-template' ),
-				button_template        = wp.template( 'variation-add-to-cart-template' ),
-				unavailable_template   = wp.template( 'unavailable-variation-template' ),
-				$single_variation_wrap = $form.find( '.single_variation_wrap' ),
-				$sku                   = $product.find( '.product_meta' ).find( '.sku' ),
+			var $sku                   = $product.find( '.product_meta' ).find( '.sku' ),
 				$weight                = $product.find( '.product_weight' ),
 				$dimensions            = $product.find( '.product_dimensions' ),
-				$variations_button     = $form.find( '.variations_button' ),
 				purchasable            = true;
 
 			// Display SKU
