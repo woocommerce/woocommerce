@@ -109,26 +109,28 @@ class WC_Order_Item_Meta {
 
 		$formatted_meta = array();
 
-		foreach ( $this->item['item_meta_array'] as $meta_id => $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
-				continue;
-			}
-
-			$attribute_key = urldecode( str_replace( 'attribute_', '', $meta->key ) );
-
-			// If this is a term slug, get the term's nice name
-			if ( taxonomy_exists( $attribute_key ) ) {
-				$term = get_term_by( 'slug', $meta->value, $attribute_key );
-				if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
-					$meta->value = $term->name;
+		if ( ! empty( $this->item['item_meta_array'] ) ) {
+			foreach ( $this->item['item_meta_array'] as $meta_id => $meta ) {
+				if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
+					continue;
 				}
-			}
 
-			$formatted_meta[ $meta_id ] = array(
-				'key'   => $meta->key,
-				'label' => wc_attribute_label( $attribute_key, $this->product ),
-				'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta->value ),
-			);
+				$attribute_key = urldecode( str_replace( 'attribute_', '', $meta->key ) );
+
+				// If this is a term slug, get the term's nice name
+				if ( taxonomy_exists( $attribute_key ) ) {
+					$term = get_term_by( 'slug', $meta->value, $attribute_key );
+					if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
+						$meta->value = $term->name;
+					}
+				}
+
+				$formatted_meta[ $meta_id ] = array(
+					'key'   => $meta->key,
+					'label' => wc_attribute_label( $attribute_key, $this->product ),
+					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta->value ),
+				);
+			}
 		}
 
 		return apply_filters( 'woocommerce_order_items_meta_get_formatted', $formatted_meta, $this );
