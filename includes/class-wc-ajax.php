@@ -2264,7 +2264,7 @@ class WC_AJAX {
 			}
 
 			// Trigger notifications and status changes
-			if ( $order->get_remaining_refund_amount() > 0 || $order->get_remaining_refund_items() > 0 ) {
+			if ( $order->get_remaining_refund_amount() > 0 || ( $order->has_free_item() && $order->get_remaining_refund_items() > 0 ) ) {
 				/**
 				 * woocommerce_order_partially_refunded
 				 *

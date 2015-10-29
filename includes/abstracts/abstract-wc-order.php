@@ -1941,24 +1941,31 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Returns true if the order contains a downloadable product.
-	 *
 	 * @return bool
 	 */
 	public function has_downloadable_item() {
-
-		$has_downloadable_item = false;
-
 		foreach ( $this->get_items() as $item ) {
-
 			$_product = $this->get_product_from_item( $item );
 
 			if ( $_product && $_product->exists() && $_product->is_downloadable() && $_product->has_file() ) {
-				$has_downloadable_item = true;
+				return true;
 			}
-
 		}
+		return false;
+	}
 
-		return $has_downloadable_item;
+	/**
+	 * Returns true if the order contains a free product
+	 * @since 2.5.0
+	 * @return bool
+	 */
+	public function has_free_item() {
+		foreach ( $this->get_items() as $item ) {
+			if ( ! $item['line_total'] ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
