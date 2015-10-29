@@ -383,10 +383,13 @@ p.demo_store {
 			.variations {
 				margin-bottom: 1em;
 				border: 0;
+				width: 100%;
 
 				td,
 				th {
 					border: 0;
+					vertical-align: top;
+					line-height: 2em;
 				}
 
 				label {
@@ -394,16 +397,14 @@ p.demo_store {
 				}
 
 				select {
-					width: 100%;
-					float: left;
+					max-width: 100%;
+					min-width: 75%;
+					display: inline-block;
+					margin-right: 1em;
 				}
 
 				td.label {
 					padding-right: 1em;
-				}
-
-				td {
-					vertical-align: top;
 				}
 			}
 
@@ -415,6 +416,7 @@ p.demo_store {
 
 			.reset_variations {
 				visibility: hidden;
+				font-size: 0.83em;
 			}
 
 			.wc-no-matching-variations {
