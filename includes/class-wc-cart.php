@@ -330,12 +330,12 @@ class WC_Cart {
 		/**
 		 * Coupons enabled function. Filterable.
 		 *
-		 * @deprecated 2.5.0 in favor to wc_is_coupons_enabled()
+		 * @deprecated 2.5.0 in favor to wc_coupons_enabled()
 		 *
 		 * @return bool
 		 */
 		public function coupons_enabled() {
-			return wc_is_coupons_enabled();
+			return wc_coupons_enabled();
 		}
 
 		/**
@@ -1670,7 +1670,7 @@ class WC_Cart {
 		 */
 		public function add_discount( $coupon_code ) {
 			// Coupons are globally disabled
-			if ( ! wc_is_coupons_enabled() ) {
+			if ( ! wc_coupons_enabled() ) {
 				return false;
 			}
 
@@ -1803,7 +1803,7 @@ class WC_Cart {
 		 */
 		public function remove_coupon( $coupon_code ) {
 			// Coupons are globally disabled
-			if ( ! wc_is_coupons_enabled() ) {
+			if ( ! wc_coupons_enabled() ) {
 				return false;
 			}
 

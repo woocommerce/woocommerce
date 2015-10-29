@@ -42,8 +42,8 @@ class Functions extends \WC_Unit_Test_Case {
 	 *
 	 * @since 2.5.0
 	 */
-	public function test_wc_is_coupons_enabled() {
-		$this->assertEquals( apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) == 'yes' ), wc_is_coupons_enabled() );
+	public function test_wc_coupons_enabled() {
+		$this->assertEquals( apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) == 'yes' ), wc_coupons_enabled() );
 	}
 
 }
