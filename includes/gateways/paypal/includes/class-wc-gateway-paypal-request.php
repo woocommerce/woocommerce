@@ -166,7 +166,7 @@ class WC_Gateway_Paypal_Request {
 			$line_item_args['tax_cart'] = $this->number_format( $order->get_total_tax(), $order );
 
 			if ( $order->get_total_discount() > 0 ) {
-				$line_item_args['discount_amount_cart'] = $this->round( $order->get_total_discount(), $order );
+				$line_item_args['discount_amount_cart'] = $this->number_format( $this->round( $order->get_total_discount(), $order ), $order );
 			}
 
 		/**
