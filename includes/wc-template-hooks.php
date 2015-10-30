@@ -227,3 +227,10 @@ add_action( 'woocommerce_order_details_after_order_table', 'woocommerce_order_ag
  */
 add_action( 'woocommerce_auth_page_header', 'woocommerce_output_auth_header', 10 );
 add_action( 'woocommerce_auth_page_footer', 'woocommerce_output_auth_footer', 10 );
+
+/**
+ * Comments
+ *
+ * Disable Jetpack comments
+ */
+add_filter( 'jetpack_comment_form_enabled_for_product', '__return_false' );
