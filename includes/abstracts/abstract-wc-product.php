@@ -751,6 +751,17 @@ class WC_Product {
 	}
 
 	/**
+	 * Returns whether or not the product can be added to the cart via ajax
+	 *
+	 * @since 2.4.9
+	 * @return bool
+	 */
+	public function supports_ajax_add_to_cart() {
+		return apply_filters( 'woocommerce_product_supports_ajax_add_to_cart', $this->is_type( 'simple' ), $this );
+	}
+
+
+	/**
 	 * Set a products price dynamically.
 	 *
 	 * @param float $price Price to set.

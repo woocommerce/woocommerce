@@ -12,7 +12,7 @@
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.1.0
+ * @version     2.4.9
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,12 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $product;
 
 echo apply_filters( 'woocommerce_loop_add_to_cart_link',
-	sprintf( '<a href="%s" rel="nofollow" data-product_id="%s" data-product_sku="%s" data-quantity="%s" class="button %s product_type_%s">%s</a>',
+	sprintf( '<a href="%s" rel="nofollow" data-product_id="%s" data-product_sku="%s" data-quantity="%s" class="button %s %s product_type_%s">%s</a>',
 		esc_url( $product->add_to_cart_url() ),
 		esc_attr( $product->id ),
 		esc_attr( $product->get_sku() ),
 		esc_attr( isset( $quantity ) ? $quantity : 1 ),
 		$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
+		$product->supports_ajax_add_to_cart() ? 'ajax_add_to_cart' : '',
 		esc_attr( $product->product_type ),
 		esc_html( $product->add_to_cart_text() )
 	),
