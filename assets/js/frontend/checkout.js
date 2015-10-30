@@ -19,7 +19,7 @@ jQuery( function( $ ) {
 			$( document.body ).bind( 'init_checkout', this.init_checkout );
 
 			// Payment methods
-			this.$checkout_form.on( 'click', 'input[name=payment_method]', this.payment_method_selected );
+			this.$checkout_form.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
 
 			// Form submission
 			this.$checkout_form.on( 'submit', this.submit );
@@ -31,7 +31,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
 
 			// Inputs/selects which update totals
-			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^=shipping_method], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type=radio]', this.trigger_update_checkout );
+			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"]', this.trigger_update_checkout );
 			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
 			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed );
 			this.$checkout_form.on( 'keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
@@ -40,8 +40,8 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.$checkout_form.find( 'input[name=payment_method]:checked' ).trigger( 'click' );
 			this.$checkout_form.find( '#ship-to-different-address input' ).change();
+			this.init_payment_methods();
 
 			// Update on page load
 			if ( wc_checkout_params.is_checkout === '1' ) {
@@ -49,6 +49,46 @@ jQuery( function( $ ) {
 			}
 			if ( wc_checkout_params.option_guest_checkout === 'yes' ) {
 				$( 'input#createaccount' ).change( this.toggle_create_account ).change();
+			}
+		},
+		init_payment_methods: function() {
+			var $payment_methods = $( '.woocommerce-checkout' ).find( 'input[name="payment_method"]' );
+
+			// If there is one method, we can hide the radio input
+			if ( 1 === $payment_methods.size() ) {
+				$payment_methods.eq(0).hide();
+			}
+
+			// If there are none selected, select the first.
+			if ( 0 === $payment_methods.filter( ':checked' ).size() ) {
+				$payment_methods.eq(0).attr( 'checked', 'checked' );
+			}
+
+			// Trigger click event for selected method
+			$payment_methods.filter( ':checked' ).eq(0).trigger( 'click' );
+		},
+		get_payment_method: function() {
+			return $( '#order_review' ).find( 'input[name="payment_method"]:checked' ).val();
+		},
+		payment_method_selected: function() {
+			if ( $( '.payment_methods input.input-radio' ).length > 1 ) {
+				var target_payment_box = $( 'div.payment_box.' + $( this ).attr( 'ID' ) );
+
+				if ( $( this ).is( ':checked' ) && ! target_payment_box.is( ':visible' ) ) {
+					$( 'div.payment_box' ).filter( ':visible' ).slideUp( 250 );
+
+					if ( $( this ).is( ':checked' ) ) {
+						$( 'div.payment_box.' + $( this ).attr( 'ID' ) ).slideDown( 250 );
+					}
+				}
+			} else {
+				$( 'div.payment_box' ).show();
+			}
+
+			if ( $( this ).data( 'order_button_text' ) ) {
+				$( '#place_order' ).val( $( this ).data( 'order_button_text' ) );
+			} else {
+				$( '#place_order' ).val( $( '#place_order' ).data( 'value' ) );
 			}
 		},
 		toggle_create_account: function() {
@@ -111,27 +151,6 @@ jQuery( function( $ ) {
 				$( 'div.shipping_address' ).slideDown();
 			}
 		},
-		payment_method_selected: function() {
-			if ( $( '.payment_methods input.input-radio' ).length > 1 ) {
-				var target_payment_box = $( 'div.payment_box.' + $( this ).attr( 'ID' ) );
-
-				if ( $( this ).is( ':checked' ) && ! target_payment_box.is( ':visible' ) ) {
-					$( 'div.payment_box' ).filter( ':visible' ).slideUp( 250 );
-
-					if ( $( this ).is( ':checked' ) ) {
-						$( 'div.payment_box.' + $( this ).attr( 'ID' ) ).slideDown( 250 );
-					}
-				}
-			} else {
-				$( 'div.payment_box' ).show();
-			}
-
-			if ( $( this ).data( 'order_button_text' ) ) {
-				$( '#place_order' ).val( $( this ).data( 'order_button_text' ) );
-			} else {
-				$( '#place_order' ).val( $( '#place_order' ).data( 'value' ) );
-			}
-		},
 		reset_update_checkout_timer: function() {
 			clearTimeout( wc_checkout_form.updateTimer );
 		},
@@ -183,11 +202,11 @@ jQuery( function( $ ) {
 
 			var shipping_methods = [];
 
-			$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
+			$( 'select.shipping_method, input[name^="shipping_method"][type="radio"]:checked, input[name^="shipping_method"][type="hidden"]' ).each( function() {
 				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 			} );
 
-			var payment_method = $( '#order_review' ).find( 'input[name=payment_method]:checked' ).val(),
+			var payment_method  = wc_checkout_form.get_payment_method(),
 				country			= $( '#billing_country' ).val(),
 				state			= $( '#billing_state' ).val(),
 				postcode		= $( 'input#billing_postcode' ).val(),
@@ -286,11 +305,8 @@ jQuery( function( $ ) {
 
 					}
 
-					// Trigger click e on selected payment method
-					if ( $( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).size() === 0 ) {
-						$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:eq(0)' ).attr( 'checked', 'checked' );
-					}
-					$( '.woocommerce-checkout' ).find( 'input[name=payment_method]:checked' ).eq(0).trigger( 'click' );
+					// re-init methods
+					wc_checkout_form.init_payment_methods();
 
 					// Fire updated_checkout e
 					$( document.body ).trigger( 'updated_checkout' );
@@ -307,7 +323,7 @@ jQuery( function( $ ) {
 			}
 
 			// Trigger a handler to let gateways manipulate the checkout if needed
-			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + $( '#order_review' ).find( 'input[name=payment_method]:checked' ).val() ) !== false ) {
+			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + wc_checkout_form.get_payment_method() ) !== false ) {
 
 				$form.addClass( 'processing' );
 
@@ -410,7 +426,7 @@ jQuery( function( $ ) {
 
 			var data = {
 				security:		wc_checkout_params.apply_coupon_nonce,
-				coupon_code:	$form.find( 'input[name=coupon_code]' ).val()
+				coupon_code:	$form.find( 'input[name="coupon_code"]' ).val()
 			};
 
 			$.ajax({

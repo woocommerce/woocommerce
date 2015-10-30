@@ -187,6 +187,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - When updating cart hash, refresh all open tabs.
 * Tweak - Use new "question" mark icon font for help tips.
 * Tweak - Improved review verification status retrieval.
+* Tweak - Improve appearance when only 1 gateway is active.
 * Dev - API - Added /products/shipping_classes endpoint.
 * Dev - API - Added support to POST, PUT, and DELETE categories and tags.
 * Dev - API - Added support to filter products by tag, category, shipping class, and attribute.
