@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - New tax settings UI - faster, enhanced with ajax, searchable.
 * Feature - WP CLI Support. https://woocommerce.wordpress.com/2015/10/01/sneak-peek-wp-cli-support-in-woocommerce/
 * Feature - Added terms and conditions checkbox to pay page.
+* Feature - Password strength indicators.
 * Fix - Check for existence of global attribute when you get_attributes() for a product.
 * Fix - Show order by template on product search.
 * Fix - Search variation skus in backend search.
@@ -181,6 +182,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Sanitize shipping method labels/titles.
 * Tweak - Only display the coupon form on the checkout if a coupon hasn't been applied.
 * Tweak - Added billing address column to order screen (off for new users).
+* Tweak - Created function to disable author archives for customers.
+* Tweak - When updating cart hash, refresh all open tabs.
+* Tweak - Use new "question" mark icon font for help tips.
+* Tweak - Improved review verification status retrieval.
 * Dev - API - Added /products/shipping_classes endpoint.
 * Dev - API - Added support to POST, PUT, and DELETE categories and tags.
 * Dev - API - Added support to filter products by tag, category, shipping class, and attribute.
@@ -191,6 +196,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Allow wc_clean to support arrays.
 * Dev - Added a manual update trigger for checkout.
 * Dev - Added woocommerce_is_price_filter_active filter to Query class.
+* Dev - Replaced some cart methods with dedicated functions. e.g. wc_ship_to_billing_address_only().
 
 = 2.4.7 - 21/09/2015 =
 * Fix - Handle Switzerland in get_european_union_countries.
