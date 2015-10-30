@@ -209,7 +209,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 			}
 
 		// Set active state if this is the shop page link
-		} elseif ( is_shop() && $shop_page == $menu_item->object_id ) {
+		} elseif ( is_shop() && $shop_page == $menu_item->object_id && 'page' === $menu_item->object ) {
 			$menu_items[ $key ]->current = true;
 			$classes[] = 'current-menu-item';
 			$classes[] = 'current_page_item';
