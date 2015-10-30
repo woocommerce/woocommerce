@@ -141,7 +141,10 @@ jQuery( function( $ ) {
 				validated = true;
 
 			if ( $parent.is( '.validate-required' ) ) {
-				if ( $this.val() === '' ) {
+				if ( 'checkbox' === $this.attr( 'type' ) && ! $this.is( ':checked' ) ) {
+					$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
+					validated = false;
+				} else if ( $this.val() === '' ) {
 					$parent.removeClass( 'woocommerce-validated' ).addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
 					validated = false;
 				}
