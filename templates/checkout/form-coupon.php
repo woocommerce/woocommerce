@@ -9,17 +9,17 @@
  * as little as possible, but it does happen. When this occurs the version of the template file will
  * be bumped and the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.2
+ * @see     http://docs.woothemes.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! WC()->cart->coupons_enabled() ) {
+if ( ! wc_coupons_enabled() ) {
 	return;
 }
 

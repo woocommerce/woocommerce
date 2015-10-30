@@ -409,7 +409,7 @@ class WC_Form_Handler {
 				}
 			}
 
-			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : WC()->cart->get_cart_url();
+			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
 		}
@@ -420,7 +420,7 @@ class WC_Form_Handler {
 
 			WC()->cart->restore_cart_item( $cart_item_key );
 
-			$referer  = wp_get_referer() ? remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) : WC()->cart->get_cart_url();
+			$referer  = wp_get_referer() ? remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) : wc_get_cart_url();
 			wp_safe_redirect( $referer );
 			exit;
 		}
@@ -473,11 +473,11 @@ class WC_Form_Handler {
 			}
 
 			if ( ! empty( $_POST['proceed'] ) ) {
-				wp_safe_redirect( WC()->cart->get_checkout_url() );
+				wp_safe_redirect( wc_get_checkout_url() );
 				exit;
 			} elseif ( $cart_updated ) {
 				wc_add_notice( __( 'Cart updated.', 'woocommerce' ) );
-				$referer = remove_query_arg( 'remove_coupon', ( wp_get_referer() ? wp_get_referer() : WC()->cart->get_cart_url() ) );
+				$referer = remove_query_arg( 'remove_coupon', ( wp_get_referer() ? wp_get_referer() : wc_get_cart_url() ) );
 				wp_safe_redirect( $referer );
 				exit;
 			}
@@ -543,7 +543,7 @@ class WC_Form_Handler {
 
 		// Redirect to cart
 		wc_add_notice( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
-		wp_safe_redirect( WC()->cart->get_cart_url() );
+		wp_safe_redirect( wc_get_cart_url() );
 		exit;
 	}
 
@@ -631,7 +631,7 @@ class WC_Form_Handler {
 				wp_safe_redirect( $url );
 				exit;
 			} elseif ( get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes' ) {
-				wp_safe_redirect( WC()->cart->get_cart_url() );
+				wp_safe_redirect( wc_get_cart_url() );
 				exit;
 			}
 		}
