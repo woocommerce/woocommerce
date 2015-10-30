@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - WP CLI Support. https://woocommerce.wordpress.com/2015/10/01/sneak-peek-wp-cli-support-in-woocommerce/
 * Feature - Added terms and conditions checkbox to pay page.
 * Feature - Password strength indicators.
+* Feature - Added 'pay' link to order screen.
 * Fix - Check for existence of global attribute when you get_attributes() for a product.
 * Fix - Show order by template on product search.
 * Fix - Search variation skus in backend search.
