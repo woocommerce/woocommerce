@@ -552,7 +552,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$active_theme         = wp_get_theme();
 		$theme_version        = $active_theme->Version;
 		$update_theme_version = $active_theme->Version;
-		$api                  = themes_api( 'theme_information', array( 'slug' => get_template(), 'fields' => array( 'sections' => false, 'tags' => false ) ) );
+		$api                  = themes_api( 'theme_information', array( 'slug' => get_stylesheet(), 'fields' => array( 'sections' => false, 'tags' => false ) ) );
 
 		// Check .org
 		if ( $api && ! is_wp_error( $api ) ) {
