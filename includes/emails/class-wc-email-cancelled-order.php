@@ -80,7 +80,8 @@ class WC_Email_Cancelled_Order extends WC_Email {
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
-			'plain_text'    => false
+			'plain_text'    => false,
+			'email'			=> $this
 		) );
 		return ob_get_clean();
 	}
