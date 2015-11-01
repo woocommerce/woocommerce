@@ -2,7 +2,7 @@
 /**
  * WooCommerce Widget Functions
  *
- * Widget related functions and widget registration
+ * Widget related functions and widget registration.
  *
  * @author 		WooThemes
  * @category 	Core
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Include widget classes
+// Include widget classes.
 include_once( 'abstracts/abstract-wc-widget.php' );
 include_once( 'widgets/class-wc-widget-cart.php' );
 include_once( 'widgets/class-wc-widget-layered-nav-filters.php' );
@@ -29,7 +29,7 @@ include_once( 'widgets/class-wc-widget-recently-viewed.php' );
 include_once( 'widgets/class-wc-widget-top-rated-products.php' );
 
 /**
- * Register Widgets
+ * Register Widgets.
  *
  * @since 2.3.0
  */
