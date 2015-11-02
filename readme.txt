@@ -195,6 +195,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Template - New star ratings. The old one was 5 separate buttons. This new one consolidates the 5 options into one element making it leaner visually and more intuitive. Works in IE9+ with a graceful degradation for IE8.
 * Dev - Template - Added `data-title` attribute to cart table.
 * Dev - Template - Product archive anchors are now hooked into templates rather than hard coded.
+* Dev - Template - Added template files for the customer details list in emails. emails/email-customer-details.php
 * Dev - Allow wc_clean to support arrays.
 * Dev - Added a manual update trigger for checkout.
 * Dev - Added woocommerce_is_price_filter_active filter to Query class.

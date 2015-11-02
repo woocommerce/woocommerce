@@ -308,6 +308,15 @@ class WC_Emails {
 	}
 
 	/**
+	 * Is customer detail field valid?
+	 * @param  array  $field
+	 * @return boolean
+	 */
+	public function customer_detail_field_is_valid( $field ) {
+		return isset( $field['label'] ) && ! empty( $field['value'] );
+	}
+
+	/**
 	 * Add customer details to email templates.
 	 *
 	 * @param mixed $order
@@ -332,37 +341,13 @@ class WC_Emails {
 			);
 	    }
 
-		$fields = apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order );
+		$fields = array_filter( apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order ), array( $this, 'customer_detail_field_is_valid' ) );
 
-		if ( $fields ) {
-
-			$heading = $sent_to_admin ? __( 'Customer details', 'woocommerce' ) : __( 'Your details', 'woocommerce' );
-
-			$heading = apply_filters( 'woocommerce_email_custom_details_header', $heading, $sent_to_admin, $order );
-
-			if ( $plain_text ) {
-
-				echo strtoupper( $heading ) . "\n\n";
-
-				foreach ( $fields as $field ) {
-					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo $field['label'] . ': ' . $field['value'] . "\n";
-					}
-				}
-
-			} else {
-
-				echo '<h2>' . $heading . '</h2>';
-
-				foreach ( $fields as $field ) {
-					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo '<p><strong>' . $field['label'] . ':</strong> <span class="text">' . $field['value'] . '</span></p>';
-					}
-				}
-			}
-
+		if ( $plain_text ) {
+			wc_get_template( 'emails/plain/email-customer-details.php', array( 'fields' => $fields ) );
+		} else {
+			wc_get_template( 'emails/email-customer-details.php', array( 'fields' => $fields ) );
 		}
-
 	}
 
 	/**
