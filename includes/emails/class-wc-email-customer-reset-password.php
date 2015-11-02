@@ -85,7 +85,8 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 			'reset_key'     => $this->reset_key,
 			'blogname'      => $this->get_blogname(),
 			'sent_to_admin' => false,
-			'plain_text'    => false
+			'plain_text'    => false,
+			'email'			=> $this
 		) );
 		return ob_get_clean();
 	}

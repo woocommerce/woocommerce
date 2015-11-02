@@ -93,7 +93,8 @@ class WC_Email_Customer_Note extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'customer_note' => $this->customer_note,
 			'sent_to_admin' => false,
-			'plain_text'    => false
+			'plain_text'    => false,
+			'email'			=> $this
 		) );
 		return ob_get_clean();
 	}

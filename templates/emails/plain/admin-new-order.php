@@ -25,12 +25,12 @@ echo sprintf( __( 'You have received an order from %s.', 'woocommerce' ), $order
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
+do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
 
 echo strtoupper( sprintf( __( 'Order number: %s', 'woocommerce' ), $order->get_order_number() ) ) . "\n";
 echo date_i18n( __( 'jS F Y', 'woocommerce' ), strtotime( $order->order_date ) ) . "\n";
 
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
 echo "\n" . $order->email_order_items_table( false, true, '', '', '', true );
 
@@ -46,9 +46,9 @@ echo "\n" . sprintf( __( 'View order: %s', 'woocommerce'), admin_url( 'post.php?
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
+do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );
 
-do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text );
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

@@ -25,12 +25,12 @@ echo __( "Your order has been received and is now being processed. Your order de
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
+do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
 
 echo strtoupper( sprintf( __( 'Order number: %s', 'woocommerce' ), $order->get_order_number() ) ) . "\n";
 echo date_i18n( __( 'jS F Y', 'woocommerce' ), strtotime( $order->order_date ) ) . "\n";
 
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
 echo "\n" . $order->email_order_items_table( $order->is_download_permitted(), true, $order->has_status( 'processing' ), '', '', true );
 
@@ -44,9 +44,9 @@ if ( $totals = $order->get_order_item_totals() ) {
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
+do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );
 
-do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text );
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

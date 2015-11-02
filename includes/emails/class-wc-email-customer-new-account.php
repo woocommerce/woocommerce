@@ -80,7 +80,8 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'blogname'           => $this->get_blogname(),
 			'password_generated' => $this->password_generated,
 			'sent_to_admin'      => false,
-			'plain_text'         => false
+			'plain_text'         => false,
+			'email'				 => $this
 		) );
 		return ob_get_clean();
 	}

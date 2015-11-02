@@ -16,7 +16,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 
-<?php do_action( 'woocommerce_email_header', $email_heading ); ?>
+<?php do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <p><?php printf( __( 'The order #%d from %s has been cancelled. The order was as follows:', 'woocommerce' ), $order->get_order_number(), $order->get_formatted_billing_full_name() ); ?></p>
 
@@ -51,10 +51,10 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly ?>
 	</tfoot>
 </table>
 
-<?php do_action( 'woocommerce_email_after_order_table', $order, true, false ); ?>
+<?php do_action( 'woocommerce_email_after_order_table', $order, true, false, $email ); ?>
 
-<?php do_action( 'woocommerce_email_order_meta', $order, true, false ); ?>
+<?php do_action( 'woocommerce_email_order_meta', $order, true, false, $email ); ?>
 
-<?php do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text ); ?>
+<?php do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email ); ?>
 
-<?php do_action( 'woocommerce_email_footer' ); ?>
+<?php do_action( 'woocommerce_email_footer', $email ); ?>
