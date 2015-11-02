@@ -345,9 +345,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_enabled() {
-		$enabled = $this->enabled == 'yes' ? true : false;
-
-		return apply_filters( 'woocommerce_email_enabled_' . $this->id, $enabled, $this->object );
+		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object );
 	}
 
 	/**
@@ -365,10 +363,9 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content() {
-
 		$this->sending = true;
 
-		if ( $this->get_email_type() == 'plain' ) {
+		if ( 'plain' === $this->get_email_type() ) {
 			$email_content = preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) );
 		} else {
 			$email_content = $this->get_content_html();
