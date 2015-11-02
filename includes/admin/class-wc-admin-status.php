@@ -298,4 +298,52 @@ class WC_Admin_Status {
 
 		return $result;
 	}
+
+	/**
+	 * Get latest version of a theme by slug
+	 * @param  object $theme WP_Theme object
+	 * @return string Version number if found
+	 */
+	public static function get_latest_theme_version( $theme ) {
+		$api = themes_api( 'theme_information', array(
+			'slug'     => $theme->get_stylesheet(),
+			'fields'   => array(
+			'sections' => false,
+			'tags'     => false
+		) ) );
+
+		$update_theme_version = 0;
+
+		// Check .org for updates
+		if ( $api && ! is_wp_error( $api ) ) {
+			$update_theme_version = $api->version;
+
+		// Check WooThemes Theme Version
+		} elseif ( strstr( $theme->{'Author URI'}, 'woothemes' ) ) {
+			$theme_dir = substr( strtolower( str_replace( ' ','', $theme->Name ) ), 0, 45 );
+
+			if ( false === ( $theme_version_data = get_transient( $theme_dir . '_version_data' ) ) ) {
+				$theme_changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $theme_dir . '/changelog.txt' );
+				$cl_lines  = explode( "\n", wp_remote_retrieve_body( $theme_changelog ) );
+				if ( ! empty( $cl_lines ) ) {
+					foreach ( $cl_lines as $line_num => $cl_line ) {
+						if ( preg_match( '/^[0-9]/', $cl_line ) ) {
+							$theme_date         = str_replace( '.' , '-' , trim( substr( $cl_line , 0 , strpos( $cl_line , '-' ) ) ) );
+							$theme_version      = preg_replace( '~[^0-9,.]~' , '' ,stristr( $cl_line , "version" ) );
+							$theme_update       = trim( str_replace( "*" , "" , $cl_lines[ $line_num + 1 ] ) );
+							$theme_version_data = array( 'date' => $theme_date , 'version' => $theme_version , 'update' => $theme_update , 'changelog' => $theme_changelog );
+							set_transient( $theme_dir . '_version_data', $theme_version_data , DAY_IN_SECONDS );
+							break;
+						}
+					}
+				}
+			}
+
+			if ( ! empty( $theme_version_data['version'] ) ) {
+				$update_theme_version = $theme_version_data['version'];
+			}
+		}
+
+		return $update_theme_version;
+	}
 }
