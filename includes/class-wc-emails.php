@@ -154,7 +154,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_name() {
-		return wp_specialchars_decode( get_option( 'woocommerce_email_from_name' ) );
+		return wp_specialchars_decode( get_option( 'woocommerce_email_from_name' ), ENT_QUOTES );
 	}
 
 	/**
@@ -163,7 +163,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_address() {
-		return get_option( 'woocommerce_email_from_address' );
+		return sanitize_email( get_option( 'woocommerce_email_from_address' ) );
 	}
 
 	/**
