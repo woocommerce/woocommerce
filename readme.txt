@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Added terms and conditions checkbox to pay page.
 * Feature - Password strength indicators.
 * Feature - Added 'pay' link to order screen.
+* Feature - Added admin order/payment failed notification.
 * Fix - Check for existence of global attribute when you get_attributes() for a product.
 * Fix - Show order by template on product search.
 * Fix - Search variation skus in backend search.

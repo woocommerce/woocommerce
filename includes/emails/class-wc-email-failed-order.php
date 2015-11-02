@@ -4,36 +4,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Email_Cancelled_Order' ) ) :
+if ( ! class_exists( 'WC_Email_Failed_Order' ) ) :
 
 /**
- * Cancelled Order Email
+ * Failed Order Email
  *
- * An email sent to the admin when an order is cancelled.
+ * An email sent to the admin when payment fails to go through.
  *
- * @class       WC_Email_Cancelled_Order
- * @version     2.2.7
+ * @class       WC_Email_Failed_Order
+ * @version     2.5.0
  * @package     WooCommerce/Classes/Emails
  * @author      WooThemes
  * @extends     WC_Email
  */
-class WC_Email_Cancelled_Order extends WC_Email {
+class WC_Email_Failed_Order extends WC_Email {
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->id               = 'cancelled_order';
-		$this->title            = __( 'Cancelled order', 'woocommerce' );
-		$this->description      = __( 'Cancelled order emails are sent to the recipient(s) below when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
-		$this->heading          = __( 'Cancelled order', 'woocommerce' );
-		$this->subject          = __( '[{site_title}] Cancelled order ({order_number})', 'woocommerce' );
-		$this->template_html    = 'emails/admin-cancelled-order.php';
-		$this->template_plain   = 'emails/plain/admin-cancelled-order.php';
+		$this->id               = 'failed_order';
+		$this->title            = __( 'Failed order', 'woocommerce' );
+		$this->description      = __( 'Failed order emails are sent to the recipient(s) below when orders have been marked failed (if they were previously processing or on-hold).', 'woocommerce' );
+		$this->heading          = __( 'Failed order', 'woocommerce' );
+		$this->subject          = __( '[{site_title}] Failed order ({order_number})', 'woocommerce' );
+		$this->template_html    = 'emails/admin-failed-order.php';
+		$this->template_plain   = 'emails/plain/admin-failed-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_failed_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_on-hold_to_failed_notification', array( $this, 'trigger' ) );
 
 		// Call parent constructor
 		parent::__construct();
@@ -47,7 +47,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	 */
 	public function trigger( $order_id ) {
 		if ( $order_id ) {
-			$this->object                  = wc_get_order( $order_id );
+            $this->object                  = wc_get_order( $order_id );
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
 			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
@@ -141,4 +141,4 @@ class WC_Email_Cancelled_Order extends WC_Email {
 
 endif;
 
-return new WC_Email_Cancelled_Order();
+return new WC_Email_Failed_Order();

@@ -1,7 +1,7 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Email_New_Order' ) ) :
@@ -22,15 +22,12 @@ class WC_Email_New_Order extends WC_Email {
 	/**
 	 * Constructor
 	 */
-	function __construct() {
-
+	public function __construct() {
 		$this->id               = 'new_order';
 		$this->title            = __( 'New order', 'woocommerce' );
-		$this->description      = __( 'New order emails are sent to the recipient list when an order is received.', 'woocommerce' );
-
+		$this->description      = __( 'New order emails are sent to the recipient(s) below when an order is received.', 'woocommerce' );
 		$this->heading          = __( 'New customer order', 'woocommerce' );
 		$this->subject          = __( '[{site_title}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
-
 		$this->template_html    = 'emails/admin-new-order.php';
 		$this->template_plain   = 'emails/plain/admin-new-order.php';
 
@@ -46,23 +43,17 @@ class WC_Email_New_Order extends WC_Email {
 		parent::__construct();
 
 		// Other settings
-		$this->recipient = $this->get_option( 'recipient' );
-
-		if ( ! $this->recipient )
-			$this->recipient = get_option( 'admin_email' );
+		$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
 	}
 
 	/**
 	 * Trigger.
 	 */
-	function trigger( $order_id ) {
-
+	public function trigger( $order_id ) {
 		if ( $order_id ) {
-			$this->object       = wc_get_order( $order_id );
-
+			$this->object                  = wc_get_order( $order_id );
 			$this->find['order-date']      = '{order_date}';
 			$this->find['order-number']    = '{order_number}';
-
 			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
 			$this->replace['order-number'] = $this->object->get_order_number();
 		}
@@ -80,7 +71,7 @@ class WC_Email_New_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_content_html() {
+	public function get_content_html() {
 		ob_start();
 		wc_get_template( $this->template_html, array(
 			'order'         => $this->object,
@@ -98,7 +89,7 @@ class WC_Email_New_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_content_plain() {
+	public function get_content_plain() {
 		ob_start();
 		wc_get_template( $this->template_plain, array(
 			'order'         => $this->object,
@@ -112,7 +103,7 @@ class WC_Email_New_Order extends WC_Email {
 	/**
 	 * Initialise settings form fields
 	 */
-	function init_form_fields() {
+	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'         => __( 'Enable/Disable', 'woocommerce' ),
