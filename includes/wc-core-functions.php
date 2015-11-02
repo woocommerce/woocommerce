@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Include core functions (available in both admin and frontend)
+// Include core functions (available in both admin and frontend).
 include( 'wc-conditional-functions.php' );
 include( 'wc-coupon-functions.php' );
 include( 'wc-user-functions.php' );
@@ -27,7 +27,7 @@ include( 'wc-term-functions.php' );
 include( 'wc-attribute-functions.php' );
 
 /**
- * Filters on data used in admin and frontend
+ * Filters on data used in admin and frontend.
  */
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
@@ -36,7 +36,7 @@ add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integer
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label
 
 /**
- * Short Description (excerpt)
+ * Short Description (excerpt).
  */
 add_filter( 'woocommerce_short_description', 'wptexturize' );
 add_filter( 'woocommerce_short_description', 'convert_smilies' );
@@ -47,11 +47,11 @@ add_filter( 'woocommerce_short_description', 'prepend_attachment' );
 add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpautop()
 
 /**
- * Create a new order programmatically
+ * Create a new order programmatically.
  *
  * Returns a new order object on success which can then be used to add additional data.
  *
- * @return WC_Order on success, WP_Error on failure
+ * @return WC_Order on success, WP_Error on failure.
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
@@ -122,6 +122,7 @@ function wc_create_order( $args = array() ) {
 
 /**
  * Update an order. Uses wc_create_order.
+ * 
  * @param  array $args
  * @return string | WC_Order
  */
@@ -157,7 +158,7 @@ function wc_get_template_part( $slug, $name = '' ) {
 		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
 	}
 
-	// Allow 3rd party plugin filter template file from their plugin
+	// Allow 3rd party plugin filter template file from their plugin.
 	if ( ( ! $template && WC_TEMPLATE_DEBUG_MODE ) || $template ) {
 		$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
 	}
@@ -188,7 +189,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		return;
 	}
 
-	// Allow 3rd party plugin filter template file from their plugin
+	// Allow 3rd party plugin filter template file from their plugin.
 	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
 
 	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
@@ -222,7 +223,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 		$default_path = WC()->plugin_path() . '/templates/';
 	}
 
-	// Look within passed path within the theme - this is priority
+	// Look within passed path within the theme - this is priority.
 	$template = locate_template(
 		array(
 			trailingslashit( $template_path ) . $template_name,
@@ -230,17 +231,18 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 		)
 	);
 
-	// Get default template
+	// Get default template/
 	if ( ! $template || WC_TEMPLATE_DEBUG_MODE ) {
 		$template = $default_path . $template_name;
 	}
 
-	// Return what we found
+	// Return what we found.
 	return apply_filters( 'woocommerce_locate_template', $template, $template_name, $template_path );
 }
 
 /**
  * Get Base Currency Code.
+ * 
  * @return string
  */
 function get_woocommerce_currency() {
@@ -249,6 +251,7 @@ function get_woocommerce_currency() {
 
 /**
  * Get full list of currency codes.
+ * 
  * @return array
  */
 function get_woocommerce_currencies() {
@@ -310,6 +313,7 @@ function get_woocommerce_currencies() {
 
 /**
  * Get Currency symbol.
+ * 
  * @param string $currency (default: '')
  * @return string
  */
@@ -453,7 +457,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 }
 
 /**
- * Send HTML emails from WooCommerce
+ * Send HTML emails from WooCommerce.
  *
  * @param mixed $to
  * @param mixed $subject
@@ -470,7 +474,7 @@ function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r
 /**
  * Get an image size.
  *
- * Variable is filtered by woocommerce_get_image_size_{image_size}
+ * Variable is filtered by woocommerce_get_image_size_{image_size}.
  *
  * @param mixed $image_size
  * @return array
@@ -543,12 +547,12 @@ function wc_print_js() {
 }
 
 /**
- * Set a cookie - wrapper for setcookie using WP constants
+ * Set a cookie - wrapper for setcookie using WP constants.
  *
- * @param  string  $name   Name of the cookie being set
- * @param  string  $value  Value of the cookie
- * @param  integer $expire Expiry of the cookie
- * @param  string  $secure Whether the cookie should be served only over https
+ * @param  string  $name   Name of the cookie being set.
+ * @param  string  $value  Value of the cookie.
+ * @param  integer $expire Expiry of the cookie.
+ * @param  string  $secure Whether the cookie should be served only over https.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
@@ -560,11 +564,11 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 }
 
 /**
- * Get the URL to the WooCommerce REST API
+ * Get the URL to the WooCommerce REST API.
  *
  * @since 2.1
- * @param string $path an endpoint to include in the URL
- * @return string the URL
+ * @param string $path an endpoint to include in the URL.
+ * @return string the URL.
  */
 function get_woocommerce_api_url( $path ) {
 
@@ -581,18 +585,18 @@ function get_woocommerce_api_url( $path ) {
 }
 
 /**
- * Get a log file path
+ * Get a log file path.
  *
  * @since 2.2
- * @param string $handle name
- * @return string the log file path
+ * @param string $handle name.
+ * @return string the log file path.
  */
 function wc_get_log_file_path( $handle ) {
 	return trailingslashit( WC_LOG_DIR ) . $handle . '-' . sanitize_file_name( wp_hash( $handle ) ) . '.log';
 }
 
 /**
- * Init for our rewrite rule fixes
+ * Init for our rewrite rule fixes.
  */
 function wc_fix_rewrite_rules_init() {
 	$permalinks = get_option( 'woocommerce_permalinks' );
@@ -604,7 +608,7 @@ function wc_fix_rewrite_rules_init() {
 add_action( 'init', 'wc_fix_rewrite_rules_init' );
 
 /**
- * Various rewrite rule fixes
+ * Various rewrite rule fixes.
  *
  * @since 2.2
  * @param array $rules
@@ -616,7 +620,7 @@ function wc_fix_rewrite_rules( $rules ) {
 	$permalinks        = get_option( 'woocommerce_permalinks' );
 	$product_permalink = empty( $permalinks['product_base'] ) ? _x( 'product', 'slug', 'woocommerce' ) : $permalinks['product_base'];
 
-	// Fix the rewrite rules when the product permalink have %product_cat% flag
+	// Fix the rewrite rules when the product permalink have %product_cat% flag.
 	if ( preg_match( '`/(.+)(/%product_cat%)`' , $product_permalink, $matches ) ) {
 		foreach ( $rules as $rule => $rewrite ) {
 
@@ -626,7 +630,7 @@ function wc_fix_rewrite_rules( $rules ) {
 		}
 	}
 
-	// If the shop page is used as the base, we need to enable verbose rewrite rules or sub pages will 404
+	// If the shop page is used as the base, we need to enable verbose rewrite rules or sub pages will 404.
 	if ( ! empty( $permalinks['use_verbose_page_rules'] ) ) {
 		$page_rewrite_rules = $wp_rewrite->page_rewrite_rules();
 		$rules              = array_merge( $page_rewrite_rules, $rules );
@@ -659,7 +663,7 @@ function wc_fix_product_attachment_link( $link, $post_id ) {
 add_filter( 'attachment_link', 'wc_fix_product_attachment_link', 10, 2 );
 
 /**
- * Protect downloads from ms-files.php in multisite
+ * Protect downloads from ms-files.php in multisite.
  *
  * @param mixed $rewrite
  * @return string
@@ -681,7 +685,7 @@ function wc_ms_protect_download_rewite_rules( $rewrite ) {
 add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
 
 /**
- * WooCommerce Core Supported Themes
+ * WooCommerce Core Supported Themes.
  *
  * @since 2.2
  * @return string[]
@@ -695,8 +699,8 @@ function wc_get_core_supported_themes() {
  * hook, see WC_Webhook::process()
  *
  * @since 2.2
- * @param int $webhook_id webhook ID to deliver
- * @param mixed $arg hook argument
+ * @param int $webhook_id webhook ID to deliver.
+ * @param mixed $arg hook argument.
  */
 function wc_deliver_webhook_async( $webhook_id, $arg ) {
 
@@ -707,7 +711,7 @@ function wc_deliver_webhook_async( $webhook_id, $arg ) {
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );
 
 /**
- * Enables template debug mode
+ * Enables template debug mode.
  */
 function wc_template_debug_mode() {
 	if ( ! defined( 'WC_TEMPLATE_DEBUG_MODE' ) ) {
@@ -723,6 +727,7 @@ add_action( 'after_setup_theme', 'wc_template_debug_mode', 20 );
 
 /**
  * Formats a string in the format COUNTRY:STATE into an array.
+ * 
  * @since 2.3.0
  * @param  string $country_string
  * @return array
@@ -742,6 +747,7 @@ function wc_format_country_state_string( $country_string ) {
 
 /**
  * Get the store's base location.
+ * 
  * @todo should the woocommerce_default_country option be renamed to contain 'base'?
  * @since 2.3.0
  * @return array
@@ -753,9 +759,10 @@ function wc_get_base_location() {
 }
 
 /**
- * Get the customer's default location. Filtered, and set to base location or left blank.
+ * Get the customer's default location. 
  *
- * If cache-busting, this should only be used when 'location' is set in the querystring.
+ * Filtered, and set to base location or left blank. If cache-busting,
+ * this should only be used when 'location' is set in the querystring.
  *
  * @todo should the woocommerce_default_country option be renamed to contain 'base'?
  * @since 2.3.0
@@ -767,7 +774,7 @@ function wc_get_customer_default_location() {
 		case 'geolocation' :
 			$location = WC_Geolocation::geolocate_ip();
 
-			// Base fallback
+			// Base fallback.
 			if ( empty( $location['country'] ) ) {
 				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
 			}
@@ -783,7 +790,7 @@ function wc_get_customer_default_location() {
 	return $location;
 }
 
-// This function can be removed when WP 3.9.2 or greater is required
+// This function can be removed when WP 3.9.2 or greater is required.
 if ( ! function_exists( 'hash_equals' ) ) :
 	/**
 	 * Compare two strings in constant time.
@@ -814,7 +821,7 @@ if ( ! function_exists( 'hash_equals' ) ) :
 endif;
 
 /**
- * Generate a rand hash
+ * Generate a rand hash.
  *
  * @since  2.4.0
  * @return string
@@ -828,7 +835,7 @@ function wc_rand_hash() {
 }
 
 /**
- * WC API - Hash
+ * WC API - Hash.
  *
  * @since  2.4.0
  * @param  string $data
