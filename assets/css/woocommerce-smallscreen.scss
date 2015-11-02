@@ -43,6 +43,13 @@
 					content: attr(data-title) ': ';
 					font-weight: 700;
 				}
+
+				&.product-remove,
+				&.actions {
+					&:before {
+						display: none;
+					}
+				}
 			}
 
 			&:nth-child(2n) {

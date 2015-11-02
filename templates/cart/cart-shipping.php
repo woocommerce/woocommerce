@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		echo wp_kses_post( apply_filters( 'woocommerce_shipping_package_name', $shipping_name, $index, $package ) );
 	?></th>
-	<td>
+	<td data-title="<?php echo wp_kses_post( apply_filters( 'woocommerce_shipping_package_name', $shipping_name, $index, $package ) ); ?>">
 		<?php if ( empty( $available_methods ) ) : ?>
 
 			<?php if ( ( WC()->countries->get_states( WC()->customer->get_shipping_country() ) && ! WC()->customer->get_shipping_state() ) || ! WC()->customer->get_shipping_postcode() ) : ?>
