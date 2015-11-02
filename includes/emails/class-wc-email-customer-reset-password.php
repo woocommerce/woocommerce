@@ -36,6 +36,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 		$this->id               = 'customer_reset_password';
 		$this->title            = __( 'Reset password', 'woocommerce' );
 		$this->description      = __( 'Customer "reset password" emails are sent when customers reset their passwords.', 'woocommerce' );
+		$this->customer_email   = true;
 
 		$this->template_html    = 'emails/customer-reset-password.php';
 		$this->template_plain   = 'emails/plain/customer-reset-password.php';

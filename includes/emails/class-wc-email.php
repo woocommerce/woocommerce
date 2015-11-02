@@ -137,6 +137,12 @@ class WC_Email extends WC_Settings_API {
 	public $sending;
 
 	/**
+	 * True when the email notification is sent to customers.
+	 * @var bool
+	 */
+	protected $customer_email = false;
+
+	/**
 	 *  List of preg* regular expression patterns to search for,
 	 *  used in conjunction with $replace.
 	 *  https://raw.github.com/ushahidi/wp-silcc/master/class.html2text.inc
@@ -236,9 +242,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return PHPMailer
 	 */
 	public function handle_multipart( $mailer )  {
-
 		if ( $this->sending && $this->get_email_type() == 'multipart' ) {
-
 			$mailer->AltBody = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) ) );
 			$this->sending = false;
 		}
@@ -275,12 +279,14 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * get_recipient function.
-	 *
+	 * Get valid recipients.
 	 * @return string
 	 */
 	public function get_recipient() {
-		return apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object );
+		$recipient  = apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object );
+		$recipients = array_map( 'trim', explode( ',', $recipient ) );
+		$recipients = array_filter( $recipients, 'is_email' );
+		return implode( ',', $recipients );
 	}
 
 	/**
@@ -346,6 +352,15 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function is_enabled() {
 		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object );
+	}
+
+	/**
+	 * Checks if this email is customer focussed.
+	 *
+	 * @return bool
+	 */
+	public function is_customer_email() {
+		return $this->customer_email;
 	}
 
 	/**

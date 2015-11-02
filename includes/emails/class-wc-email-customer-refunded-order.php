@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
  * @extends  WC_Email
  */
 class WC_Email_Customer_Refunded_Order extends WC_Email {
-	
+
 	public $refund;
 	public $partial_refund;
 
@@ -27,6 +27,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 */
 	public function __construct() {
 		$this->set_email_strings();
+		$this->customer_email = true;
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );

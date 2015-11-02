@@ -67,7 +67,7 @@ abstract class WC_Settings_Page {
 
 		$sections = $this->get_sections();
 
-		if ( empty( $sections ) ) {
+		if ( empty( $sections ) || 1 === sizeof( $sections ) ) {
 			return;
 		}
 

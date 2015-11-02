@@ -43,6 +43,8 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		// Call parent constructor
 		parent::__construct();
 
+		$this->customer_email = true;
+		$this->enabled        = 'yes'; // Always enabled - this email is manual
 		$this->heading_paid   = $this->get_option( 'heading_paid', $this->heading_paid );
 		$this->subject_paid   = $this->get_option( 'subject_paid', $this->subject_paid );
 	}
