@@ -57,7 +57,7 @@ class WC_Product {
 	public $product_type = null;
 
 	/**
-	 * Prouduct shipping class
+	 * Product shipping class
 	 *
 	 * @var string
 	 */
@@ -69,6 +69,12 @@ class WC_Product {
 	 * @var int
 	 */
 	protected $shipping_class_id = 0;
+
+	/**
+	 * Supported features such as 'ajax_add_to_cart'
+	 * @var array
+	 */
+	protected $supports = array();
 
 	/**
 	 * Constructor gets the post object and sets the ID for the loaded product.
@@ -142,6 +148,19 @@ class WC_Product {
 	 */
 	public function get_post_data() {
 		return $this->post;
+	}
+
+	/**
+	 * Check if a product supports a given feature.
+	 *
+	 * Product classes should override this to declare support (or lack of support) for a feature.
+	 *
+	 * @param string $feature string The name of a feature to test support for.
+	 * @return bool True if the product supports the feature, false otherwise.
+	 * @since 2.5.0
+	 */
+	public function supports( $feature ) {
+		return apply_filters( 'woocommerce_product_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
 	}
 
 	/**
@@ -749,17 +768,6 @@ class WC_Product {
 
 		return apply_filters( 'woocommerce_is_purchasable', $purchasable, $this );
 	}
-
-	/**
-	 * Returns whether or not the product can be added to the cart via ajax
-	 *
-	 * @since 2.4.9
-	 * @return bool
-	 */
-	public function supports_ajax_add_to_cart() {
-		return apply_filters( 'woocommerce_product_supports_ajax_add_to_cart', $this->is_type( 'simple' ), $this );
-	}
-
 
 	/**
 	 * Set a products price dynamically.

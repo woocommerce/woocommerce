@@ -1,7 +1,7 @@
 <?php
 /**
  * Loop Add to Cart
- * 
+ *
  * This template can be overridden by copying it to yourtheme/woocommerce/loop/add-to-cart.php
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
@@ -12,11 +12,11 @@
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.4.9
+ * @version     2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 global $product;
@@ -28,7 +28,7 @@ echo apply_filters( 'woocommerce_loop_add_to_cart_link',
 		esc_attr( $product->get_sku() ),
 		esc_attr( isset( $quantity ) ? $quantity : 1 ),
 		$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
-		$product->supports_ajax_add_to_cart() ? 'ajax_add_to_cart' : '',
+		$product->supports( 'ajax_add_to_cart' ) ? 'ajax_add_to_cart' : '',
 		esc_attr( $product->product_type ),
 		esc_html( $product->add_to_cart_text() )
 	),
