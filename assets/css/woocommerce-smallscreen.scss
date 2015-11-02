@@ -64,18 +64,6 @@
 				}
 			}
 		}
-
-		&.shop_table_order_pay {
-			tfoot {
-				th {
-					display: none;
-				}
-
-				td:before {
-					content: attr(data-title) ' '; // No colon needed
-				}
-			}
-		}
 	}
 
 	table.my_account_orders {

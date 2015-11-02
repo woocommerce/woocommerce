@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <form id="order_review" method="post">
 
-	<table class="shop_table shop_table_responsive shop_table_order_pay">
+	<table class="shop_table">
 		<thead>
 			<tr>
 				<th class="product-name"><?php _e( 'Product', 'woocommerce' ); ?></th>
@@ -34,9 +34,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php if ( sizeof( $order->get_items() ) > 0 ) : ?>
 				<?php foreach ( $order->get_items() as $item ) : ?>
 					<tr>
-						<td class="product-name" data-title="<?php _e( 'Product', 'woocommerce' ); ?>"><?php echo esc_html( $item['name'] ); ?></td>
-						<td class="product-quantity" data-title="<?php _e( 'Qty', 'woocommerce' ); ?>"><?php echo esc_html( $item['qty'] ); ?></td>
-						<td class="product-subtotal" data-title="<?php _e( 'Total', 'woocommerce' ); ?>"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
+						<td class="product-name"><?php echo esc_html( $item['name'] ); ?></td>
+						<td class="product-quantity"><?php echo esc_html( $item['qty'] ); ?></td>
+						<td class="product-subtotal"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
 					</tr>
 				<?php endforeach; ?>
 			<?php endif; ?>
@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php foreach ( $totals as $total ) : ?>
 					<tr>
 						<th scope="row" colspan="2"><?php echo $total['label']; ?></th>
-						<td class="product-total" data-title="<?php echo $total['label']; ?>"><?php echo $total['value']; ?></td>
+						<td class="product-total"><?php echo $total['value']; ?></td>
 					</tr>
 				<?php endforeach; ?>
 			<?php endif; ?>
