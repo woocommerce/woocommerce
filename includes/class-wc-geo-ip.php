@@ -1625,7 +1625,7 @@ class WC_Geo_IP {
 			}
 		} else {
 			$country_id = $this->geoip_country_id_by_addr( $addr );
-			if ( $country_id !== false ) {
+			if ( $country_id !== false && isset( $this->GEOIP_COUNTRY_CODES[ $country_id ] ) ) {
 				return $this->GEOIP_COUNTRY_CODES[ $country_id ];
 			}
 		}
