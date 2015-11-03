@@ -1,6 +1,6 @@
 <?php
 /**
- * WC Unit Test Factory.
+ * WC Unit Test Factory
  *
  * Provides WooCommerce-specific factories.
  *

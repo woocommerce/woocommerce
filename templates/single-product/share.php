@@ -1,6 +1,6 @@
 <?php
 /**
- * Single Product Share.
+ * Single Product Share
  *
  * Sharing plugins can hook into here or you can add your own code directly.
  *

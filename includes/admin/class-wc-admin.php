@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Admin.
+ * WooCommerce Admin
  *
  * @class       WC_Admin
  * @author      WooThemes

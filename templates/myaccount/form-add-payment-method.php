@@ -1,6 +1,6 @@
 <?php
 /**
- * Add payment method form form.
+ * Add payment method form form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/form-add-payment-method.php.
  *

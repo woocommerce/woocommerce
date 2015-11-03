@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Short Description.
+ * Product Short Description
  *
  * Replaces the standard excerpt box.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Product_Cat_List_Walker class.
+ * WC_Product_Cat_List_Walker class
  *
  * @extends 	Walker
  * @class 		WC_Product_Cat_Dropdown_Walker

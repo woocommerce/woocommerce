@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer.
+ * Customer
  *
  * The WooCommerce customer class handles storage of the current customer's data, such as location.
  *

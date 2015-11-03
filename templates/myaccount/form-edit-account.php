@@ -1,6 +1,6 @@
 <?php
 /**
- * Edit account form.
+ * Edit account form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/form-edit-account.php.
  *

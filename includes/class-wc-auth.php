@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Auth.
+ * WooCommerce Auth
  *
  * Handles wc-auth endpoint requests.
  *

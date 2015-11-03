@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Loop Start.
+ * Product Loop Start
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/loop/loop-start.php.
  *

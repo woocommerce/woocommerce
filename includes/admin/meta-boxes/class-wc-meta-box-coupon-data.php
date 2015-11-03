@@ -1,6 +1,6 @@
 <?php
 /**
- * Coupon Data.
+ * Coupon Data
  *
  * Display the coupon data meta box.
  *

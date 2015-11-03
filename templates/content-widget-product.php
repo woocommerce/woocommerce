@@ -1,6 +1,6 @@
 <?php
 /**
- * The template for displaying product widget entries.
+ * The template for displaying product widget entries
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/content-widget-product.php.
  *

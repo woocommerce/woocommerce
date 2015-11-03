@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Downloads.
+ * Order Downloads
  *
  * @author      WooThemes
  * @category    Admin

@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Item Meta.
+ * Order Item Meta
  *
  * A Simple class for managing order item meta so plugins add it in the correct format.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Contains the query functions for WooCommerce which alter the front-end post queries and loops.
+ * Contains the query functions for WooCommerce which alter the front-end post queries and loops
  *
  * @class 		WC_Query
  * @version		2.3.0

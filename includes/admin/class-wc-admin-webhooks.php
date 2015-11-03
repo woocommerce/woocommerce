@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Admin Webhooks Class.
+ * WooCommerce Admin Webhooks Class
  *
  * @author   WooThemes
  * @category Admin

@@ -1,6 +1,6 @@
 <?php
 /**
- * Post Types Admin.
+ * Post Types Admin
  *
  * @author   WooThemes
  * @category Admin

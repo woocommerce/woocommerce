@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Admin Functions.
+ * WooCommerce Admin Functions
  *
  * @author   WooThemes
  * @category Core

@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer Reset Password email.
+ * Customer Reset Password email
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-reset-password.php.
  *

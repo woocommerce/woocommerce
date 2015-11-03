@@ -1,6 +1,6 @@
 <?php
 /**
- * Cross-sells.
+ * Cross-sells
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/cart/cross-sells.php.
  *

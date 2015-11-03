@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Images.
+ * Product Images
  *
  * Display the product images meta box.
  *

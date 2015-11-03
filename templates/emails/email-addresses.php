@@ -1,6 +1,6 @@
 <?php
 /**
- * Email Addresses.
+ * Email Addresses
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/email-addresses.php.
  *

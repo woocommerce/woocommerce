@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Admin Settings Class.
+ * WooCommerce Admin Settings Class
  *
  * @author   WooThemes
  * @category Admin

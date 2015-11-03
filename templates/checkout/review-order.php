@@ -1,6 +1,6 @@
 <?php
 /**
- * Review order table.
+ * Review order table
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/review-order.php.
  *

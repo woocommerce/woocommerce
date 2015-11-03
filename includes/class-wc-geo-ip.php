@@ -1,6 +1,6 @@
 <?php
 /**
- * Geo IP class.
+ * Geo IP class
  *
  * This class is a fork of GeoIP class from MaxMind LLC.
  *

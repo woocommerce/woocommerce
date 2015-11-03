@@ -1,6 +1,6 @@
 <?php
 /**
- * Webhook Delivery Test Factory.
+ * Webhook Delivery Test Factory
  *
  * @see \WP_UnitTest_Factory_For_Comment
  * @since 2.2

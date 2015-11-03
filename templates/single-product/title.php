@@ -1,6 +1,6 @@
 <?php
 /**
- * Single Product title.
+ * Single Product title
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/single-product/title.php.
  *

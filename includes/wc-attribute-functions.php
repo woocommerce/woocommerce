@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Attribute Functions.
+ * WooCommerce Attribute Functions
  *
  * @author 		WooThemes
  * @category 	Core

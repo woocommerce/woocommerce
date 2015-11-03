@@ -1,6 +1,6 @@
 <?php
 /**
- * Contains Validation functions.
+ * Contains Validation functions
  *
  * @class    WC_Validation
  * @version  2.4.0

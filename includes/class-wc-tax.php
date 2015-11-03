@@ -1,6 +1,6 @@
 <?php
 /**
- * Performs tax calculations and loads tax rates.
+ * Performs tax calculations and loads tax rates
  *
  * @class 		WC_Tax
  * @version		2.2.0

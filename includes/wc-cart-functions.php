@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Cart Functions.
+ * WooCommerce Cart Functions
  *
  * Functions for cart specific things.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Tracking Shortcode.
+ * Order Tracking Shortcode
  *
  * Lets a user see the status of an order by entering their order details.
  *

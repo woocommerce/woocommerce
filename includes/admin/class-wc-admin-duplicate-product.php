@@ -1,6 +1,6 @@
 <?php
 /**
- * Duplicate product functionality.
+ * Duplicate product functionality
  *
  * @author      WooThemes
  * @category    Admin

@@ -1,6 +1,6 @@
 <?php
 /**
- * Peru states.
+ * Peru states
  *
  * @author      WooThemes
  * @category    i18n

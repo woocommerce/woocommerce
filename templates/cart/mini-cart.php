@@ -1,6 +1,6 @@
 <?php
 /**
- * Mini-cart.
+ * Mini-cart
  *
  * Contains the markup for the mini-cart, used by the cart widget.
  *

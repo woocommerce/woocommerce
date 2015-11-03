@@ -1,6 +1,6 @@
 <?php
 /**
- * My Addresses.
+ * My Addresses
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/my-address.php.
  *

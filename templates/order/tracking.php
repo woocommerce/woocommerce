@@ -1,6 +1,6 @@
 <?php
 /**
- * Order tracking.
+ * Order tracking
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/order/tracking.php.
  *

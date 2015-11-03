@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout shipping information form.
+ * Checkout shipping information form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-shipping.php.
  *

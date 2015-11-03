@@ -1,6 +1,6 @@
 <?php
 /**
- * South African states.
+ * South African states
  *
  * @author      WooThemes
  * @category    i18n

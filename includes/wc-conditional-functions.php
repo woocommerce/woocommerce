@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Conditional Functions.
+ * WooCommerce Conditional Functions
  *
  * Functions for determining the current query/page.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Pagination - Show numbered pagination for catalog pages.
+ * Pagination - Show numbered pagination for catalog pages
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/loop/pagination.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Factory Class.
+ * Order Factory Class
  *
  * The WooCommerce order factory creating the right order objects.
  *

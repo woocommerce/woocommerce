@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Shipping Settings.
+ * WooCommerce Shipping Settings
  *
  * @author      WooThemes
  * @category    Admin

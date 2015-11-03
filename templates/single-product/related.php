@@ -1,6 +1,6 @@
 <?php
 /**
- * Related Products.
+ * Related Products
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/single-product/related.php.
  *

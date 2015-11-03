@@ -1,6 +1,6 @@
 <?php
 /**
- * Auth footer.
+ * Auth footer
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/auth/footer.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Actions.
+ * Order Actions
  *
  * Functions for displaying the order actions meta box.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Email Footer.
+ * Email Footer
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/email-footer.php.
  *

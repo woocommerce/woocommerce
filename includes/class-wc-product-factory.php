@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Factory Class.
+ * Product Factory Class
  *
  * The WooCommerce product factory creating the right product object.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Auth header.
+ * Auth header
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/auth/header.php.
  *

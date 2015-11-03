@@ -1,6 +1,6 @@
 <?php
 /**
- * Shipping Calculator.
+ * Shipping Calculator
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/cart/shipping-calculator.php.
  *

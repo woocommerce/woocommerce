@@ -1,6 +1,6 @@
 <?php
 /**
- * Additional Information tab.
+ * Additional Information tab
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/single-product/tabs/additional-information.php.
  *

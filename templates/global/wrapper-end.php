@@ -1,6 +1,6 @@
 <?php
 /**
- * Content wrappers.
+ * Content wrappers
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/global/wrapper-end.php.
  *

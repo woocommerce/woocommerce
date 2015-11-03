@@ -1,6 +1,6 @@
 <?php
 /**
- * Update WC to 2.4.1.
+ * Update WC to 2.4.1
  *
  * @author   WooThemes
  * @category Admin

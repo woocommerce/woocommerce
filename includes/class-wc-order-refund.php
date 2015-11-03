@@ -1,6 +1,6 @@
 <?php
 /**
- * Order refund.
+ * Order refund
  *
  * @class    WC_Order_Refund
  * @version  2.2.0

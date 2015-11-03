@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Report_Customers.
+ * WC_Report_Customers
  *
  * @author      WooThemes
  * @category    Admin

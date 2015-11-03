@@ -1,6 +1,6 @@
 <?php
 /**
- * Setup importers for WC data.
+ * Setup importers for WC data
  *
  * @author      WooThemes
  * @category    Admin

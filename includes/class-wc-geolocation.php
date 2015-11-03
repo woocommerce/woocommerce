@@ -1,6 +1,6 @@
 <?php
 /**
- * Geolocation class.
+ * Geolocation class
  *
  * Handles geolocation and updating the geolocation database.
  *

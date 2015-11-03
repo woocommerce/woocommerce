@@ -1,6 +1,6 @@
 <?php
 /**
- * Setup Wizard Class.
+ * Setup Wizard Class
  *
  * Takes new users through some basic steps to setup their store.
  *

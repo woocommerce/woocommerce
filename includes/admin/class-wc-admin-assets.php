@@ -1,6 +1,6 @@
 <?php
 /**
- * Load assets.
+ * Load assets
  *
  * @author      WooThemes
  * @category    Admin

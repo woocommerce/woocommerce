@@ -1,6 +1,6 @@
 <?php
 /**
- * The template for displaying product content in the single-product.php template.
+ * The template for displaying product content in the single-product.php template
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/content-single-product.php.
  *

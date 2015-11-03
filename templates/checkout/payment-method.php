@@ -1,6 +1,6 @@
 <?php
 /**
- * Output a single payment method.
+ * Output a single payment method
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/payment-method.php.
  *

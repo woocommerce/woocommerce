@@ -1,6 +1,6 @@
 <?php
 /**
- * Pay for order form.
+ * Pay for order form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-pay.php.
  *

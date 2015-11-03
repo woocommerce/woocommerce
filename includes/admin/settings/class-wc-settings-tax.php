@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Tax Settings.
+ * WooCommerce Tax Settings
  *
  * @author      WooThemes
  * @category    Admin

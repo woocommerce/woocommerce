@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Settings.
+ * Admin View: Settings
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

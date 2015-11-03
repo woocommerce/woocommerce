@@ -1,6 +1,6 @@
 <?php
 /**
- * Greek Regions.
+ * Greek Regions
  *
  * @author   WooThemes
  * @category i18n

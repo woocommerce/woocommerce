@@ -1,6 +1,6 @@
 <?php
 /**
- * Display single product reviews (comments).
+ * Display single product reviews (comments)
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/single-product-reviews.php.
  *

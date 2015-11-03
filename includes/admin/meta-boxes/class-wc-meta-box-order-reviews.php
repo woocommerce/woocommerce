@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Reviews.
+ * Order Reviews
  *
  * Functions for displaying the order reviews data meta box.
  *

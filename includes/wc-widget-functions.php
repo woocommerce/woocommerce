@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Widget Functions.
+ * WooCommerce Widget Functions
  *
  * Widget related functions and widget registration.
  *

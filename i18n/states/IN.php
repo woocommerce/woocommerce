@@ -1,6 +1,6 @@
 <?php
 /**
- * Indian states.
+ * Indian states
  *
  * @author      WooThemes
  * @category    i18n

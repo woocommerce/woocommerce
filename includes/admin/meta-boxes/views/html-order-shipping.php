@@ -1,6 +1,6 @@
 <?php
 /**
- * Shows a shipping line.
+ * Shows a shipping line
  *
  * @var object $item The item being displayed
  * @var int $item_id The id of the item being displayed

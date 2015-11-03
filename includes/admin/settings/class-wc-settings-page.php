@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Settings Page/Tab.
+ * WooCommerce Settings Page/Tab
  *
  * @author      WooThemes
  * @category    Admin

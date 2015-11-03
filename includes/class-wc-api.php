@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce API.
+ * WooCommerce API
  *
  * Handles WC-API endpoint requests.
  *

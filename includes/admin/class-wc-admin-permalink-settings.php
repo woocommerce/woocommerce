@@ -1,6 +1,6 @@
 <?php
 /**
- * Adds settings to the permalinks admin settings page.
+ * Adds settings to the permalinks admin settings page
  *
  * @class       WC_Admin_Permalink_Settings
  * @author      WooThemes

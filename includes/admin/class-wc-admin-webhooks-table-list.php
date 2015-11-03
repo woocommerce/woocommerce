@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Webhooks Table List.
+ * WooCommerce Webhooks Table List
  *
  * @author   WooThemes
  * @category Admin

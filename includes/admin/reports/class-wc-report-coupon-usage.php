@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Report_Coupon_Usage.
+ * WC_Report_Coupon_Usage
  *
  * @author      WooThemes
  * @category    Admin

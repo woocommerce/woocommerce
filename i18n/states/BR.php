@@ -1,6 +1,6 @@
 <?php
 /**
- * Brazillian states.
+ * Brazillian states
  *
  * @author      WooThemes
  * @category    i18n

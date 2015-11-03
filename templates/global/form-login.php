@@ -1,6 +1,6 @@
 <?php
 /**
- * Login form.
+ * Login form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/global/form-login.php.
  *

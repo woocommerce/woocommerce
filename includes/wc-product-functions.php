@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Product Functions.
+ * WooCommerce Product Functions
  *
  * Functions for product specific things.
  *

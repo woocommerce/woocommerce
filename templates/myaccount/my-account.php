@@ -1,6 +1,6 @@
 <?php
 /**
- * My Account page.
+ * My Account page
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/my-account.php.
  *

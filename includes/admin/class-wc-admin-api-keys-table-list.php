@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce API Keys Table List.
+ * WooCommerce API Keys Table List
  *
  * @author   WooThemes
  * @category Admin

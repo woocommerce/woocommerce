@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Unit Tests Bootstrap.
+ * WooCommerce Unit Tests Bootstrap
  *
  * @since 2.2
  */

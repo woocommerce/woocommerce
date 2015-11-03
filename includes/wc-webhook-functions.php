@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Webhook functions.
+ * WooCommerce Webhook functions
  *
  * @author   WooThemes
  * @category Core

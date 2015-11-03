@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce countries.
+ * WooCommerce countries
  *
  * The WooCommerce countries class stores country/state data.
  *

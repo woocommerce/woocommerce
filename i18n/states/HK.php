@@ -1,6 +1,6 @@
 <?php
 /**
- * Hong Kong states.
+ * Hong Kong states
  *
  * @author      WooThemes
  * @category    i18n

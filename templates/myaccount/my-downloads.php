@@ -1,6 +1,6 @@
 <?php
 /**
- * My Orders.
+ * My Orders
  *
  * Shows recent orders on the account page.
  *

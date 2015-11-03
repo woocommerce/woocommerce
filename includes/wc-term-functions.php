@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Terms.
+ * WooCommerce Terms
  *
  * Functions for handling terms/term meta.
  *

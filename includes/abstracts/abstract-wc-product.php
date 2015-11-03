@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract Product Class.
+ * Abstract Product Class
  *
  * The WooCommerce product class handles individual product data.
  *

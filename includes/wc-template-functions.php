@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Template.
+ * WooCommerce Template
  *
  * Functions for the templating system.
  *

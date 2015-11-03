@@ -1,6 +1,6 @@
 <?php
 /**
- * Australian states.
+ * Australian states
  *
  * @author      WooThemes
  * @category    i18n

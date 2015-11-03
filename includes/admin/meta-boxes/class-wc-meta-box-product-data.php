@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Data.
+ * Product Data
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *

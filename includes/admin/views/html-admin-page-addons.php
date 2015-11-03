@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Page - Addons.
+ * Admin View: Page - Addons
  *
  * @var string $view
  * @var object $addons

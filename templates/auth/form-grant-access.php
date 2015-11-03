@@ -1,6 +1,6 @@
 <?php
 /**
- * Auth form grant access.
+ * Auth form grant access
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/auth/form-grant-access.php.
  *

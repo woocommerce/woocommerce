@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Shipping Class.
+ * WooCommerce Shipping Class
  *
  * Handles shipping and loads shipping methods via hooks.
  *

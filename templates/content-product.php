@@ -1,6 +1,6 @@
 <?php
 /**
- * The template for displaying product content within loops.
+ * The template for displaying product content within loops
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/content-product.php.
  *

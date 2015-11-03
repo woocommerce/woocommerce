@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce API Settings.
+ * WooCommerce API Settings
  *
  * @author   WooThemes
  * @category Admin

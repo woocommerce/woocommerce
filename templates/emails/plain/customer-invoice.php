@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer invoice email (plain text).
+ * Customer invoice email (plain text)
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-invoice.php.
  *

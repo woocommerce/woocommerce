@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Page - Status.
+ * Admin View: Page - Status
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

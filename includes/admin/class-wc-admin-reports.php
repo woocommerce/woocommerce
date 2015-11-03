@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Reports.
+ * Admin Reports
  *
  * Functions used for displaying sales and customer reports in admin.
  *

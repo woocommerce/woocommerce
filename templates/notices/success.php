@@ -1,6 +1,6 @@
 <?php
 /**
- * Show messages.
+ * Show messages
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/notices/success.php.
  *

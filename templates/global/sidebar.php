@@ -1,6 +1,6 @@
 <?php
 /**
- * Sidebar.
+ * Sidebar
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/global/sidebar.php.
  *

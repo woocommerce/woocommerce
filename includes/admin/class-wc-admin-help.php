@@ -1,6 +1,6 @@
 <?php
 /**
- * Add some content to the help tab.
+ * Add some content to the help tab
  *
  * @author      WooThemes
  * @category    Admin

@@ -1,6 +1,6 @@
 <?php
 /**
- * Show options for ordering.
+ * Show options for ordering
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/loop/orderby.php.
  *

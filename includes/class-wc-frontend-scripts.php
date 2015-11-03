@@ -1,6 +1,6 @@
 <?php
 /**
- * Handle frontend scripts.
+ * Handle frontend scripts
  *
  * @class       WC_Frontend_Scripts
  * @version     2.3.0

@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Email Settings.
+ * WooCommerce Email Settings
  *
  * @author      WooThemes
  * @category    Admin

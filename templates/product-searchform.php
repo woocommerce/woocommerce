@@ -1,6 +1,6 @@
 <?php
 /**
- * The template for displaying product search form.
+ * The template for displaying product search form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/product-searchform.php.
  *

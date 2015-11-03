@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Template Hooks.
+ * WooCommerce Template Hooks
  *
  * Action/filter hooks used for WooCommerce functions/templates.
  *

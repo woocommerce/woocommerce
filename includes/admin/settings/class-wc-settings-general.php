@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce General Settings.
+ * WooCommerce General Settings
  *
  * @author      WooThemes
  * @category    Admin

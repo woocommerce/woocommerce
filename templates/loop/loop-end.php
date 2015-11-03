@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Loop End.
+ * Product Loop End
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/loop/loop-end.php.
  *

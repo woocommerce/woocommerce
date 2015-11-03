@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract Order.
+ * Abstract Order
  *
  * The WooCommerce order class handles order data.
  *

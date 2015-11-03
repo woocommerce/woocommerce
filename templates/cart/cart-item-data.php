@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart item data (when outputting non-flat).
+ * Cart item data (when outputting non-flat)
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/cart/cart-item-data.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Displayed when no products are found matching the current query.
+ * Displayed when no products are found matching the current query
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/loop/no-products-found.php.
  *

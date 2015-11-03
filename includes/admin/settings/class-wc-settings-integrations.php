@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Integration Settings.
+ * WooCommerce Integration Settings
  *
  * @author      WooThemes
  * @category    Admin

@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Formatting.
+ * WooCommerce Formatting
  *
  * Functions for formatting data.
  *

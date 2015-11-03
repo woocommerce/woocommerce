@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart errors page.
+ * Cart errors page
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/cart-errors.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Product loop sale flash.
+ * Product loop sale flash
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/loop/sale-flash.php.
  *

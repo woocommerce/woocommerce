@@ -1,6 +1,6 @@
 <?php
 /**
- * Installation related functions and actions.
+ * Installation related functions and actions
  *
  * @author   WooThemes
  * @category Admin

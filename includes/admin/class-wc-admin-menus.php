@@ -1,6 +1,6 @@
 <?php
 /**
- * Setup menus in WP admin.
+ * Setup menus in WP admin
  *
  * @author      WooThemes
  * @category    Admin

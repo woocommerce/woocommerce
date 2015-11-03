@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer note email.
+ * Customer note email
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-note.php.
  *

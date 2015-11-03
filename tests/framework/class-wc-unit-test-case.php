@@ -1,6 +1,6 @@
 <?php
 /**
- * WC Unit Test Case.
+ * WC Unit Test Case
  *
  * Provides WooCommerce-specific setup/tear down/assert methods, custom factories,
  * and helper functions.

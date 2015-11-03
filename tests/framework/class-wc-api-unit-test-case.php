@@ -1,6 +1,6 @@
 <?php
 /**
- * WC API Unit Test Case.
+ * WC API Unit Test Case
  *
  * Provides REST API specific setup/tear down/assert methods, along with some helper.
  * functions.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Bangladeshi states (districts).
+ * Bangladeshi states (districts)
  *
  * @author      WooThemes
  * @category    i18n

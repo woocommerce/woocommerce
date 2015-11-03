@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Notes.
+ * Order Notes
  *
  * @author      WooThemes
  * @category    Admin

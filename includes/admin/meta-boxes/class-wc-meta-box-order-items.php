@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Data.
+ * Order Data
  *
  * Functions for displaying the order items meta box.
  *

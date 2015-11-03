@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Report_Sales_By_Date.
+ * WC_Report_Sales_By_Date
  *
  * @author      WooThemes
  * @category    Admin

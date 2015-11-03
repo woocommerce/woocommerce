@@ -1,6 +1,6 @@
 <?php
 /**
- * Deprecated functions.
+ * Deprecated functions
  *
  * Where functions come to die.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Bulk Edit Products.
+ * Admin View: Bulk Edit Products
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

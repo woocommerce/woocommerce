@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout billing information form.
+ * Checkout billing information form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-billing.php.
  *

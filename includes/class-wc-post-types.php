@@ -1,6 +1,6 @@
 <?php
 /**
- * Post Types.
+ * Post Types
  *
  * Registers post types and taxonomies.
  *

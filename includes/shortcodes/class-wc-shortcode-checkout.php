@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout Shortcode.
+ * Checkout Shortcode
  *
  * Used on the checkout page, the checkout shortcode displays the checkout process.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Thankyou page.
+ * Thankyou page
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/thankyou.php.
  *

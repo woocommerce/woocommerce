@@ -1,6 +1,6 @@
 <?php
 /**
- * Attributes Page.
+ * Attributes Page
  *
  * The attributes section lets users add custom attributes to assign to products - they can also be used in the layered nav widget.
  *

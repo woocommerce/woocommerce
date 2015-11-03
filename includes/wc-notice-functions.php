@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Message Functions.
+ * WooCommerce Message Functions
  *
  * Functions for error/message handling and display.
  *

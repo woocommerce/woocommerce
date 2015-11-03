@@ -1,6 +1,6 @@
 <?php
 /**
- * Outputs a variation.
+ * Outputs a variation
  *
  * @var int $variation_id
  * @var WP_POST $variation

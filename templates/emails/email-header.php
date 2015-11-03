@@ -1,6 +1,6 @@
 <?php
 /**
- * Email Header.
+ * Email Header
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/email-header.php.
  *

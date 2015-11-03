@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer processing order email.
+ * Customer processing order email
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-processing-order.php.
  *

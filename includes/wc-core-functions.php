@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Core Functions.
+ * WooCommerce Core Functions
  *
  * General core functions available on both the front-end and admin.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * The Template for displaying products in a product category. Simply includes the archive template.
+ * The Template for displaying products in a product category. Simply includes the archive template
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/taxonomy-product_cat.php.
  *

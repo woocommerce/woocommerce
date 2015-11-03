@@ -1,6 +1,6 @@
 <?php
 /**
- * Comments.
+ * Comments
  *
  * Handle comments (reviews and order notes).
  *

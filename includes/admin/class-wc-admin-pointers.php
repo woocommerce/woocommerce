@@ -1,6 +1,6 @@
 <?php
 /**
- * Adds and controls pointers for contextual help/tutorials.
+ * Adds and controls pointers for contextual help/tutorials
  *
  * @author   WooThemes
  * @category Admin

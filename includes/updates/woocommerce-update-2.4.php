@@ -1,6 +1,6 @@
 <?php
 /**
- * Update WC to 2.4.0.
+ * Update WC to 2.4.0
  *
  * @author   WooThemes
  * @category Admin

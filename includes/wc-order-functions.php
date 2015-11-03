@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Order Functions.
+ * WooCommerce Order Functions
  *
  * Functions for order specific things.
  *

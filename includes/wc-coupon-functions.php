@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Coupons Functions.
+ * WooCommerce Coupons Functions
  *
  * Functions for coupon specific things.
  *

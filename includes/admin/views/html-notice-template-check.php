@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Template Check.
+ * Admin View: Notice - Template Check
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

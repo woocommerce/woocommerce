@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Payment Gateways class.
+ * WooCommerce Payment Gateways class
  *
  * Loads payment gateways via hooks for use in the store.
  *

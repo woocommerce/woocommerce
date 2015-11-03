@@ -1,6 +1,6 @@
 <?php
 /**
- * Spain states.
+ * Spain states
  *
  * @author      WooThemes
  * @category    i18n

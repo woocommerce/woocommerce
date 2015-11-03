@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Report_Taxes_By_Code.
+ * WC_Report_Taxes_By_Code
  *
  * @author      WooThemes
  * @category    Admin

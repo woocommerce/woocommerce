@@ -1,6 +1,6 @@
 <?php
 /**
- * Description tab.
+ * Description tab
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/single-product/tabs/description.php.
  *

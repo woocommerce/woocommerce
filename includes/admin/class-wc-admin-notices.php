@@ -1,6 +1,6 @@
 <?php
 /**
- * Display notices in admin.
+ * Display notices in admin
  *
  * @author      WooThemes
  * @category    Admin

@@ -1,6 +1,6 @@
 <?php
 /**
- * Email Styles.
+ * Email Styles
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/email-styles.php.
  *

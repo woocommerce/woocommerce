@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Loader.
+ * Template Loader
  *
  * @class 		WC_Template
  * @version		2.2.0

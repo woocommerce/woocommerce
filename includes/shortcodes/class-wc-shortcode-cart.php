@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart Shortcode.
+ * Cart Shortcode
  *
  * Used on the cart page, the cart shortcode displays the cart contents and interface for coupon codes and other cart bits and pieces.
  *

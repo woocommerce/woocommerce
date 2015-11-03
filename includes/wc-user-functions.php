@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Customer Functions.
+ * WooCommerce Customer Functions
  *
  * Functions for customers.
  *

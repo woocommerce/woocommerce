@@ -1,6 +1,6 @@
 <?php
 /**
- * Nepal states (Districts).
+ * Nepal states (Districts)
  *
  * @author      WooThemes
  * @category    i18n

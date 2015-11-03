@@ -1,6 +1,6 @@
 <?php
 /**
- * Additional Customer Details (plain).
+ * Additional Customer Details (plain)
  *
  * This is extra customer data which can be filtered by plugins. It outputs below the order item table.
  *

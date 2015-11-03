@@ -1,6 +1,6 @@
 <?php
 /**
- * View Order.
+ * View Order
  *
  * Shows the details of a particular order on the account page.
  *

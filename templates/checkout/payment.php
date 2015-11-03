@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout Payment Section.
+ * Checkout Payment Section
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/payment.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Email Order Items (plain).
+ * Email Order Items (plain)
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/email-order-items.php.
  *

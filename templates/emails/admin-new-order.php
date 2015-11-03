@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin new order email.
+ * Admin new order email
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/admin-new-order.php.
  *

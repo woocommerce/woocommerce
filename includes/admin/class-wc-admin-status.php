@@ -1,6 +1,6 @@
 <?php
 /**
- * Debug/Status page.
+ * Debug/Status page
  *
  * @author      WooThemes
  * @category    Admin

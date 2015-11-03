@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer completed order email (plain text).
+ * Customer completed order email (plain text)
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-completed-order.php.
  *

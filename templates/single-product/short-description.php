@@ -1,6 +1,6 @@
 <?php
 /**
- * Single product short description.
+ * Single product short description
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/single-product/short-description.php.
  *

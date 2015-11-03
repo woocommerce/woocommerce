@@ -1,6 +1,6 @@
 <?php
 /**
- * This class provides functions for converting CSS styles into inline style attributes in your HTML code.
+ * This class provides functions for converting CSS styles into inline style attributes in your HTML code
  *
  * For more information, please see the README.md file.
  *

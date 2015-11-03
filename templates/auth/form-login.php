@@ -1,6 +1,6 @@
 <?php
 /**
- * Auth form login.
+ * Auth form login
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/auth/form-login.php.
  *

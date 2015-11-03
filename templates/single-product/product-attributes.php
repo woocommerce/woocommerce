@@ -1,6 +1,6 @@
 <?php
 /**
- * Product attributes.
+ * Product attributes
  *
  * Used by list_attributes() in the products class.
  *

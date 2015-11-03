@@ -1,6 +1,6 @@
 <?php
 /**
- * Webhook Test Factory.
+ * Webhook Test Factory
  *
  * @see \WP_UnitTest_Factory_For_Post
  * @since 2.2

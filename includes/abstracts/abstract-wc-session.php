@@ -1,6 +1,6 @@
 <?php
 /**
- * Handle data for the current customers session.
+ * Handle data for the current customers session
  *
  * @class       WC_Session
  * @version     2.0.0

@@ -1,6 +1,6 @@
 <?php
 /**
- * Order again button.
+ * Order again button
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/order/order-again.php.
  *

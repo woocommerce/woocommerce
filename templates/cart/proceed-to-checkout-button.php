@@ -1,6 +1,6 @@
 <?php
 /**
- * Proceed to checkout button.
+ * Proceed to checkout button
  *
  * Contains the markup for the proceed to checkout button on the cart.
  *

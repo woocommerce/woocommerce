@@ -1,6 +1,6 @@
 <?php
 /**
- * Empty cart page.
+ * Empty cart page
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/cart/cart-empty.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Page Functions.
+ * WooCommerce Page Functions
  *
  * Functions related to pages and menus.
  *

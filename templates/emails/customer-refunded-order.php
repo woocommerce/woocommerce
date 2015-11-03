@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer refunded order email.
+ * Customer refunded order email
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-refunded-order.php.
  *

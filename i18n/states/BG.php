@@ -1,6 +1,6 @@
 <?php
 /**
- * Bulgarian states.
+ * Bulgarian states
  *
  * @author      WooThemes
  * @category    i18n

@@ -1,6 +1,6 @@
 <?php
 /**
- * Show error messages.
+ * Show error messages
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/notices/error.php.
  *

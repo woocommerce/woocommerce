@@ -1,6 +1,6 @@
 <?php
 /**
- * Add extra profile fields for users in admin.
+ * Add extra profile fields for users in admin
  *
  * @author   WooThemes
  * @category Admin

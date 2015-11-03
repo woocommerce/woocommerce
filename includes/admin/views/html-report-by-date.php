@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Report by Date (with date filters).
+ * Admin View: Report by Date (with date filters)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

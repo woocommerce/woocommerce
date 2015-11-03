@@ -1,6 +1,6 @@
 <?php
 /**
- * Result Count.
+ * Result Count
  *
  * Shows text: Showing x - x of x results.
  *

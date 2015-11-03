@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Item Details.
+ * Order Item Details
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/order/order-details-item.php.
  *

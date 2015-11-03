@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Meta Boxes.
+ * WooCommerce Meta Boxes
  *
  * Sets up the write panels used by products and orders (custom post types).
  *

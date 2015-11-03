@@ -1,6 +1,6 @@
 <?php
 /**
- * My Account Shortcodes.
+ * My Account Shortcodes
  *
  * Shows the 'my account' section where the customer can view past orders and update their information.
  *

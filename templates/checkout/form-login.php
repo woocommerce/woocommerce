@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout login form.
+ * Checkout login form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-login.php.
  *

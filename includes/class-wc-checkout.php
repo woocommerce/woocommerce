@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout.
+ * Checkout
  *
  * The WooCommerce checkout class handles the checkout process, collecting user data and processing the payment.
  *

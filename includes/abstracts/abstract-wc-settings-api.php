@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Settings API used by Shipping Methods and Payment Gateways.
+ * Admin Settings API used by Shipping Methods and Payment Gateways
  *
  * @class    WC_Settings_API
  * @version  2.4.0

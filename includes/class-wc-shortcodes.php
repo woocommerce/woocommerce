@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Shortcodes class.
+ * WC_Shortcodes class
  *
  * @class       WC_Shortcodes
  * @version     2.1.0

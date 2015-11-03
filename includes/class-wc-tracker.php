@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Tracker.
+ * WooCommerce Tracker
  *
  * The WooCommerce tracker class adds functionality to track WooCommerce usage based on if the customer opted in.
  * No personal infomation is tracked, only general WooCommerce settings, general product, order and user counts and admin email for discount code.

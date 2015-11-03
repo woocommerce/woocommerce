@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout coupon form.
+ * Checkout coupon form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-coupon.php.
  *

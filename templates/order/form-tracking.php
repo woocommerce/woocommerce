@@ -1,6 +1,6 @@
 <?php
 /**
- * Order tracking form.
+ * Order tracking form
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/order/form-tracking.php.
  *

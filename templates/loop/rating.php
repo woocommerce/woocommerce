@@ -1,6 +1,6 @@
 <?php
 /**
- * Loop Rating.
+ * Loop Rating
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/loop/rating.php.
  *

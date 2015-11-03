@@ -1,6 +1,6 @@
 <?php
 /**
- * Order.
+ * Order
  *
  * @class    WC_Order
  * @version  2.2.0

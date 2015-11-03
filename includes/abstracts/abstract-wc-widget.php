@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract Widget Class.
+ * Abstract Widget Class
  *
  * @author   WooThemes
  * @category Widgets

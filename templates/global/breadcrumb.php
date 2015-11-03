@@ -1,6 +1,6 @@
 <?php
 /**
- * Shop breadcrumb.
+ * Shop breadcrumb
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/global/breadcrumb.php.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Dashboard.
+ * Admin Dashboard
  *
  * @author      WooThemes
  * @category    Admin

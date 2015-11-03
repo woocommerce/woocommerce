@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer new account email.
+ * Customer new account email
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-new-account.php.
  *

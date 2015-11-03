@@ -1,6 +1,6 @@
 <?php
 /**
- * Single variation display.
+ * Single variation display
  *
  * This is a javascript-based template for single variations (see https://codex.wordpress.org/Javascript_Reference/wp.template).
  * The values will be dynamically replaced after selecting attributes.

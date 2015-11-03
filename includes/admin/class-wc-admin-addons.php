@@ -1,6 +1,6 @@
 <?php
 /**
- * Addons Page.
+ * Addons Page
  *
  * @author      WooThemes
  * @category    Admin

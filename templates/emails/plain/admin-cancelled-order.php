@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin cancelled order email (plain text).
+ * Admin cancelled order email (plain text)
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/admin-cancelled-order.php.
  *
