@@ -1104,21 +1104,39 @@ class WC_Geo_IP {
 		'--'
 	);
 
+	/** @var WC_Logger Logger instance */
+	public static $log = false;
+
+	/**
+	 * Logging method.
+	 *
+	 * @param string $message
+	 */
+	public static function log( $message ) {
+		if ( empty( self::$log ) ) {
+			self::$log = new WC_Logger();
+		}
+		self::$log->add( 'geoip', $message );
+	}
+
 	/**
 	 * Open geoip file.
 	 *
-	 * @param  string $filename
-	 * @param  int $flags
+	 * @param string $filename
+	 * @param int $flags
 	 */
 	public function geoip_open( $filename, $flags ) {
 		$this->flags = $flags;
 		if ( $this->flags & self::GEOIP_SHARED_MEMORY ) {
 			$this->shmid = @shmop_open( self::GEOIP_SHM_KEY, "a", 0, 0 );
 		} else {
-			$this->filehandle = fopen( $filename, 'rb' ) or trigger_error( "GeoIP API: Can not open $filename\n", E_USER_ERROR );
-			if ( $this->flags & self::GEOIP_MEMORY_CACHE ) {
-				$s_array = fstat( $this->filehandle );
-				$this->memory_buffer = fread( $this->filehandle, $s_array['size'] );
+			if ( $this->filehandle = fopen( $filename, 'rb' ) ) {
+				if ( $this->flags & self::GEOIP_MEMORY_CACHE ) {
+					$s_array = fstat( $this->filehandle );
+					$this->memory_buffer = fread( $this->filehandle, $s_array['size'] );
+				}
+			} else {
+				$this->log( 'GeoIP API: Can not open ' . $filename );
 			}
 		}
 
@@ -1450,8 +1468,10 @@ class WC_Geo_IP {
 					2 * $this->record_length
 				);
 			} else {
-				fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) == 0
-				or trigger_error( 'GeoIP API: fseek failed', E_USER_ERROR );
+				if ( 0 == fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
+					$this->log( 'GeoIP API: fseek failed' );
+					break;
+				}
 
 				$buf = fread( $this->filehandle, 2 * $this->record_length );
 			}
@@ -1478,7 +1498,7 @@ class WC_Geo_IP {
 			}
 		}
 
-		trigger_error( 'GeoIP API: Error traversing database - perhaps it is corrupt?', E_USER_ERROR );
+		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?' );
 
 		return false;
 	}
@@ -1505,8 +1525,10 @@ class WC_Geo_IP {
 					2 * $this->record_length
 				);
 			} else {
-				fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) == 0
-				or trigger_error( 'GeoIP API: fseek failed', E_USER_ERROR );
+				if ( 0 == fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
+					$this->log( 'GeoIP API: fseek failed' );
+					break;
+				}
 
 				$buf = fread( $this->filehandle, 2 * $this->record_length );
 			}
@@ -1532,7 +1554,7 @@ class WC_Geo_IP {
 			}
 		}
 
-		trigger_error( 'GeoIP API: Error traversing database - perhaps it is corrupt?', E_USER_ERROR );
+		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?' );
 
 		return false;
 	}
