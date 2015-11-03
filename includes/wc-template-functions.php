@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Template
+ * WooCommerce Template.
  *
  * Functions for the templating system.
  *
@@ -167,7 +167,7 @@ function wc_generator_tag( $gen, $type ) {
 }
 
 /**
- * Add body classes for WC pages
+ * Add body classes for WC pages.
  *
  * @param  array $classes
  * @return array
@@ -248,7 +248,7 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
 }
 
 /**
- * Adds extra post classes for products
+ * Adds extra post classes for products.
  *
  * @since 2.1.0
  * @param array $classes
@@ -329,8 +329,8 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 	/**
 	 * Output WooCommerce content.
 	 *
-	 * This function is only used in the optional 'woocommerce.php' template
-	 * which people can add to their themes to add basic woocommerce support
+	 * This function is only used in the optional 'woocommerce.php' template.
+	 * which people can add to their themes to add basic woocommerce support.
 	 * without hooks or modifying core templates.
 	 *
 	 */
@@ -419,7 +419,7 @@ if ( ! function_exists( 'woocommerce_get_sidebar' ) ) {
 if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 
 	/**
-	 * Adds a demo store banner to the site if enabled
+	 * Adds a demo store banner to the site if enabled.
 	 *
 	 */
 	function woocommerce_demo_store() {
@@ -478,7 +478,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 
 	/**
-	 * Output the start of a product loop. By default this is a UL
+	 * Output the start of a product loop. By default this is a UL.
 	 *
 	 * @param bool $echo
 	 * @return string
@@ -495,7 +495,7 @@ if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 
 	/**
-	 * Output the end of a product loop. By default this is a UL
+	 * Output the end of a product loop. By default this is a UL.
 	 *
 	 * @param bool $echo
 	 * @return string
@@ -514,7 +514,7 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 
 	/**
-	 * Show the product title in the product loop. By default this is an H3
+	 * Show the product title in the product loop. By default this is an H3.
 	 */
 	function woocommerce_template_loop_product_title() {
 		echo '<h3>' . get_the_title() . '</h3>';
@@ -565,7 +565,7 @@ function woocommerce_template_loop_category_link_close() {
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 
 	/**
-	 * Show an archive description on taxonomy archives
+	 * Show an archive description on taxonomy archives.
 	 *
 	 * @subpackage	Archives
 	 */
@@ -581,7 +581,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 
 	/**
-	 * Show a shop page description on product archives
+	 * Show a shop page description on product archives.
 	 *
 	 * @subpackage	Archives
 	 */
@@ -634,7 +634,7 @@ if ( ! function_exists( 'woocommerce_template_loop_price' ) ) {
 if ( ! function_exists( 'woocommerce_template_loop_rating' ) ) {
 
 	/**
-	 * Display the average rating in the loop
+	 * Display the average rating in the loop.
 	 *
 	 * @subpackage	Loop
 	 */
@@ -657,7 +657,7 @@ if ( ! function_exists( 'woocommerce_show_product_loop_sale_flash' ) ) {
 if ( ! function_exists( 'woocommerce_get_product_schema' ) ) {
 
 	/**
-	 * Get a products Schema
+	 * Get a products Schema.
 	 * @return string
 	 */
 	function woocommerce_get_product_schema() {
@@ -1079,7 +1079,7 @@ if ( ! function_exists( 'woocommerce_default_product_tabs' ) ) {
 if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 
 	/**
-	 * Sort tabs by priority
+	 * Sort tabs by priority.
 	 *
 	 * @param array $tabs
 	 * @return array
@@ -1256,7 +1256,7 @@ if ( ! function_exists( 'woocommerce_button_proceed_to_checkout' ) ) {
 if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 
 	/**
-	 * Output the Mini-cart - used by cart widget
+	 * Output the Mini-cart - used by cart widget.
 	 *
 	 */
 	function woocommerce_mini_cart( $args = array() ) {
@@ -1276,7 +1276,7 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 if ( ! function_exists( 'woocommerce_login_form' ) ) {
 
 	/**
-	 * Output the WooCommerce Login Form
+	 * Output the WooCommerce Login Form.
 	 *
 	 * @subpackage	Forms
 	 */
@@ -1297,7 +1297,7 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
 
 	/**
-	 * Output the WooCommerce Checkout Login Form
+	 * Output the WooCommerce Checkout Login Form.
 	 *
 	 * @subpackage	Checkout
 	 */
@@ -1309,7 +1309,7 @@ if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
 if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 	/**
-	 * Output the WooCommerce Breadcrumb
+	 * Output the WooCommerce Breadcrumb.
 	 */
 	function woocommerce_breadcrumb( $args = array() ) {
 		$args = wp_parse_args( $args, apply_filters( 'woocommerce_breadcrumb_defaults', array(
@@ -1348,7 +1348,7 @@ if ( ! function_exists( 'woocommerce_order_review' ) ) {
 if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 
 	/**
-	 * Output the Payment Methods on the checkout
+	 * Output the Payment Methods on the checkout.
 	 *
 	 * @subpackage	Checkout
 	 */
@@ -1383,7 +1383,7 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 
 	/**
-	 * Check if we will be showing products or not (and not subcats only)
+	 * Check if we will be showing products or not (and not subcats only).
 	 *
 	 * @subpackage	Loop
 	 * @return bool
@@ -1870,8 +1870,8 @@ if ( ! function_exists( 'get_product_search_form' ) ) {
 	/**
 	 * Display product search form.
 	 *
-	 * Will first attempt to locate the product-searchform.php file in either the child or
-	 * the parent, then load it. If it doesn't exist, then the default search form
+	 * Will first attempt to locate the product-searchform.php file in either the child or.
+	 * the parent, then load it. If it doesn't exist, then the default search form.
 	 * will be displayed.
 	 *
 	 * The default searchform uses html5.

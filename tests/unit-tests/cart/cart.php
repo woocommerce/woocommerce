@@ -3,13 +3,13 @@
 namespace WooCommerce\Tests\Cart;
 
 /**
- * Class Cart
+ * Class Cart.
  * @package WooCommerce\Tests\Cart
  */
 class Cart extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test get_remove_url
+	 * Test get_remove_url.
 	 *
 	 * @since 2.3
 	 */
@@ -25,7 +25,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add to cart simple product
+	 * Test add to cart simple product.
 	 *
 	 * @since 2.3
 	 */
@@ -48,7 +48,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Check if we can add a trashed product to the cart
+	 * Check if we can add a trashed product to the cart.
 	 */
 	public function test_add_to_cart_trashed() {
 		// Create dummy product
@@ -71,7 +71,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add to cart variable product
+	 * Test add to cart variable product.
 	 *
 	 * @since 2.3
 	 */
@@ -93,7 +93,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Check if adding a product that is sold individually is corrected when adding multiple times
+	 * Check if adding a product that is sold individually is corrected when adding multiple times.
 	 *
 	 * @since 2.3
 	 */
@@ -119,7 +119,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the find_product_in_cart method
+	 * Test the find_product_in_cart method.
 	 *
 	 * @since 2.3
 	 */
@@ -146,7 +146,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the generate_cart_id method
+	 * Test the generate_cart_id method.
 	 *
 	 * @since 2.3
 	 */
@@ -202,7 +202,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the set_quantity method
+	 * Test the set_quantity method.
 	 *
 	 * @since 2.3
 	 */
@@ -236,7 +236,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test check_cart_item_validity method
+	 * Test check_cart_item_validity method.
 	 *
 	 * @since 2.3
 	 */
@@ -260,7 +260,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_total
+	 * Test get_total.
 	 *
 	 * @since 2.3
 	 */
@@ -288,7 +288,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_total_ex_tax
+	 * Test get_total_ex_tax.
 	 *
 	 * @since 2.3
 	 */
@@ -328,7 +328,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test needs_shipping_address method
+	 * Test needs_shipping_address method.
 	 */
 	public function test_needs_shipping_address() {
 		$needs_shipping_address = false;
@@ -341,7 +341,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test shipping total
+	 * Test shipping total.
 	 *
 	 * @since 2.3
 	 */
@@ -384,7 +384,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test cart fee
+	 * Test cart fee.
 	 *
 	 * @since 2.3
 	 */
@@ -422,7 +422,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test cart coupons
+	 * Test cart coupons.
 	 */
 	public function test_get_coupons() {
 

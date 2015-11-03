@@ -3,14 +3,14 @@
 namespace WooCommerce\Tests\Coupon;
 
 /**
- * Class Functions
+ * Class Functions.
  * @package WooCommerce\Tests\Coupon
  * @since 2.2
  */
 class Functions extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test wc_get_coupon_types()
+	 * Test wc_get_coupon_types().
 	 *
 	 * @since 2.2
 	 */
@@ -27,7 +27,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_coupon_type()
+	 * Test wc_get_coupon_type().
 	 *
 	 * @since 2.2
 	 */
@@ -38,7 +38,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test coupons_enabled method
+	 * Test coupons_enabled method.
 	 *
 	 * @since 2.5.0
 	 */

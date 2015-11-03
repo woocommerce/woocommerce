@@ -1,6 +1,6 @@
 <?php
 /**
- * Order
+ * Order.
  *
  * @class    WC_Order
  * @version  2.2.0
@@ -52,7 +52,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get order refunds
+	 * Get order refunds.
 	 *
 	 * @since 2.2
 	 * @return array
@@ -80,7 +80,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get amount already refunded
+	 * Get amount already refunded.
 	 *
 	 * @since 2.2
 	 * @return int|float
@@ -100,7 +100,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the total tax refunded
+	 * Get the total tax refunded.
 	 *
 	 * @since  2.3
 	 * @return float
@@ -121,7 +121,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the total shipping refunded
+	 * Get the total shipping refunded.
 	 *
 	 * @since  2.4
 	 * @return float
@@ -184,7 +184,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
@@ -203,7 +203,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
@@ -229,7 +229,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  int $tax_id ID of the tax we're checking

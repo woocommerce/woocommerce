@@ -11,7 +11,7 @@
 class WC_Shortcodes {
 
 	/**
-	 * Init shortcodes
+	 * Init shortcodes.
 	 */
 	public static function init() {
 		$shortcodes = array(
@@ -45,7 +45,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Shortcode Wrapper
+	 * Shortcode Wrapper.
 	 *
 	 * @param string[] $function
 	 * @param array $atts (default: array())
@@ -70,7 +70,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Loop over found products
+	 * Loop over found products.
 	 * @param  array $query_args
 	 * @param  array $atts
 	 * @param  string $loop_name
@@ -149,7 +149,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List products in a category shortcode
+	 * List products in a category shortcode.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -197,7 +197,7 @@ class WC_Shortcodes {
 
 
 	/**
-	 * List all (or limited) product categories
+	 * List all (or limited) product categories.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -278,7 +278,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Recent Products shortcode
+	 * Recent Products shortcode.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -309,7 +309,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List multiple products shortcode
+	 * List multiple products shortcode.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -349,7 +349,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Display a single product
+	 * Display a single product.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -411,7 +411,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Display a single product price + cart button
+	 * Display a single product price + cart button.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -466,7 +466,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Get the add to cart URL for a product
+	 * Get the add to cart URL for a product.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -497,7 +497,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List all products on sale
+	 * List all products on sale.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -525,7 +525,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List best selling products on sale
+	 * List best selling products on sale.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -554,7 +554,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List top rated products on sale
+	 * List top rated products on sale.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -593,7 +593,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Output featured products
+	 * Output featured products.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -630,7 +630,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Show a single product page
+	 * Show a single product page.
 	 *
 	 * @param array $atts
 	 * @return string
@@ -721,7 +721,7 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * Show messages
+	 * Show messages.
 	 *
 	 * @return string
 	 */
@@ -749,8 +749,8 @@ class WC_Shortcodes {
 	}
 
 	/**
-	 * List products with an attribute shortcode
-	 * Example [product_attribute attribute='color' filter='black']
+	 * List products with an attribute shortcode.
+	 * Example [product_attribute attribute='color' filter='black'].
 	 *
 	 * @param array $atts
 	 * @return string

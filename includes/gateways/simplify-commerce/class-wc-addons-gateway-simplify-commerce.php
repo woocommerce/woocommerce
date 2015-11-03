@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Simplify Commerce Gateway for subscriptions
+ * Simplify Commerce Gateway for subscriptions.
  *
  * @class 		WC_Addons_Gateway_Simplify_Commerce
  * @extends		WC_Gateway_Simplify_Commerce
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		parent::__construct();
@@ -42,7 +42,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Hosted payment args
+	 * Hosted payment args.
 	 *
 	 * @param  array $args
 	 * @param  int   $order_id
@@ -79,7 +79,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Process the subscription
+	 * Process the subscription.
 	 *
 	 * @param WC_Order $order
 	 * @param string   $cart_token
@@ -147,7 +147,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Store the customer and card IDs on the order and subscriptions in the order
+	 * Store the customer and card IDs on the order and subscriptions in the order.
 	 *
 	 * @param int $order_id
 	 * @param string $customer_id
@@ -165,7 +165,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Process the pre-order
+	 * Process the pre-order.
 	 *
 	 * @param WC_Order $order
 	 * @param string   $cart_token
@@ -248,7 +248,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Process the payment
+	 * Process the payment.
 	 *
 	 * @param  int $order_id
 	 * @return array
@@ -300,7 +300,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		try {
 			// Charge the customer
 			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $amount * 100, // In cents
+				'amount'              => $amount * 100, // In cents.
 				'customer'            => $customer_id,
 				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
@@ -359,7 +359,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for
+	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for.
 	 * an automatic renewal payment which previously failed.
 	 *
 	 * @param WC_Subscription $subscription The subscription for which the failing payment method relates.
@@ -370,7 +370,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Include the payment meta data required to process automatic recurring payments so that store managers can
+	 * Include the payment meta data required to process automatic recurring payments so that store managers can.
 	 * manually set up automatic recurring payments for a customer via the Edit Subscription screen in Subscriptions v2.0+.
 	 *
 	 * @since 2.4
@@ -393,7 +393,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Validate the payment meta data required to process automatic recurring payments so that store managers can
+	 * Validate the payment meta data required to process automatic recurring payments so that store managers can.
 	 * manually set up automatic recurring payments for a customer via the Edit Subscription screen in Subscriptions 2.0+.
 	 *
 	 * @since 2.4
@@ -421,7 +421,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Process a pre-order payment when the pre-order is released
+	 * Process a pre-order payment when the pre-order is released.
 	 *
 	 * @param WC_Order $order
 	 * @return wp_error|null
@@ -441,7 +441,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 			// Charge the customer
 			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $order->order_total * 100, // In cents
+				'amount'              => $order->order_total * 100, // In cents.
 				'customer'            => $customer_id,
 				'description'         => trim( substr( $pre_order_name, 0, 1024 ) ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
@@ -477,7 +477,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	}
 
 	/**
-	 * Return handler for Hosted Payments
+	 * Return handler for Hosted Payments.
 	 */
 	public function return_handler() {
 		if ( ! isset( $_REQUEST['cardToken'] ) ) {

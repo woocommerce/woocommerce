@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Integrations class
+ * WooCommerce Integrations class.
  *
  * Loads Integrations into WooCommerce.
  *

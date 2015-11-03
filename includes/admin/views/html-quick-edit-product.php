@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Quick Edit Product
+ * Admin View: Quick Edit Product.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

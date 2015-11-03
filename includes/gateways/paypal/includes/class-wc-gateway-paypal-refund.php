@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Handles refunds
+ * Handles refunds.
  */
 class WC_Gateway_Paypal_Refund {
 
@@ -19,7 +19,7 @@ class WC_Gateway_Paypal_Refund {
 	public static $api_signature;
 
 	/**
-	 * Get refund request args
+	 * Get refund request args.
 	 * @param  WC_Order $order
 	 * @param  float $amount
 	 * @param  string $reason
@@ -45,7 +45,7 @@ class WC_Gateway_Paypal_Refund {
 	}
 
 	/**
-	 * Refund an order via PayPal
+	 * Refund an order via PayPal.
 	 * @param  WC_Order $order
 	 * @param  float $amount
 	 * @param  string $reason

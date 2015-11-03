@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Cancelled_Order' ) ) :
 
 /**
- * Cancelled Order Email
+ * Cancelled Order Email.
  *
  * An email sent to the admin when an order is cancelled.
  *
@@ -20,7 +20,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order' ) ) :
 class WC_Email_Cancelled_Order extends WC_Email {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 

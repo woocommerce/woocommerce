@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Simple Product Class
+ * Simple Product Class.
  *
  * The default product type kinda product.
  *
@@ -40,7 +40,7 @@ class WC_Product_Simple extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @return string
 	 */

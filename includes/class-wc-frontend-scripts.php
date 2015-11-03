@@ -1,6 +1,6 @@
 <?php
 /**
- * Handle frontend scripts
+ * Handle frontend scripts.
  *
  * @class       WC_Frontend_Scripts
  * @version     2.3.0
@@ -14,24 +14,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Frontend_Scripts Class
+ * WC_Frontend_Scripts Class.
  */
 class WC_Frontend_Scripts {
 
 	/**
-	 * Contains an array of script handles registered by WC
+	 * Contains an array of script handles registered by WC.
 	 * @var array
 	 */
 	private static $scripts = array();
 
 	/**
-	 * Contains an array of script handles registered by WC
+	 * Contains an array of script handles registered by WC.
 	 * @var array
 	 */
 	private static $styles = array();
 
 	/**
-	 * Contains an array of script handles localized by WC
+	 * Contains an array of script handles localized by WC.
 	 * @var array
 	 */
 	private static $wp_localize_scripts = array();

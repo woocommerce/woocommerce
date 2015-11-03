@@ -2,13 +2,13 @@
 namespace WooCommerce\Tests\Tax;
 
 /**
- * Class Tax
+ * Class Tax.
  * @package WooCommerce\Tests\Tax
  */
 class Tax extends \WC_Unit_Test_Case {
 
 	/**
-	 * Get rates
+	 * Get rates.
 	 */
 	public function test_get_rates() {
 		global $wpdb;
@@ -39,7 +39,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Get rates
+	 * Get rates.
 	 */
 	public function test_get_shipping_tax_rates() {
 		global $wpdb;
@@ -70,7 +70,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Get rates
+	 * Get rates.
 	 */
 	public function test_get_base_tax_rates() {
 		global $wpdb;
@@ -100,7 +100,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Find tax rates
+	 * Find tax rates.
 	 */
 	public function test_find_rates() {
 		global $wpdb;
@@ -136,7 +136,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Find tax rates
+	 * Find tax rates.
 	 */
 	public function test_find_shipping_rates() {
 		global $wpdb;
@@ -172,7 +172,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test tax amounts
+	 * Test tax amounts.
 	 */
 	public function test_calc_tax() {
 		global $wpdb;
@@ -269,9 +269,9 @@ class Tax extends \WC_Unit_Test_Case {
 		/**
 		 * 100 is inclusive of all taxes.
 		 *
-		 * Compound would be 100 - ( 100 / 1.085 ) = 7.8341
-		 * Next tax would be calced on 100 - 7.8341 = 92.1659
-		 * 92.1659 - ( 92.1659 / 1.05 ) = 4.38885
+		 * Compound would be 100 - ( 100 / 1.085 ) = 7.8341.
+		 * Next tax would be calced on 100 - 7.8341 = 92.1659.
+		 * 92.1659 - ( 92.1659 / 1.05 ) = 4.38885.
 		 */
 		$this->assertEquals( $calced_tax, array( $tax_rate_1_id => 4.3889, $tax_rate_2_id => 7.8341 ) );
 
@@ -282,7 +282,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Shipping tax amounts
+	 * Shipping tax amounts.
 	 */
 	public function test_calc_shipping_tax() {
 		global $wpdb;
@@ -320,7 +320,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test rate labels
+	 * Test rate labels.
 	 */
 	public function test_get_rate_label() {
 		global $wpdb;
@@ -345,7 +345,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test rate percent
+	 * Test rate percent.
 	 */
 	public function test_get_rate_percent() {
 		global $wpdb;
@@ -370,7 +370,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test rate code
+	 * Test rate code.
 	 */
 	public function test_get_rate_code() {
 		global $wpdb;
@@ -395,7 +395,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is compound
+	 * Test is compound.
 	 */
 	public function test_is_compound() {
 		global $wpdb;
@@ -420,14 +420,14 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the rounding method
+	 * Test the rounding method.
 	 */
 	public function test_round() {
 		$this->assertEquals(\WC_Tax::round( '2.1234567' ), '2.1235' );
 	}
 
 	/**
-	 * Get tax totals
+	 * Get tax totals.
 	 */
 	public function test_get_tax_total() {
 		$to_total = array(
@@ -439,7 +439,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting the tax classes
+	 * Test getting the tax classes.
 	 */
 	public function test_get_tax_classes() {
 		$tax_classes = \WC_Tax::get_tax_classes();
@@ -448,7 +448,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test Inserting a tax rate
+	 * Test Inserting a tax rate.
 	 */
 	public function test__insert_tax_rate() {
 		global $wpdb;
@@ -487,7 +487,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating a tax rate
+	 * Test updating a tax rate.
 	 */
 	public function test__update_tax_rate() {
 		global $wpdb;
@@ -522,7 +522,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test deleting a tax rate
+	 * Test deleting a tax rate.
 	 */
 	public function test__delete_tax_rate() {
 		global $wpdb;
@@ -552,7 +552,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Postcode saving
+	 * Postcode saving.
 	 */
 	public function test__update_tax_rate_postcodes() {
 		global $wpdb;
@@ -583,7 +583,7 @@ class Tax extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * City saving
+	 * City saving.
 	 */
 	public function test__update_tax_rate_cities() {
 		global $wpdb;

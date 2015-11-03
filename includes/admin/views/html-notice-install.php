@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Install
+ * Admin View: Notice - Install.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

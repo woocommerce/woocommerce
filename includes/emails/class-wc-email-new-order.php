@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 
 /**
- * New Order Email
+ * New Order Email.
  *
  * An email sent to the admin when a new order is received/paid for.
  *
@@ -20,7 +20,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 class WC_Email_New_Order extends WC_Email {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 
@@ -110,7 +110,7 @@ class WC_Email_New_Order extends WC_Email {
 	}
 
 	/**
-	 * Initialise settings form fields
+	 * Initialise settings form fields.
 	 */
 	function init_form_fields() {
 		$this->form_fields = array(

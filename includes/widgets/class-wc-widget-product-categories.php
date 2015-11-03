@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Product Categories Widget
+ * Product Categories Widget.
  *
  * @author   WooThemes
  * @category Widgets
@@ -16,21 +16,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Widget_Product_Categories extends WC_Widget {
 
 	/**
-	 * Category ancestors
+	 * Category ancestors.
 	 *
 	 * @var array
 	 */
 	public $cat_ancestors;
 
 	/**
-	 * Current Category
+	 * Current Category.
 	 *
 	 * @var bool
 	 */
 	public $current_cat;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_product_categories';

@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Tax Settings
+ * WooCommerce Tax Settings.
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_Tax' ) ) :
 
 /**
- * WC_Settings_Tax
+ * WC_Settings_Tax.
  */
 class WC_Settings_Tax extends WC_Settings_Page {
 
@@ -30,7 +30,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections
+	 * Get sections.
 	 *
 	 * @return array
 	 */
@@ -51,7 +51,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
@@ -67,7 +67,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
 		global $current_section;
@@ -84,7 +84,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		global $current_section, $wpdb;
@@ -101,7 +101,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output tax rate tables
+	 * Output tax rate tables.
 	 */
 	public function output_tax_rates() {
 		global $wpdb,
@@ -178,7 +178,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get tax class being edited
+	 * Get tax class being edited.
 	 * @return string
 	 */
 	private static function get_current_tax_class() {
@@ -197,7 +197,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get a posted tax rate
+	 * Get a posted tax rate.
 	 * @param  string $key   Key of tax rate in the post data array
 	 * @param  int $order Position/order of rate
 	 * @param  string $class Tax class for rate
@@ -228,7 +228,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save tax rates
+	 * Save tax rates.
 	 */
 	public function save_tax_rates() {
 		global $wpdb;

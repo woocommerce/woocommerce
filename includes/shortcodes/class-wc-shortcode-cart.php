@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart Shortcode
+ * Cart Shortcode.
  *
  * Used on the cart page, the cart shortcode displays the cart contents and interface for coupon codes and other cart bits and pieces.
  *
@@ -12,7 +12,7 @@
 class WC_Shortcode_Cart {
 
 	/**
-	 * Calculate shipping for the cart
+	 * Calculate shipping for the cart.
 	 */
 	public static function calculate_shipping() {
 		try {

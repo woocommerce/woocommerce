@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout terms and conditions checkbox
+ * Checkout terms and conditions checkbox.
  *
  * @author 		WooThemes
  * @package 	WooCommerce/Templates

@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class WC_Helper_Product
+ * Class WC_Helper_Product.
  *
- * This helper class should ONLY be used for unit tests!
+ * This helper class should ONLY be used for unit tests!.
  */
 class WC_Helper_Product {
 
 	/**
-	 * Delete a product
+	 * Delete a product.
 	 *
 	 * @param $product_id
 	 *
@@ -26,7 +26,7 @@ class WC_Helper_Product {
 	}
 
 	/**
-	 * Create simple product
+	 * Create simple product.
 	 *
 	 * @since 2.3
 	 *
@@ -55,7 +55,7 @@ class WC_Helper_Product {
 	}
 
 	/**
-	 * Create a dummy simple product
+	 * Create a dummy simple product.
 	 *
 	 * @since 2.3
 	 *
@@ -166,7 +166,7 @@ class WC_Helper_Product {
 	}
 
 	/**
-	 * Create a dummy attribute
+	 * Create a dummy attribute.
 	 *
 	 * @since 2.3
 	 *
@@ -223,7 +223,7 @@ class WC_Helper_Product {
 	}
 
 	/**
-	 * Delete an attribute
+	 * Delete an attribute.
 	 *
 	 * @param $attribute_id
 	 *

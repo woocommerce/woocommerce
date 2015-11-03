@@ -1,9 +1,9 @@
 <?php
 /**
- * WC Unit Test Case
+ * WC Unit Test Case.
  *
  * Provides WooCommerce-specific setup/tear down/assert methods, custom factories,
- * and helper functions
+ * and helper functions.
  *
  * @since 2.2
  */
@@ -13,7 +13,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	protected $factory;
 
 	/**
-	 * Setup test case
+	 * Setup test case.
 	 *
 	 * @since 2.2
 	 */
@@ -35,8 +35,8 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Mock the WC session using the abstract class as cookies are not available
-	 * during tests
+	 * Mock the WC session using the abstract class as cookies are not available.
+	 * during tests.
 	 *
 	 * @since  2.2
 	 * @return string
@@ -46,9 +46,9 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Strip newlines and tabs when using expectedOutputString() as otherwise
-	 * the most template-related tests will fail due to indentation/alignment in
-	 * the template not matching the sample strings set in the tests
+	 * Strip newlines and tabs when using expectedOutputString() as otherwise.
+	 * the most template-related tests will fail due to indentation/alignment in.
+	 * the template not matching the sample strings set in the tests.
 	 *
 	 * @since 2.2
 	 */
@@ -61,7 +61,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Asserts thing is not WP_Error
+	 * Asserts thing is not WP_Error.
 	 *
 	 * @since 2.2
 	 * @param mixed  $actual
@@ -72,7 +72,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Asserts thing is WP_Error
+	 * Asserts thing is WP_Error.
 	 *
 	 * @param mixed  $actual
 	 * @param string $message
@@ -82,7 +82,7 @@ class WC_Unit_Test_Case extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2
+	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2.
 	 *
 	 * @since  2.2
 	 * @param  $condition

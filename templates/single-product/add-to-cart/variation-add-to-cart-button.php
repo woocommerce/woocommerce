@@ -1,6 +1,6 @@
 <?php
 /**
- * Single variation cart button
+ * Single variation cart button.
  *
  * @see 	http://docs.woothemes.com/document/template-structure/
  * @author  WooThemes

@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Geolocation Class
+ * WC_Geolocation Class.
  */
 class WC_Geo_IP {
 
@@ -1105,7 +1105,7 @@ class WC_Geo_IP {
 	);
 
 	/**
-	 * Open geoip file
+	 * Open geoip file.
 	 *
 	 * @param  string $filename
 	 * @param  int $flags
@@ -1126,7 +1126,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Setup segments
+	 * Setup segments.
 	 *
 	 * @return WC_Geo_IP instance
 	 */
@@ -1281,7 +1281,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Close geoip file
+	 * Close geoip file.
 	 *
 	 * @return bool
 	 */
@@ -1294,7 +1294,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Common get record
+	 * Common get record.
 	 *
 	 * @param  string $seek_country
 	 * @return WC_Geo_IP_Record instance
@@ -1409,7 +1409,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Get record
+	 * Get record.
 	 *
 	 * @param  int $ipnum
 	 * @return WC_Geo_IP_Record instance
@@ -1424,7 +1424,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Seek country IPv6
+	 * Seek country IPv6.
 	 *
 	 * @param  int $ipnum [description]
 	 * @return bool|int
@@ -1484,7 +1484,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Seek country
+	 * Seek country.
 	 *
 	 * @param  int $ipnum
 	 * @return bool|int
@@ -1538,7 +1538,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Record by addr
+	 * Record by addr.
 	 *
 	 * @param  string $addr
 	 * @return int
@@ -1553,7 +1553,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country ID by addr IPv6
+	 * Country ID by addr IPv6.
 	 *
 	 * @param  string $addr
 	 * @return int
@@ -1564,7 +1564,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country ID by addr
+	 * Country ID by addr.
 	 *
 	 * @param  string $addr
 	 * @return int
@@ -1575,7 +1575,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country code by addr IPv6
+	 * Country code by addr IPv6.
 	 *
 	 * @param  string $addr
 	 * @return bool|int
@@ -1590,7 +1590,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country code by addr
+	 * Country code by addr.
 	 *
 	 * @param  string $addr
 	 * @return bool|int
@@ -1612,7 +1612,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Encode string
+	 * Encode string.
 	 *
 	 * @param  string $string
 	 * @param  int $start
@@ -1641,7 +1641,7 @@ class WC_Geo_IP {
 }
 
 /**
- * Geo IP Record class
+ * Geo IP Record class.
  */
 class WC_Geo_IP_Record {
 	public $country_code;

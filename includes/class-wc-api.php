@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce API
+ * WooCommerce API.
  *
- * Handles WC-API endpoint requests
+ * Handles WC-API endpoint requests.
  *
  * @author   WooThemes
  * @category API
@@ -19,7 +19,7 @@ if ( ! class_exists( 'WC_API' ) ) :
 class WC_API {
 
 	/** This is the major version for the REST API and takes
-	 * first-order position in endpoint URLs
+	 * first-order position in endpoint URLs.
 	 */
 	const VERSION = '3.0.0';
 
@@ -30,7 +30,7 @@ class WC_API {
 	public $authentication;
 
 	/**
-	 * Setup class
+	 * Setup class.
 	 *
 	 * @since 2.0
 	 * @return WC_API
@@ -83,7 +83,7 @@ class WC_API {
 
 
 	/**
-	 * Handle REST API requests
+	 * Handle REST API requests.
 	 *
 	 * @since 2.2
 	 */
@@ -126,7 +126,7 @@ class WC_API {
 	}
 
 	/**
-	 * Include required files for REST API request
+	 * Include required files for REST API request.
 	 *
 	 * @since 2.1
 	 */
@@ -156,7 +156,7 @@ class WC_API {
 	}
 
 	/**
-	 * Register available API resources
+	 * Register available API resources.
 	 *
 	 * @since 2.1
 	 * @param WC_API_Server $server the REST server

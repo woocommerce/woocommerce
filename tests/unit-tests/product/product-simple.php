@@ -3,14 +3,14 @@
 namespace WooCommerce\Tests\Product;
 
 /**
- * Class Product_Simple
+ * Class Product_Simple.
  * @package WooCommerce\Tests\Product
  * @since 2.3
  */
 class Product_Simple extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test add_to_cart_text()
+	 * Test add_to_cart_text().
 	 *
 	 * @since 2.3
 	 */
@@ -28,7 +28,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test single_add_to_cart_text()
+	 * Test single_add_to_cart_text().
 	 *
 	 * @since 2.3
 	 */
@@ -43,7 +43,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_title()
+	 * Test get_title().
 	 *
 	 * @since 2.3
 	 */
@@ -58,7 +58,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_permalink()
+	 * Test get_permalink().
 	 *
 	 * @since 2.3
 	 */
@@ -73,7 +73,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_sku()
+	 * Test get_sku().
 	 *
 	 * @since 2.3
 	 */
@@ -88,7 +88,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_stock_quantity()
+	 * Test get_stock_quantity().
 	 *
 	 * @since 2.3
 	 */
@@ -107,7 +107,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_total_stock()
+	 * Test get_total_stock().
 	 *
 	 * @since 2.3
 	 */
@@ -125,7 +125,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test set_stock()
+	 * Test set_stock().
 	 *
 	 * @since 2.3
 	 */
@@ -143,7 +143,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test reduce_stock()
+	 * Test reduce_stock().
 	 *
 	 * @since 2.3
 	 */
@@ -160,7 +160,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test increase_stock()
+	 * Test increase_stock().
 	 *
 	 * @since 2.3
 	 */
@@ -177,7 +177,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_type()
+	 * Test is_type().
 	 *
 	 * @since 2.3
 	 */
@@ -195,7 +195,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_downloadable()
+	 * Test is_downloadable().
 	 *
 	 * @since 2.3
 	 */
@@ -216,7 +216,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_virtual()
+	 * Test is_virtual().
 	 *
 	 * @since 2.3
 	 */
@@ -237,7 +237,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test needs_shipping()
+	 * Test needs_shipping().
 	 *
 	 * @since 2.3
 	 */
@@ -256,7 +256,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_sold_individually()
+	 * Test is_sold_individually().
 	 *
 	 * @since 2.3
 	 */
@@ -275,7 +275,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test backorders_allowed()
+	 * Test backorders_allowed().
 	 *
 	 * @since 2.3
 	 */
@@ -297,7 +297,7 @@ class Product_Simple extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test backorders_require_notification()
+	 * Test backorders_require_notification().
 	 *
 	 * @since 2.3
 	 */

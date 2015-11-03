@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout Shortcode
+ * Checkout Shortcode.
  *
  * Used on the checkout page, the checkout shortcode displays the checkout process.
  *
@@ -66,7 +66,7 @@ class WC_Shortcode_Checkout {
 	}
 
 	/**
-	 * Show the pay page
+	 * Show the pay page.
 	 *
 	 * @param int $order_id
 	 */
@@ -182,7 +182,7 @@ class WC_Shortcode_Checkout {
 	}
 
 	/**
-	 * Show the thanks page
+	 * Show the thanks page.
 	 *
 	 * @param int $order_id
 	 */
@@ -209,7 +209,7 @@ class WC_Shortcode_Checkout {
 	}
 
 	/**
-	 * Show the checkout
+	 * Show the checkout.
 	 */
 	private static function checkout() {
 

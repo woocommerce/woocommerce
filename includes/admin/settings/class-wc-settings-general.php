@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce General Settings
+ * WooCommerce General Settings.
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_General' ) ) :
 
 /**
- * WC_Admin_Settings_General
+ * WC_Admin_Settings_General.
  */
 class WC_Settings_General extends WC_Settings_Page {
 
@@ -33,7 +33,7 @@ class WC_Settings_General extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
@@ -206,7 +206,7 @@ class WC_Settings_General extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		$settings = $this->get_settings();

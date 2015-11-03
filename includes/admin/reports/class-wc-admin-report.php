@@ -26,7 +26,7 @@ class WC_Admin_Report {
 	/**
 	 * Get report totals such as order totals and discount amounts.
 	 *
-	 * Data example:.
+	 * Data example:
 	 *
 	 * '_order_total' => array(
 	 *     'type'     => 'meta',

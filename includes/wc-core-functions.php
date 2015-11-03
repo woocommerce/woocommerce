@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Core Functions
+ * WooCommerce Core Functions.
  *
  * General core functions available on both the front-end and admin.
  *
@@ -122,7 +122,7 @@ function wc_create_order( $args = array() ) {
 
 /**
  * Update an order. Uses wc_create_order.
- * 
+ *
  * @param  array $args
  * @return string | WC_Order
  */
@@ -242,7 +242,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 
 /**
  * Get Base Currency Code.
- * 
+ *
  * @return string
  */
 function get_woocommerce_currency() {
@@ -251,7 +251,7 @@ function get_woocommerce_currency() {
 
 /**
  * Get full list of currency codes.
- * 
+ *
  * @return array
  */
 function get_woocommerce_currencies() {
@@ -313,7 +313,7 @@ function get_woocommerce_currencies() {
 
 /**
  * Get Currency symbol.
- * 
+ *
  * @param string $currency (default: '')
  * @return string
  */
@@ -695,8 +695,8 @@ function wc_get_core_supported_themes() {
 }
 
 /**
- * Wrapper function to execute the `woocommerce_deliver_webhook_async` cron
- * hook, see WC_Webhook::process()
+ * Wrapper function to execute the `woocommerce_deliver_webhook_async` cron.
+ * hook, see WC_Webhook::process().
  *
  * @since 2.2
  * @param int $webhook_id webhook ID to deliver.
@@ -727,7 +727,7 @@ add_action( 'after_setup_theme', 'wc_template_debug_mode', 20 );
 
 /**
  * Formats a string in the format COUNTRY:STATE into an array.
- * 
+ *
  * @since 2.3.0
  * @param  string $country_string
  * @return array
@@ -747,7 +747,7 @@ function wc_format_country_state_string( $country_string ) {
 
 /**
  * Get the store's base location.
- * 
+ *
  * @todo should the woocommerce_default_country option be renamed to contain 'base'?
  * @since 2.3.0
  * @return array
@@ -759,7 +759,7 @@ function wc_get_base_location() {
 }
 
 /**
- * Get the customer's default location. 
+ * Get the customer's default location. .
  *
  * Filtered, and set to base location or left blank. If cache-busting,
  * this should only be used when 'location' is set in the querystring.

@@ -34,7 +34,7 @@ class WC_Admin_Meta_Boxes {
 		/**
 		 * Save Order Meta Boxes.
 		 *
-		 * In order:.
+		 * In order:
 		 *      Save the order items.
 		 *      Save the order totals.
 		 *      Save the order downloads.

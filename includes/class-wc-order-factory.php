@@ -1,8 +1,8 @@
 <?php
 /**
- * Order Factory Class
+ * Order Factory Class.
  *
- * The WooCommerce order factory creating the right order objects
+ * The WooCommerce order factory creating the right order objects.
  *
  * @class 		WC_Order_Factory
  * @version		2.2.0

@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
 
 /**
- * Customer Reset Password
+ * Customer Reset Password.
  *
  * An email sent to the customer when they reset their password.
  *
@@ -29,7 +29,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	public $reset_key;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 

@@ -1,12 +1,12 @@
 <?php
 /**
- * Variable product add to cart
+ * Variable product add to cart.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/single-product/add-to-cart/variable.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/single-product/add-to-cart/variable.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
- * will need to copy the new files to your theme to maintain compatibility. We try to do this
- * as little as possible, but it does happen. When this occurs the version of the template file will
+ * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
+ * will need to copy the new files to your theme to maintain compatibility. We try to do this.
+ * as little as possible, but it does happen. When this occurs the version of the template file will.
  * be bumped and the readme will list any important changes.
  *
  * @see 	http://docs.woothemes.com/document/template-structure/
@@ -52,7 +52,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 		<div class="single_variation_wrap">
 			<?php
 				/**
-				 * woocommerce_before_single_variation Hook
+				 * woocommerce_before_single_variation Hook.
 				 */
 				do_action( 'woocommerce_before_single_variation' );
 
@@ -65,7 +65,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				do_action( 'woocommerce_single_variation' );
 
 				/**
-				 * woocommerce_after_single_variation Hook
+				 * woocommerce_after_single_variation Hook.
 				 */
 				do_action( 'woocommerce_after_single_variation' );
 			?>

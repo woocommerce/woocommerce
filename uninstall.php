@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Uninstall
+ * WooCommerce Uninstall.
  *
  * Uninstalling WooCommerce deletes user roles, pages, tables, and options.
  *

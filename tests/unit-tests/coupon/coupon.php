@@ -3,13 +3,13 @@
 namespace WooCommerce\Tests\Coupon;
 
 /**
- * Class Coupon
+ * Class Coupon.
  * @package WooCommerce\Tests\Coupon
  */
 class Coupon extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test add_discount method
+	 * Test add_discount method.
 	 *
 	 * @since 2.3
 	 */
@@ -35,7 +35,7 @@ class Coupon extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add_discount method
+	 * Test add_discount method.
 	 *
 	 * @since 2.3
 	 */
@@ -67,7 +67,7 @@ class Coupon extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test fixed cart discount method
+	 * Test fixed cart discount method.
 	 *
 	 * @since 2.3
 	 */
@@ -125,7 +125,7 @@ class Coupon extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test percent cart discount method
+	 * Test percent cart discount method.
 	 *
 	 * @since 2.3
 	 */
@@ -183,7 +183,7 @@ class Coupon extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test fixed product discount method
+	 * Test fixed product discount method.
 	 *
 	 * @since 2.3
 	 */
@@ -247,7 +247,7 @@ class Coupon extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test percent product discount method
+	 * Test percent product discount method.
 	 *
 	 * @since 2.3
 	 */

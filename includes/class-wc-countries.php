@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce countries
+ * WooCommerce countries.
  *
  * The WooCommerce countries class stores country/state data.
  *
@@ -339,7 +339,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * Get country address formats
+	 * Get country address formats.
 	 * @return array
 	 */
 	public function get_address_formats() {
@@ -935,7 +935,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * Apply locale and get address fields
+	 * Apply locale and get address fields.
 	 * @param  mixed  $country
 	 * @param  string $type (default: 'billing_')
 	 * @return array

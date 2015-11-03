@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Report_Sales_By_Product
+ * WC_Report_Sales_By_Product.
  *
  * @author      WooThemes
  * @category    Admin
@@ -14,7 +14,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	public $product_ids_titles = array();
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		if ( isset( $_GET['product_ids'] ) && is_array( $_GET['product_ids'] ) ) {
@@ -25,7 +25,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the legend for the main chart sidebar
+	 * Get the legend for the main chart sidebar.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -97,7 +97,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output the report
+	 * Output the report.
 	 */
 	public function output_report() {
 
@@ -124,7 +124,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * [get_chart_widgets description]
+	 * [get_chart_widgets description].
 	 *
 	 * @return array
 	 */
@@ -148,7 +148,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * Show current filters
+	 * Show current filters.
 	 */
 	public function current_filters() {
 
@@ -170,7 +170,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * Product selection
+	 * Product selection.
 	 */
 	public function products_widget() {
 		?>
@@ -351,7 +351,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output an export link
+	 * Output an export link.
 	 */
 	public function get_export_button() {
 
@@ -371,7 +371,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the main chart
+	 * Get the main chart.
 	 *
 	 * @return string
 	 */

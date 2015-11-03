@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Conditional Functions
+ * WooCommerce Conditional Functions.
  *
  * Functions for determining the current query/page.
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)
+ * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included).
  * @return bool
  */
 function is_woocommerce() {
@@ -117,7 +117,7 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
 
 	/**
-	 * is_wc_endpoint_url - Check if an endpoint is showing
+	 * is_wc_endpoint_url - Check if an endpoint is showing.
 	 * @param  string $endpoint
 	 * @return bool
 	 */
@@ -306,8 +306,8 @@ if ( ! function_exists( 'wc_prices_include_tax' ) ) {
 /**
  * Check if the given topic is a valid webhook topic, a topic is valid if:
  *
- * + starts with `action.woocommerce_` or `action.wc_`
- * + it has a valid resource & event
+ * + starts with `action.woocommerce_` or `action.wc_`.
+ * + it has a valid resource & event.
  *
  * @param  string $topic webhook topic
  * @return bool true if valid, false otherwise
@@ -337,8 +337,8 @@ function wc_is_webhook_valid_topic( $topic ) {
 
 
 /**
- * Simple check for validating a URL, it must start with http:// or https://
- * and pass FILTER_VALIDATE_URL validation
+ * Simple check for validating a URL, it must start with http:// or https://.
+ * and pass FILTER_VALIDATE_URL validation.
  * @param  string $url
  * @return bool
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Page Functions
+ * WooCommerce Page Functions.
  *
  * Functions related to pages and menus.
  *
@@ -11,7 +11,7 @@
  */
 
 /**
- * Replace a page title with the endpoint title
+ * Replace a page title with the endpoint title.
  * @param  string $title
  * @return string
  */
@@ -34,7 +34,7 @@ function wc_page_endpoint_title( $title ) {
 add_filter( 'the_title', 'wc_page_endpoint_title' );
 
 /**
- * Retrieve page ids - used for myaccount, edit_address, shop, cart, checkout, pay, view_order, terms. returns -1 if no page is found
+ * Retrieve page ids - used for myaccount, edit_address, shop, cart, checkout, pay, view_order, terms. returns -1 if no page is found.
  *
  * @param string $page
  * @return int
@@ -58,7 +58,7 @@ function wc_get_page_id( $page ) {
 }
 
 /**
- * Retrieve page permalink
+ * Retrieve page permalink.
  *
  * @param string $page
  * @return string
@@ -70,7 +70,7 @@ function wc_get_page_permalink( $page ) {
 }
 
 /**
- * Get endpoint URL
+ * Get endpoint URL.
  *
  * Gets the URL for an endpoint, which varies depending on permalink settings.
  *
@@ -125,7 +125,7 @@ function wc_edit_address_i18n( $id, $flip = false ) {
 }
 
 /**
- * Returns the url to the lost password endpoint url
+ * Returns the url to the lost password endpoint url.
  *
  * @access public
  * @param  string $default_url
@@ -143,7 +143,7 @@ function wc_lostpassword_url( $default_url = '' ) {
 add_filter( 'lostpassword_url',  'wc_lostpassword_url', 10, 1 );
 
 /**
- * Get the link to the edit account details page
+ * Get the link to the edit account details page.
  *
  * @return string
  */
@@ -154,7 +154,7 @@ function wc_customer_edit_account_url() {
 }
 
 /**
- * Hide menu items conditionally
+ * Hide menu items conditionally.
  *
  * @param array $items
  * @return array
@@ -231,7 +231,7 @@ add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_item_classes', 2 );
 /**
  * Fix active class in wp_list_pages for shop page.
  *
- * https://github.com/woothemes/woocommerce/issues/177
+ * https://github.com/woothemes/woocommerce/issues/177.
  *
  * @author Jessor, Peter Sterling
  * @param string $pages

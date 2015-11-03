@@ -3,14 +3,14 @@
 namespace WooCommerce\Tests\Util;
 
 /**
- * Class Core_Functions
+ * Class Core_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.2
  */
 class Core_Functions extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test get_woocommerce_currency()
+	 * Test get_woocommerce_currency().
 	 *
 	 * @since 2.2
 	 */
@@ -20,7 +20,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_woocommerce_currencies()
+	 * Test get_woocommerce_currencies().
 	 *
 	 * @since 2.2
 	 */
@@ -82,7 +82,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_woocommerce_currency_symbol()
+	 * Test get_woocommerce_currency_symbol().
 	 *
 	 * @since 2.2
 	 */
@@ -101,7 +101,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_woocommerce_api_url()
+	 * Test get_woocommerce_api_url().
 	 *
 	 * @since 2.2
 	 */
@@ -117,7 +117,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_log_file_path()
+	 * Test wc_get_log_file_path().
 	 *
 	 * @since 2.4
 	 */
@@ -129,7 +129,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_core_supported_themes()
+	 * Test wc_get_core_supported_themes().
 	 *
 	 * @since 2.2
 	 */
@@ -141,7 +141,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_base_location()
+	 * Test wc_get_base_location().
 	 *
 	 * @since 2.3.0
 	 */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Webhook Test Factory
+ * Webhook Test Factory.
  *
  * @see \WP_UnitTest_Factory_For_Post
  * @since 2.2
@@ -8,7 +8,7 @@
 class WC_Unit_Test_Factory_For_Webhook extends WP_UnitTest_Factory_For_Post {
 
 	/**
-	 * Setup factory
+	 * Setup factory.
 	 *
 	 * @since 2.2
 	 * @param null $factory
@@ -26,7 +26,7 @@ class WC_Unit_Test_Factory_For_Webhook extends WP_UnitTest_Factory_For_Post {
 	}
 
 	/**
-	 * Create a mock webhook
+	 * Create a mock webhook.
 	 *
 	 * @since 2.2
 	 * @see WP_UnitTest_Factory_For_Post::create_object()
@@ -56,7 +56,7 @@ class WC_Unit_Test_Factory_For_Webhook extends WP_UnitTest_Factory_For_Post {
 	}
 
 	/**
-	 * Get a mock webhook object
+	 * Get a mock webhook object.
 	 *
 	 * @since 2.2
 	 * @see WP_UnitTest_Factory_For_Post::get_object_by_id()

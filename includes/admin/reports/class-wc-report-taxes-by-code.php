@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Report_Taxes_By_Code
+ * WC_Report_Taxes_By_Code.
  *
  * @author      WooThemes
  * @category    Admin
@@ -10,7 +10,7 @@
 class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 	/**
-	 * Get the legend for the main chart sidebar
+	 * Get the legend for the main chart sidebar.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -18,7 +18,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output an export link
+	 * Output an export link.
 	 */
 	public function get_export_button() {
 
@@ -36,7 +36,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output the report
+	 * Output the report.
 	 */
 	public function output_report() {
 
@@ -60,7 +60,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the main chart
+	 * Get the main chart.
 	 *
 	 * @return string
 	 */

@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Customer Functions
+ * WooCommerce Customer Functions.
  *
  * Functions for customers.
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar
+ * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar.
  *
  * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compat. Defaults to true.
  *
@@ -34,7 +34,7 @@ add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
 
 
 /**
- * Create a new customer
+ * Create a new customer.
  *
  * @param  string $email
  * @param  string $username
@@ -118,7 +118,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 }
 
 /**
- * Login a customer (set auth cookie and set global user object)
+ * Login a customer (set auth cookie and set global user object).
  *
  * @param int $customer_id
  */
@@ -131,7 +131,7 @@ function wc_set_customer_auth_cookie( $customer_id ) {
 }
 
 /**
- * Get past orders (by email) and update them
+ * Get past orders (by email) and update them.
  *
  * @param  int $customer_id
  * @return int
@@ -185,7 +185,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 }
 
 /**
- * Order Status completed - This is a paying customer
+ * Order Status completed - This is a paying customer.
  *
  * @access public
  * @param int $order_id
@@ -208,7 +208,7 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 
 /**
- * Checks if a user (by email) has bought an item
+ * Checks if a user (by email) has bought an item.
  *
  * @param string $customer_email
  * @param int $user_id
@@ -260,7 +260,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 }
 
 /**
- * Checks if a user has a certain capability
+ * Checks if a user has a certain capability.
  *
  * @access public
  * @param array $allcaps
@@ -326,7 +326,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 
 /**
- * Modify the list of editable roles to prevent non-admin adding admin users
+ * Modify the list of editable roles to prevent non-admin adding admin users.
  * @param  array $roles
  * @return array
  */
@@ -339,7 +339,7 @@ function wc_modify_editable_roles( $roles ){
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
 
 /**
- * Modify capabiltiies to prevent non-admin users editing admin users
+ * Modify capabiltiies to prevent non-admin users editing admin users.
  *
  * $args[0] will be the user being edited in this case.
  *
@@ -369,7 +369,7 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
 
 /**
- * Get customer available downloads
+ * Get customer available downloads.
  *
  * @param int $customer_id Customer/User ID
  * @return array
@@ -484,7 +484,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 }
 
 /**
- * Get total spent by customer
+ * Get total spent by customer.
  * @param  int $user_id
  * @return string
  */
@@ -512,7 +512,7 @@ function wc_get_customer_total_spent( $user_id ) {
 }
 
 /**
- * Get total orders by customer
+ * Get total orders by customer.
  * @param  int $user_id
  * @return int
  */
@@ -550,7 +550,7 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
 
 /**
- * Get review verification status
+ * Get review verification status.
  * @param  int $comment_id
  * @return bool
  */
@@ -566,7 +566,7 @@ function wc_review_is_from_verified_owner( $comment_id ) {
 }
 
 /**
- * Disable author archives for customers
+ * Disable author archives for customers.
  *
  * @since 2.5.0
  */

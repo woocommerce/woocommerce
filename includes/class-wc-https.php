@@ -65,7 +65,7 @@ class WC_HTTPS {
 	}
 
 	/**
-	 * Force a post link to be SSL if needed
+	 * Force a post link to be SSL if needed.
 	 *
 	 * @return string
 	 */
@@ -79,7 +79,7 @@ class WC_HTTPS {
 	}
 
 	/**
-	 * Template redirect - if we end up on a page ensure it has the correct http/https url
+	 * Template redirect - if we end up on a page ensure it has the correct http/https url.
 	 */
 	public static function force_https_template_redirect() {
 		if ( ! is_ssl() && ( is_checkout() || is_account_page() || apply_filters( 'woocommerce_force_ssl_checkout', false ) ) ) {
@@ -95,7 +95,7 @@ class WC_HTTPS {
 	}
 
 	/**
-	 * Template redirect - if we end up on a page ensure it has the correct http/https url
+	 * Template redirect - if we end up on a page ensure it has the correct http/https url.
 	 */
 	public static function unforce_https_template_redirect() {
 		if ( function_exists( 'is_customize_preview' ) && is_customize_preview() ) {

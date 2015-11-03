@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Tracking
+ * Admin View: Notice - Tracking.
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

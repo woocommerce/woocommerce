@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Free Shipping Method
+ * Free Shipping Method.
  *
- * A simple shipping method for free shipping
+ * A simple shipping method for free shipping.
  *
  * @class   WC_Shipping_Free_Shipping
  * @version 2.4.0
@@ -23,7 +23,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	public $requires;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->id 			= 'free_shipping';
@@ -53,7 +53,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	}
 
 	/**
-	 * Initialise Gateway Settings Form Fields
+	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(

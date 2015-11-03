@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
 
 /**
- * Customer New Account
+ * Customer New Account.
  *
  * An email sent to the customer when they create an account.
  *
@@ -25,7 +25,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	public $password_generated;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 

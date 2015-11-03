@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce Auth
+ * WooCommerce Auth.
  *
- * Handles wc-auth endpoint requests
+ * Handles wc-auth endpoint requests.
  *
  * @author   WooThemes
  * @category API
@@ -19,12 +19,12 @@ if ( ! class_exists( 'WC_Auth' ) ) :
 class WC_Auth {
 
 	/**
-	 * Version
+	 * Version.
 	 */
 	const VERSION = 1;
 
 	/**
-	 * Setup class
+	 * Setup class.
 	 *
 	 * @since 2.4.0
 	 */
@@ -40,7 +40,7 @@ class WC_Auth {
 	}
 
 	/**
-	 * Add query vars
+	 * Add query vars.
 	 *
 	 * @since  2.4.0
 	 *
@@ -55,7 +55,7 @@ class WC_Auth {
 	}
 
 	/**
-	 * Add auth endpoint
+	 * Add auth endpoint.
 	 *
 	 * @since 2.4.0
 	 */
@@ -83,7 +83,7 @@ class WC_Auth {
 	}
 
 	/**
-	 * Return a list of permissions a scope allows
+	 * Return a list of permissions a scope allows.
 	 *
 	 * @since  2.4.0
 	 *
@@ -119,7 +119,7 @@ class WC_Auth {
 	}
 
 	/**
-	 * Build auth urls
+	 * Build auth urls.
 	 *
 	 * @since  2.4.0
 	 *
@@ -141,7 +141,7 @@ class WC_Auth {
 	}
 
 	/**
-	 * Make validation
+	 * Make validation.
 	 *
 	 * @since  2.4.0
 	 */
@@ -257,7 +257,7 @@ class WC_Auth {
 	}
 
 	/**
-	 * Handle auth requests
+	 * Handle auth requests.
 	 *
 	 * @since 2.4.0
 	 */
@@ -279,7 +279,7 @@ class WC_Auth {
 	}
 
 	/**
-	 * Auth endpoint
+	 * Auth endpoint.
 	 *
 	 * @since 2.4.0
 	 *
@@ -355,7 +355,7 @@ class WC_Auth {
 	}
 
 	/**
-	 * Maybe delete key
+	 * Maybe delete key.
 	 *
 	 * @since 2.4.0
 	 *

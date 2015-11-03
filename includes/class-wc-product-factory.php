@@ -1,8 +1,8 @@
 <?php
 /**
- * Product Factory Class
+ * Product Factory Class.
  *
- * The WooCommerce product factory creating the right product object
+ * The WooCommerce product factory creating the right product object.
  *
  * @class 		WC_Product_Factory
  * @version		2.3.0
@@ -36,7 +36,7 @@ class WC_Product_Factory {
 	}
 
 	/**
-	 * Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class
+	 * Create a WC coding standards compliant class name e.g. WC_Product_Type_Class instead of WC_Product_type-class.
 	 * @param  string $product_type
 	 * @return string|false
 	 */
@@ -45,7 +45,7 @@ class WC_Product_Factory {
 	}
 
 	/**
-	 * Get the product class name
+	 * Get the product class name.
 	 * @param  WP_Post $the_product
 	 * @param  array $args (default: array())
 	 * @return string
@@ -74,7 +74,7 @@ class WC_Product_Factory {
 	}
 
 	/**
-	 * Get the product object
+	 * Get the product object.
 	 * @param  mixed $the_product
 	 * @uses   WP_Post
 	 * @return WP_Post|bool false on failure

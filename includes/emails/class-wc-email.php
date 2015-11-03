@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Email Class
+ * Email Class.
  *
- * WooCommerce Email Class which is extended by specific email template classes to add emails to WooCommerce
+ * WooCommerce Email Class which is extended by specific email template classes to add emails to WooCommerce.
  *
  * @class       WC_Email
  * @version     2.0.0
@@ -20,7 +20,7 @@ if ( class_exists( 'WC_Email' ) ) {
 }
 
 /**
- * WC_Email
+ * WC_Email.
  */
 class WC_Email extends WC_Settings_API {
 
@@ -137,12 +137,12 @@ class WC_Email extends WC_Settings_API {
 	public $sending;
 
 	/**
-	 *  List of preg* regular expression patterns to search for,
-	 *  used in conjunction with $replace.
-	 *  https://raw.github.com/ushahidi/wp-silcc/master/class.html2text.inc
+	 * List of preg* regular expression patterns to search for,
+	 * used in conjunction with $replace.
+	 * https://raw.github.com/ushahidi/wp-silcc/master/class.html2text.inc.
 	 *
-	 *  @var array $search
-	 *  @see $replace
+	 * @var array $search
+	 * @see $replace
 	 */
 	public $plain_search = array(
 		"/\r/",                                          // Non-legal carriage return
@@ -168,10 +168,10 @@ class WC_Email extends WC_Settings_API {
 	);
 
 	/**
-	 *  List of pattern replacements corresponding to patterns searched.
+	 * List of pattern replacements corresponding to patterns searched.
 	 *
-	 *  @var array $replace
-	 *  @see $search
+	 * @var array $replace
+	 * @see $search
 	 */
 	public $plain_replace = array(
 		'',                                             // Non-legal carriage return
@@ -197,7 +197,7 @@ class WC_Email extends WC_Settings_API {
 	);
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 
@@ -500,7 +500,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Email type options
+	 * Email type options.
 	 *
 	 * @return array
 	 */
@@ -518,8 +518,8 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Admin Panel Options Processing
-	 * - Saves the options to the DB
+	 * Admin Panel Options Processing.
+	 * - Saves the options to the DB.
 	 *
 	 * @since 1.0.0
 	 * @return boolean|null
@@ -558,7 +558,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Save the email templates
+	 * Save the email templates.
 	 *
 	 * @since 2.4.0
 	 * @param string $template_code
@@ -622,7 +622,7 @@ class WC_Email extends WC_Settings_API {
 					copy( $template_file, $theme_file );
 
 					/**
-					 * woocommerce_copy_email_template action hook
+					 * woocommerce_copy_email_template action hook.
 					 *
 					 * @param string $template_type The copied template type
 					 * @param string $email The email object
@@ -651,7 +651,7 @@ class WC_Email extends WC_Settings_API {
 					unlink( $theme_file );
 
 					/**
-					 * woocommerce_delete_email_template action hook
+					 * woocommerce_delete_email_template action hook.
 					 *
 					 * @param string $template The deleted template type
 					 * @param string $email The email object
@@ -693,7 +693,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Admin Options
+	 * Admin Options.
 	 *
 	 * Setup the email settings screen.
 	 * Override this in your email.
@@ -711,7 +711,7 @@ class WC_Email extends WC_Settings_API {
 
 		<?php
 			/**
-			 * woocommerce_email_settings_before action hook
+			 * woocommerce_email_settings_before action hook.
 			 *
 			 * @param string $email The email object
 			 */
@@ -724,7 +724,7 @@ class WC_Email extends WC_Settings_API {
 
 		<?php
 			/**
-			 * woocommerce_email_settings_after action hook
+			 * woocommerce_email_settings_after action hook.
 			 *
 			 * @param string $email The email object
 			 */

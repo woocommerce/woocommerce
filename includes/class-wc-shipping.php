@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Shipping Class
+ * WooCommerce Shipping Class.
  *
  * Handles shipping and loads shipping methods via hooks.
  *
@@ -42,7 +42,7 @@ class WC_Shipping {
 	protected static $_instance = null;
 
 	/**
-	 * Main WC_Shipping Instance
+	 * Main WC_Shipping Instance.
 	 *
 	 * Ensures only one instance of WC_Shipping is loaded or can be loaded.
 	 *
@@ -217,7 +217,7 @@ class WC_Shipping {
 	}
 
 	/**
-	 * Get the default method
+	 * Get the default method.
 	 * @param  array  $available_methods
 	 * @param  boolean $current_chosen_method
 	 * @return string
@@ -391,7 +391,7 @@ class WC_Shipping {
 	}
 
 	/**
-	 * Get packages
+	 * Get packages.
 	 *
 	 * @return array
 	 */
@@ -438,7 +438,7 @@ class WC_Shipping {
 }
 
 /**
- * Register a shipping method
+ * Register a shipping method.
  *
  * Registers a shipping method ready to be loaded. Accepts a class name (string) or a class object.
  *

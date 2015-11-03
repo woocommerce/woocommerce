@@ -14,7 +14,7 @@ class WC_Tax {
 	public static $round_at_subtotal;
 
 	/**
-	 * Load options
+	 * Load options.
 	 *
 	 * @access public
 	 */
@@ -24,7 +24,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Calculate tax for a line
+	 * Calculate tax for a line.
 	 * @param  float  $price              Price to calc tax on
 	 * @param  array  $rates              Rates to apply
 	 * @param  boolean $price_includes_tax Whether the passed price has taxes included
@@ -65,7 +65,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Multiply cost by pow precision
+	 * Multiply cost by pow precision.
 	 * @param  float $price
 	 * @return float
 	 */
@@ -74,7 +74,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Divide cost by pow precision
+	 * Divide cost by pow precision.
 	 * @param  float $price
 	 * @return float
 	 */
@@ -98,7 +98,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Calc tax from inclusive price
+	 * Calc tax from inclusive price.
 	 *
 	 * @param  float $price
 	 * @param  array $rates
@@ -142,7 +142,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Calc tax from exclusive price
+	 * Calc tax from exclusive price.
 	 *
 	 * @param  float $price
 	 * @param  array $rates
@@ -251,7 +251,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Loop through a set of tax rates and get the matching rates (1 per priority)
+	 * Loop through a set of tax rates and get the matching rates (1 per priority).
 	 *
 	 * @param  string $country
 	 * @param  string $state
@@ -327,9 +327,9 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get the customer tax location based on their status and the current page
+	 * Get the customer tax location based on their status and the current page.
 	 *
-	 * Used by get_rates(), get_shipping_rates()
+	 * Used by get_rates(), get_shipping_rates().
 	 *
 	 * @param  $tax_class string Optional, passed to the filter for advanced tax setups.
 	 * @return array
@@ -393,7 +393,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Alias for get_base_tax_rates()
+	 * Alias for get_base_tax_rates().
 	 *
 	 * @deprecated 2.3
 	 * @param   string	Tax Class
@@ -535,7 +535,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get a rates code. Code is made up of COUNTRY-STATE-NAME-Priority. E.g GB-VAT-1, US-AL-TAX-1
+	 * Get a rates code. Code is made up of COUNTRY-STATE-NAME-Priority. E.g GB-VAT-1, US-AL-TAX-1.
 	 *
 	 * @access public
 	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format
@@ -577,7 +577,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get store tax classes
+	 * Get store tax classes.
 	 * @return array
 	 */
 	public static function get_tax_classes() {
@@ -585,7 +585,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the postcodes
+	 * format the postcodes.
 	 * @param  string $postcode
 	 * @return string
 	 */
@@ -594,7 +594,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the city
+	 * format the city.
 	 * @param  string $city
 	 * @return string
 	 */
@@ -603,7 +603,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the state
+	 * format the state.
 	 * @param  string $state
 	 * @return string
 	 */
@@ -613,7 +613,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the country
+	 * format the country.
 	 * @param  string $country
 	 * @return string
 	 */
@@ -623,7 +623,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the tax rate name
+	 * format the tax rate name.
 	 * @param  string $name
 	 * @return string
 	 */
@@ -632,7 +632,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the rate
+	 * format the rate.
 	 * @param  double $rate
 	 * @return string
 	 */
@@ -641,7 +641,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the priority
+	 * format the priority.
 	 * @param  string $priority
 	 * @return int
 	 */
@@ -650,7 +650,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the class
+	 * format the class.
 	 * @param  string $class
 	 * @return string
 	 */
@@ -664,7 +664,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Prepare and format tax rate for DB insertion
+	 * Prepare and format tax rate for DB insertion.
 	 * @param  array $tax_rate
 	 * @return array
 	 */
@@ -678,7 +678,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Insert a new tax rate
+	 * Insert a new tax rate.
 	 *
 	 * Internal use only.
 	 *
@@ -700,7 +700,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get tax rate
+	 * Get tax rate.
 	 *
 	 * Internal use only.
 	 *
@@ -722,7 +722,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Update a tax rate
+	 * Update a tax rate.
 	 *
 	 * Internal use only.
 	 *
@@ -749,7 +749,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Delete a tax rate from the database
+	 * Delete a tax rate from the database.
 	 *
 	 * Internal use only.
 	 *
@@ -768,7 +768,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Update postcodes for a tax rate in the DB
+	 * Update postcodes for a tax rate in the DB.
 	 *
 	 * Internal use only.
 	 *
@@ -790,7 +790,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Update cities for a tax rate in the DB
+	 * Update cities for a tax rate in the DB.
 	 *
 	 * Internal use only.
 	 *
@@ -811,7 +811,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Updates locations (postcode and city)
+	 * Updates locations (postcode and city).
 	 *
 	 * Internal use only.
 	 *
@@ -844,7 +844,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Expands ranges in an array (used for zipcodes). e.g. 101-105 would expand to 101, 102, 103, 104, 105
+	 * Expands ranges in an array (used for zipcodes). e.g. 101-105 would expand to 101, 102, 103, 104, 105.
 	 *
 	 * Internal use only.
 	 *
@@ -874,7 +874,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get postcode wildcards in array format
+	 * Get postcode wildcards in array format.
 	 *
 	 * Internal use only.
 	 *

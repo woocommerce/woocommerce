@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Unit Tests Bootstrap
+ * WooCommerce Unit Tests Bootstrap.
  *
  * @since 2.2
  */
@@ -19,7 +19,7 @@ class WC_Unit_Tests_Bootstrap {
 	public $plugin_dir;
 
 	/**
-	 * Setup the unit testing environment
+	 * Setup the unit testing environment.
 	 *
 	 * @since 2.2
 	 */
@@ -49,7 +49,7 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Load WooCommerce
+	 * Load WooCommerce.
 	 *
 	 * @since 2.2
 	 */
@@ -58,7 +58,7 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Install WooCommerce after the test environment and WC have been loaded
+	 * Install WooCommerce after the test environment and WC have been loaded.
 	 *
 	 * @since 2.2
 	 */
@@ -78,7 +78,7 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Load WC-specific test cases and factories
+	 * Load WC-specific test cases and factories.
 	 *
 	 * @since 2.2
 	 */
@@ -106,7 +106,7 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Get the single class instance
+	 * Get the single class instance.
 	 *
 	 * @since 2.2
 	 * @return WC_Unit_Tests_Bootstrap

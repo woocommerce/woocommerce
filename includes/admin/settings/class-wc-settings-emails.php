@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Email Settings
+ * WooCommerce Email Settings.
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_Emails' ) ) :
 
 /**
- * WC_Settings_Emails
+ * WC_Settings_Emails.
  */
 class WC_Settings_Emails extends WC_Settings_Page {
 
@@ -33,7 +33,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections
+	 * Get sections.
 	 *
 	 * @return array
 	 */
@@ -57,7 +57,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
@@ -163,7 +163,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
 		global $current_section;
@@ -189,7 +189,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		global $current_section;

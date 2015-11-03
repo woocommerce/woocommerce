@@ -3,7 +3,7 @@
 namespace WooCommerce\Tests\Util;
 
 /**
- * Class Main_Class
+ * Class Main_Class.
  * @package WooCommerce\Tests\Util
  */
 class Main_Class extends \WC_Unit_Test_Case {
@@ -12,7 +12,7 @@ class Main_Class extends \WC_Unit_Test_Case {
 	protected $wc;
 
 	/**
-	 * Setup test
+	 * Setup test.
 	 *
 	 * @since 2.2
 	 */
@@ -24,7 +24,7 @@ class Main_Class extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test WC has static instance
+	 * Test WC has static instance.
 	 *
 	 * @since 2.2
 	 */
@@ -38,7 +38,7 @@ class Main_Class extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that all WC constants are set
+	 * Test that all WC constants are set.
 	 *
 	 * @since 2.2
 	 */
@@ -55,7 +55,7 @@ class Main_Class extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test class instance
+	 * Test class instance.
 	 *
 	 * @since 2.2
 	 */

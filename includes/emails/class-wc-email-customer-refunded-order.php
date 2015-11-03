@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
 
 /**
- * Customer Refunded Order Email
+ * Customer Refunded Order Email.
  *
  * Order refunded emails are sent to the customer when the order is marked refunded.
  *
@@ -18,12 +18,12 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
  * @extends  WC_Email
  */
 class WC_Email_Customer_Refunded_Order extends WC_Email {
-	
+
 	public $refund;
 	public $partial_refund;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->set_email_strings();
@@ -64,14 +64,14 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	}
 
 	/**
-	 * Full refund notification
+	 * Full refund notification.
 	 */
 	public function trigger_full( $order_id, $refund_id = null ) {
 		$this->trigger( $order_id, false, $refund_id );
 	}
 
 	/**
-	 * Partial refund notification
+	 * Partial refund notification.
 	 */
 	public function trigger_partial( $order_id, $refund_id = null ) {
 		$this->trigger( $order_id, true, $refund_id );

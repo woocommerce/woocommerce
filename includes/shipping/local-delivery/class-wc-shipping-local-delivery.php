@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Local Delivery Shipping Method
+ * Local Delivery Shipping Method.
  *
- * A simple shipping method allowing local delivery as a shipping method
+ * A simple shipping method allowing local delivery as a shipping method.
  *
  * @class 		WC_Shipping_Local_Delivery
  * @version		2.3.0
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->id                 = 'local_delivery';
