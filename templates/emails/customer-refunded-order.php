@@ -9,7 +9,7 @@
  * as little as possible, but it does happen. When this occurs the version of the template file will.
  * be bumped and the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
+ * @see      http://docs.woothemes.com/document/template-structure/
  * @author   WooThemes
  * @package  WooCommerce/Templates/Emails
  * @version  2.4.0
@@ -25,10 +25,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <p><?php
 	if ( $partial_refund ) {
-		printf( __( "Hi there. Your order on %s has been partially refunded.", 'woocommerce' ), get_option( 'blogname' ) );
+		printf( __( 'Hi there. Your order on %s has been partially refunded.', 'woocommerce' ), get_option( 'blogname' ) );
 	}
 	else {
-		printf( __( "Hi there. Your order on %s has been refunded.", 'woocommerce' ), get_option( 'blogname' ) );
+		printf( __( 'Hi there. Your order on %s has been refunded.', 'woocommerce' ), get_option( 'blogname' ) );
 	}
 ?></p>
 
