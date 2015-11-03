@@ -4,7 +4,7 @@
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
  * Version: 2.5.0-dev
- * Author: WooThemes.
+ * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 4.1
  * Tested up to: 4.3
