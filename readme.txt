@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Check for existence of global attribute when you get_attributes() for a product.
 * Fix - Show order by template on product search.
 * Fix - Search variation skus in backend search.
+* Tweak - Revised email settings screens to show emails in a table and avoid a long sub-nav.
 * Tweak - Default customer role capabilities.
 * Tweak - Expire mini-cart cache after 24 hours.
 * Tweak - Improved refund error messages in PayPal standard.
