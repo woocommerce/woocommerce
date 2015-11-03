@@ -52,7 +52,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Install actions such as installing pages when a button is clicked.
+	 * Install actions when a update button is clicked.
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {

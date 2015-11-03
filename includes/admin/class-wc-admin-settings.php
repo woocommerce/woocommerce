@@ -603,8 +603,8 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Helper function to get the formated description and tip HTML for a.
-	 * given form field. Plugins can call this when implementing their own custom.
+	 * Helper function to get the formated description and tip HTML for a
+	 * given form field. Plugins can call this when implementing their own custom
 	 * settings types.
 	 *
 	 * @param array $value The form field value array
