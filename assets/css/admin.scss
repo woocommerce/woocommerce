@@ -2006,6 +2006,7 @@ table.wc_input_table {
 }
 
 table.wc_gateways,
+table.wc_emails,
 table.wc_shipping {
 	position: relative;
 
@@ -2068,6 +2069,33 @@ table.wc_shipping {
 			height: 100%;
 		}
 	}
+	.wc-email-settings-table-name {
+		font-weight: 700;
+		span {
+			font-weight: normal;
+			color: #999;
+		}
+	}
+	.wc-email-settings-table-status {
+		text-align: center;
+		width: 1em;
+		.tips {
+			margin: 0 auto;
+		}
+	}
+	.wc-email-settings-table-actions {
+		a {
+			@include ir();
+			padding: 0 !important;
+			height: 2em !important;
+			width: 2em;
+
+			&:after {
+				@include icon("\e01c");
+				line-height: 1.85;
+			}
+		}
+	}
 }
 
 img.help_tip {
@@ -2084,9 +2112,16 @@ img.help_tip {
 }
 
 .status-enabled,
-.status-disabled {
+.status-manual {
 	font-size: 1.4em;
 	@include ir();
+}
+
+.status-manual {
+	&:before {
+		@include icon( "\e008" );
+		color: #999;
+	}
 }
 
 .status-enabled {
@@ -2248,6 +2283,10 @@ img.help_tip {
 			label {
 				margin-left: 10px;
 			}
+		}
+
+		.wc_emails_wrapper {
+		    padding: 0 15px 10px 0;
 		}
 	}
 }

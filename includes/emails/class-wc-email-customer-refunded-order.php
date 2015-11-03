@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
  * @extends  WC_Email
  */
 class WC_Email_Customer_Refunded_Order extends WC_Email {
-	
+
 	public $refund;
 	public $partial_refund;
 
@@ -27,6 +27,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	 */
 	public function __construct() {
 		$this->set_email_strings();
+		$this->customer_email = true;
 
 		// Triggers for this email
 		add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
@@ -182,28 +183,32 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_full ),
 				'placeholder' => '',
-				'default'     => $this->subject_full
+				'default'     => $this->subject_full,
+				'desc_tip'      => true
 			),
 			'subject_partial' => array(
 				'title'       => __( 'Partial Refund Subject', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_partial ),
 				'placeholder' => '',
-				'default'     => $this->subject_partial
+				'default'     => $this->subject_partial,
+				'desc_tip'      => true
 			),
 			'heading_full' => array(
 				'title'       => __( 'Full Refund Email Heading', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_full ),
 				'placeholder' => '',
-				'default'     => $this->heading_full
+				'default'     => $this->heading_full,
+				'desc_tip'      => true
 			),
 			'heading_partial' => array(
 				'title'       => __( 'Partial Refund Email Heading', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_partial ),
 				'placeholder' => '',
-				'default'     => $this->heading_partial
+				'default'     => $this->heading_partial,
+				'desc_tip'      => true
 			),
 			'email_type' => array(
 				'title'       => __( 'Email type', 'woocommerce' ),
@@ -211,7 +216,8 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'     => 'html',
 				'class'       => 'email_type wc-enhanced-select',
-				'options'     => $this->get_email_type_options()
+				'options'     => $this->get_email_type_options(),
+				'desc_tip'      => true
 			)
 		);
 	}

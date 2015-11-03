@@ -26,15 +26,16 @@ class WC_Email_Customer_Note extends WC_Email {
 	 */
 	function __construct() {
 
-		$this->id               = 'customer_note';
-		$this->title            = __( 'Customer note', 'woocommerce' );
-		$this->description      = __( 'Customer note emails are sent when you add a note to an order.', 'woocommerce' );
+		$this->id             = 'customer_note';
+		$this->customer_email = true;
+		$this->title          = __( 'Customer note', 'woocommerce' );
+		$this->description    = __( 'Customer note emails are sent when you add a note to an order.', 'woocommerce' );
 
-		$this->template_html    = 'emails/customer-note.php';
-		$this->template_plain   = 'emails/plain/customer-note.php';
+		$this->template_html  = 'emails/customer-note.php';
+		$this->template_plain = 'emails/plain/customer-note.php';
 
-		$this->subject          = __( 'Note added to your {site_title} order from {order_date}', 'woocommerce');
-		$this->heading          = __( 'A note has been added to your order', 'woocommerce');
+		$this->subject        = __( 'Note added to your {site_title} order from {order_date}', 'woocommerce');
+		$this->heading        = __( 'A note has been added to your order', 'woocommerce');
 
 		// Triggers
 		add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );

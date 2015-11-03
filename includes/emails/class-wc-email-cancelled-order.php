@@ -25,7 +25,7 @@ class WC_Email_Cancelled_Order extends WC_Email {
 	public function __construct() {
 		$this->id               = 'cancelled_order';
 		$this->title            = __( 'Cancelled order', 'woocommerce' );
-		$this->description      = __( 'Cancelled order emails are sent to the recipient(s) below when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
+		$this->description      = __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
 		$this->heading          = __( 'Cancelled order', 'woocommerce' );
 		$this->subject          = __( '[{site_title}] Cancelled order ({order_number})', 'woocommerce' );
 		$this->template_html    = 'emails/admin-cancelled-order.php';
@@ -111,21 +111,24 @@ class WC_Email_Cancelled_Order extends WC_Email {
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to <code>%s</code>.', 'woocommerce' ), esc_attr( get_option('admin_email') ) ),
 				'placeholder'   => '',
-				'default'       => ''
+				'default'       => '',
+				'desc_tip'      => true
 			),
 			'subject' => array(
 				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: <code>%s</code>.', 'woocommerce' ), $this->subject ),
 				'placeholder'   => '',
-				'default'       => ''
+				'default'       => '',
+				'desc_tip'      => true
 			),
 			'heading' => array(
 				'title'         => __( 'Email Heading', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>.', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
-				'default'       => ''
+				'default'       => '',
+				'desc_tip'      => true
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),
@@ -133,7 +136,8 @@ class WC_Email_Cancelled_Order extends WC_Email {
 				'description'   => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'       => 'html',
 				'class'         => 'email_type wc-enhanced-select',
-				'options'       => $this->get_email_type_options()
+				'options'       => $this->get_email_type_options(),
+				'desc_tip'      => true
 			)
 		);
 	}

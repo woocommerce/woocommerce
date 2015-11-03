@@ -43,6 +43,8 @@ class WC_Email_Customer_Invoice extends WC_Email {
 		// Call parent constructor
 		parent::__construct();
 
+		$this->customer_email = true;
+		$this->manual         = true;
 		$this->heading_paid   = $this->get_option( 'heading_paid', $this->heading_paid );
 		$this->subject_paid   = $this->get_option( 'subject_paid', $this->subject_paid );
 	}
@@ -147,28 +149,32 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject ),
 				'placeholder'   => '',
-				'default'       => ''
+				'default'       => '',
+				'desc_tip'      => true
 			),
 			'heading' => array(
 				'title'         => __( 'Email Heading', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading ),
 				'placeholder'   => '',
-				'default'       => ''
+				'default'       => '',
+				'desc_tip'      => true
 			),
 			'subject_paid' => array(
 				'title'         => __( 'Email Subject (paid)', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_paid ),
 				'placeholder'   => '',
-				'default'       => ''
+				'default'       => '',
+				'desc_tip'      => true
 			),
 			'heading_paid' => array(
 				'title'         => __( 'Email Heading (paid)', 'woocommerce' ),
 				'type'          => 'text',
 				'description'   => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_paid ),
 				'placeholder'   => '',
-				'default'       => ''
+				'default'       => '',
+				'desc_tip'      => true
 			),
 			'email_type' => array(
 				'title'         => __( 'Email Type', 'woocommerce' ),
@@ -176,7 +182,8 @@ class WC_Email_Customer_Invoice extends WC_Email {
 				'description'   => __( 'Choose which format of email to send.', 'woocommerce' ),
 				'default'       => 'html',
 				'class'         => 'email_type wc-enhanced-select',
-				'options'       => $this->get_email_type_options()
+				'options'       => $this->get_email_type_options(),
+				'desc_tip'      => true
 			)
 		);
 	}
