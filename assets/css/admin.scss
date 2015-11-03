@@ -2111,9 +2111,20 @@ img.help_tip {
 	margin: 0 0 0 9px;
 }
 
-.status-enabled {
+.status-enabled,
+.status-manual {
 	font-size: 1.4em;
 	@include ir();
+}
+
+.status-manual {
+	&:before {
+		@include icon( "\e008" );
+		color: #999;
+	}
+}
+
+.status-enabled {
 	&:before {
 		@include icon( "\e015" );
 		color: $woocommerce;

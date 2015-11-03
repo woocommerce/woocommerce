@@ -35,7 +35,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * 'yes' if the method is enabled.
-	 * @var string
+	 * @var string yes, no
 	 */
 	public $enabled;
 
@@ -116,6 +116,12 @@ class WC_Email extends WC_Settings_API {
 	 * @var bool
 	 */
 	public $sending;
+
+	/**
+	 * True when the email notification is sent manually only.
+	 * @var bool
+	 */
+	protected $manual = false;
 
 	/**
 	 * True when the email notification is sent to customers.
@@ -263,7 +269,7 @@ class WC_Email extends WC_Settings_API {
 		$recipient  = apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object );
 		$recipients = array_map( 'trim', explode( ',', $recipient ) );
 		$recipients = array_filter( $recipients, 'is_email' );
-		return implode( ',', $recipients );
+		return implode( ', ', $recipients );
 	}
 
 	/**
@@ -339,7 +345,6 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Checks if this email is enabled and will be sent.
-	 *
 	 * @return bool
 	 */
 	public function is_enabled() {
@@ -347,8 +352,15 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Checks if this email is manually sent
+	 * @return bool
+	 */
+	public function is_manual() {
+		return $this->manual;
+	}
+
+	/**
 	 * Checks if this email is customer focussed.
-	 *
 	 * @return bool
 	 */
 	public function is_customer_email() {

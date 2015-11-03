@@ -231,8 +231,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 								$columns = apply_filters( 'woocommerce_email_setting_columns', array(
 									'status'     => '',
 									'name'       => __( 'Email', 'woocommerce' ),
-									'email_type' => __( 'Type', 'woocommerce' ),
-									'recipient'  => __( 'Recipient', 'woocommerce' ),
+									'email_type' => __( 'Content Type', 'woocommerce' ),
+									'recipient'  => __( 'Recipient(s)', 'woocommerce' ),
 									'actions'    => ''
 								) );
 								foreach ( $columns as $key => $column ) {
@@ -257,17 +257,25 @@ class WC_Settings_Emails extends WC_Settings_Page {
 									break;
 									case 'recipient' :
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-											' . esc_html( $email->is_customer_email() ? __( 'Customer', 'woocommerce' ) : $email->recipient ) . '
+											' . esc_html( $email->is_customer_email() ? __( 'Customer', 'woocommerce' ) : $email->get_recipient() ) . '
 										</td>';
 									break;
 									case 'status' :
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">';
-										echo $email->is_enabled() ? '<span class="status-enabled tips" data-tip="' . __( 'Enabled', 'woocommerce' ) . '">' . __ ( 'Yes', 'woocommerce' ) . '</span>' : '<span class="status-disabled tips" data-tip="' . __ ( 'Disabled', 'woocommerce' ) . '">-</span>';
+
+										if ( $email->is_manual() ) {
+											echo '<span class="status-manual tips" data-tip="' . __( 'Manually sent', 'woocommerce' ) . '">' . __( 'Manual', 'woocommerce' ) . '</span>';
+										} elseif ( $email->is_enabled() ) {
+											echo '<span class="status-enabled tips" data-tip="' . __( 'Enabled', 'woocommerce' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+										} else {
+											echo '<span class="status-disabled tips" data-tip="' . __( 'Disabled', 'woocommerce' ) . '">-</span>';
+										}
+
 										echo '</td>';
 									break;
 									case 'email_type' :
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-											' . esc_html( $email->get_email_type() ) . '
+											' . esc_html( $email->get_content_type() ) . '
 										</td>';
 									break;
 									case 'actions' :
