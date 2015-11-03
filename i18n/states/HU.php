@@ -1,6 +1,6 @@
 <?php
 /**
- * Hungary states
+ * Hungary states.
  *
  * @author      WooThemes
  * @category    i18n

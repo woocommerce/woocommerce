@@ -1,6 +1,6 @@
 <?php
 /**
- * Canadian states
+ * Canadian states.
  *
  * @author      WooThemes
  * @category    i18n

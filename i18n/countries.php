@@ -1,6 +1,6 @@
 <?php
 /**
- * Countries
+ * Countries.
  *
  * Returns an array of countries and codes.
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Italy Provinces
+ * Italy Provinces.
  *
  * @author      WooThemes
  * @category    i18n

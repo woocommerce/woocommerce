@@ -1,6 +1,6 @@
 <?php
 /**
- * Addons Page
+ * Addons Page.
  *
  * @author      WooThemes
  * @category    Admin
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Addons Class
+ * WC_Admin_Addons Class.
  */
 class WC_Admin_Addons {
 

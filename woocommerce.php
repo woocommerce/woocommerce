@@ -4,7 +4,7 @@
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
  * Version: 2.5.0-dev
- * Author: WooThemes
+ * Author: WooThemes.
  * Author URI: http://woothemes.com
  * Requires at least: 4.1
  * Tested up to: 4.3
@@ -169,7 +169,7 @@ final class WooCommerce {
 
 	/**
 	 * Define constant if not already set.
-	 * 
+	 *
 	 * @param  string $name
 	 * @param  string|bool $value
 	 */
@@ -182,7 +182,7 @@ final class WooCommerce {
 	/**
 	 * What type of request is this?
 	 * string $type ajax, frontend or admin.
-	 * 
+	 *
 	 * @return bool
 	 */
 	private function is_request( $type ) {
@@ -480,7 +480,7 @@ endif;
 
 /**
  * Main instance of WooCommerce.
- * 
+ *
  * Returns the main instance of WC to prevent the need to use globals.
  *
  * @since  2.1

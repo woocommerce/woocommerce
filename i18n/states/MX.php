@@ -1,6 +1,6 @@
 <?php
 /**
- * Mexico States
+ * Mexico States.
  *
  * @author      WooThemes
  * @category    i18n

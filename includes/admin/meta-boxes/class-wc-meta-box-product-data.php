@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Data
+ * Product Data.
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *
@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Product_Data Class
+ * WC_Meta_Box_Product_Data Class.
  */
 class WC_Meta_Box_Product_Data {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 */
 	public static function output( $post ) {
 		global $post, $thepostid;
@@ -591,7 +591,7 @@ class WC_Meta_Box_Product_Data {
 	}
 
 	/**
-	 * Show options for the variable product type
+	 * Show options for the variable product type.
 	 */
 	public static function output_variations() {
 		global $post, $wpdb;
@@ -774,7 +774,7 @@ class WC_Meta_Box_Product_Data {
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
 	 */
 	public static function save( $post_id, $post ) {
 		global $wpdb;
@@ -1249,7 +1249,7 @@ class WC_Meta_Box_Product_Data {
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
 	 *
 	 */
 	public static function save_variations( $post_id, $post ) {

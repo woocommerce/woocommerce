@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles taxonomies in admin
+ * Handles taxonomies in admin.
  *
  * @class    WC_Admin_Taxonomies
  * @version  2.3.10
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Taxonomies {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		// Category/term ordering

@@ -1,6 +1,6 @@
 <?php
 /**
- * Coupon Data
+ * Coupon Data.
  *
  * Display the coupon data meta box.
  *
@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Coupon_Data Class
+ * WC_Meta_Box_Coupon_Data Class.
  */
 class WC_Meta_Box_Coupon_Data {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 */
 	public static function output( $post ) {
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -208,7 +208,7 @@ class WC_Meta_Box_Coupon_Data {
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
 	 */
 	public static function save( $post_id, $post ) {
 		global $wpdb;

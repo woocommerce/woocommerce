@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Notes
+ * Order Notes.
  *
  * @author      WooThemes
  * @category    Admin
@@ -13,12 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Order_Notes Class
+ * WC_Meta_Box_Order_Notes Class.
  */
 class WC_Meta_Box_Order_Notes {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 */
 	public static function output( $post ) {
 		global $post;

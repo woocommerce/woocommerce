@@ -1,6 +1,6 @@
 <?php
 /**
- * Philippines Provinces
+ * Philippines Provinces.
  *
  * @category i18n
  * @package  WooCommerce/i18n

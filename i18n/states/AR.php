@@ -1,6 +1,6 @@
 <?php
 /**
- * Argentinian provinces
+ * Argentinian provinces.
  *
  * @author   WooThemes
  * @category i18n

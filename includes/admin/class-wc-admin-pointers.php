@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Pointers Class
+ * WC_Admin_Pointers Class.
  */
 class WC_Admin_Pointers {
 

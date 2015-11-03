@@ -1,6 +1,6 @@
 <?php
 /**
- * Indonesia Provinces
+ * Indonesia Provinces.
  *
  * @author      WooThemes
  * @category    i18n

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Permalink_Settings' ) ) :
 
 /**
- * WC_Admin_Permalink_Settings Class
+ * WC_Admin_Permalink_Settings Class.
  */
 class WC_Admin_Permalink_Settings {
 

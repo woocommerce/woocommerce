@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
@@ -67,7 +67,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Include admin files conditionally
+	 * Include admin files conditionally.
 	 */
 	public function conditional_includes() {
 		$screen = get_current_screen();
@@ -112,7 +112,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin
+	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin.
 	 */
 	public function prevent_admin_access() {
 		$prevent_access = false;
@@ -130,7 +130,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Preview email template
+	 * Preview email template.
 	 *
 	 * @return string
 	 */
@@ -165,7 +165,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Change the admin footer text on WooCommerce admin pages
+	 * Change the admin footer text on WooCommerce admin pages.
 	 *
 	 * @since  2.3
 	 * @param  string $footer_text

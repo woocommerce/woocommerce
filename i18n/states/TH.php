@@ -1,6 +1,6 @@
 <?php
 /**
- * Thailand states
+ * Thailand states.
  *
  * @author      WooThemes
  * @category    i18n

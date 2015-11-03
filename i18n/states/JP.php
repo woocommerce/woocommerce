@@ -1,6 +1,6 @@
 <?php
 /**
- * Japan States
+ * Japan States.
  *
  * @author      WooThemes
  * @category    i18n

@@ -62,7 +62,7 @@ abstract class WC_Session {
 	}
 
 	/**
-	 * Get a session variable
+	 * Get a session variable.
 	 *
 	 * @param string $key
 	 * @param  mixed $default used if the session variable isn't set
@@ -74,7 +74,7 @@ abstract class WC_Session {
 	}
 
 	/**
-	 * Set a session variable
+	 * Set a session variable.
 	 *
 	 * @param string $key
 	 * @param mixed $value

@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Actions
+ * Order Actions.
  *
  * Functions for displaying the order actions meta box.
  *
@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Order_Actions Class
+ * WC_Meta_Box_Order_Actions Class.
  */
 class WC_Meta_Box_Order_Actions {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 */
 	public static function output( $post ) {
 		global $theorder;
@@ -89,7 +89,7 @@ class WC_Meta_Box_Order_Actions {
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
 	 */
 	public static function save( $post_id, $post ) {
 
@@ -145,7 +145,7 @@ class WC_Meta_Box_Order_Actions {
 	}
 
 	/**
-	 * Set the correct message ID
+	 * Set the correct message ID.
 	 *
 	 * @param $location
 	 *

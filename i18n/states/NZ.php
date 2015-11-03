@@ -1,6 +1,6 @@
 <?php
 /**
- * New Zealand States
+ * New Zealand States.
  *
  * @author      WooThemes
  * @category    i18n

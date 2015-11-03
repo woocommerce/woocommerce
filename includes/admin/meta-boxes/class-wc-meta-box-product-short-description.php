@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Short Description
+ * Product Short Description.
  *
  * Replaces the standard excerpt box.
  *
@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Product_Short_Description Class
+ * WC_Meta_Box_Product_Short_Description Class.
  */
 class WC_Meta_Box_Product_Short_Description {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 */
 	public static function output( $post ) {
 

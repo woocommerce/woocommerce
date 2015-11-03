@@ -1,6 +1,6 @@
 <?php
 /**
- * Debug/Status page
+ * Debug/Status page.
  *
  * @author      WooThemes
  * @category    Admin
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Status Class
+ * WC_Admin_Status Class.
  */
 class WC_Admin_Status {
 
@@ -25,14 +25,14 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Handles output of report
+	 * Handles output of report.
 	 */
 	public static function status_report() {
 		include_once( 'views/html-admin-page-status-report.php' );
 	}
 
 	/**
-	 * Handles output of tools
+	 * Handles output of tools.
 	 */
 	public static function status_tools() {
 		global $wpdb;
@@ -52,8 +52,8 @@ class WC_Admin_Status {
 				case 'clear_expired_transients' :
 
 					/*
-					 * Deletes all expired transients. The multi-table delete syntax is used
-					 * to delete the transient record from table a, and the corresponding
+					 * Deletes all expired transients. The multi-table delete syntax is used.
+					 * to delete the transient record from table a, and the corresponding.
 					 * transient_timeout record from table b.
 					 *
 					 * Based on code inside core's upgrade_network() function.
@@ -147,7 +147,7 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Get tools
+	 * Get tools.
 	 * @return array of tools
 	 */
 	public static function get_tools() {
@@ -198,7 +198,7 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Show the logs page
+	 * Show the logs page.
 	 */
 	public static function status_logs() {
 
@@ -214,7 +214,7 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Retrieve metadata from a file. Based on WP Core's get_file_data function
+	 * Retrieve metadata from a file. Based on WP Core's get_file_data function.
 	 * @since  2.1.1
 	 * @param  string $file Path to the file
 	 * @return string
@@ -246,7 +246,7 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Scan the template files
+	 * Scan the template files.
 	 * @param  string $template_path
 	 * @return array
 	 */
@@ -276,7 +276,7 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Scan the log files
+	 * Scan the log files.
 	 * @return array
 	 */
 	public static function scan_log_files() {
@@ -300,7 +300,7 @@ class WC_Admin_Status {
 	}
 
 	/**
-	 * Get latest version of a theme by slug
+	 * Get latest version of a theme by slug.
 	 * @param  object $theme WP_Theme object
 	 * @return string Version number if found
 	 */

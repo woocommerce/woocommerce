@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Dashboard
+ * Admin Dashboard.
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Dashboard' ) ) :
 
 /**
- * WC_Admin_Dashboard Class
+ * WC_Admin_Dashboard Class.
  */
 class WC_Admin_Dashboard {
 
@@ -30,7 +30,7 @@ class WC_Admin_Dashboard {
 	}
 
 	/**
-	 * Init dashboard widgets
+	 * Init dashboard widgets.
 	 */
 	public function init() {
 		if ( current_user_can( 'publish_shop_orders' ) ) {
@@ -41,7 +41,7 @@ class WC_Admin_Dashboard {
 	}
 
 	/**
-	 * Show status widget
+	 * Show status widget.
 	 */
 	public function status_widget() {
 		global $wpdb;
@@ -170,7 +170,7 @@ class WC_Admin_Dashboard {
 	}
 
 	/**
-	 * Recent reviews widget
+	 * Recent reviews widget.
 	 */
 	public function recent_reviews() {
 		global $wpdb;

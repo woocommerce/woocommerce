@@ -1,6 +1,6 @@
 <?php
 /**
- * United States
+ * United States.
  *
  * @author      WooThemes
  * @category    i18n

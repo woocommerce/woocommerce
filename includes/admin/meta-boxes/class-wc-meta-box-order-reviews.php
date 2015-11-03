@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Reviews
+ * Order Reviews.
  *
  * Functions for displaying the order reviews data meta box.
  *
@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Order_Reviews Class
+ * WC_Meta_Box_Order_Reviews Class.
  */
 class WC_Meta_Box_Order_Reviews {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 */
 	public static function output( $comment ) {
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -36,7 +36,7 @@ class WC_Meta_Box_Order_Reviews {
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
 	 */
 	public static function save( $location, $comment_id ) {
 		// Not allowed, return regular value without updating meta

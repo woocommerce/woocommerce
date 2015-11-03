@@ -1,6 +1,6 @@
 <?php
 /**
- * Chinese states
+ * Chinese states.
  *
  * @author      WooThemes
  * @category    i18n

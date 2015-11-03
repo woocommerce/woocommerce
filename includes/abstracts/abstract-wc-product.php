@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract Product Class
+ * Abstract Product Class.
  *
  * The WooCommerce product class handles individual product data.
  *
@@ -43,35 +43,35 @@ class WC_Product {
 	public $id = 0;
 
 	/**
-	 * $post Stores post data
+	 * $post Stores post data.
 	 *
 	 * @var $post WP_Post
 	 */
 	public $post = null;
 
 	/**
-	 * The product's type (simple, variable etc)
+	 * The product's type (simple, variable etc).
 	 *
 	 * @var string
 	 */
 	public $product_type = null;
 
 	/**
-	 * Product shipping class
+	 * Product shipping class.
 	 *
 	 * @var string
 	 */
 	protected $shipping_class    = '';
 
 	/**
-	 * ID of the shipping class this product has
+	 * ID of the shipping class this product has.
 	 *
 	 * @var int
 	 */
 	protected $shipping_class_id = 0;
 
 	/**
-	 * Supported features such as 'ajax_add_to_cart'
+	 * Supported features such as 'ajax_add_to_cart'.
 	 * @var array
 	 */
 	protected $supports = array();
@@ -173,7 +173,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Wrapper for get_permalink
+	 * Wrapper for get_permalink.
 	 *
 	 * @return string
 	 */
@@ -209,7 +209,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Check if the stock status needs changing
+	 * Check if the stock status needs changing.
 	 */
 	public function check_stock_status() {
 		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
@@ -334,7 +334,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Checks if a product is downloadable
+	 * Checks if a product is downloadable.
 	 *
 	 * @return bool
 	 */
@@ -390,7 +390,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Get a file by $download_id
+	 * Get a file by $download_id.
 	 *
 	 * @param string $download_id file identifier
 	 * @return array|false if not found
@@ -412,7 +412,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Get file download path identified by $download_id
+	 * Get file download path identified by $download_id.
 	 *
 	 * @param string $download_id file identifier
 	 * @return string
@@ -449,7 +449,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Check if a product is sold individually (no quantities)
+	 * Check if a product is sold individually (no quantities).
 	 *
 	 * @return bool
 	 */
@@ -548,7 +548,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text for the single page
+	 * Get the add to cart button text for the single page.
 	 *
 	 * @return string
 	 */
@@ -557,7 +557,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @return string
 	 */
@@ -608,7 +608,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Check if a product is on backorder
+	 * Check if a product is on backorder.
 	 *
 	 * @param int $qty_in_cart (default: 0)
 	 * @return bool
@@ -916,7 +916,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Get the suffix to display after prices > 0
+	 * Get the suffix to display after prices > 0.
 	 *
 	 * @param  string  $price to calculate, left blank to just use get_price()
 	 * @param  integer $qty   passed on to get_price_including_tax() or get_price_excluding_tax()
@@ -1470,7 +1470,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Returns the main product image
+	 * Returns the main product image.
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
 	 * @return string
@@ -1504,7 +1504,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Retrieves related product terms
+	 * Retrieves related product terms.
 	 *
 	 * @param string $term
 	 * @return array
@@ -1521,7 +1521,7 @@ class WC_Product {
 	}
 
 	/**
-	 * Builds the related posts query
+	 * Builds the related posts query.
 	 *
 	 * @param array $cats_array
 	 * @param array $tags_array

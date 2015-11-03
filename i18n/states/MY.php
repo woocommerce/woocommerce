@@ -1,6 +1,6 @@
 <?php
 /**
- * Malaysian states
+ * Malaysian states.
  *
  * @author      WooThemes
  * @category    i18n

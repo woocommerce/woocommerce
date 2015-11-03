@@ -1,6 +1,6 @@
 <?php
 /**
- * Turkey States
+ * Turkey States.
  *
  * @author      WooThemes
  * @category    i18n

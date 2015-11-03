@@ -1,6 +1,6 @@
 <?php
 /**
- * Iran States
+ * Iran States.
  *
  * @author      WooThemes
  * @category    i18n

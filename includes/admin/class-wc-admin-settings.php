@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Settings' ) ) :
 
 /**
- * WC_Admin_Settings
+ * WC_Admin_Settings.
  */
 class WC_Admin_Settings {
 
@@ -24,7 +24,7 @@ class WC_Admin_Settings {
 	private static $messages = array();
 
 	/**
-	 * Include the settings page classes
+	 * Include the settings page classes.
 	 */
 	public static function get_settings_pages() {
 		if ( empty( self::$settings ) ) {
@@ -49,7 +49,7 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Save the settings
+	 * Save the settings.
 	 */
 	public static function save() {
 		global $current_tab;
@@ -78,7 +78,7 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Add a message
+	 * Add a message.
 	 * @param string $text
 	 */
 	public static function add_message( $text ) {
@@ -86,7 +86,7 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Add an error
+	 * Add an error.
 	 * @param string $text
 	 */
 	public static function add_error( $text ) {
@@ -94,7 +94,7 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Output messages + errors
+	 * Output messages + errors.
 	 * @return string
 	 */
 	public static function show_messages() {
@@ -603,8 +603,8 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Helper function to get the formated description and tip HTML for a
-	 * given form field. Plugins can call this when implementing their own custom
+	 * Helper function to get the formated description and tip HTML for a.
+	 * given form field. Plugins can call this when implementing their own custom.
 	 * settings types.
 	 *
 	 * @param array $value The form field value array
@@ -717,13 +717,13 @@ class WC_Admin_Settings {
 			}
 
 			/**
-			 * Sanitize the value of an option
+			 * Sanitize the value of an option.
 			 * @since 2.4.0
 			 */
 			$value = apply_filters( 'woocommerce_admin_settings_sanitize_option', $value, $option, $raw_value );
 
 			/**
-			 * Sanitize the value of an option by option name
+			 * Sanitize the value of an option by option name.
 			 * @since 2.4.0
 			 */
 			$value = apply_filters( "woocommerce_admin_settings_sanitize_option_$option_name", $value, $option, $raw_value );
@@ -761,9 +761,9 @@ class WC_Admin_Settings {
 	}
 
 	/**
-	 * Checks which method we're using to serve downloads
+	 * Checks which method we're using to serve downloads.
 	 *
-	 * If using force or x-sendfile, this ensures the .htaccess is in place
+	 * If using force or x-sendfile, this ensures the .htaccess is in place.
 	 */
 	public static function check_download_folder_protection() {
 		$upload_dir      = wp_upload_dir();

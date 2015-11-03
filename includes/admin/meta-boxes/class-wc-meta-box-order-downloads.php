@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Downloads
+ * Order Downloads.
  *
  * @author      WooThemes
  * @category    Admin
@@ -13,12 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Order_Downloads Class
+ * WC_Meta_Box_Order_Downloads Class.
  */
 class WC_Meta_Box_Order_Downloads {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 */
 	public static function output( $post ) {
 		global $post, $wpdb;
@@ -76,7 +76,7 @@ class WC_Meta_Box_Order_Downloads {
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
 	 */
 	public static function save( $post_id, $post ) {
 		global $wpdb;
