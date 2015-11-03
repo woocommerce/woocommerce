@@ -3,14 +3,14 @@
 namespace WooCommerce\Tests\API;
 
 /**
- * Class Functions
+ * Class Functions.
  * @package WooCommerce\Tests\API
  * @since 2.4
  */
 class Orders extends \WC_API_Unit_Test_Case {
 
 	/**
-	 * Test test_wc_api_order_get_variation_id_returns_correct_id
+	 * Test test_wc_api_order_get_variation_id_returns_correct_id.
 	 *
 	 * @since 2.4
 	 */

@@ -38,10 +38,23 @@
 
 			td {
 				display: block;
+				text-align: right !important; // Important to overwrite order status inline styling
+
+				&.order-actions {
+					text-align: left !important;
+				}
 
 				&:before {
 					content: attr(data-title) ': ';
 					font-weight: 700;
+					float: left;
+				}
+
+				&.product-remove,
+				&.actions {
+					&:before {
+						display: none;
+					}
 				}
 			}
 

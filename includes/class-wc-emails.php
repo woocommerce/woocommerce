@@ -19,7 +19,7 @@ class WC_Emails {
 	protected static $_instance = null;
 
 	/**
-	 * Main WC_Emails Instance
+	 * Main WC_Emails Instance.
 	 *
 	 * Ensures only one instance of WC_Emails is loaded or can be loaded.
 	 *
@@ -53,7 +53,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Hook in all transactional emails
+	 * Hook in all transactional emails.
 	 */
 	public static function init_transactional_emails() {
 		$email_actions = apply_filters( 'woocommerce_email_actions', array(
@@ -117,7 +117,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Init email classes
+	 * Init email classes.
 	 */
 	public function init() {
 		// Include email classes
@@ -270,7 +270,7 @@ class WC_Emails {
 		$fields = apply_filters( 'woocommerce_email_order_meta_fields', $fields, $sent_to_admin, $order );
 
 		/**
-		 * Deprecated woocommerce_email_order_meta_keys filter
+		 * Deprecated woocommerce_email_order_meta_keys filter.
 		 *
 		 * @since 2.3.0
 		 */
@@ -365,7 +365,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Get blog name formatted for emails
+	 * Get blog name formatted for emails.
 	 * @return string
 	 */
 	private function get_blogname() {

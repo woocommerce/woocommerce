@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Note' ) ) :
 
 /**
- * Customer Note Order Email
+ * Customer Note Order Email.
  *
  * Customer note emails are sent when you add a note to an order.
  *
@@ -22,7 +22,7 @@ class WC_Email_Customer_Note extends WC_Email {
 	public $customer_note;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 

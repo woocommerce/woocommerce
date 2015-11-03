@@ -22,7 +22,7 @@ class WC_Payment_Gateways {
 	protected static $_instance = null;
 
 	/**
-	 * Main WC_Payment_Gateways Instance
+	 * Main WC_Payment_Gateways Instance.
 	 *
 	 * Ensures only one instance of WC_Payment_Gateways is loaded or can be loaded.
 	 *
@@ -152,7 +152,7 @@ class WC_Payment_Gateways {
 	}
 
 	/**
-	 * Set the current, active gateway
+	 * Set the current, active gateway.
 	 */
 	public function set_current_gateway( $gateways ) {
 		$current = WC()->session->get( 'chosen_payment_method' );

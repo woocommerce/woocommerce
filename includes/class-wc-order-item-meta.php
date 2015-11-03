@@ -2,7 +2,7 @@
 /**
  * Order Item Meta
  *
- * A Simple class for managing order item meta so plugins add it in the correct format
+ * A Simple class for managing order item meta so plugins add it in the correct format.
  *
  * @class 		order_item_meta
  * @version		2.4
@@ -24,7 +24,7 @@ class WC_Order_Item_Meta {
 	public $product = null;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
 	 * @param array $item defaults to array()
 	 * @param \WC_Product $product defaults to null
@@ -44,7 +44,7 @@ class WC_Order_Item_Meta {
 	}
 
 	/**
-	 * Display meta in a formatted list
+	 * Display meta in a formatted list.
 	 *
 	 * @param bool $flat (default: false)
 	 * @param bool $return (default: false)
@@ -138,7 +138,7 @@ class WC_Order_Item_Meta {
 
 	/**
 	 * Return an array of formatted item meta in format e.g.
-	 * Handles @deprecated args
+	 * Handles @deprecated args.
 	 * @return array
 	 */
 	public function get_formatted_legacy( $hideprefix = '_' ) {

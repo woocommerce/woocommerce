@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Bank Transfer Payment Gateway
+ * Bank Transfer Payment Gateway.
  *
  * Provides a Bank Transfer Payment Gateway. Based on code by Mike Pepper.
  *
@@ -65,7 +65,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Initialise Gateway Settings Form Fields
+	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 
@@ -187,7 +187,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Save account details table
+	 * Save account details table.
 	 */
 	public function save_account_details() {
 
@@ -253,7 +253,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Get bank details and place into a list format
+	 * Get bank details and place into a list format.
 	 */
 	private function bank_details( $order_id = '' ) {
 
@@ -275,7 +275,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		if ( ! empty( $bacs_accounts ) ) {
 			echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
-			
+
 			foreach ( $bacs_accounts as $bacs_account ) {
 
 				$bacs_account = (object) $bacs_account;
@@ -319,7 +319,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process the payment and return the result
+	 * Process the payment and return the result.
 	 *
 	 * @param int $order_id
 	 * @return array
@@ -346,7 +346,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Get country locale if localized
+	 * Get country locale if localized.
 	 *
 	 * @return array
 	 */

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce Integration class
+ * WooCommerce Integration class.
  *
  * Extended by individual integrations to offer additional functionality.
  *
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Integration extends WC_Settings_API {
 
 	/**
-	 * Admin Options
+	 * Admin Options.
 	 *
 	 * Setup the gateway settings screen.
 	 * Override this in your gateway.

@@ -188,7 +188,7 @@ class WC_Email extends WC_Settings_API {
 	);
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		// Init settings
@@ -558,7 +558,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Save the email templates
+	 * Save the email templates.
 	 *
 	 * @since 2.4.0
 	 * @param string $template_code
@@ -620,7 +620,7 @@ class WC_Email extends WC_Settings_API {
 					copy( $template_file, $theme_file );
 
 					/**
-					 * woocommerce_copy_email_template action hook
+					 * woocommerce_copy_email_template action hook.
 					 *
 					 * @param string $template_type The copied template type
 					 * @param string $email The email object
@@ -649,7 +649,7 @@ class WC_Email extends WC_Settings_API {
 					unlink( $theme_file );
 
 					/**
-					 * woocommerce_delete_email_template action hook
+					 * woocommerce_delete_email_template action hook.
 					 *
 					 * @param string $template The deleted template type
 					 * @param string $email The email object
@@ -691,7 +691,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Admin Options
+	 * Admin Options.
 	 *
 	 * Setup the email settings screen.
 	 * Override this in your email.
@@ -707,7 +707,7 @@ class WC_Email extends WC_Settings_API {
 
 		<?php
 			/**
-			 * woocommerce_email_settings_before action hook
+			 * woocommerce_email_settings_before action hook.
 			 * @param string $email The email object
 			 */
 			do_action( 'woocommerce_email_settings_before', $this );
@@ -719,7 +719,7 @@ class WC_Email extends WC_Settings_API {
 
 		<?php
 			/**
-			 * woocommerce_email_settings_after action hook
+			 * woocommerce_email_settings_after action hook.
 			 * @param string $email The email object
 			 */
 			do_action( 'woocommerce_email_settings_after', $this );

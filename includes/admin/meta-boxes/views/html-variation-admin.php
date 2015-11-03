@@ -111,7 +111,7 @@ extract( $variation_data );
 
 				<?php
 					/**
-					 * woocommerce_variation_options_pricing action
+					 * woocommerce_variation_options_pricing action.
 					 *
 					 * @since 2.5.0
 					 *
@@ -142,7 +142,7 @@ extract( $variation_data );
 
 					<?php
 						/**
-						 * woocommerce_product_options_inventory action
+						 * woocommerce_product_options_inventory action.
 						 *
 						 * @since 2.5.0
 						 *
@@ -191,7 +191,7 @@ extract( $variation_data );
 
 					<?php
 						/**
-						 * woocommerce_product_options_dimensions action
+						 * woocommerce_product_options_dimensions action.
 						 *
 						 * @since 2.5.0
 						 *
@@ -231,7 +231,7 @@ extract( $variation_data );
 
 					<?php
 						/**
-						 * woocommerce_product_options_tax action
+						 * woocommerce_product_options_tax action.
 						 *
 						 * @since 2.5.0
 						 *
@@ -304,7 +304,7 @@ extract( $variation_data );
 
 				<?php
 					/**
-					 * woocommerce_product_options_download action
+					 * woocommerce_product_options_download action.
 					 *
 					 * @since 2.5.0
 					 *

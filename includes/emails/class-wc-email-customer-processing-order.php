@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Processing_Order' ) ) :
 
 /**
- * Customer Processing Order Email
+ * Customer Processing Order Email.
  *
  * An email sent to the customer when a new order is received/paid for.
  *
@@ -20,7 +20,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order' ) ) :
 class WC_Email_Customer_Processing_Order extends WC_Email {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 		$this->id               = 'customer_processing_order';

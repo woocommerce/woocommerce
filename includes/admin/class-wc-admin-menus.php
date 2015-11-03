@@ -1,6 +1,6 @@
 <?php
 /**
- * Setup menus in WP admin.
+ * Setup menus in WP admin
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Menus' ) ) :
 
 /**
- * WC_Admin_Menus Class
+ * WC_Admin_Menus Class.
  */
 class WC_Admin_Menus {
 
@@ -48,7 +48,7 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Add menu items
+	 * Add menu items.
 	 */
 	public function admin_menu() {
 		global $menu;
@@ -65,7 +65,7 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Add menu item
+	 * Add menu item.
 	 */
 	public function reports_menu() {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
@@ -76,7 +76,7 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Add menu item
+	 * Add menu item.
 	 */
 	public function settings_menu() {
 		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'wc-settings', array( $this, 'settings_page' ) );
@@ -93,7 +93,7 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Add menu item
+	 * Add menu item.
 	 */
 	public function status_menu() {
 		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
@@ -101,7 +101,7 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Addons menu item
+	 * Addons menu item.
 	 */
 	public function addons_menu() {
 		add_submenu_page( 'woocommerce', __( 'WooCommerce Add-ons/Extensions', 'woocommerce' ),  __( 'Add-ons', 'woocommerce' ) , 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
@@ -134,7 +134,7 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Adds the order processing count to the menu
+	 * Adds the order processing count to the menu.
 	 */
 	public function menu_order_count() {
 		global $submenu;
@@ -191,7 +191,7 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Custom menu order
+	 * Custom menu order.
 	 *
 	 * @return bool
 	 */
@@ -200,44 +200,44 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Init the reports page
+	 * Init the reports page.
 	 */
 	public function reports_page() {
 		WC_Admin_Reports::output();
 	}
 
 	/**
-	 * Init the settings page
+	 * Init the settings page.
 	 */
 	public function settings_page() {
 		WC_Admin_Settings::output();
 	}
 
 	/**
-	 * Init the attributes page
+	 * Init the attributes page.
 	 */
 	public function attributes_page() {
 		WC_Admin_Attributes::output();
 	}
 
 	/**
-	 * Init the status page
+	 * Init the status page.
 	 */
 	public function status_page() {
 		WC_Admin_Status::output();
 	}
 
 	/**
-	 * Init the addons page
+	 * Init the addons page.
 	 */
 	public function addons_page() {
 		WC_Admin_Addons::output();
 	}
 
 	/**
-	 * Add custom nav meta box
+	 * Add custom nav meta box.
 	 *
-	 * Adapted from http://www.johnmorrisonline.com/how-to-add-a-fully-functional-custom-meta-box-to-wordpress-navigation-menus/
+	 * Adapted from http://www.johnmorrisonline.com/how-to-add-a-fully-functional-custom-meta-box-to-wordpress-navigation-menus/.
 	 */
 	public function add_nav_menu_meta_boxes() {
 		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce Endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
@@ -285,7 +285,7 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Add the "Visit Store" link in admin bar main menu
+	 * Add the "Visit Store" link in admin bar main menu.
 	 *
 	 * @since 2.4.0
 	 * @param WP_Admin_Bar $wp_admin_bar
@@ -295,17 +295,17 @@ class WC_Admin_Menus {
 			return;
 		}
 
-		// Show only when the user is a member of this site, or they're a super admin
+		// Show only when the user is a member of this site, or they're a super admin.
 		if ( ! is_user_member_of_blog() && ! is_super_admin() ) {
 			return;
 		}
 
-		// Don't display when shop page is the same of the page on front
+		// Don't display when shop page is the same of the page on front.
 		if ( get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) {
 			return;
 		}
 
-		// Add an option to visit the store
+		// Add an option to visit the store.
 		$wp_admin_bar->add_node( array(
 			'parent' => 'site-name',
 			'id'     => 'view-store',

@@ -1,6 +1,6 @@
 <?php
 /**
- * Load assets.
+ * Load assets
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Assets' ) ) :
 
 /**
- * WC_Admin_Assets Class
+ * WC_Admin_Assets Class.
  */
 class WC_Admin_Assets {
 
@@ -353,9 +353,9 @@ class WC_Admin_Assets {
 	}
 
 	/**
-	 * Admin Head
+	 * Admin Head.
 	 *
-	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages
+	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages.
 	 */
 	public function product_taxonomy_styles() {
 

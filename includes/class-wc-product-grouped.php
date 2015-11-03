@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Grouped Product Class
+ * Grouped Product Class.
  *
  * Grouped products cannot be purchased - they are wrappers for other products.
  *
@@ -35,7 +35,7 @@ class WC_Product_Grouped extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @access public
 	 * @return string

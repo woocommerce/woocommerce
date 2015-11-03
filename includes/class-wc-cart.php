@@ -166,7 +166,7 @@ class WC_Cart {
 	}
 
 	/**
-	 * Will set cart cookies if needed, once, during WP hook
+	 * Will set cart cookies if needed, once, during WP hook.
 	 */
 	public function maybe_set_cart_cookies() {
 		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
@@ -462,7 +462,7 @@ class WC_Cart {
 				$_product = $values['data'];
 
 				/**
-				 * Check stock based on stock-status
+				 * Check stock based on stock-status.
 				 */
 				if ( ! $_product->is_in_stock() ) {
 					$error->add( 'out-of-stock', sprintf(__( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title() ) );
@@ -476,7 +476,7 @@ class WC_Cart {
 				$check_qty = $_product->is_type( 'variation' ) && true === $_product->managing_stock() ? $product_qty_in_cart[ $values['variation_id'] ] : $product_qty_in_cart[ $values['product_id'] ];
 
 				/**
-				 * Check stock based on all items in the cart
+				 * Check stock based on all items in the cart.
 				 */
 				if ( ! $_product->has_enough_stock( $check_qty ) ) {
 					$error->add( 'out-of-stock', sprintf(__( 'Sorry, we do not have enough "%s" in stock to fulfill your order (%s in stock). Please edit your cart and try again. We apologise for any inconvenience caused.', 'woocommerce' ), $_product->get_title(), $_product->get_stock_quantity() ) );
@@ -484,7 +484,7 @@ class WC_Cart {
 				}
 
 				/**
-				 * Finally consider any held stock, from pending orders
+				 * Finally consider any held stock, from pending orders.
 				 */
 				if ( get_option( 'woocommerce_hold_stock_minutes' ) > 0 && ! $_product->backorders_allowed() ) {
 					$order_id   = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
@@ -704,7 +704,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Returns a specific item in the cart
+		 * Returns a specific item in the cart.
 		 *
 		 * @return array item data
 		 */
@@ -761,7 +761,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Get all tax classes for items in the cart
+		 * Get all tax classes for items in the cart.
 		 * @return array
 		 */
 		public function get_cart_item_tax_classes() {
@@ -913,7 +913,7 @@ class WC_Cart {
 					}
 
 					/**
-					 * Check stock based on all items in the cart
+					 * Check stock based on all items in the cart.
 					 */
 					if ( ! $product_data->has_enough_stock( $check_qty + $quantity ) ) {
 						throw new Exception( sprintf(
@@ -959,7 +959,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Remove a cart item
+		 * Remove a cart item.
 		 *
 		 * @since  2.3.0
 		 * @param  string $cart_item_key
@@ -985,7 +985,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Restore a cart item
+		 * Restore a cart item.
 		 *
 		 * @param  string $cart_item_key
 		 * @return bool
@@ -1056,7 +1056,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Sort by subtotal
+		 * Sort by subtotal.
 		 * @param  array $a
 		 * @param  array $b
 		 * @return int
@@ -1106,7 +1106,7 @@ class WC_Cart {
 				$line_subtotal_tax = 0;
 
 				/**
-				 * No tax to calculate
+				 * No tax to calculate.
 				 */
 				if ( ! $_product->is_taxable() ) {
 
@@ -1115,16 +1115,16 @@ class WC_Cart {
 					$this->subtotal_ex_tax += $line_price;
 
 				/**
-				 * Prices include tax
+				 * Prices include tax.
 				 *
-				 * To prevent rounding issues we need to work with the inclusive price where possible
-				 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would
-				 * be 8.325 leading to totals being 1p off
+				 * To prevent rounding issues we need to work with the inclusive price where possible.
+				 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
+				 * be 8.325 leading to totals being 1p off.
 				 *
-				 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated
+				 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
 				 * afterwards.
 				 *
-				 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that
+				 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
 				 */
 				} elseif ( $this->prices_include_tax ) {
 
@@ -1142,7 +1142,7 @@ class WC_Cart {
 					$item_tax_rates = $tax_rates[ $_product->get_tax_class() ];
 
 					/**
-					 * ADJUST TAX - Calculations when base tax is not equal to the item tax
+					 * ADJUST TAX - Calculations when base tax is not equal to the item tax.
 					 *
  					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
  					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
@@ -1161,7 +1161,7 @@ class WC_Cart {
 						$line_subtotal_tax     = array_sum( $tax_result );
 
 					/**
-					 * Regular tax calculation (customer inside base and the tax class is unmodified
+					 * Regular tax calculation (customer inside base and the tax class is unmodified.
 					 */
 					} else {
 
@@ -1172,7 +1172,7 @@ class WC_Cart {
 					}
 
 				/**
-				 * Prices exclude tax
+				 * Prices exclude tax.
 				 *
 				 * This calculation is simpler - work with the base, untaxed price.
 				 */
@@ -1201,7 +1201,7 @@ class WC_Cart {
 			uasort( $cart, array( $this, 'sort_by_subtotal' ) );
 
 			/**
-			 * Calculate totals for items
+			 * Calculate totals for items.
 			 */
 			foreach ( $cart as $cart_item_key => $values ) {
 
@@ -1216,7 +1216,7 @@ class WC_Cart {
 				$discounted_taxes = array();
 
 				/**
-				 * No tax to calculate
+				 * No tax to calculate.
 				 */
 				if ( ! $_product->is_taxable() ) {
 
@@ -1228,7 +1228,7 @@ class WC_Cart {
 					$line_total            = WC_Tax::round( $discounted_price * $values['quantity'] );
 
 				/**
-				 * Prices include tax
+				 * Prices include tax.
 				 */
 				} elseif ( $this->prices_include_tax ) {
 
@@ -1236,7 +1236,7 @@ class WC_Cart {
 					$item_tax_rates = $tax_rates[ $_product->get_tax_class() ];
 
 					/**
-					 * ADJUST TAX - Calculations when base tax is not equal to the item tax
+					 * ADJUST TAX - Calculations when base tax is not equal to the item tax.
 					 *
  					 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
  					 * e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.
@@ -1262,7 +1262,7 @@ class WC_Cart {
 						$line_total        = ( $discounted_price * $values['quantity'] ) - $line_tax;
 
 					/**
-					 * Regular tax calculation (customer inside base and the tax class is unmodified
+					 * Regular tax calculation (customer inside base and the tax class is unmodified.
 					 */
 					} else {
 
@@ -1286,7 +1286,7 @@ class WC_Cart {
 					}
 
 				/**
-				 * Prices exclude tax
+				 * Prices exclude tax.
 				 */
 				} else {
 
@@ -1427,7 +1427,7 @@ class WC_Cart {
 		 *
 		 * Shipping methods are responsible for looping through these packages.
 		 *
-		 * By default we pass the cart itself as a package - plugins can change this
+		 * By default we pass the cart itself as a package - plugins can change this.
 		 * through the filter and break it up.
 		 *
 		 * @since 1.5.4
@@ -1484,7 +1484,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Should the shipping address form be shown
+		 * Should the shipping address form be shown.
 		 *
 		 * @return bool
 		 */
@@ -1580,8 +1580,8 @@ class WC_Cart {
 		 * Check for user coupons (now that we have billing email). If a coupon is invalid, add an error.
 		 *
 		 * Checks two types of coupons:
-		 *  1. Where a list of customer emails are set (limits coupon usage to those defined)
-		 *  2. Where a usage_limit_per_user is set (limits coupon usage to a number based on user ID and email)
+		 *  1. Where a list of customer emails are set (limits coupon usage to those defined).
+		 *  2. Where a usage_limit_per_user is set (limits coupon usage to a number based on user ID and email).
 		 *
 		 * @param array $posted
 		 */
@@ -1761,7 +1761,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Get the discount amount for a used coupon
+		 * Get the discount amount for a used coupon.
 		 * @param  string $code coupon code
 		 * @param  bool inc or ex tax
 		 * @return float discount amount
@@ -1777,7 +1777,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Get the discount tax amount for a used coupon (for tax inclusive prices)
+		 * Get the discount tax amount for a used coupon (for tax inclusive prices).
 		 * @param  string $code coupon code
 		 * @param  bool inc or ex tax
 		 * @return float discount amount
@@ -1797,7 +1797,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Remove a single coupon by code
+		 * Remove a single coupon by code.
 		 * @param  string $coupon_code Code of the coupon to remove
 		 * @return bool
 		 */
@@ -1884,7 +1884,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Store how many times each coupon is applied to cart/items
+		 * Store how many times each coupon is applied to cart/items.
 		 *
 		 * @access private
 		 * @param string $code
@@ -1902,7 +1902,7 @@ class WC_Cart {
 	/*-----------------------------------------------------------------------------------*/
 
 		/**
-		 * Add additional fee to the cart
+		 * Add additional fee to the cart.
 		 *
 		 * @param string $name Unique name for the fee. Multiple fees of the same name cannot be added.
 		 * @param float $amount Fee amount.
@@ -1941,7 +1941,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Calculate fees
+		 * Calculate fees.
 		 */
 		public function calculate_fees() {
 			// Reset fees before calculation
@@ -2080,7 +2080,7 @@ class WC_Cart {
 		 *
 		 * Gets the tax etc to avoid rounding issues.
 		 *
-		 * When on the checkout (review order), this will get the subtotal based on the customer's tax rate rather than the base rate
+		 * When on the checkout (review order), this will get the subtotal based on the customer's tax rate rather than the base rate.
 		 *
 		 * @param WC_Product $_product
 		 * @param int quantity
@@ -2137,7 +2137,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Get a tax amount
+		 * Get a tax amount.
 		 * @param  string $tax_rate_id
 		 * @return float amount
 		 */
@@ -2146,7 +2146,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Get a tax amount
+		 * Get a tax amount.
 		 * @param  string $tax_rate_id
 		 * @return float amount
 		 */
@@ -2178,7 +2178,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Get the total of all cart discounts
+		 * Get the total of all cart discounts.
 		 *
 		 * @return float
 		 */
@@ -2187,7 +2187,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * Get the total of all cart tax discounts (used for discounts on tax inclusive prices)
+		 * Get the total of all cart tax discounts (used for discounts on tax inclusive prices).
 		 *
 		 * @return float
 		 */

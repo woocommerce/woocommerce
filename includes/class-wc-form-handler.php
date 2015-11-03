@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Handle frontend forms
+ * Handle frontend forms.
  *
  * @class 		WC_Form_Handler
  * @version		2.2.0
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Form_Handler {
 
 	/**
-	 * Hook in methods
+	 * Hook in methods.
 	 */
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
@@ -37,7 +37,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Save and and update a billing or shipping address if the
+	 * Save and and update a billing or shipping address if the.
 	 * form was submitted through the user account page.
 	 */
 	public static function save_address() {
@@ -586,7 +586,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Add to cart action
+	 * Add to cart action.
 	 *
 	 * Checks for a valid request, does validation (via hooks) and then redirects if valid.
 	 *
@@ -638,7 +638,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Handle adding simple products to the cart
+	 * Handle adding simple products to the cart.
 	 * @since 2.4.6 Split from add_to_cart_action
 	 * @param int $product_id
 	 * @return bool success or not
@@ -655,7 +655,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Handle adding grouped products to the cart
+	 * Handle adding grouped products to the cart.
 	 * @since 2.4.6 Split from add_to_cart_action
 	 * @param int $product_id
 	 * @return bool success or not
@@ -697,7 +697,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Handle adding variable products to the cart
+	 * Handle adding variable products to the cart.
 	 * @since 2.4.6 Split from add_to_cart_action
 	 * @param int $product_id
 	 * @return bool success or not
@@ -832,7 +832,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Handle lost password form
+	 * Handle lost password form.
 	 */
 	public static function process_lost_password() {
 		if ( isset( $_POST['wc_reset_password'] ) && isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
@@ -841,7 +841,7 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Handle reset password form
+	 * Handle reset password form.
 	 */
 	public static function process_reset_password() {
 		$posted_fields = array( 'wc_reset_password', 'password_1', 'password_2', 'reset_key', 'reset_login', '_wpnonce' );

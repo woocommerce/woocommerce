@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Product Variation Class
+ * Product Variation Class.
  *
  * The WooCommerce product variation class handles product variation data.
  *
@@ -179,7 +179,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @return string
 	 */
@@ -249,7 +249,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get variation ID
+	 * Get variation ID.
 	 *
 	 * @return int
 	 */
@@ -258,7 +258,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get variation attribute values
+	 * Get variation attribute values.
 	 *
 	 * @return array of attributes and their values for this variation
 	 */
@@ -267,7 +267,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Check if all variation's attributes are set
+	 * Check if all variation's attributes are set.
 	 *
 	 * @return boolean
 	 */
@@ -739,7 +739,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get product variation description
+	 * Get product variation description.
 	 *
 	 * @return string
 	 */

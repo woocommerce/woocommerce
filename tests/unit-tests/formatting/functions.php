@@ -3,7 +3,7 @@
 namespace WooCommerce\Tests\Formatting;
 
 /**
- * Class Functions
+ * Class Functions.
  * @package WooCommerce\Tests\Formatting
  * @since 2.2
  *
@@ -12,7 +12,7 @@ namespace WooCommerce\Tests\Formatting;
 class Functions extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test wc_sanitize_taxonomy_name()
+	 * Test wc_sanitize_taxonomy_name().
 	 *
 	 * @since 2.2
 	 */
@@ -25,7 +25,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_filename_from_url()
+	 * Test wc_get_filename_from_url().
 	 *
 	 * @since 2.2
 	 */
@@ -38,7 +38,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_wc_get_dimension()
+	 * Data provider for test_wc_get_dimension().
 	 *
 	 * @since 2.2.0
 	 */
@@ -103,7 +103,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_dimension()
+	 * Test wc_get_dimension().
 	 *
 	 * @dataProvider data_provider_wc_get_dimension
 	 *
@@ -116,7 +116,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_weight()
+	 * Test wc_get_weight().
 	 *
 	 * @since 2.2
 	 */
@@ -160,7 +160,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_trim_zeros()
+	 * Test wc_trim_zeros().
 	 *
 	 * @since 2.2
 	 */
@@ -171,10 +171,10 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_round_tax_total()
+	 * Test wc_round_tax_total().
 	 *
-	 * Note the PHP 5.2 section of wc_round_tax_total() is excluded from test
-	 * coverage
+	 * Note the PHP 5.2 section of wc_round_tax_total() is excluded from test.
+	 * coverage.
 	 *
 	 * @since 2.2
 	 */
@@ -186,7 +186,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_format_refund_total()
+	 * Test wc_format_refund_total().
 	 *
 	 * @since 2.2
 	 */
@@ -197,7 +197,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_format_decimal()
+	 * Test wc_format_decimal().
 	 *
 	 * @since 2.2
 	 */
@@ -229,7 +229,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_float_to_string()
+	 * Test wc_float_to_string().
 	 *
 	 * @since 2.2
 	 */
@@ -242,7 +242,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_format_localized_price()
+	 * Test wc_format_localized_price().
 	 *
 	 * @since 2.2
 	 */
@@ -259,7 +259,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_format_localized_decimal()
+	 * Test wc_format_localized_decimal().
 	 *
 	 * @since 2.2
 	 */
@@ -269,8 +269,8 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_clean() - note this is a basic type test as WP core already
-	 * has coverage for sanitized_text_field()
+	 * Test wc_clean() - note this is a basic type test as WP core already.
+	 * has coverage for sanitized_text_field().
 	 *
 	 * @since 2.2
 	 */
@@ -280,8 +280,8 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_sanitize_tooltip() - note this is a basic type test as WP core already
-	 * has coverage for wp_kses()
+	 * Test wc_sanitize_tooltip() - note this is a basic type test as WP core already.
+	 * has coverage for wp_kses().
 	 *
 	 * @since 2.4
 	 */
@@ -291,7 +291,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_array_overlay()
+	 * Test wc_array_overlay().
 	 *
 	 * @since 2.2
 	 */
@@ -325,7 +325,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_stock_amount()
+	 * Test wc_stock_amount().
 	 *
 	 * @since 2.2
 	 */
@@ -337,7 +337,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_woocommerce_price_format()
+	 * Test wc_get_woocommerce_price_format().
 	 *
 	 * @since 2.2
 	 */
@@ -366,7 +366,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_price_thousand_separator()
+	 * Test wc_get_price_thousand_separator().
 	 *
 	 * @since 2.4
 	 */
@@ -386,7 +386,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_price_decimal_separator()
+	 * Test wc_get_price_decimal_separator().
 	 *
 	 * @since 2.4
 	 */
@@ -406,7 +406,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_price_decimals()
+	 * Test wc_get_price_decimals().
 	 *
 	 * @since 2.4
 	 */
@@ -429,7 +429,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_price()
+	 * Test wc_price().
 	 *
 	 * @since 2.2
 	 */
@@ -466,7 +466,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_let_to_num()
+	 * Test wc_let_to_num().
 	 *
 	 * @since 2.2
 	 */
@@ -486,7 +486,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_date_format()
+	 * Test wc_date_format().
 	 *
 	 * @since 2.2
 	 */
@@ -496,7 +496,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_time_format()
+	 * Test wc_time_format().
 	 *
 	 * @since 2.2
 	 */
@@ -505,7 +505,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_timezone_string()
+	 * Test wc_timezone_string().
 	 *
 	 * @since 2.2
 	 */
@@ -535,7 +535,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_rgb_from_hex()
+	 * Test wc_rgb_from_hex().
 	 *
 	 * @since 2.2
 	 */
@@ -552,7 +552,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_hex_darker()
+	 * Test wc_hex_darker().
 	 *
 	 * @since 2.2
 	 */
@@ -563,7 +563,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_hex_lighter()
+	 * Test wc_hex_lighter().
 	 *
 	 * @since 2.2
 	 */
@@ -575,7 +575,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_light_or_dark()
+	 * Test wc_light_or_dark().
 	 *
 	 * @since 2.2
 	 */
@@ -586,7 +586,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_format_hex()
+	 * Test wc_format_hex().
 	 *
 	 * @since 2.2
 	 */
@@ -598,7 +598,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_format_postcode()
+	 * Test wc_format_postcode().
 	 *
 	 * @since 2.2
 	 */
@@ -612,7 +612,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_format_phone_number()
+	 * Test wc_format_phone_number().
 	 *
 	 * @since 2.2
 	 */
@@ -622,7 +622,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_trim_string()
+	 * Test wc_trim_string().
 	 *
 	 * @since 2.2
 	 */

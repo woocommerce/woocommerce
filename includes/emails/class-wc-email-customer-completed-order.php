@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Completed_Order' ) ) :
 
 /**
- * Customer Completed Order Email
+ * Customer Completed Order Email.
  *
  * Order complete emails are sent to the customer when the order is marked complete and usual indicates that the order has been shipped.
  *
@@ -20,7 +20,7 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order' ) ) :
 class WC_Email_Customer_Completed_Order extends WC_Email {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 

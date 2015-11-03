@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Product_Cat_List_Walker class.
+ * WC_Product_Cat_List_Walker class
  *
  * @extends 	Walker
  * @class 		WC_Product_Cat_Dropdown_Walker
@@ -98,8 +98,8 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * Traverse elements to create list from elements.
 	 *
 	 * Display one element if the element doesn't have any children otherwise,
-	 * display the element and its children. Will only traverse up to the max
-	 * depth and no ignore elements under that depth. It is possible to set the
+	 * display the element and its children. Will only traverse up to the max.
+	 * depth and no ignore elements under that depth. It is possible to set the.
 	 * max depth to include all depths, see walk() method.
 	 *
 	 * This method shouldn't be called directly, use the walk() method instead.

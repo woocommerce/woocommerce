@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Admin Report
+ * Admin Report.
  *
  * Extended by reports to show charts and stats in admin.
  *
@@ -306,7 +306,7 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * Put data with post_date's into an array of times
+	 * Put data with post_date's into an array of times.
 	 *
 	 * @param  array $data array of your data
 	 * @param  string $date_key key for the 'date' field. e.g. 'post_date'
@@ -362,7 +362,7 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * Prepares a sparkline to show sales in the last X days
+	 * Prepares a sparkline to show sales in the last X days.
 	 *
 	 * @param  int $id ID of the product to show. Blank to get all orders.
 	 * @param  int $days Days of stats to get.
@@ -455,7 +455,7 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * Get the current range and calculate the start and end dates
+	 * Get the current range and calculate the start and end dates.
 	 *
 	 * @param  string $current_range
 	 */
@@ -557,14 +557,14 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * Get the main chart
+	 * Get the main chart.
 	 *
 	 * @return string
 	 */
 	public function get_main_chart() {}
 
 	/**
-	 * Get the legend for the main chart sidebar
+	 * Get the legend for the main chart sidebar.
 	 *
 	 * @return array
 	 */
@@ -573,7 +573,7 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * [get_chart_widgets description]
+	 * [get_chart_widgets description].
 	 *
 	 * @return array
 	 */
@@ -582,12 +582,12 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * Get an export link if needed
+	 * Get an export link if needed.
 	 */
 	public function get_export_button() {}
 
 	/**
-	 * Output the report
+	 * Output the report.
 	 */
 	public function output_report() {}
 }

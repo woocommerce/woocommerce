@@ -12,7 +12,7 @@
 class WC_Shortcode_Cart {
 
 	/**
-	 * Calculate shipping for the cart
+	 * Calculate shipping for the cart.
 	 */
 	public static function calculate_shipping() {
 		try {

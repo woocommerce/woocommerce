@@ -1,6 +1,6 @@
 <?php
 /**
- * Add some content to the help tab.
+ * Add some content to the help tab
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Help' ) ) :
 
 /**
- * WC_Admin_Help Class
+ * WC_Admin_Help Class.
  */
 class WC_Admin_Help {
 
@@ -27,7 +27,7 @@ class WC_Admin_Help {
 	}
 
 	/**
-	 * Add Contextual help tabs
+	 * Add Contextual help tabs.
 	 */
 	public function add_tabs() {
 		$screen = get_current_screen();

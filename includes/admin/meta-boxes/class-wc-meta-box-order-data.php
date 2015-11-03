@@ -15,26 +15,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Order_Data Class
+ * WC_Meta_Box_Order_Data Class.
  */
 class WC_Meta_Box_Order_Data {
 
 	/**
-	 * Billing fields
+	 * Billing fields.
 	 *
 	 * @var array
 	 */
 	protected static $billing_fields = array();
 
 	/**
-	 * Shipping fields
+	 * Shipping fields.
 	 *
 	 * @var array
 	 */
 	protected static $shipping_fields = array();
 
 	/**
-	 * Init billing and shipping fields we display + save
+	 * Init billing and shipping fields we display + save.
 	 */
 	public static function init_address_fields() {
 
@@ -132,7 +132,7 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
 	 */
 	public static function output( $post ) {
 		global $theorder;
@@ -400,7 +400,7 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
 	 */
 	public static function save( $post_id, $post ) {
 		global $wpdb;

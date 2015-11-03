@@ -2,7 +2,7 @@
 /**
  * Comments
  *
- * Handle comments (reviews and order notes)
+ * Handle comments (reviews and order notes).
  *
  * @class    WC_Comments
  * @version  2.3.0
@@ -50,10 +50,10 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude order comments from queries and RSS
+	 * Exclude order comments from queries and RSS.
 	 *
-	 * This code should exclude shop_order comments from queries. Some queries (like the recent comments widget on the dashboard) are hardcoded
-	 * and are not filtered, however, the code current_user_can( 'read_post', $comment->comment_post_ID ) should keep them safe since only admin and
+	 * This code should exclude shop_order comments from queries. Some queries (like the recent comments widget on the dashboard) are hardcoded.
+	 * and are not filtered, however, the code current_user_can( 'read_post', $comment->comment_post_ID ) should keep them safe since only admin and.
 	 * shop managers can view orders anyway.
 	 *
 	 * The frontend view order pages get around this filter by using remove_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments'), 10, 1 );
@@ -85,7 +85,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude order comments from queries and RSS
+	 * Exclude order comments from queries and RSS.
 	 * @param  string $join
 	 * @return string
 	 */
@@ -100,7 +100,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude order comments from queries and RSS
+	 * Exclude order comments from queries and RSS.
 	 * @param  string $where
 	 * @return string
 	 */
@@ -117,7 +117,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude webhook comments from queries and RSS
+	 * Exclude webhook comments from queries and RSS.
 	 * @since  2.2
 	 * @param  array $clauses
 	 * @return array
@@ -143,7 +143,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude webhook comments from queries and RSS
+	 * Exclude webhook comments from queries and RSS.
 	 * @since  2.2
 	 * @param  string $join
 	 * @return string
@@ -159,7 +159,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude webhook comments from queries and RSS
+	 * Exclude webhook comments from queries and RSS.
 	 * @since  2.1
 	 * @param  string $where
 	 * @return string
@@ -238,7 +238,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Remove order notes from wp_count_comments()
+	 * Remove order notes from wp_count_comments().
 	 * @since  2.2
 	 * @param  object $stats
 	 * @param  int $post_id
@@ -284,7 +284,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Make sure WP displays avatars for comments with the `review` type
+	 * Make sure WP displays avatars for comments with the `review` type.
 	 * @since  2.3
 	 * @param  array $comment_types
 	 * @return array

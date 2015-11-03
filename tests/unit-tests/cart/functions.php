@@ -3,13 +3,13 @@
 namespace WooCommerce\Tests\Cart;
 
 /**
- * Class Functions
+ * Class Functions.
  * @package WooCommerce\Tests\Cart
  */
 class Functions extends \WC_Unit_Test_Case {
 
 	/**
-	 * Helper method to get the checkout URL
+	 * Helper method to get the checkout URL.
 	 *
 	 * @since 2.5.0
 	 *
@@ -41,7 +41,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_checkout_url over HTTP
+	 * Test get_checkout_url over HTTP.
 	 *
 	 * @since 2.5.0
 	 */
@@ -61,7 +61,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_checkout_url over HTTP
+	 * Test get_checkout_url over HTTP.
 	 *
 	 * @since 2.5.0
 	 */
@@ -81,7 +81,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_empty_cart()
+	 * Test wc_empty_cart().
 	 *
 	 * @since 2.3.0
 	 */
@@ -103,7 +103,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_format_list_of_items()
+	 * Test wc_format_list_of_items().
 	 *
 	 * @since 2.4
 	 */
@@ -114,7 +114,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_cart_totals_subtotal_html()
+	 * Test wc_cart_totals_subtotal_html().
 	 *
 	 * @todo  test with taxes incl./excl.
 	 * @since 2.4
@@ -130,7 +130,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_cart_totals_coupon_label()
+	 * Test wc_cart_totals_coupon_label().
 	 *
 	 * @since 2.4
 	 */
@@ -143,7 +143,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_cart_url method
+	 * Test get_cart_url method.
 	 *
 	 * @since 2.5.0
 	 */

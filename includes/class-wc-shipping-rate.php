@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce Shipping Rate Class
+ * WooCommerce Shipping Rate Class.
  *
  * Simple Class for storing rates.
  *
@@ -33,7 +33,7 @@ class WC_Shipping_Rate {
 	public $method_id = '';
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
 	 * @param string $id
 	 * @param string $label
@@ -63,7 +63,7 @@ class WC_Shipping_Rate {
 	}
 
 	/**
-	 * Get label
+	 * Get label.
 	 *
 	 * @return string
 	 */

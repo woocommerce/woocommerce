@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Local Pickup Shipping Method
+ * Local Pickup Shipping Method.
  *
- * A simple shipping method allowing free pickup as a shipping method
+ * A simple shipping method allowing free pickup as a shipping method.
  *
  * @class 		WC_Shipping_Local_Pickup
  * @version		2.3.0
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->id                 = 'local_pickup';
@@ -108,7 +108,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	}
 
 	/**
-	 * Get postcodes for this method
+	 * Get postcodes for this method.
 	 * @return array
 	 */
 	public function get_valid_postcodes() {
@@ -124,7 +124,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	}
 
 	/**
-	 * See if a given postcode matches valid postcodes
+	 * See if a given postcode matches valid postcodes.
 	 * @param  string postcode
 	 * @param  string country code
 	 * @return boolean

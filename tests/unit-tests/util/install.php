@@ -3,7 +3,7 @@
 namespace WooCommerce\Tests\Util;
 
 /**
- * Class WC_Tests_Install
+ * Class WC_Tests_Install.
  * @package WooCommerce\Tests\Util
  *
  * @todo determine if this should be in Util or separate namespace
@@ -11,7 +11,7 @@ namespace WooCommerce\Tests\Util;
 class WC_Tests_Install extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test check version
+	 * Test check version.
 	 */
 	public function test_check_version() {
 		update_option( 'woocommerce_version', WC()->version - 1 );
@@ -28,7 +28,7 @@ class WC_Tests_Install extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test - install
+	 * Test - install.
 	 */
 	public function test_install() {
 		// clean existing install first
@@ -43,7 +43,7 @@ class WC_Tests_Install extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test - create pages
+	 * Test - create pages.
 	 */
 	public function test_create_pages() {
 		// Clear options
@@ -80,7 +80,7 @@ class WC_Tests_Install extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test - create roles
+	 * Test - create roles.
 	 */
 	public function test_create_roles() {
 		// Clean existing install first
@@ -96,7 +96,7 @@ class WC_Tests_Install extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test - remove roles
+	 * Test - remove roles.
 	 */
 	public function test_remove_roles() {
 		\WC_Install::remove_roles();
@@ -106,7 +106,7 @@ class WC_Tests_Install extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test - in_plugin_update_message
+	 * Test - in_plugin_update_message.
 	 */
 	public function test_in_plugin_update_message() {
 		ob_start();

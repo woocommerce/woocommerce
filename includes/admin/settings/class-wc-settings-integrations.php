@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_Integrations' ) ) :
 
 /**
- * WC_Settings_Integrations
+ * WC_Settings_Integrations.
  */
 class WC_Settings_Integrations extends WC_Settings_Page {
 
@@ -36,7 +36,7 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections
+	 * Get sections.
 	 *
 	 * @return array
 	 */
@@ -64,7 +64,7 @@ class WC_Settings_Integrations extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
 		global $current_section;

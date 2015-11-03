@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Get all WooCommerce screen ids
+ * Get all WooCommerce screen ids.
  *
  * @return array
  */
@@ -171,7 +171,7 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 }
 
 /**
- * Save order items
+ * Save order items.
  *
  * @since 2.2
  * @param int $order_id Order ID
@@ -378,7 +378,7 @@ function wc_save_order_items( $order_id, $items ) {
 }
 
 /**
- * Add help tips
+ * Add help tips.
  * Display a WooCommerce help tip.
  *
  * @since  2.5.0

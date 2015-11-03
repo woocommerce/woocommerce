@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Invoice' ) ) :
 
 /**
- * Customer Invoice
+ * Customer Invoice.
  *
  * An email sent to the customer via admin.
  *
@@ -23,7 +23,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	public $replace;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 
@@ -140,7 +140,7 @@ class WC_Email_Customer_Invoice extends WC_Email {
 	}
 
 	/**
-	 * Initialise settings form fields
+	 * Initialise settings form fields.
 	 */
 	function init_form_fields() {
 		$this->form_fields = array(

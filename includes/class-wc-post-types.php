@@ -2,7 +2,7 @@
 /**
  * Post Types
  *
- * Registers post types and taxonomies
+ * Registers post types and taxonomies.
  *
  * @class       WC_Post_types
  * @version     2.3.0
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Post_types Class
+ * WC_Post_types Class.
  */
 class WC_Post_types {
 
@@ -488,7 +488,7 @@ class WC_Post_types {
 	}
 
 	/**
-	 * Added product for Jetpack related posts
+	 * Added product for Jetpack related posts.
 	 *
 	 * @param  array $post_types
 	 * @return array

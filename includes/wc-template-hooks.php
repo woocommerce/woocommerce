@@ -2,7 +2,7 @@
 /**
  * WooCommerce Template Hooks
  *
- * Action/filter hooks used for WooCommerce functions/templates
+ * Action/filter hooks used for WooCommerce functions/templates.
  *
  * @author 		WooThemes
  * @category 	Core
@@ -18,7 +18,7 @@ add_filter( 'body_class', 'wc_body_class' );
 add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
 
 /**
- * WP Header
+ * WP Header.
  *
  * @see  wc_products_rss_feed()
  * @see  wc_generator_tag()
@@ -28,7 +28,7 @@ add_action( 'get_the_generator_html', 'wc_generator_tag', 10, 2 );
 add_action( 'get_the_generator_xhtml', 'wc_generator_tag', 10, 2 );
 
 /**
- * Content Wrappers
+ * Content Wrappers.
  *
  * @see woocommerce_output_content_wrapper()
  * @see woocommerce_output_content_wrapper_end()
@@ -37,7 +37,7 @@ add_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapp
 add_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10 );
 
 /**
- * Sale flashes
+ * Sale flashes.
  *
  * @see woocommerce_show_product_loop_sale_flash()
  * @see woocommerce_show_product_sale_flash()
@@ -46,21 +46,21 @@ add_action( 'woocommerce_before_shop_loop_item_title', 'woocommerce_show_product
 add_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
 
 /**
- * Breadcrumbs
+ * Breadcrumbs.
  *
  * @see woocommerce_breadcrumb()
  */
 add_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20, 0 );
 
 /**
- * Sidebar
+ * Sidebar.
  *
  * @see woocommerce_get_sidebar()
  */
 add_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
 
 /**
- * Archive descriptions
+ * Archive descriptions.
  *
  * @see woocommerce_taxonomy_archive_description()
  * @see woocommerce_product_archive_description()
@@ -69,7 +69,7 @@ add_action( 'woocommerce_archive_description', 'woocommerce_taxonomy_archive_des
 add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_description', 10 );
 
 /**
- * Products Loop
+ * Products Loop.
  *
  * @see woocommerce_result_count()
  * @see woocommerce_catalog_ordering()
@@ -79,7 +79,7 @@ add_action( 'woocommerce_before_shop_loop', 'woocommerce_result_count', 20 );
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 );
 
 /**
- * Product Loop Items
+ * Product Loop Items.
  *
  * @see woocommerce_template_loop_product_link_open()
  * @see woocommerce_template_loop_product_link_close()
@@ -104,14 +104,14 @@ add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop
 add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 5 );
 
 /**
- * Subcategories
+ * Subcategories.
  *
  * @see woocommerce_subcategory_thumbnail()
  */
 add_action( 'woocommerce_before_subcategory_title', 'woocommerce_subcategory_thumbnail', 10 );
 
 /**
- * Before Single Products Summary Div
+ * Before Single Products Summary Div.
  *
  * @see woocommerce_show_product_images()
  * @see woocommerce_show_product_thumbnails()
@@ -120,7 +120,7 @@ add_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_produ
 add_action( 'woocommerce_product_thumbnails', 'woocommerce_show_product_thumbnails', 20 );
 
 /**
- * After Single Products Summary Div
+ * After Single Products Summary Div.
  *
  * @see woocommerce_output_product_data_tabs()
  * @see woocommerce_upsell_display()
@@ -131,7 +131,7 @@ add_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_disp
 add_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
 
 /**
- * Product Summary Box
+ * Product Summary Box.
  *
  * @see woocommerce_template_single_title()
  * @see woocommerce_template_single_price()
@@ -147,7 +147,7 @@ add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_m
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_sharing', 50 );
 
 /**
- * Product Add to cart
+ * Product Add to cart.
  *
  * @see woocommerce_template_single_add_to_cart()
  * @see woocommerce_simple_add_to_cart()
@@ -164,20 +164,20 @@ add_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 )
 add_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
 
 /**
- * Pagination after shop loops
+ * Pagination after shop loops.
  *
  * @see woocommerce_pagination()
  */
 add_action( 'woocommerce_after_shop_loop', 'woocommerce_pagination', 10 );
 
 /**
- * Product page tabs
+ * Product page tabs.
  */
 add_filter( 'woocommerce_product_tabs', 'woocommerce_default_product_tabs' );
 add_filter( 'woocommerce_product_tabs', 'woocommerce_sort_product_tabs', 99 );
 
 /**
- * Checkout
+ * Checkout.
  *
  * @see woocommerce_checkout_login_form()
  * @see woocommerce_checkout_coupon_form()
@@ -190,7 +190,7 @@ add_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment',
 
 
 /**
- * Cart
+ * Cart.
  *
  * @see woocommerce_cross_sell_display()
  * @see woocommerce_cart_totals()
@@ -201,7 +201,7 @@ add_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals', 10 );
 add_action( 'woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20 );
 
 /**
- * Footer
+ * Footer.
  *
  * @see  wc_print_js()
  * @see woocommerce_demo_store()
@@ -210,7 +210,7 @@ add_action( 'wp_footer', 'wc_print_js', 25 );
 add_action( 'wp_footer', 'woocommerce_demo_store' );
 
 /**
- * Order details
+ * Order details.
  *
  * @see woocommerce_order_details_table()
  * @see woocommerce_order_details_table()
@@ -220,7 +220,7 @@ add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 add_action( 'woocommerce_order_details_after_order_table', 'woocommerce_order_again_button' );
 
 /**
- * Auth
+ * Auth.
  *
  * @see woocommerce_output_auth_header()
  * @see woocommerce_output_auth_footer()
@@ -229,8 +229,8 @@ add_action( 'woocommerce_auth_page_header', 'woocommerce_output_auth_header', 10
 add_action( 'woocommerce_auth_page_footer', 'woocommerce_output_auth_footer', 10 );
 
 /**
- * Comments
+ * Comments.
  *
- * Disable Jetpack comments
+ * Disable Jetpack comments.
  */
 add_filter( 'jetpack_comment_form_enabled_for_product', '__return_false' );

@@ -2,7 +2,7 @@
 /**
  * WooCommerce Meta Boxes
  *
- * Sets up the write panels used by products and orders (custom post types)
+ * Sets up the write panels used by products and orders (custom post types).
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Meta_Boxes
+ * WC_Admin_Meta_Boxes.
  */
 class WC_Admin_Meta_Boxes {
 
@@ -23,7 +23,7 @@ class WC_Admin_Meta_Boxes {
 	public static $meta_box_errors  = array();
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'remove_meta_boxes' ), 10 );
@@ -32,12 +32,12 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
 
 		/**
-		 * Save Order Meta Boxes
+		 * Save Order Meta Boxes.
 		 *
 		 * In order:
-		 *      Save the order items
-		 *      Save the order totals
-		 *      Save the order downloads
+		 *      Save the order items.
+		 *      Save the order totals.
+		 *      Save the order downloads.
 		 *      Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
 		 *      Save actions - sends out other emails. Last to show latest data.
 		 */
@@ -62,7 +62,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Add an error message
+	 * Add an error message.
 	 * @param string $text
 	 */
 	public static function add_error( $text ) {
@@ -70,7 +70,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Save errors to an option
+	 * Save errors to an option.
 	 */
 	public function save_errors() {
 		update_option( 'woocommerce_meta_box_errors', self::$meta_box_errors );
@@ -98,7 +98,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Add WC Meta boxes
+	 * Add WC Meta boxes.
 	 */
 	public function add_meta_boxes() {
 		// Products
@@ -129,7 +129,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Remove bloat
+	 * Remove bloat.
 	 */
 	public function remove_meta_boxes() {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
@@ -150,7 +150,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Rename core meta boxes
+	 * Rename core meta boxes.
 	 */
 	public function rename_meta_boxes() {
 		global $post;
@@ -164,7 +164,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Check if we're saving, the trigger an action based on the post type
+	 * Check if we're saving, the trigger an action based on the post type.
 	 *
 	 * @param  int $post_id
 	 * @param  object $post

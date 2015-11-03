@@ -16,14 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Breadcrumb {
 
 	/**
-	 * Breadcrumb trail
+	 * Breadcrumb trail.
 	 *
 	 * @var array
 	 */
 	private $crumbs = array();
 
 	/**
-	 * Add a crumb so we don't get lost
+	 * Add a crumb so we don't get lost.
 	 *
 	 * @param string $name
 	 * @param string $link
@@ -36,14 +36,14 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Reset crumbs
+	 * Reset crumbs.
 	 */
 	public function reset() {
 		$this->crumbs = array();
 	}
 
 	/**
-	 * Get the breadcrumb
+	 * Get the breadcrumb.
 	 *
 	 * @return array
 	 */
@@ -52,7 +52,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Generate breadcrumb trail
+	 * Generate breadcrumb trail.
 	 *
 	 * @return array of breadcrumbs
 	 */
@@ -92,7 +92,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Prepend the shop page to shop breadcrumbs
+	 * Prepend the shop page to shop breadcrumbs.
 	 */
 	private function prepend_shop_page() {
 		$permalinks   = get_option( 'woocommerce_permalinks' );
@@ -106,21 +106,21 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * is home trail
+	 * is home trail.
 	 */
 	private function add_crumbs_home() {
 		$this->add_crumb( single_post_title( '', false ) );
 	}
 
 	/**
-	 * 404 trail
+	 * 404 trail.
 	 */
 	private function add_crumbs_404() {
 		$this->add_crumb( __( 'Error 404', 'woocommerce' ) );
 	}
 
 	/**
-	 * attachment trail
+	 * attachment trail.
 	 */
 	private function add_crumbs_attachment() {
 		global $post;
@@ -130,7 +130,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Single post trail
+	 * Single post trail.
 	 *
 	 * @param int    $post_id
 	 * @param string $permalink
@@ -164,7 +164,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Page trail
+	 * Page trail.
 	 */
 	private function add_crumbs_page() {
 		global $post;
@@ -191,7 +191,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Product category trail
+	 * Product category trail.
 	 */
 	private function add_crumbs_product_category() {
 		$current_term = $GLOBALS['wp_query']->get_queried_object();
@@ -202,7 +202,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Product tag trail
+	 * Product tag trail.
 	 */
 	private function add_crumbs_product_tag() {
 		$current_term = $GLOBALS['wp_query']->get_queried_object();
@@ -212,7 +212,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Shop breadcrumb
+	 * Shop breadcrumb.
 	 */
 	private function add_crumbs_shop() {
 		if ( get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) {
@@ -230,7 +230,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Post type archive trail
+	 * Post type archive trail.
 	 */
 	private function add_crumbs_post_type_archive() {
 		$post_type = get_post_type_object( get_post_type() );
@@ -241,7 +241,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Category trail
+	 * Category trail.
 	 */
 	private function add_crumbs_category() {
 		$this_category = get_category( $GLOBALS['wp_query']->get_queried_object() );
@@ -255,7 +255,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Tag trail
+	 * Tag trail.
 	 */
 	private function add_crumbs_tag() {
 		$queried_object = $GLOBALS['wp_query']->get_queried_object();
@@ -263,7 +263,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Add crumbs for date based archives
+	 * Add crumbs for date based archives.
 	 */
 	private function add_crumbs_date() {
 		if ( is_year() || is_month() || is_day() ) {
@@ -278,7 +278,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Add crumbs for date based archives
+	 * Add crumbs for date based archives.
 	 */
 	private function add_crumbs_tax() {
 		$this_term = $GLOBALS['wp_query']->get_queried_object();
@@ -295,7 +295,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Add a breadcrumb for author archives
+	 * Add a breadcrumb for author archives.
 	 */
 	private function add_crumbs_author() {
 		global $author;
@@ -305,7 +305,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Add crumbs for a term
+	 * Add crumbs for a term.
 	 * @param string $taxonomy
 	 */
 	private function term_ancestors( $term_id, $taxonomy ) {
@@ -322,7 +322,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Endpoints
+	 * Endpoints.
 	 */
 	private function endpoint_trail() {
 		// Is an endpoint showing?
@@ -332,7 +332,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Add a breadcrumb for search results
+	 * Add a breadcrumb for search results.
 	 */
 	private function search_trail() {
 		if ( is_search() ) {
@@ -341,7 +341,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Add a breadcrumb for pagination
+	 * Add a breadcrumb for pagination.
 	 */
 	private function paged_trail() {
 		if ( get_query_var( 'paged' ) ) {

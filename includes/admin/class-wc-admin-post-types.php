@@ -15,14 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 
 /**
- * WC_Admin_Post_Types Class
+ * WC_Admin_Post_Types Class.
  *
  * Handles the edit posts views and some functionality on the edit post screen for WC post types.
  */
 class WC_Admin_Post_Types {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
@@ -202,7 +202,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Define custom columns for products
+	 * Define custom columns for products.
 	 * @param  array $existing_columns
 	 * @return array
 	 */
@@ -238,7 +238,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Define custom columns for coupons
+	 * Define custom columns for coupons.
 	 * @param  array $existing_columns
 	 * @return array
 	 */
@@ -257,7 +257,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Define custom columns for orders
+	 * Define custom columns for orders.
 	 * @param  array $existing_columns
 	 * @return array
 	 */
@@ -279,7 +279,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Ouput custom columns for products
+	 * Ouput custom columns for products.
 	 *
 	 * @param string $column
 	 */
@@ -317,7 +317,7 @@ class WC_Admin_Post_Types {
 
 				get_inline_data( $post );
 
-				/* Custom inline data for woocommerce */
+				/* Custom inline data for woocommerce. */
 				echo '
 					<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
 						<div class="menu_order">' . $post->menu_order . '</div>
@@ -414,8 +414,8 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Render product row actions for old version of WordPress
-	 * Since WordPress 4.3 we don't have to build the row actions
+	 * Render product row actions for old version of WordPress.
+	 * Since WordPress 4.3 we don't have to build the row actions.
 	 *
 	 * @param WP_Post $post
 	 * @param string $title
@@ -475,7 +475,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Output custom columns for coupons
+	 * Output custom columns for coupons.
 	 *
 	 * @param string $column
 	 */
@@ -547,8 +547,8 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Render shop_coupon row actions for old version of WordPress
-	 * Since WordPress 4.3 we don't have to build the row actions
+	 * Render shop_coupon row actions for old version of WordPress.
+	 * Since WordPress 4.3 we don't have to build the row actions.
 	 *
 	 * @param WP_Post $post
 	 * @param string $title
@@ -598,7 +598,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Output custom columns for coupons
+	 * Output custom columns for coupons.
 	 * @param  string $column
 	 */
 	public function render_shop_order_columns( $column ) {
@@ -808,7 +808,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Make columns sortable - https://gist.github.com/906872
+	 * Make columns sortable - https://gist.github.com/906872.
 	 *
 	 * @param array $columns
 	 * @return array
@@ -824,7 +824,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Make columns sortable - https://gist.github.com/906872
+	 * Make columns sortable - https://gist.github.com/906872.
 	 *
 	 * @param array $columns
 	 * @return array
@@ -834,7 +834,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Make columns sortable - https://gist.github.com/906872
+	 * Make columns sortable - https://gist.github.com/906872.
 	 *
 	 * @param array $columns
 	 * @return array
@@ -866,8 +866,8 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Set list table primary column for products and orders
-	 * Support for WordPress 4.3
+	 * Set list table primary column for products and orders.
+	 * Support for WordPress 4.3.
 	 *
 	 * @param  string $default
 	 * @param  string $screen_id
@@ -892,7 +892,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Set row actions for products and orders
+	 * Set row actions for products and orders.
 	 *
 	 * @param  array $actions
 	 * @param  WP_Post $post
@@ -918,9 +918,9 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Product sorting link
+	 * Product sorting link.
 	 *
-	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/)
+	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/).
 	 *
 	 * @param array $views
 	 * @return array
@@ -942,7 +942,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Custom bulk edit - form
+	 * Custom bulk edit - form.
 	 *
 	 * @param mixed $column_name
 	 * @param mixed $post_type
@@ -961,7 +961,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Custom quick edit - form
+	 * Custom quick edit - form.
 	 *
 	 * @param mixed $column_name
 	 * @param mixed $post_type
@@ -980,7 +980,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Quick and bulk edit saving
+	 * Quick and bulk edit saving.
 	 *
 	 * @param int $post_id
 	 * @param WP_Post $post
@@ -1035,7 +1035,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Quick edit
+	 * Quick edit.
 	 *
 	 * @param integer $post_id
 	 * @param WC_Product $product
@@ -1181,7 +1181,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Bulk edit
+	 * Bulk edit.
 	 * @param integer $post_id
 	 * @param WC_Product $product
 	 */
@@ -1397,9 +1397,9 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Add extra bulk action options to mark orders as complete or processing
+	 * Add extra bulk action options to mark orders as complete or processing.
 	 *
-	 * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031
+	 * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031.
 	 */
 	public function bulk_admin_footer() {
 		global $post_type;
@@ -1423,7 +1423,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Process the new bulk actions for changing order status
+	 * Process the new bulk actions for changing order status.
 	 */
 	public function bulk_action() {
 		$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
@@ -1467,7 +1467,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Show confirmation message that order status changed for number of orders
+	 * Show confirmation message that order status changed for number of orders.
 	 */
 	public function bulk_admin_notices() {
 		global $post_type, $pagenow;
@@ -1605,7 +1605,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Filters for post types
+	 * Filters for post types.
 	 */
 	public function restrict_manage_posts() {
 		global $typenow;
@@ -1620,7 +1620,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Show a category filter box
+	 * Show a category filter box.
 	 */
 	public function product_filters() {
 		global $wp_query;
@@ -1728,7 +1728,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Filters and sorting handler
+	 * Filters and sorting handler.
 	 *
 	 * @param  array $vars
 	 * @return array
@@ -1807,7 +1807,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Filter the products in admin based on options
+	 * Filter the products in admin based on options.
 	 *
 	 * @param mixed $query
 	 */
@@ -1894,7 +1894,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Removes variations etc belonging to a deleted post, and clears transients
+	 * Removes variations etc belonging to a deleted post, and clears transients.
 	 *
 	 * @param mixed $id ID of post being deleted
 	 */
@@ -2022,7 +2022,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Remove item meta on permanent deletion
+	 * Remove item meta on permanent deletion.
 	 */
 	public function delete_order_items( $postid ) {
 		global $wpdb;
@@ -2042,7 +2042,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Remove downloadable permissions on permanent order deletion
+	 * Remove downloadable permissions on permanent order deletion.
 	 */
 	public function delete_order_downloadable_permissions( $postid ) {
 		global $wpdb;
@@ -2213,8 +2213,8 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Grant downloadable file access to any newly added files on any existing
-	 * orders for this product that have previously been granted downloadable file access
+	 * Grant downloadable file access to any newly added files on any existing.
+	 * orders for this product that have previously been granted downloadable file access.
 	 *
 	 * @param int $product_id product identifier
 	 * @param int $variation_id optional product variation identifier
@@ -2270,7 +2270,7 @@ class WC_Admin_Post_Types {
 
 
 	/**
-	 * Disable DFW feature pointer
+	 * Disable DFW feature pointer.
 	 */
 	public function disable_dfw_feature_pointer() {
 		$screen = get_current_screen();

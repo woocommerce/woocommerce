@@ -1638,7 +1638,6 @@ p.demo_store {
 				border-collapse: separate;
 				margin: 0 0 6px;
 				padding: 0;
-				border-left: 0;
 
 				tr:first-child {
 					th,
@@ -1647,21 +1646,11 @@ p.demo_store {
 					}
 				}
 
-				th {
-					padding: 6px 12px 0 0;
-					width: 25%;
-				}
-
-				td {
-					padding: 6px 0;
-				}
-
 				td,
 				th {
 					vertical-align: top;
 					border-left: 0;
 					border-right: 0;
-					padding: 6px 0;
 					line-height: 2em;
 				}
 

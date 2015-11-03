@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Variable Product Class
+ * Variable Product Class.
  *
  * The WooCommerce product class handles individual product data.
  *
@@ -27,7 +27,7 @@ class WC_Product_Variable extends WC_Product {
 	private $prices_array = array();
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
 	 * @param mixed $product
 	 */
@@ -37,7 +37,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @access public
 	 * @return string
@@ -89,7 +89,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Performed after a stock level change at product level
+	 * Performed after a stock level change at product level.
 	 */
 	public function check_stock_status() {
 		$set_child_stock_status = '';
@@ -473,7 +473,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Check if variable product has default attributes set
+	 * Check if variable product has default attributes set.
 	 *
 	 * @access public
 	 * @return bool
@@ -498,7 +498,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Match a variation to a given set of attributes using a WP_Query
+	 * Match a variation to a given set of attributes using a WP_Query.
 	 * @since  2.4.0
 	 * @param  $match_attributes
 	 * @return int Variation ID which matched, 0 is no match was found
@@ -542,7 +542,7 @@ class WC_Product_Variable extends WC_Product {
 
 		/**
 		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes
+		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes.
 		 */
 	 	} elseif ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
 			return $match_attributes === array_map( 'sanitize_title', $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
@@ -660,7 +660,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sync variable product stock status with children
+	 * Sync variable product stock status with children.
 	 * @param  int $product_id
 	 */
 	public static function sync_stock_status( $product_id ) {
@@ -687,7 +687,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sync the variable product's attributes with the variations
+	 * Sync the variable product's attributes with the variations.
 	 */
 	public static function sync_attributes( $product_id, $children = false ) {
 		if ( ! $children ) {
@@ -734,7 +734,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sync the variable product with it's children
+	 * Sync the variable product with it's children.
 	 */
 	public static function sync( $product_id ) {
 		global $wpdb;

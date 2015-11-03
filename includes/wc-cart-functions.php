@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Prevent password protected products being added to the cart
+ * Prevent password protected products being added to the cart.
  *
  * @param  bool $passed
  * @param  int $product_id
@@ -31,7 +31,7 @@ function wc_protected_product_add_to_cart( $passed, $product_id ) {
 add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_cart', 10, 2 );
 
 /**
- * Clears the cart session when called
+ * Clears the cart session when called.
  */
 function wc_empty_cart() {
 	if ( ! isset( WC()->cart ) || WC()->cart == '' ) {
@@ -41,7 +41,7 @@ function wc_empty_cart() {
 }
 
 /**
- * Load the persistent cart
+ * Load the persistent cart.
  *
  * @param string $user_login
  * @param WP_User $user
@@ -145,7 +145,7 @@ function wc_clear_cart_after_payment() {
 add_action( 'get_header', 'wc_clear_cart_after_payment' );
 
 /**
- * Get the subtotal
+ * Get the subtotal.
  *
  * @access public
  * @return string
@@ -155,7 +155,7 @@ function wc_cart_totals_subtotal_html() {
 }
 
 /**
- * Get shipping methods
+ * Get shipping methods.
  *
  * @access public
  */
@@ -176,7 +176,7 @@ function wc_cart_totals_shipping_html() {
 }
 
 /**
- * Get taxes total
+ * Get taxes total.
  *
  * @access public
  */
@@ -185,7 +185,7 @@ function wc_cart_totals_taxes_total_html() {
 }
 
 /**
- * Get a coupon label
+ * Get a coupon label.
  *
  * @access public
  * @param string $coupon
@@ -198,7 +198,7 @@ function wc_cart_totals_coupon_label( $coupon ) {
 }
 
 /**
- * Get a coupon value
+ * Get a coupon value.
  *
  * @access public
  * @param string $coupon
@@ -230,7 +230,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 }
 
 /**
- * Get order total html including inc tax if needed
+ * Get order total html including inc tax if needed.
  *
  * @access public
  */
@@ -257,7 +257,7 @@ function wc_cart_totals_order_total_html() {
 }
 
 /**
- * Get the fee value
+ * Get the fee value.
  *
  * @param object $fee
  */
@@ -268,7 +268,7 @@ function wc_cart_totals_fee_html( $fee ) {
 }
 
 /**
- * Get a shipping methods full label including price
+ * Get a shipping methods full label including price.
  * @param  WC_Shipping_Rate $method
  * @return string
  */
@@ -295,7 +295,7 @@ function wc_cart_totals_shipping_method_label( $method ) {
 }
 
 /**
- * Round discount
+ * Round discount.
  *
  * @param  float $value
  * @param  int $precision
@@ -310,7 +310,7 @@ function wc_cart_round_discount( $value, $precision ) {
 }
 
 /**
- * Gets the url to the cart page
+ * Gets the url to the cart page.
  *
  * @since  2.5.0
  *
@@ -321,7 +321,7 @@ function wc_get_cart_url() {
 }
 
 /**
- * Gets the url to the checkout page
+ * Gets the url to the checkout page.
  *
  * @since  2.5.0
  *

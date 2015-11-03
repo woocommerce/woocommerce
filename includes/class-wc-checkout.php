@@ -46,7 +46,7 @@ class WC_Checkout {
 	public $enable_guest_checkout;
 
 	/**
-	 * Main WC_Checkout Instance
+	 * Main WC_Checkout Instance.
 	 *
 	 * Ensures only one instance of WC_Checkout is loaded or can be loaded.
 	 *
@@ -128,7 +128,7 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Checkout process
+	 * Checkout process.
 	 */
 	public function check_cart_items() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
@@ -136,14 +136,14 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Output the billing information form
+	 * Output the billing information form.
 	 */
 	public function checkout_form_billing() {
 		wc_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
 	}
 
 	/**
-	 * Output the shipping information form
+	 * Output the shipping information form.
 	 */
 	public function checkout_form_shipping() {
 		wc_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
@@ -153,13 +153,13 @@ class WC_Checkout {
 	 * Create an order.
 	 *
 	 * Error codes:
-	 * 		400 - Cannot insert order into the database
-	 * 		401 - Cannote update existing order
-	 * 		402 - Cannot create line item
-	 * 		403 - Cannot create fee item
-	 * 		404 - Cannot create shipping item
-	 * 		405 - Cannot create tax item
-	 * 		406 - Cannot create coupon item
+	 * 		400 - Cannot insert order into the database.
+	 * 		401 - Cannote update existing order.
+	 * 		402 - Cannot create line item.
+	 * 		403 - Cannot create fee item.
+	 * 		404 - Cannot create shipping item.
+	 * 		405 - Cannot create tax item.
+	 * 		406 - Cannot create coupon item.
 	 *
 	 * @access public
 	 * @throws Exception
@@ -336,7 +336,7 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Process the checkout after the confirm order button is pressed
+	 * Process the checkout after the confirm order button is pressed.
 	 */
 	public function process_checkout() {
 		try {
@@ -734,7 +734,7 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Gets the value either from the posted data, or from the users meta data
+	 * Gets the value either from the posted data, or from the users meta data.
 	 *
 	 * @access public
 	 * @param string $input

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Tag Cloud Widget
+ * Tag Cloud Widget.
  *
  * @author   WooThemes
  * @category Widgets
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_product_tag_cloud';
@@ -62,7 +62,7 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 	}
 
 	/**
-	 * Return the taxonomy being displayed
+	 * Return the taxonomy being displayed.
 	 *
 	 * @param  object $instance
 	 * @return string

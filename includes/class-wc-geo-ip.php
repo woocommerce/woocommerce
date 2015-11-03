@@ -1,6 +1,6 @@
 <?php
 /**
- * Geo IP class.
+ * Geo IP class
  *
  * This class is a fork of GeoIP class from MaxMind LLC.
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Geolocation Class
+ * WC_Geolocation Class.
  */
 class WC_Geo_IP {
 
@@ -1104,21 +1104,39 @@ class WC_Geo_IP {
 		'--'
 	);
 
+	/** @var WC_Logger Logger instance */
+	public static $log = false;
+
 	/**
-	 * Open geoip file
+	 * Logging method.
 	 *
-	 * @param  string $filename
-	 * @param  int $flags
+	 * @param string $message
+	 */
+	public static function log( $message ) {
+		if ( empty( self::$log ) ) {
+			self::$log = new WC_Logger();
+		}
+		self::$log->add( 'geoip', $message );
+	}
+
+	/**
+	 * Open geoip file.
+	 *
+	 * @param string $filename
+	 * @param int $flags
 	 */
 	public function geoip_open( $filename, $flags ) {
 		$this->flags = $flags;
 		if ( $this->flags & self::GEOIP_SHARED_MEMORY ) {
 			$this->shmid = @shmop_open( self::GEOIP_SHM_KEY, "a", 0, 0 );
 		} else {
-			$this->filehandle = fopen( $filename, 'rb' ) or trigger_error( "GeoIP API: Can not open $filename\n", E_USER_ERROR );
-			if ( $this->flags & self::GEOIP_MEMORY_CACHE ) {
-				$s_array = fstat( $this->filehandle );
-				$this->memory_buffer = fread( $this->filehandle, $s_array['size'] );
+			if ( $this->filehandle = fopen( $filename, 'rb' ) ) {
+				if ( $this->flags & self::GEOIP_MEMORY_CACHE ) {
+					$s_array = fstat( $this->filehandle );
+					$this->memory_buffer = fread( $this->filehandle, $s_array['size'] );
+				}
+			} else {
+				$this->log( 'GeoIP API: Can not open ' . $filename );
 			}
 		}
 
@@ -1126,7 +1144,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Setup segments
+	 * Setup segments.
 	 *
 	 * @return WC_Geo_IP instance
 	 */
@@ -1281,7 +1299,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Close geoip file
+	 * Close geoip file.
 	 *
 	 * @return bool
 	 */
@@ -1294,7 +1312,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Common get record
+	 * Common get record.
 	 *
 	 * @param  string $seek_country
 	 * @return WC_Geo_IP_Record instance
@@ -1409,7 +1427,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Get record
+	 * Get record.
 	 *
 	 * @param  int $ipnum
 	 * @return WC_Geo_IP_Record instance
@@ -1424,7 +1442,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Seek country IPv6
+	 * Seek country IPv6.
 	 *
 	 * @param  int $ipnum [description]
 	 * @return bool|int
@@ -1450,8 +1468,10 @@ class WC_Geo_IP {
 					2 * $this->record_length
 				);
 			} else {
-				fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) == 0
-				or trigger_error( 'GeoIP API: fseek failed', E_USER_ERROR );
+				if ( 0 == fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
+					$this->log( 'GeoIP API: fseek failed' );
+					break;
+				}
 
 				$buf = fread( $this->filehandle, 2 * $this->record_length );
 			}
@@ -1478,13 +1498,13 @@ class WC_Geo_IP {
 			}
 		}
 
-		trigger_error( 'GeoIP API: Error traversing database - perhaps it is corrupt?', E_USER_ERROR );
+		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?' );
 
 		return false;
 	}
 
 	/**
-	 * Seek country
+	 * Seek country.
 	 *
 	 * @param  int $ipnum
 	 * @return bool|int
@@ -1505,8 +1525,10 @@ class WC_Geo_IP {
 					2 * $this->record_length
 				);
 			} else {
-				fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) == 0
-				or trigger_error( 'GeoIP API: fseek failed', E_USER_ERROR );
+				if ( 0 == fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
+					$this->log( 'GeoIP API: fseek failed' );
+					break;
+				}
 
 				$buf = fread( $this->filehandle, 2 * $this->record_length );
 			}
@@ -1532,13 +1554,13 @@ class WC_Geo_IP {
 			}
 		}
 
-		trigger_error( 'GeoIP API: Error traversing database - perhaps it is corrupt?', E_USER_ERROR );
+		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?' );
 
 		return false;
 	}
 
 	/**
-	 * Record by addr
+	 * Record by addr.
 	 *
 	 * @param  string $addr
 	 * @return int
@@ -1553,7 +1575,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country ID by addr IPv6
+	 * Country ID by addr IPv6.
 	 *
 	 * @param  string $addr
 	 * @return int
@@ -1564,7 +1586,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country ID by addr
+	 * Country ID by addr.
 	 *
 	 * @param  string $addr
 	 * @return int
@@ -1575,7 +1597,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country code by addr IPv6
+	 * Country code by addr IPv6.
 	 *
 	 * @param  string $addr
 	 * @return bool|int
@@ -1590,7 +1612,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country code by addr
+	 * Country code by addr.
 	 *
 	 * @param  string $addr
 	 * @return bool|int
@@ -1603,7 +1625,7 @@ class WC_Geo_IP {
 			}
 		} else {
 			$country_id = $this->geoip_country_id_by_addr( $addr );
-			if ( $country_id !== false ) {
+			if ( $country_id !== false && isset( $this->GEOIP_COUNTRY_CODES[ $country_id ] ) ) {
 				return $this->GEOIP_COUNTRY_CODES[ $country_id ];
 			}
 		}
@@ -1612,7 +1634,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Encode string
+	 * Encode string.
 	 *
 	 * @param  string $string
 	 * @param  int $start
@@ -1641,7 +1663,7 @@ class WC_Geo_IP {
 }
 
 /**
- * Geo IP Record class
+ * Geo IP Record class.
  */
 class WC_Geo_IP_Record {
 	public $country_code;

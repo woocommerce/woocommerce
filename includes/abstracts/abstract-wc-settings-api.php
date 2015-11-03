@@ -35,7 +35,7 @@ abstract class WC_Settings_API {
 	public $method_description = '';
 
 	/**
-	 * 'yes' if the method is enabled
+	 * 'yes' if the method is enabled.
 	 * @var string
 	 */
 	public $enabled;
@@ -65,7 +65,7 @@ abstract class WC_Settings_API {
 	public $sanitized_fields = array();
 
 	/**
-	 * Admin Options
+	 * Admin Options.
 	 *
 	 * Setup the gateway settings screen.
 	 * Override this in your gateway.
@@ -84,9 +84,9 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Initialise Settings Form Fields
+	 * Initialise Settings Form Fields.
 	 *
-	 * Add an array of fields to be displayed
+	 * Add an array of fields to be displayed.
 	 * on the gateway's settings screen.
 	 *
 	 * @since  1.0.0
@@ -95,7 +95,7 @@ abstract class WC_Settings_API {
 	public function init_form_fields() {}
 
 	/**
-	 * Get the form fields after they are initialized
+	 * Get the form fields after they are initialized.
 	 * @return array of options
 	 */
 	public function get_form_fields() {
@@ -103,8 +103,8 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Admin Panel Options Processing
-	 * - Saves the options to the DB
+	 * Admin Panel Options Processing.
+	 * - Saves the options to the DB.
 	 *
 	 * @since 1.0.0
 	 * @return bool
@@ -131,10 +131,10 @@ abstract class WC_Settings_API {
 	public function display_errors() {}
 
 	/**
-	 * Initialise Gateway Settings
+	 * Initialise Gateway Settings.
 	 *
-	 * Store all settings in a single database entry
-	 * and make sure the $settings array is either the default
+	 * Store all settings in a single database entry.
+	 * and make sure the $settings array is either the default.
 	 * or the settings stored in the database.
 	 *
 	 * @since 1.0.0
@@ -246,7 +246,7 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Get HTML for tooltips
+	 * Get HTML for tooltips.
 	 *
 	 * @param  array $data
 	 * @return string
@@ -264,7 +264,7 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Get HTML for descriptions
+	 * Get HTML for descriptions.
 	 *
 	 * @param  array $data
 	 * @return string
@@ -285,7 +285,7 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Get custom attributes
+	 * Get custom attributes.
 	 *
 	 * @param  array $data
 	 * @return string

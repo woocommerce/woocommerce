@@ -1,6 +1,6 @@
 <?php
 /**
- * Installation related functions and actions.
+ * Installation related functions and actions
  *
  * @author   WooThemes
  * @category Admin
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Install Class
+ * WC_Install Class.
  */
 class WC_Install {
 
@@ -74,7 +74,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Install WC
+	 * Install WC.
 	 */
 	public static function install() {
 		global $wpdb;
@@ -134,8 +134,8 @@ class WC_Install {
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		/*
-		 * Deletes all expired transients. The multi-table delete syntax is used
-		 * to delete the transient record from table a, and the corresponding
+		 * Deletes all expired transients. The multi-table delete syntax is used.
+		 * to delete the transient record from table a, and the corresponding.
 		 * transient_timeout record from table b.
 		 *
 		 * Based on code inside core's upgrade_network() function.
@@ -152,7 +152,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Update WC version to current
+	 * Update WC version to current.
 	 */
 	private static function update_wc_version() {
 		delete_option( 'woocommerce_version' );
@@ -160,7 +160,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Update DB version to current
+	 * Update DB version to current.
 	 */
 	private static function update_db_version( $version = null ) {
 		delete_option( 'woocommerce_db_version' );
@@ -168,7 +168,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Handle updates
+	 * Handle updates.
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
@@ -184,7 +184,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Add more cron schedules
+	 * Add more cron schedules.
 	 * @param  array $schedules
 	 * @return array
 	 */
@@ -197,7 +197,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Create cron jobs (clear them first)
+	 * Create cron jobs (clear them first).
 	 */
 	private static function create_cron_jobs() {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
@@ -256,9 +256,9 @@ class WC_Install {
 	}
 
 	/**
-	 * Default options
+	 * Default options.
 	 *
-	 * Sets up the default options used on the settings page
+	 * Sets up the default options used on the settings page.
 	 */
 	private static function create_options() {
 		// Include settings so that we can run through defaults
@@ -326,7 +326,7 @@ class WC_Install {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 		/**
-		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates
+		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates.
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
@@ -344,7 +344,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Get Table schema
+	 * Get Table schema.
 	 * @return string
 	 */
 	private static function get_schema() {
@@ -467,7 +467,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	}
 
 	/**
-	 * Create roles and capabilities
+	 * Create roles and capabilities.
 	 */
 	public static function create_roles() {
 		global $wp_roles;
@@ -540,7 +540,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	}
 
 	/**
-	 * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset
+	 * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset.
 	 *
 	 * @return array
 	 */
@@ -611,7 +611,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	}
 
 	/**
-	 * Create files/directories
+	 * Create files/directories.
 	 */
 	private static function create_files() {
 		// Install files and folders for uploading files and prevent hotlinking
@@ -673,7 +673,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	}
 
 	/**
-	 * Parse update notice from readme file
+	 * Parse update notice from readme file.
 	 * @param  string $content
 	 * @return string
 	 */

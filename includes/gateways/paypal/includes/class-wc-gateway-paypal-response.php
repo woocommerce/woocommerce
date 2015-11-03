@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Handles refunds
+ * Handles refunds.
  */
 abstract class WC_Gateway_Paypal_Response {
 
@@ -13,7 +13,7 @@ abstract class WC_Gateway_Paypal_Response {
 	protected $sandbox = false;
 
 	/**
-	 * Get the order from the PayPal 'Custom' variable
+	 * Get the order from the PayPal 'Custom' variable.
 	 *
 	 * @param  string $raw_custom JSON Data passed back by PayPal
 	 * @return bool|WC_Order object
@@ -50,7 +50,7 @@ abstract class WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Complete order, add transaction ID and note
+	 * Complete order, add transaction ID and note.
 	 * @param  WC_Order $order
 	 * @param  string $txn_id
 	 * @param  string $note
@@ -61,7 +61,7 @@ abstract class WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Hold order and add note
+	 * Hold order and add note.
 	 * @param  WC_Order $order
 	 * @param  string $reason
 	 */

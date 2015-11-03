@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class WC_Helper_Product
+ * Class WC_Helper_Product.
  *
- * This helper class should ONLY be used for unit tests!
+ * This helper class should ONLY be used for unit tests!.
  */
 class WC_Helper_Coupon {
 
 	/**
-	 * Create a dummy coupon
+	 * Create a dummy coupon.
 	 *
 	 * @return WC_Coupon
 	 */
@@ -48,7 +48,7 @@ class WC_Helper_Coupon {
 	}
 
 	/**
-	 * Delete a coupon
+	 * Delete a coupon.
 	 *
 	 * @param $coupon_id
 	 *
