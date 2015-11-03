@@ -2071,6 +2071,10 @@ table.wc_shipping {
 	}
 	.wc-email-settings-table-name {
 		font-weight: 700;
+		span {
+			font-weight: normal;
+			color: #999;
+		}
 	}
 	.wc-email-settings-table-status {
 		text-align: center;

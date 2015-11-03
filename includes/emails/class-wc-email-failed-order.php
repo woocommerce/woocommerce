@@ -25,7 +25,7 @@ class WC_Email_Failed_Order extends WC_Email {
 	public function __construct() {
 		$this->id               = 'failed_order';
 		$this->title            = __( 'Failed order', 'woocommerce' );
-		$this->description      = __( 'Failed order emails are sent to the recipient(s) below when orders have been marked failed (if they were previously processing or on-hold).', 'woocommerce' );
+		$this->description      = __( 'Failed order emails are sent to chosen recipient(s) when orders have been marked failed (if they were previously processing or on-hold).', 'woocommerce' );
 		$this->heading          = __( 'Failed order', 'woocommerce' );
 		$this->subject          = __( '[{site_title}] Failed order ({order_number})', 'woocommerce' );
 		$this->template_html    = 'emails/admin-failed-order.php';
