@@ -53,7 +53,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	public function get_settings() {
 		$settings = apply_filters( 'woocommerce_email_settings', array(
 
-			array( 'title' => __( 'Email Notifications', 'woocommerce' ),  'desc' => __( 'Email notifications sent from WooCommerce are listed below. Click on an email name to configure it.', 'woocommerce' ), 'type' => 'title', 'id' => 'email_notification_settings' ),
+			array( 'title' => __( 'Email Notifications', 'woocommerce' ),  'desc' => __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.', 'woocommerce' ), 'type' => 'title', 'id' => 'email_notification_settings' ),
 
 			array( 'type' => 'email_notification' ),
 
