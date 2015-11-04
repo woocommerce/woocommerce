@@ -50,6 +50,7 @@ class WC_AJAX {
 			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
 				@ini_set( 'display_errors', 0 );
 			}
+			$GLOBALS['wpdb']->hide_errors();
 			// Send headers like admin-ajax.php
 			send_origin_headers();
 			@header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
