@@ -2620,7 +2620,8 @@ img.help_tip {
 
 			&.advanced_options {
 				a:before {
-					content: "\e01c";
+					content: "\f111";
+					font-family: 'Dashicons';
 				}
 			}
 
