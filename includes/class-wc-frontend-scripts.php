@@ -212,6 +212,7 @@ class WC_Frontend_Scripts {
 					'is_cart'         => is_cart() ? '1' : '0',
 					'is_account_page' => is_account_page() ? '1' : '0',
 					'is_checkout'     => is_checkout() ? '1' : '0',
+					'is_customize'    => is_customize_preview() ? '1' : '0',
 					'hash'            => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
 				);
 			break;

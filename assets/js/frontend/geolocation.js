@@ -40,7 +40,12 @@ jQuery( function( $ ) {
 		}
 	};
 
-	if ( '1' !== wc_geolocation_params.is_checkout && '1' !== wc_geolocation_params.is_cart && '1' !== wc_geolocation_params.is_account_page ) {
+	if (
+		'1' !== wc_geolocation_params.is_checkout &&
+		'1' !== wc_geolocation_params.is_cart &&
+		'1' !== wc_geolocation_params.is_account_page &&
+		'1' !== wc_geolocation_params.is_customize
+	) {
 		$.ajax( $geolocate_customer );
 
 		// Support form elements
