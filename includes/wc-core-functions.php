@@ -844,3 +844,69 @@ function wc_rand_hash() {
 function wc_api_hash( $data ) {
 	return hash_hmac( 'sha256', $data, 'wc-api' );
 }
+
+/**
+ * Find all possible combinations of values from the input array and return in a logical order.
+ * @since 2.5.0
+ * @param array $input
+ * @return array
+ */
+function wc_array_cartesian( $input ) {
+	$input   = array_filter( $input );
+	$results = array();
+	$indexes = array();
+	$index   = 0;
+
+	// Generate indexes from keys and values so we have a logical sort order
+	foreach ( $input as $key => $values ) {
+		foreach ( $values as $value ) {
+			$indexes[ $key ][ $value ] = $index ++;
+		}
+	}
+
+	// Loop over the 2D array of indexes and generate all combinations
+	foreach ( $indexes as $key => $values ) {
+		// When result is empty, fill with the values of the first looped array
+		if ( empty( $results ) ) {
+			foreach ( $values as $value ) {
+				$results[] = array( $key => $value );
+			}
+
+		// Second and subsequent input sub-array merging.
+		} else {
+			foreach ( $results as $result_key => $result ) {
+				foreach ( $values as $value ) {
+					// If the key is not set, we can set it
+					if ( ! isset( $results[ $result_key ][ $key ] ) ) {
+						$results[ $result_key ][ $key ] = $value;
+					// If the key is set, we can add a new combination to the results array
+					} else {
+						$new_combination         = $results[ $result_key ];
+						$new_combination[ $key ] = $value;
+						$results[]               = $new_combination;
+					}
+				}
+			}
+		}
+	}
+
+	// Sort the indexes
+	arsort( $results );
+
+	// Convert indexes back to values
+	foreach ( $results as $result_key => $result ) {
+		$converted_values = array();
+
+		// Sort the values
+		arsort( $results[ $result_key ] );
+
+		// Convert the values
+		foreach ( $results[ $result_key ] as $key => $value ) {
+			$converted_values[ $key ] = array_search( $value, $indexes[ $key ] );
+		}
+		
+		$results[ $result_key ] = $converted_values;
+	}
+
+	return $results;
+}
