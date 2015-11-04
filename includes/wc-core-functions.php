@@ -904,9 +904,44 @@ function wc_array_cartesian( $input ) {
 		foreach ( $results[ $result_key ] as $key => $value ) {
 			$converted_values[ $key ] = array_search( $value, $indexes[ $key ] );
 		}
-		
+
 		$results[ $result_key ] = $converted_values;
 	}
 
 	return $results;
+}
+
+/**
+ * Run a MySQL transaction query, if supported.
+ * @param string $type start (default), commit, rollback
+ * @since 2.5.0
+ */
+function wc_transaction_query( $type = 'start' ) {
+	global $wpdb;
+
+	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
+		// Try to set isolation level to support dirty reads - if this is unsupported, do not use transactions
+		$wpdb->hide_errors();
+		$result = $wpdb->query( 'SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;' );
+
+		if ( false === $result ) {
+			define( 'WC_USE_TRANSACTIONS', false );
+		} else {
+			define( 'WC_USE_TRANSACTIONS', true );
+		}
+	}
+
+	if ( WC_USE_TRANSACTIONS ) {
+		switch ( $type ) {
+			case 'commit' :
+				$wpdb->query( 'COMMIT' );
+				break;
+			case 'rollback' :
+				$wpdb->query( 'ROLLBACK' );
+				break;
+			default :
+				$wpdb->query( 'START TRANSACTION' );
+			break;
+		}
+	}
 }

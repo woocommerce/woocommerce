@@ -84,7 +84,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 	public function create( $__, $assoc_args ) {
 		global $wpdb;
 
-		$wpdb->query( 'START TRANSACTION' );
+		wc_transaction_query( 'start' );
+
 		try {
 			$porcelain = isset( $assoc_args['porcelain'] );
 			unset( $assoc_args['porcelain'] );
@@ -175,7 +176,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 			do_action( 'woocommerce_cli_create_order', $order->id, $data );
 
-			$wpdb->query( 'COMMIT' );
+			wc_transaction_query( 'commit' );
 
 			if ( $porcelain ) {
 				WP_CLI::line( $order->id );
@@ -183,7 +184,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				WP_CLI::success( "Created order {$order->id}." );
 			}
 		} catch ( WC_CLI_Exception $e ) {
-			$wpdb->query( 'ROLLBACK' );
+			wc_transaction_query( 'rollback' );
 
 			WP_CLI::error( $e->getMessage() );
 		}

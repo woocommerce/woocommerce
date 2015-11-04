@@ -175,7 +175,7 @@ class WC_Checkout {
 
 		try {
 			// Start transaction if available
-			$wpdb->query( 'START TRANSACTION' );
+			wc_transaction_query( 'start' );
 
 			$order_data = array(
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
@@ -324,11 +324,11 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
 
 			// If we got here, the order was created without problems!
-			$wpdb->query( 'COMMIT' );
+			wc_transaction_query( 'commit' );
 
 		} catch ( Exception $e ) {
 			// There was an error adding order data!
-			$wpdb->query( 'ROLLBACK' );
+			wc_transaction_query( 'rollback' );
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
 

@@ -377,7 +377,7 @@ class WC_API_Orders extends WC_API_Resource {
 	public function create_order( $data ) {
 		global $wpdb;
 
-		$wpdb->query( 'START TRANSACTION' );
+		wc_transaction_query( 'start' );
 
 		try {
 			if ( ! isset( $data['order'] ) ) {
@@ -482,13 +482,13 @@ class WC_API_Orders extends WC_API_Resource {
 
 			do_action( 'woocommerce_api_create_order', $order->id, $data, $this );
 
-			$wpdb->query( 'COMMIT' );
+			wc_transaction_query( 'commit' );
 
 			return $this->get_order( $order->id );
 
 		} catch ( WC_API_Exception $e ) {
 
-			$wpdb->query( 'ROLLBACK' );
+			wc_transaction_query( 'rollback' );
 
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
