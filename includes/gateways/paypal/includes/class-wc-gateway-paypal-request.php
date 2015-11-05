@@ -336,10 +336,10 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Round prices.
 	 *
-	 * @param  float|int $price
+	 * @param  double $price
 	 * @param  WC_Order $order
 	 *
-	 * @return float|int
+	 * @return double
 	 */
 	protected function round( $price, $order ) {
 		$precision = 2;
@@ -357,7 +357,7 @@ class WC_Gateway_Paypal_Request {
 	 * @param  float|int $price
 	 * @param  WC_Order $order
 	 *
-	 * @return float|int
+	 * @return string
 	 */
 	protected function number_format( $price, $order ) {
 		$decimals = 2;

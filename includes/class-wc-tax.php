@@ -899,7 +899,7 @@ class WC_Tax {
 	/**
 	 * Used by admin settings page.
 	 *
-	 * @param $tax_class
+	 * @param string $tax_class
 	 *
 	 * @return array|null|object
 	 */

@@ -83,7 +83,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Get amount already refunded.
 	 *
 	 * @since 2.2
-	 * @return int|float
+	 * @return string
 	 */
 	public function get_total_refunded() {
 		global $wpdb;
@@ -169,7 +169,6 @@ class WC_Order extends WC_Abstract_Order {
 	 * Get the total number of items refunded.
 	 *
 	 * @since  2.4.0
-	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
 	 * @return integer
 	 */
@@ -234,7 +233,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  int $tax_id ID of the tax we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
-	 * @return integer
+	 * @return double
 	 */
 	public function get_tax_refunded_for_item( $item_id, $tax_id, $item_type = 'line_item' ) {
 		$total = 0;
