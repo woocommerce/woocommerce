@@ -577,6 +577,9 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	// Increments the transient version to invalidate cache
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 
+	// Do the same for regular cache
+	wp_cache_incr( 'wc_orders_cache_prefix', 1, 'orders' );
+
 	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
 }
 

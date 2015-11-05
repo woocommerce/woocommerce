@@ -1311,11 +1311,25 @@ abstract class WC_Abstract_Order {
 	public function get_item_meta_array( $order_item_id ) {
 		global $wpdb;
 
-		$item_meta_array = array();
-		$metadata        = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", absint( $order_item_id ) ) );
+		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed
+		$prefix_num = wp_cache_get( 'wc_orders_cache_prefix', 'orders' );
 
-		foreach ( $metadata as $metadata_row ) {
-			$item_meta_array[ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
+		if ( $prefix_num === false ) {
+			$prefix_num = 1;
+			wp_cache_set( 'wc_orders_cache_prefix', $prefix_num, 'orders' );
+		}
+
+		$cache_prefix    = 'wc_orders_cache_' . $prefix_num . '_';
+		$cache_key       = $cache_prefix . 'item_meta_array_' . $order_item_id;
+		$item_meta_array = wp_cache_get( $cache_key, 'orders' );
+
+		if ( false === $item_meta_array ) {
+			$item_meta_array = array();
+			$metadata        = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", absint( $order_item_id ) ) );
+			foreach ( $metadata as $metadata_row ) {
+				$item_meta_array[ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
+			}
+			wp_cache_set( $cache_key, $item_meta_array, 'orders' );
 		}
 
 		return $item_meta_array ;
