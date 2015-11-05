@@ -166,7 +166,8 @@ class WC_Session_Handler extends WC_Session {
 		$prefix_num = wp_cache_get( 'wc_session_prefix', WC_SESSION_CACHE_GROUP );
 
 		if ( $prefix_num === false ) {
-			wp_cache_set( 'wc_session_prefix', 1, WC_SESSION_CACHE_GROUP );
+			$prefix_num = 1;
+			wp_cache_set( 'wc_session_prefix', $prefix_num, WC_SESSION_CACHE_GROUP );
 		}
 
 		return 'wc_session_' . $prefix_num . '_';
