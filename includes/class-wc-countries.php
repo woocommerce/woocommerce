@@ -785,14 +785,12 @@ class WC_Countries {
 					)
 				),
 				'NP' => array(
-					'postcode_before_city' => true,
 					'state' => array(
-						'label'       => __( 'District', 'woocommerce' ),
-						//'placeholder' => __( 'District', 'woocommerce' ),
+						'label'       => __( 'State / Zone', 'woocommerce' ),
+						//'placeholder' => __( 'State / Zone', 'woocommerce' ),
 					),
 					'postcode' => array(
-						'required' => false,
-						'hidden'   => false
+						'required' => false
 					)
 				),
 				'PL' => array(
