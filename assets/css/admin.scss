@@ -1572,7 +1572,8 @@ ul.wc_coupon_list_block {
 			width: 2em;
 
 			&:after {
-				@include icon("\e01c");
+				@include icon("\f111");
+				font-family: 'Dashicons';
 				line-height: 1.85;
 			}
 		}
@@ -2092,7 +2093,8 @@ table.wc_shipping {
 			width: 2em;
 
 			&:after {
-				@include icon("\e01c");
+				@include icon("\f111");
+				font-family: 'Dashicons';
 				line-height: 1.85;
 			}
 		}
