@@ -787,8 +787,8 @@ class WC_Countries {
 				'NP' => array(
 					'postcode_before_city' => true,
 					'state' => array(
-						'label'       => __( 'District', 'woocommerce' ),
-						//'placeholder' => __( 'District', 'woocommerce' ),
+						'label'       => __( 'Region', 'woocommerce' ),
+						//'placeholder' => __( 'Region', 'woocommerce' )
 					),
 					'postcode' => array(
 						'required' => false,
