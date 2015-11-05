@@ -581,7 +581,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns an array of date for a variation. Used in the add to cart form.
 	 * @since  2.4.0
-	 * @param  WC_Product|int $variation Variation product object or ID
+	 * @param  WC_Product $variation Variation product object or ID
 	 * @return array
 	 */
 	public function get_available_variation( $variation ) {

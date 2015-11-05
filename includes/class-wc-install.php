@@ -740,7 +740,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	/**
 	 * Uninstall tables when MU blog is deleted.
 	 * @param  array $tables
-	 * @return array
+	 * @return string[]
 	 */
 	public static function wpmu_drop_tables( $tables ) {
 		global $wpdb;

@@ -1507,7 +1507,7 @@ class WC_Geo_IP {
 	 * Seek country.
 	 *
 	 * @param  int $ipnum
-	 * @return bool|int
+	 * @return string
 	 */
 	private function _geoip_seek_country( $ipnum ) {
 		$offset = 0;
@@ -1600,7 +1600,7 @@ class WC_Geo_IP {
 	 * Country code by addr IPv6.
 	 *
 	 * @param  string $addr
-	 * @return bool|int
+	 * @return string
 	 */
 	public function geoip_country_code_by_addr_v6( $addr ) {
 		$country_id = $this->geoip_country_id_by_addr_v6( $addr );
@@ -1615,7 +1615,7 @@ class WC_Geo_IP {
 	 * Country code by addr.
 	 *
 	 * @param  string $addr
-	 * @return bool|int
+	 * @return string
 	 */
 	public function geoip_country_code_by_addr( $addr ) {
 		if ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1 ) {

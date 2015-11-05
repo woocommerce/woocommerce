@@ -529,6 +529,7 @@ function wc_processing_order_count() {
  * Return the orders count of a specific order status.
  *
  * @access public
+ * @param string $status
  * @return int
  */
 function wc_orders_count( $status ) {
