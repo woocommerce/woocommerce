@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Comments
  *
@@ -10,11 +15,6 @@
  * @category Class
  * @author   WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 class WC_Comments {
 
 	/**
