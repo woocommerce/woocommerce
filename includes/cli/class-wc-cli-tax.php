@@ -244,6 +244,72 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	}
 
 	/**
+	 * Get a tax rate.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : Tax rate ID
+	 *
+	 * [--field=<field>]
+	 * : Instead of returning the whole tax rate fields, returns the value of a single fields.
+	 *
+	 * [--fields=<fields>]
+	 * : Get a specific subset of the tax rates fields.
+	 *
+	 * [--format=<format>]
+	 * : Accepted values: table, json, csv. Default: table.
+	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * These fields are available for get command:
+	 *
+	 * * id
+	 * * country
+	 * * state
+	 * * postcode
+	 * * city
+	 * * rate
+	 * * name
+	 * * priority
+	 * * compound
+	 * * shipping
+	 * * order
+	 * * class
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc tax get 123 --field=rate
+	 *
+	 *     wp wc tax get 321 --format=json > rate321.json
+	 *
+	 * @since 2.5.0
+	 */
+	public function get( $args, $assoc_args ) {
+		global $wpdb;
+
+		try {
+
+			$tax_data = $this->format_taxes_to_items( array( $args[0] ) );
+
+			if ( empty( $tax_data ) ) {
+				throw new WC_CLI_Exception( 'woocommerce_cli_invalid_tax_rate', sprintf( __( 'Invalid tax rate ID: %s', 'woocommerce' ), $args[0] ) );
+			}
+
+			$tax_data = apply_filters( 'woocommerce_cli_get_tax_rate', $tax_data[0] );
+
+			if ( empty( $assoc_args['fields'] ) ) {
+				$assoc_args['fields'] = array_keys( $tax_data );
+			}
+
+			$formatter = $this->get_formatter( $assoc_args );
+			$formatter->display_item( $tax_data );
+		} catch ( WC_CLI_Exception $e ) {
+			WP_CLI::error( $e->getMessage() );
+		}
+	}
+
+	/**
 	 * List taxes.
 	 *
 	 * ## OPTIONS
@@ -471,7 +537,8 @@ class WC_CLI_Tax extends WC_CLI_Command {
 		$items = array();
 
 		foreach ( $taxes as $tax_id ) {
-			$id = $tax_id->tax_rate_id;
+			$id = is_object( $tax_id ) ? $tax_id->tax_rate_id : $tax_id;
+			$id = absint( $id );
 
 			// Get tax rate details
 			$tax = WC_Tax::_get_tax_rate( $id );
