@@ -228,7 +228,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
 			}
 
-			do_action( 'woocommerce_api_create_tax_rate', $id, $data );
+			do_action( 'woocommerce_api_create_tax', $id, $data );
 
 			$this->server->send_status( 201 );
 
@@ -317,10 +317,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
 			}
 
-			do_action( 'woocommerce_api_edit_product', $id, $data );
-
-			// Clear cache/transients
-			wc_delete_product_transients( $id );
+			do_action( 'woocommerce_api_edit_tax_rate', $id, $data );
 
 			return $this->get_tax( $id );
 		} catch ( WC_API_Exception $e ) {
@@ -394,6 +391,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @since 2.5.0
 	 *
 	 * @param  array $args
+	 * @param  bool  $count_only
 	 *
 	 * @return array
 	 */
@@ -552,7 +550,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	}
 
 	/**
-	 * Create a tax class
+	 * Create a tax class.
 	 *
 	 * @since 2.5.0
 	 *
@@ -582,7 +580,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			$classes = WC_Tax::get_tax_classes();
 			$exists  = false;
 
-			// Check if class exists
+			// Check if class exists.
 			foreach ( $classes as $key => $class ) {
 				if ( sanitize_title( $class ) === $slug ) {
 					$exists = true;
@@ -590,12 +588,12 @@ class WC_API_Taxes extends WC_API_Resource {
 				}
 			}
 
-			// Return error if tax class already exists
+			// Return error if tax class already exists.
 			if ( $exists ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_tax_class', __( 'Tax class already exists', 'woocommerce' ), 401 );
 			}
 
-			// Add the new class
+			// Add the new class.
 			$classes[] = $name;
 
 			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
