@@ -262,7 +262,7 @@ function wc_taxonomy_metadata_migrate_data( $wp_db_version, $wp_current_db_versi
 		}
 	}
 }
-add_action( 'wp_upgrade', 'wc_taxonomy_metadata_migrate_data', 10, 4 );
+add_action( 'wp_upgrade', 'wc_taxonomy_metadata_migrate_data', 10, 2 );
 
 /**
  * WooCommerce Term Meta API
