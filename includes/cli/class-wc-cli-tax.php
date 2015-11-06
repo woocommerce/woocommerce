@@ -164,6 +164,86 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	}
 
 	/**
+	 * Delete one or more tax rates.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>...
+	 * : The tax rate ID to delete.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc tax delete 123
+	 *
+	 *     wp wc tax delete $(wp wc tax list --format=ids)
+	 *
+	 */
+	public function delete( $args, $assoc_args ) {
+		$exit_code = 0;
+
+		foreach ( $args as $tax_id ) {
+			$tax_id = absint( $tax_id );
+			$tax    = WC_Tax::_get_tax_rate( $tax_id );
+
+			if ( is_null( $tax ) ) {
+				$exit_code += 1;
+				WP_CLI::warning( "Failed deleting tax rate {$tax_id}." );
+				continue;
+			}
+
+			do_action( 'woocommerce_cli_delete_tax_rate', $tax_id );
+
+			WC_Tax::_delete_tax_rate( $tax_id );
+			WP_CLI::success( "Deleted tax rate {$tax_id}." );
+		}
+		exit( $exit_code ? 1 : 0 );
+	}
+
+	/**
+	 * Delete one or more tax classes.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <slug>...
+	 * : The tax class slug to delete.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc tax delete_class reduced-rate
+	 *
+	 *     wp wc tax delete_class $(wp wc tax list_class --format=ids)
+	 *
+	 */
+	public function delete_class( $args, $assoc_args ) {
+		$classes   = WC_Tax::get_tax_classes();
+		$exit_code = 0;
+
+		foreach ( $args as $slug ) {
+			$slug    = sanitize_title( $slug );
+			$deleted = false;
+
+			foreach ( $classes as $key => $class ) {
+				if ( sanitize_title( $class ) === $slug ) {
+					unset( $classes[ $key ] );
+					$deleted = true;
+					break;
+				}
+			}
+
+			if ( $deleted ) {
+				WP_CLI::success( "Deleted tax class {$slug}." );
+			} else {
+				$exit_code += 1;
+				WP_CLI::warning( "Failed deleting tax class {$slug}." );
+			}
+		}
+
+		update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
+
+		exit( $exit_code ? 1 : 0 );
+	}
+
+	/**
 	 * List taxes.
 	 *
 	 * ## OPTIONS
@@ -260,16 +340,16 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc tax list_classes
+	 *     wp wc tax list_class
 	 *
-	 *     wp wc tax list_classes --field=slug
+	 *     wp wc tax list_class --field=slug
 	 *
-	 *     wp wc tax list_classes --format=json
+	 *     wp wc tax list_class --format=json
 	 *
 	 * @since      2.5.0
-	 * @subcommand list_classes
+	 * @subcommand list_class
 	 */
-	public function list_classes( $__, $assoc_args ) {
+	public function list_class( $__, $assoc_args ) {
 		// Set default fields for tax classes
 		if ( empty( $assoc_args['fields'] ) ) {
 			$assoc_args['fields'] = 'slug,name';
