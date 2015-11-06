@@ -10,6 +10,10 @@
  * @version     2.1.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Replace a page title with the endpoint title
  * @param  string $title

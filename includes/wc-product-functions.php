@@ -10,6 +10,10 @@
  * @version  2.3.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Main function for returning products, uses the WC_Product_Factory class.
  *
