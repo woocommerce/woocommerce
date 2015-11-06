@@ -21,7 +21,8 @@
 	font-size: 1.3em !important;
 }
 
-#adminmenu #menu-posts-product .menu-icon-post div.wp-menu-image:before {
+#adminmenu #menu-posts-product .menu-icon-post div.wp-menu-image:before,
+#adminmenu #menu-posts-product .menu-icon-product div.wp-menu-image:before {
 	font-family: 'WooCommerce' !important;
 	content: "\e01d";
 	font-size: 1.3em !important;
