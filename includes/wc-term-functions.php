@@ -223,20 +223,22 @@ add_action( 'switch_blog', 'wc_taxonomy_metadata_wpdbfix', 0 );
 function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new_term_id, $term_taxonomy_id, $taxonomy ) {
 	global $wpdb;
 
-	if ( 'product_cat' === $taxonomy || taxonomy_is_product_attribute( $taxonomy ) ) {
-		$old_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_termmeta WHERE woocommerce_term_id = %d;", $old_term_id ) );
+	if ( get_option( 'db_version' ) < 34370 ) {
+		if ( 'product_cat' === $taxonomy || taxonomy_is_product_attribute( $taxonomy ) ) {
+			$old_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_termmeta WHERE woocommerce_term_id = %d;", $old_term_id ) );
 
-		// Copy across to split term
-		if ( $old_meta_data ) {
-			foreach ( $old_meta_data as $meta_data ) {
-				$wpdb->insert(
-					"{$wpdb->prefix}woocommerce_termmeta",
-					array(
-						'woocommerce_term_id' => $new_term_id,
-						'meta_key'            => $meta_data->meta_key,
-						'meta_value'          => $meta_data->meta_value
-					)
-				);
+			// Copy across to split term
+			if ( $old_meta_data ) {
+				foreach ( $old_meta_data as $meta_data ) {
+					$wpdb->insert(
+						"{$wpdb->prefix}woocommerce_termmeta",
+						array(
+							'woocommerce_term_id' => $new_term_id,
+							'meta_key'            => $meta_data->meta_key,
+							'meta_value'          => $meta_data->meta_value
+						)
+					);
+				}
 			}
 		}
 	}
@@ -244,7 +246,31 @@ function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new
 add_action( 'split_shared_term', 'wc_taxonomy_metadata_update_content_for_split_terms', 10, 4 );
 
 /**
- * WooCommerce Term Meta API - Update term meta.
+ * Migrate data from WC term meta to WP term meta
+ *
+ * When the database is updated to support term meta, migrate WC term meta data across.
+ * We do this when the new version is >= 34370, and the old version is < 34370 (34370 is when term meta table was added).
+ *
+ * @param  string $wp_db_version The new $wp_db_version.
+ * @param  string $wp_current_db_version The old (current) $wp_db_version.
+ */
+function wc_taxonomy_metadata_migrate_data( $wp_db_version, $wp_current_db_version ) {
+	if ( $wp_db_version >= 34370 && $wp_current_db_version < 34370 ) {
+		global $wpdb;
+		if ( $wpdb->query( "INSERT INTO {$wpdb->termmeta} ( term_id, meta_key, meta_value ) SELECT woocommerce_term_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_termmeta;" ) ) {
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_termmeta" );
+		}
+	}
+}
+add_action( 'wp_upgrade', 'wc_taxonomy_metadata_migrate_data', 10, 4 );
+
+/**
+ * WooCommerce Term Meta API
+ *
+ * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  *
  * @param mixed $term_id
  * @param string $meta_key
@@ -253,11 +279,21 @@ add_action( 'split_shared_term', 'wc_taxonomy_metadata_update_content_for_split_
  * @return bool
  */
 function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
-	return update_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value );
+	// If term meta table is not installed (pre-wp-4.4), use WC tables
+	if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'update_term_meta' ) ) {
+		return update_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value );
+	} else {
+		return update_term_meta( $term_id, $meta_key, $meta_value, $prev_value );
+	}
 }
 
 /**
- * WooCommerce Term Meta API - Add term meta.
+ * WooCommerce Term Meta API
+ *
+ * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  *
  * @param mixed $term_id
  * @param mixed $meta_key
@@ -266,24 +302,44 @@ function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_v
  * @return bool
  */
 function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ){
-	return add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
+	// If term meta table is not installed (pre-wp-4.4), use WC tables
+	if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'add_term_meta' ) ) {
+		return add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
+	} else {
+		return add_term_meta( $term_id, $meta_key, $meta_value, $unique );
+	}
 }
 
 /**
- * WooCommerce Term Meta API - Delete term meta.
+ * WooCommerce Term Meta API
+ *
+ * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  *
  * @param mixed $term_id
  * @param mixed $meta_key
  * @param string $meta_value (default: '')
- * @param bool $delete_all (default: false)
+ * @param bool $deprecated (default: false)
  * @return bool
  */
-function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $delete_all = false ) {
-	return delete_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $delete_all );
+function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $deprecated = false ) {
+	// If term meta table is not installed (pre-wp-4.4), use WC tables
+	if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'delete_term_meta' ) ) {
+		return delete_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value );
+	} else {
+		return delete_term_meta( $term_id, $meta_key, $meta_value );
+	}
 }
 
 /**
- * WooCommerce Term Meta API - Get term meta.
+ * WooCommerce Term Meta API
+ *
+ * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  *
  * @param mixed $term_id
  * @param string $key
@@ -291,7 +347,12 @@ function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $d
  * @return mixed
  */
 function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
-	return get_metadata( 'woocommerce_term', $term_id, $key, $single );
+	// If term meta table is not installed (pre-wp-4.4), use WC tables
+	if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'get_term_meta' ) ) {
+		return get_metadata( 'woocommerce_term', $term_id, $key, $single );
+	} else {
+		return get_term_meta( $term_id, $key, $single );
+	}
 }
 
 /**
@@ -306,39 +367,40 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  */
 function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
 
-	if( ! $terms ) $terms = get_terms($taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
-	if( empty( $terms ) ) return $index;
+	if ( ! $terms ) $terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
+	if ( empty( $terms ) ) return $index;
 
 	$id	= $the_term->term_id;
 
 	$term_in_level = false; // flag: is our term to order in this level of terms
 
-	foreach ($terms as $term) {
+	foreach ( $terms as $term ) {
 
-		if( $term->term_id == $id ) { // our term to order, we skip
+		if ( $term->term_id == $id ) { // our term to order, we skip
 			$term_in_level = true;
 			continue; // our term to order, we skip
 		}
 		// the nextid of our term to order, lets move our term here
-		if(null !== $next_id && $term->term_id == $next_id) {
-			$index++;
+		if (null !== $next_id && $term->term_id == $next_id) {
+			$index ++;
 			$index = wc_set_term_order($id, $index, $taxonomy, true);
 		}
 
 		// set order
-		$index++;
+		$index ++;
 		$index = wc_set_term_order($term->term_id, $index, $taxonomy);
 
 		// if that term has children we walk through them
 		$children = get_terms($taxonomy, "parent={$term->term_id}&menu_order=ASC&hide_empty=0");
-		if( !empty($children) ) {
+		if ( ! empty( $children ) ) {
 			$index = wc_reorder_terms( $the_term, $next_id, $taxonomy, $index, $children );
 		}
 	}
 
 	// no nextid meaning our term is in last position
-	if( $term_in_level && null === $next_id )
-		$index = wc_set_term_order($id, $index+1, $taxonomy, true);
+	if ( $term_in_level && null === $next_id ) {
+		$index = wc_set_term_order( $id, $index + 1, $taxonomy, true );
+	}
 
 	return $index;
 }
@@ -424,7 +486,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 
 	// Meta name
 	if ( ! empty( $taxonomies[0] ) && taxonomy_is_product_attribute( $taxonomies[0] ) ) {
-		$meta_name =  'order_' . esc_attr( $taxonomies[0] );
+		$meta_name = 'order_' . esc_attr( $taxonomies[0] );
 	} else {
 		$meta_name = 'order';
 	}
@@ -434,21 +496,25 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 		$clauses['fields']  .= ', tm.* ';
 	}
 
-	//query join
-	$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = '". $meta_name ."') ";
+	// query join
+	if ( get_option( 'db_version' ) < 34370 ) {
+		$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
+	} else {
+		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
+	}
 
 	// default to ASC
 	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) {
 		$args['menu_order'] = 'ASC';
 	}
 
-	$order = "ORDER BY tm.meta_value+0 " . $args['menu_order'];
+	$order = "ORDER BY tm.meta_value+0 " . esc_sql( $args['menu_order'] );
 
-	if ( $clauses['orderby'] ):
-		$clauses['orderby'] = str_replace('ORDER BY', $order . ',', $clauses['orderby'] );
-	else:
+	if ( $clauses['orderby'] ) {
+		$clauses['orderby'] = str_replace( 'ORDER BY', esc_sql( $order ) . ',', $clauses['orderby'] );
+	} else {
 		$clauses['orderby'] = $order;
-	endif;
+	}
 
 	return $clauses;
 }
