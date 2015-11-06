@@ -2146,7 +2146,7 @@ img.help_tip {
 
 .woocommerce {
 	.woo-nav-tab-wrapper {
-		margin-bottom: 16px;
+		margin-bottom: 16px !important;
 	}
 
 	.subsubsub {
@@ -3617,8 +3617,9 @@ img.ui-datepicker-trigger {
 		}
 
 		h3.stats_range {
-			padding: 0 !important;
 			border-bottom-color: #dfdfdf;
+			margin: 0;
+			padding: 0 !important;
 
 			.export_csv {
 				float: right;
