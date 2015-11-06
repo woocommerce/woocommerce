@@ -361,7 +361,7 @@ class WC_Install {
 			}
 		}
 
-		return "
+		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id bigint(20) NOT NULL AUTO_INCREMENT,
   session_key char(32) NOT NULL,
@@ -393,15 +393,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_public int(1) NOT NULL DEFAULT 1,
   PRIMARY KEY  (attribute_id),
   KEY attribute_name (attribute_name)
-) $collate;
-CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-  meta_id bigint(20) NOT NULL auto_increment,
-  woocommerce_term_id bigint(20) NOT NULL,
-  meta_key varchar(255) NULL,
-  meta_value longtext NULL,
-  PRIMARY KEY  (meta_id),
-  KEY woocommerce_term_id (woocommerce_term_id),
-  KEY meta_key (meta_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   permission_id bigint(20) NOT NULL auto_increment,
@@ -464,6 +455,23 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
   KEY location_type_code (location_type(40),location_code(90))
 ) $collate;
 		";
+
+		// Term meta is only needed for old installs.
+		if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'get_term_meta' ) ) {
+			$tables .= "
+CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  woocommerce_term_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY woocommerce_term_id (woocommerce_term_id),
+  KEY meta_key (meta_key)
+) $collate;
+			";
+		}
+
+		return $tables;
 	}
 
 	/**
