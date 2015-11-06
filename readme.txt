@@ -158,6 +158,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.4.9 - XXX =
+* Fix - Check abspath exists in more files to prevent errors on direct access.
+* Fix - Hide SQL errors during ajax requests.
+* Fix - Fixed redirection loop on customizer screen.
+* Fix - Improved error handling in WC_Geo_IP.
+
 = 2.4.8 - 26/10/2015 =
 * Fix - Help tips in variations admin.
 * Fix - API - Fixed customer count method.
