@@ -317,10 +317,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
 			}
 
-			do_action( 'woocommerce_api_edit_product', $id, $data );
-
-			// Clear cache/transients
-			wc_delete_product_transients( $id );
+			do_action( 'woocommerce_api_edit_tax_rate', $id, $data );
 
 			return $this->get_tax( $id );
 		} catch ( WC_API_Exception $e ) {
