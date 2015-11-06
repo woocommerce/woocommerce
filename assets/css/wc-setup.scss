@@ -39,7 +39,7 @@ body {
 		color: #666;
 	}
 	a {
-		color: #A16696;
+		color: #a16696;
 		&:hover, &:focus {
 			color: #111;
 		}
@@ -234,17 +234,18 @@ body {
 			}
 			.setup-product {
 				a {
-					text-align: center;
-					font-size: 1em;
-					padding: 1em;
-					line-height: 1.75em;
-					height: auto;
-					margin: 0 0 .75em;
-					opacity: 1;
-					background-color: #A16696;
-					border-color: #A16696;
+					background-color: #a16696;
+					border-color: #a16696;
 					-webkit-box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 					box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+					font-size: 1em;
+					height: auto;
+					line-height: 1.75em;
+					margin: 0 0 .75em;
+					opacity: 1;
+					padding: 1em;
+					text-align: center;
+					text-shadow: 0px -1px 1px #8a4f7f, 1px 0px 1px #8a4f7f, 0px 1px 1px #8a4f7f, -1px 0px 1px #8a4f7f;
 				}
 			}
 			li a:before {
@@ -322,18 +323,18 @@ body {
 		background: #fff;
 	}
 	li.active {
-		border-color: #A16696;
-		color: #A16696;
+		border-color: #a16696;
+		color: #a16696;
 		&:before {
-			border-color: #A16696;
+			border-color: #a16696;
 		}
 	}
 	li.done {
-		border-color: #A16696;
-		color: #A16696;
+		border-color: #a16696;
+		color: #a16696;
 		&:before {
-			border-color: #A16696;
-			background: #A16696;
+			border-color: #a16696;
+			background: #a16696;
 		}
 	}
 }
@@ -348,13 +349,14 @@ body {
 		height: auto;
 	}
 	.button-primary {
-		margin: 0;
-		float: right;
-		opacity: 1;
-		background-color: #A16696;
-		border-color: #A16696;
+		background-color: #a16696;
+		border-color: #a16696;
 		-webkit-box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 		box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+		float: right;
+		margin: 0;
+		opacity: 1;
+		text-shadow: 0px -1px 1px #8a4f7f, 1px 0px 1px #8a4f7f, 0px 1px 1px #8a4f7f, -1px 0px 1px #8a4f7f;
 	}
 }
 .wc-return-to-dashboard {
