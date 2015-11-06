@@ -553,7 +553,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	}
 
 	/**
-	 * Create a tax class
+	 * Create a tax class.
 	 *
 	 * @since 2.5.0
 	 *
@@ -583,7 +583,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			$classes = WC_Tax::get_tax_classes();
 			$exists  = false;
 
-			// Check if class exists
+			// Check if class exists.
 			foreach ( $classes as $key => $class ) {
 				if ( sanitize_title( $class ) === $slug ) {
 					$exists = true;
@@ -591,12 +591,12 @@ class WC_API_Taxes extends WC_API_Resource {
 				}
 			}
 
-			// Return error if tax class already exists
+			// Return error if tax class already exists.
 			if ( $exists ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_tax_class', __( 'Tax class already exists', 'woocommerce' ), 401 );
 			}
 
-			// Add the new class
+			// Add the new class.
 			$classes[] = $name;
 
 			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );

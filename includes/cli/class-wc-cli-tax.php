@@ -11,6 +11,159 @@
 class WC_CLI_Tax extends WC_CLI_Command {
 
 	/**
+	 * Create a tax rate.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--<field>=<value>]
+	 * : Associative args for the new tax rate.
+	 *
+	 * [--porcelain]
+	 * : Outputs just the new tax rate id.
+	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * These fields are available for create command:
+	 *
+	 * * country
+	 * * state
+	 * * postcode
+	 * * city
+	 * * rate
+	 * * name
+	 * * priority
+	 * * compound
+	 * * shipping
+	 * * class
+	 * * order
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc tax create --country=US --rate=5 --class=standard --type=percent
+	 *
+	 */
+	public function create( $__, $assoc_args ) {
+		$porcelain = isset( $assoc_args['porcelain'] );
+		unset( $assoc_args['porcelain'] );
+
+		$assoc_args = apply_filters( 'woocommerce_cli_create_tax_rate_data', $assoc_args );
+
+		$tax_data = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '',
+			'tax_rate_name'     => '',
+			'tax_rate_priority' => 1,
+			'tax_rate_compound' => 0,
+			'tax_rate_shipping' => 1,
+			'tax_rate_order'    => 0,
+			'tax_rate_class'    => '',
+		);
+
+		foreach ( $tax_data as $key => $value ) {
+			$new_key = str_replace( 'tax_rate_', '', $key );
+			$new_key = 'tax_rate' === $new_key ? 'rate' : $new_key;
+
+			if ( isset( $assoc_args[ $new_key ] ) ) {
+				if ( in_array( $new_key, array( 'compound', 'shipping' ) ) ) {
+					$tax_data[ $key ] = $assoc_args[ $new_key ] ? 1 : 0;
+				} else {
+					$tax_data[ $key ] = $assoc_args[ $new_key ];
+				}
+			}
+		}
+
+		// Create tax rate.
+		$id = WC_Tax::_insert_tax_rate( $tax_data );
+
+		// Add locales.
+		if ( ! empty( $assoc_args['postcode'] ) ) {
+			WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $assoc_args['postcode'] ) );
+		}
+
+		if ( ! empty( $assoc_args['city'] ) ) {
+			WC_Tax::_update_tax_rate_cities( $id, wc_clean( $assoc_args['city'] ) );
+		}
+
+		do_action( 'woocommerce_cli_create_tax_rate', $id, $tax_data );
+
+		if ( $porcelain ) {
+			WP_CLI::line( $id );
+		} else {
+			WP_CLI::success( "Created tax rate $id." );
+		}
+	}
+
+	/**
+	 * Create a tax class.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--<field>=<value>]
+	 * : Associative args for the new tax class.
+	 *
+	 * [--porcelain]
+	 * : Outputs just the new tax class slug.
+	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * These fields are available for create command:
+	 *
+	 * * name
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc tax create_class --name="Reduced Rate"
+	 *
+	 */
+	public function create_class( $__, $assoc_args ) {
+		try {
+			$porcelain = isset( $assoc_args['porcelain'] );
+			unset( $assoc_args['porcelain'] );
+
+			$assoc_args = apply_filters( 'woocommerce_cli_create_tax_class_data', $assoc_args );
+
+			// Check if name is specified.
+			if ( ! isset( $assoc_args['name'] ) ) {
+				throw new WC_CLI_Exception( 'woocommerce_cli_missing_name', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'name' ) );
+			}
+
+			$name    = sanitize_text_field( $assoc_args['name'] );
+			$slug    = sanitize_title( $name );
+			$classes = WC_Tax::get_tax_classes();
+			$exists  = false;
+
+			// Check if class exists.
+			foreach ( $classes as $key => $class ) {
+				if ( sanitize_title( $class ) === $slug ) {
+					$exists = true;
+					break;
+				}
+			}
+
+			// Return error if tax class already exists.
+			if ( $exists ) {
+				throw new WC_CLI_Exception( 'woocommerce_cli_cannot_create_tax_class', __( 'Tax class already exists', 'woocommerce' ) );
+			}
+
+			// Add the new class
+			$classes[] = $name;
+
+			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
+
+			do_action( 'woocommerce_cli_create_tax_class', $slug, array( 'name' => $name ) );
+
+			if ( $porcelain ) {
+				WP_CLI::line( $slug );
+			} else {
+				WP_CLI::success( "Created tax class $slug." );
+			}
+		} catch ( WC_CLI_Exception $e ) {
+			WP_CLI::error( $e->getMessage() );
+		}
+	}
+
+	/**
 	 * List taxes.
 	 *
 	 * ## OPTIONS
