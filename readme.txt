@@ -163,6 +163,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Hide SQL errors during ajax requests.
 * Fix - Fixed redirection loop on customizer screen.
 * Fix - Improved error handling in WC_Geo_IP.
+* Fix - Bulk edit sale prices.
+* Fix - Check for child themes in System Status.
+* Fix - API - Warnings when create attributes.
 
 = 2.4.8 - 26/10/2015 =
 * Fix - Help tips in variations admin.
