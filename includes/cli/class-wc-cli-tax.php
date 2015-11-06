@@ -41,6 +41,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	 *
 	 *     wp wc tax create --country=US --rate=5 --class=standard --type=percent
 	 *
+	 * @since 2.5.0
 	 */
 	public function create( $__, $assoc_args ) {
 		$porcelain = isset( $assoc_args['porcelain'] );
@@ -115,6 +116,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	 *
 	 *     wp wc tax create_class --name="Reduced Rate"
 	 *
+	 * @since 2.5.0
 	 */
 	public function create_class( $__, $assoc_args ) {
 		try {
@@ -177,6 +179,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	 *
 	 *     wp wc tax delete $(wp wc tax list --format=ids)
 	 *
+	 * @since 2.5.0
 	 */
 	public function delete( $args, $assoc_args ) {
 		$exit_code = 0;
@@ -213,6 +216,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	 *
 	 *     wp wc tax delete_class $(wp wc tax list_class --format=ids)
 	 *
+	 * @since 2.5.0
 	 */
 	public function delete_class( $args, $assoc_args ) {
 		$classes   = WC_Tax::get_tax_classes();
@@ -447,6 +451,104 @@ class WC_CLI_Tax extends WC_CLI_Command {
 			echo implode( ' ', $_slugs );
 		} else {
 			$formatter->display_items( $items );
+		}
+	}
+
+	/**
+	 * Update a tax rate.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : The ID of the tax rate to update.
+	 *
+	 * --<field>=<value>
+	 * : One or more fields to update.
+	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * These fields are available for update command:
+	 *
+	 * * country
+	 * * state
+	 * * postcode
+	 * * city
+	 * * rate
+	 * * name
+	 * * priority
+	 * * compound
+	 * * shipping
+	 * * class
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc tax update 123 --rate=5
+	 *
+	 * @since 2.5.0
+	 */
+	public function update( $args, $assoc_args ) {
+		try {
+			// Get current tax rate data
+			$tax_data = $this->format_taxes_to_items( array( $args[0] ) );
+
+			if ( empty( $tax_data ) ) {
+				throw new WC_CLI_Exception( 'woocommerce_cli_invalid_tax_rate', sprintf( __( 'Invalid tax rate ID: %s', 'woocommerce' ), $args[0] ) );
+			}
+
+			$current_data   = $tax_data[0];
+			$id             = $current_data['id'];
+			$data           = apply_filters( 'woocommerce_cli_update_tax_rate_data', $assoc_args, $id );
+			$new_data       = array();
+			$default_fields = array(
+				'tax_rate_country',
+				'tax_rate_state',
+				'tax_rate',
+				'tax_rate_name',
+				'tax_rate_priority',
+				'tax_rate_compound',
+				'tax_rate_shipping',
+				'tax_rate_order',
+				'tax_rate_class'
+			);
+
+			foreach ( $data as $key => $value ) {
+				$new_key = 'rate' === $key ? 'tax_rate' : 'tax_rate_' . $key;
+
+				// Check if the key is valid
+				if ( ! in_array( $new_key, $default_fields ) ) {
+					continue;
+				}
+
+				// Test new data against current data
+				if ( $value === $current_data[ $key ] ) {
+					continue;
+				}
+
+				// Fix compund and shipping values
+				if ( in_array( $key, array( 'compound', 'shipping' ) ) ) {
+					$value = $value ? 1 : 0;
+				}
+
+				$new_data[ $new_key ] = $value;
+			}
+
+			// Update tax rate
+			WC_Tax::_update_tax_rate( $id, $new_data );
+
+			// Update locales
+			if ( ! empty( $data['postcode'] ) && $current_data['postcode'] != $data['postcode'] ) {
+				WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $data['postcode'] ) );
+			}
+
+			if ( ! empty( $data['city'] ) && $current_data['city'] != $data['city'] ) {
+				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
+			}
+
+			do_action( 'woocommerce_cli_update_tax_rate', $id, $data );
+
+			WP_CLI::success( "Updated tax rate $id." );
+		} catch ( WC_CLI_Exception $e ) {
+			WP_CLI::error( $e->getMessage() );
 		}
 	}
 

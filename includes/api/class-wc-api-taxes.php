@@ -228,7 +228,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
 			}
 
-			do_action( 'woocommerce_api_create_tax_rate', $id, $data );
+			do_action( 'woocommerce_api_create_tax', $id, $data );
 
 			$this->server->send_status( 201 );
 
