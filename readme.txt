@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothe
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Requires at least: 4.1
 Tested up to: 4.3
-Stable tag: 2.4.8
+Stable tag: 2.4.9
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.4.9 - XXX =
+= 2.4.9 - 09/11/2015 =
 * Fix - Check abspath exists in more files to prevent errors on direct access.
 * Fix - Hide SQL errors during ajax requests.
 * Fix - Fixed redirection loop on customizer screen.
