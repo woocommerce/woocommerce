@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothe
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Requires at least: 4.0
 Tested up to: 4.3
-Stable tag: 2.4.6
+Stable tag: 2.4.9
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -204,6 +204,38 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Added a manual update trigger for checkout.
 * Dev - Added woocommerce_is_price_filter_active filter to Query class.
 * Dev - Replaced some cart methods with dedicated functions. e.g. wc_ship_to_billing_address_only().
+
+= 2.4.9 - 09/11/2015 =
+* Fix - Check abspath exists in more files to prevent errors on direct access.
+* Fix - Hide SQL errors during ajax requests.
+* Fix - Fixed redirection loop on customizer screen.
+* Fix - Improved error handling in WC_Geo_IP.
+* Fix - Bulk edit sale prices.
+* Fix - Check for child themes in System Status.
+* Fix - API - Warnings when create attributes.
+* Fix - System Report: Template version check path.
+* Fix - Potential XSS within price.php fixed with escape on get_price() (would require edit/admin permissions to take advantage of). Discovered by FortiGuard Labs (http://www.fortiguard.com/). Template version has been bumped.
+
+= 2.4.8 - 26/10/2015 =
+* Fix - Help tips in variations admin.
+* Fix - API - Fixed customer count method.
+* Fix - Locale switching for city field.
+* Fix - Notice in wc_nav_menu_items when endpoint is not set.
+* Fix - Loading of correct variation prices when display is true and false in the same page load.
+* Fix - Shipping priority for methods with colons in the name.
+* Fix - Saving of passwords with '&' inside.
+* Fix - Remove double escaping of coupon descriptions.
+* Fix - Settings API default value should not apply if value of option is 0 .
+* Fix - Avoid potential PHP Fatals by avoiding premature script enqueues.
+* Fix - Pass mimes when checking file type .
+* Fix - Reset shipping totals before calculation to prevent totals being used incorrectly.
+* Fix - API - Corrected how attributes terms saves non-latin characters.
+* Fix - API - Variations price sync.
+* Fix - API - Fixed lost variable products data when create/edit an order.
+* Tweak - Add trailing slash in get_page_uris to reduce likelihood of conflicts.
+* Tweak - API - Added refunded_item_id on GET orders/<id>/refunds endpoint.
+* Tweak - API - Allow variable products to get retrieved by SKU.
+* Tweak - API - Allow edit variations without define the product type to variable.
 
 = 2.4.7 - 21/09/2015 =
 * Fix - Handle Switzerland in get_european_union_countries.
