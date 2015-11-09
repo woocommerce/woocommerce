@@ -166,6 +166,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Bulk edit sale prices.
 * Fix - Check for child themes in System Status.
 * Fix - API - Warnings when create attributes.
+* Fix - System Report: Template version check path.
+* Fix - Potential XSS within price.php fixed with escape on get_price() (would require edit/admin permissions to take advantage of). Discovered by FortiGuard Labs (http://www.fortiguard.com/). Template version has been bumped.
 
 = 2.4.8 - 26/10/2015 =
 * Fix - Help tips in variations admin.
