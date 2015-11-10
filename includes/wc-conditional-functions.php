@@ -359,7 +359,10 @@ function wc_is_valid_url( $url ) {
 
 /**
  * Check if the checkout is configured for https. Look at options, WP HTTPS plugin, or the permalink itself.
- * @return boolean
+ *
+ * @since  2.5.0
+ *
+ * @return bool
  */
 function wc_checkout_is_https() {
 	return 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || class_exists( 'WordPressHTTPS' ) || strstr( wc_get_page_permalink( 'checkout' ), 'https:' );
