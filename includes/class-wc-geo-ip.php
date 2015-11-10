@@ -1606,7 +1606,7 @@ class WC_Geo_IP {
 	 */
 	public function geoip_country_code_by_addr_v6( $addr ) {
 		$country_id = $this->geoip_country_id_by_addr_v6( $addr );
-		if ( $country_id !== false && isset( $this->GEOIP_COUNTRY_CODES[ $country_id ]  ) ) {
+		if ( $country_id !== false && isset( $this->GEOIP_COUNTRY_CODES[ $country_id ] ) ) {
 			return $this->GEOIP_COUNTRY_CODES[ $country_id ];
 		}
 
