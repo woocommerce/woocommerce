@@ -25,8 +25,7 @@
 					addressCountry = $form.find( '#billing_country' ).val(),
 					addressState   = $form.find( '#billing_state' ).val(),
 					addressCity    = $form.find( '#billing_city' ).val(),
-					addressZip     = $form.find( '#billing_postcode' ).val(),
-					name           = $form.find( '#billing_first_name' ).val() + ' ' + $form.find( '#billing_last_name' ).val();
+					addressZip     = $form.find( '#billing_postcode' ).val();
 
 				card = card.replace( /\s/g, '' );
 
@@ -42,8 +41,7 @@
 						addressCountry: addressCountry,
 						addressState: addressState,
 						addressZip: addressZip,
-						addressCity: addressCity,
-						name: name
+						addressCity: addressCity
 					}
 				}, simplifyResponseHandler );
 
