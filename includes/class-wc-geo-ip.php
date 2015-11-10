@@ -1127,7 +1127,7 @@ class WC_Geo_IP {
 	 * Open geoip file.
 	 *
 	 * @param string $filename
-	 * @param int $flags
+	 * @param int    $flags
 	 */
 	public function geoip_open( $filename, $flags ) {
 		$this->flags = $flags;
@@ -1448,8 +1448,8 @@ class WC_Geo_IP {
 	/**
 	 * Seek country IPv6.
 	 *
-	 * @param  int $ipnum [description]
-	 * @return bool|int
+	 * @param  int $ipnum
+	 * @return string
 	 */
 	function _geoip_seek_country_v6( $ipnum ) {
 		// arrays from unpack start with offset 1
@@ -1621,7 +1621,7 @@ class WC_Geo_IP {
 	 */
 	public function geoip_country_code_by_addr( $addr ) {
 		if ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1 ) {
-			$record = $this->geoip_record_by_addr( $addr);
+			$record = $this->geoip_record_by_addr( $addr );
 			if ( $record !== false ) {
 				return $record->country_code;
 			}
@@ -1639,9 +1639,8 @@ class WC_Geo_IP {
 	 * Encode string.
 	 *
 	 * @param  string $string
-	 * @param  int $start
-	 * @param  int $length
-	 *
+	 * @param  int    $start
+	 * @param  int    $length
 	 * @return string
 	 */
 	private function _safe_substr( $string, $start, $length ) {
