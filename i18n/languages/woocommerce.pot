@@ -2,16 +2,16 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.4.8 Frontend\n"
+"Project-Id-Version: WooCommerce 2.4.10 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-11-06 11:51:51+00:00\n"
+"POT-Creation-Date: 2015-11-10 01:00:31+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n 0.5.2\n"
+"X-Generator: grunt-wp-i18n 0.5.3\n"
 
 #: i18n/countries.php:18
 msgid "Afghanistan"
@@ -5344,7 +5344,7 @@ msgstr ""
 #: includes/api/class-wc-api-orders.php:1307
 #: includes/api/class-wc-api-orders.php:1599
 #: includes/api/class-wc-api-products.php:205
-#: includes/api/class-wc-api-products.php:2100
+#: includes/api/class-wc-api-products.php:2101
 #: includes/api/class-wc-api-webhooks.php:169
 #: includes/api/v2/class-wc-api-coupons.php:213
 #: includes/api/v2/class-wc-api-customers.php:345
@@ -5352,7 +5352,7 @@ msgstr ""
 #: includes/api/v2/class-wc-api-orders.php:1306
 #: includes/api/v2/class-wc-api-orders.php:1598
 #: includes/api/v2/class-wc-api-products.php:210
-#: includes/api/v2/class-wc-api-products.php:2105
+#: includes/api/v2/class-wc-api-products.php:2106
 #: includes/api/v2/class-wc-api-webhooks.php:169
 msgid "No %1$s data specified to create %1$s"
 msgstr ""
@@ -5365,13 +5365,13 @@ msgstr ""
 #: includes/api/class-wc-api-coupons.php:227
 #: includes/api/class-wc-api-customers.php:359
 #: includes/api/class-wc-api-products.php:219
-#: includes/api/class-wc-api-products.php:2064
+#: includes/api/class-wc-api-products.php:2065
 #: includes/api/class-wc-api-server.php:427
 #: includes/api/v1/class-wc-api-server.php:409
 #: includes/api/v2/class-wc-api-coupons.php:227
 #: includes/api/v2/class-wc-api-customers.php:359
 #: includes/api/v2/class-wc-api-products.php:224
-#: includes/api/v2/class-wc-api-products.php:2069
+#: includes/api/v2/class-wc-api-products.php:2070
 #: includes/api/v2/class-wc-api-server.php:427 includes/class-wc-auth.php:159
 msgid "Missing parameter %s"
 msgstr ""
@@ -5396,7 +5396,7 @@ msgstr ""
 #: includes/api/class-wc-api-orders.php:1364
 #: includes/api/class-wc-api-orders.php:1676
 #: includes/api/class-wc-api-products.php:307
-#: includes/api/class-wc-api-products.php:2181
+#: includes/api/class-wc-api-products.php:2182
 #: includes/api/class-wc-api-webhooks.php:245
 #: includes/api/v2/class-wc-api-coupons.php:329
 #: includes/api/v2/class-wc-api-customers.php:400
@@ -5404,7 +5404,7 @@ msgstr ""
 #: includes/api/v2/class-wc-api-orders.php:1363
 #: includes/api/v2/class-wc-api-orders.php:1675
 #: includes/api/v2/class-wc-api-products.php:312
-#: includes/api/v2/class-wc-api-products.php:2186
+#: includes/api/v2/class-wc-api-products.php:2187
 #: includes/api/v2/class-wc-api-webhooks.php:245
 msgid "No %1$s data specified to edit %1$s"
 msgstr ""
@@ -5419,22 +5419,22 @@ msgstr ""
 #: includes/api/class-wc-api-coupons.php:526
 #: includes/api/class-wc-api-customers.php:789
 #: includes/api/class-wc-api-orders.php:1789
-#: includes/api/class-wc-api-products.php:2344
+#: includes/api/class-wc-api-products.php:2345
 #: includes/api/v2/class-wc-api-coupons.php:526
 #: includes/api/v2/class-wc-api-customers.php:789
 #: includes/api/v2/class-wc-api-orders.php:1788
-#: includes/api/v2/class-wc-api-products.php:2373
+#: includes/api/v2/class-wc-api-products.php:2374
 msgid "No %1$s data specified to create/edit %1$s"
 msgstr ""
 
 #: includes/api/class-wc-api-coupons.php:534
 #: includes/api/class-wc-api-customers.php:797
 #: includes/api/class-wc-api-orders.php:1797
-#: includes/api/class-wc-api-products.php:2352
+#: includes/api/class-wc-api-products.php:2353
 #: includes/api/v2/class-wc-api-coupons.php:534
 #: includes/api/v2/class-wc-api-customers.php:797
 #: includes/api/v2/class-wc-api-orders.php:1796
-#: includes/api/v2/class-wc-api-products.php:2381
+#: includes/api/v2/class-wc-api-products.php:2382
 msgid "Unable to accept more than %s items for this request"
 msgstr ""
 
@@ -5800,109 +5800,109 @@ msgstr ""
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1731
 #: includes/api/class-wc-api-products.php:1732
+#: includes/api/class-wc-api-products.php:1733
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
-#: includes/api/v2/class-wc-api-products.php:1736
 #: includes/api/v2/class-wc-api-products.php:1737
+#: includes/api/v2/class-wc-api-products.php:1738
 #: includes/wc-product-functions.php:287
 #: templates/single-product/product-image.php:42
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1806
-#: includes/api/v2/class-wc-api-products.php:1811
+#: includes/api/class-wc-api-products.php:1807
+#: includes/api/v2/class-wc-api-products.php:1812
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1818
-#: includes/api/v2/class-wc-api-products.php:1823
+#: includes/api/class-wc-api-products.php:1819
+#: includes/api/v2/class-wc-api-products.php:1824
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1847
-#: includes/api/v2/class-wc-api-products.php:1852
+#: includes/api/class-wc-api-products.php:1848
+#: includes/api/v2/class-wc-api-products.php:1853
 msgid "Zero size file downloaded"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1979
-#: includes/api/class-wc-api-products.php:2023
-#: includes/api/v2/class-wc-api-products.php:1984
-#: includes/api/v2/class-wc-api-products.php:2028
+#: includes/api/class-wc-api-products.php:1980
+#: includes/api/class-wc-api-products.php:2024
+#: includes/api/v2/class-wc-api-products.php:1985
+#: includes/api/v2/class-wc-api-products.php:2029
 msgid "You do not have permission to read product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2018
-#: includes/api/v2/class-wc-api-products.php:2023
+#: includes/api/class-wc-api-products.php:2019
+#: includes/api/v2/class-wc-api-products.php:2024
 msgid "Invalid product attribute ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2033
-#: includes/api/class-wc-api-products.php:2274
-#: includes/api/v2/class-wc-api-products.php:2038
-#: includes/api/v2/class-wc-api-products.php:2279
+#: includes/api/class-wc-api-products.php:2034
+#: includes/api/class-wc-api-products.php:2275
+#: includes/api/v2/class-wc-api-products.php:2039
+#: includes/api/v2/class-wc-api-products.php:2280
 msgid "A product attribute with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2068
-#: includes/api/v2/class-wc-api-products.php:2073
+#: includes/api/class-wc-api-products.php:2069
+#: includes/api/v2/class-wc-api-products.php:2074
 msgid "Slug \"%s\" is too long (28 characters max). Shorten it, please."
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2070
-#: includes/api/v2/class-wc-api-products.php:2075
+#: includes/api/class-wc-api-products.php:2071
+#: includes/api/v2/class-wc-api-products.php:2076
 msgid "Slug \"%s\" is not allowed because it is a reserved term. Change it, please."
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2072
-#: includes/api/v2/class-wc-api-products.php:2077
+#: includes/api/class-wc-api-products.php:2073
+#: includes/api/v2/class-wc-api-products.php:2078
 msgid "Slug \"%s\" is already in use. Change it, please."
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2077
-#: includes/api/v2/class-wc-api-products.php:2082
+#: includes/api/class-wc-api-products.php:2078
+#: includes/api/v2/class-wc-api-products.php:2083
 msgid ""
 "Invalid product attribute type - the product attribute type must be any of "
 "these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2082
-#: includes/api/v2/class-wc-api-products.php:2087
+#: includes/api/class-wc-api-products.php:2083
+#: includes/api/v2/class-wc-api-products.php:2088
 msgid ""
 "Invalid product attribute order_by type - the product attribute order_by "
 "type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2107
-#: includes/api/v2/class-wc-api-products.php:2112
+#: includes/api/class-wc-api-products.php:2108
+#: includes/api/v2/class-wc-api-products.php:2113
 msgid "You do not have permission to create product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2189
-#: includes/api/v2/class-wc-api-products.php:2194
+#: includes/api/class-wc-api-products.php:2190
+#: includes/api/v2/class-wc-api-products.php:2195
 msgid "You do not have permission to edit product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2235
-#: includes/api/v2/class-wc-api-products.php:2240
+#: includes/api/class-wc-api-products.php:2236
+#: includes/api/v2/class-wc-api-products.php:2241
 msgid "Could not edit the attribute"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2262
-#: includes/api/v2/class-wc-api-products.php:2267
+#: includes/api/class-wc-api-products.php:2263
+#: includes/api/v2/class-wc-api-products.php:2268
 msgid "You do not have permission to delete product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2284
-#: includes/api/v2/class-wc-api-products.php:2289
+#: includes/api/class-wc-api-products.php:2285
+#: includes/api/v2/class-wc-api-products.php:2290
 msgid "Could not delete the attribute"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2302
+#: includes/api/class-wc-api-products.php:2303
 #: includes/api/class-wc-api-resource.php:386
 #: includes/api/v1/class-wc-api-resource.php:325
-#: includes/api/v2/class-wc-api-products.php:2307
+#: includes/api/v2/class-wc-api-products.php:2308
 #: includes/api/v2/class-wc-api-resource.php:386
 msgid "Deleted %s"
 msgstr ""
@@ -6053,7 +6053,7 @@ msgstr ""
 msgid "Consumer Secret is missing"
 msgstr ""
 
-#: includes/api/v2/class-wc-api-products.php:2328
+#: includes/api/v2/class-wc-api-products.php:2329
 msgid "Invalid product SKU"
 msgstr ""
 
@@ -7460,7 +7460,7 @@ msgid "Order Received"
 msgstr ""
 
 #: includes/class-wc-query.php:116
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:411
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:405
 #: templates/emails/admin-new-order.php:22
 #: templates/emails/customer-completed-order.php:22
 #: templates/emails/customer-invoice.php:26
@@ -8447,7 +8447,7 @@ msgid "Sorry, the minimum allowed order total is 0.50 to use this payment method
 msgstr ""
 
 #: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:297
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:439
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:433
 #: includes/gateways/simplify-commerce-deprecated/class-wc-addons-gateway-simplify-commerce-deprecated.php:70
 msgid "Customer not found"
 msgstr ""
@@ -8457,50 +8457,50 @@ msgstr ""
 msgid "%s - Order #%s"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:327
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:321
 #: includes/gateways/simplify-commerce-deprecated/class-wc-addons-gateway-simplify-commerce-deprecated.php:100
 msgid "Simplify payment error: %s"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:337
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:462
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:485
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:331
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:450
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:484
 #: includes/gateways/simplify-commerce-deprecated/class-wc-addons-gateway-simplify-commerce-deprecated.php:110
 msgid "Simplify payment approved (ID: %s, Auth Code: %s)"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:341
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:348
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:335
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:342
 #: includes/gateways/simplify-commerce-deprecated/class-wc-addons-gateway-simplify-commerce-deprecated.php:114
 msgid "Simplify payment declined"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:343
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:350
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:337
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:344
 #: includes/gateways/simplify-commerce-deprecated/class-wc-addons-gateway-simplify-commerce-deprecated.php:116
 msgid "Payment was declined - please try another card."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:357
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:467
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:351
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:455
 msgid "Simplify Transaction Failed (%s)"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:434
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:428
 msgid "%s - Pre-order for \"%s\""
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:434
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:428
 #: includes/gateways/simplify-commerce-deprecated/class-wc-addons-gateway-simplify-commerce-deprecated.php:65
 msgid "(Order #%s)"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:464
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:452
 msgid "Payment was declined - the customer need to try another card."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:511
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:457
+#: includes/gateways/simplify-commerce/class-wc-addons-gateway-simplify-commerce.php:499
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:456
 msgid "Payment was declined by Simplify Commerce."
 msgstr ""
 
@@ -8648,21 +8648,21 @@ msgstr ""
 msgid "is invalid"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:428
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:427
 msgid ""
 "Thank you for your order, please click the button below to pay with credit "
 "card using Simplify Commerce by MasterCard."
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:437
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:436
 msgid "Pay Now"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:437
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:436
 msgid "Cancel order &amp; restore cart"
 msgstr ""
 
-#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:521
+#: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:520
 msgid "Refund was declined."
 msgstr ""
 
