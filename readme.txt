@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Geo IP - Correctly parse .dat files.
 * Fix - Geo IP - Ensure WC_Logger class exists before logging errors.
 * Fix - Geo IP - Prevent notices in ipv6 methods.
+* Tweak - Add information about credit card address for Simplify Commerce.
 
 = 2.4.9 - 09/11/2015 =
 * Fix - Check abspath exists in more files to prevent errors on direct access.
