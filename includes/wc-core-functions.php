@@ -386,7 +386,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = '&#8362;';
 			break;
 		case 'INR' :
-			$currency_symbol = 'Rs.';
+			$currency_symbol = '&#8377;';
 			break;
 		case 'ISK' :
 			$currency_symbol = 'Kr.';
