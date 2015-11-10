@@ -1468,7 +1468,7 @@ class WC_Geo_IP {
 					2 * $this->record_length
 				);
 			} else {
-				if ( 0 == fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
+				if ( 0 != fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
 					$this->log( 'GeoIP API: fseek failed' );
 					break;
 				}
@@ -1525,7 +1525,7 @@ class WC_Geo_IP {
 					2 * $this->record_length
 				);
 			} else {
-				if ( 0 == fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
+				if ( 0 != fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
 					$this->log( 'GeoIP API: fseek failed' );
 					break;
 				}
