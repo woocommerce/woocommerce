@@ -262,7 +262,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * Gets the correct string for shipping - ether 'to the' or 'to'
+	 * Gets the correct string for shipping - either 'to the' or 'to'
 	 * @return string
 	 */
 	public function shipping_to_prefix() {
