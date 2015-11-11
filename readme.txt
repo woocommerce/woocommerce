@@ -205,6 +205,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Added woocommerce_is_price_filter_active filter to Query class.
 * Dev - Replaced some cart methods with dedicated functions. e.g. wc_ship_to_billing_address_only().
 
+[See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
+
 == Upgrade Notice ==
 
 = 2.4.0 =
