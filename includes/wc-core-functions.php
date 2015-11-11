@@ -407,13 +407,11 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			$currency_symbol = '&#107;&#114;';
 			break;
 		case 'NPR' :
-			$currency_symbol = 'Rs.';
+		case 'PKR' :
+			$currency_symbol = '&#8360';
 			break;
 		case 'PHP' :
 			$currency_symbol = '&#8369;';
-			break;
-		case 'PKR' :
-			$currency_symbol = 'Rs.';
 			break;
 		case 'PLN' :
 			$currency_symbol = '&#122;&#322;';
