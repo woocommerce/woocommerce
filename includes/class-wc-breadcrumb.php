@@ -100,7 +100,7 @@ class WC_Breadcrumb {
 		$shop_page    = get_post( $shop_page_id );
 
 		// If permalinks contain the shop page in the URI prepend the breadcrumb with shop
-		if ( $shop_page_id && $shop_page && strstr( $permalinks['product_base'], '/' . $shop_page->post_name ) && get_option( 'page_on_front' ) != $shop_page_id ) {
+		if ( $shop_page_id && $shop_page && isset( $permalinks['product_base'] ) && strstr( $permalinks['product_base'], '/' . $shop_page->post_name ) && get_option( 'page_on_front' ) != $shop_page_id ) {
 			$this->add_crumb( get_the_title( $shop_page ), get_permalink( $shop_page ) );
 		}
 	}
