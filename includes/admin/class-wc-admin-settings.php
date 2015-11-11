@@ -5,7 +5,7 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.4.0
+ * @version  2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -147,8 +147,6 @@ class WC_Admin_Settings {
 		if ( ! empty( $_GET['wc_message'] ) ) {
 			self::add_message( stripslashes( $_GET['wc_message'] ) );
 		}
-
-		self::show_messages();
 
 		// Get tabs for the settings page
 		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
