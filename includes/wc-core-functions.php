@@ -408,7 +408,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			break;
 		case 'NPR' :
 		case 'PKR' :
-			$currency_symbol = '&#8360';
+			$currency_symbol = '&#8360;';
 			break;
 		case 'PHP' :
 			$currency_symbol = '&#8369;';
