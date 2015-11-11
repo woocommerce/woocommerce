@@ -116,6 +116,7 @@ class WC_Geolocation {
 	/**
 	 * Geolocate an IP address.
 	 * @param  string $ip_address
+	 * @param  bool   $fallback
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = true ) {
