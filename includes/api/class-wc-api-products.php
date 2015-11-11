@@ -2353,6 +2353,8 @@ class WC_API_Products extends WC_API_Resource {
 
 		unset( $response );
 
+		do_action( 'woocommerce_api_uploaded_image_from_url', $upload, $image_url, $upload_for  );
+
 		return $upload;
 	}
 
