@@ -197,7 +197,7 @@ function wc_save_order_items( $order_id, $items ) {
 			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_order_items',
-					array( 'order_item_name' => wc_clean( stripslashes( $items['order_item_name'][ $item_id ] ) ) ),
+					array( 'order_item_name' => wc_clean( wp_unslash( $items['order_item_name'][ $item_id ] ) ) ),
 					array( 'order_item_id' => $item_id ),
 					array( '%s' ),
 					array( '%d' )
