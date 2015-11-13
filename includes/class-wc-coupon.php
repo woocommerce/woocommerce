@@ -144,21 +144,22 @@ class WC_Coupon {
 
 	/**
 	 * Get a coupon ID from it's code.
+	 * @since 2.5.0 woocommerce_coupon_code_query was removed in favour of woocommerce_get_coupon_id_from_code filter on the return. wp_cache was also implemented.
 	 * @param  string $code
 	 * @return int
 	 */
 	private function get_coupon_id_from_code( $code ) {
 		global $wpdb;
 
-		$coupon_code_query = $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code );
-		$transient_name    = 'wc_cid_by_code_' . md5( $coupon_code_query . WC_Cache_Helper::get_transient_version( 'coupons' ) );
+		$coupon_id = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 
-		if ( false === ( $result = get_transient( $transient_name ) ) ) {
-			$result = $wpdb->get_var( $coupon_code_query );
-			set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+		if ( false === $coupon_id ) {
+			$sql       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $this->code );
+			$coupon_id = apply_filters( 'woocommerce_get_coupon_id_from_code', $wpdb->get_var( $sql ), $this->code );
+			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $coupon_id, 'coupons' );
 		}
 
-		return absint( $result );
+		return absint( $coupon_id );
 	}
 
 	/**
