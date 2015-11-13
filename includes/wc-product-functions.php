@@ -88,10 +88,11 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_low_stock_count'
 	);
 
-	// Transients that include an ID
+	// Transient names that include an ID
 	$post_transient_names = array(
 		'wc_product_children_',
-		'wc_product_total_stock_'
+		'wc_product_total_stock_',
+		'wc_var_prices_'
 	);
 
 	if ( $post_id > 0 ) {

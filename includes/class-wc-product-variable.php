@@ -265,12 +265,10 @@ class WC_Product_Variable extends WC_Product {
 		global $wp_filter;
 
 		/**
-		 * Transient name for storing prices for this product.
-		 * Max transient length is 45, -10 for get_transient_version.
-		 * @var string
+		 * Transient name for storing prices for this product (note: Max transient length is 45)
 		 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
 		 */
-		$transient_name = 'wc_var_prices' . $this->id . '_' . WC_Cache_Helper::get_transient_version( 'product' );
+		$transient_name = 'wc_var_prices_' . $this->id;
 
 		/**
 		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
