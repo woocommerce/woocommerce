@@ -53,7 +53,10 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		$min_price = isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : 0;
 		$max_price = isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : 0;
 
-		if ( 0 < count( $_chosen_attributes ) || 0 < $min_price || 0 < $max_price ) {
+		// Rating
+		$min_rating = isset( $_GET['min_rating'] ) ? esc_attr( $_GET['min_rating'] ) : 0;
+
+		if ( 0 < count( $_chosen_attributes ) || 0 < $min_price || 0 < $max_price || 0 < $min_rating ) {
 
 			$this->widget_start( $args, $instance );
 
@@ -94,6 +97,11 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			if ( $max_price ) {
 				$link = remove_query_arg( 'max_price' );
 				echo '<li class="chosen"><a title="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . __( 'Max', 'woocommerce' ) . ' ' . wc_price( $max_price ) . '</a></li>';
+			}
+
+			if( $min_rating ) {
+				$link = remove_query_arg( 'min_rating' );
+				echo '<li class="chosen"><a title="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . sprintf( __( 'Rated %s and above', 'woocommerce' ), $min_rating ) . '</a></li>';
 			}
 
 			echo '</ul>';
