@@ -92,7 +92,8 @@ function wc_delete_product_transients( $post_id = 0 ) {
 	$post_transient_names = array(
 		'wc_product_children_',
 		'wc_product_total_stock_',
-		'wc_var_prices_'
+		'wc_var_prices_',
+		'wc_related_'
 	);
 
 	if ( $post_id > 0 ) {

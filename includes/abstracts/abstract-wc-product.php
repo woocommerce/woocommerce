@@ -1250,39 +1250,51 @@ class WC_Product {
 	/**
 	 * Get and return related products.
 	 *
+	 * Notes:
+	 * 	- Results are cached in a transient for faster queries.
+	 *  - To make results appear random, we query and extra 10 products and shuffle them.
+	 *  - To ensure we always have enough results, it will check $limit before returning the cached result, if not recalc.
+	 *  - This used to rely on transient version to invalidate cache, but to avoid multiple transients we now just expire daily.
+	 *  	This means if a related product is edited and no longer related, it won't be removed for 24 hours. Acceptable trade-off for performance.
+	 *  - Saving a product will flush caches for that product.
+	 *
 	 * @param int $limit (default: 5)
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
-		$transient_name = 'wc_related_' . $limit . '_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+		global $wpdb;
 
-		if ( false === ( $related_posts = get_transient( $transient_name ) ) ) {
-			global $wpdb;
+		$transient_name = 'wc_related_' . $this->id;
+		$related_posts  = get_transient( $transient_name );
 
+		// We want to query related posts if they are not cached, or we don't have enough
+		if ( false === $related_posts || sizeof( $related_posts ) < $limit ) {
 			// Related products are found from category and tag
 			$tags_array = $this->get_related_terms( 'product_tag' );
 			$cats_array = $this->get_related_terms( 'product_cat' );
 
 			// Don't bother if none are set
-			if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
+			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array )) {
 				$related_posts = array();
 			} else {
 				// Sanitize
 				$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
 
-				// Generate query
-				$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit );
+				// Generate query - but query an extra 10 results to give the appearance of random results
+				$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 );
 
 				// Get the posts
 				$related_posts = $wpdb->get_col( implode( ' ', $query ) );
 			}
 
-			set_transient( $transient_name, $related_posts, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
 		}
 
+		// Randomise the results
 		shuffle( $related_posts );
 
-		return $related_posts;
+		// Limit the returned results
+		return array_slice( $related_posts, 0, $limit );
 	}
 
 	/**
