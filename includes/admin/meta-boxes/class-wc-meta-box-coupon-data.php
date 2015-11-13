@@ -268,6 +268,9 @@ class WC_Meta_Box_Coupon_Data {
 		update_post_meta( $post_id, 'maximum_amount', $maximum_amount );
 		update_post_meta( $post_id, 'customer_email', $customer_email );
 
+		// Clear cache
+		WC_Cache_Helper::incr_cache_prefix( 'coupons' );
+
 		do_action( 'woocommerce_coupon_options_save', $post_id );
 	}
 }
