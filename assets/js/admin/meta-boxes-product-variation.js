@@ -285,7 +285,7 @@ jQuery( function( $ ) {
 				wc_meta_boxes_product_variations_media.variable_image_frame.on( 'select', function () {
 
 					var attachment = wc_meta_boxes_product_variations_media.variable_image_frame.state().get( 'selection' ).first().toJSON(),
-						url = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+						url = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
 					$( '.upload_image_id', wc_meta_boxes_product_variations_media.setting_variation_image ).val( attachment.id ).change();
 					wc_meta_boxes_product_variations_media.setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
