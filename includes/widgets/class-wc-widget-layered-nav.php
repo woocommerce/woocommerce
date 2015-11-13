@@ -379,6 +379,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 						$link = add_query_arg( 'query_type_' . sanitize_title( $instance['attribute'] ), 'or', $link );
 					}
 
+					// Min Rating Arg
+					if ( isset( $_GET['min_rating'] ) ) {
+						$link = add_query_arg( 'min_rating', $_GET['min_rating'], $link );
+					}
+
 					echo '<li ' . $class . '>';
 
 					echo ( $count > 0 || $option_is_set ) ? '<a href="' . esc_url( apply_filters( 'woocommerce_layered_nav_link', $link ) ) . '">' : '<span>';
