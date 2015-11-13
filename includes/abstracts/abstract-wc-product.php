@@ -1044,22 +1044,15 @@ class WC_Product {
 	}
 
 	/**
-	 * Get the average rating of product.
-	 *
+	 * Get the average rating of product. This is calculated once and stored in postmeta.
 	 * @return string
 	 */
 	public function get_average_rating() {
-		$transient_name = 'wc_average_rating_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+		global $wpdb;
 
-		if ( false === ( $average_rating = get_transient( $transient_name ) ) ) {
-
-			global $wpdb;
-
-			$average_rating = '';
-			$count          = $this->get_rating_count();
-
-			if ( $count > 0 ) {
-
+		// No meta date? Do the calculation
+		if ( ! metadata_exists( 'post', $this->id, '_wc_average_rating' ) ) {
+			if ( $count = $this->get_rating_count() ) {
 				$ratings = $wpdb->get_var( $wpdb->prepare("
 					SELECT SUM(meta_value) FROM $wpdb->commentmeta
 					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
@@ -1068,28 +1061,28 @@ class WC_Product {
 					AND comment_approved = '1'
 					AND meta_value > 0
 				", $this->id ) );
-
-				$average_rating = number_format( $ratings / $count, 2 );
+				$average = number_format( $ratings / $count, 2 );
+			} else {
+				$average = 0;
 			}
-
-			set_transient( $transient_name, $average_rating, DAY_IN_SECONDS * 30 );
+			update_post_meta( $this->id, '_wc_average_rating', $average );
+		} else {
+			$average = get_post_meta( $this->id, '_wc_average_rating', true );
 		}
 
-		return $average_rating;
+		return $average;
 	}
 
 	/**
 	 * Get the total amount (COUNT) of ratings.
-	 *
-	 * @param  int $value Optional. Rating value to get the count for. By default
-	 *                              returns the count of all rating values.
+	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
 	 * @return int
 	 */
 	public function get_rating_count( $value = null ) {
-		$transient_name = 'wc_rating_count_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+		global $wpdb;
 
-		if ( ! is_array( $counts = get_transient( $transient_name ) ) ) {
-			global $wpdb;
+		// No meta date? Do the calculation
+		if ( ! metadata_exists( 'post', $this->id, '_wc_rating_count' ) ) {
 			$counts     = array();
 			$raw_counts = $wpdb->get_results( $wpdb->prepare("
 				SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
@@ -1105,7 +1098,9 @@ class WC_Product {
 				$counts[ $count->meta_value ] = $count->meta_value_count;
 			}
 
-			set_transient( $transient_name, $counts, DAY_IN_SECONDS * 30 );
+			update_post_meta( $this->id, '_wc_rating_count', $counts );
+		} else {
+			$counts = get_post_meta( $this->id, '_wc_rating_count', true );
 		}
 
 		if ( is_null( $value ) ) {
@@ -1141,7 +1136,6 @@ class WC_Product {
 		return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
 	}
 
-
 	/**
 	 * Get the total amount (COUNT) of reviews.
 	 *
@@ -1149,13 +1143,10 @@ class WC_Product {
 	 * @return int The total numver of product reviews
 	 */
 	public function get_review_count() {
+		global $wpdb;
 
-		$transient_name = 'wc_review_count_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-		if ( false === ( $count = get_transient( $transient_name ) ) ) {
-
-			global $wpdb;
-
+		// No meta date? Do the calculation
+		if ( ! metadata_exists( 'post', $this->id, '_wc_review_count' ) ) {
 			$count = $wpdb->get_var( $wpdb->prepare("
 				SELECT COUNT(*) FROM $wpdb->comments
 				WHERE comment_parent = 0
@@ -1163,12 +1154,13 @@ class WC_Product {
 				AND comment_approved = '1'
 			", $this->id ) );
 
-			set_transient( $transient_name, $count, DAY_IN_SECONDS * 30 );
+			update_post_meta( $this->id, '_wc_review_count', $count );
+		} else {
+			$count = get_post_meta( $this->id, '_wc_review_count', true );
 		}
 
 		return apply_filters( 'woocommerce_product_review_count', $count, $this );
 	}
-
 
 	/**
 	 * Returns the upsell product ids.
