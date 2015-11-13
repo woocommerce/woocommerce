@@ -53,6 +53,7 @@ class WC_Query {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		add_action( 'init', array( $this, 'layered_nav_init' ) );
 		add_action( 'init', array( $this, 'price_filter_init' ) );
+		add_action( 'init', array( $this, 'rating_filter_init' ) );
 
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
