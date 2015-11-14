@@ -44,40 +44,6 @@ class WC_Product_Grouped extends WC_Product {
 		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'View products', 'woocommerce' ), $this );
 	}
 
-    /**
-     * Get total stock.
-     *
-     * This is the stock of parent and children combined.
-     *
-     * @access public
-     * @return int
-     */
-    public function get_total_stock() {
-
-        if ( empty( $this->total_stock ) ) {
-
-        	$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-        	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-		        $this->total_stock = $this->stock;
-
-				if ( sizeof( $this->get_children() ) > 0 ) {
-					foreach ( $this->get_children() as $child_id ) {
-						$stock = get_post_meta( $child_id, '_stock', true );
-
-						if ( $stock != '' ) {
-							$this->total_stock += wc_stock_amount( $stock );
-						}
-					}
-				}
-
-				set_transient( $transient_name, $this->total_stock, DAY_IN_SECONDS * 30 );
-			}
-		}
-
-		return wc_stock_amount( $this->total_stock );
-    }
-
 	/**
 	 * Return the products children posts.
 	 *
