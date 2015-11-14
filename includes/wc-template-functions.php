@@ -1383,12 +1383,13 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 
 	/**
-	 * Check if we will be showing products or not (and not subcats only).
-	 *
+	 * Check if we will be showing products or not (and not sub-categories only).
 	 * @subpackage	Loop
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
+		global $wpdb;
+
 		if ( is_shop() ) {
 			return 'subcategories' !== get_option( 'woocommerce_shop_page_display' ) || is_search();
 		}
@@ -1414,37 +1415,33 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 				break;
 				default :
 					// Default - no setting
-					if ( get_option( 'woocommerce_category_archive_display' ) != 'subcategories' )
+					if ( get_option( 'woocommerce_category_archive_display' ) != 'subcategories' ) {
 						return true;
+					}
 				break;
 			}
 		}
 
 		// Begin subcategory logic
-		global $wpdb;
-
-		$parent_id             = empty( $term->term_id ) ? 0 : $term->term_id;
-		$taxonomy              = empty( $term->taxonomy ) ? '' : $term->taxonomy;
-
-		if ( ! $parent_id && ! $taxonomy ) {
+		if ( empty( $term->term_id ) || empty( $term->taxonomy ) ) {
 			return true;
 		}
 
-		$transient_name = 'wc_products_will_display_' . $parent_id . WC_Cache_Helper::get_transient_version( 'product_query' );
+		$transient_name = 'wc_products_will_display_' . $term->term_id . '_' . WC_Cache_Helper::get_transient_version( 'product_query' );
 
 		if ( false === ( $products_will_display = get_transient( $transient_name ) ) ) {
-			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $parent_id, $taxonomy ) );
+			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $term->term_id, $term->taxonomy ) );
 
 			if ( $has_children ) {
 				// Check terms have products inside - parents first. If products are found inside, subcats will be shown instead of products so we can return false.
-				if ( sizeof( get_objects_in_term( $has_children, $taxonomy ) ) > 0 ) {
+				if ( sizeof( get_objects_in_term( $has_children, $term->taxonomy ) ) > 0 ) {
 					$products_will_display = false;
 				} else {
 					// If we get here, the parents were empty so we're forced to check children
 					foreach ( $has_children as $term ) {
-						$children = get_term_children( $term, $taxonomy );
+						$children = get_term_children( $term, $term->taxonomy );
 
-						if ( sizeof( get_objects_in_term( $children, $taxonomy ) ) > 0 ) {
+						if ( sizeof( get_objects_in_term( $children, $term->taxonomy ) ) > 0 ) {
 							$products_will_display = false;
 							break;
 						}
