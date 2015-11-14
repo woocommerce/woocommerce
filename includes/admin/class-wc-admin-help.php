@@ -57,10 +57,6 @@ class WC_Admin_Help {
 				'title' => __( 'Checkout Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/65yjv96z51?videoFoam=true'
 			),
-			'wc-settings-shipping' => array(
-				'title' => __( 'Shipping Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/9c9008dxnr?videoFoam=true'
-			),
 			'wc-settings-account' => array(
 				'title' => __( 'Account Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/35mazq7il2?videoFoam=true'
