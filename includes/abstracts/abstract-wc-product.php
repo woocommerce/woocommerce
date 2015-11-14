@@ -70,6 +70,9 @@ class WC_Product {
 	 */
 	protected $shipping_class_id = 0;
 
+	/** @public string The product's total stock, including that of its children. */
+	public $total_stock;
+	
 	/**
 	 * Supported features such as 'ajax_add_to_cart'.
 	 * @var array

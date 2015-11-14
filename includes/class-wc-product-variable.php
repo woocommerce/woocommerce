@@ -20,9 +20,6 @@ class WC_Product_Variable extends WC_Product {
 	/** @public array Array of child products/posts/variations. */
 	public $children = null;
 
-	/** @public string The product's total stock, including that of its children. */
-	public $total_stock;
-
 	/** @private array Array of variation prices. */
 	private $prices_array = array();
 

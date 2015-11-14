@@ -20,9 +20,6 @@ class WC_Product_Grouped extends WC_Product {
 	/** @public array Array of child products/posts/variations. */
 	public $children;
 
-	/** @public string The product's total stock, including that of its children. */
-	public $total_stock;
-
 	/**
 	 * __construct function.
 	 *
