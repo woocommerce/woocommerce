@@ -9,7 +9,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Settings' ) ) :
@@ -373,7 +373,7 @@ class WC_Admin_Settings {
 										<?php
 									}
 								?>
-						   </select> <?php echo $description; ?>
+							</select> <?php echo $description; ?>
 						</td>
 					</tr><?php
 					break;
@@ -462,9 +462,9 @@ class WC_Admin_Settings {
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								type="checkbox"
-							 	class="<?php echo esc_attr(isset($value['class']) ? $value['class'] : ''); ?>"
+								class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 								value="1"
-								<?php checked( $option_value, 'yes'); ?>
+								<?php checked( $option_value, 'yes' ); ?>
 								<?php echo implode( ' ', $custom_attributes ); ?>
 							/> <?php echo $description ?>
 						</label> <?php echo $tooltip_html; ?>

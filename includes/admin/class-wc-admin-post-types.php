@@ -5,11 +5,11 @@
  * @author   WooThemes
  * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.4.0
+ * @version  2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
@@ -1506,6 +1506,7 @@ class WC_Admin_Post_Types {
 
 		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
 			'_order_key',
+			'_payment_method',
 			'_billing_company',
 			'_billing_address_1',
 			'_billing_address_2',
@@ -1620,7 +1621,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Show a category filter box.
+	 * Show custom filters to filter products by category/type.
 	 */
 	public function product_filters() {
 		global $wp_query;
@@ -1701,8 +1702,9 @@ class WC_Admin_Post_Types {
 				foreach ( $types as $name => $type ) {
 					echo '<option value="' . esc_attr( $name ) . '"';
 
-					if ( isset( $_GET['coupon_type'] ) )
+					if ( isset( $_GET['coupon_type'] ) ) {
 						selected( $name, $_GET['coupon_type'] );
+					}
 
 					echo '>' . esc_html__( $type, 'woocommerce' ) . '</option>';
 				}
