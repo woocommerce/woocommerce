@@ -63,8 +63,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				foreach ( $totals as $total ) {
 					$i++;
 					?><tr>
-						<td class="td" colspan="2" style="text-align:left; <?php if ( $i == 1 ) echo 'border-top-width: 4px !important;'; ?>"><?php echo $total['label']; ?></td>
-						<td class="td" style="text-align:left; <?php if ( $i == 1 ) echo 'border-top-width: 4px !important;'; ?>"><?php echo $total['value']; ?></td>
+						<td class="td" colspan="2" style="text-align:left; <?php if ( $i === 1 ) echo 'border-top-width: 4px !important;'; ?>"><?php echo $total['label']; ?></td>
+						<td class="td" style="text-align:left; <?php if ( $i === 1 ) echo 'border-top-width: 4px !important;'; ?>"><?php echo $total['value']; ?></td>
 					</tr><?php
 				}
 			}

@@ -23,7 +23,7 @@ global $product, $woocommerce_loop;
 
 $crosssells = WC()->cart->get_cross_sells();
 
-if ( sizeof( $crosssells ) == 0 ) return;
+if ( 0 === sizeof( $crosssells ) ) return;
 
 $meta_query = WC()->query->get_meta_query();
 
