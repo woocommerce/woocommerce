@@ -23,7 +23,7 @@ global $product, $woocommerce_loop;
 
 $upsells = $product->get_upsells();
 
-if ( sizeof( $upsells ) == 0 ) {
+if ( sizeof( $upsells ) === 0 ) {
 	return;
 }
 
