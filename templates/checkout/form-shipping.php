@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="woocommerce-shipping-fields">
-	<?php if ( WC()->cart->needs_shipping_address() === true ) : ?>
+	<?php if ( true === WC()->cart->needs_shipping_address() ) : ?>
 
 		<?php
 			if ( empty( $_POST ) ) {

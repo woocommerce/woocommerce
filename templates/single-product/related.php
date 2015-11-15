@@ -27,7 +27,7 @@ if ( empty( $product ) || ! $product->exists() ) {
 
 $related = $product->get_related( $posts_per_page );
 
-if ( sizeof( $related ) == 0 ) return;
+if ( sizeof( $related ) === 0 ) return;
 
 $args = apply_filters( 'woocommerce_related_products_args', array(
 	'post_type'            => 'product',

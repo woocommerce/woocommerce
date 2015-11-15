@@ -33,10 +33,10 @@ if ( $attachment_ids ) {
 
 			$classes = array( 'zoom' );
 
-			if ( $loop == 0 || $loop % $columns == 0 )
+			if ( $loop === 0 || $loop % $columns === 0 )
 				$classes[] = 'first';
 
-			if ( ( $loop + 1 ) % $columns == 0 )
+			if ( ( $loop + 1 ) % $columns === 0 )
 				$classes[] = 'last';
 
 			$image_link = wp_get_attachment_url( $attachment_id );
