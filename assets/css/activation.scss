@@ -15,10 +15,7 @@
 	overflow: hidden;
 	position: relative;
 	border-left-color: #cc99c2 !important;
-}
 
-p.woocommerce-actions,
-.woocommerce-message {
 	a.button-primary {
 		background: #cc99c2;
 		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
@@ -59,9 +56,4 @@ p.woocommerce-actions,
 		margin-left: 3px;
 		vertical-align: middle;
 	}
-}
-
-p.woocommerce-actions,
-.woocommerce-about-text {
-	margin-bottom: 1em !important;
 }
