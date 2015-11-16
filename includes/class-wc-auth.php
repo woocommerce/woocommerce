@@ -235,6 +235,7 @@ class WC_Auth {
 	 * @param  string $url
 	 *
 	 * @return bool
+	 * @throws Exception
 	 */
 	protected function post_consumer_data( $consumer_data, $url ) {
 		$params = array(
