@@ -1608,6 +1608,8 @@ p.demo_store {
 			display: block;
 			text-align: center;
 			margin-bottom: 1em;
+			font-size: 1.25em;
+			padding: 1em;
 		}
 	}
 
@@ -1646,12 +1648,16 @@ p.demo_store {
 					}
 				}
 
+				th {
+					width: 40%;
+				}
+
 				td,
 				th {
 					vertical-align: top;
 					border-left: 0;
 					border-right: 0;
-					line-height: 2em;
+					line-height: 1.5em;
 				}
 
 				small {
