@@ -1811,11 +1811,11 @@ class WC_API_Products extends WC_API_Resource {
 					} else {
 						$backorders = ( true === $variation['backorders'] ) ? 'yes' : 'no';
 					}
-				} else {
-					$backorders = 'no';
-				}
 
-				update_post_meta( $variation_id, '_backorders', $backorders );
+					update_post_meta( $variation_id, '_backorders', $backorders );
+				} else {
+					$backorders = get_post_meta( $variation_id, '_backorders', true );
+				}
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
