@@ -129,7 +129,7 @@ class WC_Auth {
 	 * @return string
 	 */
 	protected function build_url( $data, $endpoint ) {
-		$url = wc_get_endpoint_url( 'wc-auth/v' . self::VERSION, $endpoint, get_home_url( '/' ) );
+		$url = wc_get_endpoint_url( 'wc-auth/v' . self::VERSION, $endpoint, home_url( '/' ) );
 
 		return add_query_arg( array(
 			'app_name'     => wc_clean( $data['app_name'] ),
