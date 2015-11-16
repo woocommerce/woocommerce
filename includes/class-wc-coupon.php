@@ -353,6 +353,7 @@ class WC_Coupon {
 	 * Checked again for emails later on in WC_Cart::check_customer_coupons().
 	 *
 	 * @param  int  $user_id
+	 * @throws Exception
 	 */
 	private function validate_user_usage_limit( $user_id = null ) {
 		if ( ! $user_id ) {
