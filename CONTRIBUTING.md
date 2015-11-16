@@ -62,8 +62,6 @@ Make sure to edit the second column’s header by using your own language’s co
 Write the translated entry in this column and translate the entry description as well.
 Don’t change other columns headers and value, but feel free to add new entries.
 
-Here you can find detailed instructions about [how to prepare a CSV to import in the GlotPress' glossary](#).
-
 When your CSV is ready, import it on GlotPress.
 
 _**Warning**: Importing a CSV does not replace existing items, they will be created again. We suggest to import them only when first creating the glossary._
