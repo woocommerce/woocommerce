@@ -186,9 +186,10 @@ class WC_API_Authentication {
 	/**
 	 * Get user by ID
 	 *
-	 * @since 2.4.0
-	 * @param int $user_id
+	 * @since  2.4.0
+	 * @param  int $user_id
 	 * @return WC_User
+	 * @throws Exception
 	 */
 	private function get_user_by_id( $user_id ) {
 		$user = get_user_by( 'id', $user_id );
