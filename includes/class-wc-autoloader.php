@@ -17,7 +17,7 @@ class WC_Autoloader {
 
 	/**
 	 * Path to the includes directory.
-	 * 
+	 *
 	 * @var string
 	 */
 	private $include_path = '';
@@ -37,7 +37,7 @@ class WC_Autoloader {
 
 	/**
 	 * Take a class name and turn it into a file name.
-	 * 
+	 *
 	 * @param  string $class
 	 * @return string
 	 */
@@ -47,7 +47,7 @@ class WC_Autoloader {
 
 	/**
 	 * Include a class file.
-	 * 
+	 *
 	 * @param  string $path
 	 * @return bool successful or not
 	 */
