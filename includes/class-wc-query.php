@@ -563,7 +563,7 @@ class WC_Query {
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 			break;
 			case 'price' :
-				$args['orderby']  = "meta_value_num {$wpdb->posts}.ID";
+				$args['orderby']  = "meta_value_num ID";
 				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
 			break;
