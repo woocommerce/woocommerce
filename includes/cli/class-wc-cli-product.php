@@ -1052,6 +1052,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @param  int $product_id
 	 * @param  array $data
 	 * @return bool
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_product_meta( $product_id, $data ) {
 		global $wpdb;
@@ -1513,6 +1514,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @param  int $id
 	 * @param  array $data
 	 * @return bool
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_variations( $id, $data ) {
 		global $wpdb;
@@ -1825,9 +1827,10 @@ class WC_CLI_Product extends WC_CLI_Command {
 	/**
 	 * Save product images.
 	 *
-	 * @since 2.5.0
-	 * @param array $images
-	 * @param int $id
+	 * @since  2.5.0
+	 * @param  array $images
+	 * @param  int $id
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_product_images( $id, $images ) {
 		if ( is_array( $images ) ) {
@@ -1992,6 +1995,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @since  2.5.0
 	 * @param  string $image_url
 	 * @return int|WP_Error attachment id
+	 * @throws WC_CLI_Exception
 	 */
 	private function upload_product_image( $image_url ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );

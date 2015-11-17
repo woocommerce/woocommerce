@@ -765,10 +765,11 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save product meta
 	 *
-	 * @since 2.2
-	 * @param int $product_id
-	 * @param array $data
+	 * @since  2.2
+	 * @param  int $product_id
+	 * @param  array $data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function save_product_meta( $product_id, $data ) {
 		global $wpdb;
@@ -1226,10 +1227,11 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save variations
 	 *
-	 * @since 2.2
-	 * @param int $id
-	 * @param array $data
+	 * @since  2.2
+	 * @param  int $id
+	 * @param  array $data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function save_variations( $id, $data ) {
 		global $wpdb;
@@ -1746,9 +1748,10 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save product images
 	 *
-	 * @since 2.2
-	 * @param array $images
-	 * @param int $id
+	 * @since  2.2
+	 * @param  array $images
+	 * @param  int $id
+	 * @throws WC_API_Exception
 	 */
 	protected function save_product_images( $id, $images ) {
 		if ( is_array( $images ) ) {
@@ -1798,9 +1801,10 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Upload image from URL
 	 *
-	 * @since 2.2
-	 * @param string $image_url
+	 * @since  2.2
+	 * @param  string $image_url
 	 * @return int|WP_Error attachment id
+	 * @throws WC_API_Exception
 	 */
 	public function upload_product_image( $image_url ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );
@@ -2064,6 +2068,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param  string $order_by
 	 * @param  bool   $new_data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function validate_attribute_data( $name, $slug, $type, $order_by, $new_data = true ) {
 		if ( empty( $name ) ) {
