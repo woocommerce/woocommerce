@@ -227,7 +227,7 @@ if ( ! function_exists( 'is_store_notice_showing' ) ) {
 	 * @return bool
 	 */
 	function is_store_notice_showing() {
-		return get_option( 'woocommerce_demo_store' ) !== 'no' ? true : false;
+		return 'no' !== get_option( 'woocommerce_demo_store' ) ? true : false;
 	}
 }
 
@@ -299,7 +299,7 @@ if ( ! function_exists( 'wc_prices_include_tax' ) ) {
 	 * @return bool
 	 */
 	function wc_prices_include_tax() {
-		return wc_tax_enabled() && get_option( 'woocommerce_prices_include_tax' ) === 'yes';
+		return wc_tax_enabled() && 'yes' === get_option( 'woocommerce_prices_include_tax' );
 	}
 }
 
