@@ -534,8 +534,8 @@ class WC_Countries {
 				'validate'    => array( 'state' )
 			),
 			'postcode' => array(
-				'label'       => __( 'Postcode / Zip', 'woocommerce' ),
-				'placeholder' => __( 'Postcode / Zip', 'woocommerce' ),
+				'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
+				'placeholder' => __( 'Postcode / ZIP', 'woocommerce' ),
 				'required'    => true,
 				'class'       => array( 'form-row-last', 'address-field' ),
 				'clear'       => true,
@@ -865,8 +865,8 @@ class WC_Countries {
 				),
 				'US' => array(
 					'postcode'  => array(
-						'label'       => __( 'Zip', 'woocommerce' ),
-						'placeholder' => __( 'Zip', 'woocommerce' ),
+						'label'       => __( 'ZIP', 'woocommerce' ),
+						'placeholder' => __( 'ZIP', 'woocommerce' ),
 					),
 					'state'     => array(
 						'label'       => __( 'State', 'woocommerce' ),
