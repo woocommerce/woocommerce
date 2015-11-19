@@ -77,20 +77,31 @@ $theme 	= wp_get_theme();
 				case 'third-party-extensions':
 					$addons = $addons->{'third-party'};
 				break;
+				default:
+					$view = '';
+
+					if ( isset( $_GET['view'] ) && isset( $addons->{esc_attr( $_GET['view'] )} ) ) {
+						$view = esc_attr( $_GET['view'] );
+					}
+
+					$addons = $addons->{$view};
+				break;
 			}
 
-			foreach ( $addons as $addon ) {
-				echo '<li class="product">';
-				echo '<a href="' . $addon->link . '">';
-				if ( ! empty( $addon->image ) ) {
-					echo '<img src="' . $addon->image . '"/>';
-				} else {
-					echo '<h3>' . $addon->title . '</h3>';
+			if ( 0 < count( $addons ) ) {
+				foreach ( $addons as $addon ) {
+					echo '<li class="product">';
+					echo '<a href="' . $addon->link . '">';
+					if ( ! empty( $addon->image ) ) {
+						echo '<img src="' . $addon->image . '"/>';
+					} else {
+						echo '<h3>' . $addon->title . '</h3>';
+					}
+					echo '<span class="price">' . $addon->price . '</span>';
+					echo '<p>' . $addon->excerpt . '</p>';
+					echo '</a>';
+					echo '</li>';
 				}
-				echo '<span class="price">' . $addon->price . '</span>';
-				echo '<p>' . $addon->excerpt . '</p>';
-				echo '</a>';
-				echo '</li>';
 			}
 		?>
 		</ul>
