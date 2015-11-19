@@ -78,13 +78,9 @@ $theme 	= wp_get_theme();
 					$addons = $addons->{'third-party'};
 				break;
 				default:
-					$view = '';
-
-					if ( isset( $_GET['view'] ) && isset( $addons->{esc_attr( $_GET['view'] )} ) ) {
-						$view = esc_attr( $_GET['view'] );
+					if ( isset( $addons->{$view} ) ) {
+						$addons = $addons->{$view};
 					}
-
-					$addons = $addons->{$view};
 				break;
 			}
 
