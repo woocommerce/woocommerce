@@ -25,24 +25,33 @@ class WC_Admin_Addons {
 		$text = __( 'View more about Storefront', 'woocommerce' );
 		$template = get_option( 'template' );
 		$stylesheet = get_option( 'stylesheet' );
+		$utm_content = 'hasstorefront';
 
 		// If we're using Storefront with a child theme.
 		if ( 'storefront' == $template && 'storefront' != $stylesheet ) {
 			$url = 'http:///www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
 			$text = __( 'View more Storefront child themes', 'woocommerce' );
+			$utm_content = 'hasstorefrontchildtheme';
 		}
 
 		// If we're using Storefront without a child theme.
 		if ( 'storefront' == $template && 'storefront' == $stylesheet ) {
 			$url = 'http:///www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
 			$text = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
+			$utm_content = 'nostorefrontchildtheme';
 		}
 
 		// If we're not using Storefront at all.
 		if ( 'storefront' != $template && 'storefront' != $stylesheet ) {
 			$url = 'http://www.woothemes.com/storefront/';
 			$text = __( 'Need a theme? Try Storefront', 'woocommerce' );
+			$utm_content = 'nostorefront';
 		}
+
+		$url = add_query_arg( 'utm_source', 'product', $url );
+		$url = add_query_arg( 'utm_medium', 'upsell', $url );
+		$url = add_query_arg( 'utm_campaign', 'wcaddons', $url );
+		$url = add_query_arg( 'utm_content', $utm_content, $url );
 
 		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
 	}
