@@ -24,7 +24,7 @@ $theme 	= wp_get_theme();
 	<?php if ( $addons ) : ?>
 		<ul class="subsubsub">
 			<?php
-				$links = array(
+				$links = apply_filters( 'woocommerce_addons_sections', array(
 					''                         => __( 'Popular', 'woocommerce' ),
 					'payment-gateways'         => __( 'Gateways', 'woocommerce' ),
 					'shipping-methods'         => __( 'Shipping', 'woocommerce' ),
@@ -34,13 +34,15 @@ $theme 	= wp_get_theme();
 					'accounting-extensions'	   => __( 'Accounting', 'woocommerce' ),
 					'free-extensions'          => __( 'Free', 'woocommerce' ),
 					'third-party-extensions'   => __( 'Third-party', 'woocommerce' ),
-				);
+				) );
 
 				$i = 0;
 
-				foreach ( $links as $link => $name ) {
-					$i ++;
-					?><li><a class="<?php if ( $view == $link ) echo 'current'; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&view=' . esc_attr( $link ) ); ?>"><?php echo $name; ?></a><?php if ( $i != sizeof( $links ) ) echo ' |'; ?></li><?php
+				if ( is_array( $links ) && 0 < count( $links ) ) {
+					foreach ( $links as $link => $name ) {
+						$i ++;
+						?><li><a class="<?php if ( $view == $link ) echo 'current'; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&view=' . esc_attr( $link ) ); ?>"><?php echo $name; ?></a><?php if ( $i != sizeof( $links ) ) echo ' |'; ?></li><?php
+					}
 				}
 			?>
 		</ul>
