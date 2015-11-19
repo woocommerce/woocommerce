@@ -33,6 +33,8 @@ class WC_Admin_Addons {
 				if ( $addons ) {
 					set_transient( 'woocommerce_addons_data', $addons, WEEK_IN_SECONDS );
 				}
+
+				$addons = (object)apply_filters( 'woocommerce_addons_data', $addons );
 			}
 		}
 
