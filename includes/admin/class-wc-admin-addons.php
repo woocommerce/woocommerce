@@ -21,8 +21,8 @@ class WC_Admin_Addons {
 	 * Handles the outputting of a contextually aware Storefront link (points to child themes if Storefront is already active).
 	 */
 	public static function output_storefront_button() {
-		$url = '';
-		$text = '';
+		$url = 'http://www.woothemes.com/storefront/';
+		$text = __( 'View more about Storefront', 'woocommerce' );
 		$template = get_option( 'template' );
 		$stylesheet = get_option( 'stylesheet' );
 
@@ -44,9 +44,7 @@ class WC_Admin_Addons {
 			$text = __( 'Need a theme? Try Storefront', 'woocommerce' );
 		}
 
-		if ( '' != $url && '' != $text ) {
-			echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
-		}
+		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
 	}
 
 	/**
