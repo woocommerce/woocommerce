@@ -435,7 +435,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_from_name() {
-		return wp_specialchars_decode( esc_html( get_option( 'woocommerce_email_from_name' ) ), ENT_QUOTES );
+		$from_name = wp_specialchars_decode( esc_html( get_option( 'woocommerce_email_from_name' ) ), ENT_QUOTES );
+		return apply_filters( 'woocommerce_email_from_name', $from_name, $this->id, $this->object );
 	}
 
 	/**
@@ -443,7 +444,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_from_address() {
-		return sanitize_email( get_option( 'woocommerce_email_from_address' ) );
+		$from_address = return sanitize_email( get_option( 'woocommerce_email_from_address' ) );
+		return apply_filters( 'woocommerce_email_from_address', $from_address, $this->id, $this->object );
 	}
 
 	/**
