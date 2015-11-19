@@ -21,6 +21,7 @@ $theme 	= wp_get_theme();
 		<a href="http://www.woothemes.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
 		<a href="http://www.woothemes.com/storefront/" class="add-new-h2"><?php _e( 'Need a theme? Try Storefront', 'woocommerce' ); ?></a>
 	</h2>
+	<?php do_action( 'woocommerce_addons_before', $view, $addons ); ?>
 	<?php if ( $addons ) : ?>
 		<ul class="subsubsub">
 			<?php
@@ -47,6 +48,7 @@ $theme 	= wp_get_theme();
 			?>
 		</ul>
 		<br class="clear" />
+		<?php do_action( 'woocommerce_addons_before_products', $view, $addons ); ?>
 		<ul class="products">
 		<?php
 			switch ( $view ) {
@@ -101,6 +103,7 @@ $theme 	= wp_get_theme();
 			}
 		?>
 		</ul>
+		<?php do_action( 'woocommerce_addons_after_products', $view, $addons ); ?>
 	<?php else : ?>
 		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'http://www.woothemes.com/product-category/woocommerce-extensions/' ); ?></p>
 	<?php endif; ?>
@@ -127,4 +130,5 @@ $theme 	= wp_get_theme();
 	</div>
 
 	<?php endif; ?>
+	<?php do_action( 'woocommerce_addons_after', $view, $addons ); ?>
 </div>
