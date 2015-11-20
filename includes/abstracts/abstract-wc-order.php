@@ -2381,6 +2381,13 @@ abstract class WC_Abstract_Order {
 		}
 
 		update_post_meta( $this->id, '_recorded_sales', 'yes' );
+
+		/**
+		 * Called when sales for an order are recorded
+		 *
+		 * @param int $order_id order id
+		 */
+		do_action( 'woocommerce_recorded_sales', $this->id );
 	}
 
 
