@@ -1528,6 +1528,9 @@ class WC_Meta_Box_Product_Data {
 					delete_post_meta( $variation_id, $key );
 				}
 
+				$modified_date = current_time( 'timestamp' );
+				$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $modified_date, get_gmt_from_date( $modified_date ), $variation_id ) );
+
 				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
 			}
 		}
