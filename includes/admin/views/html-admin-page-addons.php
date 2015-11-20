@@ -19,7 +19,7 @@ $theme 	= wp_get_theme();
 	<h2>
 		<?php _e( 'WooCommerce Add-ons/Extensions', 'woocommerce' ); ?>
 		<a href="http://www.woothemes.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
-		<?php WC_Admin_Addons::output_storefront_button( $theme ); ?>
+		<?php WC_Admin_Addons::output_storefront_button(); ?>
 	</h2>
 	<?php if ( $addons ) : ?>
 		<ul class="subsubsub">
