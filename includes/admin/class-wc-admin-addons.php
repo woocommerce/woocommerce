@@ -2,10 +2,10 @@
 /**
  * Addons Page
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -48,10 +48,12 @@ class WC_Admin_Addons {
 			$utm_content = 'nostorefront';
 		}
 
-		$url = add_query_arg( 'utm_source', 'product', $url );
-		$url = add_query_arg( 'utm_medium', 'upsell', $url );
-		$url = add_query_arg( 'utm_campaign', 'wcaddons', $url );
-		$url = add_query_arg( 'utm_content', $utm_content, $url );
+		$url = add_query_arg( array(
+			'utm_source'   => 'product',
+			'utm_medium'   => 'upsell',
+			'utm_campaign' => 'wcaddons',
+			'utm_content'  => $utm_content,
+		), $url );
 
 		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
 	}
