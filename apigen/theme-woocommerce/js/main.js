@@ -1,5 +1,7 @@
 $(window).load(function() {
 	var $document = $(document);
+	var $navigation = $('#navigation');
+	var navigationHeight = $navigation.height();
 	var $left = $('#left');
 	var $right = $('#right');
 	var $rightInner = $('#rightInner');
@@ -40,12 +42,13 @@ $(window).load(function() {
 	// Search autocompletion
 	var autocompleteFound = false;
 	var autocompleteFiles = {'c': 'class', 'co': 'constant', 'f': 'function', 'm': 'class', 'mm': 'class', 'p': 'class', 'mp': 'class', 'cc': 'class'};
-	var $search = $('#search').find('input[name=q]');
+	var $search = $('#search input[name=q]');
 	$search
 		.autocomplete(ApiGen.elements, {
 			matchContains: true,
 			scrollHeight: 200,
 			max: 20,
+			width: 300,
 			noRecord: '',
 			highlight: function(value, term) {
 				var term = term.toUpperCase().replace(/([\^\$\(\)\[\]\{\}\*\.\+\?\|\\])/gi, "\\$1").replace(/[A-Z0-9]/g, function(m, offset) {
@@ -68,9 +71,7 @@ $(window).load(function() {
 					return $(this).width();
 				}));
 				// 10px padding
-				$list
-					.width(Math.max(maxWidth + 10, $search.innerWidth()))
-					.css('left', $search.offset().left + $search.outerWidth() - $list.outerWidth());
+				$list.width(Math.max(maxWidth + 10, $search.innerWidth()));
 			}
 		}).result(function(event, data) {
 			autocompleteFound = true;
@@ -92,7 +93,7 @@ $(window).load(function() {
 				if ('' === query) {
 					return false;
 				}
-				return !autocompleteFound && '' !== $('#search').find('input[name=cx]').val();
+				return !autocompleteFound && '' !== $('#search input[name=cx]').val();
 			});
 
 	// Save natural order
@@ -106,7 +107,7 @@ $(window).load(function() {
 	// Switch between natural and alphabetical order
 	var $caption = $('table.summary', $content)
 		.filter(':has(tr[data-order])')
-			.find('caption');
+			.prev('h2');
 	$caption
 		.click(function() {
 			var $this = $(this);
@@ -116,7 +117,7 @@ $(window).load(function() {
 			$.cookie('order', order, {expires: 365});
 			var attr = 'alphabetical' === order ? 'data-order' : 'data-order-natural';
 			$this
-				.closest('table')
+				.next('table')
 					.find('tr').sortElements(function(a, b) {
 						return $(a).attr(attr) > $(b).attr(attr) ? 1 : -1;
 					});
@@ -130,12 +131,17 @@ $(window).load(function() {
 
 	// Open details
 	if (ApiGen.config.options.elementDetailsCollapsed) {
-		$('tr', $content).filter(':has(.detailed)')
-			.click(function() {
-				var $this = $(this);
-				$('.short', $this).hide();
-				$('.detailed', $this).show();
-			});
+		$(document.body).on('click', 'tr', function(ev) {
+
+			var short = this.querySelector('.short')
+			, detailed = this.querySelector('.detailed')
+
+			if (!short || !detailed) return
+
+			$(short).toggleClass('hidden')
+			$(detailed).toggleClass('hidden')
+
+		})
 	}
 
 	// Splitter
@@ -149,6 +155,13 @@ $(window).load(function() {
 		$left.width(position);
 		$right.css('margin-left', position + splitterWidth);
 		$splitter.css('left', position);
+	}
+	function setNavigationPosition()
+	{
+		var height = $(window).height() - navigationHeight;
+		$left.height(height);
+		$splitter.height(height);
+		$right.height(height);
 	}
 	function setContentWidth()
 	{
@@ -200,8 +213,11 @@ $(window).load(function() {
 	if (null !== splitterPosition) {
 		setSplitterPosition(splitterPosition);
 	}
+	setNavigationPosition();
 	setContentWidth();
-	$(window).resize(setContentWidth);
+	$(window)
+		.resize(setNavigationPosition)
+		.resize(setContentWidth);
 
 	// Select selected lines
 	var matches = window.location.hash.substr(1).match(/^\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*$/);
@@ -218,7 +234,7 @@ $(window).load(function() {
 
 		var $firstLine = $('#' + parseInt(matches[0]));
 		if ($firstLine.length > 0) {
-			$document.scrollTop($firstLine.offset().top);
+			$right.scrollTop($firstLine.position().top);
 		}
 	}
 
@@ -227,8 +243,8 @@ $(window).load(function() {
 	$('.l a').click(function(event) {
 		event.preventDefault();
 
-		var $selectedLine = $(this).parent();
-		var selectedLine = parseInt($selectedLine.attr('id'));
+		var selectedLine = $(this).parent().index() + 1;
+		var $selectedLine = $('pre.code .l').eq(selectedLine - 1);
 
 		if (event.shiftKey) {
 			if (lastLine) {
