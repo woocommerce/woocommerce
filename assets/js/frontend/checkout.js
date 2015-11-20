@@ -186,12 +186,12 @@ jQuery( function( $ ) {
 				$parent.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' ).addClass( 'woocommerce-validated' );
 			}
 		},
-		update_checkout: function() {
+		update_checkout: function( event, args ) {
 			// Small timeout to prevent multiple requests when several fields update at the same time
 			wc_checkout_form.reset_update_checkout_timer();
-			wc_checkout_form.updateTimer = setTimeout( wc_checkout_form.update_checkout_action, '5' );
+			wc_checkout_form.updateTimer = setTimeout( wc_checkout_form.update_checkout_action, '5', args );
 		},
-		update_checkout_action: function() {
+		update_checkout_action: function( args ) {
 			if ( wc_checkout_form.xhr ) {
 				wc_checkout_form.xhr.abort();
 			}
@@ -200,54 +200,36 @@ jQuery( function( $ ) {
 				return;
 			}
 
-			var shipping_methods = [];
+			args = typeof args !== 'undefined' ? args : {
+				update_shipping_method: true
+			};
 
-			$( 'select.shipping_method, input[name^="shipping_method"][type="radio"]:checked, input[name^="shipping_method"][type="hidden"]' ).each( function() {
-				shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
-			} );
-
-			var payment_method  = wc_checkout_form.get_payment_method(),
-				country			= $( '#billing_country' ).val(),
+			var country			= $( '#billing_country' ).val(),
 				state			= $( '#billing_state' ).val(),
 				postcode		= $( 'input#billing_postcode' ).val(),
 				city			= $( '#billing_city' ).val(),
 				address			= $( 'input#billing_address_1' ).val(),
-				address_2		= $( 'input#billing_address_2' ).val(),
-				s_country,
-				s_state,
-				s_postcode,
-				s_city,
-				s_address,
-				s_address_2;
+				address_2		= $( 'input#billing_address_2' ).val();
 
 			if ( $( '#ship-to-different-address' ).find( 'input' ).is( ':checked' ) ) {
-				s_country		= $( '#shipping_country' ).val();
-				s_state			= $( '#shipping_state' ).val();
-				s_postcode		= $( 'input#shipping_postcode' ).val();
-				s_city			= $( '#shipping_city' ).val();
-				s_address		= $( 'input#shipping_address_1' ).val();
-				s_address_2		= $( 'input#shipping_address_2' ).val();
+				var s_country		 = $( '#shipping_country' ).val(),
+				s_state			     = $( '#shipping_state' ).val(),
+				s_postcode		     = $( 'input#shipping_postcode' ).val(),
+				s_city			     = $( '#shipping_city' ).val(),
+				s_address		     = $( 'input#shipping_address_1' ).val(),
+				s_address_2		     = $( 'input#shipping_address_2' ).val();
 			} else {
-				s_country		= country;
-				s_state			= state;
-				s_postcode		= postcode;
-				s_city			= city;
-				s_address		= address;
-				s_address_2		= address_2;
+				var s_country		 = country,
+				s_state			     = state,
+				s_postcode		     = postcode,
+				s_city			     = city,
+				s_address		     = address,
+				s_address_2		     = address_2;
 			}
-
-			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
 
 			var data = {
 				security:					wc_checkout_params.update_order_review_nonce,
-				shipping_method:			shipping_methods,
-				payment_method:				payment_method,
+				payment_method:				wc_checkout_form.get_payment_method(),
 				country:					country,
 				state:						state,
 				postcode:					postcode,
@@ -262,6 +244,24 @@ jQuery( function( $ ) {
 				s_address_2:				s_address_2,
 				post_data:					$( 'form.checkout' ).serialize()
 			};
+
+			if ( false !== args.update_shipping_method ) {
+				var shipping_methods = [];
+
+				$( 'select.shipping_method, input[name^="shipping_method"][type="radio"]:checked, input[name^="shipping_method"][type="hidden"]' ).each( function() {
+					shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
+				} );
+
+				data.shipping_method = shipping_methods;
+			}
+
+			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).block({
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			});
 
 			wc_checkout_form.xhr = $.ajax({
 				type:		'POST',
@@ -441,7 +441,7 @@ jQuery( function( $ ) {
 						$form.before( code );
 						$form.slideUp();
 
-						$( document.body ).trigger( 'update_checkout' );
+						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 					}
 				},
 				dataType: 'html'
@@ -479,7 +479,7 @@ jQuery( function( $ ) {
 					if ( code ) {
 						$( 'form.woocommerce-checkout' ).before( code );
 
-						$( document.body ).trigger( 'update_checkout' );
+						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 
 						// remove coupon code from coupon field
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
