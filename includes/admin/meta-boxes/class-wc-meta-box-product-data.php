@@ -1324,7 +1324,7 @@ class WC_Meta_Box_Product_Data {
 
 				} else {
 
-					$modified_date = current_time( 'timestamp' );
+					$modified_date = date_i18n( 'Y-m-d H:i:s', current_time( 'timestamp' ) );
 
 					$wpdb->update( $wpdb->posts, array(
 							'post_status'       => $post_status,
