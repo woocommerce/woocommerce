@@ -85,7 +85,7 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 		$permalink = get_permalink();
 
 	// Map endpoint to options
-	$endpoint = isset( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
+	$endpoint = !empty( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
 	$value    = ( 'edit-address' == $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
 
 	if ( get_option( 'permalink_structure' ) ) {
