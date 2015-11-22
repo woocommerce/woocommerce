@@ -70,6 +70,9 @@ class WC_Product {
 	 */
 	protected $shipping_class_id = 0;
 
+	/** @public string The product's total stock, including that of its children. */
+	public $total_stock;
+	
 	/**
 	 * Supported features such as 'ajax_add_to_cart'.
 	 * @var array
@@ -202,10 +205,24 @@ class WC_Product {
 	/**
 	 * Get total stock.
 	 *
+	 * This is the stock of parent and children combined.
+	 *
 	 * @return int
 	 */
 	public function get_total_stock() {
-		return $this->get_stock_quantity();
+		if ( empty( $this->total_stock ) ) {
+			$this->total_stock = max( 0, $this->get_stock_quantity() );
+
+			if ( sizeof( $this->get_children() ) > 0 ) {
+				foreach ( $this->get_children() as $child_id ) {
+					if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
+						$stock = get_post_meta( $child_id, '_stock', true );
+						$this->total_stock += max( 0, wc_stock_amount( $stock ) );
+					}
+				}
+			}
+		}
+		return wc_stock_amount( $this->total_stock );
 	}
 
 	/**
@@ -1044,22 +1061,15 @@ class WC_Product {
 	}
 
 	/**
-	 * Get the average rating of product.
-	 *
+	 * Get the average rating of product. This is calculated once and stored in postmeta.
 	 * @return string
 	 */
 	public function get_average_rating() {
-		$transient_name = 'wc_average_rating_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+		global $wpdb;
 
-		if ( false === ( $average_rating = get_transient( $transient_name ) ) ) {
-
-			global $wpdb;
-
-			$average_rating = '';
-			$count          = $this->get_rating_count();
-
-			if ( $count > 0 ) {
-
+		// No meta date? Do the calculation
+		if ( ! metadata_exists( 'post', $this->id, '_wc_average_rating' ) ) {
+			if ( $count = $this->get_rating_count() ) {
 				$ratings = $wpdb->get_var( $wpdb->prepare("
 					SELECT SUM(meta_value) FROM $wpdb->commentmeta
 					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
@@ -1068,28 +1078,28 @@ class WC_Product {
 					AND comment_approved = '1'
 					AND meta_value > 0
 				", $this->id ) );
-
-				$average_rating = number_format( $ratings / $count, 2 );
+				$average = number_format( $ratings / $count, 2 );
+			} else {
+				$average = 0;
 			}
-
-			set_transient( $transient_name, $average_rating, DAY_IN_SECONDS * 30 );
+			update_post_meta( $this->id, '_wc_average_rating', $average );
+		} else {
+			$average = get_post_meta( $this->id, '_wc_average_rating', true );
 		}
 
-		return $average_rating;
+		return $average;
 	}
 
 	/**
 	 * Get the total amount (COUNT) of ratings.
-	 *
-	 * @param  int $value Optional. Rating value to get the count for. By default
-	 *                              returns the count of all rating values.
+	 * @param  int $value Optional. Rating value to get the count for. By default returns the count of all rating values.
 	 * @return int
 	 */
 	public function get_rating_count( $value = null ) {
-		$transient_name = 'wc_rating_count_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+		global $wpdb;
 
-		if ( ! is_array( $counts = get_transient( $transient_name ) ) ) {
-			global $wpdb;
+		// No meta date? Do the calculation
+		if ( ! metadata_exists( 'post', $this->id, '_wc_rating_count' ) ) {
 			$counts     = array();
 			$raw_counts = $wpdb->get_results( $wpdb->prepare("
 				SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
@@ -1105,7 +1115,9 @@ class WC_Product {
 				$counts[ $count->meta_value ] = $count->meta_value_count;
 			}
 
-			set_transient( $transient_name, $counts, DAY_IN_SECONDS * 30 );
+			update_post_meta( $this->id, '_wc_rating_count', $counts );
+		} else {
+			$counts = get_post_meta( $this->id, '_wc_rating_count', true );
 		}
 
 		if ( is_null( $value ) ) {
@@ -1141,7 +1153,6 @@ class WC_Product {
 		return apply_filters( 'woocommerce_product_get_rating_html', $rating_html, $rating );
 	}
 
-
 	/**
 	 * Get the total amount (COUNT) of reviews.
 	 *
@@ -1149,13 +1160,10 @@ class WC_Product {
 	 * @return int The total numver of product reviews
 	 */
 	public function get_review_count() {
+		global $wpdb;
 
-		$transient_name = 'wc_review_count_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-		if ( false === ( $count = get_transient( $transient_name ) ) ) {
-
-			global $wpdb;
-
+		// No meta date? Do the calculation
+		if ( ! metadata_exists( 'post', $this->id, '_wc_review_count' ) ) {
 			$count = $wpdb->get_var( $wpdb->prepare("
 				SELECT COUNT(*) FROM $wpdb->comments
 				WHERE comment_parent = 0
@@ -1163,12 +1171,13 @@ class WC_Product {
 				AND comment_approved = '1'
 			", $this->id ) );
 
-			set_transient( $transient_name, $count, DAY_IN_SECONDS * 30 );
+			update_post_meta( $this->id, '_wc_review_count', $count );
+		} else {
+			$count = get_post_meta( $this->id, '_wc_review_count', true );
 		}
 
 		return apply_filters( 'woocommerce_product_review_count', $count, $this );
 	}
-
 
 	/**
 	 * Returns the upsell product ids.
@@ -1258,39 +1267,51 @@ class WC_Product {
 	/**
 	 * Get and return related products.
 	 *
+	 * Notes:
+	 * 	- Results are cached in a transient for faster queries.
+	 *  - To make results appear random, we query and extra 10 products and shuffle them.
+	 *  - To ensure we always have enough results, it will check $limit before returning the cached result, if not recalc.
+	 *  - This used to rely on transient version to invalidate cache, but to avoid multiple transients we now just expire daily.
+	 *  	This means if a related product is edited and no longer related, it won't be removed for 24 hours. Acceptable trade-off for performance.
+	 *  - Saving a product will flush caches for that product.
+	 *
 	 * @param int $limit (default: 5)
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
-		$transient_name = 'wc_related_' . $limit . '_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
+		global $wpdb;
 
-		if ( false === ( $related_posts = get_transient( $transient_name ) ) ) {
-			global $wpdb;
+		$transient_name = 'wc_related_' . $this->id;
+		$related_posts  = get_transient( $transient_name );
 
+		// We want to query related posts if they are not cached, or we don't have enough
+		if ( false === $related_posts || sizeof( $related_posts ) < $limit ) {
 			// Related products are found from category and tag
 			$tags_array = $this->get_related_terms( 'product_tag' );
 			$cats_array = $this->get_related_terms( 'product_cat' );
 
 			// Don't bother if none are set
-			if ( sizeof( $cats_array ) == 1 && sizeof( $tags_array ) == 1 ) {
+			if ( 1 === sizeof( $cats_array ) && 1 === sizeof( $tags_array )) {
 				$related_posts = array();
 			} else {
 				// Sanitize
 				$exclude_ids = array_map( 'absint', array_merge( array( 0, $this->id ), $this->get_upsells() ) );
 
-				// Generate query
-				$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit );
+				// Generate query - but query an extra 10 results to give the appearance of random results
+				$query = $this->build_related_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 );
 
 				// Get the posts
 				$related_posts = $wpdb->get_col( implode( ' ', $query ) );
 			}
 
-			set_transient( $transient_name, $related_posts, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, $related_posts, DAY_IN_SECONDS );
 		}
 
+		// Randomise the results
 		shuffle( $related_posts );
 
-		return $related_posts;
+		// Limit the returned results
+		return array_slice( $related_posts, 0, $limit );
 	}
 
 	/**

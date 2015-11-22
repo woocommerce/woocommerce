@@ -579,7 +579,7 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 
 	// Do the same for regular cache
-	wp_cache_incr( 'wc_orders_cache_prefix', 1, 'orders' );
+	WC_Cache_Helper::incr_cache_prefix( 'orders' );
 
 	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
 }

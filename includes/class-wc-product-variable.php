@@ -20,9 +20,6 @@ class WC_Product_Variable extends WC_Product {
 	/** @public array Array of child products/posts/variations. */
 	public $children = null;
 
-	/** @public string The product's total stock, including that of its children. */
-	public $total_stock;
-
 	/** @private array Array of variation prices. */
 	private $prices_array = array();
 
@@ -44,35 +41,6 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function add_to_cart_text() {
 		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Select options', 'woocommerce' ), $this );
-	}
-
-	/**
-	 * Get total stock.
-	 *
-	 * This is the stock of parent and children combined.
-	 *
-	 * @access public
-	 * @return int
-	 */
-	public function get_total_stock() {
-		if ( empty( $this->total_stock ) ) {
-			$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-			if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-				$this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
-
-				if ( sizeof( $this->get_children() ) > 0 ) {
-					foreach ( $this->get_children() as $child_id ) {
-						if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-							$stock = get_post_meta( $child_id, '_stock', true );
-							$this->total_stock += max( 0, wc_stock_amount( $stock ) );
-						}
-					}
-				}
-				set_transient( $transient_name, $this->total_stock, DAY_IN_SECONDS * 30 );
-			}
-		}
-		return wc_stock_amount( $this->total_stock );
 	}
 
 	/**
@@ -265,12 +233,10 @@ class WC_Product_Variable extends WC_Product {
 		global $wp_filter;
 
 		/**
-		 * Transient name for storing prices for this product.
-		 * Max transient length is 45, -10 for get_transient_version.
-		 * @var string
+		 * Transient name for storing prices for this product (note: Max transient length is 45)
 		 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
 		 */
-		$transient_name = 'wc_var_prices' . $this->id . '_' . WC_Cache_Helper::get_transient_version( 'product' );
+		$transient_name = 'wc_var_prices_' . $this->id;
 
 		/**
 		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
