@@ -1264,7 +1264,16 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle price - remove dates and set to lowest
-		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
+		$change_price_product_types = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external' ) );
+		$can_product_type_change_price = false;
+		foreach ( $change_price_product_types as $product_type ) {
+			if ( $product->is_type( $product_type ) ) {
+				$can_product_type_change_price = true;
+				break;
+			}
+		}
+
+		if ( $can_product_type_change_price ) {
 
 			$price_changed = false;
 
