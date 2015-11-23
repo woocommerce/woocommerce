@@ -1324,7 +1324,15 @@ class WC_Meta_Box_Product_Data {
 
 				} else {
 
-					$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[ $i ] ), array( 'ID' => $variation_id ) );
+					$modified_date = date_i18n( 'Y-m-d H:i:s', current_time( 'timestamp' ) );
+
+					$wpdb->update( $wpdb->posts, array(
+							'post_status'       => $post_status,
+							'post_title'        => $variation_post_title,
+							'menu_order'        => $variable_menu_order[ $i ],
+							'post_modified'     => $modified_date,
+							'post_modified_gmt' => get_gmt_from_date( $modified_date )
+					), array( 'ID' => $variation_id ) );
 
 					clean_post_cache( $variation_id );
 
