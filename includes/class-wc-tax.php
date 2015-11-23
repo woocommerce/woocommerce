@@ -226,7 +226,7 @@ class WC_Tax {
 		$rates_transient_key = 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, implode( ',', $valid_postcodes ), $tax_class ) );
 		$matched_tax_rates   = get_transient( $rates_transient_key );
 
-		if ( false === $matched_tax_rates ) {
+		if ( empty($matched_tax_rates) ) {
 			$matched_tax_rates = self::get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes );
 			set_transient( $rates_transient_key, $matched_tax_rates, WEEK_IN_SECONDS );
 		}
