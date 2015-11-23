@@ -1970,3 +1970,23 @@ p.demo_store {
 		}
 	}
 }
+
+/**
+ * Twenty Sixteen specific styles
+ */
+body:not(.search-results) {
+	.twentysixteen {
+		.entry-summary {
+			color: inherit;
+			font-size: inherit;
+			line-height: inherit;
+		}
+	}
+}
+
+.twentysixteen {
+	.price ins {
+		background: inherit;
+		color: inherit;
+	}
+}

@@ -30,6 +30,9 @@ switch( $template ) {
 	case 'twentyfifteen' :
 		echo '</div></div>';
 		break;
+	case 'twentysixteen' :
+		echo '</div></main>';
+		break;
 	default :
 		echo '</div></div>';
 		break;
