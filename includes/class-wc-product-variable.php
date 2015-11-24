@@ -566,7 +566,7 @@ class WC_Product_Variable extends WC_Product {
 			$image_srcset    = wp_get_attachment_image_srcset( $attachment_id, 'shop_single' );
 			$image_sizes     = wp_get_attachment_image_sizes( $attachment_id, 'shop_single' );
 		} else {
-			$image = $image_link = $image_title = $image_alt = '';
+			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = '';
 		}
 
 		$availability      = $variation->get_availability();
