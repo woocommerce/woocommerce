@@ -33,11 +33,11 @@
 			</div>
 			<div class="collapse navbar-collapse">
 
-                <form{if $config->googleCseId} action="http://www.google.com/cse"{/if} id="search" class="navbar-form navbar-left" role="search">
-                    <input type="hidden" name="cx" value="{$config->googleCseId}">
-                    <input type="hidden" name="ie" value="UTF-8">
-                    <div class="form-group">
-                        <input type="text" name="q" class="search-query form-control" placeholder="Search"{if 'overview' === $active} autofocus{/if}>
+				<form{if $config->googleCseId} action="http://www.google.com/cse"{/if} id="search" class="navbar-form navbar-left" role="search">
+					<input type="hidden" name="cx" value="{$config->googleCseId}">
+					<input type="hidden" name="ie" value="UTF-8">
+					<div class="form-group">
+						<input type="text" name="q" class="search-query form-control" placeholder="Search"{if 'overview' === $active} autofocus{/if}>
 					</div>
 				</form>
 

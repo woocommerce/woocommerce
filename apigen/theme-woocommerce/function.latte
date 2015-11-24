@@ -32,7 +32,7 @@
 
 	{if count($function->parameters)}
 	<div class="panel panel-default">
-        <div class="panel-heading"><h2>Parameters summary</h2></div>
+		<div class="panel-heading"><h2>Parameters summary</h2></div>
 		<table class="summary table table-bordered table-striped" id="parameters">
 		<tr n:foreach="$function->parameters as $parameter" id="${$parameter->name}">
 			<td class="name"><code>{$parameter->typeHint|typeLinks:$function|noescape}</code></td>
@@ -47,7 +47,7 @@
 
 	{if isset($annotations['return']) && 'void' !== $annotations['return'][0]}
 	<div class="panel panel-default">
-        <div class="panel-heading"><h2>Return value summary</h2></div>
+		<div class="panel-heading"><h2>Return value summary</h2></div>
 		<table class="summary table table-bordered table-striped" id="returns">
 		<tr>
 			<td class="name"><code>
@@ -63,7 +63,7 @@
 
 	{if isset($annotations['throws'])}
 	<div class="panel panel-default">
-        <div class="panel-heading"><h2>Thrown exceptions summary</h2></div>
+		<div class="panel-heading"><h2>Thrown exceptions summary</h2></div>
 		<table class="summary table table-bordered table-striped" id="throws">
 		<tr n:foreach="$annotations['throws'] as $throws">
 			<td class="name"><code>

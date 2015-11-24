@@ -10,7 +10,7 @@
 	{if $hasElements}
 		{if $annotationClasses}
 			<div class="panel panel-default">
-                <div class="panel-heading"><h2>Classes summary</h2></div>
+				<div class="panel-heading"><h2>Classes summary</h2></div>
 				<table class="summary table table-bordered table-striped" id="classes">
 					{include classes, items => $annotationClasses}
 				</table>
@@ -19,7 +19,7 @@
 
 		{if $annotationInterfaces}
 			<div class="panel panel-default">
-                <div class="panel-heading"><h2>Interfaces summary</h2></div>
+				<div class="panel-heading"><h2>Interfaces summary</h2></div>
 				<table class="summary table table-bordered table-striped" id="interfaces">
 					{include classes, items => $annotationInterfaces}
 				</table>
@@ -28,7 +28,7 @@
 
 		{if $annotationTraits}
 			<div class="panel panel-default">
-                <div class="panel-heading"><h2>Traits summary</h2></div>
+				<div class="panel-heading"><h2>Traits summary</h2></div>
 				<table class="summary table table-bordered table-striped" id="traits">
 					{include classes, items => $annotationTraits}
 				</table>
@@ -37,7 +37,7 @@
 
 		{if $annotationExceptions}
 			<div class="panel panel-default">
-                <div class="panel-heading"><h2>Exceptions summary</h2></div>
+				<div class="panel-heading"><h2>Exceptions summary</h2></div>
 				<table class="summary table table-bordered table-striped" id="exceptions">
 					{include classes, items => $annotationExceptions}
 				</table>
@@ -46,7 +46,7 @@
 
 		{if $annotationMethods}
 			<div class="panel panel-default">
-                <div class="panel-heading"><h2>Methods summary</h2></div>
+				<div class="panel-heading"><h2>Methods summary</h2></div>
 				<table class="summary table table-bordered table-striped" id="methods">
 					<tr n:foreach="$annotationMethods as $method">
 						<td class="name"><a href="{$method->declaringClassName|classUrl}">{$method->declaringClassName}</a></td>
@@ -67,7 +67,7 @@
 
 		{if $annotationConstants}
 			<div class="panel panel-default">
-                <div class="panel-heading"><h2>Constants summary</h2></div>
+				<div class="panel-heading"><h2>Constants summary</h2></div>
 				<table class="summary table table-bordered table-striped" id="constants">
 					<tr n:foreach="$annotationConstants as $constant">
 						{if $constant->declaringClassName}
@@ -92,7 +92,7 @@
 
 		{if $annotationProperties}
 			<div class="panel panel-default">
-                <div class="panel-heading"><h2>Properties summary</h2></div>
+				<div class="panel-heading"><h2>Properties summary</h2></div>
 				<table class="summary table table-bordered table-striped" id="properties">
 					<tr n:foreach="$annotationProperties as $property">
 						<td class="name"><a href="{$property->declaringClassName|classUrl}">{$property->declaringClassName}</a></td>
@@ -111,7 +111,7 @@
 
 		{if $annotationFunctions}
 			<div class="panel panel-default">
-                <div class="panel-heading"><h2>Functions summary</h2></div>
+				<div class="panel-heading"><h2>Functions summary</h2></div>
 				<table class="summary table table-bordered table-striped" id="functions">
 					<tr n:foreach="$annotationFunctions as $function">
 						<td class="name" n:if="$namespaces"><a n:if="$function->namespaceName" href="{$function->namespaceName|namespaceUrl}">{$function->namespaceName}</a></td>
