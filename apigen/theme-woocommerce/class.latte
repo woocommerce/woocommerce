@@ -214,7 +214,7 @@
 
 		{foreach $inheritedMethods as $parentName => $methods}
 		<div class="panel panel-default">
-	        <div class="panel-heading"><h3>Methods inherited from <a href="{$parentName|classUrl}#methods" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
+			<div class="panel-heading"><h3>Methods inherited from <a href="{$parentName|classUrl}#methods" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
 			<p class="elementList">
 			{foreach $methods as $method}
 				<code><a href="{$method|methodUrl}" n:tag-if="$template->getClass($parentName)"><span n:tag-if="$method->deprecated" class="deprecated">{$method->name}()</span></a></code>{sep}, {/sep}
@@ -225,7 +225,7 @@
 
 		{foreach $usedMethods as $traitName => $methods}
 		<div class="panel panel-default">
-	        <div class="panel-heading"><h3>Methods used from <a href="{$traitName|classUrl}#methods" n:tag-if="$template->getClass($traitName)">{$traitName}</a></h3></div>
+			<div class="panel-heading"><h3>Methods used from <a href="{$traitName|classUrl}#methods" n:tag-if="$template->getClass($traitName)">{$traitName}</a></h3></div>
 			<p class="elementList">
 			{foreach $methods as $data}
 				<code><a href="{$data['method']|methodUrl:$data['method']->declaringTrait}" n:tag-if="$template->getClass($traitName)"><span n:tag-if="$data['method']->deprecated" class="deprecated">{$data['method']->name}()</span></a>{if $data['aliases']}(as {foreach $data['aliases'] as $alias}<span n:tag-if="$data['method']->deprecated" class="deprecated">{$alias->name}()</span>{sep}, {/sep}{/foreach}){/if}</code>{sep}, {/sep}
@@ -236,7 +236,7 @@
 
 		{if $ownMagicMethods}
 		<div class="panel panel-default">
-	        <div class="panel-heading"><h3>Magic methods summary</h3></div>
+			<div class="panel-heading"><h3>Magic methods summary</h3></div>
 			<table class="summary table table-bordered table-striped methods" id="magicMethods" n:if="$ownMagicMethods">
 			{foreach $ownMagicMethods as $method}
 				{include method, method => $method}
@@ -247,7 +247,7 @@
 
 		{foreach $inheritedMagicMethods as $parentName => $methods}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h3>Magic methods inherited from <a href="{$parentName|classUrl}#methods" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
+			<div class="panel-heading"><h3>Magic methods inherited from <a href="{$parentName|classUrl}#methods" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
 			<p class="elementList">
 			{foreach $methods as $method}
 				<code><a href="{$method|methodUrl}" n:tag-if="$template->getClass($parentName)"><span n:tag-if="$method->deprecated" class="deprecated">{$method->name}()</span></a></code>{sep}, {/sep}
@@ -258,7 +258,7 @@
 
 		{foreach $usedMagicMethods as $traitName => $methods}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h3>Magic methods used from <a href="{$traitName|classUrl}#methods" n:tag-if="$template->getClass($traitName)">{$traitName}</a></h3></div>
+			<div class="panel-heading"><h3>Magic methods used from <a href="{$traitName|classUrl}#methods" n:tag-if="$template->getClass($traitName)">{$traitName}</a></h3></div>
 			<p class="elementList">
 			{foreach $methods as $data}
 				<code><a href="{$data['method']|methodUrl:$data['method']->declaringTrait}" n:tag-if="$template->getClass($traitName)"><span n:tag-if="$data['method']->deprecated" class="deprecated">{$data['method']->name}()</span></a>{if $data['aliases']}(as {foreach $data['aliases'] as $alias}<span n:tag-if="$data['method']->deprecated" class="deprecated">{$alias->name}()</span>{sep}, {/sep}{/foreach}){/if}</code>{sep}, {/sep}
@@ -274,7 +274,7 @@
 
 	{if $ownConstants || $inheritedConstants}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h2>Constants summary</h2></div>
+			<div class="panel-heading"><h2>Constants summary</h2></div>
 			<table class="summary table table-bordered table-striped constants" id="constants" n:if="$ownConstants">
 			<tr n:foreach="$ownConstants as $constant" data-order="{$constant->name}" id="{$constant->name}">
 				{var $annotations = $constant->annotations}
@@ -320,7 +320,7 @@
 
 		{foreach $inheritedConstants as $parentName => $constants}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h3>Constants inherited from <a href="{$parentName|classUrl}#constants" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
+			<div class="panel-heading"><h3>Constants inherited from <a href="{$parentName|classUrl}#constants" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
 			<p class="elementList">
 			{foreach $constants as $constant}
 				<code><a href="{$constant|constantUrl}" n:tag-if="$template->getClass($parentName)"><b><span n:tag-if="$constant->deprecated" class"deprecated">{$constant->name}</span></b></a></code>{sep}, {/sep}
@@ -381,7 +381,7 @@
 		{/define}
 
 		<div class="panel panel-default">
-            <div class="panel-heading"><h2>Properties summary</h2></div>
+			<div class="panel-heading"><h2>Properties summary</h2></div>
 			<table class="summary table table-bordered table-striped properties" id="properties" n:if="$ownProperties">
 			{foreach $ownProperties as $property}
 				{include property, property => $property}
@@ -391,7 +391,7 @@
 
 		{foreach $inheritedProperties as $parentName => $properties}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h3>Properties inherited from <a href="{$parentName|classUrl}#properties" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
+			<div class="panel-heading"><h3>Properties inherited from <a href="{$parentName|classUrl}#properties" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
 			<p class="elementList">
 			{foreach $properties as $property}
 				<code><a href="{$property|propertyUrl}" n:tag-if="$template->getClass($parentName)"><var><span n:tag-if="$property->deprecated" class="deprecated">${$property->name}</span></var></a></code>{sep}, {/sep}
@@ -402,7 +402,7 @@
 
 		{foreach $usedProperties as $traitName => $properties}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h3>Properties used from <a href="{$traitName|classUrl}#properties" n:tag-if="$template->getClass($traitName)">{$traitName}</a></h3></div>
+			<div class="panel-heading"><h3>Properties used from <a href="{$traitName|classUrl}#properties" n:tag-if="$template->getClass($traitName)">{$traitName}</a></h3></div>
 			<p class="elementList">
 			{foreach $properties as $property}
 				<code><a href="{$property|propertyUrl:$property->declaringTrait}" n:tag-if="$template->getClass($traitName)"><var><span n:tag-if="$property->deprecated" class="deprecated">${$property->name}</span></var></a></code>{sep}, {/sep}
@@ -413,7 +413,7 @@
 
 		{if $ownMagicProperties}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h3>Magic properties</h3></div>
+			<div class="panel-heading"><h3>Magic properties</h3></div>
 			<table class="summary table table-bordered table-striped properties" id="magicProperties">
 			{foreach $ownMagicProperties as $property}
 				{include property, property => $property}
@@ -424,7 +424,7 @@
 
 		{foreach $inheritedMagicProperties as $parentName => $properties}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h3>Magic properties inherited from <a href="{$parentName|classUrl}#properties" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
+			<div class="panel-heading"><h3>Magic properties inherited from <a href="{$parentName|classUrl}#properties" n:tag-if="$template->getClass($parentName)">{$parentName}</a></h3></div>
 			<p class="elementList">
 			{foreach $properties as $property}
 				<code><a href="{$property|propertyUrl}" n:tag-if="$template->getClass($parentName)"><var><span n:tag-if="$property->deprecated" class="deprecated">${$property->name}</span></var></a></code>{sep}, {/sep}
@@ -435,7 +435,7 @@
 
 		{foreach $usedMagicProperties as $traitName => $properties}
 		<div class="panel panel-default">
-            <div class="panel-heading"><h3>Magic properties used from <a href="{$traitName|classUrl}#properties" n:tag-if="$template->getClass($traitName)">{$traitName}</a></h3></div>
+			<div class="panel-heading"><h3>Magic properties used from <a href="{$traitName|classUrl}#properties" n:tag-if="$template->getClass($traitName)">{$traitName}</a></h3></div>
 			<p class="elementList">
 			{foreach $properties as $property}
 				<code><a href="{$property|propertyUrl:$property->declaringTrait}" n:tag-if="$template->getClass($traitName)"><var><span n:tag-if="$property->deprecated" class="deprecated">${$property->name}</span></var></a></code>{sep}, {/sep}
