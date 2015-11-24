@@ -1,0 +1,149 @@
+{layout '@layout.latte'}
+{var $active = 'annotation-group-' . $annotation}
+
+{block title}{$annotation|firstUpper}{/block}
+
+{block content}
+<div id="content">
+	<h1>{include title}</h1>
+
+	{if $hasElements}
+		{if $annotationClasses}
+			<div class="panel panel-default">
+                <div class="panel-heading"><h2>Classes summary</h2></div>
+				<table class="summary table table-bordered table-striped" id="classes">
+					{include classes, items => $annotationClasses}
+				</table>
+			</div>
+		{/if}
+
+		{if $annotationInterfaces}
+			<div class="panel panel-default">
+                <div class="panel-heading"><h2>Interfaces summary</h2></div>
+				<table class="summary table table-bordered table-striped" id="interfaces">
+					{include classes, items => $annotationInterfaces}
+				</table>
+			</div>
+		{/if}
+
+		{if $annotationTraits}
+			<div class="panel panel-default">
+                <div class="panel-heading"><h2>Traits summary</h2></div>
+				<table class="summary table table-bordered table-striped" id="traits">
+					{include classes, items => $annotationTraits}
+				</table>
+			</div>
+		{/if}
+
+		{if $annotationExceptions}
+			<div class="panel panel-default">
+                <div class="panel-heading"><h2>Exceptions summary</h2></div>
+				<table class="summary table table-bordered table-striped" id="exceptions">
+					{include classes, items => $annotationExceptions}
+				</table>
+			</div>
+		{/if}
+
+		{if $annotationMethods}
+			<div class="panel panel-default">
+                <div class="panel-heading"><h2>Methods summary</h2></div>
+				<table class="summary table table-bordered table-striped" id="methods">
+					<tr n:foreach="$annotationMethods as $method">
+						<td class="name"><a href="{$method->declaringClassName|classUrl}">{$method->declaringClassName}</a></td>
+						<td class="name"><code><a href="{$method|methodUrl}">{$method->name}()</a></code></td>
+						<td>
+							{if $method->hasAnnotation($annotation)}
+								{foreach $method->annotations[$annotation] as $description}
+									{if $description}
+										{$description|annotation:$annotation:$method|noescape}<br>
+									{/if}
+								{/foreach}
+							{/if}
+						</td>
+					</tr>
+				</table>
+			</div>
+		{/if}
+
+		{if $annotationConstants}
+			<div class="panel panel-default">
+                <div class="panel-heading"><h2>Constants summary</h2></div>
+				<table class="summary table table-bordered table-striped" id="constants">
+					<tr n:foreach="$annotationConstants as $constant">
+						{if $constant->declaringClassName}
+							<td class="name"><a href="{$constant->declaringClassName|classUrl}">{$constant->declaringClassName}</a></td>
+							<td class="name"><code><a href="{$constant|constantUrl}"><b>{$constant->name}</b></a></code></td>
+
+						{else}
+							<td class="name" n:if="$namespaces || $classes || $interfaces || $traits || $exceptions"><a n:if="$constant->namespaceName" href="{$constant->namespaceName|namespaceUrl}">{$constant->namespaceName}</a></td>
+							<td n:class="name"><code><a href="{$constant|constantUrl}"><b>{$constant->shortName}</b></a></code></td>
+						{/if}
+						<td>
+							{foreach $constant->annotations[$annotation] as $description}
+								{if $description}
+									{$description|annotation:$annotation:$constant|noescape}<br>
+								{/if}
+							{/foreach}
+						</td>
+					</tr>
+				</table>
+			</div>
+		{/if}
+
+		{if $annotationProperties}
+			<div class="panel panel-default">
+                <div class="panel-heading"><h2>Properties summary</h2></div>
+				<table class="summary table table-bordered table-striped" id="properties">
+					<tr n:foreach="$annotationProperties as $property">
+						<td class="name"><a href="{$property->declaringClassName|classUrl}">{$property->declaringClassName}</a></td>
+						<td class="name"><a href="{$property|propertyUrl}"><var>${$property->name}</var></a></td>
+						<td>
+							{foreach $property->annotations[$annotation] as $description}
+								{if $description}
+									{$description|annotation:$annotation:$property|noescape}<br>
+								{/if}
+							{/foreach}
+						</td>
+					</tr>
+				</table>
+			</div>
+		{/if}
+
+		{if $annotationFunctions}
+			<div class="panel panel-default">
+                <div class="panel-heading"><h2>Functions summary</h2></div>
+				<table class="summary table table-bordered table-striped" id="functions">
+					<tr n:foreach="$annotationFunctions as $function">
+						<td class="name" n:if="$namespaces"><a n:if="$function->namespaceName" href="{$function->namespaceName|namespaceUrl}">{$function->namespaceName}</a></td>
+						<td class="name"><code><a href="{$function|functionUrl}">{$function->shortName}</a></code></td>
+						<td>
+							{foreach $function->annotations[$annotation] as $description}
+								{if $description}
+									{$description|annotation:$annotation:$function|noescape}<br>
+								{/if}
+							{/foreach}
+						</td>
+					</tr>
+				</table>
+			</div>
+		{/if}
+
+	{else}
+		<p>No elements with <code>@{$annotation}</code> annotation found.</p>
+	{/if}
+</div>
+{/block}
+
+
+{define classes}
+	<tr n:foreach="$items as $class">
+		<td class="name"><a href="{$class|classUrl}">{$class->name}</a></td>
+		<td>
+			{foreach $class->annotations[$annotation] as $description}
+				{if $description}
+					{$description|annotation:$annotation:$class|noescape}<br>
+				{/if}
+			{/foreach}
+		</td>
+	</tr>
+{/define}

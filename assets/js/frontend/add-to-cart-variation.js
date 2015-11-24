@@ -451,12 +451,16 @@
 			$product_img.wc_set_variation_attr( 'src', variation.image_src );
 			$product_img.wc_set_variation_attr( 'title', variation.image_title );
 			$product_img.wc_set_variation_attr( 'alt', variation.image_title );
+			$product_img.wc_set_variation_attr( 'srcset', variation.image_srcset );
+			$product_img.wc_set_variation_attr( 'sizes', variation.image_sizes );
 			$product_link.wc_set_variation_attr( 'href', variation.image_link );
 			$product_link.wc_set_variation_attr( 'title', variation.image_caption );
 		} else {
 			$product_img.wc_reset_variation_attr( 'src' );
 			$product_img.wc_reset_variation_attr( 'title' );
 			$product_img.wc_reset_variation_attr( 'alt' );
+			$product_img.wc_reset_variation_attr( 'srcset' );
+			$product_img.wc_reset_variation_attr( 'sizes' );
 			$product_link.wc_reset_variation_attr( 'href' );
 			$product_link.wc_reset_variation_attr( 'title' );
 		}

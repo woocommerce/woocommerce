@@ -223,7 +223,7 @@ class WC_Tax {
 		}
 
 		$valid_postcodes     = self::_get_wildcard_postcodes( wc_clean( $postcode ) );
-		$rates_transient_key = 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, implode( ',', $valid_postcodes), $tax_class ) );
+		$rates_transient_key = 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, implode( ',', $valid_postcodes ), $tax_class ) );
 		$matched_tax_rates   = get_transient( $rates_transient_key );
 
 		if ( false === $matched_tax_rates ) {

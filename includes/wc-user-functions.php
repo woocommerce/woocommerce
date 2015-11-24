@@ -206,10 +206,8 @@ function wc_paying_customer( $order_id ) {
 }
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
-
 /**
- * Checks if a user (by email) has bought an item.
- *
+ * Checks if a user (by email or ID or both) has bought an item.
  * @param string $customer_email
  * @param int $user_id
  * @param int $product_id
@@ -252,11 +250,11 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			AND im.meta_value != 0
 			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
 		" );
-		$result = array_map( 'intval', $result );
+		$result = array_map( 'absint', $result );
 
 		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
 	}
-	return in_array( (int) $product_id, $result );
+	return in_array( absint( $product_id ), $result );
 }
 
 /**

@@ -1311,16 +1311,8 @@ abstract class WC_Abstract_Order {
 	public function get_item_meta_array( $order_item_id ) {
 		global $wpdb;
 
-		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed
-		$prefix_num = wp_cache_get( 'wc_orders_cache_prefix', 'orders' );
-
-		if ( $prefix_num === false ) {
-			$prefix_num = 1;
-			wp_cache_set( 'wc_orders_cache_prefix', $prefix_num, 'orders' );
-		}
-
-		$cache_prefix    = 'wc_orders_cache_' . $prefix_num . '_';
-		$cache_key       = $cache_prefix . 'item_meta_array_' . $order_item_id;
+		// Get cache key - uses get_cache_prefix to invalidate when needed
+		$cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $order_item_id;
 		$item_meta_array = wp_cache_get( $cache_key, 'orders' );
 
 		if ( false === $item_meta_array ) {
@@ -2381,6 +2373,13 @@ abstract class WC_Abstract_Order {
 		}
 
 		update_post_meta( $this->id, '_recorded_sales', 'yes' );
+
+		/**
+		 * Called when sales for an order are recorded
+		 *
+		 * @param int $order_id order id
+		 */
+		do_action( 'woocommerce_recorded_sales', $this->id );
 	}
 
 

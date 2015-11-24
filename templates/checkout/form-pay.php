@@ -34,7 +34,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php if ( sizeof( $order->get_items() ) > 0 ) : ?>
 				<?php foreach ( $order->get_items() as $item ) : ?>
 					<tr>
-						<td class="product-name"><?php echo esc_html( $item['name'] ); ?></td>
+						<td class="product-name">
+							<?php echo esc_html( $item['name'] ); ?>
+							<?php $order->display_item_meta( $item ); ?>
+						</td>
 						<td class="product-quantity"><?php echo esc_html( $item['qty'] ); ?></td>
 						<td class="product-subtotal"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
 					</tr>
