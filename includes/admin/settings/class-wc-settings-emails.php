@@ -251,8 +251,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 								switch ( $key ) {
 									case 'name' :
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-											<a href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( get_class( $email ) ) ) . '">' . $email->get_title() . '</a>
 											' . wc_help_tip( $email->get_description() ) . '
+											<a href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( get_class( $email ) ) ) . '">' . $email->get_title() . '</a>
 										</td>';
 									break;
 									case 'recipient' :
