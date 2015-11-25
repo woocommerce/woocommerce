@@ -204,27 +204,26 @@ jQuery( function( $ ) {
 				update_shipping_method: true
 			};
 
-			var country			= $( '#billing_country' ).val(),
-				state			= $( '#billing_state' ).val(),
-				postcode		= $( 'input#billing_postcode' ).val(),
-				city			= $( '#billing_city' ).val(),
-				address			= $( 'input#billing_address_1' ).val(),
-				address_2		= $( 'input#billing_address_2' ).val();
+			var country			 = $( '#billing_country' ).val(),
+				state			 = $( '#billing_state' ).val(),
+				postcode		 = $( 'input#billing_postcode' ).val(),
+				city			 = $( '#billing_city' ).val(),
+				address			 = $( 'input#billing_address_1' ).val(),
+				address_2		 = $( 'input#billing_address_2' ).val(),
+				s_country		 = country,
+				s_state			 = state,
+				s_postcode		 = postcode,
+				s_city			 = city,
+				s_address		 = address,
+				s_address_2		 = address_2;
 
 			if ( $( '#ship-to-different-address' ).find( 'input' ).is( ':checked' ) ) {
-				var s_country		 = $( '#shipping_country' ).val(),
-				s_state			     = $( '#shipping_state' ).val(),
-				s_postcode		     = $( 'input#shipping_postcode' ).val(),
-				s_city			     = $( '#shipping_city' ).val(),
-				s_address		     = $( 'input#shipping_address_1' ).val(),
-				s_address_2		     = $( 'input#shipping_address_2' ).val();
-			} else {
-				var s_country		 = country,
-				s_state			     = state,
-				s_postcode		     = postcode,
-				s_city			     = city,
-				s_address		     = address,
-				s_address_2		     = address_2;
+				s_country		 = $( '#shipping_country' ).val();
+				s_state			 = $( '#shipping_state' ).val();
+				s_postcode		 = $( 'input#shipping_postcode' ).val();
+				s_city			 = $( '#shipping_city' ).val();
+				s_address		 = $( 'input#shipping_address_1' ).val();
+				s_address_2		 = $( 'input#shipping_address_2' ).val();
 			}
 
 			var data = {
