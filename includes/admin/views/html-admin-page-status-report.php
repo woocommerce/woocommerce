@@ -66,6 +66,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td><?php
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
 
+				if ( function_exists( 'memory_get_usage' ) ) {
+					$system_memory = wc_let_to_num( @ini_get( 'memory_limit' ) );
+					$memory        = max( $memory, $system_memory );
+				}
+
 				if ( $memory < 67108864 ) {
 					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s" target="_blank">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
 				} else {
