@@ -451,10 +451,16 @@ class WC_Shortcodes {
 		if ( ! $product ) {
 			return '';
 		}
+		
+		$style_attr = '';
+		
+		if ( ! empty( $atts['style'] ) ) {
+			$style_attr = ' style="' . esc_attr( $atts['style'] ) . '"';	
+		}
 
 		ob_start();
 		?>
-		<p class="product woocommerce add_to_cart_inline <?php echo esc_attr( $atts['class'] ); ?>" style="<?php echo esc_attr( $atts['style'] ); ?>">
+		<p class="product woocommerce add_to_cart_inline <?php echo esc_attr( $atts['class'] ); ?>"<?php echo $style_attr; ?>>
 
 			<?php if ( 'true' == $atts['show_price'] ) : ?>
 				<?php echo $product->get_price_html(); ?>
