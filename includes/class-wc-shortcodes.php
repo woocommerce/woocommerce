@@ -454,7 +454,7 @@ class WC_Shortcodes {
 		
 		$style_attr = '';
 		
-		if( ! empty( $atts['style'] ) ) {
+		if ( ! empty( $atts['style'] ) ) {
 			$style_attr = ' style="' . esc_attr( $atts['style'] ) . '"';	
 		}
 
