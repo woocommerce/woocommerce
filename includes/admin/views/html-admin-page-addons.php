@@ -21,10 +21,11 @@ $theme 	= wp_get_theme();
 		<a href="http://www.woothemes.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
 		<?php WC_Admin_Addons::output_storefront_button(); ?>
 	</h2>
+	<?php do_action( 'woocommerce_addons_before', $view, $addons ); ?>
 	<?php if ( $addons ) : ?>
 		<ul class="subsubsub">
 			<?php
-				$links = array(
+				$links = apply_filters( 'woocommerce_addons_sections', array(
 					''                         => __( 'Popular', 'woocommerce' ),
 					'payment-gateways'         => __( 'Gateways', 'woocommerce' ),
 					'shipping-methods'         => __( 'Shipping', 'woocommerce' ),
@@ -34,17 +35,20 @@ $theme 	= wp_get_theme();
 					'accounting-extensions'	   => __( 'Accounting', 'woocommerce' ),
 					'free-extensions'          => __( 'Free', 'woocommerce' ),
 					'third-party-extensions'   => __( 'Third-party', 'woocommerce' ),
-				);
+				) );
 
 				$i = 0;
 
-				foreach ( $links as $link => $name ) {
-					$i ++;
-					?><li><a class="<?php if ( $view == $link ) echo 'current'; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&view=' . esc_attr( $link ) ); ?>"><?php echo $name; ?></a><?php if ( $i != sizeof( $links ) ) echo ' |'; ?></li><?php
+				if ( is_array( $links ) && 0 < count( $links ) ) {
+					foreach ( $links as $link => $name ) {
+						$i ++;
+						?><li><a class="<?php if ( $view == $link ) echo 'current'; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&view=' . esc_attr( $link ) ); ?>"><?php echo $name; ?></a><?php if ( $i != sizeof( $links ) ) echo ' |'; ?></li><?php
+					}
 				}
 			?>
 		</ul>
 		<br class="clear" />
+		<?php do_action( 'woocommerce_addons_before_products', $view, $addons ); ?>
 		<ul class="products">
 		<?php
 			switch ( $view ) {
@@ -75,23 +79,31 @@ $theme 	= wp_get_theme();
 				case 'third-party-extensions':
 					$addons = $addons->{'third-party'};
 				break;
+				default:
+					if ( isset( $addons->{$view} ) ) {
+						$addons = $addons->{$view};
+					}
+				break;
 			}
 
-			foreach ( $addons as $addon ) {
-				echo '<li class="product">';
-				echo '<a href="' . $addon->link . '">';
-				if ( ! empty( $addon->image ) ) {
-					echo '<img src="' . $addon->image . '"/>';
-				} else {
-					echo '<h3>' . $addon->title . '</h3>';
+			if ( 0 < count( $addons ) ) {
+				foreach ( $addons as $addon ) {
+					echo '<li class="product">';
+					echo '<a href="' . $addon->link . '">';
+					if ( ! empty( $addon->image ) ) {
+						echo '<img src="' . $addon->image . '"/>';
+					} else {
+						echo '<h3>' . $addon->title . '</h3>';
+					}
+					echo '<span class="price">' . $addon->price . '</span>';
+					echo '<p>' . $addon->excerpt . '</p>';
+					echo '</a>';
+					echo '</li>';
 				}
-				echo '<span class="price">' . $addon->price . '</span>';
-				echo '<p>' . $addon->excerpt . '</p>';
-				echo '</a>';
-				echo '</li>';
 			}
 		?>
 		</ul>
+		<?php do_action( 'woocommerce_addons_after_products', $view, $addons ); ?>
 	<?php else : ?>
 		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'http://www.woothemes.com/product-category/woocommerce-extensions/' ); ?></p>
 	<?php endif; ?>
@@ -118,4 +130,5 @@ $theme 	= wp_get_theme();
 	</div>
 
 	<?php endif; ?>
+	<?php do_action( 'woocommerce_addons_after', $view, $addons ); ?>
 </div>

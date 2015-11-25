@@ -77,6 +77,8 @@ class WC_Admin_Addons {
 			}
 		}
 
+		$addons = (object)apply_filters( 'woocommerce_addons_data', $addons );
+
 		include_once( 'views/html-admin-page-addons.php' );
 	}
 }
