@@ -4,7 +4,7 @@ Plugin URI: https://github.com/woothemes/woocommerce-beta-tester
 Contributors: woothemes, mikejolley, claudiosanches
 Tags: woocommerce, wc, beta, beta tester, bleeding edge
 Requires at least: 4.2
-Tested up to: 4.2
+Tested up to: 4.4
 Stable Tag: 1.0.0
 
 Run bleeding edge versions of WooCommerce from our Github repo. This will replace your installed version of WooCommerce with the latest tagged release on Github - use with caution, and not on production sites. You have been warned.
