@@ -5,8 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Embed Controller
- *
  * Embed Class which handles any WooCommerce Products that are embedded on this site or another site
  *
  * @class 		WC_Embed
@@ -55,7 +53,7 @@ class WC_Embed {
 	}
 
 	/**
-	 * Init email classes.
+	 * Init embed class.
 	 */
 	public static function init() {
 
@@ -146,7 +144,7 @@ class WC_Embed {
     }
 
     /**
-     * Returns whether or not comments are open Since we don't want the comment icon to show up we're going to return false.
+     * Returns whether or not comments are open - since we don't want the comment icon to show up we're going to return false.
      *
      * @return bool
      */
