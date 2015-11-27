@@ -283,9 +283,11 @@ class WC_Product_Variable extends WC_Product {
 			$price_hash = array( false );
 		}
 
-		foreach ( array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' ) as $filter_name ) {
+		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
+
+		foreach ( $filter_names as $filter_name ) {
 			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
-				$hash[ $filter_name ] = $wp_filter[ $filter_name ];
+				$price_hash[ $filter_name ] = $wp_filter[ $filter_name ];
 			}
 		}
 
