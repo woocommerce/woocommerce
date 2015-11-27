@@ -162,9 +162,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - WordPress 4.4 support.
 * Fix - Removes Switzerland from EU VAT definition .
 * Fix - Fix auth endpoint urls.
-* Fix - Shipping class menu display in 4.4.
-* Tweak - Support for srcset/sizes and responsive images in 4.4.
-* Tweak - Support for Twenty Sixteen.
+* Fix - 4.4 - Shipping class menu display.
+* Fix - 4.4 - Admin menu icons and styling.
+* Tweak - 4.4 - Support for srcset/sizes and responsive images.
+* Tweak - 4.4 - Support for Twenty Sixteen.
 
 = 2.4.10 - 10/11/2015 =
 * Fix - Geo IP - Correctly parse .dat files.

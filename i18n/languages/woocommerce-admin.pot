@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.4.10 Admin\n"
+"Project-Id-Version: WooCommerce 2.4.11 Admin\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-11-10 01:00:31+00:00\n"
+"POT-Creation-Date: 2015-11-27 12:20:34+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -477,7 +477,7 @@ msgid "Update"
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:348
-#: includes/admin/class-wc-admin-menus.php:64
+#: includes/admin/class-wc-admin-menus.php:62
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:109
 msgid "Attributes"
 msgstr ""
@@ -547,7 +547,7 @@ msgid "WooCommerce Recent Reviews"
 msgstr ""
 
 #: includes/admin/class-wc-admin-dashboard.php:40
-#: includes/admin/class-wc-admin-menus.php:99
+#: includes/admin/class-wc-admin-menus.php:97
 msgid "WooCommerce Status"
 msgstr ""
 
@@ -688,13 +688,13 @@ msgstr ""
 #: includes/admin/class-wc-admin-help.php:121
 #: includes/admin/class-wc-admin-help.php:188
 #: includes/admin/class-wc-admin-help.php:206
-#: includes/admin/class-wc-admin-menus.php:99
+#: includes/admin/class-wc-admin-menus.php:97
 #: includes/admin/views/html-admin-page-status.php:16
 msgid "System Status"
 msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:125
-#: includes/admin/class-wc-admin-menus.php:72
+#: includes/admin/class-wc-admin-menus.php:70
 msgid "Reports"
 msgstr ""
 
@@ -827,47 +827,43 @@ msgstr ""
 msgid "Import <strong>tax rates</strong> to your store via a csv file."
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:62
-msgid "Shipping Classes"
-msgstr ""
-
-#: includes/admin/class-wc-admin-menus.php:74
+#: includes/admin/class-wc-admin-menus.php:72
 msgid "Sales Reports"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:82
+#: includes/admin/class-wc-admin-menus.php:80
 msgid "WooCommerce Settings"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:82
+#: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/class-wc-admin-welcome.php:189
 #: includes/admin/settings/class-wc-settings-api.php:45
 #: includes/admin/views/html-admin-page-status-report.php:389
 msgid "Settings"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:107
+#: includes/admin/class-wc-admin-menus.php:105
 #: includes/admin/views/html-admin-page-addons.php:20
 msgid "WooCommerce Add-ons/Extensions"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:107
+#: includes/admin/class-wc-admin-menus.php:105
 msgid "Add-ons"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:243
+#: includes/admin/class-wc-admin-menus.php:237
 msgid "WooCommerce Endpoints"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:276
+#: includes/admin/class-wc-admin-menus.php:270
 msgid "Select All"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:279
+#: includes/admin/class-wc-admin-menus.php:273
 msgid "Add to Menu"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:312
+#: includes/admin/class-wc-admin-menus.php:306
 msgid "Visit Store"
 msgstr ""
 
@@ -1816,8 +1812,8 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-profile.php:72
 #: includes/admin/class-wc-admin-profile.php:125
-#: includes/admin/class-wc-admin-settings.php:559
-#: includes/admin/class-wc-admin-settings.php:584
+#: includes/admin/class-wc-admin-settings.php:557
+#: includes/admin/class-wc-admin-settings.php:582
 #: includes/admin/class-wc-admin-setup-wizard.php:504
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:71
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:120
@@ -1919,35 +1915,35 @@ msgstr ""
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:501
+#: includes/admin/class-wc-admin-settings.php:499
 msgid ""
 "The settings of this image size have been disabled because its values are "
 "being overwritten by a filter."
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:510
+#: includes/admin/class-wc-admin-settings.php:508
 msgid "Hard Crop?"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:537
+#: includes/admin/class-wc-admin-settings.php:535
 msgid "Select a page&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:559
+#: includes/admin/class-wc-admin-settings.php:557
 #: includes/admin/class-wc-admin-setup-wizard.php:313
 msgid "Choose a country&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:584
+#: includes/admin/class-wc-admin-settings.php:582
 msgid "Choose countries&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:592
+#: includes/admin/class-wc-admin-settings.php:590
 #: includes/admin/meta-boxes/views/html-product-attribute.php:40
 msgid "Select all"
 msgstr ""
 
-#: includes/admin/class-wc-admin-settings.php:592
+#: includes/admin/class-wc-admin-settings.php:590
 #: includes/admin/meta-boxes/views/html-product-attribute.php:41
 msgid "Select none"
 msgstr ""
@@ -6780,7 +6776,7 @@ msgstr ""
 msgid "Logs"
 msgstr ""
 
-#: includes/admin/views/html-admin-settings.php:32
+#: includes/admin/views/html-admin-settings.php:35
 msgid "Save changes"
 msgstr ""
 
@@ -7066,7 +7062,7 @@ msgctxt "enhanced select"
 msgid "Searching&hellip;"
 msgstr ""
 
-#: includes/admin/class-wc-admin-menus.php:149
+#: includes/admin/class-wc-admin-menus.php:143
 msgctxt "Admin menu name"
 msgid "Orders"
 msgstr ""
