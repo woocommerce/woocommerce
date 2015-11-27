@@ -104,7 +104,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 *
 	 * This method shouldn't be called directly, use the walk() method instead.
 	 *
-	 * @since 2.5.0
+	 * @since 2.4.0
 	 *
 	 * @param object $element Data object
 	 * @param array $children_elements List of elements to continue traversing.
