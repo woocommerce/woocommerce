@@ -1918,6 +1918,11 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $variation_id, '_downloadable_files', '' );
 			}
 
+			// Description.
+			if ( isset( $variation['description'] ) ) {
+				update_post_meta( $variation_id, '_variation_description', wp_kses_post( $variation['description'] ) );
+			}
+
 			// Update taxonomies
 			if ( isset( $variation['attributes'] ) ) {
 				$updated_attribute_keys = array();
