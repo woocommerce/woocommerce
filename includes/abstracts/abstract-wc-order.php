@@ -1207,6 +1207,12 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Get refunds
+	 * @return array
+	 */
+	public function get_refunds() { return array(); }
+
+	/**
 	 * Return an array of fees within this order.
 	 *
 	 * @return array
@@ -1846,7 +1852,6 @@ abstract class WC_Abstract_Order {
 		}
 
 		if ( $fees = $this->get_fees() ) {
-
 			foreach ( $fees as $id => $fee ) {
 
 				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', $fee['line_total'] + $fee['line_tax'] == 0, $id ) ) {
@@ -1868,11 +1873,10 @@ abstract class WC_Abstract_Order {
 					);
 				}
 			}
-
 		}
 
 		// Tax for tax exclusive prices.
-		if ( 'excl' == $tax_display ) {
+		if ( 'excl' === $tax_display ) {
 
 			if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
 
@@ -1900,6 +1904,15 @@ abstract class WC_Abstract_Order {
 			);
 		}
 
+		if ( $refunds = $this->get_refunds() ) {
+			foreach ( $refunds as $id => $refund ) {
+				$total_rows[ 'refund_' . $id ] = array(
+					'label' => $refund->get_refund_reason() ? $refund->get_refund_reason() : __( 'Refund', 'woocommerce' ) . ':',
+					'value'	=> wc_price( '-' . $refund->get_refund_amount(), array( 'currency' => $this->get_order_currency() ) )
+				);
+			}
+		}
+		
 		$total_rows['order_total'] = array(
 			'label' => __( 'Total:', 'woocommerce' ),
 			'value'	=> $this->get_formatted_order_total( $tax_display )
