@@ -153,7 +153,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		foreach ( $found_shipping_classes as $shipping_class => $products ) {
 			// Also handles BW compatibility when slugs were used instead of ids
 			$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
-			$class_cost_string   = $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
+			$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
 
 			if ( $class_cost_string === '' ) {
 				continue;
