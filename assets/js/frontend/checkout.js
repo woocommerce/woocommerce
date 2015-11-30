@@ -21,6 +21,10 @@ jQuery( function( $ ) {
 			// Payment methods
 			this.$checkout_form.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
 
+			if ( $( document.body ).hasClass( 'woocommerce-order-pay' ) ) {
+				this.$order_review.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
+			}
+
 			// Form submission
 			this.$checkout_form.on( 'submit', this.submit );
 
