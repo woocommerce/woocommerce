@@ -21,8 +21,8 @@ class WC_AJAX {
 	 * Hook in ajax handlers.
 	 */
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'define_ajax'), 0 );
-		add_action( 'template_redirect', array( __CLASS__, 'do_wc_ajax'), 0 );
+		add_action( 'init', array( __CLASS__, 'define_ajax' ), 0 );
+		add_action( 'template_redirect', array( __CLASS__, 'do_wc_ajax' ), 0 );
 		self::add_ajax_events();
 	}
 
@@ -51,13 +51,20 @@ class WC_AJAX {
 				@ini_set( 'display_errors', 0 );
 			}
 			$GLOBALS['wpdb']->hide_errors();
-			// Send headers like admin-ajax.php
-			send_origin_headers();
-			@header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
-			@header( 'X-Robots-Tag: noindex' );
-			send_nosniff_header();
-			nocache_headers();
 		}
+	}
+
+	/**
+	 * Send headers for WC Ajax Requests
+	 * @since 2.5.0
+	 */
+	private static function wc_ajax_headers() {
+		send_origin_headers();
+		@header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+		@header( 'X-Robots-Tag: noindex' );
+		send_nosniff_header();
+		nocache_headers();
+		status_header( 200 );
 	}
 
 	/**
@@ -71,6 +78,7 @@ class WC_AJAX {
 		}
 
 		if ( $action = $wp_query->get( 'wc-ajax' ) ) {
+			self::wc_ajax_headers();
 			do_action( 'wc_ajax_' . sanitize_text_field( $action ) );
 			die();
 		}
