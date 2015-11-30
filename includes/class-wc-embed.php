@@ -15,43 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Embed {
 
-	/** @var WC_Embed The single instance of the class */
-	protected static $_instance = null;
-
-	/**
-	 * Main WC_Embed Instance.
-	 *
-	 * Ensures only one instance of WC_Embed is loaded or can be loaded.
-	 *
-	 * @since 2.5
-	 * @static
-	 * @return WC_Embed Main instance
-	 */
-	public static function instance() {
-		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new self();
-		}
-		return self::$_instance;
-	}
-
-	/**
-	 * Cloning is forbidden.
-	 *
-	 * @since 2.5
-	 */
-	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
-	}
-
-	/**
-	 * Unserializing instances of this class is forbidden.
-	 *
-	 * @since 2.5
-	 */
-	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'woocommerce' ), '2.1' );
-	}
-
 	/**
 	 * Init embed class.
 	 */
