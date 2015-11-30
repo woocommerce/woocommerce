@@ -11,52 +11,41 @@
  *
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author		WooThemes
- * @package		WooCommerce/Templates/Emails/Plain
- * @version		2.2.0
+ * @package 	WooCommerce/Templates/Emails/Plain
+ * @version		2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 echo "= " . $email_heading . " =\n\n";
 
-if ( $order->has_status( 'pending' ) )
+if ( $order->has_status( 'pending' ) ) {
 	echo sprintf( __( 'An order has been created for you on %s. To pay for this order please use the following link: %s', 'woocommerce' ), get_bloginfo( 'name', 'display' ), $order->get_checkout_payment_url() ) . "\n\n";
+}
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
-
-echo strtoupper( sprintf( __( 'Order number: %s', 'woocommerce' ), $order->get_order_number() ) ) . "\n";
-echo date_i18n( __( 'jS F Y', 'woocommerce' ), strtotime( $order->order_date ) ) . "\n";
-
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
-
-echo "\n";
-
-switch ( $order->get_status() ) {
-	case "completed" :
-		echo $order->email_order_items_table( $order->is_download_permitted(), false, true, '', '', true );
-	break;
-	case "processing" :
-		echo $order->email_order_items_table( $order->is_download_permitted(), true, true, '', '', true );
-	break;
-	default :
-		echo $order->email_order_items_table( $order->is_download_permitted(), true, false, '', '', true );
-	break;
-}
-
-echo "==========\n\n";
-
-if ( $totals = $order->get_order_item_totals() ) {
-	foreach ( $totals as $total ) {
-		echo $total['label'] . "\t " . $total['value'] . "\n";
-	}
-}
+/**
+ * @hooked WC_Emails::order_details() Shows the order details table.
+ * @since 2.5.0
+ */
+do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );
+/**
+ * @hooked WC_Emails::order_meta() Shows order meta data.
+ */
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
+
+/**
+ * @hooked WC_Emails::customer_details() Shows customer details
+ * @hooked WC_Emails::email_address() Shows email address
+ */
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+
+echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );

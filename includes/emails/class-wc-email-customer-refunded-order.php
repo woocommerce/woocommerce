@@ -162,7 +162,8 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 			'partial_refund' => $this->partial_refund,
 			'email_heading'  => $this->get_heading(),
 			'sent_to_admin'  => false,
-			'plain_text'     => true
+			'plain_text'     => true,
+			'email'			 => $this
 		) );
 		return ob_get_clean();
 	}

@@ -1845,7 +1845,7 @@ abstract class WC_Abstract_Order {
 			);
 		}
 
-		if ( $fees = $this->get_fees() )
+		if ( $fees = $this->get_fees() ) {
 
 			foreach ( $fees as $id => $fee ) {
 
@@ -1868,6 +1868,8 @@ abstract class WC_Abstract_Order {
 					);
 				}
 			}
+
+		}
 
 		// Tax for tax exclusive prices.
 		if ( 'excl' == $tax_display ) {
@@ -1909,31 +1911,47 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Output items for display in html emails.
-	 *
-	 * @param bool $show_download_links (default: false).
-	 * @param bool $show_sku (default: false).
-	 * @param bool $show_purchase_note (default: false).
-	 * @param bool $show_image (default: false).
-	 * @param array $image_size (default: array( 32, 32 ).
+	 * @param array $args
 	 * @param bool plain text
 	 * @return string
 	 */
-	public function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ), $plain_text = false ) {
-
+	public function email_order_items_table( $args = array(), $deprecated = null, $deprecated = null, $deprecated = null, $deprecated = null, $deprecated = null ) {
 		ob_start();
 
-		$template = $plain_text ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
+		if ( ! is_null( $deprecated ) ) {
+			_deprecated_argument( __FUNCTION__, '2.5.0' );
+		}
+
+		$defaults = array(
+			'show_sku'   => false,
+			'show_image' => false,
+			'image_size' => array( 32, 32 ),
+			'plain_text' => false
+		);
+
+		$args     = wp_parse_args( $args, $defaults );
+		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
 		wc_get_template( $template, array(
-			'order'                 => $this,
-			'items'                 => $this->get_items(),
-			'show_download_links'   => $show_download_links,
-			'show_sku'              => $show_sku,
-			'show_purchase_note'    => $show_purchase_note,
-			'show_image'            => $show_image,
-			'image_size'            => $image_size
+			'order'               => $this,
+			'items'               => $this->get_items(),
+			'show_download_links' => $this->is_download_permitted(),
+			'show_sku'            => $args['show_sku'],
+			'show_purchase_note'  => $this->is_paid(),
+			'show_image'          => $args['show_image'],
+			'image_size'          => $args['image_size'],
 		) );
+
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
+	}
+
+	/**
+	 * Returns if an order has been paid for based on the order status.
+	 * @since 2.5.0
+	 * @return bool
+	 */
+	public function is_paid() {
+		return apply_filters( 'woocommerce_order_is_paid', $this->has_status( apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) ) ), $this );
 	}
 
 	/**
