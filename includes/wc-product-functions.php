@@ -674,3 +674,19 @@ function wc_get_product_variation_attributes( $variation_id ) {
 
 	return $variation_attributes;
 }
+
+/**
+ * Get all product cats for a product by ID, including hierarchy
+ * @since  2.5.0
+ * @param  int $product_id
+ * @return array
+ */
+function wc_get_product_cat_ids( $product_id ) {
+	$product_cats = wp_get_post_terms( $product_id, 'product_cat', array( "fields" => "ids" ) );
+
+	foreach ( $product_cats as $product_cat ) {
+		$product_cats = array_merge( $product_cats, get_ancestors( $product_cat, 'product_cat' ) );
+	}
+
+	return $product_cats;
+}
