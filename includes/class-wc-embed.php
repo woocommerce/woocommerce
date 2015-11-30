@@ -75,10 +75,6 @@ class WC_Embed {
         //  make sure we're only affecting embedded products
         if ( WC_Embed::is_embedded_product() ) {
 
-            // get product
-            $_pf = new WC_Product_Factory();
-            $_product = $_pf->get_product( get_the_ID() );
-
             // add the exerpt
             $excerpt = wpautop( $excerpt );
 
