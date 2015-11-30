@@ -7,11 +7,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Embed Class which handles any WooCommerce Products that are embedded on this site or another site
  *
- * @class 		WC_Embed
- * @version		2.5
- * @package		WooCommerce/Classes/Embed
- * @category	Class
- * @author 		WooThemes
+ * @class       WC_Embed
+ * @version     2.5
+ * @package     WooCommerce/Classes/Embed
+ * @category    Class
+ * @author      WooThemes
  */
 class WC_Embed {
 
@@ -27,8 +27,10 @@ class WC_Embed {
         add_filter( 'the_excerpt_embed', array( 'WC_Embed', 'the_excerpt' ), 10 );
 
         // make sure no comments display. Doesn't make sense for products
-        add_filter( 'get_comments_number', array( 'WC_Embed', 'get_comments_number' ), 10);
-        add_filter( 'comments_open', array( 'WC_Embed', 'comments_open' ), 10 );
+        remove_action( 'embed_content_meta', 'print_embed_comments_button' );
+
+        // in the comments place let's display the product rating
+        add_action( 'embed_content_meta', array( 'WC_Embed', 'get_ratings' ), 5 );
 
 	}
 
@@ -96,32 +98,27 @@ class WC_Embed {
     }
 
     /**
-     * Returns number of comments for embedded products. Since we don't want the comment icon to show up we're going to return 0.
+     * Prints the markup for the rating stars
      *
      * @return string
      * @since 2.5
      */
-    public static function get_comments_number( $comments ) {
+    public static function get_ratings( $comments ) {
         //  make sure we're only affecting embedded products
         if ( WC_Embed::is_embedded_product() ) {
-            return 0;
+            ?>
+            <div style="display:inline-block;">
+                <?php
+                // get product
+                $_pf = new WC_Product_Factory();
+                $_product = $_pf->get_product( get_the_ID() );
+                echo $_product->get_rating_html();
+                ?>
+            </div>
+            <?php
         }
-        return $comments;
     }
 
-    /**
-     * Returns whether or not comments are open - since we don't want the comment icon to show up we're going to return false.
-     *
-     * @return bool
-     * @since 2.5
-     */
-    public static function comments_open( $comments_open ) {
-        //  make sure we're only affecting embedded products
-        if ( WC_Embed::is_embedded_product() ) {
-            return false;
-        }
-        return $comments_open;
-    }
 }
 
 WC_Embed::init();
