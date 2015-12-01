@@ -68,7 +68,7 @@ jQuery( function( $ ) {
 			$payment_methods.filter( ':checked' ).eq(0).trigger( 'click' );
 		},
 		get_payment_method: function() {
-			return $( '#order_review' ).find( 'input[name="payment_method"]:checked' ).val();
+			return wc_checkout_form.$order_review.find( 'input[name="payment_method"]:checked' ).val();
 		},
 		payment_method_selected: function() {
 			if ( $( '.payment_methods input.input-radio' ).length > 1 ) {

@@ -34,7 +34,7 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
  * Clears the cart session when called.
  */
 function wc_empty_cart() {
-	if ( ! isset( WC()->cart ) || WC()->cart == '' ) {
+	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
 	WC()->cart->empty_cart( false );
@@ -52,7 +52,7 @@ function wc_load_persistent_cart( $user_login, $user ) {
 		return;
 	}
 
-	if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) === 0 ) {
+	if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || 0 === sizeof( WC()->session->cart ) ) {
 		WC()->session->cart = $saved_cart['cart'];
 	}
 }
