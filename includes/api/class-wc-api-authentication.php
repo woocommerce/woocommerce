@@ -332,7 +332,7 @@ class WC_API_Authentication {
 		$valid_window = 15 * 60; // 15 minute window
 
 		if ( ( $timestamp < time() - $valid_window ) || ( $timestamp > time() + $valid_window ) ) {
-			throw new Exception( __( 'Invalid timestamp', 'woocommerce' ) );
+			throw new Exception( __( 'Invalid timestamp', 'woocommerce' ), 401 );
 		}
 
 		$used_nonces = maybe_unserialize( $keys['nonces'] );
