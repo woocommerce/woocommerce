@@ -3054,8 +3054,13 @@ img.help_tip {
 		}
 
 		.handlediv {
+			width: auto;
+			margin-right: 1em;
+
 			&:before {
-				line-height: .5 !important;
+				line-height: 2 !important;
+				font-family: "Dashicons";
+				content: "\f142" !important;
 			}
 		}
 
