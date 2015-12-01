@@ -421,11 +421,11 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Delete a product
+	 * Delete a product.
 	 *
 	 * @since 2.2
-	 * @param int $id the product ID
-	 * @param bool $force true to permanently delete order, false to move to trash
+	 * @param int $id the product ID.
+	 * @param bool $force true to permanently delete order, false to move to trash.
 	 * @return array
 	 */
 	public function delete_product( $id, $force = false ) {
@@ -438,7 +438,25 @@ class WC_API_Products extends WC_API_Resource {
 
 		do_action( 'woocommerce_api_delete_product', $id, $this );
 
-		return $this->delete( $id, 'product', ( 'true' === $force ) );
+		$parent_id = wp_get_post_parent_id( $id );
+		$result    = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_api_cannot_delete_product', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product' ), array( 'status' => 500 ) );
+		}
+
+		// Delete parent product transients.
+		if ( $parent_id ) {
+			wc_delete_product_transients( $parent_id );
+		}
+
+		if ( $force ) {
+			return array( 'message' => sprintf( __( 'Permanently deleted %s', 'woocommerce' ), 'product' ) );
+		} else {
+			$this->server->send_status( '202' );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product' ) );
+		}
 	}
 
 	/**
