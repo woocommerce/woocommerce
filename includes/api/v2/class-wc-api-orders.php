@@ -522,7 +522,6 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @return array
 	 */
 	public function edit_order( $id, $data ) {
-
 		try {
 			if ( ! isset( $data['order'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_order_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'order' ), 400 );
@@ -547,21 +546,14 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order_args = array( 'order_id' => $order->id );
 
-			// customer note
+			// Customer note.
 			if ( isset( $data['note'] ) ) {
 				$order_args['customer_note'] = $data['note'];
 			}
 
-			// order status
-			if ( ! empty( $data['status'] ) ) {
-
-				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '' );
-			}
-
-			// customer ID
+			// Customer ID.
 			if ( isset( $data['customer_id'] ) && $data['customer_id'] != $order->get_user_id() ) {
-
-				// make sure customer exists
+				// Make sure customer exists.
 				if ( false === get_user_by( 'id', $data['customer_id'] ) ) {
 					throw new WC_API_Exception( 'woocommerce_api_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ), 400 );
 				}
@@ -569,7 +561,7 @@ class WC_API_Orders extends WC_API_Resource {
 				update_post_meta( $order->id, '_customer_user', $data['customer_id'] );
 			}
 
-			// billing/shipping address
+			// Billing/shipping address.
 			$this->set_order_addresses( $order, $data );
 
 			$lines = array(
@@ -587,52 +579,46 @@ class WC_API_Orders extends WC_API_Resource {
 
 					foreach ( $data[ $line ] as $item ) {
 
-						// item ID is always required
+						// Item ID is always required.
 						if ( ! array_key_exists( 'id', $item ) ) {
 							throw new WC_API_Exception( 'woocommerce_invalid_item_id', __( 'Order item ID is required', 'woocommerce' ), 400 );
 						}
 
-						// create item
+						// Create item.
 						if ( is_null( $item['id'] ) ) {
-
 							$this->set_item( $order, $line_type, $item, 'create' );
-
 						} elseif ( $this->item_is_null( $item ) ) {
-
-							// delete item
+							// Delete item.
 							wc_delete_order_item( $item['id'] );
-
 						} else {
-
-							// update item
+							// Update item.
 							$this->set_item( $order, $line_type, $item, 'update' );
 						}
 					}
 				}
 			}
 
-			// payment method (and payment_complete() if `paid` == true and order needs payment)
+			// Payment method (and payment_complete() if `paid` == true and order needs payment).
 			if ( isset( $data['payment_details'] ) && is_array( $data['payment_details'] ) ) {
 
-				// method ID
+				// Method ID.
 				if ( isset( $data['payment_details']['method_id'] ) ) {
 					update_post_meta( $order->id, '_payment_method', $data['payment_details']['method_id'] );
 				}
 
-				// method title
+				// Method title.
 				if ( isset( $data['payment_details']['method_title'] ) ) {
 					update_post_meta( $order->id, '_payment_method_title', $data['payment_details']['method_title'] );
 				}
 
-				// mark as paid if set
+				// Mark as paid if set.
 				if ( $order->needs_payment() && isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
 					$order->payment_complete( isset( $data['payment_details']['transaction_id'] ) ? $data['payment_details']['transaction_id'] : '' );
 				}
 			}
 
-			// set order currency
+			// Set order currency.
 			if ( isset( $data['currency'] ) ) {
-
 				if ( ! array_key_exists( $data['currency'], get_woocommerce_currencies() ) ) {
 					throw new WC_API_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ), 400 );
 				}
@@ -640,24 +626,28 @@ class WC_API_Orders extends WC_API_Resource {
 				update_post_meta( $order->id, '_order_currency', $data['currency'] );
 			}
 
-			// set order number
+			// Set order number.
 			if ( isset( $data['order_number'] ) ) {
-
 				update_post_meta( $order->id, '_order_number', $data['order_number'] );
 			}
 
-			// if items have changed, recalculate order totals
+			// If items have changed, recalculate order totals.
 			if ( $update_totals ) {
 				$order->calculate_totals();
 			}
 
-			// update order meta
+			// Update order meta.
 			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
 				$this->set_order_meta( $order->id, $data['order_meta'] );
 			}
 
-			// update the order post to set customer note/modified date
+			// Update the order post to set customer note/modified date.
 			wc_update_order( $order_args );
+
+			// Order status.
+			if ( ! empty( $data['status'] ) ) {
+				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '' );
+			}
 
 			wc_delete_shop_order_transients( $order->id );
 
