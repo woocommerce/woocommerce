@@ -1087,7 +1087,7 @@ class WC_Product {
 			$average = get_post_meta( $this->id, '_wc_average_rating', true );
 		}
 
-		return number_format( $average, 2, '.', '' );
+		return (string) floatval( $average );
 	}
 
 	/**
@@ -1145,7 +1145,7 @@ class WC_Product {
 
 			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
 
-			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . floatval( $rating ) . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
 
 			$rating_html .= '</div>';
 		}
