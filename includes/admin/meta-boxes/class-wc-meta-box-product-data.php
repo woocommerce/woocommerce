@@ -851,14 +851,12 @@ class WC_Meta_Box_Product_Data {
 
 		// Unique SKU
 		$sku     = get_post_meta( $post_id, '_sku', true );
-		$new_sku = wc_clean( stripslashes( $_POST['_sku'] ) );
+		$new_sku = wc_clean( $_POST['_sku'] );
 
 		if ( '' == $new_sku ) {
 			update_post_meta( $post_id, '_sku', '' );
 		} elseif ( $new_sku !== $sku ) {
-
 			if ( ! empty( $new_sku ) ) {
-
 				$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
 
 				if ( ! $unique_sku ) {
@@ -1338,12 +1336,11 @@ class WC_Meta_Box_Product_Data {
 
 				// Unique SKU
 				$sku     = get_post_meta( $variation_id, '_sku', true );
-				$new_sku = wc_clean( stripslashes( $variable_sku[ $i ] ) );
+				$new_sku = wc_clean( $variable_sku[ $i ] );
 
 				if ( '' == $new_sku ) {
 					update_post_meta( $variation_id, '_sku', '' );
 				} elseif ( $new_sku !== $sku ) {
-
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 

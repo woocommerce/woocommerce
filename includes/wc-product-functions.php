@@ -522,7 +522,7 @@ function wc_get_product_types() {
  *
  * @since 2.2
  * @param int $product_id
- * @param string $sku
+ * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
@@ -536,7 +536,7 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 		AND $wpdb->posts.post_status = 'publish'
 		AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
 		AND $wpdb->postmeta.post_id <> %d LIMIT 1
-	 ", $sku, $product_id ) );
+	 ", wp_slash( $sku ), $product_id ) );
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
