@@ -1,135 +1,142 @@
 <?php
+/**
+ * WooCommerce Product Embed.
+ *
+ * @version  2.4.11
+ * @package  WooCommerce/Classes/Embed
+ * @category Class
+ * @author   WooThemes
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Embed Class which handles any WooCommerce Products that are embedded on this site or another site
+ * Embed Class which handles any WooCommerce Products that are embedded on this site or another site.
  *
- * @class       WC_Embed
- * @version     2.4.11
- * @package     WooCommerce/Classes/Embed
- * @category    Class
- * @author      WooThemes
+ * @class    WC_Embed
+ * @version  2.4.11
+ * @author   WooThemes
  */
 class WC_Embed {
 
 	/**
 	 * Init embed class.
 	 *
-     * @since 2.4.11
+	 * @since 2.4.11
 	 */
 	public static function init() {
 
-        // filter all of the content that's going to be embedded
-        add_filter( 'the_title', array( __CLASS__, 'the_title' ), 10 );
-        add_filter( 'the_excerpt_embed', array( __CLASS__, 'the_excerpt' ), 10 );
+		// Filter all of the content that's going to be embedded.
+		add_filter( 'the_title', array( __CLASS__, 'the_title' ), 10 );
+		add_filter( 'the_excerpt_embed', array( __CLASS__, 'the_excerpt' ), 10 );
 
-        // make sure no comments display. Doesn't make sense for products
-        remove_action( 'embed_content_meta', 'print_embed_comments_button' );
+		// Make sure no comments display. Doesn't make sense for products.
+		remove_action( 'embed_content_meta', 'print_embed_comments_button' );
 
-        // in the comments place let's display the product rating
-        add_action( 'embed_content_meta', array( __CLASS__, 'get_ratings' ), 5 );
+		// In the comments place let's display the product rating.
+		add_action( 'embed_content_meta', array( __CLASS__, 'get_ratings' ), 5 );
 
-		// Add some basic styles
+		// Add some basic styles.
 		add_action( 'embed_head', array( __CLASS__, 'print_embed_styles' ) );
 	}
 
-    /**
-     * Create the title for embedded products - we want to add the price to it
-     *
-     * @return string
-     * @since 2.4.11
-     */
-    public static function the_title( $title ) {
-        // make sure we're only affecting embedded products
-        if ( self::is_embedded_product() ) {
+	/**
+	 * Create the title for embedded products - we want to add the price to it.
+	 *
+	 * @since 2.4.11
+	 * @param string $title Embed title.
+	 * @return string
+	 */
+	public static function the_title( $title ) {
+		// Make sure we're only affecting embedded products.
+		if ( self::is_embedded_product() ) {
 
-            // get product
-            $_product = wc_get_product( get_the_ID() );
+			// Get product.
+			$_product = wc_get_product( get_the_ID() );
 
-            // add the price
-            $title = $title . '<span class="wc-embed-price">' . $_product->get_price_html() . '</span>';
-        }
-        return $title;
-    }
+			// Add the price.
+			$title = $title . '<span class="wc-embed-price">' . $_product->get_price_html() . '</span>';
+		}
+		return $title;
+	}
 
-    /**
-     * Check if this is an embedded product - to make sure we don't mess up regular posts
-     *
-     * @return bool
-     * @since 2.4.11
-     */
-    public static function is_embedded_product() {
-        if ( function_exists( 'is_embed' ) && is_embed() && is_product() ) {
-            return true;
-        }
-        return false;
-    }
+	/**
+	 * Check if this is an embedded product - to make sure we don't mess up regular posts.
+	 *
+	 * @since 2.4.11
+	 * @return bool
+	 */
+	public static function is_embedded_product() {
+		if ( function_exists( 'is_embed' ) && is_embed() && is_product() ) {
+			return true;
+		}
+		return false;
+	}
 
-    /**
-     * Create the excerpt for embedded products - we want to add the buy button to it
-     *
-     * @return string
-     * @since 2.4.11
-     */
-    public static function the_excerpt( $excerpt ) {
+	/**
+	 * Create the excerpt for embedded products - we want to add the buy button to it.
+	 *
+	 * @since 2.4.11
+	 * @param string $excerpt Embed short description.
+	 * @return string
+	 */
+	public static function the_excerpt( $excerpt ) {
 		global $post;
 
-        //  make sure we're only affecting embedded products
-        if ( self::is_embedded_product() ) {
+		// Make sure we're only affecting embedded products.
+		if ( self::is_embedded_product() ) {
 			if ( ! empty( $post->post_excerpt ) ) {
 				ob_start();
-	            woocommerce_template_single_excerpt();
-	            $excerpt = ob_get_clean();
+				woocommerce_template_single_excerpt();
+				$excerpt = ob_get_clean();
 			}
 
-			// add the button
-			$excerpt.= self::product_buttons();
-        }
-        return $excerpt;
-    }
+			// Add the button.
+			$excerpt .= self::product_buttons();
+		}
+		return $excerpt;
+	}
 
-    /**
-     * Create the button to go to the product page for embedded products.
-     *
-     * @return string
-     * @since 2.4.11
-     */
-    public static function product_buttons() {
+	/**
+	 * Create the button to go to the product page for embedded products.
+	 *
+	 * @since 2.4.11
+	 * @return string
+	 */
+	public static function product_buttons() {
 		$_product = wc_get_product( get_the_ID() );
 		$buttons  = array();
 		$button   = '<a href="%s" class="wp-embed-more wc-embed-button">%s</a>';
 
 		if ( $_product->is_type( 'simple' ) && $_product->is_purchasable() && $_product->is_in_stock() ) {
-			$buttons[] = sprintf( $button, add_query_arg( 'add-to-cart', get_the_ID(), wc_get_cart_url() ), __( 'Buy Now', 'woocommerce' ) );
+			$buttons[] = sprintf( $button, esc_url( add_query_arg( 'add-to-cart', get_the_ID(), wc_get_cart_url() ) ), esc_html__( 'Buy Now', 'woocommerce' ) );
 		}
 
-        $buttons[] = sprintf( $button, get_the_permalink(), __( 'Read More', 'woocommerce' ) );
+		$buttons[] = sprintf( $button, get_the_permalink(), esc_html__( 'Read More', 'woocommerce' ) );
 
 		return '<p>' . implode( ' ', $buttons ) . '</p>';
-    }
-
-    /**
-     * Prints the markup for the rating stars
-     *
-     * @return string
-     * @since 2.4.11
-     */
-    public static function get_ratings( $comments ) {
-        //  make sure we're only affecting embedded products
-        if ( self::is_embedded_product() && ( $_product = wc_get_product( get_the_ID() ) ) && $_product->get_average_rating() > 0 ) {
-            ?>
-            <div class="wc-embed-rating">
-                <?php printf( __( 'Rated %s out of 5', 'woocommerce' ), $_product->get_average_rating() ); ?>
-            </div>
-            <?php
-        }
-    }
+	}
 
 	/**
-	 * Basic styling
+	 * Prints the markup for the rating stars.
+	 *
+	 * @since 2.4.11
+	 */
+	public static function get_ratings() {
+		// Make sure we're only affecting embedded products.
+		if ( self::is_embedded_product() && ( $_product = wc_get_product( get_the_ID() ) ) && $_product->get_average_rating() > 0 ) {
+			?>
+			<div class="wc-embed-rating">
+				<?php echo esc_html( sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $_product->get_average_rating() ) ); ?>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Basic styling.
 	 */
 	public static function print_embed_styles() {
 		if ( ! self::is_embedded_product() ) {
@@ -138,17 +145,17 @@ class WC_Embed {
 		?>
 		<style type="text/css">
 			a.wc-embed-button {
-				border: 1px solid #ddd;
 				border-radius: 4px;
-				padding: .5em;
+				border: 1px solid #ddd;
+				box-shadow: 0px 1px 0 0px rgba(0, 0, 0, 0.05);
 				display:inline-block;
-				box-shadow: 0px 1px 0 0px rgba(0,0,0,0.05);
+				padding: .5em;
 			}
 			a.wc-embed-button:hover, a.wc-embed-button:focus {
 				border: 1px solid #ccc;
-				box-shadow: 0px 1px 0 0px rgba(0,0,0,0.1);
-				text-decoration: none;
+				box-shadow: 0px 1px 0 0px rgba(0, 0, 0, 0.1);
 				color: #999;
+				text-decoration: none;
 			}
 			.wp-embed-excerpt p {
 				margin: 0 0 1em;
