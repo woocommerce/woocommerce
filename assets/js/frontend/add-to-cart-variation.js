@@ -520,12 +520,17 @@
 	$.fn.wc_variations_description_update = function( variation_description ) {
 		var $form                   = this;
 		var $variations_description = $form.find( '.woocommerce-variation-description' );
+		var $single_variation_wrap  = $form.find( '.single_variation_wrap' );
 
 		if ( $variations_description.length === 0 ) {
 			if ( variation_description ) {
 				// add transparent border to allow correct height measurement when children have top/bottom margins
-				$form.find( '.single_variation_wrap' ).prepend( $( '<div class="woocommerce-variation-description" style="border:1px solid transparent;">' + variation_description + '</div>' ).hide() );
-				$form.find( '.woocommerce-variation-description' ).slideDown( 200 );
+				$single_variation_wrap.prepend( $( '<div class="woocommerce-variation-description" style="border:1px solid transparent;">' + variation_description + '</div>' ).hide() );
+				if ( $single_variation_wrap.is( ':visible' ) ) {
+					$form.find( '.woocommerce-variation-description' ).slideDown( 200 );
+				} else {
+					$form.find( '.woocommerce-variation-description' ).show();
+				}
 			}
 		} else {
 			var load_height    = $variations_description.outerHeight( true );
