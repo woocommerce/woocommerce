@@ -162,6 +162,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - WordPress 4.4 support.
 * Fix - Removes Switzerland from EU VAT definition .
 * Fix - Fix auth endpoint urls.
+* Fix - To allow backslash in SKUs.
+* Fix - Sanity check for min/max quantity .
 * Fix - 4.4 - Shipping class menu display.
 * Fix - 4.4 - Admin menu icons and styling.
 * Tweak - 4.4 - Basic support for product embeds.
