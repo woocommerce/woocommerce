@@ -1058,7 +1058,7 @@ class WC_Product {
 			set_transient( $transient_name, $average_rating, DAY_IN_SECONDS * 30 );
 		}
 
-		return number_format( $average_rating, 2, '.', '' );
+		return (string) floatval( $average_rating );
 	}
 
 	/**
@@ -1116,7 +1116,7 @@ class WC_Product {
 
 			$rating_html  = '<div class="star-rating" title="' . sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $rating ) . '">';
 
-			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . floatval( $rating ) . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
+			$rating_html .= '<span style="width:' . ( ( $rating / 5 ) * 100 ) . '%"><strong class="rating">' . $rating . '</strong> ' . __( 'out of 5', 'woocommerce' ) . '</span>';
 
 			$rating_html .= '</div>';
 		}
