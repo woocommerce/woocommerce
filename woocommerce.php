@@ -260,6 +260,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( 'includes/class-wc-https.php' );                          // https Helper
+		include_once( 'includes/class-wc-embed.php' );                          // Embeds
 	}
 
 	/**
