@@ -169,7 +169,7 @@ abstract class WC_Widget extends WP_Widget {
 
 		foreach ( $this->settings as $key => $setting ) {
 
-			$class = isset( $setting['class'] ) ? $setting['class'] : $key;
+			$class = isset( $setting['class'] ) ? $setting['class'] : '';
 			$value = isset( $instance[ $key ] ) ? $instance[ $key ] : $setting['std'];
 
 			switch ( $setting['type'] ) {
@@ -208,7 +208,7 @@ abstract class WC_Widget extends WP_Widget {
 				case 'checkbox' :
 					?>
 					<p>
-						<input class="<?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="checkbox" value="1" <?php checked( $value, 1 ); ?> />
+						<input class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="checkbox" value="1" <?php checked( $value, 1 ); ?> />
 						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
 					</p>
 					<?php
