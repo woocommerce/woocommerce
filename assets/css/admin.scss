@@ -3054,13 +3054,18 @@ img.help_tip {
 		}
 
 		.handlediv {
-			width: auto;
-			margin-right: 1em;
+			width: 27px;
 
 			&:before {
-				line-height: 2 !important;
-				font-family: "Dashicons";
 				content: "\f142" !important;
+				cursor: pointer;
+				display: inline-block;
+				font: 400 20px/1 "Dashicons";
+				line-height: .5 !important;
+				padding: 8px 10px;
+				position: relative;
+				right: 12px;
+				top: 0;
 			}
 		}
 
