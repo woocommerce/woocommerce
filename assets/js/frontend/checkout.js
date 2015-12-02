@@ -342,6 +342,36 @@ jQuery( function( $ ) {
 					});
 				}
 
+				jQuery.ajaxSetup( {
+					dataFilter: function( raw_response ) {
+
+						try {
+
+							// check for valid JSON
+							var data = $.parseJSON( raw_response );
+
+							if ( data && typeof data === 'object' ) {
+
+								// return it so it can be parsed by Ajax handler
+								return raw_response;
+							}
+
+						} catch ( e ) {
+
+							// attempt to fix the malformed JSON
+							valid_json = raw_response.match( /{"result.*"}/ );
+
+							if ( null === valid_json ) {
+								console.log( 'Unable to fix malformed JSON' );
+							} else {
+								raw_response = valid_json[0];
+							}
+						}
+
+						return raw_response;
+					}
+				} );
+
 				$.ajax({
 					type:		'POST',
 					url:		wc_checkout_params.checkout_url,
