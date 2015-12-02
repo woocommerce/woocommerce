@@ -102,7 +102,7 @@ class WC_Embed {
 		$buttons  = array();
 		$button   = '<a href="%s" class="wp-embed-more wc-embed-button">%s</a>';
 
-		if ( $_product->is_purchasable() && $_product->is_in_stock() ) {
+		if ( $_product->is_type( 'simple' ) && $_product->is_purchasable() && $_product->is_in_stock() ) {
 			$buttons[] = sprintf( $button, add_query_arg( 'add-to-cart', get_the_ID(), wc_get_cart_url() ), __( 'Buy Now', 'woocommerce' ) );
 		}
 
