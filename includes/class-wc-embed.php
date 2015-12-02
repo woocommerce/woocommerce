@@ -41,11 +41,10 @@ class WC_Embed {
      */
     public static function the_title( $title ) {
         // make sure we're only affecting embedded products
-        if ( WC_Embed::is_embedded_product() ) {
+        if ( self::is_embedded_product() ) {
 
             // get product
-            $_pf = new WC_Product_Factory();
-            $_product = $_pf->get_product( get_the_ID() );
+            $_product = wc_get_product( get_the_ID() );
 
             // add the price
             $title = $title . '<span class="price" style="float: right;">' . $_product->get_price_html() . '</span>';
@@ -73,14 +72,18 @@ class WC_Embed {
      * @since 2.4.11
      */
     public static function the_excerpt( $excerpt ) {
+		global $post;
+
         //  make sure we're only affecting embedded products
-        if ( WC_Embed::is_embedded_product() ) {
+        if ( self::is_embedded_product() ) {
+			if ( ! empty( $post->post_excerpt ) ) {
+				ob_start();
+	            woocommerce_template_single_excerpt();
+	            $excerpt = ob_get_clean();
+			}
 
-            // add the exerpt
-            $excerpt = wpautop( $excerpt );
-
-            // add the button
-            $excerpt .= WC_Embed::product_button();
+			// add the button
+			$excerpt.= self::product_button();
         }
         return $excerpt;
     }
@@ -92,8 +95,8 @@ class WC_Embed {
      * @since 2.4.11
      */
     public static function product_button( ) {
-        $button = '<a href="%s" class="wp-embed-more">%s &rarr;</a>';
-        return sprintf( $button, get_the_permalink(), __( 'View The Product', 'woocommerce' ) );
+        $button = '<p><a href="%s" class="wp-embed-more button">%s &rarr;</a></p>';
+        return sprintf( $button, get_the_permalink(), __( 'View Product', 'woocommerce' ) );
     }
 
     /**
@@ -104,7 +107,7 @@ class WC_Embed {
      */
     public static function get_ratings( $comments ) {
         //  make sure we're only affecting embedded products
-        if ( WC_Embed::is_embedded_product() ) {
+        if ( self::is_embedded_product() ) {
             ?>
             <div style="display:inline-block;">
                 <?php
