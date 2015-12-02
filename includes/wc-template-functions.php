@@ -942,6 +942,17 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
 
+		// Apply sanity to min/max args - min cannot be lower than 0
+		if ( '' !== $args['min_value'] && $args['min_value'] < 0 ) {
+			$args['min_value'] = 0; // Cannot be lower than 0
+		}
+
+		// Max cannot be lower than 0 or min
+		if ( '' !== $args['max_value'] ) {
+			$args['max_value'] = $args['max_value'] < 0 ? 0 : $args['max_value'];
+			$args['max_value'] = $args['max_value'] < $args['min_value'] ? $args['min_value'] : $args['max_value'];
+		}
+
 		ob_start();
 
 		wc_get_template( 'global/quantity-input.php', $args );
