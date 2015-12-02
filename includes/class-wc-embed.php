@@ -119,13 +119,10 @@ class WC_Embed {
      */
     public static function get_ratings( $comments ) {
         //  make sure we're only affecting embedded products
-        if ( self::is_embedded_product() ) {
+        if ( self::is_embedded_product() && ( $_product = wc_get_product( get_the_ID() ) ) && $_product->get_average_rating() > 0 ) {
             ?>
             <div class="wc-embed-rating">
-                <?php
-                	$_product = wc_get_product( get_the_ID() );
-                	printf( __( 'Rated %s out of 5', 'woocommerce' ), $_product->get_average_rating() );
-                ?>
+                <?php printf( __( 'Rated %s out of 5', 'woocommerce' ), $_product->get_average_rating() ); ?>
             </div>
             <?php
         }
