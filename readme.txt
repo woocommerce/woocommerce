@@ -166,6 +166,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Sanity check for min/max quantity .
 * Fix - 4.4 - Shipping class menu display.
 * Fix - 4.4 - Admin menu icons and styling.
+* Fix - API - Variable product backorders editing.
+* Fix - API - Delete product transients when delete a variable product.
+* Fix - API - Returned status when have an invalid oAuth timestamp.
+* Fix - API - Early call of order status when editing orders.
 * Tweak - 4.4 - Basic support for product embeds.
 * Tweak - 4.4 - Support for srcset/sizes and responsive images.
 * Tweak - 4.4 - Support for Twenty Sixteen.
