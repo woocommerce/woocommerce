@@ -23,14 +23,17 @@ class WC_Embed {
 	public static function init() {
 
         // filter all of the content that's going to be embedded
-        add_filter( 'the_title', array( 'WC_Embed', 'the_title' ), 10 );
-        add_filter( 'the_excerpt_embed', array( 'WC_Embed', 'the_excerpt' ), 10 );
+        add_filter( 'the_title', array( __CLASS__, 'the_title' ), 10 );
+        add_filter( 'the_excerpt_embed', array( __CLASS__, 'the_excerpt' ), 10 );
 
         // make sure no comments display. Doesn't make sense for products
         remove_action( 'embed_content_meta', 'print_embed_comments_button' );
 
         // in the comments place let's display the product rating
-        add_action( 'embed_content_meta', array( 'WC_Embed', 'get_ratings' ), 5 );
+        add_action( 'embed_content_meta', array( __CLASS__, 'get_ratings' ), 5 );
+
+		// Add some basic styles
+		add_action( 'embed_head', array( __CLASS__, 'print_embed_styles' ) );
 	}
 
     /**
@@ -47,7 +50,7 @@ class WC_Embed {
             $_product = wc_get_product( get_the_ID() );
 
             // add the price
-            $title = $title . '<span class="price" style="float: right;">' . $_product->get_price_html() . '</span>';
+            $title = $title . '<span class="wc-embed-price">' . $_product->get_price_html() . '</span>';
         }
         return $title;
     }
@@ -83,7 +86,7 @@ class WC_Embed {
 			}
 
 			// add the button
-			$excerpt.= self::product_button();
+			$excerpt.= self::product_buttons();
         }
         return $excerpt;
     }
@@ -94,9 +97,18 @@ class WC_Embed {
      * @return string
      * @since 2.4.11
      */
-    public static function product_button( ) {
-        $button = '<p><a href="%s" class="wp-embed-more button">%s &rarr;</a></p>';
-        return sprintf( $button, get_the_permalink(), __( 'View Product', 'woocommerce' ) );
+    public static function product_buttons() {
+		$_product = wc_get_product( get_the_ID() );
+		$buttons  = array();
+		$button   = '<a href="%s" class="wp-embed-more wc-embed-button">%s</a>';
+
+		if ( $_product->is_purchasable() && $_product->is_in_stock() ) {
+			$buttons[] = sprintf( $button, add_query_arg( 'add-to-cart', get_the_ID(), wc_get_cart_url() ), __( 'Buy Now', 'woocommerce' ) );
+		}
+
+        $buttons[] = sprintf( $button, get_the_permalink(), __( 'Read More', 'woocommerce' ) );
+
+		return '<p>' . implode( ' ', $buttons ) . '</p>';
     }
 
     /**
@@ -109,7 +121,7 @@ class WC_Embed {
         //  make sure we're only affecting embedded products
         if ( self::is_embedded_product() ) {
             ?>
-            <div style="display:inline-block;">
+            <div class="wc-embed-rating">
                 <?php
                 	$_product = wc_get_product( get_the_ID() );
                 	printf( __( 'Rated %s out of 5', 'woocommerce' ), $_product->get_average_rating() );
@@ -119,6 +131,40 @@ class WC_Embed {
         }
     }
 
+	/**
+	 * Basic styling
+	 */
+	public static function print_embed_styles() {
+		if ( ! self::is_embedded_product() ) {
+			return;
+		}
+		?>
+		<style type="text/css">
+			a.wc-embed-button {
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				padding: .5em;
+				display:inline-block;
+				box-shadow: 0px 1px 0 0px rgba(0,0,0,0.05);
+			}
+			a.wc-embed-button:hover, a.wc-embed-button:focus {
+				border: 1px solid #ccc;
+				box-shadow: 0px 1px 0 0px rgba(0,0,0,0.1);
+				text-decoration: none;
+				color: #999;
+			}
+			.wp-embed-excerpt p {
+				margin: 0 0 1em;
+			}
+			.wc-embed-price {
+				float:right;
+			}
+			.wc-embed-rating {
+				display: inline-block;
+			}
+		</style>
+		<?php
+	}
 }
 
 WC_Embed::init();
