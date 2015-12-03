@@ -22,24 +22,29 @@ class WC_Admin_Addons {
 	 * @return array of objects
 	 */
 	public static function get_sections() {
-		if ( false === ( $sections = get_transient( 'woocommerce_addons_sections' ) ) ) {
+		if ( false === ( $sections = get_transient( 'wc_addons_sections' ) ) ) {
 			$raw_sections = wp_safe_remote_get( 'http://d3t0oesq8995hv.cloudfront.net/woocommerce-addons.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
 
 			if ( ! is_wp_error( $raw_sections ) ) {
 				$sections = json_decode( wp_remote_retrieve_body( $raw_sections ) );
 
 				if ( $sections ) {
-					set_transient( 'woocommerce_addons_sections', $sections, WEEK_IN_SECONDS );
+					set_transient( 'wc_addons_sections', $sections, WEEK_IN_SECONDS );
 				}
 			}
 		}
 
 		$addon_sections = array();
 
-		foreach ( $sections as $section ) {
-			$addon_sections[ $section->id ]           = new stdClass;
-			$addon_sections[ $section->id ]->title    = wc_clean( $section->title );
-			$addon_sections[ $section->id ]->endpoint = wc_clean( $section->endpoint );
+		if ( $sections ) {
+			foreach ( $sections as $section ) {
+				if ( empty( $section->id ) ) {
+					continue;
+				}
+				$addon_sections[ $section->id ]           = new stdClass;
+				$addon_sections[ $section->id ]->title    = wc_clean( $section->title );
+				$addon_sections[ $section->id ]->endpoint = wc_clean( $section->endpoint );
+			}
 		}
 
 		return apply_filters( 'woocommerce_addons_sections', $addon_sections );
@@ -66,14 +71,14 @@ class WC_Admin_Addons {
 		$section_data = '';
 
 		if ( ! empty( $section->endpoint ) ) {
-			if ( false === ( $section_data = get_transient( 'woocommerce_addons_section_' . $section_id ) ) ) {
+			if ( false === ( $section_data = get_transient( 'wc_addons_section_' . $section_id ) ) ) {
 				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ), array( 'user-agent' => 'WooCommerce Addons Page' ) );
 
 				if ( ! is_wp_error( $raw_section ) ) {
 					$section_data = json_decode( wp_remote_retrieve_body( $raw_section ) );
 
 					if ( $section_data ) {
-						set_transient( 'woocommerce_addons_section_' . $section_id, $section_data, WEEK_IN_SECONDS );
+						set_transient( 'wc_addons_section_' . $section_id, $section_data, WEEK_IN_SECONDS );
 					}
 				}
 			}
