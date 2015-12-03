@@ -643,7 +643,7 @@ class WC_Checkout {
 					$result = $available_gateways[ $this->posted['payment_method'] ]->process_payment( $order_id );
 
 					// Redirect to success/confirmation/payment page
-					if ( $result['result'] == 'success' ) {
+					if ( 'success' === $result['result'] ) {
 
 						$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
