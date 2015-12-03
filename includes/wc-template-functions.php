@@ -308,8 +308,12 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 			}
 		}
 
-		if ( is_product() && 'variable' === $product->product_type && $product->has_default_attributes() ) {
+		if ('variable' === $product->product_type && $product->has_default_attributes() ) {
 			$classes[] = 'has-default-attributes';
+		}
+
+		if ( 'variable' === $product->product_type && $product->has_child() ) {
+			$classes[] = 'has-children';
 		}
 
 		$classes[] = $product->stock_status;

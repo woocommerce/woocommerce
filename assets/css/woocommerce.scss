@@ -1909,7 +1909,7 @@ p.demo_store {
 }
 
 /* added to get around variation image flicker issue */
-.product.has-default-attributes {
+.product.has-default-attributes.has-children {
 	> .images {
 		opacity: 0;
 	}
