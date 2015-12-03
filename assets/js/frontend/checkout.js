@@ -342,28 +342,34 @@ jQuery( function( $ ) {
 					});
 				}
 
-				jQuery.ajaxSetup( {
-					dataFilter: function( raw_response ) {
+				// ajaxSetup is global, but we use it to ensure JSON is valid once returned.
+				$.ajaxSetup( {
+					dataFilter: function( raw_response, dataType ) {
+						// We only want to work with JSON
+						if ( 'json' !== dataType ) {
+							return raw_response;
+						}
 
 						try {
-
 							// check for valid JSON
 							var data = $.parseJSON( raw_response );
 
-							if ( data && typeof data === 'object' ) {
+							if ( data && 'object' === typeof data ) {
 
-								// return it so it can be parsed by Ajax handler
+								// Valid - return it so it can be parsed by Ajax handler
 								return raw_response;
 							}
 
 						} catch ( e ) {
 
 							// attempt to fix the malformed JSON
-							valid_json = raw_response.match( /{"result.*"}/ );
+							var valid_json = raw_response.match( /{"result.*"}/ );
 
 							if ( null === valid_json ) {
 								console.log( 'Unable to fix malformed JSON' );
 							} else {
+								console.log( 'Fixed malformed JSON. Original:' );
+								console.log( raw_response );
 								raw_response = valid_json[0];
 							}
 						}
