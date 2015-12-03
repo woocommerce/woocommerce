@@ -81,10 +81,10 @@ class WC_Meta_Box_Coupon_Data {
 				echo '<div class="options_group">';
 
 				// minimum spend
-				woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum spend', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum subtotal needed to use the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
+				woocommerce_wp_text_input( array( 'id' => 'minimum_amount', 'label' => __( 'Minimum spend', 'woocommerce' ), 'placeholder' => __( 'No minimum', 'woocommerce' ), 'description' => __( 'This field allows you to set the minimum spend (subtotal, including taxes) allowed to use the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
 
 				// maximum spend
-				woocommerce_wp_text_input( array( 'id' => 'maximum_amount', 'label' => __( 'Maximum spend', 'woocommerce' ), 'placeholder' => __( 'No maximum', 'woocommerce' ), 'description' => __( 'This field allows you to set the maximum subtotal allowed when using the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
+				woocommerce_wp_text_input( array( 'id' => 'maximum_amount', 'label' => __( 'Maximum spend', 'woocommerce' ), 'placeholder' => __( 'No maximum', 'woocommerce' ), 'description' => __( 'This field allows you to set the maximum spend (subtotal, including taxes) allowed when using the coupon.', 'woocommerce' ), 'data_type' => 'price', 'desc_tip' => true ) );
 
 				// Individual use
 				woocommerce_wp_checkbox( array( 'id' => 'individual_use', 'label' => __( 'Individual use only', 'woocommerce' ), 'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ) ) );
