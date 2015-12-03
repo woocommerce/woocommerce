@@ -9,7 +9,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -18,33 +18,93 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Addons {
 
 	/**
+	 * Get sections for the addons screen
+	 * @return array of objects
+	 */
+	public static function get_sections() {
+		if ( false === ( $sections = get_transient( 'woocommerce_addons_sections' ) ) ) {
+			$raw_sections = wp_safe_remote_get( 'http://d3t0oesq8995hv.cloudfront.net/woocommerce-addons.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+
+			if ( ! is_wp_error( $raw_sections ) ) {
+				$sections = json_decode( wp_remote_retrieve_body( $raw_sections ) );
+
+				if ( $sections ) {
+					set_transient( 'woocommerce_addons_sections', $sections, WEEK_IN_SECONDS );
+				}
+			}
+		}
+
+		$addon_sections = array();
+
+		foreach ( $sections as $section ) {
+			$addon_sections[ $section->id ]           = new stdClass;
+			$addon_sections[ $section->id ]->title    = wc_clean( $section->title );
+			$addon_sections[ $section->id ]->endpoint = wc_clean( $section->endpoint );
+		}
+
+		return apply_filters( 'woocommerce_addons_sections', $addon_sections );
+	}
+
+	/**
+	 * Get section for the addons screen
+	 * @return object|bool
+	 */
+	public static function get_section( $section_id ) {
+		$sections = self::get_sections();
+		if ( isset( $sections['section_id'] ) ) {
+			return $sections['section_id'];
+		}
+		return false;
+	}
+
+	/**
+	 * Get section content for the addons screen
+	 * @return string
+	 */
+	public static function get_section_data( $section_id ) {
+		$section      = self::get_section( $section_id );
+		$section_data = '';
+
+		if ( ! empty( $section->endpoint ) ) {
+			if ( false === ( $section_data = get_transient( 'woocommerce_addons_section_' . $section_id ) ) ) {
+				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ), array( 'user-agent' => 'WooCommerce Addons Page' ) );
+
+				if ( ! is_wp_error( $raw_section ) ) {
+					$section_data = json_decode( wp_remote_retrieve_body( $raw_section ) );
+
+					if ( $section_data ) {
+						set_transient( 'woocommerce_addons_section_' . $section_id, $section_data, WEEK_IN_SECONDS );
+					}
+				}
+			}
+		}
+
+		return apply_filters( 'woocommerce_addons_section_data', $section_data, $section_id );
+	}
+
+	/**
 	 * Handles the outputting of a contextually aware Storefront link (points to child themes if Storefront is already active).
 	 */
 	public static function output_storefront_button() {
-		$url = 'http://www.woothemes.com/storefront/';
-		$text = __( 'View more about Storefront', 'woocommerce' );
-		$template = get_option( 'template' );
-		$stylesheet = get_option( 'stylesheet' );
+		$url         = 'http://www.woothemes.com/storefront/';
+		$text        = __( 'View more about Storefront', 'woocommerce' );
+		$template    = get_option( 'template' );
+		$stylesheet  = get_option( 'stylesheet' );
 		$utm_content = 'hasstorefront';
 
-		// If we're using Storefront with a child theme.
-		if ( 'storefront' == $template && 'storefront' != $stylesheet ) {
-			$url = 'http:///www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
-			$text = __( 'View more Storefront child themes', 'woocommerce' );
-			$utm_content = 'hasstorefrontchildtheme';
-		}
-
-		// If we're using Storefront without a child theme.
-		if ( 'storefront' == $template && 'storefront' == $stylesheet ) {
-			$url = 'http:///www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
-			$text = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
-			$utm_content = 'nostorefrontchildtheme';
-		}
-
-		// If we're not using Storefront at all.
-		if ( 'storefront' != $template && 'storefront' != $stylesheet ) {
-			$url = 'http://www.woothemes.com/storefront/';
-			$text = __( 'Need a theme? Try Storefront', 'woocommerce' );
+		if ( 'storefront' === $template ) {
+			if ( 'storefront' === $stylesheet ) {
+				$url         = 'http:///www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
+				$text        = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
+				$utm_content = 'nostorefrontchildtheme';
+			} else {
+				$url         = 'http:///www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
+				$text        = __( 'View more Storefront child themes', 'woocommerce' );
+				$utm_content = 'hasstorefrontchildtheme';
+			}
+		} else {
+			$url         = 'http://www.woothemes.com/storefront/';
+			$text        = __( 'Need a theme? Try Storefront', 'woocommerce' );
 			$utm_content = 'nostorefront';
 		}
 
@@ -59,24 +119,13 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Handles output of the reports page in admin.
+	 * Handles output of the addons page in admin.
 	 */
 	public static function output() {
-
-		if ( false === ( $addons = get_transient( 'woocommerce_addons_data' ) ) ) {
-
-			$addons_json = wp_safe_remote_get( 'http://d3t0oesq8995hv.cloudfront.net/woocommerce-addons.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
-
-			if ( ! is_wp_error( $addons_json ) ) {
-
-				$addons = json_decode( wp_remote_retrieve_body( $addons_json ) );
-
-				if ( $addons ) {
-					set_transient( 'woocommerce_addons_data', $addons, WEEK_IN_SECONDS );
-				}
-			}
-		}
-
+		$sections        = self::get_sections();
+		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '';
+		$theme           = wp_get_theme();
+		$section_keys    = array_keys( $sections );
 		include_once( 'views/html-admin-page-addons.php' );
 	}
 }
