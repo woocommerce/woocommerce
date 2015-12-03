@@ -325,7 +325,7 @@ class WC_Form_Handler {
 						$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
 						// Redirect to success/confirmation/payment page
-						if ( 'success' == $result['result'] ) {
+						if ( 'success' === $result['result'] ) {
 							wp_redirect( $result['redirect'] );
 							exit;
 						}
