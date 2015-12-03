@@ -48,14 +48,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php $method = current( $available_methods ); ?>
 			<?php echo wc_cart_totals_shipping_method_label( $method ); ?>
 			<input type="hidden" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" value="<?php echo esc_attr( $method->id ); ?>" class="shipping_method" />
+			<?php do_action( 'woocommerce_after_shipping_rate', $method, $index ); ?>
 
 		<?php elseif ( 'select' === get_option( 'woocommerce_shipping_method_format' ) ) : ?>
 
 			<select name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>" class="shipping_method">
+				<?php $current_method = false; ?>
 				<?php foreach ( $available_methods as $method ) : ?>
+					<?php $current_method = ( $method->id == $chosen_method ) ? $method : $current_method; ?>
 					<option value="<?php echo esc_attr( $method->id ); ?>" <?php selected( $method->id, $chosen_method ); ?>><?php echo wc_cart_totals_shipping_method_label( $method ); ?></option>
 				<?php endforeach; ?>
 			</select>
+			<?php do_action( 'woocommerce_after_shipping_rate', $current_method, $index ); ?>
 
 		<?php else : ?>
 
@@ -64,6 +68,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<li>
 						<input type="radio" name="shipping_method[<?php echo $index; ?>]" data-index="<?php echo $index; ?>" id="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>" value="<?php echo esc_attr( $method->id ); ?>" <?php checked( $method->id, $chosen_method ); ?> class="shipping_method" />
 						<label for="shipping_method_<?php echo $index; ?>_<?php echo sanitize_title( $method->id ); ?>"><?php echo  wc_cart_totals_shipping_method_label( $method ); ?></label>
+						<?php do_action( 'woocommerce_after_shipping_rate', $method, $index ); ?>
 					</li>
 				<?php endforeach; ?>
 			</ul>
