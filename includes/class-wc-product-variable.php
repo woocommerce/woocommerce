@@ -719,12 +719,10 @@ class WC_Product_Variable extends WC_Product {
 			'post_status'	=> 'publish'
 		) );
 
-		// No published variations - update parent post status. Use $wpdb to prevent endless loop on save_post hooks.
-		if ( ! $children && get_post_status( $product_id ) == 'publish' ) {
-			$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $product_id ) );
-
+		// No published variations - product won't be purchasable.
+		if ( ! $children && 'publish' === get_post_status( $product_id ) ) {
 			if ( is_admin() ) {
-				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations so cannot be published. Changing status to draft.', 'woocommerce' ) );
+				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations. Add or enable variations to allow this product to be purchased.', 'woocommerce' ) );
 			}
 
 		// Loop the variations

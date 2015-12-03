@@ -84,7 +84,7 @@ class WC_Admin_Meta_Boxes {
 
 		if ( ! empty( $errors ) ) {
 
-			echo '<div id="woocommerce_errors" class="error">';
+			echo '<div id="woocommerce_errors" class="error notice is-dismissible">';
 
 			foreach ( $errors as $error ) {
 				echo '<p>' . wp_kses_post( $error ) . '</p>';

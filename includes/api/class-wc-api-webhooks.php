@@ -343,32 +343,35 @@ class WC_API_Webhooks extends WC_API_Resource {
 	 * Helper method to get webhook post objects
 	 *
 	 * @since 2.2
-	 * @param array $args request arguments for filtering query
+	 * @param array $args request arguments for filtering query.
 	 * @return WP_Query
 	 */
 	private function query_webhooks( $args ) {
 
-		// Set base query arguments
+		// Set base query arguments.
 		$query_args = array(
 			'fields'      => 'ids',
 			'post_type'   => 'shop_webhook',
 		);
 
-		// Add status argument
+		// Add status argument.
 		if ( ! empty( $args['status'] ) ) {
-
 			switch ( $args['status'] ) {
-				case 'active':
+				case 'active' :
 					$query_args['post_status'] = 'publish';
 					break;
-				case 'paused':
+				case 'paused' :
 					$query_args['post_status'] = 'draft';
 					break;
-				case 'disabled':
+				case 'disabled' :
 					$query_args['post_status'] = 'pending';
 					break;
-				default:
+				case 'all' :
+					$query_args['post_status'] = 'any';
+					break;
+				default :
 					$query_args['post_status'] = 'publish';
+					break;
 			}
 			unset( $args['status'] );
 		}

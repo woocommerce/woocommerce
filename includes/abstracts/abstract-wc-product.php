@@ -72,7 +72,7 @@ class WC_Product {
 
 	/** @public string The product's total stock, including that of its children. */
 	public $total_stock;
-	
+
 	/**
 	 * Supported features such as 'ajax_add_to_cart'.
 	 * @var array
@@ -1078,7 +1078,7 @@ class WC_Product {
 					AND comment_approved = '1'
 					AND meta_value > 0
 				", $this->id ) );
-				$average = number_format( $ratings / $count, 2 );
+				$average = number_format( $ratings / $count, 2, '.', '' );
 			} else {
 				$average = 0;
 			}
@@ -1087,7 +1087,7 @@ class WC_Product {
 			$average = get_post_meta( $this->id, '_wc_average_rating', true );
 		}
 
-		return $average;
+		return (string) floatval( $average );
 	}
 
 	/**
