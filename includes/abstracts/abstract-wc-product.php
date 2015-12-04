@@ -453,7 +453,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_virtual() {
-		return $this->virtual == 'yes' ? true : false;
+		return apply_filters( 'woocommerce_is_virtual', $this->virtual == 'yes' ? true : false, $this );
 	}
 
 	/**
