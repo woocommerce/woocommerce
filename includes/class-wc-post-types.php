@@ -396,7 +396,7 @@ class WC_Post_types {
 						'parent'             => __( 'Parent Webhook', 'woocommerce' )
 					),
 					'public'              => false,
-					'show_ui'             => false,
+					'show_ui'             => true,
 					'capability_type'     => 'shop_webhook',
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => false,
