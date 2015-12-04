@@ -63,8 +63,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			if ( ! is_null( $_chosen_attributes ) ) {
 				foreach ( $_chosen_attributes as $taxonomy => $data ) {
 
-					foreach ( $data['terms'] as $term_id ) {
-						$term = get_term( $term_id, $taxonomy );
+					foreach ( $data['terms'] as $term_slug ) {
+						$term = get_term_by( 'slug', $term_slug, $taxonomy );
 
 						if ( ! isset( $term->name ) ) {
 							continue;
@@ -72,8 +72,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 
 						$taxonomy_filter = str_replace( 'pa_', '', $taxonomy );
 						$current_filter  = ! empty( $_GET[ 'filter_' . $taxonomy_filter ] ) ? $_GET[ 'filter_' . $taxonomy_filter ] : '';
-						$new_filter      = array_map( 'absint', explode( ',', $current_filter ) );
-						$new_filter      = array_diff( $new_filter, array( $term_id ) );
+						$new_filter      = array_map( 'sanitize_text_field', explode( ',', $current_filter ) );
+						$new_filter      = array_diff( $new_filter, array( $term_slug ) );
 
 						$link = remove_query_arg( array( 'add-to-cart', 'filter_' . $taxonomy_filter ) );
 
