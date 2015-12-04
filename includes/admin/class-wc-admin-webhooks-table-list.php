@@ -106,7 +106,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 				$actions['trash'] = '<a class="submitdelete" title="' . esc_attr( __( 'Move this item to the Trash', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . __( 'Trash', 'woocommerce' ) . '</a>';
 			}
 			if ( 'trash' == $post_status || ! EMPTY_TRASH_DAYS ) {
-				$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id ) . '">' . __( 'Delete Permanently', 'woocommerce' ) . '</a>';
+				$actions['delete'] = '<a class="submitdelete" title="' . esc_attr( __( 'Delete this item permanently', 'woocommerce' ) ) . '" href="' . get_delete_post_link( $the_webhook->id, '', true ) . '">' . __( 'Delete Permanently', 'woocommerce' ) . '</a>';
 			}
 		}
 
