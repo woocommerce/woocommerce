@@ -143,7 +143,7 @@ abstract class WC_Widget extends WP_Widget {
 
 		// Loop settings and get values to save.
 		foreach ( $this->settings as $key => $setting ) {
-			if ( ! isset( $new_instance[ $key ] ) || ! isset( $setting['type'] ) ) {
+			if ( ! isset( $setting['type'] ) ) {
 				continue;
 			}
 
@@ -161,14 +161,14 @@ abstract class WC_Widget extends WP_Widget {
 					}
 				break;
 				case 'checkbox' :
-					$instance[ $key ] = is_null( $new_instance[ $key ] );
-					break;
+					$instance[ $key ] = is_null( $new_instance[ $key ] ) ? 0 : 1;
+				break;
 				case 'textarea' :
 					$instance[ $key ] = wp_kses_post( trim( $new_instance[ $key ] ) );
 				break;
 				default:
 					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
-					break;
+				break;
 			}
 		}
 
