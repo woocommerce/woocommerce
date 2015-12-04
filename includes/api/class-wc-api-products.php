@@ -122,6 +122,7 @@ class WC_API_Products extends WC_API_Resource {
 		# GET/PUT/DELETE /products/attributes/<attribute_id>/terms/<id>
 		$routes[ $this->base . '/attributes/(?P<attribute_id>\d+)/terms/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product_attribute_term' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_attribute_term' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# POST|PUT /products/bulk
@@ -2752,7 +2753,7 @@ class WC_API_Products extends WC_API_Resource {
 			$id   = absint( $id );
 			$data = $data['product_attribute'];
 
-			// Check permissions
+			// Check permissions.
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_attribute', __( 'You do not have permission to edit product attributes', 'woocommerce' ), 401 );
 			}
@@ -2781,7 +2782,7 @@ class WC_API_Products extends WC_API_Resource {
 				$attribute_public = $attribute['product_attribute']['has_archives'];
 			}
 
-			// Validate the attribute data
+			// Validate the attribute data.
 			$this->validate_attribute_data( $attribute_name, $attribute_slug, $attribute_type, $attribute_order_by, false );
 
 			$update = $wpdb->update(
@@ -2798,14 +2799,14 @@ class WC_API_Products extends WC_API_Resource {
 				array( '%d' )
 			);
 
-			// Checks for an error in the product creation
+			// Checks for an error in the product creation.
 			if ( false === $update ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_attribute', __( 'Could not edit the attribute', 'woocommerce' ), 400 );
 			}
 
 			do_action( 'woocommerce_api_edit_product_attribute', $id, $data );
 
-			// Clear transients
+			// Clear transients.
 			flush_rewrite_rules();
 			delete_transient( 'wc_attribute_taxonomies' );
 
@@ -2933,7 +2934,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Get the product attribute term for the given ID
+	 * Get the product attribute term for the given ID.
 	 *
 	 * @since 2.4.0
 	 * @param int $attribute_id Attribute ID.
@@ -2983,7 +2984,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Create a new product attribute.
+	 * Create a new product attribute term.
 	 *
 	 * @since 2.4.0
 	 * @param int $attribute_id Attribute ID.
@@ -3027,7 +3028,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			$term = wp_insert_term( $data['name'], $taxonomy, $args );
 
-			// Checks for an error in the product creation.
+			// Checks for an error in the term creation.
 			if ( is_wp_error( $term ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_attribute', $term->get_error_message(), 400 );
 			}
@@ -3037,6 +3038,65 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_create_product_attribute_term', $id, $data );
 
 			$this->server->send_status( 201 );
+
+			return $this->get_product_attribute_term( $attribute_id, $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product attribute term.
+	 *
+	 * @since 2.4.0
+	 * @param int $attribute_id Attribute ID.
+	 * @param int $id the attribute ID.
+	 * @param array $data
+	 * @return array
+	 */
+	public function edit_product_attribute_term( $attribute_id, $id, $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_attribute_term'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_attribute_term_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_attribute_term' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_attribute_term'];
+
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_attribute', __( 'You do not have permission to edit product attributes', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
+			if ( ! $taxonomy ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$data = apply_filters( 'woocommerce_api_edit_product_attribute_term_data', $data, $this );
+
+			$args = array();
+
+			// Update name.
+			if ( isset( $data['name'] ) ) {
+				$args['name'] = wc_clean( wp_unslash( $data['name'] ) );
+			}
+
+			// Update slug.
+			if ( isset( $data['slug'] ) ) {
+				$args['slug'] = sanitize_title( wp_unslash( $data['slug'] ) );
+			}
+
+			$term = wp_update_term( $id, $taxonomy, $args );
+
+			if ( is_wp_error( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_attribute_term', $term->get_error_message(), 400 );
+			}
+
+			do_action( 'woocommerce_api_edit_product_attribute_term', $id, $data );
 
 			return $this->get_product_attribute_term( $attribute_id, $id );
 		} catch ( WC_API_Exception $e ) {
