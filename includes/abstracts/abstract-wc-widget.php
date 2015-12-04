@@ -164,7 +164,7 @@ abstract class WC_Widget extends WP_Widget {
 					$instance[ $key ] = is_null( $new_instance[ $key ] ) ? 0 : 1;
 				break;
 				case 'textarea' :
-					$instance[ $key ] = wp_kses_post( trim( $new_instance[ $key ] ) );
+					$instance[ $key ] = wp_kses( trim( wp_unslash( $new_instance[ $key ] ) ), wp_kses_allowed_html( 'post' ) );
 				break;
 				default:
 					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
