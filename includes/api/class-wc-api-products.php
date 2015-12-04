@@ -2536,7 +2536,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Get a listing of product attributes
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */
@@ -2570,7 +2570,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Get the product attribute for the given ID
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param string $id product attribute term ID
 	 * @param string|null $fields fields to limit response to
 	 * @return array
@@ -2619,7 +2619,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Validate attribute data.
 	 *
-	 * @since  2.4.0
+	 * @since  2.5.0
 	 * @param  string $name
 	 * @param  string $slug
 	 * @param  string $type
@@ -2657,7 +2657,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Create a new product attribute.
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param array $data Posted data.
 	 * @return array
 	 */
@@ -2738,7 +2738,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Edit a product attribute.
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param int $id the attribute ID.
 	 * @param array $data
 	 * @return array
@@ -2820,7 +2820,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Delete a product attribute.
 	 *
-	 * @since  2.4.0
+	 * @since  2.5.0
 	 * @param  int $id the product attribute ID.
 	 * @return array
 	 */
@@ -2880,7 +2880,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Get a listing of product attribute terms.
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param int $attribute_id Attribute ID.
 	 * @param string|null $fields Fields to limit response to.
 	 * @return array
@@ -2937,7 +2937,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Get the product attribute term for the given ID.
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param int $attribute_id Attribute ID.
 	 * @param string $id Product attribute term ID.
 	 * @param string|null $fields Fields to limit response to.
@@ -2987,7 +2987,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Create a new product attribute term.
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param int $attribute_id Attribute ID.
 	 * @param array $data Posted data.
 	 * @return array
@@ -3049,7 +3049,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Edit a product attribute term.
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param int $attribute_id Attribute ID.
 	 * @param int $id the attribute ID.
 	 * @param array $data
@@ -3108,7 +3108,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Delete a product attribute term.
 	 *
-	 * @since  2.4.0
+	 * @since  2.5.0
 	 * @param int $attribute_id Attribute ID.
 	 * @param int $id the product attribute ID.
 	 * @return array
