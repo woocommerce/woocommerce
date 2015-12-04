@@ -468,6 +468,7 @@
 
 	$( function() {
 		if ( typeof wc_add_to_cart_variation_params !== 'undefined' ) {
+			$( wc_add_to_cart_variation_params.variation_template ).appendTo( document.body );
 			$( '.variations_form' ).each( function() {
 				$( this ).wc_variation_form().find('.variations select:eq(0)').change();
 			});

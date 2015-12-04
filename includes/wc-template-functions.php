@@ -1952,7 +1952,7 @@ if ( ! function_exists( 'woocommerce_single_variation' ) ) {
 	 * Output placeholders for the single variation.
 	 */
 	function woocommerce_single_variation() {
-		wc_get_template( 'single-product/add-to-cart/variation.php' );
+		echo '<div class="woocommerce-variation single_variation"></div>';
 	}
 }
 
