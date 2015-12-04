@@ -152,6 +152,8 @@ abstract class WC_Widget extends WP_Widget {
 				if ( isset( $setting['max'] ) && '' !== $setting['max'] ) {
 					$instance[ $key ] = min( $instance[ $key ], $setting['max'] );
 				}
+			} elseif ( 'textarea' === $setting['type'] ) {
+				$instance[ $key ] = wp_kses( trim( wp_unslash( $new_instance[ $key ] ) ), wp_kses_allowed_html( 'post' ) );
 			} elseif ( isset( $new_instance[ $key ] ) ) {
 				$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
 			} elseif ( 'checkbox' === $setting['type'] ) {
