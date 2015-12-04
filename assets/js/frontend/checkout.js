@@ -271,6 +271,12 @@ jQuery( function( $ ) {
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'update_order_review' ),
 				data:		data,
 				success:	function( data ) {
+					// Reload the page if requested
+					if ( 'true' === data.reload ) {
+						window.location.reload();
+						return;
+					}
+
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
@@ -283,11 +289,6 @@ jQuery( function( $ ) {
 					if ( 'failure' === data.result ) {
 
 						var $form = $( 'form.checkout' );
-
-						if ( 'true' === data.reload ) {
-							window.location.reload();
-							return;
-						}
 
 						$( '.woocommerce-error, .woocommerce-message' ).remove();
 
