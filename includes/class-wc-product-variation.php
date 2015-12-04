@@ -148,6 +148,17 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Return the variation ID
+	 *
+	 * @since 2.5.0
+	 * @return int variation (post) ID
+	 */
+	public function get_id() {
+
+		return $this->variation_id;
+	}
+
+	/**
 	 * Returns whether or not the product post exists.
 	 *
 	 * @return bool
