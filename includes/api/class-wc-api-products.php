@@ -123,6 +123,7 @@ class WC_API_Products extends WC_API_Resource {
 		$routes[ $this->base . '/attributes/(?P<attribute_id>\d+)/terms/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product_attribute_term' ), WC_API_Server::READABLE ),
 			array( array( $this, 'edit_product_attribute_term' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_attribute_term' ), WC_API_Server::DELETABLE ),
 		);
 
 		# POST|PUT /products/bulk
@@ -2817,17 +2818,17 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Delete a product attribute
+	 * Delete a product attribute.
 	 *
 	 * @since  2.4.0
-	 * @param  int $id the product attribute ID
+	 * @param  int $id the product attribute ID.
 	 * @return array
 	 */
 	public function delete_product_attribute( $id ) {
 		global $wpdb;
 
 		try {
-			// Check permissions
+			// Check permissions.
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_attribute', __( 'You do not have permission to delete product attributes', 'woocommerce' ), 401 );
 			}
@@ -3099,6 +3100,46 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_api_edit_product_attribute_term', $id, $data );
 
 			return $this->get_product_attribute_term( $attribute_id, $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product attribute term.
+	 *
+	 * @since  2.4.0
+	 * @param int $attribute_id Attribute ID.
+	 * @param int $id the product attribute ID.
+	 * @return array
+	 */
+	public function delete_product_attribute_term( $attribute_id, $id ) {
+		global $wpdb;
+
+		try {
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_attribute_term', __( 'You do not have permission to delete product attribute terms', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
+			if ( ! $taxonomy ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$id   = absint( $id );
+			$term = wp_delete_term( $id, $taxonomy );
+
+			if ( ! $term ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product_attribute_term' ), 500 );
+			} else if ( is_wp_error( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', $term->get_error_message(), 400 );
+			}
+
+			do_action( 'woocommerce_api_delete_product_attribute_term', $id, $this );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
