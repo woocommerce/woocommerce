@@ -118,6 +118,11 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'get_product_attribute_terms' ), WC_API_Server::READABLE ),
 		);
 
+		# GET/PUT/DELETE /products/attributes/<attribute_id>/terms/<id>
+		$routes[ $this->base . '/attributes/(?P<attribute_id>\d+)/terms/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_attribute_term' ), WC_API_Server::READABLE ),
+		);
+
 		# POST|PUT /products/bulk
 		$routes[ $this->base . '/bulk' ] = array(
 			array( array( $this, 'bulk' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
@@ -2580,7 +2585,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Permissions check
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_categories', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attributes', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
 			}
 
 			$attribute = $wpdb->get_row( $wpdb->prepare( "
@@ -2918,6 +2923,55 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			return array( 'product_attribute_terms' => apply_filters( 'woocommerce_api_product_attribute_terms_response', $attribute_terms, $terms, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the product attribute term for the given ID
+	 *
+	 * @since 2.4.0
+	 * @param string $id product attribute term ID
+	 * @param string|null $fields fields to limit response to
+	 * @return array
+	 */
+	public function get_product_attribute_term( $attribute_id, $id, $fields = null ) {
+		global $wpdb;
+
+		try {
+			$id = absint( $id );
+
+			// Validate ID
+			if ( empty( $id ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_term_id', __( 'Invalid product attribute ID', 'woocommerce' ), 400 );
+			}
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attribute_terms', __( 'You do not have permission to read product attribute terms', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
+			if ( ! $taxonomy ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$term = get_term( $id, $taxonomy );
+
+			if ( is_wp_error( $term ) || is_null( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_term_id', __( 'A product attribute term with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$attribute_term = array(
+				'id'    => $term->term_id,
+				'slug'  => $term->slug,
+				'name'  => $term->name,
+				'count' => $term->count,
+			);
+
+			return array( 'product_attribute_term' => apply_filters( 'woocommerce_api_product_attribute_response', $attribute_term, $id, $fields, $term, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
