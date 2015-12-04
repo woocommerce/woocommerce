@@ -141,23 +141,34 @@ abstract class WC_Widget extends WP_Widget {
 			return $instance;
 		}
 
+		// Loop settings and get values to save.
 		foreach ( $this->settings as $key => $setting ) {
-			if ( 'number' === $setting['type'] ) {
-				$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
+			if ( ! isset( $setting['type'] ) ) {
+				continue;
+			}
 
-				if ( isset( $setting['min'] ) && '' !== $setting['min'] ) {
-					$instance[ $key ] = max( $instance[ $key ], $setting['min'] );
-				}
+			// Format the value based on settings type.
+			switch ( $setting['type'] ) {
+				case 'number' :
+					$instance[ $key ] = absint( $new_instance[ $key ] );
 
-				if ( isset( $setting['max'] ) && '' !== $setting['max'] ) {
-					$instance[ $key ] = min( $instance[ $key ], $setting['max'] );
-				}
-			} elseif ( 'textarea' === $setting['type'] ) {
-				$instance[ $key ] = wp_kses( trim( wp_unslash( $new_instance[ $key ] ) ), wp_kses_allowed_html( 'post' ) );
-			} elseif ( isset( $new_instance[ $key ] ) ) {
-				$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
-			} elseif ( 'checkbox' === $setting['type'] ) {
-				$instance[ $key ] = 0;
+					if ( isset( $setting['min'] ) && '' !== $setting['min'] ) {
+						$instance[ $key ] = max( $instance[ $key ], $setting['min'] );
+					}
+
+					if ( isset( $setting['max'] ) && '' !== $setting['max'] ) {
+						$instance[ $key ] = min( $instance[ $key ], $setting['max'] );
+					}
+				break;
+				case 'textarea' :
+					$instance[ $key ] = wp_kses( trim( wp_unslash( $new_instance[ $key ] ) ), wp_kses_allowed_html( 'post' ) );
+				break;
+				case 'checkbox' :
+					$instance[ $key ] = is_null( $new_instance[ $key ] ) ? 0 : 1;
+				break;
+				default:
+					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
+				break;
 			}
 		}
 
