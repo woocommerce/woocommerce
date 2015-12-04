@@ -40,13 +40,36 @@ function wc_get_attribute_taxonomies() {
 }
 
 /**
- * Get a product attributes name.
+ * Get a product attribute name.
  *
- * @param mixed $name
+ * @param string $attribute_name Attribute name.
  * @return string
  */
-function wc_attribute_taxonomy_name( $name ) {
-	return 'pa_' . wc_sanitize_taxonomy_name( $name );
+function wc_attribute_taxonomy_name( $attribute_name ) {
+	return 'pa_' . wc_sanitize_taxonomy_name( $attribute_name );
+}
+
+/**
+ * Get a product attribute name by ID.
+ *
+ * @since  2.4.0
+ * @param int $attribute_id Attribute ID.
+ * @return string Return an empty string if attribute doesn't exist.
+ */
+function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
+	global $wpdb;
+
+	$attribute_name = $wpdb->get_var( $wpdb->prepare( "
+		SELECT attribute_name
+		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+		WHERE attribute_id = %d
+	", $attribute_id ) );
+
+	if ( $attribute_name && ! is_wp_error( $attribute_name ) ) {
+		return wc_attribute_taxonomy_name( $attribute_name );
+	}
+
+	return '';
 }
 
 /**
