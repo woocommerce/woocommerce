@@ -167,6 +167,17 @@ class WC_Product {
 	}
 
 	/**
+	 * Return the product ID
+	 *
+	 * @since 2.5.0
+	 * @return int product (post) ID
+	 */
+	public function get_id() {
+
+		return $this->id;
+	}
+
+	/**
 	 * get_gallery_attachment_ids function.
 	 *
 	 * @return array
