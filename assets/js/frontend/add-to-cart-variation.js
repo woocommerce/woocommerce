@@ -183,9 +183,7 @@
 				$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).change();
 			} else {
 				$single_variation.html( template( {
-					price:        variation.price_html,
-					availability: variation.availability_html,
-					description:  variation.variation_description
+					variation:    variation
 				} ) );
 				$form.find( 'input[name="variation_id"], input.variation_id' ).val( variation.variation_id ).change();
 			}

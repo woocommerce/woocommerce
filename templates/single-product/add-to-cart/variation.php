@@ -16,15 +16,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <script type="text/template" id="tmpl-variation-template">
     <div class="woocommerce-variation-description">
-        {{{ data.description }}}
+        {{{ data.variation.price_html }}}
     </div>
 
     <div class="woocommerce-variation-price">
-        {{{ data.price }}}
+        {{{ data.variation.variation_description }}}
     </div>
 
     <div class="woocommerce-variation-availability">
-        {{{ data.availability }}}
+        {{{ data.variation.availability_html }}}
     </div>
 </script>
 <script type="text/template" id="tmpl-unavailable-variation-template">
