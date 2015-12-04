@@ -216,6 +216,18 @@ abstract class WC_Widget extends WP_Widget {
 					<?php
 				break;
 
+				case 'textarea' :
+					?>
+					<p>
+						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
+						<textarea class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>" cols="20" rows="3"><?php echo esc_textarea( $value ); ?></textarea>
+						<?php if ( isset( $setting['desc'] ) ) : ?>
+							<small><?php echo esc_html( $setting['desc'] ); ?></small>
+						<?php endif; ?>
+					</p>
+					<?php
+				break;
+
 				case 'checkbox' :
 					?>
 					<p>
