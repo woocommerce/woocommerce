@@ -22,14 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $product;
 
 echo apply_filters( 'woocommerce_loop_add_to_cart_link',
-	sprintf( '<a href="%s" rel="nofollow" data-product_id="%s" data-product_sku="%s" data-quantity="%s" class="button %s %s product_type_%s">%s</a>',
+	sprintf( '<a rel="nofollow" href="%s" data-quantity="%s" data-product_id="%s" data-product_sku="%s" class="%s">%s</a>',
 		esc_url( $product->add_to_cart_url() ),
+		esc_attr( $quantity ),
 		esc_attr( $product->id ),
 		esc_attr( $product->get_sku() ),
-		esc_attr( isset( $quantity ) ? $quantity : 1 ),
-		$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
-		$product->supports( 'ajax_add_to_cart' ) ? 'ajax_add_to_cart' : '',
-		esc_attr( $product->product_type ),
+		esc_attr( $class ),
 		esc_html( $product->add_to_cart_text() )
 	),
 $product );
