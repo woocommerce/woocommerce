@@ -141,21 +141,34 @@ abstract class WC_Widget extends WP_Widget {
 			return $instance;
 		}
 
+		// Loop settings and get values to save.
 		foreach ( $this->settings as $key => $setting ) {
-			if ( 'number' === $setting['type'] ) {
-				$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
+			if ( ! isset( $new_instance[ $key ] ) || ! isset( $setting['type'] ) ) {
+				continue;
+			}
 
-				if ( isset( $setting['min'] ) && '' !== $setting['min'] ) {
-					$instance[ $key ] = max( $instance[ $key ], $setting['min'] );
-				}
+			// Format the value based on settings type.
+			switch ( $setting['type'] ) {
+				case 'number' :
+					$instance[ $key ] = absint( $new_instance[ $key ] );
 
-				if ( isset( $setting['max'] ) && '' !== $setting['max'] ) {
-					$instance[ $key ] = min( $instance[ $key ], $setting['max'] );
-				}
-			} elseif ( isset( $new_instance[ $key ] ) ) {
-				$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
-			} elseif ( 'checkbox' === $setting['type'] ) {
-				$instance[ $key ] = 0;
+					if ( isset( $setting['min'] ) && '' !== $setting['min'] ) {
+						$instance[ $key ] = max( $instance[ $key ], $setting['min'] );
+					}
+
+					if ( isset( $setting['max'] ) && '' !== $setting['max'] ) {
+						$instance[ $key ] = min( $instance[ $key ], $setting['max'] );
+					}
+				break;
+				case 'checkbox' :
+					$instance[ $key ] = is_null( $new_instance[ $key ] );
+					break;
+				case 'textarea' :
+					$instance[ $key ] = wp_kses_post( trim( $new_instance[ $key ] ) );
+				break;
+				default:
+					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
+					break;
 			}
 		}
 
@@ -214,6 +227,15 @@ abstract class WC_Widget extends WP_Widget {
 					<?php
 				break;
 
+				case 'checkbox' :
+					?>
+					<p>
+						<input class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="checkbox" value="1" <?php checked( $value, 1 ); ?> />
+						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
+					</p>
+					<?php
+				break;
+
 				case 'textarea' :
 					?>
 					<p>
@@ -222,15 +244,6 @@ abstract class WC_Widget extends WP_Widget {
 						<?php if ( isset( $setting['desc'] ) ) : ?>
 							<small><?php echo esc_html( $setting['desc'] ); ?></small>
 						<?php endif; ?>
-					</p>
-					<?php
-				break;
-
-				case 'checkbox' :
-					?>
-					<p>
-						<input class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="checkbox" value="1" <?php checked( $value, 1 ); ?> />
-						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
 					</p>
 					<?php
 				break;
