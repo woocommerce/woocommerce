@@ -17,6 +17,9 @@
 			unavailable_template   = wp.template( 'unavailable-variation-template' ),
 			$single_variation_wrap = $form.find( '.single_variation_wrap' );
 
+		// Always visible since 2.5.0
+		$single_variation_wrap.show();
+
 		// Unbind any existing events
 		$form.unbind( 'check_variations update_variation_values found_variation' );
 		$form.find( '.reset_variations' ).unbind( 'click' );
