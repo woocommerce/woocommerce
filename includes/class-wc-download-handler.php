@@ -419,6 +419,9 @@ class WC_Download_Handler {
 		if ( ! strstr( $message, '<a ' ) ) {
 			$message .= ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>';
 		}
+		
+		do_action('woocommerce_download_error', $message, $title);		
+		
 		wp_die( $message, $title, array( 'response' => $status ) );
 	}
 }
