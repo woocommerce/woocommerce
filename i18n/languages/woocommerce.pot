@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.4.11 Frontend\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-12-02 12:54:34+00:00\n"
+"POT-Creation-Date: 2015-12-07 13:11:49+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5233,17 +5233,17 @@ msgstr ""
 msgid "Out of stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1115
-#: templates/single-product/rating.php:27
+#: includes/abstracts/abstract-wc-product.php:1117
+#: includes/class-wc-embed.php:132 templates/single-product/rating.php:27
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1117
+#: includes/abstracts/abstract-wc-product.php:1119
 #: templates/single-product/review.php:30
 msgid "out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1472
+#: includes/abstracts/abstract-wc-product.php:1474
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -6759,6 +6759,15 @@ msgstr ""
 msgid "%s units of %s have been backordered in order #%s."
 msgstr ""
 
+#: includes/class-wc-embed.php:114
+msgid "Buy Now"
+msgstr ""
+
+#: includes/class-wc-embed.php:117 includes/class-wc-product-simple.php:47
+#: includes/class-wc-product-variation.php:187
+msgid "Read More"
+msgstr ""
+
 #: includes/class-wc-form-handler.php:129
 msgid "Address changed successfully."
 msgstr ""
@@ -6907,7 +6916,7 @@ msgid "Error processing checkout. Please try again."
 msgstr ""
 
 #: includes/class-wc-frontend-scripts.php:243
-#: includes/wc-template-functions.php:1626
+#: includes/wc-template-functions.php:1637
 msgid "required"
 msgstr ""
 
@@ -7438,11 +7447,6 @@ msgstr[1] ""
 msgid "Buy product"
 msgstr ""
 
-#: includes/class-wc-product-simple.php:47
-#: includes/class-wc-product-variation.php:187
-msgid "Read More"
-msgstr ""
-
 #: includes/class-wc-product-variable.php:46
 msgid "Select options"
 msgstr ""
@@ -7944,7 +7948,7 @@ msgstr ""
 #: includes/gateways/cod/class-wc-gateway-cod.php:75
 #: includes/gateways/paypal/includes/settings-paypal.php:25
 #: includes/gateways/simplify-commerce/class-wc-gateway-simplify-commerce.php:197
-#: includes/wc-template-functions.php:1005
+#: includes/wc-template-functions.php:1016
 msgid "Description"
 msgstr ""
 
@@ -9397,42 +9401,42 @@ msgstr ""
 msgid "Sort by price: high to low"
 msgstr ""
 
-#: includes/wc-template-functions.php:1014
+#: includes/wc-template-functions.php:1025
 #: templates/checkout/form-shipping.php:58
 #: templates/single-product/tabs/additional-information.php:16
 msgid "Additional Information"
 msgstr ""
 
-#: includes/wc-template-functions.php:1023
+#: includes/wc-template-functions.php:1034
 msgid "Reviews (%d)"
 msgstr ""
 
-#: includes/wc-template-functions.php:1107
+#: includes/wc-template-functions.php:1118
 msgid ""
 "Use $args argument as an array instead. Deprecated argument will be removed "
 "in WC 2.2."
 msgstr ""
 
-#: includes/wc-template-functions.php:1318
+#: includes/wc-template-functions.php:1329
 msgid "Place order"
 msgstr ""
 
-#: includes/wc-template-functions.php:1674
+#: includes/wc-template-functions.php:1685
 #: templates/cart/shipping-calculator.php:30
 msgid "Select a country&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1682
+#: includes/wc-template-functions.php:1693
 msgid "Update country"
 msgstr ""
 
-#: includes/wc-template-functions.php:1703
+#: includes/wc-template-functions.php:1714
 #: templates/cart/shipping-calculator.php:54
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1759
-#: includes/wc-template-functions.php:1915
+#: includes/wc-template-functions.php:1770
+#: includes/wc-template-functions.php:1926
 msgid "Choose an option"
 msgstr ""
 
@@ -10928,7 +10932,7 @@ msgctxt "edit-address-slug"
 msgid "shipping"
 msgstr ""
 
-#: includes/wc-template-functions.php:1273
+#: includes/wc-template-functions.php:1284
 msgctxt "breadcrumb"
 msgid "Home"
 msgstr ""
