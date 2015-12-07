@@ -1815,6 +1815,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			case 'text' :
 			case 'email' :
 			case 'tel' :
+			case 'number' :
 
 				$field .= '<input type="' . $args['type'] . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" '.$args['maxlength'].' value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
 
