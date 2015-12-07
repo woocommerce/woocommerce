@@ -1912,7 +1912,7 @@ abstract class WC_Abstract_Order {
 				);
 			}
 		}
-		
+
 		$total_rows['order_total'] = array(
 			'label' => __( 'Total:', 'woocommerce' ),
 			'value'	=> $this->get_formatted_order_total( $tax_display )
@@ -2244,67 +2244,71 @@ abstract class WC_Abstract_Order {
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual is this a manual order status change?
+	 * @return bool Successful change or not
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
 		if ( ! $this->id ) {
-			return;
+			return false;
 		}
 
 		// Standardise status names.
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 		$old_status = $this->get_status();
 
-		// Only update if they differ - and ensure post_status is a 'wc' status.
-		if ( $new_status !== $old_status || ! in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
-
-			// Update the order.
-			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
-			$this->post_status = 'wc-' . $new_status;
-
-			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
-
-			// Status was changed.
-			do_action( 'woocommerce_order_status_' . $new_status, $this->id );
-			do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
-			do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
-
-			switch ( $new_status ) {
-
-				case 'completed' :
-					// Record the sales.
-					$this->record_product_sales();
-
-					// Increase coupon usage counts.
-					$this->increase_coupon_usage_counts();
-
-					// Record the completed date of the order.
-					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-
-				case 'processing' :
-				case 'on-hold' :
-					// Record the sales.
-					$this->record_product_sales();
-
-					// Increase coupon usage counts.
-					$this->increase_coupon_usage_counts();
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-
-				case 'cancelled' :
-					// If the order is cancelled, restore used coupons.
-					$this->decrease_coupon_usage_counts();
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-			}
+		// If the statuses are the same there is no need to update, unless the post status is not a valid 'wc' status.
+		if ( $new_status === $old_status && in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
+			return false;
 		}
+
+		// Update the order.
+		wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
+		$this->post_status = 'wc-' . $new_status;
+
+		$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+
+		// Status was changed.
+		do_action( 'woocommerce_order_status_' . $new_status, $this->id );
+		do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
+		do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
+
+		switch ( $new_status ) {
+
+			case 'completed' :
+				// Record the sales.
+				$this->record_product_sales();
+
+				// Increase coupon usage counts.
+				$this->increase_coupon_usage_counts();
+
+				// Record the completed date of the order.
+				update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+
+			case 'processing' :
+			case 'on-hold' :
+				// Record the sales.
+				$this->record_product_sales();
+
+				// Increase coupon usage counts.
+				$this->increase_coupon_usage_counts();
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+
+			case 'cancelled' :
+				// If the order is cancelled, restore used coupons.
+				$this->decrease_coupon_usage_counts();
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+		}
+
+		return true;
 	}
 
 
