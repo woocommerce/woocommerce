@@ -20,9 +20,6 @@ class WC_Product_Variable extends WC_Product {
 	/** @public array Array of child products/posts/variations. */
 	public $children = null;
 
-	/** @public string The product's total stock, including that of its children. */
-	public $total_stock;
-
 	/** @private array Array of variation prices. */
 	private $prices_array = array();
 
@@ -44,35 +41,6 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function add_to_cart_text() {
 		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Select options', 'woocommerce' ), $this );
-	}
-
-	/**
-	 * Get total stock.
-	 *
-	 * This is the stock of parent and children combined.
-	 *
-	 * @access public
-	 * @return int
-	 */
-	public function get_total_stock() {
-		if ( empty( $this->total_stock ) ) {
-			$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-			if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-				$this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
-
-				if ( sizeof( $this->get_children() ) > 0 ) {
-					foreach ( $this->get_children() as $child_id ) {
-						if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-							$stock = get_post_meta( $child_id, '_stock', true );
-							$this->total_stock += max( 0, wc_stock_amount( $stock ) );
-						}
-					}
-				}
-				set_transient( $transient_name, $this->total_stock, DAY_IN_SECONDS * 30 );
-			}
-		}
-		return wc_stock_amount( $this->total_stock );
 	}
 
 	/**
@@ -265,12 +233,10 @@ class WC_Product_Variable extends WC_Product {
 		global $wp_filter;
 
 		/**
-		 * Transient name for storing prices for this product.
-		 * Max transient length is 45, -10 for get_transient_version.
-		 * @var string
+		 * Transient name for storing prices for this product (note: Max transient length is 45)
 		 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
 		 */
-		$transient_name = 'wc_var_prices' . $this->id . '_' . WC_Cache_Helper::get_transient_version( 'product' );
+		$transient_name = 'wc_var_prices_' . $this->id;
 
 		/**
 		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
@@ -283,9 +249,11 @@ class WC_Product_Variable extends WC_Product {
 			$price_hash = array( false );
 		}
 
-		foreach ( $wp_filter as $key => $val ) {
-			if ( in_array( $key, array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' ) ) ) {
-				$price_hash[ $key ] = $val;
+		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
+
+		foreach ( $filter_names as $filter_name ) {
+			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
+				$price_hash[ $filter_name ] = $wp_filter[ $filter_name ];
 			}
 		}
 
@@ -597,8 +565,10 @@ class WC_Product_Variable extends WC_Product {
 			$image_link      = $full_attachment ? current( $full_attachment ) : '';
 			$image_title     = get_the_title( $attachment_id );
 			$image_alt       = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+			$image_srcset    = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : '';
+			$image_sizes     = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : '';
 		} else {
-			$image = $image_link = $image_title = $image_alt = '';
+			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = '';
 		}
 
 		$availability      = $variation->get_availability();
@@ -617,6 +587,8 @@ class WC_Product_Variable extends WC_Product {
 			'image_link'            => $image_link,
 			'image_title'           => $image_title,
 			'image_alt'             => $image_alt,
+			'image_srcset'			=> $image_srcset,
+			'image_sizes'			=> $image_sizes,
 			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => $availability_html,
 			'sku'                   => $variation->get_sku(),
@@ -747,12 +719,10 @@ class WC_Product_Variable extends WC_Product {
 			'post_status'	=> 'publish'
 		) );
 
-		// No published variations - update parent post status. Use $wpdb to prevent endless loop on save_post hooks.
-		if ( ! $children && get_post_status( $product_id ) == 'publish' ) {
-			$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $product_id ) );
-
+		// No published variations - product won't be purchasable.
+		if ( ! $children && 'publish' === get_post_status( $product_id ) ) {
 			if ( is_admin() ) {
-				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations so cannot be published. Changing status to draft.', 'woocommerce' ) );
+				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations. Add or enable variations to allow this product to be purchased.', 'woocommerce' ) );
 			}
 
 		// Loop the variations

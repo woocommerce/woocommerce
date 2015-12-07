@@ -20,5 +20,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
+?>
 
-echo '<a href="' . esc_url( wc_get_checkout_url() ) . '" class="checkout-button button alt wc-forward">' . __( 'Proceed to Checkout', 'woocommerce' ) . '</a>';
+<a href="<?php echo esc_url( wc_get_checkout_url() ) ;?>" class="checkout-button button alt wc-forward">
+	<?php echo __( 'Proceed to Checkout', 'woocommerce' ); ?>
+</a>

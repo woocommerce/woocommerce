@@ -97,7 +97,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$this->save_tax_rates();
 		}
 
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_tax_rates_%') OR `option_name` LIKE ('_transient_timeout_wc_tax_rates_%')" );
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 	}
 
 	/**

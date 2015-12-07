@@ -589,15 +589,26 @@ class WC_Webhook {
 	 * Send a test ping to the delivery URL, sent when the webhook is first created.
 	 *
 	 * @since 2.2
+	 * @return bool|WP_Error
 	 */
 	public function deliver_ping() {
-
 		$args = array(
 			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
 			'body'       => "webhook_id={$this->id}",
 		);
 
-		wp_safe_remote_post( $this->get_delivery_url(), $args );
+		$test          = wp_safe_remote_post( $this->get_delivery_url(), $args );
+		$response_code = wp_remote_retrieve_response_code( $test );
+
+		if ( is_wp_error( $test ) ) {
+			return new WP_Error( 'error', __( 'Error: Delivery URL cannot be reached: ' . $test->get_error_message() ) );
+		}
+
+		if ( 200 !== $response_code ) {
+			return new WP_Error( 'error', __( 'Error: Delivery URL returned response code ' . absint( $response_code ) ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -684,8 +695,9 @@ class WC_Webhook {
 	 * @param string $url
 	 */
 	public function set_delivery_url( $url ) {
-
-		update_post_meta( $this->id, '_delivery_url', esc_url_raw( $url, array( 'http', 'https' ) ) );
+		if ( update_post_meta( $this->id, '_delivery_url', esc_url_raw( $url, array( 'http', 'https' ) ) ) ) {
+			update_post_meta( $this->id, '_webhook_pending_delivery', true );
+		}
 	}
 
 	/**

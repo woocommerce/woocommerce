@@ -42,12 +42,6 @@ class WC_Cart {
 	/** @var float The total cost of the cart items. */
 	public $cart_contents_total;
 
-	/** @var float The total weight of the cart items. */
-	public $cart_contents_weight;
-
-	/** @var float The total count of the cart items. */
-	public $cart_contents_count;
-
 	/** @var float Cart grand total. */
 	public $total;
 
@@ -84,8 +78,6 @@ class WC_Cart {
 	/** @var array cart_session_data. Array of data the cart calculates and stores in the session with defaults */
 	public $cart_session_data = array(
 		'cart_contents_total'         => 0,
-		'cart_contents_weight'        => 0,
-		'cart_contents_count'         => 0,
 		'total'                       => 0,
 		'subtotal'                    => 0,
 		'subtotal_ex_tax'             => 0,
@@ -149,7 +141,13 @@ class WC_Cart {
 	 */
 	public function __get( $key ) {
 		switch ( $key ) {
-			case 'tax':
+			case 'cart_contents_weight' :
+				return $this->get_cart_contents_weight();
+			break;
+			case 'cart_contents_count' :
+				return $this->get_cart_contents_count();
+			break;
+			case 'tax' :
 				_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax:: directly' );
 				$this->tax = new WC_Tax();
 			return $this->tax;
@@ -345,11 +343,25 @@ class WC_Cart {
 
 		/**
 		 * Get number of items in the cart.
-		 *
 		 * @return int
 		 */
 		public function get_cart_contents_count() {
-			return apply_filters( 'woocommerce_cart_contents_count', $this->cart_contents_count );
+			return apply_filters( 'woocommerce_cart_contents_count', array_sum( wp_list_pluck( $this->get_cart(), 'quantity' ) ) );
+		}
+
+		/**
+		 * Get weight of items in the cart.
+		 * @since 2.5.0
+		 * @return int
+		 */
+		public function get_cart_contents_weight() {
+			$weight = 0;
+
+			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+				$weight += $values['data']->get_weight() * $values['quantity'];
+			}
+
+			return apply_filters( 'woocommerce_cart_contents_weight', $weight );
 		}
 
 		/**
@@ -1097,17 +1109,9 @@ class WC_Cart {
 			 * Calculate subtotals for items. This is done first so that discount logic can use the values.
 			 */
 			foreach ( $cart as $cart_item_key => $values ) {
-
-				$_product = $values['data'];
-
-				// Count items + weight
-				$this->cart_contents_weight += $_product->get_weight() * $values['quantity'];
-				$this->cart_contents_count  += $values['quantity'];
-
-				// Prices
-				$line_price = $_product->get_price() * $values['quantity'];
-
-				$line_subtotal = 0;
+				$_product          = $values['data'];
+				$line_price        = $_product->get_price() * $values['quantity'];
+				$line_subtotal     = 0;
 				$line_subtotal_tax = 0;
 
 				/**

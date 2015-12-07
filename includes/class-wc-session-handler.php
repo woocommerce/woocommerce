@@ -163,14 +163,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return string
 	 */
 	private function get_cache_prefix() {
-		$prefix_num = wp_cache_get( 'wc_session_prefix', WC_SESSION_CACHE_GROUP );
-
-		if ( $prefix_num === false ) {
-			$prefix_num = 1;
-			wp_cache_set( 'wc_session_prefix', $prefix_num, WC_SESSION_CACHE_GROUP );
-		}
-
-		return 'wc_session_' . $prefix_num . '_';
+		return WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP );
 	}
 
 	/**
@@ -262,7 +255,7 @@ class WC_Session_Handler extends WC_Session {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) );
 
 			// Invalidate cache
-			wp_cache_incr( 'wc_session_prefix', 1, WC_SESSION_CACHE_GROUP );
+			WC_Cache_Helper::incr_cache_prefix( WC_SESSION_CACHE_GROUP );
 		}
 	}
 

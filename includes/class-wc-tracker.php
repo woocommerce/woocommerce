@@ -154,11 +154,17 @@ class WC_Tracker {
 		$wp_data = array();
 
 		$memory = wc_let_to_num( WP_MEMORY_LIMIT );
+
+		if ( function_exists( 'memory_get_usage' ) ) {
+			$system_memory = wc_let_to_num( @ini_get( 'memory_limit' ) );
+			$memory        = max( $memory, $system_memory );
+		}
+
 		$wp_data['memory_limit'] = size_format( $memory );
-		$wp_data['debug_mode'] = ( defined('WP_DEBUG') && WP_DEBUG ) ? 'Yes' : 'No';
-		$wp_data['locale'] = get_locale();
-		$wp_data['version'] = get_bloginfo( 'version' );
-		$wp_data['multisite'] = is_multisite() ? 'Yes' : 'No';
+		$wp_data['debug_mode']   = ( defined('WP_DEBUG') && WP_DEBUG ) ? 'Yes' : 'No';
+		$wp_data['locale']       = get_locale();
+		$wp_data['version']      = get_bloginfo( 'version' );
+		$wp_data['multisite']    = is_multisite() ? 'Yes' : 'No';
 
 		return $wp_data;
 	}

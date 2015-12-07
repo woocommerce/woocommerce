@@ -21,7 +21,7 @@ function wc_template_redirect() {
 	global $wp_query, $wp;
 
 	// When default permalinks are enabled, redirect shop page to post type archive url
-	if ( ! empty( $_GET['page_id'] ) && get_option( 'permalink_structure' ) == "" && $_GET['page_id'] == wc_get_page_id( 'shop' ) ) {
+	if ( ! empty( $_GET['page_id'] ) && '' === get_option( 'permalink_structure' ) && $_GET['page_id'] == wc_get_page_id( 'shop' ) ) {
 		wp_safe_redirect( get_post_type_archive_link('product') );
 		exit;
 	}
@@ -39,7 +39,7 @@ function wc_template_redirect() {
 	}
 
 	// Redirect to the product page if we have a single product
-	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && $wp_query->found_posts == 1 ) {
+	elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && 1 === $wp_query->found_posts ) {
 		$product = wc_get_product( $wp_query->post );
 
 		if ( $product && $product->is_visible() ) {
@@ -234,11 +234,11 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
 	$classes[] = 'product-category';
 	$classes[] = 'product';
 
-	if ( ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] == 0 || $woocommerce_loop['columns'] == 1 ) {
+	if ( 0 === ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 === $woocommerce_loop['columns'] ) {
 		$classes[] = 'first';
 	}
 
-	if ( $woocommerce_loop['loop'] % $woocommerce_loop['columns'] == 0 ) {
+	if ( 0 === $woocommerce_loop['loop'] % $woocommerce_loop['columns'] ) {
 		$classes[] = 'last';
 	}
 
@@ -308,8 +308,12 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 			}
 		}
 
-		if ( is_product() && 'variable' === $product->product_type && $product->has_default_attributes() ) {
+		if ('variable' === $product->product_type && $product->has_default_attributes() ) {
 			$classes[] = 'has-default-attributes';
+		}
+
+		if ( 'variable' === $product->product_type && $product->has_child() ) {
+			$classes[] = 'has-children';
 		}
 
 		$classes[] = $product->stock_status;
@@ -570,7 +574,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	 * @subpackage	Archives
 	 */
 	function woocommerce_taxonomy_archive_description() {
-		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && get_query_var( 'paged' ) == 0 ) {
+		if ( is_tax( array( 'product_cat', 'product_tag' ) ) && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$description = wc_format_content( term_description() );
 			if ( $description ) {
 				echo '<div class="term-description">' . $description . '</div>';
@@ -586,7 +590,7 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 	 * @subpackage	Archives
 	 */
 	function woocommerce_product_archive_description() {
-		if ( is_post_type_archive( 'product' ) && get_query_var( 'paged' ) == 0 ) {
+		if ( is_post_type_archive( 'product' ) && 0 === absint( get_query_var( 'paged' ) ) ) {
 			$shop_page   = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
 				$description = wc_format_content( $shop_page->post_content );
@@ -606,7 +610,23 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 	 * @subpackage	Loop
 	 */
 	function woocommerce_template_loop_add_to_cart( $args = array() ) {
-		wc_get_template( 'loop/add-to-cart.php' , $args );
+		global $product;
+
+		if ( $product ) {
+			$defaults = array(
+				'quantity' => 1,
+				'class'    => implode( ' ', array_filter( array(
+						'button',
+						'product_type_' . $product->product_type,
+						$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
+						$product->supports( 'ajax_add_to_cart' ) ? 'ajax_add_to_cart' : ''
+				) ) )
+			);
+
+			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
+
+			wc_get_template( 'loop/add-to-cart.php', $args );
+		}
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_product_thumbnail' ) ) {
@@ -728,7 +748,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	function woocommerce_catalog_ordering() {
 		global $wp_query;
 
-		if ( 1 == $wp_query->found_posts || ! woocommerce_products_will_display() ) {
+		if ( 1 === $wp_query->found_posts || ! woocommerce_products_will_display() ) {
 			return;
 		}
 
@@ -747,7 +767,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			unset( $catalog_orderby_options['menu_order'] );
 		}
 
-		if ( get_option( 'woocommerce_enable_review_rating' ) === 'no' ) {
+		if ( 'no' === get_option( 'woocommerce_enable_review_rating' ) ) {
 			unset( $catalog_orderby_options['rating'] );
 		}
 
@@ -975,8 +995,9 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 * @param  boolean $echo Whether to return or echo|string
 	 */
 	function woocommerce_quantity_input( $args = array(), $product = null, $echo = true ) {
-		if ( is_null( $product ) )
+		if ( is_null( $product ) ) {
 			$product = $GLOBALS['product'];
+		}
 
 		$defaults = array(
 			'input_name'  	=> 'quantity',
@@ -987,6 +1008,17 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
+
+		// Apply sanity to min/max args - min cannot be lower than 0
+		if ( '' !== $args['min_value'] && is_numeric( $args['min_value'] ) && $args['min_value'] < 0 ) {
+			$args['min_value'] = 0; // Cannot be lower than 0
+		}
+
+		// Max cannot be lower than 0 or min
+		if ( '' !== $args['max_value'] && is_numeric( $args['max_value'] ) ) {
+			$args['max_value'] = $args['max_value'] < 0 ? 0 : $args['max_value'];
+			$args['max_value'] = $args['max_value'] < $args['min_value'] ? $args['min_value'] : $args['max_value'];
+		}
 
 		ob_start();
 
@@ -1095,7 +1127,7 @@ if ( ! function_exists( 'woocommerce_sort_product_tabs' ) ) {
 		// Re-order tabs by priority
 		if ( ! function_exists( '_sort_priority_callback' ) ) {
 			function _sort_priority_callback( $a, $b ) {
-				if ( $a['priority'] == $b['priority'] )
+				if ( $a['priority'] === $b['priority'] )
 			        return 0;
 			    return ( $a['priority'] < $b['priority'] ) ? -1 : 1;
 			}
@@ -1383,12 +1415,13 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 
 	/**
-	 * Check if we will be showing products or not (and not subcats only).
-	 *
+	 * Check if we will be showing products or not (and not sub-categories only).
 	 * @subpackage	Loop
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
+		global $wpdb;
+
 		if ( is_shop() ) {
 			return 'subcategories' !== get_option( 'woocommerce_shop_page_display' ) || is_search();
 		}
@@ -1414,37 +1447,33 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 				break;
 				default :
 					// Default - no setting
-					if ( get_option( 'woocommerce_category_archive_display' ) != 'subcategories' )
+					if ( get_option( 'woocommerce_category_archive_display' ) != 'subcategories' ) {
 						return true;
+					}
 				break;
 			}
 		}
 
 		// Begin subcategory logic
-		global $wpdb;
-
-		$parent_id             = empty( $term->term_id ) ? 0 : $term->term_id;
-		$taxonomy              = empty( $term->taxonomy ) ? '' : $term->taxonomy;
-
-		if ( ! $parent_id && ! $taxonomy ) {
+		if ( empty( $term->term_id ) || empty( $term->taxonomy ) ) {
 			return true;
 		}
 
-		$transient_name = 'wc_products_will_display_' . $parent_id . WC_Cache_Helper::get_transient_version( 'product_query' );
+		$transient_name = 'wc_products_will_display_' . $term->term_id . '_' . WC_Cache_Helper::get_transient_version( 'product_query' );
 
 		if ( false === ( $products_will_display = get_transient( $transient_name ) ) ) {
-			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $parent_id, $taxonomy ) );
+			$has_children = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE parent = %d AND taxonomy = %s", $term->term_id, $term->taxonomy ) );
 
 			if ( $has_children ) {
 				// Check terms have products inside - parents first. If products are found inside, subcats will be shown instead of products so we can return false.
-				if ( sizeof( get_objects_in_term( $has_children, $taxonomy ) ) > 0 ) {
+				if ( sizeof( get_objects_in_term( $has_children, $term->taxonomy ) ) > 0 ) {
 					$products_will_display = false;
 				} else {
 					// If we get here, the parents were empty so we're forced to check children
 					foreach ( $has_children as $term ) {
-						$children = get_term_children( $term, $taxonomy );
+						$children = get_term_children( $term, $term->taxonomy );
 
-						if ( sizeof( get_objects_in_term( $children, $taxonomy ) ) > 0 ) {
+						if ( sizeof( get_objects_in_term( $children, $term->taxonomy ) ) > 0 ) {
 							$products_will_display = false;
 							break;
 						}
@@ -1494,7 +1523,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 		}
 
 		// Check categories are enabled
-		if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) == '' ) {
+		if ( is_shop() && '' === get_option( 'woocommerce_shop_page_display' ) ) {
 			return;
 		}
 
@@ -1510,7 +1539,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 					return;
 				break;
 				case '' :
-					if ( get_option( 'woocommerce_category_archive_display' ) == '' ) {
+					if ( '' === get_option( 'woocommerce_category_archive_display' ) ) {
 						return;
 					}
 				break;
@@ -1550,7 +1579,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 						$wp_query->max_num_pages = 0;
 					break;
 					case '' :
-						if ( get_option( 'woocommerce_category_archive_display' ) == 'subcategories' ) {
+						if ( 'subcategories' === get_option( 'woocommerce_category_archive_display' ) ) {
 							$wp_query->post_count    = 0;
 							$wp_query->max_num_pages = 0;
 						}
@@ -1558,7 +1587,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 				}
 			}
 
-			if ( is_shop() && get_option( 'woocommerce_shop_page_display' ) == 'subcategories' ) {
+			if ( is_shop() && 'subcategories' === get_option( 'woocommerce_shop_page_display' ) ) {
 				$wp_query->post_count    = 0;
 				$wp_query->max_num_pages = 0;
 			}
@@ -1711,9 +1740,9 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		switch ( $args['type'] ) {
 			case 'country' :
 
-				$countries = $key == 'shipping_country' ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+				$countries = 'shipping_country' === $key ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
 
-				if ( sizeof( $countries ) == 1 ) {
+				if ( 1 === sizeof( $countries ) ) {
 
 					$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
 
@@ -1738,7 +1767,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			case 'state' :
 
 				/* Get Country */
-				$country_key = $key == 'billing_state'? 'billing_country' : 'shipping_country';
+				$country_key = 'billing_state' === $key ? 'billing_country' : 'shipping_country';
 				$current_cc  = WC()->checkout->get_value( $country_key );
 				$states      = WC()->countries->get_states( $current_cc );
 
@@ -1804,7 +1833,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				if ( ! empty( $args['options'] ) ) {
 					foreach ( $args['options'] as $option_key => $option_text ) {
-						if ( "" === $option_key ) {
+						if ( '' === $option_key ) {
 							// If we have a blank option, select2 needs a placeholder
 							if ( empty( $args['placeholder'] ) ) {
 								$args['placeholder'] = $option_text ? $option_text : __( 'Choose an option', 'woocommerce' );
@@ -1923,7 +1952,7 @@ if ( ! function_exists( 'woocommerce_single_variation' ) ) {
 	 * Output placeholders for the single variation.
 	 */
 	function woocommerce_single_variation() {
-		wc_get_template( 'single-product/add-to-cart/variation.php' );
+		echo '<div class="woocommerce-variation single_variation"></div>';
 	}
 }
 

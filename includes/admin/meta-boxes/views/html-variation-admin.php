@@ -242,7 +242,8 @@ extract( $variation_data );
 						do_action( 'woocommerce_product_options_tax', $loop, $variation_data, $variation );
 					?>
 				<?php endif; ?>
-
+			</div>
+			<div>
 				<p class="form-row form-row-full">
 					<label><?php _e( 'Variation Description:', 'woocommerce' ); ?></label>
 					<textarea name="variable_description[<?php echo $loop; ?>]" rows="3" style="width:100%;"><?php echo isset( $variation_data['_variation_description'] ) ? esc_textarea( $variation_data['_variation_description'] ) : ''; ?></textarea>

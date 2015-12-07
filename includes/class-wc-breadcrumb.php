@@ -278,7 +278,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Add crumbs for date based archives.
+	 * Add crumbs for taxonomies
 	 */
 	private function add_crumbs_tax() {
 		$this_term = $GLOBALS['wp_query']->get_queried_object();
@@ -287,8 +287,7 @@ class WC_Breadcrumb {
 		$this->add_crumb( $taxonomy->labels->name );
 
 		if ( 0 != $this_term->parent ) {
-			$this->term_ancestors( $this_term->parent, 'post_category' );
-			$this->add_crumb( $this_term->name, get_term_link( $this_term->term_id, $this_term->taxonomy ) );
+			$this->term_ancestors( $this_term->term_id, $this_term->taxonomy );
 		}
 
 		$this->add_crumb( single_term_title( '', false ), get_term_link( $this_term->term_id, $this_term->taxonomy ) );

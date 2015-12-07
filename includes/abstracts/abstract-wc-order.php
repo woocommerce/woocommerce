@@ -1207,6 +1207,12 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Get refunds
+	 * @return array
+	 */
+	public function get_refunds() { return array(); }
+
+	/**
 	 * Return an array of fees within this order.
 	 *
 	 * @return array
@@ -1311,16 +1317,8 @@ abstract class WC_Abstract_Order {
 	public function get_item_meta_array( $order_item_id ) {
 		global $wpdb;
 
-		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed
-		$prefix_num = wp_cache_get( 'wc_orders_cache_prefix', 'orders' );
-
-		if ( $prefix_num === false ) {
-			$prefix_num = 1;
-			wp_cache_set( 'wc_orders_cache_prefix', $prefix_num, 'orders' );
-		}
-
-		$cache_prefix    = 'wc_orders_cache_' . $prefix_num . '_';
-		$cache_key       = $cache_prefix . 'item_meta_array_' . $order_item_id;
+		// Get cache key - uses get_cache_prefix to invalidate when needed
+		$cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $order_item_id;
 		$item_meta_array = wp_cache_get( $cache_key, 'orders' );
 
 		if ( false === $item_meta_array ) {
@@ -1853,8 +1851,7 @@ abstract class WC_Abstract_Order {
 			);
 		}
 
-		if ( $fees = $this->get_fees() )
-
+		if ( $fees = $this->get_fees() ) {
 			foreach ( $fees as $id => $fee ) {
 
 				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', $fee['line_total'] + $fee['line_tax'] == 0, $id ) ) {
@@ -1876,9 +1873,10 @@ abstract class WC_Abstract_Order {
 					);
 				}
 			}
+		}
 
 		// Tax for tax exclusive prices.
-		if ( 'excl' == $tax_display ) {
+		if ( 'excl' === $tax_display ) {
 
 			if ( get_option( 'woocommerce_tax_total_display' ) == 'itemized' ) {
 
@@ -1906,6 +1904,15 @@ abstract class WC_Abstract_Order {
 			);
 		}
 
+		if ( $refunds = $this->get_refunds() ) {
+			foreach ( $refunds as $id => $refund ) {
+				$total_rows[ 'refund_' . $id ] = array(
+					'label' => $refund->get_refund_reason() ? $refund->get_refund_reason() : __( 'Refund', 'woocommerce' ) . ':',
+					'value'	=> wc_price( '-' . $refund->get_refund_amount(), array( 'currency' => $this->get_order_currency() ) )
+				);
+			}
+		}
+
 		$total_rows['order_total'] = array(
 			'label' => __( 'Total:', 'woocommerce' ),
 			'value'	=> $this->get_formatted_order_total( $tax_display )
@@ -1917,31 +1924,47 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Output items for display in html emails.
-	 *
-	 * @param bool $show_download_links (default: false).
-	 * @param bool $show_sku (default: false).
-	 * @param bool $show_purchase_note (default: false).
-	 * @param bool $show_image (default: false).
-	 * @param array $image_size (default: array( 32, 32 ).
+	 * @param array $args
 	 * @param bool plain text
 	 * @return string
 	 */
-	public function email_order_items_table( $show_download_links = false, $show_sku = false, $show_purchase_note = false, $show_image = false, $image_size = array( 32, 32 ), $plain_text = false ) {
-
+	public function email_order_items_table( $args = array(), $deprecated = null, $deprecated = null, $deprecated = null, $deprecated = null, $deprecated = null ) {
 		ob_start();
 
-		$template = $plain_text ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
+		if ( ! is_null( $deprecated ) ) {
+			_deprecated_argument( __FUNCTION__, '2.5.0' );
+		}
+
+		$defaults = array(
+			'show_sku'   => false,
+			'show_image' => false,
+			'image_size' => array( 32, 32 ),
+			'plain_text' => false
+		);
+
+		$args     = wp_parse_args( $args, $defaults );
+		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
 		wc_get_template( $template, array(
-			'order'                 => $this,
-			'items'                 => $this->get_items(),
-			'show_download_links'   => $show_download_links,
-			'show_sku'              => $show_sku,
-			'show_purchase_note'    => $show_purchase_note,
-			'show_image'            => $show_image,
-			'image_size'            => $image_size
+			'order'               => $this,
+			'items'               => $this->get_items(),
+			'show_download_links' => $this->is_download_permitted(),
+			'show_sku'            => $args['show_sku'],
+			'show_purchase_note'  => $this->is_paid(),
+			'show_image'          => $args['show_image'],
+			'image_size'          => $args['image_size'],
 		) );
+
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
+	}
+
+	/**
+	 * Returns if an order has been paid for based on the order status.
+	 * @since 2.5.0
+	 * @return bool
+	 */
+	public function is_paid() {
+		return apply_filters( 'woocommerce_order_is_paid', $this->has_status( apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) ) ), $this );
 	}
 
 	/**
@@ -2221,67 +2244,71 @@ abstract class WC_Abstract_Order {
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual is this a manual order status change?
+	 * @return bool Successful change or not
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
 		if ( ! $this->id ) {
-			return;
+			return false;
 		}
 
 		// Standardise status names.
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 		$old_status = $this->get_status();
 
-		// Only update if they differ - and ensure post_status is a 'wc' status.
-		if ( $new_status !== $old_status || ! in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
-
-			// Update the order.
-			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
-			$this->post_status = 'wc-' . $new_status;
-
-			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
-
-			// Status was changed.
-			do_action( 'woocommerce_order_status_' . $new_status, $this->id );
-			do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
-			do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
-
-			switch ( $new_status ) {
-
-				case 'completed' :
-					// Record the sales.
-					$this->record_product_sales();
-
-					// Increase coupon usage counts.
-					$this->increase_coupon_usage_counts();
-
-					// Record the completed date of the order.
-					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-
-				case 'processing' :
-				case 'on-hold' :
-					// Record the sales.
-					$this->record_product_sales();
-
-					// Increase coupon usage counts.
-					$this->increase_coupon_usage_counts();
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-
-				case 'cancelled' :
-					// If the order is cancelled, restore used coupons.
-					$this->decrease_coupon_usage_counts();
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-			}
+		// If the statuses are the same there is no need to update, unless the post status is not a valid 'wc' status.
+		if ( $new_status === $old_status && in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
+			return false;
 		}
+
+		// Update the order.
+		wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
+		$this->post_status = 'wc-' . $new_status;
+
+		$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+
+		// Status was changed.
+		do_action( 'woocommerce_order_status_' . $new_status, $this->id );
+		do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
+		do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
+
+		switch ( $new_status ) {
+
+			case 'completed' :
+				// Record the sales.
+				$this->record_product_sales();
+
+				// Increase coupon usage counts.
+				$this->increase_coupon_usage_counts();
+
+				// Record the completed date of the order.
+				update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+
+			case 'processing' :
+			case 'on-hold' :
+				// Record the sales.
+				$this->record_product_sales();
+
+				// Increase coupon usage counts.
+				$this->increase_coupon_usage_counts();
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+
+			case 'cancelled' :
+				// If the order is cancelled, restore used coupons.
+				$this->decrease_coupon_usage_counts();
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+		}
+
+		return true;
 	}
 
 
@@ -2381,6 +2408,13 @@ abstract class WC_Abstract_Order {
 		}
 
 		update_post_meta( $this->id, '_recorded_sales', 'yes' );
+
+		/**
+		 * Called when sales for an order are recorded
+		 *
+		 * @param int $order_id order id
+		 */
+		do_action( 'woocommerce_recorded_sales', $this->id );
 	}
 
 

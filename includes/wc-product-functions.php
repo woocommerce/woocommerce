@@ -88,10 +88,12 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_low_stock_count'
 	);
 
-	// Transients that include an ID
+	// Transient names that include an ID
 	$post_transient_names = array(
 		'wc_product_children_',
-		'wc_product_total_stock_'
+		'wc_product_total_stock_',
+		'wc_var_prices_',
+		'wc_related_'
 	);
 
 	if ( $post_id > 0 ) {
@@ -522,7 +524,7 @@ function wc_get_product_types() {
  *
  * @since 2.2
  * @param int $product_id
- * @param string $sku
+ * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
@@ -536,7 +538,7 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 		AND $wpdb->posts.post_status = 'publish'
 		AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = '%s'
 		AND $wpdb->postmeta.post_id <> %d LIMIT 1
-	 ", $sku, $product_id ) );
+	 ", wp_slash( $sku ), $product_id ) );
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
@@ -671,4 +673,20 @@ function wc_get_product_variation_attributes( $variation_id ) {
 	}
 
 	return $variation_attributes;
+}
+
+/**
+ * Get all product cats for a product by ID, including hierarchy
+ * @since  2.5.0
+ * @param  int $product_id
+ * @return array
+ */
+function wc_get_product_cat_ids( $product_id ) {
+	$product_cats = wp_get_post_terms( $product_id, 'product_cat', array( "fields" => "ids" ) );
+
+	foreach ( $product_cats as $product_cat ) {
+		$product_cats = array_merge( $product_cats, get_ancestors( $product_cat, 'product_cat' ) );
+	}
+
+	return $product_cats;
 }

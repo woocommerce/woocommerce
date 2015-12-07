@@ -187,17 +187,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 							continue;
 						}
 
-						// Get count based on current view - uses transients
-						$transient_name = 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $term->term_taxonomy_id ) );
-
-						if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
-
-							$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
-
-							set_transient( $transient_name, $_products_in_term, DAY_IN_SECONDS * 30 );
-						}
-
-						$option_is_set = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
+						// Get count based on current view
+						$_products_in_term = wc_get_term_product_ids( $term->term_id, $taxonomy );
+						$option_is_set     = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
 
 						// If this is an AND query, only show options with count > 0
 						if ( 'and' == $query_type ) {
@@ -245,16 +237,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				foreach ( $terms as $term ) {
 
 					// Get count based on current view - uses transients
-					$transient_name = 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $term->term_taxonomy_id ) );
-
-					if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
-
-						$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
-
-						set_transient( $transient_name, $_products_in_term );
-					}
-
-					$option_is_set = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
+					$_products_in_term = wc_get_term_product_ids( $term->term_id, $taxonomy );
+					$option_is_set     = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
 
 					// skip the term for the current archive
 					if ( $current_term == $term->term_id ) {
@@ -396,7 +380,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			} // End display type conditional
 
 			$this->widget_end( $args );
-
+			
 			if ( ! $found ) {
 				ob_end_clean();
 			} else {

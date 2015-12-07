@@ -5,11 +5,11 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @version     2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Importers' ) ) :
@@ -70,7 +70,7 @@ class WC_Admin_Importers {
 			return;
 		}
 
-		$id          = (int) $_POST['import_id'];
+		$id          = absint( $_POST['import_id'] );
 		$file        = get_attached_file( $id );
 		$parser      = new WXR_Parser();
 		$import_data = $parser->parse( $file );
@@ -79,40 +79,36 @@ class WC_Admin_Importers {
 			$posts = $import_data['posts'];
 
 			if ( $posts && sizeof( $posts ) > 0 ) {
-
 				foreach ( $posts as $post ) {
-
-					if ( $post['post_type'] == 'product' ) {
-
-						if ( $post['terms'] && sizeof( $post['terms'] ) > 0 ) {
-
+					if ( 'product' === $post['post_type'] ) {
+						if ( ! empty( $post['terms'] ) ) {
 							foreach ( $post['terms'] as $term ) {
-
-								$domain = $term['domain'];
-
-								if ( strstr( $domain, 'pa_' ) ) {
-
-									// Make sure it exists!
-									if ( ! taxonomy_exists( $domain ) ) {
-
-										$nicename = strtolower( sanitize_title( str_replace( 'pa_', '', $domain ) ) );
-
-										$exists_in_db = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_id FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $nicename ) );
+								if ( strstr( $term['domain'], 'pa_' ) ) {
+									if ( ! taxonomy_exists( $term['domain'] ) ) {
+										$attribute_name = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $term['domain'] ) );
 
 										// Create the taxonomy
-										if ( ! $exists_in_db ) {
-											$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'select', 'attribute_orderby' => 'menu_order', 'attribute_public' => 0 ), array( '%s', '%s', '%s' ) );
+										if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies() ) ) {
+											$attribute = array(
+												'attribute_label'   => $attribute_name,
+												'attribute_name'    => $attribute_name,
+												'attribute_type'    => 'select',
+												'attribute_orderby' => 'menu_order',
+												'attribute_public'  => 0
+											);
+											$wpdb->insert( $wpdb->prefix . 'woocommerce_attribute_taxonomies', $attribute );
+											delete_transient( 'wc_attribute_taxonomies' );
 										}
 
 										// Register the taxonomy now so that the import works!
 										register_taxonomy(
-											$domain,
-											apply_filters( 'woocommerce_taxonomy_objects_' . $domain, array( 'product' ) ),
-											apply_filters( 'woocommerce_taxonomy_args_' . $domain, array(
+											$term['domain'],
+											apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
+											apply_filters( 'woocommerce_taxonomy_args_' . $term['domain'], array(
 												'hierarchical' => true,
-												'show_ui' => false,
-												'query_var' => true,
-												'rewrite' => false,
+												'show_ui'      => false,
+												'query_var'    => true,
+												'rewrite'      => false,
 											) )
 										);
 									}

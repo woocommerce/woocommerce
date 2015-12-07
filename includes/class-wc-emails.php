@@ -107,6 +107,7 @@ class WC_Emails {
 		// Email Header, Footer and content hooks
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
+		add_action( 'woocommerce_email_order_details', array( $this, 'order_details' ), 10, 4 );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 20, 3 );
@@ -252,6 +253,17 @@ class WC_Emails {
 
 		$email = $this->emails['WC_Email_Customer_New_Account'];
 		$email->trigger( $customer_id, $user_pass, $password_generated );
+	}
+
+	/**
+	 * Show the order details table
+	 */
+	public function order_details( $order, $sent_to_admin = false, $plain_text = false, $email = '' ) {
+		if ( $plain_text ) {
+			wc_get_template( 'emails/plain/email-order-details.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email ) );
+		} else {
+			wc_get_template( 'emails/email-order-details.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email ) );
+		}
 	}
 
 	/**

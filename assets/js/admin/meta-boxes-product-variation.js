@@ -768,11 +768,12 @@ jQuery( function( $ ) {
 			$.ajax({
 				url: woocommerce_admin_meta_boxes_variations.ajax_url,
 				data: {
-					action:      'woocommerce_bulk_edit_variations',
-					security:    woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
-					product_id:  woocommerce_admin_meta_boxes_variations.post_id,
-					bulk_action: do_variation_action,
-					data:        data
+					action:       'woocommerce_bulk_edit_variations',
+					security:     woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
+					product_id:   woocommerce_admin_meta_boxes_variations.post_id,
+					product_type: $( '#product-type' ).val(),
+					bulk_action:  do_variation_action,
+					data:         data
 				},
 				type: 'POST',
 				success: function() {

@@ -222,13 +222,14 @@ class WC_Tax {
 			return array();
 		}
 
-		$valid_postcodes     = self::_get_wildcard_postcodes( wc_clean( $postcode ) );
-		$rates_transient_key = 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, implode( ',', $valid_postcodes), $tax_class ) );
-		$matched_tax_rates   = get_transient( $rates_transient_key );
+		$postcode          = wc_clean( $postcode );
+		$valid_postcodes   = self::_get_wildcard_postcodes( $postcode );
+		$cache_key         = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, $postcode, $tax_class ) );
+		$matched_tax_rates = wp_cache_get( $cache_key, 'taxes' );
 
 		if ( false === $matched_tax_rates ) {
 			$matched_tax_rates = self::get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes );
-			set_transient( $rates_transient_key, $matched_tax_rates, WEEK_IN_SECONDS );
+			wp_cache_set( $cache_key, $matched_tax_rates, 'taxes' );
 		}
 
 		return apply_filters( 'woocommerce_find_rates', $matched_tax_rates, $args );
@@ -699,6 +700,8 @@ class WC_Tax {
 
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', self::prepare_tax_rate( $tax_rate ) );
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
 		do_action( 'woocommerce_tax_rate_added', $wpdb->insert_id, $tax_rate );
 
 		return $wpdb->insert_id;
@@ -750,6 +753,8 @@ class WC_Tax {
 			)
 		);
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
 		do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $tax_rate );
 	}
 
@@ -768,6 +773,8 @@ class WC_Tax {
 
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
+
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 
 		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
 	}
@@ -846,6 +853,8 @@ class WC_Tax {
 				INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES $sql;
 				" );
 		}
+
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 	}
 
 	/**

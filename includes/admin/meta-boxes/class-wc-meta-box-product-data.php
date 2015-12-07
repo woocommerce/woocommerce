@@ -793,14 +793,6 @@ class WC_Meta_Box_Product_Data {
 		update_post_meta( $post_id, '_virtual', $is_virtual );
 
 		// Update post meta
-		if ( isset( $_POST['_regular_price'] ) ) {
-			update_post_meta( $post_id, '_regular_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
-		}
-
-		if ( isset( $_POST['_sale_price'] ) ) {
-			update_post_meta( $post_id, '_sale_price', ( $_POST['_sale_price'] === '' ? '' : wc_format_decimal( $_POST['_sale_price'] ) ) );
-		}
-
 		if ( isset( $_POST['_tax_status'] ) ) {
 			update_post_meta( $post_id, '_tax_status', wc_clean( $_POST['_tax_status'] ) );
 		}
@@ -850,14 +842,12 @@ class WC_Meta_Box_Product_Data {
 
 		// Unique SKU
 		$sku     = get_post_meta( $post_id, '_sku', true );
-		$new_sku = wc_clean( stripslashes( $_POST['_sku'] ) );
+		$new_sku = wc_clean( $_POST['_sku'] );
 
 		if ( '' == $new_sku ) {
 			update_post_meta( $post_id, '_sku', '' );
 		} elseif ( $new_sku !== $sku ) {
-
 			if ( ! empty( $new_sku ) ) {
-
 				$unique_sku = wc_product_has_unique_sku( $post_id, $new_sku );
 
 				if ( ! $unique_sku ) {
@@ -997,22 +987,17 @@ class WC_Meta_Box_Product_Data {
 			update_post_meta( $post_id, '_price', '' );
 
 		} else {
+			$date_from     = isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';
+			$date_to       = isset( $_POST['_sale_price_dates_to'] ) ? wc_clean( $_POST['_sale_price_dates_to'] )     : '';
+			$regular_price = isset( $_POST['_regular_price'] ) ? wc_clean( $_POST['_regular_price'] )                 : '';
+			$sale_price    = isset( $_POST['_sale_price'] ) ? wc_clean( $_POST['_sale_price'] )                       : '';
 
-			$date_from = isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';
-			$date_to   = isset( $_POST['_sale_price_dates_to'] ) ? wc_clean( $_POST['_sale_price_dates_to'] ) : '';
+			update_post_meta( $post_id, '_regular_price', '' === $regular_price ? '' : wc_format_decimal( $regular_price ) );
+			update_post_meta( $post_id, '_sale_price', '' === $sale_price ? '' : wc_format_decimal( $sale_price ) );
 
 			// Dates
-			if ( $date_from ) {
-				update_post_meta( $post_id, '_sale_price_dates_from', strtotime( $date_from ) );
-			} else {
-				update_post_meta( $post_id, '_sale_price_dates_from', '' );
-			}
-
-			if ( $date_to ) {
-				update_post_meta( $post_id, '_sale_price_dates_to', strtotime( $date_to ) );
-			} else {
-				update_post_meta( $post_id, '_sale_price_dates_to', '' );
-			}
+			update_post_meta( $post_id, '_sale_price_dates_from', $date_from ? strtotime( $date_from ) : '' );
+			update_post_meta( $post_id, '_sale_price_dates_to', $date_to ? strtotime( $date_to ) : '' );
 
 			if ( $date_to && ! $date_from ) {
 				$date_from = date( 'Y-m-d' );
@@ -1020,18 +1005,16 @@ class WC_Meta_Box_Product_Data {
 			}
 
 			// Update price if on sale
-			if ( '' !== $_POST['_sale_price'] && '' == $date_to && '' == $date_from ) {
-				update_post_meta( $post_id, '_price', wc_format_decimal( $_POST['_sale_price'] ) );
+			if ( '' !== $sale_price && '' === $date_to && '' === $date_from ) {
+				update_post_meta( $post_id, '_price', wc_format_decimal( $sale_price ) );
+			} elseif ( '' !== $sale_price && $date_from && strtotime( $date_from ) <= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
+				update_post_meta( $post_id, '_price', wc_format_decimal( $sale_price ) );
 			} else {
-				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
-			}
-
-			if ( '' !== $_POST['_sale_price'] && $date_from && strtotime( $date_from ) <= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $post_id, '_price', wc_format_decimal( $_POST['_sale_price'] ) );
+				update_post_meta( $post_id, '_price', '' === $regular_price ? '' : wc_format_decimal( $regular_price ) );
 			}
 
 			if ( $date_to && strtotime( $date_to ) < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $post_id, '_price', ( $_POST['_regular_price'] === '' ) ? '' : wc_format_decimal( $_POST['_regular_price'] ) );
+				update_post_meta( $post_id, '_price', '' === $regular_price ? '' : wc_format_decimal( $regular_price ) );
 				update_post_meta( $post_id, '_sale_price_dates_from', '' );
 				update_post_meta( $post_id, '_sale_price_dates_to', '' );
 			}
@@ -1324,7 +1307,15 @@ class WC_Meta_Box_Product_Data {
 
 				} else {
 
-					$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status, 'post_title' => $variation_post_title, 'menu_order' => $variable_menu_order[ $i ] ), array( 'ID' => $variation_id ) );
+					$modified_date = date_i18n( 'Y-m-d H:i:s', current_time( 'timestamp' ) );
+
+					$wpdb->update( $wpdb->posts, array(
+							'post_status'       => $post_status,
+							'post_title'        => $variation_post_title,
+							'menu_order'        => $variable_menu_order[ $i ],
+							'post_modified'     => $modified_date,
+							'post_modified_gmt' => get_gmt_from_date( $modified_date )
+					), array( 'ID' => $variation_id ) );
 
 					clean_post_cache( $variation_id );
 
@@ -1339,12 +1330,11 @@ class WC_Meta_Box_Product_Data {
 
 				// Unique SKU
 				$sku     = get_post_meta( $variation_id, '_sku', true );
-				$new_sku = wc_clean( stripslashes( $variable_sku[ $i ] ) );
+				$new_sku = wc_clean( $variable_sku[ $i ] );
 
 				if ( '' == $new_sku ) {
 					update_post_meta( $variation_id, '_sku', '' );
 				} elseif ( $new_sku !== $sku ) {
-
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 

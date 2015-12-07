@@ -169,6 +169,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Check for existence of global attribute when you get_attributes() for a product.
 * Fix - Show order by template on product search.
 * Fix - Search variation skus in backend search.
+* Tweak - For coupons with category restrictions, respect the category hierarchy.
 * Tweak - Added wc_array_cartesian function to generate variations in a logical order.
 * Tweak - Revised email settings screens to show emails in a table and avoid a long sub-nav.
 * Tweak - Default customer role capabilities.
@@ -191,6 +192,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Use new "question" mark icon font for help tips.
 * Tweak - Improved review verification status retrieval.
 * Tweak - Improve appearance when only 1 gateway is active.
+* Tweak - Aligned terms box left and added required asterisk.
 * Dev - API - Added /products/shipping_classes endpoint.
 * Dev - API - Added support to POST, PUT, and DELETE categories and tags.
 * Dev - API - Added support to filter products by tag, category, shipping class, and attribute.
@@ -200,6 +202,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Template - Product archive anchors are now hooked into templates rather than hard coded.
 * Dev - Template - Added template files for the customer details list in emails. emails/email-customer-details.php
 * Dev - Template - Revised single variation cart template. Template files now exist for variations, and the cart button will display (disabled) when no selections are made.
+* Dev - Template - Made "my orders" columns fully customizable with filters.
+* Dev - Template - Unified email template order details tables to use a single template.
 * Dev - Allow wc_clean to support arrays.
 * Dev - Added a manual update trigger for checkout.
 * Dev - Added woocommerce_is_price_filter_active filter to Query class.

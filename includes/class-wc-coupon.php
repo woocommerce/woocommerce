@@ -144,21 +144,22 @@ class WC_Coupon {
 
 	/**
 	 * Get a coupon ID from it's code.
+	 * @since 2.5.0 woocommerce_coupon_code_query was removed in favour of woocommerce_get_coupon_id_from_code filter on the return. wp_cache was also implemented.
 	 * @param  string $code
 	 * @return int
 	 */
 	private function get_coupon_id_from_code( $code ) {
 		global $wpdb;
 
-		$coupon_code_query = $wpdb->prepare( apply_filters( 'woocommerce_coupon_code_query', "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'" ), $this->code );
-		$transient_name    = 'wc_cid_by_code_' . md5( $coupon_code_query . WC_Cache_Helper::get_transient_version( 'coupons' ) );
+		$coupon_id = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 
-		if ( false === ( $result = get_transient( $transient_name ) ) ) {
-			$result = $wpdb->get_var( $coupon_code_query );
-			set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+		if ( false === $coupon_id ) {
+			$sql       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $this->code );
+			$coupon_id = apply_filters( 'woocommerce_get_coupon_id_from_code', $wpdb->get_var( $sql ), $this->code );
+			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $coupon_id, 'coupons' );
 		}
 
-		return absint( $result );
+		return absint( $coupon_id );
 	}
 
 	/**
@@ -353,6 +354,7 @@ class WC_Coupon {
 	 * Checked again for emails later on in WC_Cart::check_customer_coupons().
 	 *
 	 * @param  int  $user_id
+	 * @throws Exception
 	 */
 	private function validate_user_usage_limit( $user_id = null ) {
 		if ( ! $user_id ) {
@@ -426,7 +428,8 @@ class WC_Coupon {
 			$valid_for_cart = false;
 			if ( ! WC()->cart->is_empty() ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
+
 					if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) {
 						$valid_for_cart = true;
 					}
@@ -503,7 +506,7 @@ class WC_Coupon {
 			if ( ! WC()->cart->is_empty() ) {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 
-					$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
 					if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
 						$valid_for_cart = false;
@@ -590,7 +593,7 @@ class WC_Coupon {
 		}
 
 		$valid        = false;
-		$product_cats = wp_get_post_terms( $product->id, 'product_cat', array( "fields" => "ids" ) );
+		$product_cats = wc_get_product_cat_ids( $product->id );
 
 		// Specific products get the discount
 		if ( sizeof( $this->product_ids ) > 0 ) {
@@ -803,8 +806,7 @@ class WC_Coupon {
 				$categories = array();
 				if ( ! WC()->cart->is_empty() ) {
 					foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-
-						$product_cats = wp_get_post_terms( $cart_item['product_id'], 'product_cat', array( "fields" => "ids" ) );
+						$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
 						if ( sizeof( $intersect = array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
 

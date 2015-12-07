@@ -151,18 +151,26 @@ class WC_Admin_Webhooks {
 		// Topic
 		$this->update_topic( $webhook );
 
-		// Ping the webhook at the first time that is activated
-		$peding_delivery = get_post_meta( $webhook->id, '_webhook_pending_delivery', true );
-		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $peding_delivery ) {
-			$webhook->deliver_ping();
-		}
-
+		// Run actions
 		do_action( 'woocommerce_webhook_options_save', $webhook->id );
 
 		delete_transient( 'woocommerce_webhook_ids' );
 
+		// Ping the webhook at the first time that is activated
+		$pending_delivery = get_post_meta( $webhook->id, '_webhook_pending_delivery', true );
+
+		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $pending_delivery ) {
+			$result = $webhook->deliver_ping();
+
+			if ( is_wp_error( $result ) ) {
+				// Redirect to webhook edit page to avoid settings save actions
+				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&error=' . urlencode( $result->get_error_message() ) ) );
+				exit();
+			}
+		}
+
 		// Redirect to webhook edit page to avoid settings save actions
-		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&edit-webhook=' . $webhook->id . '&updated=1' ) );
 		exit();
 	}
 
@@ -381,6 +389,10 @@ class WC_Admin_Webhooks {
 
 		if ( isset( $_GET['created'] ) ) {
 			WC_Admin_Settings::add_message( __( 'Webhook created successfully.', 'woocommerce' ) );
+		}
+
+		if ( isset( $_GET['error'] ) ) {
+			WC_Admin_Settings::add_error( wc_clean( $_GET['error'] ) );
 		}
 	}
 

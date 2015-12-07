@@ -58,9 +58,8 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get order refunds.
-	 *
 	 * @since 2.2
-	 * @return array
+	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
 		if ( empty( $this->refunds ) && ! is_array( $this->refunds ) ) {

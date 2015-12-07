@@ -16,11 +16,11 @@ $theme 	= wp_get_theme();
 
 <div class="wrap woocommerce wc_addons_wrap">
 	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
-	<h2>
+	<h1>
 		<?php _e( 'WooCommerce Add-ons/Extensions', 'woocommerce' ); ?>
 		<a href="http://www.woothemes.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
-		<a href="http://www.woothemes.com/storefront/" class="add-new-h2"><?php _e( 'Need a theme? Try Storefront', 'woocommerce' ); ?></a>
-	</h2>
+		<?php WC_Admin_Addons::output_storefront_button(); ?>
+	</h1>
 	<?php if ( $addons ) : ?>
 		<ul class="subsubsub">
 			<?php

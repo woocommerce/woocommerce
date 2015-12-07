@@ -1909,7 +1909,7 @@ p.demo_store {
 }
 
 /* added to get around variation image flicker issue */
-.product.has-default-attributes {
+.product.has-default-attributes.has-children {
 	> .images {
 		opacity: 0;
 	}
@@ -1958,5 +1958,25 @@ p.demo_store {
 		li.product {
 			margin-top: 0 !important;
 		}
+	}
+}
+
+/**
+ * Twenty Sixteen specific styles
+ */
+body:not(.search-results) {
+	.twentysixteen {
+		.entry-summary {
+			color: inherit;
+			font-size: inherit;
+			line-height: inherit;
+		}
+	}
+}
+
+.twentysixteen {
+	.price ins {
+		background: inherit;
+		color: inherit;
 	}
 }

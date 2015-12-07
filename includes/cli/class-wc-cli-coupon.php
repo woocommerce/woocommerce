@@ -374,7 +374,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 	 *
 	 * @since 2.5.0
 	 */
-	public function types( $__, $__ ) {
+	public function types( $__, $___ ) {
 		$coupon_types = wc_get_coupon_types();
 		foreach ( $coupon_types as $type => $label ) {
 			WP_CLI::line( sprintf( '%s: %s', $label, $type ) );
