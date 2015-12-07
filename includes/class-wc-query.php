@@ -868,7 +868,7 @@ class WC_Query {
 						WHERE post_type IN ( 'product', 'product_variation' )
 						AND post_status = 'publish'
 						AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-						AND pm1.meta_value BETWEEN %d AND %d
+						AND pm1.meta_value BETWEEN %f AND %f
 						AND pm2.meta_key = '_tax_class'
 						AND pm2.meta_value = %s
 					", $min_class, $max_class, sanitize_title( $tax_class ) ), OBJECT_K ), $min_class, $max_class );
