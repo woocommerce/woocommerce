@@ -447,6 +447,7 @@ class WC_API_Server {
 			'description' => get_option( 'blogdescription' ),
 			'URL'         => get_option( 'siteurl' ),
 			'wc_version'  => WC()->version,
+			'version'     => WC_API::VERSION,
 			'routes'      => array(),
 			'meta'        => array(
 				'timezone'           => wc_timezone_string(),
