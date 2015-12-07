@@ -1924,14 +1924,19 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Output items for display in html emails.
-	 * @param array $args
-	 * @param bool plain text
+	 *
+	 * @param array $args Items args.
+	 * @param null $deprecated1 Deprecated arg.
+	 * @param null $deprecated2 Deprecated arg.
+	 * @param null $deprecated3 Deprecated arg.
+	 * @param null $deprecated4 Deprecated arg.
+	 * @param null $deprecated5 Deprecated arg.
 	 * @return string
 	 */
-	public function email_order_items_table( $args = array(), $deprecated = null, $deprecated = null, $deprecated = null, $deprecated = null, $deprecated = null ) {
+	public function email_order_items_table( $args = array(), $deprecated1 = null, $deprecated2 = null, $deprecated3 = null, $deprecated4 = null, $deprecated5 = null ) {
 		ob_start();
 
-		if ( ! is_null( $deprecated ) ) {
+		if ( ! is_null( $deprecated1 ) || ! is_null( $deprecated2 ) || ! is_null( $deprecated3 ) || ! is_null( $deprecated4 ) || ! is_null( $deprecated5 ) ) {
 			_deprecated_argument( __FUNCTION__, '2.5.0' );
 		}
 
