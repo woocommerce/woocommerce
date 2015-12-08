@@ -26,6 +26,7 @@ class WC_Admin_Menus {
 		// Add menus
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
+		add_action( 'admin_menu', array( $this, 'shipping_menu' ), 40 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
@@ -103,6 +104,13 @@ class WC_Admin_Menus {
 	 */
 	public function addons_menu() {
 		add_submenu_page( 'woocommerce', __( 'WooCommerce Add-ons/Extensions', 'woocommerce' ),  __( 'Add-ons', 'woocommerce' ) , 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+	}
+
+	/**
+	 * Shipping menu item.
+	 */
+	public function shipping_menu() {
+		add_submenu_page( 'woocommerce', __( 'Shipping', 'woocommerce' ),  __( 'Shipping', 'woocommerce' ) , 'manage_woocommerce', 'wc-shipping', array( $this, 'shipping_page' ) );
 	}
 
 	/**
@@ -197,6 +205,14 @@ class WC_Admin_Menus {
 	 */
 	public function reports_page() {
 		WC_Admin_Reports::output();
+	}
+
+	/**
+	 * Init the shipping page.
+	 * @since 2.5.0
+	 */
+	public function shipping_page() {
+		WC_Admin_Shipping_Zones::output();
 	}
 
 	/**

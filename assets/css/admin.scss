@@ -2111,6 +2111,91 @@ table.wc_shipping {
 	}
 }
 
+table.wc_shipping_zones {
+	td, th {
+		vertical-align: top;
+		line-height: 30px;
+		padding: 1em 1em;
+		font-size: 14px;
+	}
+	tbody tr:nth-child(odd) {
+		td {
+			background: #f9f9f9;
+		}
+	}
+	ul {
+		margin: 0;
+	}
+	td.wc-shipping-zone-sort {
+		cursor: move;
+		text-align: center;
+
+		&:before {
+			content: "\e032";
+			font-family: 'WooCommerce';
+			text-align: center;
+			line-height: 1;
+			color: #999;
+			display: block;
+			width: 17px;
+			float: left;
+			height: 100%;
+			line-height: 30px;
+		}
+		&:hover {
+			&:before {
+				color: #333;
+			}
+		}
+	}
+	td.wc-shipping-zone-worldwide {
+		text-align: center;
+		&:before {
+			content: "\f319";
+			font-family: 'dashicons';
+			text-align: center;
+			line-height: 1;
+			color: #999;
+			display: block;
+			width: 17px;
+			float: left;
+			height: 100%;
+			line-height: 30px;
+		}
+	}
+	.wc-shipping-zone-name,
+	.wc-shipping-zone-methods {
+		width: 25%;
+	}
+	.wc-shipping-zone-name,
+	.wc-shipping-zone-region {
+		input, select {
+			width: 100%;
+		}
+	}
+	a.delete {
+		@include ir();
+
+		&:before {
+			@include icon;
+			content: "\e013";
+			color: #999;
+			line-height: 30px;
+		}
+
+		&:hover {
+			&:before {
+				color: $red;
+			}
+		}
+	}
+	tfoot {
+		input {
+			float:right;
+		}
+	}
+}
+
 img.help_tip {
 	margin: 0 0 0 9px;
 	vertical-align: middle;
