@@ -51,6 +51,17 @@ class WC_Countries {
 	}
 
 	/**
+	 * Get all continents.
+	 * @return array
+	 */
+	public function get_continents() {
+		if ( empty( $this->continents ) ) {
+			$this->continents = apply_filters( 'woocommerce_continents', include( WC()->plugin_path() . '/i18n/continents.php' ) );
+		}
+		return $this->continents;
+	}
+
+	/**
 	 * Load the states.
 	 */
 	public function load_country_states() {
