@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Page - Status Report
+ * Admin View: Page - Status Report.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -106,7 +106,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td data-export-label="PHP Version"><?php _e( 'PHP Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); ?></td>
 			<td><?php
-				// Check if phpversion function exists
+				// Check if phpversion function exists.
 				if ( function_exists( 'phpversion' ) ) {
 					$php_version = phpversion();
 
@@ -173,7 +173,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 			$posting = array();
 
-			// fsockopen/cURL
+			// fsockopen/cURL.
 			$posting['fsockopen_curl']['name'] = 'fsockopen/cURL';
 			$posting['fsockopen_curl']['help'] = wc_help_tip( __( 'Payment gateways can use cURL to communicate with remote servers to authorize payments, other plugins may also use it when communicating with remote services.', 'woocommerce' ) );
 
@@ -184,7 +184,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['fsockopen_curl']['note']    = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
 			}
 
-			// SOAP
+			// SOAP.
 			$posting['soap_client']['name'] = 'SoapClient';
 			$posting['soap_client']['help'] = wc_help_tip( __( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce' ) );
 
@@ -195,7 +195,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
 			}
 
-			// DOMDocument
+			// DOMDocument.
 			$posting['dom_document']['name'] = 'DOMDocument';
 			$posting['dom_document']['help'] = wc_help_tip( __( 'HTML/Multipart emails use DOMDocument to generate inline CSS in templates.', 'woocommerce' ) );
 
@@ -206,7 +206,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the <a href="%s">DOMDocument</a> class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), 'http://php.net/manual/en/class.domdocument.php' ) . '</mark>';
 			}
 
-			// GZIP
+			// GZIP.
 			$posting['gzip']['name'] = 'GZip';
 			$posting['gzip']['help'] = wc_help_tip( __( 'GZip (gzopen) is used to open the GEOIP database from MaxMind.', 'woocommerce' ) );
 
@@ -217,7 +217,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the <a href="%s">gzopen</a> function - this is required to use the GeoIP database from MaxMind. The API fallback will be used instead for geolocation.', 'woocommerce' ), 'http://php.net/manual/en/zlib.installation.php' ) . '</mark>';
 			}
 
-			// WP Remote Post Check
+			// Multibyte String.
+			$posting['mbstring']['name'] = 'Multibyte String';
+			$posting['mbstring']['help'] = wc_help_tip( __( 'Multibyte String (mbstring) is used to convert character encoding, like for emails or converting characters to lowercase.', 'woocommerce' ) );
+
+			if ( extension_loaded( 'mbstring' ) ) {
+				$posting['mbstring']['success'] = true;
+			} else {
+				$posting['mbstring']['success'] = false;
+				$posting['mbstring']['note']    = sprintf( __( 'Your server does not support the <a href="%s">mbstring</a> functions - this is required for better charactrer encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), 'http://php.net/manual/en/mbstring.installation.php' ) . '</mark>';
+			}
+
+			// WP Remote Post Check.
 			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce');
 			$posting['wp_remote_post']['help'] = wc_help_tip( __( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) );
 
@@ -241,7 +252,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['wp_remote_post']['success'] = false;
 			}
 
-			// WP Remote Get Check
+			// WP Remote Get Check.
 			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
 			$posting['wp_remote_get']['help'] = wc_help_tip( __( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) );
 
@@ -341,7 +352,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			if ( ! empty( $plugin_data['Name'] ) ) {
 
-				// link the plugin name to the plugin url if available
+				// Link the plugin name to the plugin url if available.
 				$plugin_name = esc_html( $plugin_data['Name'] );
 
 				if ( ! empty( $plugin_data['PluginURI'] ) ) {
@@ -493,7 +504,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				echo '<tr><td data-export-label="' . esc_attr( $page_name ) . '">' . $page_name . ':</td>';
 				echo '<td class="help">' . wc_help_tip( $values['help']  ) . '</td><td>';
 
-				// Page ID check
+				// Page ID check.
 				if ( ! $page_id ) {
 					echo '<mark class="error">' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 					$error = true;
@@ -732,16 +743,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 				jQuery( 'tr', jQuery( this ) ).each( function() {
 
 					var label       = jQuery( this ).find( 'td:eq(0)' ).data( 'export-label' ) || jQuery( this ).find( 'td:eq(0)' ).text();
-					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML
-					var image       = jQuery( this ).find( 'td:eq(2)' ).find( 'img' ); // Get WP 4.2 emojis
-					var prefix      = ( undefined === image.attr( 'alt' ) ) ? '' : image.attr( 'alt' ) + ' '; // Remove WP 4.2 emojis
+					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML.
+					var image       = jQuery( this ).find( 'td:eq(2)' ).find( 'img' ); // Get WP 4.2 emojis.
+					var prefix      = ( undefined === image.attr( 'alt' ) ) ? '' : image.attr( 'alt' ) + ' '; // Remove WP 4.2 emojis.
 					var the_value   = jQuery.trim( prefix + jQuery( this ).find( 'td:eq(2)' ).text() );
 					var value_array = the_value.split( ', ' );
 
 					if ( value_array.length > 1 ) {
 
-						// If value have a list of plugins ','
-						// Split to add new line
+						// If value have a list of plugins ','.
+						// Split to add new line.
 						var temp_line ='';
 						jQuery.each( value_array, function( key, line ) {
 							temp_line = temp_line + line + '\n';
