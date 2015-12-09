@@ -72,7 +72,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 
 				if ( $memory < 67108864 ) {
-					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s" target="_blank">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
+					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: %s', 'woocommerce' ), size_format( $memory ), '<a href="http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . __( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
 				}
@@ -111,7 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$php_version = phpversion();
 
 					if ( version_compare( $php_version, '5.4', '<' ) ) {
-						echo '<mark class="error">' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: <a href="%s" target="_blank">How to update your PHP version</a>', 'woocommerce' ), esc_html( $php_version ), 'http://docs.woothemes.com/document/how-to-update-your-php-version/' ) . '</mark>';
+						echo '<mark class="error">' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: %s', 'woocommerce' ), esc_html( $php_version ), '<a href="http://docs.woothemes.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . esc_html( $php_version ) . '</mark>';
 					}
@@ -124,17 +124,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr>
 				<td data-export-label="PHP Post Max Size"><?php _e( 'PHP Post Max Size', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The largest filesize that can be contained in one post.', 'woocommerce' ) ); ?></td>
-				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
+				<td><?php echo size_format( wc_let_to_num( ini_get( 'post_max_size' ) ) ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="PHP Time Limit"><?php _e( 'PHP Time Limit', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce' ) ); ?></td>
-				<td><?php echo ini_get('max_execution_time'); ?></td>
+				<td><?php echo ini_get( 'max_execution_time' ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="PHP Max Input Vars"><?php _e( 'PHP Max Input Vars', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce' ) ); ?></td>
-				<td><?php echo ini_get('max_input_vars'); ?></td>
+				<td><?php echo ini_get( 'max_input_vars' ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="SUHOSIN Installed"><?php _e( 'SUHOSIN Installed', 'woocommerce' ); ?>:</td>
@@ -181,7 +181,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['fsockopen_curl']['success'] = true;
 			} else {
 				$posting['fsockopen_curl']['success'] = false;
-				$posting['fsockopen_curl']['note']    = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
+				$posting['fsockopen_curl']['note']    = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' );
 			}
 
 			// SOAP.
@@ -192,7 +192,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['soap_client']['success'] = true;
 			} else {
 				$posting['soap_client']['success'] = false;
-				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
+				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="http://php.net/manual/en/class.soapclient.php">SoapClient</a>' );
 			}
 
 			// DOMDocument.
@@ -203,7 +203,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['dom_document']['success'] = true;
 			} else {
 				$posting['dom_document']['success'] = false;
-				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the <a href="%s">DOMDocument</a> class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), 'http://php.net/manual/en/class.domdocument.php' ) . '</mark>';
+				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="http://php.net/manual/en/class.domdocument.php">DOMDocument</a>' );
 			}
 
 			// GZIP.
@@ -214,7 +214,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['gzip']['success'] = true;
 			} else {
 				$posting['gzip']['success'] = false;
-				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the <a href="%s">gzopen</a> function - this is required to use the GeoIP database from MaxMind. The API fallback will be used instead for geolocation.', 'woocommerce' ), 'http://php.net/manual/en/zlib.installation.php' ) . '</mark>';
+				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind. The API fallback will be used instead for geolocation.', 'woocommerce' ), '<a href="http://php.net/manual/en/zlib.installation.php">gzopen</a>' );
 			}
 
 			// Multibyte String.
@@ -225,7 +225,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['mbstring']['success'] = true;
 			} else {
 				$posting['mbstring']['success'] = false;
-				$posting['mbstring']['note']    = sprintf( __( 'Your server does not support the <a href="%s">mbstring</a> functions - this is required for better charactrer encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), 'http://php.net/manual/en/mbstring.installation.php' ) . '</mark>';
+				$posting['mbstring']['note']    = sprintf( __( 'Your server does not support the %s functions - this is required for better charactrer encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="http://php.net/manual/en/mbstring.installation.php">mbstring</a>' );
 			}
 
 			// WP Remote Post Check.
