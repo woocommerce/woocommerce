@@ -284,7 +284,7 @@ class WC_Admin_Post_Types {
 
 		switch ( $column ) {
 			case 'thumb' :
-				echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $the_product->get_image( 'thumbnail' ) . '</a>';
+				echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $the_product->get_image( 'post-thumbnail' ) . '</a>';
 				break;
 			case 'name' :
 				$edit_link = get_edit_post_link( $post->ID );
