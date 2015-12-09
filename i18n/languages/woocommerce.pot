@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.5.0-beta-1\n"
+"Project-Id-Version: WooCommerce 2.5.0-beta-2\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-12-04 19:10:17+00:00\n"
+"POT-Creation-Date: 2015-12-09 15:24:10+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4844,7 +4844,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-settings-api.php:79
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/settings/class-wc-settings-api.php:45
-#: includes/admin/views/html-admin-page-status-report.php:395
+#: includes/admin/views/html-admin-page-status-report.php:406
 #: includes/class-wc-install.php:713
 msgid "Settings"
 msgstr ""
@@ -4859,10 +4859,10 @@ msgid "via %s"
 msgstr ""
 
 #: includes/abstracts/abstract-wc-order.php:1772
-#: includes/abstracts/abstract-wc-product.php:1005
-#: includes/abstracts/abstract-wc-product.php:1011
+#: includes/abstracts/abstract-wc-product.php:1016
+#: includes/abstracts/abstract-wc-product.php:1022
 #: includes/class-wc-cart.php:1577 includes/class-wc-product-variable.php:351
-#: includes/class-wc-product-variation.php:307
+#: includes/class-wc-product-variation.php:318
 msgid "Free!"
 msgstr ""
 
@@ -4902,12 +4902,12 @@ msgstr ""
 msgid "Total:"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2177
+#: includes/abstracts/abstract-wc-order.php:2182
 #: templates/emails/plain/email-order-items.php:57
 msgid "Download %d"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2177
+#: includes/abstracts/abstract-wc-order.php:2182
 #: templates/emails/plain/email-order-items.php:59
 msgid "Download"
 msgstr ""
@@ -4916,15 +4916,15 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2264
+#: includes/abstracts/abstract-wc-order.php:2272
 msgid "Order status changed from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2513
+#: includes/abstracts/abstract-wc-order.php:2522
 msgid "Item %s variation #%s stock reduced from %s to %s."
 msgstr ""
 
-#: includes/abstracts/abstract-wc-order.php:2515
+#: includes/abstracts/abstract-wc-order.php:2524
 #: includes/class-wc-ajax.php:1366
 msgid "Item %s stock reduced from %s to %s."
 msgstr ""
@@ -4950,55 +4950,55 @@ msgstr ""
 msgid "CVC"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:573
+#: includes/abstracts/abstract-wc-product.php:584
 #: includes/class-wc-product-simple.php:48
-#: includes/class-wc-product-variation.php:187
+#: includes/class-wc-product-variation.php:198
 msgid "Add to cart"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:582
+#: includes/abstracts/abstract-wc-product.php:593
 msgid "Read more"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:662
 #: includes/abstracts/abstract-wc-product.php:673
-#: includes/abstracts/abstract-wc-product.php:695
+#: includes/abstracts/abstract-wc-product.php:684
+#: includes/abstracts/abstract-wc-product.php:706
 #: includes/admin/class-wc-admin-post-types.php:400
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:337
 #: includes/admin/reports/class-wc-report-stock.php:108
 #: includes/admin/views/html-bulk-edit-product.php:223
 #: includes/admin/views/html-quick-edit-product.php:166
 #: includes/class-wc-ajax.php:841 includes/class-wc-ajax.php:2427
-#: includes/class-wc-product-variation.php:526
-#: includes/class-wc-product-variation.php:536
-#: includes/class-wc-product-variation.php:552
+#: includes/class-wc-product-variation.php:537
+#: includes/class-wc-product-variation.php:547
+#: includes/class-wc-product-variation.php:563
 msgid "In stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:667
-#: includes/class-wc-product-variation.php:530
+#: includes/abstracts/abstract-wc-product.php:678
+#: includes/class-wc-product-variation.php:541
 msgid "Only %s left in stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:670
 #: includes/abstracts/abstract-wc-product.php:681
-#: includes/class-wc-product-variation.php:533
-#: includes/class-wc-product-variation.php:543
+#: includes/abstracts/abstract-wc-product.php:692
+#: includes/class-wc-product-variation.php:544
+#: includes/class-wc-product-variation.php:554
 msgid "(can be backordered)"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:678
-#: includes/class-wc-product-variation.php:540
+#: includes/abstracts/abstract-wc-product.php:689
+#: includes/class-wc-product-variation.php:551
 msgid "%s in stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:690
-#: includes/class-wc-product-variation.php:549 templates/cart/cart.php:90
+#: includes/abstracts/abstract-wc-product.php:701
+#: includes/class-wc-product-variation.php:560 templates/cart/cart.php:90
 msgid "Available on backorder"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:700
-#: includes/abstracts/abstract-wc-product.php:706
+#: includes/abstracts/abstract-wc-product.php:711
+#: includes/abstracts/abstract-wc-product.php:717
 #: includes/admin/class-wc-admin-post-types.php:402
 #: includes/admin/class-wc-admin-reports.php:100
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:338
@@ -5006,23 +5006,23 @@ msgstr ""
 #: includes/admin/views/html-bulk-edit-product.php:224
 #: includes/admin/views/html-quick-edit-product.php:167
 #: includes/class-wc-ajax.php:842 includes/class-wc-ajax.php:2428
-#: includes/class-wc-product-variation.php:555
-#: includes/class-wc-product-variation.php:559
+#: includes/class-wc-product-variation.php:566
+#: includes/class-wc-product-variation.php:570
 msgid "Out of stock"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1146
+#: includes/abstracts/abstract-wc-product.php:1157
 #: includes/class-wc-embed.php:132 templates/single-product/rating.php:35
 msgid "Rated %s out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1148
+#: includes/abstracts/abstract-wc-product.php:1159
 #: includes/admin/class-wc-admin-dashboard.php:198
 #: templates/single-product/review.php:39
 msgid "out of 5"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1524
+#: includes/abstracts/abstract-wc-product.php:1535
 msgid "%s &ndash; %s"
 msgstr ""
 
@@ -5303,7 +5303,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-variation-admin.php:258
 #: includes/admin/settings/class-wc-settings-shipping.php:203
 #: includes/admin/settings/views/html-webhooks-edit.php:15
-#: includes/admin/views/html-admin-page-status-report.php:564
+#: includes/admin/views/html-admin-page-status-report.php:575
 #: includes/class-wc-ajax.php:1448
 #: includes/widgets/class-wc-widget-product-categories.php:52
 #: templates/single-product-reviews.php:73
@@ -7159,7 +7159,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:319
 #: includes/admin/settings/class-wc-settings-general.php:137
-#: includes/admin/views/html-admin-page-status-report.php:410
+#: includes/admin/views/html-admin-page-status-report.php:421
 msgid "Currency Position"
 msgstr ""
 
@@ -7185,13 +7185,13 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:330
 #: includes/admin/settings/class-wc-settings-general.php:154
-#: includes/admin/views/html-admin-page-status-report.php:415
+#: includes/admin/views/html-admin-page-status-report.php:426
 msgid "Thousand Separator"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:336
 #: includes/admin/settings/class-wc-settings-general.php:164
-#: includes/admin/views/html-admin-page-status-report.php:420
+#: includes/admin/views/html-admin-page-status-report.php:431
 msgid "Decimal Separator"
 msgstr ""
 
@@ -8102,7 +8102,7 @@ msgid "Last Name"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:86
-#: includes/class-wc-countries.php:973
+#: includes/class-wc-countries.php:974
 msgid "Phone"
 msgstr ""
 
@@ -9178,7 +9178,7 @@ msgid "Drag and drop, or click to set admin variation order"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-variation-admin.php:33
-#: includes/class-wc-product-variation.php:669
+#: includes/class-wc-product-variation.php:680
 msgid "Any"
 msgstr ""
 
@@ -9864,7 +9864,7 @@ msgstr ""
 
 #: includes/admin/settings/class-wc-settings-api.php:27
 #: includes/admin/settings/class-wc-settings-api.php:68
-#: includes/admin/views/html-admin-page-status-report.php:434
+#: includes/admin/views/html-admin-page-status-report.php:445
 msgid "API"
 msgstr ""
 
@@ -10240,7 +10240,7 @@ msgid "The following options affect how prices are displayed on the frontend."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:125
-#: includes/admin/views/html-admin-page-status-report.php:405
+#: includes/admin/views/html-admin-page-status-report.php:416
 msgid "Currency"
 msgstr ""
 
@@ -10263,7 +10263,7 @@ msgid "This sets the decimal separator of displayed prices."
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:174
-#: includes/admin/views/html-admin-page-status-report.php:425
+#: includes/admin/views/html-admin-page-status-report.php:436
 msgid "Number of Decimals"
 msgstr ""
 
@@ -11333,9 +11333,11 @@ msgid "The maximum amount of memory (RAM) that your site can use at one time."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:75
-msgid ""
-"%s - We recommend setting memory to at least 64MB. See: <a href=\"%s\" "
-"target=\"_blank\">Increasing memory allocated to PHP</a>"
+msgid "%s - We recommend setting memory to at least 64MB. See: %s"
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-report.php:75
+msgid "Increasing memory allocated to PHP"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:82
@@ -11375,9 +11377,11 @@ msgid "The version of PHP installed on your hosting server."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:114
-msgid ""
-"%s - We recommend a minimum PHP version of 5.4. See: <a href=\"%s\" "
-"target=\"_blank\">How to update your PHP version</a>"
+msgid "%s - We recommend a minimum PHP version of 5.4. See: %s"
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-report.php:114
+msgid "How to update your PHP version"
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:119
@@ -11477,8 +11481,8 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:195
 msgid ""
-"Your server does not have the <a href=\"%s\">SOAP Client</a> class enabled "
-"- some gateway plugins which use SOAP may not work as expected."
+"Your server does not have the %s class enabled - some gateway plugins which "
+"use SOAP may not work as expected."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:200
@@ -11487,9 +11491,8 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:206
 msgid ""
-"Your server does not have the <a href=\"%s\">DOMDocument</a> class enabled "
-"- HTML/Multipart emails, and also some extensions, will not work without "
-"DOMDocument."
+"Your server does not have the %s class enabled - HTML/Multipart emails, and "
+"also some extensions, will not work without DOMDocument."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:211
@@ -11498,282 +11501,294 @@ msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:217
 msgid ""
-"Your server does not support the <a href=\"%s\">gzopen</a> function - this "
-"is required to use the GeoIP database from MaxMind. The API fallback will "
-"be used instead for geolocation."
-msgstr ""
-
-#: includes/admin/views/html-admin-page-status-report.php:221
-msgid "Remote Post"
+"Your server does not support the %s function - this is required to use the "
+"GeoIP database from MaxMind. The API fallback will be used instead for "
+"geolocation."
 msgstr ""
 
 #: includes/admin/views/html-admin-page-status-report.php:222
+msgid ""
+"Multibyte String (mbstring) is used to convert character encoding, like for "
+"emails or converting characters to lowercase."
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-report.php:228
+msgid ""
+"Your server does not support the %s functions - this is required for better "
+"charactrer encoding. Some fallbacks will be used instead for it."
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-report.php:232
+msgid "Remote Post"
+msgstr ""
+
+#: includes/admin/views/html-admin-page-status-report.php:233
 msgid ""
 "PayPal uses this method of communicating when sending back transaction "
 "information."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:235
+#: includes/admin/views/html-admin-page-status-report.php:246
 msgid ""
 "wp_remote_post() failed. PayPal IPN won't work with your server. Contact "
 "your hosting provider."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:237
-#: includes/admin/views/html-admin-page-status-report.php:255
+#: includes/admin/views/html-admin-page-status-report.php:248
+#: includes/admin/views/html-admin-page-status-report.php:266
 #: includes/class-wc-auth.php:354
 msgid "Error: %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:239
-#: includes/admin/views/html-admin-page-status-report.php:257
+#: includes/admin/views/html-admin-page-status-report.php:250
+#: includes/admin/views/html-admin-page-status-report.php:268
 msgid "Status code: %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:245
+#: includes/admin/views/html-admin-page-status-report.php:256
 msgid "Remote Get"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:246
+#: includes/admin/views/html-admin-page-status-report.php:257
 msgid ""
 "WooCommerce plugins may use this method of communication when checking for "
 "plugin updates."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:253
+#: includes/admin/views/html-admin-page-status-report.php:264
 msgid ""
 "wp_remote_get() failed. The WooCommerce plugin updater won't work with your "
 "server. Contact your hosting provider."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:284
+#: includes/admin/views/html-admin-page-status-report.php:295
 msgid "Database"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:289
+#: includes/admin/views/html-admin-page-status-report.php:300
 msgid "WC Database Version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:290
+#: includes/admin/views/html-admin-page-status-report.php:301
 msgid ""
 "The version of WooCommerce that the database is formatted for. This should "
 "be the same as your WooCommerce Version."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:312
+#: includes/admin/views/html-admin-page-status-report.php:323
 msgid "Table does not exist"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:323
+#: includes/admin/views/html-admin-page-status-report.php:334
 msgid "Active Plugins"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:348
+#: includes/admin/views/html-admin-page-status-report.php:359
 msgid "Visit plugin homepage"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:376
+#: includes/admin/views/html-admin-page-status-report.php:387
 msgid "Network enabled"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:400
+#: includes/admin/views/html-admin-page-status-report.php:411
 msgid "Force SSL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:401
+#: includes/admin/views/html-admin-page-status-report.php:412
 msgid "Does your site force a SSL Certificate for transactions?"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:406
+#: includes/admin/views/html-admin-page-status-report.php:417
 msgid ""
 "What currency prices are listed at in the catalog and which currency "
 "gateways will take payments in."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:411
+#: includes/admin/views/html-admin-page-status-report.php:422
 msgid "The position of the currency symbol."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:416
+#: includes/admin/views/html-admin-page-status-report.php:427
 msgid "The thousand separator of displayed prices."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:421
+#: includes/admin/views/html-admin-page-status-report.php:432
 msgid "The decimal separator of displayed prices."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:426
+#: includes/admin/views/html-admin-page-status-report.php:437
 msgid "The number of decimal points shown in displayed prices."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:439
+#: includes/admin/views/html-admin-page-status-report.php:450
 msgid "API Enabled"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:440
+#: includes/admin/views/html-admin-page-status-report.php:451
 msgid "Does your site have REST API enabled?"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:444
+#: includes/admin/views/html-admin-page-status-report.php:455
 msgid "API Version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:445
+#: includes/admin/views/html-admin-page-status-report.php:456
 msgid "What version of the REST API does your site use?"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:453
+#: includes/admin/views/html-admin-page-status-report.php:464
 msgid "WC Pages"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:462
+#: includes/admin/views/html-admin-page-status-report.php:473
 msgid "The URL of your WooCommerce shop's homepage (along with the Page ID)."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:467
+#: includes/admin/views/html-admin-page-status-report.php:478
 msgid "The URL of your WooCommerce shop's cart (along with the page ID)."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:472
+#: includes/admin/views/html-admin-page-status-report.php:483
 msgid "The URL of your WooCommerce shop's checkout (along with the page ID)."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:477
+#: includes/admin/views/html-admin-page-status-report.php:488
 msgid ""
 "The URL of your WooCommerce shop's “My Account” Page (along with the page "
 "ID)."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:498
+#: includes/admin/views/html-admin-page-status-report.php:509
 msgid "Page not set"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:508
+#: includes/admin/views/html-admin-page-status-report.php:519
 msgid "Page does not exist"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:513
+#: includes/admin/views/html-admin-page-status-report.php:524
 msgid "Page does not contain the shortcode: %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:531
+#: includes/admin/views/html-admin-page-status-report.php:542
 msgid "Taxonomies"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:531
+#: includes/admin/views/html-admin-page-status-report.php:542
 msgid ""
 "A list of taxonomy terms that can be used in regard to order/product "
 "statuses."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:536
+#: includes/admin/views/html-admin-page-status-report.php:547
 msgid "Product Types"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:552
+#: includes/admin/views/html-admin-page-status-report.php:563
 msgid "Theme"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:565
+#: includes/admin/views/html-admin-page-status-report.php:576
 msgid "The name of the current active theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:569
+#: includes/admin/views/html-admin-page-status-report.php:580
 msgid "Version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:570
+#: includes/admin/views/html-admin-page-status-report.php:581
 msgid "The installed version of the current active theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:575
-#: includes/admin/views/html-admin-page-status-report.php:608
+#: includes/admin/views/html-admin-page-status-report.php:586
+#: includes/admin/views/html-admin-page-status-report.php:619
 msgid "%s is available"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:580
+#: includes/admin/views/html-admin-page-status-report.php:591
 msgid "Author URL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:581
+#: includes/admin/views/html-admin-page-status-report.php:592
 msgid "The theme developers URL."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:585
+#: includes/admin/views/html-admin-page-status-report.php:596
 msgid "Child Theme"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:586
+#: includes/admin/views/html-admin-page-status-report.php:597
 msgid "Displays whether or not the current theme is a child theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:588
+#: includes/admin/views/html-admin-page-status-report.php:599
 msgid ""
 "If you're modifying WooCommerce on a parent theme you didn't build "
 "personally, then we recommend using a child theme. See: <a href=\"%s\" "
 "target=\"_blank\">How to create a child theme</a>"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:597
+#: includes/admin/views/html-admin-page-status-report.php:608
 msgid "Parent Theme Name"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:598
+#: includes/admin/views/html-admin-page-status-report.php:609
 msgid "The name of the parent theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:602
+#: includes/admin/views/html-admin-page-status-report.php:613
 msgid "Parent Theme Version"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:603
+#: includes/admin/views/html-admin-page-status-report.php:614
 msgid "The installed version of the parent theme."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:613
+#: includes/admin/views/html-admin-page-status-report.php:624
 msgid "Parent Theme Author URL"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:614
+#: includes/admin/views/html-admin-page-status-report.php:625
 msgid "The parent theme developers URL."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:619
+#: includes/admin/views/html-admin-page-status-report.php:630
 msgid "WooCommerce Support"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:620
+#: includes/admin/views/html-admin-page-status-report.php:631
 msgid ""
 "Displays whether or not the current active theme declares WooCommerce "
 "support."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:623
+#: includes/admin/views/html-admin-page-status-report.php:634
 msgid "Not Declared"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:634
+#: includes/admin/views/html-admin-page-status-report.php:645
 msgid "Templates"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:634
+#: includes/admin/views/html-admin-page-status-report.php:645
 msgid ""
 "This section shows any files that are overriding the default WooCommerce "
 "template pages."
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:670
+#: includes/admin/views/html-admin-page-status-report.php:681
 msgid ""
 "<code>%s</code> version <strong style=\"color:red\">%s</strong> is out of "
 "date. The core version is %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:682
-#: includes/admin/views/html-admin-page-status-report.php:691
+#: includes/admin/views/html-admin-page-status-report.php:693
+#: includes/admin/views/html-admin-page-status-report.php:702
 msgid "Overrides"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:703
+#: includes/admin/views/html-admin-page-status-report.php:714
 msgid "Learn how to update outdated templates"
 msgstr ""
 
@@ -13449,7 +13464,7 @@ msgstr ""
 msgid "ZIP"
 msgstr ""
 
-#: includes/class-wc-countries.php:966
+#: includes/class-wc-countries.php:967
 msgid "Email Address"
 msgstr ""
 
@@ -13622,7 +13637,7 @@ msgid "Buy Now"
 msgstr ""
 
 #: includes/class-wc-embed.php:117 includes/class-wc-product-simple.php:48
-#: includes/class-wc-product-variation.php:187
+#: includes/class-wc-product-variation.php:198
 msgid "Read More"
 msgstr ""
 
@@ -14227,7 +14242,7 @@ msgid ""
 "allow this product to be purchased."
 msgstr ""
 
-#: includes/class-wc-product-variation.php:738
+#: includes/class-wc-product-variation.php:749
 msgid "%s &ndash; %s%s"
 msgstr ""
 
@@ -14244,6 +14259,14 @@ msgstr ""
 
 #: includes/class-wc-query.php:119
 msgid "Edit Account Details"
+msgstr ""
+
+#: includes/class-wc-webhook.php:604
+msgid "Error: Delivery URL cannot be reached: %s"
+msgstr ""
+
+#: includes/class-wc-webhook.php:608
+msgid "Error: Delivery URL returned response code: %s"
 msgstr ""
 
 #: includes/cli/class-wc-cli-coupon.php:241
@@ -15929,94 +15952,98 @@ msgid "Japanese Yen"
 msgstr ""
 
 #: includes/wc-core-functions.php:297
-msgid "Lao Kip"
+msgid "Kenyan shilling"
 msgstr ""
 
 #: includes/wc-core-functions.php:298
-msgid "South Korean Won"
+msgid "Lao Kip"
 msgstr ""
 
 #: includes/wc-core-functions.php:299
-msgid "Mexican Peso"
+msgid "South Korean Won"
 msgstr ""
 
 #: includes/wc-core-functions.php:300
-msgid "Malaysian Ringgits"
+msgid "Mexican Peso"
 msgstr ""
 
 #: includes/wc-core-functions.php:301
-msgid "Nigerian Naira"
+msgid "Malaysian Ringgits"
 msgstr ""
 
 #: includes/wc-core-functions.php:302
-msgid "Norwegian Krone"
+msgid "Nigerian Naira"
 msgstr ""
 
 #: includes/wc-core-functions.php:303
-msgid "Nepali Rupee"
+msgid "Norwegian Krone"
 msgstr ""
 
 #: includes/wc-core-functions.php:304
-msgid "New Zealand Dollar"
+msgid "Nepali Rupee"
 msgstr ""
 
 #: includes/wc-core-functions.php:305
-msgid "Philippine Pesos"
+msgid "New Zealand Dollar"
 msgstr ""
 
 #: includes/wc-core-functions.php:306
-msgid "Pakistani Rupee"
+msgid "Philippine Pesos"
 msgstr ""
 
 #: includes/wc-core-functions.php:307
-msgid "Polish Zloty"
+msgid "Pakistani Rupee"
 msgstr ""
 
 #: includes/wc-core-functions.php:308
-msgid "Paraguayan Guaraní"
+msgid "Polish Zloty"
 msgstr ""
 
 #: includes/wc-core-functions.php:309
-msgid "Romanian Leu"
+msgid "Paraguayan Guaraní"
 msgstr ""
 
 #: includes/wc-core-functions.php:310
-msgid "Russian Ruble"
+msgid "Romanian Leu"
 msgstr ""
 
 #: includes/wc-core-functions.php:311
-msgid "Swedish Krona"
+msgid "Russian Ruble"
 msgstr ""
 
 #: includes/wc-core-functions.php:312
-msgid "Singapore Dollar"
+msgid "Swedish Krona"
 msgstr ""
 
 #: includes/wc-core-functions.php:313
-msgid "Thai Baht"
+msgid "Singapore Dollar"
 msgstr ""
 
 #: includes/wc-core-functions.php:314
-msgid "Turkish Lira"
+msgid "Thai Baht"
 msgstr ""
 
 #: includes/wc-core-functions.php:315
-msgid "Taiwan New Dollars"
+msgid "Turkish Lira"
 msgstr ""
 
 #: includes/wc-core-functions.php:316
-msgid "Ukrainian Hryvnia"
+msgid "Taiwan New Dollars"
 msgstr ""
 
 #: includes/wc-core-functions.php:317
-msgid "US Dollars"
+msgid "Ukrainian Hryvnia"
 msgstr ""
 
 #: includes/wc-core-functions.php:318
-msgid "Vietnamese Dong"
+msgid "US Dollars"
 msgstr ""
 
 #: includes/wc-core-functions.php:319
+msgid "Vietnamese Dong"
+msgstr ""
+
+#: includes/wc-core-functions.php:320
 msgid "South African rand"
 msgstr ""
 
@@ -16135,8 +16162,8 @@ msgstr ""
 msgid "Select a state&hellip;"
 msgstr ""
 
-#: includes/wc-template-functions.php:1839
-#: includes/wc-template-functions.php:1986
+#: includes/wc-template-functions.php:1828
+#: includes/wc-template-functions.php:1975
 msgid "Choose an option"
 msgstr ""
 
@@ -17189,7 +17216,7 @@ msgctxt "full name"
 msgid "%1$s %2$s"
 msgstr ""
 
-#: includes/abstracts/abstract-wc-product.php:1027
+#: includes/abstracts/abstract-wc-product.php:1038
 msgctxt "min_price"
 msgid "From:"
 msgstr ""
@@ -17337,7 +17364,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-permalink-settings.php:196
 #: includes/class-wc-post-types.php:231
 #: includes/updates/woocommerce-update-2.0.php:55
-#: includes/wc-core-functions.php:630 includes/wc-core-functions.php:665
+#: includes/wc-core-functions.php:634 includes/wc-core-functions.php:669
 msgctxt "slug"
 msgid "product"
 msgstr ""
@@ -17533,37 +17560,37 @@ msgctxt "Pagination, like `1 of 3`"
 msgid "%1$s of %2$s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:372
+#: includes/admin/views/html-admin-page-status-report.php:383
 msgctxt "Version info"
 msgid "%s is available"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:384
+#: includes/admin/views/html-admin-page-status-report.php:395
 msgctxt "by author"
 msgid "by %s"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:459
+#: includes/admin/views/html-admin-page-status-report.php:470
 msgctxt "Page setting"
 msgid "Shop Base"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:464
+#: includes/admin/views/html-admin-page-status-report.php:475
 msgctxt "Page setting"
 msgid "Cart"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:469
+#: includes/admin/views/html-admin-page-status-report.php:480
 msgctxt "Page setting"
 msgid "Checkout"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:474
+#: includes/admin/views/html-admin-page-status-report.php:485
 msgctxt "Page setting"
 msgid "My Account"
 msgstr ""
 
-#: includes/admin/views/html-admin-page-status-report.php:488
+#: includes/admin/views/html-admin-page-status-report.php:499
 msgctxt "WC Pages links in the System Status"
 msgid "Edit %s page"
 msgstr ""
