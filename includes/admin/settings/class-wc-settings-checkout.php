@@ -295,7 +295,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										break;
 
 									case 'name' :
-										$method_title = $gateway->get_title() ? $gateway->get_title() : __( '(Untitled)', 'woocommerce' );
+										$method_title = $gateway->get_title() ? $gateway->get_title() : __( '(no title)', 'woocommerce' );
 										echo '<td class="name">
 											<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( get_class( $gateway ) ) ) . '">' . esc_html( $method_title ) . '</a>
 										</td>';
