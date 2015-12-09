@@ -294,6 +294,7 @@ function get_woocommerce_currencies() {
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
+				'KES' => __( 'Kenyan shilling', 'woocommerce' ),
 				'KIP' => __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
@@ -401,6 +402,9 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			break;
 		case 'ISK' :
 			$currency_symbol = 'Kr.';
+			break;
+		case 'KES' :
+			$currency_symbol = 'KSh';
 			break;
 		case 'KIP' :
 			$currency_symbol = '&#8365;';
