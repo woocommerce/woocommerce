@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 = 2.4.12 - 9/12/2015 =
 * Fix - 4.4 - Permission error when editing attribute terms.
 * Fix - 4.4 - Missing variation images when wp_get_attachment_image_srcset() returns false instead of a string.
+* Fix - 4.4 - Use post-thumbnail size in admin to avoid srcset.
 
 = 2.4.11 - 7/12/2015 =
 * Fix - WordPress 4.4 support.
