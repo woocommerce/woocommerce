@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothe
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Requires at least: 4.1
 Tested up to: 4.3
-Stable tag: 2.4.9
+Stable tag: 2.4.12
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -208,6 +208,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Added a manual update trigger for checkout.
 * Dev - Added woocommerce_is_price_filter_active filter to Query class.
 * Dev - Replaced some cart methods with dedicated functions. e.g. wc_ship_to_billing_address_only().
+* Localisation - Add Kenyan currency and symbol.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 
