@@ -52,6 +52,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 			'INR' => __( 'Indian Rupee', 'woocommerce' ),
 			'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 			'JPY' => __( 'Japanese Yen', 'woocommerce' ),
+			'KES' => __( 'Kenyan shilling', 'woocommerce' ),
 			'KIP' => __( 'Lao Kip', 'woocommerce' ),
 			'KRW' => __( 'South Korean Won', 'woocommerce' ),
 			'MXN' => __( 'Mexican Peso', 'woocommerce' ),
