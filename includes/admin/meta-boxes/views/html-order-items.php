@@ -87,6 +87,7 @@ if ( wc_tax_enabled() ) {
 
 				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item, $order );
 			}
+			do_action( 'woocommerce_admin_order_items_after_line_items', $order->id );
 		?>
 		</tbody>
 		<tbody id="order_shipping_line_items">
@@ -95,6 +96,7 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items_shipping as $item_id => $item ) {
 				include( 'html-order-shipping.php' );
 			}
+			do_action( 'woocommerce_admin_order_items_after_shipping', $order->id );
 		?>
 		</tbody>
 		<tbody id="order_fee_line_items">
@@ -102,6 +104,7 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items_fee as $item_id => $item ) {
 				include( 'html-order-fee.php' );
 			}
+			do_action( 'woocommerce_admin_order_items_after_fees', $order->id );
 		?>
 		</tbody>
 		<tbody id="order_refunds">
@@ -110,6 +113,7 @@ if ( wc_tax_enabled() ) {
 				foreach ( $refunds as $refund ) {
 					include( 'html-order-refund.php' );
 				}
+				do_action( 'woocommerce_admin_order_items_after_refunds', $order->id );
 			}
 		?>
 		</tbody>
