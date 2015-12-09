@@ -675,6 +675,7 @@ class WC_Webhook {
 		}
 
 		$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status ), array( 'ID' => $this->id ) );
+		clean_post_cache( $this->id );
 	}
 
 	/**
