@@ -2,7 +2,7 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Requires at least: 4.1
-Tested up to: 4.3
+Tested up to: 4.4
 Stable tag: 2.4.12
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
