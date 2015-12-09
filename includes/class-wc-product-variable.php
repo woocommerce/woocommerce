@@ -569,8 +569,8 @@ class WC_Product_Variable extends WC_Product {
 			$image_link      = $full_attachment ? current( $full_attachment ) : '';
 			$image_title     = get_the_title( $attachment_id );
 			$image_alt       = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
-			$image_srcset    = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : '';
-			$image_sizes     = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : '';
+			$image_srcset    = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+			$image_sizes     = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
 		} else {
 			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = '';
 		}
@@ -591,8 +591,8 @@ class WC_Product_Variable extends WC_Product {
 			'image_link'            => $image_link,
 			'image_title'           => $image_title,
 			'image_alt'             => $image_alt,
-			'image_srcset'			=> $image_srcset,
-			'image_sizes'			=> $image_sizes,
+			'image_srcset'			=> $image_srcset ? $image_srcset : '',
+			'image_sizes'			=> $image_sizes ? $image_sizes : '',
 			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => $availability_html,
 			'sku'                   => $variation->get_sku(),
