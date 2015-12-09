@@ -139,7 +139,7 @@ You can vote on and request new features and extensions in our [WooIdeas board](
 
 Bugs can be reported either in our support forum or preferably on the [WooCommerce GitHub repository](https://github.com/woothemes/woocommerce/issues).
 
-= Where can I found the Rest API documentation? =
+= Where can I find the Rest API documentation? =
 
 You can find the documentation of our REST API on the [WooCommerce REST API Docs](http://woothemes.github.io/woocommerce-rest-api-docs/).
 
