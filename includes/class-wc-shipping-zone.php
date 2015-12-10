@@ -115,6 +115,10 @@ class WC_Shipping_Zone {
 			$location_parts[] = $all_states[ $location_codes[ 0 ] ][ $location_codes[ 1 ] ];
 		}
 
+		foreach ( $postcodes as $location ) {
+			$location_parts[] = $location->code;
+		}
+
 		if ( sizeof( $location_parts ) > $max ) {
 			$remaining = sizeof( $location_parts ) - $max;
 			return sprintf( _n( '%s and %d other region', '%s and %d other regions', $remaining, 'woocommerce' ), implode( ', ', array_splice( $location_parts, 0, $max ) ), $remaining );

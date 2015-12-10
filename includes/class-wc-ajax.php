@@ -3057,7 +3057,8 @@ class WC_AJAX {
 				'zone_id'        => 1,
 				'zone_name'      => 1,
 				'zone_order'     => 1,
-				'zone_locations' => 1
+				'zone_locations' => 1,
+				'zone_postcodes' => 1
 			) );
 
 			if ( isset( $zone_data['zone_id'] ) ) {
@@ -3088,6 +3089,13 @@ class WC_AJAX {
 								$zone->add_location( $location_parts[1], 'continent' );
 							break;
 						}
+					}
+				}
+
+				if ( isset( $zone_data['zone_postcodes'] ) ) {
+					$postcodes = array_filter( array_map( 'strtoupper', array_map( 'wc_clean', explode( "\n", $zone_data['zone_postcodes'] ) ) ) );
+					foreach ( $postcodes as $postcode ) {
+						$zone->add_location( $postcode, 'postcode' );
 					}
 				}
 

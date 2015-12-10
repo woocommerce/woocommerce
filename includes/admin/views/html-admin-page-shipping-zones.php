@@ -68,7 +68,11 @@
 						}
 					?>
 				</select>
-				<a class="wc-shipping-zone-postcodes" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
+				<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
+				<div class="wc-shipping-zone-postcodes">
+					<textarea name="zone_postcodes[{{ data.zone_id }}]" data-attribute="zone_postcodes" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>" class="input-text large-text" cols="25" rows="5"></textarea>
+					<span class="description"><?php _e( 'Wildcards and numerical ranges are supported too, for example, 90210-99000 and CB23*', 'woocommerce' ) ?></span>
+				</div>
 			</div>
 		</td>
         <td class="wc-shipping-zone-methods"><a class="wc-shipping-zone-add-method button" href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a></td>

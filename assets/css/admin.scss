@@ -2131,7 +2131,7 @@ table.wc_shipping_zones {
 			background: #f9f9f9;
 		}
 	}
-	ul {
+	ul, p {
 		margin: 0;
 	}
 	td.wc-shipping-zone-sort {
@@ -2177,8 +2177,24 @@ table.wc_shipping_zones {
 	}
 	.wc-shipping-zone-name,
 	.wc-shipping-zone-region {
-		input, select {
+		input, select, textarea {
 			width: 100%;
+		}
+		.wc-shipping-zone-postcodes-toggle {
+			float: right;
+			margin: 0;
+			font-size: 0.9em;
+			color: #999;
+		}
+		.wc-shipping-zone-postcodes {
+			display:none;
+			textarea {
+				margin-top: 1em;
+			}
+			.description {
+				font-size: 0.9em;
+				color: #999;
+			}
 		}
 	}
 	.wc-shipping-zone-actions {

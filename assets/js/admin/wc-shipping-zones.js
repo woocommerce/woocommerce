@@ -62,8 +62,7 @@
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
-					$save_button.attr( 'disabled','disabled' );
-					$table.find( '.wc-shipping-zone-add' ).on( 'click', { view: this }, this.onAddNewRow );
+					$( '.wc-shipping-zone-add' ).on( 'click', { view: this }, this.onAddNewRow );
 				},
 				render: function() {
 					var zones       = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
@@ -86,7 +85,19 @@
 
 							// Select values in region select
 							_.each( rowData.zone_locations, function( location ) {
-								$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
+								if ( 'postcode' === location.type ) {
+									var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
+
+									if ( postcode_field.val() ) {
+										postcode_field.val( postcode_field.val() + "\n" + location.code );
+									} else {
+										postcode_field.val( location.code );
+									}
+									$tr.find( '.wc-shipping-zone-postcodes' ).show();
+									$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
+								} else {
+									$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
+								}
 							} );
 
 							// Editing?
@@ -100,6 +111,7 @@
 						this.$el.find('.edit').hide();
 						this.$el.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
 						this.$el.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
+						this.$el.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
 						this.$el.find('.editing .wc-shipping-zone-edit').trigger('click');
 
 						// Stripe
@@ -115,6 +127,8 @@
 					event.preventDefault();
 				},
 				onAddNewRow: function( event ) {
+					event.preventDefault();
+
 					var view    = event.data.view,
 						model   = view.model,
 						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
@@ -140,8 +154,12 @@
 					model.logChanges( changes );
 
 					view.render();
-
-					return false;
+				},
+				onTogglePostcodes: function( event ) {
+					event.preventDefault();
+					var $tr = $( this ).closest( 'tr');
+					$tr.find( '.wc-shipping-zone-postcodes' ).show();
+					$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
 				},
 				onEditRow: function( event ) {
 					event.preventDefault();
