@@ -652,7 +652,7 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $deprecated1 = 0, $deprecated2 = 0 ) {
 		global $post;
 
-		if ( has_post_thumbnail() ) {
+		if ( has_post_thumbnail() && wp_attachment_is_image( get_post_thumbnail_id() ) ) {
 			return get_the_post_thumbnail( $post->ID, $size );
 		} elseif ( wc_placeholder_img_src() ) {
 			return wc_placeholder_img( $size );
