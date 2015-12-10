@@ -88,6 +88,78 @@ class WC_Shipping_Zone {
     }
 
 	/**
+	 * Return a text string representing what this zone is for.
+	 * @return string
+	 */
+	public function get_formatted_location( $max = 10 ) {
+		$location_parts = array();
+		$all_continents = WC()->countries->get_continents();
+		$all_countries  = WC()->countries->get_countries();
+		$all_states     = WC()->countries->get_states();
+		$locations      = $this->get_zone_locations();
+		$continents     = array_filter( $locations, array( $this, 'location_is_continent' ) );
+		$countries      = array_filter( $locations, array( $this, 'location_is_country' ) );
+		$states         = array_filter( $locations, array( $this, 'location_is_state' ) );
+		$postcodes      = array_filter( $locations, array( $this, 'location_is_postcode' ) );
+
+		foreach ( $continents as $location ) {
+			$location_parts[] = $all_continents[ $location->code ]['name'];
+		}
+
+		foreach ( $countries as $location ) {
+			$location_parts[] = $all_countries[ $location->code ];
+		}
+
+		foreach ( $states as $location ) {
+			$location_codes = explode( ':', $location->code );
+			$location_parts[] = $all_states[ $location_codes[ 0 ] ][ $location_codes[ 1 ] ];
+		}
+
+		if ( sizeof( $location_parts ) > $max ) {
+			$remaining = sizeof( $location_parts ) - $max;
+			return sprintf( _n( '%s and %d other region', '%s and %d other regions', $remaining, 'woocommerce' ), implode( ', ', array_splice( $location_parts, 0, $max ) ), $remaining );
+		} else {
+			return implode( ', ', $location_parts );
+		}
+	}
+
+	/**
+	 * Location type detection
+	 * @param  object  $location
+	 * @return boolean
+	 */
+	private function location_is_continent( $location ) {
+		return 'continent' === $location->type;
+	}
+
+	/**
+	 * Location type detection
+	 * @param  object  $location
+	 * @return boolean
+	 */
+	private function location_is_country( $location ) {
+		return 'country' === $location->type;
+	}
+
+	/**
+	 * Location type detection
+	 * @param  object  $location
+	 * @return boolean
+	 */
+	private function location_is_state( $location ) {
+		return 'state' === $location->type;
+	}
+
+	/**
+	 * Location type detection
+	 * @param  object  $location
+	 * @return boolean
+	 */
+	private function location_is_postcode( $location ) {
+		return 'postcode' === $location->type;
+	}
+
+	/**
 	 * Set zone ID
 	 * @access private
 	 * @param int $set

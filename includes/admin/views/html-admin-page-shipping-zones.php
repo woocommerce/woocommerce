@@ -78,7 +78,7 @@
             <div class="edit"><input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
         </td>
 		<td class="wc-shipping-zone-region">
-			<div class="view">Add stuff here</div>
+			<div class="view">{{ data.formatted_zone_location }}</div>
 			<div class="edit">
 				<select multiple="multiple" name="zone_locations[{{ data.zone_id }}]" data-attribute="zone_locations" data-placeholder="<?php _e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select">
 					<?php
