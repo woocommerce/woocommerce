@@ -75,10 +75,34 @@
         <td width="1%" class="wc-shipping-zone-sort"></td>
         <td class="wc-shipping-zone-name">
             <div class="view">{{ data.zone_name }}</div>
-            <div class="edit"><input type="text" name="zone_name[ {{ data.zone_id }} ]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
+            <div class="edit"><input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
         </td>
-        <td></td>
-        <td><a class="wc-shipping-zone-add-method button" href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a></td>
+		<td class="wc-shipping-zone-region">
+			<div class="view">Add stuff here</div>
+			<div class="edit">
+				<select multiple="multiple" name="zone_locations[{{ data.zone_id }}]" data-attribute="zone_locations" data-placeholder="<?php _e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select">
+					<?php
+						foreach ( $continents as $continent_code => $continent ) {
+							echo '<option value="continent:' . esc_attr( $continent_code ) . '" alt="">' . esc_html( $continent['name'] ) . '</option>';
+
+							$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
+
+							foreach ( $countries as $country_code ) {
+								echo '<option value="country:' . esc_attr( $country_code ) . '" alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
+
+								if ( $states = WC()->countries->get_states( $country_code ) ) {
+									foreach ( $states as $state_code => $state_name ) {
+										echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '" alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
+									}
+								}
+							}
+						}
+					?>
+				</select>
+				<a href=""><?php _e( 'Limit to specific zip codes', 'woocommerce' ); ?></a>
+			</div>
+		</td>
+        <td class="wc-shipping-zone-methods"><a class="wc-shipping-zone-add-method button" href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a></td>
         <td class="wc-shipping-zone-actions">
 			<a class="wc-shipping-zone-delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 		</td>

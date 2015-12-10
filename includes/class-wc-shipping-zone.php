@@ -134,7 +134,7 @@ class WC_Shipping_Zone {
 	 * @return boolean
 	 */
 	public function is_valid_location_type( $type ) {
-		return in_array( $type, array( 'postcode', 'state' ) );
+		return in_array( $type, array( 'postcode', 'state', 'country', 'continent' ) );
 	}
 
 	/**
@@ -143,7 +143,7 @@ class WC_Shipping_Zone {
 	 * @param string $type state or postcode
 	 */
 	public function add_location( $code, $type ) {
-		if ( is_valid_location_type( $type ) ) {
+		if ( $this->is_valid_location_type( $type ) ) {
 			$location = array(
 				'code' => wc_clean( $code ),
 				'type' => wc_clean( $type )
@@ -154,11 +154,19 @@ class WC_Shipping_Zone {
 	}
 
 	/**
+	 * Clear all locations for this zone.
+	 */
+	public function clear_locations() {
+		$this->data['zone_locations'] = array();
+		$this->_locations_changed = true;
+	}
+
+	/**
 	 * Set locations
 	 * @param array $locations Array of locations
 	 */
 	public function set_locations( $locations = array() ) {
-		$this->data['zone_locations'] = array();
+		$this->clear_locations();
 
 		foreach ( $locations as $location ) {
 			$this->add_location( $location['code'], $location['type'] );
@@ -174,7 +182,7 @@ class WC_Shipping_Zone {
 	private function read_zone_locations( $zone_id ) {
 		global $wpdb;
 
-		if ( $locations = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE zone_id = %d LIMIT 1;", $zone_id ) ) ) {
+		if ( $locations = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE zone_id = %d;", $zone_id ) ) ) {
 			foreach ( $locations as $location ) {
 				$this->add_location( $location->location_code, $location->location_type );
 			}
@@ -210,6 +218,7 @@ class WC_Shipping_Zone {
 		if ( ! $this->get_zone_id() || ! $this->_locations_changed ) {
 			return false;
 		}
+		global $wpdb;
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $this->get_zone_id() ) );
 
 		foreach ( $this->get_zone_locations() as $location ) {

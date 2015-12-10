@@ -1,10 +1,18 @@
 /* global shippingZonesLocalizeScript, ajaxurl */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
-
-        var $table             = $( '.wc_shipping_zones' ),
-            $tbody             = $( '.wc-shipping-zone-rows' ),
-            $save_button       = $( 'input[name="save"]' ),
+        var $table        = $( '.wc_shipping_zones' ),
+            $tbody        = $( '.wc-shipping-zone-rows' ),
+            $save_button  = $( 'input[name="save"]' ),
+			$row_template = wp.template( 'wc-shipping-zone-row' ),
+			select2_args  = $.extend({
+				minimumResultsForSearch: 10,
+				allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
+				placeholder: $( this ).data( 'placeholder' ),
+				matcher: function( term, text, opt ) {
+					return text.toUpperCase().indexOf( term.toUpperCase() ) >= 0 || opt.attr( "alt" ).toUpperCase().indexOf( term.toUpperCase() ) >= 0;
+				}
+			}, getEnhancedSelectFormatString() );
 
             // Backbone model
             ShippingZone       = Backbone.Model.extend({
@@ -30,6 +38,7 @@
 					}
 				},
 				onSaveResponse: function( response, textStatus ) {
+					console.log(response);
 					if ( 'success' === textStatus ) {
 						if ( response.success ) {
 							shippingZone.set( 'zones', response.data.zones );
@@ -45,7 +54,7 @@
 
             // Backbone view
 			ShippingZoneView = Backbone.View.extend({
-				rowTemplate: wp.template( 'wc-shipping-zone-row' ),
+				rowTemplate: $row_template,
 				initialize: function() {
 					this.listenTo( this.model, 'change:zones', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:zones', this.clearUnloadConfirmation );
@@ -73,9 +82,16 @@
 						// Populate $tbody with the current zones
 						$.each( zones, function( id, rowData ) {
 							view.$el.append( view.rowTemplate( rowData ) );
+
+							var locations = view.$el.find( 'select[name="zone_locations[' + rowData.zone_id + ']"]');
+
+							// Select values in region select
+							_.each( rowData.zone_locations, function( location ) {
+								 locations.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( "selected", true );
+							} );
 						} );
 
-                        // Make the rows functiothis.$el.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
+                        // Make the rows function
 						this.$el.find('.view').show();
 						this.$el.find('.edit').hide();
 						this.$el.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
@@ -127,6 +143,7 @@
 					event.preventDefault();
 					$( this ).closest('tr').find('.view, .wc-shipping-zone-edit').hide();
 					$( this ).closest('tr').find('.edit').show();
+					$( '.wc-shipping-zone-region-select' ).select2( select2_args );
 					event.data.view.model.trigger( 'change:zones' );
 				},
 				onDeleteRow: function( event ) {
@@ -184,15 +201,13 @@
 						zones        = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes      = {};
 
-					reordered_zones = _.map( zones, function( zone ) {
+					_.each( zones, function( zone ) {
 						var old_position = parseInt( zone.zone_order, 10 );
 						var new_position = parseInt( $table.find( 'tr[data-id="' + zone.zone_id + '"]').index(), 10 );
 
 						if ( old_position !== new_position ) {
 							changes[ zone.zone_id ] = _.extend( changes[ zone.zone_id ] || {}, { zone_order : new_position } );
 						}
-
-						return zone;
 					} );
 
 					if ( _.size( changes ) ) {
@@ -209,6 +224,7 @@
 			} );
 
 		shippingZoneView.render();
+
         $tbody.sortable({
 			items: 'tr',
 			cursor: 'move',
@@ -216,5 +232,55 @@
 			handle: 'td.wc-shipping-zone-sort',
 			scrollSensitivity: 40
 		});
+
+		function getEnhancedSelectFormatString() {
+			var formatString = {
+				formatMatches: function( matches ) {
+					if ( 1 === matches ) {
+						return wc_enhanced_select_params.i18n_matches_1;
+					}
+					return wc_enhanced_select_params.i18n_matches_n.replace( '%qty%', matches );
+				},
+				formatNoMatches: function() {
+					return wc_enhanced_select_params.i18n_no_matches;
+				},
+				formatAjaxError: function() {
+					return wc_enhanced_select_params.i18n_ajax_error;
+				},
+				formatInputTooShort: function( input, min ) {
+					var number = min - input.length;
+
+					if ( 1 === number ) {
+						return wc_enhanced_select_params.i18n_input_too_short_1;
+					}
+
+					return wc_enhanced_select_params.i18n_input_too_short_n.replace( '%qty%', number );
+				},
+				formatInputTooLong: function( input, max ) {
+					var number = input.length - max;
+
+					if ( 1 === number ) {
+						return wc_enhanced_select_params.i18n_input_too_long_1;
+					}
+
+					return wc_enhanced_select_params.i18n_input_too_long_n.replace( '%qty%', number );
+				},
+				formatSelectionTooBig: function( limit ) {
+					if ( 1 === limit ) {
+						return wc_enhanced_select_params.i18n_selection_too_long_1;
+					}
+
+					return wc_enhanced_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
+				},
+				formatLoadMore: function() {
+					return wc_enhanced_select_params.i18n_load_more;
+				},
+				formatSearching: function() {
+					return wc_enhanced_select_params.i18n_searching;
+				}
+			};
+
+			return formatString;
+		}
 	});
 })( jQuery, shippingZonesLocalizeScript, wp, ajaxurl );

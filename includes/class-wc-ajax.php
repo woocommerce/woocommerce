@@ -3054,9 +3054,10 @@ class WC_AJAX {
 			}
 
 			$zone_data = array_intersect_key( $data, array(
-				'zone_id'    => 1,
-				'zone_name'  => 1,
-				'zone_order' => 1
+				'zone_id'        => 1,
+				'zone_name'      => 1,
+				'zone_order'     => 1,
+				'zone_locations' => 1
 			) );
 
 			if ( isset( $zone_data['zone_id'] ) ) {
@@ -3070,12 +3071,33 @@ class WC_AJAX {
 					$zone->set_zone_order( $zone_data['zone_order'] );
 				}
 
+				if ( isset( $zone_data['zone_locations'] ) ) {
+					$locations = array_filter( array_map( 'wc_clean', (array) $zone_data['zone_locations'] ) );
+					$zone->clear_locations();
+					foreach ( $locations as $location ) {
+						// Each posted location will be in the format type:code
+						$location_parts = explode( ':', $location );
+						switch ( $location_parts[0] ) {
+							case 'state' :
+								$zone->add_location( $location_parts[1] . ':' . $location_parts[2], 'state' );
+							break;
+							case 'country' :
+								$zone->add_location( $location_parts[1], 'country' );
+							break;
+							case 'continent' :
+								$zone->add_location( $location_parts[1], 'continent' );
+							break;
+						}
+					}
+				}
+
 				$zone->save();
 			}
 		}
 
 		wp_send_json_success( array(
 			'zones' => WC_Shipping_Zones::get_zones(),
+			'test' => print_r($_POST['changes'], true)
 		) );
 	}
 }
