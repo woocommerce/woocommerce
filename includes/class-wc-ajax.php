@@ -3059,10 +3059,19 @@ class WC_AJAX {
 				'zone_order' => 1
 			) );
 
-			$zone = new WC_Shipping_Zone( $zone_data['zone_id'] );
-			$zone->set_zone_name( $zone_data['zone_name'] );
-			$zone->set_zone_order( isset( $zone_data['zone_order'] ) ? $zone_data['zone_order'] : 0 );
-			$zone->save();
+			if ( isset( $zone_data['zone_id'] ) ) {
+				$zone = new WC_Shipping_Zone( $zone_data['zone_id'] );
+
+				if ( isset( $zone_data['zone_name'] ) ) {
+					$zone->set_zone_name( $zone_data['zone_name'] );
+				}
+
+				if ( isset( $zone_data['zone_order'] ) ) {
+					$zone->set_zone_order( $zone_data['zone_order'] );
+				}
+
+				$zone->save();
+			}
 		}
 
 		wp_send_json_success( array(

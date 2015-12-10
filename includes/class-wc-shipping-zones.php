@@ -17,17 +17,17 @@ class WC_Shipping_Zones {
 
 	/**
 	 * Get shipping zones from the database
-	 * @return [type] [description]
+	 * @return array of arrays
 	 */
     public static function get_zones() {
 		global $wpdb;
 
-        $raw_zones = $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones;" );
+        $raw_zones = $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones order by zone_order ASC;" );
 		$zones     = array();
 
 		foreach ( $raw_zones as $raw_zone ) {
 			$zone    = new WC_Shipping_Zone( $raw_zone );
-			$zones[] = $zone->get_data();
+			$zones[ $zone->get_zone_id() ] = $zone->get_data();
 		}
 
 		return $zones;

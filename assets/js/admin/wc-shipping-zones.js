@@ -64,6 +64,11 @@
 					this.$el.empty();
 
 					if ( _.size( zones ) ) {
+						// Sort zones
+						zones = _.sortBy( zones, function( zone ) {
+							return parseInt( zone.zone_order, 10 );
+						} );
+
 						// Populate $tbody with the current zones
 						$.each( zones, function( id, rowData ) {
 							view.$el.append( view.rowTemplate( rowData ) );
@@ -158,16 +163,8 @@
 						$target   = $( event.target ),
 						zone_id   = $target.closest( 'tr' ).data( 'id' ),
 						attribute = $target.data( 'attribute' ),
-						value     = $target.val();
-
-					/*if ( 'city' === attribute || 'postcode' === attribute ) {
-						val = val.split( ';' );
-						val = $.map( val, function( thing ) {
-							return thing.trim();
-						});
-					}*/
-
-					var zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
+						value     = $target.val(),
+						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {};
 
 					if ( zones[ zone_id ][ attribute ] !== value ) {
@@ -182,19 +179,20 @@
 					var view         = event.data.view,
 						model        = view.model,
 						$tr          = ui.item,
-						zone_id  = $tr.data( 'id' ),
+						zone_id      = $tr.data( 'id' ),
 						zones        = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						old_position = zones[ zone_id ].zone_order,
-						new_position = $tr.index() + ( ( view.page - 1 ) * view.per_page ),
+						new_position = $tr.index(),
 						which_way    = ( new_position > old_position ) ? 'higher' : 'lower',
 						changes      = {},
-						zones_to_reorder, reordered_zones;
+						zones_to_reorder,
+						reordered_zones;
 
-					zones_to_reorder = _.filter( zones, function( rate ) {
-						var order  = parseInt( rate.zone_order, 10 ),
+					zones_to_reorder = _.filter( zones, function( zone ) {
+						var order  = parseInt( zone.zone_order, 10 ),
 							limits = [ old_position, new_position ];
 
-						if ( parseInt( rate.zone_id, 10 ) === parseInt( zone_id, 10 ) ) {
+						if ( parseInt( zone.zone_id, 10 ) === parseInt( zone_id, 10 ) ) {
 							return true;
 						} else if ( order > _.min( limits ) && order < _.max( limits ) ) {
 							return true;
@@ -206,25 +204,24 @@
 						return false;
 					} );
 
-					reordered_zones = _.map( zones_to_reorder, function( rate ) {
-						var order = parseInt( rate.zone_order, 10 );
+					reordered_zones = _.map( zones_to_reorder, function( zone ) {
+						var order = parseInt( zone.zone_order, 10 );
 
-						if ( parseInt( rate.zone_id, 10 ) === parseInt( zone_id, 10 ) ) {
-							rate.zone_order = new_position;
+						if ( parseInt( zone.zone_id, 10 ) === parseInt( zone_id, 10 ) ) {
+							zone.zone_order = new_position;
 						} else if ( 'higher' === which_way ) {
-							rate.zone_order = order - 1;
+							zone.zone_order = order - 1;
 						} else if ( 'lower' === which_way ) {
-							rate.zone_order = order + 1;
+							zone.zone_order = order + 1;
 						}
 
-						changes[ rate.zone_id ] = _.extend( changes[ rate.zone_id ] || {}, { zone_order : rate.zone_order } );
+						changes[ zone.zone_id ] = _.extend( changes[ zone.zone_id ] || {}, { zone_order : zone.zone_order } );
 
-						return rate;
+						return zone;
 					} );
 
 					if ( reordered_zones.length ) {
 						model.logChanges( changes );
-						view.render(); // temporary, probably should get yanked.
 					}
 				}
 			} ),
