@@ -10,31 +10,18 @@
                     <th class="wc-shipping-zone-name">Zone Name</th>
                     <th class="wc-shipping-zone-region">Region(s)</th>
                     <th class="wc-shipping-zone-methods">Shipping Method(s)</th>
-                    <th class="wc-shipping-zone-remove">&nbsp;</th>
+                    <th class="wc-shipping-zone-actions">&nbsp;</th>
                 </tr>
             </thead>
             <tfoot>
                 <tr>
                     <td colspan="5">
-                        <a class="button button-secondary" href="#"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
-                        <input type="submit" class="button button-primary" value="Save shipping zones" />
+                        <a class="button button-secondary wc-shipping-zone-add" href="#"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
+                        <input type="submit" name="save" class="button button-primary" value="Save shipping zones" />
                     </td>
                 </tr>
             </tfoot>
-            <tbody>
-                <tr>
-                    <td width="1%" class="wc-shipping-zone-sort">
-    					<input type="hidden" name="zone_order[]" value="">
-    				</td>
-                    <td class="wc-shipping-zone-name">
-                        UK and Eire
-                    </td>
-                    <td>UK, Ireland</td>
-                    <td>
-                        <a href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a>
-                    </td>
-                    <td width="1%"><a class="delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a></td>
-                </tr>
+            <tbody class="wc-shipping-zone-rows">
                 <tr>
                     <td width="1%" class="wc-shipping-zone-sort">
     					<input type="hidden" name="zone_order[]" value="">
@@ -61,7 +48,7 @@
                         <a href="">Limit to specific states</a> | <a href="">Limit to specific zip codes</a>
                     </td>
                     <td></td>
-                    <td width="1%"><a class="delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a></td>
+                    <td class="wc-shipping-zone-actions"><a class="delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a></td>
                 </tr>
             </tbody>
             <tbody>
@@ -72,11 +59,28 @@
                     </td>
                     <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping methods added here apply to all regions without a zone.', 'woocommerce' ); ?></td>
                     <td>
-                        <a href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a>
+                        <a href="#" class="wc-shipping-zone-add-method button"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a>
                     </td>
-                    <td width="1%"><a class="delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a></td>
+                    <td class="wc-shipping-zone-actions">
+						<a class="wc-shipping-zone-delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a>
+					</td>
                 </tr>
             </tbody>
         </table>
     </form>
 </div>
+
+<script type="text/html" id="tmpl-wc-shipping-zone-row">
+    <tr data-id="{{ data.zone_id }}">
+        <td width="1%" class="wc-shipping-zone-sort"></td>
+        <td class="wc-shipping-zone-name">
+            <div class="view">{{ data.zone_name }}</div>
+            <div class="edit"><input type="text" name="zone_name[ {{ data.zone_id }} ]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
+        </td>
+        <td></td>
+        <td><a class="wc-shipping-zone-add-method button" href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a></td>
+        <td class="wc-shipping-zone-actions">
+			<a class="wc-shipping-zone-delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+		</td>
+    </tr>
+</script>

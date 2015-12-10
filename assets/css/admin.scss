@@ -2117,8 +2117,16 @@ table.wc_shipping_zones {
 		line-height: 30px;
 		padding: 1em 1em;
 		font-size: 14px;
+		background: #fff;
 	}
-	tbody tr:nth-child(odd) {
+	tbody.wc-shipping-zone-rows {
+		tr:nth-child(odd) {
+			td {
+				background: #f9f9f9;
+			}
+		}
+	}
+	tr.odd {
 		td {
 			background: #f9f9f9;
 		}
@@ -2173,19 +2181,42 @@ table.wc_shipping_zones {
 			width: 100%;
 		}
 	}
-	a.delete {
-		@include ir();
+	.wc-shipping-zone-actions {
+		width: 3em;
 
-		&:before {
-			@include icon;
-			content: "\e013";
-			color: #999;
-			line-height: 30px;
-		}
+		a.wc-shipping-zone-edit {
+			@include ir();
+			float: right;
 
-		&:hover {
 			&:before {
-				color: $red;
+				@include icon;
+				content: "\e603";
+				color: #999;
+				line-height: 30px;
+			}
+
+			&:hover {
+				&:before {
+					color: $red;
+				}
+			}
+		}
+		a.wc-shipping-zone-delete {
+			@include ir();
+			float: right;
+			margin-left: 1em;
+
+			&:before {
+				@include icon;
+				content: "\e013";
+				color: #999;
+				line-height: 30px;
+			}
+
+			&:hover {
+				&:before {
+					color: $red;
+				}
 			}
 		}
 	}

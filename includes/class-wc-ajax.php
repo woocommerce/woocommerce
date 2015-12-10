@@ -141,6 +141,7 @@ class WC_AJAX {
 			'save_variations'                                  => false,
 			'bulk_edit_variations'                             => false,
 			'tax_rates_save_changes'                           => false,
+			'shipping_zones_save_changes'                      => false,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -3017,6 +3018,55 @@ class WC_AJAX {
 
 		wp_send_json_success( array(
 			'rates' => WC_Tax::get_rates_for_tax_class( $current_class ),
+		) );
+	}
+
+	/**
+	 * Handle submissions from assets/js/wc-shipping-zones.js Backbone model.
+	 */
+	public static function shipping_zones_save_changes() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' . (isset( $_POST['wc_shipping_zones_nonce'] ) ? 1 : 0). (isset( $_POST['changes'] ) ? 1 : 0) );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		// Check User Caps
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$changes = $_POST['changes'];
+		foreach ( $changes as $zone_id => $data ) {
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					// So the user added and deleted a new row.
+					// That's fine, it's not in the database anyways. NEXT!
+					continue;
+				}
+				WC_Shipping_Zones::delete_zone( $zone_id );
+				continue;
+			}
+
+			$zone_data = array_intersect_key( $data, array(
+				'zone_id'    => 1,
+				'zone_name'  => 1,
+				'zone_order' => 1
+			) );
+
+			$zone = new WC_Shipping_Zone( $zone_data['zone_id'] );
+			$zone->set_zone_name( $zone_data['zone_name'] );
+			$zone->set_zone_order( isset( $zone_data['zone_order'] ) ? $zone_data['zone_order'] : 0 );
+			$zone->save();
+		}
+
+		wp_send_json_success( array(
+			'zones' => WC_Shipping_Zones::get_zones(),
 		) );
 	}
 }
