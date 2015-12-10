@@ -38,7 +38,6 @@
 					}
 				},
 				onSaveResponse: function( response, textStatus ) {
-					console.log(response);
 					if ( 'success' === textStatus ) {
 						if ( response.success ) {
 							shippingZone.set( 'zones', response.data.zones );
@@ -83,12 +82,17 @@
 						$.each( zones, function( id, rowData ) {
 							view.$el.append( view.rowTemplate( rowData ) );
 
-							var locations = view.$el.find( 'select[name="zone_locations[' + rowData.zone_id + ']"]');
+							var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
 
 							// Select values in region select
 							_.each( rowData.zone_locations, function( location ) {
-								 locations.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( "selected", true );
+								 $tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( "selected", true );
 							} );
+
+							// Editing?
+							if ( rowData.editing ) {
+								$tr.addClass( 'editing' );
+							}
 						} );
 
                         // Make the rows function
@@ -96,6 +100,7 @@
 						this.$el.find('.edit').hide();
 						this.$el.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
                         this.$el.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
+						this.$el.find('.editing .wc-shipping-zone-edit').trigger('click');
 
                         // Stripe
                         if ( _.size(zones) % 2 == 0 ) {
@@ -117,7 +122,7 @@
 						size    = _.size( zones ),
 						newRow  = _.extend( {}, data.default_zone, {
 							zone_id: 'new-' + size + '-' + Date.now(),
-							newRow:  true
+							editing:  true
 						} );
 
 					newRow.zone_order = 1 + _.max(
@@ -135,15 +140,16 @@
 					model.logChanges( changes );
 
 					view.render();
-					$table.find( 'tr[data-id="' + newRow.zone_id + '"] .wc-shipping-zone-edit' ).trigger( 'click' );
 
                     return false;
 				},
 				onEditRow: function( event ) {
 					event.preventDefault();
+					$( this ).closest('tr').addClass('editing');
 					$( this ).closest('tr').find('.view, .wc-shipping-zone-edit').hide();
 					$( this ).closest('tr').find('.edit').show();
-					$( '.wc-shipping-zone-region-select' ).select2( select2_args );
+					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).select2( select2_args );
+					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).addClass('enhanced');
 					event.data.view.model.trigger( 'change:zones' );
 				},
 				onDeleteRow: function( event ) {
