@@ -27,7 +27,7 @@ class WC_Shipping_Zones {
 
 		foreach ( $raw_zones as $raw_zone ) {
 			$zone    = new WC_Shipping_Zone( $raw_zone );
-			$zones[ $zone->get_zone_id() ] = $zone->get_data();
+			$zones[] = $zone->get_data();
 		}
 
 		return $zones;

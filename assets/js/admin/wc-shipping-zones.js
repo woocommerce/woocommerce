@@ -49,6 +49,7 @@
 				initialize: function() {
 					this.listenTo( this.model, 'change:zones', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:zones', this.clearUnloadConfirmation );
+					this.listenTo( this.model, 'saved:zones', this.render );
 					$tbody.on( 'change', { view: this }, this.updateModelOnChange );
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
@@ -90,7 +91,6 @@
 				},
 				onSubmit: function( event ) {
 					event.data.view.model.save();
-					event.data.view.render()
 					event.preventDefault();
 				},
 				onAddNewRow: function( event ) {
@@ -119,6 +119,7 @@
 					model.logChanges( changes );
 
 					view.render();
+					$table.find( 'tr[data-id="' + newRow.zone_id + '"] .wc-shipping-zone-edit' ).trigger( 'click' );
 
                     return false;
 				},
@@ -181,46 +182,20 @@
 						$tr          = ui.item,
 						zone_id      = $tr.data( 'id' ),
 						zones        = _.indexBy( model.get( 'zones' ), 'zone_id' ),
-						old_position = zones[ zone_id ].zone_order,
-						new_position = $tr.index(),
-						which_way    = ( new_position > old_position ) ? 'higher' : 'lower',
-						changes      = {},
-						zones_to_reorder,
-						reordered_zones;
+						changes      = {};
 
-					zones_to_reorder = _.filter( zones, function( zone ) {
-						var order  = parseInt( zone.zone_order, 10 ),
-							limits = [ old_position, new_position ];
+					reordered_zones = _.map( zones, function( zone ) {
+						var old_position = parseInt( zone.zone_order, 10 );
+						var new_position = parseInt( $table.find( 'tr[data-id="' + zone.zone_id + '"]').index(), 10 );
 
-						if ( parseInt( zone.zone_id, 10 ) === parseInt( zone_id, 10 ) ) {
-							return true;
-						} else if ( order > _.min( limits ) && order < _.max( limits ) ) {
-							return true;
-						} else if ( 'higher' === which_way && order === _.max( limits ) ) {
-							return true;
-						} else if ( 'lower' === which_way && order === _.min( limits ) ) {
-							return true;
+						if ( old_position !== new_position ) {
+							changes[ zone.zone_id ] = _.extend( changes[ zone.zone_id ] || {}, { zone_order : new_position } );
 						}
-						return false;
-					} );
-
-					reordered_zones = _.map( zones_to_reorder, function( zone ) {
-						var order = parseInt( zone.zone_order, 10 );
-
-						if ( parseInt( zone.zone_id, 10 ) === parseInt( zone_id, 10 ) ) {
-							zone.zone_order = new_position;
-						} else if ( 'higher' === which_way ) {
-							zone.zone_order = order - 1;
-						} else if ( 'lower' === which_way ) {
-							zone.zone_order = order + 1;
-						}
-
-						changes[ zone.zone_id ] = _.extend( changes[ zone.zone_id ] || {}, { zone_order : zone.zone_order } );
 
 						return zone;
 					} );
 
-					if ( reordered_zones.length ) {
+					if ( _.size( changes ) ) {
 						model.logChanges( changes );
 					}
 				}
