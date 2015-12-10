@@ -21,36 +21,7 @@
                     </td>
                 </tr>
             </tfoot>
-            <tbody class="wc-shipping-zone-rows">
-                <tr>
-                    <td width="1%" class="wc-shipping-zone-sort">
-    					<input type="hidden" name="zone_order[]" value="">
-    				</td>
-                    <td class="wc-shipping-zone-name">
-                        <input type="text" name="" value="" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" />
-                    </td>
-                    <td class="wc-shipping-zone-region">
-                        <select multiple="multiple" name="" data-placeholder="<?php _e( 'Select countries inside this zone', 'woocommerce' ); ?>"  class="wc-enhanced-select">
-                       		<?php
-                       			foreach ( $continents as $key => $continent ) {
-                                    echo '<optgroup label="' . esc_attr( $continent['name'] ) . '">';
-
-                                    $countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
-
-                                    foreach ( $countries as $key ) {
-                                        echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $allowed_countries[ $key ] ) . '</option>';
-                                    }
-
-                                    echo '</optgroup>';
-                        		}
-                       		?>
-                    	</select>
-                        <a href="">Limit to specific states</a> | <a href="">Limit to specific zip codes</a>
-                    </td>
-                    <td></td>
-                    <td class="wc-shipping-zone-actions"><a class="delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a></td>
-                </tr>
-            </tbody>
+            <tbody class="wc-shipping-zone-rows"></tbody>
             <tbody>
                 <tr>
                     <td width="1%" class="wc-shipping-zone-worldwide"></td>
