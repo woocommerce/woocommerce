@@ -70,7 +70,7 @@
 						}
 					?>
 				</select>
-				<a href=""><?php _e( 'Limit to specific zip codes', 'woocommerce' ); ?></a>
+				<a class="wc-shipping-zone-postcodes" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
 			</div>
 		</td>
         <td class="wc-shipping-zone-methods"><a class="wc-shipping-zone-add-method button" href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a></td>
