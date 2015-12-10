@@ -1,22 +1,22 @@
-/* global shippingZonesLocalizeScript, ajaxurl */
+/* global wc_enhanced_select_params, shippingZonesLocalizeScript, ajaxurl */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
-        var $table        = $( '.wc_shipping_zones' ),
-            $tbody        = $( '.wc-shipping-zone-rows' ),
-            $save_button  = $( 'input[name="save"]' ),
+		var $table        = $( '.wc_shipping_zones' ),
+			$tbody        = $( '.wc-shipping-zone-rows' ),
+			$save_button  = $( 'input[name="save"]' ),
 			$row_template = wp.template( 'wc-shipping-zone-row' ),
 			select2_args  = $.extend({
 				minimumResultsForSearch: 10,
 				allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 				placeholder: $( this ).data( 'placeholder' ),
 				matcher: function( term, text, opt ) {
-					return text.toUpperCase().indexOf( term.toUpperCase() ) >= 0 || opt.attr( "alt" ).toUpperCase().indexOf( term.toUpperCase() ) >= 0;
+					return text.toUpperCase().indexOf( term.toUpperCase() ) >= 0 || opt.attr( 'alt' ).toUpperCase().indexOf( term.toUpperCase() ) >= 0;
 				}
-			}, getEnhancedSelectFormatString() );
+			}, getEnhancedSelectFormatString() ),
 
-            // Backbone model
-            ShippingZone       = Backbone.Model.extend({
-                changes: {},
+			// Backbone model
+			ShippingZone       = Backbone.Model.extend({
+				changes: {},
 				logChanges: function( changedRows ) {
 					var changes = this.changes || {};
 
@@ -45,13 +45,13 @@
 							shippingZone.changes = {};
 							shippingZone.trigger( 'saved:zones' );
 						} else {
-							alert( data.strings.save_failed );
+							window.alert( data.strings.save_failed );
 						}
 					}
 				}
 			} ),
 
-            // Backbone view
+			// Backbone view
 			ShippingZoneView = Backbone.View.extend({
 				rowTemplate: $row_template,
 				initialize: function() {
@@ -86,7 +86,7 @@
 
 							// Select values in region select
 							_.each( rowData.zone_locations, function( location ) {
-								 $tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( "selected", true );
+								$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
 							} );
 
 							// Editing?
@@ -95,20 +95,20 @@
 							}
 						} );
 
-                        // Make the rows function
+						// Make the rows function
 						this.$el.find('.view').show();
 						this.$el.find('.edit').hide();
 						this.$el.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
-                        this.$el.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
+						this.$el.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
 						this.$el.find('.editing .wc-shipping-zone-edit').trigger('click');
 
-                        // Stripe
-                        if ( _.size(zones) % 2 == 0 ) {
-                            $table.find( 'tbody.wc-shipping-zone-rows').next('tbody').find('tr').addClass('odd');
-                        } else {
-                            $table.find( 'tbody.wc-shipping-zone-rows').next('tbody').find('tr').removeClass('odd');
-                        }
-                    }
+						// Stripe
+						if ( 0 === _.size( zones ) % 2) {
+							$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).addClass( 'odd' );
+						} else {
+							$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
+						}
+					}
 				},
 				onSubmit: function( event ) {
 					event.data.view.model.save();
@@ -141,7 +141,7 @@
 
 					view.render();
 
-                    return false;
+					return false;
 				},
 				onEditRow: function( event ) {
 					event.preventDefault();
@@ -231,7 +231,7 @@
 
 		shippingZoneView.render();
 
-        $tbody.sortable({
+		$tbody.sortable({
 			items: 'tr',
 			cursor: 'move',
 			axis: 'y',
