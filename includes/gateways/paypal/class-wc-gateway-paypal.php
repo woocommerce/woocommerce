@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * PayPal Standard Payment Gateway
+ * PayPal Standard Payment Gateway.
  *
  * Provides a PayPal Standard Payment Gateway.
  *
@@ -68,7 +68,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Logging method
+	 * Logging method.
 	 * @param  string $message
 	 */
 	public static function log( $message ) {
@@ -99,7 +99,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Get the link for an icon based on country
+	 * Get the link for an icon based on country.
 	 * @param  string $country
 	 * @return string
 	 */
@@ -114,7 +114,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Get PayPal images for a country
+	 * Get PayPal images for a country.
 	 * @param  string $country
 	 * @return array of image URLs
 	 */
@@ -180,7 +180,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check if this gateway is enabled and available in the user's country
+	 * Check if this gateway is enabled and available in the user's country.
 	 *
 	 * @return bool
 	 */
@@ -189,8 +189,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Admin Panel Options
-	 * - Options for bits like 'title' and availability on a country-by-country basis
+	 * Admin Panel Options.
+	 * - Options for bits like 'title' and availability on a country-by-country basis.
 	 *
 	 * @since 1.0.0
 	 */
@@ -205,7 +205,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Initialise Gateway Settings Form Fields
+	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = include( 'includes/settings-paypal.php' );
@@ -228,7 +228,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process the payment and return the result
+	 * Process the payment and return the result.
 	 *
 	 * @param int $order_id
 	 * @return array
@@ -255,7 +255,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process a refund if supported
+	 * Process a refund if supported.
 	 * @param  int $order_id
 	 * @param  float $amount
 	 * @param  string $reason
@@ -266,7 +266,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( ! $this->can_refund_order( $order ) ) {
 			$this->log( 'Refund Failed: No transaction ID' );
-			return false;
+			return new WP_Error( 'error', __( 'Refund Failed: No transaction ID', 'woocommerce' ) );
 		}
 
 		include_once( 'includes/class-wc-gateway-paypal-refund.php' );
@@ -279,7 +279,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( is_wp_error( $result ) ) {
 			$this->log( 'Refund Failed: ' . $result->get_error_message() );
-			return false;
+			return new WP_Error( 'error', $result->get_error_message() );
 		}
 
 		$this->log( 'Refund Result: ' . print_r( $result, true ) );
@@ -292,6 +292,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			break;
 		}
 
-		return false;
+		return isset( $result['L_LONGMESSAGE0'] ) ? new WP_Error( 'error', $result['L_LONGMESSAGE0'] ) : false;
 	}
 }

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Layered Navigation Fitlers Widget
+ * Layered Navigation Fitlers Widget.
  *
  * @author   WooThemes
  * @category Widgets
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_layered_nav_filters';

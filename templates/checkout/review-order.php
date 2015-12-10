@@ -2,11 +2,11 @@
 /**
  * Review order table
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/checkout/review-order.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
- * will need to copy the new files to your theme to maintain compatibility. We try to do this
- * as little as possible, but it does happen. When this occurs the version of the template file will
+ * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
+ * will need to copy the new files to your theme to maintain compatibility. We try to do this.
+ * as little as possible, but it does happen. When this occurs the version of the template file will.
  * be bumped and the readme will list any important changes.
  *
  * @see 	    http://docs.woothemes.com/document/template-structure/
@@ -83,8 +83,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		<?php endforeach; ?>
 
-		<?php if ( wc_tax_enabled() && WC()->cart->tax_display_cart === 'excl' ) : ?>
-			<?php if ( get_option( 'woocommerce_tax_total_display' ) === 'itemized' ) : ?>
+		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) : ?>
+			<?php if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) : ?>
 				<?php foreach ( WC()->cart->get_tax_totals() as $code => $tax ) : ?>
 					<tr class="tax-rate tax-rate-<?php echo sanitize_title( $code ); ?>">
 						<th><?php echo esc_html( $tax->label ); ?></th>

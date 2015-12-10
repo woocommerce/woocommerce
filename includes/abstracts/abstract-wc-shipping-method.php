@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce Shipping Method Class
+ * WooCommerce Shipping Method Class.
  *
  * Extended by shipping methods to handle shipping calculations etc.
  *
@@ -57,7 +57,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	public $rates        = array();
 
 	/**
-	 * Whether or not we need to calculate tax on top of the shipping rate
+	 * Whether or not we need to calculate tax on top of the shipping rate.
 	 *
 	 * @return boolean
 	 */
@@ -66,7 +66,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Add a rate
+	 * Add a rate.
 	 *
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
 	 *
@@ -181,7 +181,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the shipping method title
+	 * Return the shipping method title.
 	 *
 	 * @return string
 	 */

@@ -149,31 +149,14 @@ module.exports = function( grunt ) {
 					'language-team': 'LANGUAGE <EMAIL@ADDRESS>'
 				}
 			},
-			frontend: {
+			dist: {
 				options: {
 					potFilename: 'woocommerce.pot',
 					exclude: [
-						'includes/admin/.*',
 						'apigen/.*',
 						'tests/.*',
 						'tmp/.*'
-					],
-					processPot: function ( pot ) {
-						pot.headers['project-id-version'] += ' Frontend';
-						return pot;
-					}
-				}
-			},
-			admin: {
-				options: {
-					potFilename: 'woocommerce-admin.pot',
-					include: [
-						'includes/admin/.*'
-					],
-					processPot: function ( pot ) {
-						pot.headers['project-id-version'] += ' Admin';
-						return pot;
-					}
+					]
 				}
 			}
 		},

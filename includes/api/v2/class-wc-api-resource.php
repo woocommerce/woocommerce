@@ -362,25 +362,25 @@ class WC_API_Resource {
 
 			$result = wp_delete_user( $id );
 
-			if ( $result )
+			if ( $result ) {
 				return array( 'message' => __( 'Permanently deleted customer', 'woocommerce' ) );
-			else
+			} else {
 				return new WP_Error( 'woocommerce_api_cannot_delete_customer', __( 'The customer cannot be deleted', 'woocommerce' ), array( 'status' => 500 ) );
+			}
 
 		} else {
 
-			// delete order/coupon/product/webhook
+			// delete order/coupon/webhook
 
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 
-			if ( ! $result )
+			if ( ! $result ) {
 				return new WP_Error( "woocommerce_api_cannot_delete_{$resource_name}", sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), $resource_name ), array( 'status' => 500 ) );
+			}
 
 			if ( $force ) {
 				return array( 'message' => sprintf( __( 'Permanently deleted %s', 'woocommerce' ), $resource_name ) );
-
 			} else {
-
 				$this->server->send_status( '202' );
 
 				return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), $resource_name ) );

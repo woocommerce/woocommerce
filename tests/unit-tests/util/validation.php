@@ -2,13 +2,13 @@
 namespace WooCommerce\Tests\Util;
 
 /**
- * Class Validation
+ * Class Validation.
  * @package WooCommerce\Tests\Util
  * @since 2.3
  */
 class Validation extends \WC_Unit_Test_Case {
 	/**
-	 * Test is_email()
+	 * Test is_email().
 	 *
 	 * @since 2.3
 	 */
@@ -19,7 +19,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_is_phone
+	 * Data provider for test_is_phone.
 	 *
 	 * @since 2.4
 	 */
@@ -34,7 +34,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_phone()
+	 * Test is_phone().
 	 *
 	 * @dataProvider data_provider_test_is_phone
 	 * @since 2.3
@@ -44,7 +44,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_is_postcode()
+	 * Data provider for test_is_postcode().
 	 *
 	 * @since 2.4
 	 */
@@ -87,7 +87,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_postcode()
+	 * Test is_postcode().
 	 *
 	 * @dataProvider data_provider_test_is_postcode
 	 * @since 2.4
@@ -97,7 +97,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_is_GB_postcode
+	 * Data provider for test_is_GB_postcode.
 	 *
 	 * @since 2.4
 	 */
@@ -118,7 +118,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_GB_postcode()
+	 * Test is_GB_postcode().
 	 *
 	 * @dataProvider data_provider_test_is_GB_postcode
 	 * @since 2.4
@@ -128,7 +128,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_format_postcode
+	 * Data provider for test_format_postcode.
 	 *
 	 * @since 2.4
 	 */
@@ -144,7 +144,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test format_postcode()
+	 * Test format_postcode().
 	 *
 	 * @dataProvider data_provider_test_format_postcode
 	 * @since 2.4
@@ -154,7 +154,7 @@ class Validation extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test format_phone()
+	 * Test format_phone().
 	 *
 	 * @since 2.4
 	 */

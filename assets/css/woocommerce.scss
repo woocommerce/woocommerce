@@ -147,7 +147,7 @@ p.demo_store {
 		margin-top: 10px;
 	}
 
-	.woocommerce-breadcrumb{
+	.woocommerce-breadcrumb {
 		@include clearfix();
 		margin: 0 0 1em;
 		padding: 0;
@@ -383,10 +383,13 @@ p.demo_store {
 			.variations {
 				margin-bottom: 1em;
 				border: 0;
+				width: 100%;
 
 				td,
 				th {
 					border: 0;
+					vertical-align: top;
+					line-height: 2em;
 				}
 
 				label {
@@ -394,16 +397,14 @@ p.demo_store {
 				}
 
 				select {
-					width: 100%;
-					float: left;
+					max-width: 100%;
+					min-width: 75%;
+					display: inline-block;
+					margin-right: 1em;
 				}
 
 				td.label {
 					padding-right: 1em;
-				}
-
-				td {
-					vertical-align: top;
 				}
 			}
 
@@ -415,6 +416,7 @@ p.demo_store {
 
 			.reset_variations {
 				visibility: hidden;
+				font-size: 0.83em;
 			}
 
 			.wc-no-matching-variations {
@@ -913,102 +915,56 @@ p.demo_store {
 	}
 
 	p.stars {
-		position: relative;
-		font-size: 1em;
-
 		a {
-			display: inline-block;
-			font-weight: 700;
-			margin-right: 1em;
-			text-indent: -9999px;
 			position: relative;
-			border-bottom: 0 !important;
-			outline: 0;
+			height: 1em;
+			width: 1em;
+			text-indent: -999em;
+			display: inline-block;
+			text-decoration: none;
 
-			&:last-child {
-				border-right: 0;
+			&:before {
+				display: block;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 1em;
+				height: 1em;
+				line-height: 1;
+				font-family: "WooCommerce";
+				content: "\e021";
+				text-indent: 0;
 			}
 
-			&.star-1,
-			&.star-2,
-			&.star-3,
-			&.star-4,
-			&.star-5 {
-				border-right: 1px solid #ccc;
-
-				&:after {
-					font-family: "WooCommerce";
-					text-indent: 0;
-					position: absolute;
-					top: 0;
-					left: 0;
-				}
-
-			}
-
-			&.star-1 {
-				width: 2em;
-
-				&:after {
+			&:hover {
+				~ a:before {
 					content: "\e021";
 				}
+			}
+		}
 
-				&:hover:after,
-				&.active:after {
-					content: "\e020"
+		&:hover {
+			a {
+				&:before {
+					content: "\e020";
+				}
+			}
+		}
+
+		&.selected {
+			a.active {
+				&:before {
+					content: "\e020";
+				}
+
+				~ a:before {
+					content: "\e021";
 				}
 			}
 
-			&.star-2 {
-				width: 3em;
-
-				&:after {
-					content: "\e021\e021";
-				}
-
-				&:hover:after,
-				&.active:after {
-					content: "\e020\e020"
-				}
-			}
-
-			&.star-3 {
-				width: 4em;
-
-				&:after {
-					content: "\e021\e021\e021";
-				}
-
-				&:hover:after,
-				&.active:after {
-					content: "\e020\e020\e020"
-				}
-			}
-
-			&.star-4 {
-				width: 5em;
-
-				&:after {
-					content: "\e021\e021\e021\e021";
-				}
-
-				&:hover:after,
-				&.active:after {
-					content: "\e020\e020\e020\e020"
-				}
-			}
-
-			&.star-5 {
-				width: 6em;
-				border: 0;
-
-				&:after {
-					content: "\e021\e021\e021\e021\e021";
-				}
-
-				&:hover:after,
-				&.active:after {
-					content: "\e020\e020\e020\e020\e020"
+			a:not(.active) {
+				&:before {
+					content: "\e020";
 				}
 			}
 		}
@@ -1316,6 +1272,9 @@ p.demo_store {
 			}
 
 			&.woocommerce-invalid {
+				label {
+					color: $red;
+				}
 				.select2-container,
 				input.input-text,
 				select {
@@ -1649,6 +1608,8 @@ p.demo_store {
 			display: block;
 			text-align: center;
 			margin-bottom: 1em;
+			font-size: 1.25em;
+			padding: 1em;
 		}
 	}
 
@@ -1679,7 +1640,6 @@ p.demo_store {
 				border-collapse: separate;
 				margin: 0 0 6px;
 				padding: 0;
-				border-left: 0;
 
 				tr:first-child {
 					th,
@@ -1689,12 +1649,7 @@ p.demo_store {
 				}
 
 				th {
-					padding: 6px 12px 0 0;
-					width: 25%;
-				}
-
-				td {
-					padding: 6px 0;
+					width: 40%;
 				}
 
 				td,
@@ -1702,8 +1657,7 @@ p.demo_store {
 					vertical-align: top;
 					border-left: 0;
 					border-right: 0;
-					padding: 6px 0;
-					line-height: 2em;
+					line-height: 1.5em;
 				}
 
 				small {
@@ -1925,8 +1879,37 @@ p.demo_store {
 	}
 }
 
+/**
+ *  Password strength meter
+ */
+.woocommerce-password-strength {
+	text-align: center;
+	font-weight: 600;
+	padding: 3px 0px 3px 0px;
+
+	&.strong {
+		background-color: #c1e1b9;
+		border-color: #83c373;
+	}
+
+	&.short {
+		background-color: #f1adad;
+		border-color: #e35b5b;
+	}
+
+	&.bad {
+		background-color: #fbc5a9;
+		border-color: #f78b53;
+	}
+
+	&.good {
+		background-color: #ffe399;
+		border-color: #ffc733;
+	}
+}
+
 /* added to get around variation image flicker issue */
-.product.has-default-attributes {
+.product.has-default-attributes.has-children {
 	> .images {
 		opacity: 0;
 	}
@@ -1975,5 +1958,25 @@ p.demo_store {
 		li.product {
 			margin-top: 0 !important;
 		}
+	}
+}
+
+/**
+ * Twenty Sixteen specific styles
+ */
+body:not(.search-results) {
+	.twentysixteen {
+		.entry-summary {
+			color: inherit;
+			font-size: inherit;
+			line-height: inherit;
+		}
+	}
+}
+
+.twentysixteen {
+	.price ins {
+		background: inherit;
+		color: inherit;
 	}
 }

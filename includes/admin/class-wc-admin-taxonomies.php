@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Taxonomies {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		// Category/term ordering

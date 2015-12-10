@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Checkout
  *
@@ -46,7 +51,7 @@ class WC_Checkout {
 	public $enable_guest_checkout;
 
 	/**
-	 * Main WC_Checkout Instance
+	 * Main WC_Checkout Instance.
 	 *
 	 * Ensures only one instance of WC_Checkout is loaded or can be loaded.
 	 *
@@ -128,7 +133,7 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Checkout process
+	 * Checkout process.
 	 */
 	public function check_cart_items() {
 		// When we process the checkout, lets ensure cart items are rechecked to prevent checkout
@@ -136,14 +141,14 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Output the billing information form
+	 * Output the billing information form.
 	 */
 	public function checkout_form_billing() {
 		wc_get_template( 'checkout/form-billing.php', array( 'checkout' => $this ) );
 	}
 
 	/**
-	 * Output the shipping information form
+	 * Output the shipping information form.
 	 */
 	public function checkout_form_shipping() {
 		wc_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
@@ -153,13 +158,13 @@ class WC_Checkout {
 	 * Create an order.
 	 *
 	 * Error codes:
-	 * 		400 - Cannot insert order into the database
-	 * 		401 - Cannote update existing order
-	 * 		402 - Cannot create line item
-	 * 		403 - Cannot create fee item
-	 * 		404 - Cannot create shipping item
-	 * 		405 - Cannot create tax item
-	 * 		406 - Cannot create coupon item
+	 * 		400 - Cannot insert order into the database.
+	 * 		401 - Cannote update existing order.
+	 * 		402 - Cannot create line item.
+	 * 		403 - Cannot create fee item.
+	 * 		404 - Cannot create shipping item.
+	 * 		405 - Cannot create tax item.
+	 * 		406 - Cannot create coupon item.
 	 *
 	 * @access public
 	 * @throws Exception
@@ -175,7 +180,7 @@ class WC_Checkout {
 
 		try {
 			// Start transaction if available
-			$wpdb->query( 'START TRANSACTION' );
+			wc_transaction_query( 'start' );
 
 			$order_data = array(
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
@@ -324,11 +329,11 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
 
 			// If we got here, the order was created without problems!
-			$wpdb->query( 'COMMIT' );
+			wc_transaction_query( 'commit' );
 
 		} catch ( Exception $e ) {
 			// There was an error adding order data!
-			$wpdb->query( 'ROLLBACK' );
+			wc_transaction_query( 'rollback' );
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
 
@@ -336,7 +341,7 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Process the checkout after the confirm order button is pressed
+	 * Process the checkout after the confirm order button is pressed.
 	 */
 	public function process_checkout() {
 		try {
@@ -374,7 +379,7 @@ class WC_Checkout {
 			}
 
 			// Ship to billing only option
-			if ( WC()->cart->ship_to_billing_address_only() ) {
+			if ( wc_ship_to_billing_address_only() ) {
 				$this->posted['ship_to_different_address']  = false;
 			}
 
@@ -536,7 +541,7 @@ class WC_Checkout {
 			WC()->cart->calculate_totals();
 
 			// Terms
-			if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && wc_get_page_id( 'terms' ) > 0 ) {
+			if ( ! isset( $_POST['woocommerce_checkout_update_totals'] ) && empty( $this->posted['terms'] ) && wc_get_page_id( 'terms' ) > 0 && apply_filters( 'woocommerce_checkout_show_terms', true ) ) {
 				wc_add_notice( __( 'You must accept our Terms &amp; Conditions.', 'woocommerce' ), 'error' );
 			}
 
@@ -638,7 +643,7 @@ class WC_Checkout {
 					$result = $available_gateways[ $this->posted['payment_method'] ]->process_payment( $order_id );
 
 					// Redirect to success/confirmation/payment page
-					if ( $result['result'] == 'success' ) {
+					if ( 'success' === $result['result'] ) {
 
 						$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
@@ -734,7 +739,7 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Gets the value either from the posted data, or from the users meta data
+	 * Gets the value either from the posted data, or from the users meta data.
 	 *
 	 * @access public
 	 * @param string $input

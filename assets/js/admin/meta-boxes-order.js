@@ -144,22 +144,11 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						var info = response;
-
-						if ( info ) {
-							$( 'input#_billing_first_name' ).val( info.billing_first_name ).change();
-							$( 'input#_billing_last_name' ).val( info.billing_last_name ).change();
-							$( 'input#_billing_company' ).val( info.billing_company ).change();
-							$( 'input#_billing_address_1' ).val( info.billing_address_1 ).change();
-							$( 'input#_billing_address_2' ).val( info.billing_address_2 ).change();
-							$( 'input#_billing_city' ).val( info.billing_city ).change();
-							$( 'input#_billing_postcode' ).val( info.billing_postcode ).change();
-							$( '#_billing_country' ).val( info.billing_country ).change();
-							$( '#_billing_state' ).val( info.billing_state ).change();
-							$( 'input#_billing_email' ).val( info.billing_email ).change();
-							$( 'input#_billing_phone' ).val( info.billing_phone ).change();
+						if ( response ) {
+							$.each( response, function( key, data ) {
+							    $( ':input#_' + key ).val( data ).change();
+							});
 						}
-
 						$( 'div.edit_address' ).unblock();
 					}
 				});
@@ -198,20 +187,11 @@ jQuery( function ( $ ) {
 					data: data,
 					type: 'POST',
 					success: function( response ) {
-						var info = response;
-
-						if ( info ) {
-							$( 'input#_shipping_first_name' ).val( info.shipping_first_name ).change();
-							$( 'input#_shipping_last_name' ).val( info.shipping_last_name ).change();
-							$( 'input#_shipping_company' ).val( info.shipping_company ).change();
-							$( 'input#_shipping_address_1' ).val( info.shipping_address_1 ).change();
-							$( 'input#_shipping_address_2' ).val( info.shipping_address_2 ).change();
-							$( 'input#_shipping_city' ).val( info.shipping_city ).change();
-							$( 'input#_shipping_postcode' ).val( info.shipping_postcode ).change();
-							$( '#_shipping_country' ).val( info.shipping_country ).change();
-							$( '#_shipping_state' ).val( info.shipping_state ).change();
+						if ( response ) {
+							$.each( response, function( key, data ) {
+							    $( ':input#_' + key ).val( data ).change();
+							});
 						}
-
 						$( 'div.edit_address' ).unblock();
 					}
 				});
@@ -221,15 +201,11 @@ jQuery( function ( $ ) {
 
 		copy_billing_to_shipping: function() {
 			if ( window.confirm( woocommerce_admin_meta_boxes.copy_billing ) ) {
-				$( 'input#_shipping_first_name' ).val( $( 'input#_billing_first_name' ).val() ).change();
-				$( 'input#_shipping_last_name' ).val( $( 'input#_billing_last_name' ).val() ).change();
-				$( 'input#_shipping_company' ).val( $( 'input#_billing_company' ).val() ).change();
-				$( 'input#_shipping_address_1' ).val( $( 'input#_billing_address_1' ).val() ).change();
-				$( 'input#_shipping_address_2' ).val( $( 'input#_billing_address_2' ).val() ).change();
-				$( 'input#_shipping_city' ).val( $( 'input#_billing_city' ).val() ).change();
-				$( 'input#_shipping_postcode' ).val( $( 'input#_billing_postcode' ).val() ).change();
-				$( '#_shipping_country' ).val( $( '#_billing_country' ).val() ).change();
-				$( '#_shipping_state' ).val( $( '#_billing_state' ).val() ).change();
+				$('.order_data_column :input[name^="_billing_"]').each( function() {
+					var input_name = $(this).attr('name');
+					input_name     = input_name.replace( '_billing_', '_shipping_' );
+					$( ':input#' + input_name ).val( $(this).val() ).change();
+				});
 			}
 			return false;
 		}
@@ -523,20 +499,20 @@ jQuery( function ( $ ) {
 			if ( window.confirm( woocommerce_admin_meta_boxes.calc_line_taxes ) ) {
 				wc_meta_boxes_order_items.block();
 
-				var shipping_country = $( '#_shipping_country' ).val();
-				var billing_country  = $( '#_billing_country' ).val();
-				var country          = woocommerce_admin_meta_boxes.base_country;
+				var country          = '';
 				var state            = '';
 				var postcode         = '';
 				var city             = '';
 
-				if ( shipping_country ) {
-					country  = shipping_country;
+				if ( 'shipping' === woocommerce_admin_meta_boxes.tax_based_on ) {
+					country  = $( '#_shipping_country' ).val();
 					state    = $( '#_shipping_state' ).val();
 					postcode = $( '#_shipping_postcode' ).val();
 					city     = $( '#_shipping_city' ).val();
-				} else if ( billing_country ) {
-					country  = billing_country;
+				}
+
+				if ( 'billing' === woocommerce_admin_meta_boxes.tax_based_on || ! country ) {
+					country  = $( '#_billing_country' ).val();
 					state    = $( '#_billing_state' ).val();
 					postcode = $( '#_billing_postcode' ).val();
 					city     = $( '#_billing_city' ).val();

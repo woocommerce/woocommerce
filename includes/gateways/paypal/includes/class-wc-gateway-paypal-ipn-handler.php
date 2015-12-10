@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 include_once( 'class-wc-gateway-paypal-response.php' );
 
 /**
- * Handles responses from PayPal IPN
+ * Handles responses from PayPal IPN.
  */
 class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 
@@ -15,7 +15,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	protected $receiver_email;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct( $sandbox = false, $receiver_email = '' ) {
 		add_action( 'woocommerce_api_wc_gateway_paypal', array( $this, 'check_response' ) );
@@ -26,7 +26,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check for PayPal IPN Response
+	 * Check for PayPal IPN Response.
 	 */
 	public function check_response() {
 		if ( ! empty( $_POST ) && $this->validate_ipn() ) {
@@ -39,7 +39,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * There was a valid response
+	 * There was a valid response.
 	 * @param  array $posted Post data after wp_unslash
 	 */
 	public function valid_response( $posted ) {
@@ -63,7 +63,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check PayPal IPN validity
+	 * Check PayPal IPN validity.
 	 */
 	public function validate_ipn() {
 		WC_Gateway_Paypal::log( 'Checking IPN response is valid' );
@@ -104,7 +104,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check for a valid transaction type
+	 * Check for a valid transaction type.
 	 * @param  string $txn_type
 	 */
 	protected function validate_transaction_type( $txn_type ) {
@@ -117,7 +117,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check currency from IPN matches the order
+	 * Check currency from IPN matches the order.
 	 * @param  WC_Order $order
 	 * @param  string $currency
 	 */
@@ -133,7 +133,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check payment amount from IPN matches the order
+	 * Check payment amount from IPN matches the order.
 	 * @param  WC_Order $order
 	 */
 	protected function validate_amount( $order, $amount ) {
@@ -147,7 +147,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check payment amount from IPN matches the order
+	 * Check receiver email from PayPal. If the receiver email in the IPN is different than what is stored in.
+	 * WooCommerce -> Settings -> Checkout -> PayPal, it will log an error about it.
 	 * @param  WC_Order $order
 	 */
 	protected function validate_receiver_email( $order, $receiver_email ) {
@@ -162,7 +163,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a completed payment
+	 * Handle a completed payment.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_completed( $order, $posted ) {
@@ -191,7 +192,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a pending payment
+	 * Handle a pending payment.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_pending( $order, $posted ) {
@@ -199,7 +200,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a failed payment
+	 * Handle a failed payment.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_failed( $order, $posted ) {
@@ -207,7 +208,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a denied payment
+	 * Handle a denied payment.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_denied( $order, $posted ) {
@@ -215,7 +216,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle an expired payment
+	 * Handle an expired payment.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_expired( $order, $posted ) {
@@ -223,7 +224,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a voided payment
+	 * Handle a voided payment.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_voided( $order, $posted ) {
@@ -231,7 +232,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Handle a refunded order
+	 * Handle a refunded order.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_refunded( $order, $posted ) {
@@ -242,27 +243,27 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			$order->update_status( 'refunded', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), strtolower( $posted['payment_status'] ) ) );
 
 			$this->send_ipn_email_notification(
-				sprintf( __( 'Payment for order #%s refunded/reversed', 'woocommerce' ), $order->get_order_number() ),
+				sprintf( __( 'Payment for order %s refunded', 'woocommerce' ), '<a class="link" href="' . esc_url( admin_url( 'post.php?post=' . $order->id . '&action=edit' ) ) . '">' . $order->get_order_number() . '</a>' ),
 				sprintf( __( 'Order #%s has been marked as refunded - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), $posted['reason_code'] )
 			);
 		}
 	}
 
 	/**
-	 * Handle a reveral
+	 * Handle a reveral.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_reversed( $order, $posted ) {
 		$order->update_status( 'on-hold', sprintf( __( 'Payment %s via IPN.', 'woocommerce' ), wc_clean( $posted['payment_status'] ) ) );
 
 		$this->send_ipn_email_notification(
-			sprintf( __( 'Payment for order #%s reversed', 'woocommerce' ), $order->get_order_number() ),
+			sprintf( __( 'Payment for order %s reversed', 'woocommerce' ), '<a class="link" href="' . esc_url( admin_url( 'post.php?post=' . $order->id . '&action=edit' ) ) . '">' . $order->get_order_number() . '</a>' ),
 			sprintf( __( 'Order #%s has been marked on-hold due to a reversal - PayPal reason code: %s', 'woocommerce' ), $order->get_order_number(), wc_clean( $posted['reason_code'] ) )
 		);
 	}
 
 	/**
-	 * Handle a cancelled reveral
+	 * Handle a cancelled reveral.
 	 * @param  WC_Order $order
 	 */
 	protected function payment_status_canceled_reversal( $order, $posted ) {
@@ -273,7 +274,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Save important data from the IPN to the order
+	 * Save important data from the IPN to the order.
 	 * @param WC_Order $order
 	 */
 	protected function save_paypal_meta_data( $order, $posted ) {

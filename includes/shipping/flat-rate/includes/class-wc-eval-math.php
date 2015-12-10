@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class WC_Eval_Math. Supports basic math only (removed eval function)
+ * Class WC_Eval_Math. Supports basic math only (removed eval function).
  *
- * Based on EvalMath by Miles Kaufman Copyright (C) 2005 Miles Kaufmann http://www.twmagic.com/
+ * Based on EvalMath by Miles Kaufman Copyright (C) 2005 Miles Kaufmann http://www.twmagic.com/.
  */
 class WC_Eval_Math {
 	/** @var string */
@@ -25,7 +25,7 @@ class WC_Eval_Math {
 	public static $fb = array(); // built-in functions
 
 	/**
-	 * Evaluate maths string
+	 * Evaluate maths string.
 	 *
 	 * @param string  $expr
 	 * @return mixed
@@ -71,7 +71,7 @@ class WC_Eval_Math {
 	}
 
 	/**
-	 * Convert infix to postfix notation
+	 * Convert infix to postfix notation.
 	 *
 	 * @param  string $expr
 	 * @return string
@@ -276,7 +276,7 @@ class WC_Eval_Math {
 }
 
 /**
- * Class WC_Eval_Math_Stack
+ * Class WC_Eval_Math_Stack.
  */
 class WC_Eval_Math_Stack {
 

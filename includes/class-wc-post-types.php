@@ -2,13 +2,13 @@
 /**
  * Post Types
  *
- * Registers post types and taxonomies
+ * Registers post types and taxonomies.
  *
- * @class       WC_Post_types
- * @version     2.3.0
- * @package     WooCommerce/Classes/Products
- * @category    Class
- * @author      WooThemes
+ * @class     WC_Post_types
+ * @version   2.5.0
+ * @package   WooCommerce/Classes/Products
+ * @category  Class
+ * @author    WooThemes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Post_types Class
+ * WC_Post_types Class.
  */
 class WC_Post_types {
 
@@ -128,7 +128,7 @@ class WC_Post_types {
 		);
 
 		register_taxonomy( 'product_shipping_class',
-			apply_filters( 'woocommerce_taxonomy_objects_product_shipping_class', array('product', 'product_variation') ),
+			apply_filters( 'woocommerce_taxonomy_objects_product_shipping_class', array( 'product', 'product_variation' ) ),
 			apply_filters( 'woocommerce_taxonomy_args_product_shipping_class', array(
 				'hierarchical'          => true,
 				'update_count_callback' => '_update_post_term_count',
@@ -146,7 +146,7 @@ class WC_Post_types {
 						'add_new_item'      => __( 'Add New Shipping Class', 'woocommerce' ),
 						'new_item_name'     => __( 'New Shipping Class Name', 'woocommerce' )
 					),
-				'show_ui'               => false,
+				'show_ui'               => true,
 				'show_in_nav_menus'     => false,
 				'query_var'             => is_admin(),
 				'capabilities'          => array(
@@ -399,7 +399,7 @@ class WC_Post_types {
 						'parent'             => __( 'Parent Webhook', 'woocommerce' )
 					),
 					'public'              => false,
-					'show_ui'             => false,
+					'show_ui'             => true,
 					'capability_type'     => 'shop_webhook',
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => false,
@@ -488,7 +488,7 @@ class WC_Post_types {
 	}
 
 	/**
-	 * Added product for Jetpack related posts
+	 * Added product for Jetpack related posts.
 	 *
 	 * @param  array $post_types
 	 * @return array

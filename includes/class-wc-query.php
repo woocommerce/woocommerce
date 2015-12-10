@@ -1,6 +1,6 @@
 <?php
 /**
- * Contains the query functions for WooCommerce which alter the front-end post queries and loops.
+ * Contains the query functions for WooCommerce which alter the front-end post queries and loops
  *
  * @class 		WC_Query
  * @version		2.3.0
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Query' ) ) :
 
 /**
- * WC_Query Class
+ * WC_Query Class.
  */
 class WC_Query {
 
@@ -68,7 +68,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get any errors from querystring
+	 * Get any errors from querystring.
 	 */
 	public function get_errors() {
 		if ( ! empty( $_GET['wc_error'] ) && ( $error = sanitize_text_field( $_GET['wc_error'] ) ) && ! wc_has_notice( $error, 'error' ) ) {
@@ -97,7 +97,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get page title for an endpoint
+	 * Get page title for an endpoint.
 	 * @param  string
 	 * @return string
 	 */
@@ -135,7 +135,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Add endpoints for query vars
+	 * Add endpoints for query vars.
 	 */
 	public function add_endpoints() {
 		foreach ( $this->query_vars as $key => $var ) {
@@ -159,7 +159,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get query vars
+	 * Get query vars.
 	 *
 	 * @return array
 	 */
@@ -168,7 +168,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get query current active query var
+	 * Get query current active query var.
 	 *
 	 * @return string
 	 */
@@ -183,7 +183,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Parse the request and look for query vars - endpoints may not be supported
+	 * Parse the request and look for query vars - endpoints may not be supported.
 	 */
 	public function parse_request() {
 		global $wp;
@@ -201,7 +201,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Hook into pre_get_posts to do the main product query
+	 * Hook into pre_get_posts to do the main product query.
 	 *
 	 * @param mixed $q query object
 	 */
@@ -326,7 +326,7 @@ class WC_Query {
 
 	/**
 	 * wpseo_metadesc function.
-	 * Hooked into wpseo_ hook already, so no need for function_exist
+	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
 	 * @access public
 	 * @return string
@@ -339,7 +339,7 @@ class WC_Query {
 
 	/**
 	 * wpseo_metakey function.
-	 * Hooked into wpseo_ hook already, so no need for function_exist
+	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
 	 * @access public
 	 * @return string
@@ -350,7 +350,7 @@ class WC_Query {
 
 
 	/**
-	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility
+	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility.
 	 *
 	 * @access public
 	 * @param array $posts
@@ -406,7 +406,7 @@ class WC_Query {
 
 
 	/**
-	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
+	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop.
 	 *
 	 * @param mixed $q
 	 */
@@ -445,14 +445,14 @@ class WC_Query {
 
 
 	/**
-	 * Remove the query
+	 * Remove the query.
 	 */
 	public function remove_product_query() {
 		remove_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 	}
 
 	/**
-	 * Remove ordering queries
+	 * Remove ordering queries.
 	 */
 	public function remove_ordering_args() {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
@@ -460,7 +460,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Remove the posts_where filter
+	 * Remove the posts_where filter.
 	 */
 	public function remove_posts_where() {
 		remove_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
@@ -527,7 +527,7 @@ class WC_Query {
 
 
 	/**
-	 * Returns an array of arguments for ordering products based on the selected values
+	 * Returns an array of arguments for ordering products based on the selected values.
 	 *
 	 * @access public
 	 * @return array
@@ -563,7 +563,7 @@ class WC_Query {
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 			break;
 			case 'price' :
-				$args['orderby']  = "meta_value_num {$wpdb->posts}.ID";
+				$args['orderby']  = "meta_value_num ID";
 				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
 			break;
@@ -587,7 +587,7 @@ class WC_Query {
 	}
 
 	/**
-	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065
+	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065.
 	 *
 	 * This lets us sort by meta value desc, and have a second orderby param.
 	 *
@@ -646,7 +646,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Returns a meta query to handle product visibility
+	 * Returns a meta query to handle product visibility.
 	 *
 	 * @access public
 	 * @param string $compare (default: 'IN')
@@ -668,7 +668,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Returns a meta query to handle product stock status
+	 * Returns a meta query to handle product stock status.
 	 *
 	 * @access public
 	 * @param string $status (default: 'instock')
@@ -687,7 +687,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Layered Nav Init
+	 * Layered Nav Init.
 	 */
 	public function layered_nav_init( ) {
 
@@ -724,7 +724,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Layered Nav post filter
+	 * Layered Nav post filter.
 	 *
 	 * @param array $filtered_posts
 	 * @return array
@@ -816,10 +816,10 @@ class WC_Query {
 	}
 
 	/**
-	 * Price filter Init
+	 * Price filter Init.
 	 */
 	public function price_filter_init() {
-		if ( is_active_widget( false, false, 'woocommerce_price_filter', true ) && ! is_admin() ) {
+		if ( apply_filters( 'woocommerce_is_price_filter_active', is_active_widget( false, false, 'woocommerce_price_filter', true ) ) && ! is_admin() ) {
 
 			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
@@ -838,7 +838,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Price Filter post filter
+	 * Price Filter post filter.
 	 *
 	 * @param array $filtered_posts
 	 * @return array

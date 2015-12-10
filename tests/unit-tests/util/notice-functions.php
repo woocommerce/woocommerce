@@ -3,14 +3,14 @@
 namespace WooCommerce\Tests\Util;
 
 /**
- * Class Notice_Functions
+ * Class Notice_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.2
  */
 class Notice_Functions extends \WC_Unit_Test_Case {
 
 	/**
-	 * Clear out notices after each test
+	 * Clear out notices after each test.
 	 *
 	 * @since 2.2
 	 */
@@ -20,7 +20,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_notice_count()
+	 * Test wc_notice_count().
 	 *
 	 * @since 2.2
 	 */
@@ -44,7 +44,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_has_notice()
+	 * Test wc_has_notice().
 	 *
 	 * @since 2.2
 	 */
@@ -60,7 +60,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_notice_add_notice()
+	 * Test wc_notice_add_notice().
 	 *
 	 * @since 2.2
 	 */
@@ -83,7 +83,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_clear_notices()
+	 * Test wc_clear_notices().
 	 *
 	 * @since 2.2
 	 */
@@ -95,7 +95,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_print_notices()
+	 * Test wc_print_notices().
 	 *
 	 * @since 2.2
 	 */
@@ -111,7 +111,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test actions that print the notices
+	 * Test actions that print the notices.
 	 *
 	 * @since 2.2
 	 */
@@ -122,7 +122,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_print_notice() w/ success type
+	 * Test wc_print_notice() w/ success type.
 	 *
 	 * @since 2.2
 	 */
@@ -134,7 +134,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_print_notice() w/ notice type
+	 * Test wc_print_notice() w/ notice type.
 	 *
 	 * @since 2.2
 	 */
@@ -146,7 +146,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_print_notice() w/ error type
+	 * Test wc_print_notice() w/ error type.
 	 *
 	 * @since 2.2
 	 */
@@ -159,7 +159,7 @@ class Notice_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_notices()
+	 * Test wc_get_notices().
 	 *
 	 * @since 2.2
 	 */

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2013, 2014 MasterCard International Incorporated
+ * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
@@ -58,9 +58,6 @@ class Simplify_HTTP
         "get" => self::GET,
         "delete" => self::DELETE);
 
-    /**
-     * @param string $url
-     */
     private function request($url, $method, $authentication, $payload = '')
     {
         if ($authentication->publicKey == null) {
@@ -129,7 +126,7 @@ class Simplify_HTTP
     /**
      * Handles Simplify API requests
      *
-     * @param string $url
+     * @param $url
      * @param $method
      * @param $authentication
      * @param string $payload
@@ -170,9 +167,9 @@ class Simplify_HTTP
     /**
      * Handles Simplify OAuth requests
      *
-     * @param string $url
-     * @param string $payload
-     * @param Simplify_Authentication $authentication
+     * @param $url
+     * @param $payload
+     * @param $authentication
      * @return mixed
      * @throws Simplify_AuthenticationException
      * @throws Simplify_ObjectNotFoundException
@@ -200,9 +197,9 @@ class Simplify_HTTP
 
             if ( $error == 'invalid_request'){
                 throw new Simplify_BadRequestException("", $status, $this->buildOauthError('Error during OAuth request', $error, $error_description));
-            }else if ( $error == 'unsupported_grant_type'){
+            }else if ($error == 'unsupported_grant_type'){
                 throw new Simplify_BadRequestException("", $status, $this->buildOauthError('Unsupported grant type in OAuth request', $error, $error_description));
-            }else if ( $error == 'invalid_scope'){
+            }else if ($error == 'invalid_scope'){
                 throw new Simplify_BadRequestException("", $status, $this->buildOauthError('Invalid scope in OAuth request', $error, $error_description));
             }else{
                 throw new Simplify_BadRequestException("", $status, $this->buildOauthError('Unknown OAuth error', $error, $error_description));
@@ -212,11 +209,11 @@ class Simplify_HTTP
 
         } else if ($status == self::HTTP_UNAUTHORIZED){
 
-            if ( $error == 'access_denied'){
+            if ($error == 'access_denied'){
                 throw new Simplify_AuthenticationException("", $status, $this->buildOauthError('Access denied for OAuth request', $error, $error_description));
-            }else if ( $error == 'invalid_client'){
+            }else if ($error == 'invalid_client'){
                 throw new Simplify_AuthenticationException("", $status, $this->buildOauthError('Invalid client ID in OAuth request', $error, $error_description));
-            }else if ( $error == 'unauthorized_client'){
+            }else if ($error == 'unauthorized_client'){
                 throw new Simplify_AuthenticationException("", $status, $this->buildOauthError('Unauthorized client in OAuth request', $error, $error_description));
             }else{
                 throw new Simplify_AuthenticationException("", $status, $this->buildOauthError('Unknown authentication error', $error, $error_description));
@@ -228,9 +225,6 @@ class Simplify_HTTP
         throw new Simplify_SystemException("An unexpected error has been raised.  Looks like there's something wrong at our end." , $status, $object);
     }
 
-    /**
-     * @param Simplify_Authentication $authentication
-     */
     public function jwsDecode($authentication, $hash)
     {
         if ($authentication->publicKey == null) {
@@ -277,10 +271,6 @@ class Simplify_HTTP
         }
     }
 
-    /**
-     * @param string $payload
-     * @param boolean $hasPayload
-     */
     private function jwsEncode($authentication, $url, $payload, $hasPayload)
     {
         // TODO - better seeding of RNG
@@ -309,9 +299,6 @@ class Simplify_HTTP
         return $msg . "." . $this->jwsSign($authentication->privateKey, $msg);
     }
 
-    /**
-     * @param string $msg
-     */
     private function jwsSign($privateKey, $msg) {
         $decodedPrivateKey = $this->jwsUrlSafeDecode64($privateKey);
         $sig = hash_hmac('sha256', $msg, $decodedPrivateKey, true);
@@ -319,9 +306,6 @@ class Simplify_HTTP
         return $this->jwsUrlSafeEncode64($sig);
     }
 
-    /**
-     * @param string $header
-     */
     private function jwsVerifyHeader($header, $url, $publicKey) {
 
 	    $hdr = json_decode($header, true);
@@ -375,16 +359,10 @@ class Simplify_HTTP
     }
 
 
-    /**
-     * @param string $msg
-     */
     private function jwsVerifySignature($privateKey, $msg, $expectedSig) {
         return $this->jwsSign($privateKey, $msg) == $expectedSig;
     }
 
-    /**
-     * @param string $reason
-     */
     private function jwsAuthError($reason) {
         throw new Simplify_AuthenticationException("JWS authentication failure: " . $reason);
     }
@@ -398,9 +376,6 @@ class Simplify_HTTP
         return strpos($k, "lvpb") === 0;
     }
 
-    /**
-     * @param string $s
-     */
     private function jwsUrlSafeEncode64($s) {
         return str_replace(array('+', '/', '='),
                            array('-', '_', ''),
@@ -420,9 +395,6 @@ class Simplify_HTTP
         return base64_decode(str_replace(array('-', '_'), array('+', '/'), $s));
     }
 
-    /**
-     * @param string $msg
-     */
     private function buildOauthError($msg, $error, $error_description){
 
         return array(

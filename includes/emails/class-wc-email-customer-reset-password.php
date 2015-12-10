@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
 
 /**
- * Customer Reset Password
+ * Customer Reset Password.
  *
  * An email sent to the customer when they reset their password.
  *
@@ -29,13 +29,14 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	public $reset_key;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
 
 		$this->id               = 'customer_reset_password';
 		$this->title            = __( 'Reset password', 'woocommerce' );
 		$this->description      = __( 'Customer "reset password" emails are sent when customers reset their passwords.', 'woocommerce' );
+		$this->customer_email   = true;
 
 		$this->template_html    = 'emails/customer-reset-password.php';
 		$this->template_plain   = 'emails/plain/customer-reset-password.php';
@@ -78,16 +79,15 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	 * @return string
 	 */
 	function get_content_html() {
-		ob_start();
-		wc_get_template( $this->template_html, array(
+		return wc_get_template_html( $this->template_html, array(
 			'email_heading' => $this->get_heading(),
 			'user_login'    => $this->user_login,
 			'reset_key'     => $this->reset_key,
 			'blogname'      => $this->get_blogname(),
 			'sent_to_admin' => false,
-			'plain_text'    => false
+			'plain_text'    => false,
+			'email'			=> $this
 		) );
-		return ob_get_clean();
 	}
 
 	/**
@@ -97,16 +97,15 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	 * @return string
 	 */
 	function get_content_plain() {
-		ob_start();
-		wc_get_template( $this->template_plain, array(
+		return wc_get_template_html( $this->template_plain, array(
 			'email_heading' => $this->get_heading(),
 			'user_login'    => $this->user_login,
 			'reset_key'     => $this->reset_key,
 			'blogname'      => $this->get_blogname(),
 			'sent_to_admin' => false,
-			'plain_text'    => true
+			'plain_text'    => true,
+			'email'			=> $this
 		) );
-		return ob_get_clean();
 	}
 }
 

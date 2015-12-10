@@ -4,10 +4,10 @@
  *
  * Functions for cart specific things.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Core
+ * @package  WooCommerce/Functions
+ * @version  2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Prevent password protected products being added to the cart
+ * Prevent password protected products being added to the cart.
  *
  * @param  bool $passed
  * @param  int $product_id
@@ -31,17 +31,17 @@ function wc_protected_product_add_to_cart( $passed, $product_id ) {
 add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_cart', 10, 2 );
 
 /**
- * Clears the cart session when called
+ * Clears the cart session when called.
  */
 function wc_empty_cart() {
-	if ( ! isset( WC()->cart ) || WC()->cart == '' ) {
+	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
 	WC()->cart->empty_cart( false );
 }
 
 /**
- * Load the persistent cart
+ * Load the persistent cart.
  *
  * @param string $user_login
  * @param WP_User $user
@@ -52,7 +52,7 @@ function wc_load_persistent_cart( $user_login, $user ) {
 		return;
 	}
 
-	if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || sizeof( WC()->session->cart ) === 0 ) {
+	if ( empty( WC()->session->cart ) || ! is_array( WC()->session->cart ) || 0 === sizeof( WC()->session->cart ) ) {
 		WC()->session->cart = $saved_cart['cart'];
 	}
 }
@@ -145,7 +145,7 @@ function wc_clear_cart_after_payment() {
 add_action( 'get_header', 'wc_clear_cart_after_payment' );
 
 /**
- * Get the subtotal
+ * Get the subtotal.
  *
  * @access public
  * @return string
@@ -155,7 +155,7 @@ function wc_cart_totals_subtotal_html() {
 }
 
 /**
- * Get shipping methods
+ * Get shipping methods.
  *
  * @access public
  */
@@ -165,12 +165,18 @@ function wc_cart_totals_shipping_html() {
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
-		wc_get_template( 'cart/cart-shipping.php', array( 'package' => $package, 'available_methods' => $package['rates'], 'show_package_details' => ( sizeof( $packages ) > 1 ), 'index' => $i, 'chosen_method' => $chosen_method ) );
+		wc_get_template( 'cart/cart-shipping.php', array(
+			'package'              => $package,
+			'available_methods'    => $package['rates'],
+			'show_package_details' => sizeof( $packages ) > 1,
+			'index'                => $i,
+			'chosen_method'        => $chosen_method
+		) );
 	}
 }
 
 /**
- * Get taxes total
+ * Get taxes total.
  *
  * @access public
  */
@@ -179,7 +185,7 @@ function wc_cart_totals_taxes_total_html() {
 }
 
 /**
- * Get a coupon label
+ * Get a coupon label.
  *
  * @access public
  * @param string $coupon
@@ -192,7 +198,7 @@ function wc_cart_totals_coupon_label( $coupon ) {
 }
 
 /**
- * Get a coupon value
+ * Get a coupon value.
  *
  * @access public
  * @param string $coupon
@@ -200,7 +206,7 @@ function wc_cart_totals_coupon_label( $coupon ) {
 function wc_cart_totals_coupon_html( $coupon ) {
 	if ( is_string( $coupon ) ) {
 		$coupon = new WC_Coupon( $coupon );
-    }
+	}
 
 	$value  = array();
 
@@ -214,17 +220,17 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	if ( $coupon->enable_free_shipping() ) {
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
-    }
+	}
 
-    // get rid of empty array elements
-    $value = array_filter( $value );
-	$value = implode( ', ', $value ) . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', urlencode( $coupon->code ), defined( 'WOOCOMMERCE_CHECKOUT' ) ? WC()->cart->get_checkout_url() : WC()->cart->get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->code ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	// get rid of empty array elements
+	$value = array_filter( $value );
+	$value = implode( ', ', $value ) . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', urlencode( $coupon->code ), defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->code ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo apply_filters( 'woocommerce_cart_totals_coupon_html', $value, $coupon );
 }
 
 /**
- * Get order total html including inc tax if needed
+ * Get order total html including inc tax if needed.
  *
  * @access public
  */
@@ -243,7 +249,10 @@ function wc_cart_totals_order_total_html() {
 		}
 
 		if ( ! empty( $tax_string_array ) ) {
-			$value .= '<small class="includes_tax">' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) ) . '</small>';
+			$estimated_text = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
+				? sprintf( ' ' . __( 'estimated for %s', 'woocommerce' ), WC()->countries->estimated_for_prefix() . __( WC()->countries->countries[ WC()->countries->get_base_country() ], 'woocommerce' ) )
+				: '';
+			$value .= '<small class="includes_tax">' . sprintf( __( '(includes %s%s)', 'woocommerce' ), implode( ', ', $tax_string_array ), $estimated_text ) . '</small>';
 		}
 	}
 
@@ -251,7 +260,7 @@ function wc_cart_totals_order_total_html() {
 }
 
 /**
- * Get the fee value
+ * Get the fee value.
  *
  * @param object $fee
  */
@@ -262,7 +271,7 @@ function wc_cart_totals_fee_html( $fee ) {
 }
 
 /**
- * Get a shipping methods full label including price
+ * Get a shipping methods full label including price.
  * @param  WC_Shipping_Rate $method
  * @return string
  */
@@ -289,7 +298,7 @@ function wc_cart_totals_shipping_method_label( $method ) {
 }
 
 /**
- * Round discount
+ * Round discount.
  *
  * @param  float $value
  * @param  int $precision
@@ -301,4 +310,34 @@ function wc_cart_round_discount( $value, $precision ) {
 	} else {
 		return round( $value, $precision );
 	}
+}
+
+/**
+ * Gets the url to the cart page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to cart page
+ */
+function wc_get_cart_url() {
+	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+}
+
+/**
+ * Gets the url to the checkout page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to checkout page
+ */
+function wc_get_checkout_url() {
+	$checkout_url = wc_get_page_permalink( 'checkout' );
+	if ( $checkout_url ) {
+		// Force SSL if needed
+		if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
+			$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
+		}
+	}
+
+	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 }

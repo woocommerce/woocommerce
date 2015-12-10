@@ -106,11 +106,24 @@ class WC_API_Products extends WC_API_Resource {
 			array( array( $this, 'create_product_attribute' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
-		# GET/PUT/DELETE /attributes/<id>
+		# GET/PUT/DELETE /products/attributes/<id>
 		$routes[ $this->base . '/attributes/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_product_attribute' ), WC_API_Server::READABLE ),
 			array( array( $this, 'edit_product_attribute' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 			array( array( $this, 'delete_product_attribute' ), WC_API_Server::DELETABLE ),
+		);
+
+		# GET/POST /products/attributes/<attribute_id>/terms
+		$routes[ $this->base . '/attributes/(?P<attribute_id>\d+)/terms' ] = array(
+			array( array( $this, 'get_product_attribute_terms' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_product_attribute_term' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+		);
+
+		# GET/PUT/DELETE /products/attributes/<attribute_id>/terms/<id>
+		$routes[ $this->base . '/attributes/(?P<attribute_id>\d+)/terms/(?P<id>\d+)' ] = array(
+			array( array( $this, 'get_product_attribute_term' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_product_attribute_term' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_product_attribute_term' ), WC_API_Server::DELETABLE ),
 		);
 
 		# POST|PUT /products/bulk
@@ -399,8 +412,14 @@ class WC_API_Products extends WC_API_Resource {
 			$this->save_product_meta( $id, $data );
 
 			// Save variations
-			if ( isset( $data['type'] ) && 'variable' == $data['type'] && isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
-				$this->save_variations( $id, $data );
+			$product = get_product( $id );
+			if ( $product->is_type( 'variable' ) ) {
+				if ( isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
+					$this->save_variations( $id, $data );
+				} else {
+					// Just sync variations
+					WC_Product_Variable::sync( $id );
+				}
 			}
 
 			do_action( 'woocommerce_api_edit_product', $id, $data );
@@ -415,11 +434,11 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Delete a product
+	 * Delete a product.
 	 *
 	 * @since 2.2
-	 * @param int $id the product ID
-	 * @param bool $force true to permanently delete order, false to move to trash
+	 * @param int $id the product ID.
+	 * @param bool $force true to permanently delete order, false to move to trash.
 	 * @return array
 	 */
 	public function delete_product( $id, $force = false ) {
@@ -432,7 +451,25 @@ class WC_API_Products extends WC_API_Resource {
 
 		do_action( 'woocommerce_api_delete_product', $id, $this );
 
-		return $this->delete( $id, 'product', ( 'true' === $force ) );
+		$parent_id = wp_get_post_parent_id( $id );
+		$result    = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_api_cannot_delete_product', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product' ), array( 'status' => 500 ) );
+		}
+
+		// Delete parent product transients.
+		if ( $parent_id ) {
+			wc_delete_product_transients( $parent_id );
+		}
+
+		if ( $force ) {
+			return array( 'message' => sprintf( __( 'Permanently deleted %s', 'woocommerce' ), 'product' ) );
+		} else {
+			$this->server->send_status( '202' );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product' ) );
+		}
 	}
 
 	/**
@@ -463,7 +500,7 @@ class WC_API_Products extends WC_API_Resource {
 				'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
 				'reviewer_name'  => $comment->comment_author,
 				'reviewer_email' => $comment->comment_author_email,
-				'verified'       => (bool) wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $id ),
+				'verified'       => wc_review_is_from_verified_owner( $comment->comment_ID ),
 			);
 		}
 
@@ -1040,6 +1077,8 @@ class WC_API_Products extends WC_API_Resource {
 				'value'   => $args['sku'],
 				'compare' => '='
 			);
+
+			$query_args['post_type'] = array( 'product', 'product_variation' );
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );
@@ -1055,8 +1094,6 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return WC_Product
 	 */
 	private function get_product_data( $product ) {
-		$prices_precision = wc_get_price_decimals();
-
 		return array(
 			'title'              => $product->get_title(),
 			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
@@ -1068,9 +1105,9 @@ class WC_API_Products extends WC_API_Resource {
 			'virtual'            => $product->is_virtual(),
 			'permalink'          => $product->get_permalink(),
 			'sku'                => $product->get_sku(),
-			'price'              => wc_format_decimal( $product->get_price(), $prices_precision ),
-			'regular_price'      => wc_format_decimal( $product->get_regular_price(), $prices_precision ),
-			'sale_price'         => $product->get_sale_price() ? wc_format_decimal( $product->get_sale_price(), $prices_precision ) : null,
+			'price'              => $product->get_price(),
+			'regular_price'      => $product->get_regular_price(),
+			'sale_price'         => $product->get_sale_price() ? $product->get_sale_price() : null,
 			'price_html'         => $product->get_price_html(),
 			'taxable'            => $product->is_taxable(),
 			'tax_status'         => $product->get_tax_status(),
@@ -1088,7 +1125,7 @@ class WC_API_Products extends WC_API_Resource {
 			'on_sale'            => $product->is_on_sale(),
 			'product_url'        => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'        => $product->is_type( 'external' ) ? $product->get_button_text() : '',
-			'weight'             => $product->get_weight() ? wc_format_decimal( $product->get_weight(), 2 ) : null,
+			'weight'             => $product->get_weight() ? $product->get_weight() : null,
 			'dimensions'         => array(
 				'length' => $product->length,
 				'width'  => $product->width,
@@ -1133,8 +1170,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return array
 	 */
 	private function get_variation_data( $product ) {
-		$prices_precision = wc_get_price_decimals();
-		$variations       = array();
+		$variations = array();
 
 		foreach ( $product->get_children() as $child_id ) {
 
@@ -1152,9 +1188,9 @@ class WC_API_Products extends WC_API_Resource {
 					'virtual'           => $variation->is_virtual(),
 					'permalink'         => $variation->get_permalink(),
 					'sku'               => $variation->get_sku(),
-					'price'             => wc_format_decimal( $variation->get_price(), $prices_precision ),
-					'regular_price'     => wc_format_decimal( $variation->get_regular_price(), $prices_precision ),
-					'sale_price'        => $variation->get_sale_price() ? wc_format_decimal( $variation->get_sale_price(), $prices_precision ) : null,
+					'price'             => $variation->get_price(),
+					'regular_price'     => $variation->get_regular_price(),
+					'sale_price'        => $variation->get_sale_price() ? $variation->get_sale_price() : null,
 					'taxable'           => $variation->is_taxable(),
 					'tax_status'        => $variation->get_tax_status(),
 					'tax_class'         => $variation->get_tax_class(),
@@ -1165,7 +1201,7 @@ class WC_API_Products extends WC_API_Resource {
 					'purchaseable'      => $variation->is_purchasable(),
 					'visible'           => $variation->variation_is_visible(),
 					'on_sale'           => $variation->is_on_sale(),
-					'weight'            => $variation->get_weight() ? wc_format_decimal( $variation->get_weight(), 2 ) : null,
+					'weight'            => $variation->get_weight() ? $variation->get_weight() : null,
 					'dimensions'        => array(
 						'length' => $variation->length,
 						'width'  => $variation->width,
@@ -1213,10 +1249,11 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save product meta
 	 *
-	 * @since 2.2
-	 * @param int $product_id
-	 * @param array $data
+	 * @since  2.2
+	 * @param  int $product_id
+	 * @param  array $data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function save_product_meta( $product_id, $data ) {
 		global $wpdb;
@@ -1293,8 +1330,8 @@ class WC_API_Products extends WC_API_Resource {
 			$attributes = array();
 
 			foreach ( $data['attributes'] as $attribute ) {
-				$is_taxonomy    = 0;
-				$taxonomy       = 0;
+				$is_taxonomy = 0;
+				$taxonomy    = 0;
 
 				if ( ! isset( $attribute['name'] ) ) {
 					continue;
@@ -1314,15 +1351,14 @@ class WC_API_Products extends WC_API_Resource {
 				if ( $is_taxonomy ) {
 
 					if ( isset( $attribute['options'] ) ) {
-						// Select based attributes - Format values (posted values are slugs)
-						if ( is_array( $attribute['options'] ) ) {
-							$values = array_map( 'sanitize_title', $attribute['options'] );
+						$options = $attribute['options'];
 
-						// Text based attributes - Posted values are term names - don't change to slugs
-						} else {
-							$values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute['options'] ) );
+						if ( ! is_array( $attribute['options'] ) ) {
+							// Text based attributes - Posted values are term names
+							$options = explode( WC_DELIMITER, $options );
 						}
 
+						$values = array_map( 'wc_sanitize_term_text_based', $options );
 						$values = array_filter( $values, 'strlen' );
 					} else {
 						$values = array();
@@ -1680,10 +1716,11 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save variations
 	 *
-	 * @since 2.2
-	 * @param int $id
-	 * @param array $data
+	 * @since  2.2
+	 * @param  int $id
+	 * @param  array $data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function save_variations( $id, $data ) {
 		global $wpdb;
@@ -1801,17 +1838,17 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( 'yes' === $managing_stock ) {
+				$backorders = get_post_meta( $variation_id, '_backorders', true );
+
 				if ( isset( $variation['backorders'] ) ) {
 					if ( 'notify' == $variation['backorders'] ) {
 						$backorders = 'notify';
 					} else {
 						$backorders = ( true === $variation['backorders'] ) ? 'yes' : 'no';
 					}
-				} else {
-					$backorders = 'no';
 				}
 
-				update_post_meta( $variation_id, '_backorders', $backorders );
+				update_post_meta( $variation_id, '_backorders', '' === $backorders ? 'no' : $backorders );
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
@@ -1912,6 +1949,11 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $variation_id, '_downloadable_files', '' );
 			}
 
+			// Description.
+			if ( isset( $variation['description'] ) ) {
+				update_post_meta( $variation_id, '_variation_description', wp_kses_post( $variation['description'] ) );
+			}
+
 			// Update taxonomies
 			if ( isset( $variation['attributes'] ) ) {
 				$updated_attribute_keys = array();
@@ -1921,6 +1963,7 @@ class WC_API_Products extends WC_API_Resource {
 						continue;
 					}
 
+					$taxonomy   = 0;
 					$_attribute = array();
 
 					if ( isset( $attribute['slug'] ) ) {
@@ -2204,9 +2247,10 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save product images
 	 *
-	 * @since 2.2
-	 * @param array $images
-	 * @param int $id
+	 * @since  2.2
+	 * @param  array $images
+	 * @param  int $id
+	 * @throws WC_API_Exception
 	 */
 	protected function save_product_images( $id, $images ) {
 		if ( is_array( $images ) ) {
@@ -2347,6 +2391,8 @@ class WC_API_Products extends WC_API_Resource {
 		}
 
 		unset( $response );
+
+		do_action( 'woocommerce_api_uploaded_image_from_url', $upload, $image_url, $upload_for  );
 
 		return $upload;
 	}
@@ -2490,13 +2536,13 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Get a listing of product attributes
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param string|null $fields fields to limit response to
 	 * @return array
 	 */
 	public function get_product_attributes( $fields = null ) {
 		try {
-			// Permissions check
+			// Permissions check.
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attributes', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
 			}
@@ -2524,7 +2570,7 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Get the product attribute for the given ID
 	 *
-	 * @since 2.4.0
+	 * @since 2.5.0
 	 * @param string $id product attribute term ID
 	 * @param string|null $fields fields to limit response to
 	 * @return array
@@ -2542,7 +2588,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Permissions check
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_categories', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attributes', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
 			}
 
 			$attribute = $wpdb->get_row( $wpdb->prepare( "
@@ -2573,13 +2619,14 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Validate attribute data.
 	 *
-	 * @since  2.4.0
+	 * @since  2.5.0
 	 * @param  string $name
 	 * @param  string $slug
 	 * @param  string $type
 	 * @param  string $order_by
 	 * @param  bool   $new_data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function validate_attribute_data( $name, $slug, $type, $order_by, $new_data = true ) {
 		if ( empty( $name ) ) {
@@ -2608,10 +2655,10 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Create a new product attribute
+	 * Create a new product attribute.
 	 *
-	 * @since 2.4.0
-	 * @param array $data posted data
+	 * @since 2.5.0
+	 * @param array $data Posted data.
 	 * @return array
 	 */
 	public function create_product_attribute( $data ) {
@@ -2624,7 +2671,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			$data = $data['product_attribute'];
 
-			// Check permissions
+			// Check permissions.
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_attribute', __( 'You do not have permission to create product attributes', 'woocommerce' ), 401 );
 			}
@@ -2635,24 +2682,24 @@ class WC_API_Products extends WC_API_Resource {
 				$data['name'] = '';
 			}
 
-			// Set the attribute slug
+			// Set the attribute slug.
 			if ( ! isset( $data['slug'] ) ) {
 				$data['slug'] = wc_sanitize_taxonomy_name( stripslashes( $data['name'] ) );
 			} else {
 				$data['slug'] = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( stripslashes( $data['slug'] ) ) );
 			}
 
-			// Set attribute type when not sent
+			// Set attribute type when not sent.
 			if ( ! isset( $data['type'] ) ) {
 				$data['type'] = 'select';
 			}
 
-			// Set order by when not sent
+			// Set order by when not sent.
 			if ( ! isset( $data['order_by'] ) ) {
 				$data['order_by'] = 'menu_order';
 			}
 
-			// Validate the attribute data
+			// Validate the attribute data.
 			$this->validate_attribute_data( $data['name'], $data['slug'], $data['type'], $data['order_by'], true );
 
 			$insert = $wpdb->insert(
@@ -2667,7 +2714,7 @@ class WC_API_Products extends WC_API_Resource {
 				array( '%s', '%s', '%s', '%s', '%d' )
 			);
 
-			// Checks for an error in the product creation
+			// Checks for an error in the product creation.
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_attribute', $insert->get_error_message(), 400 );
 			}
@@ -2676,7 +2723,8 @@ class WC_API_Products extends WC_API_Resource {
 
 			do_action( 'woocommerce_api_create_product_attribute', $id, $data );
 
-			// Clear transients
+			// Clear transients.
+			flush_rewrite_rules();
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			$this->server->send_status( 201 );
@@ -2688,10 +2736,10 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Edit a product attribute
+	 * Edit a product attribute.
 	 *
-	 * @since 2.4.0
-	 * @param int $id the attribute ID
+	 * @since 2.5.0
+	 * @param int $id the attribute ID.
 	 * @param array $data
 	 * @return array
 	 */
@@ -2706,7 +2754,7 @@ class WC_API_Products extends WC_API_Resource {
 			$id   = absint( $id );
 			$data = $data['product_attribute'];
 
-			// Check permissions
+			// Check permissions.
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_attribute', __( 'You do not have permission to edit product attributes', 'woocommerce' ), 401 );
 			}
@@ -2735,7 +2783,7 @@ class WC_API_Products extends WC_API_Resource {
 				$attribute_public = $attribute['product_attribute']['has_archives'];
 			}
 
-			// Validate the attribute data
+			// Validate the attribute data.
 			$this->validate_attribute_data( $attribute_name, $attribute_slug, $attribute_type, $attribute_order_by, false );
 
 			$update = $wpdb->update(
@@ -2752,14 +2800,15 @@ class WC_API_Products extends WC_API_Resource {
 				array( '%d' )
 			);
 
-			// Checks for an error in the product creation
+			// Checks for an error in the product creation.
 			if ( false === $update ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_attribute', __( 'Could not edit the attribute', 'woocommerce' ), 400 );
 			}
 
 			do_action( 'woocommerce_api_edit_product_attribute', $id, $data );
 
-			// Clear transients
+			// Clear transients.
+			flush_rewrite_rules();
 			delete_transient( 'wc_attribute_taxonomies' );
 
 			return $this->get_product_attribute( $id );
@@ -2769,17 +2818,17 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Delete a product attribute
+	 * Delete a product attribute.
 	 *
-	 * @since  2.4.0
-	 * @param  int $id the product attribute ID
+	 * @since  2.5.0
+	 * @param  int $id the product attribute ID.
 	 * @return array
 	 */
 	public function delete_product_attribute( $id ) {
 		global $wpdb;
 
 		try {
-			// Check permissions
+			// Check permissions.
 			if ( ! current_user_can( 'manage_product_terms' ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_attribute', __( 'You do not have permission to delete product attributes', 'woocommerce' ), 401 );
 			}
@@ -2818,8 +2867,277 @@ class WC_API_Products extends WC_API_Resource {
 			do_action( 'woocommerce_attribute_deleted', $id, $attribute_name, $taxonomy );
 			do_action( 'woocommerce_api_delete_product_attribute', $id, $this );
 
-			// Clear transients
+			// Clear transients.
+			flush_rewrite_rules();
 			delete_transient( 'wc_attribute_taxonomies' );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get a listing of product attribute terms.
+	 *
+	 * @since 2.5.0
+	 * @param int $attribute_id Attribute ID.
+	 * @param string|null $fields Fields to limit response to.
+	 * @return array
+	 */
+	public function get_product_attribute_terms( $attribute_id, $fields = null ) {
+		try {
+			// Permissions check.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attribute_terms', __( 'You do not have permission to read product attribute terms', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
+			if ( ! $taxonomy ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$args    = array( 'hide_empty' => false );
+			$orderby = wc_attribute_orderby( $taxonomy );
+
+			switch ( $orderby ) {
+				case 'name' :
+					$args['orderby']    = 'name';
+					$args['menu_order'] = false;
+				break;
+				case 'id' :
+					$args['orderby']    = 'id';
+					$args['order']      = 'ASC';
+					$args['menu_order'] = false;
+				break;
+				case 'menu_order' :
+					$args['menu_order'] = 'ASC';
+				break;
+			}
+
+			$terms = get_terms( $taxonomy, $args );
+			$attribute_terms = array();
+
+			foreach ( $terms as $term ) {
+				$attribute_terms[] = array(
+					'id'    => $term->term_id,
+					'slug'  => $term->slug,
+					'name'  => $term->name,
+					'count' => $term->count,
+				);
+			}
+
+			return array( 'product_attribute_terms' => apply_filters( 'woocommerce_api_product_attribute_terms_response', $attribute_terms, $terms, $fields, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Get the product attribute term for the given ID.
+	 *
+	 * @since 2.5.0
+	 * @param int $attribute_id Attribute ID.
+	 * @param string $id Product attribute term ID.
+	 * @param string|null $fields Fields to limit response to.
+	 * @return array
+	 */
+	public function get_product_attribute_term( $attribute_id, $id, $fields = null ) {
+		global $wpdb;
+
+		try {
+			$id = absint( $id );
+
+			// Validate ID
+			if ( empty( $id ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_term_id', __( 'Invalid product attribute ID', 'woocommerce' ), 400 );
+			}
+
+			// Permissions check
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attribute_terms', __( 'You do not have permission to read product attribute terms', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
+			if ( ! $taxonomy ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$term = get_term( $id, $taxonomy );
+
+			if ( is_wp_error( $term ) || is_null( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_term_id', __( 'A product attribute term with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$attribute_term = array(
+				'id'    => $term->term_id,
+				'slug'  => $term->slug,
+				'name'  => $term->name,
+				'count' => $term->count,
+			);
+
+			return array( 'product_attribute_term' => apply_filters( 'woocommerce_api_product_attribute_response', $attribute_term, $id, $fields, $term, $this ) );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Create a new product attribute term.
+	 *
+	 * @since 2.5.0
+	 * @param int $attribute_id Attribute ID.
+	 * @param array $data Posted data.
+	 * @return array
+	 */
+	public function create_product_attribute_term( $attribute_id, $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_attribute_term'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_attribute_term_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_attribute_term' ), 400 );
+			}
+
+			$data = $data['product_attribute_term'];
+
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_attribute', __( 'You do not have permission to create product attributes', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
+			if ( ! $taxonomy ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$data = apply_filters( 'woocommerce_api_create_product_attribute_term_data', $data, $this );
+
+			// Check if attribute term name is specified.
+			if ( ! isset( $data['name'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_attribute_term_name', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'name' ), 400 );
+			}
+
+			$args = array();
+
+			// Set the attribute term slug.
+			if ( isset( $data['slug'] ) ) {
+				$args['slug'] = sanitize_title( wp_unslash( $data['slug'] ) );
+			}
+
+			$term = wp_insert_term( $data['name'], $taxonomy, $args );
+
+			// Checks for an error in the term creation.
+			if ( is_wp_error( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_attribute', $term->get_error_message(), 400 );
+			}
+
+			$id = $term['term_id'];
+
+			do_action( 'woocommerce_api_create_product_attribute_term', $id, $data );
+
+			$this->server->send_status( 201 );
+
+			return $this->get_product_attribute_term( $attribute_id, $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Edit a product attribute term.
+	 *
+	 * @since 2.5.0
+	 * @param int $attribute_id Attribute ID.
+	 * @param int $id the attribute ID.
+	 * @param array $data
+	 * @return array
+	 */
+	public function edit_product_attribute_term( $attribute_id, $id, $data ) {
+		global $wpdb;
+
+		try {
+			if ( ! isset( $data['product_attribute_term'] ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_missing_product_attribute_term_data', sprintf( __( 'No %1$s data specified to edit %1$s', 'woocommerce' ), 'product_attribute_term' ), 400 );
+			}
+
+			$id   = absint( $id );
+			$data = $data['product_attribute_term'];
+
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_attribute', __( 'You do not have permission to edit product attributes', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
+			if ( ! $taxonomy ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$data = apply_filters( 'woocommerce_api_edit_product_attribute_term_data', $data, $this );
+
+			$args = array();
+
+			// Update name.
+			if ( isset( $data['name'] ) ) {
+				$args['name'] = wc_clean( wp_unslash( $data['name'] ) );
+			}
+
+			// Update slug.
+			if ( isset( $data['slug'] ) ) {
+				$args['slug'] = sanitize_title( wp_unslash( $data['slug'] ) );
+			}
+
+			$term = wp_update_term( $id, $taxonomy, $args );
+
+			if ( is_wp_error( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_attribute_term', $term->get_error_message(), 400 );
+			}
+
+			do_action( 'woocommerce_api_edit_product_attribute_term', $id, $data );
+
+			return $this->get_product_attribute_term( $attribute_id, $id );
+		} catch ( WC_API_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a product attribute term.
+	 *
+	 * @since  2.5.0
+	 * @param int $attribute_id Attribute ID.
+	 * @param int $id the product attribute ID.
+	 * @return array
+	 */
+	public function delete_product_attribute_term( $attribute_id, $id ) {
+		global $wpdb;
+
+		try {
+			// Check permissions.
+			if ( ! current_user_can( 'manage_product_terms' ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_product_attribute_term', __( 'You do not have permission to delete product attribute terms', 'woocommerce' ), 401 );
+			}
+
+			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
+
+			if ( ! $taxonomy ) {
+				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
+			}
+
+			$id   = absint( $id );
+			$term = wp_delete_term( $id, $taxonomy );
+
+			if ( ! $term ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product_attribute_term' ), 500 );
+			} else if ( is_wp_error( $term ) ) {
+				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', $term->get_error_message(), 400 );
+			}
+
+			do_action( 'woocommerce_api_delete_product_attribute_term', $id, $this );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {

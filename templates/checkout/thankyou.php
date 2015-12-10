@@ -2,11 +2,11 @@
 /**
  * Thankyou page
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/checkout/thankyou.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
- * will need to copy the new files to your theme to maintain compatibility. We try to do this
- * as little as possible, but it does happen. When this occurs the version of the template file will
+ * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
+ * will need to copy the new files to your theme to maintain compatibility. We try to do this.
+ * as little as possible, but it does happen. When this occurs the version of the template file will.
  * be bumped and the readme will list any important changes.
  *
  * @see 	    http://docs.woothemes.com/document/template-structure/
@@ -16,34 +16,27 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( $order ) : ?>
 
 	<?php if ( $order->has_status( 'failed' ) ) : ?>
 
-		<p><?php _e( 'Unfortunately your order cannot be processed as the originating bank/merchant has declined your transaction.', 'woocommerce' ); ?></p>
+		<p class="woocommerce-thankyou-order-failed"><?php _e( 'Unfortunately your order cannot be processed as the originating bank/merchant has declined your transaction. Please attempt your purchase again.', 'woocommerce' ); ?></p>
 
-		<p><?php
-			if ( is_user_logged_in() )
-				_e( 'Please attempt your purchase again or go to your account page.', 'woocommerce' );
-			else
-				_e( 'Please attempt your purchase again.', 'woocommerce' );
-		?></p>
-
-		<p>
+		<p class="woocommerce-thankyou-order-failed-actions">
 			<a href="<?php echo esc_url( $order->get_checkout_payment_url() ); ?>" class="button pay"><?php _e( 'Pay', 'woocommerce' ) ?></a>
 			<?php if ( is_user_logged_in() ) : ?>
-			<a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" class="button pay"><?php _e( 'My Account', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" class="button pay"><?php _e( 'My Account', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 		</p>
 
 	<?php else : ?>
 
-		<p><?php echo apply_filters( 'woocommerce_thankyou_order_received_text', __( 'Thank you. Your order has been received.', 'woocommerce' ), $order ); ?></p>
+		<p class="woocommerce-thankyou-order-received"><?php echo apply_filters( 'woocommerce_thankyou_order_received_text', __( 'Thank you. Your order has been received.', 'woocommerce' ), $order ); ?></p>
 
-		<ul class="order_details">
+		<ul class="woocommerce-thankyou-order-details order_details">
 			<li class="order">
 				<?php _e( 'Order Number:', 'woocommerce' ); ?>
 				<strong><?php echo $order->get_order_number(); ?></strong>
@@ -72,6 +65,6 @@ if ( $order ) : ?>
 
 <?php else : ?>
 
-	<p><?php echo apply_filters( 'woocommerce_thankyou_order_received_text', __( 'Thank you. Your order has been received.', 'woocommerce' ), null ); ?></p>
+	<p class="woocommerce-thankyou-order-received"><?php echo apply_filters( 'woocommerce_thankyou_order_received_text', __( 'Thank you. Your order has been received.', 'woocommerce' ), null ); ?></p>
 
 <?php endif; ?>

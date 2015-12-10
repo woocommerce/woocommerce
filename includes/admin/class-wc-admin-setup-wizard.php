@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Setup_Wizard class
+ * WC_Admin_Setup_Wizard class.
  */
 class WC_Admin_Setup_Wizard {
 
@@ -48,7 +48,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Show the setup wizard
+	 * Show the setup wizard.
 	 */
 	public function setup_wizard() {
 		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) {
@@ -131,11 +131,11 @@ class WC_Admin_Setup_Wizard {
 
 	public function get_next_step_link() {
 		$keys = array_keys( $this->steps );
-		return add_query_arg( 'step', $keys[ array_search( $this->step, array_keys( $this->steps ) ) + 1 ], remove_query_arg( 'translation_updated' ) );
+		return add_query_arg( 'step', $keys[ array_search( $this->step, array_keys( $this->steps ) ) + 1 ] );
 	}
 
 	/**
-	 * Setup Wizard Header
+	 * Setup Wizard Header.
 	 */
 	public function setup_wizard_header() {
 		?>
@@ -155,7 +155,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Setup Wizard Footer
+	 * Setup Wizard Footer.
 	 */
 	public function setup_wizard_footer() {
 		?>
@@ -168,7 +168,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Output the steps
+	 * Output the steps.
 	 */
 	public function setup_wizard_steps() {
 		$ouput_steps = $this->steps;
@@ -189,7 +189,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Output the content for the current step
+	 * Output the content for the current step.
 	 */
 	public function setup_wizard_content() {
 		echo '<div class="wc-setup-content">';
@@ -198,36 +198,22 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Introduction step
+	 * Introduction step.
 	 */
 	public function wc_setup_introduction() {
-		$locale = get_locale();
-
-		if ( isset( $_GET['translation_updated'] ) ) {
-			WC_Language_Pack_Upgrader::language_update_messages();
-		} elseif( 'en_US' !== $locale && WC_Language_Pack_Upgrader::has_available_update( $locale ) ) {
-			?>
-			<div class="woocommerce-message woocommerce-language-pack">
-				<p><?php printf( esc_html__( 'WooCommerce is available in %s. Would you like to use this translation?', 'woocommerce' ), $locale ); ?></p>
-				<p class="submit">
-					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'index.php?page=wc-setup&action=translation_upgrade' ), 'setup_language' ) ); ?>" class="button-primary"><?php _e( 'Install Translation', 'woocommerce' ); ?></a>
-				</p>
-			</div>
-			<?php
-		}
 		?>
 		<h1><?php _e( 'Welcome to the world of WooCommerce!', 'woocommerce' ); ?></h1>
 		<p><?php _e( 'Thank you for choosing WooCommerce to power your online store! This quick setup wizard will help you configure the basic settings. <strong>It’s completely optional and shouldn’t take longer than five minutes.</strong>', 'woocommerce' ); ?></p>
 		<p><?php _e( 'No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard. Come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
-			<a href="<?php echo esc_url( wp_get_referer() ? wp_get_referer() : admin_url( 'plugins.php' ) ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( admin_url() ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
 		<?php
 	}
 
 	/**
-	 * Page setup
+	 * Page setup.
 	 */
 	public function wc_setup_pages() {
 		?>
@@ -277,7 +263,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save Page Settings
+	 * Save Page Settings.
 	 */
 	public function wc_setup_pages_save() {
 		check_admin_referer( 'wc-setup' );
@@ -288,7 +274,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Locale settings
+	 * Locale settings.
 	 */
 	public function wc_setup_locale() {
 		$user_location  = WC_Geolocation::geolocate_ip();
@@ -318,7 +304,7 @@ class WC_Admin_Setup_Wizard {
 				<tr>
 					<th scope="row"><label for="currency_code"><?php _e( 'Which currency will your store use?', 'woocommerce' ); ?></label></th>
 					<td>
-						<select id="currency_code" name="currency_code" required style="width:100%;" data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+						<select id="currency_code" name="currency_code" style="width:100%;" data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
 							<option value=""><?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 							<?php
 							foreach ( get_woocommerce_currencies() as $code => $name ) {
@@ -386,7 +372,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save Locale Settings
+	 * Save Locale Settings.
 	 */
 	public function wc_setup_locale_save() {
 		check_admin_referer( 'wc-setup' );
@@ -412,7 +398,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Shipping and taxes
+	 * Shipping and taxes.
 	 */
 	public function wc_setup_shipping_taxes() {
 		$domestic                         = new WC_Shipping_Flat_Rate();
@@ -543,7 +529,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save shipping and tax options
+	 * Save shipping and tax options.
 	 */
 	public function wc_setup_shipping_taxes_save() {
 		check_admin_referer( 'wc-setup' );
@@ -637,7 +623,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Payments Step
+	 * Payments Step.
 	 */
 	public function wc_setup_payments() {
 		$paypal_settings = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
@@ -696,7 +682,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Payments Step save
+	 * Payments Step save.
 	 */
 	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
@@ -725,7 +711,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Actions on the final step
+	 * Actions on the final step.
 	 */
 	private function wc_setup_ready_actions() {
 		WC_Admin_Notices::remove_notice( 'install' );
@@ -740,7 +726,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Final step
+	 * Final step.
 	 */
 	public function wc_setup_ready() {
 		$this->wc_setup_ready_actions();
@@ -771,10 +757,10 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-setup-next-steps-last">
 				<h2><?php _e( 'Learn More', 'woocommerce' ); ?></h2>
 				<ul>
-					<li class="video-walkthrough"><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommerce&amp;utm_medium=Wizard&amp;utm_content=Videos&amp;utm_campaign=Onboarding"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="newsletter"><a href="http://www.woothemes.com/woocommerce-onboarding-email/?utm_source=WooCommerce&amp;utm_medium=Wizard&amp;utm_content=Newsletter&amp;utm_campaign=Onboarding"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
+					<li class="video-walkthrough"><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Videos&amp;utm_campaign=Onboarding"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
+					<li class="newsletter"><a href="http://www.woothemes.com/woocommerce-onboarding-email/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Newsletter&amp;utm_campaign=Onboarding"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
 					<li class="sidekick"><a href="http://www.woothemes.com/sidekick/"><?php _e( 'Follow Sidekick interactive walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=WooCommerce&amp;utm_medium=Wizard&amp;utm_content=Docs&amp;utm_campaign=Onboarding"><?php _e( 'Read more about getting started', 'woocommerce' ); ?></a></li>
+					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Docs&amp;utm_campaign=Onboarding"><?php _e( 'Read more about getting started', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 		</div>

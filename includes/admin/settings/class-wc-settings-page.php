@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_Page' ) ) :
 
 /**
- * WC_Settings_Page
+ * WC_Settings_Page.
  */
 abstract class WC_Settings_Page {
 
@@ -23,7 +23,7 @@ abstract class WC_Settings_Page {
 	protected $label = '';
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
@@ -33,7 +33,7 @@ abstract class WC_Settings_Page {
 	}
 
 	/**
-	 * Add this page to settings
+	 * Add this page to settings.
 	 */
 	public function add_settings_page( $pages ) {
 		$pages[ $this->id ] = $this->label;
@@ -42,7 +42,7 @@ abstract class WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
@@ -51,7 +51,7 @@ abstract class WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections
+	 * Get sections.
 	 *
 	 * @return array
 	 */
@@ -60,14 +60,14 @@ abstract class WC_Settings_Page {
 	}
 
 	/**
-	 * Output sections
+	 * Output sections.
 	 */
 	public function output_sections() {
 		global $current_section;
 
 		$sections = $this->get_sections();
 
-		if ( empty( $sections ) ) {
+		if ( empty( $sections ) || 1 === sizeof( $sections ) ) {
 			return;
 		}
 
@@ -83,7 +83,7 @@ abstract class WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
 		$settings = $this->get_settings();
@@ -92,7 +92,7 @@ abstract class WC_Settings_Page {
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		global $current_section;

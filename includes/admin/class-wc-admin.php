@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Admin.
+ * WooCommerce Admin
  *
  * @class       WC_Admin
  * @author      WooThemes
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
@@ -56,12 +56,7 @@ class WC_Admin {
 			switch ( $_GET['page'] ) {
 				case 'wc-setup' :
 					include_once( 'class-wc-admin-setup-wizard.php' );
-					break;
-				case 'wc-about' :
-				case 'wc-credits' :
-				case 'wc-translators' :
-					include_once( 'class-wc-admin-welcome.php' );
-					break;
+				break;
 			}
 		}
 
@@ -72,7 +67,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Include admin files conditionally
+	 * Include admin files conditionally.
 	 */
 	public function conditional_includes() {
 		$screen = get_current_screen();
@@ -99,13 +94,13 @@ class WC_Admin {
 	 * Transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
-		if ( ! get_transient( '_wc_activation_redirect' ) || is_network_admin() || isset( $_GET['activate-multi'] ) || ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! get_transient( '_wc_activation_redirect' ) ) {
 			return;
 		}
 
 		delete_transient( '_wc_activation_redirect' );
 
-		if ( ! empty( $_GET['page'] ) && in_array( $_GET['page'], array( 'wc-setup', 'wc-about' ) ) ) {
+		if ( ( ! empty( $_GET['page'] ) && in_array( $_GET['page'], array( 'wc-setup' ) ) ) || is_network_admin() || isset( $_GET['activate-multi'] ) || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
@@ -113,16 +108,11 @@ class WC_Admin {
 		if ( WC_Admin_Notices::has_notice( 'install' ) ) {
 			wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
 			exit;
-
-		// Otherwise, the welcome page
-		} else {
-			wp_safe_redirect( admin_url( 'index.php?page=wc-about' ) );
-			exit;
 		}
 	}
 
 	/**
-	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin
+	 * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from accessing admin.
 	 */
 	public function prevent_admin_access() {
 		$prevent_access = false;
@@ -140,7 +130,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Preview email template
+	 * Preview email template.
 	 *
 	 * @return string
 	 */
@@ -175,7 +165,7 @@ class WC_Admin {
 	}
 
 	/**
-	 * Change the admin footer text on WooCommerce admin pages
+	 * Change the admin footer text on WooCommerce admin pages.
 	 *
 	 * @since  2.3
 	 * @param  string $footer_text
@@ -197,11 +187,6 @@ class WC_Admin {
 			unset( $wc_pages['user-edit'] );
 		}
 		$wc_pages = array_flip( $wc_pages );
-
-		// Add the dashboard pages
-		$wc_pages[] = 'dashboard_page_wc-about';
-		$wc_pages[] = 'dashboard_page_wc-credits';
-		$wc_pages[] = 'dashboard_page_wc-translators';
 
 		// Check to make sure we're on a WooCommerce admin page
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {

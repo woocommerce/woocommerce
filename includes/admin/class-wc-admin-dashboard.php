@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Dashboard' ) ) :
 
 /**
- * WC_Admin_Dashboard Class
+ * WC_Admin_Dashboard Class.
  */
 class WC_Admin_Dashboard {
 
@@ -30,7 +30,7 @@ class WC_Admin_Dashboard {
 	}
 
 	/**
-	 * Init dashboard widgets
+	 * Init dashboard widgets.
 	 */
 	public function init() {
 		if ( current_user_can( 'publish_shop_orders' ) ) {
@@ -41,7 +41,7 @@ class WC_Admin_Dashboard {
 	}
 
 	/**
-	 * Show status widget
+	 * Show status widget.
 	 */
 	public function status_widget() {
 		global $wpdb;
@@ -163,14 +163,14 @@ class WC_Admin_Dashboard {
 					<?php printf( _n( "<strong>%s product</strong> out of stock", "<strong>%s products</strong> out of stock", $outofstock_count, 'woocommerce' ), $outofstock_count ); ?>
 				</a>
 			</li>
-			
+
 			<?php do_action( 'woocommerce_after_dashboard_status_widget', $reports ); ?>
 		</ul>
 		<?php
 	}
 
 	/**
-	 * Recent reviews widget
+	 * Recent reviews widget.
 	 */
 	public function recent_reviews() {
 		global $wpdb;
@@ -195,9 +195,9 @@ class WC_Admin_Dashboard {
 				$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
 				echo '<div class="star-rating" title="' . esc_attr( $rating ) . '">
-					<span style="width:'. ( $rating * 20 ) . '%">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
+					<span style="width:' . ( $rating * 20 ) . '%">' . $rating . ' ' . __( 'out of 5', 'woocommerce' ) . '</span></div>';
 
-				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) .'">' . esc_html__( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . __( 'reviewed by', 'woocommerce' ) . ' ' . esc_html( $comment->comment_author ) .'</h4>';
+				echo '<h4 class="meta"><a href="' . get_permalink( $comment->ID ) . '#comment-' . absint( $comment->comment_ID ) .'">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . __( 'reviewed by', 'woocommerce' ) . ' ' . esc_html( $comment->comment_author ) .'</h4>';
 				echo '<blockquote>' . wp_kses_data( $comment->comment_excerpt ) . ' [...]</blockquote></li>';
 
 			}

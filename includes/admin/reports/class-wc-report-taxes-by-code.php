@@ -10,7 +10,7 @@
 class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 	/**
-	 * Get the legend for the main chart sidebar
+	 * Get the legend for the main chart sidebar.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -18,7 +18,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output an export link
+	 * Output an export link.
 	 */
 	public function get_export_button() {
 
@@ -36,7 +36,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output the report
+	 * Output the report.
 	 */
 	public function output_report() {
 
@@ -60,7 +60,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the main chart
+	 * Get the main chart.
 	 *
 	 * @return string
 	 */
@@ -144,9 +144,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 					<th><?php _e( 'Tax', 'woocommerce' ); ?></th>
 					<th><?php _e( 'Rate', 'woocommerce' ); ?></th>
 					<th class="total_row"><?php _e( 'Number of Orders', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Tax Amount', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'This is the sum of the "Tax Rows" tax amount within your orders.', 'woocommerce' ); ?>" href="#">[?]</a></th>
-					<th class="total_row"><?php _e( 'Shipping Tax Amount', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'This is the sum of the "Tax Rows" shipping tax amount within your orders.', 'woocommerce' ); ?>" href="#">[?]</a></th>
-					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ); ?>" href="#">[?]</a></th>
+					<th class="total_row"><?php _e( 'Tax Amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax Rows" tax amount within your orders.', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Shipping Tax Amount', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the sum of the "Tax Rows" shipping tax amount within your orders.', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>
 			<?php if ( $tax_rows ) : ?>

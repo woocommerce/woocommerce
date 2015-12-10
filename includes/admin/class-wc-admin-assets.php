@@ -1,6 +1,6 @@
 <?php
 /**
- * Load assets.
+ * Load assets
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Assets' ) ) :
 
 /**
- * WC_Admin_Assets Class
+ * WC_Admin_Assets Class.
  */
 class WC_Admin_Assets {
 
@@ -101,13 +101,14 @@ class WC_Admin_Assets {
 		wp_register_script( 'flot-time', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot.time' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 		wp_register_script( 'flot-pie', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot.pie' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
 		wp_register_script( 'flot-stack', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot.stack' . $suffix . '.js', array( 'jquery', 'flot' ), WC_VERSION );
+		wp_register_script( 'wc-settings-tax', WC()->plugin_url() . '/assets/js/admin/settings-views-html-settings-tax' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), WC_VERSION );
 
 		// Chosen is @deprecated (2.3) in favour of select2, but is registered for backwards compat
 		wp_register_script( 'ajax-chosen', WC()->plugin_url() . '/assets/js/chosen/ajax-chosen.jquery' . $suffix . '.js', array( 'jquery', 'chosen' ), WC_VERSION );
 		wp_register_script( 'chosen', WC()->plugin_url() . '/assets/js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 
 		// Select2 is the replacement for chosen
-		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.2' );
+		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.4' );
 		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
 		wp_localize_script( 'wc-enhanced-select', 'wc_enhanced_select_params', array(
 			'i18n_matches_1'            => _x( 'One result is available, press enter to select it.', 'enhanced select', 'woocommerce' ),
@@ -250,6 +251,7 @@ class WC_Admin_Assets {
 				'load_shipping'                 => __( 'Load the customer\'s shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
 				'featured_label'                => __( 'Featured', 'woocommerce' ),
 				'prices_include_tax'            => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
+				'tax_based_on'                  => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
 				'round_at_subtotal'             => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
 				'no_customer_selected'          => __( 'No customer selected', 'woocommerce' ),
 				'plugin_url'                    => WC()->plugin_url(),
@@ -351,9 +353,9 @@ class WC_Admin_Assets {
 	}
 
 	/**
-	 * Admin Head
+	 * Admin Head.
 	 *
-	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages
+	 * Outputs some styles in the admin <head> to show icons on the woocommerce admin pages.
 	 */
 	public function product_taxonomy_styles() {
 

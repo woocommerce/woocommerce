@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Transactional Emails Controller
  *
@@ -19,7 +24,7 @@ class WC_Emails {
 	protected static $_instance = null;
 
 	/**
-	 * Main WC_Emails Instance
+	 * Main WC_Emails Instance.
 	 *
 	 * Ensures only one instance of WC_Emails is loaded or can be loaded.
 	 *
@@ -53,7 +58,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Hook in all transactional emails
+	 * Hook in all transactional emails.
 	 */
 	public static function init_transactional_emails() {
 		$email_actions = apply_filters( 'woocommerce_email_actions', array(
@@ -63,11 +68,13 @@ class WC_Emails {
 			'woocommerce_order_status_pending_to_processing',
 			'woocommerce_order_status_pending_to_completed',
 			'woocommerce_order_status_pending_to_cancelled',
+			'woocommerce_order_status_pending_to_failed',
 			'woocommerce_order_status_pending_to_on-hold',
 			'woocommerce_order_status_failed_to_processing',
 			'woocommerce_order_status_failed_to_completed',
 			'woocommerce_order_status_on-hold_to_processing',
 			'woocommerce_order_status_on-hold_to_cancelled',
+			'woocommerce_order_status_on-hold_to_failed',
 			'woocommerce_order_status_completed',
 			'woocommerce_order_fully_refunded',
 			'woocommerce_order_partially_refunded',
@@ -100,6 +107,7 @@ class WC_Emails {
 		// Email Header, Footer and content hooks
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
+		add_action( 'woocommerce_email_order_details', array( $this, 'order_details' ), 10, 4 );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 20, 3 );
@@ -115,21 +123,22 @@ class WC_Emails {
 	}
 
 	/**
-	 * Init email classes
+	 * Init email classes.
 	 */
 	public function init() {
 		// Include email classes
 		include_once( 'emails/class-wc-email.php' );
 
-		$this->emails['WC_Email_New_Order']                 		= include( 'emails/class-wc-email-new-order.php' );
-		$this->emails['WC_Email_Cancelled_Order']           		= include( 'emails/class-wc-email-cancelled-order.php' );
-		$this->emails['WC_Email_Customer_Processing_Order'] 		= include( 'emails/class-wc-email-customer-processing-order.php' );
-		$this->emails['WC_Email_Customer_Completed_Order']  		= include( 'emails/class-wc-email-customer-completed-order.php' );
-		$this->emails['WC_Email_Customer_Refunded_Order']   		= include( 'emails/class-wc-email-customer-refunded-order.php' );
-		$this->emails['WC_Email_Customer_Invoice']          		= include( 'emails/class-wc-email-customer-invoice.php' );
-		$this->emails['WC_Email_Customer_Note']             		= include( 'emails/class-wc-email-customer-note.php' );
-		$this->emails['WC_Email_Customer_Reset_Password']   		= include( 'emails/class-wc-email-customer-reset-password.php' );
-		$this->emails['WC_Email_Customer_New_Account']      		= include( 'emails/class-wc-email-customer-new-account.php' );
+		$this->emails['WC_Email_New_Order'] 		                 = include( 'emails/class-wc-email-new-order.php' );
+		$this->emails['WC_Email_Cancelled_Order'] 		             = include( 'emails/class-wc-email-cancelled-order.php' );
+		$this->emails['WC_Email_Failed_Order'] 		                 = include( 'emails/class-wc-email-failed-order.php' );
+		$this->emails['WC_Email_Customer_Processing_Order'] 		 = include( 'emails/class-wc-email-customer-processing-order.php' );
+		$this->emails['WC_Email_Customer_Completed_Order'] 		     = include( 'emails/class-wc-email-customer-completed-order.php' );
+		$this->emails['WC_Email_Customer_Refunded_Order'] 		     = include( 'emails/class-wc-email-customer-refunded-order.php' );
+		$this->emails['WC_Email_Customer_Invoice'] 		             = include( 'emails/class-wc-email-customer-invoice.php' );
+		$this->emails['WC_Email_Customer_Note'] 		             = include( 'emails/class-wc-email-customer-note.php' );
+		$this->emails['WC_Email_Customer_Reset_Password'] 		     = include( 'emails/class-wc-email-customer-reset-password.php' );
+		$this->emails['WC_Email_Customer_New_Account'] 		         = include( 'emails/class-wc-email-customer-new-account.php' );
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 
@@ -154,7 +163,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_name() {
-		return wp_specialchars_decode( get_option( 'woocommerce_email_from_name' ) );
+		return wp_specialchars_decode( get_option( 'woocommerce_email_from_name' ), ENT_QUOTES );
 	}
 
 	/**
@@ -163,7 +172,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_address() {
-		return get_option( 'woocommerce_email_from_address' );
+		return sanitize_email( get_option( 'woocommerce_email_from_address' ) );
 	}
 
 	/**
@@ -247,6 +256,17 @@ class WC_Emails {
 	}
 
 	/**
+	 * Show the order details table
+	 */
+	public function order_details( $order, $sent_to_admin = false, $plain_text = false, $email = '' ) {
+		if ( $plain_text ) {
+			wc_get_template( 'emails/plain/email-order-details.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email ) );
+		} else {
+			wc_get_template( 'emails/email-order-details.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email ) );
+		}
+	}
+
+	/**
 	 * Add order meta to email templates.
 	 *
 	 * @param mixed $order
@@ -267,7 +287,7 @@ class WC_Emails {
 		$fields = apply_filters( 'woocommerce_email_order_meta_fields', $fields, $sent_to_admin, $order );
 
 		/**
-		 * Deprecated woocommerce_email_order_meta_keys filter
+		 * Deprecated woocommerce_email_order_meta_keys filter.
 		 *
 		 * @since 2.3.0
 		 */
@@ -308,6 +328,15 @@ class WC_Emails {
 	}
 
 	/**
+	 * Is customer detail field valid?
+	 * @param  array  $field
+	 * @return boolean
+	 */
+	public function customer_detail_field_is_valid( $field ) {
+		return isset( $field['label'] ) && ! empty( $field['value'] );
+	}
+
+	/**
 	 * Add customer details to email templates.
 	 *
 	 * @param mixed $order
@@ -332,37 +361,13 @@ class WC_Emails {
 			);
 	    }
 
-		$fields = apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order );
+		$fields = array_filter( apply_filters( 'woocommerce_email_customer_details_fields', $fields, $sent_to_admin, $order ), array( $this, 'customer_detail_field_is_valid' ) );
 
-		if ( $fields ) {
-
-			$heading = $sent_to_admin ? __( 'Customer details', 'woocommerce' ) : __( 'Your details', 'woocommerce' );
-
-			$heading = apply_filters( 'woocommerce_email_custom_details_header', $heading, $sent_to_admin, $order );
-
-			if ( $plain_text ) {
-
-				echo strtoupper( $heading ) . "\n\n";
-
-				foreach ( $fields as $field ) {
-					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo $field['label'] . ': ' . $field['value'] . "\n";
-					}
-				}
-
-			} else {
-
-				echo '<h2>' . $heading . '</h2>';
-
-				foreach ( $fields as $field ) {
-					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo '<p><strong>' . $field['label'] . ':</strong> <span class="text">' . $field['value'] . '</span></p>';
-					}
-				}
-			}
-
+		if ( $plain_text ) {
+			wc_get_template( 'emails/plain/email-customer-details.php', array( 'fields' => $fields ) );
+		} else {
+			wc_get_template( 'emails/email-customer-details.php', array( 'fields' => $fields ) );
 		}
-
 	}
 
 	/**
@@ -377,7 +382,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Get blog name formatted for emails
+	 * Get blog name formatted for emails.
 	 * @return string
 	 */
 	private function get_blogname() {

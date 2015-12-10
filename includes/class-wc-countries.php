@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WooCommerce countries
  *
@@ -250,14 +255,13 @@ class WC_Countries {
 		if ( 'eu_vat' === $type ) {
 			$countries[] = 'MC';
 			$countries[] = 'IM';
-			$countries[] = 'CH';
 		}
 
 		return $countries;
 	}
 
 	/**
-	 * Gets the correct string for shipping - ether 'to the' or 'to'
+	 * Gets the correct string for shipping - either 'to the' or 'to'
 	 * @return string
 	 */
 	public function shipping_to_prefix() {
@@ -339,7 +343,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * Get country address formats
+	 * Get country address formats.
 	 * @return array
 	 */
 	public function get_address_formats() {
@@ -530,8 +534,8 @@ class WC_Countries {
 				'validate'    => array( 'state' )
 			),
 			'postcode' => array(
-				'label'       => __( 'Postcode / Zip', 'woocommerce' ),
-				'placeholder' => __( 'Postcode / Zip', 'woocommerce' ),
+				'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
+				'placeholder' => __( 'Postcode / ZIP', 'woocommerce' ),
 				'required'    => true,
 				'class'       => array( 'form-row-last', 'address-field' ),
 				'clear'       => true,
@@ -785,14 +789,12 @@ class WC_Countries {
 					)
 				),
 				'NP' => array(
-					'postcode_before_city' => true,
 					'state' => array(
-						'label'       => __( 'District', 'woocommerce' ),
-						//'placeholder' => __( 'District', 'woocommerce' ),
+						'label'       => __( 'State / Zone', 'woocommerce' ),
+						//'placeholder' => __( 'State / Zone', 'woocommerce' ),
 					),
 					'postcode' => array(
-						'required' => false,
-						'hidden'   => false
+						'required' => false
 					)
 				),
 				'PL' => array(
@@ -863,8 +865,8 @@ class WC_Countries {
 				),
 				'US' => array(
 					'postcode'  => array(
-						'label'       => __( 'Zip', 'woocommerce' ),
-						'placeholder' => __( 'Zip', 'woocommerce' ),
+						'label'       => __( 'ZIP', 'woocommerce' ),
+						'placeholder' => __( 'ZIP', 'woocommerce' ),
 					),
 					'state'     => array(
 						'label'       => __( 'State', 'woocommerce' ),
@@ -935,7 +937,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * Apply locale and get address fields
+	 * Apply locale and get address fields.
 	 * @param  mixed  $country
 	 * @param  string $type (default: 'billing_')
 	 * @return array
@@ -956,10 +958,11 @@ class WC_Countries {
 		$address_fields = array();
 
 		foreach ( $fields as $key => $value ) {
+			$keys = array_keys( $fields );
 			$address_fields[ $type . $key ] = $value;
 
 			// Add email and phone after company or last
-			if ( $type == 'billing_' && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && $key === end( array_keys( $fields ) ) ) ) ) {
+			if ( $type == 'billing_' && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && $key === end( $keys ) ) ) ) {
 				$address_fields['billing_email'] = array(
 					'label'		=> __( 'Email Address', 'woocommerce' ),
 					'required'	=> true,

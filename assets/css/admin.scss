@@ -114,15 +114,16 @@
 
 	a.button-primary,
 	button.button-primary {
-		background: #cc99c2;
-		border-color: #b366a4;
+		background: #bb77ae;
+		border-color: #aa559a;
 		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		color: #fff;
 		text-decoration: none !important;
+		text-shadow: 0px -1px 1px #8a4f7f, 1px 0px 1px #8a4f7f, 0px 1px 1px #8a4f7f, -1px 0px 1px #8a4f7f;
 
 		&:hover {
-			background: #bb77ae;
+			background: #c480b7;
 			border-color: #aa559a;
 			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 			box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
@@ -130,7 +131,16 @@
 
 		&:active {
 			background: #aa559a;
+			border-color: #873A79;
+			-webkit-box-shadow: inset 0px 2px 0px #873A79;
+			box-shadow: inset 0px 2px 0px #873A79;
+		}
+
+		&:focus {
+			background: #bb77ae;
 			border-color: #aa559a;
+			-webkit-box-shadow: 0px 1px 0px #bb77ae, 0px 0px 2px 1px #aa559a;
+			box-shadow: 0px 1px 0px #bb77ae, 0px 0px 2px 1px #aa559a;
 		}
 	}
 
@@ -147,7 +157,7 @@
 	}
 }
 
-#variable_product_options #message {
+#variable_product_options #message, #variable_product_options .notice {
 	margin: 10px;
 }
 
@@ -181,6 +191,26 @@ mark.amount {
 		padding: 15px 0;
 		margin-left: 1em;
 		width: 200px;
+	}
+}
+
+/**
+ * Help Tip
+ */
+.woocommerce-help-tip {
+	color: #666;
+	display: inline-block;
+	font-size: 13px;
+	font-style: normal;
+	height: 16px;
+	line-height: 16px;
+	position: relative;
+	vertical-align: middle;
+	width: 16px;
+
+	&:after {
+		@include icon( "\e018" );
+		cursor: help;
 	}
 }
 
@@ -447,7 +477,7 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce-order-data {
-	h3.hndle,
+	.hndle,
 	.handlediv {
 		display: none;
 	}
@@ -612,7 +642,7 @@ ul.wc_coupon_list_block {
 			padding-right: 1px;
 		}
 
-		.wc-customer-user {
+		.wc-customer-user, .wc-order-status {
 			label a {
 				float: right;
 			}
@@ -1552,7 +1582,8 @@ ul.wc_coupon_list_block {
 			width: 2em;
 
 			&:after {
-				@include icon("\e01c");
+				@include icon("\f111");
+				font-family: 'Dashicons';
 				line-height: 1.85;
 			}
 		}
@@ -1683,11 +1714,11 @@ table.wp-list-table {
 
 	td.column-thumb img {
 		margin: 0;
-		vertical-align: middle;
 		width: auto;
 		height: auto;
 		max-width: 40px;
 		max-height: 40px;
+		vertical-align: middle;
 	}
 
 	span.na {
@@ -1842,6 +1873,14 @@ a.import_rates {
 	margin-bottom: 0;
 }
 
+#rates-search {
+	float: right;
+	input.wc-tax-rates-search-field {
+		padding: 4px 8px;
+		font-size: 1.2em;
+	}
+}
+
 table.wc_tax_rates,
 table.wc_input_table {
 	width: 100%;
@@ -1897,31 +1936,36 @@ table.wc_input_table {
 
 	th.sort {
 		width: 17px;
-		padding: 0;
+		padding: 0 4px;
 	}
 
 	td.sort {
 		padding: 0 4px;
-		cursor: move;
-		background: #f9f9f9;
-		text-align: center;
-		vertical-align: middle;
+	}
 
-		&:before {
-			content: "\e032";
-			font-family: 'WooCommerce';
+	.ui-sortable:not(.ui-sortable-disabled) {
+		td.sort {
+			cursor: move;
+			background: #f9f9f9;
 			text-align: center;
-			line-height: 1;
-			color: #999;
-			display: block;
-			width: 17px;
-			float: left;
-			height: 100%;
-		}
+			vertical-align: middle;
 
-		&:hover {
 			&:before {
-				color: #333;
+				content: "\e032";
+				font-family: 'WooCommerce';
+				text-align: center;
+				line-height: 1;
+				color: #999;
+				display: block;
+				width: 17px;
+				float: left;
+				height: 100%;
+			}
+
+			&:hover {
+				&:before {
+					color: #333;
+				}
 			}
 		}
 	}
@@ -1973,6 +2017,7 @@ table.wc_input_table {
 }
 
 table.wc_gateways,
+table.wc_emails,
 table.wc_shipping {
 	position: relative;
 
@@ -2035,21 +2080,61 @@ table.wc_shipping {
 			height: 100%;
 		}
 	}
+	.wc-email-settings-table-name {
+		font-weight: 700;
+		span {
+			font-weight: normal;
+			color: #999;
+			margin: 0 0 0 4px !important;
+		}
+	}
+	.wc-email-settings-table-status {
+		text-align: center;
+		width: 1em;
+		.tips {
+			margin: 0 auto;
+		}
+	}
+	.wc-email-settings-table-actions {
+		a {
+			@include ir();
+			padding: 0 !important;
+			height: 2em !important;
+			width: 2em;
+
+			&:after {
+				@include icon("\f111");
+				font-family: 'Dashicons';
+				line-height: 1.85;
+			}
+		}
+	}
 }
 
 img.help_tip {
-	vertical-align: middle;
 	margin: 0 0 0 9px;
+	vertical-align: middle;
 }
 
 .postbox img.help_tip {
-	margin-top: -4px;
+	margin-top: 0px;
+}
+
+.postbox .woocommerce-help-tip {
+	margin: 0 0 0 9px;
 }
 
 .status-enabled,
-.status-disabled {
+.status-manual {
 	font-size: 1.4em;
 	@include ir();
+}
+
+.status-manual {
+	&:before {
+		@include icon( "\e008" );
+		color: #999;
+	}
 }
 
 .status-enabled {
@@ -2061,7 +2146,7 @@ img.help_tip {
 
 .woocommerce {
 	.woo-nav-tab-wrapper {
-		margin-bottom: 16px;
+		margin-bottom: 16px !important;
 	}
 
 	.subsubsub {
@@ -2118,7 +2203,8 @@ img.help_tip {
 			width: 100%;
 		}
 
-		img.help_tip {
+		img.help_tip,
+		.woocommerce-help-tip {
 			padding: 0;
 			margin: -4px 0 0 5px;
 			vertical-align: middle;
@@ -2145,15 +2231,21 @@ img.help_tip {
 			padding-right: inherit;
 		}
 
-		th img.help_tip {
+		th img.help_tip,
+		th .woocommerce-help-tip {
 			margin: 0 -24px 0 0;
 			float: right;
+		}
+
+		.wp-list-table .woocommerce-help-tip {
+			float: none;
 		}
 
 		fieldset {
 			margin-top: 4px;
 
-			img.help_tip {
+			img.help_tip,
+			.woocommerce-help-tip {
 				margin: -3px 0 0 5px;
 			}
 
@@ -2204,6 +2296,10 @@ img.help_tip {
 			label {
 				margin-left: 10px;
 			}
+		}
+
+		.wc_emails_wrapper {
+		    padding: 0 15px 10px 0;
 		}
 	}
 }
@@ -2349,7 +2445,7 @@ img.help_tip {
 }
 
 #woocommerce-product-data {
-	h3.hndle {
+	.hndle {
 		padding: 10px;
 
 		span {
@@ -2536,7 +2632,8 @@ img.help_tip {
 
 			&.advanced_options {
 				a:before {
-					content: "\e01c";
+					content: "\f111";
+					font-family: 'Dashicons';
 				}
 			}
 
@@ -2606,15 +2703,15 @@ img.help_tip {
 #woocommerce-order-downloads,
 #woocommerce-coupon-data {
 	.inside {
-		padding: 0;
 		margin: 0;
+		padding: 0;
 	}
 }
 
 .woocommerce_options_panel,
 .panel {
-	padding: 9px 9px 9px 9px;
-	color:  #555;
+	padding: 9px;
+	color: #555;
 }
 
 .woocommerce_page_settings .woocommerce_options_panel,
@@ -2624,8 +2721,8 @@ img.help_tip {
 
 #woocommerce-product-type-options .panel,
 #woocommerce-product-specs .inside {
-	padding: 9px;
 	margin: 0;
+	padding: 9px;
 }
 
 .woocommerce_options_panel p,
@@ -2648,8 +2745,8 @@ img.help_tip {
 .woocommerce_options_panel .checkbox,
 .woocommerce_variable_attributes .checkbox {
 	width: auto;
+	margin: 3px 0;
 	vertical-align: middle;
-	margin: 7px 0;
 }
 
 .woocommerce_variations,
@@ -2771,6 +2868,7 @@ img.help_tip {
 }
 
 .woocommerce_options_panel {
+	min-height: 175px;
 	box-sizing: border-box;
 
 	.downloadable_files {
@@ -2787,7 +2885,7 @@ img.help_tip {
 	}
 
 	p {
-		margin: 9px 0 9px;
+		margin: 9px 0;
 	}
 
 	p.form-field,
@@ -2838,9 +2936,9 @@ img.help_tip {
 	}
 
 	textarea {
-		vertical-align: top;
 		height: 3.5em;
 		line-height: 1.5em;
+		vertical-align: top;
 	}
 
 	input[type="text"],
@@ -2874,48 +2972,48 @@ img.help_tip {
 	.options_group {
 		border-top: 1px solid white;
 		border-bottom: 1px solid #eee;
-	}
 
-	.options_group:first-child {
-		border-top: 0;
-	}
-
-	.options_group:last-child {
-		border-bottom: 0;
-	}
-
-	.options_group fieldset {
-		margin: 9px 0;
-		font-size: 12px;
-		padding: 5px 9px;
-		line-height: 24px;
-
-		label {
-			width: auto;
-			float: none;
+		&:first-child {
+			border-top: 0;
 		}
 
-		ul {
-			float: left;
-			width: 50%;
-			margin: 0;
-			padding: 0;
+		&:last-child {
+			border-bottom: 0;
+		}
 
-			li {
-				margin: 0;
+		fieldset {
+			margin: 9px 0;
+			font-size: 12px;
+			padding: 5px 9px;
+			line-height: 24px;
+
+			label {
 				width: auto;
+				float: none;
+			}
 
-				input {
+			ul {
+				float: left;
+				width: 50%;
+				margin: 0;
+				padding: 0;
+
+				li {
+					margin: 0;
 					width: auto;
-					float: none;
-					margin-right: 4px;
+
+					input {
+						width: auto;
+						float: none;
+						margin-right: 4px;
+					}
 				}
 			}
-		}
 
-		ul.wc-radios {
-			label {
-				margin-left: 0;
+			ul.wc-radios {
+				label {
+					margin-left: 0;
+				}
 			}
 		}
 	}
@@ -3044,8 +3142,18 @@ img.help_tip {
 		}
 
 		.handlediv {
+			width: 27px;
+
 			&:before {
+				content: "\f142" !important;
+				cursor: pointer;
+				display: inline-block;
+				font: 400 20px/1 "Dashicons";
 				line-height: .5 !important;
+				padding: 8px 10px;
+				position: relative;
+				right: 12px;
+				top: 0;
 			}
 		}
 
@@ -3519,8 +3627,9 @@ img.ui-datepicker-trigger {
 		}
 
 		h3.stats_range {
-			padding: 0 !important;
 			border-bottom-color: #dfdfdf;
+			margin: 0;
+			padding: 0 !important;
 
 			.export_csv {
 				float: right;

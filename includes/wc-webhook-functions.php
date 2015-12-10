@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Webhook functions.
+ * WooCommerce Webhook functions
  *
  * @author   WooThemes
  * @category Core
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Get Webhook statuses
+ * Get Webhook statuses.
  *
  * @since  2.3.0
  * @return array

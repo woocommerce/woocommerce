@@ -1,6 +1,6 @@
 <?php
 /**
- * Add extra profile fields for users in admin.
+ * Add extra profile fields for users in admin
  *
  * @author   WooThemes
  * @category Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Profile' ) ) :
 
 /**
- * WC_Admin_Profile Class
+ * WC_Admin_Profile Class.
  */
 class WC_Admin_Profile {
 
@@ -185,7 +185,7 @@ class WC_Admin_Profile {
 	}
 
 	/**
-	 * Save Address Fields on edit user pages
+	 * Save Address Fields on edit user pages.
 	 *
 	 * @param int $user_id User ID of the user being saved
 	 */

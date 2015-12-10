@@ -367,8 +367,14 @@ class WC_API_Products extends WC_API_Resource {
 			$this->save_product_meta( $id, $data );
 
 			// Save variations
-			if ( isset( $data['type'] ) && 'variable' == $data['type'] && isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
-				$this->save_variations( $id, $data );
+			$product = get_product( $id );
+			if ( $product->is_type( 'variable' ) ) {
+				if ( isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
+					$this->save_variations( $id, $data );
+				} else {
+					// Just sync variations
+					WC_Product_Variable::sync( $id );
+				}
 			}
 
 			do_action( 'woocommerce_api_edit_product', $id, $data );
@@ -383,11 +389,11 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Delete a product
+	 * Delete a product.
 	 *
 	 * @since 2.2
-	 * @param int $id the product ID
-	 * @param bool $force true to permanently delete order, false to move to trash
+	 * @param int $id the product ID.
+	 * @param bool $force true to permanently delete order, false to move to trash.
 	 * @return array
 	 */
 	public function delete_product( $id, $force = false ) {
@@ -400,7 +406,25 @@ class WC_API_Products extends WC_API_Resource {
 
 		do_action( 'woocommerce_api_delete_product', $id, $this );
 
-		return $this->delete( $id, 'product', ( 'true' === $force ) );
+		$parent_id = wp_get_post_parent_id( $id );
+		$result    = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_api_cannot_delete_product', sprintf( __( 'This %s cannot be deleted', 'woocommerce' ), 'product' ), array( 'status' => 500 ) );
+		}
+
+		// Delete parent product transients.
+		if ( $parent_id ) {
+			wc_delete_product_transients( $parent_id );
+		}
+
+		if ( $force ) {
+			return array( 'message' => sprintf( __( 'Permanently deleted %s', 'woocommerce' ), 'product' ) );
+		} else {
+			$this->server->send_status( '202' );
+
+			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product' ) );
+		}
 	}
 
 	/**
@@ -431,7 +455,7 @@ class WC_API_Products extends WC_API_Resource {
 				'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
 				'reviewer_name'  => $comment->comment_author,
 				'reviewer_email' => $comment->comment_author_email,
-				'verified'       => (bool) wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $id ),
+				'verified'       => wc_review_is_from_verified_owner( $comment->comment_ID ),
 			);
 		}
 
@@ -610,6 +634,8 @@ class WC_API_Products extends WC_API_Resource {
 				'value'   => $args['sku'],
 				'compare' => '='
 			);
+
+			$query_args['post_type'] = array( 'product', 'product_variation' );
 		}
 
 		$query_args = $this->merge_query_args( $query_args, $args );
@@ -757,10 +783,11 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save product meta
 	 *
-	 * @since 2.2
-	 * @param int $product_id
-	 * @param array $data
+	 * @since  2.2
+	 * @param  int $product_id
+	 * @param  array $data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function save_product_meta( $product_id, $data ) {
 		global $wpdb;
@@ -837,8 +864,8 @@ class WC_API_Products extends WC_API_Resource {
 			$attributes = array();
 
 			foreach ( $data['attributes'] as $attribute ) {
-				$is_taxonomy    = 0;
-				$taxonomy       = 0;
+				$is_taxonomy = 0;
+				$taxonomy    = 0;
 
 				if ( ! isset( $attribute['name'] ) ) {
 					continue;
@@ -858,15 +885,14 @@ class WC_API_Products extends WC_API_Resource {
 				if ( $is_taxonomy ) {
 
 					if ( isset( $attribute['options'] ) ) {
-						// Select based attributes - Format values (posted values are slugs)
-						if ( is_array( $attribute['options'] ) ) {
-							$values = array_map( 'sanitize_title', $attribute['options'] );
+						$options = $attribute['options'];
 
-						// Text based attributes - Posted values are term names - don't change to slugs
-						} else {
-							$values = array_map( 'wc_sanitize_term_text_based', explode( WC_DELIMITER, $attribute['options'] ) );
+						if ( ! is_array( $attribute['options'] ) ) {
+							// Text based attributes - Posted values are term names
+							$options = explode( WC_DELIMITER, $options );
 						}
 
+						$values = array_map( 'wc_sanitize_term_text_based', $options );
 						$values = array_filter( $values, 'strlen' );
 					} else {
 						$values = array();
@@ -1219,10 +1245,11 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save variations
 	 *
-	 * @since 2.2
-	 * @param int $id
-	 * @param array $data
+	 * @since  2.2
+	 * @param  int $id
+	 * @param  array $data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function save_variations( $id, $data ) {
 		global $wpdb;
@@ -1340,17 +1367,17 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( 'yes' === $managing_stock ) {
+				$backorders = get_post_meta( $variation_id, '_backorders', true );
+
 				if ( isset( $variation['backorders'] ) ) {
 					if ( 'notify' == $variation['backorders'] ) {
 						$backorders = 'notify';
 					} else {
 						$backorders = ( true === $variation['backorders'] ) ? 'yes' : 'no';
 					}
-				} else {
-					$backorders = 'no';
 				}
 
-				update_post_meta( $variation_id, '_backorders', $backorders );
+				update_post_meta( $variation_id, '_backorders', '' === $backorders ? 'no' : $backorders );
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
@@ -1455,6 +1482,7 @@ class WC_API_Products extends WC_API_Resource {
 						continue;
 					}
 
+					$taxonomy   = 0;
 					$_attribute = array();
 
 					if ( isset( $attribute['slug'] ) ) {
@@ -1738,9 +1766,10 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Save product images
 	 *
-	 * @since 2.2
-	 * @param array $images
-	 * @param int $id
+	 * @since  2.2
+	 * @param  array $images
+	 * @param  int $id
+	 * @throws WC_API_Exception
 	 */
 	protected function save_product_images( $id, $images ) {
 		if ( is_array( $images ) ) {
@@ -1790,9 +1819,10 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Upload image from URL
 	 *
-	 * @since 2.2
-	 * @param string $image_url
+	 * @since  2.2
+	 * @param  string $image_url
 	 * @return int|WP_Error attachment id
+	 * @throws WC_API_Exception
 	 */
 	public function upload_product_image( $image_url ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );
@@ -2056,6 +2086,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param  string $order_by
 	 * @param  bool   $new_data
 	 * @return bool
+	 * @throws WC_API_Exception
 	 */
 	protected function validate_attribute_data( $name, $slug, $type, $order_by, $new_data = true ) {
 		if ( empty( $name ) ) {

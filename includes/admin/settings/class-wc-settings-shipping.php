@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_Shipping' ) ) :
 
 /**
- * WC_Settings_Shipping
+ * WC_Settings_Shipping.
  */
 class WC_Settings_Shipping extends WC_Settings_Page {
 
@@ -34,7 +34,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections
+	 * Get sections.
 	 *
 	 * @return array
 	 */
@@ -60,7 +60,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
@@ -163,7 +163,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
 		global $current_section;
@@ -203,7 +203,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 							<th class="name"><?php _e( 'Name', 'woocommerce' ); ?></th>
 							<th class="id"><?php _e( 'ID', 'woocommerce' ); ?></th>
 							<th class="status"><?php _e( 'Enabled', 'woocommerce' ); ?></th>
-							<th class="priority"><?php _e( 'Selection Priority', 'woocommerce' ); ?> <span class="tips" data-tip="<?php echo esc_attr( __( 'Available methods will be chosen by default in this order. If multiple methods have the same priority, they will be sorted by cost.', 'woocommerce' ) ); ?>">[?]</span></th>
+							<th class="priority"><?php _e( 'Selection Priority', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Available methods will be chosen by default in this order. If multiple methods have the same priority, they will be sorted by cost.', 'woocommerce' ) ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -246,7 +246,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		global $current_section;

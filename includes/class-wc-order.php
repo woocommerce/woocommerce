@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Order
  *
@@ -18,7 +23,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @return string
 	 */
-	public function get_formatted_order_total( $tax_display = '' ) {
+	public function get_formatted_order_total( $tax_display = '', $display_refunded = true ) {
 		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_order_currency() ) );
 		$order_total    = $this->get_total();
 		$total_refunded = $this->get_total_refunded();
@@ -30,18 +35,19 @@ class WC_Order extends WC_Abstract_Order {
 
 			if ( 'itemized' == get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $this->get_tax_totals() as $code => $tax ) {
-					$tax_amount         = $total_refunded ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_order_currency() ) ) : $tax->formatted_amount;
+					$tax_amount         = ( $total_refunded && $display_refunded ) ? wc_price( WC_Tax::round( $tax->amount - $this->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ), array( 'currency' => $this->get_order_currency() ) ) : $tax->formatted_amount;
 					$tax_string_array[] = sprintf( '%s %s', $tax_amount, $tax->label );
 				}
 			} else {
-				$tax_string_array[] = sprintf( '%s %s', wc_price( $this->get_total_tax() - $this->get_total_tax_refunded(), array( 'currency' => $this->get_order_currency() ) ), WC()->countries->tax_or_vat() );
+				$tax_amount         = ( $total_refunded && $display_refunded ) ? $this->get_total_tax() - $this->get_total_tax_refunded() : $this->get_total_tax();
+				$tax_string_array[] = sprintf( '%s %s', wc_price( $tax_amount, array( 'currency' => $this->get_order_currency() ) ), WC()->countries->tax_or_vat() );
 			}
 			if ( ! empty( $tax_string_array ) ) {
 				$tax_string = ' ' . sprintf( __( '(Includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) );
 			}
 		}
 
-		if ( $total_refunded ) {
+		if ( $total_refunded && $display_refunded ) {
 			$formatted_total = '<del>' . strip_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_order_currency() ) ) . $tax_string . '</ins>';
 		} else {
 			$formatted_total .= $tax_string;
@@ -51,10 +57,9 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get order refunds
-	 *
+	 * Get order refunds.
 	 * @since 2.2
-	 * @return array
+	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
 		if ( empty( $this->refunds ) && ! is_array( $this->refunds ) ) {
@@ -79,10 +84,10 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get amount already refunded
+	 * Get amount already refunded.
 	 *
 	 * @since 2.2
-	 * @return int|float
+	 * @return string
 	 */
 	public function get_total_refunded() {
 		global $wpdb;
@@ -99,7 +104,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the total tax refunded
+	 * Get the total tax refunded.
 	 *
 	 * @since  2.3
 	 * @return float
@@ -120,7 +125,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the total shipping refunded
+	 * Get the total shipping refunded.
 	 *
 	 * @since  2.4
 	 * @return float
@@ -168,7 +173,6 @@ class WC_Order extends WC_Abstract_Order {
 	 * Get the total number of items refunded.
 	 *
 	 * @since  2.4.0
-	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
 	 * @return integer
 	 */
@@ -183,7 +187,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
@@ -202,7 +206,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
@@ -228,12 +232,12 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  int $tax_id ID of the tax we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
-	 * @return integer
+	 * @return double
 	 */
 	public function get_tax_refunded_for_item( $item_id, $tax_id, $item_type = 'line_item' ) {
 		$total = 0;
@@ -278,5 +282,21 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		return $total;
+	}
+
+	/**
+	 * How much money is left to refund?
+	 * @return string
+	 */
+	public function get_remaining_refund_amount() {
+		return wc_format_decimal( $this->get_total() - $this->get_total_refunded() );
+	}
+
+	/**
+	 * How many items are left to refund?
+	 * @return int
+	 */
+	public function get_remaining_refund_items() {
+		return absint( $this->get_item_count() - $this->get_item_count_refunded() );
 	}
 }

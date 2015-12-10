@@ -66,7 +66,7 @@ class WC_Shortcode_Checkout {
 	}
 
 	/**
-	 * Show the pay page
+	 * Show the pay page.
 	 *
 	 * @param int $order_id
 	 */
@@ -84,7 +84,7 @@ class WC_Shortcode_Checkout {
 			// Pay for existing order
 			$order_key            = $_GET[ 'key' ];
 			$order                = wc_get_order( $order_id );
-			
+
 			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
 				echo '<div class="woocommerce-error">' . __( 'Invalid order. If you have an account please log in and try again.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '" class="wc-forward">' . __( 'My Account', 'woocommerce' ) . '</a>' . '</div>';
 				return;
@@ -95,14 +95,27 @@ class WC_Shortcode_Checkout {
 				if ( $order->needs_payment() ) {
 
 					// Set customer location to order location
-					if ( $order->billing_country )
+					if ( $order->billing_country ) {
 						WC()->customer->set_country( $order->billing_country );
-					if ( $order->billing_state )
+					}
+					if ( $order->billing_state ) {
 						WC()->customer->set_state( $order->billing_state );
-					if ( $order->billing_postcode )
+					}
+					if ( $order->billing_postcode ) {
 						WC()->customer->set_postcode( $order->billing_postcode );
+					}
 
-					wc_get_template( 'checkout/form-pay.php', array( 'order' => $order ) );
+					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+					if ( sizeof( $available_gateways ) ) {
+						current( $available_gateways )->set_current();
+					}
+
+					wc_get_template( 'checkout/form-pay.php', array(
+						'order'              => $order,
+						'available_gateways' => $available_gateways,
+						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) )
+					) );
 
 				} else {
 					wc_add_notice( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'error' );
@@ -117,7 +130,7 @@ class WC_Shortcode_Checkout {
 			// Pay for order after checkout step
 			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 			$order                = wc_get_order( $order_id );
-			
+
 			if ( $order->id == $order_id && $order->order_key == $order_key ) {
 
 				if ( $order->needs_payment() ) {
@@ -169,7 +182,7 @@ class WC_Shortcode_Checkout {
 	}
 
 	/**
-	 * Show the thanks page
+	 * Show the thanks page.
 	 *
 	 * @param int $order_id
 	 */
@@ -196,7 +209,7 @@ class WC_Shortcode_Checkout {
 	}
 
 	/**
-	 * Show the checkout
+	 * Show the checkout.
 	 */
 	private static function checkout() {
 

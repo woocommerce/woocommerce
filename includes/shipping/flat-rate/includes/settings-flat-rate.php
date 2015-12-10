@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.', 'woocommerce' ) . '<br/>' . __( 'Supports the following placeholders: <code>[qty]</code> = number of items, <code>[cost]</code> = cost of items, <code>[fee percent="10" min_fee="20"]</code> = Percentage based fee.', 'woocommerce' );
 
 /**
- * Settings for flat rate shipping
+ * Settings for flat rate shipping.
  */
 $settings = array(
 	'enabled' => array(
@@ -73,15 +73,15 @@ if ( ! empty( $shipping_classes ) ) {
 		'description'   => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' ) . '">', '</a>' )
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
-		if ( ! isset( $shipping_class->slug ) ) {
+		if ( ! isset( $shipping_class->term_id ) ) {
 			continue;
 		}
-		$settings[ 'class_cost_' . $shipping_class->slug ] = array(
+		$settings[ 'class_cost_' . $shipping_class->term_id ] = array(
 			'title'       => sprintf( __( '"%s" Shipping Class Cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
 			'type'        => 'text',
 			'placeholder' => __( 'N/A', 'woocommerce' ),
 			'description' => $cost_desc,
-			'default'     => '',
+			'default'     => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names
 			'desc_tip'    => true
 		);
 	}

@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_General' ) ) :
 
 /**
- * WC_Admin_Settings_General
+ * WC_Admin_Settings_General.
  */
 class WC_Settings_General extends WC_Settings_Page {
 
@@ -33,7 +33,7 @@ class WC_Settings_General extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
@@ -200,13 +200,13 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * @param string $desc (default: '')
 	 */
 	public function color_picker( $name, $id, $value, $desc = '' ) {
-		echo '<div class="color_box"><strong><img class="help_tip" data-tip="' . esc_attr( $desc ) . '" src="' . WC()->plugin_url() . '/assets/images/help.png" height="16" width="16" /> ' . esc_html( $name ) . '</strong>
+		echo '<div class="color_box">' . wc_help_tip( $desc ) . '
 			<input name="' . esc_attr( $id ). '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
 		</div>';
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		$settings = $this->get_settings();

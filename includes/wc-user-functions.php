@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar
+ * Prevent any user who cannot 'edit_posts' (subscribers, customers etc) from seeing the admin bar.
  *
  * Note: get_option( 'woocommerce_lock_down_admin', true ) is a deprecated option here for backwards compat. Defaults to true.
  *
@@ -34,7 +34,7 @@ add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
 
 
 /**
- * Create a new customer
+ * Create a new customer.
  *
  * @param  string $email
  * @param  string $username
@@ -118,7 +118,7 @@ function wc_create_new_customer( $email, $username = '', $password = '' ) {
 }
 
 /**
- * Login a customer (set auth cookie and set global user object)
+ * Login a customer (set auth cookie and set global user object).
  *
  * @param int $customer_id
  */
@@ -131,7 +131,7 @@ function wc_set_customer_auth_cookie( $customer_id ) {
 }
 
 /**
- * Get past orders (by email) and update them
+ * Get past orders (by email) and update them.
  *
  * @param  int $customer_id
  * @return int
@@ -185,7 +185,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 }
 
 /**
- * Order Status completed - This is a paying customer
+ * Order Status completed - This is a paying customer.
  *
  * @access public
  * @param int $order_id
@@ -206,10 +206,8 @@ function wc_paying_customer( $order_id ) {
 }
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
-
 /**
- * Checks if a user (by email) has bought an item
- *
+ * Checks if a user (by email or ID or both) has bought an item.
  * @param string $customer_email
  * @param int $user_id
  * @param int $product_id
@@ -218,7 +216,7 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
-	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . $product_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
+	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
 
 	if ( false === ( $result = get_transient( $transient_name ) ) ) {
 		$customer_data = array( $user_id );
@@ -241,27 +239,26 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			return false;
 		}
 
-		$result = $wpdb->get_var(
-			$wpdb->prepare( "
-				SELECT COUNT( i.order_item_id ) FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-				WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
-				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-				AND im.meta_key IN ( '_product_id', '_variation_id' )
-				AND im.meta_value = %d
-				", $product_id
-			) . " AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )"
-		);
+		$result = $wpdb->get_col( "
+			SELECT im.meta_value FROM {$wpdb->posts} AS p
+			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+			WHERE p.post_status IN ( 'wc-completed', 'wc-processing' )
+			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+			AND im.meta_key IN ( '_product_id', '_variation_id' )
+			AND im.meta_value != 0
+			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+		" );
+		$result = array_map( 'absint', $result );
 
-		set_transient( $transient_name, $result ? 1 : 0, DAY_IN_SECONDS * 30 );
+		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
 	}
-	return (bool) $result;
+	return in_array( absint( $product_id ), $result );
 }
 
 /**
- * Checks if a user has a certain capability
+ * Checks if a user has a certain capability.
  *
  * @access public
  * @param array $allcaps
@@ -327,7 +324,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 
 /**
- * Modify the list of editable roles to prevent non-admin adding admin users
+ * Modify the list of editable roles to prevent non-admin adding admin users.
  * @param  array $roles
  * @return array
  */
@@ -340,7 +337,7 @@ function wc_modify_editable_roles( $roles ){
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
 
 /**
- * Modify capabiltiies to prevent non-admin users editing admin users
+ * Modify capabiltiies to prevent non-admin users editing admin users.
  *
  * $args[0] will be the user being edited in this case.
  *
@@ -370,7 +367,7 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
 
 /**
- * Get customer available downloads
+ * Get customer available downloads.
  *
  * @param int $customer_id Customer/User ID
  * @return array
@@ -485,7 +482,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 }
 
 /**
- * Get total spent by customer
+ * Get total spent by customer.
  * @param  int $user_id
  * @return string
  */
@@ -513,7 +510,7 @@ function wc_get_customer_total_spent( $user_id ) {
 }
 
 /**
- * Get total orders by customer
+ * Get total orders by customer.
  * @param  int $user_id
  * @return int
  */
@@ -537,3 +534,50 @@ function wc_get_customer_order_count( $user_id ) {
 
 	return absint( $count );
 }
+
+/**
+ * Reset _customer_user on orders when a user is deleted.
+ * @param int $user_id
+ */
+function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
+	global $wpdb;
+
+	$wpdb->update( $wpdb->postmeta, array( '_customer_user' => 0 ), array( '_customer_user' => $user_id ) );
+}
+
+add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
+
+/**
+ * Get review verification status.
+ * @param  int $comment_id
+ * @return bool
+ */
+function wc_review_is_from_verified_owner( $comment_id ) {
+	$verified = get_comment_meta( $comment_id, 'verified', true );
+
+	// If no "verified" meta is present, generate it (if this is a product review).
+	if ( '' === $verified ) {
+		$verified = WC_Comments::add_comment_purchase_verification( $comment_id );
+	}
+
+	return (bool) $verified;
+}
+
+/**
+ * Disable author archives for customers.
+ *
+ * @since 2.5.0
+ */
+function wc_disable_author_archives_for_customers() {
+	global $wp_query, $author;
+
+	if ( is_author() ) {
+		$user = get_user_by( 'id', $author );
+
+		if ( isset( $user->roles[0] ) && 'customer' === $user->roles[0] ) {
+			wp_redirect( wc_get_page_permalink( 'shop' ) );
+		}
+	}
+}
+
+add_action( 'template_redirect', 'wc_disable_author_archives_for_customers' );

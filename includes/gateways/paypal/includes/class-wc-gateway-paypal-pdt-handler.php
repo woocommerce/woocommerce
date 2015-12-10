@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 include_once( 'class-wc-gateway-paypal-response.php' );
 
 /**
- * Handle PDT Responses from PayPal
+ * Handle PDT Responses from PayPal.
  */
 class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
@@ -15,7 +15,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	protected $identity_token;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct( $sandbox = false, $identity_token = '' ) {
 		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response' ) );
@@ -25,7 +25,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Validate a PDT transaction to ensure its authentic
+	 * Validate a PDT transaction to ensure its authentic.
 	 * @param  string $transaction
 	 * @return bool
 	 */
@@ -52,7 +52,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check Response for PDT
+	 * Check Response for PDT.
 	 */
 	public function check_response() {
 		if ( empty( $_REQUEST['cm'] ) || empty( $_REQUEST['tx'] ) || empty( $_REQUEST['st'] ) ) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Display notices in admin.
+ * Display notices in admin
  *
  * @author      WooThemes
  * @category    Admin
@@ -13,30 +13,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Notices Class
+ * WC_Admin_Notices Class.
  */
 class WC_Admin_Notices {
 
 	/**
-	 * Array of notices - name => callback
+	 * Array of notices - name => callback.
 	 * @var array
 	 */
 	private $core_notices = array(
-		'install'             => 'install_notice',
-		'update'              => 'update_notice',
-		'template_files'      => 'template_file_check_notice',
-		'theme_support'       => 'theme_check_notice',
-		'translation_upgrade' => 'translation_upgrade_notice'
+		'install'        => 'install_notice',
+		'update'         => 'update_notice',
+		'template_files' => 'template_file_check_notice',
+		'theme_support'  => 'theme_check_notice'
 	);
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'switch_theme', array( $this, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( $this, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( $this, 'hide_notices' ) );
-		add_action( 'woocommerce_hide_translation_upgrade_notice', array( $this, 'hide_translation_upgrade_notice' ) );
 
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			add_action( 'admin_print_styles', array( $this, 'add_notices' ) );
@@ -44,14 +42,14 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Remove all notices
+	 * Remove all notices.
 	 */
 	public static function remove_all_notices() {
 		delete_option( 'woocommerce_admin_notices' );
 	}
 
 	/**
-	 * Reset notices for themes when switched or a new version of WC is installed
+	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public function reset_admin_notices() {
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
@@ -61,7 +59,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Show a notice
+	 * Show a notice.
 	 * @param  string $name
 	 */
 	public static function add_notice( $name ) {
@@ -70,7 +68,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Remove a notice from being displayed
+	 * Remove a notice from being displayed.
 	 * @param  string $name
 	 */
 	public static function remove_notice( $name ) {
@@ -79,7 +77,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * See if a notice is being shown
+	 * See if a notice is being shown.
 	 * @param  string  $name
 	 * @return boolean
 	 */
@@ -107,13 +105,6 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Hide translation upgrade message
-	 */
-	public function hide_translation_upgrade_notice() {
-		update_option( 'woocommerce_language_pack_version', array( WC_VERSION, get_locale() ) );
-	}
-
-	/**
 	 * Add notices + styles if needed.
 	 */
 	public function add_notices() {
@@ -130,21 +121,21 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * If we need to update, include a message with the update button
+	 * If we need to update, include a message with the update button.
 	 */
 	public function update_notice() {
 		include( 'views/html-notice-update.php' );
 	}
 
 	/**
-	 * If we have just installed, show a message with the install pages button
+	 * If we have just installed, show a message with the install pages button.
 	 */
 	public function install_notice() {
 		include( 'views/html-notice-install.php' );
 	}
 
 	/**
-	 * Show the Theme Check notice
+	 * Show the Theme Check notice.
 	 */
 	public function theme_check_notice() {
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
@@ -155,23 +146,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Show the translation upgrade notice
-	 */
-	public function translation_upgrade_notice() {
-		$screen = get_current_screen();
-		$locale = get_locale();
-
-		if ( 'en_US' === $locale ) {
-			self::hide_translation_upgrade_notice();
-		}
-
-		if ( 'update-core' !== $screen->id && 'en_US' !== $locale ) {
-			include( 'views/html-notice-translation-upgrade.php' );
-		}
-	}
-
-	/**
-	 * Show a notice highlighting bad template files
+	 * Show a notice highlighting bad template files.
 	 */
 	public function template_file_check_notice() {
 		$core_templates = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates' );

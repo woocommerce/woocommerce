@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Duplicate_Product' ) ) :
 
 /**
- * WC_Admin_Duplicate_Product Class
+ * WC_Admin_Duplicate_Product Class.
  */
 class WC_Admin_Duplicate_Product {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'admin_action_duplicate_product', array( $this, 'duplicate_product_action' ) );
@@ -30,7 +30,7 @@ class WC_Admin_Duplicate_Product {
 	}
 
 	/**
-	 * Show the "Duplicate" link in admin products list
+	 * Show the "Duplicate" link in admin products list.
 	 * @param  array   $actions
 	 * @param  WP_Post $post Post object
 	 * @return array
@@ -51,7 +51,7 @@ class WC_Admin_Duplicate_Product {
 	}
 
 	/**
-	 * Show the dupe product link in admin
+	 * Show the dupe product link in admin.
 	 */
 	public function dupe_button() {
 		global $post;
@@ -180,7 +180,7 @@ class WC_Admin_Duplicate_Product {
 	}
 
 	/**
-	 * Get a product from the database to duplicate
+	 * Get a product from the database to duplicate.
 	 *
 	 * @param mixed $id
 	 * @return WP_Post|bool
@@ -207,7 +207,7 @@ class WC_Admin_Duplicate_Product {
 	}
 
 	/**
-	 * Copy the taxonomies of a post to another post
+	 * Copy the taxonomies of a post to another post.
 	 *
 	 * @param mixed $id
 	 * @param mixed $new_id
@@ -228,7 +228,7 @@ class WC_Admin_Duplicate_Product {
 	}
 
 	/**
-	 * Copy the meta information of a post to another post
+	 * Copy the meta information of a post to another post.
 	 *
 	 * @param mixed $id
 	 * @param mixed $new_id
@@ -244,7 +244,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		$post_meta = $wpdb->get_results( $sql );
-		
+
 		if ( sizeof( $post_meta ) ) {
 			$sql_query_sel = array();
 			$sql_query     = "INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value) ";

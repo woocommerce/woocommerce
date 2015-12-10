@@ -9,7 +9,7 @@ if ( ! class_exists( 'WC_Report_Stock' ) ) {
 }
 
 /**
- * WC_Report_Most_Stocked
+ * WC_Report_Most_Stocked.
  *
  * @author      WooThemes
  * @category    Admin
@@ -19,7 +19,7 @@ if ( ! class_exists( 'WC_Report_Stock' ) ) {
 class WC_Report_Most_Stocked extends WC_Report_Stock {
 
 	/**
-	 * Get Products matching stock criteria
+	 * Get Products matching stock criteria.
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;

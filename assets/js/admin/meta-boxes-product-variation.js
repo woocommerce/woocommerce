@@ -109,7 +109,7 @@ jQuery( function( $ ) {
 			// Init TipTip
 			$( '#tiptip_holder' ).removeAttr( 'style' );
 			$( '#tiptip_arrow' ).removeAttr( 'style' );
-			$( '.woocommerce_variations .tips, .woocommerce_variations .help_tip', wrapper ).tipTip({
+			$( '.woocommerce_variations .tips, .woocommerce_variations .help_tip, .woocommerce_variations .woocommerce-help-tip', wrapper ).tipTip({
 				'attribute': 'data-tip',
 				'fadeIn':    50,
 				'fadeOut':   50,
@@ -285,7 +285,7 @@ jQuery( function( $ ) {
 				wc_meta_boxes_product_variations_media.variable_image_frame.on( 'select', function () {
 
 					var attachment = wc_meta_boxes_product_variations_media.variable_image_frame.state().get( 'selection' ).first().toJSON(),
-						url = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+						url = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
 					$( '.upload_image_id', wc_meta_boxes_product_variations_media.setting_variation_image ).val( attachment.id ).change();
 					wc_meta_boxes_product_variations_media.setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
@@ -768,11 +768,12 @@ jQuery( function( $ ) {
 			$.ajax({
 				url: woocommerce_admin_meta_boxes_variations.ajax_url,
 				data: {
-					action:      'woocommerce_bulk_edit_variations',
-					security:    woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
-					product_id:  woocommerce_admin_meta_boxes_variations.post_id,
-					bulk_action: do_variation_action,
-					data:        data
+					action:       'woocommerce_bulk_edit_variations',
+					security:     woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
+					product_id:   woocommerce_admin_meta_boxes_variations.post_id,
+					product_type: $( '#product-type' ).val(),
+					bulk_action:  do_variation_action,
+					data:         data
 				},
 				type: 'POST',
 				success: function() {

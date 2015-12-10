@@ -13,7 +13,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	private $report_data;
 
 	/**
-	 * Get report data
+	 * Get report data.
 	 * @return array
 	 */
 	public function get_report_data() {
@@ -24,7 +24,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get all data needed for this report and store in the class
+	 * Get all data needed for this report and store in the class.
 	 */
 	private function query_report_data() {
 		$this->report_data = new stdClass;
@@ -330,7 +330,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the legend for the main chart sidebar
+	 * Get the legend for the main chart sidebar.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -408,7 +408,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output the report
+	 * Output the report.
 	 */
 	public function output_report() {
 		$ranges = array(
@@ -442,7 +442,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output an export link
+	 * Output an export link.
 	 */
 	public function get_export_button() {
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
@@ -462,7 +462,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Round our totals correctly
+	 * Round our totals correctly.
 	 * @param  string $amount
 	 * @return string
 	 */
@@ -475,7 +475,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the main chart
+	 * Get the main chart.
 	 *
 	 * @return string
 	 */
@@ -492,22 +492,27 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$shipping_tax_amounts = $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_shipping_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$tax_amounts          = $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
-		$net_order_amounts = array();
+		$net_order_amounts   = array();
+		$gross_order_amounts = array();
 
 		foreach ( $order_amounts as $order_amount_key => $order_amount_value ) {
+			$gross_order_amounts[ $order_amount_key ]    = $order_amount_value;
+			$gross_order_amounts[ $order_amount_key ][1] = $gross_order_amounts[ $order_amount_key ][1] - $refund_amounts[ $order_amount_key ][1];
+
 			$net_order_amounts[ $order_amount_key ]    = $order_amount_value;
-			$net_order_amounts[ $order_amount_key ][1] = $net_order_amounts[ $order_amount_key ][1] - $shipping_amounts[ $order_amount_key ][1] - $shipping_tax_amounts[ $order_amount_key ][1] - $tax_amounts[ $order_amount_key ][1];
+			$net_order_amounts[ $order_amount_key ][1] = $net_order_amounts[ $order_amount_key ][1] - $refund_amounts[ $order_amount_key ][1] - $shipping_amounts[ $order_amount_key ][1] - $shipping_tax_amounts[ $order_amount_key ][1] - $tax_amounts[ $order_amount_key ][1];
 		}
 
 		// Encode in json format
 		$chart_data = json_encode( array(
-			'order_counts'      => array_values( $order_counts ),
-			'order_item_counts' => array_values( $order_item_counts ),
-			'order_amounts'     => array_map( array( $this, 'round_chart_totals' ), array_values( $order_amounts ) ),
-			'net_order_amounts' => array_map( array( $this, 'round_chart_totals' ), array_values( $net_order_amounts ) ),
-			'shipping_amounts'  => array_map( array( $this, 'round_chart_totals' ), array_values( $shipping_amounts ) ),
-			'coupon_amounts'    => array_map( array( $this, 'round_chart_totals' ), array_values( $coupon_amounts ) ),
-			'refund_amounts'    => array_map( array( $this, 'round_chart_totals' ), array_values( $refund_amounts ) )
+			'order_counts'        => array_values( $order_counts ),
+			'order_item_counts'   => array_values( $order_item_counts ),
+			'order_amounts'       => array_map( array( $this, 'round_chart_totals' ), array_values( $order_amounts ) ),
+			'gross_order_amounts' => array_map( array( $this, 'round_chart_totals' ), array_values( $gross_order_amounts ) ),
+			'net_order_amounts'   => array_map( array( $this, 'round_chart_totals' ), array_values( $net_order_amounts ) ),
+			'shipping_amounts'    => array_map( array( $this, 'round_chart_totals' ), array_values( $shipping_amounts ) ),
+			'coupon_amounts'      => array_map( array( $this, 'round_chart_totals' ), array_values( $coupon_amounts ) ),
+			'refund_amounts'      => array_map( array( $this, 'round_chart_totals' ), array_values( $refund_amounts ) )
 		) );
 		?>
 		<div class="chart-container">
@@ -579,7 +584,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 						},
 						{
 							label: "<?php echo esc_js( __( 'Gross Sales amount', 'woocommerce' ) ) ?>",
-							data: order_data.order_amounts,
+							data: order_data.gross_order_amounts,
 							yaxis: 2,
 							color: '<?php echo $this->chart_colours['sales_amount']; ?>',
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },

@@ -26,13 +26,13 @@ jQuery( function( $ ) {
 	});
 
 	// Type box
-	$( '.type_box' ).appendTo( '#woocommerce-product-data h3.hndle span' );
+	$( '.type_box' ).appendTo( '#woocommerce-product-data .hndle span' );
 
 	$( function() {
 		// Prevent inputs in meta box headings opening/closing contents
-		$( '#woocommerce-product-data' ).find( 'h3.hndle' ).unbind( 'click.postboxes' );
+		$( '#woocommerce-product-data' ).find( '.hndle' ).unbind( 'click.postboxes' );
 
-		jQuery( '#woocommerce-product-data' ).on( 'click', 'h3.hndle', function( event ) {
+		jQuery( '#woocommerce-product-data' ).on( 'click', '.hndle', function( event ) {
 
 			// If the user clicks on some form input inside the h3 the box should not be toggled
 			if ( $( event.target ).filter( 'input, option, label, select' ).length ) {

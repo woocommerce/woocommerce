@@ -9,7 +9,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 /**
- * WC_Report_Stock
+ * WC_Report_Stock.
  *
  * @author      WooThemes
  * @category    Admin
@@ -33,14 +33,14 @@ class WC_Report_Stock extends WP_List_Table {
 	}
 
 	/**
-	 * No items found text
+	 * No items found text.
 	 */
 	public function no_items() {
 		_e( 'No products found.', 'woocommerce' );
 	}
 
 	/**
-	 * Don't need this
+	 * Don't need this.
 	 */
 	public function display_tablenav( $position ) {
 
@@ -50,7 +50,7 @@ class WC_Report_Stock extends WP_List_Table {
 	}
 
 	/**
-	 * Output the report
+	 * Output the report.
 	 */
 	public function output_report() {
 
@@ -174,7 +174,7 @@ class WC_Report_Stock extends WP_List_Table {
 		$this->get_items( $current_page, $per_page );
 
 		/**
-		 * Pagination
+		 * Pagination.
 		 */
 		$this->set_pagination_args( array(
 			'total_items' => $this->max_items,

@@ -5,48 +5,48 @@
  * @author   WooThemes
  * @category Widgets
  * @package  WooCommerce/Abstracts
- * @version  2.3.0
+ * @version  2.5.0
  * @extends  WP_Widget
  */
 abstract class WC_Widget extends WP_Widget {
 
 	/**
-	 * CSS class
+	 * CSS class.
 	 *
 	 * @var string
 	 */
 	public $widget_cssclass;
 
 	/**
-	 * Widget description
+	 * Widget description.
 	 *
 	 * @var string
 	 */
 	public $widget_description;
 
 	/**
-	 * Widget ID
+	 * Widget ID.
 	 *
 	 * @var string
 	 */
 	public $widget_id;
 
 	/**
-	 * Widget name
+	 * Widget name.
 	 *
 	 * @var string
 	 */
 	public $widget_name;
 
 	/**
-	 * Settings
+	 * Settings.
 	 *
 	 * @var array
 	 */
 	public $settings;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 
@@ -82,7 +82,7 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * Cache the widget
+	 * Cache the widget.
 	 *
 	 * @param  array $args
 	 * @param  string $content
@@ -95,14 +95,14 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * Flush the cache
+	 * Flush the cache.
 	 */
 	public function flush_widget_cache() {
 		wp_cache_delete( apply_filters( 'woocommerce_cached_widget_id', $this->widget_id ), 'widget' );
 	}
 
 	/**
-	 * Output the html at the start of a widget
+	 * Output the html at the start of a widget.
 	 *
 	 * @param  array $args
 	 * @return string
@@ -116,7 +116,7 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * Output the html at the end of a widget
+	 * Output the html at the end of a widget.
 	 *
 	 * @param  array $args
 	 * @return string
@@ -128,9 +128,9 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * update function.
 	 *
-	 * @see WP_Widget->update
-	 * @param array $new_instance
-	 * @param array $old_instance
+	 * @see    WP_Widget->update
+	 * @param  array $new_instance
+	 * @param  array $old_instance
 	 * @return array
 	 */
 	public function update( $new_instance, $old_instance ) {
@@ -141,12 +141,34 @@ abstract class WC_Widget extends WP_Widget {
 			return $instance;
 		}
 
+		// Loop settings and get values to save.
 		foreach ( $this->settings as $key => $setting ) {
+			if ( ! isset( $setting['type'] ) ) {
+				continue;
+			}
 
-			if ( isset( $new_instance[ $key ] ) ) {
-				$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
-			} elseif ( 'checkbox' === $setting['type'] ) {
-				$instance[ $key ] = 0;
+			// Format the value based on settings type.
+			switch ( $setting['type'] ) {
+				case 'number' :
+					$instance[ $key ] = absint( $new_instance[ $key ] );
+
+					if ( isset( $setting['min'] ) && '' !== $setting['min'] ) {
+						$instance[ $key ] = max( $instance[ $key ], $setting['min'] );
+					}
+
+					if ( isset( $setting['max'] ) && '' !== $setting['max'] ) {
+						$instance[ $key ] = min( $instance[ $key ], $setting['max'] );
+					}
+				break;
+				case 'textarea' :
+					$instance[ $key ] = wp_kses( trim( wp_unslash( $new_instance[ $key ] ) ), wp_kses_allowed_html( 'post' ) );
+				break;
+				case 'checkbox' :
+					$instance[ $key ] = is_null( $new_instance[ $key ] ) ? 0 : 1;
+				break;
+				default:
+					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
+				break;
 			}
 		}
 
@@ -158,7 +180,7 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * form function.
 	 *
-	 * @see WP_Widget->form
+	 * @see   WP_Widget->form
 	 * @param array $instance
 	 */
 	public function form( $instance ) {
@@ -169,6 +191,7 @@ abstract class WC_Widget extends WP_Widget {
 
 		foreach ( $this->settings as $key => $setting ) {
 
+			$class = isset( $setting['class'] ) ? $setting['class'] : '';
 			$value = isset( $instance[ $key ] ) ? $instance[ $key ] : $setting['std'];
 
 			switch ( $setting['type'] ) {
@@ -177,7 +200,7 @@ abstract class WC_Widget extends WP_Widget {
 					?>
 					<p>
 						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
-						<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>" type="text" value="<?php echo esc_attr( $value ); ?>" />
+						<input class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>" type="text" value="<?php echo esc_attr( $value ); ?>" />
 					</p>
 					<?php
 				break;
@@ -186,7 +209,7 @@ abstract class WC_Widget extends WP_Widget {
 					?>
 					<p>
 						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
-						<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>" type="number" step="<?php echo esc_attr( $setting['step'] ); ?>" min="<?php echo esc_attr( $setting['min'] ); ?>" max="<?php echo esc_attr( $setting['max'] ); ?>" value="<?php echo esc_attr( $value ); ?>" />
+						<input class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>" type="number" step="<?php echo esc_attr( $setting['step'] ); ?>" min="<?php echo esc_attr( $setting['min'] ); ?>" max="<?php echo esc_attr( $setting['max'] ); ?>" value="<?php echo esc_attr( $value ); ?>" />
 					</p>
 					<?php
 				break;
@@ -195,7 +218,7 @@ abstract class WC_Widget extends WP_Widget {
 					?>
 					<p>
 						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
-						<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>">
+						<select class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>">
 							<?php foreach ( $setting['options'] as $option_key => $option_value ) : ?>
 								<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( $option_key, $value ); ?>><?php echo esc_html( $option_value ); ?></option>
 							<?php endforeach; ?>
@@ -204,10 +227,22 @@ abstract class WC_Widget extends WP_Widget {
 					<?php
 				break;
 
+				case 'textarea' :
+					?>
+					<p>
+						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
+						<textarea class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>" cols="20" rows="3"><?php echo esc_textarea( $value ); ?></textarea>
+						<?php if ( isset( $setting['desc'] ) ) : ?>
+							<small><?php echo esc_html( $setting['desc'] ); ?></small>
+						<?php endif; ?>
+					</p>
+					<?php
+				break;
+
 				case 'checkbox' :
 					?>
 					<p>
-						<input id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="checkbox" value="1" <?php checked( $value, 1 ); ?> />
+						<input class="checkbox <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="checkbox" value="1" <?php checked( $value, 1 ); ?> />
 						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
 					</p>
 					<?php

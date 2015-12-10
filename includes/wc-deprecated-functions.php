@@ -102,7 +102,7 @@ function woocommerce_legacy_paypal_ipn() {
 add_action( 'init', 'woocommerce_legacy_paypal_ipn' );
 
 /**
- * get_product soft deprecated for wc_get_product
+ * get_product soft deprecated for wc_get_product.
  *
  * @deprecated
  */
@@ -111,7 +111,7 @@ function get_product( $the_product = false, $args = array() ) {
 }
 
 /**
- * Cart functions (soft deprecated)
+ * Cart functions (soft deprecated).
  */
 /**
  * @deprecated
@@ -181,7 +181,7 @@ function woocommerce_cart_totals_shipping_method_label( $method ) {
 }
 
 /**
- * Core functions (soft deprecated)
+ * Core functions (soft deprecated).
  */
 /**
  * @deprecated
@@ -209,7 +209,7 @@ function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: te
 }
 
 /**
- * Customer functions (soft deprecated)
+ * Customer functions (soft deprecated).
  */
 /**
  * @deprecated
@@ -255,7 +255,7 @@ function woocommerce_customer_has_capability( $allcaps, $caps, $args ) {
 }
 
 /**
- * Formatting functions (soft deprecated)
+ * Formatting functions (soft deprecated).
  */
 /**
  * @deprecated
@@ -387,7 +387,7 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 }
 
 /**
- * Order functions (soft deprecated)
+ * Order functions (soft deprecated).
  */
 /**
  * @deprecated
@@ -457,7 +457,7 @@ function woocommerce_processing_order_count() {
 }
 
 /**
- * Page functions (soft deprecated)
+ * Page functions (soft deprecated).
  */
 /**
  * @deprecated
@@ -503,7 +503,7 @@ function woocommerce_list_pages( $pages ) {
 }
 
 /**
- * Handle renamed filters
+ * Handle renamed filters.
  */
 global $wc_map_deprecated_filters;
 
@@ -538,7 +538,7 @@ function woocommerce_deprecated_filter_mapping( $data, $arg_1 = '', $arg_2 = '',
  */
 
 /**
- * Attribute functions - soft deprecated
+ * Attribute functions - soft deprecated.
  */
 /**
  * @deprecated
@@ -596,7 +596,7 @@ function woocommerce_change_term_counts( $terms, $taxonomies, $args ) {
 }
 
 /**
- * Product functions - soft deprecated
+ * Product functions - soft deprecated.
  */
 /**
  * @deprecated
@@ -666,7 +666,7 @@ function woocommerce_track_product_view() {
 }
 
 /**
- * Shop order status
+ * Shop order status.
  *
  * @since 2.2
  * @param WP_Query $q

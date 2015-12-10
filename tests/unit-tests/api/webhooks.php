@@ -3,7 +3,7 @@
 namespace WooCommerce\Tests\API;
 
 /**
- * Class Webhooks
+ * Class Webhooks.
  * @package WooCommerce\Tests\API
  * @since 2.2
  */
@@ -19,7 +19,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	protected $webhook_delivery_id;
 
 	/**
-	 * Setup test webhook data
+	 * Setup test webhook data.
 	 *
 	 * @see WC_API_UnitTestCase::setup()
 	 * @since 2.2
@@ -39,7 +39,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 
 
 	/**
-	 * Test route registration
+	 * Test route registration.
 	 *
 	 * @since 2.2
 	 */
@@ -55,7 +55,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test GET /webhooks/{id}
+	 * Test GET /webhooks/{id}.
 	 *
 	 * @since 2.2
 	 */
@@ -75,7 +75,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test GET /webhooks/{id} without valid permissions
+	 * Test GET /webhooks/{id} without valid permissions.
 	 *
 	 * @since 2.2
 	 */
@@ -89,7 +89,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test GET /webhooks
+	 * Test GET /webhooks.
 	 *
 	 * @since 2.2
 	 */
@@ -106,7 +106,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test GET /webhooks without valid permissions
+	 * Test GET /webhooks without valid permissions.
 	 *
 	 * @since 2.2
 	 */
@@ -121,7 +121,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test GET /webhooks/count
+	 * Test GET /webhooks/count.
 	 *
 	 * @since 2.2
 	 */
@@ -149,7 +149,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test GET /webhooks/count without valid permissions
+	 * Test GET /webhooks/count without valid permissions.
 	 *
 	 * @since 2.2
 	 */
@@ -164,7 +164,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test POST /webhooks
+	 * Test POST /webhooks.
 	 *
 	 * @since 2.2
 	 */
@@ -176,7 +176,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test POST /webhooks without valid permissions
+	 * Test POST /webhooks without valid permissions.
 	 *
 	 * @since 2.2
 	 */
@@ -190,7 +190,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test POST /webhooks with custom topic
+	 * Test POST /webhooks with custom topic.
 	 *
 	 * @since 2.2
 	 */
@@ -202,7 +202,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test an invalid or empty topic for POST /webhooks
+	 * Test an invalid or empty topic for POST /webhooks.
 	 *
 	 * @since 2.2
 	 */
@@ -225,7 +225,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test an invalid or empty delivery for POST /webhooks
+	 * Test an invalid or empty delivery for POST /webhooks.
 	 *
 	 * @since 2.2
 	 */
@@ -248,7 +248,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wp_insert_post() failure for POST /webhooks
+	 * Test wp_insert_post() failure for POST /webhooks.
 	 *
 	 * @since 2.2
 	 */
@@ -262,7 +262,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test PUT /webhooks/{id}
+	 * Test PUT /webhooks/{id}.
 	 *
 	 * @since 2.2
 	 */
@@ -285,7 +285,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test PUT /webhooks/{id} without valid permissions
+	 * Test PUT /webhooks/{id} without valid permissions.
 	 *
 	 * @since 2.2
 	 */
@@ -299,7 +299,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test PUT /webhooks/{id} with updated topic
+	 * Test PUT /webhooks/{id} with updated topic.
 	 *
 	 * @since 2.2
 	 */
@@ -317,7 +317,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test PUT /webhooks/{id} with updated delivery URL
+	 * Test PUT /webhooks/{id} with updated delivery URL.
 	 *
 	 * @since 2.2
 	 */
@@ -335,7 +335,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test DELETE /webhooks/{id}
+	 * Test DELETE /webhooks/{id}.
 	 *
 	 * @since 2.2
 	 */
@@ -354,7 +354,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 
 
 	/**
-	 * Test GET /webhooks/{id}/deliveries
+	 * Test GET /webhooks/{id}/deliveries.
 	 *
 	 * @since 2.2
 	 */
@@ -377,7 +377,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 
 
 	/**
-	 * Test GET /webhooks/{id}/deliveries/{id}
+	 * Test GET /webhooks/{id}/deliveries/{id}.
 	 *
 	 * @since 2.2
 	 */
@@ -393,7 +393,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Test GET /webhooks/{id}/deliveries/{id} with invalid webhook & delivery IDs
+	 * Test GET /webhooks/{id}/deliveries/{id} with invalid webhook & delivery IDs.
 	 *
 	 * @since 2.2
 	 */
@@ -419,7 +419,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Get default arguments for creating/editing a webhook
+	 * Get default arguments for creating/editing a webhook.
 	 *
 	 * @since 2.2
 	 * @param array $args
@@ -437,7 +437,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure a valid response when creating a webhook
+	 * Ensure a valid response when creating a webhook.
 	 * @since 2.2
 	 * @param $response
 	 */
@@ -450,7 +450,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure a valid response after editing a webhook
+	 * Ensure a valid response after editing a webhook.
 	 *
 	 * @since 2.2
 	 * @param $response
@@ -464,7 +464,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure valid webhook data response
+	 * Ensure valid webhook data response.
 	 *
 	 * @since 2.2
 	 * @param array $response
@@ -485,7 +485,7 @@ class Webhooks extends \WC_API_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure valid webhook delivery response
+	 * Ensure valid webhook delivery response.
 	 *
 	 * @since 2.2
 	 * @param array $response

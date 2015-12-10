@@ -12,7 +12,7 @@ jQuery( function( $ ) {
 		// AJAX add to cart request
 		var $thisbutton = $( this );
 
-		if ( $thisbutton.is( '.product_type_simple' ) ) {
+		if ( $thisbutton.is( '.ajax_add_to_cart' ) ) {
 
 			if ( ! $thisbutton.attr( 'data-product_id' ) ) {
 				return true;

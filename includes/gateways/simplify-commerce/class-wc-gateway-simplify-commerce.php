@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Simplify Commerce Gateway
+ * Simplify Commerce Gateway.
  *
  * @class 		WC_Gateway_Simplify_Commerce
  * @extends		WC_Payment_Gateway
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->id                 = 'simplify_commerce';
@@ -81,8 +81,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Admin Panel Options
-	 * - Options for bits like 'title' and availability on a country-by-country basis
+	 * Admin Panel Options.
+	 * - Options for bits like 'title' and availability on a country-by-country basis.
 	 */
 	public function admin_options() {
 		?>
@@ -132,7 +132,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check if SSL is enabled and notify the user
+	 * Check if SSL is enabled and notify the user.
 	 */
 	public function checks() {
 		if ( 'no' == $this->enabled ) {
@@ -150,20 +150,20 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		}
 
 		// Show message when using standard mode and no SSL on the checkout page
-		elseif ( 'standard' == $this->mode && 'no' == get_option( 'woocommerce_force_ssl_checkout' ) && ! class_exists( 'WordPressHTTPS' ) ) {
+		elseif ( 'standard' == $this->mode && ! wc_checkout_is_https() ) {
 			echo '<div class="error"><p>' . sprintf( __( 'Simplify Commerce is enabled, but the <a href="%s">force SSL option</a> is disabled; your checkout may not be secure! Please enable SSL and ensure your server has a valid SSL certificate - Simplify Commerce will only work in sandbox mode.', 'woocommerce'), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ) . '</p></div>';
 		}
 	}
 
 	/**
-	 * Check if this gateway is enabled
+	 * Check if this gateway is enabled.
 	 */
 	public function is_available() {
-		if ( 'yes' != $this->enabled ) {
+		if ( 'yes' !== $this->enabled ) {
 			return false;
 		}
 
-		if ( 'standard' == $this->mode && ! is_ssl() && 'yes' != $this->sandbox ) {
+		if ( 'standard' === $this->mode && 'yes' !== $this->sandbox && ! wc_checkout_is_https() ) {
 			return false;
 		}
 
@@ -175,7 +175,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Initialise Gateway Settings Form Fields
+	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
@@ -257,7 +257,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Payment form on checkout page
+	 * Payment form on checkout page.
 	 */
 	public function payment_fields() {
 		$description = $this->get_description();
@@ -278,7 +278,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	/**
 	 * payment_scripts function.
 	 *
-	 * Outputs scripts used for simplify payment
+	 * Outputs scripts used for simplify payment.
 	 */
 	public function payment_scripts() {
 		if ( ! is_checkout() || ! $this->is_available() ) {
@@ -301,7 +301,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process standard payments
+	 * Process standard payments.
 	 *
 	 * @param  WC_Order $order
 	 * @param  string   $cart_token
@@ -323,17 +323,11 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			}
 
 			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $order->order_total * 100, // In cents
+				'amount'              => $order->order_total * 100, // In cents.
 				'token'               => $cart_token,
 				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id,
-				'card.addressCity'    => $order->billing_city,
-				'card.addressCountry' => $order->billing_country,
-				'card.addressLine1'   => $order->billing_address_1,
-				'card.addressLine2'   => $order->billing_address_2,
-				'card.addressState'   => $order->billing_state,
-				'card.addressZip'     => $order->billing_postcode
+				'reference'           => $order->id
 			) );
 
 			$order_complete = $this->process_order_status( $order, $payment->id, $payment->paymentStatus, $payment->authCode );
@@ -367,7 +361,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process standard payments
+	 * Process standard payments.
 	 *
 	 * @param WC_Order $order
 	 * @return array
@@ -380,7 +374,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process the payment
+	 * Process the payment.
 	 *
 	 * @param integer $order_id
 	 */
@@ -404,21 +398,26 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 */
 	protected function get_hosted_payments_args( $order ) {
 		$args = apply_filters( 'woocommerce_simplify_commerce_hosted_args', array(
-			'sc-key'       => $this->public_key,
-			'amount'       => $order->order_total * 100,
-			'reference'    => $order->id,
-			'name'         => esc_html( get_bloginfo( 'name', 'display' ) ),
-			'description'  => sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ),
-			'receipt'      => 'false',
-			'color'        => $this->modal_color,
-			'redirect-url' => WC()->api_request_url( 'WC_Gateway_Simplify_Commerce' )
+			'sc-key'          => $this->public_key,
+			'amount'          => $order->order_total * 100,
+			'reference'       => $order->id,
+			'name'            => esc_html( get_bloginfo( 'name', 'display' ) ),
+			'description'     => sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ),
+			'receipt'         => 'false',
+			'color'           => $this->modal_color,
+			'redirect-url'    => WC()->api_request_url( 'WC_Gateway_Simplify_Commerce' ),
+			'address'         => $order->billing_address_1 . ' ' . $order->billing_address_2,
+			'address-city'    => $order->billing_city,
+			'address-state'   => $order->billing_state,
+			'address-zip'     => $order->billing_postcode,
+			'address-country' => $order->billing_country
 		), $order->id );
 
 		return $args;
 	}
 
 	/**
-	 * Receipt page
+	 * Receipt page.
 	 *
 	 * @param  int $order_id
 	 */
@@ -439,7 +438,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Return handler for Hosted Payments
+	 * Return handler for Hosted Payments.
 	 */
 	public function return_handler() {
 		@ob_clean();
@@ -467,7 +466,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process the order status
+	 * Process the order status.
 	 *
 	 * @param  WC_Order $order
 	 * @param  string   $payment_id
@@ -494,8 +493,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Process refunds
-	 * WooCommerce 2.2 or later
+	 * Process refunds.
+	 * WooCommerce 2.2 or later.
 	 *
 	 * @param  int $order_id
 	 * @param  float $amount
@@ -509,7 +508,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			$payment_id = get_post_meta( $order_id, '_transaction_id', true );
 
 			$refund = Simplify_Refund::createRefund( array(
-				'amount'    => $amount * 100, // In cents
+				'amount'    => $amount * 100, // In cents.
 				'payment'   => $payment_id,
 				'reason'    => $reason,
 				'reference' => $order_id

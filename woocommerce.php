@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.5.0-dev
+ * Version: 2.5.0-beta-2
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 4.1
@@ -17,13 +17,13 @@
  * @author WooThemes
  */
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 if ( ! class_exists( 'WooCommerce' ) ) :
 
 /**
- * Main WooCommerce Class
+ * Main WooCommerce Class.
  *
  * @class WooCommerce
  * @version	2.4.0
@@ -33,10 +33,10 @@ final class WooCommerce {
 	/**
 	 * @var string
 	 */
-	public $version = '2.4.6';
+	public $version = '2.5.0';
 
 	/**
-	 * @var WooCommerce The single instance of the class
+	 * @var WooCommerce The single instance of the class.
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
@@ -82,14 +82,14 @@ final class WooCommerce {
 	public $order_factory = null;
 
 	/**
-	 * Main WooCommerce Instance
+	 * Main WooCommerce Instance.
 	 *
 	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
 	 *
 	 * @since 2.1
 	 * @static
 	 * @see WC()
-	 * @return WooCommerce - Main instance
+	 * @return WooCommerce - Main instance.
 	 */
 	public static function instance() {
 		if ( is_null( self::$_instance ) ) {
@@ -137,7 +137,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Hook into actions and filters
+	 * Hook into actions and filters.
 	 * @since  2.3
 	 */
 	private function init_hooks() {
@@ -150,7 +150,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Define WC Constants
+	 * Define WC Constants.
 	 */
 	private function define_constants() {
 		$upload_dir = wp_upload_dir();
@@ -164,10 +164,12 @@ final class WooCommerce {
 		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
 		$this->define( 'WC_DELIMITER', '|' );
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
+		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 	}
 
 	/**
-	 * Define constant if not already set
+	 * Define constant if not already set.
+	 *
 	 * @param  string $name
 	 * @param  string|bool $value
 	 */
@@ -179,7 +181,8 @@ final class WooCommerce {
 
 	/**
 	 * What type of request is this?
-	 * string $type ajax, frontend or admin
+	 * string $type ajax, frontend or admin.
+	 *
 	 * @return bool
 	 */
 	private function is_request( $type ) {
@@ -242,7 +245,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-countries.php' );                      // Defines countries and states
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
-		include_once( 'includes/class-wc-language-pack-upgrader.php' );         // Download/update languages
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( 'includes/class-wc-cli.php' );
@@ -264,6 +266,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( 'includes/class-wc-https.php' );                          // https Helper
+		include_once( 'includes/class-wc-embed.php' );                          // Embeds
 	}
 
 	/**
@@ -277,25 +280,25 @@ final class WooCommerce {
 	 * Init WooCommerce when WordPress Initialises.
 	 */
 	public function init() {
-		// Before init action
+		// Before init action.
 		do_action( 'before_woocommerce_init' );
 
-		// Set up localisation
+		// Set up localisation.
 		$this->load_plugin_textdomain();
 
-		// Load class instances
+		// Load class instances.
 		$this->product_factory = new WC_Product_Factory();                      // Product Factory to create new product instances
 		$this->order_factory   = new WC_Order_Factory();                        // Order Factory to create new order instances
 		$this->countries       = new WC_Countries();                            // Countries class
 		$this->integrations    = new WC_Integrations();                         // Integrations class
 
-		// Session class, handles session data for users - can be overwritten if custom handler is needed
+		// Session class, handles session data for users - can be overwritten if custom handler is needed.
 		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
 			$session_class  = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
 			$this->session  = new $session_class();
 		}
 
-		// Classes/actions loaded for the frontend and for ajax requests
+		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
 			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
@@ -303,7 +306,7 @@ final class WooCommerce {
 
 		$this->load_webhooks();
 
-		// Init action
+		// Init action.
 		do_action( 'woocommerce_init' );
 	}
 
@@ -312,25 +315,15 @@ final class WooCommerce {
 	 *
 	 * Note: the first-loaded translation file overrides any following ones if the same translation is present.
 	 *
-	 * Admin Locales are found in:
-	 * 		- WP_LANG_DIR/woocommerce/woocommerce-admin-LOCALE.mo
-	 * 		- WP_LANG_DIR/plugins/woocommerce-admin-LOCALE.mo
-	 *
-	 * Frontend/global Locales found in:
-	 * 		- WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
-	 * 	 	- woocommerce/i18n/languages/woocommerce-LOCALE.mo (which if not found falls back to:)
-	 * 	 	- WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
+	 * Locales found in:
+	 *      - WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
+	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce' );
 
-		if ( $this->is_request( 'admin' ) ) {
-			load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-admin-' . $locale . '.mo' );
-			load_textdomain( 'woocommerce', WP_LANG_DIR . '/plugins/woocommerce-admin-' . $locale . '.mo' );
-		}
-
 		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
-		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . "/i18n/languages" );
+		load_plugin_textdomain( 'woocommerce', false, plugin_basename( dirname( __FILE__ ) ) . '/i18n/languages' );
 	}
 
 	/**
@@ -347,7 +340,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Ensure post thumbnail support is turned on
+	 * Ensure post thumbnail support is turned on.
 	 */
 	private function add_thumbnail_support() {
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
@@ -357,7 +350,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Add WC Image sizes to WP
+	 * Add WC Image sizes to WP.
 	 *
 	 * @since 2.3
 	 */
@@ -404,7 +397,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Return the WC API URL for a given request
+	 * Return the WC API URL for a given request.
 	 *
 	 * @param string $request
 	 * @param mixed $ssl (default: null)
@@ -431,7 +424,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Load & enqueue active webhooks
+	 * Load & enqueue active webhooks.
 	 *
 	 * @since 2.2
 	 */
@@ -460,7 +453,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Get gateways class
+	 * Get gateways class.
 	 * @return WC_Payment_Gateways
 	 */
 	public function payment_gateways() {
@@ -468,7 +461,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Get shipping class
+	 * Get shipping class.
 	 * @return WC_Shipping
 	 */
 	public function shipping() {
@@ -487,6 +480,8 @@ final class WooCommerce {
 endif;
 
 /**
+ * Main instance of WooCommerce.
+ *
  * Returns the main instance of WC to prevent the need to use globals.
  *
  * @since  2.1

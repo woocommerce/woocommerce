@@ -15,14 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Post_Types' ) ) :
 
 /**
- * WC_Admin_Post_Types Class
+ * WC_Admin_Post_Types Class.
  *
  * Handles the edit posts views and some functionality on the edit post screen for WC post types.
  */
 class WC_Admin_Post_Types {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
@@ -76,6 +76,7 @@ class WC_Admin_Post_Types {
 		add_action( 'wp_trash_post', array( $this, 'trash_post' ) );
 		add_action( 'untrash_post', array( $this, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( $this, 'delete_order_items' ) );
+		add_action( 'before_delete_post', array( $this, 'delete_order_downloadable_permissions' ) );
 
 		// Edit post screens
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
@@ -201,7 +202,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Define custom columns for products
+	 * Define custom columns for products.
 	 * @param  array $existing_columns
 	 * @return array
 	 */
@@ -214,7 +215,6 @@ class WC_Admin_Post_Types {
 
 		$columns          = array();
 		$columns['cb']    = '<input type="checkbox" />';
-		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
 		$columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
 		$columns['name']  = __( 'Name', 'woocommerce' );
 
@@ -238,7 +238,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Define custom columns for coupons
+	 * Define custom columns for coupons.
 	 * @param  array $existing_columns
 	 * @return array
 	 */
@@ -257,7 +257,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Define custom columns for orders
+	 * Define custom columns for orders.
 	 * @param  array $existing_columns
 	 * @return array
 	 */
@@ -279,7 +279,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Ouput custom columns for products
+	 * Ouput custom columns for products.
 	 *
 	 * @param string $column
 	 */
@@ -292,13 +292,13 @@ class WC_Admin_Post_Types {
 
 		switch ( $column ) {
 			case 'thumb' :
-				echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $the_product->get_image( 'thumbnail' ) . '</a>';
+				echo '<a href="' . get_edit_post_link( $post->ID ) . '">' . $the_product->get_image( 'post-thumbnail' ) . '</a>';
 				break;
 			case 'name' :
 				$edit_link = get_edit_post_link( $post->ID );
 				$title     = _draft_or_post_title();
 
-				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) .'">' . $title .'</a>';
+				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
 
 				_post_states( $post );
 
@@ -317,7 +317,7 @@ class WC_Admin_Post_Types {
 
 				get_inline_data( $post );
 
-				/* Custom inline data for woocommerce */
+				/* Custom inline data for woocommerce. */
 				echo '
 					<div class="hidden" id="woocommerce_inline_' . $post->ID . '">
 						<div class="menu_order">' . $post->menu_order . '</div>
@@ -414,8 +414,8 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Render product row actions for old version of WordPress
-	 * Since WordPress 4.3 we don't have to build the row actions
+	 * Render product row actions for old version of WordPress.
+	 * Since WordPress 4.3 we don't have to build the row actions.
 	 *
 	 * @param WP_Post $post
 	 * @param string $title
@@ -475,7 +475,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Output custom columns for coupons
+	 * Output custom columns for coupons.
 	 *
 	 * @param string $column
 	 */
@@ -487,9 +487,11 @@ class WC_Admin_Post_Types {
 				$edit_link = get_edit_post_link( $post->ID );
 				$title     = _draft_or_post_title();
 
-				echo '<strong><a href="' . esc_attr( $edit_link ) . '" class="row-title">' . esc_html( $title ). '</a></strong>';
+				echo '<strong><a class="row-title" href="' . esc_url( $edit_link ) . '">' . esc_html( $title ) . '</a>';
 
 				_post_states( $post );
+
+				echo '</strong>';
 
 				$this->_render_shop_coupon_row_actions( $post, $title );
 			break;
@@ -545,8 +547,8 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Render shop_coupon row actions for old version of WordPress
-	 * Since WordPress 4.3 we don't have to build the row actions
+	 * Render shop_coupon row actions for old version of WordPress.
+	 * Since WordPress 4.3 we don't have to build the row actions.
 	 *
 	 * @param WP_Post $post
 	 * @param string $title
@@ -596,7 +598,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Output custom columns for coupons
+	 * Output custom columns for coupons.
 	 * @param  string $column
 	 */
 	public function render_shop_order_columns( $column ) {
@@ -654,7 +656,7 @@ class WC_Admin_Post_Types {
 									<?php echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false ); ?>
 								<?php endif; ?>
 								<?php if ( ! empty( $item_meta_html ) ) : ?>
-									<a class="tips" href="#" data-tip="<?php echo esc_attr( $item_meta_html ); ?>">[?]</a>
+									<?php echo wc_help_tip( $item_meta_html ); ?>
 								<?php endif; ?>
 							</td>
 						</tr>
@@ -737,7 +739,7 @@ class WC_Admin_Post_Types {
 					$username = '<a href="user-edit.php?user_id=' . absint( $user_info->ID ) . '">';
 
 					if ( $user_info->first_name || $user_info->last_name ) {
-						$username .= esc_html( ucfirst( $user_info->first_name ) . ' ' . ucfirst( $user_info->last_name ) );
+						$username .= esc_html( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), ucfirst( $user_info->first_name ), ucfirst( $user_info->last_name ) ) );
 					} else {
 						$username .= esc_html( ucfirst( $user_info->display_name ) );
 					}
@@ -746,7 +748,7 @@ class WC_Admin_Post_Types {
 
 				} else {
 					if ( $the_order->billing_first_name || $the_order->billing_last_name ) {
-						$username = trim( $the_order->billing_first_name . ' ' . $the_order->billing_last_name );
+						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->billing_first_name, $the_order->billing_last_name ) );
 					} else {
 						$username = __( 'Guest', 'woocommerce' );
 					}
@@ -806,7 +808,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Make columns sortable - https://gist.github.com/906872
+	 * Make columns sortable - https://gist.github.com/906872.
 	 *
 	 * @param array $columns
 	 * @return array
@@ -822,7 +824,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Make columns sortable - https://gist.github.com/906872
+	 * Make columns sortable - https://gist.github.com/906872.
 	 *
 	 * @param array $columns
 	 * @return array
@@ -832,7 +834,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Make columns sortable - https://gist.github.com/906872
+	 * Make columns sortable - https://gist.github.com/906872.
 	 *
 	 * @param array $columns
 	 * @return array
@@ -864,8 +866,8 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Set list table primary column for products and orders
-	 * Support for WordPress 4.3
+	 * Set list table primary column for products and orders.
+	 * Support for WordPress 4.3.
 	 *
 	 * @param  string $default
 	 * @param  string $screen_id
@@ -890,7 +892,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Set row actions for products and orders
+	 * Set row actions for products and orders.
 	 *
 	 * @param  array $actions
 	 * @param  WP_Post $post
@@ -916,9 +918,9 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Product sorting link
+	 * Product sorting link.
 	 *
-	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/)
+	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/).
 	 *
 	 * @param array $views
 	 * @return array
@@ -940,7 +942,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Custom bulk edit - form
+	 * Custom bulk edit - form.
 	 *
 	 * @param mixed $column_name
 	 * @param mixed $post_type
@@ -959,7 +961,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Custom quick edit - form
+	 * Custom quick edit - form.
 	 *
 	 * @param mixed $column_name
 	 * @param mixed $post_type
@@ -978,7 +980,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Quick and bulk edit saving
+	 * Quick and bulk edit saving.
 	 *
 	 * @param int $post_id
 	 * @param WP_Post $post
@@ -1033,7 +1035,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Quick edit
+	 * Quick edit.
 	 *
 	 * @param integer $post_id
 	 * @param WC_Product $product
@@ -1047,7 +1049,7 @@ class WC_Admin_Post_Types {
 		// Save fields
 		if ( isset( $_REQUEST['_sku'] ) ) {
 			$sku     = get_post_meta( $post_id, '_sku', true );
-			$new_sku = wc_clean( stripslashes( $_REQUEST['_sku'] ) );
+			$new_sku = wc_clean( $_REQUEST['_sku'] );
 
 			if ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {
@@ -1179,7 +1181,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Bulk edit
+	 * Bulk edit.
 	 * @param integer $post_id
 	 * @param WC_Product $product
 	 */
@@ -1262,7 +1264,16 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle price - remove dates and set to lowest
-		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
+		$change_price_product_types = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external' ) );
+		$can_product_type_change_price = false;
+		foreach ( $change_price_product_types as $product_type ) {
+			if ( $product->is_type( $product_type ) ) {
+				$can_product_type_change_price = true;
+				break;
+			}
+		}
+
+		if ( $can_product_type_change_price ) {
 
 			$price_changed = false;
 
@@ -1342,13 +1353,11 @@ class WC_Admin_Post_Types {
 						break;
 				}
 
-				if ( ! empty( $new_price ) && $new_price != $old_sale_price ) {
+				if ( isset( $new_price ) && $new_price != $old_sale_price ) {
 					$price_changed = true;
-					$new_price = round( $new_price, wc_get_price_decimals() );
+					$new_price = ! empty( $new_price ) || '0' === $new_price ? round( $new_price, wc_get_price_decimals() ) : '';
 					update_post_meta( $post_id, '_sale_price', $new_price );
 					$product->sale_price = $new_price;
-				} else {
-					update_post_meta( $post_id, '_sale_price', '' );
 				}
 			}
 
@@ -1397,9 +1406,9 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Add extra bulk action options to mark orders as complete or processing
+	 * Add extra bulk action options to mark orders as complete or processing.
 	 *
-	 * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031
+	 * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031.
 	 */
 	public function bulk_admin_footer() {
 		global $post_type;
@@ -1423,7 +1432,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Process the new bulk actions for changing order status
+	 * Process the new bulk actions for changing order status.
 	 */
 	public function bulk_action() {
 		$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
@@ -1467,7 +1476,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Show confirmation message that order status changed for number of orders
+	 * Show confirmation message that order status changed for number of orders.
 	 */
 	public function bulk_admin_notices() {
 		global $post_type, $pagenow;
@@ -1605,7 +1614,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Filters for post types
+	 * Filters for post types.
 	 */
 	public function restrict_manage_posts() {
 		global $typenow;
@@ -1620,7 +1629,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Show a category filter box
+	 * Show a category filter box.
 	 */
 	public function product_filters() {
 		global $wp_query;
@@ -1720,7 +1729,7 @@ class WC_Admin_Post_Types {
 		if ( ! empty( $_GET['_customer_user'] ) ) {
 			$user_id     = absint( $_GET['_customer_user'] );
 			$user        = get_user_by( 'id', $user_id );
-			$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
+			$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 		}
 		?>
 		<input type="hidden" class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-selected="<?php echo htmlspecialchars( $user_string ); ?>" value="<?php echo $user_id; ?>" data-allow_clear="true" />
@@ -1728,7 +1737,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Filters and sorting handler
+	 * Filters and sorting handler.
 	 *
 	 * @param  array $vars
 	 * @return array
@@ -1807,7 +1816,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Filter the products in admin based on options
+	 * Filter the products in admin based on options.
 	 *
 	 * @param mixed $query
 	 */
@@ -1894,7 +1903,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Removes variations etc belonging to a deleted post, and clears transients
+	 * Removes variations etc belonging to a deleted post, and clears transients.
 	 *
 	 * @param mixed $id ID of post being deleted
 	 */
@@ -2022,7 +2031,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Remove item meta on permanent deletion
+	 * Remove item meta on permanent deletion.
 	 */
 	public function delete_order_items( $postid ) {
 		global $wpdb;
@@ -2038,6 +2047,24 @@ class WC_Admin_Post_Types {
 				" );
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
+		}
+	}
+
+	/**
+	 * Remove downloadable permissions on permanent order deletion.
+	 */
+	public function delete_order_downloadable_permissions( $postid ) {
+		global $wpdb;
+
+		if ( in_array( get_post_type( $postid ), wc_get_order_types() ) ) {
+			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
+
+			$wpdb->query( $wpdb->prepare( "
+				DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				WHERE order_id = %d
+			", $postid ) );
+
+			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
 		}
 	}
 
@@ -2067,7 +2094,7 @@ class WC_Admin_Post_Types {
 	public function edit_form_after_title( $post ) {
 		if ( 'shop_coupon' === $post->post_type ) {
 			?>
-			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php esc_html_e( $post->post_excerpt ); ?></textarea>
+			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // This is already escaped in core ?></textarea>
 			<?php
 		}
 	}
@@ -2195,8 +2222,8 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Grant downloadable file access to any newly added files on any existing
-	 * orders for this product that have previously been granted downloadable file access
+	 * Grant downloadable file access to any newly added files on any existing.
+	 * orders for this product that have previously been granted downloadable file access.
 	 *
 	 * @param int $product_id product identifier
 	 * @param int $variation_id optional product variation identifier
@@ -2252,7 +2279,7 @@ class WC_Admin_Post_Types {
 
 
 	/**
-	 * Disable DFW feature pointer
+	 * Disable DFW feature pointer.
 	 */
 	public function disable_dfw_feature_pointer() {
 		$screen = get_current_screen();

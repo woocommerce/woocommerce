@@ -27,7 +27,7 @@ function wc_sanitize_taxonomy_name( $taxonomy ) {
 }
 
 /**
- * Gets the filename part of a download URL
+ * Gets the filename part of a download URL.
  *
  * @param string $file_url
  * @return string
@@ -40,7 +40,7 @@ function wc_get_filename_from_url( $file_url ) {
 }
 
 /**
- * Normalise dimensions, unify to cm then convert to wanted unit value
+ * Normalise dimensions, unify to cm then convert to wanted unit value.
  *
  * Usage: wc_get_dimension(55, 'in');
  *
@@ -91,7 +91,7 @@ function wc_get_dimension( $dim, $to_unit ) {
 }
 
 /**
- * Normalise weights, unify to kg then convert to wanted unit value
+ * Normalise weights, unify to kg then convert to wanted unit value.
  *
  * Usage: wc_get_weight(55, 'kg');
  *
@@ -146,7 +146,7 @@ function wc_trim_zeros( $price ) {
 }
 
 /**
- * Round a tax amount
+ * Round a tax amount.
  *
  * @param mixed $tax
  * @return double
@@ -165,7 +165,7 @@ function wc_round_tax_total( $tax ) {
 }
 
 /**
- * Make a refund total negative
+ * Make a refund total negative.
  * @return float
  */
 function wc_format_refund_total( $amount ) {
@@ -173,9 +173,9 @@ function wc_format_refund_total( $amount ) {
 }
 
 /**
- * Format decimal numbers ready for DB storage
+ * Format decimal numbers ready for DB storage.
  *
- * Sanitize, remove locale formatting, and optionally round + trim off zeros
+ * Sanitize, remove locale formatting, and optionally round + trim off zeros.
  *
  * @param  float|string $number Expects either a float or a string with a decimal separator only (no thousands)
  * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
@@ -208,7 +208,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 }
 
 /**
- * Convert a float to a string without locale formatting which PHP adds when changing floats to strings
+ * Convert a float to a string without locale formatting which PHP adds when changing floats to strings.
  * @param  float $float
  * @return string
  */
@@ -225,7 +225,7 @@ function wc_float_to_string( $float ) {
 }
 
 /**
- * Format a price with WC Currency Locale settings
+ * Format a price with WC Currency Locale settings.
  * @param  string $value
  * @return string
  */
@@ -234,7 +234,7 @@ function wc_format_localized_price( $value ) {
 }
 
 /**
- * Format a decimal with PHP Locale settings
+ * Format a decimal with PHP Locale settings.
  * @param  string $value
  * @return string
  */
@@ -244,13 +244,12 @@ function wc_format_localized_decimal( $value ) {
 }
 
 /**
- * Clean variables
- *
- * @param string $var
- * @return string
+ * Clean variables using sanitize_text_field.
+ * @param string|array $var
+ * @return string|array
  */
 function wc_clean( $var ) {
-	return sanitize_text_field( $var );
+	return is_array( $var ) ? array_map( 'wc_clean', $var ) : sanitize_text_field( $var );
 }
 
 /**
@@ -275,7 +274,7 @@ function wc_sanitize_tooltip( $var ) {
 }
 
 /**
- * Merge two arrays
+ * Merge two arrays.
  *
  * @param array $a1
  * @param array $a2
@@ -296,7 +295,7 @@ function wc_array_overlay( $a1, $a2 ) {
 }
 
 /**
- * Formats a stock amount by running it through a filter
+ * Formats a stock amount by running it through a filter.
  * @param  int|float $amount
  * @return int|float
  */
@@ -305,7 +304,7 @@ function wc_stock_amount( $amount ) {
 }
 
 /**
- * Get the price format depending on the currency position
+ * Get the price format depending on the currency position.
  *
  * @return string
  */
@@ -332,7 +331,7 @@ function get_woocommerce_price_format() {
 }
 
 /**
- * Return the thousand separator for prices
+ * Return the thousand separator for prices.
  * @since  2.3
  * @return string
  */
@@ -342,7 +341,7 @@ function wc_get_price_thousand_separator() {
 }
 
 /**
- * Return the decimal separator for prices
+ * Return the decimal separator for prices.
  * @since  2.3
  * @return string
  */
@@ -422,7 +421,7 @@ function wc_let_to_num( $size ) {
 }
 
 /**
- * WooCommerce Date Format - Allows to change date format for everything WooCommerce
+ * WooCommerce Date Format - Allows to change date format for everything WooCommerce.
  *
  * @return string
  */
@@ -431,7 +430,7 @@ function wc_date_format() {
 }
 
 /**
- * WooCommerce Time Format - Allows to change time format for everything WooCommerce
+ * WooCommerce Time Format - Allows to change time format for everything WooCommerce.
  *
  * @return string
  */
@@ -440,10 +439,10 @@ function wc_time_format() {
 }
 
 /**
- * WooCommerce Timezone - helper to retrieve the timezone string for a site until
- * a WP core method exists (see http://core.trac.wordpress.org/ticket/24730)
+ * WooCommerce Timezone - helper to retrieve the timezone string for a site until.
+ * a WP core method exists (see http://core.trac.wordpress.org/ticket/24730).
  *
- * Adapted from http://www.php.net/manual/en/function.timezone-name-from-abbr.php#89155
+ * Adapted from http://www.php.net/manual/en/function.timezone-name-from-abbr.php#89155.
  *
  * @since 2.1
  * @return string a valid PHP timezone string for the site
@@ -488,7 +487,7 @@ function wc_timezone_string() {
 if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours
+	 * Hex darker/lighter/contrast functions for colours.
 	 *
 	 * @param mixed $color
 	 * @return string
@@ -510,7 +509,7 @@ if ( ! function_exists( 'wc_rgb_from_hex' ) ) {
 if ( ! function_exists( 'wc_hex_darker' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours
+	 * Hex darker/lighter/contrast functions for colours.
 	 *
 	 * @param mixed $color
 	 * @param int $factor (default: 30)
@@ -539,7 +538,7 @@ if ( ! function_exists( 'wc_hex_darker' ) ) {
 if ( ! function_exists( 'wc_hex_lighter' ) ) {
 
 	/**
-	 * Hex darker/lighter/contrast functions for colours
+	 * Hex darker/lighter/contrast functions for colours.
 	 *
 	 * @param mixed $color
 	 * @param int $factor (default: 30)
@@ -569,7 +568,7 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 if ( ! function_exists( 'wc_light_or_dark' ) ) {
 
 	/**
-	 * Detect if we should use a light or dark colour on a background colour
+	 * Detect if we should use a light or dark colour on a background colour.
 	 *
 	 * @param mixed $color
 	 * @param string $dark (default: '#000000')
@@ -593,7 +592,7 @@ if ( ! function_exists( 'wc_light_or_dark' ) ) {
 if ( ! function_exists( 'wc_format_hex' ) ) {
 
 	/**
-	 * Format string as hex
+	 * Format string as hex.
 	 *
 	 * @param string $hex
 	 * @return string
@@ -611,7 +610,7 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
 }
 
 /**
- * Format the postcode according to the country and length of the postcode
+ * Format the postcode according to the country and length of the postcode.
  *
  * @param string postcode
  * @param string country
@@ -652,7 +651,7 @@ function wc_strtolower( $string ) {
 }
 
 /**
- * Trim a string and append a suffix
+ * Trim a string and append a suffix.
  * @param  string  $string
  * @param  integer $chars
  * @param  string  $suffix
@@ -666,7 +665,7 @@ function wc_trim_string( $string, $chars = 200, $suffix = '...' ) {
 }
 
 /**
- * Format content to display shortcodes
+ * Format content to display shortcodes.
  *
  * @since  2.3.0
  * @param  string $raw_string
@@ -677,8 +676,8 @@ function wc_format_content( $raw_string ) {
 }
 
 /**
- * Format product short description
- * Adds support for Jetpack Markdown
+ * Format product short description.
+ * Adds support for Jetpack Markdown.
  *
  * @since  2.4.0
  * @param  string $content
@@ -698,7 +697,7 @@ function wc_format_product_short_description( $content ) {
 add_filter( 'woocommerce_short_description', 'wc_format_product_short_description', 9999999 );
 
 /**
- * Formats curency symbols when saved in settings
+ * Formats curency symbols when saved in settings.
  * @param  string $value
  * @param  array $option
  * @param  string $raw_value
@@ -711,7 +710,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_decima
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousand_sep', 'wc_format_option_price_separators', 10, 3 );
 
 /**
- * Formats decimals when saved in settings
+ * Formats decimals when saved in settings.
  * @param  string $value
  * @param  array $option
  * @param  string $raw_value

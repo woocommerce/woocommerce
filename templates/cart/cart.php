@@ -2,14 +2,14 @@
 /**
  * Cart Page
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/single-product.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/cart/cart.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
- * will need to copy the new files to your theme to maintain compatibility. We try to do this
- * as little as possible, but it does happen. When this occurs the version of the template file will
+ * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
+ * will need to copy the new files to your theme to maintain compatibility. We try to do this.
+ * as little as possible, but it does happen. When this occurs the version of the template file will.
  * be bumped and the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
+ * @see     http://docs.woothemes.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.3.8
@@ -23,11 +23,11 @@ wc_print_notices();
 
 do_action( 'woocommerce_before_cart' ); ?>
 
-<form action="<?php echo esc_url( WC()->cart->get_cart_url() ); ?>" method="post">
+<form action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
 
 <?php do_action( 'woocommerce_before_cart_table' ); ?>
 
-<table class="shop_table cart" cellspacing="0">
+<table class="shop_table shop_table_responsive cart" cellspacing="0">
 	<thead>
 		<tr>
 			<th class="product-remove">&nbsp;</th>
@@ -74,7 +74,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 						?>
 					</td>
 
-					<td class="product-name">
+					<td class="product-name" data-title="<?php _e( 'Product', 'woocommerce' ); ?>">
 						<?php
 							if ( ! $_product->is_visible() ) {
 								echo apply_filters( 'woocommerce_cart_item_name', $_product->get_title(), $cart_item, $cart_item_key ) . '&nbsp;';
@@ -92,13 +92,13 @@ do_action( 'woocommerce_before_cart' ); ?>
 						?>
 					</td>
 
-					<td class="product-price">
+					<td class="product-price" data-title="<?php _e( 'Price', 'woocommerce' ); ?>">
 						<?php
 							echo apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
 						?>
 					</td>
 
-					<td class="product-quantity">
+					<td class="product-quantity" data-title="<?php _e( 'Quantity', 'woocommerce' ); ?>">
 						<?php
 							if ( $_product->is_sold_individually() ) {
 								$product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
@@ -115,7 +115,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 						?>
 					</td>
 
-					<td class="product-subtotal">
+					<td class="product-subtotal" data-title="<?php _e( 'Total', 'woocommerce' ); ?>">
 						<?php
 							echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key );
 						?>
@@ -130,7 +130,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 		<tr>
 			<td colspan="6" class="actions">
 
-				<?php if ( WC()->cart->coupons_enabled() ) { ?>
+				<?php if ( wc_coupons_enabled() ) { ?>
 					<div class="coupon">
 
 						<label for="coupon_code"><?php _e( 'Coupon', 'woocommerce' ); ?>:</label> <input type="text" name="coupon_code" class="input-text" id="coupon_code" value="" placeholder="<?php esc_attr_e( 'Coupon code', 'woocommerce' ); ?>" /> <input type="submit" class="button" name="apply_coupon" value="<?php esc_attr_e( 'Apply Coupon', 'woocommerce' ); ?>" />

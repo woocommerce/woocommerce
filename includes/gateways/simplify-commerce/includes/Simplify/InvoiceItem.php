@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2013, 2014 MasterCard International Incorporated
+ * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are 
@@ -31,10 +31,13 @@ class Simplify_InvoiceItem extends Simplify_Object {
     /**
      * Creates an Simplify_InvoiceItem object
      * @param     array $hash a map of parameters; valid keys are:<dl style="padding-left:10px;">
-     *     <dt><tt>amount</tt></dt>    <dd>Amount of the invoice item (minor units). Example: 1000 = 10.00 [min value: 1, max value: 99999999] <strong>required </strong></dd>
-     *     <dt><tt>currency</tt></dt>    <dd>Currency code (ISO-4217) for the invoice item. Must match the currency associated with your account. [default: USD] <strong>required </strong></dd>
-     *     <dt><tt>description</tt></dt>    <dd>Individual items of an invoice </dd>
-     *     <dt><tt>invoice</tt></dt>    <dd>Description of the invoice item <strong>required </strong></dd></dl>
+     *     <dt><tt>amount</tt></dt>    <dd>Amount of the invoice item in the smallest unit of your currency. Example: 100 = $1.00USD [min value: -9999900, max value: 9999900] <strong>required </strong></dd>
+     *     <dt><tt>description</tt></dt>    <dd>Individual items of an invoice [max length: 1024] </dd>
+     *     <dt><tt>invoice</tt></dt>    <dd>The ID of the invoice this item belongs to. </dd>
+     *     <dt><tt>product</tt></dt>    <dd>Product ID this item relates to. </dd>
+     *     <dt><tt>quantity</tt></dt>    <dd>Quantity of the item.  This total amount of the invoice item is the amount * quantity. [min value: 1, max value: 999999, default: 1] </dd>
+     *     <dt><tt>reference</tt></dt>    <dd>User defined reference field. [max length: 255] </dd>
+     *     <dt><tt>tax</tt></dt>    <dd>The tax ID of the tax charge in the invoice item. </dd></dl>
      * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.<i/>
      * @return    InvoiceItem a InvoiceItem object.
      */
@@ -69,30 +72,6 @@ class Simplify_InvoiceItem extends Simplify_Object {
         }
 
 
-       /**
-        * Retrieve Simplify_InvoiceItem objects.
-        * @param     array criteria a map of parameters; valid keys are:<dl style="padding-left:10px;">
-        *     <dt><tt>filter</tt></dt>    <dd>Filters to apply to the list.  </dd>
-        *     <dt><tt>max</tt></dt>    <dd>Allows up to a max of 50 list items to return. [max value: 50, default: 20]  </dd>
-        *     <dt><tt>offset</tt></dt>    <dd>Used in paging of the list.  This is the start offset of the page. [default: 0]  </dd>
-        *     <dt><tt>sorting</tt></dt>    <dd>Allows for ascending or descending sorting of the list.  The value maps properties to the sort direction (either <tt>asc</tt> for ascending or <tt>desc</tt> for descending).  Sortable properties are: <tt> id</tt><tt> amount</tt><tt> description</tt><tt> invoice</tt>.</dd></dl>
-        * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
-        * @return    Simplify_ResourceList a ResourceList object that holds the list of InvoiceItem objects and the total
-        *            number of InvoiceItem objects available for the given criteria.
-        * @see       ResourceList
-        */
-        static public function listInvoiceItem($criteria = null, $authentication = null) {
-
-            $args = func_get_args();
-            $authentication = Simplify_PaymentsApi::buildAuthenticationObject($authentication, $args, 2);
-
-            $val = new Simplify_InvoiceItem();
-            $list = Simplify_PaymentsApi::listObject($val, $criteria, $authentication);
-
-            return $list;
-        }
-
-
         /**
          * Retrieve a Simplify_InvoiceItem object from the API
          *
@@ -119,9 +98,11 @@ class Simplify_InvoiceItem extends Simplify_Object {
          *
          * The properties that can be updated:
          * <dl style="padding-left:10px;">
-         *     <dt><tt>amount</tt></dt>    <dd>Amount of the invoice item (minor units). Example: 1000 = 10.00 [min value: 1, max value: 99999999] </dd>
-         *     <dt><tt>currency</tt></dt>    <dd>Currency code (ISO-4217) for the invoice item. Must match the currency associated with your account. [default: USD] </dd>
-         *     <dt><tt>description</tt></dt>    <dd>Individual items of an invoice </dd></dl>
+         *     <dt><tt>amount</tt></dt>    <dd>Amount of the invoice item in the smallest unit of your currency. Example: 100 = $1.00USD [min value: 1] </dd>
+         *     <dt><tt>description</tt></dt>    <dd>Individual items of an invoice </dd>
+         *     <dt><tt>quantity</tt></dt>    <dd>Quantity of the item.  This total amount of the invoice item is the amount * quantity. [min value: 1, max value: 999999] </dd>
+         *     <dt><tt>reference</tt></dt>    <dd>User defined reference field. </dd>
+         *     <dt><tt>tax</tt></dt>    <dd>The tax ID of the tax charge in the invoice item. </dd></dl>
          * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
          * @return    InvoiceItem a InvoiceItem object.
          */

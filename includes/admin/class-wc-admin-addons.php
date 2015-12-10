@@ -2,10 +2,10 @@
 /**
  * Addons Page
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,9 +13,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Addons Class
+ * WC_Admin_Addons Class.
  */
 class WC_Admin_Addons {
+
+	/**
+	 * Handles the outputting of a contextually aware Storefront link (points to child themes if Storefront is already active).
+	 */
+	public static function output_storefront_button() {
+		$url = 'http://www.woothemes.com/storefront/';
+		$text = __( 'View more about Storefront', 'woocommerce' );
+		$template = get_option( 'template' );
+		$stylesheet = get_option( 'stylesheet' );
+		$utm_content = 'hasstorefront';
+
+		// If we're using Storefront with a child theme.
+		if ( 'storefront' == $template && 'storefront' != $stylesheet ) {
+			$url = 'http:///www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
+			$text = __( 'View more Storefront child themes', 'woocommerce' );
+			$utm_content = 'hasstorefrontchildtheme';
+		}
+
+		// If we're using Storefront without a child theme.
+		if ( 'storefront' == $template && 'storefront' == $stylesheet ) {
+			$url = 'http:///www.woothemes.com/product-category/themes/storefront-child-theme-themes/';
+			$text = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
+			$utm_content = 'nostorefrontchildtheme';
+		}
+
+		// If we're not using Storefront at all.
+		if ( 'storefront' != $template && 'storefront' != $stylesheet ) {
+			$url = 'http://www.woothemes.com/storefront/';
+			$text = __( 'Need a theme? Try Storefront', 'woocommerce' );
+			$utm_content = 'nostorefront';
+		}
+
+		$url = add_query_arg( array(
+			'utm_source'   => 'product',
+			'utm_medium'   => 'upsell',
+			'utm_campaign' => 'wcaddons',
+			'utm_content'  => $utm_content,
+		), $url );
+
+		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
+	}
 
 	/**
 	 * Handles output of the reports page in admin.

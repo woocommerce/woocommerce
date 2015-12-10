@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Get all order statuses
+ * Get all order statuses.
  *
  * @since 2.2
  * @return array
@@ -55,7 +55,7 @@ function wc_get_order( $the_order = false ) {
 }
 
 /**
- * Get the nice name for an order status
+ * Get the nice name for an order status.
  *
  * @since  2.2
  * @param  string $status
@@ -86,7 +86,7 @@ function wc_get_order_id_by_order_key( $order_key ) {
 }
 
 /**
- * Get all registered order types
+ * Get all registered order types.
  *
  * $for optionally define what you are getting order types for so only relevent types are returned.
  *
@@ -157,7 +157,7 @@ function wc_get_order_types( $for = '' ) {
 }
 
 /**
- * Get an order type by post type name
+ * Get an order type by post type name.
  * @param  string post type name
  * @return bool|array of datails about the order type
  */
@@ -174,15 +174,15 @@ function wc_get_order_type( $type ) {
 /**
  * Register order type. Do not use before init.
  *
- * Wrapper for register post type, as well as a method of telling WC which
+ * Wrapper for register post type, as well as a method of telling WC which.
  * post types are types of orders, and having them treated as such.
  *
  * $args are passed to register_post_type, but there are a few specific to this function:
- * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main
+ * 		- exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main.
  * 		orders screen.
  * 		- add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
  * 		- exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
- * 		- exclude_from_order_views (bool) Whether or not this order type is visible by customers when
+ * 		- exclude_from_order_views (bool) Whether or not this order type is visible by customers when.
  * 		viewing orders e.g. on the my account page.
  * 		- exclude_from_order_reports (bool) Whether or not to exclude this type from core reports.
  * 		- exclude_from_order_sales_reports (bool) Whether or not to exclude this type from core sales reports.
@@ -229,7 +229,7 @@ function wc_register_order_type( $type, $args = array() ) {
 }
 
 /**
- * Grant downloadable product access to the file identified by $download_id
+ * Grant downloadable product access to the file identified by $download_id.
  *
  * @access public
  * @param string $download_id file identifier
@@ -296,7 +296,7 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
 }
 
 /**
- * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER
+ * Order Status completed - GIVE DOWNLOADABLE PRODUCT ACCESS TO CUSTOMER.
  *
  * @access public
  * @param int $order_id
@@ -376,7 +376,7 @@ function wc_add_order_item( $order_id, $item ) {
 }
 
 /**
- * Update an item for an order
+ * Update an item for an order.
  *
  * @since 2.2
  * @param int $item_id
@@ -398,7 +398,7 @@ function wc_update_order_item( $item_id, $args ) {
 }
 
 /**
- * Delete an item from the order it belongs to based on item id
+ * Delete an item from the order it belongs to based on item id.
  *
  * @access public
  * @param int $item_id
@@ -423,7 +423,7 @@ function wc_delete_order_item( $item_id ) {
 }
 
 /**
- * WooCommerce Order Item Meta API - Update term meta
+ * WooCommerce Order Item Meta API - Update term meta.
  *
  * @access public
  * @param mixed $item_id
@@ -437,7 +437,7 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
 }
 
 /**
- * WooCommerce Order Item Meta API - Add term meta
+ * WooCommerce Order Item Meta API - Add term meta.
  *
  * @access public
  * @param mixed $item_id
@@ -451,7 +451,7 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
 }
 
 /**
- * WooCommerce Order Item Meta API - Delete term meta
+ * WooCommerce Order Item Meta API - Delete term meta.
  *
  * @access public
  * @param mixed $item_id
@@ -465,7 +465,7 @@ function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $dele
 }
 
 /**
- * WooCommerce Order Item Meta API - Get term meta
+ * WooCommerce Order Item Meta API - Get term meta.
  *
  * @access public
  * @param mixed $item_id
@@ -478,7 +478,7 @@ function wc_get_order_item_meta( $item_id, $key, $single = true ) {
 }
 
 /**
- * Cancel all unpaid orders after held duration to prevent stock lock for those products
+ * Cancel all unpaid orders after held duration to prevent stock lock for those products.
  *
  * @access public
  */
@@ -529,6 +529,7 @@ function wc_processing_order_count() {
  * Return the orders count of a specific order status.
  *
  * @access public
+ * @param string $status
  * @return int
  */
 function wc_orders_count( $status ) {
@@ -577,11 +578,14 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	// Increments the transient version to invalidate cache
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 
+	// Do the same for regular cache
+	WC_Cache_Helper::incr_cache_prefix( 'orders' );
+
 	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
 }
 
 /**
- * See if we only ship to billing addresses
+ * See if we only ship to billing addresses.
  * @return bool
  */
 function wc_ship_to_billing_address_only() {
@@ -589,7 +593,7 @@ function wc_ship_to_billing_address_only() {
 }
 
 /**
- * Create a new order refund programmatically
+ * Create a new order refund programmatically.
  *
  * Returns a new refund object on success which can then be used to add additional data.
  *
@@ -716,22 +720,6 @@ function wc_create_refund( $args = array() ) {
 
 		// Set total to total refunded which may vary from order items
 		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1, 'total' );
-
-		// Figure out if this is just a partial refund
-		$max_remaining_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
-		$max_remaining_items  = absint( $order->get_item_count() - $order->get_item_count_refunded() );
-
-		if ( $max_remaining_refund > 0 || $max_remaining_items > 0 ) {
-			/**
-			 * woocommerce_order_partially_refunded
-			 *
-			 * @since 2.4.0
-			 * Note: 3rd arg was added in err. Kept for bw compat. 2.4.3
-			 */
-			do_action( 'woocommerce_order_partially_refunded', $args['order_id'], $refund_id, $refund_id );
-		} else {
-			do_action( 'woocommerce_order_fully_refunded', $args['order_id'], $refund_id );
-		}
 
 		do_action( 'woocommerce_refund_created', $refund_id, $args );
 	}
