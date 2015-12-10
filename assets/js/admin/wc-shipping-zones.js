@@ -3,7 +3,7 @@
 	$( function() {
 		var $table        = $( '.wc_shipping_zones' ),
 			$tbody        = $( '.wc-shipping-zone-rows' ),
-			$save_button  = $( 'input[name="save"]' ),
+			$save_button  = $( '.wc-shipping-zone-save' ),
 			$row_template = wp.template( 'wc-shipping-zone-row' ),
 			select2_args  = $.extend({
 				minimumResultsForSearch: 10,
@@ -199,11 +199,9 @@
 
 					model.logChanges( changes );
 				},
-				updateModelOnSort: function( event, ui ) {
+				updateModelOnSort: function( event ) {
 					var view         = event.data.view,
 						model        = view.model,
-						$tr          = ui.item,
-						zone_id      = $tr.data( 'id' ),
 						zones        = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes      = {};
 
