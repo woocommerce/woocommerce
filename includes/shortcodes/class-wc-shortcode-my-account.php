@@ -109,6 +109,12 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
+		if ( ! $order ) {
+			status_header( 404 );
+			echo '<div class="woocommerce-error">' . __( 'Order not found.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
+			return;
+		}
+
 		// Backwards compatibility
 		$status       = new stdClass();
 		$status->name = wc_get_order_status_name( $order->get_status() );
