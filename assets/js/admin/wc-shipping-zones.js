@@ -1,7 +1,7 @@
 /* global wc_enhanced_select_params, shippingZonesLocalizeScript, ajaxurl */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
-		var $table        = $( '.wc_shipping_zones' ),
+		var $table        = $( '.wc-shipping-zones' ),
 			$tbody        = $( '.wc-shipping-zone-rows' ),
 			$save_button  = $( '.wc-shipping-zone-save' ),
 			$row_template = wp.template( 'wc-shipping-zone-row' ),
@@ -98,6 +98,13 @@
 								} else {
 									$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
 								}
+							} );
+
+							// List shipping methods
+							$method_list = $tr.find('.wc-shipping-zone-methods ul');
+
+							_.each( rowData.shipping_methods, function( shipping_method ) {
+								$method_list.append( '<li><a href="admin.php?page=wc-shipping&amp;instance_id=' + shipping_method.instance_id + '">' + shipping_method.method_title + '</a></li>' );
 							} );
 
 							// Editing?

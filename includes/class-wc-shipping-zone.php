@@ -128,6 +128,28 @@ class WC_Shipping_Zone {
 	}
 
 	/**
+	 * Get shipping methods linked to this zone
+	 * @return array of objects
+	 */
+	public function get_shipping_methods() {
+		global $wpdb;
+
+        $raw_methods     = $wpdb->get_results( $wpdb->prepare( "SELECT method_id, method_order, instance_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d order by method_order ASC;", $this->get_zone_id() ) );
+		$wc_shipping     = WC_Shipping::instance();
+		$allowed_classes = $wc_shipping->get_shipping_method_class_names();
+		$methods         = array();
+
+		foreach ( $raw_methods as $raw_method ) {
+			if ( in_array( $raw_method->method_id, array_keys( $allowed_classes ) ) ) {
+				$class_name                          = $allowed_classes[ $raw_method->method_id ];
+				$methods[ $raw_method->instance_id ] = new $class_name( $raw_method->instance_id );
+			}
+		}
+
+		return $methods;
+	}
+
+	/**
 	 * Location type detection
 	 * @param  object  $location
 	 * @return boolean

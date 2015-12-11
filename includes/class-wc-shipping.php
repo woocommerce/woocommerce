@@ -21,7 +21,7 @@ class WC_Shipping {
 	public $enabled					= false;
 
 	/** @var array Stores methods loaded into woocommerce. */
-	public $shipping_methods 		= array();
+	public $shipping_methods;
 
 	/** @var float Stores the cost of shipping */
 	public $shipping_total 			= 0;
@@ -51,8 +51,9 @@ class WC_Shipping {
 	 * @return WC_Shipping Main instance
 	 */
 	public static function instance() {
-		if ( is_null( self::$_instance ) )
+		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self();
+		}
 		return self::$_instance;
 	}
 
@@ -91,6 +92,21 @@ class WC_Shipping {
 	}
 
 	/**
+	 * Shipping methods register themselves by returning their main class name through the woocommerce_shipping_methods filter.
+	 * @return array
+	 */
+	public function get_shipping_method_class_names() {
+		// Unique Method ID => Method Class name
+		return apply_filters( 'woocommerce_shipping_methods', array(
+			'flat_rate'              => 'WC_Shipping_Flat_Rate',
+			'free_shipping'          => 'WC_Shipping_Free_Shipping',
+			'international_delivery' => 'WC_Shipping_International_Delivery',
+			'local_delivery'         => 'WC_Shipping_Local_Delivery',
+			'local_pickup'           => 'WC_Shipping_Local_Pickup'
+		) );
+	}
+
+	/**
 	 * load_shipping_methods function.
 	 *
 	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
@@ -109,13 +125,7 @@ class WC_Shipping {
 		do_action( 'woocommerce_load_shipping_methods', $package );
 
 		// Register methods through a filter
-		$shipping_methods_to_load = apply_filters( 'woocommerce_shipping_methods', array(
-			'WC_Shipping_Flat_Rate',
-			'WC_Shipping_Free_Shipping',
-			'WC_Shipping_International_Delivery',
-			'WC_Shipping_Local_Delivery',
-			'WC_Shipping_Local_Pickup'
-		) );
+		$shipping_methods_to_load = $this->get_shipping_method_class_names();
 
 		foreach ( $shipping_methods_to_load as $method ) {
 			$this->register_shipping_method( $method );
@@ -197,6 +207,9 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function get_shipping_methods() {
+		if ( is_null( $this->shipping_methods ) ) {
+			$this->load_shipping_methods();
+		}
 		return $this->shipping_methods;
 	}
 

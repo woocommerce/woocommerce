@@ -2111,7 +2111,7 @@ table.wc_shipping {
 	}
 }
 
-table.wc_shipping_zones {
+table.wc-shipping-zones, table.wc-shipping-zone-methods {
 	td, th {
 		vertical-align: top;
 		line-height: 30px;
@@ -2197,47 +2197,51 @@ table.wc_shipping_zones {
 			}
 		}
 	}
-	.wc-shipping-zone-actions {
-		width: 3em;
+	.wc-shipping-zone-actions, .wc-shipping-zone-method-actions {
+		width: 4em;
 
-		a.wc-shipping-zone-edit {
+		a {
 			@include ir();
 			float: right;
+			padding: .5em;
+			cursor: pointer;
 
 			&:before {
 				@include icon;
-				content: "\e603";
 				color: #999;
 				line-height: 30px;
 			}
+			&:hover {
+				&:before {
+					color: #0073aa;
+				}
+			}
+		}
 
+		a.wc-shipping-zone-edit {
+			&:before {
+				content: "\e603";
+			}
+		}
+		a.wc-shipping-zone-delete, a.wc-shipping-zone-method-delete {
+			&:before {
+				content: "\e013";
+			}
 			&:hover {
 				&:before {
 					color: $red;
 				}
 			}
 		}
-		a.wc-shipping-zone-delete {
-			@include ir();
-			float: right;
-			margin-left: 1em;
 
+		a.wc-shipping-zone-method-settings {
 			&:before {
-				@include icon;
-				content: "\e013";
-				color: #999;
-				line-height: 30px;
-			}
-
-			&:hover {
-				&:before {
-					color: $red;
-				}
+				content: "\e01c";
 			}
 		}
 	}
 	tfoot {
-		input {
+		.button-primary {
 			float:right;
 		}
 	}

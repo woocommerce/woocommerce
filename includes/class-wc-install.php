@@ -475,9 +475,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
   location_code varchar(255) NOT NULL,
   location_type varchar(40) NOT NULL,
   PRIMARY KEY  (location_id)
-  KEY location_id (tax_rate_id),
+  KEY location_id (location_id),
   KEY location_type (location_type),
   KEY location_type_code (location_type(40),location_code(90))
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
+  zone_id bigint(20) NOT NULL,
+  instance_id bigint(20) NOT NULL auto_increment,
+  method_id varchar(255) NOT NULL,
+  method_order bigint(20) NOT NULL,
+  PRIMARY KEY  (method_id)
 ) $collate;
 		";
 	}

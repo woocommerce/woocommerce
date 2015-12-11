@@ -1,7 +1,7 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -47,14 +47,37 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/** @var bool Enabled for disabled */
 	public $enabled      = false;
 
-	/** @var bool Whether the method has settings or not (In WooCommerce > Settings > Shipping) */
+	/** @var bool Whether the method has global settings or not (In WooCommerce > Settings > Shipping) */
 	public $has_settings = true;
 
 	/** @var array Features this method supports. */
+
+	/**
+	 * Features this method supports. Possible features used by core:
+	 *   - shipping-zones
+	 * @var array
+	 */
 	public $supports     = array();
 
 	/** @var array This is an array of rates - methods must populate this array to register shipping costs */
 	public $rates        = array();
+
+	/**
+	 * Check if a shipping method supports a given feature.
+	 *
+	 * Methods should override this to declare support (or lack of support) for a feature.
+	 *
+	 * @param $feature string The name of a feature to test support for.
+	 * @return bool True if the shipping method supports the feature, false otherwise.
+	 */
+	public function supports( $feature ) {
+		return apply_filters( 'woocommerce_shipping_method_supports', in_array( $feature, $this->supports ), $feature, $this );
+	}
+
+	/**
+	 * Called to calculate shipping rates for this method. Rates can be added using the add_rate() method.
+	 */
+	public function calculate_shipping() {}
 
 	/**
 	 * Whether or not we need to calculate tax on top of the shipping rate.
@@ -62,7 +85,16 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return boolean
 	 */
 	public function is_taxable() {
-		return ( wc_tax_enabled() && $this->tax_status == 'taxable' && ! WC()->customer->is_vat_exempt() );
+		return ( wc_tax_enabled() && 'taxable' === $this->tax_status && ! WC()->customer->is_vat_exempt() );
+	}
+
+	/**
+	 * Return the shipping method title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return apply_filters( 'woocommerce_shipping_method_title', $this->title, $this->id );
 	}
 
 	/**
@@ -136,8 +168,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * has_settings function.
-	 *
+	 * Does this method have a global settings page?
 	 * @return bool
 	 */
 	public function has_settings() {
@@ -181,15 +212,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the shipping method title.
-	 *
-	 * @return string
-	 */
-	public function get_title() {
-		return apply_filters( 'woocommerce_shipping_method_title', $this->title, $this->id );
-	}
-
-	/**
 	 * get_fee function.
 	 *
 	 * @param mixed $fee
@@ -204,18 +226,5 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$fee = $this->minimum_fee;
 		}
 		return $fee;
-	}
-
-	/**
-	 * Check if a shipping method supports a given feature.
-	 *
-	 * Methods should override this to declare support (or lack of support) for a feature.
-	 *
-	 * @param $feature string The name of a feature to test support for.
-	 * @return bool True if the gateway supports the feature, false otherwise.
-	 * @since 1.5.7
-	 */
-	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_shipping_method_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
 	}
 }

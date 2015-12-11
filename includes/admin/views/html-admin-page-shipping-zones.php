@@ -1,15 +1,14 @@
 <div class="wrap woocommerce">
-	<h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?></h2>
+	<h1><?php _e( 'Shipping Zones', 'woocommerce' ); ?></h1>
     <p><?php _e( 'Create shipping zones for all of the places you ship products to. Customers who enter a shipping address that isn\'t included in your shipping zones will receive a notice that there is no shipping available to their region.', 'woocommerce' ); ?><p>
-
     <form>
-        <table class="wc_shipping_zones widefat">
+        <table class="wc-shipping-zones widefat">
             <thead>
                 <tr>
                     <th class="wc-shipping-zone-sort">&nbsp;</th>
-                    <th class="wc-shipping-zone-name">Zone Name</th>
-                    <th class="wc-shipping-zone-region">Region(s)</th>
-                    <th class="wc-shipping-zone-methods">Shipping Method(s)</th>
+                    <th class="wc-shipping-zone-name"><?php esc_html_e( 'Zone Name', 'woocommerce' ); ?></th>
+                    <th class="wc-shipping-zone-region"><?php esc_html_e( 'Region(s)', 'woocommerce' ); ?></th>
+                    <th class="wc-shipping-zone-methods"><?php esc_html_e( 'Shipping Method(s)', 'woocommerce' ); ?></th>
                     <th class="wc-shipping-zone-actions">&nbsp;</th>
                 </tr>
             </thead>
@@ -25,13 +24,9 @@
             <tbody>
                 <tr>
                     <td width="1%" class="wc-shipping-zone-worldwide"></td>
-                    <td class="wc-shipping-zone-name">
-                        <?php esc_html_e( 'Worldwide', 'woocommerce' ); ?>
-                    </td>
+                    <td class="wc-shipping-zone-name"><?php esc_html_e( 'Worldwide', 'woocommerce' ); ?></td>
                     <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping methods added here apply to all regions without a zone.', 'woocommerce' ); ?></td>
-                    <td>
-                        <a href="#" class="wc-shipping-zone-add-method button"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a>
-                    </td>
+                    <td><a href="#" class="wc-shipping-zone-add-method button"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a></td>
                     <td class="wc-shipping-zone-actions"></td>
                 </tr>
             </tbody>
@@ -75,7 +70,10 @@
 				</div>
 			</div>
 		</td>
-        <td class="wc-shipping-zone-methods"><a class="wc-shipping-zone-add-method button" href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a></td>
+        <td class="wc-shipping-zone-methods">
+			<ul></ul>
+			<a class="wc-shipping-zone-add-method button" href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a>
+		</td>
         <td class="wc-shipping-zone-actions">
 			<a class="wc-shipping-zone-delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 		</td>
