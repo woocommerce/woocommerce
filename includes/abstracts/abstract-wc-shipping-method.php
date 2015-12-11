@@ -10,22 +10,51 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extended by shipping methods to handle shipping calculations etc.
  *
  * @class       WC_Shipping_Method
- * @version     2.3.0
+ * @version     2.6.0
  * @package     WooCommerce/Abstracts
  * @category    Abstract Class
  * @author      WooThemes
  */
 abstract class WC_Shipping_Method extends WC_Settings_API {
 
-	/** @var string Unique ID for the shipping method - must be set. */
-	public $id;
+	/**
+	 * Features this method supports. Possible features used by core:
+	 *   - shipping-zones Shipping zone functionality + instances
+	 *   - global-settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
+	 * @var array
+	 */
+	public $supports     = array( 'global-settings' );
 
-	/** @var int Optional instance ID. */
-	public $number;
+	/**
+	 * Unique ID for the shipping method - must be set.
+	 * @var string
+	 */
+	public $id = '';
 
-	/** @var string Method title */
-	public $method_title;
+	/**
+	 * Instance ID if used.
+	 * @var int
+	 */
+	protected $instance_id = 0;
 
+	/**
+	 * Method title.
+	 * @var string
+	 */
+	public $method_title = '';
+
+	/**
+	 * Method description.
+	 * @var string
+	 */
+	public $method_description = '';
+
+	/**
+	 * yes or no based on whether the method is enabled.
+	 * @var string
+	 */
+	public $enabled = 'yes';
+	
 	/** @var string User set title */
 	public $title;
 
@@ -47,20 +76,15 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/** @var bool Enabled for disabled */
 	public $enabled      = false;
 
-	/** @var bool Whether the method has global settings or not (In WooCommerce > Settings > Shipping) */
-	public $has_settings = true;
-
-	/** @var array Features this method supports. */
-
-	/**
-	 * Features this method supports. Possible features used by core:
-	 *   - shipping-zones
-	 * @var array
-	 */
-	public $supports     = array();
-
 	/** @var array This is an array of rates - methods must populate this array to register shipping costs */
 	public $rates        = array();
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct( $instance_id = 0 ) {
+		$this->instance_id = absint( $instance_id );
+	}
 
 	/**
 	 * Check if a shipping method supports a given feature.
@@ -75,6 +99,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
+	 * Does this method have a global settings page?
+	 * @return bool
+	 */
+	public function has_settings() {
+		return $this->supports( 'global-settings' );
+	}
+
+	/**
 	 * Called to calculate shipping rates for this method. Rates can be added using the add_rate() method.
 	 */
 	public function calculate_shipping() {}
@@ -85,11 +117,50 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return boolean
 	 */
 	public function is_taxable() {
-		return ( wc_tax_enabled() && 'taxable' === $this->tax_status && ! WC()->customer->is_vat_exempt() );
+		return wc_tax_enabled() && 'taxable' === $this->tax_status && ! WC()->customer->is_vat_exempt();
 	}
 
 	/**
 	 * Return the shipping method title.
+	 * @since 2.6.0
+	 * @return string
+	 */
+	public function get_method_title() {
+		return apply_filters( 'woocommerce_shipping_method_title', $this->method_title, $this );
+	}
+
+	/**
+	 * Return the shipping method description.
+	 * @since 2.6.0
+	 * @return string
+	 */
+	public function get_method_description() {
+		return apply_filters( 'woocommerce_shipping_method_description', $this->method_description, $this );
+	}
+
+	/**
+	 * Return the name of the option in the WP DB.
+	 * @return string
+	 */
+	public function get_option_key() {
+		if ( $this->instance_id ) {
+			return $this->plugin_id . $this->id . $this->instance_id . '_settings';
+		} else {
+			return $this->plugin_id . $this->id . '_settings';
+		}
+	}
+
+	/**
+	 * Output the shipping settings screen.
+	 */
+	public function admin_options() {
+		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
+		echo wp_kses_post( wpautop( $this->get_method_description() ) );
+		parent::admin_options();
+	}
+
+	/**
+	 * Return the shipping title which is user set.
 	 *
 	 * @return string
 	 */
@@ -168,14 +239,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Does this method have a global settings page?
-	 * @return bool
-	 */
-	public function has_settings() {
-		return $this->has_settings;
-	}
-
-	/**
 	 * is_available function.
 	 *
 	 * @param array $package
@@ -226,5 +289,45 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$fee = $this->minimum_fee;
 		}
 		return $fee;
+	}
+
+
+	/**
+	 * Get setting form fields for instances of this shipping method within zones.
+	 * @return array
+	 */
+	public function get_instance_form_fields() {
+		return array();
+	}
+
+	/**
+	 * Output settings for this instance.
+	 * @uses self::get_instance_form_fields()
+	 * @since 2.6.0
+	 */
+	public function instance_options() {
+		echo wp_kses_post( wpautop( $this->get_method_description() ) ); ?>
+		<table class="form-table">
+			<?php $this->generate_settings_html( $this->get_instance_form_fields() ); ?>
+		</table>
+		<?php
+	}
+
+	/**
+	 * Save the settings for this instance.
+	 * @uses self::get_instance_form_fields()
+	 * @since 2.6.0
+	 * @return bool was anything saved?
+	 */
+	public function process_instance_options() {
+		$this->validate_settings_fields( $this->get_instance_form_fields()  );
+
+		if ( count( $this->errors ) > 0 ) {
+			$this->display_errors();
+		} else {
+			return update_option( $this->plugin_id . $this->id . $this->instance_id . '_settings', $this->sanitized_fields );
+		}
+
+		return false;
 	}
 }

@@ -22,8 +22,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	/** @var string Requires option */
 	public $requires   = '';
 
-	public $instance_id = 0;
-
 	/**
 	 * Constructor.
 	 */
@@ -31,7 +29,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$this->id 			         = 'free_shipping';
 		$this->instance_id 			 = absint( $instance_id );
 		$this->method_title          = __( 'Free Shipping', 'woocommerce' );
-		$this->has_settings          = false; // No global settings
+		$this->method_description    = __( 'Free Shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones'
 		);

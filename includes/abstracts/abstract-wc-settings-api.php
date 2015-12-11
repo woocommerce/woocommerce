@@ -2,10 +2,10 @@
 /**
  * Abstract Settings API Class
  *
- * Admin Settings API used by Shipping Methods and Payment Gateways.
+ * Admin Settings API used by Integrations, Shipping Methods, and Payment Gateways.
  *
  * @class    WC_Settings_API
- * @version  2.4.0
+ * @version  2.6.0
  * @package  WooCommerce/Abstracts
  * @category Abstract Class
  * @author   WooThemes
@@ -19,28 +19,16 @@ abstract class WC_Settings_API {
 	public $plugin_id = 'woocommerce_';
 
 	/**
-	 * Method ID.
+	 * ID of the class extending the settings API. Used in option names.
 	 * @var string
 	 */
 	public $id = '';
 
 	/**
-	 * Method title.
-	 * @var string
+	 * Validation errors.
+	 * @var array of strings
 	 */
-	public $method_title = '';
-
-	/**
-	 * Method description.
-	 * @var string
-	 */
-	public $method_description = '';
-
-	/**
-	 * 'yes' if the method is enabled.
-	 * @var string
-	 */
-	public $enabled;
+	public $errors = array();
 
 	/**
 	 * Setting values.
@@ -55,46 +43,10 @@ abstract class WC_Settings_API {
 	public $form_fields = array();
 
 	/**
-	 * Validation errors.
-	 * @var array
-	 */
-	public $errors = array();
-
-	/**
 	 * Sanitized fields after validation.
 	 * @var array
 	 */
 	public $sanitized_fields = array();
-
-	/**
-	 * Admin Options.
-	 *
-	 * Setup the gateway settings screen.
-	 * Override this in your gateway.
-	 *
-	 * @since 1.0.0
-	 */
-	public function admin_options() { ?>
-
-		<h3><?php echo ( ! empty( $this->method_title ) ) ? $this->method_title : __( 'Settings', 'woocommerce' ) ; ?></h3>
-
-		<?php echo ( ! empty( $this->method_description ) ) ? wpautop( $this->method_description ) : ''; ?>
-
-		<table class="form-table">
-			<?php $this->generate_settings_html(); ?>
-		</table><?php
-	}
-
-	/**
-	 * Initialise Settings Form Fields.
-	 *
-	 * Add an array of fields to be displayed
-	 * on the gateway's settings screen.
-	 *
-	 * @since  1.0.0
-	 * @return string
-	 */
-	public function init_form_fields() {}
 
 	/**
 	 * Get the form fields after they are initialized.
@@ -105,21 +57,32 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Admin Panel Options Processing.
-	 * - Saves the options to the DB.
-	 *
-	 * @since 1.0.0
-	 * @return bool
+	 * Output the admin options table.
+	 */
+	public function admin_options() {
+		echo '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>';
+	}
+
+	/**
+	 * Return the name of the option in the WP DB.
+	 * @return string
+	 */
+	public function get_option_key() {
+		return $this->plugin_id . $this->id . '_settings';
+	}
+
+	/**
+	 * Process and save options.
+	 * @return bool was anything saved?
 	 */
 	public function process_admin_options() {
-
 		$this->validate_settings_fields();
 
 		if ( count( $this->errors ) > 0 ) {
 			$this->display_errors();
 			return false;
 		} else {
-			update_option( $this->plugin_id . $this->id . '_settings', apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->sanitized_fields ) );
+			update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->sanitized_fields ) );
 			$this->init_settings();
 			return true;
 		}
@@ -133,7 +96,7 @@ abstract class WC_Settings_API {
 	public function display_errors() {}
 
 	/**
-	 * Initialise Gateway Settings.
+	 * Initialise Settings.
 	 *
 	 * Store all settings in a single database entry
 	 * and make sure the $settings array is either the default
@@ -145,7 +108,7 @@ abstract class WC_Settings_API {
 	public function init_settings() {
 
 		// Load form_field settings.
-		$this->settings = get_option( $this->plugin_id . $this->id . '_settings', null );
+		$this->settings = get_option( $this->get_option_key(), null );
 
 		if ( ! $this->settings || ! is_array( $this->settings ) ) {
 
@@ -176,7 +139,6 @@ abstract class WC_Settings_API {
 	 * @return mixed  The value specified for the option or a default value for the option.
 	 */
 	public function get_option( $key, $empty_value = null ) {
-
 		if ( empty( $this->settings ) ) {
 			$this->init_settings();
 		}
@@ -205,13 +167,12 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Decode values for settings.
-	 *
-	 * @param  mixed $value
+	 * Format settings if needed.
+	 * @param  array $value
 	 * @return array
 	 */
 	public function format_settings( $value ) {
-		return is_array( $value ) ? $value : $value;
+		return $value;
 	}
 
 	/**
@@ -224,7 +185,7 @@ abstract class WC_Settings_API {
 	 * @uses   method_exists()
 	 * @return string the html for the settings
 	 */
-	public function generate_settings_html( $form_fields = array() ) {
+	public function generate_settings_html( $form_fields = array(), $echo = true ) {
 
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
@@ -244,7 +205,11 @@ abstract class WC_Settings_API {
 			}
 		}
 
-		echo $html;
+		if ( $echo ) {
+			echo $html;
+		} else {
+			return $html;
+		}
 	}
 
 	/**
@@ -272,7 +237,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_description_html( $data ) {
-
 		if ( $data['desc_tip'] === true ) {
 			$description = '';
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
@@ -293,11 +257,9 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_custom_attribute_html( $data ) {
-
 		$custom_attributes = array();
 
 		if ( ! empty( $data['custom_attributes'] ) && is_array( $data['custom_attributes'] ) ) {
-
 			foreach ( $data['custom_attributes'] as $attribute => $attribute_value ) {
 				$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $attribute_value ) . '"';
 			}
@@ -315,7 +277,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_text_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
@@ -360,7 +321,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_price_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
@@ -405,7 +365,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_decimal_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
@@ -463,7 +422,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_color_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
@@ -509,7 +467,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_textarea_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
@@ -554,7 +511,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_checkbox_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
@@ -604,7 +560,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_select_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
@@ -654,7 +609,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_multiselect_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
 			'title'             => '',
@@ -705,11 +659,10 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_title_html( $key, $data ) {
-
 		$field    = $this->get_field_key( $key );
 		$defaults = array(
-			'title'             => '',
-			'class'             => ''
+			'title' => '',
+			'class' => ''
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -854,19 +807,13 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Textarea Field.
 	 *
-	 * Make sure the data is escaped correctly, etc.
-	 *
-	 * @param  mixed $key
-	 * @since  1.0.0
+	 * @param  string $key
 	 * @return string
 	 */
 	public function validate_textarea_field( $key ) {
-
-		$text  = $this->get_option( $key );
 		$field = $this->get_field_key( $key );
 
 		if ( isset( $_POST[ $field ] ) ) {
-
 			$text = wp_kses( trim( stripslashes( $_POST[ $field ] ) ),
 				array_merge(
 					array(
@@ -875,6 +822,8 @@ abstract class WC_Settings_API {
 					wp_kses_allowed_html( 'post' )
 				)
 			);
+		} else {
+			$text = $this->get_option( $key );
 		}
 
 		return $text;
@@ -885,62 +834,33 @@ abstract class WC_Settings_API {
 	 *
 	 * If not set, return "no", otherwise return "yes".
 	 *
-	 * @param  mixed $key
-	 * @since  1.0.0
+	 * @param  string $key
 	 * @return string
 	 */
 	public function validate_checkbox_field( $key ) {
-
-		$status = 'no';
 		$field  = $this->get_field_key( $key );
-
-		if ( isset( $_POST[ $field ] ) && ( 1 == $_POST[ $field ] ) ) {
-			$status = 'yes';
-		}
-
-		return $status;
+		return isset( $_POST[ $field ] ) && '1' === $_POST[ $field ] ) ? 'yes' : 'no';
 	}
 
 	/**
 	 * Validate Select Field.
 	 *
-	 * Make sure the data is escaped correctly, etc.
-	 *
-	 * @param  mixed $key
-	 * @since  1.0.0
+	 * @param  string $key
 	 * @return string
 	 */
 	public function validate_select_field( $key ) {
-
-		$value = $this->get_option( $key );
 		$field = $this->get_field_key( $key );
-
-		if ( isset( $_POST[ $field ] ) ) {
-			$value = wc_clean( stripslashes( $_POST[ $field ] ) );
-		}
-
-		return $value;
+		return isset( $_POST[ $field ] ) ? wc_clean( stripslashes( $_POST[ $field ] ) ) : $this->get_option( $key );
 	}
 
 	/**
 	 * Validate Multiselect Field.
 	 *
-	 * Make sure the data is escaped correctly, etc.
-	 *
-	 * @param  mixed $key
-	 * @since  1.0.0
+	 * @param  string $key
 	 * @return string
 	 */
 	public function validate_multiselect_field( $key ) {
-
 		$field = $this->get_field_key( $key );
-
-		if ( isset( $_POST[ $field ] ) ) {
-			$value = array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $field ] ) );
-		} else {
-			$value = '';
-		}
-
-		return $value;
+		return isset( $_POST[ $field ] ) ? array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $field ] ) ) : '';
 	}
 }

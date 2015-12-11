@@ -213,9 +213,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 									<input type="hidden" name="method_order[<?php echo esc_attr( $method->id ); ?>]" value="<?php echo esc_attr( $method->id ); ?>" />
 								</td>
 								<td class="name">
-									<?php if ( $method->has_settings ) : ?><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) ); ?>"><?php endif; ?>
+									<?php if ( $method->has_settings() ) : ?><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) ); ?>"><?php endif; ?>
 									<?php echo esc_html( $method->get_title() ); ?>
-									<?php if ( $method->has_settings ) : ?></a><?php endif; ?>
+									<?php if ( $method->has_settings() ) : ?></a><?php endif; ?>
 								</td>
 								<td class="id">
 									<?php echo esc_attr( $method->id ); ?>
