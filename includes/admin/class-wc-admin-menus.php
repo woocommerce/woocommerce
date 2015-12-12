@@ -35,7 +35,7 @@ class WC_Admin_Menus {
 
 		add_action( 'admin_head', array( $this, 'menu_highlight' ) );
 		add_action( 'admin_head', array( $this, 'menu_order_count' ) );
-		add_filter( 'menu_order', array( $this, 'menu_order' ) );
+		add_filter( 'menu_order', array( $this, 'menu_order' ), 1 );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages
