@@ -1809,6 +1809,10 @@ class WC_AJAX {
 					continue;
 				}
 
+				if ( ! $product || ( $product->is_type( 'variation' ) && empty( $product->parent ) ) ) {
+					continue;
+				}
+
 				$found_products[ $post ] = rawurldecode( $product->get_formatted_name() );
 			}
 		}
