@@ -407,11 +407,11 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
-	 * ## AVAILABLE_FIELDS
+	 * ## AVAILABLE FIELDS
 	 *
 	 * For available fields, see: wp wc order create --help
 	 *
-	 * # EXAMPLES
+	 * ## EXAMPLES
 	 *
 	 *    wp wc order update 123 --status=completed
 	 *
