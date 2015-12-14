@@ -1013,14 +1013,13 @@ jQuery( function ( $ ) {
 					if ( item.has_fields ) {
 
 						if ( $( '#wc-backbone-modal-dialog' ).length === 0 ) {
-							wc_meta_boxes_order_items.backbone.modal = $( '.woocommerce_order_items' ).WCBackboneModal( {
+							wc_meta_boxes_order_items.backbone.modal = $( '#woocommerce-order-items' ).WCBackboneModal( {
 								template: 'wc-modal-configure-product-fields',
 								variable: { title: item.title, fields_html: item.fields_html }
 							} );
 						}
 					} else {
 						wc_meta_boxes_order_items.backbone.add_configured_item( item.id, false );
-						wc_meta_boxes_order_items.backbone.configure_items();
 					}
 				}
 
@@ -1045,10 +1044,17 @@ jQuery( function ( $ ) {
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 					if ( response.result === 'success' && response.html ) {
-						$( 'table.woocommerce_order_items tbody#order_line_items' ).append( response.html );
+
 						if ( $( '#wc-backbone-modal-dialog' ).length > 0 ) {
 							$( '#wc-backbone-modal-dialog button.modal-close' ).trigger( 'click' );
 						}
+
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+						$( '#woocommerce-order-items' ).find( '.inside' ).append( response.html );
+
+						wc_meta_boxes_order.init_tiptip();
+						wc_meta_boxes_order_items.stupidtable.init();
+
 					} else {
 						if ( response.messages ) {
 							window.alert( response.messages.join( '\n\n' ) );
@@ -1058,7 +1064,6 @@ jQuery( function ( $ ) {
 							}
 						}
 					}
-					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
 					wc_meta_boxes_order_items.backbone.configure_items();
 				} );

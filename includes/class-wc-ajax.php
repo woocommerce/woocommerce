@@ -1270,19 +1270,17 @@ class WC_AJAX {
 				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order, $data );
 			}
 
-			$item['item_meta']       = $order->get_item_meta( $item_id );
-			$item['item_meta_array'] = $order->get_item_meta_array( $item_id );
-			$item                    = $order->expand_item_meta( $item );
-			$item                    = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id, $order, $data );
+			$order    = wc_get_order( $order_id );
+			$data     = get_post_meta( $order_id );
 
 			ob_start();
-			include( 'admin/meta-boxes/views/html-order-item.php' );
-			$order_item_html = ob_get_clean();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+			$order_items_html = ob_get_clean();
 		}
 
 		$data = array(
 			'result'   => empty( $messages ) ? 'success' : 'failure',
-			'html'     => empty( $messages ) ? $order_item_html : '',
+			'html'     => empty( $messages ) ? $order_items_html : '',
 			'messages' => $messages,
 		);
 
