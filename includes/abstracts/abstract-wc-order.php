@@ -1386,7 +1386,7 @@ abstract class WC_Abstract_Order {
 				$total_discount = (double) $this->cart_discount + (double) $this->cart_discount_tax;
 			}
 		}
-		return apply_filters( 'woocommerce_order_amount_total_discount', $total_discount, $this );
+		return apply_filters( 'woocommerce_order_amount_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
 	}
 
 	/**
