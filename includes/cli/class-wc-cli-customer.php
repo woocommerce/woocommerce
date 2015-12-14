@@ -425,7 +425,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 * <customer>
 	 * : Customer ID, email, or username.
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
 	 * ## AVAILABLE FIELDS

@@ -578,7 +578,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * <id>
 	 * : Product ID
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
 	 * ## AVAILABLE_FIELDS
