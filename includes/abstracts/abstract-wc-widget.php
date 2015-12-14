@@ -170,6 +170,11 @@ abstract class WC_Widget extends WP_Widget {
 					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
 				break;
 			}
+
+			/**
+			 * Sanitize the value of a setting.
+			 */
+			$instance[ $key ] = apply_filters( 'woocommerce_widget_settings_sanitize_option', $instance[ $key ], $new_instance, $key, $setting );
 		}
 
 		$this->flush_widget_cache();
@@ -246,6 +251,11 @@ abstract class WC_Widget extends WP_Widget {
 						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
 					</p>
 					<?php
+				break;
+
+				// Default: run an action
+				default :
+					do_action( 'woocommerce_widget_field_' . $setting['type'], $key, $value, $setting, $instance );
 				break;
 			}
 		}
