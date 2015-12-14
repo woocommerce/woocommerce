@@ -52,10 +52,12 @@
 		_target: undefined,
 		_string: undefined,
 		events: {
-			'click .modal-close': 'closeButton',
-			'click #btn-ok':      'addButton',
-			'touchstart #btn-ok': 'addButton',
-			'keydown':            'keyboardActions'
+			'click .modal-close':       'closeButton',
+			'click #btn-ok':            'addButton',
+			'click #btn-validate':      'validateButton',
+			'touchstart #btn-ok':       'addButton',
+			'touchstart #btn-validate': 'validateButton',
+			'keydown':                  'keyboardActions'
 		},
 		initialize: function( data ) {
 			this._target = data.target;
@@ -115,6 +117,9 @@
 		addButton: function( e ) {
 			$( document.body ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e );
+		},
+		validateButton: function( e ) {
+			$( document.body ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 		},
 		getFormData: function() {
 			var data = {};

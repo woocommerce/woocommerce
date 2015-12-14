@@ -4454,6 +4454,23 @@ table.bar_chart {
 			padding: 10px 0 0;
 			text-align: center;
 		}
+
+		h2 {
+			font-size: 16px;
+			font-weight: 700;
+		}
+
+		h3 {
+			font-size: 14px;
+		}
+
+		.order-item-field {
+			margin: auto 1em;
+		}
+
+		.order-item-field-select_variation {
+			min-height: 70px;
+		}
 	}
 
 	footer {
