@@ -84,7 +84,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc order create --customer_id=1 --
+	 *     wp wc order create --customer_id=1 --status=pending ...
 	 *
 	 * @since  2.5.0
 	 */
@@ -194,6 +194,11 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 	/**
 	 * Delete an order.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>...
+	 * : The order ID to delete.
 	 *
 	 * ## EXAMPLES
 	 *
