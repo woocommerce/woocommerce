@@ -485,7 +485,7 @@ jQuery( function( $ ) {
 				}
 			});
 
-			file_path_field.val( file_path );
+			file_path_field.val( file_path ).change();
 		});
 
 		// Set post to 0 and set our custom type
