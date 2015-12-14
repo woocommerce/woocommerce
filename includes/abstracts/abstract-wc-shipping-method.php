@@ -23,7 +23,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *   - global-settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
 	 * @var array
 	 */
-	public $supports     = array( 'global-settings' );
+	public $supports = array( 'global-settings' );
 
 	/**
 	 * Unique ID for the shipping method - must be set.
@@ -54,8 +54,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @var string
 	 */
 	public $enabled = 'yes';
-	
-	/** @var string User set title */
+
+	/**
+	 * Shipping method title for the frontend.
+	 * @var string
+	 */
 	public $title;
 
 	/**  @var bool True if the method is available. */
@@ -73,10 +76,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/** @var float Minimum fee for the method */
 	public $minimum_fee  = null;
 
-	/** @var bool Enabled for disabled */
-	public $enabled      = false;
-
-	/** @var array This is an array of rates - methods must populate this array to register shipping costs */
+	/**
+	 * This is an array of rates - methods must populate this array to register shipping costs.
+	 * @var array
+	 */
 	public $rates        = array();
 
 	/**
@@ -140,6 +143,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/**
 	 * Return the name of the option in the WP DB.
+	 * @since 2.6.0
 	 * @return string
 	 */
 	public function get_option_key() {
@@ -157,6 +161,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
 		parent::admin_options();
+	}
+
+	/**
+	 * Init settings for shipping methods.
+	 */
+	public function init_settings() {
+		parent::init_settings();
+		$this->enabled  = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
 	}
 
 	/**

@@ -128,6 +128,14 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
+	 * Init settings for gateways.
+	 */
+	public function init_settings() {
+		parent::init_settings();
+		$this->enabled  = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
+	}
+
+	/**
 	 * Get the return url (thank you page).
 	 *
 	 * @param WC_Order $order
@@ -194,7 +202,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_available() {
-
 		$is_available = ( 'yes' === $this->enabled ) ? true : false;
 
 		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {

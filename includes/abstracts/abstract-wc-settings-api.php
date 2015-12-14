@@ -43,12 +43,6 @@ abstract class WC_Settings_API {
 	public $form_fields = array();
 
 	/**
-	 * Sanitized fields after validation.
-	 * @var array
-	 */
-	public $sanitized_fields = array();
-
-	/**
 	 * Get the form fields after they are initialized.
 	 * @return array of options
 	 */
@@ -65,6 +59,7 @@ abstract class WC_Settings_API {
 
 	/**
 	 * Return the name of the option in the WP DB.
+	 * @since 2.6.0
 	 * @return string
 	 */
 	public function get_option_key() {
@@ -72,28 +67,84 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Process and save options.
-	 * @return bool was anything saved?
+	 * Get a fields type. Defaults to "text" if not set.
+	 * @param  array $field
+	 * @return string
 	 */
-	public function process_admin_options() {
-		$this->validate_settings_fields();
-
-		if ( count( $this->errors ) > 0 ) {
-			$this->display_errors();
-			return false;
-		} else {
-			update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->sanitized_fields ) );
-			$this->init_settings();
-			return true;
-		}
+	public function get_field_type( $field ) {
+		return empty( $field['type'] ) ? 'text' : $field['type'];
 	}
 
 	/**
-	 * Display admin error messages.
-	 *
-	 * @since 1.0.0
+	 * Get a field's posted and validated value.
+	 * @return string
 	 */
-	public function display_errors() {}
+	public function get_field_value( $key, $field ) {
+		$type = $this->get_field_type( $field );
+
+		// Look for a validate_FIELDID_field method for special handling
+		if ( method_exists( $this, 'validate_' . $key . '_field' ) ) {
+			return $this->{'validate_' . $key . '_field'}( $key );
+		}
+
+		// Look for a validate_FIELDTYPE_field method
+		if ( method_exists( $this, 'validate_' . $type . '_field' ) ) {
+			return $this->{'validate_' . $type . '_field'}( $key );
+		}
+
+		// Fallback to text
+		return $this->validate_text_field( $key );
+	}
+
+	/**
+	 * Processes and saves options.
+	 *
+	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
+	 *
+	 * @return bool was anything saved?
+	 */
+	public function process_admin_options() {
+		$this->init_settings();
+		$this->errors = array();
+
+		foreach ( $this->get_form_fields() as $key => $field ) {
+			if ( ! empty( $field['type'] ) && in_array( $field['type'], array( 'title' ) ) ) {
+				continue; // Exclude certain types from saving
+			}
+
+			try {
+				$value = $this->get_field_value( $key, $field );
+				$this->settings[ $key ] = $value;
+			} catch ( Exception $e ) {
+				$this->errors[] = $e->getMessage();
+			}
+		}
+
+		if ( count( $this->errors ) > 0 ) {
+			$this->display_errors();
+		}
+
+		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ) );
+	}
+
+	/**
+	 * Validate the data on the "Settings" form.
+	 * @deprecated 2.6.0 No longer used
+	 */
+	public function validate_settings_fields( $form_fields = array() ) {}
+
+	/**
+	 * Display admin error messages.
+	 */
+	public function display_errors() {
+		echo '<div id="woocommerce_errors" class="error notice is-dismissible">';
+
+		foreach ( $this->errors as $error ) {
+			echo '<p>' . wp_kses_post( $error ) . '</p>';
+		}
+
+		echo '</div>';
+	}
 
 	/**
 	 * Initialise Settings.
@@ -106,27 +157,20 @@ abstract class WC_Settings_API {
 	 * @uses get_option(), add_option()
 	 */
 	public function init_settings() {
-
-		// Load form_field settings.
 		$this->settings = get_option( $this->get_option_key(), null );
 
-		if ( ! $this->settings || ! is_array( $this->settings ) ) {
-
+		if ( ! is_array( $this->settings ) ) {
 			$this->settings = array();
 
 			// If there are no settings defined, load defaults.
 			if ( $form_fields = $this->get_form_fields() ) {
-
 				foreach ( $form_fields as $k => $v ) {
 					$this->settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
 				}
 			}
 		}
 
-		if ( ! empty( $this->settings ) && is_array( $this->settings ) ) {
-			$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
-			$this->enabled  = isset( $this->settings['enabled'] ) && $this->settings['enabled'] == 'yes' ? 'yes' : 'no';
-		}
+		$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
 	}
 
 	/**
@@ -193,15 +237,12 @@ abstract class WC_Settings_API {
 
 		$html = '';
 		foreach ( $form_fields as $k => $v ) {
+			$type = $this->get_field_type( $field );
 
-			if ( ! isset( $v['type'] ) || ( $v['type'] == '' ) ) {
-				$v['type'] = 'text'; // Default to "text" field type.
-			}
-
-			if ( method_exists( $this, 'generate_' . $v['type'] . '_html' ) ) {
-				$html .= $this->{'generate_' . $v['type'] . '_html'}( $k, $v );
+			if ( method_exists( $this, 'generate_' . $type . '_html' ) ) {
+				$html .= $this->{'generate_' . $type . '_html'}( $k, $v );
 			} else {
-				$html .= $this->{'generate_text_html'}( $k, $v );
+				$html .= $this->generate_text_html( $k, $v );
 			}
 		}
 
@@ -681,45 +722,6 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Validate the data on the "Settings" form.
-	 *
-	 * @since 1.0.0
-	 * @param array $form_fields (default: array())
-	 */
-	public function validate_settings_fields( $form_fields = array() ) {
-		if ( empty( $form_fields ) ) {
-			$form_fields = $this->get_form_fields();
-		}
-
-		$this->sanitized_fields = array();
-
-		foreach ( $form_fields as $key => $field ) {
-
-			// Default to "text" field type.
-			$type = empty( $field['type'] ) ? 'text' : $field['type'];
-
-			// Look for a validate_FIELDID_field method for special handling
-			if ( method_exists( $this, 'validate_' . $key . '_field' ) ) {
-				$field = $this->{'validate_' . $key . '_field'}( $key );
-
-			// Exclude certain types from saving
-			} elseif ( in_array( $type, array( 'title' ) ) ) {
-				continue;
-
-			// Look for a validate_FIELDTYPE_field method
-			} elseif ( method_exists( $this, 'validate_' . $type . '_field' ) ) {
-				$field = $this->{'validate_' . $type . '_field'}( $key );
-
-			// Fallback to text
-			} else {
-				$field = $this->validate_text_field( $key );
-			}
-
-			$this->sanitized_fields[ $key ] = $field;
-		}
-	}
-
-	/**
 	 * Validate Text Field.
 	 *
 	 * Make sure the data is escaped correctly, etc.
@@ -728,7 +730,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function validate_text_field( $key ) {
-
 		$text  = $this->get_option( $key );
 		$field = $this->get_field_key( $key );
 
@@ -748,7 +749,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function validate_price_field( $key ) {
-
 		$text  = $this->get_option( $key );
 		$field = $this->get_field_key( $key );
 
@@ -839,7 +839,7 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_checkbox_field( $key ) {
 		$field  = $this->get_field_key( $key );
-		return isset( $_POST[ $field ] ) && '1' === $_POST[ $field ] ) ? 'yes' : 'no';
+		return isset( $_POST[ $field ] ) && '1' === $_POST[ $field ] ? 'yes' : 'no';
 	}
 
 	/**
