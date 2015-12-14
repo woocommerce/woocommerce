@@ -193,7 +193,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 	}
 
 	/**
-	 * Delete an order.
+	 * Delete one or more orders.
 	 *
 	 * ## OPTIONS
 	 *
