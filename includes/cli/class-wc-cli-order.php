@@ -27,6 +27,13 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 * * customer_id
 	 *
+	 * Optional fields:
+	 *
+	 * * status
+	 * * note
+	 * * currency
+	 * * order_meta
+	 *
 	 * Payment detail fields:
 	 *
 	 * * payment_details.method_id
@@ -160,11 +167,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 				}
 
 				update_post_meta( $order->id, '_order_currency', $data['currency'] );
-			}
-
-			// Set order numberl
-			if ( isset( $data['order_number'] ) ) {
-				update_post_meta( $order->id, '_order_number', $data['order_number'] );
 			}
 
 			// Set order meta.
