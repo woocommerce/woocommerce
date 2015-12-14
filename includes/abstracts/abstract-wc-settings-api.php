@@ -76,6 +76,15 @@ abstract class WC_Settings_API {
 	}
 
 	/**
+	 * Get a fields default value. Defaults to "" if not set.
+	 * @param  array $field
+	 * @return string
+	 */
+	public function get_field_default( $field ) {
+		return empty( $field['default'] ) ? '' : $field['default'];
+	}
+
+	/**
 	 * Get a field's posted and validated value.
 	 * @return string
 	 */
@@ -98,52 +107,44 @@ abstract class WC_Settings_API {
 
 	/**
 	 * Processes and saves options.
-	 *
 	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
-	 *
 	 * @return bool was anything saved?
 	 */
 	public function process_admin_options() {
 		$this->init_settings();
-		$this->errors = array();
 
 		foreach ( $this->get_form_fields() as $key => $field ) {
-			if ( ! empty( $field['type'] ) && in_array( $field['type'], array( 'title' ) ) ) {
-				continue; // Exclude certain types from saving
+			if ( ! in_array( $this->get_field_type( $field ), array( 'title' ) ) ) {
+				try {
+					$this->settings[ $key ] = $this->get_field_value( $key, $field );
+				} catch ( Exception $e ) {
+					$this->add_error( $e->getMessage() );
+				}
 			}
-
-			try {
-				$value = $this->get_field_value( $key, $field );
-				$this->settings[ $key ] = $value;
-			} catch ( Exception $e ) {
-				$this->errors[] = $e->getMessage();
-			}
-		}
-
-		if ( count( $this->errors ) > 0 ) {
-			$this->display_errors();
 		}
 
 		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ) );
 	}
 
 	/**
-	 * Validate the data on the "Settings" form.
-	 * @deprecated 2.6.0 No longer used
+	 * Add an error message for display in admin on save.
+	 * @param string $error
 	 */
-	public function validate_settings_fields( $form_fields = array() ) {}
+	public function add_error( $error ) {
+		$this->errors[] = $error;
+	}
 
 	/**
 	 * Display admin error messages.
 	 */
 	public function display_errors() {
-		echo '<div id="woocommerce_errors" class="error notice is-dismissible">';
-
-		foreach ( $this->errors as $error ) {
-			echo '<p>' . wp_kses_post( $error ) . '</p>';
+		if ( count( $this->errors ) > 0 ) {
+			echo '<div id="woocommerce_errors" class="error notice is-dismissible">';
+			foreach ( $this->errors as $error ) {
+				echo '<p>' . wp_kses_post( $error ) . '</p>';
+			}
+			echo '</div>';
 		}
-
-		echo '</div>';
 	}
 
 	/**
@@ -159,18 +160,11 @@ abstract class WC_Settings_API {
 	public function init_settings() {
 		$this->settings = get_option( $this->get_option_key(), null );
 
+		// If there are no settings defined, use defaults.
 		if ( ! is_array( $this->settings ) ) {
-			$this->settings = array();
-
-			// If there are no settings defined, load defaults.
-			if ( $form_fields = $this->get_form_fields() ) {
-				foreach ( $form_fields as $k => $v ) {
-					$this->settings[ $k ] = isset( $v['default'] ) ? $v['default'] : '';
-				}
-			}
+			$form_fields    = $this->get_form_fields();
+			$this->settings = array_merge( array_fill_keys( array_keys( $form_fields ), '' ), wp_list_pluck( $form_fields, 'default' ) );
 		}
-
-		$this->settings = array_map( array( $this, 'format_settings' ), $this->settings );
 	}
 
 	/**
@@ -190,10 +184,10 @@ abstract class WC_Settings_API {
 		// Get option default if unset.
 		if ( ! isset( $this->settings[ $key ] ) ) {
 			$form_fields            = $this->get_form_fields();
-			$this->settings[ $key ] = isset( $form_fields[ $key ]['default'] ) ? $form_fields[ $key ]['default'] : '';
+			$this->settings[ $key ] = isset( $form_fields[ $key ] ) ? $this->get_field_default( $form_fields[ $key ] ) : '';
 		}
 
-		if ( ! is_null( $empty_value ) && empty( $this->settings[ $key ] ) && '' === $this->settings[ $key ] ) {
+		if ( ! is_null( $empty_value ) && '' === $this->settings[ $key ] ) {
 			$this->settings[ $key ] = $empty_value;
 		}
 
@@ -211,15 +205,6 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Format settings if needed.
-	 * @param  array $value
-	 * @return array
-	 */
-	public function format_settings( $value ) {
-		return $value;
-	}
-
-	/**
 	 * Generate Settings HTML.
 	 *
 	 * Generate the HTML for the fields on the "settings" screen.
@@ -230,7 +215,6 @@ abstract class WC_Settings_API {
 	 * @return string the html for the settings
 	 */
 	public function generate_settings_html( $form_fields = array(), $echo = true ) {
-
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
 		}
@@ -862,5 +846,21 @@ abstract class WC_Settings_API {
 	public function validate_multiselect_field( $key ) {
 		$field = $this->get_field_key( $key );
 		return isset( $_POST[ $field ] ) ? array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $field ] ) ) : '';
+	}
+
+	/**
+	 * Validate the data on the "Settings" form.
+	 * @deprecated 2.6.0 No longer used
+	 */
+	public function validate_settings_fields( $form_fields = array() ) {}
+
+	/**
+	 * Format settings if needed.
+	 * @deprecated 2.6.0 Unused
+	 * @param  array $value
+	 * @return array
+	 */
+	public function format_settings( $value ) {
+		return $value;
 	}
 }
