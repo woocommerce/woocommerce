@@ -160,7 +160,9 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 *
 	 * ## AVAILABLE FIELDS
 	 *
-	 * See
+	 * * download_id
+	 * * download_name
+	 * * access_expires
 	 *
 	 * ## EXAMPLES
 	 *
