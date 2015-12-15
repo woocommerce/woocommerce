@@ -152,6 +152,15 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
+	 * Return the shipping method instance ID.
+	 * @since 2.6.0
+	 * @return int
+	 */
+	public function get_instance_id() {
+		return $this->instance_id;
+	}
+
+	/**
 	 * Return the shipping method title.
 	 * @since 2.6.0
 	 * @return string

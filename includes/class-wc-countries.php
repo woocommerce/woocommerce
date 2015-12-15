@@ -68,10 +68,15 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function get_continent_code_for_country( $cc ) {
+		$cc                 = trim( strtoupper( $cc ) );
 		$continents         = $this->get_continents();
 		$continents_and_ccs = wp_list_pluck( $continents, 'countries' );
-		$match              = array_search( trim( strtoupper( $cc ) ), $continents_and_ccs );
-		return ! empty( $match ) ? $match : '';
+		foreach ( $continents_and_ccs as $continent_code => $countries ) {
+			if ( false !== array_search( $cc, $countries ) ) {
+				return $continent_code;
+			}
+		}
+		return '';
 	}
 
 	/**

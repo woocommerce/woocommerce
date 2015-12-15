@@ -290,8 +290,6 @@ function wc_cart_totals_shipping_method_label( $method ) {
 				$label .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
 		}
-	} elseif ( $method->id !== 'free_shipping' ) {
-		$label .= ' (' . __( 'Free', 'woocommerce' ) . ')';
 	}
 
 	return apply_filters( 'woocommerce_cart_shipping_method_full_label', $label, $method );
@@ -340,6 +338,16 @@ function wc_get_checkout_url() {
 	}
 
 	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
+}
+
+/**
+ * Register a shipping method.
+ *
+ * @since 1.5.7
+ * @param string|object $shipping_method class name (string) or a class object.
+ */
+function woocommerce_register_shipping_method( $shipping_method ) {
+	WC()->shipping->register_shipping_method( $shipping_method );
 }
 
 /**
