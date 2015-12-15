@@ -188,6 +188,20 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
+	 * Return calculated rates for a package.
+	 * @since 2.6.0
+	 * @param object $package
+	 * @return array
+	 */
+	public function get_rates_for_package( $package ) {
+		$this->rates = array();
+		if ( $this->is_available( $package ) && ( empty( $package['ship_via'] ) || in_array( $this->id, $package['ship_via'] ) ) ) {
+			$this->calculate_shipping( $package );
+		}
+		return $this->rates;
+	}
+
+	/**
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
 	 * @param array $args (default: array())
 	 */
@@ -222,7 +236,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			}
 		}
 
-		$this->rates[] = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );
+		$this->rates[ $args['id'] ] = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );
 	}
 
 	/**

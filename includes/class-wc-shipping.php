@@ -225,11 +225,8 @@ class WC_Shipping {
 		}
 
 		// Calculate costs for passed packages
-		$package_keys 		= array_keys( $packages );
-		$package_keys_size 	= sizeof( $package_keys );
-
-		for ( $i = 0; $i < $package_keys_size; $i ++ ) {
-			$this->packages[ $package_keys[ $i ] ] = $this->calculate_shipping_for_package( $packages[ $package_keys[ $i ] ] );
+		foreach ( $packages as $package_key => $package ) {
+			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package );
 		}
 
 		// Get all chosen methods
@@ -246,25 +243,22 @@ class WC_Shipping {
 			}
 
 			if ( ! empty( $method_counts[ $i ] ) ) {
-				$method_count = $method_counts[ $i ];
+				$method_count = absint( $method_counts[ $i ] );
 			}
 
-			// Get available methods for package
-			$available_methods = $package['rates'];
-
-			if ( sizeof( $available_methods ) > 0 ) {
+			if ( sizeof( $package['rates'] ) > 0 ) {
 
 				// If not set, not available, or available methods have changed, set to the DEFAULT option
-				if ( empty( $chosen_method ) || ! isset( $available_methods[ $chosen_method ] ) || $method_count != sizeof( $available_methods ) ) {
-					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $available_methods, $chosen_method ), $available_methods );
+				if ( empty( $chosen_method ) || ! isset( $package['rates'][ $chosen_method ] ) || $method_count !== sizeof( $package['rates'] ) ) {
+					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], $chosen_method ), $package['rates'] );
 					$chosen_methods[ $i ] = $chosen_method;
-					$method_counts[ $i ]  = sizeof( $available_methods );
+					$method_counts[ $i ]  = sizeof( $package['rates'] );
 					do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 				}
 
 				// Store total costs
 				if ( $chosen_method ) {
-					$rate = $available_methods[ $chosen_method ];
+					$rate = $package['rates'][ $chosen_method ];
 
 					// Merge cost and taxes - label and ID will be the same
 					$this->shipping_total += $rate->cost;
@@ -306,26 +300,9 @@ class WC_Shipping {
 			$package['rates'] = array();
 
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
-
-				if ( $shipping_method->supports( 'shipping-zones' ) && ! $shipping_method->get_instance_id() ) {
-					continue;
-				}
-
-
-				if ( $shipping_method->is_available( $package ) && ( empty( $package['ship_via'] ) || in_array( $shipping_method->id, $package['ship_via'] ) ) ) {
-
-					// Reset Rates
-					$shipping_method->rates = array();
-
-					// Calculate Shipping for package
-					$shipping_method->calculate_shipping( $package );
-
-					// Place rates in package array
-					if ( ! empty( $shipping_method->rates ) && is_array( $shipping_method->rates ) ) {
-						foreach ( $shipping_method->rates as $rate ) {
-							$package['rates'][ $rate->id ] = $rate;
-						}
-					}
+				// Shipping instances need an ID
+				if ( ! $shipping_method->supports( 'shipping-zones' ) || $shipping_method->get_instance_id() ) {
+					$package['rates'] = array_merge( $package['rates'], $shipping_method->get_rates_for_package( $package ) );
 				}
 			}
 
