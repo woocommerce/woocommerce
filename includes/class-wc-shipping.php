@@ -21,22 +21,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shipping {
 
 	/** @var bool True if shipping is enabled. */
-	public $enabled					= false;
+	public $enabled					 = false;
 
 	/** @var array Stores methods loaded into woocommerce. */
-	public $shipping_methods;
+	public $shipping_methods         = null;
 
 	/** @var float Stores the cost of shipping */
-	public $shipping_total 			= 0;
+	public $shipping_total 			 = 0;
 
-	/**  @var array Stores an array of shipping taxes. */
-	public $shipping_taxes			= array();
+	/** @var array Stores an array of shipping taxes. */
+	public $shipping_taxes			 = array();
 
 	/** @var array Stores the shipping classes. */
-	public $shipping_classes		= array();
+	public $shipping_classes		 = array();
 
 	/** @var array Stores packages to ship and to get quotes for. */
-	public $packages				= array();
+	public $packages				 = array();
 
 	/**
 	 * @var WC_Shipping The single instance of the class
@@ -114,27 +114,26 @@ class WC_Shipping {
 	/**
 	 * Load shipping methods.
 	 *
-	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
-	 *
-	 * Methods are sorted into their user-defined order after being loaded.
+	 * Loads all shipping methods which are hooked in.
+	 * If a $package is passed some methods may add themselves conditionally and zones will be used.
 	 *
 	 * @param array $package
 	 * @return array
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( $package ) {
-			// Register methods for the current customer's zone
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods();
 		} else {
 			$this->shipping_methods = array();
 		}
 
+		// For the settings in the backend, and for non-shipping zone methods, we still need to load any registered classes here.
 		foreach ( $this->get_shipping_method_class_names() as $method_id => $method_class ) {
 			$this->register_shipping_method( $method_class );
 		}
 
-		// Methods can register themselves manually through this hook
+		// Methods can register themselves manually through this hook if necessary.
 		do_action( 'woocommerce_load_shipping_methods', $package );
 
 		// Return loaded methods
@@ -161,9 +160,7 @@ class WC_Shipping {
 	}
 
 	/**
-	 * get_shipping_methods function.
-	 *
-	 * Returns all registered shipping methods for usage.
+	 * Returns all registered shipping methods.
 	 *
 	 * @access public
 	 * @return array
@@ -176,9 +173,7 @@ class WC_Shipping {
 	}
 
 	/**
-	 * get_shipping_classes function.
-	 *
-	 * Load shipping classes taxonomy terms.
+	 * Get an array of shipping classes.
 	 *
 	 * @access public
 	 * @return array
@@ -186,7 +181,7 @@ class WC_Shipping {
 	public function get_shipping_classes() {
 		if ( empty( $this->shipping_classes ) ) {
 			$classes                = get_terms( 'product_shipping_class', array( 'hide_empty' => '0' ) );
-			$this->shipping_classes = $classes && ! is_wp_error( $classes ) ? $classes : array();
+			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
 		return $this->shipping_classes;
 	}
