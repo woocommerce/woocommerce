@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Represents a single shipping zone
  *
  * @class 		WC_Shipping_Zone
- * @version		2.5.0
+ * @version		2.6.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes

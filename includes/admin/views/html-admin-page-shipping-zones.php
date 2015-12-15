@@ -27,7 +27,7 @@
                     <td class="wc-shipping-zone-name"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Worldwide', 'woocommerce' ); ?></a></td>
                     <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping methods added here apply to all regions without a zone.', 'woocommerce' ); ?></td>
                     <td>&ndash;</td>
-                    <td class="wc-shipping-zone-actions"></td>
+                    <td class="wc-shipping-zone-actions"><a class="wc-shipping-zone-view tips" data-tip="<?php _e( 'View Zone', 'woocommerce' ); ?>" href="admin.php?page=wc-shipping&amp;zone_id=0"><?php _e( 'View', 'woocommerce' ); ?></a></td>
                 </tr>
             </tbody>
         </table>
