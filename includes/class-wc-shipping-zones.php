@@ -61,17 +61,22 @@ class WC_Shipping_Zones {
 
 		switch ( $by ) {
 			case 'zone_id' :
-				$raw_zone = $wpdb->get_row( $wpdb->prepare( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones WHERE zone_id = %d LIMIT 1;", $id ) );
+				if ( 0 === $id ) {
+					return new WC_Shipping_Zone( 0 );
+				} else {
+					$raw_zone = $wpdb->get_row( $wpdb->prepare( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones WHERE zone_id = %d LIMIT 1;", $id ) );
+				}
 			break;
 			case 'instance_id' :
 				$zone_id = $wpdb->get_var( $wpdb->prepare( "SELECT zone_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods as methods WHERE methods.instance_id = %d LIMIT 1;", $id ) );
+
 				if ( false !== $zone_id ) {
-					return self::get_zone_by( 'zone_id', $zone_id );
+					return self::get_zone_by( 'zone_id', absint( $zone_id ) );
 				}
 			break;
 		}
 
-		return $raw_zone !== false ? new WC_Shipping_Zone( $raw_zone ) : false;
+		return $raw_zone ? new WC_Shipping_Zone( $raw_zone ) : false;
 	}
 
 	/**
