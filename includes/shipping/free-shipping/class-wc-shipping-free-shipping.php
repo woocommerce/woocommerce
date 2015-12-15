@@ -32,7 +32,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$this->method_description    = __( 'Free Shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
-			'settings',
 			'instance-settings'
 		);
 		$this->enabled		         = $this->get_option( 'enabled' );
@@ -41,22 +40,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$this->requires		         = $this->get_option( 'requires' );
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) ); // @todo
-	}
-
-	/**
-	 * Get the form fields after they are initialized.
-	 * @return array of options
-	 */
-	public function get_form_fields() {
-		return array(
-			'test-setting' => array(
-				'title' 		=> __( 'Testing', 'woocommerce' ),
-				'type' 			=> 'text',
-				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'		=> '',
-				'desc_tip'		=> true,
-			)
-		);
 	}
 
 	/**
