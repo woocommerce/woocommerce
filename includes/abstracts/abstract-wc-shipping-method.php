@@ -101,7 +101,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Instance ID if used.
 	 * @var int
 	 */
-	protected $instance_id     = 0;
+	public $instance_id     = 0;
 
 	/**
 	 * Instance settings.

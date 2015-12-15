@@ -2134,7 +2134,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 	ul, p {
 		margin: 0;
 	}
-	td.wc-shipping-zone-sort {
+	td.wc-shipping-zone-sort, td.wc-shipping-zone-method-sort {
 		cursor: move;
 		text-align: center;
 
@@ -2198,7 +2198,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 		}
 	}
 	.wc-shipping-zone-actions, .wc-shipping-zone-method-actions {
-		width: 4em;
+		width: 6em;
 
 		a {
 			@include ir();
@@ -2221,6 +2221,11 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 		a.wc-shipping-zone-edit {
 			&:before {
 				content: "\e603";
+			}
+		}
+		a.wc-shipping-zone-view {
+			&:before {
+				content: "\e010";
 			}
 		}
 		a.wc-shipping-zone-delete, a.wc-shipping-zone-method-delete {

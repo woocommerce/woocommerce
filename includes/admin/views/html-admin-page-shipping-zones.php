@@ -38,7 +38,7 @@
     <tr data-id="{{ data.zone_id }}">
         <td width="1%" class="wc-shipping-zone-sort"></td>
         <td class="wc-shipping-zone-name">
-            <div class="view"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-shipping&zone_id=' ) ); ?>{{ data.zone_id }}">{{ data.zone_name }}</a></div>
+            <div class="view"><a href="admin.php?page=wc-shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a></div>
             <div class="edit"><input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
         </td>
 		<td class="wc-shipping-zone-region">
@@ -74,7 +74,7 @@
 			<ul></ul>
 		</td>
         <td class="wc-shipping-zone-actions">
-			<a class="wc-shipping-zone-delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+			<a class="wc-shipping-zone-delete tips" data-tip="<?php _e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-edit tips" href="#" data-tip="<?php _e( 'Edit', 'woocommerce' ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a><a class="wc-shipping-zone-view tips" data-tip="<?php _e( 'View Zone', 'woocommerce' ); ?>" href="admin.php?page=wc-shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'View', 'woocommerce' ); ?></a>
 		</td>
     </tr>
 </script>

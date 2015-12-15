@@ -143,6 +143,7 @@ class WC_Shipping_Zone {
 			if ( in_array( $raw_method->method_id, array_keys( $allowed_classes ) ) ) {
 				$class_name                          = $allowed_classes[ $raw_method->method_id ];
 				$methods[ $raw_method->instance_id ] = new $class_name( $raw_method->instance_id );
+				$methods[ $raw_method->instance_id ]->method_order = absint( $raw_method->method_order );
 			}
 		}
 

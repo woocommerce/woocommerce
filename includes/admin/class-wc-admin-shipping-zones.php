@@ -41,6 +41,7 @@ class WC_Admin_Shipping_Zones {
 
 		wp_localize_script( 'wc-shipping-zone-methods', 'shippingZoneMethodsLocalizeScript', array(
             'methods'                 => $zone->get_shipping_methods(),
+			'zone_id'                 => $zone->get_zone_id(),
 			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'                 => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
@@ -99,7 +100,7 @@ class WC_Admin_Shipping_Zones {
 
 		?>
 		<div class="wrap woocommerce">
-			<h1><?php echo esc_html( $shipping_method->get_method_title() ); ?> <small class="wc-admin-breadcrumb">&lt; <a href=""<?php echo esc_url( admin_url( 'admin.php?page=shipping&zone_id=' . absint( $zone->get_zone_id() ) ) ); ?>"><?php _e( 'Shipping Methods', 'woocommerce' ); ?> (<?php echo esc_html( $zone->get_zone_name() ); ?>)</a> &lt; <a href="<?php echo esc_url( admin_url( 'admin.php?page=shipping' ) ); ?>"><?php _e( 'Shipping Zones', 'woocommerce' ); ?></a></small></h1>
+			<h1><?php echo esc_html( $shipping_method->get_method_title() ); ?> <small class="wc-admin-breadcrumb">&lt; <a href=""<?php echo esc_url( admin_url( 'admin.php?page=wc-shipping&zone_id=' . absint( $zone->get_zone_id() ) ) ); ?>"><?php _e( 'Shipping Methods', 'woocommerce' ); ?> (<?php echo esc_html( $zone->get_zone_name() ); ?>)</a> &lt; <a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-shipping' ) ); ?>"><?php _e( 'Shipping Zones', 'woocommerce' ); ?></a></small></h1>
 			<form id="add-method" method="post">
 				<?php $shipping_method->admin_options(); ?>
 				<p class="submit"><input type="submit" class="button button-primary" name="save_method" value="<?php _e( 'Save changes', 'woocommerce' ); ?>" /></p>

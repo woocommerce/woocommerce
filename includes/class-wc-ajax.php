@@ -142,6 +142,7 @@ class WC_AJAX {
 			'bulk_edit_variations'                             => false,
 			'tax_rates_save_changes'                           => false,
 			'shipping_zones_save_changes'                      => false,
+			'shipping_zone_methods_save_changes'               => false,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -3026,7 +3027,7 @@ class WC_AJAX {
 	 */
 	public static function shipping_zones_save_changes() {
 		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['changes'] ) ) {
-			wp_send_json_error( 'missing_fields' . (isset( $_POST['wc_shipping_zones_nonce'] ) ? 1 : 0). (isset( $_POST['changes'] ) ? 1 : 0) );
+			wp_send_json_error( 'missing_fields' );
 			exit;
 		}
 
@@ -3104,8 +3105,53 @@ class WC_AJAX {
 		}
 
 		wp_send_json_success( array(
-			'zones' => WC_Shipping_Zones::get_zones(),
-			'test' => print_r($_POST['changes'], true)
+			'zones' => WC_Shipping_Zones::get_zones()
+		) );
+	}
+
+	/**
+	 * Handle submissions from assets/js/wc-shipping-zone-methods.js Backbone model.
+	 */
+	public static function shipping_zone_methods_save_changes() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		// Check User Caps
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		global $wpdb;
+
+		$zone_id = absint( $_POST['zone_id'] );
+		$zone    = new WC_Shipping_Zone( $zone_id );
+		$changes = $_POST['changes'];
+
+		foreach ( $changes as $instance_id => $data ) {
+			if ( isset( $data['deleted'] ) ) {
+				$wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => array( $instance_id ) ) );
+				continue;
+			}
+
+			$method_data = array_intersect_key( $data, array(
+				'method_order' => 1
+			) );
+
+			if ( isset( $method_data['method_order'] ) ) {
+				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $method_data['method_order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
+			}
+		}
+
+		wp_send_json_success( array(
+			'methods' => $zone->get_shipping_methods()
 		) );
 	}
 }

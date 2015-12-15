@@ -127,7 +127,14 @@
 						} else {
 							$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
 						}
+
+						this.initTooltips();
 					}
+				},
+				initTooltips: function() {
+					$( '#tiptip_holder' ).removeAttr( 'style' );
+					$( '#tiptip_arrow' ).removeAttr( 'style' );
+					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				onSubmit: function( event ) {
 					event.data.view.model.save();

@@ -7,7 +7,7 @@
 			$row_template = wp.template( 'wc-shipping-zone-method-row' ),
 
 			// Backbone model
-			ShippingZone       = Backbone.Model.extend({
+			ShippingMethod       = Backbone.Model.extend({
 				changes: {},
 				logChanges: function( changedRows ) {
 					var changes = this.changes || {};
@@ -21,21 +21,22 @@
 				},
 				save: function() {
 					if ( _.size( this.changes ) ) {
-						$.post( ajaxurl + '?action=woocommerce_shipping_methods_save_changes', {
-							wc_shipping_methods_nonce : data.wc_shipping_methods_nonce,
-							changes                 : this.changes
+						$.post( ajaxurl + '?action=woocommerce_shipping_zone_methods_save_changes', {
+							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
+							changes                 : this.changes,
+							zone_id                 : data.zone_id
 						}, this.onSaveResponse, 'json' );
 					} else {
-						shippingmethod.trigger( 'saved:methods' );
+						shippingMethod.trigger( 'saved:methods' );
 					}
 				},
 				onSaveResponse: function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
 						if ( response.success ) {
-							shippingmethod.set( 'methods', response.data.methods );
-							shippingmethod.trigger( 'change:methods' );
-							shippingmethod.changes = {};
-							shippingmethod.trigger( 'saved:methods' );
+							shippingMethod.set( 'methods', response.data.methods );
+							shippingMethod.trigger( 'change:methods' );
+							shippingMethod.changes = {};
+							shippingMethod.trigger( 'saved:methods' );
 						} else {
 							window.alert( data.strings.save_failed );
 						}
@@ -44,7 +45,7 @@
 			} ),
 
 			// Backbone view
-			ShippingZoneView = Backbone.View.extend({
+			ShippingMethodView = Backbone.View.extend({
 				rowTemplate: $row_template,
 				initialize: function() {
 					this.listenTo( this.model, 'change:methods', this.setUnloadConfirmation );
@@ -140,7 +141,7 @@
 						methods        = _.indexBy( model.get( 'methods' ), 'instance_id' ),
 						changes      = {};
 
-					_.each( methods, function( zone ) {
+					_.each( methods, function( method ) {
 						var old_position = parseInt( method.method_order, 10 );
 						var new_position = parseInt( $table.find( 'tr[data-id="' + method.instance_id + '"]').index(), 10 );
 
@@ -154,15 +155,15 @@
 					}
 				}
 			} ),
-			shippingZone = new ShippingZone({
+			shippingMethod = new ShippingMethod({
 				methods: data.methods
 			} ),
-			shippingZoneView = new ShippingZoneView({
-				model:    shippingZone,
+			shippingMethodView = new ShippingMethodView({
+				model:    shippingMethod,
 				el:       $tbody
 			} );
 
-		shippingZoneView.render();
+		shippingMethodView.render();
 
 		$tbody.sortable({
 			items: 'tr',
