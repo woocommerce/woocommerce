@@ -62,6 +62,19 @@ class WC_Countries {
 	}
 
 	/**
+	 * Get continent code for a country code.
+	 * @since 2.6.0
+	 * @param $cc string
+	 * @return string
+	 */
+	public function get_continent_code_for_country( $cc ) {
+		$continents         = $this->get_continents();
+		$continents_and_ccs = wp_list_pluck( $continents, 'countries' );
+		$match              = array_search( trim( strtoupper( $cc ) ), $continents_and_ccs );
+		return ! empty( $match ) ? $match : '';
+	}
+
+	/**
 	 * Load the states.
 	 */
 	public function load_country_states() {

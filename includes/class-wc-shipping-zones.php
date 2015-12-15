@@ -104,5 +104,116 @@ class WC_Shipping_Zones {
         global $wpdb;
         $wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $zone_id ) );
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zones', array( 'zone_id' => $zone_id ) );
+		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
     }
+
+	/**
+	 * Get postcode wildcards in array format.
+	 *
+	 * Internal use only.
+	 *
+	 * @since 2.6.0
+	 * @access private
+	 *
+	 * @param  string  $postcode array of values
+	 * @return string[] Array of postcodes with wildcards
+	 */
+	private static function _get_wildcard_postcodes( $postcode ) {
+		$postcodes         = array( '*', strtoupper( $postcode ), strtoupper( $postcode ) . '*' );
+		$postcode_length   = strlen( $postcode );
+		$wildcard_postcode = strtoupper( $postcode );
+
+		for ( $i = 0; $i < $postcode_length; $i ++ ) {
+			$wildcard_postcode = substr( $wildcard_postcode, 0, -1 );
+			$postcodes[] = $wildcard_postcode . '*';
+		}
+		return $postcodes;
+	}
+
+	/**
+	 * Find a matching zone for a given package.
+	 * @since  2.6.0
+	 * @uses   wc_make_numeric_postcode()
+	 * @param  object $package
+	 * @return WC_Shipping_Zone
+	 */
+	public static function get_zone_matching_package( $package ) {
+		global $wpdb;
+
+		$country          = strtoupper( wc_clean( $package['destination']['country'] ) );
+		$state            = strtoupper( wc_clean( $package['destination']['state'] ) );
+		$continent        = strtoupper( wc_clean( WC()->countries->get_continent_code_for_country( $country ) ) );
+		$postcode         = strtoupper( wc_clean( $package['destination']['postcode'] ) );
+		$valid_postcodes  = array_map( 'wc_clean', self::_get_wildcard_postcodes( $postcode ) );
+
+		$cache_key        = WC_Cache_Helper::get_cache_prefix( 'shipping_zones' ) . 'wc_shipping_zone_' . md5( sprintf( '%s+%s+%s', $country, $state, $postcode ) );
+		$matching_zone_id = wp_cache_get( $cache_key, 'shipping_zones' );
+
+		if ( false === $matching_zone_id ) {
+
+			// Work out criteria for our zone search
+			$criteria = array();
+			$criteria[] = $wpdb->prepare( "( ( location_type = 'country' AND location_code = %s )", $country );
+			$criteria[] = $wpdb->prepare( "OR ( location_type = 'state' AND location_code = %s )", $country . ':' . $state );
+			$criteria[] = $wpdb->prepare( "OR ( location_type = 'continent' AND location_code = %s ) )", $continent );
+
+			// Postcode range and wildcard matching
+			$postcode_locations = $wpdb->get_results( "SELECT zone_id, location_code FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE location_type = 'postcode';" );
+
+			if ( $postcode_locations ) {
+				$zone_ids_with_postcode_rules = array_map( 'absint', wp_list_pluck( $postcode_locations, 'zone_id' ) );
+				$zone_id_matches              = array();
+
+				foreach ( $postcode_locations as $postcode_location ) {
+					$postcode_to_match = trim( strtoupper( $postcode_location->location_code ) );
+
+					// Ranges
+					if ( strstr( '-', $postcode_to_match ) ) {
+						$range = array_map( 'trim', explode( '-', $postcode_to_match ) );
+
+						if ( sizeof( $range ) != 2 ) {
+							continue;
+						}
+
+						if ( is_numeric( $range[0] ) && is_numeric( $range[1] ) ) {
+							$encoded_postcode = $postcode;
+							$min              = $range[0];
+							$max              = $range[1];
+						} else {
+							$min = wc_make_numeric_postcode( $range[0] );
+							$max = wc_make_numeric_postcode( $range[1] );
+							$min = str_pad( $min, $encoded_postcode_len, '0' );
+							$max = str_pad( $max, $encoded_postcode_len, '9' );
+						}
+
+						if ( $encoded_postcode >= $min && $encoded_postcode <= $max ) {
+							$zone_id_matches[] = absint( $postcode_location->zone_id );
+						}
+
+					// Wildcard/standard
+					} elseif ( in_array( $postcode_to_match, $valid_postcodes ) ) {
+						$zone_id_matches[] = absint( $postcode_location->zone_id );
+					}
+				}
+
+				$do_not_match = array_unique( array_diff( $zone_ids_with_postcode_rules, $zone_id_matches ) );
+
+				if ( $do_not_match ) {
+					$criteria[] = "AND zones.zone_id NOT IN (" . implode( ',', $do_not_match ) . ")";
+				}
+			}
+
+			// Get matching zones
+			$matching_zone_id = $wpdb->get_var( "
+				SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
+				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id
+				WHERE " . implode( ' ', $criteria ) . "
+				ORDER BY zone_order ASC LIMIT 1
+			" );
+
+			wp_cache_set( $cache_key, $matching_zone_id, 'shipping_zones' );
+		}
+
+		return new WC_Shipping_Zone( $matching_zone_id ? $matching_zone_id : 0 );
+	}
 }

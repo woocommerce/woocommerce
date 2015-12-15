@@ -305,6 +305,7 @@ class WC_Shipping_Zone {
         }
 
 		$this->save_locations();
+		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
 	}
 
 	/**

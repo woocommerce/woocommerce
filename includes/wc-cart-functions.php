@@ -341,3 +341,15 @@ function wc_get_checkout_url() {
 
 	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 }
+
+/**
+ * Get the shipping zone matching a given package from the cart.
+ *
+ * @since  2.6.0
+ * @uses   WC_Shipping_Zones::get_zone_matching_package
+ * @param  array $package
+ * @return WC_Shipping_Zone
+ */
+function wc_get_shipping_zone( $package ) {
+	return WC_Shipping_Zones::get_zone_matching_package( $package );
+}
