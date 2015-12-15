@@ -103,8 +103,8 @@
 							// List shipping methods
 							$method_list = $tr.find('.wc-shipping-zone-methods ul');
 
-							_.each( rowData.shipping_methods, function( shipping_method ) {
-								$method_list.append( '<li><a href="admin.php?page=wc-shipping&amp;instance_id=' + shipping_method.instance_id + '">' + shipping_method.method_title + '</a></li>' );
+							_.each( rowData.shipping_methods, function( shipping_method, instance_id ) {
+								$method_list.append( '<li><a href="admin.php?page=wc-shipping&amp;instance_id=' + instance_id + '">' + shipping_method.method_title + '</a></li>' );
 							} );
 
 							// Editing?

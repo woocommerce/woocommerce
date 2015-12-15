@@ -24,9 +24,9 @@
             <tbody>
                 <tr>
                     <td width="1%" class="wc-shipping-zone-worldwide"></td>
-                    <td class="wc-shipping-zone-name"><?php esc_html_e( 'Worldwide', 'woocommerce' ); ?></td>
+                    <td class="wc-shipping-zone-name"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Worldwide', 'woocommerce' ); ?></a></td>
                     <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping methods added here apply to all regions without a zone.', 'woocommerce' ); ?></td>
-                    <td><a href="#" class="wc-shipping-zone-add-method button"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a></td>
+                    <td>&ndash;</td>
                     <td class="wc-shipping-zone-actions"></td>
                 </tr>
             </tbody>
@@ -38,7 +38,7 @@
     <tr data-id="{{ data.zone_id }}">
         <td width="1%" class="wc-shipping-zone-sort"></td>
         <td class="wc-shipping-zone-name">
-            <div class="view">{{ data.zone_name }}</div>
+            <div class="view"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-shipping&zone_id=' ) ); ?>{{ data.zone_id }}">{{ data.zone_name }}</a></div>
             <div class="edit"><input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
         </td>
 		<td class="wc-shipping-zone-region">
@@ -72,7 +72,6 @@
 		</td>
         <td class="wc-shipping-zone-methods">
 			<ul></ul>
-			<a class="wc-shipping-zone-add-method button" href="#"><?php esc_html_e( 'Add a shipping method', 'woocommerce' ); ?></a>
 		</td>
         <td class="wc-shipping-zone-actions">
 			<a class="wc-shipping-zone-delete" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a>
