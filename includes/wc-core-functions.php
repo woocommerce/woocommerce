@@ -153,9 +153,9 @@ function wc_get_template_part( $slug, $name = '' ) {
 		$template = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
 	}
 
-	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php
+	// If template file doesn't exist, look in yourtheme/slug.php, yourtheme/woocommerce/slug.php, and template-parts/slug.php
 	if ( ! $template && ! WC_TEMPLATE_DEBUG_MODE ) {
-		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
+		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php", "template-parts/{$slug}.php" ) );
 	}
 
 	// Allow 3rd party plugin filter template file from their plugin.
