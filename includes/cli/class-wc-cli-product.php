@@ -223,7 +223,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	}
 
 	/**
-	 * Delete a product.
+	 * Delete products.
 	 *
 	 * ## OPTIONS
 	 *
