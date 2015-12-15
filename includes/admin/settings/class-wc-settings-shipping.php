@@ -29,7 +29,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
 		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
-		add_action( 'woocommerce_admin_field_shipping_methods', array( $this, 'shipping_methods_setting' ) );
 		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
 	}
 
@@ -151,10 +150,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'type'    => 'multi_select_countries'
 			),
 
-			array(
-				'type' => 'shipping_methods',
-			),
-
 			array( 'type' => 'sectionend', 'id' => 'shipping_options' ),
 
 		) );
@@ -188,64 +183,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output shipping method settings.
-	 */
-	public function shipping_methods_setting() {
-		$selection_priority = get_option( 'woocommerce_shipping_method_selection_priority', array() );
-		?>
-		<tr valign="top">
-			<th scope="row" class="titledesc"><?php _e( 'Shipping Methods', 'woocommerce' ) ?></th>
-			<td class="forminp">
-				<table class="wc_shipping widefat wp-list-table" cellspacing="0">
-					<thead>
-						<tr>
-							<th class="sort">&nbsp;</th>
-							<th class="name"><?php _e( 'Name', 'woocommerce' ); ?></th>
-							<th class="id"><?php _e( 'ID', 'woocommerce' ); ?></th>
-							<th class="status"><?php _e( 'Enabled', 'woocommerce' ); ?></th>
-							<th class="priority"><?php _e( 'Selection Priority', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Available methods will be chosen by default in this order. If multiple methods have the same priority, they will be sorted by cost.', 'woocommerce' ) ); ?></th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) : ?>
-							<tr>
-								<td width="1%" class="sort">
-									<input type="hidden" name="method_order[<?php echo esc_attr( $method->id ); ?>]" value="<?php echo esc_attr( $method->id ); ?>" />
-								</td>
-								<td class="name">
-									<?php if ( $method->has_settings() ) : ?><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) ); ?>"><?php endif; ?>
-									<?php echo esc_html( $method->get_title() ); ?>
-									<?php if ( $method->has_settings() ) : ?></a><?php endif; ?>
-								</td>
-								<td class="id">
-									<?php echo esc_attr( $method->id ); ?>
-								</td>
-								<td class="status">
-									<?php if ( 'yes' === $method->enabled ) : ?>
-										<span class="status-enabled tips" data-tip="<?php esc_attr_e( 'Yes', 'woocommerce' ); ?>"><?php _e( 'Yes', 'woocommerce' ); ?></span>
-									<?php else : ?>
-										<span class="na">-</span>
-									<?php endif; ?>
-								</td>
-								<td width="1%" class="priority">
-									<input type="number" step="1" min="0" name="method_priority[<?php echo esc_attr( $method->id ); ?>]" value="<?php echo isset( $selection_priority[ $method->id ] ) ? absint( $selection_priority[ $method->id ] ) : 1; ?>" />
-								</td>
-							</tr>
-						<?php endforeach; ?>
-					</tbody>
-					<tfoot>
-						<tr>
-							<th>&nbsp;</th>
-							<th colspan="4"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
-						</tr>
-					</tfoot>
-				</table>
-			</td>
-		</tr>
-		<?php
-	}
-
-	/**
 	 * Save settings.
 	 */
 	public function save() {
@@ -255,7 +192,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( ! $current_section ) {
 			WC_Admin_Settings::save_fields( $this->get_settings() );
-			$wc_shipping->process_admin_options();
 
 		} else {
 			foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {

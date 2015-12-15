@@ -193,46 +193,24 @@ class WC_Shipping {
 	 * @return string
 	 */
 	private function get_default_method( $available_methods, $current_chosen_method = false ) {
-		$selection_priority = get_option( 'woocommerce_shipping_method_selection_priority', array() );
-
 		if ( ! empty( $available_methods ) ) {
-
-			// Is a method already chosen?
-			if ( ! empty( $current_chosen_method ) && ! isset( $available_methods[ $current_chosen_method ] ) ) {
-				foreach ( $available_methods as $method_key => $method ) {
-					if ( strpos( $method->id, $current_chosen_method ) === 0 ) {
-						return $method->id;
+			if ( ! empty( $current_chosen_method ) ) {
+				if ( isset( $available_methods[ $current_chosen_method ] ) ) {
+					return $available_methods[ $current_chosen_method ]->id;
+				} else {
+					foreach ( $available_methods as $method_key => $method ) {
+						if ( strpos( $method->id, $current_chosen_method ) === 0 ) {
+							return $method->id;
+						}
 					}
 				}
 			}
-
-			// Order by priorities and costs
-			$prioritized_methods = array();
-
-			foreach ( $available_methods as $method_key => $method ) {
-				// Some IDs contain : if they have multiple rates so use $method->method_id
-				$priority  = isset( $selection_priority[ $method->method_id ] ) ? absint( $selection_priority[ $method->method_id ] ): 1;
-
-				if ( empty( $prioritized_methods[ $priority ] ) ) {
-					$prioritized_methods[ $priority ] = array();
-				}
-
-				$prioritized_methods[ $priority ][ $method_key ] = $method->cost;
-			}
-
-			ksort( $prioritized_methods );
-			$prioritized_methods = current( $prioritized_methods );
-			asort( $prioritized_methods );
-
-			return current( array_keys( $prioritized_methods ) );
+			return current( $available_methods )->id;
 		}
-
-		return false;
+		return '';
 	}
 
 	/**
-	 * Calculate shipping costs.
-	 *
 	 * Calculate shipping for (multiple) packages of cart items.
 	 *
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
@@ -368,7 +346,6 @@ class WC_Shipping {
 
 	/**
 	 * Get packages.
-	 *
 	 * @return array
 	 */
 	public function get_packages() {
@@ -385,30 +362,6 @@ class WC_Shipping {
 		$this->shipping_total = null;
 		$this->shipping_taxes = array();
 		$this->packages = array();
-	}
-
-	/**
-	 * Process admin options.
-	 *
-	 * Saves options on the shipping setting page.
-	 */
-	public function process_admin_options() {
-		$method_order       = isset( $_POST['method_order'] ) ? $_POST['method_order'] : '';
-		$method_priority    = isset( $_POST['method_priority'] ) ? $_POST['method_priority'] : '';
-		$order              = array();
-		$selection_priority = array();
-
-		if ( is_array( $method_order ) && sizeof( $method_order ) > 0 ) {
-			$loop = 0;
-			foreach ( $method_order as $method_id ) {
-				$order[ $method_id ]              = $loop;
-				$selection_priority[ $method_id ] = absint( $method_priority[ $method_id ] );
-				$loop ++;
-			}
-		}
-
-		update_option( 'woocommerce_shipping_method_selection_priority', $selection_priority );
-		update_option( 'woocommerce_shipping_method_order', $order );
 	}
 
 	/**
