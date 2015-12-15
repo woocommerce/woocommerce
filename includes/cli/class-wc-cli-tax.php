@@ -462,7 +462,7 @@ class WC_CLI_Tax extends WC_CLI_Command {
 	 * <id>
 	 * : The ID of the tax rate to update.
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
 	 * ## AVAILABLE FIELDS

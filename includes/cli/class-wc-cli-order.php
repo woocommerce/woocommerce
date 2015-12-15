@@ -27,6 +27,13 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 * * customer_id
 	 *
+	 * Optional fields:
+	 *
+	 * * status
+	 * * note
+	 * * currency
+	 * * order_meta
+	 *
 	 * Payment detail fields:
 	 *
 	 * * payment_details.method_id
@@ -77,7 +84,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc order create --customer_id=1 --
+	 *     wp wc order create --customer_id=1 --status=pending ...
 	 *
 	 * @since  2.5.0
 	 */
@@ -162,11 +169,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 				update_post_meta( $order->id, '_order_currency', $data['currency'] );
 			}
 
-			// Set order numberl
-			if ( isset( $data['order_number'] ) ) {
-				update_post_meta( $order->id, '_order_number', $data['order_number'] );
-			}
-
 			// Set order meta.
 			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
 				$this->set_order_meta( $order->id, $data['order_meta'] );
@@ -191,7 +193,12 @@ class WC_CLI_Order extends WC_CLI_Command {
 	}
 
 	/**
-	 * Delete an order.
+	 * Delete one or more orders.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>...
+	 * : The order ID to delete.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -397,14 +404,14 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * <id>
 	 * : Product ID
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
-	 * ## AVAILABLE_FIELDS
+	 * ## AVAILABLE FIELDS
 	 *
 	 * For available fields, see: wp wc order create --help
 	 *
-	 * # EXAMPLES
+	 * ## EXAMPLES
 	 *
 	 *    wp wc order update 123 --status=completed
 	 *
