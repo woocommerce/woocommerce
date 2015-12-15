@@ -512,6 +512,15 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * [--format=<format>]
 	 * : Accepted values: table, json, csv. Default: table.
 	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * rating
+	 * * reviewer_name
+	 * * reviewer_email
+	 * * verified
+	 * * created_at
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product reviews 123
