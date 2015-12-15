@@ -20,7 +20,16 @@
                     </td>
                 </tr>
             </tfoot>
-            <tbody class="wc-shipping-zone-rows"></tbody>
+            <tbody class="wc-shipping-zone-rows">
+				<tr>
+					<td class="wc-shipping-zones-blank-state" colspan="5">
+						<p class="main"><?php _e( 'Shipping Zones are regions you ship products to.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'You can add as many zones as you want, for example you could have "Local", "Domestic", and "Europe" zones depending on your needs.', 'woocommerce' ); ?></p>
+						<p><?php _e( 'Once a zone has been added, you can add multiple shipping rates within each. Customers will only see rates that apply to them.', 'woocommerce' ); ?></p>
+						<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add a shipping zone', 'woocommerce' ); ?></a>
+					</td>
+				</tr>
+			</tbody>
             <tbody>
                 <tr>
                     <td width="1%" class="wc-shipping-zone-worldwide"></td>

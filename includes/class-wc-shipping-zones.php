@@ -34,7 +34,7 @@ class WC_Shipping_Zones {
 			$zones[ $zone->get_zone_id() ]['shipping_methods']        = $zone->get_shipping_methods();
 		}
 
-		return $zones;
+		return array();
     }
 
 	/**

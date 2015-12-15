@@ -66,12 +66,11 @@
 				},
 				render: function() {
 					var zones       = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
-						view        = this;
-
-					// Blank out the contents.
-					this.$el.empty();
+						view        = this;					
 
 					if ( _.size( zones ) ) {
+						this.$el.empty();
+
 						// Sort zones
 						zones = _.sortBy( zones, function( zone ) {
 							return parseInt( zone.zone_order, 10 );
