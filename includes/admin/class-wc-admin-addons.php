@@ -23,7 +23,7 @@ class WC_Admin_Addons {
 	 */
 	public static function get_sections() {
 		if ( false === ( $sections = get_transient( 'wc_addons_sections' ) ) ) {
-			$raw_sections = wp_safe_remote_get( 'https://gist.githubusercontent.com/mikejolley/56f7c40f0f0274551057/raw/ca2fe7cc08a865927a2f403b795870249851e43f/sections.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
+			$raw_sections = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/addon-sections.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
 			if ( ! is_wp_error( $raw_sections ) ) {
 				$sections = json_decode( wp_remote_retrieve_body( $raw_sections ) );
 
