@@ -98,20 +98,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Shipping Display Mode', 'woocommerce' ),
-				'desc'     => __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
-				'id'       => 'woocommerce_shipping_method_format',
-				'default'  => '',
-				'type'     => 'radio',
-				'options'  => array(
-					''       => __( 'Display shipping methods with "radio" buttons', 'woocommerce' ),
-					'select' => __( 'Display shipping methods in a dropdown', 'woocommerce' ),
-				),
-				'desc_tip' =>  true,
-				'autoload' => false
-			),
-
-			array(
 				'title'   => __( 'Shipping Destination', 'woocommerce' ),
 				'desc'    => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
 				'id'      => 'woocommerce_ship_to_destination',
