@@ -39,7 +39,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$this->min_amount 	         = $this->get_option( 'min_amount', 0 );
 		$this->requires		         = $this->get_option( 'requires' );
 
-		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) ); // @todo
+		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
 	/**

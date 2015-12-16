@@ -105,20 +105,4 @@ if ( ! empty( $shipping_classes ) ) {
 	);
 }
 
-if ( apply_filters( 'woocommerce_enable_deprecated_additional_flat_rates', $this->get_option( 'options', false ) ) ) {
-	$settings[ 'additional_rates' ] = array(
-		'title'			=> __( 'Additional Rates', 'woocommerce' ),
-		'type'			=> 'title',
-		'description'   => __( 'These rates are extra shipping options with additional costs (based on the flat rate).', 'woocommerce' ),
-	);
-	$settings['options'] = array(
-		'title' 		=> __( 'Additional Rates', 'woocommerce' ),
-		'type' 			=> 'textarea',
-		'description'	=> __( 'One per line: Option Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>.', 'woocommerce' ),
-		'default'		=> '',
-		'desc_tip'		=> true,
-		'placeholder'	=> __( 'Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item)', 'woocommerce' )
-	);
-}
-
 return $settings;

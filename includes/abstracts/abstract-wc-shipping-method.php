@@ -19,36 +19,36 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 	/**
 	 * Features this method supports. Possible features used by core:
-	 *   - shipping-zones Shipping zone functionality + instances
-	 *   - instance-settings Instance settings screens.
-	 *   - settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
+	 * - shipping-zones Shipping zone functionality + instances
+	 * - instance-settings Instance settings screens.
+	 * - settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
 	 * @var array
 	 */
-	public $supports           = array( 'settings' );
+	public $supports             = array( 'settings' );
 
 	/**
 	 * Unique ID for the shipping method - must be set.
 	 * @var string
 	 */
-	public $id                 = '';
+	public $id                   = '';
 
 	/**
 	 * Method title.
 	 * @var string
 	 */
-	public $method_title       = '';
+	public $method_title         = '';
 
 	/**
 	 * Method description.
 	 * @var string
 	 */
-	public $method_description = '';
+	public $method_description   = '';
 
 	/**
 	 * yes or no based on whether the method is enabled.
 	 * @var string
 	 */
-	public $enabled            = 'yes';
+	public $enabled              = 'yes';
 
 	/**
 	 * Shipping method title for the frontend.
@@ -60,26 +60,26 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * This is an array of rates - methods must populate this array to register shipping costs.
 	 * @var array
 	 */
-	public $rates              = array();
+	public $rates                = array();
 
 	/**
 	 * If 'taxable' tax will be charged for this method (if applicable).
 	 * @var string
 	 */
-	public $tax_status         = 'taxable';
+	public $tax_status           = 'taxable';
 
 	/**
 	 * Fee for the method (if applicable).
 	 * @var string
 	 */
-	public $fee                = null;
+	public $fee                  = null;
 
 	/** @var float Minimum fee for the method */
 	/**
 	 * Minimum fee for the method (if applicable).
 	 * @var string
 	 */
-	public $minimum_fee        = null;
+	public $minimum_fee          = null;
 
 	/**
 	 * Availability - legacy. Used for method Availability.
@@ -95,19 +95,25 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @deprecated 2.6.0
 	 * @var string
 	 */
-	public $countries          = array();
+	public $countries            = array();
 
 	/**
 	 * Instance ID if used.
 	 * @var int
 	 */
-	public $instance_id     = 0;
+	public $instance_id          = 0;
+
+	/**
+	 * Instance form fields.
+	 * @var array
+	 */
+	public $instance_form_fields = array();
 
 	/**
 	 * Instance settings.
 	 * @var array
 	 */
-	public $instance_settings  = array();
+	public $instance_settings    = array();
 
 	/**
 	 * Constructor.
@@ -407,7 +413,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return array
 	 */
 	public function get_instance_form_fields() {
-		return array();
+		return apply_filters( 'woocommerce_shipping_instance_form_fields_' . $this->id, $this->instance_form_fields );
 	}
 
 	/**
