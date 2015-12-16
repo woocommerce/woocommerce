@@ -142,6 +142,7 @@ class WC_AJAX {
 			'bulk_edit_variations'                             => false,
 			'tax_rates_save_changes'                           => false,
 			'shipping_zones_save_changes'                      => false,
+			'shipping_zone_add_method'                         => false,
 			'shipping_zone_methods_save_changes'               => false,
 		);
 
@@ -3112,8 +3113,8 @@ class WC_AJAX {
 	/**
 	 * Handle submissions from assets/js/wc-shipping-zone-methods.js Backbone model.
 	 */
-	public static function shipping_zone_methods_save_changes() {
-		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['changes'] ) ) {
+	public static function shipping_zone_add_method() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['method_id'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			exit;
 		}
@@ -3129,6 +3130,35 @@ class WC_AJAX {
 			exit;
 		}
 
+		$zone_id     = absint( $_POST['zone_id'] );
+		$zone        = WC_Shipping_Zones::get_zone( $zone_id );
+		$instance_id = $zone->add_shipping_method( wc_clean( $_POST['method_id'] ) );
+
+		wp_send_json_success( array(
+			'instance_id' => $instance_id,
+			'methods'     => $zone->get_shipping_methods()
+		) );
+	}
+
+	/**
+	 * Handle submissions from assets/js/wc-shipping-zone-methods.js Backbone model.
+	 */
+	public static function shipping_zone_methods_save_changes() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
 		global $wpdb;
 
 		$zone_id = absint( $_POST['zone_id'] );
@@ -3137,7 +3167,7 @@ class WC_AJAX {
 
 		foreach ( $changes as $instance_id => $data ) {
 			if ( isset( $data['deleted'] ) ) {
-				$wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => array( $instance_id ) ) );
+				$wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) );
 				continue;
 			}
 

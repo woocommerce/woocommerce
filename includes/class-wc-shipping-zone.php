@@ -353,4 +353,36 @@ class WC_Shipping_Zone {
         global $wpdb;
 		$wpdb->update( $wpdb->prefix . 'woocommerce_shipping_zones', $zone_data, array( 'zone_id' => $this->get_zone_id() ) );
     }
+
+	/**
+	 * Add a shipping method to this zone.
+	 * @param string $type shipping method type
+	 * @return int new instance_id, 0 on failure
+	 */
+	public function add_shipping_method( $type ) {
+		global $wpdb;
+
+		$instance_id     = 0;
+		$wc_shipping     = WC_Shipping::instance();
+		$allowed_classes = $wc_shipping->get_shipping_method_class_names();
+
+		if ( in_array( $type, array_keys( $allowed_classes ) ) ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+				array(
+					'method_id'    => $type,
+					'zone_id'      => $this->get_zone_id(),
+					'method_order' => 0
+				),
+				array(
+					'%s',
+					'%d',
+					'%d'
+				)
+			);
+			$instance_id = $wpdb->insert_id;
+		}
+
+		return $instance_id;
+	}
 }

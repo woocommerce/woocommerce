@@ -30,6 +30,13 @@
 						shippingMethod.trigger( 'saved:methods' );
 					}
 				},
+				addMethod: function() {
+					$.post( ajaxurl + '?action=woocommerce_shipping_zone_add_method', {
+						wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
+						method_id               : $('select[name="add_method_id"]').val(),
+						zone_id                 : data.zone_id
+					}, this.onAddResponse, 'json' );
+				},
 				onSaveResponse: function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
 						if ( response.success ) {
@@ -39,6 +46,18 @@
 							shippingMethod.trigger( 'saved:methods' );
 						} else {
 							window.alert( data.strings.save_failed );
+						}
+					}
+				},
+				onAddResponse: function( response, textStatus ) {
+					if ( 'success' === textStatus ) {
+						if ( response.success && response.data.instance_id ) {
+							shippingMethod.set( 'methods', response.data.methods );
+							shippingMethod.trigger( 'change:methods' );
+							shippingMethod.changes = {};
+							shippingMethod.trigger( 'saved:methods' );
+						} else {
+							window.alert( data.strings.add_method_failed );
 						}
 					}
 				}
@@ -55,6 +74,19 @@
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
+					$('.wc-shipping-zone-add-method').on( 'click', { view: this }, this.onAdd );
+				},
+				block: function() {
+					$( this.el ).block({
+						message: null,
+						overlayCSS: {
+							background: '#fff',
+							opacity: 0.6
+						}
+					});
+				},
+				unblock: function() {
+					$( this.el ).unblock();
 				},
 				render: function() {
 					var methods       = _.indexBy( this.model.get( 'methods' ), 'instance_id' ),
@@ -62,6 +94,7 @@
 
 					// Blank out the contents.
 					this.$el.empty();
+					this.unblock();
 
 					if ( _.size( methods ) ) {
 						// Sort methods
@@ -85,7 +118,13 @@
 					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				onSubmit: function( event ) {
+					event.data.view.block();
 					event.data.view.model.save();
+					event.preventDefault();
+				},
+				onAdd: function( event ) {
+					event.data.view.block();
+					event.data.view.model.addMethod();
 					event.preventDefault();
 				},
 				onDeleteRow: function( event ) {

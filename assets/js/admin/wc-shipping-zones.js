@@ -64,12 +64,25 @@
 					$save_button.on( 'click', { view: this }, this.onSubmit );
 					$( '.wc-shipping-zone-add' ).on( 'click', { view: this }, this.onAddNewRow );
 				},
+				block: function() {
+					$( this.el ).block({
+						message: null,
+						overlayCSS: {
+							background: '#fff',
+							opacity: 0.6
+						}
+					});
+				},
+				unblock: function() {
+					$( this.el ).unblock();
+				},
 				render: function() {
 					var zones       = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
 						view        = this;
 
 					if ( _.size( zones ) ) {
 						this.$el.empty();
+						this.unblock();
 
 						// Sort zones
 						zones = _.sortBy( zones, function( zone ) {
@@ -88,7 +101,7 @@
 									var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
 
 									if ( postcode_field.val() ) {
-										postcode_field.val( postcode_field.val() + "\n" + location.code );
+										postcode_field.val( postcode_field.val() + '\n' + location.code );
 									} else {
 										postcode_field.val( location.code );
 									}
@@ -100,7 +113,7 @@
 							} );
 
 							// List shipping methods
-							$method_list = $tr.find('.wc-shipping-zone-methods ul');
+							var $method_list = $tr.find('.wc-shipping-zone-methods ul');
 
 							_.each( rowData.shipping_methods, function( shipping_method, instance_id ) {
 								$method_list.append( '<li><a href="admin.php?page=wc-shipping&amp;instance_id=' + instance_id + '">' + shipping_method.title + '</a></li>' );
@@ -136,6 +149,7 @@
 					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				onSubmit: function( event ) {
+					event.data.view.block();
 					event.data.view.model.save();
 					event.preventDefault();
 				},

@@ -2297,8 +2297,18 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 		}
 	}
 	tfoot {
+		input, select {
+			vertical-align: middle !important;
+		}
 		.button-primary {
 			float:right;
+		}
+	}
+	.wc-shipping-zone-method-selector {
+		float: left;
+		select {
+			margin:0;
+			height: 29px;
 		}
 	}
 }

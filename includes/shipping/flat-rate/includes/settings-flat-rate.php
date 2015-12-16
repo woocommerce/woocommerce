@@ -68,9 +68,10 @@ $shipping_classes = WC()->shipping->get_shipping_classes();
 
 if ( ! empty( $shipping_classes ) ) {
 	$settings[ 'class_costs' ] = array(
-		'title'			=> __( 'Shipping Class Costs', 'woocommerce' ),
-		'type'			=> 'title',
-		'description'   => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' ) . '">', '</a>' )
+		'title'			 => __( 'Shipping Class Costs', 'woocommerce' ),
+		'type'			 => 'title',
+		'default'        => '',
+		'description'    => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' ) . '">', '</a>' )
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
 		if ( ! isset( $shipping_class->term_id ) ) {

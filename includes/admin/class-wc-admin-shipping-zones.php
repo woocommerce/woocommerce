@@ -45,7 +45,8 @@ class WC_Admin_Shipping_Zones {
 			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'                 => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
-				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' )
+				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+				'add_method_failed'       => __( 'Shipping method could not be added. Please retry.', 'woocommerce' )
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zone-methods' );
