@@ -334,7 +334,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		$currency = get_woocommerce_currency();
 	}
 
-	$symbols = apply_filter( 'woocommerce_currency_symbols', array(
+	$symbols = apply_filters( 'woocommerce_currency_symbols', array(
 		'AED' => 'د.إ',
 		'ARS' => '&#36;',
 		'AUD' => '&#36;',
