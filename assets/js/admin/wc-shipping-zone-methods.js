@@ -1,10 +1,11 @@
 /* global shippingZoneMethodsLocalizeScript, ajaxurl */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
-		var $table        = $( '.wc-shipping-zone-methods' ),
-			$tbody        = $( '.wc-shipping-zone-method-rows' ),
-			$save_button  = $( '.wc-shipping-zone-method-save' ),
-			$row_template = wp.template( 'wc-shipping-zone-method-row' ),
+		var $table          = $( '.wc-shipping-zone-methods' ),
+			$tbody          = $( '.wc-shipping-zone-method-rows' ),
+			$save_button    = $( '.wc-shipping-zone-method-save' ),
+			$row_template   = wp.template( 'wc-shipping-zone-method-row' ),
+			$blank_template = wp.template( 'wc-shipping-zone-method-row-blank' ),
 
 			// Backbone model
 			ShippingMethod       = Backbone.Model.extend({
@@ -109,8 +110,11 @@
 
 						// Make the rows function
 						this.$el.find( '.wc-shipping-zone-method-delete' ).on( 'click', { view: this }, this.onDeleteRow );
-						this.initTooltips();
+					} else {
+						view.$el.append( $blank_template );
 					}
+
+					this.initTooltips();
 				},
 				initTooltips: function() {
 					$( '#tiptip_holder' ).removeAttr( 'style' );

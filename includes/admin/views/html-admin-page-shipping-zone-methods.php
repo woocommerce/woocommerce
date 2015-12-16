@@ -35,6 +35,16 @@
     </table>
 </div>
 
+<script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
+	<tr>
+		<td class="wc-shipping-zone-method-blank-state" colspan="5">
+			<p class="main"><?php _e( 'Add shipping methods to this zone', 'woocommerce' ); ?></p>
+			<p><?php _e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'Choose a method from the dropdown below and click "add shipping method" to get started.', 'woocommerce' ); ?></p>
+		</td>
+	</tr>
+</script>
+
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row">
     <tr data-id="{{ data.instance_id }}">
         <td width="1%" class="wc-shipping-zone-method-sort"></td>

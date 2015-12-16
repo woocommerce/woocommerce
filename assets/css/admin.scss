@@ -2123,11 +2123,11 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 			font-size: 14px;
 		}
 	}
-	td.wc-shipping-zones-blank-state {
+	td.wc-shipping-zones-blank-state, td.wc-shipping-zone-method-blank-state {
 		background: #F7F1F6 !important;
 		overflow: hidden;
 		position: relative;
-		padding: 7.5em 10% 15em;
+		padding: 7.5em 10%;
 		border-bottom: 2px solid #EEE2EC;
 		p {
 			color: #a46497;
@@ -2150,8 +2150,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 			color: #EEE2EC;
 			display: block;
 			width: 17px;
-			font-size: 50em;
-			top: 10%;
+			font-size: 40em;
+			top: 0;
 			left: 0;
 			position: absolute;
 		}
@@ -2168,6 +2168,11 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 			height: auto;
 			position: relative;
 			z-index: 1;
+		}
+		&.wc-shipping-zone-method-blank-state {
+			&:before {
+				content: "\f231";
+			}
 		}
 	}
 	tbody.wc-shipping-zone-rows {

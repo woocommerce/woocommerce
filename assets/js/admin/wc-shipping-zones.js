@@ -1,11 +1,12 @@
 /* global wc_enhanced_select_params, shippingZonesLocalizeScript, ajaxurl */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
-		var $table        = $( '.wc-shipping-zones' ),
-			$tbody        = $( '.wc-shipping-zone-rows' ),
-			$save_button  = $( '.wc-shipping-zone-save' ),
-			$row_template = wp.template( 'wc-shipping-zone-row' ),
-			select2_args  = $.extend({
+		var $table          = $( '.wc-shipping-zones' ),
+			$tbody          = $( '.wc-shipping-zone-rows' ),
+			$save_button    = $( '.wc-shipping-zone-save' ),
+			$row_template   = wp.template( 'wc-shipping-zone-row' ),
+			$blank_template = wp.template( 'wc-shipping-zone-row-blank' ),
+			select2_args    = $.extend({
 				minimumResultsForSearch: 10,
 				allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 				placeholder: $( this ).data( 'placeholder' ),
@@ -80,10 +81,10 @@
 					var zones       = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
 						view        = this;
 
-					if ( _.size( zones ) ) {
-						this.$el.empty();
-						this.unblock();
+					this.$el.empty();
+					this.unblock();
 
+					if ( _.size( zones ) ) {
 						// Sort zones
 						zones = _.sortBy( zones, function( zone ) {
 							return parseInt( zone.zone_order, 10 );
@@ -139,9 +140,11 @@
 						} else {
 							$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
 						}
-
-						this.initTooltips();
+					} else {
+						view.$el.append( $blank_template );
 					}
+
+					this.initTooltips();
 				},
 				initTooltips: function() {
 					$( '#tiptip_holder' ).removeAttr( 'style' );
