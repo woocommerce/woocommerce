@@ -1,7 +1,6 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -10,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * A simple shipping method allowing local delivery as a shipping method.
  *
  * @class 		WC_Shipping_Local_Delivery
- * @version		2.3.0
+ * @version		2.6.0
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
@@ -19,10 +18,15 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 	/**
 	 * Constructor.
 	 */
-	public function __construct() {
-		$this->id                 = 'local_delivery';
-		$this->method_title       = __( 'Local Delivery', 'woocommerce' );
-		$this->method_description = __( 'Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce' );
+	public function __construct( $instance_id = 0 ) {
+		$this->id                    = 'local_delivery';
+		$this->instance_id 			 = absint( $instance_id );
+		$this->method_title          = __( 'Local Delivery', 'woocommerce' );
+		$this->method_description    = __( 'Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce' );
+		$this->supports              = array(
+			'shipping-zones',
+			'instance-settings'
+		);
 		$this->init();
 	}
 
@@ -71,20 +75,18 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 			break;
 		}
 
-		$rate = array(
-			'id'    => $this->id,
+		$this->add_rate( array(
+			'id'    => $this->id . $this->instance_id,
 			'label' => $this->title,
 			'cost'  => $shipping_total
-		);
-
-		$this->add_rate( $rate );
+		) );
 	}
 
 	/**
 	 * Init form fields.
 	 */
 	public function init_form_fields() {
-		$this->form_fields = array(
+		$this->instance_form_fields = array(
 			'enabled' => array(
 				'title'   => __( 'Enable', 'woocommerce' ),
 				'type'    => 'checkbox',
@@ -118,35 +120,6 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 				'default'     => '',
 				'desc_tip'    => true,
 				'placeholder' => wc_format_localized_price( 0 )
-			),
-			'codes' => array(
-				'title'       => __( 'Allowed ZIP/Post Codes', 'woocommerce' ),
-				'type'        => 'text',
-				'desc_tip'    => __( 'What ZIP/post codes are available for local delivery?', 'woocommerce' ),
-				'default'     => '',
-				'description' => __( 'Separate codes with a comma. Accepts wildcards, e.g. <code>P*</code> will match a postcode of PE30. Also accepts a pattern, e.g. <code>NG1___</code> would match NG1 1AA but not NG10 1AA', 'woocommerce' ),
-				'placeholder' => 'e.g. 12345, 56789'
-			),
-			'availability' => array(
-				'title'       => __( 'Method availability', 'woocommerce' ),
-				'type'        => 'select',
-				'default'     => 'all',
-				'class'       => 'availability wc-enhanced-select',
-				'options'     => array(
-					'all'         => __( 'All allowed countries', 'woocommerce' ),
-					'specific'    => __( 'Specific Countries', 'woocommerce' )
-				)
-			),
-			'countries' => array(
-				'title'       => __( 'Specific Countries', 'woocommerce' ),
-				'type'        => 'multiselect',
-				'class'       => 'wc-enhanced-select',
-				'css'         => 'width: 450px;',
-				'default'     => '',
-				'options'     => WC()->countries->get_shipping_countries(),
-				'custom_attributes' => array(
-					'data-placeholder' => __( 'Select some countries', 'woocommerce' )
-				)
 			)
 		);
 	}

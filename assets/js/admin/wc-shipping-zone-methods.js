@@ -32,6 +32,9 @@
 					}
 				},
 				addMethod: function() {
+					if ( _.size( this.changes ) ) {
+						this.save();
+					}
 					$.post( ajaxurl + '?action=woocommerce_shipping_zone_add_method', {
 						wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 						method_id               : $('select[name="add_method_id"]').val(),
@@ -186,7 +189,7 @@
 
 					_.each( methods, function( method ) {
 						var old_position = parseInt( method.method_order, 10 );
-						var new_position = parseInt( $table.find( 'tr[data-id="' + method.instance_id + '"]').index(), 10 );
+						var new_position = parseInt( $table.find( 'tr[data-id="' + method.instance_id + '"]').index() + 1, 10 );
 
 						if ( old_position !== new_position ) {
 							changes[ method.instance_id ] = _.extend( changes[ method.instance_id ] || {}, { method_order : new_position } );

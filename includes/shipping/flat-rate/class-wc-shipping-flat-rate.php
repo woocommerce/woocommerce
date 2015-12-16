@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Flat Rate Shipping Method.
  *
  * @class 		WC_Shipping_Flat_Rate
- * @version		2.4.0
+ * @version		2.6.0
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
@@ -121,7 +121,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$rate = array(
-			'id'    => $this->id,
+			'id'    => $this->id . $this->instance_id,
 			'label' => $this->title,
 			'cost'  => 0,
 		);

@@ -3075,8 +3075,8 @@ class WC_AJAX {
 				}
 
 				if ( isset( $zone_data['zone_locations'] ) ) {
+					$zone->clear_locations( array( 'state', 'country', 'continent' ) );
 					$locations = array_filter( array_map( 'wc_clean', (array) $zone_data['zone_locations'] ) );
-					$zone->clear_locations();
 					foreach ( $locations as $location ) {
 						// Each posted location will be in the format type:code
 						$location_parts = explode( ':', $location );
@@ -3095,6 +3095,7 @@ class WC_AJAX {
 				}
 
 				if ( isset( $zone_data['zone_postcodes'] ) ) {
+					$zone->clear_locations( 'postcode' );
 					$postcodes = array_filter( array_map( 'strtoupper', array_map( 'wc_clean', explode( "\n", $zone_data['zone_postcodes'] ) ) ) );
 					foreach ( $postcodes as $postcode ) {
 						$zone->add_location( $postcode, 'postcode' );

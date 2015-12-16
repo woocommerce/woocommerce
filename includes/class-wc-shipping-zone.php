@@ -257,10 +257,18 @@ class WC_Shipping_Zone {
 
 	/**
 	 * Clear all locations for this zone.
+	 * @param array|string $types of location to clear
 	 */
-	public function clear_locations() {
-		$this->data['zone_locations'] = array();
-		$this->_locations_changed = true;
+	public function clear_locations( $types = array( 'postcode', 'state', 'country', 'continent' ) ) {
+		if ( ! is_array( $types ) ) {
+			$types = array( $types );
+		}
+		foreach ( $this->data['zone_locations'] as $key => $values ) {
+			if ( in_array( $values->type, $types ) ) {
+				unset( $this->data['zone_locations'][ $key ] );
+				$this->_locations_changed = true;
+			}
+		}
 	}
 
 	/**
