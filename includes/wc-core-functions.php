@@ -136,6 +136,8 @@ function wc_update_order( $args ) {
 /**
  * Get template part (for templates like the shop-loop).
  *
+ * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
+ *
  * @access public
  * @param mixed $slug
  * @param string $name (default: '')
@@ -158,10 +160,8 @@ function wc_get_template_part( $slug, $name = '' ) {
 		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
 	}
 
-	// Allow 3rd party plugin filter template file from their plugin.
-	if ( ( ! $template && WC_TEMPLATE_DEBUG_MODE ) || $template ) {
-		$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
-	}
+	// Allow 3rd party plugins to filter template file from their plugin.
+	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
 
 	if ( $template ) {
 		load_template( $template, false );
