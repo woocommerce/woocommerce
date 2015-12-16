@@ -7,13 +7,14 @@
                 <th class="wc-shipping-zone-method-sort">&nbsp;</th>
                 <th class="wc-shipping-zone-method-title"><?php esc_html_e( 'Title', 'woocommerce' ); ?></th>
 				<th class="wc-shipping-zone-method-type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></th>
+				<th class="wc-shipping-zone-method-enabled"><?php esc_html_e( 'Enabled', 'woocommerce' ); ?></th>
                 <th class="wc-shipping-zone-method-description"><?php esc_html_e( 'Description', 'woocommerce' ); ?></th>
                 <th class="wc-shipping-zone-method-actions">&nbsp;</th>
             </tr>
         </thead>
         <tfoot>
             <tr>
-                <td colspan="5">
+                <td colspan="6">
                     <div class="wc-shipping-zone-method-selector">
             			<select name="add_method_id">
             				<?php
@@ -37,7 +38,7 @@
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
 	<tr>
-		<td class="wc-shipping-zone-method-blank-state" colspan="5">
+		<td class="wc-shipping-zone-method-blank-state" colspan="6">
 			<p class="main"><?php _e( 'Add shipping methods to this zone', 'woocommerce' ); ?></p>
 			<p><?php _e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
 			<p><?php _e( 'Choose a method from the dropdown below and click "add shipping method" to get started.', 'woocommerce' ); ?></p>
@@ -50,6 +51,7 @@
         <td width="1%" class="wc-shipping-zone-method-sort"></td>
         <td class="wc-shipping-zone-method-title"><a href="admin.php?page=wc-shipping&amp;instance_id={{ data.instance_id }}">{{ data.title }}</a></td>
 		<td class="wc-shipping-zone-method-type">{{ data.method_title }}</td>
+		<td class="wc-shipping-zone-method-enabled">{{{ data.enabled_icon }}}</td>
         <td class="wc-shipping-zone-method-description">{{ data.method_description }}</td>
         <td class="wc-shipping-zone-method-actions">
 			<a class="wc-shipping-zone-method-delete tips" data-tip="<?php esc_attr_e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-method-settings tips" data-tip="<?php esc_attr_e( 'Settings', 'woocommerce' ); ?>" href="admin.php?page=wc-shipping&amp;instance_id={{ data.instance_id }}"><?php _e( 'Settings', 'woocommerce' ); ?></a>

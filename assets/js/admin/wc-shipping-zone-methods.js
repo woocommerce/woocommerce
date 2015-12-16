@@ -108,6 +108,12 @@
 
 						// Populate $tbody with the current methods
 						$.each( methods, function( id, rowData ) {
+							if ( 'yes' === rowData.enabled ) {
+								rowData.enabled_icon = '<span class="status-enabled tips" data-tip="' + data.strings.yes + '">' + data.strings.yes + '</span>';
+							} else {
+								rowData.enabled_icon = '&ndash;';
+							}
+
 							view.$el.append( view.rowTemplate( rowData ) );
 						} );
 

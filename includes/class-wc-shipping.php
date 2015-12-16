@@ -105,8 +105,8 @@ class WC_Shipping {
 		return apply_filters( 'woocommerce_shipping_methods', array(
 			'flat_rate'              => 'WC_Shipping_Flat_Rate',
 			'free_shipping'          => 'WC_Shipping_Free_Shipping',
-			'international_delivery' => 'WC_Shipping_International_Delivery',
-			'local_delivery'         => 'WC_Shipping_Local_Delivery',
+			//'international_delivery' => 'WC_Shipping_International_Delivery',
+			//'local_delivery'         => 'WC_Shipping_Local_Delivery',
 			'local_pickup'           => 'WC_Shipping_Local_Pickup'
 		) );
 	}
@@ -147,6 +147,9 @@ class WC_Shipping {
 	 */
 	public function register_shipping_method( $method ) {
 		if ( ! is_object( $method ) ) {
+			if ( ! class_exists( $method ) ) {
+				return false;
+			}
 			$method = new $method();
 		}
 		$this->shipping_methods[ $method->id ] = $method;

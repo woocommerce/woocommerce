@@ -2227,6 +2227,15 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 			line-height: 30px;
 		}
 	}
+	.wc-shipping-zone-method-enabled {
+		text-align: center;
+		.status-enabled {
+			display: inline-block;
+			&:before {
+				line-height: inherit;
+			}
+		}
+	}
 	.wc-shipping-zone-name,
 	.wc-shipping-zone-methods {
 		width: 25%;
