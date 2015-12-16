@@ -737,13 +737,9 @@ class WC_API_Products extends WC_API_Resource {
 				return $category;
 			}
 
-			$display_type = '';
-			if ( isset( $data['display'] ) ) {
-				$display_type = $data['display'];
-				unset( $data['display'] );
-			}
-
 			if ( isset( $data['image'] ) ) {
+				$image_id = 0;
+
 				// If value of image is numeric, assume value as image_id.
 				$image = $data['image'];
 				if ( is_numeric( $image ) ) {
@@ -753,13 +749,10 @@ class WC_API_Products extends WC_API_Resource {
 					$image_id = $this->set_product_category_image_as_attachment( $upload );
 				}
 
-				// In case client supplies invalid image or wants to unset category
-				// image.
+				// In case client supplies invalid image or wants to unset category image.
 				if ( ! wp_attachment_is_image( $image_id ) ) {
 					$image_id = '';
 				}
-
-				unset( $data['image'] );
 			}
 
 			$update = wp_update_term( $id, 'product_cat', $data );
@@ -767,8 +760,8 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_catgory', __( 'Could not edit the category', 'woocommerce' ), 400 );
 			}
 
-			if ( ! empty( $display_type ) ) {
-				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+			if ( ! empty( $data['display'] ) ) {
+				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', sanitize_text_field( $data['display'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
