@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improved review verification status retrieval.
 * Tweak - Improve appearance when only 1 gateway is active.
 * Tweak - Aligned terms box left and added required asterisk.
+* Tweak - Removed dropdown display mode for cart shipping methods - radios are more flexible.
 * Dev - API - Added /products/shipping_classes endpoint.
 * Dev - API - Added support to POST, PUT, and DELETE categories and tags.
 * Dev - API - Added support to filter products by tag, category, shipping class, and attribute.
