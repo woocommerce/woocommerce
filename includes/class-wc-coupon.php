@@ -445,7 +445,7 @@ class WC_Coupon {
 	 * Ensure coupon is valid for sale items in the cart is valid or throw exception.
 	 */
 	private function validate_sale_items() {
-		if ( 'yes' === $this->exclude_sale_items && $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
+		if ( 'yes' === $this->exclude_sale_items && $this->is_type( wc_get_product_coupon_types() ) ) {
 			$valid_for_cart      = false;
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
@@ -470,7 +470,7 @@ class WC_Coupon {
 	 * Cart discounts cannot be added if non-eligble product is found in cart.
 	 */
 	private function validate_cart_excluded_items() {
-		if ( ! $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
+		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {
 			$this->validate_cart_excluded_product_ids();
 			$this->validate_cart_excluded_product_categories();
 			$this->validate_cart_excluded_sale_items();
@@ -578,7 +578,7 @@ class WC_Coupon {
 	 * @return bool
 	 */
 	public function is_valid_for_cart() {
-		return apply_filters( 'woocommerce_coupon_is_valid_for_cart', $this->is_type( array( 'fixed_cart', 'percent' ) ), $this );
+		return apply_filters( 'woocommerce_coupon_is_valid_for_cart', $this->is_type( wc_get_cart_coupon_types() ), $this );
 	}
 
 	/**
@@ -588,7 +588,7 @@ class WC_Coupon {
 	 * @return boolean
 	 */
 	public function is_valid_for_product( $product, $values = array() ) {
-		if ( ! $this->is_type( array( 'fixed_product', 'percent_product' ) ) ) {
+		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {
 			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this, $values );
 		}
 
