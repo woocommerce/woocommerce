@@ -910,10 +910,7 @@ class WC_API_Products extends WC_API_Resource {
 			$data = wp_parse_args( $data['product_tag'], $defaults );
 			$data = apply_filters( 'woocommerce_api_create_product_tag_data', $data, $this );
 
-			$name = $data['name'];
-			unset( $data['name'] );
-
-			$insert = wp_insert_term( $name, 'product_tag', $data );
+			$insert = wp_insert_term( $data['name'], 'product_tag', $data );
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_tag', $insert->get_error_message(), 400 );
 			}
@@ -3336,9 +3333,6 @@ class WC_API_Products extends WC_API_Resource {
 			$data = wp_parse_args( $data['product_shipping_class'], $defaults );
 			$data = apply_filters( 'woocommerce_api_create_product_shipping_class_data', $data, $this );
 
-			$name = $data['name'];
-			unset( $data['name'] );
-
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
@@ -3348,7 +3342,7 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			$insert = wp_insert_term( $name, 'product_shipping_class', $data );
+			$insert = wp_insert_term( $data['name'], 'product_shipping_class', $data );
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_shipping_class', $insert->get_error_message(), 400 );
 			}
