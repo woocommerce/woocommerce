@@ -35,7 +35,22 @@
                     <td width="1%" class="wc-shipping-zone-worldwide"></td>
                     <td class="wc-shipping-zone-name"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Worldwide', 'woocommerce' ); ?></a></td>
                     <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping methods added here apply to all regions without a zone.', 'woocommerce' ); ?></td>
-                    <td>&ndash;</td>
+                    <td class="wc-shipping-zone-methods">
+						<?php
+							$worldwide = new WC_Shipping_Zone( 0 );
+							$methods   = $worldwide->get_shipping_methods();
+
+							if ( ! $methods ) {
+								echo '&ndash;';
+							} else {
+								echo '<ul>';
+								foreach ( $methods as $method ) {
+									echo '<li><a href="admin.php?page=wc-shipping&amp;instance_id=' . absint( $method->instance_id ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
+								}
+								echo '</ul>';
+							}
+						?>
+					</td>
                     <td class="wc-shipping-zone-actions"><a class="wc-shipping-zone-view tips" data-tip="<?php _e( 'View Zone', 'woocommerce' ); ?>" href="admin.php?page=wc-shipping&amp;zone_id=0"><?php _e( 'View', 'woocommerce' ); ?></a></td>
                 </tr>
             </tbody>

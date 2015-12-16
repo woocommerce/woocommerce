@@ -66,7 +66,7 @@
 				},
 				render: function() {
 					var zones       = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
-						view        = this;					
+						view        = this;
 
 					if ( _.size( zones ) ) {
 						this.$el.empty();
@@ -103,7 +103,7 @@
 							$method_list = $tr.find('.wc-shipping-zone-methods ul');
 
 							_.each( rowData.shipping_methods, function( shipping_method, instance_id ) {
-								$method_list.append( '<li><a href="admin.php?page=wc-shipping&amp;instance_id=' + instance_id + '">' + shipping_method.method_title + '</a></li>' );
+								$method_list.append( '<li><a href="admin.php?page=wc-shipping&amp;instance_id=' + instance_id + '">' + shipping_method.title + '</a></li>' );
 							} );
 
 							// Editing?

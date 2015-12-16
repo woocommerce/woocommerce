@@ -2118,6 +2118,10 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 		padding: 1em 1em;
 		font-size: 14px;
 		background: #fff;
+		li {
+			line-height: 30px;
+			font-size: 14px;
+		}
 	}
 	td.wc-shipping-zones-blank-state {
 		background: #F7F1F6 !important;
