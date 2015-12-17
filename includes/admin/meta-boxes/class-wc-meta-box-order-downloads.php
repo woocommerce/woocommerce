@@ -90,7 +90,6 @@ class WC_Meta_Box_Order_Downloads {
 			$access_expires         = $_POST['access_expires'];
 
 			// Order data
-			$order_key       = get_post_meta( $post->ID, '_order_key', true );
 			$customer_email  = get_post_meta( $post->ID, '_billing_email', true );
 			$customer_user   = get_post_meta( $post->ID, '_customer_user', true );
 			$product_ids_max = max( array_keys( $product_ids ) );

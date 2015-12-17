@@ -63,7 +63,7 @@ class WC_Admin_Addons {
 
 	/**
 	 * Get section content for the addons screen
-	 * @return string
+	 * @return array
 	 */
 	public static function get_section_data( $section_id ) {
 		$section      = self::get_section( $section_id );
@@ -90,11 +90,8 @@ class WC_Admin_Addons {
 	 * Handles the outputting of a contextually aware Storefront link (points to child themes if Storefront is already active).
 	 */
 	public static function output_storefront_button() {
-		$url         = 'http://www.woothemes.com/storefront/';
-		$text        = __( 'View more about Storefront', 'woocommerce' );
-		$template    = get_option( 'template' );
-		$stylesheet  = get_option( 'stylesheet' );
-		$utm_content = 'hasstorefront';
+		$template   = get_option( 'template' );
+		$stylesheet = get_option( 'stylesheet' );
 
 		if ( 'storefront' === $template ) {
 			if ( 'storefront' === $stylesheet ) {
