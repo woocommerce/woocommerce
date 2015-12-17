@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php
 				printf( '%3$s <input type="hidden" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d" value="%2$s" class="shipping_method" />', $index, esc_attr( current( $available_methods )->id ), wc_cart_totals_shipping_method_label( current( $available_methods ) ) );
 
-				do_action( 'woocommerce_after_shipping_rate', $method, $index );
+				do_action( 'woocommerce_after_shipping_rate', $available_methods, $index );
 			?>
 		<?php elseif ( ! WC()->customer->has_calculated_shipping() ) : ?>
 			<?php echo wpautop( __( 'Shipping costs will be calculated once you have provided your address.', 'woocommerce' ) ); ?>
