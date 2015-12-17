@@ -664,9 +664,6 @@ class WC_API_Products extends WC_API_Resource {
 			$data = wp_parse_args( $data['product_category'], $defaults );
 			$data = apply_filters( 'woocommerce_api_create_product_category_data', $data, $this );
 
-			$name = $data['name'];
-			unset( $data['name'] );
-
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
@@ -676,28 +673,25 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			$display_type = $data['display'];
-			unset( $data['display'] );
-
 			// If value of image is numeric, assume value as image_id.
-			$image = $data['image'];
+			$image    = $data['image'];
+			$image_id = 0;
 			if ( is_numeric( $image ) ) {
 				$image_id = absint( $image );
 			} else if ( ! empty( $image ) ) {
 				$upload   = $this->upload_product_image( esc_url_raw( $image ) );
 				$image_id = $this->set_product_category_image_as_attachment( $upload );
 			}
-			unset( $data['image'] );
 
-			$insert = wp_insert_term( $name, 'product_cat', $data );
+			$insert = wp_insert_term( $data['name'], 'product_cat', $data );
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_category', $insert->get_error_message(), 400 );
 			}
 
-			update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+			update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'display_type', esc_attr( $data['display'] ) );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
-			if ( wp_attachment_is_image( $image_id ) ) {
+			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
 				update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'thumbnail_id', $image_id );
 			}
 
@@ -743,13 +737,9 @@ class WC_API_Products extends WC_API_Resource {
 				return $category;
 			}
 
-			$display_type = '';
-			if ( isset( $data['display'] ) ) {
-				$display_type = $data['display'];
-				unset( $data['display'] );
-			}
-
 			if ( isset( $data['image'] ) ) {
+				$image_id = 0;
+
 				// If value of image is numeric, assume value as image_id.
 				$image = $data['image'];
 				if ( is_numeric( $image ) ) {
@@ -759,13 +749,10 @@ class WC_API_Products extends WC_API_Resource {
 					$image_id = $this->set_product_category_image_as_attachment( $upload );
 				}
 
-				// In case client supplies invalid image or wants to unset category
-				// image.
+				// In case client supplies invalid image or wants to unset category image.
 				if ( ! wp_attachment_is_image( $image_id ) ) {
 					$image_id = '';
 				}
-
-				unset( $data['image'] );
 			}
 
 			$update = wp_update_term( $id, 'product_cat', $data );
@@ -773,8 +760,8 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_catgory', __( 'Could not edit the category', 'woocommerce' ), 400 );
 			}
 
-			if ( ! empty( $display_type ) ) {
-				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+			if ( ! empty( $data['display'] ) ) {
+				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', sanitize_text_field( $data['display'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
@@ -923,10 +910,7 @@ class WC_API_Products extends WC_API_Resource {
 			$data = wp_parse_args( $data['product_tag'], $defaults );
 			$data = apply_filters( 'woocommerce_api_create_product_tag_data', $data, $this );
 
-			$name = $data['name'];
-			unset( $data['name'] );
-
-			$insert = wp_insert_term( $name, 'product_tag', $data );
+			$insert = wp_insert_term( $data['name'], 'product_tag', $data );
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_tag', $insert->get_error_message(), 400 );
 			}
@@ -3349,9 +3333,6 @@ class WC_API_Products extends WC_API_Resource {
 			$data = wp_parse_args( $data['product_shipping_class'], $defaults );
 			$data = apply_filters( 'woocommerce_api_create_product_shipping_class_data', $data, $this );
 
-			$name = $data['name'];
-			unset( $data['name'] );
-
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
@@ -3361,7 +3342,7 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			$insert = wp_insert_term( $name, 'product_shipping_class', $data );
+			$insert = wp_insert_term( $data['name'], 'product_shipping_class', $data );
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_shipping_class', $insert->get_error_message(), 400 );
 			}
