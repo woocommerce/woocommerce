@@ -504,7 +504,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				}
 			}
 
-			return array( 'taxes' => apply_filters( 'woocommerce_api_taxes_bulk_response', $orders, $this ) );
+			return array( 'taxes' => apply_filters( 'woocommerce_api_taxes_bulk_response', $taxes, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
