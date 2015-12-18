@@ -102,13 +102,23 @@ class WC_Shipping {
 	 */
 	public function get_shipping_method_class_names() {
 		// Unique Method ID => Method Class name
-		return apply_filters( 'woocommerce_shipping_methods', array(
+		$shipping_methods = apply_filters( 'woocommerce_shipping_methods', array(
 			'flat_rate'              => 'WC_Shipping_Flat_Rate',
-			'free_shipping'          => 'WC_Shipping_Free_Shipping',
-			//'international_delivery' => 'WC_Shipping_International_Delivery',
-			//'local_delivery'         => 'WC_Shipping_Local_Delivery',
-			'local_pickup'           => 'WC_Shipping_Local_Pickup'
+			'free_shipping'                 => 'WC_Shipping_Free_Shipping',
+			'local_pickup'                  => 'WC_Shipping_Local_Pickup'
 		) );
+
+		// For backwards compatibility with 2.5.x we load any ENABLED legacy shipping methods here
+		$maybe_load_legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
+
+		foreach ( $maybe_load_legacy_methods as $method ) {
+			$options = get_option( 'woocommerce_' . $method . '_settings' );
+			if ( $options && isset( $options['enabled'] ) && 'yes' === $options['enabled'] ) {
+				$shipping_methods[ 'legacy_' . $method ] = 'WC_Shipping_Legacy_' . $method;
+			}
+		}
+
+		return $shipping_methods;
 	}
 
 	/**
