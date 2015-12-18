@@ -623,6 +623,8 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @return array
 	 */
 	public function delete_tax_class( $slug ) {
+		global $wpdb;
+
 		try {
 			// Check permissions
 			if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -646,6 +648,19 @@ class WC_API_Taxes extends WC_API_Resource {
 			}
 
 			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
+
+			// Delete tax rate locations locations from the selected class.
+			$wpdb->query( $wpdb->prepare( "
+				DELETE locations.*
+				FROM {$wpdb->prefix}woocommerce_tax_rate_locations AS locations
+				INNER JOIN
+					{$wpdb->prefix}woocommerce_tax_rates AS rates
+					ON rates.tax_rate_id = locations.tax_rate_id
+				WHERE rates.tax_rate_class = '%s'
+			", $slug ) );
+
+			// Delete tax rates in the selected class.
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_class' => $slug ), array( '%s' ) );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'tax_class' ) );
 		} catch ( WC_API_Exception $e ) {
