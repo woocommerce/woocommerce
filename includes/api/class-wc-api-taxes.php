@@ -136,7 +136,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			}
 
 			$tax_data = array(
-				'id'       => $tax['tax_rate_id'],
+				'id'       => (int) $tax['tax_rate_id'],
 				'country'  => $tax['tax_rate_country'],
 				'state'    => $tax['tax_rate_state'],
 				'postcode' => '',
