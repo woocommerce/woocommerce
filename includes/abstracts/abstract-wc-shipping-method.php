@@ -138,7 +138,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Called to calculate shipping rates for this method. Rates can be added using the add_rate() method.
 	 */
-	public function calculate_shipping() {}
+	public function calculate_shipping( $package = array() ) {}
 
 	/**
 	 * Whether or not we need to calculate tax on top of the shipping rate.
@@ -406,7 +406,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_instance_option_key() {
-		return $this->instance_id ? $this->plugin_id . $this->id . $this->instance_id . '_settings' : '';
+		return $this->instance_id ? $this->plugin_id . $this->id . '_' . $this->instance_id . '_settings' : '';
 	}
 
 	/**

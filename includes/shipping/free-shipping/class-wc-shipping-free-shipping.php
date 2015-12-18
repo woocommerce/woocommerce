@@ -142,7 +142,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * Called to calculate shipping rates for this method. Rates can be added using the add_rate() method.
 	 * @uses WC_Shipping_Method::add_rate()
 	 */
-	public function calculate_shipping() {
+	public function calculate_shipping( $package = array() ) {
 		$this->add_rate( array(
 			'id' 	 => $this->id . $this->instance_id,
 			'label'  => $this->title,

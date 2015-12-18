@@ -58,7 +58,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	/**
 	 * calculate_shipping function.
 	 */
-	public function calculate_shipping() {
+	public function calculate_shipping( $package = array() ) {
 		$rate = array(
 			'id' 		=> $this->id,
 			'label' 	=> $this->title,

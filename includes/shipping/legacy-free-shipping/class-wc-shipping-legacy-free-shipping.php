@@ -206,7 +206,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	 * calculate_shipping function.
 	 * @return array
 	 */
-	public function calculate_shipping() {
+	public function calculate_shipping( $package = array() ) {
 		$args = array(
 			'id' 	=> $this->id,
 			'label' => $this->title,
