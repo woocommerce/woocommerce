@@ -84,7 +84,7 @@ class WC_Shortcodes {
 	private static function product_loop( $query_args, $atts, $loop_name ) {
 		global $woocommerce_loop;
 
-		$products                    = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts ) );
+		$products                    = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name ) );
 		$columns                     = absint( $atts['columns'] );
 		$woocommerce_loop['columns'] = $columns;
 
