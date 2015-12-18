@@ -183,7 +183,7 @@ class WC_Product {
 	 * @return array
 	 */
 	public function get_gallery_attachment_ids() {
-		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( (array) explode( ',', $this->product_image_gallery ) ), $this );
+		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( (array) explode( ',', $this->product_image_gallery ) ), 'wp_attachment_is_image' ), $this );
 	}
 
 	/**
