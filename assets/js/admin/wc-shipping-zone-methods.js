@@ -115,6 +115,13 @@
 							}
 
 							view.$el.append( view.rowTemplate( rowData ) );
+
+							var $tr = view.$el.find( 'tr[data-id="' + rowData.instance_id + '"]');
+
+							if ( ! rowData.has_settings ) {
+								$tr.find( '.wc-shipping-zone-method-title a').replaceWith( $tr.find( '.wc-shipping-zone-method-title' ).text() );
+								$tr.find( '.wc-shipping-zone-method-settings' ).remove();
+							}
 						} );
 
 						// Make the rows function

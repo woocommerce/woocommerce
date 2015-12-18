@@ -82,22 +82,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	public $minimum_fee          = null;
 
 	/**
-	 * Availability - legacy. Used for method Availability.
-	 * No longer useful for instance based shipping methods.
-	 * @deprecated 2.6.0
-	 * @var string
-	 */
-	public $availability;
-
-	/**
-	 * Availability countries - legacy. Used for method Availability.
-	 * No longer useful for instance based shipping methods.
-	 * @deprecated 2.6.0
-	 * @var string
-	 */
-	public $countries            = array();
-
-	/**
 	 * Instance ID if used.
 	 * @var int
 	 */
@@ -114,6 +98,22 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @var array
 	 */
 	public $instance_settings    = array();
+
+	/**
+	 * Availability - legacy. Used for method Availability.
+	 * No longer useful for instance based shipping methods.
+	 * @deprecated 2.6.0
+	 * @var string
+	 */
+	public $availability;
+
+	/**
+	 * Availability countries - legacy. Used for method Availability.
+	 * No longer useful for instance based shipping methods.
+	 * @deprecated 2.6.0
+	 * @var string
+	 */
+	public $countries            = array();
 
 	/**
 	 * Constructor.
@@ -229,17 +229,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$total_cost = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
 		$taxes      = $args['taxes'];
 
-		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable
-		// This saves shipping methods having to do complex tax calculations
+		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable. This saves shipping methods having to do complex tax calculations.
 		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && $this->is_taxable() ) {
-			switch ( $args['calc_tax'] ) {
-				case "per_item" :
-					$taxes = $this->get_taxes_per_item( $args['cost'] );
-				break;
-				default :
-					$taxes = WC_Tax::calc_shipping_tax( $total_cost, WC_Tax::get_shipping_tax_rates() );
-				break;
-			}
+			$taxes = 'per_item' === $args['calc_tax'] ? $this->get_taxes_per_item( $args['cost'] ) : WC_Tax::calc_shipping_tax( $total_cost, WC_Tax::get_shipping_tax_rates() );
 		}
 
 		$this->rates[ $args['id'] ] = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );
@@ -288,44 +280,38 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * is_available function.
-	 *
+	 * Is this method available?
 	 * @param array $package
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-		if ( ! $this->is_enabled() ) {
-			return false;
+		$available = $this->is_enabled();
+
+		// Country availability (legacy, for non-zone based methods)
+		if ( ! $this->instance_id ) {
+			$countries = is_array( $this->countries ) ? $this->countries : array();
+
+			switch ( $this->availability ) {
+				case 'specific' :
+				case 'including' :
+					$available = in_array( $package['destination']['country'], array_intersect( $countries, array_keys( WC()->countries->get_shipping_countries() ) ) );
+				break;
+				case 'excluding' :
+					$available = in_array( $package['destination']['country'], array_diff( array_keys( WC()->countries->get_shipping_countries() ), $countries ) );
+				break;
+				default :
+					$available = in_array( $package['destination']['country'], array_keys( WC()->countries->get_shipping_countries() ) );
+				break;
+			}
 		}
 
-		// Country availability
-		$countries = is_array( $this->countries ) ? $this->countries : array();
-
-		switch ( $this->availability ) {
-			case 'specific' :
-			case 'including' :
-				$ship_to_countries = array_intersect( $countries, array_keys( WC()->countries->get_shipping_countries() ) );
-			break;
-			case 'excluding' :
-				$ship_to_countries = array_diff( array_keys( WC()->countries->get_shipping_countries() ), $countries );
-			break;
-			default :
-				$ship_to_countries = array_keys( WC()->countries->get_shipping_countries() );
-			break;
-		}
-
-		if ( ! in_array( $package['destination']['country'], $ship_to_countries ) ) {
-			return false;
-		}
-
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $available, $package );
 	}
 
 	/**
-	 * get_fee function.
-	 *
-	 * @param mixed $fee
-	 * @param mixed $total
+	 * Get fee to add to shipping cost.
+	 * @param string|float $fee
+	 * @param float $total
 	 * @return float
 	 */
 	public function get_fee( $fee, $total ) {

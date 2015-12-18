@@ -30,6 +30,10 @@ class WC_Admin_Shipping_Zones {
 		}
 	}
 
+	/**
+	 * Show method for a zone
+	 * @param  int $zone_id
+	 */
 	public static function zone_methods_screen( $zone_id ) {
 		$wc_shipping      = WC_Shipping      ::instance();
 		$zone             = WC_Shipping_Zones::get_zone( $zone_id );
@@ -55,6 +59,9 @@ class WC_Admin_Shipping_Zones {
 		include_once( 'views/html-admin-page-shipping-zone-methods.php' );
 	}
 
+	/**
+	 * Show zones
+	 */
 	public static function zones_screen() {
 		$allowed_countries = WC()->countries->get_allowed_countries();
         $continents        = WC()->countries->get_continents();
@@ -77,6 +84,10 @@ class WC_Admin_Shipping_Zones {
 		include_once( 'views/html-admin-page-shipping-zones.php' );
 	}
 
+	/**
+	 * Show instance settings
+	 * @param  int $instance_id
+	 */
 	public static function instance_settings_screen( $instance_id ) {
 		$zone            = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
 		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
@@ -86,6 +97,9 @@ class WC_Admin_Shipping_Zones {
 		}
 		if ( ! $zone ) {
 			wp_die( __( 'Zone does not exist!', 'woocommerce' ) );
+		}
+		if ( ! $shipping_method->has_settings() ) {
+			wp_die( __( 'This shipping method does not have any settings to configure.', 'woocommerce' ) );
 		}
 
 		if ( ! empty( $_POST['save_method'] ) ) {
