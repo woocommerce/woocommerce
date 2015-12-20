@@ -27,7 +27,7 @@ function wc_template_redirect() {
 	}
 
 	// When on the checkout with an empty cart, redirect to cart page
-	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] )  && wc_get_page_permalink('cart') !== wc_get_page_permalink('checkout') ) {
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 	}
