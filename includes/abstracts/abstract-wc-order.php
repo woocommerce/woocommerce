@@ -684,13 +684,16 @@ abstract class WC_Abstract_Order {
 
 		// Now calculate shipping tax
 		$matched_tax_rates = array();
-		$tax_rates         = WC_Tax::find_rates( array(
-			'country'   => $country,
-			'state'     => $state,
-			'postcode'  => $postcode,
-			'city'      => $city,
-			'tax_class' => ''
-		) );
+		$shipping_methods = $this->get_shipping_methods();
+		if ( ! empty( $shipping_methods ) ) {
+			$tax_rates         = WC_Tax::find_rates( array(
+				'country'   => $country,
+				'state'     => $state,
+				'postcode'  => $postcode,
+				'city'      => $city,
+				'tax_class' => ''
+			) );
+		}
 
 		if ( ! empty( $tax_rates ) ) {
 			foreach ( $tax_rates as $key => $rate ) {
