@@ -466,7 +466,8 @@ class WC_API_Orders extends WC_API_Resource {
 
 					foreach ( $data[ $line ] as $item ) {
 
-						$this->$set_item( $order, $item, 'create' );
+						$new_item_id = $this->$set_item( $order, $item, 'create' );
+						do_action( 'woocommerce_api_create_order_item', $item, $new_item_id, $this, $data );
 					}
 				}
 			}
@@ -804,6 +805,9 @@ class WC_API_Orders extends WC_API_Resource {
 				update_user_meta( $order->get_user_id(), 'shipping_' . $key, $value );
 			}
 		}
+		
+		do_action( 'woocommerce_api_set_order_addresses', $order, $data, $address_fields );
+		
 	}
 
 	/**
@@ -880,7 +884,9 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 		}
 
-		$this->$set_method( $order, $item, $action );
+		$item_id = $this->$set_method( $order, $item, $action );
+		
+		return $item_id;
 	}
 
 	/**
@@ -972,6 +978,8 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( isset( $item['subtotal_tax'] ) ) {
 			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
 		}
+		
+		$item_args = apply_filters( 'woocommerce_api_set_line_item', $item_args, $order, $item, $action );
 
 		if ( $creating ) {
 
@@ -989,6 +997,9 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_line_item', __( 'Cannot update line item, try again', 'woocommerce' ), 500 );
 			}
 		}
+		
+		return $item_id;
+		
 	}
 
 	/**
@@ -1095,6 +1106,8 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_shipping', __( 'Cannot update shipping method, try again', 'woocommerce' ), 500 );
 			}
 		}
+		
+		return $shipping_id;
 	}
 
 	/**
@@ -1176,6 +1189,8 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_fee', __( 'Cannot update fee, try again', 'woocommerce' ), 500 );
 			}
 		}
+		
+		return $fee_id;
 	}
 
 	/**
@@ -1225,6 +1240,8 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_order_coupon', __( 'Cannot update coupon, try again', 'woocommerce' ), 500 );
 			}
 		}
+		
+		return $coupon_id;
 	}
 
 	/**
