@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.5.0-beta-2\n"
+"Project-Id-Version: WooCommerce 2.5.0-beta-3\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2015-12-16 11:04:52+00:00\n"
+"POT-Creation-Date: 2015-12-18 19:04:48+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -3290,55 +3290,55 @@ msgid "Kelantan"
 msgstr ""
 
 #: i18n/states/MY.php:16
-msgid "Melaka"
+msgid "Labuan"
 msgstr ""
 
 #: i18n/states/MY.php:17
-msgid "Negeri Sembilan"
+msgid "Malacca (Melaka)"
 msgstr ""
 
 #: i18n/states/MY.php:18
-msgid "Pahang"
+msgid "Negeri Sembilan"
 msgstr ""
 
 #: i18n/states/MY.php:19
-msgid "Perak"
+msgid "Pahang"
 msgstr ""
 
 #: i18n/states/MY.php:20
-msgid "Perlis"
+msgid "Penang (Pulau Pinang)"
 msgstr ""
 
 #: i18n/states/MY.php:21
-msgid "Pulau Pinang"
+msgid "Perak"
 msgstr ""
 
 #: i18n/states/MY.php:22
-msgid "Sabah"
+msgid "Perlis"
 msgstr ""
 
 #: i18n/states/MY.php:23
-msgid "Sarawak"
+msgid "Sabah"
 msgstr ""
 
 #: i18n/states/MY.php:24
-msgid "Selangor"
+msgid "Sarawak"
 msgstr ""
 
 #: i18n/states/MY.php:25
-msgid "Terengganu"
+msgid "Selangor"
 msgstr ""
 
 #: i18n/states/MY.php:26
-msgid "W.P. Kuala Lumpur"
+msgid "Terengganu"
 msgstr ""
 
 #: i18n/states/MY.php:27
-msgid "W.P. Labuan"
+msgid "Putrajaya"
 msgstr ""
 
 #: i18n/states/MY.php:28
-msgid "W.P. Putrajaya"
+msgid "Kuala Lumpur"
 msgstr ""
 
 #: i18n/states/NP.php:13
@@ -4845,7 +4845,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/settings/class-wc-settings-api.php:45
 #: includes/admin/views/html-admin-page-status-report.php:406
-#: includes/class-wc-install.php:713
+#: includes/class-wc-install.php:714
 msgid "Settings"
 msgstr ""
 
@@ -5026,19 +5026,15 @@ msgstr ""
 msgid "%s &ndash; %s"
 msgstr ""
 
-#: includes/admin/class-wc-admin-addons.php:94
-msgid "View more about Storefront"
-msgstr ""
-
-#: includes/admin/class-wc-admin-addons.php:102
+#: includes/admin/class-wc-admin-addons.php:99
 msgid "Need a fresh look? Try Storefront child themes"
 msgstr ""
 
-#: includes/admin/class-wc-admin-addons.php:106
+#: includes/admin/class-wc-admin-addons.php:103
 msgid "View more Storefront child themes"
 msgstr ""
 
-#: includes/admin/class-wc-admin-addons.php:111
+#: includes/admin/class-wc-admin-addons.php:108
 msgid "Need a theme? Try Storefront"
 msgstr ""
 
@@ -5301,7 +5297,7 @@ msgstr ""
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:191
 #: includes/admin/meta-boxes/views/html-product-attribute.php:12
 #: includes/admin/meta-boxes/views/html-variation-admin.php:258
-#: includes/admin/settings/class-wc-settings-shipping.php:203
+#: includes/admin/settings/class-wc-settings-shipping.php:189
 #: includes/admin/settings/views/html-webhooks-edit.php:15
 #: includes/admin/views/html-admin-page-status-report.php:575
 #: includes/class-wc-ajax.php:1448
@@ -5408,13 +5404,13 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:98
-#: includes/api/class-wc-api-products.php:2637
+#: includes/api/class-wc-api-products.php:2628
 #: includes/api/v2/class-wc-api-products.php:2097
 msgid "Slug \"%s\" is too long (28 characters max). Shorten it, please."
 msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:100
-#: includes/api/class-wc-api-products.php:2639
+#: includes/api/class-wc-api-products.php:2630
 #: includes/api/v2/class-wc-api-products.php:2099
 msgid "Slug \"%s\" is not allowed because it is a reserved term. Change it, please."
 msgstr ""
@@ -5426,7 +5422,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-attributes.php:121
 #: includes/admin/class-wc-admin-attributes.php:154
-#: includes/api/class-wc-api-products.php:2641
+#: includes/api/class-wc-api-products.php:2632
 #: includes/api/v2/class-wc-api-products.php:2101
 msgid "Slug \"%s\" is already in use. Change it, please."
 msgstr ""
@@ -5851,13 +5847,13 @@ msgstr ""
 #: includes/admin/class-wc-admin-help.php:208
 #: includes/admin/class-wc-admin-help.php:210
 #: includes/admin/class-wc-admin-help.php:212
-msgid "Onboarding Wizard"
+msgid "Setup Wizard"
 msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:211
 msgid ""
-"If you need to access the onboarding wizard again, please click on the "
-"button below."
+"If you need to access the setup wizard again, please click on the button "
+"below."
 msgstr ""
 
 #: includes/admin/class-wc-admin-help.php:217
@@ -6534,7 +6530,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-post-types.php:716
 #: includes/admin/settings/class-wc-settings-checkout.php:312
 #: includes/admin/settings/class-wc-settings-emails.php:269
-#: includes/admin/settings/class-wc-settings-shipping.php:225
+#: includes/admin/settings/class-wc-settings-shipping.php:211
 #: includes/admin/views/html-bulk-edit-product.php:205
 #: includes/admin/views/html-bulk-edit-product.php:242
 #: includes/admin/views/html-bulk-edit-product.php:303
@@ -8296,8 +8292,8 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-shipping.php:27
 #: includes/admin/settings/class-wc-settings-tax.php:170
 #: includes/admin/settings/views/html-settings-tax.php:25
-#: templates/cart/cart-shipping.php:28 templates/cart/cart-shipping.php:78
-#: templates/cart/cart-totals.php:54 templates/cart/cart-totals.php:55
+#: includes/wc-cart-functions.php:180 templates/cart/cart-totals.php:54
+#: templates/cart/cart-totals.php:55
 msgid "Shipping"
 msgstr ""
 
@@ -8848,7 +8844,7 @@ msgid "The downloadable file %s cannot be used as it does not exist on the serve
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1289
-#: includes/api/class-wc-api-products.php:1735
+#: includes/api/class-wc-api-products.php:1726
 #: includes/api/v2/class-wc-api-products.php:1264
 #: includes/cli/class-wc-cli-product.php:1538
 msgid "Variation #%s of %s"
@@ -9195,7 +9191,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-variation-admin.php:76
 #: includes/admin/settings/class-wc-settings-checkout.php:272
 #: includes/admin/settings/class-wc-settings-emails.php:269
-#: includes/admin/settings/class-wc-settings-shipping.php:205
+#: includes/admin/settings/class-wc-settings-shipping.php:191
 #: includes/admin/views/html-admin-page-status-tools.php:37
 #: includes/admin/views/html-admin-page-status-tools.php:48
 #: includes/admin/views/html-admin-page-status-tools.php:59
@@ -9398,7 +9394,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:27
 #: includes/admin/settings/class-wc-settings-emails.php:260
-#: includes/class-wc-install.php:484
+#: includes/class-wc-install.php:485
 msgid "Customer"
 msgstr ""
 
@@ -10169,7 +10165,7 @@ msgid "Sell to specific countries only"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-general.php:78
-#: includes/admin/settings/class-wc-settings-shipping.php:146
+#: includes/admin/settings/class-wc-settings-shipping.php:132
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:33
 #: includes/shipping/flat-rate/includes/settings-flat-rate.php:37
 #: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php:80
@@ -10607,82 +10603,66 @@ msgid "Hide shipping costs until an address is entered"
 msgstr ""
 
 #: includes/admin/settings/class-wc-settings-shipping.php:101
-msgid "Shipping Display Mode"
-msgstr ""
-
-#: includes/admin/settings/class-wc-settings-shipping.php:102
-msgid "This controls how multiple shipping methods are displayed on the frontend."
-msgstr ""
-
-#: includes/admin/settings/class-wc-settings-shipping.php:107
-msgid "Display shipping methods with \"radio\" buttons"
-msgstr ""
-
-#: includes/admin/settings/class-wc-settings-shipping.php:108
-msgid "Display shipping methods in a dropdown"
-msgstr ""
-
-#: includes/admin/settings/class-wc-settings-shipping.php:115
 msgid "Shipping Destination"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:116
+#: includes/admin/settings/class-wc-settings-shipping.php:102
 msgid "This controls which shipping address is used by default."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:121
+#: includes/admin/settings/class-wc-settings-shipping.php:107
 msgid "Default to shipping address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:122
+#: includes/admin/settings/class-wc-settings-shipping.php:108
 msgid "Default to billing address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:123
+#: includes/admin/settings/class-wc-settings-shipping.php:109
 msgid "Only ship to the customer's billing address"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:131
+#: includes/admin/settings/class-wc-settings-shipping.php:117
 msgid "Restrict shipping to Location(s)"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:132
+#: includes/admin/settings/class-wc-settings-shipping.php:118
 msgid ""
 "Choose which countries you want to ship to, or choose to ship to all <a "
 "href=\"%s\">locations you sell to</a>."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:139
+#: includes/admin/settings/class-wc-settings-shipping.php:125
 msgid "Ship to all countries you sell to"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:140
+#: includes/admin/settings/class-wc-settings-shipping.php:126
 msgid "Ship to all countries"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:141
+#: includes/admin/settings/class-wc-settings-shipping.php:127
 msgid "Ship to specific countries only"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:197
+#: includes/admin/settings/class-wc-settings-shipping.php:183
 msgid "Shipping Methods"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:204
+#: includes/admin/settings/class-wc-settings-shipping.php:190
 msgid "ID"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:206
+#: includes/admin/settings/class-wc-settings-shipping.php:192
 msgid "Selection Priority"
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:206
+#: includes/admin/settings/class-wc-settings-shipping.php:192
 msgid ""
 "Available methods will be chosen by default in this order. If multiple "
 "methods have the same priority, they will be sorted by cost."
 msgstr ""
 
-#: includes/admin/settings/class-wc-settings-shipping.php:239
+#: includes/admin/settings/class-wc-settings-shipping.php:225
 msgid "Drag and drop the above shipping methods to control their display order."
 msgstr ""
 
@@ -12075,11 +12055,11 @@ msgstr ""
 #: includes/api/class-wc-api-orders.php:1323
 #: includes/api/class-wc-api-orders.php:1615
 #: includes/api/class-wc-api-products.php:255
-#: includes/api/class-wc-api-products.php:647
-#: includes/api/class-wc-api-products.php:909
-#: includes/api/class-wc-api-products.php:2669
-#: includes/api/class-wc-api-products.php:3000
-#: includes/api/class-wc-api-products.php:3334
+#: includes/api/class-wc-api-products.php:653
+#: includes/api/class-wc-api-products.php:902
+#: includes/api/class-wc-api-products.php:2660
+#: includes/api/class-wc-api-products.php:2991
+#: includes/api/class-wc-api-products.php:3325
 #: includes/api/class-wc-api-taxes.php:184
 #: includes/api/class-wc-api-taxes.php:564
 #: includes/api/class-wc-api-webhooks.php:169
@@ -12102,8 +12082,8 @@ msgstr ""
 #: includes/api/class-wc-api-coupons.php:227
 #: includes/api/class-wc-api-customers.php:359
 #: includes/api/class-wc-api-products.php:269
-#: includes/api/class-wc-api-products.php:2633
-#: includes/api/class-wc-api-products.php:3020
+#: includes/api/class-wc-api-products.php:2624
+#: includes/api/class-wc-api-products.php:3011
 #: includes/api/class-wc-api-server.php:427
 #: includes/api/class-wc-api-taxes.php:575
 #: includes/api/v1/class-wc-api-server.php:409
@@ -12141,12 +12121,12 @@ msgstr ""
 #: includes/api/class-wc-api-orders.php:552
 #: includes/api/class-wc-api-orders.php:1380
 #: includes/api/class-wc-api-orders.php:1692
-#: includes/api/class-wc-api-products.php:357
+#: includes/api/class-wc-api-products.php:358
 #: includes/api/class-wc-api-products.php:728
-#: includes/api/class-wc-api-products.php:956
-#: includes/api/class-wc-api-products.php:2751
-#: includes/api/class-wc-api-products.php:3063
-#: includes/api/class-wc-api-products.php:3393
+#: includes/api/class-wc-api-products.php:946
+#: includes/api/class-wc-api-products.php:2742
+#: includes/api/class-wc-api-products.php:3054
+#: includes/api/class-wc-api-products.php:3381
 #: includes/api/class-wc-api-taxes.php:254
 #: includes/api/class-wc-api-webhooks.php:245
 #: includes/api/v2/class-wc-api-coupons.php:329
@@ -12171,7 +12151,7 @@ msgstr ""
 #: includes/api/class-wc-api-coupons.php:526
 #: includes/api/class-wc-api-customers.php:777
 #: includes/api/class-wc-api-orders.php:1805
-#: includes/api/class-wc-api-products.php:3184
+#: includes/api/class-wc-api-products.php:3175
 #: includes/api/class-wc-api-taxes.php:457
 #: includes/api/v2/class-wc-api-coupons.php:526
 #: includes/api/v2/class-wc-api-customers.php:789
@@ -12183,7 +12163,7 @@ msgstr ""
 #: includes/api/class-wc-api-coupons.php:534
 #: includes/api/class-wc-api-customers.php:785
 #: includes/api/class-wc-api-orders.php:1813
-#: includes/api/class-wc-api-products.php:3192
+#: includes/api/class-wc-api-products.php:3183
 #: includes/api/class-wc-api-taxes.php:465
 #: includes/api/v2/class-wc-api-coupons.php:534
 #: includes/api/v2/class-wc-api-customers.php:797
@@ -12548,7 +12528,7 @@ msgid "You do not have permission to create products"
 msgstr ""
 
 #: includes/api/class-wc-api-products.php:284
-#: includes/api/class-wc-api-products.php:403
+#: includes/api/class-wc-api-products.php:409
 #: includes/api/v2/class-wc-api-products.php:239
 #: includes/api/v2/class-wc-api-products.php:358
 #: includes/cli/class-wc-cli-product.php:166
@@ -12556,8 +12536,8 @@ msgstr ""
 msgid "Invalid product type - the product type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:458
-#: includes/api/class-wc-api-products.php:3135
+#: includes/api/class-wc-api-products.php:464
+#: includes/api/class-wc-api-products.php:3126
 #: includes/api/class-wc-api-resource.php:377
 #: includes/api/v1/class-wc-api-resource.php:316
 #: includes/api/v2/class-wc-api-products.php:413
@@ -12565,7 +12545,7 @@ msgstr ""
 msgid "This %s cannot be deleted"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:467
+#: includes/api/class-wc-api-products.php:473
 #: includes/api/class-wc-api-resource.php:380
 #: includes/api/v1/class-wc-api-resource.php:319
 #: includes/api/v2/class-wc-api-products.php:422
@@ -12573,12 +12553,12 @@ msgstr ""
 msgid "Permanently deleted %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:471
-#: includes/api/class-wc-api-products.php:820
-#: includes/api/class-wc-api-products.php:1010
-#: includes/api/class-wc-api-products.php:2874
-#: includes/api/class-wc-api-products.php:3142
-#: includes/api/class-wc-api-products.php:3449
+#: includes/api/class-wc-api-products.php:477
+#: includes/api/class-wc-api-products.php:813
+#: includes/api/class-wc-api-products.php:1000
+#: includes/api/class-wc-api-products.php:2865
+#: includes/api/class-wc-api-products.php:3133
+#: includes/api/class-wc-api-products.php:3437
 #: includes/api/class-wc-api-resource.php:386
 #: includes/api/class-wc-api-taxes.php:354
 #: includes/api/class-wc-api-taxes.php:650
@@ -12589,28 +12569,28 @@ msgstr ""
 msgid "Deleted %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:561
-#: includes/api/class-wc-api-products.php:597
+#: includes/api/class-wc-api-products.php:567
+#: includes/api/class-wc-api-products.php:603
 #: includes/api/v2/class-wc-api-products.php:516
 #: includes/api/v2/class-wc-api-products.php:552
 msgid "You do not have permission to read product categories"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:592
+#: includes/api/class-wc-api-products.php:598
 #: includes/api/v2/class-wc-api-products.php:547
 msgid "Invalid product category ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:603
+#: includes/api/class-wc-api-products.php:609
 #: includes/api/v2/class-wc-api-products.php:558
 msgid "A product category with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:652
+#: includes/api/class-wc-api-products.php:658
 msgid "You do not have permission to create product categories"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:675
+#: includes/api/class-wc-api-products.php:678
 msgid "Product category parent is invalid"
 msgstr ""
 
@@ -12618,53 +12598,53 @@ msgstr ""
 msgid "You do not have permission to edit product categories"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:773
+#: includes/api/class-wc-api-products.php:766
 msgid "Could not edit the category"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:806
+#: includes/api/class-wc-api-products.php:799
 msgid "You do not have permission to delete product category"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:812
+#: includes/api/class-wc-api-products.php:805
 msgid "Could not delete the category"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:837
-#: includes/api/class-wc-api-products.php:873
+#: includes/api/class-wc-api-products.php:830
+#: includes/api/class-wc-api-products.php:866
 msgid "You do not have permission to read product tags"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:868
+#: includes/api/class-wc-api-products.php:861
 msgid "Invalid product tag ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:879
+#: includes/api/class-wc-api-products.php:872
 msgid "A product tag with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:914
+#: includes/api/class-wc-api-products.php:907
 msgid "You do not have permission to create product tags"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:964
+#: includes/api/class-wc-api-products.php:954
 msgid "You do not have permission to edit product tags"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:976
+#: includes/api/class-wc-api-products.php:966
 msgid "Could not edit the tag"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:999
+#: includes/api/class-wc-api-products.php:989
 msgid "You do not have permission to delete product tag"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1005
+#: includes/api/class-wc-api-products.php:995
 msgid "Could not delete the tag"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:1318
-#: includes/api/class-wc-api-products.php:1782
+#: includes/api/class-wc-api-products.php:1309
+#: includes/api/class-wc-api-products.php:1773
 #: includes/api/v2/class-wc-api-products.php:852
 #: includes/api/v2/class-wc-api-products.php:1311
 #: includes/cli/class-wc-cli-product.php:1126
@@ -12672,8 +12652,8 @@ msgstr ""
 msgid "The SKU already exists on another product"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2238
-#: includes/api/class-wc-api-products.php:2239
+#: includes/api/class-wc-api-products.php:2229
+#: includes/api/class-wc-api-products.php:2230
 #: includes/api/v1/class-wc-api-products.php:461
 #: includes/api/v1/class-wc-api-products.php:462
 #: includes/api/v2/class-wc-api-products.php:1757
@@ -12685,137 +12665,137 @@ msgstr ""
 msgid "Placeholder"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2349
+#: includes/api/class-wc-api-products.php:2340
 #: includes/api/v2/class-wc-api-products.php:1834
 #: includes/cli/class-wc-cli-product.php:2016
 msgid "Invalid URL %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2361
+#: includes/api/class-wc-api-products.php:2352
 #: includes/api/v2/class-wc-api-products.php:1846
 #: includes/cli/class-wc-cli-product.php:2028
 msgid "Error getting remote image %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2390
+#: includes/api/class-wc-api-products.php:2381
 #: includes/api/v2/class-wc-api-products.php:1875
 #: includes/cli/class-wc-cli-product.php:2057
 msgid "Zero size file downloaded"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2547
-#: includes/api/class-wc-api-products.php:2591
+#: includes/api/class-wc-api-products.php:2538
+#: includes/api/class-wc-api-products.php:2582
 #: includes/api/v2/class-wc-api-products.php:2007
 #: includes/api/v2/class-wc-api-products.php:2051
 msgid "You do not have permission to read product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2586
-#: includes/api/class-wc-api-products.php:2954
+#: includes/api/class-wc-api-products.php:2577
+#: includes/api/class-wc-api-products.php:2945
 #: includes/api/v2/class-wc-api-products.php:2046
 msgid "Invalid product attribute ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2601
-#: includes/api/class-wc-api-products.php:2845
-#: includes/api/class-wc-api-products.php:2898
-#: includes/api/class-wc-api-products.php:2965
-#: includes/api/class-wc-api-products.php:3013
-#: includes/api/class-wc-api-products.php:3077
-#: includes/api/class-wc-api-products.php:3128
+#: includes/api/class-wc-api-products.php:2592
+#: includes/api/class-wc-api-products.php:2836
+#: includes/api/class-wc-api-products.php:2889
+#: includes/api/class-wc-api-products.php:2956
+#: includes/api/class-wc-api-products.php:3004
+#: includes/api/class-wc-api-products.php:3068
+#: includes/api/class-wc-api-products.php:3119
 #: includes/api/v2/class-wc-api-products.php:2061
 #: includes/api/v2/class-wc-api-products.php:2303
 msgid "A product attribute with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2646
+#: includes/api/class-wc-api-products.php:2637
 #: includes/api/v2/class-wc-api-products.php:2106
 msgid ""
 "Invalid product attribute type - the product attribute type must be any of "
 "these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2651
+#: includes/api/class-wc-api-products.php:2642
 #: includes/api/v2/class-wc-api-products.php:2111
 msgid ""
 "Invalid product attribute order_by type - the product attribute order_by "
 "type must be any of these: %s"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2676
-#: includes/api/class-wc-api-products.php:3007
+#: includes/api/class-wc-api-products.php:2667
+#: includes/api/class-wc-api-products.php:2998
 #: includes/api/v2/class-wc-api-products.php:2136
 msgid "You do not have permission to create product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2759
-#: includes/api/class-wc-api-products.php:3071
+#: includes/api/class-wc-api-products.php:2750
+#: includes/api/class-wc-api-products.php:3062
 #: includes/api/v2/class-wc-api-products.php:2218
 msgid "You do not have permission to edit product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2805
+#: includes/api/class-wc-api-products.php:2796
 #: includes/api/v2/class-wc-api-products.php:2264
 msgid "Could not edit the attribute"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2833
+#: includes/api/class-wc-api-products.php:2824
 #: includes/api/v2/class-wc-api-products.php:2291
 msgid "You do not have permission to delete product attributes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2855
+#: includes/api/class-wc-api-products.php:2846
 #: includes/api/v2/class-wc-api-products.php:2313
 msgid "Could not delete the attribute"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2892
-#: includes/api/class-wc-api-products.php:2959
+#: includes/api/class-wc-api-products.php:2883
+#: includes/api/class-wc-api-products.php:2950
 msgid "You do not have permission to read product attribute terms"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:2971
+#: includes/api/class-wc-api-products.php:2962
 msgid "A product attribute term with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3122
+#: includes/api/class-wc-api-products.php:3113
 msgid "You do not have permission to delete product attribute terms"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3260
-#: includes/api/class-wc-api-products.php:3295
+#: includes/api/class-wc-api-products.php:3251
+#: includes/api/class-wc-api-products.php:3286
 msgid "You do not have permission to read product shipping classes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3290
+#: includes/api/class-wc-api-products.php:3281
 msgid "Invalid product shipping class ID"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3301
+#: includes/api/class-wc-api-products.php:3292
 msgid "A product shipping class with the provided ID could not be found"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3339
+#: includes/api/class-wc-api-products.php:3330
 msgid "You do not have permission to create product shipping classes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3360
+#: includes/api/class-wc-api-products.php:3348
 msgid "Product shipping class parent is invalid"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3401
+#: includes/api/class-wc-api-products.php:3389
 msgid "You do not have permission to edit product shipping classes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3413
+#: includes/api/class-wc-api-products.php:3401
 msgid "Could not edit the shipping class"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3438
+#: includes/api/class-wc-api-products.php:3426
 msgid "You do not have permission to delete product shipping classes"
 msgstr ""
 
-#: includes/api/class-wc-api-products.php:3444
+#: includes/api/class-wc-api-products.php:3432
 msgid "Could not delete the shipping class"
 msgstr ""
 
@@ -13776,45 +13756,45 @@ msgstr ""
 msgid "Sorry, this product is unavailable. Please choose a different combination."
 msgstr ""
 
-#: includes/class-wc-install.php:71
+#: includes/class-wc-install.php:72
 msgid ""
 "WooCommerce data update complete. Thank you for updating to the latest "
 "version!"
 msgstr ""
 
-#: includes/class-wc-install.php:194
+#: includes/class-wc-install.php:195
 msgid "Monthly"
 msgstr ""
 
-#: includes/class-wc-install.php:489
+#: includes/class-wc-install.php:490
 msgid "Shop Manager"
 msgstr ""
 
-#: includes/class-wc-install.php:713
+#: includes/class-wc-install.php:714
 msgid "View WooCommerce Settings"
 msgstr ""
 
-#: includes/class-wc-install.php:729
+#: includes/class-wc-install.php:730
 msgid "View WooCommerce Documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:729
+#: includes/class-wc-install.php:730
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:730
+#: includes/class-wc-install.php:731
 msgid "View WooCommerce API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:730
+#: includes/class-wc-install.php:731
 msgid "API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:731
+#: includes/class-wc-install.php:732
 msgid "Visit Premium Customer Support Forum"
 msgstr ""
 
-#: includes/class-wc-install.php:731
+#: includes/class-wc-install.php:732
 msgid "Premium Support"
 msgstr ""
 
@@ -15792,27 +15772,27 @@ msgstr ""
 msgid "and"
 msgstr ""
 
-#: includes/wc-cart-functions.php:197
+#: includes/wc-cart-functions.php:206
 msgid "Coupon:"
 msgstr ""
 
-#: includes/wc-cart-functions.php:222
+#: includes/wc-cart-functions.php:231
 msgid "Free shipping coupon"
 msgstr ""
 
-#: includes/wc-cart-functions.php:227
+#: includes/wc-cart-functions.php:236
 msgid "[Remove]"
 msgstr ""
 
-#: includes/wc-cart-functions.php:253 templates/cart/cart-totals.php:69
+#: includes/wc-cart-functions.php:262 templates/cart/cart-totals.php:69
 msgid "estimated for %s"
 msgstr ""
 
-#: includes/wc-cart-functions.php:255
+#: includes/wc-cart-functions.php:264
 msgid "(includes %s%s)"
 msgstr ""
 
-#: includes/wc-cart-functions.php:294
+#: includes/wc-cart-functions.php:303
 msgid "Free"
 msgstr ""
 
@@ -16485,15 +16465,11 @@ msgstr ""
 msgid "Return To Shop"
 msgstr ""
 
-#: templates/cart/cart-shipping.php:26
-msgid "Shipping #%d"
-msgstr ""
-
-#: templates/cart/cart-shipping.php:38
+#: templates/cart/cart-shipping.php:47
 msgid "Shipping costs will be calculated once you have provided your address."
 msgstr ""
 
-#: templates/cart/cart-shipping.php:42
+#: templates/cart/cart-shipping.php:49
 msgid ""
 "There are no shipping methods available. Please double check your address, "
 "or contact us if you need any help."
@@ -16606,7 +16582,7 @@ msgstr ""
 #: templates/checkout/form-login.php:34
 msgid ""
 "If you have shopped with us before, please enter your details in the boxes "
-"below. If you are a new customer please proceed to the Billing &amp; "
+"below. If you are a new customer, please proceed to the Billing &amp; "
 "Shipping section."
 msgstr ""
 
@@ -17341,7 +17317,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-permalink-settings.php:196
 #: includes/class-wc-post-types.php:231
 #: includes/updates/woocommerce-update-2.0.php:55
-#: includes/wc-core-functions.php:634 includes/wc-core-functions.php:669
+#: includes/wc-core-functions.php:557 includes/wc-core-functions.php:592
 msgctxt "slug"
 msgid "product"
 msgstr ""
@@ -17368,25 +17344,25 @@ msgid "%s by %s"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:232
-#: includes/class-wc-install.php:233
+#: includes/class-wc-install.php:234
 msgctxt "Page title"
 msgid "Shop"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:236
-#: includes/class-wc-install.php:238
+#: includes/class-wc-install.php:239
 msgctxt "Page title"
 msgid "Cart"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:240
-#: includes/class-wc-install.php:243
+#: includes/class-wc-install.php:244
 msgctxt "Page title"
 msgid "Checkout"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:246
-#: includes/class-wc-install.php:248
+#: includes/class-wc-install.php:249
 msgctxt "Page title"
 msgid "My Account"
 msgstr ""
@@ -17572,22 +17548,22 @@ msgctxt "WC Pages links in the System Status"
 msgid "Edit %s page"
 msgstr ""
 
-#: includes/class-wc-install.php:232
+#: includes/class-wc-install.php:233
 msgctxt "Page slug"
 msgid "shop"
 msgstr ""
 
-#: includes/class-wc-install.php:237
+#: includes/class-wc-install.php:238
 msgctxt "Page slug"
 msgid "cart"
 msgstr ""
 
-#: includes/class-wc-install.php:242
+#: includes/class-wc-install.php:243
 msgctxt "Page slug"
 msgid "checkout"
 msgstr ""
 
-#: includes/class-wc-install.php:247
+#: includes/class-wc-install.php:248
 msgctxt "Page slug"
 msgid "my-account"
 msgstr ""

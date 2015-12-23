@@ -62,21 +62,44 @@
 
 					return rates;
 				},
-				save: function() {
-					$.post( ajaxurl + '?action=woocommerce_tax_rates_save_changes', {
-							current_class : data.current_class,
-							wc_tax_nonce  : data.wc_tax_nonce,
-							changes       : this.changes
-						}, this.onSaveResponse, 'json' );
+				block: function() {
+					$( '.wc_tax_rates' ).block({
+						message: null,
+						overlayCSS: {
+							background: '#fff',
+							opacity: 0.6
+						}
+					});
 				},
-				onSaveResponse: function( response, textStatus ) {
-					if ( 'success' === textStatus ) {
-						WCTaxTableModelInstance.set( 'rates', response.data.rates );
-						WCTaxTableModelInstance.trigger( 'change:rates' );
+				unblock: function() {
+					$( '.wc_tax_rates' ).unblock();
+				},
+				save: function() {
+					var self = this;
 
-						WCTaxTableModelInstance.changes = {};
-						WCTaxTableModelInstance.trigger( 'saved:rates' );
-					}
+					self.block();
+
+					Backbone.ajax({
+						method: 'POST',
+						dataType: 'json',
+						url: ajaxurl + '?action=woocommerce_tax_rates_save_changes',
+						data: {
+							current_class: data.current_class,
+							wc_tax_nonce: data.wc_tax_nonce,
+							changes: self.changes
+						},
+						success: function( response, textStatus ) {
+							if ( 'success' === textStatus ) {
+								WCTaxTableModelInstance.set( 'rates', response.data.rates );
+								WCTaxTableModelInstance.trigger( 'change:rates' );
+
+								WCTaxTableModelInstance.changes = {};
+								WCTaxTableModelInstance.trigger( 'saved:rates' );
+							}
+
+							self.unblock();
+						}
+					});
 				}
 			} ),
 			WCTaxTableViewConstructor = Backbone.View.extend({

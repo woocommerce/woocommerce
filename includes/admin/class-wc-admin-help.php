@@ -205,11 +205,11 @@ class WC_Admin_Help {
 
 		$screen->add_help_tab( array(
 			'id'        => 'woocommerce_onboard_tab',
-			'title'     => __( 'Onboarding Wizard', 'woocommerce' ),
+			'title'     => __( 'Setup Wizard', 'woocommerce' ),
 			'content'   =>
-				'<h2>' . __( 'Onboarding Wizard', 'woocommerce' ) . '</h2>' .
-				'<p>' . __( 'If you need to access the onboarding wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Onboarding Wizard', 'woocommerce' ) . '</a></p>'
+				'<h2>' . __( 'Setup Wizard', 'woocommerce' ) . '</h2>' .
+				'<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
+				'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Setup Wizard', 'woocommerce' ) . '</a></p>'
 
 		) );
 

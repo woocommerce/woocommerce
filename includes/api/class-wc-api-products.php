@@ -2964,8 +2964,8 @@ class WC_API_Products extends WC_API_Resource {
 
 			$attribute_term = array(
 				'id'    => $term->term_id,
-				'slug'  => $term->slug,
 				'name'  => $term->name,
+				'slug'  => $term->slug,
 				'count' => $term->count,
 			);
 
