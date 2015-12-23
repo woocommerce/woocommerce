@@ -984,7 +984,6 @@ class WC_Meta_Box_Product_Data {
 			update_post_meta( $post_id, '_sale_price', '' );
 			update_post_meta( $post_id, '_sale_price_dates_from', '' );
 			update_post_meta( $post_id, '_sale_price_dates_to', '' );
-			update_post_meta( $post_id, '_price', '' );
 
 		} else {
 			$date_from     = isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';

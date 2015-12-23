@@ -683,9 +683,10 @@ abstract class WC_Abstract_Order {
 		}
 
 		// Now calculate shipping tax
-		$matched_tax_rates = array();
 		$shipping_methods = $this->get_shipping_methods();
+
 		if ( ! empty( $shipping_methods ) ) {
+			$matched_tax_rates = array();
 			$tax_rates         = WC_Tax::find_rates( array(
 				'country'   => $country,
 				'state'     => $state,
@@ -693,18 +694,21 @@ abstract class WC_Abstract_Order {
 				'city'      => $city,
 				'tax_class' => ''
 			) );
-		}
 
-		if ( ! empty( $tax_rates ) ) {
-			foreach ( $tax_rates as $key => $rate ) {
-				if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
-					$matched_tax_rates[ $key ] = $rate;
+			if ( ! empty( $tax_rates ) ) {
+				foreach ( $tax_rates as $key => $rate ) {
+					if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
+						$matched_tax_rates[ $key ] = $rate;
+					}
 				}
 			}
-		}
 
-		$shipping_taxes     = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
-		$shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
+			$shipping_taxes     = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
+			$shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
+		} else {
+			$shipping_taxes     = array();
+			$shipping_tax_total = 0;
+		}
 
 		// Save tax totals
 		$this->set_total( $shipping_tax_total, 'shipping_tax' );
