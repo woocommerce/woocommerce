@@ -442,11 +442,12 @@ class WC_Tax {
 				// This will be per order shipping - loop through the order and find the highest tax class rate
 				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes();
 
-				// If multiple classes are found, use highest. Don't bother with standard rate, we can get that later.
+				// If multiple classes are found, use the first one. Don't bother with standard rate, we can get that later.
 				if ( sizeof( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes ) ) {
 					$tax_classes = self::get_tax_classes();
 
 					foreach ( $tax_classes as $tax_class ) {
+						$tax_class = sanitize_title( $tax_class );
 						if ( in_array( $tax_class, $cart_tax_classes ) ) {
 							$matched_tax_rates = self::find_shipping_rates( array(
 								'country' 	=> $country,
