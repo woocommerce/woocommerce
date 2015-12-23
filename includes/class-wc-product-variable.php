@@ -720,8 +720,11 @@ class WC_Product_Variable extends WC_Product {
 		) );
 
 		// No published variations - product won't be purchasable.
-		if ( ! $children && 'publish' === get_post_status( $product_id ) ) {
-			if ( is_admin() ) {
+		if ( ! $children ) {
+			update_post_meta( $product_id, '_price', '' );
+			delete_transient( 'wc_products_onsale' );
+
+			if ( is_admin() && 'publish' === get_post_status( $product_id ) ) {
 				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations. Add or enable variations to allow this product to be purchased.', 'woocommerce' ) );
 			}
 
