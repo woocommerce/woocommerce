@@ -147,6 +147,7 @@ class WC_Post_types {
 						'new_item_name'     => __( 'New Shipping Class Name', 'woocommerce' )
 					),
 				'show_ui'               => true,
+				'show_in_quick_edit'    => false,
 				'show_in_nav_menus'     => false,
 				'query_var'             => is_admin(),
 				'capabilities'          => array(
@@ -184,16 +185,17 @@ class WC_Post_types {
 								'add_new_item'      => sprintf( __( 'Add New %s', 'woocommerce' ), $label ),
 								'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label )
 							),
-						'show_ui'           => true,
-						'show_in_menu'      => false,
-						'show_in_nav_menus' => false,
-						'meta_box_cb'       => false,
-						'query_var'         => 1 === $tax->attribute_public,
-						'rewrite'           => false,
-						'sort'              => false,
-						'public'            => 1 === $tax->attribute_public,
-						'show_in_nav_menus' => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
-						'capabilities'      => array(
+						'show_ui'            => true,
+						'show_in_quick_edit' => false,
+						'show_in_menu'       => false,
+						'show_in_nav_menus'  => false,
+						'meta_box_cb'        => false,
+						'query_var'          => 1 === $tax->attribute_public,
+						'rewrite'            => false,
+						'sort'               => false,
+						'public'             => 1 === $tax->attribute_public,
+						'show_in_nav_menus'  => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
+						'capabilities'       => array(
 							'manage_terms' => 'manage_product_terms',
 							'edit_terms'   => 'edit_product_terms',
 							'delete_terms' => 'delete_product_terms',
