@@ -282,7 +282,7 @@ class WC_Breadcrumb {
 	 */
 	private function add_crumbs_tax() {
 		$this_term = $GLOBALS['wp_query']->get_queried_object();
-		$taxonomy  = get_taxonomy( $this_term->taxonomy );
+		$taxonomy  = apply_filter( 'woocommerce_breadcrumb_taxonomy', get_taxonomy( $this_term->taxonomy ) );
 
 		$this->add_crumb( $taxonomy->labels->name );
 
