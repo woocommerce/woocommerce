@@ -31,7 +31,7 @@ function wc_get_attribute_taxonomies() {
 	if ( false === ( $attribute_taxonomies = get_transient( 'wc_attribute_taxonomies' ) ) ) {
 		global $wpdb;
 
-		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
+		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies order by attribute_name ASC;" );
 
 		set_transient( 'wc_attribute_taxonomies', $attribute_taxonomies );
 	}
