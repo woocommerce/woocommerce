@@ -35,7 +35,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'update', this.trigger_update_checkout );
 
 			// Inputs/selects which update totals
-			this.$checkout_form.on( 'change', 'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"]', this.trigger_update_checkout );
+			this.$checkout_form.on( 'change', 'select.shipping_method, #shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"]', this.trigger_update_checkout );
 			this.$checkout_form.on( 'change', '.address-field select', this.input_changed );
 			this.$checkout_form.on( 'change', '.address-field input.input-text, .update_totals_on_change input.input-text', this.maybe_input_changed );
 			this.$checkout_form.on( 'change keydown', '.address-field input.input-text, .update_totals_on_change input.input-text', this.queue_update_checkout );
