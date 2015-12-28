@@ -1127,7 +1127,7 @@ class WC_API_Orders extends WC_API_Resource {
 			// if taxable, tax class and total are required
 			if ( isset( $fee['taxable'] ) && $fee['taxable'] ) {
 
-				if ( ! isset( $fee['tax_class'] ) ) {
+				if ( !array_key_exists('tax_class', $fee) ) {
 					throw new WC_API_Exception( 'woocommerce_invalid_fee_item', __( 'Fee tax class is required when fee is taxable', 'woocommerce' ), 400 );
 				}
 
