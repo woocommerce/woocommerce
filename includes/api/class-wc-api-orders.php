@@ -276,6 +276,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'method_id'    => $shipping_item['method_id'],
 				'method_title' => $shipping_item['name'],
 				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
+				'taxes'        => $shipping_item['taxes'],
 			);
 		}
 
