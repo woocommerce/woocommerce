@@ -721,6 +721,8 @@ abstract class WC_Abstract_Order {
 		foreach ( array_keys( $taxes + $shipping_taxes ) as $tax_rate_id ) {
 			$this->add_tax( $tax_rate_id, isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 		}
+		
+		do_action( 'woocommerce_order_calculate_taxes', $this ); 
 
 		return true;
 	}
@@ -822,7 +824,7 @@ abstract class WC_Abstract_Order {
 		// line items
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal     += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
-			$cart_total        += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
+	 	 			$cart_total        += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
 			$cart_subtotal_tax += wc_format_decimal( isset( $item['line_subtotal_tax'] ) ? $item['line_subtotal_tax'] : 0 );
 			$cart_total_tax    += wc_format_decimal( isset( $item['line_tax'] ) ? $item['line_tax'] : 0 );
 		}
@@ -839,6 +841,8 @@ abstract class WC_Abstract_Order {
 		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
 
 		$this->set_total( $grand_total, 'total' );
+		
+		apply_filters( 'woocommerce_order_calculate_totals', $grand_total, $this, $and_taxes );
 
 		return $grand_total;
 	}
