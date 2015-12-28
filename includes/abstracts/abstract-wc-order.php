@@ -824,7 +824,7 @@ abstract class WC_Abstract_Order {
 		// line items
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal     += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
-	 	 			$cart_total        += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
+	 	 	$cart_total        += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
 			$cart_subtotal_tax += wc_format_decimal( isset( $item['line_subtotal_tax'] ) ? $item['line_subtotal_tax'] : 0 );
 			$cart_total_tax    += wc_format_decimal( isset( $item['line_tax'] ) ? $item['line_tax'] : 0 );
 		}
