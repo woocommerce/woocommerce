@@ -466,7 +466,8 @@ class WC_API_Orders extends WC_API_Resource {
 
 					foreach ( $data[ $line ] as $item ) {
 
-						$this->$set_item( $order, $item, 'create' );
+						$item_id = $this->$set_item( $order, $item, 'create' );
+						do_action( 'woocommerce_api_create_order_item', $item, $item_id, $this, $data ); 
 					}
 				}
 			}
@@ -804,6 +805,9 @@ class WC_API_Orders extends WC_API_Resource {
 				update_user_meta( $order->get_user_id(), 'shipping_' . $key, $value );
 			}
 		}
+		
+		do_action( 'woocommerce_api_set_order_addresses', $order, $data, $address_fields );
+		
 	}
 
 	/**
@@ -880,7 +884,9 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 		}
 
-		$this->$set_method( $order, $item, $action );
+		$item_id = $this->$set_method( $order, $item, $action );
+		
+		return $item_id;
 	}
 
 	/**
@@ -939,7 +945,7 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		// quantity must be positive float
-		if ( isset( $item['quantity'] ) && floatval( $item['quantity'] ) <= 0 ) {
+		if ( isset( $item['quantity'] ) && floatval( $item['quantity'] ) <= 0 && apply_filters( 'woocommerce_api_is_check_positive_float_amount' , true, 'line_item', $order, $action ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_product_quantity', __( 'Product quantity must be a positive float', 'woocommerce' ), 400 );
 		}
 
@@ -972,6 +978,8 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( isset( $item['subtotal_tax'] ) ) {
 			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
 		}
+		
+		$item_args = apply_filters( 'woocommerce_api_set_line_item', $item_args, $order, $item, $action ); 
 
 		if ( $creating ) {
 
@@ -989,6 +997,8 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_line_item', __( 'Cannot update line item, try again', 'woocommerce' ), 500 );
 			}
 		}
+		
+		return $item_id;
 	}
 
 	/**
@@ -1054,7 +1064,7 @@ class WC_API_Orders extends WC_API_Resource {
 	protected function set_shipping( $order, $shipping, $action ) {
 
 		// total must be a positive float
-		if ( isset( $shipping['total'] ) && floatval( $shipping['total'] ) < 0 ) {
+		if ( isset( $shipping['total'] ) && floatval( $shipping['total'] ) < 0 && apply_filters( 'woocommerce_api_is_check_positive_float_amount' , true, 'shipping', $order, $action ) ) {
 			throw new WC_API_Exception( 'woocommerce_invalid_shipping_total', __( 'Shipping total must be a positive amount', 'woocommerce' ), 400 );
 		}
 
@@ -1095,6 +1105,9 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_shipping', __( 'Cannot update shipping method, try again', 'woocommerce' ), 500 );
 			}
 		}
+		
+		return $shipping_id;
+		
 	}
 
 	/**
@@ -1176,6 +1189,8 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_fee', __( 'Cannot update fee, try again', 'woocommerce' ), 500 );
 			}
 		}
+		
+		return $fee_id;
 	}
 
 	/**
@@ -1190,7 +1205,7 @@ class WC_API_Orders extends WC_API_Resource {
 	protected function set_coupon( $order, $coupon, $action ) {
 
 		// coupon amount must be positive float
-		if ( isset( $coupon['amount'] ) && floatval( $coupon['amount'] ) < 0 ) {
+		if ( isset( $coupon['amount'] ) && floatval( $coupon['amount'] ) < 0 && apply_filters( 'woocommerce_api_is_check_positive_float_amount' , true, 'coupon', $order, $action ) ) {
 			throw new WC_API_Exception( 'woocommerce_invalid_coupon_total', __( 'Coupon discount total must be a positive amount', 'woocommerce' ), 400 );
 		}
 
@@ -1225,6 +1240,9 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_cannot_update_order_coupon', __( 'Cannot update coupon, try again', 'woocommerce' ), 500 );
 			}
 		}
+		
+		return $coupon_id;
+		
 	}
 
 	/**
