@@ -1851,7 +1851,7 @@ class WC_Cart {
 
 				foreach ( $this->coupons as $code => $coupon ) {
 					if ( $coupon->is_valid() && ( $coupon->is_valid_for_product( $product, $values ) || $coupon->is_valid_for_cart() ) ) {
-						$discount_amount = $coupon->get_discount_amount( ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ? $price : $undiscounted_price ), $values, true );
+						$discount_amount = $coupon->get_discount_amount( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ? $price : $undiscounted_price, $values, true );
 						$discount_amount = min( $price, $discount_amount );
 						$price           = max( $price - $discount_amount, 0 );
 
@@ -1872,6 +1872,11 @@ class WC_Cart {
 							$this->increase_coupon_discount_amount( $code, $total_discount, $total_discount_tax );
 							$this->increase_coupon_applied_count( $code, $values['quantity'] );
 						}
+					}
+
+					// If the price is 0, we can stop going through coupons because there is nothing more to discount for this product.
+					if ( 0 >= $price ) {
+						break;
 					}
 				}
 			}
