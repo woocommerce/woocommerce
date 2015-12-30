@@ -472,7 +472,12 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			// calculate totals and set them
-			$order->calculate_totals();
+			if ( isset( $data['is_vat_exempt'] ) && true === $data['is_vat_exempt'] ) {
+				$and_taxes = false;
+			} else {
+				$and_taxes = true;
+			}	
+			$order->calculate_totals( $and_taxes );
 
 			// payment method (and payment_complete() if `paid` == true)
 			if ( isset( $data['payment_details'] ) && is_array( $data['payment_details'] ) ) {
@@ -653,7 +658,13 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// If items have changed, recalculate order totals.
 			if ( $update_totals ) {
-				$order->calculate_totals();
+			
+				if ( isset( $data['is_vat_exempt'] ) && true === $data['is_vat_exempt'] ) {
+					$and_taxes = false;
+				} else {
+					$and_taxes = true;
+				}	
+				$order->calculate_totals( $and_taxes );
 			}
 
 			// Update order meta.
