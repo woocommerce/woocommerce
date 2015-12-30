@@ -189,7 +189,7 @@ class WC_API_Products extends WC_API_Resource {
 		$product = wc_get_product( $id );
 
 		// add data that applies to every product type
-		$product_data = $this->get_product_data( $product );
+		$product_data = $this->get_product_data( $product, $fields );
 
 		// add variations to variable products
 		if ( $product->is_type( 'variable' ) && $product->has_child() ) {
@@ -198,17 +198,17 @@ class WC_API_Products extends WC_API_Resource {
 
 		// add the parent product data to an individual variation
 		if ( $product->is_type( 'variation' ) && $product->parent ) {
-			$product_data['parent'] = $this->get_product_data( $product->parent );
+			$product_data['parent'] = $this->get_product_data( $product->parent, $fields );
 		}
 
 		// Add grouped products data
 		if ( $product->is_type( 'grouped' ) && $product->has_child() ) {
-			$product_data['grouped_products'] = $this->get_grouped_products_data( $product );
+			$product_data['grouped_products'] = $this->get_grouped_products_data( $product, $fields );
 		}
 
 		if ( $product->is_type( 'simple' ) && ! empty( $product->post->post_parent ) ) {
 			$_product = wc_get_product( $product->post->post_parent );
-			$product_data['parent'] = $this->get_product_data( $_product );
+			$product_data['parent'] = $this->get_product_data( $_product, $fields );
 		}
 
 		return array( 'product' => apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields, $this->server ) );
@@ -1083,74 +1083,202 @@ class WC_API_Products extends WC_API_Resource {
 	 * @param WC_Product $product
 	 * @return WC_Product
 	 */
-	private function get_product_data( $product ) {
-		return array(
-			'title'              => $product->get_title(),
-			'id'                 => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
-			'created_at'         => $this->server->format_datetime( $product->get_post_data()->post_date_gmt ),
-			'updated_at'         => $this->server->format_datetime( $product->get_post_data()->post_modified_gmt ),
-			'type'               => $product->product_type,
-			'status'             => $product->get_post_data()->post_status,
-			'downloadable'       => $product->is_downloadable(),
-			'virtual'            => $product->is_virtual(),
-			'permalink'          => $product->get_permalink(),
-			'sku'                => $product->get_sku(),
-			'price'              => $product->get_price(),
-			'regular_price'      => $product->get_regular_price(),
-			'sale_price'         => $product->get_sale_price() ? $product->get_sale_price() : null,
-			'price_html'         => $product->get_price_html(),
-			'taxable'            => $product->is_taxable(),
-			'tax_status'         => $product->get_tax_status(),
-			'tax_class'          => $product->get_tax_class(),
-			'managing_stock'     => $product->managing_stock(),
-			'stock_quantity'     => $product->get_stock_quantity(),
-			'in_stock'           => $product->is_in_stock(),
-			'backorders_allowed' => $product->backorders_allowed(),
-			'backordered'        => $product->is_on_backorder(),
-			'sold_individually'  => $product->is_sold_individually(),
-			'purchaseable'       => $product->is_purchasable(),
-			'featured'           => $product->is_featured(),
-			'visible'            => $product->is_visible(),
-			'catalog_visibility' => $product->visibility,
-			'on_sale'            => $product->is_on_sale(),
-			'product_url'        => $product->is_type( 'external' ) ? $product->get_product_url() : '',
-			'button_text'        => $product->is_type( 'external' ) ? $product->get_button_text() : '',
-			'weight'             => $product->get_weight() ? $product->get_weight() : null,
-			'dimensions'         => array(
-				'length' => $product->length,
-				'width'  => $product->width,
-				'height' => $product->height,
-				'unit'   => get_option( 'woocommerce_dimension_unit' ),
-			),
-			'shipping_required'  => $product->needs_shipping(),
-			'shipping_taxable'   => $product->is_shipping_taxable(),
-			'shipping_class'     => $product->get_shipping_class(),
-			'shipping_class_id'  => ( 0 !== $product->get_shipping_class_id() ) ? $product->get_shipping_class_id() : null,
-			'description'        => wpautop( do_shortcode( $product->get_post_data()->post_content ) ),
-			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_post_data()->post_excerpt ),
-			'reviews_allowed'    => ( 'open' === $product->get_post_data()->comment_status ),
-			'average_rating'     => wc_format_decimal( $product->get_average_rating(), 2 ),
-			'rating_count'       => (int) $product->get_rating_count(),
-			'related_ids'        => array_map( 'absint', array_values( $product->get_related() ) ),
-			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
-			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sells() ),
-			'parent_id'          => $product->post->post_parent,
-			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
-			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
-			'images'             => $this->get_images( $product ),
-			'featured_src'       => (string) wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) ),
-			'attributes'         => $this->get_attributes( $product ),
-			'downloads'          => $this->get_downloads( $product ),
-			'download_limit'     => (int) $product->download_limit,
-			'download_expiry'    => (int) $product->download_expiry,
-			'download_type'      => $product->download_type,
-			'purchase_note'      => wpautop( do_shortcode( wp_kses_post( $product->purchase_note ) ) ),
-			'total_sales'        => metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0,
-			'variations'         => array(),
-			'parent'             => array(),
-			'grouped_products'   => array(),
-			'menu_order'         => $product->post->menu_order,
-		);
+	private function get_product_data( $product, $fields = null ) {
+	    
+	    if($fields)    {
+	        $field_list = explode( ',', $fields );
+	    }
+	     
+	    $product_data = array();
+	    
+	    if(!$fields || ($fields && in_array('title', $field_list))) {
+	        $product_data[ 'title' ] = $product->get_title();
+	    }
+	    if(!$fields || ($fields && in_array('id', $field_list))) {
+	        $product_data[ 'id' ] = (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id;
+	    }
+	    if(!$fields || ($fields && in_array('created_at', $field_list))) {
+	        $product_data[ 'created_at' ] = $this->server->format_datetime( $product->get_post_data()->post_date_gmt );
+	    }
+	    if(!$fields || ($fields && in_array('updated_at', $field_list))) {
+	        $product_data[ 'updated_at' ] = $this->server->format_datetime( $product->get_post_data()->post_modified_gmt );
+	    }
+	    if(!$fields || ($fields && in_array('type', $field_list))) {
+	        $product_data[ 'type' ] = $product->product_type;
+	    }
+	    if(!$fields || ($fields && in_array('status', $field_list))) {
+	        $product_data[ 'status' ] = $product->get_post_data()->post_status;
+	    }
+	    if(!$fields || ($fields && in_array('downloadable', $field_list))) {
+	        $product_data[ 'downloadable' ] = $product->is_downloadable();
+	    }
+	    if(!$fields || ($fields && in_array('virtual', $field_list))) {
+	        $product_data[ 'virtual' ] = $product->is_virtual();
+	    }
+	    if(!$fields || ($fields && in_array('permalink', $field_list))) {
+	        $product_data[ 'permalink' ] = $product->get_permalink();
+	    }
+	    if(!$fields || ($fields && in_array('sku', $field_list))) {
+	        $product_data[ 'sku' ] = $product->get_sku();
+	    }
+	    if(!$fields || ($fields && in_array('price', $field_list))) {
+	        $product_data[ 'price' ] = $product->get_price();
+	    }
+	    if(!$fields || ($fields && in_array('regular_price', $field_list))) {
+	        $product_data[ 'regular_price' ] = $product->get_regular_price();
+	    }
+	    if(!$fields || ($fields && in_array('sale_price', $field_list))) {
+	        $product_data[ 'sale_price' ] = $product->get_sale_price() ? $product->get_sale_price() : null;
+	    }
+	    if(!$fields || ($fields && in_array('price_html', $field_list))) {
+	        $product_data[ 'price_html' ] = $product->get_price_html();
+	    }
+	    if(!$fields || ($fields && in_array('taxable', $field_list))) {
+	        $product_data[ 'taxable' ] = $product->is_taxable();
+	    }
+	    if(!$fields || ($fields && in_array('tax_status', $field_list))) {
+	        $product_data[ 'tax_status' ] = $product->get_tax_status();
+	    }
+	    if(!$fields || ($fields && in_array('tax_class', $field_list))) {
+	        $product_data[ 'tax_class' ] = $product->get_tax_class();
+	    }
+	    if(!$fields || ($fields && in_array('managing_stock', $field_list))) {
+	        $product_data[ 'managing_stock' ] = $product->managing_stock();
+	    }
+	    if(!$fields || ($fields && in_array('stock_quantity', $field_list))) {
+	        $product_data[ 'stock_quantity' ] = $product->get_stock_quantity();
+	    }
+	    if(!$fields || ($fields && in_array('in_stock', $field_list))) {
+	        $product_data[ 'in_stock' ] = $product->is_in_stock();
+	    }
+	    if(!$fields || ($fields && in_array('backorders_allowed', $field_list))) {
+	        $product_data[ 'backorders_allowed' ] = $product->backorders_allowed();
+	    }
+	    if(!$fields || ($fields && in_array('backordered', $field_list))) {
+	        $product_data[ 'backordered' ] = $product->is_on_backorder();
+	    }
+	    if(!$fields || ($fields && in_array('sold_individually', $field_list))) {
+	        $product_data[ 'sold_individually' ] = $product->is_sold_individually();
+	    }
+	    if(!$fields || ($fields && in_array('purchaseable', $field_list))) {
+	        $product_data[ 'purchaseable' ] = $product->is_purchasable();
+	    }
+	    if(!$fields || ($fields && in_array('featured', $field_list))) {
+	        $product_data[ 'featured' ] = $product->is_featured();
+	    }
+	    if(!$fields || ($fields && in_array('visible', $field_list))) {
+	        $product_data[ 'visible' ] = $product->is_visible();
+	    }
+	    if(!$fields || ($fields && in_array('catalog_visibility', $field_list))) {
+	        $product_data[ 'catalog_visibility' ] = $product->visibility;
+	    }
+	    if(!$fields || ($fields && in_array('on_sale', $field_list))) {
+	        $product_data[ 'on_sale' ] = $product->is_on_sale();
+	    }
+	    if(!$fields || ($fields && in_array('product_url', $field_list))) {
+	        $product_data[ 'product_url' ] = $product->is_type( 'external' ) ? $product->get_product_url() : '';
+	    }
+	    if(!$fields || ($fields && in_array('button_text', $field_list))) {
+	        $product_data[ 'button_text' ] = $product->is_type( 'external' ) ? $product->get_button_text() : '';
+	    }
+	    if(!$fields || ($fields && in_array('weight', $field_list))) {
+	        $product_data[ 'weight' ] = $product->get_weight() ? $product->get_weight() : null;
+	    }
+	    if(!$fields || ($fields && in_array('dimensions', $field_list))) {
+	        $product_data[ 'dimensions' ] = array(
+	            'length' => $product->length,
+	            'width'  => $product->width,
+	            'height' => $product->height,
+	            'unit'   => get_option( 'woocommerce_dimension_unit' ),
+	        );
+	    }
+	    if(!$fields || ($fields && in_array('shipping_required', $field_list))) {
+	        $product_data[ 'shipping_required' ] = $product->needs_shipping();
+	    }
+	    if(!$fields || ($fields && in_array('shipping_taxable', $field_list))) {
+	        $product_data[ 'shipping_taxable' ] = $product->is_shipping_taxable();
+	    }
+	    if(!$fields || ($fields && in_array('shipping_class', $field_list))) {
+	        $product_data[ 'shipping_class' ] = $product->get_shipping_class();
+	    }
+	    if(!$fields || ($fields && in_array('shipping_class_id', $field_list))) {
+	        $product_data[ 'shipping_class_id' ] = ( 0 !== $product->get_shipping_class_id() ) ? $product->get_shipping_class_id() : null;
+	    }
+	    if(!$fields || ($fields && in_array('description', $field_list))) {
+	        $product_data[ 'description' ] = wpautop( do_shortcode( $product->get_post_data()->post_content ) );
+	    }
+	    if(!$fields || ($fields && in_array('short_description', $field_list))) {
+	        $product_data[ 'short_description' ] = apply_filters( 'woocommerce_short_description', $product->get_post_data()->post_excerpt );
+	    }
+	    if(!$fields || ($fields && in_array('reviews_allowed', $field_list))) {
+	        $product_data[ 'reviews_allowed' ] = ( 'open' === $product->get_post_data()->comment_status );
+	    }
+	    if(!$fields || ($fields && in_array('average_rating', $field_list))) {
+	        $product_data[ 'average_rating' ] = wc_format_decimal( $product->get_average_rating(), 2 );
+	    }
+	    if(!$fields || ($fields && in_array('rating_count', $field_list))) {
+	        $product_data[ 'rating_count' ] = (int) $product->get_rating_count();
+	    }
+	    if(!$fields || ($fields && in_array('related_ids', $field_list))) {
+	        $product_data[ 'related_ids' ] = array_map( 'absint', array_values( $product->get_related() ) );
+	    }
+	    if(!$fields || ($fields && in_array('upsell_ids', $field_list))) {
+	        $product_data[ 'upsell_ids' ] = array_map( 'absint', $product->get_upsells() );
+	    }
+	    if(!$fields || ($fields && in_array('cross_sell_ids', $field_list))) {
+	        $product_data[ 'cross_sell_ids' ] = array_map( 'absint', $product->get_cross_sells() );
+	    }
+	    if(!$fields || ($fields && in_array('parent_id', $field_list))) {
+	        $product_data[ 'parent_id' ] = $product->post->post_parent;
+	    }
+	    if(!$fields || ($fields && in_array('categories', $field_list))) {
+	        $product_data[ 'categories' ] = wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) );
+	    }
+	    if(!$fields || ($fields && in_array('tags', $field_list))) {
+	        $product_data[ 'tags' ] = wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) );
+	    }
+	    if(!$fields || ($fields && in_array('images', $field_list))) {
+	        $product_data[ 'images' ] = $this->get_images( $product );
+	    }
+	    if(!$fields || ($fields && in_array('featured_src', $field_list))) {
+	        $product_data[ 'featured_src' ] = (string) wp_get_attachment_url( get_post_thumbnail_id( $product->is_type( 'variation' ) ? $product->variation_id : $product->id ) );
+	    }
+	    if(!$fields || ($fields && in_array('attributes', $field_list))) {
+	        $product_data[ 'attributes' ] = $this->get_attributes( $product );
+	    }
+	    if(!$fields || ($fields && in_array('downloads', $field_list))) {
+	        $product_data[ 'downloads' ] = $this->get_downloads( $product );
+	    }
+	    if(!$fields || ($fields && in_array('download_limit', $field_list))) {
+	        $product_data[ 'download_limit' ] = (int) $product->download_limit;
+	    }
+	    if(!$fields || ($fields && in_array('download_expiry', $field_list))) {
+	        $product_data[ 'download_expiry' ] = (int) $product->download_expiry;
+	    }
+	    if(!$fields || ($fields && in_array('download_type', $field_list))) {
+	        $product_data[ 'download_type' ] = $product->download_type;
+	    }
+	    if(!$fields || ($fields && in_array('purchase_note', $field_list))) {
+	        $product_data[ 'purchase_note' ] = wpautop( do_shortcode( wp_kses_post( $product->purchase_note ) ) );
+	    }
+	    if(!$fields || ($fields && in_array('total_sales', $field_list))) {
+	        $product_data[ 'total_sales' ] = metadata_exists( 'post', $product->id, 'total_sales' ) ? (int) get_post_meta( $product->id, 'total_sales', true ) : 0;
+	    }
+	    if(!$fields || ($fields && in_array('variations', $field_list))) {
+	        $product_data[ 'variations' ] = array();
+	    }
+	    if(!$fields || ($fields && in_array('parent', $field_list))) {
+	        $product_data[ 'parent' ] = array();
+	    }
+	    if(!$fields || ($fields && in_array('grouped_products', $field_list))) {
+	        $product_data[ 'grouped_products' ] = array();
+	    }
+	    if(!$fields || ($fields && in_array('menu_order', $field_list))) {
+	        $product_data[ 'menu_order' ] = $product->post->menu_order;
+	    }
+	    
+	    return $product_data;
+	    
 	}
 
 	/**
@@ -1220,7 +1348,7 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @return array
 	 */
-	private function get_grouped_products_data( $product ) {
+	private function get_grouped_products_data( $product, $fields = null ) {
 		$products = array();
 
 		foreach ( $product->get_children() as $child_id ) {
@@ -1230,7 +1358,7 @@ class WC_API_Products extends WC_API_Resource {
 				continue;
 			}
 
-			$products[] = $this->get_product_data( $_product );
+			$products[] = $this->get_product_data( $_product, $fields );
 
 		}
 
