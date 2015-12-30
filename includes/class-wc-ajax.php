@@ -1521,6 +1521,8 @@ class WC_AJAX {
 		// Action
 		$items = apply_filters( 'woocommerce_ajax_calc_line_taxes', $items, $order_id, $country, $_POST );
 
+		if ( wc_tax_enabled() && ! apply_filters( 'woocommerce_ajax_calc_line_taxes_is_vat_exempt', false, $order_id, $country, $_POST ) ) {
+		
 		// Get items and fees taxes
 		if ( isset( $items['order_item_id'] ) ) {
 			$line_total = $line_subtotal = $order_item_tax_class = array();
@@ -1605,7 +1607,8 @@ class WC_AJAX {
 				}
 			}
 		}
-
+		}
+		
 		// Remove old tax rows
 		$order->remove_order_items( 'tax' );
 
