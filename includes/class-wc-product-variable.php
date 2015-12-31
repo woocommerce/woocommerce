@@ -244,9 +244,7 @@ class WC_Product_Variable extends WC_Product {
 		 * @var string
 		 */
 		if ( $display ) {
-			$tax_rate_ids = array_keys( WC_Tax::get_rates() );
-			asort( $tax_rate_ids );
-			$price_hash = array( get_option( 'woocommerce_tax_display_shop', 'excl' ), $tax_rate_ids );
+			$price_hash = array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() );
 		} else {
 			$price_hash = array( false );
 		}
@@ -255,7 +253,11 @@ class WC_Product_Variable extends WC_Product {
 
 		foreach ( $filter_names as $filter_name ) {
 			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
-				$price_hash[ $filter_name ] = $wp_filter[ $filter_name ];
+				$price_hash[ $filter_name ] = array();
+
+				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
+					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
+				}
 			}
 		}
 
