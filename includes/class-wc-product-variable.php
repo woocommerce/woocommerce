@@ -244,7 +244,9 @@ class WC_Product_Variable extends WC_Product {
 		 * @var string
 		 */
 		if ( $display ) {
-			$price_hash = array( true, WC_Tax::get_rates(), get_option( 'woocommerce_tax_display_shop' ) );
+			$tax_rate_ids = array_keys( WC_Tax::get_rates() );
+			asort( $tax_rate_ids );
+			$price_hash = array( get_option( 'woocommerce_tax_display_shop', 'excl' ), $tax_rate_ids );
 		} else {
 			$price_hash = array( false );
 		}
@@ -265,7 +267,7 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		// Get value of transient
-		$this->prices_array = array_filter( (array) get_transient( $transient_name ) );
+		$this->prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
 		// If the prices are not stored for this hash, generate them
 		if ( empty( $this->prices_array[ $price_hash ] ) ) {
@@ -314,7 +316,7 @@ class WC_Product_Variable extends WC_Product {
 				'sale_price'    => $sale_prices
 			);
 
-			set_transient( $transient_name, $this->prices_array, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, json_encode( $this->prices_array ), DAY_IN_SECONDS * 30 );
 		}
 
 		/**
