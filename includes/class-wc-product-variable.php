@@ -271,6 +271,11 @@ class WC_Product_Variable extends WC_Product {
 		// Get value of transient
 		$this->prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
+		// If the product version has changed, reset cache
+		if ( empty( $this->prices_array['version'] ) || $this->prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
+			$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
+		}
+
 		// If the prices are not stored for this hash, generate them
 		if ( empty( $this->prices_array[ $price_hash ] ) ) {
 			$prices         = array();
