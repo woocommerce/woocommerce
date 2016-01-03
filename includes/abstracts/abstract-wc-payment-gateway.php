@@ -163,7 +163,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * has_fields function.
+	 * Check if the gateway has fields on the checkout.
 	 *
 	 * @return bool
 	 */
@@ -190,7 +190,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * get_icon function.
+	 * Return the gateway's icon.
 	 *
 	 * @return string
 	 */
@@ -247,6 +247,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Validate frontend fields.
 	 *
 	 * Validate payment fields on the frontend.
+	 *
+	 * @return bool
 	 */
 	public function validate_fields() { return true; }
 
@@ -283,6 +285,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Core credit card form which gateways can used if needed.
 	 *
 	 * @param  array $args
+	 * @param  array $fields
 	 */
 	public function credit_card_form( $args = array(), $fields = array() ) {
 
