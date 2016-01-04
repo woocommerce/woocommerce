@@ -63,7 +63,10 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * get_cached_widget function.
+	 * Get cached widget.
+	 *
+	 * @param  array $args
+	 * @return bool true if the widget is cached otherwise false
 	 */
 	public function get_cached_widget( $args ) {
 
@@ -126,7 +129,7 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * update function.
+	 * Updates a particular instance of a widget.
 	 *
 	 * @see    WP_Widget->update
 	 * @param  array $new_instance
@@ -183,7 +186,7 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * form function.
+	 * Outputs the settings update form.
 	 *
 	 * @see   WP_Widget->form
 	 * @param array $instance
