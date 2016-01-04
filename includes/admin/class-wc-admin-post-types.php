@@ -1538,9 +1538,9 @@ class WC_Admin_Post_Types {
 		if ( is_numeric( $search_order_id ) ) {
 			$post_ids = array_unique( array_merge(
 				$wpdb->get_col(
-					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%d%%';", $search_order_id )
+					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%d%%';", absint( $search_order_id ) )
 				),
-				array( $search_order_id )
+				array( absint( $search_order_id ) )
 			) );
 		} else {
 			$post_ids = array_unique( array_merge(
@@ -1556,7 +1556,7 @@ class WC_Admin_Post_Types {
 						OR
 							( p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%s%%' )
 						",
-						esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
+						wc_clean( $_GET['s'] ), wc_clean( $_GET['s'] ), wc_clean( $_GET['s'] )
 					)
 				),
 				$wpdb->get_col(
@@ -1565,10 +1565,9 @@ class WC_Admin_Post_Types {
 						FROM {$wpdb->prefix}woocommerce_order_items as order_items
 						WHERE order_item_name LIKE '%%%s%%'
 						",
-						esc_attr( $_GET['s'] )
+						wc_clean( $_GET['s'] )
 					)
-				),
-				array( $search_order_id )
+				)
 			) );
 		}
 
