@@ -164,11 +164,20 @@ function wc_cart_totals_shipping_html() {
 
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+		$product_names = array();
+
+		if ( sizeof( $packages ) > 1 ) {
+			foreach ( $package['contents'] as $item_id => $values ) {
+				$product_names[] = $values['data']->get_title() . ' &times;' . $values['quantity'];
+			}
+		}
 
 		wc_get_template( 'cart/cart-shipping.php', array(
 			'package'              => $package,
 			'available_methods'    => $package['rates'],
 			'show_package_details' => sizeof( $packages ) > 1,
+			'package_details'      => implode( ', ', $product_names ),
+			'package_name'         => apply_filters( 'woocommerce_shipping_package_name', sprintf( _n( 'Shipping', 'Shipping %d', ( $i + 1 ), 'woocommerce' ), ( $i + 1 ) ), $i, $package ),
 			'index'                => $i,
 			'chosen_method'        => $chosen_method
 		) );

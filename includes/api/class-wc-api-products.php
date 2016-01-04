@@ -241,7 +241,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Create a new product
+	 * Create a new product.
 	 *
 	 * @since 2.2
 	 * @param array $data posted data
@@ -257,29 +257,29 @@ class WC_API_Products extends WC_API_Resource {
 
 			$data = $data['product'];
 
-			// Check permissions
+			// Check permissions.
 			if ( ! current_user_can( 'publish_products' ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product', __( 'You do not have permission to create products', 'woocommerce' ), 401 );
 			}
 
 			$data = apply_filters( 'woocommerce_api_create_product_data', $data, $this );
 
-			// Check if product title is specified
+			// Check if product title is specified.
 			if ( ! isset( $data['title'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_product_title', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'title' ), 400 );
 			}
 
-			// Check product type
+			// Check product type.
 			if ( ! isset( $data['type'] ) ) {
 				$data['type'] = 'simple';
 			}
 
-			// Set visible visibility when not sent
+			// Set visible visibility when not sent.
 			if ( ! isset( $data['catalog_visibility'] ) ) {
 				$data['catalog_visibility'] = 'visible';
 			}
 
-			// Validate the product type
+			// Validate the product type.
 			if ( ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_product_types() ) ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_type', sprintf( __( 'Invalid product type - the product type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_product_types() ) ) ), 400 );
 			}
@@ -299,44 +299,45 @@ class WC_API_Products extends WC_API_Resource {
 
 			$new_product = array(
 				'post_title'   => wc_clean( $data['title'] ),
-				'post_status'  => ( isset( $data['status'] ) ? wc_clean( $data['status'] ) : 'publish' ),
+				'post_status'  => isset( $data['status'] ) ? wc_clean( $data['status'] ) : 'publish',
 				'post_type'    => 'product',
-				'post_excerpt' => ( isset( $data['short_description'] ) ? $post_excerpt : '' ),
-				'post_content' => ( isset( $data['description'] ) ? $post_content : '' ),
+				'post_excerpt' => isset( $data['short_description'] ) ? $post_excerpt : '',
+				'post_content' => isset( $data['description'] ) ? $post_content : '',
 				'post_author'  => get_current_user_id(),
+				'menu_order'   => isset( $data['menu_order'] ) ? intval( $data['menu_order'] ) : 0,
 			);
 
-			// Attempts to create the new product
+			// Attempts to create the new product.
 			$id = wp_insert_post( $new_product, true );
 
-			// Checks for an error in the product creation
+			// Checks for an error in the product creation.
 			if ( is_wp_error( $id ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product', $id->get_error_message(), 400 );
 			}
 
-			// Check for featured/gallery images, upload it and set it
+			// Check for featured/gallery images, upload it and set it.
 			if ( isset( $data['images'] ) ) {
 				$this->save_product_images( $id, $data['images'] );
 			}
 
-			// Save product meta fields
+			// Save product meta fields.
 			$this->save_product_meta( $id, $data );
 
-			// Save variations
+			// Save variations.
 			if ( isset( $data['type'] ) && 'variable' == $data['type'] && isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
 				$this->save_variations( $id, $data );
 			}
 
 			do_action( 'woocommerce_api_create_product', $id, $data );
 
-			// Clear cache/transients
+			// Clear cache/transients.
 			wc_delete_product_transients( $id );
 
 			$this->server->send_status( 201 );
 
 			return $this->get_product( $id );
 		} catch ( WC_API_Exception $e ) {
-			// Remove the product when fails
+			// Remove the product when fails.
 			$this->clear_product( $id );
 
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -398,20 +399,25 @@ class WC_API_Products extends WC_API_Resource {
 				wp_update_post( array( 'ID' => $id, 'post_content' => $post_content ) );
 			}
 
-			// Validate the product type
+			// Menu order.
+			if ( isset( $data['menu_order'] ) ) {
+				wp_update_post( array( 'ID' => $id, 'menu_order' => intval( $data['menu_order'] ) ) );
+			}
+
+			// Validate the product type.
 			if ( isset( $data['type'] ) && ! in_array( wc_clean( $data['type'] ), array_keys( wc_get_product_types() ) ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_type', sprintf( __( 'Invalid product type - the product type must be any of these: %s', 'woocommerce' ), implode( ', ', array_keys( wc_get_product_types() ) ) ), 400 );
 			}
 
-			// Check for featured/gallery images, upload it and set it
+			// Check for featured/gallery images, upload it and set it.
 			if ( isset( $data['images'] ) ) {
 				$this->save_product_images( $id, $data['images'] );
 			}
 
-			// Save product meta fields
+			// Save product meta fields.
 			$this->save_product_meta( $id, $data );
 
-			// Save variations
+			// Save variations.
 			$product = get_product( $id );
 			if ( $product->is_type( 'variable' ) ) {
 				if ( isset( $data['variations'] ) && is_array( $data['variations'] ) ) {
@@ -424,7 +430,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			do_action( 'woocommerce_api_edit_product', $id, $data );
 
-			// Clear cache/transients
+			// Clear cache/transients.
 			wc_delete_product_transients( $id );
 
 			return $this->get_product( $id );
@@ -664,9 +670,6 @@ class WC_API_Products extends WC_API_Resource {
 			$data = wp_parse_args( $data['product_category'], $defaults );
 			$data = apply_filters( 'woocommerce_api_create_product_category_data', $data, $this );
 
-			$name = $data['name'];
-			unset( $data['name'] );
-
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
@@ -676,28 +679,25 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			$display_type = $data['display'];
-			unset( $data['display'] );
-
 			// If value of image is numeric, assume value as image_id.
-			$image = $data['image'];
+			$image    = $data['image'];
+			$image_id = 0;
 			if ( is_numeric( $image ) ) {
 				$image_id = absint( $image );
 			} else if ( ! empty( $image ) ) {
 				$upload   = $this->upload_product_image( esc_url_raw( $image ) );
 				$image_id = $this->set_product_category_image_as_attachment( $upload );
 			}
-			unset( $data['image'] );
 
-			$insert = wp_insert_term( $name, 'product_cat', $data );
+			$insert = wp_insert_term( $data['name'], 'product_cat', $data );
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_category', $insert->get_error_message(), 400 );
 			}
 
-			update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+			update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'display_type', esc_attr( $data['display'] ) );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
-			if ( wp_attachment_is_image( $image_id ) ) {
+			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
 				update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'thumbnail_id', $image_id );
 			}
 
@@ -743,13 +743,9 @@ class WC_API_Products extends WC_API_Resource {
 				return $category;
 			}
 
-			$display_type = '';
-			if ( isset( $data['display'] ) ) {
-				$display_type = $data['display'];
-				unset( $data['display'] );
-			}
-
 			if ( isset( $data['image'] ) ) {
+				$image_id = 0;
+
 				// If value of image is numeric, assume value as image_id.
 				$image = $data['image'];
 				if ( is_numeric( $image ) ) {
@@ -759,13 +755,10 @@ class WC_API_Products extends WC_API_Resource {
 					$image_id = $this->set_product_category_image_as_attachment( $upload );
 				}
 
-				// In case client supplies invalid image or wants to unset category
-				// image.
+				// In case client supplies invalid image or wants to unset category image.
 				if ( ! wp_attachment_is_image( $image_id ) ) {
 					$image_id = '';
 				}
-
-				unset( $data['image'] );
 			}
 
 			$update = wp_update_term( $id, 'product_cat', $data );
@@ -773,8 +766,8 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_catgory', __( 'Could not edit the category', 'woocommerce' ), 400 );
 			}
 
-			if ( ! empty( $display_type ) ) {
-				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', esc_attr( $display_type ) );
+			if ( ! empty( $data['display'] ) ) {
+				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', sanitize_text_field( $data['display'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
@@ -923,10 +916,7 @@ class WC_API_Products extends WC_API_Resource {
 			$data = wp_parse_args( $data['product_tag'], $defaults );
 			$data = apply_filters( 'woocommerce_api_create_product_tag_data', $data, $this );
 
-			$name = $data['name'];
-			unset( $data['name'] );
-
-			$insert = wp_insert_term( $name, 'product_tag', $data );
+			$insert = wp_insert_term( $data['name'], 'product_tag', $data );
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_tag', $insert->get_error_message(), 400 );
 			}
@@ -1159,6 +1149,7 @@ class WC_API_Products extends WC_API_Resource {
 			'variations'         => array(),
 			'parent'             => array(),
 			'grouped_products'   => array(),
+			'menu_order'         => $product->post->menu_order,
 		);
 	}
 
@@ -1247,7 +1238,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Save product meta
+	 * Save product meta.
 	 *
 	 * @since  2.2
 	 * @param  int $product_id
@@ -1258,7 +1249,7 @@ class WC_API_Products extends WC_API_Resource {
 	protected function save_product_meta( $product_id, $data ) {
 		global $wpdb;
 
-		// Product Type
+		// Product Type.
 		$product_type = null;
 		if ( isset( $data['type'] ) ) {
 			$product_type = wc_clean( $data['type'] );
@@ -1271,40 +1262,40 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
-		// Virtual
+		// Virtual.
 		if ( isset( $data['virtual'] ) ) {
 			update_post_meta( $product_id, '_virtual', ( true === $data['virtual'] ) ? 'yes' : 'no' );
 		}
 
-		// Tax status
+		// Tax status.
 		if ( isset( $data['tax_status'] ) ) {
 			update_post_meta( $product_id, '_tax_status', wc_clean( $data['tax_status'] ) );
 		}
 
-		// Tax Class
+		// Tax Class.
 		if ( isset( $data['tax_class'] ) ) {
 			update_post_meta( $product_id, '_tax_class', wc_clean( $data['tax_class'] ) );
 		}
 
-		// Catalog Visibility
+		// Catalog Visibility.
 		if ( isset( $data['catalog_visibility'] ) ) {
 			update_post_meta( $product_id, '_visibility', wc_clean( $data['catalog_visibility'] ) );
 		}
 
-		// Purchase Note
+		// Purchase Note.
 		if ( isset( $data['purchase_note'] ) ) {
 			update_post_meta( $product_id, '_purchase_note', wc_clean( $data['purchase_note'] ) );
 		}
 
-		// Featured Product
+		// Featured Product.
 		if ( isset( $data['featured'] ) ) {
 			update_post_meta( $product_id, '_featured', ( true === $data['featured'] ) ? 'yes' : 'no' );
 		}
 
-		// Shipping data
+		// Shipping data.
 		$this->save_product_shipping_data( $product_id, $data );
 
-		// SKU
+		// SKU.
 		if ( isset( $data['sku'] ) ) {
 			$sku     = get_post_meta( $product_id, '_sku', true );
 			$new_sku = wc_clean( $data['sku'] );
@@ -1325,7 +1316,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
-		// Attributes
+		// Attributes.
 		if ( isset( $data['attributes'] ) ) {
 			$attributes = array();
 
@@ -1354,7 +1345,7 @@ class WC_API_Products extends WC_API_Resource {
 						$options = $attribute['options'];
 
 						if ( ! is_array( $attribute['options'] ) ) {
-							// Text based attributes - Posted values are term names
+							// Text based attributes - Posted values are term names.
 							$options = explode( WC_DELIMITER, $options );
 						}
 
@@ -1364,13 +1355,13 @@ class WC_API_Products extends WC_API_Resource {
 						$values = array();
 					}
 
-					// Update post terms
+					// Update post terms.
 					if ( taxonomy_exists( $taxonomy ) ) {
 						wp_set_object_terms( $product_id, $values, $taxonomy );
 					}
 
 					if ( $values ) {
-						// Add attribute to array, but don't set values
+						// Add attribute to array, but don't set values.
 						$attributes[ $taxonomy ] = array(
 							'name'         => $taxonomy,
 							'value'        => '',
@@ -1382,16 +1373,16 @@ class WC_API_Products extends WC_API_Resource {
 					}
 
 				} elseif ( isset( $attribute['options'] ) ) {
-					// Array based
+					// Array based.
 					if ( is_array( $attribute['options'] ) ) {
 						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', $attribute['options'] ) );
 
-					// Text based, separate by pipe
+					// Text based, separate by pipe.
 					} else {
 						$values = implode( ' ' . WC_DELIMITER . ' ', array_map( 'wc_clean', explode( WC_DELIMITER, $attribute['options'] ) ) );
 					}
 
-					// Custom attribute - Add attribute to array and set the values
+					// Custom attribute - Add attribute to array and set the values.
 					$attributes[ $attribute_slug ] = array(
 						'name'         => wc_clean( $attribute['name'] ),
 						'value'        => $values,
@@ -1417,10 +1408,10 @@ class WC_API_Products extends WC_API_Resource {
 			update_post_meta( $product_id, '_product_attributes', $attributes );
 		}
 
-		// Sales and prices
+		// Sales and prices.
 		if ( in_array( $product_type, array( 'variable', 'grouped' ) ) ) {
 
-			// Variable and grouped products have no prices
+			// Variable and grouped products have no prices.
 			update_post_meta( $product_id, '_regular_price', '' );
 			update_post_meta( $product_id, '_sale_price', '' );
 			update_post_meta( $product_id, '_sale_price_dates_from', '' );
@@ -1429,7 +1420,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		} else {
 
-			// Regular Price
+			// Regular Price.
 			if ( isset( $data['regular_price'] ) ) {
 				$regular_price = ( '' === $data['regular_price'] ) ? '' : wc_format_decimal( $data['regular_price'] );
 				update_post_meta( $product_id, '_regular_price', $regular_price );
@@ -1437,7 +1428,7 @@ class WC_API_Products extends WC_API_Resource {
 				$regular_price = get_post_meta( $product_id, '_regular_price', true );
 			}
 
-			// Sale Price
+			// Sale Price.
 			if ( isset( $data['sale_price'] ) ) {
 				$sale_price = ( '' === $data['sale_price'] ) ? '' : wc_format_decimal( $data['sale_price'] );
 				update_post_meta( $product_id, '_sale_price', $sale_price );
@@ -1466,7 +1457,7 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
 			}
 
-			// Update price if on sale
+			// Update price if on sale.
 			if ( '' !== $sale_price && '' == $date_to && '' == $date_from ) {
 				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
 			} else {
@@ -1484,12 +1475,12 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
-		// Product parent ID for groups
+		// Product parent ID for groups.
 		if ( isset( $data['parent_id'] ) ) {
 			wp_update_post( array( 'ID' => $product_id, 'post_parent' => absint( $data['parent_id'] ) ) );
 		}
 
-		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
+		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
 		$_product = wc_get_product( $product_id );
 		if ( $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
 
@@ -1526,12 +1517,12 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
-		// Sold Individually
+		// Sold Individually.
 		if ( isset( $data['sold_individually'] ) ) {
 			update_post_meta( $product_id, '_sold_individually', ( true === $data['sold_individually'] ) ? 'yes' : '' );
 		}
 
-		// Stock status
+		// Stock status.
 		if ( isset( $data['in_stock'] ) ) {
 			$stock_status = ( true === $data['in_stock'] ) ? 'instock' : 'outofstock';
 		} else {
@@ -1542,9 +1533,9 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
-		// Stock Data
+		// Stock Data.
 		if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) {
-			// Manage stock
+			// Manage stock.
 			if ( isset( $data['managing_stock'] ) ) {
 				$managing_stock = ( true === $data['managing_stock'] ) ? 'yes' : 'no';
 				update_post_meta( $product_id, '_manage_stock', $managing_stock );
@@ -1552,7 +1543,7 @@ class WC_API_Products extends WC_API_Resource {
 				$managing_stock = get_post_meta( $product_id, '_manage_stock', true );
 			}
 
-			// Backorders
+			// Backorders.
 			if ( isset( $data['backorders'] ) ) {
 				if ( 'notify' == $data['backorders'] ) {
 					$backorders = 'notify';
@@ -1586,7 +1577,7 @@ class WC_API_Products extends WC_API_Resource {
 
 				wc_update_product_stock_status( $product_id, $stock_status );
 
-				// Stock quantity
+				// Stock quantity.
 				if ( isset( $data['stock_quantity'] ) ) {
 					wc_update_product_stock( $product_id, wc_stock_amount( $data['stock_quantity'] ) );
 				} else if ( isset( $data['inventory_delta'] ) ) {
@@ -1597,7 +1588,7 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			} else {
 
-				// Don't manage stock
+				// Don't manage stock.
 				update_post_meta( $product_id, '_manage_stock', 'no' );
 				update_post_meta( $product_id, '_backorders', $backorders );
 				update_post_meta( $product_id, '_stock', '' );
@@ -1609,7 +1600,7 @@ class WC_API_Products extends WC_API_Resource {
 			wc_update_product_stock_status( $product_id, $stock_status );
 		}
 
-		// Upsells
+		// Upsells.
 		if ( isset( $data['upsell_ids'] ) ) {
 			$upsells = array();
 			$ids     = $data['upsell_ids'];
@@ -1627,7 +1618,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
-		// Cross sells
+		// Cross sells.
 		if ( isset( $data['cross_sell_ids'] ) ) {
 			$crosssells = array();
 			$ids        = $data['cross_sell_ids'];
@@ -1645,19 +1636,19 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
-		// Product categories
+		// Product categories.
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
 			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_cat' );
 		}
 
-		// Product tags
+		// Product tags.
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
 			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_tag' );
 		}
 
-		// Downloadable
+		// Downloadable.
 		if ( isset( $data['downloadable'] ) ) {
 			$is_downloadable = ( true === $data['downloadable'] ) ? 'yes' : 'no';
 			update_post_meta( $product_id, '_downloadable', $is_downloadable );
@@ -1665,31 +1656,31 @@ class WC_API_Products extends WC_API_Resource {
 			$is_downloadable = get_post_meta( $product_id, '_downloadable', true );
 		}
 
-		// Downloadable options
+		// Downloadable options.
 		if ( 'yes' == $is_downloadable ) {
 
-			// Downloadable files
+			// Downloadable files.
 			if ( isset( $data['downloads'] ) && is_array( $data['downloads'] ) ) {
 				$this->save_downloadable_files( $product_id, $data['downloads'] );
 			}
 
-			// Download limit
+			// Download limit.
 			if ( isset( $data['download_limit'] ) ) {
 				update_post_meta( $product_id, '_download_limit', ( '' === $data['download_limit'] ) ? '' : absint( $data['download_limit'] ) );
 			}
 
-			// Download expiry
+			// Download expiry.
 			if ( isset( $data['download_expiry'] ) ) {
 				update_post_meta( $product_id, '_download_expiry', ( '' === $data['download_expiry'] ) ? '' : absint( $data['download_expiry'] ) );
 			}
 
-			// Download type
+			// Download type.
 			if ( isset( $data['download_type'] ) ) {
 				update_post_meta( $product_id, '_download_type', wc_clean( $data['download_type'] ) );
 			}
 		}
 
-		// Product url
+		// Product url.
 		if ( $product_type == 'external' ) {
 			if ( isset( $data['product_url'] ) ) {
 				update_post_meta( $product_id, '_product_url', wc_clean( $data['product_url'] ) );
@@ -1700,7 +1691,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
-		// Reviews allowed
+		// Reviews allowed.
 		if ( isset( $data['reviews_allowed'] ) ) {
 			$reviews_allowed = ( true === $data['reviews_allowed'] ) ? 'open' : 'closed';
 
@@ -2973,8 +2964,8 @@ class WC_API_Products extends WC_API_Resource {
 
 			$attribute_term = array(
 				'id'    => $term->term_id,
-				'slug'  => $term->slug,
 				'name'  => $term->name,
+				'slug'  => $term->slug,
 				'count' => $term->count,
 			);
 
@@ -3349,9 +3340,6 @@ class WC_API_Products extends WC_API_Resource {
 			$data = wp_parse_args( $data['product_shipping_class'], $defaults );
 			$data = apply_filters( 'woocommerce_api_create_product_shipping_class_data', $data, $this );
 
-			$name = $data['name'];
-			unset( $data['name'] );
-
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
@@ -3361,7 +3349,7 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			$insert = wp_insert_term( $name, 'product_shipping_class', $data );
+			$insert = wp_insert_term( $data['name'], 'product_shipping_class', $data );
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_shipping_class', $insert->get_error_message(), 400 );
 			}

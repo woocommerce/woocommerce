@@ -16,7 +16,7 @@ if [ $1 == 'before' ]; then
 	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
 
 	# install php-coveralls to send coverage info
-	composer init --require=satooshi/php-coveralls:0.7.x-dev -n
+	composer init --require=satooshi/php-coveralls:0.7.0 -n
 	composer install --no-interaction
 
 elif [ $1 == 'after' ]; then

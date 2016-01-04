@@ -601,11 +601,11 @@ class WC_Webhook {
 		$response_code = wp_remote_retrieve_response_code( $test );
 
 		if ( is_wp_error( $test ) ) {
-			return new WP_Error( 'error', __( 'Error: Delivery URL cannot be reached: ' . $test->get_error_message() ) );
+			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL cannot be reached: %s', 'woocommerce' ), $test->get_error_message() ) );
 		}
 
 		if ( 200 !== $response_code ) {
-			return new WP_Error( 'error', __( 'Error: Delivery URL returned response code ' . absint( $response_code ) ) );
+			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
 		}
 
 		return true;
@@ -686,6 +686,7 @@ class WC_Webhook {
 		}
 
 		$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status ), array( 'ID' => $this->id ) );
+		clean_post_cache( $this->id );
 	}
 
 	/**

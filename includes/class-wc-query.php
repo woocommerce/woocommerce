@@ -248,11 +248,12 @@ class WC_Query {
 		}
 
 		// Special check for shops with the product archive on front
-		if ( $q->is_page() && 'page' == get_option( 'show_on_front' ) && $q->get('page_id') == wc_get_page_id('shop') ) {
+		if ( $q->is_page() && 'page' == get_option( 'show_on_front' ) && $q->get( 'page_id' ) == wc_get_page_id( 'shop' ) ) {
 
 			// This is a front-page shop
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
+
 			if ( isset( $q->query['paged'] ) ) {
 				$q->set( 'paged', $q->query['paged'] );
 			}
@@ -264,7 +265,7 @@ class WC_Query {
 			// This is hacky but works. Awaiting http://core.trac.wordpress.org/ticket/21096
 			global $wp_post_types;
 
-			$shop_page 	= get_post( wc_get_page_id('shop') );
+			$shop_page 	= get_post( wc_get_page_id( 'shop' ) );
 
 			$wp_post_types['product']->ID 			= $shop_page->ID;
 			$wp_post_types['product']->post_title 	= $shop_page->post_title;
@@ -277,6 +278,9 @@ class WC_Query {
 			$q->is_post_type_archive = true;
 			$q->is_archive           = true;
 			$q->is_page              = true;
+
+			// Remove post type archive name from front page title tag
+			add_filter( 'post_type_archive_title', '__return_empty_string', 5 );
 
 			// Fix WP SEO
 			if ( class_exists( 'WPSEO_Meta' ) ) {
@@ -333,9 +337,7 @@ class WC_Query {
 	 */
 	public function wpseo_metadesc() {
 		return WPSEO_Meta::get_value( 'metadesc', wc_get_page_id('shop') );
-
 	}
-
 
 	/**
 	 * wpseo_metakey function.
@@ -347,7 +349,6 @@ class WC_Query {
 	public function wpseo_metakey() {
 		return WPSEO_Meta::get_value( 'metakey', wc_get_page_id('shop') );
 	}
-
 
 	/**
 	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility.
@@ -868,7 +869,7 @@ class WC_Query {
 						WHERE post_type IN ( 'product', 'product_variation' )
 						AND post_status = 'publish'
 						AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-						AND pm1.meta_value BETWEEN %d AND %d
+						AND pm1.meta_value BETWEEN %f AND %f
 						AND pm2.meta_key = '_tax_class'
 						AND pm2.meta_value = %s
 					", $min_class, $max_class, sanitize_title( $tax_class ) ), OBJECT_K ), $min_class, $max_class );

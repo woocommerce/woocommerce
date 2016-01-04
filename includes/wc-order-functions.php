@@ -51,6 +51,10 @@ function wc_is_order_status( $maybe_status ) {
  * @return WC_Order
  */
 function wc_get_order( $the_order = false ) {
+	if ( ! did_action( 'woocommerce_init' ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+		return false;
+	}
 	return WC()->order_factory->get_order( $the_order );
 }
 

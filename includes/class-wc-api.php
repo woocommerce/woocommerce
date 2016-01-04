@@ -21,7 +21,7 @@ class WC_API {
 	/** This is the major version for the REST API and takes
 	 * first-order position in endpoint URLs.
 	 */
-	const VERSION = '3.0.0';
+	const VERSION = '3.1.0';
 
 	/** @var WC_API_Server the REST API server */
 	public $server;

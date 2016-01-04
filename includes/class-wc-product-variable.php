@@ -244,7 +244,7 @@ class WC_Product_Variable extends WC_Product {
 		 * @var string
 		 */
 		if ( $display ) {
-			$price_hash = array( true, WC_Tax::get_rates(), get_option( 'woocommerce_tax_display_shop' ) );
+			$price_hash = array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() );
 		} else {
 			$price_hash = array( false );
 		}
@@ -253,7 +253,11 @@ class WC_Product_Variable extends WC_Product {
 
 		foreach ( $filter_names as $filter_name ) {
 			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
-				$price_hash[ $filter_name ] = $wp_filter[ $filter_name ];
+				$price_hash[ $filter_name ] = array();
+
+				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
+					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
+				}
 			}
 		}
 
@@ -265,7 +269,12 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		// Get value of transient
-		$this->prices_array = array_filter( (array) get_transient( $transient_name ) );
+		$this->prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
+
+		// If the product version has changed, reset cache
+		if ( empty( $this->prices_array['version'] ) || $this->prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
+			$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
+		}
 
 		// If the prices are not stored for this hash, generate them
 		if ( empty( $this->prices_array[ $price_hash ] ) ) {
@@ -314,7 +323,7 @@ class WC_Product_Variable extends WC_Product {
 				'sale_price'    => $sale_prices
 			);
 
-			set_transient( $transient_name, $this->prices_array, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, json_encode( $this->prices_array ), DAY_IN_SECONDS * 30 );
 		}
 
 		/**
@@ -565,8 +574,8 @@ class WC_Product_Variable extends WC_Product {
 			$image_link      = $full_attachment ? current( $full_attachment ) : '';
 			$image_title     = get_the_title( $attachment_id );
 			$image_alt       = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
-			$image_srcset    = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : '';
-			$image_sizes     = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : '';
+			$image_srcset    = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+			$image_sizes     = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
 		} else {
 			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = '';
 		}
@@ -587,8 +596,8 @@ class WC_Product_Variable extends WC_Product {
 			'image_link'            => $image_link,
 			'image_title'           => $image_title,
 			'image_alt'             => $image_alt,
-			'image_srcset'			=> $image_srcset,
-			'image_sizes'			=> $image_sizes,
+			'image_srcset'			=> $image_srcset ? $image_srcset : '',
+			'image_sizes'			=> $image_sizes ? $image_sizes : '',
 			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => $availability_html,
 			'sku'                   => $variation->get_sku(),
@@ -720,8 +729,11 @@ class WC_Product_Variable extends WC_Product {
 		) );
 
 		// No published variations - product won't be purchasable.
-		if ( ! $children && 'publish' === get_post_status( $product_id ) ) {
-			if ( is_admin() ) {
+		if ( ! $children ) {
+			update_post_meta( $product_id, '_price', '' );
+			delete_transient( 'wc_products_onsale' );
+
+			if ( is_admin() && 'publish' === get_post_status( $product_id ) ) {
 				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations. Add or enable variations to allow this product to be purchased.', 'woocommerce' ) );
 			}
 

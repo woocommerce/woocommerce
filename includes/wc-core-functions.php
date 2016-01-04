@@ -136,6 +136,8 @@ function wc_update_order( $args ) {
 /**
  * Get template part (for templates like the shop-loop).
  *
+ * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
+ *
  * @access public
  * @param mixed $slug
  * @param string $name (default: '')
@@ -158,10 +160,8 @@ function wc_get_template_part( $slug, $name = '' ) {
 		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
 	}
 
-	// Allow 3rd party plugin filter template file from their plugin.
-	if ( ( ! $template && WC_TEMPLATE_DEBUG_MODE ) || $template ) {
-		$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
-	}
+	// Allow 3rd party plugins to filter template file from their plugin.
+	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
 
 	if ( $template ) {
 		load_template( $template, false );
@@ -294,7 +294,8 @@ function get_woocommerce_currencies() {
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
-				'KIP' => __( 'Lao Kip', 'woocommerce' ),
+				'KES' => __( 'Kenyan shilling', 'woocommerce' ),
+				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
@@ -333,134 +334,60 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		$currency = get_woocommerce_currency();
 	}
 
-	switch ( $currency ) {
-		case 'AED' :
-			$currency_symbol = 'د.إ';
-			break;
-		case 'AUD' :
-		case 'ARS' :
-		case 'CAD' :
-		case 'CLP' :
-		case 'COP' :
-		case 'HKD' :
-		case 'MXN' :
-		case 'NZD' :
-		case 'SGD' :
-		case 'USD' :
-			$currency_symbol = '&#36;';
-			break;
-		case 'BDT':
-			$currency_symbol = '&#2547;&nbsp;';
-			break;
-		case 'BGN' :
-			$currency_symbol = '&#1083;&#1074;.';
-			break;
-		case 'BRL' :
-			$currency_symbol = '&#82;&#36;';
-			break;
-		case 'CHF' :
-			$currency_symbol = '&#67;&#72;&#70;';
-			break;
-		case 'CNY' :
-		case 'JPY' :
-		case 'RMB' :
-			$currency_symbol = '&yen;';
-			break;
-		case 'CZK' :
-			$currency_symbol = '&#75;&#269;';
-			break;
-		case 'DKK' :
-			$currency_symbol = 'DKK';
-			break;
-		case 'DOP' :
-			$currency_symbol = 'RD&#36;';
-			break;
-		case 'EGP' :
-			$currency_symbol = 'EGP';
-			break;
-		case 'EUR' :
-			$currency_symbol = '&euro;';
-			break;
-		case 'GBP' :
-			$currency_symbol = '&pound;';
-			break;
-		case 'HRK' :
-			$currency_symbol = 'Kn';
-			break;
-		case 'HUF' :
-			$currency_symbol = '&#70;&#116;';
-			break;
-		case 'IDR' :
-			$currency_symbol = 'Rp';
-			break;
-		case 'ILS' :
-			$currency_symbol = '&#8362;';
-			break;
-		case 'INR' :
-			$currency_symbol = '&#8377;';
-			break;
-		case 'ISK' :
-			$currency_symbol = 'Kr.';
-			break;
-		case 'KIP' :
-			$currency_symbol = '&#8365;';
-			break;
-		case 'KRW' :
-			$currency_symbol = '&#8361;';
-			break;
-		case 'MYR' :
-			$currency_symbol = '&#82;&#77;';
-			break;
-		case 'NGN' :
-			$currency_symbol = '&#8358;';
-			break;
-		case 'NOK' :
-			$currency_symbol = '&#107;&#114;';
-			break;
-		case 'NPR' :
-		case 'PKR' :
-			$currency_symbol = '&#8360;';
-			break;
-		case 'PHP' :
-			$currency_symbol = '&#8369;';
-			break;
-		case 'PLN' :
-			$currency_symbol = '&#122;&#322;';
-			break;
-		case 'PYG' :
-			$currency_symbol = '&#8370;';
-			break;
-		case 'RON' :
-			$currency_symbol = 'lei';
-			break;
-		case 'RUB' :
-			$currency_symbol = '&#1088;&#1091;&#1073;.';
-			break;
-		case 'SEK' :
-			$currency_symbol = '&#107;&#114;';
-			break;
-		case 'THB' :
-			$currency_symbol = '&#3647;';
-			break;
-		case 'TRY' :
-			$currency_symbol = '&#8378;';
-			break;
-		case 'TWD' :
-			$currency_symbol = '&#78;&#84;&#36;';
-			break;
-		case 'UAH' :
-			$currency_symbol = '&#8372;';
-			break;
-		case 'VND' :
-			$currency_symbol = '&#8363;';
-			break;
-		case 'ZAR' :
-			$currency_symbol = '&#82;';
-			break;
-		default :
-			$currency_symbol = '';
-			break;
-	}
+	$symbols = apply_filters( 'woocommerce_currency_symbols', array(
+		'AED' => 'د.إ',
+		'ARS' => '&#36;',
+		'AUD' => '&#36;',
+		'BDT' => '&#2547;&nbsp;',
+		'BGN' => '&#1083;&#1074;.',
+		'BRL' => '&#82;&#36;',
+		'CAD' => '&#36;',
+		'CHF' => '&#67;&#72;&#70;',
+		'CLP' => '&#36;',
+		'CNY' => '&yen;',
+		'COP' => '&#36;',
+		'CZK' => '&#75;&#269;',
+		'DKK' => 'DKK',
+		'DOP' => 'RD&#36;',
+		'EGP' => 'EGP',
+		'EUR' => '&euro;',
+		'GBP' => '&pound;',
+		'HKD' => '&#36;',
+		'HRK' => 'Kn',
+		'HUF' => '&#70;&#116;',
+		'IDR' => 'Rp',
+		'ILS' => '&#8362;',
+		'INR' => '&#8377;',
+		'ISK' => 'Kr.',
+		'JPY' => '&yen;',
+		'KES' => 'KSh',
+		'LAK' => '&#8365;',
+		'KRW' => '&#8361;',
+		'MXN' => '&#36;',
+		'MYR' => '&#82;&#77;',
+		'NGN' => '&#8358;',
+		'NOK' => '&#107;&#114;',
+		'NPR' => '&#8360;',
+		'NZD' => '&#36;',
+		'PHP' => '&#8369;',
+		'PKR' => '&#8360;',
+		'PLN' => '&#122;&#322;',
+		'PYG' => '&#8370;',
+		'RMB' => '&yen;',
+		'RON' => 'lei',
+		'RUB' => '&#1088;&#1091;&#1073;.',
+		'SEK' => '&#107;&#114;',
+		'SGD' => '&#36;',
+		'THB' => '&#3647;',
+		'TRY' => '&#8378;',
+		'TWD' => '&#78;&#84;&#36;',
+		'UAH' => '&#8372;',
+		'USD' => '&#36;',
+		'VND' => '&#8363;',
+		'ZAR' => '&#82;',
+	) );
+
+	$currency_symbol = isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : '';
 
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }

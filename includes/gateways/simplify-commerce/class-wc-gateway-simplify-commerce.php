@@ -62,7 +62,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 		// Hooks
 		add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
-		add_action( 'admin_notices', array( $this, 'checks' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );
 		add_action( 'woocommerce_api_wc_gateway_simplify_commerce', array( $this, 'return_handler' ) );
@@ -101,6 +100,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			<p><?php _e( 'Simplify Commerce is your merchant account and payment gateway all rolled into one. Choose Simplify Commerce as your WooCommerce payment gateway to get access to your money quickly with a powerful, secure payment engine backed by MasterCard.', 'woocommerce' ); ?></p>
 		<?php endif; ?>
 
+		<?php $this->checks(); ?>
+
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 			<script type="text/javascript">
@@ -120,7 +121,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				jQuery( '#woocommerce_simplify_commerce_mode' ).on( 'change', function() {
 					var color = jQuery( '#woocommerce_simplify_commerce_modal_color' ).closest( 'tr' );
 
-					if ( 'standard' == jQuery( this ).val() ) {
+					if ( 'standard' === jQuery( this ).val() ) {
 						color.hide();
 					} else {
 						color.show();

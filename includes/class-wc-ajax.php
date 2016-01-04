@@ -1752,8 +1752,7 @@ class WC_AJAX {
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		$term    = (string) wc_clean( stripslashes( $_GET['term'] ) );
-		$exclude = array();
+		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
 
 		if ( empty( $term ) ) {
 			die();
@@ -1794,6 +1793,14 @@ class WC_AJAX {
 			$query .= " AND posts.ID NOT IN (" . implode( ',', array_map( 'intval', explode( ',', $_GET['exclude'] ) ) ) . ")";
 		}
 
+		if ( ! empty( $_GET['include'] ) ) {
+			$query .= " AND posts.ID IN (" . implode( ',', array_map( 'intval', explode( ',', $_GET['include'] ) ) ) . ")";
+		}
+
+		if ( ! empty( $_GET['limit'] ) ) {
+			$query .= " LIMIT " . intval( $_GET['limit'] );
+		}
+
 		$posts          = array_unique( $wpdb->get_col( $query ) );
 		$found_products = array();
 
@@ -1802,6 +1809,10 @@ class WC_AJAX {
 				$product = wc_get_product( $post );
 
 				if ( ! current_user_can( 'read_product', $post ) ) {
+					continue;
+				}
+
+				if ( ! $product || ( $product->is_type( 'variation' ) && empty( $product->parent ) ) ) {
 					continue;
 				}
 

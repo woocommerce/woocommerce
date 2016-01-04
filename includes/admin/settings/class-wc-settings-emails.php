@@ -215,7 +215,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output payment gateway settings.
+	 * Output email notification settings.
 	 */
 	public function email_notification_setting() {
 		// Define emails that can be customised here
@@ -251,7 +251,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 								switch ( $key ) {
 									case 'name' :
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-											<a href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( get_class( $email ) ) ) . '">' . $email->get_title() . '</a>
+											<a href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . $email->get_title() . '</a>
 											' . wc_help_tip( $email->get_description() ) . '
 										</td>';
 									break;
@@ -280,7 +280,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 									break;
 									case 'actions' :
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-											<a class="button alignright tips" data-tip="' . __( 'Configure', 'woocommerce' ) . '" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( get_class( $email ) ) ) . '">' . __( 'Configure', 'woocommerce' ) . '</a>
+											<a class="button alignright tips" data-tip="' . __( 'Configure', 'woocommerce' ) . '" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . __( 'Configure', 'woocommerce' ) . '</a>
 										</td>';
 									break;
 									default :

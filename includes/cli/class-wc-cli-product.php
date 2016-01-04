@@ -223,7 +223,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	}
 
 	/**
-	 * Delete a product.
+	 * Delete products.
 	 *
 	 * ## OPTIONS
 	 *
@@ -512,6 +512,15 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * [--format=<format>]
 	 * : Accepted values: table, json, csv. Default: table.
 	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * rating
+	 * * reviewer_name
+	 * * reviewer_email
+	 * * verified
+	 * * created_at
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product reviews 123
@@ -578,7 +587,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * <id>
 	 * : Product ID
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
 	 * ## AVAILABLE_FIELDS

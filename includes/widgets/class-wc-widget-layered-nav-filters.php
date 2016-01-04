@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Layered Navigation Fitlers Widget.
+ * Layered Navigation Filters Widget.
  *
  * @author   WooThemes
  * @category Widgets

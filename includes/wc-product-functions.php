@@ -22,6 +22,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return WC_Product
  */
 function wc_get_product( $the_product = false, $args = array() ) {
+	if ( ! did_action( 'woocommerce_init' ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'wc_get_product should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+		return false;
+	}
 	return WC()->product_factory->get_product( $the_product, $args );
 }
 

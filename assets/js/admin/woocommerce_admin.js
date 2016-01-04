@@ -125,15 +125,16 @@ jQuery( function ( $ ) {
 	});
 
 	var controlled = false;
-	var shifted = false;
-	var hasFocus = false;
+	var shifted    = false;
+	var hasFocus   = false;
 
 	$( document.body ).bind( 'keyup keydown', function( e ) {
-		shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey;
+		shifted    = e.shiftKey;
+		controlled = e.ctrlKey || e.metaKey;
 	});
 
 	$( '.wc_input_table' ).on( 'focus click', 'input', function( e ) {
-		var $this_table = $( this ).closest( 'table' );
+		var $this_table = $( this ).closest( 'table, tbody' );
 		var $this_row   = $( this ).closest( 'tr' );
 
 		if ( ( e.type === 'focus' && hasFocus !== $this_row.index() ) || ( e.type === 'click' && $( this ).is( ':focus' ) ) ) {

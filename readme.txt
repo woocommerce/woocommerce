@@ -2,8 +2,8 @@
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Requires at least: 4.1
-Tested up to: 4.3
-Stable tag: 2.4.9
+Tested up to: 4.4
+Stable tag: 2.4.12
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -139,7 +139,7 @@ You can vote on and request new features and extensions in our [WooIdeas board](
 
 Bugs can be reported either in our support forum or preferably on the [WooCommerce GitHub repository](https://github.com/woothemes/woocommerce/issues).
 
-= Where can I found the Rest API documentation? =
+= Where can I find the REST API documentation? =
 
 You can find the documentation of our REST API on the [WooCommerce REST API Docs](http://woothemes.github.io/woocommerce-rest-api-docs/).
 
@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Improved review verification status retrieval.
 * Tweak - Improve appearance when only 1 gateway is active.
 * Tweak - Aligned terms box left and added required asterisk.
+* Tweak - Removed dropdown display mode for cart shipping methods - radios are more flexible.
 * Dev - API - Added /products/shipping_classes endpoint.
 * Dev - API - Added support to POST, PUT, and DELETE categories and tags.
 * Dev - API - Added support to filter products by tag, category, shipping class, and attribute.
@@ -208,6 +209,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Added a manual update trigger for checkout.
 * Dev - Added woocommerce_is_price_filter_active filter to Query class.
 * Dev - Replaced some cart methods with dedicated functions. e.g. wc_ship_to_billing_address_only().
+* Localisation - Add Kenyan currency and symbol.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 
