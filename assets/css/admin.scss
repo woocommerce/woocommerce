@@ -2325,6 +2325,11 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 			height: 29px;
 		}
 	}
+	.editing {
+		.wc-shipping-zone-view, .wc-shipping-zone-edit {
+			display: none;
+		}
+	}
 }
 
 img.help_tip {

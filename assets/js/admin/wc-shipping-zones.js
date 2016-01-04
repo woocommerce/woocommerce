@@ -63,7 +63,7 @@
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
-					$( '.wc-shipping-zone-add' ).on( 'click', { view: this }, this.onAddNewRow );
+					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
 				},
 				block: function() {
 					$( this.el ).block({
@@ -194,7 +194,7 @@
 				onEditRow: function( event ) {
 					event.preventDefault();
 					$( this ).closest('tr').addClass('editing');
-					$( this ).closest('tr').find('.view, .wc-shipping-zone-edit').hide();
+					$( this ).closest('tr').find('.view').hide();
 					$( this ).closest('tr').find('.edit').show();
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).select2( select2_args );
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).addClass('enhanced');
