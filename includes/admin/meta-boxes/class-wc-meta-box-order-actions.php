@@ -21,6 +21,8 @@ class WC_Meta_Box_Order_Actions {
 
 	/**
 	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 		global $theorder;
@@ -90,6 +92,9 @@ class WC_Meta_Box_Order_Actions {
 
 	/**
 	 * Save meta box data.
+	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
 
@@ -147,7 +152,7 @@ class WC_Meta_Box_Order_Actions {
 	/**
 	 * Set the correct message ID.
 	 *
-	 * @param $location
+	 * @param string $location
 	 *
 	 * @since  2.3.0
 	 *
