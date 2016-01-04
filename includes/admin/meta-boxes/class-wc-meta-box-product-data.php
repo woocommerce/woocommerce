@@ -21,6 +21,8 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 		global $post, $thepostid;
@@ -1233,6 +1235,8 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Save meta box data.
 	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
 	 */
 	public static function save_variations( $post_id, $post ) {
 		global $wpdb;

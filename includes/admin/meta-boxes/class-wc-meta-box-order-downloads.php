@@ -19,6 +19,8 @@ class WC_Meta_Box_Order_Downloads {
 
 	/**
 	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 		global $post, $wpdb;
@@ -77,6 +79,9 @@ class WC_Meta_Box_Order_Downloads {
 
 	/**
 	 * Save meta box data.
+	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
 		global $wpdb;
