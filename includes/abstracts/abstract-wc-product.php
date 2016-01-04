@@ -178,7 +178,7 @@ class WC_Product {
 	}
 
 	/**
-	 * get_gallery_attachment_ids function.
+	 * Returns the gallery attachment ids.
 	 *
 	 * @return array
 	 */
@@ -319,7 +319,7 @@ class WC_Product {
 	}
 
 	/**
-	 * set_stock_status function.
+	 * Set stock status of the product.
 	 *
 	 * @param string $status
 	 */
@@ -493,17 +493,17 @@ class WC_Product {
 	}
 
 	/**
-	 * get_child function.
+	 * Returns the child product.
 	 *
 	 * @param mixed $child_id
-	 * @return WC_Product WC_Product or WC_Product_variation
+	 * @return WC_Product|WC_Product|WC_Product_variation
 	 */
 	public function get_child( $child_id ) {
 		return wc_get_product( $child_id );
 	}
 
 	/**
-	 * get_children function.
+	 * Returns the children.
 	 *
 	 * @return array
 	 */
@@ -845,6 +845,7 @@ class WC_Product {
 	/**
 	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
+	 * @param  int $qty
 	 * @param  string $price to calculate, left blank to just use get_price()
 	 * @return string
 	 */
@@ -904,6 +905,7 @@ class WC_Product {
 	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
+	 * @param  int $qty
 	 * @param  string $price to calculate, left blank to just use get_price()
 	 * @return string
 	 */
@@ -1505,6 +1507,7 @@ class WC_Product {
 	 * Returns the main product image.
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
+	 * @param array $attr
 	 * @return string
 	 */
 	public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
