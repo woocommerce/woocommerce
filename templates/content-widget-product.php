@@ -20,15 +20,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-global $product; ?>
-
+global $product;
+/*Let the browser determine protocol by using // as opposed to https:// or http:// */
+$productimage = preg_replace("/(https:|http:)/","",$product->get_image(), -1);
+?>
 <li>
 	<a href="<?php echo esc_url( get_permalink( $product->id ) ); ?>" title="<?php echo esc_attr( $product->get_title() ); ?>">
-		<?php echo $product->get_image(); ?>
+		<?php echo $productimage; ?>
 		<span class="product-title"><?php echo $product->get_title(); ?></span>
 	</a>
-	<?php if ( ! empty( $show_rating ) ) : ?>
-		<?php echo $product->get_rating_html(); ?>
-	<?php endif; ?>
+	<?php if ( ! empty( $show_rating ) ) echo $product->get_rating_html(); ?>
 	<?php echo $product->get_price_html(); ?>
 </li>
