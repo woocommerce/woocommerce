@@ -136,7 +136,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * has_settings function.
+	 * Check if the shipping method has settings or not.
 	 *
 	 * @return bool
 	 */
@@ -145,7 +145,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * is_available function.
+	 * Check if shipping method is available or not.
 	 *
 	 * @param array $package
 	 * @return bool
@@ -190,7 +190,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * get_fee function.
+	 * Get fee for the shipping method.
 	 *
 	 * @param mixed $fee
 	 * @param mixed $total
