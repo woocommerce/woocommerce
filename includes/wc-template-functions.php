@@ -1987,10 +1987,10 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		echo '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">';
+		$html = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">';
 
 		if ( $args['show_option_none'] ) {
-			echo '<option value="">' . esc_html( $args['show_option_none'] ) . '</option>';
+			$html .= '<option value="">' . esc_html( $args['show_option_none'] ) . '</option>';
 		}
 
 		if ( ! empty( $options ) ) {
@@ -2000,18 +2000,21 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 
 				foreach ( $terms as $term ) {
 					if ( in_array( $term->slug, $options ) ) {
-						echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
+						$html .= '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
 					}
 				}
 			} else {
 				foreach ( $options as $option ) {
 					// This handles < 2.4.0 bw compatibility where text attributes were not sanitized.
 					$selected = sanitize_title( $args['selected'] ) === $args['selected'] ? selected( $args['selected'], sanitize_title( $option ), false ) : selected( $args['selected'], $option, false );
-					echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+					$html .= '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
 				}
 			}
 		}
 
-		echo '</select>';
+		$html .= '</select>';
+
+		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html );
 	}
+
 }
