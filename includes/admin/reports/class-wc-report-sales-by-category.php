@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WC_Report_Sales_By_Category
  *
@@ -9,9 +14,32 @@
  */
 class WC_Report_Sales_By_Category extends WC_Admin_Report {
 
+	/**
+	 * Chart colours.
+	 *
+	 * @var array
+	 */
 	public $chart_colours         = array();
+
+	/**
+	 * Categories ids.
+	 *
+	 * @var array
+	 */
 	public $show_categories       = array();
+
+	/**
+	 * Item sales.
+	 *
+	 * @var array
+	 */
 	private $item_sales           = array();
+
+	/**
+	 * Item sales and times.
+	 *
+	 * @var array
+	 */
 	private $item_sales_and_times = array();
 
 	/**
@@ -153,7 +181,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	}
 
 	/**
-	 * [get_chart_widgets description].
+	 * Get chart widgets.
 	 *
 	 * @return array
 	 */
@@ -168,7 +196,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	}
 
 	/**
-	 * Category selection.
+	 * Output category widget.
 	 */
 	public function category_widget() {
 
