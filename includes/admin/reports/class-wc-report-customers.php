@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WC_Report_Customers
  *
@@ -9,7 +14,18 @@
  */
 class WC_Report_Customers extends WC_Admin_Report {
 
+	/**
+	 * Chart colours.
+	 *
+	 * @var array
+	 */
 	public $chart_colours = array();
+
+	/**
+	 * Customers.
+	 *
+	 * @var array
+	 */
 	public $customers = array();
 
 	/**
@@ -30,7 +46,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	}
 
 	/**
-	 * [get_chart_widgets description].
+	 * Get chart widgets.
 	 *
 	 * @return array
 	 */
@@ -46,7 +62,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	}
 
 	/**
-	 * customers_vs_guests.
+	 * Output customers vs guests chart.
 	 */
 	public function customers_vs_guests() {
 
@@ -216,9 +232,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the main chart.
-	 *
-	 * @return string
+	 * Output the main chart.
 	 */
 	public function get_main_chart() {
 		global $wp_locale;
