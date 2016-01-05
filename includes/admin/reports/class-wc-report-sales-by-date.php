@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WC_Report_Sales_By_Date
  *
@@ -9,12 +14,23 @@
  */
 class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
+	/**
+	 * Chart colours.
+	 *
+	 * @var array
+	 */
 	public $chart_colours = array();
+
+	/**
+	 * The report data.
+	 *
+	 * @var stdClass
+	 */
 	private $report_data;
 
 	/**
 	 * Get report data.
-	 * @return array
+	 * @return stdClass
 	 */
 	public function get_report_data() {
 		if ( empty( $this->report_data ) ) {
