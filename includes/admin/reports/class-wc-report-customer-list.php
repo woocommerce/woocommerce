@@ -19,7 +19,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 class WC_Report_Customer_List extends WP_List_Table {
 
 	/**
-	 * __construct function.
+	 * Constructor.
 	 */
 	public function __construct() {
 
@@ -71,13 +71,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 	}
 
 	/**
-	 * column_default function.
+	 * Get column value.
 	 *
 	 * @param WP_User $user
 	 * @param string $column_name
 	 * @return string
 	 */
-	function column_default( $user, $column_name ) {
+	public function column_default( $user, $column_name ) {
 		global $wpdb;
 
 		switch ( $column_name ) {
@@ -221,9 +221,9 @@ class WC_Report_Customer_List extends WP_List_Table {
 	}
 
 	/**
-	 * get_columns function.
+	 * Get columns.
 	 */
-	public function get_columns(){
+	public function get_columns() {
 		$columns = array(
 			'customer_name'   => __( 'Name (Last, First)', 'woocommerce' ),
 			'username'        => __( 'Username', 'woocommerce' ),
@@ -260,7 +260,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 	}
 
 	/**
-	 * prepare_items function.
+	 * Prepare customer list items.
 	 */
 	public function prepare_items() {
 		global $wpdb;
