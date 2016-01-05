@@ -41,3 +41,10 @@ if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone
         }
     }
 }
+
+/**
+ * woocommerce_calc_shipping option has been removed in 2.6
+ */
+if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
+	update_option( 'woocommerce_ship_to_countries', 'disabled' );
+}

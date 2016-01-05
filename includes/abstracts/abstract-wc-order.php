@@ -2625,7 +2625,7 @@ abstract class WC_Abstract_Order {
 	 * @return boolean
 	 */
 	public function needs_shipping_address() {
-		if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
+		if ( ! wc_shipping_enabled() ) {
 			return false;
 		}
 

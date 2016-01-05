@@ -26,7 +26,6 @@ class WC_Admin_Menus {
 		// Add menus
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
-		add_action( 'admin_menu', array( $this, 'shipping_menu' ), 40 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
 
@@ -107,13 +106,6 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Shipping menu item.
-	 */
-	public function shipping_menu() {
-		add_submenu_page( 'woocommerce', __( 'Shipping', 'woocommerce' ),  __( 'Shipping', 'woocommerce' ) , 'manage_woocommerce', 'wc-shipping', array( $this, 'shipping_page' ) );
-	}
-
-	/**
 	 * Highlights the correct top level admin menu item for post type add screens.
 	 */
 	public function menu_highlight() {
@@ -181,7 +173,7 @@ class WC_Admin_Menus {
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
 				unset( $menu_order[ $woocommerce_separator ] );
 				unset( $menu_order[ $woocommerce_product ] );
-			} elseif ( !in_array( $item, array( 'separator-woocommerce' ) ) ) {
+			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 
@@ -205,14 +197,6 @@ class WC_Admin_Menus {
 	 */
 	public function reports_page() {
 		WC_Admin_Reports::output();
-	}
-
-	/**
-	 * Init the shipping page.
-	 * @since 2.5.0
-	 */
-	public function shipping_page() {
-		WC_Admin_Shipping_Zones::output();
 	}
 
 	/**

@@ -22,7 +22,7 @@ class WC_Shipping_Legacy_Local_Pickup extends WC_Shipping_Method {
 	public function __construct() {
 		$this->id                 = 'legacy_local_pickup';
 		$this->method_title       = __( 'Local Pickup (Legacy)', 'woocommerce' );
-		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-shipping' ) );
+		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
 		$this->init();
 	}
 

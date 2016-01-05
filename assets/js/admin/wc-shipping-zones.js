@@ -117,7 +117,7 @@
 							var $method_list = $tr.find('.wc-shipping-zone-methods ul');
 
 							_.each( rowData.shipping_methods, function( shipping_method, instance_id ) {
-								$method_list.append( '<li><a href="admin.php?page=wc-shipping&amp;instance_id=' + instance_id + '">' + shipping_method.title + '</a></li>' );
+								$method_list.append( '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '">' + shipping_method.title + '</a></li>' );
 							} );
 
 							// Editing?

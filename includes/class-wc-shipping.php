@@ -82,7 +82,7 @@ class WC_Shipping {
 	 * Initialize shipping.
 	 */
 	public function __construct() {
-		$this->enabled = 'yes' === get_option( 'woocommerce_calc_shipping' );
+		$this->enabled = wc_shipping_enabled();
 
 		if ( $this->enabled ) {
 			$this->init();

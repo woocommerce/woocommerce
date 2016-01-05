@@ -173,6 +173,10 @@ class WC_Install {
 	 * Handle updates.
 	 */
 	private static function update() {
+		if ( ! defined( 'WC_UPDATING' ) ) {
+			define( 'WC_UPDATING', true );
+		}
+
 		$current_db_version = get_option( 'woocommerce_db_version' );
 
 		foreach ( self::$db_updates as $version => $updater ) {
