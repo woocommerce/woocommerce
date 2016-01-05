@@ -2375,7 +2375,7 @@ abstract class WC_Abstract_Order {
 			add_post_meta( $this->id, '_paid_date', current_time( 'mysql' ), true );
 
 			if ( ! empty( $transaction_id ) ) {
-				add_post_meta( $this->id, '_transaction_id', $transaction_id, true );
+				update_post_meta( $this->id, '_transaction_id', $transaction_id );
 			}
 
 			wp_update_post( array(
