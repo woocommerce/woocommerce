@@ -19,9 +19,32 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
  */
 class WC_Email_Customer_New_Account extends WC_Email {
 
+	/**
+	 * User login name.
+	 *
+	 * @var string
+	 */
 	public $user_login;
+
+	/**
+	 * User email.
+	 *
+	 * @var string
+	 */
 	public $user_email;
+
+	/**
+	 * User password.
+	 *
+	 * @var string
+	 */
 	public $user_pass;
+
+	/**
+	 * Is the password generated?
+	 *
+	 * @var bool
+	 */
 	public $password_generated;
 
 	/**
@@ -46,6 +69,10 @@ class WC_Email_Customer_New_Account extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param int $user_id
+	 * @param string $user_pass
+	 * @param bool $password_generated
 	 */
 	function trigger( $user_id, $user_pass = '', $password_generated = false ) {
 
@@ -67,7 +94,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
@@ -86,7 +113,7 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
 	 * @access public
 	 * @return string
