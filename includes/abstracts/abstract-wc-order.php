@@ -625,6 +625,11 @@ abstract class WC_Abstract_Order {
 		$taxes        = array();
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
+		// If is_vat_exempt is 'yes', or wc_tax_enabled is false, return and do nothing.
+		if ( 'yes' == $this->is_vat_exempt or ! wc_tax_enabled() ) {
+			return false;
+		}
+
 		if ( 'billing' === $tax_based_on ) {
 			$country  = $this->billing_country;
 			$state    = $this->billing_state;
