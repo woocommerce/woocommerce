@@ -19,7 +19,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Meta_Boxes {
 
+	/**
+	 * Is meta boxes saved once?
+	 *
+	 * @var boolean
+	 */
 	private static $saved_meta_boxes = false;
+
+	/**
+	 * Meta box error messages.
+	 *
+	 * @var array
+	 */
 	public static $meta_box_errors  = array();
 
 	/**
@@ -198,7 +209,7 @@ class WC_Admin_Meta_Boxes {
 		// We need this save event to run once to avoid potential endless loops. This would have been perfect:
 		//	remove_action( current_filter(), __METHOD__ );
 		// But cannot be used due to https://github.com/woothemes/woocommerce/issues/6485
-		// When that is patched in core we cna use the above. For now:
+		// When that is patched in core we can use the above. For now:
 		self::$saved_meta_boxes = true;
 
 		// Check the post type
