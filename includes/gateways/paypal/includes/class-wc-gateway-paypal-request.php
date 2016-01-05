@@ -1,7 +1,7 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -38,8 +38,8 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Get the PayPal request URL for an order.
-	 * @param  WC_Order  $order
-	 * @param  boolean $sandbox
+	 * @param  WC_Order $order
+	 * @param  boolean  $sandbox
 	 * @return string
 	 */
 	public function get_request_url( $order, $sandbox = false ) {
@@ -54,8 +54,7 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Get PayPal Args for passing to PP.
-	 *
-	 * @param WC_Order $order
+	 * @param  WC_Order $order
 	 * @return array
 	 */
 	protected function get_paypal_args( $order ) {
@@ -236,7 +235,6 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Get line items to send to paypal.
-	 *
 	 * @param  WC_Order $order
 	 * @return bool
 	 */
@@ -262,12 +260,12 @@ class WC_Gateway_Paypal_Request {
 			}
 		}
 
-		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order
+		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order.
 		if ( $order->get_total_shipping() > 0 && ! $this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->round( $order->get_total_shipping(), $order ) ) ) {
 			return false;
 		}
 
-		// Check for mismatched totals
+		// Check for mismatched totals.
 		if ( $this->number_format( $calculated_total + $order->get_total_tax() + $this->round( $order->get_total_shipping(), $order ) - $this->round( $order->get_total_discount(), $order ), $order ) != $this->number_format( $order->get_total(), $order ) ) {
 			return false;
 		}
@@ -277,10 +275,10 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Add PayPal Line Item.
-	 * @param string  $item_name
-	 * @param integer $quantity
-	 * @param integer $amount
-	 * @param string  $item_number
+	 * @param  string  $item_name
+	 * @param  integer $quantity
+	 * @param  integer $amount
+	 * @param  string  $item_number
 	 * @return bool successfully added or not
 	 */
 	protected function add_line_item( $item_name, $quantity = 1, $amount = 0, $item_number = '' ) {
@@ -320,9 +318,7 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Check if currency has decimals.
-	 *
 	 * @param  string $currency
-	 *
 	 * @return bool
 	 */
 	protected function currency_has_decimals( $currency ) {
@@ -335,10 +331,8 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Round prices.
-	 *
 	 * @param  double $price
 	 * @param  WC_Order $order
-	 *
 	 * @return double
 	 */
 	protected function round( $price, $order ) {
@@ -353,10 +347,8 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Format prices.
-	 *
 	 * @param  float|int $price
 	 * @param  WC_Order $order
-	 *
 	 * @return string
 	 */
 	protected function number_format( $price, $order ) {

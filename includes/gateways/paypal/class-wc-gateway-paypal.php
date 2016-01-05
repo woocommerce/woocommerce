@@ -1,9 +1,4 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * PayPal Standard Payment Gateway.
  *
@@ -14,6 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version		2.3.0
  * @package		WooCommerce/Classes/Payment
  * @author 		WooThemes
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WC_Gateway_Paypal Class.
  */
 class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
@@ -41,7 +44,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		// Define user set variables
+		// Define user set variables.
 		$this->title          = $this->get_option( 'title' );
 		$this->description    = $this->get_option( 'description' );
 		$this->testmode       = 'yes' === $this->get_option( 'testmode', 'no' );
@@ -69,7 +72,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Logging method.
-	 * @param  string $message
+	 * @param string $message
 	 */
 	public static function log( $message ) {
 		if ( self::$log_enabled ) {
@@ -82,7 +85,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * get_icon function.
-	 *
 	 * @return string
 	 */
 	public function get_icon() {
@@ -181,7 +183,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Check if this gateway is enabled and available in the user's country.
-	 *
 	 * @return bool
 	 */
 	public function is_valid_for_use() {
@@ -213,9 +214,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Get the transaction URL.
-	 *
 	 * @param  WC_Order $order
-	 *
 	 * @return string
 	 */
 	public function get_transaction_url( $order ) {
@@ -229,8 +228,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Process the payment and return the result.
-	 *
-	 * @param int $order_id
+	 * @param  int $order_id
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
@@ -256,10 +254,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Process a refund if supported.
-	 * @param  int $order_id
-	 * @param  float $amount
+	 * @param  int    $order_id
+	 * @param  float  $amount
 	 * @param  string $reason
-	 * @return  boolean True or false based on success, or a WP_Error object
+	 * @return boolean True or false based on success, or a WP_Error object
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
