@@ -222,6 +222,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 	/**
 	 * Get columns.
+	 *
+	 * @return array
 	 */
 	public function get_columns() {
 		$columns = array(
@@ -240,6 +242,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 	/**
 	 * Order users by name.
+	 *
+	 * @param WP_User_Query $query
 	 */
 	public function order_by_last_name( $query ) {
 		global $wpdb;
