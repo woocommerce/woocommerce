@@ -48,6 +48,8 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param int $order_id
 	 */
 	function trigger( $order_id ) {
 
@@ -70,7 +72,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	}
 
 	/**
-	 * get_subject function.
+	 * Get email subject.
 	 *
 	 * @access public
 	 * @return string
@@ -84,7 +86,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	}
 
 	/**
-	 * get_heading function.
+	 * Get email heading.
 	 *
 	 * @access public
 	 * @return string
@@ -98,7 +100,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
