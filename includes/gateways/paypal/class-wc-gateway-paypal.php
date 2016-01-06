@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
-	/** @var boolean Whether or not logging is enabled */
+	/** @var bool Whether or not logging is enabled */
 	public static $log_enabled = false;
 
 	/** @var WC_Logger Logger instance */
@@ -84,7 +84,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * get_icon function.
+	 * Get gateway icon.
 	 * @return string
 	 */
 	public function get_icon() {
@@ -257,7 +257,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param  int    $order_id
 	 * @param  float  $amount
 	 * @param  string $reason
-	 * @return boolean True or false based on success, or a WP_Error object
+	 * @return bool True or false based on success, or a WP_Error object
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );

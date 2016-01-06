@@ -49,7 +49,7 @@ class WC_Gateway_Paypal_Refund {
 	 * @param  WC_Order $order
 	 * @param  float    $amount
 	 * @param  string   $reason
-	 * @param  boolean  $sandbox
+	 * @param  bool     $sandbox
 	 * @return array|wp_error The parsed response from paypal, or a WP_Error object
 	 */
 	public static function refund_order( $order, $amount = null, $reason = '', $sandbox = false ) {

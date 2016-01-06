@@ -39,7 +39,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the PayPal request URL for an order.
 	 * @param  WC_Order $order
-	 * @param  boolean  $sandbox
+	 * @param  bool     $sandbox
 	 * @return string
 	 */
 	public function get_request_url( $order, $sandbox = false ) {
@@ -276,8 +276,8 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Add PayPal Line Item.
 	 * @param  string  $item_name
-	 * @param  integer $quantity
-	 * @param  integer $amount
+	 * @param  int     $quantity
+	 * @param  int     $amount
 	 * @param  string  $item_number
 	 * @return bool successfully added or not
 	 */
