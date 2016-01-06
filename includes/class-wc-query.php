@@ -144,7 +144,7 @@ class WC_Query {
 	}
 
 	/**
-	 * add_query_vars function.
+	 * Add query vars.
 	 *
 	 * @access public
 	 * @param array $vars
@@ -308,7 +308,7 @@ class WC_Query {
 	}
 
 	/**
-	 * search_post_excerpt function.
+	 * Search post excerpt.
 	 *
 	 * @access public
 	 * @param string $where (default: '')
@@ -329,7 +329,8 @@ class WC_Query {
 	}
 
 	/**
-	 * wpseo_metadesc function.
+	 * WP SEO meta description.
+	 *
 	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
 	 * @access public
@@ -340,7 +341,8 @@ class WC_Query {
 	}
 
 	/**
-	 * wpseo_metakey function.
+	 * WP SEO meta key.
+	 *
 	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
 	 * @access public
@@ -605,7 +607,7 @@ class WC_Query {
 	}
 
 	/**
-	 * order_by_rating_post_clauses function.
+	 * Order by rating post clauses.
 	 *
 	 * @access public
 	 * @param array $args
