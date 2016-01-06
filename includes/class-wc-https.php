@@ -48,7 +48,7 @@ class WC_HTTPS {
 	}
 
 	/**
-	 * force_https_url function.
+	 * Force https for urls.
 	 *
 	 * @param mixed $content
 	 * @return string
