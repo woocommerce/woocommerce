@@ -148,7 +148,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * get_child function.
+	 * Get child product.
 	 *
 	 * @access public
 	 * @param mixed $child_id
