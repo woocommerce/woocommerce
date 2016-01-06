@@ -142,7 +142,7 @@ class WC_Customer {
 	}
 
 	/**
-	 * has_calculated_shipping function.
+	 * Has calculated shipping?
 	 *
 	 * @return bool
 	 */
@@ -322,7 +322,7 @@ class WC_Customer {
 	}
 
 	/**
-	 * get_taxable_address function.
+	 * Get taxable address.
 	 *
 	 * @return array
 	 */
@@ -550,7 +550,7 @@ class WC_Customer {
 	}
 
 	/**
-	 * calculated_shipping function.
+	 * Calculated shipping.
 	 *
 	 * @param boolean $calculated
 	 */
