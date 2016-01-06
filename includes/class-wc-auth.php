@@ -20,6 +20,8 @@ class WC_Auth {
 
 	/**
 	 * Version.
+	 *
+	 * @var int
 	 */
 	const VERSION = 1;
 
@@ -44,7 +46,7 @@ class WC_Auth {
 	 *
 	 * @since  2.4.0
 	 *
-	 * @param  $vars
+	 * @param  array $vars
 	 *
 	 * @return string[]
 	 */
