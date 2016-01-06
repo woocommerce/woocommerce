@@ -51,6 +51,8 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  *
  * Returns a new order object on success which can then be used to add additional data.
  *
+ * @param  array $args
+ *
  * @return WC_Order on success, WP_Error on failure.
  */
 function wc_create_order( $args = array() ) {
