@@ -179,7 +179,7 @@ function wc_format_refund_total( $amount ) {
  *
  * @param  float|string $number Expects either a float or a string with a decimal separator only (no thousands)
  * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
- * @param  boolean $trim_zeros from end of string
+ * @param  bool $trim_zeros from end of string
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {

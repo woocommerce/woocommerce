@@ -78,6 +78,10 @@ function wc_get_page_permalink( $page ) {
  *
  * Gets the URL for an endpoint, which varies depending on permalink settings.
  *
+ * @param  string $endpoint
+ * @param  string $value
+ * @param  string $permalink
+ *
  * @return string
  */
 function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {

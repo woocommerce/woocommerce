@@ -448,7 +448,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 	/**
 	 * woocommerce_page_title function.
 	 *
-	 * @param  boolean $echo
+	 * @param  bool $echo
 	 * @return string
 	 */
 	function woocommerce_page_title( $echo = true ) {
@@ -1145,6 +1145,9 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	 * Output the Review comments template.
 	 *
 	 * @subpackage	Product
+	 * @param WP_Comment $comment
+	 * @param array $args
+	 * @param int $depth
 	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
@@ -1256,9 +1259,9 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	/**
 	 * Output the cart cross-sells.
 	 *
-	 * @param  integer $posts_per_page
-	 * @param  integer $columns
-	 * @param  string $orderby
+	 * @param  int $posts_per_page (default: 2)
+	 * @param  int $columns (default: 2)
+	 * @param  string $orderby (default: 'rand')
 	 */
 	function woocommerce_cross_sell_display( $posts_per_page = 2, $columns = 2, $orderby = 'rand' ) {
 		wc_get_template( 'cart/cross-sells.php', array(
@@ -1290,6 +1293,7 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 	/**
 	 * Output the Mini-cart - used by cart widget.
 	 *
+	 * @param array $args
 	 */
 	function woocommerce_mini_cart( $args = array() ) {
 
@@ -1311,6 +1315,7 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 	 * Output the WooCommerce Login Form.
 	 *
 	 * @subpackage	Forms
+	 * @param array $args
 	 */
 	function woocommerce_login_form( $args = array() ) {
 
@@ -1342,6 +1347,8 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 	/**
 	 * Output the WooCommerce Breadcrumb.
+	 *
+	 * @param array $args
 	 */
 	function woocommerce_breadcrumb( $args = array() ) {
 		$args = wp_parse_args( $args, apply_filters( 'woocommerce_breadcrumb_defaults', array(
