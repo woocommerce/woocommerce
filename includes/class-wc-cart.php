@@ -94,25 +94,53 @@ class WC_Cart {
 		'fees'                        => array()
 	);
 
-	/** @var array An array of fees. */
-	public $fees                  = array();
+	/**
+	 * An array of fees.
+	 *
+	 * @var array
+	 */
+	public $fees = array();
 
-	/** @var boolean Prices inc tax */
+	/**
+	 * Prices include tax.
+	 *
+	 * @var bool
+	 */
 	public $prices_include_tax;
 
-	/** @var boolean */
+	/**
+	 * Round at subtotal.
+	 *
+	 * @var bool
+	 */
 	public $round_at_subtotal;
 
-	/** @var string */
+	/**
+	 * Tax display cart.
+	 *
+	 * @var string
+	 */
 	public $tax_display_cart;
 
-	/** @var int Prices inc tax */
+	/**
+	 * Prices inc tax.
+	 *
+	 * @var int
+	 */
 	public $dp;
 
-	/** @var boolean */
+	/**
+	 * Display totals excluding tax.
+	 *
+	 * @var bool
+	 */
 	public $display_totals_ex_tax;
 
-	/** @var boolean */
+	/**
+	 * Display cart excluding tax.
+	 *
+	 * @var bool
+	 */
 	public $display_cart_ex_tax;
 
 	/**
@@ -859,9 +887,9 @@ class WC_Cart {
 		/**
 		 * Add a product to the cart.
 		 *
-		 * @param integer $product_id contains the id of the product to add to the cart
-		 * @param integer $quantity contains the quantity of the item to add
-		 * @param integer $variation_id
+		 * @param int $product_id contains the id of the product to add to the cart
+		 * @param int $quantity contains the quantity of the item to add
+		 * @param int $variation_id
 		 * @param array $variation attribute values
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
 		 * @return string $cart_item_key
@@ -1029,9 +1057,9 @@ class WC_Cart {
 		/**
 		 * Set the quantity for an item in the cart.
 		 *
-		 * @param string	cart_item_key	contains the id of the cart item
-		 * @param string	quantity		contains the quantity of the item
-		 * @param boolean 	$refresh_totals	whether or not to calculate totals after setting the new qty
+		 * @param string	$cart_item_key	contains the id of the cart item
+		 * @param string	$quantity		contains the quantity of the item
+		 * @param bool      $refresh_totals	whether or not to calculate totals after setting the new qty
 		 *
 		 * @return bool
 		 */
@@ -1382,7 +1410,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * remove_taxes function.
+		 * Remove taxes.
 		 */
 		public function remove_taxes() {
 			$this->shipping_tax_total = $this->tax_total = 0;
@@ -1402,7 +1430,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * looks at the totals to see if payment is actually required.
+		 * Looks at the totals to see if payment is actually required.
 		 *
 		 * @return bool
 		 */
@@ -1902,7 +1930,7 @@ class WC_Cart {
 		 *
 		 * @access private
 		 * @param string $code
-		 * @param integer $count
+		 * @param int    $count
 		 */
 		private function increase_coupon_applied_count( $code, $count = 1 ) {
 			if ( empty( $this->coupon_applied_count[ $code ] ) ) {
@@ -1946,7 +1974,7 @@ class WC_Cart {
 		}
 
 		/**
-		 * get_fees function.
+		 * Get fees.
 		 *
 		 * @return array
 		 */
@@ -2171,8 +2199,8 @@ class WC_Cart {
 		/**
 		 * Get tax row amounts with or without compound taxes includes.
 		 *
-		 * @param  boolean $compound True if getting compound taxes
-		 * @param  boolean $display  True if getting total to display
+		 * @param  bool $compound True if getting compound taxes
+		 * @param  bool $display  True if getting total to display
 		 * @return float price
 		 */
 		public function get_taxes_total( $compound = true, $display = true ) {
@@ -2243,7 +2271,7 @@ class WC_Cart {
 		 * Get the total of all order discounts (after tax discounts).
 		 *
 		 * @deprecated Order discounts (after tax) removed in 2.3
-		 * @return integer
+		 * @return int
 		 */
 		public function get_order_discount_total() {
 			_deprecated_function( 'get_order_discount_total', '2.3' );
