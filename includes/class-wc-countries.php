@@ -194,7 +194,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * get_allowed_country_states function.
+	 * Get allowed country states.
 	 * @return array
 	 */
 	public function get_allowed_country_states() {
@@ -216,7 +216,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * get_shipping_country_states function.
+	 * Get shipping country states.
 	 * @return array
 	 */
 	public function get_shipping_country_states() {
@@ -316,6 +316,7 @@ class WC_Countries {
 	 * Outputs the list of countries and states for use in dropdown boxes.
 	 * @param string $selected_country (default: '')
 	 * @param string $selected_state (default: '')
+	 * @param bool $escape (default: false)
 	 * @param bool   $escape (default: false)
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
@@ -475,7 +476,7 @@ class WC_Countries {
 
 	/**
 	 * Trim white space and commas off a line.
-	 * @param  string
+	 * @param  string $line
 	 * @return string
 	 */
 	private function trim_formatted_address_line( $line ) {
@@ -912,7 +913,7 @@ class WC_Countries {
 
 	/**
 	 * Apply locale and get address fields.
-	 * @param  mixed  $country
+	 * @param  mixed  $country (default: '')
 	 * @param  string $type (default: 'billing_')
 	 * @return array
 	 */
