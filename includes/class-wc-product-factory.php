@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_Factory {
 
 	/**
-	 * get_product function.
+	 * Get product.
 	 *
 	 * @param bool $the_product (default: false)
 	 * @param array $args (default: array())
