@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Beta Tester
  * Plugin URI: https://github.com/woothemes/woocommerce-beta-tester
  * Description: Run bleeding edge versions of WooCommerce from our Github repo. This will replace your installed version of WooCommerce with the latest tagged release on Github - use with caution, and not on production sites. You have been warned.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Mike Jolley
  * Author URI: http://woothemes.com/
  * Requires at least: 4.2
@@ -49,6 +49,7 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 */
 		public static function activate() {
 			delete_site_transient( 'update_plugins' );
+			delete_site_transient( 'woocommerce_latest_tag' );
 		}
 
 		/**
@@ -61,8 +62,8 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 				'proper_folder_name' => 'woocommerce',
 				'api_url'            => 'https://api.github.com/repos/woothemes/woocommerce',
 				'github_url'         => 'https://github.com/woothemes/woocommerce',
-				'requires'           => '4.2',
-				'tested'             => '4.2'
+				'requires'           => '4.4',
+				'tested'             => '4.4'
 			);
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
 			add_filter( 'plugins_api', array( $this, 'get_plugin_info' ), 10, 3 );
@@ -79,7 +80,7 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 			$this->config[ 'version' ]      = $plugin_data['Version'];
 			$this->config[ 'author' ]       = $plugin_data['Author'];
 			$this->config[ 'homepage' ]     = $plugin_data['PluginURI'];
-			$this->config[ 'new_version' ]  = $this->get_latest_tag();
+			$this->config[ 'new_version' ]  = $this->get_latest_prerelease();
 			$this->config[ 'last_updated' ] = $this->get_date();
 			$this->config[ 'description' ]  = $this->get_description();
 			$this->config[ 'zip_url' ]      = 'https://github.com/woothemes/woocommerce/zipball/' . $this->config[ 'new_version' ];
@@ -100,22 +101,27 @@ elseif ( ! class_exists( 'WC_Beta_Tester' ) ) :
 		 * @since 1.0
 		 * @return int $version the version number
 		 */
-		public function get_latest_tag() {
+		public function get_latest_prerelease() {
 			$tagged_version = get_site_transient( md5( $this->config['slug'] ) . '_latest_tag' );
 
 			if ( $this->overrule_transients() || empty( $tagged_version ) ) {
 
-				$raw_response = wp_remote_get( trailingslashit( $this->config['api_url'] ) . 'tags' );
+				$raw_response = wp_remote_get( trailingslashit( $this->config['api_url'] ) . 'releases' );
 
 				if ( is_wp_error( $raw_response ) ) {
 					return false;
 				}
 
-				$tags = json_decode( $raw_response['body'] );
+				$releases       = json_decode( $raw_response['body'] );
+				$tagged_version = false;
 
-				if ( is_array( $tags ) ) {
-					$latest_tag     = $tags[0];
-					$tagged_version = $latest_tag->name;
+				if ( is_array( $releases ) ) {
+					foreach ( $releases as $release ) {
+						if ( $release->prerelease ) {
+							$tagged_version = $release->tag_name;
+							break;
+						}
+					}
 				}
 
 				// refresh every 6 hours

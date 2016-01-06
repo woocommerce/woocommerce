@@ -5,7 +5,7 @@ Contributors: woothemes, mikejolley, claudiosanches
 Tags: woocommerce, wc, beta, beta tester, bleeding edge
 Requires at least: 4.2
 Tested up to: 4.4
-Stable Tag: 1.0.0
+Stable Tag: 1.0.1
 
 Run bleeding edge versions of WooCommerce from our Github repo. This will replace your installed version of WooCommerce with the latest tagged release on Github - use with caution, and not on production sites. You have been warned.
 
@@ -21,6 +21,8 @@ Based on WP_GitHub_Updater by Joachim Kudish and code by Patrick Garman.
 
 == Changelog ==
 
-= 1.0 =
+= 1.0.1 =
+* Switched to releases API to get latest release, rather than tag which are not chronological.
 
+= 1.0 =
 * First release.
