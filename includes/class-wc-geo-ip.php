@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Geolocation Class.
+ * WC_Geo_IP Class.
  */
 class WC_Geo_IP {
 
@@ -54,20 +54,60 @@ class WC_Geo_IP {
 	const GEOIP_ORG_EDITION_V6           = 23;
 	const GEOIP_DOMAIN_EDITION_V6        = 24;
 
+	/**
+	 * Flags.
+	 *
+	 * @var array
+	 */
 	public $flags;
 
+	/**
+	 * File handler.
+	 *
+	 * @var resource
+	 */
 	public $filehandle;
 
+	/**
+	 * Memory buffer.
+	 *
+	 * @var array
+	 */
 	public $memory_buffer;
 
+	/**
+	 * Database type.
+	 *
+	 * @var string
+	 */
 	public $databaseType;
 
+	/**
+	 * Database segments.
+	 *
+	 * @var int
+	 */
 	public $databaseSegments;
 
+	/**
+	 * Record length.
+	 *
+	 * @var int
+	 */
 	public $record_length;
 
+	/**
+	 * Shmid.
+	 *
+	 * @var string
+	 */
 	public $shmid;
 
+	/**
+	 * Two letters country codes.
+	 *
+	 * @var array
+	 */
 	public $GEOIP_COUNTRY_CODES = array(
 		'',
 		'AP',
@@ -327,6 +367,11 @@ class WC_Geo_IP {
 		'O1'
 	);
 
+	/**
+	 * 3 letters country codes.
+	 *
+	 * @var array
+	 */
 	public $GEOIP_COUNTRY_CODES3 = array(
 		'',
 		'AP',
@@ -586,6 +631,11 @@ class WC_Geo_IP {
 		'O1'
 	);
 
+	/**
+	 * Contry names.
+	 *
+	 * @var array
+	 */
 	public $GEOIP_COUNTRY_NAMES = array(
 		'',
 		'Asia/Pacific Region',
@@ -845,6 +895,11 @@ class WC_Geo_IP {
 		'Other'
 	);
 
+	/**
+	 * 2 letters continent codes.
+	 *
+	 * @var array
+	 */
 	public $GEOIP_CONTINENT_CODES = array(
 		'--',
 		'AS',
@@ -1667,16 +1722,91 @@ class WC_Geo_IP {
  * Geo IP Record class.
  */
 class WC_Geo_IP_Record {
+
+	/**
+	 * Country code.
+	 *
+	 * @var string
+	 */
 	public $country_code;
+
+	/**
+	 * 3 letters country code.
+	 *
+	 * @var string
+	 */
 	public $country_code3;
+
+	/**
+	 * Country name.
+	 *
+	 * @var string
+	 */
 	public $country_name;
+
+	/**
+	 * Region.
+	 *
+	 * @var string
+	 */
 	public $region;
+
+	/**
+	 * City.
+	 *
+	 * @var string
+	 */
 	public $city;
+
+	/**
+	 * Postal code.
+	 *
+	 * @var string
+	 */
 	public $postal_code;
+
+	/**
+	 * Latitude
+	 *
+	 * @var float
+	 */
 	public $latitude;
+
+	/**
+	 * Longitude.
+	 *
+	 * @var float
+	 */
 	public $longitude;
+
+	/**
+	 * Area code.
+	 *
+	 * @var string
+	 */
 	public $area_code;
-	public $dma_code; // metro and dma code are the same. use metro_code
+
+	/**
+	 * DMA Code.
+	 *
+	 * Metro and DMA code are the same.
+	 * Use metro code instead.
+	 *
+	 * @var int
+	 */
+	public $dma_code;
+
+	/**
+	 * Metro code.
+	 *
+	 * @var int
+	 */
 	public $metro_code;
+
+	/**
+	 * Continent code.
+	 *
+	 * @var string
+	 */
 	public $continent_code;
 }
