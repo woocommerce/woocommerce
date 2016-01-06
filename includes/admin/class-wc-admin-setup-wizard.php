@@ -401,18 +401,6 @@ class WC_Admin_Setup_Wizard {
 	 * Shipping and taxes.
 	 */
 	public function wc_setup_shipping_taxes() {
-		$domestic                         = new WC_Shipping_Flat_Rate();
-		$international                    = new WC_Shipping_International_Delivery();
-		$shipping_cost_domestic           = '';
-		$shipping_cost_international      = '';
-
-		if ( 'yes' === $domestic->get_option( 'enabled' ) ) {
-			$shipping_cost_domestic      = $domestic->get_option( 'cost' );
-		}
-
-		if ( 'yes' === $international->get_option( 'enabled' ) ) {
-			$shipping_cost_international      = $international->get_option( 'cost' );
-		}
 		?>
 		<h1><?php _e( 'Shipping &amp; Tax Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
@@ -426,20 +414,20 @@ class WC_Admin_Setup_Wizard {
 				<tr>
 					<th scope="row"><label for="woocommerce_calc_shipping"><?php _e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="checkbox" id="woocommerce_calc_shipping" <?php checked( get_option( 'woocommerce_calc_shipping', 'no' ), 'yes' ); ?> name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
+						<input type="checkbox" id="woocommerce_calc_shipping" <?php checked( get_option( 'woocommerce_ship_to_countries', '' ) !== 'disabled', true ); ?> name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
 						<label for="woocommerce_calc_shipping"><?php _e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="shipping_cost_domestic"><?php _e( '<strong>Domestic</strong> shipping costs:', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="shipping_cost_domestic"><?php _e( '<strong>Domestic</strong> shipping cost:', 'woocommerce' ); ?></label></th>
 					<td>
-						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="' . esc_attr( $shipping_cost_domestic ) . '" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" />' ); ?>
+						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" />' ); ?>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="shipping_cost_international"><?php _e( '<strong>International</strong> shipping costs:', 'woocommerce' ); ?></label></th>
+					<th scope="row"><label for="shipping_cost_worldwide"><?php _e( '<strong>Worldwide</strong> shipping cost:', 'woocommerce' ); ?></label></th>
 					<td>
-						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="' . esc_attr( $shipping_cost_international ) . '" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_international_item" name="shipping_cost_international_item" size="5" />' ); ?>
+						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_worldwide" name="shipping_cost_worldwide" size="5" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_worldwide_item" name="shipping_cost_worldwide_item" size="5" />' ); ?>
 					</td>
 				</tr>
 				<tr class="section_title">
@@ -534,56 +522,63 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_taxes_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$woocommerce_calc_shipping = isset( $_POST['woocommerce_calc_shipping'] ) ? 'yes' : 'no';
-		$woocommerce_calc_taxes    = isset( $_POST['woocommerce_calc_taxes'] ) ? 'yes' : 'no';
+		$enable_shipping = isset( $_POST['woocommerce_calc_shipping'] );
+		$enable_taxes    = isset( $_POST['woocommerce_calc_taxes'] );
 
-		update_option( 'woocommerce_calc_shipping', $woocommerce_calc_shipping );
-		update_option( 'woocommerce_calc_taxes', $woocommerce_calc_taxes );
+		if ( $enable_shipping ) {
+			update_option( 'woocommerce_ship_to_countries', '' );
+		} else {
+			update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		}
+
+		update_option( 'woocommerce_calc_taxes', $enable_taxes ? 'yes' : 'no' );
 		update_option( 'woocommerce_prices_include_tax', sanitize_text_field( $_POST['woocommerce_prices_include_tax'] ) );
 
-		if ( 'yes' === $woocommerce_calc_shipping && ! empty( $_POST['shipping_cost_domestic'] ) ) {
-			// Delete existing settings if they exist
-			delete_option( 'woocommerce_flat_rate_settings' );
+		if ( $enable_shipping && ! empty( $_POST['shipping_cost_domestic'] ) ) {
+			// Create a domestic shipping zone
+			$zone = new WC_Shipping_Zone( $zone_data['zone_id'] );
+			$zone->set_zone_name( __( 'Domestic', 'woocommerce' ) );
+			$zone->set_zone_order( 1 );
+			$zone->add_location( WC()->countries->get_base_country(), 'country' );
+			$zone->save();
 
-			// Init rate and settings
-			$shipping_method = new WC_Shipping_Flat_Rate();
+			// Add a flat rate shipping method to this domestic zone
+			$instance_id     = $zone->add_shipping_method( 'flat_rate' );
+			$shipping_method = new WC_Shipping_Flat_Rate( $instance_id );
+			$option_key      = $shipping_method->get_instance_option_key();
+
+			// Update rate settings
 			$costs           = array();
 			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_domestic'] ) );
 			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_domestic_item'] ) ) {
 				$costs[] = $item_cost . ' * [qty]';
 			}
-			$shipping_method->settings['cost']         = implode( ' + ', array_filter( $costs ) );
-			$shipping_method->settings['enabled']      = 'yes';
-			$shipping_method->settings['type']         = 'order';
-			$shipping_method->settings['availability'] = 'specific';
-			$shipping_method->settings['countries']    = array( WC()->countries->get_base_country() );
-
-			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
+			$shipping_method->instance_settings['cost']    = implode( ' + ', array_filter( $costs ) );
+			$shipping_method->instance_settings['enabled'] = 'yes';
+			$shipping_method->instance_settings['type']    = 'order';
+			update_option( $option_key, $shipping_method->instance_settings );
 		}
 
-		if ( 'yes' === $woocommerce_calc_shipping && ! empty( $_POST['shipping_cost_international'] ) ) {
-			// Delete existing settings if they exist
-			delete_option( 'woocommerce_international_delivery_settings' );
+		if ( $enable_shipping && ! empty( $_POST['shipping_cost_worldwide'] ) ) {
+			// Add a flat rate shipping method to the worldwide zone
+			$zone            = WC_Shipping_Zones::get_zone( 0 );
+			$instance_id     = $zone->add_shipping_method( 'flat_rate' );
+			$shipping_method = new WC_Shipping_Flat_Rate( $instance_id );
+			$option_key      = $shipping_method->get_instance_option_key();
 
-			// Init rate and settings
-			$shipping_method = new WC_Shipping_International_Delivery();
+			// Update rate settings
 			$costs           = array();
-			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_international'] ) );
-			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_international_item'] ) ) {
+			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_worldwide'] ) );
+			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_worldwide_item'] ) ) {
 				$costs[] = $item_cost . ' * [qty]';
 			}
-			$shipping_method->settings['cost']         = implode( ' + ', array_filter( $costs ) );
-			$shipping_method->settings['enabled']      = 'yes';
-			$shipping_method->settings['type']         = 'order';
-			if ( ! empty( $_POST['shipping_cost_domestic'] ) ) {
-				$shipping_method->settings['availability'] = 'excluding';
-				$shipping_method->settings['countries']    = array( WC()->countries->get_base_country() );
-			}
-
-			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
+			$shipping_method->instance_settings['cost']    = implode( ' + ', array_filter( $costs ) );
+			$shipping_method->instance_settings['enabled'] = 'yes';
+			$shipping_method->instance_settings['type']    = 'order';
+			update_option( $option_key, $shipping_method->instance_settings );
 		}
 
-		if ( 'yes' === $woocommerce_calc_taxes && ! empty( $_POST['woocommerce_import_tax_rates'] ) ) {
+		if ( $enable_taxes && ! empty( $_POST['woocommerce_import_tax_rates'] ) ) {
 			$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
 			$tax_rates   = array();
 			$country     = WC()->countries->get_base_country();
