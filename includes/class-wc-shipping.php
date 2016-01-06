@@ -82,7 +82,7 @@ class WC_Shipping {
 	}
 
     /**
-     * init function.
+     * Initialize shipping.
      */
     public function init() {
 		do_action( 'woocommerce_shipping_init' );
@@ -91,8 +91,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * load_shipping_methods function.
-	 *
 	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
 	 *
 	 * Methods are sorted into their user-defined order after being loaded.
@@ -189,8 +187,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * get_shipping_methods function.
-	 *
 	 * Returns all registered shipping methods for usage.
 	 *
 	 * @access public
@@ -201,8 +197,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * get_shipping_classes function.
-	 *
 	 * Load shipping classes taxonomy terms.
 	 *
 	 * @access public
@@ -261,8 +255,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * calculate_shipping function.
-	 *
 	 * Calculate shipping for (multiple) packages of cart items.
 	 *
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
