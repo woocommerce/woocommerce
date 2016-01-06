@@ -711,21 +711,27 @@ function wc_get_customer_default_location() {
 		case 'geolocation_ajax' :
 		case 'geolocation' :
 			$location = WC_Geolocation::geolocate_ip();
-
-			// Base fallback.
-			if ( empty( $location['country'] ) ) {
-				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+			if ( ! empty( $location['country'] ) ) {
+				// We have a geolocated location. Convert it to a string so it can be passed
+				// through the filter in the same way as other results.
+				if ( empty( $location['state'] ) ) {
+					$location = $location['country'];
+				} else {
+					$location = implode( ':', $location );
+				}
+			} else {
+				// Base fallback.
+				$location = get_option( 'woocommerce_default_country' );
 			}
 		break;
 		case 'base' :
-			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+			$location = get_option( 'woocommerce_default_country' );
 		break;
 		default :
-			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', '' ) );
+			$location = '';
 		break;
 	}
-
-	return $location;
+	return wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $location ) );
 }
 
 // This function can be removed when WP 3.9.2 or greater is required.
