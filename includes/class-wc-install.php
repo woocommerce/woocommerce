@@ -43,7 +43,7 @@ class WC_Install {
 	}
 
 	/**
-	 * check_version function.
+	 * Check WooCommerce version.
 	 */
 	public static function check_version() {
 		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version ) ) {

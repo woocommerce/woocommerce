@@ -15,7 +15,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Tax {
 
+	/**
+	 * Precision.
+	 *
+	 * @var int
+	 */
 	public static $precision;
+
+	/**
+	 * Round at subtotal.
+	 *
+	 * @var bool
+	 */
 	public static $round_at_subtotal;
 
 	/**
