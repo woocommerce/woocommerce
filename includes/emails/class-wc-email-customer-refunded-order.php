@@ -19,7 +19,18 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
  */
 class WC_Email_Customer_Refunded_Order extends WC_Email {
 
+	/**
+	 * Refund order.
+	 *
+	 * @var WC_Order
+	 */
 	public $refund;
+
+	/**
+	 * Is the order partial refunded?
+	 *
+	 * @var bool
+	 */
 	public $partial_refund;
 
 	/**
@@ -37,6 +48,11 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 		parent::__construct();
 	}
 
+	/**
+	 * Set email strings.
+	 *
+	 * @param bool $partial_refund
+	 */
 	public function set_email_strings( $partial_refund = false ) {
 		$this->subject_partial     = $this->get_option( 'subject_partial', __( 'Your {site_title} order from {order_date} has been partially refunded', 'woocommerce' ) );
 		$this->subject_full        = $this->get_option( 'subject_full', __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' ) );
@@ -66,6 +82,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 	/**
 	 * Full refund notification.
+	 *
+	 * @param int $order_id
+	 * @param int $refund_id
 	 */
 	public function trigger_full( $order_id, $refund_id = null ) {
 		$this->trigger( $order_id, false, $refund_id );
@@ -73,6 +92,9 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 	/**
 	 * Partial refund notification.
+	 *
+	 * @param int $order_id
+	 * @param int $refund_id
 	 */
 	public function trigger_partial( $order_id, $refund_id = null ) {
 		$this->trigger( $order_id, true, $refund_id );
@@ -80,6 +102,10 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param int $order_id
+	 * @param bool $partial_refund
+	 * @param int $refund_id
 	 */
 	public function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
 		$this->partial_refund = $partial_refund;
@@ -110,7 +136,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	}
 
 	/**
-	 * get_subject function.
+	 * Get email subject.
 	 *
 	 * @access public
 	 * @return string
@@ -120,7 +146,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	}
 
 	/**
-	 * get_heading function.
+	 * Get email heading.
 	 *
 	 * @access public
 	 * @return string
@@ -130,7 +156,7 @@ class WC_Email_Customer_Refunded_Order extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
