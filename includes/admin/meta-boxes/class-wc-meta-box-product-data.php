@@ -218,6 +218,9 @@ class WC_Meta_Box_Product_Data {
 											include( 'views/html-product-download.php' );
 											echo esc_attr( ob_get_clean() );
 										?>"><?php _e( 'Add File', 'woocommerce' ); ?></a>
+
+										<?php do_action( 'woocommerce_product_downloadable_files_footer' ); ?>
+
 									</th>
 								</tr>
 							</tfoot>
