@@ -43,6 +43,8 @@ $products = new WP_Query( $args );
 
 $woocommerce_loop['columns'] = $columns;
 
+$woocommerce_loop['listtype'] = 'related';
+
 if ( $products->have_posts() ) : ?>
 
 	<div class="related products">
