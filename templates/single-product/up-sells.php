@@ -29,7 +29,7 @@ if ( sizeof( $upsells ) === 0 ) {
 
 $meta_query = WC()->query->get_meta_query();
 
-$args = array(
+$args = apply_filters( 'woocommerce_upsell_products_args', array(
 	'post_type'           => 'product',
 	'ignore_sticky_posts' => 1,
 	'no_found_rows'       => 1,
