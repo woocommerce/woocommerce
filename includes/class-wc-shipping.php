@@ -217,7 +217,6 @@ class WC_Shipping {
 	 * @return string
 	 */
 	private function get_default_method( $available_methods, $current_chosen_method = false ) {
-		$selection_priority = get_option( 'woocommerce_shipping_method_selection_priority', array() );
 
 		if ( ! empty( $available_methods ) ) {
 
@@ -234,8 +233,8 @@ class WC_Shipping {
 			$prioritized_methods = array();
 
 			foreach ( $available_methods as $method_key => $method ) {
-				// Some IDs contain : if they have multiple rates so use $method->method_id
-				$priority  = isset( $selection_priority[ $method->method_id ] ) ? absint( $selection_priority[ $method->method_id ] ): 1;
+
+				$priority  = $method->get_priority();
 
 				if ( empty( $prioritized_methods[ $priority ] ) ) {
 					$prioritized_methods[ $priority ] = array();
