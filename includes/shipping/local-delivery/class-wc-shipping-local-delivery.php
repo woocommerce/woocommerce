@@ -27,7 +27,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 	}
 
 	/**
-	 * init function.
+	 * Initialize local delivery.
 	 */
 	public function init() {
 
@@ -48,7 +48,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 	}
 
 	/**
-	 * calculate_shipping function.
+	 * Calculate local delivery shipping.
 	 *
 	 * @param array $package (default: array())
 	 */
