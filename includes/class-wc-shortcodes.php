@@ -446,9 +446,9 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$product = wc_setup_product_data( $product_data );
-
-		if ( ! $product ) {
+		if ( is_object( $product_data ) ) {
+			$product = wc_setup_product_data( $product_data );
+		} else {
 			return '';
 		}
 
@@ -490,6 +490,12 @@ class WC_Shortcodes {
 		} elseif ( isset( $atts['sku'] ) ) {
 			$product_id   = wc_get_product_id_by_sku( $atts['sku'] );
 			$product_data = get_post( $product_id );
+		} else {
+			return '';
+		}
+
+		if ( is_object( $product_data ) ) {
+			$product = wc_setup_product_data( $product_data );
 		} else {
 			return '';
 		}
