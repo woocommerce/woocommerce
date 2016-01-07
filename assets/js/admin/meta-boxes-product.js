@@ -131,12 +131,12 @@ jQuery( function( $ ) {
 
 		// Hide/Show all with rules
 		var hide_classes = '.hide_if_downloadable, .hide_if_virtual';
-		var show_classes = '.show_if_downloadable, .show_if_virtual, .show_if_external';
+		var show_classes = '.show_if_downloadable, .show_if_virtual';
 
 		$.each( woocommerce_admin_meta_boxes.product_types, function( index, value ) {
 			hide_classes = hide_classes + ', .hide_if_' + value;
 			show_classes = show_classes + ', .show_if_' + value;
-		} );
+		});
 
 		$( hide_classes ).show();
 		$( show_classes ).hide();
