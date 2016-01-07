@@ -38,7 +38,7 @@ $args = apply_filters( 'woocommerce_upsell_products_args', array(
 	'post__in'            => $upsells,
 	'post__not_in'        => array( $product->id ),
 	'meta_query'          => $meta_query
-);
+) );
 
 $products = new WP_Query( $args );
 
