@@ -32,6 +32,9 @@ class WC_Shipping_Rate {
 	/** @var string Label for the rate. */
 	public $method_id = '';
 
+	/** @var int Default rate priority. */
+	public $priority  = 1;
+
 	/**
 	 * Constructor.
 	 *
@@ -40,13 +43,15 @@ class WC_Shipping_Rate {
 	 * @param float $cost
 	 * @param array $taxes
 	 * @param string $method_id
+	 * @param int $priority
 	 */
-	public function __construct( $id, $label, $cost, $taxes, $method_id ) {
+	public function __construct( $id, $label, $cost, $taxes, $method_id, $priority = 1 ) {
 		$this->id 			= $id;
 		$this->label 		= $label;
 		$this->cost 		= $cost;
 		$this->taxes 		= $taxes ? $taxes : array();
 		$this->method_id 	= $method_id;
+		$this->priority		= $priority;
 	}
 
 	/**
@@ -69,5 +74,23 @@ class WC_Shipping_Rate {
 	 */
 	public function get_label() {
 		return apply_filters( 'woocommerce_shipping_rate_label', $this->label );
+	}
+
+	/**
+	 * Get priority.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return int Shipping rate priority.
+	 */
+	public function get_priority() {
+
+		// BC - Check for priority in settings when it has the default value.
+		if ( 1 == $this->priority ) {
+			$selection_priority = get_option( 'woocommerce_shipping_method_selection_priority', array() );
+			$this->priority = isset( $selection_priority[ $this->id ] ) ? absint( $selection_priority[ $this->id ] ) : 1;
+		}
+
+		return apply_filters( 'woocommerce_shipping_rate_priority', (int) $this->priority );
 	}
 }
