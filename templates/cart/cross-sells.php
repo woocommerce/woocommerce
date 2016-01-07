@@ -41,6 +41,8 @@ $products = new WP_Query( $args );
 
 $woocommerce_loop['columns'] = apply_filters( 'woocommerce_cross_sells_columns', $columns );
 
+$woocommerce_loop['listtype'] = 'cross-sells';
+
 if ( $products->have_posts() ) : ?>
 
 	<div class="cross-sells">
