@@ -27,7 +27,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	}
 
 	/**
-	 * init function.
+	 * Initialize local pickup.
 	 */
 	public function init() {
 
@@ -48,6 +48,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
 	 * calculate_shipping function.
+	 * Calculate local pickup shipping.
 	 */
 	public function calculate_shipping() {
 		$rate = array(
@@ -58,7 +59,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	}
 
 	/**
-	 * init_form_fields function.
+	 * Init form fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
@@ -188,7 +189,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	}
 
 	/**
-	 * clean function.
+	 * Clean code string.
 	 *
 	 * @access public
 	 * @param mixed $code
