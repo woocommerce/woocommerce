@@ -27,7 +27,7 @@ if ( 0 === sizeof( $crosssells ) ) return;
 
 $meta_query = WC()->query->get_meta_query();
 
-$args = array(
+$args = apply_filters( 'woocommerce_cross_sells_products_args', array(
 	'post_type'           => 'product',
 	'ignore_sticky_posts' => 1,
 	'no_found_rows'       => 1,
@@ -35,7 +35,7 @@ $args = array(
 	'orderby'             => $orderby,
 	'post__in'            => $crosssells,
 	'meta_query'          => $meta_query
-);
+));
 
 $products = new WP_Query( $args );
 
