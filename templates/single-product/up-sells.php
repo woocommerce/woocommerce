@@ -44,6 +44,8 @@ $products = new WP_Query( $args );
 
 $woocommerce_loop['columns'] = $columns;
 
+$woocommerce_loop['listtype'] = 'upsells';
+
 if ( $products->have_posts() ) : ?>
 
 	<div class="upsells products">
