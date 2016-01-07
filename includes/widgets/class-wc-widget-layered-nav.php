@@ -28,7 +28,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * update function.
+	 * Updates a particular instance of a widget.
 	 *
 	 * @see WP_Widget->update
 	 *
@@ -44,7 +44,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * form function.
+	 * Outputs the settings update form.
 	 *
 	 * @see WP_Widget->form
 	 *
@@ -105,7 +105,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *
@@ -380,7 +380,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			} // End display type conditional
 
 			$this->widget_end( $args );
-			
+
 			if ( ! $found ) {
 				ob_end_clean();
 			} else {
