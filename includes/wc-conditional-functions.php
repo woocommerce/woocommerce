@@ -358,12 +358,21 @@ function wc_is_valid_url( $url ) {
 }
 
 /**
+ * Check if the home URL is https. If it is, we don't need to do things such as 'force ssl'.
+ *
+ * @since  2.4.13
+ * @return bool
+ */
+function wc_site_is_https() {
+	return strstr( get_option( 'home' ), 'https:' );
+}
+
+/**
  * Check if the checkout is configured for https. Look at options, WP HTTPS plugin, or the permalink itself.
  *
  * @since  2.5.0
- *
  * @return bool
  */
 function wc_checkout_is_https() {
-	return 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || class_exists( 'WordPressHTTPS' ) || strstr( wc_get_page_permalink( 'checkout' ), 'https:' );
+	return wc_site_is_https() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || class_exists( 'WordPressHTTPS' ) || strstr( wc_get_page_permalink( 'checkout' ), 'https:' );
 }

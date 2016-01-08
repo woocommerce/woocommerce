@@ -19,7 +19,7 @@ class WC_HTTPS {
 	 * Hook in our HTTPS functions if we're on the frontend. This will ensure any links output to a page (when viewing via HTTPS) are also served over HTTPS.
 	 */
 	public static function init() {
-		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) && ! is_admin() ) {
+		if ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) && ! is_admin() ) {
 			// HTTPS urls with SSL on
 			$filters = array(
 				'post_thumbnail_html',
@@ -72,7 +72,7 @@ class WC_HTTPS {
 	public static function force_https_page_link( $link, $page_id ) {
 		if ( in_array( $page_id, array( get_option( 'woocommerce_checkout_page_id' ), get_option( 'woocommerce_myaccount_page_id' ) ) ) ) {
 			$link = str_replace( 'http:', 'https:', $link );
-		} elseif ( 'yes' == get_option( 'woocommerce_unforce_ssl_checkout' ) ) {
+		} elseif ( 'yes' === get_option( 'woocommerce_unforce_ssl_checkout' ) && ! wc_site_is_https() ) {
 			$link = str_replace( 'https:', 'http:', $link );
 		}
 		return $link;
@@ -102,7 +102,7 @@ class WC_HTTPS {
 			return;
 		}
 
-		if ( is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
+		if ( ! wc_site_is_https() && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
 
 			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
 				wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );
