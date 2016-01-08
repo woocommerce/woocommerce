@@ -440,7 +440,7 @@ final class WooCommerce {
 			$api_request_url = add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) );
 		}
 
-		return esc_url_raw( $api_request_url );
+		return esc_url_raw( apply_filters( 'woocommerce_api_request_url', $api_request_url, $request, $ssl ) );
 	}
 
 	/**
