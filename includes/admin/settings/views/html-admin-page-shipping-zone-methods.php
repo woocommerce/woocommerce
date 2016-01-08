@@ -1,4 +1,4 @@
-<h2><?php _e( 'Shipping Methods', 'woocommerce' ); ?> (<?php echo esc_html( $zone->get_zone_name() ); ?>) <small class="wc-admin-breadcrumb">&lt; <a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>"><?php _e( 'Shipping Zones', 'woocommerce' ); ?></a><small></h2>
+<h2><?php _e( 'Shipping Methods', 'woocommerce' ); ?> (<?php echo esc_html( $zone->get_zone_name() ); ?>) <small class="wc-admin-breadcrumb"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>" title="<?php echo esc_attr( __( 'Return to Shipping Zones', 'woocommerce' ) ); ?>">&#x21a9;</a></small></h2>
 <p><?php printf( __( 'The following shipping methods will apply to customers within the %s zone.', 'woocommerce' ), esc_html( $zone->get_zone_name() ) ); ?><p>
 <table class="wc-shipping-zone-methods widefat">
     <thead>
