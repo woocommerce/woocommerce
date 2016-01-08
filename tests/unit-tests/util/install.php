@@ -34,7 +34,9 @@ class WC_Tests_Install extends \WC_Unit_Test_Case {
 		// clean existing install first
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
+			update_option( 'woocommerce_status_options', array( 'uninstall_data' => 1 ) );
 		}
+
 		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
 
 		\WC_Install::install();
@@ -86,6 +88,7 @@ class WC_Tests_Install extends \WC_Unit_Test_Case {
 		// Clean existing install first
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
+			update_option( 'woocommerce_status_options', array( 'uninstall_data' => 1 ) );
 		}
 		include( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/uninstall.php' );
 

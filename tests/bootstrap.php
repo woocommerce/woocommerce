@@ -66,6 +66,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		// clean existing install first
 		define( 'WP_UNINSTALL_PLUGIN', true );
+		update_option( 'woocommerce_status_options', array( 'uninstall_data' => 1 ) );
 		include( $this->plugin_dir . '/uninstall.php' );
 
 		WC_Install::install();

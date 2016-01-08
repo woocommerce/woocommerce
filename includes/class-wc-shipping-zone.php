@@ -360,7 +360,7 @@ class WC_Shipping_Zone {
 	 * @access private
      * @param array $zone_data data to save for this zone
      */
-    public function update( $zone_data ) {
+    private function update( $zone_data ) {
         global $wpdb;
 		$wpdb->update( $wpdb->prefix . 'woocommerce_shipping_zones', $zone_data, array( 'zone_id' => $this->get_zone_id() ) );
     }

@@ -11,6 +11,8 @@ class WC_Helper_Shipping_Zones {
      * Create some mock shipping zones to test against
      */
     public static function create_mock_zones() {
+        self::remove_mock_zones();
+        
         // Local zone
         $zone = new WC_Shipping_Zone();
         $zone->set_zone_name( 'Local' );
@@ -46,12 +48,9 @@ class WC_Helper_Shipping_Zones {
      */
     public static function remove_mock_zones() {
         global $wpdb;
-        $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_shipping_zone_methods;" );
-        $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_shipping_zone_locations;" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_shipping_zones;" );
-        $wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_shipping_zone_methods" );
-        $wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_shipping_zone_locations" );
-        $wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_shipping_zones" );
+        $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods;" );
+        $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations;" );
+        $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_shipping_zones;" );
 		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
     }
 }
