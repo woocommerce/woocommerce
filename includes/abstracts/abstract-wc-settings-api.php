@@ -47,7 +47,18 @@ abstract class WC_Settings_API {
 	 * @return array of options
 	 */
 	public function get_form_fields() {
-		return apply_filters( 'woocommerce_settings_api_form_fields_' . $this->id, $this->form_fields );
+		return apply_filters( 'woocommerce_settings_api_form_fields_' . $this->id, array_map( array( $this, 'set_defaults' ), $this->form_fields ) );
+	}
+
+	/**
+	 * Set default required properties for each field.
+	 * @param array
+	 */
+	private function set_defaults( $field ) {
+		if ( ! isset( $field['default'] ) ) {
+			$field['default'] = '';
+		}
+		return $field;
 	}
 
 	/**

@@ -102,6 +102,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-customer.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-order.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php' );
 	}
 
 	/**

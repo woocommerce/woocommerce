@@ -483,7 +483,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
   PRIMARY KEY  (location_id),
   KEY location_id (location_id),
   KEY location_type (location_type),
-  KEY zone_location_type_code (location_type(40),location_code(90))
+  KEY location_type_code (location_type(40),location_code(90))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
   zone_id bigint(20) NOT NULL,
