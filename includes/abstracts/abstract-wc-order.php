@@ -451,6 +451,13 @@ abstract class WC_Abstract_Order {
 		$taxes = array_map( 'wc_format_decimal', $shipping_rate->taxes );
 		wc_add_order_item_meta( $item_id, 'taxes', $taxes );
 
+		// Store meta
+		if ( ! empty( $shipping_rate->get_meta_data() ) ) {
+			foreach ( $shipping_rate->get_meta_data() as $key => $value ) {
+				wc_add_order_item_meta( $item_id, $key, $value );
+			}
+		}
+
 		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
 
 		// Update total

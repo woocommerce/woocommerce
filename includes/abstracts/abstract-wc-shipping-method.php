@@ -213,11 +213,12 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public function add_rate( $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'id'        => '',          // ID for the rate
-			'label'     => '',          // Label for the rate
-			'cost'      => '0',         // Amount or array of costs (per item shipping)
-			'taxes'     => '',          // Pass taxes, nothing to have it calculated for you, or 'false' to calc no tax
-			'calc_tax'  => 'per_order'  // Calc tax per_order or per_item. Per item needs an array of costs
+			'id'        => '', // ID for the rate
+			'label'     => '', // Label for the rate
+			'cost'      => '0', // Amount or array of costs (per item shipping)
+			'taxes'     => '', // Pass taxes, or leave empty to have it calculated for you, or 'false' to disable calculations
+			'calc_tax'  => 'per_order', // Calc tax per_order or per_item. Per item needs an array of costs
+			'meta_data' => array() // Array of misc meta data to store along with this rate - key value pairs.
 		) );
 
 		// ID and label are required
@@ -234,7 +235,16 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$taxes = 'per_item' === $args['calc_tax'] ? $this->get_taxes_per_item( $args['cost'] ) : WC_Tax::calc_shipping_tax( $total_cost, WC_Tax::get_shipping_tax_rates() );
 		}
 
-		$this->rates[ $args['id'] ] = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );
+		// Create rate object
+		$rate = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );
+
+		if ( ! empty( $args['meta_data'] ) ) {
+			foreach ( $args['meta_data'] as $key => $value ) {
+				$rate->add_meta_data( $key, $value );
+			}
+		}
+
+		$this->rates[ $args['id'] ] = $rate;
 	}
 
 	/**

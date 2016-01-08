@@ -1183,6 +1183,11 @@ ul.wc_coupon_list_block {
 					color: #bbbbbb;
 				}
 			}
+			.shipping_method_name,
+			.shipping_method {
+				width: 100%;
+				margin: 0 0 .5em;
+			}
 		}
 
 		th.line_tax {

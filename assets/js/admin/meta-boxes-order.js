@@ -802,7 +802,7 @@ jQuery( function ( $ ) {
 
 			add: function() {
 				var $button = $( this );
-				var $item = $button.closest( 'tr.item' );
+				var $item = $button.closest( 'tr.item, tr.shipping' );
 
 				var data = {
 					order_item_id: $item.attr( 'data-order_item_id' ),
