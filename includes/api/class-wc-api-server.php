@@ -459,7 +459,7 @@ class WC_API_Server {
 				'tax_included'       => wc_prices_include_tax(),
 				'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
 				'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
-				'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
+				'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || wc_site_is_https() ),
 				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
 				'generate_password'  => ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ),
 				'links'              => array(
