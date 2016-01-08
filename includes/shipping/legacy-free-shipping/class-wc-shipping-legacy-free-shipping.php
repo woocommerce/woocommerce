@@ -70,7 +70,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 			'enabled' => array(
 				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable Free Shipping', 'woocommerce' ),
+				'label' 		=> __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
 				'default' 		=> 'no'
 			),
 			'title' => array(

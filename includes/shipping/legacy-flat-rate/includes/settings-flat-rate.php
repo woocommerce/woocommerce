@@ -13,7 +13,7 @@ $settings = array(
 	'enabled' => array(
 		'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 		'type' 			=> 'checkbox',
-		'label' 		=> __( 'Enable this shipping method', 'woocommerce' ),
+		'label' 		=> __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
 		'default' 		=> 'no',
 	),
 	'title' => array(

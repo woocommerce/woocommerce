@@ -97,7 +97,7 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 			'enabled' => array(
 				'title'   => __( 'Enable', 'woocommerce' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Enable local delivery', 'woocommerce' ),
+				'label'   => __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
 				'default' => 'no'
 			),
 			'title' => array(
