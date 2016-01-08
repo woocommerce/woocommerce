@@ -241,13 +241,9 @@ class WC_Product {
 	 */
 	public function check_stock_status() {
 		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( $this->stock_status !== 'outofstock' ) {
-				$this->set_stock_status( 'outofstock' );
-			}
+			$this->set_stock_status( 'outofstock' );
 		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			if ( $this->stock_status !== 'instock' ) {
-				$this->set_stock_status( 'instock' );
-			}
+			$this->set_stock_status( 'instock' );
 		}
 	}
 
