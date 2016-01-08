@@ -34,7 +34,8 @@
 					} else {
 						echo '<ul>';
 						foreach ( $methods as $method ) {
-							echo '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
+                            $class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
+							echo '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
 						}
 						echo '</ul>';
 					}

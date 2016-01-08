@@ -2267,6 +2267,11 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 			}
 		}
 	}
+	.wc-shipping-zone-methods {
+		.method_disabled {
+			text-decoration: line-through;
+		}
+	}
 	.wc-shipping-zone-actions, .wc-shipping-zone-method-actions {
 		width: 6em;
 
