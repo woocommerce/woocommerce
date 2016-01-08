@@ -322,7 +322,11 @@ class WC_Form_Handler {
 					// Process
 					if ( wc_notice_count( 'error' ) == 0 ) {
 
+						do_action( 'woocommerce_before_process_payment', $order_id );
+
 						$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
+
+						do_action( 'woocommerce_after_process_payment', $order_id, $result );
 
 						// Redirect to success/confirmation/payment page
 						if ( 'success' === $result['result'] ) {

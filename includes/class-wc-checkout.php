@@ -640,7 +640,12 @@ class WC_Checkout {
 					WC()->session->order_awaiting_payment = $order_id;
 
 					// Process Payment
+
+					do_action( 'woocommerce_before_process_payment', $order_id );
+
 					$result = $available_gateways[ $this->posted['payment_method'] ]->process_payment( $order_id );
+
+					do_action( 'woocommerce_after_process_payment', $order_id, $result );
 
 					// Redirect to success/confirmation/payment page
 					if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
