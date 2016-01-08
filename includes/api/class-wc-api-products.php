@@ -1638,14 +1638,14 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Product categories.
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
-			wp_set_object_terms( $product_id, $term_ids, 'product_cat' );
+			$terms = array_unique( $data['categories'] );
+			wp_set_object_terms( $product_id, $terms, 'product_cat' );
 		}
 
 		// Product tags.
 		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
-			wp_set_object_terms( $product_id, $term_ids, 'product_tag' );
+			$terms = array_unique( $data['tags'] );
+			wp_set_object_terms( $product_id, $terms, 'product_tag' );
 		}
 
 		// Downloadable.
@@ -1973,9 +1973,17 @@ class WC_API_Products extends WC_API_Resource {
 						$_attribute_key           = 'attribute_' . sanitize_title( $_attribute['name'] );
 						$updated_attribute_keys[] = $_attribute_key;
 
+
 						if ( isset( $_attribute['is_taxonomy'] ) && $_attribute['is_taxonomy'] ) {
+							$taxonomy = $_attribute['name'];
+
 							// Don't use wc_clean as it destroys sanitized characters
-							$_attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
+							if ( ! $term_info = term_exists( sanitize_title( stripslashes( $attribute['option'] ) ), $taxonomy ) ) {
+								throw new WC_API_Exception( 'woocommerce_api_invalid_variation_attribute_term', sprintf( __( 'The variation attribute term %s doesn\'t exist in the taxonomy %s.', 'woocommerce' ), $attribute['option'], $taxonomy ), 400 );
+							} else {
+								$term             = get_term( $term_info['term_id'], $taxonomy );
+								$_attribute_value = isset( $term->slug ) ? $term->slug : '';
+							}
 						} else {
 							$_attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
 						}
