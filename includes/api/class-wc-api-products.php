@@ -1545,7 +1545,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Backorders.
 			if ( isset( $data['backorders'] ) ) {
-				if ( 'notify' == $data['backorders'] ) {
+				if ( 'notify' === $data['backorders'] ) {
 					$backorders = 'notify';
 				} else {
 					$backorders = ( true === $data['backorders'] ) ? 'yes' : 'no';
