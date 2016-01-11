@@ -66,7 +66,6 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 		if ( ! is_user_logged_in() ) {
-			add_action( 'woocommerce_thankyou', array( $this, 'destroy_session' ) );
 			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
 		}
 	}

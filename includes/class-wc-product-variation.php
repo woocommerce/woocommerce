@@ -471,7 +471,9 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * set_stock_status function.
+	 * Set stock status.
+	 *
+	 * @param string $status
 	 */
 	public function set_stock_status( $status ) {
 		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
@@ -588,7 +590,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * is_on_backorder function.
+	 * Is on backorder?
 	 *
 	 * @param int $qty_in_cart (default: 0)
 	 * @return bool

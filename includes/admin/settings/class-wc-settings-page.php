@@ -19,7 +19,18 @@ if ( ! class_exists( 'WC_Settings_Page' ) ) :
  */
 abstract class WC_Settings_Page {
 
-	protected $id    = '';
+	/**
+	 * Setting page id.
+	 *
+	 * @var string
+	 */
+	protected $id = '';
+
+	/**
+	 * Setting page label.
+	 *
+	 * @var string
+	 */
 	protected $label = '';
 
 	/**

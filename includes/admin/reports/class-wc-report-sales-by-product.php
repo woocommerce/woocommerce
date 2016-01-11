@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WC_Report_Sales_By_Product
  *
@@ -9,8 +14,25 @@
  */
 class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
+	/**
+	 * Chart colours.
+	 *
+	 * @var array
+	 */
 	public $chart_colours      = array();
+
+	/**
+	 * Product ids.
+	 *
+	 * @var array
+	 */
 	public $product_ids        = array();
+
+	/**
+	 * Product ids with titles.
+	 *
+	 * @var array
+	 */
 	public $product_ids_titles = array();
 
 	/**
@@ -124,7 +146,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * [get_chart_widgets description].
+	 * Get chart widgets.
 	 *
 	 * @return array
 	 */
@@ -148,7 +170,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * Show current filters.
+	 * Output current filters.
 	 */
 	public function current_filters() {
 
@@ -170,7 +192,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	}
 
 	/**
-	 * Product selection.
+	 * Output products widget.
 	 */
 	public function products_widget() {
 		?>

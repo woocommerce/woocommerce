@@ -1835,7 +1835,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Search for gruoped products and return json.
+	 * Search for grouped products and return json.
 	 */
 	public static function json_search_grouped_products() {
 		ob_start();

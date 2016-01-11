@@ -275,16 +275,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
-		$fields = array();
-
-		if ( $order->customer_note ) {
-			$fields['customer_note'] = array(
-				'label' => __( 'Note', 'woocommerce' ),
-				'value' => wptexturize( $order->customer_note )
-			);
-		}
-
-		$fields = apply_filters( 'woocommerce_email_order_meta_fields', $fields, $sent_to_admin, $order );
+		$fields = apply_filters( 'woocommerce_email_order_meta_fields', array(), $sent_to_admin, $order );
 
 		/**
 		 * Deprecated woocommerce_email_order_meta_keys filter.
@@ -347,6 +338,13 @@ class WC_Emails {
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
 		$fields = array();
 
+		if ( $order->customer_note ) {
+			$fields['customer_note'] = array(
+				'label' => __( 'Note', 'woocommerce' ),
+				'value' => wptexturize( $order->customer_note )
+			);
+		}
+		
 		if ( $order->billing_email ) {
 			$fields['billing_email'] = array(
 				'label' => __( 'Email', 'woocommerce' ),

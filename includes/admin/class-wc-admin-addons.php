@@ -50,7 +50,10 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Get section for the addons screen
+	 * Get section for the addons screen.
+	 *
+	 * @param  string $section_id
+	 *
 	 * @return object|bool
 	 */
 	public static function get_section( $section_id ) {
@@ -62,7 +65,10 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Get section content for the addons screen
+	 * Get section content for the addons screen.
+	 *
+	 * @param  string $section_id
+	 *
 	 * @return array
 	 */
 	public static function get_section_data( $section_id ) {

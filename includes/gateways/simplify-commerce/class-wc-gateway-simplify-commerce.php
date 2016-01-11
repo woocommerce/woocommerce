@@ -158,6 +158,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 	/**
 	 * Check if this gateway is enabled.
+	 *
+	 * @return bool
 	 */
 	public function is_available() {
 		if ( 'yes' !== $this->enabled ) {
@@ -277,8 +279,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * payment_scripts function.
-	 *
 	 * Outputs scripts used for simplify payment.
 	 */
 	public function payment_scripts() {
@@ -377,7 +377,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	/**
 	 * Process the payment.
 	 *
-	 * @param integer $order_id
+	 * @param int $order_id
 	 */
 	public function process_payment( $order_id ) {
 		$cart_token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
@@ -535,7 +535,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * get_icon function.
+	 * Get gateway icon.
 	 *
 	 * @access public
 	 * @return string

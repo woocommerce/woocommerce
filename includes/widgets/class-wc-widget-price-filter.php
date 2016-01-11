@@ -37,7 +37,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *

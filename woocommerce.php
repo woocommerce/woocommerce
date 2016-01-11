@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.5.0-beta-3
+ * Version: 2.5.0-RC1
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 4.1
@@ -26,58 +26,78 @@ if ( ! class_exists( 'WooCommerce' ) ) :
  * Main WooCommerce Class.
  *
  * @class WooCommerce
- * @version	2.4.0
+ * @version	2.5.0
  */
 final class WooCommerce {
 
 	/**
+	 * WooCommerce version.
+	 *
 	 * @var string
 	 */
 	public $version = '2.6.0';
 
 	/**
-	 * @var WooCommerce The single instance of the class.
+	 * The single instance of the class.
+	 *
+	 * @var WooCommerce
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
 
 	/**
-	 * @var WC_Session session
+	 * Session instance.
+	 *
+	 * @var WC_Session
 	 */
 	public $session = null;
 
 	/**
-	 * @var WC_Query $query
+	 * Query instance.
+	 *
+	 * @var WC_Query
 	 */
 	public $query = null;
 
 	/**
-	 * @var WC_Product_Factory $product_factory
+	 * Product factory instance.
+	 *
+	 * @var WC_Product_Factory
 	 */
 	public $product_factory = null;
 
 	/**
-	 * @var WC_Countries $countries
+	 * Countries instance.
+	 *
+	 * @var WC_Countries
 	 */
 	public $countries = null;
 
 	/**
-	 * @var WC_Integrations $integrations
+	 * Integrations instance.
+	 *
+	 * @var WC_Integrations
 	 */
 	public $integrations = null;
 
 	/**
-	 * @var WC_Cart $cart
+	 * Cart instance.
+	 *
+	 * @var WC_Cart
 	 */
 	public $cart = null;
 
 	/**
-	 * @var WC_Customer $customer
+	 * Customer instance.
+	 *
+	 * @var WC_Customer
 	 */
 	public $customer = null;
 
 	/**
-	 * @var WC_Order_Factory $order_factory
+	 * Order factory instance.
+	 *
+	 * @var WC_Order_Factory
 	 */
 	public $order_factory = null;
 
@@ -421,7 +441,7 @@ final class WooCommerce {
 			$api_request_url = add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) );
 		}
 
-		return esc_url_raw( $api_request_url );
+		return esc_url_raw( apply_filters( 'woocommerce_api_request_url', $api_request_url, $request, $ssl ) );
 	}
 
 	/**

@@ -83,7 +83,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *

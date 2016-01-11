@@ -90,7 +90,7 @@ class WC_Shipping {
 	}
 
     /**
-     * init function.
+     * Initialize shipping.
      */
     public function init() {
 		do_action( 'woocommerce_shipping_init' );
@@ -122,7 +122,7 @@ class WC_Shipping {
 	}
 
 	/**
-	 * Load shipping methods.
+	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
 	 *
 	 * Loads all shipping methods which are hooked in.
 	 * If a $package is passed some methods may add themselves conditionally and zones will be used.
@@ -173,7 +173,50 @@ class WC_Shipping {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Returns all registered shipping methods.
+=======
+	 * Sort shipping methods.
+	 *
+	 * Sorts shipping methods into the user defined order.
+	 *
+	 * @return array
+	 */
+	public function sort_shipping_methods() {
+
+		$sorted_shipping_methods = array();
+
+		// Get order option
+		$ordering 	= (array) get_option('woocommerce_shipping_method_order');
+		$order_end 	= 999;
+
+		// Load shipping methods in order
+		foreach ( $this->shipping_methods as $method ) {
+
+			if ( isset( $ordering[ $method->id ] ) && is_numeric( $ordering[ $method->id ] ) ) {
+				// Add in position
+				$sorted_shipping_methods[ $ordering[ $method->id ] ][] = $method;
+			} else {
+				// Add to end of the array
+				$sorted_shipping_methods[ $order_end ][] = $method;
+			}
+		}
+
+		ksort( $sorted_shipping_methods );
+
+		$this->shipping_methods = array();
+
+		foreach ( $sorted_shipping_methods as $methods )
+			foreach ( $methods as $method ) {
+				$id = empty( $method->instance_id ) ? $method->id : $method->instance_id;
+				$this->shipping_methods[ $id ] = $method;
+			}
+
+		return $this->shipping_methods;
+	}
+
+	/**
+	 * Returns all registered shipping methods for usage.
 	 *
 	 * @access public
 	 * @return array

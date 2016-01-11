@@ -21,6 +21,8 @@ class WC_Meta_Box_Order_Reviews {
 
 	/**
 	 * Output the metabox.
+	 *
+	 * @param WP_Comment $comment
 	 */
 	public static function output( $comment ) {
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -37,6 +39,9 @@ class WC_Meta_Box_Order_Reviews {
 
 	/**
 	 * Save meta box data.
+	 *
+	 * @param string $location
+	 * @param int $comment_id
 	 */
 	public static function save( $location, $comment_id ) {
 		// Not allowed, return regular value without updating meta

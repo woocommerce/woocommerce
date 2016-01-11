@@ -57,7 +57,7 @@ class WC_Shipping_Rate {
 	}
 
 	/**
-	 * get_shipping_tax function.
+	 * Get shipping tax.
 	 *
 	 * @return array
 	 */

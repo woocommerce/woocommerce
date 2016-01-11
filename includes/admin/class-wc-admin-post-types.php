@@ -1533,38 +1533,43 @@ class WC_Admin_Post_Types {
 		) ) );
 
 		$search_order_id = str_replace( 'Order #', '', $_GET['s'] );
-		if ( ! is_numeric( $search_order_id ) ) {
-			$search_order_id = 0;
-		}
 
 		// Search orders
-		$post_ids = array_unique( array_merge(
-			$wpdb->get_col(
-				$wpdb->prepare( "
-					SELECT DISTINCT p1.post_id
-					FROM {$wpdb->postmeta} p1
-					INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
-					WHERE
-						( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-					OR
-						( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-					OR
-						( p1.meta_key IN ('" . implode( "','", $search_fields ) . "') AND p1.meta_value LIKE '%%%s%%' )
-					",
-					esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] ), esc_attr( $_GET['s'] )
+		if ( is_numeric( $search_order_id ) ) {
+			$post_ids = array_unique( array_merge(
+				$wpdb->get_col(
+					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%d%%';", absint( $search_order_id ) )
+				),
+				array( absint( $search_order_id ) )
+			) );
+		} else {
+			$post_ids = array_unique( array_merge(
+				$wpdb->get_col(
+					$wpdb->prepare( "
+						SELECT DISTINCT p1.post_id
+						FROM {$wpdb->postmeta} p1
+						INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
+						WHERE
+							( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
+						OR
+							( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
+						OR
+							( p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%s%%' )
+						",
+						wc_clean( $_GET['s'] ), wc_clean( $_GET['s'] ), wc_clean( $_GET['s'] )
+					)
+				),
+				$wpdb->get_col(
+					$wpdb->prepare( "
+						SELECT order_id
+						FROM {$wpdb->prefix}woocommerce_order_items as order_items
+						WHERE order_item_name LIKE '%%%s%%'
+						",
+						wc_clean( $_GET['s'] )
+					)
 				)
-			),
-			$wpdb->get_col(
-				$wpdb->prepare( "
-					SELECT order_id
-					FROM {$wpdb->prefix}woocommerce_order_items as order_items
-					WHERE order_item_name LIKE '%%%s%%'
-					",
-					esc_attr( $_GET['s'] )
-				)
-			),
-			array( $search_order_id )
-		) );
+			) );
+		}
 
 		// Remove s - we don't want to search order name
 		unset( $wp->query_vars['s'] );

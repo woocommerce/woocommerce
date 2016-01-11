@@ -213,6 +213,8 @@ class WC_Comments {
 
 	/**
 	 * Modify recipient of review email.
+	 * @param array $emails
+	 * @param int $comment_id
 	 * @return array
 	 */
 	public static function comment_moderation_recipients( $emails, $comment_id ) {

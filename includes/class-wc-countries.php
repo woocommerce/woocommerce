@@ -223,7 +223,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * get_allowed_country_states function.
+	 * Get allowed country states.
 	 * @return array
 	 */
 	public function get_allowed_country_states() {
@@ -245,7 +245,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * get_shipping_country_states function.
+	 * Get shipping country states.
 	 * @return array
 	 */
 	public function get_shipping_country_states() {
@@ -345,6 +345,7 @@ class WC_Countries {
 	 * Outputs the list of countries and states for use in dropdown boxes.
 	 * @param string $selected_country (default: '')
 	 * @param string $selected_state (default: '')
+	 * @param bool $escape (default: false)
 	 * @param bool   $escape (default: false)
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
@@ -504,7 +505,7 @@ class WC_Countries {
 
 	/**
 	 * Trim white space and commas off a line.
-	 * @param  string
+	 * @param  string $line
 	 * @return string
 	 */
 	private function trim_formatted_address_line( $line ) {
@@ -551,7 +552,6 @@ class WC_Countries {
 			),
 			'city' => array(
 				'label'       => __( 'Town / City', 'woocommerce' ),
-				'placeholder' => __( 'Town / City', 'woocommerce' ),
 				'required'    => true,
 				'class'       => array( 'form-row-wide', 'address-field' )
 			),
@@ -564,7 +564,6 @@ class WC_Countries {
 			),
 			'postcode' => array(
 				'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
-				'placeholder' => __( 'Postcode / ZIP', 'woocommerce' ),
 				'required'    => true,
 				'class'       => array( 'form-row-last', 'address-field' ),
 				'clear'       => true,
@@ -620,15 +619,12 @@ class WC_Countries {
 				'AU' => array(
 					'city'      => array(
 						'label'       => __( 'Suburb', 'woocommerce' ),
-						'placeholder' => __( 'Suburb', 'woocommerce' ),
 					),
 					'postcode'  => array(
 						'label'       => __( 'Postcode', 'woocommerce' ),
-						'placeholder' => __( 'Postcode', 'woocommerce' ),
 					),
 					'state'     => array(
 						'label'       => __( 'State', 'woocommerce' ),
-						//'placeholder' => __( 'State', 'woocommerce' ),
 					)
 				),
 				'AX' => array(
@@ -643,7 +639,6 @@ class WC_Countries {
 					),
 					'state' => array(
 						'label'       => __( 'District', 'woocommerce' ),
-						//'placeholder' => __( 'District', 'woocommerce' ),
 					)
 				),
 				'BE' => array(
@@ -651,7 +646,6 @@ class WC_Countries {
 					'state' => array(
 						'required'    => false,
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					),
 				),
 				'BI' => array(
@@ -674,14 +668,12 @@ class WC_Countries {
 				'CA' => array(
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'CH' => array(
 					'postcode_before_city' => true,
 					'state' => array(
 						'label'       => __( 'Canton', 'woocommerce' ),
-						//'placeholder' => __( 'Canton', 'woocommerce' ),
 						'required'    => false
 					)
 				),
@@ -694,13 +686,11 @@ class WC_Countries {
 					),
 					'state'     => array(
 						'label'       => __( 'Region', 'woocommerce' ),
-						//'placeholder' => __( 'Region', 'woocommerce' )
 					)
 				),
 				'CN' => array(
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'CO' => array(
@@ -749,23 +739,19 @@ class WC_Countries {
 					),
 					'city'  => array(
 						'label'       => __( 'Town / District', 'woocommerce' ),
-						'placeholder' => __( 'Town / District', 'woocommerce' )
 					),
 					'state' => array(
 						'label'       => __( 'Region', 'woocommerce' ),
-						//'placeholder' => __( 'Region', 'woocommerce' ),
 					)
 				),
 				'HU' => array(
 					'state' => array(
 						'label'       => __( 'County', 'woocommerce' ),
-						//'placeholder' => __( 'County', 'woocommerce' ),
 					)
 				),
 				'ID' => array(
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'IS' => array(
@@ -785,7 +771,6 @@ class WC_Countries {
 					'state' => array(
 						'required'    => true,
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'JP' => array(
@@ -803,7 +788,6 @@ class WC_Countries {
 					'state' => array(
 						'required'    => false,
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'NZ' => array(
@@ -820,7 +804,6 @@ class WC_Countries {
 				'NP' => array(
 					'state' => array(
 						'label'       => __( 'State / Zone', 'woocommerce' ),
-						//'placeholder' => __( 'State / Zone', 'woocommerce' ),
 					),
 					'postcode' => array(
 						'required' => false
@@ -863,14 +846,12 @@ class WC_Countries {
 					'postcode_before_city' => true,
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'LI' => array(
 					'postcode_before_city' => true,
 					'state' => array(
 						'label'       => __( 'Municipality', 'woocommerce' ),
-						//'placeholder' => __( 'Municipality', 'woocommerce' ),
 						'required'    => false
 					)
 				),
@@ -889,27 +870,22 @@ class WC_Countries {
 					'postcode_before_city' => true,
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'US' => array(
 					'postcode'  => array(
 						'label'       => __( 'ZIP', 'woocommerce' ),
-						'placeholder' => __( 'ZIP', 'woocommerce' ),
 					),
 					'state'     => array(
 						'label'       => __( 'State', 'woocommerce' ),
-						//'placeholder' => __( 'State', 'woocommerce' ),
 					)
 				),
 				'GB' => array(
 					'postcode'  => array(
 						'label'       => __( 'Postcode', 'woocommerce' ),
-						'placeholder' => __( 'Postcode', 'woocommerce' ),
 					),
 					'state'     => array(
 						'label'       => __( 'County', 'woocommerce' ),
-						//'placeholder' => __( 'County', 'woocommerce' ),
 						'required'    => false
 					)
 				),
@@ -936,7 +912,6 @@ class WC_Countries {
 				'ZA' => array(
 					'state' => array(
 						'label'       => __( 'Province', 'woocommerce' ),
-						//'placeholder' => __( 'Province', 'woocommerce' ),
 					)
 				),
 				'ZW' => array(
@@ -967,7 +942,7 @@ class WC_Countries {
 
 	/**
 	 * Apply locale and get address fields.
-	 * @param  mixed  $country
+	 * @param  mixed  $country (default: '')
 	 * @param  string $type (default: 'billing_')
 	 * @return array
 	 */

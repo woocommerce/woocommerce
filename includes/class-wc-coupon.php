@@ -331,6 +331,8 @@ class WC_Coupon {
 
 	/**
 	 * Ensure coupon exists or throw exception.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_exists() {
 		if ( ! $this->exists ) {
@@ -340,6 +342,8 @@ class WC_Coupon {
 
 	/**
 	 * Ensure coupon usage limit is valid or throw exception.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_usage_limit() {
 		if ( $this->usage_limit > 0 && $this->usage_count >= $this->usage_limit ) {
@@ -376,6 +380,8 @@ class WC_Coupon {
 
 	/**
 	 * Ensure coupon date is valid or throw exception.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_expiry_date() {
 		if ( $this->expiry_date && current_time( 'timestamp' ) > $this->expiry_date ) {
@@ -385,6 +391,8 @@ class WC_Coupon {
 
 	/**
 	 * Ensure coupon amount is valid or throw exception.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_minimum_amount() {
 		if ( $this->minimum_amount > 0 && wc_format_decimal( $this->minimum_amount ) > wc_format_decimal( WC()->cart->subtotal ) ) {
@@ -394,6 +402,8 @@ class WC_Coupon {
 
 	/**
 	 * Ensure coupon amount is valid or throw exception.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_maximum_amount() {
 		if ( $this->maximum_amount > 0 && wc_format_decimal( $this->maximum_amount ) < wc_format_decimal( WC()->cart->subtotal ) ) {
@@ -403,6 +413,8 @@ class WC_Coupon {
 
 	/**
 	 * Ensure coupon is valid for products in the cart is valid or throw exception.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_product_ids() {
 		if ( sizeof( $this->product_ids ) > 0 ) {
@@ -422,6 +434,8 @@ class WC_Coupon {
 
 	/**
 	 * Ensure coupon is valid for product categories in the cart is valid or throw exception.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_product_categories() {
 		if ( sizeof( $this->product_categories ) > 0 ) {
@@ -443,6 +457,8 @@ class WC_Coupon {
 
 	/**
 	 * Ensure coupon is valid for sale items in the cart is valid or throw exception.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_sale_items() {
 		if ( 'yes' === $this->exclude_sale_items && $this->is_type( wc_get_product_coupon_types() ) ) {
@@ -479,6 +495,8 @@ class WC_Coupon {
 
 	/**
 	 * Exclude products from cart.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_cart_excluded_product_ids() {
 		// Exclude Products
@@ -499,6 +517,8 @@ class WC_Coupon {
 
 	/**
 	 * Exclude categories from cart.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_cart_excluded_product_categories() {
 		if ( sizeof( $this->exclude_product_categories ) > 0 ) {
@@ -521,6 +541,8 @@ class WC_Coupon {
 
 	/**
 	 * Exclude sale items from cart.
+	 *
+	 * @throws Exception
 	 */
 	private function validate_cart_excluded_sale_items() {
 		if ( $this->exclude_sale_items == 'yes' ) {
@@ -547,6 +569,7 @@ class WC_Coupon {
 	 * Check if a coupon is valid.
 	 *
 	 * @return boolean validity
+	 * @throws Exception
 	 */
 	public function is_valid() {
 		try {

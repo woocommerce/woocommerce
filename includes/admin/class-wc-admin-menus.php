@@ -236,6 +236,9 @@ class WC_Admin_Menus {
 		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce Endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
 	}
 
+	/**
+	 * Output menu links.
+	 */
 	public function nav_menu_links() {
 		$exclude = array( 'view-order', 'add-payment-method', 'order-pay', 'order-received' );
 		?>

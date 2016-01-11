@@ -19,13 +19,25 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
  */
 class WC_Email_Customer_Reset_Password extends WC_Email {
 
-	/** @var string */
+	/**
+	 * User login name.
+	 *
+	 * @var string
+	 */
 	public $user_login;
 
-	/** @var string */
+	/**
+	 * User email.
+	 *
+	 * @var string
+	 */
 	public $user_email;
 
-	/** @var string */
+	/**
+	 * Reset key.
+	 *
+	 * @var string
+	 */
 	public $reset_key;
 
 	/**
@@ -53,6 +65,9 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param string $user_login
+	 * @param string $reset_key
 	 */
 	function trigger( $user_login = '', $reset_key = '' ) {
 		if ( $user_login && $reset_key ) {
@@ -73,7 +88,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
@@ -91,7 +106,7 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
 	 * @access public
 	 * @return string

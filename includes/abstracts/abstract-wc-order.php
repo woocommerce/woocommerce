@@ -96,7 +96,7 @@ abstract class WC_Abstract_Order {
 	 * should be used. It is possible, but the aforementioned are preferred and are the only.
 	 * methods that will be maintained going forward.
 	 *
-	 * @param int $order
+	 * @param  int|object|WC_Order $order Order to init.
 	 */
 	public function __construct( $order = 0 ) {
 		$this->prices_include_tax    = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
@@ -147,7 +147,6 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Set the payment method for the order.
 	 *
-	 * @param WC_Payment_Gateway
 	 * @param WC_Payment_Gateway $payment_method
 	 */
 	public function set_payment_method( $payment_method ) {
@@ -337,8 +336,8 @@ abstract class WC_Abstract_Order {
 	 * Add coupon code to the order.
 	 *
 	 * @param string $code
-	 * @param integer $discount_amount
-	 * @param integer $discount_amount_tax "Discounted" tax - used for tax inclusive prices.
+	 * @param int $discount_amount
+	 * @param int $discount_amount_tax "Discounted" tax - used for tax inclusive prices.
 	 * @return int|bool Item ID or false.
 	 */
 	public function add_coupon( $code, $discount_amount = 0, $discount_amount_tax = 0 ) {
@@ -812,7 +811,7 @@ abstract class WC_Abstract_Order {
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
-	 * @param  $and_taxes bool Calc taxes if true.
+	 * @param  bool $and_taxes Calc taxes if true.
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
@@ -1373,7 +1372,7 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Gets the total discount amount.
-	 * @param  $ex_tax Show discount excl any tax.
+	 * @param  bool $ex_tax Show discount excl any tax.
 	 * @return float
 	 */
 	public function get_total_discount( $ex_tax = true ) {
@@ -1834,6 +1833,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Get totals for display on pages and in emails.
 	 *
+	 * @param mixed $tax_display
 	 * @return array
 	 */
 	public function get_order_item_totals( $tax_display = '' ) {
@@ -2027,7 +2027,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Generates a URL so that a customer can pay for their (unpaid - pending) order. Pass 'true' for the checkout version which doesn't offer gateway choices.
 	 *
-	 * @param  boolean $on_checkout
+	 * @param  bool $on_checkout
 	 * @return string
 	 */
 	public function get_checkout_payment_url( $on_checkout = false ) {
@@ -2350,7 +2350,7 @@ abstract class WC_Abstract_Order {
 	 * Sales are also recorded for products.
 	 * Finally, record the date of payment.
 	 *
-	 * @param $transaction_id string Optional transaction id to store in post meta.
+	 * @param string $transaction_id Optional transaction id to store in post meta.
 	 */
 	public function payment_complete( $transaction_id = '' ) {
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
@@ -2382,7 +2382,7 @@ abstract class WC_Abstract_Order {
 			add_post_meta( $this->id, '_paid_date', current_time( 'mysql' ), true );
 
 			if ( ! empty( $transaction_id ) ) {
-				add_post_meta( $this->id, '_transaction_id', $transaction_id, true );
+				update_post_meta( $this->id, '_transaction_id', $transaction_id );
 			}
 
 			wp_update_post( array(

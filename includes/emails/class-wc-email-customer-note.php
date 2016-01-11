@@ -19,6 +19,11 @@ if ( ! class_exists( 'WC_Email_Customer_Note' ) ) :
  */
 class WC_Email_Customer_Note extends WC_Email {
 
+	/**
+	 * Customer note.
+	 *
+	 * @var string
+	 */
 	public $customer_note;
 
 	/**
@@ -46,6 +51,8 @@ class WC_Email_Customer_Note extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param array $args
 	 */
 	function trigger( $args ) {
 
@@ -82,7 +89,7 @@ class WC_Email_Customer_Note extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
@@ -99,7 +106,7 @@ class WC_Email_Customer_Note extends WC_Email {
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
 	 * @access public
 	 * @return string

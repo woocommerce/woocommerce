@@ -448,7 +448,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 	/**
 	 * woocommerce_page_title function.
 	 *
-	 * @param  boolean $echo
+	 * @param  bool $echo
 	 * @return string
 	 */
 	function woocommerce_page_title( $echo = true ) {
@@ -1145,6 +1145,9 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	 * Output the Review comments template.
 	 *
 	 * @subpackage	Product
+	 * @param WP_Comment $comment
+	 * @param array $args
+	 * @param int $depth
 	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
@@ -1256,9 +1259,9 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	/**
 	 * Output the cart cross-sells.
 	 *
-	 * @param  integer $posts_per_page
-	 * @param  integer $columns
-	 * @param  string $orderby
+	 * @param  int $posts_per_page (default: 2)
+	 * @param  int $columns (default: 2)
+	 * @param  string $orderby (default: 'rand')
 	 */
 	function woocommerce_cross_sell_display( $posts_per_page = 2, $columns = 2, $orderby = 'rand' ) {
 		wc_get_template( 'cart/cross-sells.php', array(
@@ -1290,6 +1293,7 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 	/**
 	 * Output the Mini-cart - used by cart widget.
 	 *
+	 * @param array $args
 	 */
 	function woocommerce_mini_cart( $args = array() ) {
 
@@ -1311,6 +1315,7 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 	 * Output the WooCommerce Login Form.
 	 *
 	 * @subpackage	Forms
+	 * @param array $args
 	 */
 	function woocommerce_login_form( $args = array() ) {
 
@@ -1342,6 +1347,8 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 	/**
 	 * Output the WooCommerce Breadcrumb.
+	 *
+	 * @param array $args
 	 */
 	function woocommerce_breadcrumb( $args = array() ) {
 		$args = wp_parse_args( $args, apply_filters( 'woocommerce_breadcrumb_defaults', array(
@@ -1754,7 +1761,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 							. '<option value="">'.__( 'Select a country&hellip;', 'woocommerce' ) .'</option>';
 
 					foreach ( $countries as $ckey => $cvalue ) {
-						$field .= '<option value="' . esc_attr( $ckey ) . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
+						$field .= '<option value="' . esc_attr( $ckey ) . '" '. selected( $value, $ckey, false ) . '>'.__( $cvalue, 'woocommerce' ) .'</option>';
 					}
 
 					$field .= '</select>';
@@ -1779,7 +1786,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				} elseif ( is_array( $states ) ) {
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '">
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
 						<option value="">'.__( 'Select a state&hellip;', 'woocommerce' ) .'</option>';
 
 					foreach ( $states as $ckey => $cvalue ) {
@@ -1832,7 +1839,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 						$options .= '<option value="' . esc_attr( $option_key ) . '" '. selected( $value, $option_key, false ) . '>' . esc_attr( $option_text ) .'</option>';
 					}
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '.esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '">
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '. esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
 							' . $options . '
 						</select>';
 				}
@@ -1987,10 +1994,10 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		echo '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">';
+		$html = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">';
 
 		if ( $args['show_option_none'] ) {
-			echo '<option value="">' . esc_html( $args['show_option_none'] ) . '</option>';
+			$html .= '<option value="">' . esc_html( $args['show_option_none'] ) . '</option>';
 		}
 
 		if ( ! empty( $options ) ) {
@@ -2000,18 +2007,21 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 
 				foreach ( $terms as $term ) {
 					if ( in_array( $term->slug, $options ) ) {
-						echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
+						$html .= '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) ) . '</option>';
 					}
 				}
 			} else {
 				foreach ( $options as $option ) {
 					// This handles < 2.4.0 bw compatibility where text attributes were not sanitized.
 					$selected = sanitize_title( $args['selected'] ) === $args['selected'] ? selected( $args['selected'], sanitize_title( $option ), false ) : selected( $args['selected'], $option, false );
-					echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+					$html .= '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
 				}
 			}
 		}
 
-		echo '</select>';
+		$html .= '</select>';
+
+		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html );
 	}
+
 }
