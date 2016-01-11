@@ -1438,14 +1438,14 @@ class WC_API_Products extends WC_API_Resource {
 				$date_from = $data['sale_price_dates_from'];
 			} else {
 				$date_from = get_post_meta( $product_id, '_sale_price_dates_from', true );
-				$date_from = date( 'Y-m-d', $date_from );
+				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
 			}
 
 			if ( isset( $data['sale_price_dates_to'] ) ) {
 				$date_to = $data['sale_price_dates_to'];
 			} else {
-				$date_to = get_post_meta( $product_id, '_sale_price_dates_to', TRUE );
-				$date_to = date( 'Y-m-d', $date_to );
+				$date_to = get_post_meta( $product_id, '_sale_price_dates_to', true );
+				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
 			}
 
 			_wc_save_product_price( $product_id, $regular_price, $sale_price, $date_from, $date_to );
@@ -1849,14 +1849,14 @@ class WC_API_Products extends WC_API_Resource {
 				$date_from = $variation['sale_price_dates_from'];
 			} else {
 				$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
-				$date_from = date( 'Y-m-d', $date_from );
+				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
 			}
 
 			if ( isset( $variation['sale_price_dates_to'] ) ) {
 				$date_to = $variation['sale_price_dates_to'];
 			} else {
 				$date_to = get_post_meta( $variation_id, '_sale_price_dates_to', true );
-				$date_to = date( 'Y-m-d', $date_to );
+				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
 			}
 
 			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
