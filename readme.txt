@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothe
 Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
 Requires at least: 4.1
 Tested up to: 4.4
-Stable tag: 2.4.12
+Stable tag: 2.4.13
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.4.13 - 11/01/2016 =
+* Fix - Potential redirect loop when using 'unforce ssl' setting and a https home URL.
+* Fix - Escape option names when cleaning up sessions.
 
 = 2.4.12 - 9/12/2015 =
 * Fix - 4.4 - Permission error when editing attribute terms.
