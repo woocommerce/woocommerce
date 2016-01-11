@@ -238,9 +238,8 @@ class WC_Session_Handler extends WC_Session {
 						}
 					}
 
-					// delete from options table
-					$option_names = implode( "','", $chunk );
-					$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ('$option_names')" );
+					// Delete from options table
+					$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name IN ( '" . implode( "','", array_map( 'esc_sql', $chunk ) ) . "' )" );
 				}
 			}
 		}
