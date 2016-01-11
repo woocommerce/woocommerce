@@ -477,18 +477,18 @@ class WC_Cart {
 		 * @return bool|WP_Error
 		 */
 		public function check_cart_item_validity() {
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			$return = true;
 
+			foreach ( $this->get_cart() as $cart_item_key => $values ) {
 				$_product = $values['data'];
 
-				if ( ! $_product || ! $_product->exists() || $_product->post->post_status == 'trash' ) {
+				if ( ! $_product || ! $_product->exists() || 'trash' === $_product->post->post_status ) {
 					$this->set_quantity( $cart_item_key, 0 );
-
-					return new WP_Error( 'invalid', __( 'An item which is no longer available was removed from your cart.', 'woocommerce' ) );
+					$return = new WP_Error( 'invalid', __( 'An item which is no longer available was removed from your cart.', 'woocommerce' ) );
 				}
 			}
 
-			return true;
+			return $return;
 		}
 
 		/**
