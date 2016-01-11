@@ -313,8 +313,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_text_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title'             => '',
 			'disabled'          => false,
 			'class'             => '',
@@ -332,13 +332,13 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
 			</th>
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-					<input class="input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+					<input class="input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
 					<?php echo $this->get_description_html( $data ); ?>
 				</fieldset>
 			</td>
@@ -357,8 +357,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_price_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title'             => '',
 			'disabled'          => false,
 			'class'             => '',
@@ -376,13 +376,13 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
 			</th>
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-					<input class="wc_input_price input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+					<input class="wc_input_price input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
 					<?php echo $this->get_description_html( $data ); ?>
 				</fieldset>
 			</td>
@@ -401,8 +401,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_decimal_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title'             => '',
 			'disabled'          => false,
 			'class'             => '',
@@ -420,13 +420,13 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
 			</th>
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-					<input class="wc_input_decimal input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_decimal( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+					<input class="wc_input_decimal input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_decimal( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
 					<?php echo $this->get_description_html( $data ); ?>
 				</fieldset>
 			</td>
@@ -458,8 +458,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_color_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title'             => '',
 			'disabled'          => false,
 			'class'             => '',
@@ -476,15 +476,15 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
 			</th>
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
 					<span class="colorpickpreview" style="background:<?php echo esc_attr( $this->get_option( $key ) ); ?>;"></span>
-					<input class="colorpick <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
-					<div id="colorPickerDiv_<?php echo esc_attr( $field ); ?>" class="colorpickdiv" style="z-index: 100; background: #eee; border: 1px solid #ccc; position: absolute; display: none;"></div>
+					<input class="colorpick <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+					<div id="colorPickerDiv_<?php echo esc_attr( $field_key ); ?>" class="colorpickdiv" style="z-index: 100; background: #eee; border: 1px solid #ccc; position: absolute; display: none;"></div>
 					<?php echo $this->get_description_html( $data ); ?>
 				</fieldset>
 			</td>
@@ -503,8 +503,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_textarea_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title'             => '',
 			'disabled'          => false,
 			'class'             => '',
@@ -522,13 +522,13 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
 			</th>
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-					<textarea rows="3" cols="20" class="input-text wide-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>><?php echo esc_textarea( $this->get_option( $key ) ); ?></textarea>
+					<textarea rows="3" cols="20" class="input-text wide-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>><?php echo esc_textarea( $this->get_option( $key ) ); ?></textarea>
 					<?php echo $this->get_description_html( $data ); ?>
 				</fieldset>
 			</td>
@@ -547,8 +547,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_checkbox_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title'             => '',
 			'label'             => '',
 			'disabled'          => false,
@@ -570,14 +570,14 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
 			</th>
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-					<label for="<?php echo esc_attr( $field ); ?>">
-					<input <?php disabled( $data['disabled'], true ); ?> class="<?php echo esc_attr( $data['class'] ); ?>" type="checkbox" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="1" <?php checked( $this->get_option( $key ), 'yes' ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> /> <?php echo wp_kses_post( $data['label'] ); ?></label><br/>
+					<label for="<?php echo esc_attr( $field_key ); ?>">
+					<input <?php disabled( $data['disabled'], true ); ?> class="<?php echo esc_attr( $data['class'] ); ?>" type="checkbox" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="1" <?php checked( $this->get_option( $key ), 'yes' ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> /> <?php echo wp_kses_post( $data['label'] ); ?></label><br/>
 					<?php echo $this->get_description_html( $data ); ?>
 				</fieldset>
 			</td>
@@ -596,8 +596,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_select_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title'             => '',
 			'disabled'          => false,
 			'class'             => '',
@@ -616,13 +616,13 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
 			</th>
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-					<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
+					<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
 						<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
 							<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_attr( $option_value ); ?></option>
 						<?php endforeach; ?>
@@ -645,8 +645,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_multiselect_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title'             => '',
 			'disabled'          => false,
 			'class'             => '',
@@ -666,13 +666,13 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
 			</th>
 			<td class="forminp">
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-					<select multiple="multiple" class="multiselect <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field ); ?>[]" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
+					<select multiple="multiple" class="multiselect <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>[]" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
 						<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
 							<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( $option_key, $value ), true ); ?>><?php echo esc_attr( $option_value ); ?></option>
 						<?php endforeach; ?>
@@ -695,8 +695,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function generate_title_html( $key, $data ) {
-		$field    = $this->get_field_key( $key );
-		$defaults = array(
+		$field_key = $this->get_field_key( $key );
+		$defaults  = array(
 			'title' => '',
 			'class' => ''
 		);
@@ -706,7 +706,7 @@ abstract class WC_Settings_API {
 		ob_start();
 		?>
 			</table>
-			<h3 class="wc-settings-sub-title <?php echo esc_attr( $data['class'] ); ?>" id="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></h3>
+			<h3 class="wc-settings-sub-title <?php echo esc_attr( $data['class'] ); ?>" id="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></h3>
 			<?php if ( ! empty( $data['description'] ) ) : ?>
 				<p><?php echo wp_kses_post( $data['description'] ); ?></p>
 			<?php endif; ?>
@@ -721,15 +721,15 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  mixed $key
+	 * @param  string $key
 	 * @return string
 	 */
 	public function validate_text_field( $key ) {
-		$text  = $this->get_option( $key );
-		$field = $this->get_field_key( $key );
+		$text      = $this->get_option( $key );
+		$field_key = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $field ] ) ) {
-			$text = wp_kses_post( trim( stripslashes( $_POST[ $field ] ) ) );
+		if ( isset( $_POST[ $field_key ] ) ) {
+			$text = wp_kses_post( trim( stripslashes( $_POST[ $field_key ] ) ) );
 		}
 
 		return $text;
@@ -740,17 +740,17 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  mixed $key
+	 * @param  string $key
 	 * @return string
 	 */
 	public function validate_price_field( $key ) {
-		$text  = $this->get_option( $key );
-		$field = $this->get_field_key( $key );
+		$text      = $this->get_option( $key );
+		$field_key = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $field ] ) ) {
+		if ( isset( $_POST[ $field_key ] ) ) {
 
-			if ( $_POST[ $field ] !== '' ) {
-				$text = wc_format_decimal( trim( stripslashes( $_POST[ $field ] ) ) );
+			if ( $_POST[ $field_key ] !== '' ) {
+				$text = wc_format_decimal( trim( stripslashes( $_POST[ $field_key ] ) ) );
 			} else {
 				$text = '';
 			}
@@ -764,18 +764,17 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  mixed $key
+	 * @param  string $key
 	 * @return string
 	 */
 	public function validate_decimal_field( $key ) {
+		$text      = $this->get_option( $key );
+		$field_key = $this->get_field_key( $key );
 
-		$text  = $this->get_option( $key );
-		$field = $this->get_field_key( $key );
+		if ( isset( $_POST[ $field_key ] ) ) {
 
-		if ( isset( $_POST[ $field ] ) ) {
-
-			if ( $_POST[ $field ] !== '' ) {
-				$text = wc_format_decimal( trim( stripslashes( $_POST[ $field ] ) ) );
+			if ( $_POST[ $field_key ] !== '' ) {
+				$text = wc_format_decimal( trim( stripslashes( $_POST[ $field_key ] ) ) );
 			} else {
 				$text = '';
 			}
@@ -789,13 +788,12 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  mixed $key
-	 * @since  1.0.0
+	 * @param  string $key
 	 * @return string
 	 */
 	public function validate_password_field( $key ) {
-		$field = $this->get_field_key( $key );
-		$value = wp_kses_post( trim( stripslashes( $_POST[ $field ] ) ) );
+		$field_key = $this->get_field_key( $key );
+		$value     = wp_kses_post( trim( stripslashes( $_POST[ $field_key ] ) ) );
 		return $value;
 	}
 
@@ -806,10 +804,10 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function validate_textarea_field( $key ) {
-		$field = $this->get_field_key( $key );
+		$field_key = $this->get_field_key( $key );
 
-		if ( isset( $_POST[ $field ] ) ) {
-			$text = wp_kses( trim( stripslashes( $_POST[ $field ] ) ),
+		if ( isset( $_POST[ $field_key ] ) ) {
+			$text = wp_kses( trim( stripslashes( $_POST[ $field_key ] ) ),
 				array_merge(
 					array(
 						'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
@@ -833,8 +831,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function validate_checkbox_field( $key ) {
-		$field  = $this->get_field_key( $key );
-		return isset( $_POST[ $field ] ) && '1' === $_POST[ $field ] ? 'yes' : 'no';
+		$field_key = $this->get_field_key( $key );
+		return isset( $_POST[ $field_key ] ) && '1' === $_POST[ $field_key ] ? 'yes' : 'no';
 	}
 
 	/**
@@ -844,8 +842,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function validate_select_field( $key ) {
-		$field = $this->get_field_key( $key );
-		return isset( $_POST[ $field ] ) ? wc_clean( stripslashes( $_POST[ $field ] ) ) : $this->get_option( $key );
+		$field_key = $this->get_field_key( $key );
+		return isset( $_POST[ $field_key ] ) ? wc_clean( stripslashes( $_POST[ $field_key ] ) ) : $this->get_option( $key );
 	}
 
 	/**
@@ -855,8 +853,8 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function validate_multiselect_field( $key ) {
-		$field = $this->get_field_key( $key );
-		return isset( $_POST[ $field ] ) ? array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $field ] ) ) : '';
+		$field_key = $this->get_field_key( $key );
+		return isset( $_POST[ $field_key ] ) ? array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $field_key ] ) ) : '';
 	}
 
 	/**
