@@ -444,7 +444,32 @@ class WC_Coupon {
 				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
 
+					// If we find an item with a cat in our allowed cat list, the coupon is valid
 					if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) {
+						$valid_for_cart = true;
+					}
+				}
+			}
+			if ( ! $valid_for_cart ) {
+				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
+			}
+		}
+	}
+
+	/**
+	 * Ensure coupon is valid for product categories in the cart is valid or throw exception.
+	 *
+	 * @throws Exception
+	 */
+	private function validate_excluded_product_categories() {
+		if ( sizeof( $this->exclude_product_categories ) > 0 ) {
+			$valid_for_cart = false;
+			if ( ! WC()->cart->is_empty() ) {
+				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
+
+					// If we find an item with a cat NOT in our disallowed cat list, the coupon is valid
+					if ( empty( $product_cats ) || sizeof( array_diff( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
 						$valid_for_cart = true;
 					}
 				}
@@ -581,6 +606,7 @@ class WC_Coupon {
 			$this->validate_maximum_amount();
 			$this->validate_product_ids();
 			$this->validate_product_categories();
+			$this->validate_excluded_product_categories();
 			$this->validate_sale_items();
 			$this->validate_cart_excluded_items();
 
