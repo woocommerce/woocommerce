@@ -5,8 +5,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="wc-tax-rates-search" id="rates-search">
-	<input type="search" class="wc-tax-rates-search-field" placeholder="<?php esc_attr_e( 'Search…', 'woocommerce' ); ?>" value="<?php if ( isset( $_GET['s'] ) ) { echo esc_attr( $_GET['s'] ); } ?>" />
+	<input type="search" class="wc-tax-rates-search-field" placeholder="<?php esc_attr_e( 'Search&hellip;', 'woocommerce' ); ?>" value="<?php if ( isset( $_GET['s'] ) ) { echo esc_attr( $_GET['s'] ); } ?>" />
 </div>
+
+<div id="rates-pagination"></div>
 
 <h3><?php printf( __( '"%s" Tax Rates', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 
