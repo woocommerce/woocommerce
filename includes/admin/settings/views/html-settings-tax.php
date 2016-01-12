@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tfoot>
 	<tbody id="rates">
 		<tr>
-			<th colspan="10" style="text-align: center;"><?php esc_html_e( 'Loading…', 'woocommerce' ); ?></th>
+			<th colspan="10" style="text-align: center;"><?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?></th>
 		</tr>
 	</tbody>
 </table>
