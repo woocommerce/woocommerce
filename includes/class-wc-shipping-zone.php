@@ -45,7 +45,7 @@ class WC_Shipping_Zone {
 			$this->set_zone_order( $zone->zone_order );
 			$this->read_zone_locations( $zone->zone_id );
 		} elseif ( 0 === $zone ) {
-			$this->set_zone_name( __( 'Worldwide', 'woocommerce' ) );
+			$this->set_zone_name( __( 'Rest of the World', 'woocommerce' ) );
 			$this->read_zone_locations( 0 );
 		}
     }

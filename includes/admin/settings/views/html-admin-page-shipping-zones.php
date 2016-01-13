@@ -1,5 +1,5 @@
 <h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?></h2>
-<p><?php _e( 'Shipping Zones are regions with similar Shipping Methods and rates. WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them. If there are no Shipping Methods within the matching zone, the customer will see a notice stating that there are no shipping methods available for the address they&lsquo;ve provided.', 'woocommerce' ); ?><p>
+<p><?php _e( 'Shipping Zones let you group regions with similar Shipping Methods and rates. WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them. If there are no Shipping Methods within the matching zone, the customer will see a notice stating that there are no shipping methods available for the address they&lsquo;ve provided.', 'woocommerce' ); ?><p>
 
 <table class="wc-shipping-zones widefat">
     <thead>
@@ -14,8 +14,8 @@
     <tfoot>
         <tr>
             <td colspan="5">
-                <a class="button button-secondary wc-shipping-zone-add" href="#"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
-                <input type="submit" name="save" class="button button-primary wc-shipping-zone-save" value="Save shipping zones" disabled />
+                <a class="button button-secondary wc-shipping-zone-add" href="#"><?php esc_html_e( 'Add Shipping Zone', 'woocommerce' ); ?></a>
+                <input type="submit" name="save" class="button button-primary wc-shipping-zone-save" value="Save Shipping Zones" disabled />
             </td>
         </tr>
     </tfoot>
@@ -24,7 +24,7 @@
         <tr>
             <td width="1%" class="wc-shipping-zone-worldwide"></td>
             <td class="wc-shipping-zone-name"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Rest of the World', 'woocommerce' ); ?></a></td>
-            <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping methods added here apply to all regions without a zone.', 'woocommerce' ); ?></td>
+            <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping Methods added here will apply to shipping addresses that aren&lsquo;t included in any other Shipping Zone.', 'woocommerce' ); ?></td>
             <td class="wc-shipping-zone-methods">
 				<?php
 					$worldwide = new WC_Shipping_Zone( 0 );
@@ -50,10 +50,10 @@
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
 	<tr>
 		<td class="wc-shipping-zones-blank-state" colspan="5">
-			<p class="main"><?php _e( 'Shipping Zones are regions you ship products to', 'woocommerce' ); ?></p>
-			<p><?php _e( 'You can add as many zones as you want, for example you could have "Local", "Domestic", and "Europe" zones depending on your needs.', 'woocommerce' ); ?></p>
-			<p><?php _e( 'Once a zone has been added, you can add multiple shipping rates within each. Customers will only see rates that apply to them.', 'woocommerce' ); ?></p>
-			<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add a shipping zone', 'woocommerce' ); ?></a>
+			<p class="main"><?php _e( 'Shipping Zones let you group regions with similar Shipping Methods and rates.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'You can add as many Shipping Zones as you want, for example you could have "Local", "Domestic", and "Europe" zones.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'Once a Shipping Zone has been added, you can add one or more Shipping Methods to it. Customers will only see Shipping Methods that apply to their address.', 'woocommerce' ); ?></p>
+			<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add Shipping Zone', 'woocommerce' ); ?></a>
 		</td>
 	</tr>
 </script>
