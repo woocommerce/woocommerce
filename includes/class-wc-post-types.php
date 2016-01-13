@@ -146,7 +146,7 @@ class WC_Post_types {
 						'add_new_item'      => __( 'Add New Shipping Class', 'woocommerce' ),
 						'new_item_name'     => __( 'New Shipping Class Name', 'woocommerce' )
 					),
-				'show_ui'               => true,
+				'show_ui'               => false,
 				'show_in_quick_edit'    => false,
 				'show_in_nav_menus'     => false,
 				'query_var'             => is_admin(),

@@ -101,10 +101,6 @@ class WC_Admin_Help {
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
 			),
-			'edit-product_shipping_class' => array(
-				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
-			),
 			'product_attributes' => array(
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'

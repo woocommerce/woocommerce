@@ -2116,7 +2116,7 @@ table.wc_shipping {
 	}
 }
 
-table.wc-shipping-zones, table.wc-shipping-zone-methods {
+table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-classes {
 	td, th {
 		vertical-align: top;
 		line-height: 30px;
@@ -2245,6 +2245,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 	.wc-shipping-zone-methods {
 		width: 25%;
 	}
+	.wc-shipping-class-description,
+	.wc-shipping-class-name,
+	.wc-shipping-class-slug,
 	.wc-shipping-zone-name,
 	.wc-shipping-zone-region {
 		input, select, textarea {
@@ -2266,6 +2269,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 				color: #999;
 			}
 		}
+	}
+	.wc-shipping-class-count {
+		text-align: center;
 	}
 	.wc-shipping-zone-methods {
 		color: #999;
@@ -2292,7 +2298,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 			display: inline-block;
 		}
 	}
-	.wc-shipping-zone-actions, .wc-shipping-zone-method-actions {
+	.wc-shipping-zone-actions, .wc-shipping-zone-method-actions, .wc-shipping-class-actions {
 		width: 4em;
 
 		a {
@@ -2313,7 +2319,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 			}
 		}
 
-		a.wc-shipping-zone-delete, a.wc-shipping-zone-method-delete {
+		a.wc-shipping-zone-delete, a.wc-shipping-zone-method-delete, a.wc-shipping-class-delete {
 			&:before {
 				content: "\e013";
 			}
@@ -2321,6 +2327,12 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods {
 				&:before {
 					color: $red;
 				}
+			}
+		}
+
+		a.wc-shipping-class-edit {
+			&:before {
+				content: "\e603";
 			}
 		}
 

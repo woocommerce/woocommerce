@@ -27,7 +27,7 @@
         			</select>
         			<input type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add Shipping Method', 'woocommerce' ); ?>" />
         		</div>
-                <input type="submit" name="save" class="button button-primary wc-shipping-zone-method-save" value="Save Shipping Methods" disabled />
+                <input type="submit" name="save" class="button button-primary wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save Shipping Methods', 'woocommerce' ); ?>" disabled />
             </td>
         </tr>
     </tfoot>

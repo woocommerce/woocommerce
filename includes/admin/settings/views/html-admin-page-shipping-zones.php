@@ -15,7 +15,7 @@
         <tr>
             <td colspan="5">
                 <a class="button button-secondary wc-shipping-zone-add" href="#"><?php esc_html_e( 'Add Shipping Zone', 'woocommerce' ); ?></a>
-                <input type="submit" name="save" class="button button-primary wc-shipping-zone-save" value="Save Shipping Zones" disabled />
+                <input type="submit" name="save" class="button button-primary wc-shipping-zone-save" value="<?php esc_attr_e( 'Save Shipping Zones', 'woocommerce' ); ?>" disabled />
             </td>
         </tr>
     </tfoot>

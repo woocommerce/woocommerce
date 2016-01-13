@@ -144,6 +144,7 @@ class WC_AJAX {
 			'shipping_zones_save_changes'                      => false,
 			'shipping_zone_add_method'                         => false,
 			'shipping_zone_methods_save_changes'               => false,
+			'shipping_classes_save_changes'                    => false,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -3195,6 +3196,77 @@ class WC_AJAX {
 
 		wp_send_json_success( array(
 			'methods' => $zone->get_shipping_methods()
+		) );
+	}
+
+	/**
+	 * Handle submissions from assets/js/wc-shipping-classes.js Backbone model.
+	 */
+	public static function shipping_classes_save_changes() {
+		if ( ! isset( $_POST['wc_shipping_classes_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_classes_nonce'], 'wc_shipping_classes_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$changes = $_POST['changes'];
+
+		foreach ( $changes as $term_id => $data ) {
+			$term_id = absint( $term_id );
+
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					// So the user added and deleted a new row.
+					// That's fine, it's not in the database anyways. NEXT!
+					continue;
+				}
+				wp_delete_term( $term_id, 'product_shipping_class' );
+				continue;
+			}
+
+			$update_args = array();
+
+			if ( isset( $data['name'] ) ) {
+				$update_args['name'] = wc_clean( $data['name'] );
+			}
+
+			if ( isset( $data['slug'] ) ) {
+				$update_args['slug'] = wc_clean( $data['slug'] );
+			}
+
+			if ( isset( $data['description'] ) ) {
+				$update_args['description'] = wc_clean( $data['description'] );
+			}
+
+			if ( isset( $data['newRow'] ) ) {
+				$update_args = array_filter( $update_args );
+				if ( empty( $update_args['name'] ) ) {
+					wp_send_json_error( __( 'Shipping Class name is required', 'woocommerce' ) );
+				}
+				$result      = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+			} else {
+				$result = wp_update_term( $term_id, 'product_shipping_class', $update_args );
+			}
+
+			if ( is_wp_error( $result ) ) {
+				wp_send_json_error( $result->get_error_message() );
+				exit;
+			}
+		}
+
+		$wc_shipping = WC_Shipping::instance();
+
+		wp_send_json_success( array(
+			'shipping_classes' => $wc_shipping->get_shipping_classes()
 		) );
 	}
 }
