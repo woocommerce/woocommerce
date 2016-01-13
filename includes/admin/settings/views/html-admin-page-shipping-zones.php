@@ -21,9 +21,14 @@
     </tfoot>
     <tbody class="wc-shipping-zone-rows"></tbody>
     <tbody>
-        <tr>
+        <tr data-id="0">
             <td width="1%" class="wc-shipping-zone-worldwide"></td>
-            <td class="wc-shipping-zone-name"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Rest of the World', 'woocommerce' ); ?></a></td>
+            <td class="wc-shipping-zone-name">
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Rest of the World', 'woocommerce' ); ?></a>
+                <div class="row-actions">
+                    <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit Shipping Methods', 'woocommerce' ); ?></a>
+                </div>
+            </td>
             <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping Methods added here will apply to shipping addresses that aren&lsquo;t included in any other Shipping Zone.', 'woocommerce' ); ?></td>
             <td class="wc-shipping-zone-methods">
 				<?php
@@ -31,18 +36,19 @@
 					$methods   = $worldwide->get_shipping_methods();
 
 					if ( ! $methods ) {
-						echo '&ndash;';
+						echo '<ul><li><a href="#" class="add_shipping_method button">' . __( 'Add Shipping Method', 'woocommerce' ) . '</a></li></ul>';
 					} else {
 						echo '<ul>';
 						foreach ( $methods as $method ) {
                             $class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
 							echo '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
 						}
+                        echo '<a href="#" class="add_shipping_method button">' . __( 'Add Shipping Method', 'woocommerce' ) . '</a>';
 						echo '</ul>';
 					}
 				?>
 			</td>
-            <td class="wc-shipping-zone-actions"><a class="wc-shipping-zone-view tips" data-tip="<?php _e( 'View Zone', 'woocommerce' ); ?>" href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'View', 'woocommerce' ); ?></a></td>
+            <td class="wc-shipping-zone-actions"></td>
         </tr>
     </tbody>
 </table>
@@ -62,7 +68,12 @@
     <tr data-id="{{ data.zone_id }}">
         <td width="1%" class="wc-shipping-zone-sort"></td>
         <td class="wc-shipping-zone-name">
-            <div class="view"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a></div>
+            <div class="view">
+                <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
+                <div class="row-actions">
+                    <a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit Zone', 'woocommerce' ); ?></a> | <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit Shipping Methods', 'woocommerce' ); ?></a>
+                </div>
+            </div>
             <div class="edit"><input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
         </td>
 		<td class="wc-shipping-zone-region">
@@ -95,10 +106,51 @@
 			</div>
 		</td>
         <td class="wc-shipping-zone-methods">
-			<ul></ul>
+			<div class="view">
+                <ul></ul>
+            </div>
+            <div class="edit"><?php _e( '<a href="#" class="wc-shipping-zone-save-changes">Save changes</a> before adding methods.', 'woocommerce' ); ?></div>
 		</td>
         <td class="wc-shipping-zone-actions">
-			<a class="wc-shipping-zone-delete tips" data-tip="<?php _e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-edit tips" href="#" data-tip="<?php _e( 'Edit', 'woocommerce' ); ?>"><?php _e( 'Edit', 'woocommerce' ); ?></a><a class="wc-shipping-zone-view tips" data-tip="<?php _e( 'View Zone', 'woocommerce' ); ?>" href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'View', 'woocommerce' ); ?></a>
+			<a class="wc-shipping-zone-delete tips" data-tip="<?php _e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a>
 		</td>
     </tr>
+</script>
+
+<script type="text/template" id="tmpl-wc-modal-add-shipping-method">
+	<div class="wc-backbone-modal">
+		<div class="wc-backbone-modal-content">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php _e( 'Add Shipping Method', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
+					</button>
+				</header>
+				<article>
+					<form action="" method="post">
+                        <div class="wc-shipping-zone-method-selector">
+                			<select name="add_method_id">
+                				<?php
+                					foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+                						if ( ! $method->supports( 'shipping-zones' ) ) {
+                							continue;
+                                        }
+                						echo '<option value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</li>';
+                					}
+                				?>
+                			</select>
+                            <input type="hidden" name="zone_id" value="{{{ data.zone_id }}}" />
+                		</div>
+					</form>
+				</article>
+				<footer>
+					<div class="inner">
+						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Add Shipping Method', 'woocommerce' ); ?></button>
+					</div>
+				</footer>
+			</section>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
 </script>

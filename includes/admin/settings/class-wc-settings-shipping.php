@@ -229,7 +229,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'strings'       => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
-				'no_methods'              => __( 'No Shipping Methods defined.', 'woocommerce' ) . ' <a href="" class="add_shipping_method">' . __( 'Add one?', 'woocommerce' ) . '</a>'
+				'no_methods'              => '<a href="#" class="add_shipping_method button">' . __( 'Add Shipping Method', 'woocommerce' ) . '</a>',
+				'add_another_method'      => '<a href="#" class="add_shipping_method button">' . __( 'Add Shipping Method', 'woocommerce' ) . '</a>'
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zones' );

@@ -63,7 +63,10 @@
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
+					$( document.body ).on( 'click', '.add_shipping_method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
+					$( document.body ).on( 'click', '.wc-shipping-zone-save-changes', { view: this }, this.onSubmit );
+					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
 				},
 				block: function() {
 					$( this.el ).block({
@@ -96,6 +99,11 @@
 
 							var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
 
+							// Editing?
+							if ( rowData.editing ) {
+								$tr.addClass( 'editing' );
+							}
+
 							// Select values in region select
 							_.each( rowData.zone_locations, function( location ) {
 								if ( 'postcode' === location.type ) {
@@ -114,26 +122,7 @@
 							} );
 
 							// List shipping methods
-							var $method_list = $tr.find('.wc-shipping-zone-methods ul');
-
-							if ( _.size( rowData.shipping_methods ) ) {
-								_.each( rowData.shipping_methods, function( shipping_method, instance_id ) {
-									var class_name = 'method_disabled';
-
-									if ( 'yes' === shipping_method.enabled ) {
-										class_name = 'method_enabled';
-									}
-
-									$method_list.append( '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
-								} );
-							} else {
-								$method_list.append( '<li>' + data.strings.no_methods + '</li>' );
-							}
-
-							// Editing?
-							if ( rowData.editing ) {
-								$tr.addClass( 'editing' );
-							}
+							view.renderShippingMethods( rowData.zone_id, rowData.shipping_methods );
 						} );
 
 						// Make the rows function
@@ -155,6 +144,27 @@
 					}
 
 					this.initTooltips();
+				},
+				renderShippingMethods: function( zone_id, shipping_methods ) {
+					var $tr          = $( '.wc-shipping-zones tr[data-id="' + zone_id + '"]');
+					var $method_list = $tr.find('.wc-shipping-zone-methods ul');
+
+					$method_list.empty();
+
+					if ( _.size( shipping_methods ) ) {
+						_.each( shipping_methods, function( shipping_method, instance_id ) {
+							var class_name = 'method_disabled';
+
+							if ( 'yes' === shipping_method.enabled ) {
+								class_name = 'method_enabled';
+							}
+
+							$method_list.append( '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
+						} );
+						$method_list.append( '<li>' + data.strings.add_another_method + '</li>' );
+					} else {
+						$method_list.append( '<li>' + data.strings.no_methods + '</li>' );
+					}
 				},
 				initTooltips: function() {
 					$( '#tiptip_holder' ).removeAttr( 'style' );
@@ -274,6 +284,36 @@
 
 					if ( _.size( changes ) ) {
 						model.logChanges( changes );
+					}
+				},
+				onAddShippingMethod: function( event ) {
+					var zone_id = $( this ).closest('tr').data('id');
+
+					event.preventDefault();
+
+					$( this ).WCBackboneModal({
+						template : 'wc-modal-add-shipping-method',
+						variable : {
+							zone_id : zone_id
+						}
+					});
+				},
+				onAddShippingMethodSubmitted: function( event, target, posted_data ) {
+					if ( 'wc-modal-add-shipping-method' === target ) {
+						shippingZoneView.block();
+
+						// Add method to zone via ajax call
+						$.post( ajaxurl + '?action=woocommerce_shipping_zone_add_method', {
+							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
+							method_id               : posted_data.add_method_id,
+							zone_id                 : posted_data.zone_id
+						}, function( response, textStatus ) {
+							if ( 'success' === textStatus && response.success ) {
+								// Method was added. Render methods.
+								shippingZoneView.renderShippingMethods( posted_data.zone_id, response.data.methods );
+							}
+							shippingZoneView.unblock();
+						}, 'json' );
 					}
 				}
 			} ),

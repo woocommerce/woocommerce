@@ -14,7 +14,7 @@ $settings = array(
 		'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 		'type' 			=> 'checkbox',
 		'label' 		=> __( 'Enable this shipping method', 'woocommerce' ),
-		'default' 		=> 'no',
+		'default' 		=> 'yes',
 	),
 	'title' => array(
 		'title' 		=> __( 'Method Title', 'woocommerce' ),

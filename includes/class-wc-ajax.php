@@ -3148,6 +3148,7 @@ class WC_AJAX {
 
 		wp_send_json_success( array(
 			'instance_id' => $instance_id,
+			'zone_id'     => $zone_id,
 			'methods'     => $zone->get_shipping_methods()
 		) );
 	}
