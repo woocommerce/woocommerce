@@ -127,7 +127,7 @@
 									$method_list.append( '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
 								} );
 							} else {
-								$method_list.append( '<li>&ndash;</li>' );
+								$method_list.append( '<li>' + data.strings.no_methods + '</li>' );
 							}
 
 							// Editing?
