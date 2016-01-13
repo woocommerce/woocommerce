@@ -1,14 +1,14 @@
-/* global wc_enhanced_select_params, shippingClassesLocalizeScript, ajaxurl */
+/* global shippingClassesLocalizeScript, ajaxurl */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
 		var $table          = $( '.wc-shipping-classes' ),
 			$tbody          = $( '.wc-shipping-class-rows' ),
 			$save_button    = $( '.wc-shipping-class-save' ),
 			$row_template   = wp.template( 'wc-shipping-class-row' ),
-			$blank_template = wp.template( 'wc-shipping-class-row-blank' );
+			$blank_template = wp.template( 'wc-shipping-class-row-blank' ),
 
 			// Backbone model
-			Shippingclass       = Backbone.Model.extend({
+			ShippingClass       = Backbone.Model.extend({
 				changes: {},
 				logChanges: function( changedRows ) {
 					var changes = this.changes || {};
@@ -27,28 +27,28 @@
 							changes                 : this.changes
 						}, this.onSaveResponse, 'json' );
 					} else {
-						shippingclass.trigger( 'saved:classes' );
+						shippingClass.trigger( 'saved:classes' );
 					}
 				},
 				onSaveResponse: function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
 						if ( response.success ) {
-							shippingclass.set( 'classes', response.data.shipping_classes );
-							shippingclass.trigger( 'change:classes' );
-							shippingclass.changes = {};
-							shippingclass.trigger( 'saved:classes' );
+							shippingClass.set( 'classes', response.data.shipping_classes );
+							shippingClass.trigger( 'change:classes' );
+							shippingClass.changes = {};
+							shippingClass.trigger( 'saved:classes' );
 						} else if ( response.data ) {
                             window.alert( response.data );
                         } else {
 							window.alert( data.strings.save_failed );
 						}
 					}
-                    shippingclassView.unblock();
+                    shippingClassView.unblock();
 				}
 			} ),
 
 			// Backbone view
-			ShippingclassView = Backbone.View.extend({
+			ShippingClassView = Backbone.View.extend({
 				rowTemplate: $row_template,
 				initialize: function() {
 					this.listenTo( this.model, 'change:classes', this.setUnloadConfirmation );
@@ -80,6 +80,11 @@
 					this.unblock();
 
 					if ( _.size( classes ) ) {
+						// Sort classes
+						classes = _.sortBy( classes, function( shipping_class ) {
+							return shipping_class.name;
+						} );
+
 						// Populate $tbody with the current classes
 						$.each( classes, function( id, rowData ) {
 							view.$el.append( view.rowTemplate( rowData ) );
@@ -192,14 +197,14 @@
 					model.logChanges( changes );
 				}
 			} ),
-			shippingclass = new Shippingclass({
+			shippingClass = new ShippingClass({
 				classes: data.classes
 			} ),
-			shippingclassView = new ShippingclassView({
-				model:    shippingclass,
+			shippingClassView = new ShippingClassView({
+				model:    shippingClass,
 				el:       $tbody
 			} );
 
-		shippingclassView.render();
+		shippingClassView.render();
 	});
 })( jQuery, shippingClassesLocalizeScript, wp, ajaxurl );
