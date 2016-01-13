@@ -289,7 +289,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_remaining_refund_amount() {
-		return wc_format_decimal( $this->get_total() - $this->get_total_refunded() );
+		return wc_format_decimal( $this->get_total() - $this->get_total_refunded(), wc_get_price_decimals() );
 	}
 
 	/**
