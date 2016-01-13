@@ -23,27 +23,6 @@ $settings = array(
 		'default'		=> __( 'Flat Rate', 'woocommerce' ),
 		'desc_tip'		=> true
 	),
-	'availability' => array(
-		'title' 		=> __( 'Availability', 'woocommerce' ),
-		'type' 			=> 'select',
-		'default' 		=> 'all',
-		'class'			=> 'availability wc-enhanced-select',
-		'options'		=> array(
-			'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-			'specific' 	=> __( 'Specific Countries', 'woocommerce' ),
-		),
-	),
-	'countries' => array(
-		'title' 		=> __( 'Specific Countries', 'woocommerce' ),
-		'type' 			=> 'multiselect',
-		'class'			=> 'wc-enhanced-select',
-		'css'			=> 'width: 450px;',
-		'default' 		=> '',
-		'options'		=> WC()->countries->get_shipping_countries(),
-		'custom_attributes' => array(
-			'data-placeholder' => __( 'Select some countries', 'woocommerce' )
-		)
-	),
 	'tax_status' => array(
 		'title' 		=> __( 'Tax Status', 'woocommerce' ),
 		'type' 			=> 'select',
