@@ -1,5 +1,6 @@
 <h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?></h2>
-<p><?php _e( 'Create shipping zones for all of the places you ship products to. Customers who enter a shipping address that isn\'t included in your shipping zones will receive a notice that there is no shipping available to their region.', 'woocommerce' ); ?><p>
+<p><?php _e( 'Shipping Zones are regions with similar Shipping Methods and rates. WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them. If there are no Shipping Methods within the matching zone, the customer will see a notice stating that there are no shipping methods available for the address they&lsquo;ve provided.', 'woocommerce' ); ?><p>
+
 <table class="wc-shipping-zones widefat">
     <thead>
         <tr>
@@ -22,7 +23,7 @@
     <tbody>
         <tr>
             <td width="1%" class="wc-shipping-zone-worldwide"></td>
-            <td class="wc-shipping-zone-name"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Worldwide', 'woocommerce' ); ?></a></td>
+            <td class="wc-shipping-zone-name"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Rest of the World', 'woocommerce' ); ?></a></td>
             <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping methods added here apply to all regions without a zone.', 'woocommerce' ); ?></td>
             <td class="wc-shipping-zone-methods">
 				<?php
