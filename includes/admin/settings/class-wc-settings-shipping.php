@@ -244,7 +244,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$wc_shipping->process_admin_options();
 
 		} else {
-			foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
+			foreach ( $wc_shipping->load_shipping_methods() as $method_id => $method ) {
 				if ( $current_section === sanitize_title( get_class( $method ) ) ) {
 					do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
 				}
