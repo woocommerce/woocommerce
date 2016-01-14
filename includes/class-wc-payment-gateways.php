@@ -99,6 +99,8 @@ class WC_Payment_Gateways {
 		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
 		$order_end = 999;
 
+		WC()->shipping()->load_shipping_methods();
+
 		// Load gateways in order
 		foreach ( $load_gateways as $gateway ) {
 			$load_gateway = is_string( $gateway ) ? new $gateway() : $gateway;

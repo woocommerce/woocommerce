@@ -52,7 +52,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
     	$shipping_methods = array();
 
     	if ( is_admin() )
-	    	foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
+	    	foreach ( WC()->shipping()->get_shipping_methods() as $method ) {
 		    	$shipping_methods[ $method->id ] = $method->get_title();
 	    	}
 
