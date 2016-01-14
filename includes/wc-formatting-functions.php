@@ -46,11 +46,14 @@ function wc_get_filename_from_url( $file_url ) {
  *
  * @param mixed $dim
  * @param mixed $to_unit 'in', 'm', 'cm', 'm'
+ * @param mixed $from_unit (optional) 'in', 'm', 'cm', 'm'
  * @return float
  */
-function wc_get_dimension( $dim, $to_unit ) {
+function wc_get_dimension( $dim, $to_unit, $from_unit = null ) {
 
-	$from_unit 	= strtolower( get_option( 'woocommerce_dimension_unit' ) );
+	if ( empty( $from_unit ) ) {
+		$from_unit = strtolower( get_option( 'woocommerce_dimension_unit' ) );
+	}
 	$to_unit	= strtolower( $to_unit );
 
 	// Unify all units to cm first
@@ -97,11 +100,14 @@ function wc_get_dimension( $dim, $to_unit ) {
  *
  * @param mixed $weight
  * @param mixed $to_unit 'g', 'kg', 'lbs'
+ * @param mixed $from_unit (optional) 'g', 'kg', 'lbs'
  * @return float
  */
-function wc_get_weight( $weight, $to_unit ) {
+function wc_get_weight( $weight, $to_unit, $from_unit = null ) {
 
-	$from_unit 	= strtolower( get_option('woocommerce_weight_unit') );
+	if ( empty( $from_unit ) ) {
+		$from_unit = strtolower( get_option( 'woocommerce_weight_unit' ) );
+	}
 	$to_unit	= strtolower( $to_unit );
 
 	//Unify all units to kg first
