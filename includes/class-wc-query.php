@@ -225,7 +225,7 @@ class WC_Query {
 		}
 
 		// Fix for endpoints on the homepage
-		if ( $q->is_home() && 'page' === get_option( 'show_on_front' ) && absint( get_option( 'page_on_front' ) ) !== $q->get( 'page_id' ) ) {
+		if ( $q->is_home() && 'page' === get_option( 'show_on_front' ) && absint( get_option( 'page_on_front' ) ) !== absint( $q->get( 'page_id' ) ) ) {
 			$_query = wp_parse_args( $q->query );
 			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
 				$q->is_page     = true;
@@ -248,7 +248,7 @@ class WC_Query {
 		}
 
 		// Special check for shops with the product archive on front
-		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && $q->get( 'page_id' ) === wc_get_page_id( 'shop' ) ) {
+		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 
 			// This is a front-page shop
 			$q->set( 'post_type', 'product' );
