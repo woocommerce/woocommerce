@@ -2023,5 +2023,51 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 
 		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html );
 	}
+}
 
+if ( ! function_exists( 'woocommerce_account_view_order' ) ) {
+
+	/**
+	 * My Account view order template.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	function woocommerce_account_view_order( $order_id ) {
+		WC_Shortcode_My_Account::view_order( absint( $order_id ) );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
+
+	/**
+	 * My Account edit account template.
+	 */
+	function woocommerce_account_edit_account() {
+		WC_Shortcode_My_Account::edit_account();
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
+
+	/**
+	 * My Account edit address template.
+	 *
+	 * @param string $type Address type.
+	 */
+	function woocommerce_account_edit_address( $type ) {
+		$type = wc_edit_address_i18n( sanitize_title( $type ), true );
+
+		WC_Shortcode_My_Account::edit_address( $type );
+	}
+}
+
+
+if ( ! function_exists( 'woocommerce_account_add_payment_method' ) ) {
+
+	/**
+	 * My Account add payment method template.
+	 */
+	function woocommerce_account_add_payment_method() {
+		WC_Shortcode_My_Account::add_payment_method();
+	}
 }

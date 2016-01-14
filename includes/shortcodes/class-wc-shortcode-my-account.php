@@ -35,7 +35,6 @@ class WC_Shortcode_My_Account {
 		}
 
 		if ( ! is_user_logged_in() ) {
-
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) ) {
@@ -43,37 +42,24 @@ class WC_Shortcode_My_Account {
 			}
 
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
-
 				self::lost_password();
-
 			} else {
-
 				wc_get_template( 'myaccount/form-login.php' );
-
 			}
-
+		} else if (
+			isset( $wp->query_vars['page'] ) // Regular page with shortcode.
+			|| empty( $wp->query_vars ) // When My Account page is the front page.
+		) {
+			self::my_account( $atts );
 		} else {
+			foreach ( $wp->query_vars as $key => $value ) {
+				// Ignore pagename param.
+				if ( 'pagename' === $key ) {
+					continue;
+				}
 
-			if ( ! empty( $wp->query_vars['view-order'] ) ) {
-
-				self::view_order( absint( $wp->query_vars['view-order'] ) );
-
-			} elseif ( isset( $wp->query_vars['edit-account'] ) ) {
-
-				self::edit_account();
-
-			} elseif ( isset( $wp->query_vars['edit-address'] ) ) {
-
-				self::edit_address( wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) );
-
-			} elseif ( isset( $wp->query_vars['add-payment-method'] ) ) {
-
-				self::add_payment_method();
-
-			} else {
-
-				self::my_account( $atts );
-
+				$key = str_replace( '-', '_', $key );
+				do_action( 'woocommerce_my_account_' . $key . '_endpoint', $value );
 			}
 		}
 	}
@@ -81,7 +67,7 @@ class WC_Shortcode_My_Account {
 	/**
 	 * My account page.
 	 *
-	 * @param  array $atts
+	 * @param array $atts
 	 */
 	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
@@ -97,12 +83,12 @@ class WC_Shortcode_My_Account {
 	/**
 	 * View order page.
 	 *
-	 * @param  int $order_id
+	 * @param int $order_id
 	 */
-	private static function view_order( $order_id ) {
+	public static function view_order( $order_id ) {
 
-		$user_id      	= get_current_user_id();
-		$order 			= wc_get_order( $order_id );
+		$user_id = get_current_user_id();
+		$order   = wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
@@ -123,17 +109,16 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Edit account details page.
 	 */
-	private static function edit_account() {
+	public static function edit_account() {
 		wc_get_template( 'myaccount/form-edit-account.php', array( 'user' => get_user_by( 'id', get_current_user_id() ) ) );
 	}
 
 	/**
 	 * Edit address page.
 	 *
-	 * @access public
 	 * @param string $load_address
 	 */
-	private static function edit_address( $load_address = 'billing' ) {
+	public static function edit_address( $load_address = 'billing' ) {
 
 		// Current user
 		global $current_user;
@@ -208,7 +193,6 @@ class WC_Shortcode_My_Account {
 	 *
 	 * Based on retrieve_password() in core wp-login.php.
 	 *
-	 * @access public
 	 * @uses $wpdb WordPress Database object
 	 * @return bool True: when finish. False: on error
 	 */
@@ -344,7 +328,7 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Show the add payment method page.
 	 */
-	private static function add_payment_method() {
+	public static function add_payment_method() {
 
 		if ( ! is_user_logged_in() ) {
 
