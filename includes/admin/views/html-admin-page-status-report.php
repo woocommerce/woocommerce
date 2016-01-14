@@ -86,7 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="WP Cron"><?php _e( 'WP Cron', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WP Cron Jobs are enabled.', 'woocommerce' ) ); ?></td>
-			<td><?php if ( defined('WP_CRON') && WP_CRON ) echo '<mark class="yes">&#10004;</mark>'; else echo '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php if ( defined('DISABLE_WP_CRON') && DISABLE_WP_CRON ) echo '<mark class="yes">&#10004;</mark>'; else echo '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Language"><?php _e( 'Language', 'woocommerce' ); ?>:</td>
