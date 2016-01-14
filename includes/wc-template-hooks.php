@@ -239,3 +239,11 @@ add_action( 'woocommerce_auth_page_footer', 'woocommerce_output_auth_footer', 10
  * Disable Jetpack comments.
  */
 add_filter( 'jetpack_comment_form_enabled_for_product', '__return_false' );
+
+/**
+ * My Account.
+ */
+add_action( 'woocommerce_my_account_view_order_endpoint', 'woocommerce_account_view_order' );
+add_action( 'woocommerce_my_account_edit_account_endpoint', 'woocommerce_account_edit_account' );
+add_action( 'woocommerce_my_account_edit_address_endpoint', 'woocommerce_account_edit_address' );
+add_action( 'woocommerce_my_account_add_payment_method_endpoint', 'woocommerce_account_add_payment_method' );
