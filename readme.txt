@@ -1,6 +1,6 @@
 === WooCommerce - excelling eCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
-Tags: ecommerce, e-commerce, commerce, woothemes, wordpress ecommerce, affiliate, store, sales, sell, shop, shopping, cart, checkout, configurable, variable, widgets, reports, download, downloadable, digital, inventory, stock, reports, shipping, tax
+Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, shipping, storefront
 Requires at least: 4.1
 Tested up to: 4.4
 Stable tag: 2.4.13
