@@ -858,16 +858,10 @@ function wc_array_cartesian( $input ) {
 function wc_transaction_query( $type = 'start' ) {
 	global $wpdb;
 
-	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
-		// Try to set isolation level to support dirty reads - if this is unsupported, do not use transactions
-		$wpdb->hide_errors();
-		$result = $wpdb->query( 'SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;' );
+	$wpdb->hide_errors();
 
-		if ( false === $result ) {
-			define( 'WC_USE_TRANSACTIONS', false );
-		} else {
-			define( 'WC_USE_TRANSACTIONS', true );
-		}
+	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
+		define( 'WC_USE_TRANSACTIONS', true );
 	}
 
 	if ( WC_USE_TRANSACTIONS ) {
