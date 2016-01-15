@@ -1067,7 +1067,14 @@ class WC_API_Products extends WC_API_Resource {
 
 		// Stock status
 		if ( isset( $data['in_stock'] ) ) {
-			$stock_status = ( true === $data['in_stock'] ) ? 'instock' : 'outofstock';
+			$statuses = array( 'instock', 'outofstock', 'discontinued' );
+			if ( $data['in_stock'] === true ) {
+				$stock_status = 'instock';
+			} elseif ( ! in_array( $data['in_stock'], $statuses ) ) {
+				$stock_status = $data['in_stock'];
+			} else {
+				$stock_status = 'outofstock';
+			}
 		} else {
 			$stock_status = get_post_meta( $product_id, '_stock_status', true );
 
@@ -1362,7 +1369,14 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
 			if ( isset( $variation['in_stock'] ) ) {
-				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
+				$statuses = array( 'instock', 'outofstock', 'discontinued' );
+		        if ( $variation['in_stock'] === true ) {
+		          $stock_status = 'instock';
+		        } elseif ( ! in_array( $variation['in_stock'], $statuses ) ) {
+		          $stock_status = $variation['in_stock'];
+		        } else {
+		          $stock_status = 'outofstock';
+		        }
 				wc_update_product_stock_status( $variation_id, $stock_status );
 			}
 
