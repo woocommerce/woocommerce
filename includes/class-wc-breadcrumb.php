@@ -30,7 +30,7 @@ class WC_Breadcrumb {
 	 */
 	public function add_crumb( $name, $link = '' ) {
 		$this->crumbs[] = array(
-			$name,
+			strip_tags( $name ),
 			$link
 		);
 	}
