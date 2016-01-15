@@ -753,22 +753,22 @@ class WC_Query {
 				if ( sizeof( $data['terms'] ) > 0 ) {
 					foreach ( $data['terms'] as $value ) {
 
-						$posts = get_posts(
-							array(
-								'post_type' 	=> 'product',
-								'numberposts' 	=> -1,
-								'post_status' 	=> 'publish',
-								'fields' 		=> 'ids',
-								'no_found_rows' => true,
-								'tax_query' => array(
-									array(
-										'taxonomy' 	=> $attribute,
-										'terms' 	=> $value,
-										'field' 	=> 'term_id'
-									)
+						$args = array(
+							'post_type' 	=> 'product',
+							'numberposts' 	=> -1,
+							'post_status' 	=> 'publish',
+							'fields' 		=> 'ids',
+							'no_found_rows' => true,
+							'tax_query' => array(
+								array(
+									'taxonomy' 	=> $attribute,
+									'terms' 	=> $value,
+									'field' 	=> 'term_id'
 								)
 							)
 						);
+
+						$posts = apply_filters( 'woocommerce_layered_nav_query_posts', get_posts( $args ), $args, $attribute, $value );
 
 						if ( ! is_wp_error( $posts ) ) {
 
