@@ -1,8 +1,8 @@
 <?php
 /**
- * My Orders
+ * My Downloads
  *
- * Shows recent orders on the account page.
+ * Shows downloads on the account page.
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/my-downloads.php.
  *
@@ -11,10 +11,10 @@
  * as little as possible, but it does happen. When this occurs the version of the template file will.
  * be bumped and the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.0.0
+ * @see     http://docs.woothemes.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

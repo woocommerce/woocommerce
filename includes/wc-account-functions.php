@@ -68,3 +68,22 @@ function wc_edit_address_i18n( $id, $flip = false ) {
 
 	return $slugs[ $id ];
 }
+
+/**
+ * Get My Account menu items.
+ *
+ * @since 2.6.0
+ * @return array
+ */
+function wc_get_account_menu_items() {
+	$pages = apply_filters( 'woocommerce_account_menu_items', array(
+		'recent-orders'       => __( 'Recent Orders', 'woocommerce' ),
+		'available-downloads' => __( 'Downloads', 'woocommerce' ),
+		'edit-address'        => __( 'Addresses', 'woocommerce' ),
+		'edit-account'        => __( 'Account Details', 'woocommerce' ),
+	) );
+
+	$pages['customer-logout'] = __( 'Logout', 'woocommerce' );
+
+	return $pages;
+}
