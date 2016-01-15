@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.5.0-RC2\n"
+"Project-Id-Version: WooCommerce 2.5.0-RC3\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2016-01-12 16:03:14+00:00\n"
+"POT-Creation-Date: 2016-01-15 15:54:41+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -4861,7 +4861,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-order.php:1778
 #: includes/abstracts/abstract-wc-product.php:1018
 #: includes/abstracts/abstract-wc-product.php:1024
-#: includes/class-wc-cart.php:1605 includes/class-wc-product-variable.php:360
+#: includes/class-wc-cart.php:1605 includes/class-wc-product-variable.php:364
 #: includes/class-wc-product-variation.php:318
 msgid "Free!"
 msgstr ""
@@ -14188,7 +14188,7 @@ msgstr ""
 msgid "Select options"
 msgstr ""
 
-#: includes/class-wc-product-variable.php:737
+#: includes/class-wc-product-variable.php:741
 msgid ""
 "This variable product has no active variations. Add or enable variations to "
 "allow this product to be purchased."
@@ -17616,8 +17616,8 @@ msgid "Failed"
 msgstr ""
 
 #: includes/class-wc-product-grouped.php:156
-#: includes/class-wc-product-variable.php:351
-#: includes/class-wc-product-variable.php:357
+#: includes/class-wc-product-variable.php:355
+#: includes/class-wc-product-variable.php:361
 msgctxt "Price range: from-to"
 msgid "%1$s&ndash;%2$s"
 msgstr ""
