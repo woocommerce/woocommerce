@@ -36,7 +36,28 @@ wc_print_notices(); ?>
 		?>
 	</p>
 
-	<?php do_action( 'woocommerce_before_my_account' ); ?>
+	<?php
+		/**
+		 * My Account dashboard.
+		 *
+		 * @since 2.6.0
+		 */
+		do_action( 'woocommerce_my_account_dashboard' );
+	?>
 
-	<?php do_action( 'woocommerce_after_my_account' ); ?>
+	<?php
+		/**
+		 * Deprecated woocommerce_before_my_account action.
+		 *
+		 * @depracated 2.6.0
+		 */
+		do_action( 'woocommerce_before_my_account' );
+
+		/**
+		 * Deprecated woocommerce_after_my_account action.
+		 *
+		 * @depracated 2.6.0
+		 */
+		do_action( 'woocommerce_after_my_account' );
+	?>
 </div>
