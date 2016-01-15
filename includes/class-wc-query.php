@@ -489,23 +489,23 @@ class WC_Query {
 		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
 
 			// Get all visible posts, regardless of filters
-			$unfiltered_product_ids = get_posts(
-				array_merge(
-					$current_wp_query,
-					array(
-						'post_type'              => 'product',
-						'numberposts'            => -1,
-						'post_status'            => 'publish',
-						'meta_query'             => $this->meta_query,
-						'fields'                 => 'ids',
-						'no_found_rows'          => true,
-						'update_post_meta_cache' => false,
-						'update_post_term_cache' => false,
-						'pagename'               => '',
-						'wc_query'               => 'get_products_in_view'
-					)
+			$unfiltered_args = array_merge(
+				$current_wp_query,
+				array(
+					'post_type'              => 'product',
+					'numberposts'            => -1,
+					'post_status'            => 'publish',
+					'meta_query'             => $this->meta_query,
+					'fields'                 => 'ids',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+					'pagename'               => '',
+					'wc_query'               => 'get_products_in_view'
 				)
 			);
+
+			$unfiltered_product_ids = apply_filters( 'woocommerce_unfiltered_product_ids', get_posts( $unfiltered_args ), $unfiltered_args );
 
 			set_transient( $transient_name, $unfiltered_product_ids, DAY_IN_SECONDS * 30 );
 		}
