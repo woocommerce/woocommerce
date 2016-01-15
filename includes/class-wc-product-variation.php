@@ -536,7 +536,12 @@ class WC_Product_Variation extends WC_Product {
 	public function get_availability() {
 		$availability = $class = '';
 
-		if ( $this->managing_stock() ) {
+		if ( $this->stock_status === 'discontinued' ) {
+
+	      $availability = __( 'Discontinued', 'woocommerce' );
+	      $class        = 'discontinued';
+
+    	} elseif ( $this->managing_stock() ) {
 			if ( $this->is_in_stock() && $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				switch ( get_option( 'woocommerce_stock_format' ) ) {
 					case 'no_amount' :
