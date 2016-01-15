@@ -768,14 +768,14 @@ class WC_Query {
 							)
 						);
 
-						$posts = apply_filters( 'woocommerce_layered_nav_query_posts', get_posts( $args ), $args, $attribute, $value );
+						$post_ids = apply_filters( 'woocommerce_layered_nav_query_post_ids', get_posts( $args ), $args, $attribute, $value );
 
-						if ( ! is_wp_error( $posts ) ) {
+						if ( ! is_wp_error( $post_ids ) ) {
 
 							if ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) {
-								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $posts, $matched_products_from_attribute ) : array_intersect( $posts, $matched_products_from_attribute );
+								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $post_ids, $matched_products_from_attribute ) : array_intersect( $post_ids, $matched_products_from_attribute );
 							} else {
-								$matched_products_from_attribute = $posts;
+								$matched_products_from_attribute = $post_ids;
 							}
 
 							$filtered = true;
