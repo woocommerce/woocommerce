@@ -1,11 +1,11 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
- * Handles refunds
+ * Handles Refunds.
  */
 class WC_Gateway_Paypal_Refund {
 
@@ -19,10 +19,10 @@ class WC_Gateway_Paypal_Refund {
 	public static $api_signature;
 
 	/**
-	 * Get refund request args
+	 * Get refund request args.
 	 * @param  WC_Order $order
-	 * @param  float $amount
-	 * @param  string $reason
+	 * @param  float    $amount
+	 * @param  string   $reason
 	 * @return array
 	 */
 	public static function get_request( $order, $amount = null, $reason = '' ) {
@@ -45,11 +45,11 @@ class WC_Gateway_Paypal_Refund {
 	}
 
 	/**
-	 * Refund an order via PayPal
+	 * Refund an order via PayPal.
 	 * @param  WC_Order $order
-	 * @param  float $amount
-	 * @param  string $reason
-	 * @param  boolean $sandbox
+	 * @param  float    $amount
+	 * @param  string   $reason
+	 * @param  bool     $sandbox
 	 * @return array|wp_error The parsed response from paypal, or a WP_Error object
 	 */
 	public static function refund_order( $order, $amount = null, $reason = '', $sandbox = false ) {

@@ -114,15 +114,16 @@
 
 	a.button-primary,
 	button.button-primary {
-		background: #cc99c2;
-		border-color: #b366a4;
+		background: #bb77ae;
+		border-color: #aa559a;
 		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 		color: #fff;
 		text-decoration: none !important;
+		text-shadow: 0px -1px 1px #8a4f7f, 1px 0px 1px #8a4f7f, 0px 1px 1px #8a4f7f, -1px 0px 1px #8a4f7f;
 
 		&:hover {
-			background: #bb77ae;
+			background: #c480b7;
 			border-color: #aa559a;
 			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
 			box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
@@ -130,7 +131,16 @@
 
 		&:active {
 			background: #aa559a;
+			border-color: #873A79;
+			-webkit-box-shadow: inset 0px 2px 0px #873A79;
+			box-shadow: inset 0px 2px 0px #873A79;
+		}
+
+		&:focus {
+			background: #bb77ae;
 			border-color: #aa559a;
+			-webkit-box-shadow: 0px 1px 0px #bb77ae, 0px 0px 2px 1px #aa559a;
+			box-shadow: 0px 1px 0px #bb77ae, 0px 0px 2px 1px #aa559a;
 		}
 	}
 
@@ -147,7 +157,7 @@
 	}
 }
 
-#variable_product_options #message {
+#variable_product_options #message, #variable_product_options .notice {
 	margin: 10px;
 }
 
@@ -467,7 +477,7 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce-order-data {
-	h3.hndle,
+	.hndle,
 	.handlediv {
 		display: none;
 	}
@@ -632,7 +642,7 @@ ul.wc_coupon_list_block {
 			padding-right: 1px;
 		}
 
-		.wc-customer-user {
+		.wc-customer-user, .wc-order-status {
 			label a {
 				float: right;
 			}
@@ -1572,7 +1582,8 @@ ul.wc_coupon_list_block {
 			width: 2em;
 
 			&:after {
-				@include icon("\e01c");
+				@include icon("\f111");
+				font-family: 'Dashicons';
 				line-height: 1.85;
 			}
 		}
@@ -1869,6 +1880,13 @@ a.import_rates {
 		font-size: 1.2em;
 	}
 }
+#rates-pagination {
+	float: right;
+	margin-right: .5em;
+	.tablenav {
+		margin: 0;
+	}
+}
 
 table.wc_tax_rates,
 table.wc_input_table {
@@ -2006,6 +2024,7 @@ table.wc_input_table {
 }
 
 table.wc_gateways,
+table.wc_emails,
 table.wc_shipping {
 	position: relative;
 
@@ -2068,6 +2087,35 @@ table.wc_shipping {
 			height: 100%;
 		}
 	}
+	.wc-email-settings-table-name {
+		font-weight: 700;
+		span {
+			font-weight: normal;
+			color: #999;
+			margin: 0 0 0 4px !important;
+		}
+	}
+	.wc-email-settings-table-status {
+		text-align: center;
+		width: 1em;
+		.tips {
+			margin: 0 auto;
+		}
+	}
+	.wc-email-settings-table-actions {
+		a {
+			@include ir();
+			padding: 0 !important;
+			height: 2em !important;
+			width: 2em;
+
+			&:after {
+				@include icon("\f111");
+				font-family: 'Dashicons';
+				line-height: 1.85;
+			}
+		}
+	}
 }
 
 img.help_tip {
@@ -2084,9 +2132,16 @@ img.help_tip {
 }
 
 .status-enabled,
-.status-disabled {
+.status-manual {
 	font-size: 1.4em;
 	@include ir();
+}
+
+.status-manual {
+	&:before {
+		@include icon( "\e008" );
+		color: #999;
+	}
 }
 
 .status-enabled {
@@ -2098,7 +2153,7 @@ img.help_tip {
 
 .woocommerce {
 	.woo-nav-tab-wrapper {
-		margin-bottom: 16px;
+		margin-bottom: 16px !important;
 	}
 
 	.subsubsub {
@@ -2249,6 +2304,10 @@ img.help_tip {
 				margin-left: 10px;
 			}
 		}
+
+		.wc_emails_wrapper {
+		    padding: 0 15px 10px 0;
+		}
 	}
 }
 
@@ -2393,7 +2452,7 @@ img.help_tip {
 }
 
 #woocommerce-product-data {
-	h3.hndle {
+	.hndle {
 		padding: 10px;
 
 		span {
@@ -2580,7 +2639,8 @@ img.help_tip {
 
 			&.advanced_options {
 				a:before {
-					content: "\e01c";
+					content: "\f111";
+					font-family: 'Dashicons';
 				}
 			}
 
@@ -2890,7 +2950,8 @@ img.help_tip {
 
 	input[type="text"],
 	input[type="email"],
-	input[type="number"] {
+	input[type="number"],
+	input[type="password"] {
 		width: 50%;
 		float: left;
 	}
@@ -2907,6 +2968,7 @@ img.help_tip {
 	input[type="text"].short,
 	input[type="email"].short,
 	input[type="number"].short,
+	input[type="password"].short,
 	.short {
 		width: 50%;
 	}
@@ -3089,8 +3151,18 @@ img.help_tip {
 		}
 
 		.handlediv {
+			width: 27px;
+
 			&:before {
+				content: "\f142" !important;
+				cursor: pointer;
+				display: inline-block;
+				font: 400 20px/1 "Dashicons";
 				line-height: .5 !important;
+				padding: 8px 10px;
+				position: relative;
+				right: 12px;
+				top: 0;
 			}
 		}
 
@@ -3564,8 +3636,9 @@ img.ui-datepicker-trigger {
 		}
 
 		h3.stats_range {
-			padding: 0 !important;
 			border-bottom-color: #dfdfdf;
+			margin: 0;
+			padding: 0 !important;
 
 			.export_csv {
 				float: right;

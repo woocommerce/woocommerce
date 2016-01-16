@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Product_Cat_Dropdown_Walker class.
+ * WC_Product_Cat_Dropdown_Walker class
  *
  * @extends 	Walker
  * @class 		WC_Product_Cat_Dropdown_Walker
@@ -17,10 +17,27 @@ if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) :
 
 class WC_Product_Cat_Dropdown_Walker extends Walker {
 
+	/**
+	 * What the class handles.
+	 *
+	 * @var string
+	 */
 	public $tree_type = 'category';
-	public $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
 
 	/**
+	 * DB fields to use.
+	 *
+	 * @var array
+	 */
+	public $db_fields = array(
+		'parent' => 'parent',
+		'id'     => 'term_id',
+		'slug'   => 'slug'
+	);
+
+	/**
+	 * Starts the list before the elements are added.
+	 *
 	 * @see Walker::start_el()
 	 * @since 2.1.0
 	 *
@@ -58,8 +75,8 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 	 * Traverse elements to create list from elements.
 	 *
 	 * Display one element if the element doesn't have any children otherwise,
-	 * display the element and its children. Will only traverse up to the max
-	 * depth and no ignore elements under that depth. It is possible to set the
+	 * display the element and its children. Will only traverse up to the max.
+	 * depth and no ignore elements under that depth. It is possible to set the.
 	 * max depth to include all depths, see walk() method.
 	 *
 	 * This method shouldn't be called directly, use the walk() method instead.

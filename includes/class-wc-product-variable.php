@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Variable Product Class
+ * Variable Product Class.
  *
  * The WooCommerce product class handles individual product data.
  *
@@ -20,14 +20,11 @@ class WC_Product_Variable extends WC_Product {
 	/** @public array Array of child products/posts/variations. */
 	public $children = null;
 
-	/** @public string The product's total stock, including that of its children. */
-	public $total_stock;
-
 	/** @private array Array of variation prices. */
 	private $prices_array = array();
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
 	 * @param mixed $product
 	 */
@@ -37,42 +34,13 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	public function add_to_cart_text() {
 		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Select options', 'woocommerce' ), $this );
-	}
-
-	/**
-	 * Get total stock.
-	 *
-	 * This is the stock of parent and children combined.
-	 *
-	 * @access public
-	 * @return int
-	 */
-	public function get_total_stock() {
-		if ( empty( $this->total_stock ) ) {
-			$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-			if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-				$this->total_stock = max( 0, wc_stock_amount( $this->stock ) );
-
-				if ( sizeof( $this->get_children() ) > 0 ) {
-					foreach ( $this->get_children() as $child_id ) {
-						if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
-							$stock = get_post_meta( $child_id, '_stock', true );
-							$this->total_stock += max( 0, wc_stock_amount( $stock ) );
-						}
-					}
-				}
-				set_transient( $transient_name, $this->total_stock, DAY_IN_SECONDS * 30 );
-			}
-		}
-		return wc_stock_amount( $this->total_stock );
 	}
 
 	/**
@@ -89,7 +57,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Performed after a stock level change at product level
+	 * Performed after a stock level change at product level.
 	 */
 	public function check_stock_status() {
 		$set_child_stock_status = '';
@@ -180,7 +148,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * get_child function.
+	 * Get child product.
 	 *
 	 * @access public
 	 * @param mixed $child_id
@@ -265,12 +233,10 @@ class WC_Product_Variable extends WC_Product {
 		global $wp_filter;
 
 		/**
-		 * Transient name for storing prices for this product.
-		 * Max transient length is 45, -10 for get_transient_version.
-		 * @var string
+		 * Transient name for storing prices for this product (note: Max transient length is 45)
 		 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
 		 */
-		$transient_name = 'wc_var_prices' . $this->id . '_' . WC_Cache_Helper::get_transient_version( 'product' );
+		$transient_name = 'wc_var_prices_' . $this->id;
 
 		/**
 		 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
@@ -278,81 +244,96 @@ class WC_Product_Variable extends WC_Product {
 		 * @var string
 		 */
 		if ( $display ) {
-			$price_hash = array( true, WC_Tax::get_rates(), get_option( 'woocommerce_tax_display_shop' ) );
+			$price_hash = array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() );
 		} else {
 			$price_hash = array( false );
 		}
 
-		foreach ( $wp_filter as $key => $val ) {
-			if ( in_array( $key, array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' ) ) ) {
-				$price_hash[ $key ] = $val;
+		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
+
+		foreach ( $filter_names as $filter_name ) {
+			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
+				$price_hash[ $filter_name ] = array();
+
+				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
+					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
+				}
 			}
 		}
 
 		$price_hash = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
 
-		// If the value has already been generated, return it now
-		if ( ! empty( $this->prices_array[ $price_hash ] ) ) {
-			return $this->prices_array[ $price_hash ];
-		}
-
-		// Get value of transient
-		$this->prices_array = array_filter( (array) get_transient( $transient_name ) );
-
-		// If the prices are not stored for this hash, generate them
+		// If the value has already been generated, we don't need to grab the values again.
 		if ( empty( $this->prices_array[ $price_hash ] ) ) {
-			$prices         = array();
-			$regular_prices = array();
-			$sale_prices    = array();
-			$variation_ids  = $this->get_children( true );
 
-			foreach ( $variation_ids as $variation_id ) {
-				if ( $variation = $this->get_child( $variation_id ) ) {
-					$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
-					$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
-					$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->sale_price, $variation, $this );
+			// Get value of transient
+			$this->prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
-					// If sale price does not equal price, the product is not yet on sale
-					if ( $sale_price === $regular_price || $sale_price !== $price ) {
-						$sale_price = $regular_price;
-					}
-
-					// If we are getting prices for display, we need to account for taxes
-					if ( $display ) {
-						if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
-							$price         = '' === $price ? ''         : $variation->get_price_including_tax( 1, $price );
-							$regular_price = '' === $regular_price ? '' : $variation->get_price_including_tax( 1, $regular_price );
-							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_including_tax( 1, $sale_price );
-						} else {
-							$price         = '' === $price ? ''         : $variation->get_price_excluding_tax( 1, $price );
-							$regular_price = '' === $regular_price ? '' : $variation->get_price_excluding_tax( 1, $regular_price );
-							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_excluding_tax( 1, $sale_price );
-						}
-					}
-
-					$prices[ $variation_id ]         = $price;
-					$regular_prices[ $variation_id ] = $regular_price;
-					$sale_prices[ $variation_id ]    = $sale_price;
-				}
+			// If the product version has changed, reset cache
+			if ( empty( $this->prices_array['version'] ) || $this->prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
+				$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
 			}
 
-			asort( $prices );
-			asort( $regular_prices );
-			asort( $sale_prices );
+			// If the prices are not stored for this hash, generate them
+			if ( empty( $this->prices_array[ $price_hash ] ) ) {
+				$prices         = array();
+				$regular_prices = array();
+				$sale_prices    = array();
+				$variation_ids  = $this->get_children( true );
 
-			$this->prices_array[ $price_hash ] = array(
-				'price'         => $prices,
-				'regular_price' => $regular_prices,
-				'sale_price'    => $sale_prices
-			);
+				foreach ( $variation_ids as $variation_id ) {
+					if ( $variation = $this->get_child( $variation_id ) ) {
+						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
+						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
+						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->sale_price, $variation, $this );
 
-			set_transient( $transient_name, $this->prices_array, DAY_IN_SECONDS * 30 );
+						// If sale price does not equal price, the product is not yet on sale
+						if ( $sale_price === $regular_price || $sale_price !== $price ) {
+							$sale_price = $regular_price;
+						}
+
+						// If we are getting prices for display, we need to account for taxes
+						if ( $display ) {
+							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
+								$price         = '' === $price ? ''         : $variation->get_price_including_tax( 1, $price );
+								$regular_price = '' === $regular_price ? '' : $variation->get_price_including_tax( 1, $regular_price );
+								$sale_price    = '' === $sale_price ? ''    : $variation->get_price_including_tax( 1, $sale_price );
+							} else {
+								$price         = '' === $price ? ''         : $variation->get_price_excluding_tax( 1, $price );
+								$regular_price = '' === $regular_price ? '' : $variation->get_price_excluding_tax( 1, $regular_price );
+								$sale_price    = '' === $sale_price ? ''    : $variation->get_price_excluding_tax( 1, $sale_price );
+							}
+						}
+
+						$prices[ $variation_id ]         = $price;
+						$regular_prices[ $variation_id ] = $regular_price;
+						$sale_prices[ $variation_id ]    = $sale_price;
+					}
+				}
+
+				asort( $prices );
+				asort( $regular_prices );
+				asort( $sale_prices );
+
+				$this->prices_array[ $price_hash ] = array(
+					'price'         => $prices,
+					'regular_price' => $regular_prices,
+					'sale_price'    => $sale_prices
+				);
+
+				set_transient( $transient_name, json_encode( $this->prices_array ), DAY_IN_SECONDS * 30 );
+			}
+
+			/**
+			 * Give plugins one last chance to filter the variation prices array which has been generated.
+			 */
+			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
 		}
 
 		/**
-		 * Give plugins one last chance to filter the variation prices array which is being returned.
+		 * Return the values.
 		 */
-		return $this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
+		return $this->prices_array[ $price_hash ];
 	}
 
 	/**
@@ -473,7 +454,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Check if variable product has default attributes set
+	 * Check if variable product has default attributes set.
 	 *
 	 * @access public
 	 * @return bool
@@ -498,7 +479,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Match a variation to a given set of attributes using a WP_Query
+	 * Match a variation to a given set of attributes using a WP_Query.
 	 * @since  2.4.0
 	 * @param  $match_attributes
 	 * @return int Variation ID which matched, 0 is no match was found
@@ -542,7 +523,7 @@ class WC_Product_Variable extends WC_Product {
 
 		/**
 		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes
+		 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same. @see WC_Product_Variable::sync_attributes.
 		 */
 	 	} elseif ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
 			return $match_attributes === array_map( 'sanitize_title', $match_attributes ) ? 0 : $this->get_matching_variation( array_map( 'sanitize_title', $match_attributes ) );
@@ -581,7 +562,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns an array of date for a variation. Used in the add to cart form.
 	 * @since  2.4.0
-	 * @param  WC_Product|int $variation Variation product object or ID
+	 * @param  WC_Product $variation Variation product object or ID
 	 * @return array
 	 */
 	public function get_available_variation( $variation ) {
@@ -597,8 +578,10 @@ class WC_Product_Variable extends WC_Product {
 			$image_link      = $full_attachment ? current( $full_attachment ) : '';
 			$image_title     = get_the_title( $attachment_id );
 			$image_alt       = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+			$image_srcset    = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+			$image_sizes     = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
 		} else {
-			$image = $image_link = $image_title = $image_alt = '';
+			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = '';
 		}
 
 		$availability      = $variation->get_availability();
@@ -617,6 +600,8 @@ class WC_Product_Variable extends WC_Product {
 			'image_link'            => $image_link,
 			'image_title'           => $image_title,
 			'image_alt'             => $image_alt,
+			'image_srcset'			=> $image_srcset ? $image_srcset : '',
+			'image_sizes'			=> $image_sizes ? $image_sizes : '',
 			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 			'availability_html'     => $availability_html,
 			'sku'                   => $variation->get_sku(),
@@ -660,7 +645,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sync variable product stock status with children
+	 * Sync variable product stock status with children.
 	 * @param  int $product_id
 	 */
 	public static function sync_stock_status( $product_id ) {
@@ -687,7 +672,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sync the variable product's attributes with the variations
+	 * Sync the variable product's attributes with the variations.
 	 */
 	public static function sync_attributes( $product_id, $children = false ) {
 		if ( ! $children ) {
@@ -734,7 +719,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Sync the variable product with it's children
+	 * Sync the variable product with it's children.
 	 */
 	public static function sync( $product_id ) {
 		global $wpdb;
@@ -747,12 +732,13 @@ class WC_Product_Variable extends WC_Product {
 			'post_status'	=> 'publish'
 		) );
 
-		// No published variations - update parent post status. Use $wpdb to prevent endless loop on save_post hooks.
-		if ( ! $children && get_post_status( $product_id ) == 'publish' ) {
-			$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $product_id ) );
+		// No published variations - product won't be purchasable.
+		if ( ! $children ) {
+			update_post_meta( $product_id, '_price', '' );
+			delete_transient( 'wc_products_onsale' );
 
-			if ( is_admin() ) {
-				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations so cannot be published. Changing status to draft.', 'woocommerce' ) );
+			if ( is_admin() && 'publish' === get_post_status( $product_id ) ) {
+				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations. Add or enable variations to allow this product to be purchased.', 'woocommerce' ) );
 			}
 
 		// Loop the variations

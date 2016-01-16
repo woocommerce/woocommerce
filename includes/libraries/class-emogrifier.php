@@ -1,6 +1,6 @@
 <?php
 /**
- * This class provides functions for converting CSS styles into inline style attributes in your HTML code.
+ * This class provides functions for converting CSS styles into inline style attributes in your HTML code
  *
  * For more information, please see the README.md file.
  *
@@ -35,14 +35,14 @@ class Emogrifier {
 	const CACHE_KEY_CSS_DECLARATION_BLOCK = 3;
 
 	/**
-	 * for calculating nth-of-type and nth-child selectors
+	 * for calculating nth-of-type and nth-child selectors.
 	 *
 	 * @var integer
 	 */
 	const INDEX = 0;
 
 	/**
-	 * for calculating nth-of-type and nth-child selectors
+	 * for calculating nth-of-type and nth-child selectors.
 	 *
 	 * @var integer
 	 */
@@ -84,15 +84,15 @@ class Emogrifier {
 	);
 
 	/**
-	 * the visited nodes with the XPath paths as array keys
+	 * the visited nodes with the XPath paths as array keys.
 	 *
 	 * @var array<\DOMNode>
 	 */
 	private $visitedNodes = array();
 
 	/**
-	 * the styles to apply to the nodes with the XPath paths as array keys for the outer array and the attribute names/values
-	 * as key/value pairs for the inner array
+	 * the styles to apply to the nodes with the XPath paths as array keys for the outer array and the attribute names/values.
+	 * as key/value pairs for the inner array.
 	 *
 	 * @var array<array><string>
 	 */
@@ -354,9 +354,9 @@ class Emogrifier {
 
 
 	/**
-	 * This method merges old or existing name/value array with new name/value array
+	 * This method merges old or existing name/value array with new name/value array.
 	 * and then generates a string of the combined style suitable for placing inline.
-	 * This becomes the single point for CSS string generation allowing for consistent
+	 * This becomes the single point for CSS string generation allowing for consistent.
 	 * CSS output no matter where the CSS originally came from.
 	 * @param array $oldStyles
 	 * @param array $newStyles
@@ -444,12 +444,12 @@ class Emogrifier {
 	/**
 	 * Splits input CSS code to an array where:
 	 *
-	 * - key "css" will be contains clean CSS code
-	 * - key "media" will be contains all valuable media queries
+	 * - key "css" will be contains clean CSS code.
+	 * - key "media" will be contains all valuable media queries.
 	 *
 	 * Example:
 	 *
-	 * The CSS code
+	 * The CSS code.
 	 *
 	 *   "@import "file.css"; h1 { color:red; } @media { h1 {}} @media tv { h1 {}}"
 	 *
@@ -752,9 +752,9 @@ class Emogrifier {
 	 *
 	 * Example:
 	 *
-	 * The declaration block
+	 * The declaration block.
 	 *
-	 *   "color: #000; font-weight: bold;"
+	 *   "color: #000; font-weight: bold;".
 	 *
 	 * will be parsed into the following array:
 	 *

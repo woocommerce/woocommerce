@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Order
  *
@@ -52,10 +57,9 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get order refunds
-	 *
+	 * Get order refunds.
 	 * @since 2.2
-	 * @return array
+	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
 		if ( empty( $this->refunds ) && ! is_array( $this->refunds ) ) {
@@ -80,10 +84,10 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get amount already refunded
+	 * Get amount already refunded.
 	 *
 	 * @since 2.2
-	 * @return int|float
+	 * @return string
 	 */
 	public function get_total_refunded() {
 		global $wpdb;
@@ -100,7 +104,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the total tax refunded
+	 * Get the total tax refunded.
 	 *
 	 * @since  2.3
 	 * @return float
@@ -121,7 +125,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the total shipping refunded
+	 * Get the total shipping refunded.
 	 *
 	 * @since  2.4
 	 * @return float
@@ -169,7 +173,6 @@ class WC_Order extends WC_Abstract_Order {
 	 * Get the total number of items refunded.
 	 *
 	 * @since  2.4.0
-	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
 	 * @return integer
 	 */
@@ -184,7 +187,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
@@ -203,7 +206,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
@@ -229,12 +232,12 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the refunded amount for a line item
+	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int $item_id ID of the item we're checking
 	 * @param  int $tax_id ID of the tax we're checking
 	 * @param  string $item_type type of the item we're checking, if not a line_item
-	 * @return integer
+	 * @return double
 	 */
 	public function get_tax_refunded_for_item( $item_id, $tax_id, $item_type = 'line_item' ) {
 		$total = 0;
@@ -286,7 +289,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_remaining_refund_amount() {
-		return wc_format_decimal( $this->get_total() - $this->get_total_refunded() );
+		return wc_format_decimal( $this->get_total() - $this->get_total_refunded(), wc_get_price_decimals() );
 	}
 
 	/**

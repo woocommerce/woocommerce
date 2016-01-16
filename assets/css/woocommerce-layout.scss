@@ -317,9 +317,10 @@
 			}
 		}
 
-		.terms {
-			text-align: right;
-			padding: 0 1em 0;
+		.wc-terms-and-conditions, .terms {
+			text-align: left;
+			padding: 0 1em 0 0;
+			float:left;
 		}
 
 		#place_order {
@@ -439,6 +440,63 @@
 		.twentyfifteen {
 			.entry-summary {
 				padding: 0 !important;
+			}
+		}
+	}
+}
+
+/**
+ * Twenty Sixteen specific styles
+ */
+.twentysixteen {
+	.site-main {
+		margin-right: 7.6923%;
+		margin-left: 7.6923%;
+	}
+
+	.entry-summary {
+		margin-right: 0;
+		margin-left: 0;
+	}
+}
+
+#content {
+	.twentysixteen {
+		div.product {
+			div.images,
+			div.summary {
+				width: 46.42857%;
+			}
+		}
+	}
+}
+
+@media screen and (min-width: 44.375em) {
+	.twentysixteen {
+		.site-main {
+			margin-right: 23.0769%;
+		}
+	}
+}
+
+@media screen and (min-width: 56.875em) {
+	.twentysixteen {
+		.site-main {
+			margin-right: 0;
+			margin-left: 0;
+		}
+	}
+
+	.no-sidebar {
+		.twentysixteen {
+			.site-main {
+				margin-right: 15%;
+				margin-left: 15%;
+			}
+
+			.entry-summary {
+				margin-right: 0;
+				margin-left: 0;
 			}
 		}
 	}

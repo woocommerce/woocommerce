@@ -15,10 +15,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_Tax' ) ) :
 
 /**
- * WC_Settings_Tax
+ * WC_Settings_Tax.
  */
 class WC_Settings_Tax extends WC_Settings_Page {
 
+	/**
+	 * Setting page id.
+	 *
+	 * @var string
+	 */
 	protected $id = 'tax';
 
 	/**
@@ -30,7 +35,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections
+	 * Get sections.
 	 *
 	 * @return array
 	 */
@@ -51,7 +56,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
@@ -67,7 +72,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
 		global $current_section;
@@ -84,7 +89,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		global $current_section, $wpdb;
@@ -97,11 +102,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$this->save_tax_rates();
 		}
 
-		$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_tax_rates_%') OR `option_name` LIKE ('_transient_timeout_wc_tax_rates_%')" );
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 	}
 
 	/**
-	 * Output tax rate tables
+	 * Output tax rate tables.
 	 */
 	public function output_tax_rates() {
 		global $wpdb,
@@ -178,7 +183,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get tax class being edited
+	 * Get tax class being edited.
 	 * @return string
 	 */
 	private static function get_current_tax_class() {
@@ -197,7 +202,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get a posted tax rate
+	 * Get a posted tax rate.
 	 * @param  string $key   Key of tax rate in the post data array
 	 * @param  int $order Position/order of rate
 	 * @param  string $class Tax class for rate
@@ -228,7 +233,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save tax rates
+	 * Save tax rates.
 	 */
 	public function save_tax_rates() {
 		global $wpdb;

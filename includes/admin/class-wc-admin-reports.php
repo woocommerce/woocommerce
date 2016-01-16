@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Reports' ) ) :
 
 /**
- * WC_Admin_Reports Class
+ * WC_Admin_Reports Class.
  */
 class WC_Admin_Reports {
 
@@ -151,7 +151,7 @@ class WC_Admin_Reports {
 	}
 
 	/**
-	 * Get a report from our reports subfolder
+	 * Get a report from our reports subfolder.
 	 */
 	public static function get_report( $name ) {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );

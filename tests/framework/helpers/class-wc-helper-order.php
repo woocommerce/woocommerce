@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class WC_Helper_Order
+ * Class WC_Helper_Order.
  *
- * This helper class should ONLY be used for unit tests!
+ * This helper class should ONLY be used for unit tests!.
  */
 class WC_Helper_Order {
 

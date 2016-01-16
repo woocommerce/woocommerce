@@ -5,10 +5,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce Webhook class
+ * WooCommerce Webhook class.
  *
- * This class handles storing and retrieving webhook data from the associated
- * `shop_webhook` custom post type, as well as delivery logs from the `webhook_delivery`
+ * This class handles storing and retrieving webhook data from the associated.
+ * `shop_webhook` custom post type, as well as delivery logs from the `webhook_delivery`.
  * comment type.
  *
  * Webhooks are enqueued to their associated actions, delivered, and logged.
@@ -24,7 +24,7 @@ class WC_Webhook {
 	public $id;
 
 	/**
-	 * Setup webhook & load post data
+	 * Setup webhook & load post data.
 	 *
 	 * @since 2.2
 	 * @param string|int $id
@@ -44,7 +44,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Magic isset as a wrapper around metadata_exists()
+	 * Magic isset as a wrapper around metadata_exists().
 	 *
 	 * @since 2.2
 	 * @param string $key
@@ -59,7 +59,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Magic get, wraps get_post_meta() for all keys except $status
+	 * Magic get, wraps get_post_meta() for all keys except $status.
 	 *
 	 * @since 2.2
 	 * @param string $key
@@ -78,7 +78,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Enqueue the hooks associated with the webhook
+	 * Enqueue the hooks associated with the webhook.
 	 *
 	 * @since 2.2
 	 */
@@ -95,8 +95,8 @@ class WC_Webhook {
 
 
 	/**
-	 * Process the webhook for delivery by verifying that it should be delivered
-	 * and scheduling the delivery (in the background by default, or immediately)
+	 * Process the webhook for delivery by verifying that it should be delivered.
+	 * and scheduling the delivery (in the background by default, or immediately).
 	 *
 	 * @since 2.2
 	 * @param mixed $arg the first argument provided from the associated hooks
@@ -124,7 +124,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Helper to check if the webhook should be delivered, as some hooks
+	 * Helper to check if the webhook should be delivered, as some hooks.
 	 * (like `wp_trash_post`) will fire for every post type, not just ours.
 	 *
 	 * @since 2.2
@@ -176,7 +176,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Deliver the webhook payload using wp_safe_remote_request()
+	 * Deliver the webhook payload using wp_safe_remote_request().
 	 *
 	 * @since 2.2
 	 * @param mixed $arg first hook argument
@@ -222,7 +222,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Build the payload data for the webhook
+	 * Build the payload data for the webhook.
 	 *
 	 * @since 2.2
 	 * @param mixed $resource_id first hook argument, typically the resource ID
@@ -291,9 +291,9 @@ class WC_Webhook {
 
 
 	/**
-	 * Generate a base64-encoded HMAC-SHA256 signature of the payload body so the
-	 * recipient can verify the authenticity of the webhook. Note that the signature
-	 * is calculated after the body has already been encoded (JSON by default)
+	 * Generate a base64-encoded HMAC-SHA256 signature of the payload body so the.
+	 * recipient can verify the authenticity of the webhook. Note that the signature.
+	 * is calculated after the body has already been encoded (JSON by default).
 	 *
 	 * @since 2.2
 	 * @param string $payload payload data to hash
@@ -308,8 +308,8 @@ class WC_Webhook {
 
 
 	/**
-	 * Create a new comment for log the delivery request/response and
-	 * return the ID for inclusion in the webhook request
+	 * Create a new comment for log the delivery request/response and.
+	 * return the ID for inclusion in the webhook request.
 	 *
 	 * @since 2.2
 	 * @return int delivery (comment) ID
@@ -333,7 +333,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Log the delivery request/response
+	 * Log the delivery request/response.
 	 *
 	 * @since 2.2
 	 * @param int $delivery_id previously created comment ID
@@ -399,9 +399,9 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Track consecutive delivery failures and automatically disable the webhook
-	 * if more than 5 consecutive failures occur. A failure is defined as a
-	 * non-2xx response
+	 * Track consecutive delivery failures and automatically disable the webhook.
+	 * if more than 5 consecutive failures occur. A failure is defined as a.
+	 * non-2xx response.
 	 *
 	 * @since 2.2
 	 */
@@ -421,7 +421,7 @@ class WC_Webhook {
 
 
 	/**
-	 * Get the delivery logs for this webhook
+	 * Get the delivery logs for this webhook.
 	 *
 	 * @since 2.2
 	 * @return array
@@ -494,7 +494,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Set the webhook topic and associated hooks. The topic resource & event
+	 * Set the webhook topic and associated hooks. The topic resource & event.
 	 * are also saved separately.
 	 *
 	 * @since 2.2
@@ -523,7 +523,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the associated hook names for a topic
+	 * Get the associated hook names for a topic.
 	 *
 	 * @since 2.2
 	 * @param string $topic
@@ -586,27 +586,38 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Send a test ping to the delivery URL, sent when the webhook is first created
+	 * Send a test ping to the delivery URL, sent when the webhook is first created.
 	 *
 	 * @since 2.2
+	 * @return bool|WP_Error
 	 */
 	public function deliver_ping() {
-
 		$args = array(
 			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
 			'body'       => "webhook_id={$this->id}",
 		);
 
-		wp_safe_remote_post( $this->get_delivery_url(), $args );
+		$test          = wp_safe_remote_post( $this->get_delivery_url(), $args );
+		$response_code = wp_remote_retrieve_response_code( $test );
+
+		if ( is_wp_error( $test ) ) {
+			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL cannot be reached: %s', 'woocommerce' ), $test->get_error_message() ) );
+		}
+
+		if ( 200 !== $response_code ) {
+			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
+		}
+
+		return true;
 	}
 
 	/**
 	 * Get the webhook status:
 	 *
-	 * + `active` - delivers payload
-	 * + `paused` - does not deliver payload, paused by admin
-	 * + `disabled` - does not delivery payload, paused automatically due to
-	 * consecutive failures
+	 * + `active` - delivers payload.
+	 * + `paused` - does not deliver payload, paused by admin.
+	 * + `disabled` - does not delivery payload, paused automatically due to.
+	 * consecutive failures.
 	 *
 	 * @since 2.2
 	 * @return string status
@@ -635,7 +646,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the webhook i18n status
+	 * Get the webhook i18n status.
 	 *
 	 * @return string
 	 */
@@ -647,7 +658,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Update the webhook status, see get_status() for valid statuses
+	 * Update the webhook status, see get_status() for valid statuses.
 	 *
 	 * @since 2.2
 	 * @param $status
@@ -675,21 +686,23 @@ class WC_Webhook {
 		}
 
 		$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status ), array( 'ID' => $this->id ) );
+		clean_post_cache( $this->id );
 	}
 
 	/**
-	 * Set the delivery URL
+	 * Set the delivery URL.
 	 *
 	 * @since 2.2
 	 * @param string $url
 	 */
 	public function set_delivery_url( $url ) {
-
-		update_post_meta( $this->id, '_delivery_url', esc_url_raw( $url, array( 'http', 'https' ) ) );
+		if ( update_post_meta( $this->id, '_delivery_url', esc_url_raw( $url, array( 'http', 'https' ) ) ) ) {
+			update_post_meta( $this->id, '_webhook_pending_delivery', true );
+		}
 	}
 
 	/**
-	 * Get the delivery URL
+	 * Get the delivery URL.
 	 *
 	 * @since 2.2
 	 * @return string
@@ -700,7 +713,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Set the secret used for generating the HMAC-SHA256 signature
+	 * Set the secret used for generating the HMAC-SHA256 signature.
 	 *
 	 * @since 2.2
 	 * @param string $secret
@@ -711,7 +724,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the secret used for generating the HMAC-SHA256 signature
+	 * Get the secret used for generating the HMAC-SHA256 signature.
 	 *
 	 * @since 2.2
 	 * @return string
@@ -721,7 +734,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the friendly name for the webhook
+	 * Get the friendly name for the webhook.
 	 *
 	 * @since 2.2
 	 * @return string
@@ -731,7 +744,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the webhook topic, e.g. `order.created`
+	 * Get the webhook topic, e.g. `order.created`.
 	 *
 	 * @since 2.2
 	 * @return string
@@ -741,7 +754,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the hook names for the webhook
+	 * Get the hook names for the webhook.
 	 *
 	 * @since 2.2
 	 * @return array hook names
@@ -751,7 +764,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the resource for the webhook, e.g. `order`
+	 * Get the resource for the webhook, e.g. `order`.
 	 *
 	 * @since 2.2
 	 * @return string
@@ -761,7 +774,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the event for the webhook, e.g. `created`
+	 * Get the event for the webhook, e.g. `created`.
 	 *
 	 * @since 2.2
 	 * @return string
@@ -771,7 +784,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the failure count
+	 * Get the failure count.
 	 *
 	 * @since 2.2
 	 * @return int
@@ -781,7 +794,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the user ID for this webhook
+	 * Get the user ID for this webhook.
 	 *
 	 * @since 2.2
 	 * @return int|string user ID
@@ -791,7 +804,7 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Get the post data for the webhook
+	 * Get the post data for the webhook.
 	 *
 	 * @since 2.2
 	 * @return null|WP_Post

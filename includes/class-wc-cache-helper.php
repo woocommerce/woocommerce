@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Cache_Helper {
 
 	/**
-	 * Hook in methods
+	 * Hook in methods.
 	 */
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
@@ -26,7 +26,32 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Get a hash of the customer location
+	 * Get prefix for use with wp_cache_set. Allows all cache in a group to be invalidated at once.
+	 * @param  string $group
+	 * @return string
+	 */
+	public static function get_cache_prefix( $group ) {
+		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed
+		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
+
+		if ( false === $prefix ) {
+			$prefix = 1;
+			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
+		}
+
+		return 'wc_cache_' . $prefix . '_';
+	}
+
+	/**
+	 * Increment group cache prefix (invalidates cache).
+	 * @param  string $group
+	 */
+	public static function incr_cache_prefix( $group ) {
+		wp_cache_incr( 'wc_' . $group . '_cache_prefix', 1, $group );
+	}
+
+	/**
+	 * Get a hash of the customer location.
 	 * @return string
 	 */
 	public static function geolocation_ajax_get_location_hash() {
@@ -70,20 +95,20 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Get transient version
+	 * Get transient version.
 	 *
-	 * When using transients with unpredictable names, e.g. those containing an md5
+	 * When using transients with unpredictable names, e.g. those containing an md5.
 	 * hash in the name, we need a way to invalidate them all at once.
 	 *
-	 * When using default WP transients we're able to do this with a DB query to
+	 * When using default WP transients we're able to do this with a DB query to.
 	 * delete transients manually.
 	 *
-	 * With external cache however, this isn't possible. Instead, this function is used
-	 * to append a unique string (based on time()) to each transient. When transients
+	 * With external cache however, this isn't possible. Instead, this function is used.
+	 * to append a unique string (based on time()) to each transient. When transients.
 	 * are invalidated, the transient version will increment and data will be regenerated.
 	 *
-	 * Raised in issue https://github.com/woothemes/woocommerce/issues/5777
-	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/
+	 * Raised in issue https://github.com/woothemes/woocommerce/issues/5777.
+	 * Adapted from ideas in http://tollmanz.com/invalidation-schemes/.
 	 *
 	 * @param  string  $group   Name for the group of transients we need to invalidate
 	 * @param  boolean $refresh true to force a new version
@@ -122,7 +147,7 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Get the page name/id for a WC page
+	 * Get the page name/id for a WC page.
 	 * @param  string $wc_page
 	 * @return array
 	 */

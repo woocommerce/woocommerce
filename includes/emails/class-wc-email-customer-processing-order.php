@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Processing_Order' ) ) :
 
 /**
- * Customer Processing Order Email
+ * Customer Processing Order Email.
  *
  * An email sent to the customer when a new order is received/paid for.
  *
@@ -20,17 +20,15 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order' ) ) :
 class WC_Email_Customer_Processing_Order extends WC_Email {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	function __construct() {
-
 		$this->id               = 'customer_processing_order';
+		$this->customer_email   = true;
 		$this->title            = __( 'Processing order', 'woocommerce' );
 		$this->description      = __( 'This is an order notification sent to customers containing their order details after payment.', 'woocommerce' );
-
 		$this->heading          = __( 'Thank you for your order', 'woocommerce' );
 		$this->subject          = __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
-
 		$this->template_html    = 'emails/customer-processing-order.php';
 		$this->template_plain   = 'emails/plain/customer-processing-order.php';
 
@@ -44,6 +42,8 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param int $order_id
 	 */
 	function trigger( $order_id ) {
 
@@ -66,37 +66,35 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	function get_content_html() {
-		ob_start();
-		wc_get_template( $this->template_html, array(
+		return wc_get_template_html( $this->template_html, array(
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
-			'plain_text'    => false
+			'plain_text'    => false,
+			'email'			=> $this
 		) );
-		return ob_get_clean();
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	function get_content_plain() {
-		ob_start();
-		wc_get_template( $this->template_plain, array(
+		return wc_get_template_html( $this->template_plain, array(
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
-			'plain_text'    => true
+			'plain_text'    => true,
+			'email'			=> $this
 		) );
-		return ob_get_clean();
 	}
 }
 

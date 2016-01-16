@@ -3,14 +3,14 @@
 namespace WooCommerce\Tests\Product;
 
 /**
- * Class Functions
+ * Class Functions.
  * @package WooCommerce\Tests\Product
  * @since 2.3
  */
 class Functions extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test wc_get_product()
+	 * Test wc_get_product().
 	 *
 	 * @since 2.3
 	 */
@@ -28,7 +28,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_update_product_stock()
+	 * Test wc_update_product_stock().
 	 *
 	 * @since 2.3
 	 */
@@ -46,7 +46,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_delete_product_transients()
+	 * Test wc_delete_product_transients().
 	 *
 	 * @since 2.4
 	 */
@@ -71,7 +71,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_product_ids_on_sale()
+	 * Test wc_get_product_ids_on_sale().
 	 *
 	 * @since 2.4
 	 */
@@ -94,7 +94,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_featured_product_ids()
+	 * Test wc_get_featured_product_ids().
 	 *
 	 * @since 2.4
 	 */
@@ -115,7 +115,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_placeholder_img()
+	 * Test wc_placeholder_img().
 	 *
 	 * @since 2.4
 	 */
@@ -136,7 +136,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_product_types()
+	 * Test wc_get_product_types().
 	 *
 	 * @since 2.3
 	 */
@@ -152,7 +152,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_product_has_unique_sku()
+	 * Test wc_product_has_unique_sku().
 	 *
 	 * @since 2.3
 	 */
@@ -172,7 +172,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_product_id_by_sku()
+	 * Test wc_get_product_id_by_sku().
 	 *
 	 * @since 2.3
 	 */

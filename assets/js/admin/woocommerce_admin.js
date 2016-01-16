@@ -125,15 +125,16 @@ jQuery( function ( $ ) {
 	});
 
 	var controlled = false;
-	var shifted = false;
-	var hasFocus = false;
+	var shifted    = false;
+	var hasFocus   = false;
 
 	$( document.body ).bind( 'keyup keydown', function( e ) {
-		shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey;
+		shifted    = e.shiftKey;
+		controlled = e.ctrlKey || e.metaKey;
 	});
 
 	$( '.wc_input_table' ).on( 'focus click', 'input', function( e ) {
-		var $this_table = $( this ).closest( 'table' );
+		var $this_table = $( this ).closest( 'table, tbody' );
 		var $this_row   = $( this ).closest( 'tr' );
 
 		if ( ( e.type === 'focus' && hasFocus !== $this_row.index() ) || ( e.type === 'click' && $( this ).is( ':focus' ) ) ) {
@@ -221,18 +222,4 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
-
-	// Add js validation for product quick edit panel.
-
-	$( '#woocommerce-fields .regular_price[type=text], #woocommerce-fields .sale_price[type=text]' ).keyup( function() {
-			var value    = $( this ).val();
-			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
-			var newvalue = value.replace( regex, '' );
-			if ( value !== newvalue ) {
-				$( this ).val( newvalue );
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
-			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
-			}
-	});
 });

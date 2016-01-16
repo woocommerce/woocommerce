@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce Autoloader
+ * WooCommerce Autoloader.
  *
  * @class 		WC_Autoloader
  * @version		2.3.0
@@ -16,13 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Autoloader {
 
 	/**
-	 * Path to the includes directory
+	 * Path to the includes directory.
+	 *
 	 * @var string
 	 */
 	private $include_path = '';
 
 	/**
-	 * The Constructor
+	 * The Constructor.
 	 */
 	public function __construct() {
 		if ( function_exists( "__autoload" ) ) {
@@ -35,7 +36,8 @@ class WC_Autoloader {
 	}
 
 	/**
-	 * Take a class name and turn it into a file name
+	 * Take a class name and turn it into a file name.
+	 *
 	 * @param  string $class
 	 * @return string
 	 */
@@ -44,7 +46,8 @@ class WC_Autoloader {
 	}
 
 	/**
-	 * Include a class file
+	 * Include a class file.
+	 *
 	 * @param  string $path
 	 * @return bool successful or not
 	 */

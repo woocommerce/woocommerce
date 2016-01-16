@@ -17,9 +17,15 @@
 					}
 				});
 
-				var card   = $( '#simplify_commerce-card-number' ).val(),
-					cvc    = $( '#simplify_commerce-card-cvc' ).val(),
-					expiry = $.payment.cardExpiryVal( $( '#simplify_commerce-card-expiry' ).val() );
+				var card           = $( '#simplify_commerce-card-number' ).val(),
+					cvc            = $( '#simplify_commerce-card-cvc' ).val(),
+					expiry         = $.payment.cardExpiryVal( $( '#simplify_commerce-card-expiry' ).val() ),
+					address1       = $form.find( '#billing_address_1' ).val(),
+					address2       = $form.find( '#billing_address_2' ).val(),
+					addressCountry = $form.find( '#billing_country' ).val(),
+					addressState   = $form.find( '#billing_state' ).val(),
+					addressCity    = $form.find( '#billing_city' ).val(),
+					addressZip     = $form.find( '#billing_postcode' ).val();
 
 				card = card.replace( /\s/g, '' );
 
@@ -29,7 +35,13 @@
 						number: card,
 						cvc: cvc,
 						expMonth: expiry.month,
-						expYear: ( expiry.year - 2000 )
+						expYear: ( expiry.year - 2000 ),
+						addressLine1: address1,
+						addressLine2: address2,
+						addressCountry: addressCountry,
+						addressState: addressState,
+						addressZip: addressZip,
+						addressCity: addressCity
 					}
 				}, simplifyResponseHandler );
 

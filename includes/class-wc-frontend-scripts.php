@@ -14,24 +14,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Frontend_Scripts Class
+ * WC_Frontend_Scripts Class.
  */
 class WC_Frontend_Scripts {
 
 	/**
-	 * Contains an array of script handles registered by WC
+	 * Contains an array of script handles registered by WC.
 	 * @var array
 	 */
 	private static $scripts = array();
 
 	/**
-	 * Contains an array of script handles registered by WC
+	 * Contains an array of script handles registered by WC.
 	 * @var array
 	 */
 	private static $styles = array();
 
 	/**
-	 * Contains an array of script handles localized by WC
+	 * Contains an array of script handles localized by WC.
 	 * @var array
 	 */
 	private static $wp_localize_scripts = array();
@@ -159,14 +159,14 @@ class WC_Frontend_Scripts {
 
 		// Chosen is @deprecated as of 2.3 in favour of 2.3. Here for backwards compatibility.
 		self::register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
-		self::register_script( 'select2', $assets_path . 'js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.2' );
+		self::register_script( 'select2', $assets_path . 'js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.4' );
 
 		// Register any scripts for later use, or used as dependencies
 		self::register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70' );
 		self::register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.2.4' );
 		self::register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.4.1' );
 		self::register_script( 'wc-credit-card-form', $frontend_script_path . 'credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ) );
-		self::register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js' );
+		self::register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery', 'wp-util' ) );
 		self::register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js' );
 		self::register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js' );
 		self::register_script( 'wc-address-i18n', $frontend_script_path . 'address-i18n' . $suffix . '.js' );
@@ -253,12 +253,10 @@ class WC_Frontend_Scripts {
 			break;
 			case 'wc-geolocation' :
 				return array(
-					'wc_ajax_url'     => WC_AJAX::get_endpoint( "%%endpoint%%" ),
-					'home_url'        => home_url(),
-					'is_cart'         => is_cart() ? '1' : '0',
-					'is_account_page' => is_account_page() ? '1' : '0',
-					'is_checkout'     => is_checkout() ? '1' : '0',
-					'hash'            => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
+					'wc_ajax_url'  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
+					'home_url'     => home_url(),
+					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
+					'hash'         => isset( $_GET['v'] ) ? wc_clean( $_GET['v'] ) : ''
 				);
 			break;
 			case 'wc-single-product' :
@@ -307,15 +305,19 @@ class WC_Frontend_Scripts {
 					'ajax_url'                => WC()->ajax_url(),
 					'wc_ajax_url'             => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 					'i18n_view_cart'          => esc_attr__( 'View Cart', 'woocommerce' ),
-					'cart_url'                => apply_filters( 'woocommerce_add_to_cart_redirect', WC()->cart->get_cart_url() ),
+					'cart_url'                => apply_filters( 'woocommerce_add_to_cart_redirect', wc_get_cart_url() ),
 					'is_cart'                 => is_cart(),
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' )
 				);
 			break;
 			case 'wc-add-to-cart-variation' :
+				// We also need the wp.template for this script :)
+				wc_get_template( 'single-product/add-to-cart/variation.php' );
+
 				return array(
 					'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
-					'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' ),
+					'i18n_make_a_selection_text'       => esc_attr__( 'Select product options before adding this product to your cart.', 'woocommerce' ),
+					'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' )
 				);
 			break;
 			case 'wc-country-select' :

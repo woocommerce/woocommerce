@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WC_Report_Sales_By_Date
  *
@@ -9,12 +14,23 @@
  */
 class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
+	/**
+	 * Chart colours.
+	 *
+	 * @var array
+	 */
 	public $chart_colours = array();
+
+	/**
+	 * The report data.
+	 *
+	 * @var stdClass
+	 */
 	private $report_data;
 
 	/**
-	 * Get report data
-	 * @return array
+	 * Get report data.
+	 * @return stdClass
 	 */
 	public function get_report_data() {
 		if ( empty( $this->report_data ) ) {
@@ -24,7 +40,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get all data needed for this report and store in the class
+	 * Get all data needed for this report and store in the class.
 	 */
 	private function query_report_data() {
 		$this->report_data = new stdClass;
@@ -330,7 +346,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the legend for the main chart sidebar
+	 * Get the legend for the main chart sidebar.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -408,7 +424,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output the report
+	 * Output the report.
 	 */
 	public function output_report() {
 		$ranges = array(
@@ -442,7 +458,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output an export link
+	 * Output an export link.
 	 */
 	public function get_export_button() {
 		$current_range = ! empty( $_GET['range'] ) ? sanitize_text_field( $_GET['range'] ) : '7day';
@@ -462,7 +478,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Round our totals correctly
+	 * Round our totals correctly.
 	 * @param  string $amount
 	 * @return string
 	 */
@@ -475,7 +491,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the main chart
+	 * Get the main chart.
 	 *
 	 * @return string
 	 */

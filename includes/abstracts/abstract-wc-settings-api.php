@@ -1,6 +1,8 @@
 <?php
 /**
- * Admin Settings API used by Shipping Methods and Payment Gateways
+ * Abstract Settings API Class
+ *
+ * Admin Settings API used by Shipping Methods and Payment Gateways.
  *
  * @class    WC_Settings_API
  * @version  2.4.0
@@ -35,7 +37,7 @@ abstract class WC_Settings_API {
 	public $method_description = '';
 
 	/**
-	 * 'yes' if the method is enabled
+	 * 'yes' if the method is enabled.
 	 * @var string
 	 */
 	public $enabled;
@@ -65,7 +67,7 @@ abstract class WC_Settings_API {
 	public $sanitized_fields = array();
 
 	/**
-	 * Admin Options
+	 * Admin Options.
 	 *
 	 * Setup the gateway settings screen.
 	 * Override this in your gateway.
@@ -84,7 +86,7 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Initialise Settings Form Fields
+	 * Initialise Settings Form Fields.
 	 *
 	 * Add an array of fields to be displayed
 	 * on the gateway's settings screen.
@@ -95,7 +97,7 @@ abstract class WC_Settings_API {
 	public function init_form_fields() {}
 
 	/**
-	 * Get the form fields after they are initialized
+	 * Get the form fields after they are initialized.
 	 * @return array of options
 	 */
 	public function get_form_fields() {
@@ -103,8 +105,8 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Admin Panel Options Processing
-	 * - Saves the options to the DB
+	 * Admin Panel Options Processing.
+	 * - Saves the options to the DB.
 	 *
 	 * @since 1.0.0
 	 * @return bool
@@ -131,7 +133,7 @@ abstract class WC_Settings_API {
 	public function display_errors() {}
 
 	/**
-	 * Initialise Gateway Settings
+	 * Initialise Gateway Settings.
 	 *
 	 * Store all settings in a single database entry
 	 * and make sure the $settings array is either the default
@@ -142,14 +144,14 @@ abstract class WC_Settings_API {
 	 */
 	public function init_settings() {
 
-		// Load form_field settings
+		// Load form_field settings.
 		$this->settings = get_option( $this->plugin_id . $this->id . '_settings', null );
 
 		if ( ! $this->settings || ! is_array( $this->settings ) ) {
 
 			$this->settings = array();
 
-			// If there are no settings defined, load defaults
+			// If there are no settings defined, load defaults.
 			if ( $form_fields = $this->get_form_fields() ) {
 
 				foreach ( $form_fields as $k => $v ) {
@@ -171,7 +173,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param  string $key
 	 * @param  mixed  $empty_value
-	 * @return mixed  The value specified for the option or a default value for the option
+	 * @return mixed  The value specified for the option or a default value for the option.
 	 */
 	public function get_option( $key, $empty_value = null ) {
 
@@ -179,7 +181,7 @@ abstract class WC_Settings_API {
 			$this->init_settings();
 		}
 
-		// Get option default if unset
+		// Get option default if unset.
 		if ( ! isset( $this->settings[ $key ] ) ) {
 			$form_fields            = $this->get_form_fields();
 			$this->settings[ $key ] = isset( $form_fields[ $key ]['default'] ) ? $form_fields[ $key ]['default'] : '';
@@ -246,7 +248,7 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Get HTML for tooltips
+	 * Get HTML for tooltips.
 	 *
 	 * @param  array $data
 	 * @return string
@@ -264,7 +266,7 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Get HTML for descriptions
+	 * Get HTML for descriptions.
 	 *
 	 * @param  array $data
 	 * @return string
@@ -285,7 +287,7 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Get custom attributes
+	 * Get custom attributes.
 	 *
 	 * @param  array $data
 	 * @return string
@@ -844,7 +846,6 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function validate_password_field( $key ) {
-		$text  = $this->get_option( $key );
 		$field = $this->get_field_key( $key );
 		$value = wp_kses_post( trim( stripslashes( $_POST[ $field ] ) ) );
 		return $value;

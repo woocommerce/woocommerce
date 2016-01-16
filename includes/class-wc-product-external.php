@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * External Product Class
+ * External Product Class.
  *
  * External products cannot be bought; they link offsite. Extends simple products.
  *
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_External extends WC_Product {
 
 	/**
-	 * __construct function.
+	 * Constructor.
 	 *
 	 * @access public
 	 * @param mixed $product
@@ -49,7 +49,7 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text for the single page
+	 * Get the add to cart button text for the single page.
 	 *
 	 * @access public
 	 * @return string
@@ -59,7 +59,7 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @access public
 	 * @return string
@@ -69,7 +69,7 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
-	 * get_product_url function.
+	 * Get product url.
 	 *
 	 * @access public
 	 * @return string
@@ -79,7 +79,7 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
-	 * get_button_text function.
+	 * Get button text.
 	 *
 	 * @access public
 	 * @return string

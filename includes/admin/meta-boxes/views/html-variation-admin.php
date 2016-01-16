@@ -111,7 +111,7 @@ extract( $variation_data );
 
 				<?php
 					/**
-					 * woocommerce_variation_options_pricing action
+					 * woocommerce_variation_options_pricing action.
 					 *
 					 * @since 2.5.0
 					 *
@@ -142,7 +142,7 @@ extract( $variation_data );
 
 					<?php
 						/**
-						 * woocommerce_product_options_inventory action
+						 * woocommerce_variation_options_inventory action.
 						 *
 						 * @since 2.5.0
 						 *
@@ -150,7 +150,7 @@ extract( $variation_data );
 						 * @param array   $variation_data
 						 * @param WP_Post $variation
 						 */
-						do_action( 'woocommerce_product_options_inventory', $loop, $variation_data, $variation );
+						do_action( 'woocommerce_variation_options_inventory', $loop, $variation_data, $variation );
 					?>
 				</div>
 			<?php endif; ?>
@@ -191,7 +191,7 @@ extract( $variation_data );
 
 					<?php
 						/**
-						 * woocommerce_product_options_dimensions action
+						 * woocommerce_variation_options_dimensions action.
 						 *
 						 * @since 2.5.0
 						 *
@@ -199,7 +199,7 @@ extract( $variation_data );
 						 * @param array   $variation_data
 						 * @param WP_Post $variation
 						 */
-						do_action( 'woocommerce_product_options_dimensions', $loop, $variation_data, $variation );
+						do_action( 'woocommerce_variation_options_dimensions', $loop, $variation_data, $variation );
 					?>
 				</div>
 			<?php endif; ?>
@@ -231,7 +231,7 @@ extract( $variation_data );
 
 					<?php
 						/**
-						 * woocommerce_product_options_tax action
+						 * woocommerce_variation_options_tax action.
 						 *
 						 * @since 2.5.0
 						 *
@@ -239,10 +239,11 @@ extract( $variation_data );
 						 * @param array   $variation_data
 						 * @param WP_Post $variation
 						 */
-						do_action( 'woocommerce_product_options_tax', $loop, $variation_data, $variation );
+						do_action( 'woocommerce_variation_options_tax', $loop, $variation_data, $variation );
 					?>
 				<?php endif; ?>
-
+			</div>
+			<div>
 				<p class="form-row form-row-full">
 					<label><?php _e( 'Variation Description:', 'woocommerce' ); ?></label>
 					<textarea name="variable_description[<?php echo $loop; ?>]" rows="3" style="width:100%;"><?php echo isset( $variation_data['_variation_description'] ) ? esc_textarea( $variation_data['_variation_description'] ) : ''; ?></textarea>
@@ -304,7 +305,7 @@ extract( $variation_data );
 
 				<?php
 					/**
-					 * woocommerce_product_options_download action
+					 * woocommerce_variation_options_download action.
 					 *
 					 * @since 2.5.0
 					 *
@@ -312,7 +313,7 @@ extract( $variation_data );
 					 * @param array   $variation_data
 					 * @param WP_Post $variation
 					 */
-					do_action( 'woocommerce_product_options_download', $loop, $variation_data, $variation );
+					do_action( 'woocommerce_variation_options_download', $loop, $variation_data, $variation );
 				?>
 			</div>
 			<?php do_action( 'woocommerce_product_after_variable_attributes', $loop, $variation_data, $variation ); ?>

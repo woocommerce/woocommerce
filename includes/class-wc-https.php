@@ -19,7 +19,7 @@ class WC_HTTPS {
 	 * Hook in our HTTPS functions if we're on the frontend. This will ensure any links output to a page (when viewing via HTTPS) are also served over HTTPS.
 	 */
 	public static function init() {
-		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) && ! is_admin() ) {
+		if ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) && ! is_admin() ) {
 			// HTTPS urls with SSL on
 			$filters = array(
 				'post_thumbnail_html',
@@ -48,7 +48,7 @@ class WC_HTTPS {
 	}
 
 	/**
-	 * force_https_url function.
+	 * Force https for urls.
 	 *
 	 * @param mixed $content
 	 * @return string
@@ -65,21 +65,21 @@ class WC_HTTPS {
 	}
 
 	/**
-	 * Force a post link to be SSL if needed
+	 * Force a post link to be SSL if needed.
 	 *
 	 * @return string
 	 */
 	public static function force_https_page_link( $link, $page_id ) {
 		if ( in_array( $page_id, array( get_option( 'woocommerce_checkout_page_id' ), get_option( 'woocommerce_myaccount_page_id' ) ) ) ) {
 			$link = str_replace( 'http:', 'https:', $link );
-		} elseif ( 'yes' == get_option( 'woocommerce_unforce_ssl_checkout' ) ) {
+		} elseif ( 'yes' === get_option( 'woocommerce_unforce_ssl_checkout' ) && ! wc_site_is_https() ) {
 			$link = str_replace( 'https:', 'http:', $link );
 		}
 		return $link;
 	}
 
 	/**
-	 * Template redirect - if we end up on a page ensure it has the correct http/https url
+	 * Template redirect - if we end up on a page ensure it has the correct http/https url.
 	 */
 	public static function force_https_template_redirect() {
 		if ( ! is_ssl() && ( is_checkout() || is_account_page() || apply_filters( 'woocommerce_force_ssl_checkout', false ) ) ) {
@@ -95,14 +95,14 @@ class WC_HTTPS {
 	}
 
 	/**
-	 * Template redirect - if we end up on a page ensure it has the correct http/https url
+	 * Template redirect - if we end up on a page ensure it has the correct http/https url.
 	 */
 	public static function unforce_https_template_redirect() {
 		if ( function_exists( 'is_customize_preview' ) && is_customize_preview() ) {
 			return;
 		}
 
-		if ( is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
+		if ( ! wc_site_is_https() && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! is_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
 
 			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
 				wp_safe_redirect( preg_replace( '|^https://|', 'http://', $_SERVER['REQUEST_URI'] ) );

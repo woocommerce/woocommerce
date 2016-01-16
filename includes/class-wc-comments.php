@@ -1,8 +1,13 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Comments
  *
- * Handle comments (reviews and order notes)
+ * Handle comments (reviews and order notes).
  *
  * @class    WC_Comments
  * @version  2.3.0
@@ -10,11 +15,6 @@
  * @category Class
  * @author   WooThemes
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 class WC_Comments {
 
 	/**
@@ -50,10 +50,10 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude order comments from queries and RSS
+	 * Exclude order comments from queries and RSS.
 	 *
-	 * This code should exclude shop_order comments from queries. Some queries (like the recent comments widget on the dashboard) are hardcoded
-	 * and are not filtered, however, the code current_user_can( 'read_post', $comment->comment_post_ID ) should keep them safe since only admin and
+	 * This code should exclude shop_order comments from queries. Some queries (like the recent comments widget on the dashboard) are hardcoded.
+	 * and are not filtered, however, the code current_user_can( 'read_post', $comment->comment_post_ID ) should keep them safe since only admin and.
 	 * shop managers can view orders anyway.
 	 *
 	 * The frontend view order pages get around this filter by using remove_filter('comments_clauses', array( 'WC_Comments' ,'exclude_order_comments'), 10, 1 );
@@ -85,7 +85,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude order comments from queries and RSS
+	 * Exclude order comments from queries and RSS.
 	 * @param  string $join
 	 * @return string
 	 */
@@ -100,7 +100,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude order comments from queries and RSS
+	 * Exclude order comments from queries and RSS.
 	 * @param  string $where
 	 * @return string
 	 */
@@ -117,7 +117,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude webhook comments from queries and RSS
+	 * Exclude webhook comments from queries and RSS.
 	 * @since  2.2
 	 * @param  array $clauses
 	 * @return array
@@ -143,7 +143,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude webhook comments from queries and RSS
+	 * Exclude webhook comments from queries and RSS.
 	 * @since  2.2
 	 * @param  string $join
 	 * @return string
@@ -159,7 +159,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude webhook comments from queries and RSS
+	 * Exclude webhook comments from queries and RSS.
 	 * @since  2.1
 	 * @param  string $where
 	 * @return string
@@ -213,6 +213,8 @@ class WC_Comments {
 
 	/**
 	 * Modify recipient of review email.
+	 * @param array $emails
+	 * @param int $comment_id
 	 * @return array
 	 */
 	public static function comment_moderation_recipients( $emails, $comment_id ) {
@@ -226,19 +228,17 @@ class WC_Comments {
 	}
 
 	/**
-	 * Clear transients for a review.
+	 * Ensure product average rating and review count is kept up to date.
 	 * @param int $post_id
 	 */
 	public static function clear_transients( $post_id ) {
-		$post_id = absint( $post_id );
-		$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
-		delete_transient( 'wc_average_rating_' . $post_id . $transient_version );
-		delete_transient( 'wc_rating_count_' . $post_id . $transient_version );
-		delete_transient( 'wc_review_count_' . $post_id . $transient_version );
+		delete_post_meta( $post_id, '_wc_average_rating' );
+		delete_post_meta( $post_id, '_wc_rating_count' );
+		delete_post_meta( $post_id, '_wc_review_count' );
 	}
 
 	/**
-	 * Remove order notes from wp_count_comments()
+	 * Remove order notes from wp_count_comments().
 	 * @since  2.2
 	 * @param  object $stats
 	 * @param  int $post_id
@@ -284,7 +284,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Make sure WP displays avatars for comments with the `review` type
+	 * Make sure WP displays avatars for comments with the `review` type.
 	 * @since  2.3
 	 * @param  array $comment_types
 	 * @return array

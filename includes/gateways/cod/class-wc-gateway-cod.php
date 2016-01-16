@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Cash on Delivery Gateway
+ * Cash on Delivery Gateway.
  *
  * Provides a Cash on Delivery Payment Gateway.
  *
@@ -46,7 +46,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	}
 
     /**
-     * Initialise Gateway Settings Form Fields
+     * Initialise Gateway Settings Form Fields.
      */
     public function init_form_fields() {
     	$shipping_methods = array();
@@ -108,7 +108,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
     }
 
 	/**
-	 * Check If The Gateway Is Available For Use
+	 * Check If The Gateway Is Available For Use.
 	 *
 	 * @return bool
 	 */
@@ -190,7 +190,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 
     /**
-     * Process the payment and return the result
+     * Process the payment and return the result.
      *
      * @param int $order_id
      * @return array

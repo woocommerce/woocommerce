@@ -3,95 +3,13 @@
 namespace WooCommerce\Tests\Cart;
 
 /**
- * Class Cart
+ * Class Cart.
  * @package WooCommerce\Tests\Cart
  */
 class Cart extends \WC_Unit_Test_Case {
 
 	/**
-	 * Helper method to get the checkout URL
-	 *
-	 * @since 2.3
-	 * @return string
-	 */
-	private function get_checkout_url() {
-
-		// Get the checkout URL
-		$checkout_page_id = wc_get_page_id( 'checkout' );
-
-		$checkout_url = '';
-
-		// Check if there is a checkout page
-		if ( $checkout_page_id ) {
-
-			// Get the permalink
-			$checkout_url = get_permalink( $checkout_page_id );
-
-			// Force SSL if needed
-			if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
-				$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
-			}
-
-			// Allow filtering of checkout URL
-			$checkout_url = apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
-		}
-
-		return $checkout_url;
-	}
-
-	/**
-	 * Test get_checkout_url over HTTP
-	 *
-	 * @since 2.3
-	 */
-	public function test_get_checkout_url_regular() {
-
-		// Get the original setting
-		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
-
-		// Force SSL checkout
-		update_option( 'woocommerce_force_ssl_checkout', 'no' );
-
-		$this->assertEquals( $this->get_checkout_url(), WC()->cart->get_checkout_url() );
-
-		// Restore option
-		update_option( 'woocommerce_force_ssl_checkout', $o_setting );
-
-	}
-
-	/**
-	 * Test get_checkout_url over HTTP
-	 *
-	 * @since 2.3
-	 */
-	public function test_get_checkout_url_ssl() {
-
-		// Get the original setting
-		$o_setting = get_option( 'woocommerce_force_ssl_checkout' );
-
-		// Force SSL checkout
-		update_option( 'woocommerce_force_ssl_checkout', 'yes' );
-
-		$this->assertEquals( $this->get_checkout_url(), WC()->cart->get_checkout_url() );
-
-		// Restore option
-		update_option( 'woocommerce_force_ssl_checkout', $o_setting );
-
-	}
-
-	/**
-	 * Test get_cart_url method
-	 *
-	 * @since 2.3
-	 */
-	public function test_get_cart_url() {
-		$cart_page_url = wc_get_page_permalink( 'cart' );
-
-		$this->assertEquals( apply_filters( 'woocommerce_get_cart_url', $cart_page_url ? $cart_page_url : '' ), WC()->cart->get_cart_url() );
-	}
-
-	/**
-	 * Test get_remove_url
+	 * Test get_remove_url.
 	 *
 	 * @since 2.3
 	 */
@@ -107,7 +25,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add to cart simple product
+	 * Test add to cart simple product.
 	 *
 	 * @since 2.3
 	 */
@@ -130,7 +48,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Check if we can add a trashed product to the cart
+	 * Check if we can add a trashed product to the cart.
 	 */
 	public function test_add_to_cart_trashed() {
 		// Create dummy product
@@ -153,7 +71,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add to cart variable product
+	 * Test add to cart variable product.
 	 *
 	 * @since 2.3
 	 */
@@ -175,7 +93,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Check if adding a product that is sold individually is corrected when adding multiple times
+	 * Check if adding a product that is sold individually is corrected when adding multiple times.
 	 *
 	 * @since 2.3
 	 */
@@ -201,7 +119,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the find_product_in_cart method
+	 * Test the find_product_in_cart method.
 	 *
 	 * @since 2.3
 	 */
@@ -228,7 +146,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the generate_cart_id method
+	 * Test the generate_cart_id method.
 	 *
 	 * @since 2.3
 	 */
@@ -284,7 +202,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the set_quantity method
+	 * Test the set_quantity method.
 	 *
 	 * @since 2.3
 	 */
@@ -318,7 +236,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test check_cart_item_validity method
+	 * Test check_cart_item_validity method.
 	 *
 	 * @since 2.3
 	 */
@@ -342,7 +260,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_total
+	 * Test get_total.
 	 *
 	 * @since 2.3
 	 */
@@ -370,7 +288,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_total_ex_tax
+	 * Test get_total_ex_tax.
 	 *
 	 * @since 2.3
 	 */
@@ -410,26 +328,12 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test coupons_enabled method
-	 */
-	public function test_coupons_enabled() {
-		$this->assertEquals( apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) == 'yes' ), WC()->cart->coupons_enabled() );
-	}
-
-	/**
-	 * Test ship_to_billing_address_only method
-	 */
-	public function test_ship_to_billing_address_only() {
-		$this->assertEquals( wc_ship_to_billing_address_only(), WC()->cart->ship_to_billing_address_only() );
-	}
-
-	/**
-	 * Test needs_shipping_address method
+	 * Test needs_shipping_address method.
 	 */
 	public function test_needs_shipping_address() {
 		$needs_shipping_address = false;
 
-		if ( WC()->cart->needs_shipping() === true && ! WC()->cart->ship_to_billing_address_only() ) {
+		if ( WC()->cart->needs_shipping() === true && ! wc_ship_to_billing_address_only() ) {
 			$needs_shipping_address = true;
 		}
 
@@ -437,7 +341,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test shipping total
+	 * Test shipping total.
 	 *
 	 * @since 2.3
 	 */
@@ -480,7 +384,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test cart fee
+	 * Test cart fee.
 	 *
 	 * @since 2.3
 	 */
@@ -518,7 +422,7 @@ class Cart extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test cart coupons
+	 * Test cart coupons.
 	 */
 	public function test_get_coupons() {
 

@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WooCommerce Payment Gateways class
  *
@@ -22,7 +27,7 @@ class WC_Payment_Gateways {
 	protected static $_instance = null;
 
 	/**
-	 * Main WC_Payment_Gateways Instance
+	 * Main WC_Payment_Gateways Instance.
 	 *
 	 * Ensures only one instance of WC_Payment_Gateways is loaded or can be loaded.
 	 *
@@ -132,7 +137,6 @@ class WC_Payment_Gateways {
 	/**
 	 * Get available gateways.
 	 *
-	 * @access public
 	 * @return array
 	 */
 	public function get_available_payment_gateways() {
@@ -152,15 +156,28 @@ class WC_Payment_Gateways {
 	}
 
 	/**
-	 * Set the current, active gateway
+	 * Set the current, active gateway.
+	 *
+	 * @param array $gateway Available payment gateways.
 	 */
 	public function set_current_gateway( $gateways ) {
+		// Be on the defensive
+		if ( ! is_array( $gateways ) || empty( $gateways ) ) {
+			return;
+		}
+
 		$current = WC()->session->get( 'chosen_payment_method' );
 
-		if ( isset( $gateways[ $current ] ) ) {
-			$gateways[ $current ]->set_current();
+		if ( $current && isset( $gateways[ $current ] ) ) {
+			$current_gateway = $gateways[ $current ];
+
 		} else {
-			current( $gateways )->set_current();
+			$current_gateway = current( $gateways );
+		}
+
+		// Ensure we can make a call to set_current() without triggering an error
+		if ( $current_gateway && is_callable( array( $current_gateway, 'set_current' ) ) ) {
+			$current_gateway->set_current();
 		}
 	}
 

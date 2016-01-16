@@ -9,7 +9,7 @@ if ( ! class_exists( 'WC_Report_Stock' ) ) {
 }
 
 /**
- * WC_Report_Out_Of_Stock
+ * WC_Report_Out_Of_Stock.
  *
  * @author      WooThemes
  * @category    Admin
@@ -19,14 +19,17 @@ if ( ! class_exists( 'WC_Report_Stock' ) ) {
 class WC_Report_Out_Of_Stock extends WC_Report_Stock {
 
 	/**
-	 * No items found text
+	 * No items found text.
 	 */
 	public function no_items() {
 		_e( 'No out of stock products found.', 'woocommerce' );
 	}
 
 	/**
-	 * Get Products matching stock criteria
+	 * Get Products matching stock criteria.
+	 *
+	 * @param int $current_page
+	 * @param int $per_page
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;

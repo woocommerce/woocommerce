@@ -13,12 +13,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Order_Notes Class
+ * WC_Meta_Box_Order_Notes Class.
  */
 class WC_Meta_Box_Order_Notes {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 		global $post;

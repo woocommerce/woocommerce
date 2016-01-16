@@ -33,7 +33,7 @@ class WC_Session_Handler extends WC_Session {
 	private $_table;
 
 	/**
-	 * Constructor for the session class
+	 * Constructor for the session class.
 	 */
 	public function __construct() {
 		global $wpdb;
@@ -66,17 +66,16 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 		if ( ! is_user_logged_in() ) {
-			add_action( 'woocommerce_thankyou', array( $this, 'destroy_session' ) );
 			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
 		}
 	}
 
 	/**
-	 * Sets the session cookie on-demand (usually after adding an item to the cart)
+	 * Sets the session cookie on-demand (usually after adding an item to the cart).
 	 *
-	 * Since the cookie name (as of 2.1) is prepended with wp, cache systems like batcache will not cache pages when set
+	 * Since the cookie name (as of 2.1) is prepended with wp, cache systems like batcache will not cache pages when set.
 	 *
-	 * Warning: Cookies will only be set if this is called before the headers are sent
+	 * Warning: Cookies will only be set if this is called before the headers are sent.
 	 */
 	public function set_customer_session_cookie( $set ) {
 		if ( $set ) {
@@ -92,7 +91,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Return true if the current user has an active session, i.e. a cookie to retrieve values
+	 * Return true if the current user has an active session, i.e. a cookie to retrieve values.
 	 *
 	 * @return bool
 	 */
@@ -104,14 +103,14 @@ class WC_Session_Handler extends WC_Session {
 	 * Set session expiration.
 	 */
 	public function set_session_expiration() {
-		$this->_session_expiring   = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours
-		$this->_session_expiration = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours
+		$this->_session_expiring   = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours.
+		$this->_session_expiration = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours.
 	}
 
 	/**
-	 * Generate a unique customer ID for guests, or return user ID if logged in
+	 * Generate a unique customer ID for guests, or return user ID if logged in.
 	 *
-	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID
+	 * Uses Portable PHP password hashing framework to generate a unique cryptographically strong ID.
 	 *
 	 * @return int|string
 	 */
@@ -126,7 +125,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Get session cookie
+	 * Get session cookie.
 	 *
 	 * @return bool|array
 	 */
@@ -149,7 +148,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Get session data
+	 * Get session data.
 	 *
 	 * @return array
 	 */
@@ -158,22 +157,16 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Gets a cache prefix. This is used in session names so the entire cache can be invalidated with 1 function call
+	 * Gets a cache prefix. This is used in session names so the entire cache can be invalidated with 1 function call.
 	 *
 	 * @return string
 	 */
 	private function get_cache_prefix() {
-		$prefix_num = wp_cache_get( 'wc_session_prefix', WC_SESSION_CACHE_GROUP );
-
-		if ( $prefix_num === false ) {
-			wp_cache_set( 'wc_session_prefix', 1, WC_SESSION_CACHE_GROUP );
-		}
-
-		return 'wc_session_' . $prefix_num . '_';
+		return WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP );
 	}
 
 	/**
-	 * Save data
+	 * Save data.
 	 */
 	public function save_data() {
 		// Dirty if something changed - prevents saving nothing new
@@ -223,7 +216,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Destroy all session data
+	 * Destroy all session data.
 	 */
 	public function destroy_session() {
 		// Clear cookie
@@ -241,7 +234,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * When a user is logged out, ensure they have a unique nonce by using the customer/session ID
+	 * When a user is logged out, ensure they have a unique nonce by using the customer/session ID.
 	 *
 	 * @return string
 	 */
@@ -250,7 +243,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Cleanup sessions
+	 * Cleanup sessions.
 	 */
 	public function cleanup_sessions() {
 		global $wpdb;
@@ -261,12 +254,12 @@ class WC_Session_Handler extends WC_Session {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) );
 
 			// Invalidate cache
-			wp_cache_incr( 'wc_session_prefix', 1, WC_SESSION_CACHE_GROUP );
+			WC_Cache_Helper::incr_cache_prefix( WC_SESSION_CACHE_GROUP );
 		}
 	}
 
 	/**
-	 * Returns the session
+	 * Returns the session.
 	 *
 	 * @param string $customer_id
 	 * @param mixed $default
@@ -296,7 +289,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Delete the session from the cache and database
+	 * Delete the session from the cache and database.
 	 *
 	 * @param int $customer_id
 	 */
@@ -314,7 +307,7 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Update the session expiry timestamp
+	 * Update the session expiry timestamp.
 	 *
 	 * @param string $customer_id
 	 * @param int $timestamp

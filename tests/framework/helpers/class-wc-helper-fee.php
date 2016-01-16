@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class WC_Helper_Fee
+ * Class WC_Helper_Fee.
  *
- * This helper class should ONLY be used for unit tests!
+ * This helper class should ONLY be used for unit tests!.
  */
 class WC_Helper_Fee {
 
 	/**
-	 * Create a cart simple fee without taxes
+	 * Create a cart simple fee without taxes.
 	 *
 	 * @since 2.3
 	 */
@@ -21,8 +21,8 @@ class WC_Helper_Fee {
 	}
 
 	/**
-	 * Add a cart simple fee without taxes
-	 * Note: need to be added before add any product in the cart
+	 * Add a cart simple fee without taxes.
+	 * Note: need to be added before add any product in the cart.
 	 *
 	 * @since 2.3
 	 */
@@ -31,7 +31,7 @@ class WC_Helper_Fee {
 	}
 
 	/**
-	 * Remove a cart simple fee without taxes
+	 * Remove a cart simple fee without taxes.
 	 *
 	 * @since 2.3
 	 */

@@ -36,8 +36,37 @@ function wc_get_coupon_types() {
  */
 function wc_get_coupon_type( $type = '' ) {
 	$types = wc_get_coupon_types();
-	if ( isset( $types[ $type ] ) )
-		return $types[ $type ];
+	return isset( $types[ $type ] ) ? $types[ $type ] : '';
+}
 
-	return '';
+/**
+ * Coupon types that apply to individual products. Controls which validation rules will apply.
+ *
+ * @since  2.5.0
+ * @return array
+ */
+function wc_get_product_coupon_types() {
+	return (array) apply_filters( 'woocommerce_product_coupon_types', array( 'fixed_product', 'percent_product' ) );
+}
+
+/**
+ * Coupon types that apply to the cart as a whole. Controls which validation rules will apply.
+ *
+ * @since  2.5.0
+ * @return array
+ */
+function wc_get_cart_coupon_types() {
+	return (array) apply_filters( 'woocommerce_cart_coupon_types', array( 'fixed_cart', 'percent' ) );
+}
+
+/**
+ * Check if coupons are enabled.
+ * Filterable.
+ *
+ * @since  2.5.0
+ *
+ * @return array
+ */
+function wc_coupons_enabled() {
+	return apply_filters( 'woocommerce_coupons_enabled', 'yes' === get_option( 'woocommerce_enable_coupons' ) );
 }

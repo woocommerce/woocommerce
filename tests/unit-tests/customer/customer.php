@@ -2,13 +2,13 @@
 namespace WooCommerce\Tests\Customer;
 
 /**
- * Class Customer
+ * Class Customer.
  * @package WooCommerce\Tests\Customer
  */
 class Customer extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test the get_taxable_address method
+	 * Test the get_taxable_address method.
 	 */
 	public function test_get_taxable_address() {
 
@@ -64,7 +64,7 @@ class Customer extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the is_customer_outside_base method
+	 * Test the is_customer_outside_base method.
 	 */
 	public function test_is_customer_outside_base() {
 

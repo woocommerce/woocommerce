@@ -1,6 +1,6 @@
 <?php
 /**
- * Geolocation class.
+ * Geolocation class
  *
  * Handles geolocation and updating the geolocation database.
  *
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Geolocation Class
+ * WC_Geolocation Class.
  */
 class WC_Geolocation {
 
@@ -54,7 +54,7 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Maybe trigger a DB update for the first time
+	 * Maybe trigger a DB update for the first time.
 	 * @param  string $new_value
 	 * @param  string $old_value
 	 * @return string
@@ -67,7 +67,7 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Get current user IP Address
+	 * Get current user IP Address.
 	 * @return string
 	 */
 	public static function get_ip_address() {
@@ -84,7 +84,7 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Get user IP Address using a service
+	 * Get user IP Address using a service.
 	 * @return string
 	 */
 	public static function get_external_ip_address() {
@@ -114,8 +114,9 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Geolocate an IP address
+	 * Geolocate an IP address.
 	 * @param  string $ip_address
+	 * @param  bool   $fallback
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = true ) {
@@ -150,7 +151,7 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Path to our local db
+	 * Path to our local db.
 	 * @param  string $version
 	 * @return string
 	 */
@@ -275,7 +276,7 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Test if is IPv6
+	 * Test if is IPv6.
 	 *
 	 * @since  2.4.0
 	 *

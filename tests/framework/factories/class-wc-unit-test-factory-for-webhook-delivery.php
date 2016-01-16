@@ -8,7 +8,7 @@
 class WC_Unit_Test_Factory_For_Webhook_Delivery extends WP_UnitTest_Factory_For_Comment {
 
 	/**
-	 * Setup factory
+	 * Setup factory.
 	 *
 	 * @since 2.2
 	 * @param null $factory
@@ -30,7 +30,7 @@ class WC_Unit_Test_Factory_For_Webhook_Delivery extends WP_UnitTest_Factory_For_
 	}
 
 	/**
-	 * Create a mock webhook delivery
+	 * Create a mock webhook delivery.
 	 *
 	 * @since 2.2
 	 * @see WP_UnitTest_Factory_For_comment::create_object()

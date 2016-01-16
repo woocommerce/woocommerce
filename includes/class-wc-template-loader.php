@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Template Loader
  *
@@ -11,7 +16,7 @@
 class WC_Template_Loader {
 
 	/**
-	 * Hook in methods
+	 * Hook in methods.
 	 */
 	public static function init() {
 		add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
@@ -23,11 +28,11 @@ class WC_Template_Loader {
 	 *
 	 * Handles template usage so that we can use our own templates instead of the themes.
 	 *
-	 * Templates are in the 'templates' folder. woocommerce looks for theme
-	 * overrides in /theme/woocommerce/ by default
+	 * Templates are in the 'templates' folder. woocommerce looks for theme.
+	 * overrides in /theme/woocommerce/ by default.
 	 *
-	 * For beginners, it also looks for a woocommerce.php template first. If the user adds
-	 * this to the theme (containing a woocommerce() inside) this will be used for all
+	 * For beginners, it also looks for a woocommerce.php template first. If the user adds.
+	 * this to the theme (containing a woocommerce() inside) this will be used for all.
 	 * woocommerce templates.
 	 *
 	 * @param mixed $template
@@ -79,7 +84,7 @@ class WC_Template_Loader {
 	}
 
 	/**
-	 * comments_template_loader function.
+	 * Load comments template.
 	 *
 	 * @param mixed $template
 	 * @return string

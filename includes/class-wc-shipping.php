@@ -42,7 +42,7 @@ class WC_Shipping {
 	protected static $_instance = null;
 
 	/**
-	 * Main WC_Shipping Instance
+	 * Main WC_Shipping Instance.
 	 *
 	 * Ensures only one instance of WC_Shipping is loaded or can be loaded.
 	 *
@@ -82,7 +82,7 @@ class WC_Shipping {
 	}
 
     /**
-     * init function.
+     * Initialize shipping.
      */
     public function init() {
 		do_action( 'woocommerce_shipping_init' );
@@ -91,8 +91,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * load_shipping_methods function.
-	 *
 	 * Loads all shipping methods which are hooked in. If a $package is passed some methods may add themselves conditionally.
 	 *
 	 * Methods are sorted into their user-defined order after being loaded.
@@ -145,7 +143,7 @@ class WC_Shipping {
 	 * Unregister shipping methods.
 	 */
 	public function unregister_shipping_methods() {
-		unset( $this->shipping_methods );
+		$this->shipping_methods = array();
 	}
 
 	/**
@@ -189,8 +187,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * get_shipping_methods function.
-	 *
 	 * Returns all registered shipping methods for usage.
 	 *
 	 * @access public
@@ -201,8 +197,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * get_shipping_classes function.
-	 *
 	 * Load shipping classes taxonomy terms.
 	 *
 	 * @access public
@@ -217,7 +211,7 @@ class WC_Shipping {
 	}
 
 	/**
-	 * Get the default method
+	 * Get the default method.
 	 * @param  array  $available_methods
 	 * @param  boolean $current_chosen_method
 	 * @return string
@@ -261,8 +255,6 @@ class WC_Shipping {
 	}
 
 	/**
-	 * calculate_shipping function.
-	 *
 	 * Calculate shipping for (multiple) packages of cart items.
 	 *
 	 * @param array $packages multi-dimensional array of cart items to calc shipping for
@@ -336,30 +328,28 @@ class WC_Shipping {
 	}
 
 	/**
-	 * calculate_shipping_for_package function.
+	 * Calculate shipping rates for a package,
 	 *
-	 * Calculates each shipping methods cost. Rates are cached based on the package to speed up calculations.
+	 * Calculates each shipping methods cost. Rates are stored in the session based on the package hash to avoid re-calculation every page load.
 	 *
-	 * @access public
 	 * @param array $package cart items
 	 * @return array
-	 * @todo Return array() instead of false for consistent return type?
 	 */
 	public function calculate_shipping_for_package( $package = array() ) {
-		if ( ! $this->enabled ) return false;
-		if ( ! $package ) return false;
+		if ( ! $this->enabled || ! $package ) {
+			return false;
+		}
 
 		// Check if we need to recalculate shipping for this package
 		$package_hash   = 'wc_ship_' . md5( json_encode( $package ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
 		$status_options = get_option( 'woocommerce_status_options', array() );
+		$stored_rates   = WC()->session->get( 'shipping_for_package' );
 
-		if ( false === ( $stored_rates = get_transient( $package_hash ) ) || ! empty( $status_options['shipping_debug_mode'] ) ) {
-
+		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || ! empty( $status_options['shipping_debug_mode'] ) ) {
 			// Calculate shipping method rates
 			$package['rates'] = array();
 
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
-
 				if ( $shipping_method->is_available( $package ) && ( empty( $package['ship_via'] ) || in_array( $shipping_method->id, $package['ship_via'] ) ) ) {
 
 					// Reset Rates
@@ -369,33 +359,35 @@ class WC_Shipping {
 					$shipping_method->calculate_shipping( $package );
 
 					// Place rates in package array
-					if ( ! empty( $shipping_method->rates ) && is_array( $shipping_method->rates ) )
-						foreach ( $shipping_method->rates as $rate )
+					if ( ! empty( $shipping_method->rates ) && is_array( $shipping_method->rates ) ) {
+						foreach ( $shipping_method->rates as $rate ) {
 							$package['rates'][ $rate->id ] = $rate;
+						}
+					}
 				}
 			}
 
 			// Filter the calculated rates
 			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
 
-			// Store
-			set_transient( $package_hash, $package['rates'], 60 * 60 ); // Cached for an hour
-
+			// Store in session to avoid recalculation
+			WC()->session->set( 'shipping_for_package', array(
+				'package_hash' => $package_hash,
+				'rates'        => $package['rates']
+			) );
 		} else {
-
-			$package['rates'] = $stored_rates;
-
+			$package['rates'] = $stored_rates['rates'];
 		}
 
 		return $package;
 	}
 
 	/**
-	 * Get packages
+	 * Get packages.
 	 *
 	 * @return array
 	 */
-	public  function get_packages() {
+	public function get_packages() {
 		return $this->packages;
 	}
 
@@ -438,7 +430,7 @@ class WC_Shipping {
 }
 
 /**
- * Register a shipping method
+ * Register a shipping method.
  *
  * Registers a shipping method ready to be loaded. Accepts a class name (string) or a class object.
  *

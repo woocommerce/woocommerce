@@ -4,28 +4,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class WC_Eval_Math. Supports basic math only (removed eval function)
+ * Class WC_Eval_Math. Supports basic math only (removed eval function).
  *
- * Based on EvalMath by Miles Kaufman Copyright (C) 2005 Miles Kaufmann http://www.twmagic.com/
+ * Based on EvalMath by Miles Kaufman Copyright (C) 2005 Miles Kaufmann http://www.twmagic.com/.
  */
 class WC_Eval_Math {
-	/** @var string */
-	public static $last_error = null;
-
-	/** @var array */
-	public static $v = array( 'e' => 2.71, 'pi' => 3.14 ); // variables (and constants)
-
-	/** @var array */
-	public static $f = array(); // user-defined functions
-
-	/** @var array */
-	public static $vb = array( 'e', 'pi' ); // constants
-
-	/** @var array */
-	public static $fb = array(); // built-in functions
 
 	/**
-	 * Evaluate maths string
+	 * Last error.
+	 *
+	 * @var string
+	 */
+	public static $last_error = null;
+
+	/**
+	 * Variables (and constants).
+	 *
+	 * @var array
+	 */
+	public static $v = array( 'e' => 2.71, 'pi' => 3.14 );
+
+	/**
+	 * User-defined functions.
+	 *
+	 * @var array
+	 */
+	public static $f = array();
+
+	/**
+	 * Constants.
+	 *
+	 * @var array
+	 */
+	public static $vb = array( 'e', 'pi' );
+
+	/**
+	 * Built-in functions.
+	 *
+	 * @var array
+	 */
+	public static $fb = array();
+
+	/**
+	 * Evaluate maths string.
 	 *
 	 * @param string  $expr
 	 * @return mixed
@@ -71,7 +92,7 @@ class WC_Eval_Math {
 	}
 
 	/**
-	 * Convert infix to postfix notation
+	 * Convert infix to postfix notation.
 	 *
 	 * @param  string $expr
 	 * @return string
@@ -201,7 +222,14 @@ class WC_Eval_Math {
 		return $output;
 	}
 
-	// evaluate postfix notation
+	/**
+	 * Evaluate postfix notation.
+	 *
+	 * @param  mixed $tokens
+	 * @param  array $vars
+	 *
+	 * @return mixed
+	 */
 	private static function pfx( $tokens, $vars = array() ) {
 		if ( $tokens == false ) return false;
 
@@ -246,7 +274,13 @@ class WC_Eval_Math {
 		return $stack->pop();
 	}
 
-	// trigger an error, but nicely, if need be
+	/**
+	 * Trigger an error, but nicely, if need be.
+	 *
+	 * @param  string $msg
+	 *
+	 * @return bool
+	 */
 	private static function trigger( $msg ) {
 		self::$last_error = $msg;
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -257,10 +291,12 @@ class WC_Eval_Math {
 		return false;
 	}
 
-	// Prints the file name, function name, and
-	// line number which called your function
-	// (not this function, then one that  called
-	// it to begin with)
+	/**
+	 * Prints the file name, function name, and
+	 * line number which called your function
+	 * (not this function, then one that  called
+	 * it to begin with)
+	 */
 	private static function debugPrintCallingFunction() {
 		$file = 'n/a';
 		$func = 'n/a';
@@ -276,21 +312,39 @@ class WC_Eval_Math {
 }
 
 /**
- * Class WC_Eval_Math_Stack
+ * Class WC_Eval_Math_Stack.
  */
 class WC_Eval_Math_Stack {
 
-	/** @var array */
+	/**
+	 * Stack array.
+	 *
+	 * @var array
+	 */
 	public $stack = array();
 
-	/** @var integer */
+	/**
+	 * Stack counter.
+	 *
+	 * @var integer
+	 */
 	public $count = 0;
 
+	/**
+	 * Push value into stack.
+	 *
+	 * @param  mixed $val
+	 */
 	public function push( $val ) {
 		$this->stack[ $this->count ] = $val;
 		$this->count++;
 	}
 
+	/**
+	 * Pop value from stack.
+	 *
+	 * @return mixed
+	 */
 	public function pop() {
 		if ( $this->count > 0 ) {
 			$this->count--;
@@ -299,7 +353,14 @@ class WC_Eval_Math_Stack {
 		return null;
 	}
 
-	public function last( $n=1 ) {
+	/**
+	 * Get last value from stack.
+	 *
+	 * @param  int $n
+	 *
+	 * @return mixed
+	 */
+	public function last( $n = 1 ) {
 		$key = $this->count - $n;
 		return array_key_exists( $key, $this->stack ) ? $this->stack[ $key ] : null;
 	}

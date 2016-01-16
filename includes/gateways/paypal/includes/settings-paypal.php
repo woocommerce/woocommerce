@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Settings for PayPal Gateway
+ * Settings for PayPal Gateway.
  */
 return array(
 	'enabled' => array(

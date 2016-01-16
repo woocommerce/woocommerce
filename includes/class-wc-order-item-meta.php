@@ -1,8 +1,13 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Order Item Meta
  *
- * A Simple class for managing order item meta so plugins add it in the correct format
+ * A Simple class for managing order item meta so plugins add it in the correct format.
  *
  * @class 		order_item_meta
  * @version		2.4
@@ -24,7 +29,7 @@ class WC_Order_Item_Meta {
 	public $product = null;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
 	 * @param array $item defaults to array()
 	 * @param \WC_Product $product defaults to null
@@ -44,7 +49,7 @@ class WC_Order_Item_Meta {
 	}
 
 	/**
-	 * Display meta in a formatted list
+	 * Display meta in a formatted list.
 	 *
 	 * @param bool $flat (default: false)
 	 * @param bool $return (default: false)
@@ -109,26 +114,28 @@ class WC_Order_Item_Meta {
 
 		$formatted_meta = array();
 
-		foreach ( $this->item['item_meta_array'] as $meta_id => $meta ) {
-			if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
-				continue;
-			}
-
-			$attribute_key = urldecode( str_replace( 'attribute_', '', $meta->key ) );
-
-			// If this is a term slug, get the term's nice name
-			if ( taxonomy_exists( $attribute_key ) ) {
-				$term = get_term_by( 'slug', $meta->value, $attribute_key );
-				if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
-					$meta->value = $term->name;
+		if ( ! empty( $this->item['item_meta_array'] ) ) {
+			foreach ( $this->item['item_meta_array'] as $meta_id => $meta ) {
+				if ( "" === $meta->value || is_serialized( $meta->value ) || ( ! empty( $hideprefix ) && substr( $meta->key, 0, 1 ) == $hideprefix ) ) {
+					continue;
 				}
-			}
 
-			$formatted_meta[ $meta_id ] = array(
-				'key'   => $meta->key,
-				'label' => wc_attribute_label( $attribute_key, $this->product ),
-				'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta->value ),
-			);
+				$attribute_key = urldecode( str_replace( 'attribute_', '', $meta->key ) );
+
+				// If this is a term slug, get the term's nice name
+				if ( taxonomy_exists( $attribute_key ) ) {
+					$term = get_term_by( 'slug', $meta->value, $attribute_key );
+					if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
+						$meta->value = $term->name;
+					}
+				}
+
+				$formatted_meta[ $meta_id ] = array(
+					'key'   => $meta->key,
+					'label' => wc_attribute_label( $attribute_key, $this->product ),
+					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta->value ),
+				);
+			}
 		}
 
 		return apply_filters( 'woocommerce_order_items_meta_get_formatted', $formatted_meta, $this );
@@ -136,7 +143,7 @@ class WC_Order_Item_Meta {
 
 	/**
 	 * Return an array of formatted item meta in format e.g.
-	 * Handles @deprecated args
+	 * Handles @deprecated args.
 	 * @return array
 	 */
 	public function get_formatted_legacy( $hideprefix = '_' ) {
