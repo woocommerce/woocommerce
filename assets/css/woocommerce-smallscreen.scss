@@ -99,7 +99,7 @@
 	/**
 	 * Products
 	 */
-	&[class*="columns-"] {
+	&, &[class*="columns-"] {
 		ul.products {
 			li.product {
 				width: 48%;
