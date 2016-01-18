@@ -158,58 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.5.0 - 18/01/2016 =
-* Feature - New default session handler. Uses custom table to store data rather than the options table for performance and scalability reasons. https://woocommerce.wordpress.com/2015/10/07/new-session-handler-in-2-5/
-* Feature - New tax settings UI - faster, enhanced with ajax, searchable.
-* Feature - WP CLI Support. https://woocommerce.wordpress.com/2015/10/01/sneak-peek-wp-cli-support-in-woocommerce/
-* Feature - Added terms and conditions checkbox to pay page.
-* Feature - Password strength indicators.
-* Feature - Added 'pay' link to order screen.
-* Feature - Added admin order/payment failed notification.
-* Fix - Check for existence of global attribute when you get_attributes() for a product.
-* Fix - Show order by template on product search.
-* Fix - Search variation skus in backend search.
-* Tweak - For coupons with category restrictions, respect the category hierarchy.
-* Tweak - Added wc_array_cartesian function to generate variations in a logical order.
-* Tweak - Revised email settings screens to show emails in a table and avoid a long sub-nav.
-* Tweak - Default customer role capabilities.
-* Tweak - Expire mini-cart cache after 24 hours.
-* Tweak - Improved refund error messages in PayPal standard.
-* Tweak - Removed language pack downloader in favour of translate.wordpress.org.
-* Tweak - Added onboarding wizard button to the contextual help so it can be accessed again.
-* Tweak - When a WordPress user is deleted, turn any orders they have into Guest orders.
-* Tweak - When calculating order taxes, respect tax settings and default to base country.
-* Tweak - Fade in variation images to avoid flicker during load.
-* Tweak - Display 2 averages on report (net and gross).
-* Tweak - Improve product search and use WPDB instead of several get_posts queries for performance.
-* Tweak - Use SKU for stock order notes.
-* Tweak - Added order notes for manual email sends.
-* Tweak - Sanitize shipping method labels/titles.
-* Tweak - Only display the coupon form on the checkout if a coupon hasn't been applied.
-* Tweak - Added billing address column to order screen (off for new users).
-* Tweak - Created function to disable author archives for customers.
-* Tweak - When updating cart hash, refresh all open tabs.
-* Tweak - Use new "question" mark icon font for help tips.
-* Tweak - Improved review verification status retrieval.
-* Tweak - Improve appearance when only 1 gateway is active.
-* Tweak - Aligned terms box left and added required asterisk.
-* Tweak - Removed dropdown display mode for cart shipping methods - radios are more flexible.
-* Dev - API - Added /products/shipping_classes endpoint.
-* Dev - API - Added support to POST, PUT, and DELETE categories and tags.
-* Dev - API - Added support to filter products by tag, category, shipping class, and attribute.
-* Dev - API - Added tax and tax_class endpoints.
-* Dev - Template - New star ratings. The old one was 5 separate buttons. This new one consolidates the 5 options into one element making it leaner visually and more intuitive. Works in IE9+ with a graceful degradation for IE8.
-* Dev - Template - Added `data-title` attribute to cart table.
-* Dev - Template - Product archive anchors are now hooked into templates rather than hard coded.
-* Dev - Template - Added template files for the customer details list in emails. emails/email-customer-details.php
-* Dev - Template - Revised single variation cart template. Template files now exist for variations, and the cart button will display (disabled) when no selections are made.
-* Dev - Template - Made "my orders" columns fully customizable with filters.
-* Dev - Template - Unified email template order details tables to use a single template.
-* Dev - Allow wc_clean to support arrays.
-* Dev - Added a manual update trigger for checkout.
-* Dev - Added woocommerce_is_price_filter_active filter to Query class.
-* Dev - Replaced some cart methods with dedicated functions. e.g. wc_ship_to_billing_address_only().
-* Localisation - Add Kenyan currency and symbol.
+= 2.6.0 - TBD =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 
