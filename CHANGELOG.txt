@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 2.4.13 - 11/01/2016 =
+* Fix - Potential redirect loop when using 'unforce ssl' setting and a https home URL.
+* Fix - Escape option names when cleaning up sessions.
+
 = 2.4.12 - 9/12/2015 =
 * Fix - 4.4 - Permission error when editing attribute terms.
 * Fix - 4.4 - Missing variation images when wp_get_attachment_image_srcset() returns false instead of a string.
