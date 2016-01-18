@@ -1,4 +1,4 @@
-=== WooCommerce - excelling eCommerce ===
+=== WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, shipping, storefront
 Requires at least: 4.1
