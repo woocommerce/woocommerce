@@ -2025,10 +2025,20 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_account_orders' ) ) {
+
+	/**
+	 * My Account > Orders template.
+	 */
+	function woocommerce_account_orders() {
+		wc_get_template( 'myaccount/orders.php' );
+	}
+}
+
 if ( ! function_exists( 'woocommerce_account_view_order' ) ) {
 
 	/**
-	 * My Account view order template.
+	 * My Account > View order template.
 	 *
 	 * @param int $order_id Order ID.
 	 */
@@ -2037,10 +2047,20 @@ if ( ! function_exists( 'woocommerce_account_view_order' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_account_downloads' ) ) {
+
+	/**
+	 * My Account > Downloads template.
+	 */
+	function woocommerce_account_downloads() {
+		wc_get_template( 'myaccount/downloads.php' );
+	}
+}
+
 if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 
 	/**
-	 * My Account edit account template.
+	 * My Account > Edit account template.
 	 */
 	function woocommerce_account_edit_account() {
 		WC_Shortcode_My_Account::edit_account();
@@ -2050,7 +2070,7 @@ if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
 
 	/**
-	 * My Account edit address template.
+	 * My Account > Edit address template.
 	 *
 	 * @param string $type Address type.
 	 */
@@ -2065,7 +2085,7 @@ if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
 if ( ! function_exists( 'woocommerce_account_add_payment_method' ) ) {
 
 	/**
-	 * My Account add payment method template.
+	 * My Account > Add payment method template.
 	 */
 	function woocommerce_account_add_payment_method() {
 		WC_Shortcode_My_Account::add_payment_method();
