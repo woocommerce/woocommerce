@@ -122,6 +122,9 @@ class WC_Shipping_Zone {
 			$location_parts[] = $location->code;
 		}
 
+		// Fix display of encoded characters.
+		$location_parts = array_map( 'html_entity_decode', $location_parts );
+
 		if ( sizeof( $location_parts ) > $max ) {
 			$remaining = sizeof( $location_parts ) - $max;
 			return sprintf( _n( '%s and %d other region', '%s and %d other regions', $remaining, 'woocommerce' ), implode( ', ', array_splice( $location_parts, 0, $max ) ), $remaining );
