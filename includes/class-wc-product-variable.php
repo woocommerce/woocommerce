@@ -68,7 +68,7 @@ class WC_Product_Variable extends WC_Product {
 			$set_child_stock_status = 'instock';
 		}
 		
-		$set_child_stock_status = apply_filters( 'woocommerce_product_check_stock_status', $set_child_stock_status, $this )
+		$set_child_stock_status = apply_filters( 'woocommerce_product_check_stock_status', $set_child_stock_status, $this );
 
 		if ( ! empty( $set_child_stock_status ) ) {
 			foreach ( $this->get_children() as $child_id ) {
