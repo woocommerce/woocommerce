@@ -324,8 +324,7 @@ class WC_Product {
 	 * @param string $status
 	 */
 	public function set_stock_status( $status ) {
-
-		$status = ( ! empty( $status ) ) ? $status : 'instock';
+		$status = ! empty( $status ) ? $status : 'instock';
 
 		// Sanity check
 		if ( $this->managing_stock() && $status === 'instock' ) {
