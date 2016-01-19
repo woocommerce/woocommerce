@@ -71,12 +71,12 @@ class WC_Shortcode_My_Account {
 	 */
 	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
-	    	'order_count' => 15
+	    	'order_count' => 15 // @deprecated 2.6.0. Keep for backward compatibility.
 		), $atts ) );
 
 		wc_get_template( 'myaccount/my-account.php', array(
-			'current_user' 	=> get_user_by( 'id', get_current_user_id() ),
-			'order_count' 	=> 'all' == $order_count ? -1 : $order_count
+			'current_user' => get_user_by( 'id', get_current_user_id() ),
+			'order_count'  => 'all' == $order_count ? -1 : $order_count
 		) );
 	}
 

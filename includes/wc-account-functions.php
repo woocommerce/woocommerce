@@ -84,3 +84,50 @@ function wc_get_account_menu_items() {
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	) );
 }
+
+/**
+ * Get My Account > Orders coluns.
+ *
+ * @since 2.6.0
+ * @return array
+ */
+function wc_get_account_orders_columns() {
+	$columns = apply_filters( 'woocommerce_account_orders_columns', array(
+		'order-number'  => __( 'Order', 'woocommerce' ),
+		'order-date'    => __( 'Date', 'woocommerce' ),
+		'order-status'  => __( 'Status', 'woocommerce' ),
+		'order-total'   => __( 'Total', 'woocommerce' ),
+		'order-actions' => '&nbsp;',
+	) );
+
+	// Deprecated filter since 2.6.0.
+	return apply_filters( 'woocommerce_my_account_my_orders_columns', $columns );
+}
+
+/**
+ * Get My Account > Orders query args.
+ *
+ * @return array
+ */
+function wc_get_account_orders_query_args() {
+	$args = array(
+		'numberposts' => 15,
+		'meta_key'    => '_customer_user',
+		'meta_value'  => get_current_user_id(),
+		'post_type'   => wc_get_order_types( 'view-orders' ),
+		'post_status' => array_keys( wc_get_order_statuses() )
+	);
+
+	// @deprecated 2.6.0.
+	$args = apply_filters( 'woocommerce_my_account_my_orders_query', $args );
+
+	// Remove deprecated option.
+	$args['posts_per_page'] = $args['numberposts'];
+	unset( $args['numberposts'] );
+
+	if ( isset( $_GET['orders-page'] ) && 1 < $_GET['orders-page'] ) {
+		$args['paged'] = absint( $_GET['orders-page'] );
+	}
+
+	return apply_filters( 'woocommerce_account_orders_query', $args );
+}
