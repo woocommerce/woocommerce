@@ -140,11 +140,11 @@ class WC_Query {
 				$title = __( 'Lost Password', 'woocommerce' );
 			break;
 			default :
-				$title = '';
+				$title = apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', '' );
 			break;
 		}
 
-		return apply_filters( 'woocommerce_endpoint_title', $title, $endpoint );
+		return $title;
 	}
 
 	/**
