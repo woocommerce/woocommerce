@@ -1,3 +1,9 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
+
 <h2><?php _e( 'Shipping Methods', 'woocommerce' ); ?> (<?php echo esc_html( $zone->get_zone_name() ); ?>) <small class="wc-admin-breadcrumb"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>" title="<?php echo esc_attr( __( 'Return to Shipping Zones', 'woocommerce' ) ); ?>">&#x21a9;</a></small></h2>
 <p><?php _e( 'The following Shipping Methods apply to customers with shipping addresses within this zone.', 'woocommerce' ); ?><p>
 <table class="wc-shipping-zone-methods widefat">

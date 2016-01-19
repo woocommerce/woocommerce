@@ -1,3 +1,9 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
+
 <h2><?php _e( 'Shipping Classes', 'woocommerce' ); ?></h2>
 <p><?php _e( 'Shipping classes can be used to group products of similar type. Assign classes to a product on the product edit screen. Once assigned, Shipping Classes can be used by some Shipping Methods (such as Flat Rate Shipping) to provide different rates to different classes of product.', 'woocommerce' ); ?><p>
 
