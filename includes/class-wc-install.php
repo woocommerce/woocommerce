@@ -33,7 +33,7 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public static function init() {
-		add_action( 'admin_init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -43,17 +43,21 @@ class WC_Install {
 	}
 
 	/**
-	 * Check WooCommerce version.
+	 * Check WooCommerce version and run the updater is required.
+	 *
+	 * This check is done on all requests and runs if he versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version ) ) {
+		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
 	}
 
 	/**
-	 * Install actions when a update button is clicked.
+	 * Install actions when a update button is clicked within the admin area.
+	 *
+	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
