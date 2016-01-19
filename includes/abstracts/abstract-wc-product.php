@@ -252,7 +252,9 @@ class WC_Product {
 			}
 		}
 		
-		if ( $stock_status = apply_filters( 'woocommerce_product_check_stock_status', $stock_status, $this ) ) {
+		$stock_status = apply_filters( 'woocommerce_product_check_stock_status', $stock_status, $this )
+		
+		if ( ! empty( $stock_status ) ) {
 			$this->set_stock_status( $stock_status );
 		}
 	}
