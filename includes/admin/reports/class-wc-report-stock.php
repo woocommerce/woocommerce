@@ -111,7 +111,7 @@ class WC_Report_Stock extends WP_List_Table {
 			break;
 
 			case 'stock_status' :
-				if ( ! empty( $stock_status = apply_filters( 'woocommerce_admin_column_stock_status', $product ) ) ) {
+				if ( ! empty( $stock_status = apply_filters( 'woocommerce_admin_column_stock_status', '', $product ) ) ) {
 					echo '<mark class="' . sanitize_title( $stock_status ) . '">' . esc_html( $stock_status ) . '</mark>';
 				} elseif ( $product->is_in_stock() ) {
 					echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
