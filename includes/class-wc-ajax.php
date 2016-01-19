@@ -837,10 +837,10 @@ class WC_AJAX {
 			);
 
 			// set stock status options
-			$stock_status_options = array(
+			$stock_status_options = apply_filters( 'woocommerce_stock_status_options', array(
 				'instock'    => __( 'In stock', 'woocommerce' ),
 				'outofstock' => __( 'Out of stock', 'woocommerce' )
-			);
+			) );
 
 			// Get attributes
 			$attributes = (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) );
@@ -2434,10 +2434,10 @@ class WC_AJAX {
 		);
 
 		// set stock status options
-		$stock_status_options = array(
+		$stock_status_options = apply_filters( 'woocommerce_stock_status_options', array(
 			'instock'    => __( 'In stock', 'woocommerce' ),
 			'outofstock' => __( 'Out of stock', 'woocommerce' )
-		);
+		) );
 
 		$parent_data = array(
 			'id'                   => $product_id,
