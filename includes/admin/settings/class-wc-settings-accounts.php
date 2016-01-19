@@ -58,11 +58,29 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
 
 			array(
+				'title'    => __( 'Orders', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Orders page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_orders_endpoint',
+				'type'     => 'text',
+				'default'  => 'orders',
+				'desc_tip' => true,
+			),
+
+			array(
 				'title'    => __( 'View Order', 'woocommerce' ),
 				'desc'     => __( 'Endpoint for the My Account &rarr; View Order page', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_view_order_endpoint',
 				'type'     => 'text',
 				'default'  => 'view-order',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Downloads', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Downloads page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_downloads_endpoint',
+				'type'     => 'text',
+				'default'  => 'downloads',
 				'desc_tip' => true,
 			),
 
