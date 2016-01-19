@@ -21,13 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$orders = new WP_Query( wc_get_account_orders_query_args() );
-$current_page = isset( $_GET['orders-page'] ) ? absint( $_GET['orders-page'] ) : 1;
+$customer_orders = new WP_Query( wc_get_account_orders_query_args() );
+$current_page    = isset( $_GET['orders-page'] ) ? absint( $_GET['orders-page'] ) : 1;
 
 wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="my-account-content">
-	<?php if ( $orders->have_posts() ) : ?>
+	<?php if ( $customer_orders->have_posts() ) : ?>
 		<table class="shop_table shop_table_responsive my_account_orders">
 			<thead>
 				<tr>
@@ -38,7 +38,7 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 			</thead>
 
 			<tbody>
-				<?php foreach ( $orders->posts as $customer_order ) :
+				<?php foreach ( $customer_orders->posts as $customer_order ) :
 					$order      = wc_get_order( $customer_order );
 					$item_count = $order->get_item_count();
 					?>
@@ -101,13 +101,13 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 			</tbody>
 		</table>
 
-		<?php if ( 1 < $orders->max_num_pages ) : ?>
+		<?php if ( 1 < $customer_orders->max_num_pages ) : ?>
 			<div class="wc-account-orders-pagination">
 				<?php if ( 1 !== $current_page ) : ?>
 					<a class="button" href="?orders-page=<?php echo esc_attr( $current_page - 1 ); ?>"><?php _e( 'Previous', 'woocommerce' ); ?></a>
 				<?php endif; ?>
 
-				<?php if ( $current_page !== intval( $orders->max_num_pages ) ) : ?>
+				<?php if ( $current_page !== intval( $customer_orders->max_num_pages ) ) : ?>
 					<a class="button" href="?orders-page=<?php echo esc_attr( $current_page + 1 ); ?>"><?php _e( 'Next', 'woocommerce' ); ?></a>
 				<?php endif; ?>
 			</div>
