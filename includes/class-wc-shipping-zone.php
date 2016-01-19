@@ -307,8 +307,7 @@ class WC_Shipping_Zone {
 	}
 
 	/**
-     * Save zone data to the database
-     * @param array data to save for this zone
+     * Save zone data to the database.
      */
     public function save() {
 		$data = array(
@@ -324,10 +323,13 @@ class WC_Shipping_Zone {
 
 		$this->save_locations();
 		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+
+		// Increments the transient version to invalidate cache.
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
 	/**
-	 * Save locations to the DB
+	 * Save locations to the DB.
 	 *
 	 * This function clears old locations, then re-inserts new if any changes are found.
 	 */
