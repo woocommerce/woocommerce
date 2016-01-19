@@ -219,9 +219,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="stock_status" name="_stock_status">
 				<?php
 					$options = array(
-						''           => __( '— No Change —', 'woocommerce' ),
-						'instock'    => __( 'In stock', 'woocommerce' ),
-						'outofstock' => __( 'Out of stock', 'woocommerce' )
+						''              => __( '— No Change —', 'woocommerce' ),
+			            'instock'       => __( 'In stock', 'woocommerce' ),
+			            'outofstock'    => __( 'Out of stock', 'woocommerce' ),
+			            'discontinued'  => __( 'Discontinued', 'woocommerce' )
 					);
 					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">'. $value .'</option>';

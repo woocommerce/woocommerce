@@ -403,8 +403,9 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		// If we're managing stock at variation level, check stock levels
-		if ( true === $this->managing_stock() ) {
+		if ( $this->stock_status === 'discontinued' ) {
+      		return false;
+    	} elseif ( true === $this->managing_stock() ) {
 			if ( $this->backorders_allowed() ) {
 				return true;
 			} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
@@ -476,16 +477,19 @@ class WC_Product_Variation extends WC_Product {
 	 * @param string $status
 	 */
 	public function set_stock_status( $status ) {
-		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
+		$statuses = array( 'instock', 'outofstock', 'discontinued' );
+    	$status = in_array( $status, $statuses ) ? $status : 'instock';
 
 		// Sanity check
-		if ( true === $this->managing_stock() ) {
-			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$status = 'outofstock';
-			}
-		} elseif ( 'parent' === $this->managing_stock() ) {
-			if ( ! $this->parent->backorders_allowed() && $this->parent->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				$status = 'outofstock';
+		if ( $status !== 'discontinued' ) {
+			if ( true === $this->managing_stock() ) {
+				if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+					$status = 'outofstock';
+				}
+			} elseif ( 'parent' === $this->managing_stock() ) {
+				if ( ! $this->parent->backorders_allowed() && $this->parent->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+					$status = 'outofstock';
+				}
 			}
 		}
 
@@ -532,7 +536,12 @@ class WC_Product_Variation extends WC_Product {
 	public function get_availability() {
 		$availability = $class = '';
 
-		if ( $this->managing_stock() ) {
+		if ( $this->stock_status === 'discontinued' ) {
+
+	      $availability = __( 'Discontinued', 'woocommerce' );
+	      $class        = 'discontinued';
+
+    	} elseif ( $this->managing_stock() ) {
 			if ( $this->is_in_stock() && $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				switch ( get_option( 'woocommerce_stock_format' ) ) {
 					case 'no_amount' :

@@ -240,6 +240,9 @@ class WC_Product {
 	 * Check if the stock status needs changing.
 	 */
 	public function check_stock_status() {
+		if ( $this->stock_status === 'discontinued' )
+			return;
+			
 		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			if ( $this->stock_status !== 'outofstock' ) {
 				$this->set_stock_status( 'outofstock' );
@@ -324,11 +327,11 @@ class WC_Product {
 	 * @param string $status
 	 */
 	public function set_stock_status( $status ) {
-
-		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
+		$statuses = array( 'instock', 'outofstock', 'discontinued' );
+		$status = in_array( $status, $statuses ) ? $status : 'instock';
 
 		// Sanity check
-		if ( $this->managing_stock() ) {
+		if ( $this->managing_stock() && $status !== 'discontinued' ) {
 			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				$status = 'outofstock';
 			}
@@ -608,7 +611,9 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		if ( $this->managing_stock() && $this->backorders_allowed() ) {
+		if ( $this->stock_status === 'discontinued' ) {
+			return false;
+		} elseif ( $this->managing_stock() && $this->backorders_allowed() ) {
 			return true;
 		} elseif ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			return false;
@@ -663,7 +668,12 @@ class WC_Product {
 	public function get_availability() {
 		$availability = $class = '';
 
-		if ( $this->managing_stock() ) {
+		if ( $this->stock_status === 'discontinued' ) {
+
+      		$availability = __( 'Discontinued', 'woocommerce' );
+    		$class        = 'discontinued';
+
+    	} elseif ( $this->managing_stock() ) {
 
 			if ( $this->is_in_stock() && $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 

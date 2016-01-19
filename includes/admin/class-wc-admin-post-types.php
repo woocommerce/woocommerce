@@ -396,7 +396,9 @@ class WC_Admin_Post_Types {
 				break;
 			case 'is_in_stock' :
 
-				if ( $the_product->is_in_stock() ) {
+				if ( $the_product->stock_status === 'discontinued' ) {
+					echo '<mark class="discontinued">' . __( 'Discontinued', 'woocommerce' ) . '</mark>';
+				} elseif ( $the_product->is_in_stock() ) {
 					echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';

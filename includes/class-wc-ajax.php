@@ -838,8 +838,9 @@ class WC_AJAX {
 
 			// set stock status options
 			$stock_status_options = array(
-				'instock'    => __( 'In stock', 'woocommerce' ),
-				'outofstock' => __( 'Out of stock', 'woocommerce' )
+				'instock'    	=> __( 'In stock', 'woocommerce' ),
+				'outofstock' 	=> __( 'Out of stock', 'woocommerce' ),
+				'discontinued' 	=> __( 'Discontinued', 'woocommerce' )
 			);
 
 			// Get attributes
@@ -2435,8 +2436,9 @@ class WC_AJAX {
 
 		// set stock status options
 		$stock_status_options = array(
-			'instock'    => __( 'In stock', 'woocommerce' ),
-			'outofstock' => __( 'Out of stock', 'woocommerce' )
+			'instock'    	=> __( 'In stock', 'woocommerce' ),
+			'outofstock' 	=> __( 'Out of stock', 'woocommerce' ),
+			'discontinued' 	=> __( 'Discontinued', 'woocommerce' )
 		);
 
 		$parent_data = array(

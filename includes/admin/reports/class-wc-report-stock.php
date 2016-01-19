@@ -111,7 +111,9 @@ class WC_Report_Stock extends WP_List_Table {
 			break;
 
 			case 'stock_status' :
-				if ( $product->is_in_stock() ) {
+				if ( $product->stock_status === 'discontinued' ) {
+					echo '<mark class="discontinued">' . __( 'Discontinued', 'woocommerce' ) . '</mark>';
+				} elseif ( $product->is_in_stock() ) {
 					echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';

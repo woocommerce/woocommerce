@@ -1811,6 +1811,13 @@ table.wp-list-table {
 		background: transparent none;
 		line-height: 1;
 	}
+	
+	mark.discontinued {
+		font-weight: 700;
+	    color: #908F8E;
+	    background: transparent none;
+	    line-height: 1;
+	}
 
 	.order-notes_head,
 	.notes_head,

@@ -62,10 +62,12 @@ class WC_Product_Variable extends WC_Product {
 	public function check_stock_status() {
 		$set_child_stock_status = '';
 
-		if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$set_child_stock_status = 'outofstock';
-		} elseif ( $this->backorders_allowed() || $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			$set_child_stock_status = 'instock';
+		if ( $this->stock_status !== 'discontinued' ) {
+			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				$set_child_stock_status = 'outofstock';
+			} elseif ( $this->backorders_allowed() || $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+				$set_child_stock_status = 'instock';
+			}
 		}
 
 		if ( $set_child_stock_status ) {
@@ -84,7 +86,8 @@ class WC_Product_Variable extends WC_Product {
 	 * Set stock status.
 	 */
 	public function set_stock_status( $status ) {
-		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
+		$statuses = array( 'instock', 'outofstock', 'discontinued' );
+    	$status = in_array( $status, $statuses ) ? $status : 'instock';
 
 		if ( update_post_meta( $this->id, '_stock_status', $status ) ) {
 			do_action( 'woocommerce_product_set_stock_status', $this->id, $status );
@@ -657,13 +660,14 @@ class WC_Product_Variable extends WC_Product {
 			'post_status'	=> 'publish'
 		) );
 
+		$statuses = array( 'instock', 'outofstock', 'discontinued' );
 		$stock_status = 'outofstock';
 
 		foreach ( $children as $child_id ) {
 			$child_stock_status = get_post_meta( $child_id, '_stock_status', true );
 			$child_stock_status = $child_stock_status ? $child_stock_status : 'instock';
-			if ( 'instock' === $child_stock_status ) {
-				$stock_status = 'instock';
+			if ( in_array( $child_stock_status, $statuses ) ) {
+				$stock_status = $child_stock_status;
 				break;
 			}
 		}
