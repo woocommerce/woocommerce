@@ -33,7 +33,7 @@ wc_print_notices(); ?>
 				wc_get_endpoint_url( 'customer-logout', '', wc_get_page_permalink( 'myaccount' ) )
 			);
 
-			_e( 'From your account dashboard you can view your recent orders, manage your shipping and billing addresses and edit your password and account details</a>.', 'woocommerce' );
+			_e( 'From your account dashboard you can view your recent orders, manage your shipping and billing addresses and edit your password and account details.', 'woocommerce' );
 		?>
 	</p>
 
