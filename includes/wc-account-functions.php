@@ -76,14 +76,11 @@ function wc_edit_address_i18n( $id, $flip = false ) {
  * @return array
  */
 function wc_get_account_menu_items() {
-	$pages = apply_filters( 'woocommerce_account_menu_items', array(
-		'recent-orders'       => __( 'Recent Orders', 'woocommerce' ),
-		'available-downloads' => __( 'Downloads', 'woocommerce' ),
-		'edit-address'        => __( 'Addresses', 'woocommerce' ),
-		'edit-account'        => __( 'Account Details', 'woocommerce' ),
+	return apply_filters( 'woocommerce_account_menu_items', array(
+		'orders'          => __( 'Orders', 'woocommerce' ),
+		'downloads'       => __( 'Downloads', 'woocommerce' ),
+		'edit-address'    => __( 'Addresses', 'woocommerce' ),
+		'edit-account'    => __( 'Account Details', 'woocommerce' ),
+		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	) );
-
-	$pages['customer-logout'] = __( 'Logout', 'woocommerce' );
-
-	return $pages;
 }
