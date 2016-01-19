@@ -240,14 +240,20 @@ class WC_Product {
 	 * Check if the stock status needs changing.
 	 */
 	public function check_stock_status() {
+		$stock_status = '';
+		
 		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			if ( $this->stock_status !== 'outofstock' ) {
-				$this->set_stock_status( apply_filters( 'woocommerce_product_check_stock_status', 'outofstock', $this ) );
+				$stock_status = 'outofstock';
 			}
 		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			if ( $this->stock_status !== 'instock' ) {
-				$this->set_stock_status( apply_filters( 'woocommerce_product_check_stock_status', 'instock', $this ) );
+				$stock_status = 'instock';
 			}
+		}
+		
+		if ( $stock_status = apply_filters( 'woocommerce_product_check_stock_status', $stock_status, $this ) ) {
+			$this->set_stock_status( $stock_status );
 		}
 	}
 
