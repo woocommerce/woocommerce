@@ -2338,7 +2338,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 
 		a.wc-shipping-zone-method-settings {
 			&:before {
-				content: "\e01c";
+				@include icon("\f111");
+				font-family: 'Dashicons';
+				line-height: 2.26;
 			}
 		}
 	}
