@@ -58,7 +58,6 @@ class WC_Shortcode_My_Account {
 					continue;
 				}
 
-				$key = str_replace( '-', '_', $key );
 				do_action( 'woocommerce_my_account_' . $key . '_endpoint', $value );
 			}
 		}
