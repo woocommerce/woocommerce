@@ -86,7 +86,7 @@ function wc_get_account_menu_items() {
 }
 
 /**
- * Get My Account > Orders coluns.
+ * Get My Account > Orders columns.
  *
  * @since 2.6.0
  * @return array
@@ -130,4 +130,19 @@ function wc_get_account_orders_query_args() {
 	}
 
 	return apply_filters( 'woocommerce_account_orders_query', $args );
+}
+
+/**
+ * Get My Account > Downloads columns.
+ *
+ * @since 2.6.0
+ * @return array
+ */
+function wc_get_account_downloads_columns() {
+	return apply_filters( 'woocommerce_account_orders_columns', array(
+		'download-file'      => __( 'File', 'woocommerce' ),
+		'download-remaining' => __( 'Remaining', 'woocommerce' ),
+		'download-expires'   => __( 'Expires', 'woocommerce' ),
+		'download-actions'   => '&nbsp;',
+	) );
 }

@@ -28,7 +28,7 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="my-account-content">
 	<?php if ( $customer_orders->have_posts() ) : ?>
-		<table class="shop_table shop_table_responsive my_account_orders">
+		<table class="shop_table shop_table_responsive my_account_orders account-orders-table">
 			<thead>
 				<tr>
 					<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) : ?>
