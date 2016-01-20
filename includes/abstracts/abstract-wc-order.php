@@ -80,6 +80,14 @@ abstract class WC_Abstract_Order {
 		// modified_date
 		// $order_type
 		// id
+		// customer_user
+		//
+		// cart_discount
+		// order_shipping
+		// order_tax
+		// cart_discount_tax
+		// order_shipping_tax
+		// order_total
 
 		return $value;
 	}
@@ -90,11 +98,18 @@ abstract class WC_Abstract_Order {
 	 * @var array
 	 */
     protected $data = array(
-		// @todo when migrating to DB structure, these will be columns
+		// @todo when migrating to custom tables, these will be column names
 		'order_id'             => 0,
 		'order_status'         => '',
-		'order_type' => '',
-		'order_notes'          => array(),
+		'order_type'           => 'simple',
+		'order_key'            => '',
+		'order_currency'       => '',
+		'order_date'           => '',
+		'modified_date'        => '',
+		'completed_date'       => '',
+		'customer_id'          => 0,
+
+		// Billing address
 		'billing_first_name'   => '',
 		'billing_last_name'    => '',
 		'billing_company'      => '',
@@ -106,6 +121,8 @@ abstract class WC_Abstract_Order {
 		'billing_country'      => '',
 		'billing_email'        => '',
 		'billing_phone'        => '',
+
+		// Shipping address
 		'shipping_first_name'  => '',
 		'shipping_last_name'   => '',
 		'shipping_company'     => '',
@@ -115,32 +132,25 @@ abstract class WC_Abstract_Order {
 		'shipping_state'       => '',
 		'shipping_postcode'    => '',
 		'shipping_country'     => '',
+
+		// Order totals
+		'discount_total'       => 0,
+		'discount_tax'         => 0,
+		'shipping_total'       => 0,
+		'shipping_tax'         => 0, // Total shipping taxes for the order
+		'order_tax'            => 0, // Total tax for the order excluding shipping
+		'order_total'          => 0,
+
+		// @todo when migrating to custom tables, these will be custom meta
 		'payment_method'       => '',
 		'payment_method_title' => '',
 		'transaction_id'       => '',
-		'order_date' => '',
-		'modified_date' => '',
-		'completed_date'       => '',
-
-		'order_key'            => '',
-		'order_currency'       => '',
-		'prices_include_tax'   => '',
-
-		'customer_user'        => 0,
-		'customer_note' => '',
 		'customer_ip_address'  => '',
 		'customer_user_agent'  => '',
-
 		'created_via'          => '',
 		'order_version'        => '',
-		'cart_discount'        => 0,
-		'cart_discount_tax'    => 0,
-		'order_tax'            => 0,
-		'order_shipping_tax'   => 0,
-		'order_shipping'       => 0,
-		'order_total'          => 0,
-
-		// @todo when migrating to DB structure, these will be custom meta
+		'prices_include_tax'   => '',
+		'customer_note'        => '',
 	);
 
 	/*
@@ -178,6 +188,14 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_order_key() {
 		return $this->data['order_key'];
+	}
+
+	/**
+	 * Gets order currency.
+	 * @return string
+	 */
+	public function get_order_currency() {
+		return apply_filters( 'woocommerce_get_order_currency', $this->data['order_currency'], $this );
 	}
 
 	/**
@@ -585,7 +603,7 @@ abstract class WC_Abstract_Order {
 	 * @param string $value
 	 */
 	public function set_status( $value ) {
-		if ( in_array( $value, array_keys( wc_get_order_statuses() ) ) {
+		if ( in_array( $value, array_keys( wc_get_order_statuses() ) ) ) {
 			$this->data['order_status'] = $value;
 		}
 	}
@@ -928,49 +946,116 @@ abstract class WC_Abstract_Order {
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'variation' => array(),
-			'totals'    => array()
+			'name'         => $product->get_title(),
+			'qty'          => absint( $qty ),
+			'tax_class'    => $product->get_tax_class(),
+			'product_id'   => $product->id,
+			'variation_id' => isset( $product->variation_id ) ? $product->variation_id : 0,
+			'variation'    => array(),
+			'totals'       => array(
+				'subtotal'     => $product->get_price_excluding_tax( $qty ),
+				'total'        => $product->get_price_excluding_tax( $qty ),
+				'subtotal_tax' => 0,
+				'tax'          => 0,
+				'tax_data' => array(
+					'total' => array(),
+					'subtotal' => array()
+				)
+			)
 		) );
+		$item = new WC_Order_Item_Product();
+		$item->set_order_id( $this->get_order_id() );
+		return $this->update_product( $item, $product, $args );
+	}
+
+	/**
+	 * Update a line item for the order.
+	 *
+	 * Note this does not update order totals.
+	 *
+	 * @since 2.2
+	 * @param object|int $item order item ID or item object.
+	 * @param WC_Product $product
+	 * @param array $args data to update.
+	 * @return int Updated item ID
+	 */
+	public function update_product( $item, $product, $args ) {
+		if ( is_numeric( $item ) ) {
+			$item = $this->get_item( $item );
+		}
+
+		if ( ! is_object( $product ) || ! $item->is_type( 'line_item' ) ) {
+			return false;
+		}
 
 		if ( ! $this->get_order_id() ) {
 			$this->save();
 		}
 
-		$item = new WC_Order_Item();
-		$item->set_order_id( $this->get_order_id() );
-		$item->set_order_item_name( $product->get_title() );
-		$item->set_order_item_type( 'line_item' );
-		$item->add_meta_data( '_qty', wc_stock_amount( $qty ) );
-		$item->add_meta_data( '_tax_class', $product->get_tax_class() );
-		$item->add_meta_data( '_product_id', $product->id );
-		$item->add_meta_data( '_variation_id', isset( $product->variation_id ) ? $product->variation_id : 0 );
-
-		// Backorders
-		if ( $product->backorders_require_notification() && $product->is_on_backorder( $qty ) ) {
-			$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $qty - max( 0, $product->get_total_stock() ) );
+		if ( ! $item->get_order_item_id() ) {
+			$inserting = true;
+		} else {
+			$inserting = false;
 		}
 
-		// Add variation data
-		foreach ( $args['variation'] as $key => $value ) {
-			$item->add_meta_data( str_replace( 'attribute_', '', $key ), $value );
+		if ( isset( $args['name'] ) ) {
+			$item->set_name( $args['name'] );
 		}
 
-		// Set line item totals, either passed in or from the product
-		$item->add_meta_data( '_line_subtotal', wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $qty ) ) );
-		$item->add_meta_data( '_line_total', wc_format_decimal( isset( $args['totals']['total'] ) ? $args['totals']['total'] : $product->get_price_excluding_tax( $qty ) ) );
-		$item->add_meta_data( '_line_subtotal_tax', wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
-		$item->add_meta_data( '_line_tax', wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
+		if ( isset( $args['qty'] ) ) {
+			$item->set_qty( $args['qty'] );
 
-		// Add tax data - Since 2.2
-		$tax_data             = array();
-		$tax_data['total']    = isset( $args['totals']['tax_data'] ) ) ? array_map( 'wc_format_decimal', $args['totals']['tax_data']['total'] : array() );
-		$tax_data['subtotal'] = isset( $args['totals']['tax_data'] ) ) ? array_map( 'wc_format_decimal', $args['totals']['tax_data']['subtotal'] : array() );
-		$item->add_meta_data( '_line_tax_data', $tax_data );
+			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
+				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ) );
+			}
 
-		// Save the new line item
+			$item->set_line_subtotal( $product->get_price_excluding_tax( $args['qty' ) );
+			$item->set_line_total( $product->get_price_excluding_tax( $args['qty' ) );
+		}
+
+		if ( isset( $args['tax_class'] ) ) {
+			$item->set_tax_class( $args['tax_class'] );
+		}
+
+		if ( isset( $args['product_id'] ) ) {
+			$item->set_product_id( $args['product_id'] );
+		}
+
+		if ( isset( $args['variation_id'] ) ) {
+			$item->set_variation_id( $args['variation_id'] );
+		}
+
+		if ( isset( $args['variation'] ) && is_array( $args['variation'] ) ) {
+			foreach ( $args['variation'] as $key => $value ) {
+				$item->add_meta_data( str_replace( 'attribute_', '', $key ), $value );
+			}
+		}
+
+		if ( isset( $args['totals'] ) ) {
+			if ( isset( $args['totals']['subtotal'] ) ) {
+				$item->set_line_subtotal( $args['totals']['subtotal'] );
+			}
+			if ( isset( $args['totals']['total'] ) ) {
+				$item->set_line_total( $args['totals']['total'] );
+			}
+			if ( isset( $args['totals']['subtotal_tax'] ) ) {
+				$item->set_line_subtotal_tax( $args['totals']['subtotal_tax'] );
+			}
+			if ( isset( $args['totals']['tax'] ) ) {
+				$item->set_line_tax( $args['totals']['tax'] );
+			}
+			if ( isset( $args['totals']['tax_data'] ) ) {
+				$item->set_line_tax_data( $args['totals']['tax_data'] );
+			}
+		}
+
 		$item->save();
 
-		do_action( 'woocommerce_order_add_product', $this->get_order_id(), $item->get_order_item_id(), $product, $qty, $args );
+		if ( $inserting ) {
+			do_action( 'woocommerce_order_add_product', $this->get_order_id(), $item->get_order_item_id(), $args, $product );
+		} else {
+			do_action( 'woocommerce_order_edit_product', $this->get_order_id(), $item->get_order_item_id(), $args, $product );
+		}
 
 		return $item->get_order_item_id();
 	}
@@ -989,12 +1074,11 @@ abstract class WC_Abstract_Order {
 			$this->save();
 		}
 
-		$item = new WC_Order_Item();
+		$item = new WC_Order_Item_Coupon();
 		$item->set_order_id( $this->get_order_id() );
-		$item->set_order_item_name( $code );
-		$item->set_order_item_type( 'coupon' );
-		$item->add_meta_data( 'discount_amount', $discount_amount );
-		$item->add_meta_data( 'discount_amount_tax', $discount_amount_tax );
+		$item->set_coupon_code( $code );
+		$item->set_discount_amount( $discount_amount );
+		$item->set_discount_amount_tax( $discount_amount_tax );
 		$item->save();
 
 		do_action( 'woocommerce_order_add_coupon', $this->get_order_id(), $item->get_order_item_id(), $code, $discount_amount, $discount_amount_tax );
@@ -1303,95 +1387,12 @@ abstract class WC_Abstract_Order {
 
 
 
-	/**
-	 * Update a line item for the order.
-	 *
-	 * Note this does not update order totals.
-	 *
-	 * @since 2.2
-	 * @param int $item_id order item ID.
-	 * @param array $args data to update.
-	 * @param WC_Product $product
-	 * @return bool
-	 */
-	public function update_product( $item_id, $product, $args ) {
-		if ( ! $item_id || ! is_object( $product ) ) {
-			return false;
-		}
-
-		// quantity
-		if ( isset( $args['qty'] ) ) {
-			wc_update_order_item_meta( $item_id, '_qty', wc_stock_amount( $args['qty'] ) );
-		}
-
-		// tax class
-		if ( isset( $args['tax_class'] ) ) {
-			wc_update_order_item_meta( $item_id, '_tax_class', $args['tax_class'] );
-		}
-
-		// set item totals, either provided or from product
-		if ( isset( $args['qty'] ) ) {
-			wc_update_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( isset( $args['totals']['subtotal'] ) ? $args['totals']['subtotal'] : $product->get_price_excluding_tax( $args['qty'] ) ) );
-			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( isset( $args['totals']['total'] ) ? $args['totals']['total'] : $product->get_price_excluding_tax( $args['qty'] ) ) );
-		}
-
-		// set item tax totals
-		wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( isset( $args['totals']['subtotal_tax'] ) ? $args['totals']['subtotal_tax'] : 0 ) );
-		wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( isset( $args['totals']['tax'] ) ? $args['totals']['tax'] : 0 ) );
-
-		// variation meta
-		if ( isset( $args['variation'] ) && is_array( $args['variation'] ) ) {
-
-			foreach ( $args['variation'] as $key => $value ) {
-				wc_update_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
-			}
-		}
-
-		// backorders
-		if ( isset( $args['qty'] ) && $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-			wc_update_order_item_meta( $item_id, apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ) );
-		}
-
-		do_action( 'woocommerce_order_edit_product', $this->id, $item_id, $args, $product );
-
-		return true;
-	}
 
 
 
 
-	/**
-	 * Update coupon for order.
-	 *
-	 * Note this does not update order totals.
-	 *
-	 * @since 2.2
-	 * @param int $item_id
-	 * @param array $args
-	 * @return bool
-	 */
-	public function update_coupon( $item_id, $args ) {
-		if ( ! $item_id ) {
-			return false;
-		}
 
-		// code
-		if ( isset( $args['code'] ) ) {
-			wc_update_order_item( $item_id, array( 'order_item_name' => $args['code'] ) );
-		}
 
-		// amount
-		if ( isset( $args['discount_amount'] ) ) {
-			wc_update_order_item_meta( $item_id, 'discount_amount', wc_format_decimal( $args['discount_amount'] ) );
-		}
-		if ( isset( $args['discount_amount_tax'] ) ) {
-			wc_add_order_item_meta( $item_id, 'discount_amount_tax', wc_format_decimal( $args['discount_amount_tax'] ) );
-		}
-
-		do_action( 'woocommerce_order_update_coupon', $this->id, $item_id, $args );
-
-		return true;
-	}
 
 
 
@@ -1747,7 +1748,6 @@ abstract class WC_Abstract_Order {
 	 * @return float
 	 */
 	public function get_item_tax( $item, $round = true ) {
-
 		$price = $item['line_tax'] / max( 1, $item['qty'] );
 		$price = $round ? wc_round_tax_total( $price ) : $price;
 
@@ -1810,14 +1810,7 @@ abstract class WC_Abstract_Order {
 		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $subtotal, $item, $this );
 	}
 
-	/**
-	 * Gets order currency.
-	 *
-	 * @return string
-	 */
-	public function get_order_currency() {
-		return apply_filters( 'woocommerce_get_order_currency', $this->order_currency, $this );
-	}
+
 
 	/**
 	 * Gets order total - formatted for display.
@@ -2080,46 +2073,7 @@ abstract class WC_Abstract_Order {
 	}
 
 
-	/**
-	 * Output items for display in html emails.
-	 *
-	 * @param array $args Items args.
-	 * @param null $deprecated1 Deprecated arg.
-	 * @param null $deprecated2 Deprecated arg.
-	 * @param null $deprecated3 Deprecated arg.
-	 * @param null $deprecated4 Deprecated arg.
-	 * @param null $deprecated5 Deprecated arg.
-	 * @return string
-	 */
-	public function email_order_items_table( $args = array(), $deprecated1 = null, $deprecated2 = null, $deprecated3 = null, $deprecated4 = null, $deprecated5 = null ) {
-		ob_start();
 
-		if ( ! is_null( $deprecated1 ) || ! is_null( $deprecated2 ) || ! is_null( $deprecated3 ) || ! is_null( $deprecated4 ) || ! is_null( $deprecated5 ) ) {
-			_deprecated_argument( __FUNCTION__, '2.5.0' );
-		}
-
-		$defaults = array(
-			'show_sku'   => false,
-			'show_image' => false,
-			'image_size' => array( 32, 32 ),
-			'plain_text' => false
-		);
-
-		$args     = wp_parse_args( $args, $defaults );
-		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
-
-		wc_get_template( $template, array(
-			'order'               => $this,
-			'items'               => $this->get_items(),
-			'show_download_links' => $this->is_download_permitted(),
-			'show_sku'            => $args['show_sku'],
-			'show_purchase_note'  => $this->is_paid(),
-			'show_image'          => $args['show_image'],
-			'image_size'          => $args['image_size'],
-		) );
-
-		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
-	}
 
 
 
@@ -2572,7 +2526,7 @@ abstract class WC_Abstract_Order {
 
 	/*
 	|--------------------------------------------------------------------------
-	| Conditonals
+	| Conditionals
 	|--------------------------------------------------------------------------
 	|
 	| Checks if a condition is true or false.
@@ -2732,6 +2686,11 @@ abstract class WC_Abstract_Order {
 		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ) ), $this );
 	}
 
+
+	public function get_item( $item_id ) {
+		return WC_Order_Factory::get_order_item( $item_id );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Deprecated methods
@@ -2740,6 +2699,40 @@ abstract class WC_Abstract_Order {
 	| Will be removed after 2 major releases, or 1 year.
 	|
 	*/
+
+	/**
+	 * Update coupon for order. Note this does not update order totals.
+	 * @deprecated 2.6.0
+	 * @since 2.2
+	 * @param int $item_id
+	 * @param array $args
+	 * @return bool
+	 */
+	public function update_coupon( $item_id, $args ) {
+		_deprecated_function( 'update_coupon', '2.6' );
+
+		$item = $this->get_item( $item_id );
+
+		if ( ! $item->is_type( 'coupon' ) ) {
+			return false;
+		}
+
+		if ( isset( $args['code'] ) ) {
+			$item->set_coupon_code( $args['code'] );
+		}
+		if ( isset( $args['discount_amount'] ) ) {
+			$item->set_discount_amount( $args['discount_amount'] );
+		}
+		if ( isset( $args['discount_amount_tax'] ) ) {
+			$item->set_discount_amount_tax( $args['discount_amount_tax'] );
+		}
+
+		$item->save();
+
+		do_action( 'woocommerce_order_update_coupon', $this->id, $item_id, $args );
+
+		return true;
+	}
 
 	/**
 	 * Gets an order from the database.

@@ -10,7 +10,7 @@
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-class WC_Order_Item {
+abstract class WC_Order_Item {
 
     /**
 	 * Data array, with defaults.
@@ -35,16 +35,25 @@ class WC_Order_Item {
 	 * Constructor.
 	 * @param int|object $order_item ID to load from the DB (optional) or already queried data.
 	 */
-    public function __construct( $order_item = 0 ) {
-		if ( is_numeric( $order_item ) && ! empty( $order_item ) ) {
-        	$this->read( $order_item );
-		} elseif ( is_object( $order_item ) ) {
-            $this->set_order_id( $order_item->order_id );
-			$this->set_order_item_id( $order_item->order_item_id );
-			$this->set_order_item_name( $order_item->order_item_name );
-            $this->set_order_item_type( $order_item->order_item_type );
+    public function __construct( $item = 0 ) {
+		if ( is_numeric( $item ) && ! empty( $item ) ) {
+        	$this->read( $item );
+		} elseif ( is_object( $item ) && ( empty( $this->get_order_item_type() ) || $this->is_type( $item->order_item_type ) ) ) {
+            $this->set_order_id( $item->order_id );
+			$this->set_order_item_id( $item->order_item_id );
+			$this->set_order_item_name( $item->order_item_name );
+            $this->set_order_item_type( $item->order_item_type );
 			$this->read_order_item_meta();
 		}
+    }
+
+    /**
+     * Type checking
+     * @param  string  $Type
+     * @return boolean
+     */
+    public function is_type( $type ) {
+        return $type === $this->get_order_item_type();
     }
 
     /*
@@ -229,5 +238,6 @@ class WC_Order_Item {
         } else {
             $this->update();
         }
+        //do_action()?
 	}
 }

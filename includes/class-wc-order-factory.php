@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce order factory creating the right order objects.
  *
  * @class 		WC_Order_Factory
- * @version		2.2.0
+ * @version		2.6.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -23,7 +23,7 @@ class WC_Order_Factory {
 	 * @param bool $the_order (default: false)
 	 * @return WC_Order|bool
 	 */
-	public function get_order( $the_order = false ) {
+	public static function get_order( $the_order = false ) {
 		global $post;
 
 		if ( false === $the_order ) {
@@ -55,5 +55,30 @@ class WC_Order_Factory {
 		}
 
 		return new $classname( $the_order );
+	}
+
+	/**
+	 * Get order item.
+	 * @param int
+	 * @return WC_Order_Item|bool
+	 */
+	public static function get_order_item( $item_id = 0 ) {
+		if ( $item_id && ( $data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) ) ) ) {
+			switch ( $data->order_item_type ) {
+				case "line_item" :
+					return new WC_Order_Item_Product( $data );
+				break;
+				case "coupon" :
+					return new WC_Order_Item_Coupon( $data );
+				break;
+				case "fee" :
+					return new WC_Order_Item_Fee( $data );
+				break;
+				case "shipping" :
+					return new WC_Order_Item_Shipping( $data );
+				break;
+			}
+		}
+		return new WC_Order_Item();
 	}
 }
