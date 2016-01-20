@@ -617,9 +617,7 @@ class WC_Product {
 	public function is_in_stock() {
 		$is_in_stock = true;
 		
-		if ( $this->managing_stock() && $this->backorders_allowed() ) {
-			$is_in_stock = true;
-		} elseif ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+		if ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			$is_in_stock = false;
 		} else {
 			$is_in_stock = $this->stock_status === 'instock';
