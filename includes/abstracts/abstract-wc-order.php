@@ -952,27 +952,13 @@ abstract class WC_Abstract_Order {
 			'product_id'   => $product->id,
 			'variation_id' => isset( $product->variation_id ) ? $product->variation_id : 0,
 			'variation'    => array(),
-
-			/*
-			'subtotal'
-			'subtotal_tax'
-			'total'     => $fee->amount,
-			'total_tax' => $fee->tax,
-			'taxes'     => array(
-				'total' => $fee->tax_data
-			)*/
-
-
-
-			'totals'       => array(
-				'subtotal'     => $product->get_price_excluding_tax( $qty ),
-				'total'        => $product->get_price_excluding_tax( $qty ),
-				'subtotal_tax' => 0,
-				'tax'          => 0,
-				'tax_data' => array(
-					'total' => array(),
-					'subtotal' => array()
-				)
+			'subtotal'     => $product->get_price_excluding_tax( $qty ),
+			'subtotal_tax' => 0,
+			'total'        => $product->get_price_excluding_tax( $qty ),
+			'total_tax'    => 0,
+			'taxes'        => array(
+				'subtotal' => array(),
+				'total'    => array()
 			)
 		) );
 		$item = new WC_Order_Item_Product();
@@ -1044,21 +1030,38 @@ abstract class WC_Abstract_Order {
 		}
 
 		if ( isset( $args['totals'] ) ) {
+			// BW compatibility with old args
 			if ( isset( $args['totals']['subtotal'] ) ) {
-				$item->set_line_subtotal( $args['totals']['subtotal'] );
+				$args['subtotal'] = $args['totals']['subtotal'];
 			}
 			if ( isset( $args['totals']['total'] ) ) {
-				$item->set_line_total( $args['totals']['total'] );
+				$args['total'] = $args['totals']['total'];
 			}
 			if ( isset( $args['totals']['subtotal_tax'] ) ) {
-				$item->set_line_subtotal_tax( $args['totals']['subtotal_tax'] );
+				$args['subtotal_tax'] = $args['totals']['subtotal_tax'];
 			}
 			if ( isset( $args['totals']['tax'] ) ) {
-				$item->set_line_tax( $args['totals']['tax'] );
+				$args['total_tax'] = $args['totals']['tax'];
 			}
 			if ( isset( $args['totals']['tax_data'] ) ) {
-				$item->set_line_tax_data( $args['totals']['tax_data'] );
+				$args['taxes'] = $args['totals']['tax_data'];
 			}
+		}
+
+		if ( isset( $args['subtotal'] ) ) {
+			$item->set_subtotal( $args['subtotal'] );
+		}
+		if ( isset( $args['total'] ) ) {
+			$item->set_total( $args['total'] );
+		}
+		if ( isset( $args['subtotal_tax'] ) ) {
+			$item->set_line_subtotal_tax( $args['subtotal_tax'] );
+		}
+		if ( isset( $args['total_tax'] ) ) {
+			$item->set_total_tax( $args['total_tax'] );
+		}
+		if ( isset( $args['taxes'] ) ) {
+			$item->set_taxes( $args['taxes'] );
 		}
 
 		$item->save();

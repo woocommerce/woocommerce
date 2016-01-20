@@ -62,7 +62,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * Line subtotal (before discounts).
      * @param string $value
      */
-    public function set_line_subtotal( $value ) {
+    public function set_subtotal( $value ) {
         $this->meta_data['_line_subtotal'] = wc_format_decimal( $value );
     }
 
@@ -70,7 +70,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * Line total (after discounts).
      * @param string $value
      */
-    public function set_line_total( $value ) {
+    public function set_total( $value ) {
         $this->meta_data['_line_total'] = wc_format_decimal( $value );
     }
 
@@ -78,7 +78,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * Line subtotal tax (before discounts).
      * @param string $value
      */
-    public function set_line_subtotal_tax( $value ) {
+    public function set_subtotal_tax( $value ) {
         $this->meta_data['_line_subtotal_tax'] = wc_format_decimal( $value );
     }
 
@@ -86,7 +86,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * Line total tax (after discounts).
      * @param string $value
      */
-    public function set_line_tax( $value ) {
+    public function set_total_tax( $value ) {
         $this->meta_data['_line_tax'] = wc_format_decimal( $value );
     }
 
@@ -94,7 +94,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * Set line taxes.
      * @param array $raw_tax_data
      */
-    public function set_line_tax_data( $raw_tax_data ) {
+    public function set_taxes( $raw_tax_data ) {
         $tax_data = array(
             'total'    => array(),
             'subtotal' => array()
