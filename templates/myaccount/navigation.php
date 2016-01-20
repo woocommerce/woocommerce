@@ -24,7 +24,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 <nav class="my-account-navigation">
 	<ul>
 		<?php foreach ( wc_get_account_menu_items() as $endpoint => $label ) : ?>
-			<li class="my-account-menu-item-<?php echo sanitize_html_class( $endpoint ); ?>"><a href="<?php echo esc_url( wc_get_endpoint_url( $endpoint ) ); ?>"><?php echo esc_html( $label ); ?></a></li>
+			<li class="<?php echo wc_get_account_menu_item_classes( $endpoint ); ?>">
+				<a href="<?php echo esc_url( wc_get_account_endpoint_url( $endpoint ) ); ?>"><?php echo esc_html( $label ); ?></a>
+			</li>
 		<?php endforeach; ?>
 	</ul>
 </nav>
