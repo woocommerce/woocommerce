@@ -21,12 +21,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$downloads     = WC()->customer->get_downloadable_products();
+$has_downloads = (bool) $downloads;
+
 wc_print_notices(); ?>
 
 <?php wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="my-account-content">
-	<?php if ( $downloads = WC()->customer->get_downloadable_products() ) : ?>
+
+	<?php do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
+
+	<?php if ( $has_downloads ) : ?>
 
 		<?php do_action( 'woocommerce_before_available_downloads' ); ?>
 
@@ -92,4 +98,6 @@ wc_print_notices(); ?>
 		<?php do_action( 'woocommerce_after_available_downloads' ); ?>
 
 	<?php endif; ?>
+
+	<?php do_action( 'woocommerce_after_account_downloads', $has_downloads ); ?>
 </div>
