@@ -952,6 +952,18 @@ abstract class WC_Abstract_Order {
 			'product_id'   => $product->id,
 			'variation_id' => isset( $product->variation_id ) ? $product->variation_id : 0,
 			'variation'    => array(),
+
+			/*
+			'subtotal'
+			'subtotal_tax'
+			'total'     => $fee->amount,
+			'total_tax' => $fee->tax,
+			'taxes'     => array(
+				'total' => $fee->tax_data
+			)*/
+
+
+
 			'totals'       => array(
 				'subtotal'     => $product->get_price_excluding_tax( $qty ),
 				'total'        => $product->get_price_excluding_tax( $qty ),
@@ -1214,24 +1226,81 @@ abstract class WC_Abstract_Order {
 	 * Order must be saved prior to adding items.
 
 	 * @param object $fee
-	 * @return int|bool Item ID or false.
+	 * @return int updated order item ID
 	 */
 	public function add_fee( $fee ) {
+		$args = wp_parse_args( $args, array(
+			'name'      => $fee->name,
+			'tax_class' => $fee->taxable ? $fee->tax_class : 0,
+			'total'     => $fee->amount,
+			'total_tax' => $fee->tax,
+			'taxes'     => array(
+				'total' => $fee->tax_data
+			)
+		) );
+		$item = new WC_Order_Item_Fee();
+		$item->set_order_id( $this->get_order_id() );
+		$item_id = $this->update_fee( $item, $args );
+
+		do_action( 'woocommerce_order_add_fee', $this->get_order_id(), $item->get_order_item_id(), $fee );
+
+		return $item_id;
+	}
+
+	/**
+	 * Update fee for order.
+	 *
+	 * Note this does not update order totals.
+	 *
+	 * @since 2.2
+	 * @param object|int $item
+	 * @param array $args
+	 * @return int updated order item ID
+	 */
+	public function update_fee( $item, $args ) {
+		if ( is_numeric( $item ) ) {
+			$item = $this->get_item( $item );
+		}
+
+		if ( ! is_object( $product ) || ! $item->is_type( 'fee' ) ) {
+			return false;
+		}
+
 		if ( ! $this->get_order_id() ) {
 			$this->save();
 		}
 
-		$item = new WC_Order_Item();
-		$item->set_order_id( $this->get_order_id() );
-		$item->set_order_item_name( $fee->name );
-		$item->set_order_item_type( 'fee' );
-		$item->add_meta_data( '_tax_class', $fee->taxable ? $fee->tax_class : '0' );
-		$item->add_meta_data( '_line_total', wc_format_decimal( $fee->amount ) );
-		$item->add_meta_data( '_line_tax', wc_format_decimal( $fee->tax ) );
-		$item->add_meta_data( '_line_tax_data', array_map( 'wc_format_decimal', $fee->tax_data ) );
+		if ( ! $item->get_order_item_id() ) {
+			$inserting = true;
+		} else {
+			$inserting = false;
+		}
+
+		if ( isset( $args['name'] ) ) {
+			$item->set_name( $args['name'] );
+		}
+
+		if ( isset( $args['tax_class'] ) ) {
+			$item->set_tax_class( $args['tax_class'] );
+		}
+
+		if ( isset( $args['total'] ) ) {
+			$item->set_total( $args['total'] );
+		}
+
+		if ( isset( $args['total_tax'] ) ) {
+			$item->set_total_tax( $args['total_tax'] );
+		}
+
+		if ( isset( $args['taxes'] ) ) {
+			$item->set_taxes( $args['taxes'] );
+		}
+
 		$item->save();
 
-		do_action( 'woocommerce_order_add_fee', $this->get_order_id(), $item->get_order_item_id(), $fee );
+		if ( ! $inserting ) {
+			do_action( 'woocommerce_order_update_fee', $this->get_order_id(), $item->get_order_item_id(), $args );
+		}
 
 		return $item->get_order_item_id();
 	}
@@ -1553,46 +1622,7 @@ abstract class WC_Abstract_Order {
 
 
 
-	/**
-	 * Update fee for order.
-	 *
-	 * Note this does not update order totals.
-	 *
-	 * @since 2.2
-	 * @param int $item_id
-	 * @param array $args
-	 * @return bool
-	 */
-	public function update_fee( $item_id, $args ) {
 
-		if ( ! $item_id ) {
-			return false;
-		}
-
-		// name
-		if ( isset( $args['name'] ) ) {
-			wc_update_order_item( $item_id, array( 'order_item_name' => $args['name'] ) );
-		}
-
-		// tax class
-		if ( isset( $args['tax_class'] ) ) {
-			wc_update_order_item_meta( $item_id, '_tax_class', $args['tax_class'] );
-		}
-
-		// total
-		if ( isset( $args['line_total'] ) ) {
-			wc_update_order_item_meta( $item_id, '_line_total', wc_format_decimal( $args['line_total'] ) );
-		}
-
-		// total tax
-		if ( isset( $args['line_tax'] ) ) {
-			wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $args['line_tax'] ) );
-		}
-
-		do_action( 'woocommerce_order_update_fee', $this->id, $item_id, $args );
-
-		return true;
-	}
 
 
 
