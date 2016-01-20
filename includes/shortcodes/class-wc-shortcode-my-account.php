@@ -58,7 +58,7 @@ class WC_Shortcode_My_Account {
 					continue;
 				}
 
-				do_action( 'woocommerce_my_account_' . $key . '_endpoint', $value );
+				do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
 			}
 		}
 	}
