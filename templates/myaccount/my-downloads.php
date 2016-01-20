@@ -12,10 +12,11 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     http://docs.woothemes.com/document/template-structure/
- * @author  WooThemes
- * @package WooCommerce/Templates
- * @version 2.0.0
+ * @see         http://docs.woothemes.com/document/template-structure/
+ * @author      WooThemes
+ * @package     WooCommerce/Templates
+ * @version     2.0.0
+ * @depreacated 2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
