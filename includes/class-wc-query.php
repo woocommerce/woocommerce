@@ -94,8 +94,8 @@ class WC_Query {
 				$title = __( 'Order Received', 'woocommerce' );
 			break;
 			case 'orders' :
-				if ( isset( $_GET['orders-page'] ) ) {
-					$title = sprintf( __( 'Orders (page %d)', 'woocommerce' ), intval( $_GET['orders-page'] ) );
+				if ( ! empty( $wp->query_vars['orders'] ) ) {
+					$title = sprintf( __( 'Orders (page %d)', 'woocommerce' ), intval( $wp->query_vars['orders'] ) );
 				} else {
 					$title = __( 'Orders', 'woocommerce' );
 				}
