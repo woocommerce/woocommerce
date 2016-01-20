@@ -77,12 +77,57 @@ function wc_edit_address_i18n( $id, $flip = false ) {
  */
 function wc_get_account_menu_items() {
 	return apply_filters( 'woocommerce_account_menu_items', array(
+		'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
 		'edit-address'    => __( 'Addresses', 'woocommerce' ),
 		'edit-account'    => __( 'Account Details', 'woocommerce' ),
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	) );
+}
+
+/**
+ * Get account menu item classes.
+ *
+ * @since 2.6.0
+ * @param string $endpoint
+ * @return string
+ */
+function wc_get_account_menu_item_classes( $endpoint ) {
+	global $wp;
+
+	$classes = array(
+		'my-account-menu-item-' . $endpoint,
+	);
+
+	// Set current item class.
+	$current = isset( $wp->query_vars[ $endpoint ] );
+	if ( 'dashboard' === $endpoint && ( isset( $wp->query_vars['page'] ) || empty( $wp->query_vars ) ) ) {
+		$current = true; // Dashboard is not an endpoint, so needs a custom check.
+	}
+
+	if ( $current ) {
+		$classes[] = 'current-item';
+	}
+
+	$classes = apply_filters( 'woocommerce_account_menu_item_classes', $classes, $endpoint );
+
+	return implode( ' ', array_map( 'sanitize_html_class', $classes ) );
+}
+
+/**
+ * Get account endpoint URL.
+ *
+ * @since 2.6.0
+ * @param string $endpoint
+ * @return string
+ */
+function wc_get_account_endpoint_url( $endpoint ) {
+	if ( 'dashboard' === $endpoint ) {
+		return wc_get_page_permalink( 'myaccount' );
+	}
+
+	return wc_get_endpoint_url( $endpoint );
 }
 
 /**
