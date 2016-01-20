@@ -270,7 +270,8 @@ jQuery( function( $ ) {
 	$( 'button.add_attribute' ).on( 'click', function() {
 		var size         = $( '.product_attributes .woocommerce_attribute' ).size();
 		var attribute    = $( 'select.attribute_taxonomy' ).val();
-		var $wrapper     = $( this ).closest( '#product_attributes' ).find( '.product_attributes' );
+		var $wrapper     = $( this ).closest( '#product_attributes' );
+		var $attributes  = $wrapper.find( '.product_attributes' );
 		var product_type = $( 'select#product-type' ).val();
 		var data         = {
 			action:   'woocommerce_add_attribute',
@@ -288,10 +289,10 @@ jQuery( function( $ ) {
 		});
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-			$wrapper.append( response );
+			$attributes.append( response );
 
 			if ( product_type !== 'variable' ) {
-				$wrapper.find( '.enable_variation' ).hide();
+				$attributes.find( '.enable_variation' ).hide();
 			}
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
