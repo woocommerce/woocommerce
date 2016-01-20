@@ -2029,9 +2029,13 @@ if ( ! function_exists( 'woocommerce_account_orders' ) ) {
 
 	/**
 	 * My Account > Orders template.
+	 *
+	 * @param int $current_page Current page number.
 	 */
-	function woocommerce_account_orders() {
-		wc_get_template( 'myaccount/orders.php' );
+	function woocommerce_account_orders( $current_page ) {
+		$current_page = empty( $current_page ) ? 1 : $current_page;
+
+		wc_get_template( 'myaccount/orders.php', array( 'current_page' => absint( $current_page ) ) );
 	}
 }
 

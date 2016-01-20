@@ -107,9 +107,11 @@ function wc_get_account_orders_columns() {
 /**
  * Get My Account > Orders query args.
  *
+ * @since 2.6.0
+ * @param int $current_page
  * @return array
  */
-function wc_get_account_orders_query_args() {
+function wc_get_account_orders_query_args( $current_page = 1 ) {
 	$args = array(
 		'numberposts' => 2,
 		'meta_key'    => '_customer_user',
@@ -125,8 +127,8 @@ function wc_get_account_orders_query_args() {
 	$args['posts_per_page'] = $args['numberposts'];
 	unset( $args['numberposts'] );
 
-	if ( isset( $_GET['orders-page'] ) && 1 < $_GET['orders-page'] ) {
-		$args['paged'] = absint( $_GET['orders-page'] );
+	if ( 1 < $current_page ) {
+		$args['paged'] = absint( $current_page );
 	}
 
 	return apply_filters( 'woocommerce_account_orders_query', $args );
