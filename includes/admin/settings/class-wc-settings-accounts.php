@@ -103,6 +103,15 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
+				'title'    => __( 'Payment Methods', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Payment Methods page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_payment_methods_endpoint',
+				'type'     => 'text',
+				'default'  => 'payment-methods',
+				'desc_tip' => true,
+			),
+
+			array(
 				'title'    => __( 'Lost Password', 'woocommerce' ),
 				'desc'     => __( 'Endpoint for the My Account &rarr; Lost Password page', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_lost_password_endpoint',

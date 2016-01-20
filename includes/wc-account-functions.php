@@ -81,6 +81,7 @@ function wc_get_account_menu_items() {
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
 		'edit-address'    => __( 'Addresses', 'woocommerce' ),
+		'payment-methods' => __( 'Payment Methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account Details', 'woocommerce' ),
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	) );
@@ -191,5 +192,19 @@ function wc_get_account_downloads_columns() {
 		'download-remaining' => __( 'Remaining', 'woocommerce' ),
 		'download-expires'   => __( 'Expires', 'woocommerce' ),
 		'download-actions'   => '&nbsp;',
+	) );
+}
+
+/**
+ * Get My Account > Payment methods columns.
+ *
+ * @since 2.6.0
+ * @return array
+ */
+function wc_get_account_payment_methods_columns() {
+	return apply_filters( 'woocommerce_account_orders_columns', array(
+		'method'  => __( 'Method', 'woocommerce' ),
+		'expires' => __( 'Expires', 'woocommerce' ),
+		'actions' => '&nbsp;',
 	) );
 }
