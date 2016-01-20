@@ -50,14 +50,14 @@ wc_print_notices(); ?>
 		/**
 		 * Deprecated woocommerce_before_my_account action.
 		 *
-		 * @depracated 2.6.0
+		 * @deprecated 2.6.0
 		 */
 		do_action( 'woocommerce_before_my_account' );
 
 		/**
 		 * Deprecated woocommerce_after_my_account action.
 		 *
-		 * @depracated 2.6.0
+		 * @deprecated 2.6.0
 		 */
 		do_action( 'woocommerce_after_my_account' );
 	?>
