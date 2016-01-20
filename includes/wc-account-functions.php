@@ -158,7 +158,7 @@ function wc_get_account_orders_columns() {
  */
 function wc_get_account_orders_query_args( $current_page = 1 ) {
 	$args = array(
-		'numberposts' => 2,
+		'numberposts' => 15,
 		'meta_key'    => '_customer_user',
 		'meta_value'  => get_current_user_id(),
 		'post_type'   => wc_get_order_types( 'view-orders' ),
