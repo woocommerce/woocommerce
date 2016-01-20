@@ -2061,16 +2061,6 @@ if ( ! function_exists( 'woocommerce_account_downloads' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
-
-	/**
-	 * My Account > Edit account template.
-	 */
-	function woocommerce_account_edit_account() {
-		WC_Shortcode_My_Account::edit_account();
-	}
-}
-
 if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
 
 	/**
@@ -2085,6 +2075,15 @@ if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_account_payment_methods' ) ) {
+
+	/**
+	 * My Account > Downloads template.
+	 */
+	function woocommerce_account_payment_methods() {
+		wc_get_template( 'myaccount/payment-methods.php' );
+	}
+}
 
 if ( ! function_exists( 'woocommerce_account_add_payment_method' ) ) {
 
@@ -2093,5 +2092,15 @@ if ( ! function_exists( 'woocommerce_account_add_payment_method' ) ) {
 	 */
 	function woocommerce_account_add_payment_method() {
 		WC_Shortcode_My_Account::add_payment_method();
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
+
+	/**
+	 * My Account > Edit account template.
+	 */
+	function woocommerce_account_edit_account() {
+		WC_Shortcode_My_Account::edit_account();
 	}
 }

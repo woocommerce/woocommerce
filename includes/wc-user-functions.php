@@ -581,3 +581,14 @@ function wc_disable_author_archives_for_customers() {
 }
 
 add_action( 'template_redirect', 'wc_disable_author_archives_for_customers' );
+
+/**
+ * Get customer saved payment methods list.
+ *
+ * @since 2.6.0
+ * @param int $customer_id
+ * @return array
+ */
+function wc_get_customer_saved_methods_list( $customer_id ) {
+	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id );
+}

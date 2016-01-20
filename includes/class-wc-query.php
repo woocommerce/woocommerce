@@ -92,6 +92,7 @@ class WC_Query {
 			'downloads'          => get_option( 'woocommerce_myaccount_downloads_endpoint', 'downloads' ),
 			'edit-account'       => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
 			'edit-address'       => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
+			'payment-methods'    => get_option( 'woocommerce_myaccount_payment_methods_endpoint', 'payment-methods' ),
 			'lost-password'      => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
 			'customer-logout'    => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
 			'add-payment-method' => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
@@ -132,6 +133,9 @@ class WC_Query {
 			break;
 			case 'edit-address' :
 				$title = __( 'Edit Address', 'woocommerce' );
+			break;
+			case 'payment-methods' :
+				$title = __( 'Payment Methods', 'woocommerce' );
 			break;
 			case 'add-payment-method' :
 				$title = __( 'Add Payment Method', 'woocommerce' );
