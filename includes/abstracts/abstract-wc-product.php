@@ -1343,7 +1343,7 @@ class WC_Product {
 
 			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
 
-			if ( $attribute['is_taxonomy'] ) {
+			if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
 
 				return implode( ', ', wc_get_product_terms( $this->id, $attribute['name'], array( 'fields' => 'names' ) ) );
 
