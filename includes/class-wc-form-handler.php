@@ -648,7 +648,7 @@ class WC_Form_Handler {
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) !== false ) {
-			wc_add_to_cart_message( $product_id );
+			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}
 		return false;
@@ -678,7 +678,7 @@ class WC_Form_Handler {
 
 				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
 					$was_added_to_cart = true;
-					$added_to_cart[]   = $item;
+					$added_to_cart[ $item ] = $quantity;
 				}
 			}
 
@@ -752,7 +752,7 @@ class WC_Form_Handler {
 			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
 			if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
-				wc_add_to_cart_message( $product_id );
+				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 				return true;
 			}
 		}

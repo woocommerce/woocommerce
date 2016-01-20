@@ -414,7 +414,7 @@ class WC_AJAX {
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
 			if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) {
-				wc_add_to_cart_message( $product_id );
+				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}
 
 			// Return fragments
