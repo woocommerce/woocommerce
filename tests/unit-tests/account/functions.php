@@ -15,9 +15,11 @@ class Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_account_menu_items() {
 		$this->assertEquals( array(
+			'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 			'orders'          => __( 'Orders', 'woocommerce' ),
 			'downloads'       => __( 'Downloads', 'woocommerce' ),
 			'edit-address'    => __( 'Addresses', 'woocommerce' ),
+			'payment-methods' => __( 'Payment Methods', 'woocommerce' ),
 			'edit-account'    => __( 'Account Details', 'woocommerce' ),
 			'customer-logout' => __( 'Logout', 'woocommerce' ),
 		), wc_get_account_menu_items() );
