@@ -403,8 +403,6 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		$is_in_stock = true;
-		
 		// If we're managing stock at variation level, check stock levels
 		if ( true === $this->managing_stock() ) {
 			if ( $this->backorders_allowed() ) {
