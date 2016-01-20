@@ -22,11 +22,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $customer_orders = new WP_Query( wc_get_account_orders_query_args( $current_page ) );
+$has_orders      = $customer_orders->have_posts();
+
+wc_print_notices();
 
 wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="my-account-content">
-	<?php if ( $customer_orders->have_posts() ) : ?>
+
+	<?php do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
+
+	<?php if ( $has_orders ) : ?>
+
 		<table class="shop_table shop_table_responsive my_account_orders account-orders-table">
 			<thead>
 				<tr>
@@ -100,6 +107,8 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 			</tbody>
 		</table>
 
+		<?php do_action( 'woocommerce_before_account_orders_pagination' ); ?>
+
 		<?php if ( 1 < $customer_orders->max_num_pages ) : ?>
 			<div class="wc-account-orders-pagination">
 				<?php if ( 1 !== $current_page ) : ?>
@@ -120,4 +129,7 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 			<?php _e( 'No order has been made yet.', 'woocommerce' ); ?>
 		</div>
 	<?php endif; ?>
+
+	<?php do_action( 'woocommerce_after_account_orders', $has_orders ); ?>
+
 </div>
