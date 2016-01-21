@@ -16,13 +16,14 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @var array
 	 */
     protected $data = array(
-        'order_id'        => 0,
-		'order_item_id'   => 0,
-        'name'            => '',
-        'tax_class'       => '',
-        'total'           => '',
-        'total_tax'       => '',
-        'taxes'           => array(
+        'order_id'      => 0,
+		'order_item_id' => 0,
+        'name'          => '',
+        'tax_class'     => '',
+        'tax_status'    => 'taxable',
+        'total'         => '',
+        'total_tax'     => '',
+        'taxes'         => array(
             'total' => array()
         )
     );
@@ -34,6 +35,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
         parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_tax_class( get_metadata( 'order_item', $this->get_order_item_id(), '_tax_class', true ) );
+            $this->set_tax_status( get_metadata( 'order_item', $this->get_order_item_id(), '_tax_status', true ) );
             $this->set_total( get_metadata( 'order_item', $this->get_order_item_id(), '_line_total', true ) );
             $this->set_total_tax( get_metadata( 'order_item', $this->get_order_item_id(), '_line_tax', true ) );
             $this->set_taxes( get_metadata( 'order_item', $this->get_order_item_id(), '_line_tax_data', true ) );
@@ -47,6 +49,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
         parent::save();
         if ( $this->get_order_item_id() ) {
             wc_update_order_item_meta( $this->get_order_item_id(), '_tax_class', $this->get_tax_class() );
+            wc_update_order_item_meta( $this->get_order_item_id(), '_tax_status', $this->get_tax_status() );
             wc_update_order_item_meta( $this->get_order_item_id(), '_line_total', $this->get_total() );
             wc_update_order_item_meta( $this->get_order_item_id(), '_line_tax', $this->get_total_tax() );
             wc_update_order_item_meta( $this->get_order_item_id(), '_line_tax_data', $this->get_taxes() );
@@ -65,6 +68,18 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      */
     public function set_tax_class( $value ) {
         $this->data['tax_class'] = $value;
+    }
+
+    /**
+     * Set tax_status.
+     * @param string $value
+     */
+    public function set_tax_status( $value ) {
+        if ( in_array( $value, array( 'taxable', 'none' ) ) ) {
+            $this->data['tax_status'] = $value;
+        } else {
+            $this->data['tax_status'] = 'taxable';
+        }
     }
 
     /**
@@ -90,7 +105,8 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * @param array $raw_tax_data
      */
     public function set_taxes( $raw_tax_data ) {
-        $tax_data = array(
+        $raw_tax_data = maybe_unserialize( $raw_tax_data );
+        $tax_data     = array(
             'total'    => array()
         );
         if ( ! empty( $raw_tax_data['total'] ) ) {
@@ -119,6 +135,14 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      */
     public function get_tax_class() {
         return $this->data['tax_class'];
+    }
+
+    /**
+     * Get tax status.
+     * @return string
+     */
+    public function get_tax_status() {
+        return $this->data['tax_status'];
     }
 
     /**

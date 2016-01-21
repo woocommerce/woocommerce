@@ -90,7 +90,8 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @param array $raw_tax_data
      */
     public function set_taxes( $raw_tax_data ) {
-        $tax_data = array(
+        $raw_tax_data = maybe_unserialize( $raw_tax_data );
+        $tax_data     = array(
             'total'    => array()
         );
         if ( ! empty( $raw_tax_data['total'] ) ) {

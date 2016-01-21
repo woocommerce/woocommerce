@@ -83,6 +83,15 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
     }
 
+    /**
+     * Get tax status.
+     * @return string
+     */
+    public function get_tax_status() {
+        $product = $this->get_product();
+        return $product ? $product->get_tax_class() : 'taxable';
+    }
+
     /*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -158,7 +167,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param array $raw_tax_data
      */
     public function set_taxes( $raw_tax_data ) {
-        $tax_data = array(
+        $raw_tax_data = maybe_unserialize( $raw_tax_data );
+        $tax_data     = array(
             'total'    => array(),
             'subtotal' => array()
         );
