@@ -393,6 +393,8 @@ class WC_AJAX {
 			) )
 		);
 
+		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
+
 		wp_send_json( $data );
 
 		die();
