@@ -63,19 +63,35 @@ class WC_Order_Factory {
 	 * @return WC_Order_Item|bool
 	 */
 	public static function get_order_item( $item_id = 0 ) {
-		if ( $item_id && ( $data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) ) ) ) {
-			switch ( $data->order_item_type ) {
+		global $wpdb;
+
+		if ( is_numeric( $item_id ) ) {
+			$item_data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item_id ) );
+			$item_type = $item_data->order_item_type;
+		} elseif ( $item_id instanceof WC_Order_Item ) {
+			$item_data = $item_id->get_data();
+			$item_type = $item_data->get_type();
+		} elseif( is_object( $item_id ) && ! empty( $item_id->order_item_type ) ) {
+			$item_data = $item_id;
+			$item_type = $item_id->order_item_type;
+		} else {
+			$item_data = false;
+			$item_type = false;
+		}
+
+		if ( $item_data && $item_type ) {
+			switch ( $item_type ) {
 				case "line_item" :
-					return new WC_Order_Item_Product( $data );
+					return new WC_Order_Item_Product( $item_data );
 				break;
 				case "coupon" :
-					return new WC_Order_Item_Coupon( $data );
+					return new WC_Order_Item_Coupon( $item_data );
 				break;
 				case "fee" :
-					return new WC_Order_Item_Fee( $data );
+					return new WC_Order_Item_Fee( $item_data );
 				break;
 				case "shipping" :
-					return new WC_Order_Item_Shipping( $data );
+					return new WC_Order_Item_Shipping( $item_data );
 				break;
 			}
 		}

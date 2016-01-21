@@ -3,6 +3,7 @@
  * Order Item
  *
  * A class which represents an item within an order and handles CRUD.
+ * Uses ArrayAccess to be BW compatible with WC_Orders::get_items().
  *
  * @class 		WC_Order_Item
  * @version		2.6.0
@@ -10,7 +11,7 @@
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-abstract class WC_Order_Item {
+class WC_Order_Item implements ArrayAccess {
 
     /**
 	 * Data array, with defaults.
@@ -18,23 +19,60 @@ abstract class WC_Order_Item {
 	 * @var array
 	 */
     protected $data = array(
-		'order_id'        => 0,
-		'order_item_id'   => 0,
-		'order_item_name' => '',
-		'order_item_type' => '',
-        'meta_data'       => array(),
+		'order_id'      => 0,
+		'order_item_id' => 0,
+		'name'          => '',
+		'type'          => '',
+        'meta_data'     => array(),
 	);
+
+    /**
+     * offsetSet for ArrayAccess
+     * @param string $offset
+     * @param mixed $value
+     */
+    public function offsetSet( $offset, $value ) {
+        $this->data[ $offset ] = $value;
+    }
+
+    /**
+     * offsetExists for ArrayAccess
+     * @param string $offset
+     * @return bool
+     */
+    public function offsetExists( $offset ) {
+        return isset( $this->data[ $offset ] );
+    }
+
+    /**
+     * offsetUnset for ArrayAccess
+     * @param string $offset
+     */
+    public function offsetUnset( $offset ) {
+        unset( $this->data[ $offset ] );
+    }
+
+    /**
+     * offsetGet for ArrayAccess
+     * @param string $offset
+     * @return mixed
+     */
+    public function offsetGet( $offset ) {
+        return isset( $this->data[ $offset ] ) ? $this->data[ $offset ] : null;
+    }
 
     /**
 	 * Constructor.
 	 * @param int|object $order_item ID to load from the DB (optional) or already queried data.
 	 */
     public function __construct( $item = 0 ) {
-		if ( is_numeric( $item ) && ! empty( $item ) ) {
-        	$this->read( $item );
-		} elseif ( is_object( $item ) && $this->is_type( $item->get_order_item_type() ) ) {
-            $this->set_all( $item );
-		}
+		if ( $item instanceof WC_Order_Item ) {
+            if ( $this->is_type( $item->get_type() ) ) {
+                $this->set_all( $item );
+            }
+		} else {
+            $this->read( $item );
+        }
     }
 
     /**
@@ -61,7 +99,7 @@ abstract class WC_Order_Item {
      * @return boolean
      */
     public function is_type( $type ) {
-        return $type === $this->get_order_item_type();
+        return $type === $this->get_type();
     }
 
     /**
@@ -126,16 +164,16 @@ abstract class WC_Order_Item {
      * Get order item name.
      * @return string
      */
-    public function get_order_item_name() {
-        return $this->data['order_item_name'];
+    public function get_name() {
+        return $this->data['name'];
     }
 
     /**
      * Get order item type.
      * @return string
      */
-    public function get_order_item_type() {
-        return $this->data['order_item_type'];
+    public function get_type() {
+        return $this->data['type'];
     }
 
     /*
@@ -164,16 +202,16 @@ abstract class WC_Order_Item {
      * Set order item name.
      * @param string $value
      */
-    public function set_order_item_name( $value ) {
-        $this->data['order_item_name'] = wc_clean( $value );
+    public function set_name( $value ) {
+        $this->data['name'] = wc_clean( $value );
     }
 
     /**
      * Set order item type.
      * @param string $value
      */
-    public function set_order_item_type( $value ) {
-        $this->data['order_item_type'] = wc_clean( $value );
+    public function set_type( $value ) {
+        $this->data['type'] = wc_clean( $value );
 
     }
 
@@ -200,11 +238,14 @@ abstract class WC_Order_Item {
      * Insert data into the database.
 	 * @since 2.6.0
      * @access private
-     * @param array $data data to save
      */
-    private function create( $data ) {
+    private function create() {
         global $wpdb;
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', $data );
+		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
+            'order_item_name' => $this->get_name(),
+            'order_item_type' => $this->get_type(),
+            'order_id'        => $this->get_order_id()
+        ) );
 		$this->set_item_id( $wpdb->insert_id );
 	}
 
@@ -212,26 +253,38 @@ abstract class WC_Order_Item {
      * Update data in the database.
 	 * @since 2.6.0
 	 * @access private
-     * @param array $data data to save
      */
-    private function update( $zone_data ) {
+    private function update() {
         global $wpdb;
-		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $zone_data, array( 'order_item_id' => $this->get_order_item_id() ) );
+		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
+            'order_item_name' => $this->get_name(),
+            'order_item_type' => $this->get_type(),
+            'order_id'        => $this->get_order_id()
+        ), array( 'order_item_id' => $this->get_order_item_id() ) );
     }
 
 	/**
      * Read from the database.
 	 * @since 2.6.0
      * @access protected
-     * @param int $id ID of object to read.
+     * @param int|object $item ID of object to read, or already queried object.
      */
-    protected function read( $id ) {
+    protected function read( $item ) {
 		global $wpdb;
-		if ( $data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $id ) ) ) {
+
+        if ( is_numeric( $item ) && ! empty( $item ) ) {
+            $data = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item ) );
+        } elseif ( ! empty( $item->order_item_id ) ) {
+            $data = $item;
+        } else {
+            $data = false;
+        }
+
+		if ( $data ) {
 			$this->set_order_id( $data->order_id );
 			$this->set_order_item_id( $data->order_item_id );
-			$this->set_order_item_name( $data->order_item_name );
-            $this->set_order_item_type( $data->order_item_type );
+			$this->set_name( $data->order_item_name );
+            $this->set_type( $data->order_item_type );
 		}
 	}
 

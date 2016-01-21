@@ -29,8 +29,8 @@ class WC_Order_Item_Tax extends WC_Order_Item {
     /**
      * Read/populate data properties specific to this order item.
      */
-    protected function read() {
-        parent::read();
+    protected function read( $id ) {
+        parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_rate_id( get_metadata( 'order_item', $this->get_order_item_id(), 'rate_id', true ) );
             $this->set_label( get_metadata( 'order_item', $this->get_order_item_id(), 'label', true ) );
@@ -64,7 +64,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * Set order item name.
      * @param string $value
      */
-    public function set_order_item_name( $value ) {
+    public function set_name( $value ) {
         $this->data['rate_code'] = wc_clean( $value );
     }
 
@@ -73,7 +73,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @param string $value
      */
     public function set_rate_code( $value ) {
-        $this->set_order_item_name( $value );
+        $this->set_name( $value );
     }
 
     /**
@@ -118,16 +118,8 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * Get order item type.
      * @return string
      */
-    public function get_order_item_type() {
+    public function get_type() {
         return 'tax';
-    }
-
-    /**
-     * Get order item name.
-     * @return string
-     */
-    public function get_order_item_name() {
-        return $this->data['rate_code'];
     }
 
     /**
@@ -135,7 +127,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @return string
      */
     public function get_rate_code() {
-        return $this->get_order_item_name();
+        return $this->get_name();
     }
 
     /**

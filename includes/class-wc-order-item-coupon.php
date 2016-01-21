@@ -26,8 +26,8 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
     /**
      * Read/populate data properties specific to this order item.
      */
-    protected function read() {
-        parent::read();
+    protected function read( $id ) {
+        parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_discount( get_metadata( 'order_item', $this->get_order_item_id(), 'discount_amount', true ) );
             $this->set_discount_tax( get_metadata( 'order_item', $this->get_order_item_id(), 'discount_amount_tax', true ) );
@@ -55,7 +55,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * Set order item name.
      * @param string $value
      */
-    public function set_order_item_name( $value ) {
+    public function set_name( $value ) {
         $this->data['code'] = wc_clean( $value );
     }
 
@@ -85,7 +85,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * Get order item type.
      * @return string
      */
-    public function get_order_item_type() {
+    public function get_type() {
         return 'coupon';
     }
 
@@ -93,7 +93,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * Get order item name.
      * @return string
      */
-    public function get_order_item_name() {
+    public function get_name() {
         return $this->data['code'];
     }
 

@@ -37,8 +37,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
     /**
      * Read/populate data properties specific to this order item.
      */
-    protected function read() {
-        parent::read();
+    protected function read( $id ) {
+        parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_product_id( get_metadata( 'order_item', $this->get_order_item_id(), '_product_id', true ) );
             $this->set_variation_id( get_metadata( 'order_item', $this->get_order_item_id(), '_variation_id', true ) );
@@ -71,19 +71,23 @@ class WC_Order_Item_Product extends WC_Order_Item {
         }
     }
 
+    /**
+     * Get the associated product.
+     * @return WC_Product|bool
+     */
+    public function get_product() {
+        if ( $this->get_variation_id() ) {
+			return wc_get_product( $this->get_variation_id() );
+		} else {
+			return wc_get_product( $this->get_product_id() );
+		}
+    }
+
     /*
 	|--------------------------------------------------------------------------
 	| Setters
 	|--------------------------------------------------------------------------
 	*/
-
-    /**
-     * Set item name.
-     * @param string $value
-     */
-    public function set_name( $value ) {
-        $this->set_order_item_name( $value );
-    }
 
     /**
      * Set qty.
@@ -185,24 +189,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * Get order item type.
      * @return string
      */
-    public function get_order_item_type() {
+    public function get_type() {
         return 'line_item';
-    }
-
-    /**
-     * Get order item name.
-     * @return string
-     */
-    public function get_order_item_name() {
-        return $this->data['name'];
-    }
-
-    /**
-     * Get fee name.
-     * @return string
-     */
-    public function get_name() {
-        return $this->get_order_item_name();
     }
 
     /**

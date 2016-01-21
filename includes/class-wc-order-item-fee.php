@@ -30,8 +30,8 @@ class WC_Order_Item_Fee extends WC_Order_Item {
     /**
      * Read/populate data properties specific to this order item.
      */
-    protected function read() {
-        parent::read();
+    protected function read( $id ) {
+        parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_tax_class( get_metadata( 'order_item', $this->get_order_item_id(), '_tax_class', true ) );
             $this->set_total( get_metadata( 'order_item', $this->get_order_item_id(), '_line_total', true ) );
@@ -58,22 +58,6 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	| Setters
 	|--------------------------------------------------------------------------
 	*/
-
-    /**
-     * Set order item name.
-     * @param string $value
-     */
-    public function set_order_item_name( $value ) {
-        $this->data['name'] = wc_clean( $value );
-    }
-
-    /**
-     * Set item name.
-     * @param string $value
-     */
-    public function set_name( $value ) {
-        $this->set_order_item_name( $value );
-    }
 
     /**
      * Set tax class.
@@ -125,24 +109,8 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * Get order item type.
      * @return string
      */
-    public function get_order_item_type() {
+    public function get_type() {
         return 'fee';
-    }
-
-    /**
-     * Get order item name.
-     * @return string
-     */
-    public function get_order_item_name() {
-        return $this->data['name'];
-    }
-
-    /**
-     * Get fee name.
-     * @return string
-     */
-    public function get_name() {
-        return $this->get_order_item_name();
     }
 
     /**

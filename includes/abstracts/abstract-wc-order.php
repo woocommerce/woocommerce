@@ -4,11 +4,11 @@
  *
  * The WooCommerce order class handles order data.
  *
- * @class       WC_Abstract_Order
- * @version     2.6.0
- * @package     WooCommerce/Classes
- * @category    Class
- * @author      WooThemes
+ * @class	   WC_Abstract_Order
+ * @version	 2.6.0
+ * @package	 WooCommerce/Classes
+ * @category	Class
+ * @author	  WooThemes
  */
 abstract class WC_Abstract_Order {
 
@@ -23,8 +23,8 @@ abstract class WC_Abstract_Order {
 	 * @param  int|object|WC_Order $order Order to init.
 	 */
 	public function __construct( $order = 0 ) {
-		$this->prices_include_tax    = 'yes' === get_option( 'woocommerce_prices_include_tax' );
-		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
+		$this->prices_include_tax	= 'yes' === get_option( 'woocommerce_prices_include_tax' );
+		$this->tax_display_cart	  = get_option( 'woocommerce_tax_display_cart' );
 		$this->display_totals_ex_tax = 'excl' === $this->tax_display_cart;
 		$this->display_cart_ex_tax   = 'excl' === $this->tax_display_cart;
 		$this->init( $order );
@@ -46,12 +46,12 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
-     * Change data to JSON format.
-     * @return string Data in JSON format.
-     */
-    public function __toString() {
-        return json_encode( $this->get_data() );
-    }
+	 * Change data to JSON format.
+	 * @return string Data in JSON format.
+	 */
+	public function __toString() {
+		return json_encode( $this->get_data() );
+	}
 
 	/**
 	 * Magic __isset method.
@@ -98,11 +98,11 @@ abstract class WC_Abstract_Order {
 		// cart_discount_tax
 		// order_shipping_tax
 		// order_total
-		// $this->order_date          = $post_object->post_date;
-		//$this->modified_date       = $post_object->post_modified;
-	//	$this->customer_message    = $post_object->post_excerpt;
-	//	$this->customer_note       = $post_object->post_excerpt;
-	//	$this->post_status         = $post_object->post_status;
+		// $this->order_date		  = $post_object->post_date;
+		//$this->modified_date	   = $post_object->post_modified;
+	//	$this->customer_message	= $post_object->post_excerpt;
+	//	$this->customer_note	   = $post_object->post_excerpt;
+	//	$this->post_status		 = $post_object->post_status;
 	//	completed_date
 
 		return $value;
@@ -113,61 +113,61 @@ abstract class WC_Abstract_Order {
 	 * @since 2.6.0
 	 * @var array
 	 */
-    protected $data = array(
+	protected $data = array(
 		// @todo when migrating to custom tables, these will be column names
-		'order_id'             => 0,
-		'status'               => '',
-		'order_type'           => 'simple',
-		'order_key'            => '',
-		'order_currency'       => '',
-		'date_created'         => '',
-		'date_modified'        => '',
-		'customer_id'          => 0,
+		'order_id'			 => 0,
+		'status'			   => '',
+		'order_type'		   => 'simple',
+		'order_key'			=> '',
+		'order_currency'	   => '',
+		'date_created'		 => '',
+		'date_modified'		=> '',
+		'customer_id'		  => 0,
 
 		// Billing address
 		'billing_first_name'   => '',
-		'billing_last_name'    => '',
-		'billing_company'      => '',
-		'billing_address_1'    => '',
-		'billing_address_2'    => '',
-		'billing_city'         => '',
-		'billing_state'        => '',
-		'billing_postcode'     => '',
-		'billing_country'      => '',
-		'billing_email'        => '',
-		'billing_phone'        => '',
+		'billing_last_name'	=> '',
+		'billing_company'	  => '',
+		'billing_address_1'	=> '',
+		'billing_address_2'	=> '',
+		'billing_city'		 => '',
+		'billing_state'		=> '',
+		'billing_postcode'	 => '',
+		'billing_country'	  => '',
+		'billing_email'		=> '',
+		'billing_phone'		=> '',
 
 		// Shipping address
 		'shipping_first_name'  => '',
 		'shipping_last_name'   => '',
-		'shipping_company'     => '',
+		'shipping_company'	 => '',
 		'shipping_address_1'   => '',
 		'shipping_address_2'   => '',
-		'shipping_city'        => '',
-		'shipping_state'       => '',
-		'shipping_postcode'    => '',
-		'shipping_country'     => '',
+		'shipping_city'		=> '',
+		'shipping_state'	   => '',
+		'shipping_postcode'	=> '',
+		'shipping_country'	 => '',
 
 		// Order totals
-		'discount_total'       => 0,
-		'discount_tax'         => 0,
-		'shipping_total'       => 0,
-		'shipping_tax'         => 0, // Total shipping taxes for the order
-		'cart_tax'             => 0, // Total tax for the cart excl. shipping
-		'order_total'          => 0, // Order total, taxes included
-		'order_tax'            => 0, // Sum of all taxes for the order
+		'discount_total'	   => 0,
+		'discount_tax'		 => 0,
+		'shipping_total'	   => 0,
+		'shipping_tax'		 => 0, // Total shipping taxes for the order
+		'cart_tax'			 => 0, // Total tax for the cart excl. shipping
+		'order_total'		  => 0, // Order total, taxes included
+		'order_tax'			=> 0, // Sum of all taxes for the order
 
 		// @todo when migrating to custom tables, these will be custom meta
-		'payment_method'       => '',
+		'payment_method'	   => '',
 		'payment_method_title' => '',
-		'transaction_id'       => '',
+		'transaction_id'	   => '',
 		'customer_ip_address'  => '',
 		'customer_user_agent'  => '',
-		'created_via'          => '',
-		'order_version'        => '',
+		'created_via'		  => '',
+		'order_version'		=> '',
 		'prices_include_tax'   => false,
-		'customer_note'        => '',
-		'date_completed'       => '',
+		'customer_note'		=> '',
+		'date_completed'	   => '',
 	);
 
 	/*
@@ -182,7 +182,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Get all class data in array format.
 	 * @since 2.6.0
-     * @access protected
+	 * @access protected
 	 * @return array
 	 */
 	protected function get_data() {
@@ -509,27 +509,27 @@ abstract class WC_Abstract_Order {
 			$address = array(
 				'first_name' => $this->data['billing_first_name'],
 				'last_name'  => $this->data['billing_last_name'],
-				'company'    => $this->data['billing_company'],
+				'company'	=> $this->data['billing_company'],
 				'address_1'  => $this->data['billing_address_1'],
 				'address_2'  => $this->data['billing_address_2'],
-				'city'       => $this->data['billing_city'],
-				'state'      => $this->data['billing_state'],
+				'city'	   => $this->data['billing_city'],
+				'state'	  => $this->data['billing_state'],
 				'postcode'   => $this->data['billing_postcode'],
-				'country'    => $this->data['billing_country'],
-				'email'      => $this->data['billing_email'],
-				'phone'      => $this->data['billing_phone']
+				'country'	=> $this->data['billing_country'],
+				'email'	  => $this->data['billing_email'],
+				'phone'	  => $this->data['billing_phone']
 			);
 		} else {
 			$address = array(
 				'first_name' => $this->data['shipping_first_name'],
 				'last_name'  => $this->data['shipping_last_name'],
-				'company'    => $this->data['shipping_company'],
+				'company'	=> $this->data['shipping_company'],
 				'address_1'  => $this->data['shipping_address_1'],
 				'address_2'  => $this->data['shipping_address_2'],
-				'city'       => $this->data['shipping_city'],
-				'state'      => $this->data['shipping_state'],
+				'city'	   => $this->data['shipping_city'],
+				'state'	  => $this->data['shipping_state'],
 				'postcode'   => $this->data['shipping_postcode'],
-				'country'    => $this->data['shipping_country'],
+				'country'	=> $this->data['shipping_country'],
 			);
 		}
 
@@ -590,12 +590,12 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_shipping_address_map_url() {
 		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', array(
-			'address_1'     => $this->get_shipping_address_1(),
-			'address_2'     => $this->get_shipping_address_2(),
-			'city'          => $this->get_shipping_city(),
-			'state'         => $this->get_shipping_state(),
-			'postcode'      => $this->get_shipping_postcode(),
-			'country'       => $this->get_shipping_country()
+			'address_1'	 => $this->get_shipping_address_1(),
+			'address_2'	 => $this->get_shipping_address_2(),
+			'city'		  => $this->get_shipping_city(),
+			'state'		 => $this->get_shipping_state(),
+			'postcode'	  => $this->get_shipping_postcode(),
+			'country'	   => $this->get_shipping_country()
 		), $this );
 		return apply_filters( 'woocommerce_shipping_address_map_url', 'http://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
 	}
@@ -627,7 +627,14 @@ abstract class WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_discount_total() {
-		return wc_format_decimal( $this->data['discount_total'] );
+		$discount_total = wc_format_decimal( $this->data['discount_total'] );
+
+		// Backwards compatible total calculation - totals were not stored consistently in old versions.
+		if ( ( ! $this->get_order_version() || version_compare( $this->get_order_version(), '2.3.7', '<' ) ) && $this->get_prices_include_tax() ) {
+			$discount_total = $discount_total - $this->get_discount_tax();
+		}
+
+		return $discount_total;
 	}
 
 	/**
@@ -648,19 +655,6 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_shipping_total() {
 		return wc_format_decimal( $this->data['shipping_total'] );
-	}
-
-	/**
-	 * Gets shipping total. Alias of WC_Order::get_shipping_total().
-	 *
-	 * @since 2.6.0 woocommerce_order_amount_total_shipping filter has been removed to avoid
-	 * these values being modified and then saved back to the DB or used in
-	 * calculations. There are other, later hooks available to change totals on
-	 * display. e.g. woocommerce_get_order_item_totals.
-	 * @return float
-	 */
-	public function get_total_shipping() {
-		return $this->get_shipping_total();
 	}
 
 	/**
@@ -698,6 +692,28 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the stored order total. Includes taxes and everything else.
+	 * @return string
+	 */
+	public function get_order_total() {
+		return wc_format_decimal( $this->data['order_total'], wc_get_price_decimals() );
+	}
+
+	/**
+	 * Gets the total discount amount.
+	 * @param  bool $ex_tax Show discount excl any tax.
+	 * @return float
+	 */
+	public function get_total_discount( $ex_tax = true ) {
+		if ( $ex_tax ) {
+			$total_discount = $this->get_discount_total();
+		} else {
+			$total_discount = $this->get_discount_total() + $this->get_discount_tax();
+		}
+		return apply_filters( 'woocommerce_order_amount_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
+	}
+
+	/**
 	 * Get total tax amount. Alias for get_order_tax().
 	 *
 	 * @since 2.6.0 woocommerce_order_amount_total_tax filter has been removed to avoid
@@ -711,11 +727,16 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the stored order total. Includes taxes and everything else.
-	 * @return string
+	 * Gets shipping total. Alias of WC_Order::get_shipping_total().
+	 *
+	 * @since 2.6.0 woocommerce_order_amount_total_shipping filter has been removed to avoid
+	 * these values being modified and then saved back to the DB or used in
+	 * calculations. There are other, later hooks available to change totals on
+	 * display. e.g. woocommerce_get_order_item_totals.
+	 * @return float
 	 */
-	public function get_order_total() {
-		return wc_format_decimal( $this->data['order_total'], wc_get_price_decimals() );
+	public function get_total_shipping() {
+		return $this->get_shipping_total();
 	}
 
 	/**
@@ -746,7 +767,7 @@ abstract class WC_Abstract_Order {
 	 * @return array
 	 */
 	public function get_tax_totals() {
-		$taxes      = $this->get_items( 'tax' );
+		$taxes	  = $this->get_items( 'tax' );
 		$tax_totals = array();
 
 		foreach ( $taxes as $key => $tax ) {
@@ -757,11 +778,11 @@ abstract class WC_Abstract_Order {
 				$tax_totals[ $code ]->amount = 0;
 			}
 
-			$tax_totals[ $code ]->id                = $key;
-			$tax_totals[ $code ]->rate_id           = $tax['rate_id'];
-			$tax_totals[ $code ]->is_compound       = $tax[ 'compound' ];
-			$tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
-			$tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
+			$tax_totals[ $code ]->id				= $key;
+			$tax_totals[ $code ]->rate_id		   = $tax['rate_id'];
+			$tax_totals[ $code ]->is_compound	   = $tax[ 'compound' ];
+			$tax_totals[ $code ]->label			 = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
+			$tax_totals[ $code ]->amount		   += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
 			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array('currency' => $this->get_order_currency()) );
 		}
 
@@ -817,9 +838,9 @@ abstract class WC_Abstract_Order {
 	public function get_cancel_order_url( $redirect = '' ) {
 		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
 			'cancel_order' => 'true',
-			'order'        => $this->get_order_key(),
-			'order_id'     => $this->get_order_id(),
-			'redirect'     => $redirect
+			'order'		=> $this->get_order_key(),
+			'order_id'	 => $this->get_order_id(),
+			'redirect'	 => $redirect
 		), $this->get_cancel_endpoint() ), 'woocommerce-cancel_order' ) );
 	}
 
@@ -833,10 +854,10 @@ abstract class WC_Abstract_Order {
 	public function get_cancel_order_url_raw( $redirect = '' ) {
 		return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array(
 			'cancel_order' => 'true',
-			'order'        => $this->get_order_key(),
-			'order_id'     => $this->get_order_id(),
-			'redirect'     => $redirect,
-			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
+			'order'		=> $this->get_order_key(),
+			'order_id'	 => $this->get_order_id(),
+			'redirect'	 => $redirect,
+			'_wpnonce'	 => wp_create_nonce( 'woocommerce-cancel_order' )
 		), $this->get_cancel_endpoint() ) );
 	}
 
@@ -874,6 +895,14 @@ abstract class WC_Abstract_Order {
 	 * @return array
 	 */
 	public function get_refunds() { return array(); }
+
+	/**
+	 * Gets formatted shipping method title.
+	 * @return string
+	 */
+	public function get_shipping_method() {
+		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', wp_list_pluck( $this->get_shipping_methods(), 'name' ) ), $this );
+	}
 
 	/*
 	|--------------------------------------------------------------------------
@@ -1340,33 +1369,33 @@ abstract class WC_Abstract_Order {
 	*/
 
 	/**
-     * Insert data into the database.
+	 * Insert data into the database.
 	 * @since 2.6.0
-     * @access protected
-     * @todo Convert to custom tables.
-     * @param array $data data to save
-     */
-    protected function create( $data ) {
-		$order_data                  = array();
-		$order_data['post_type']     = 'shop_order';
+	 * @access protected
+	 * @todo Convert to custom tables.
+	 * @param array $data data to save
+	 */
+	protected function create( $data ) {
+		$order_data				  = array();
+		$order_data['post_type']	 = 'shop_order';
 		$order_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
 		$order_data['ping_status']   = 'closed';
 		$order_data['post_author']   = 1;
 		$order_data['post_password'] = uniqid( 'order_' );
-		$order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		$order_data['post_title']	= sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
 		$order_data['post_parent']   = absint( $args['parent'] );
-		$order_id                    = wp_insert_post( apply_filters( 'woocommerce_new_order_data', $order_data ), true );
+		$order_id					= wp_insert_post( apply_filters( 'woocommerce_new_order_data', $order_data ), true );
 		$this->set_order_id( $order_id );
 	}
 
 	/**
-     * Read from the database.
+	 * Read from the database.
 	 * @since 2.6.0
-     * @access protected
-     * @todo Convert to custom tables.
-     * @param int $id ID of object to read.
-     */
-    protected function read( $id ) {
+	 * @access protected
+	 * @todo Convert to custom tables.
+	 * @param int $id ID of object to read.
+	 */
+	protected function read( $id ) {
 		$post_object = get_post( $id );
 
 		// Map standard post data
@@ -1375,7 +1404,6 @@ abstract class WC_Abstract_Order {
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );
 		$this->set_customer_note( $post_object->post_excerpt );
-		$this->set_order_type( wc_get_order_type( $post_object->post_type ) );
 
 		// Map meta data
 		$this->set_customer_id( get_post_meta( $this->get_order_id(), '_customer_user', true ) );
@@ -1428,46 +1456,46 @@ abstract class WC_Abstract_Order {
 		$this->prices_include_tax = metadata_exists( 'post', $this->get_order_id(), '_prices_include_tax' ) ? get_post_meta( $this->get_order_id(), '_prices_include_tax', true ) === 'yes' : $this->prices_include_tax;
 	}
 
-    /**
-     * Update data in the database.
+	/**
+	 * Update data in the database.
 	 * @since 2.6.0
 	 * @access protected
 	 * @todo Convert to custom tables.
-     * @param array $data data to save
-     */
-    protected function update( $zone_data ) {
-		$order_data                  = array();
-		$order_data['post_type']     = 'shop_order';
+	 * @param array $data data to save
+	 */
+	protected function update( $zone_data ) {
+		$order_data				  = array();
+		$order_data['post_type']	 = 'shop_order';
 		$order_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
 		$order_data['ping_status']   = 'closed';
 		$order_data['post_author']   = 1;
 		$order_data['post_password'] = uniqid( 'order_' );
-		$order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		$order_data['post_title']	= sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
 		$order_data['post_parent']   = absint( $args['parent'] );
 		wp_update_post( $order_data );
-    }
+	}
 
 	/**
-     * Delete data from the database.
+	 * Delete data from the database.
 	 * @since 2.6.0
-     * @todo Convert to custom tables.
+	 * @todo Convert to custom tables.
 	 * @access protected
-     */
-    protected function delete() {
-        wp_delete_post( $this->get_order_id() );
-    }
+	 */
+	protected function delete() {
+		wp_delete_post( $this->get_order_id() );
+	}
 
 	/**
-     * Save data to the database.
+	 * Save data to the database.
 	 * @since 2.6.0
-     * @access protected
-     */
-    protected function save() {
-        if ( ! $this->get_order_id() ) {
+	 * @access protected
+	 */
+	protected function save() {
+		if ( ! $this->get_order_id() ) {
 			$this->create();
-        } else {
-            $this->update();
-        }
+		} else {
+			$this->update();
+		}
 	}
 
 	/*
@@ -1484,38 +1512,40 @@ abstract class WC_Abstract_Order {
 	 * Return an array of items/products within this order.
 	 *
 	 * @param string|array $type Types of line items to get (array or string).
-	 * @return array
+	 * @return Array of WC_Order_item
 	 */
-	public function get_items( $type = '' ) {
+	public function get_items( $type = 'line_item' ) {
 		global $wpdb;
 
-		if ( empty( $type ) ) {
-			$type = array( 'line_item' );
-		}
+		$type			= ! is_array( $type ) ? array( $type ) : $type;
+		$items		   = array();
+		$get_items_sql   = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->get_order_id() );
+		$get_items_sql  .= "AND order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', $type ) ) . "' ) ORDER BY order_item_id;";
+		$raw_items	   = $wpdb->get_results( $get_items_sql );
 
-		if ( ! is_array( $type ) ) {
-			$type = array( $type );
-		}
-
-		$items          = array();
-		$get_items_sql  = $wpdb->prepare( "SELECT order_item_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->get_order_id() );
-		$get_items_sql .= "AND order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', $type ) ) . "' ) ORDER BY order_item_id;";
-		$line_items     = $wpdb->get_results( $get_items_sql );
-
-		// Loop items
-		foreach ( $line_items as $item ) {
-			$items[ $item->order_item_id ]['name']            = $item->order_item_name;
-			$items[ $item->order_item_id ]['type']            = $item->order_item_type;
-			$items[ $item->order_item_id ]['item_meta']       = $this->get_item_meta( $item->order_item_id );
-			$items[ $item->order_item_id ]['item_meta_array'] = $this->get_item_meta_array( $item->order_item_id );
-			$items[ $item->order_item_id ]                    = $this->expand_item_meta( $items[ $item->order_item_id ] );
+		foreach ( $raw_items as $item ) {
+			$item                                = $this->get_item( $item );
+			$item['item_meta']                   = $this->get_item_meta( $item->get_order_item_id() );
+			$item['item_meta_array']             = $this->get_item_meta_array( $item->get_order_item_id() );
+			$item                                = $this->expand_item_meta( $item );
+			$items[ $item->get_order_item_id() ] = $item;
 		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this );
 	}
 
 	/**
+	 * Get an order item object, based on it's type.
+	 * @param  int $item_id
+	 * @return WC_Order_Item
+	 */
+	public function get_item( $item_id ) {
+		return WC_Order_Factory::get_order_item( $item_id );
+	}
+
+	/**
 	 * Expand item meta into the $item array.
+	 * @deprecated 2.6.0 Item meta no longer expanded.
 	 * @since 2.4.0
 	 * @param array $item before expansion.
 	 * @return array
@@ -1536,7 +1566,6 @@ abstract class WC_Abstract_Order {
 			'line_tax',
 			'line_subtotal_tax'
 		);
-
 		// Expand item meta if set.
 		if ( ! empty( $item['item_meta'] ) ) {
 			foreach ( $item['item_meta'] as $name => $value ) {
@@ -1544,8 +1573,8 @@ abstract class WC_Abstract_Order {
 					continue;
 				}
 				if ( '_' === substr( $name, 0, 1 ) ) {
-					$item[ substr( $name, 1 ) ] = $value[0];
-				} elseif ( ! in_array( $name, $reserved_item_meta_keys ) ) {
+					$item[ substr( $name, 1 ) ] = make_clickable( $value[0] );
+				} else {
 					$item[ $name ] = make_clickable( $value[0] );
 				}
 			}
@@ -1642,19 +1671,19 @@ abstract class WC_Abstract_Order {
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'name'         => $product->get_title(),
-			'qty'          => absint( $qty ),
-			'tax_class'    => $product->get_tax_class(),
+			'name'		 => $product->get_title(),
+			'qty'		  => absint( $qty ),
+			'tax_class'	=> $product->get_tax_class(),
 			'product_id'   => $product->id,
 			'variation_id' => isset( $product->variation_id ) ? $product->variation_id : 0,
-			'variation'    => array(),
-			'subtotal'     => $product->get_price_excluding_tax( $qty ),
+			'variation'	=> array(),
+			'subtotal'	 => $product->get_price_excluding_tax( $qty ),
 			'subtotal_tax' => 0,
-			'total'        => $product->get_price_excluding_tax( $qty ),
-			'total_tax'    => 0,
-			'taxes'        => array(
+			'total'		=> $product->get_price_excluding_tax( $qty ),
+			'total_tax'	=> 0,
+			'taxes'		=> array(
 				'subtotal' => array(),
-				'total'    => array()
+				'total'	=> array()
 			)
 		) );
 		$item = new WC_Order_Item_Product();
@@ -1782,8 +1811,8 @@ abstract class WC_Abstract_Order {
 	 */
 	public function add_coupon( $code, $discount_amount = 0, $discount_amount_tax = 0 ) {
 		$args = wp_parse_args( $args, array(
-			'code'                => $code,
-			'discount_amount'     => $discount_amount,
+			'code'				=> $code,
+			'discount_amount'	 => $discount_amount,
 			'discount_amount_tax' => $discount_amount_tax
 		) );
 		$item = new WC_Order_Item_Coupon();
@@ -1848,9 +1877,9 @@ abstract class WC_Abstract_Order {
 	public function add_shipping( $shipping_rate ) {
 		$args = wp_parse_args( $args, array(
 			'method_title' => $shipping_rate->label,
-			'method_id'    => $shipping_rate->id,
-			'cost'         => wc_format_decimal( $shipping_rate->cost ),
-			'taxes'        => $shipping_rate->taxes
+			'method_id'	=> $shipping_rate->id,
+			'cost'		 => wc_format_decimal( $shipping_rate->cost ),
+			'taxes'		=> $shipping_rate->taxes
 		) );
 		$item = new WC_Order_Item_Shipping();
 		$item->set_order_id( $this->get_order_id() );
@@ -1928,11 +1957,11 @@ abstract class WC_Abstract_Order {
 	 */
 	public function add_fee( $fee ) {
 		$args = wp_parse_args( $args, array(
-			'name'      => $fee->name,
+			'name'	  => $fee->name,
 			'tax_class' => $fee->taxable ? $fee->tax_class : 0,
-			'total'     => $fee->amount,
+			'total'	 => $fee->amount,
 			'total_tax' => $fee->tax,
-			'taxes'     => array(
+			'taxes'	 => array(
 				'total' => $fee->tax_data
 			)
 		) );
@@ -2016,12 +2045,12 @@ abstract class WC_Abstract_Order {
 		}
 
 		$args = wp_parse_args( $args, array(
-	        'rate_code'          => $code,
-	        'rate_id'            => $tax_rate_id,
-	        'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-	        'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-	        'tax_total'          => $tax_amount,
-	        'shipping_tax_total' => $shipping_tax_amount
+			'rate_code'		  => $code,
+			'rate_id'			=> $tax_rate_id,
+			'label'			  => WC_Tax::get_rate_label( $tax_rate_id ),
+			'compound'		   => WC_Tax::is_compound( $tax_rate_id ),
+			'tax_total'		  => $tax_amount,
+			'shipping_tax_total' => $shipping_tax_amount
 		) );
 		$item = new WC_Order_Item_Tax();
 		$item->set_order_id( $this->get_order_id() );
@@ -2128,55 +2157,55 @@ abstract class WC_Abstract_Order {
 	 * @return bool success or fail.
 	 */
 	public function calculate_taxes() {
-		$tax_total    = 0;
-		$taxes        = array();
+		$tax_total	= 0;
+		$taxes		= array();
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		if ( 'billing' === $tax_based_on ) {
 			$country  = $this->billing_country;
-			$state    = $this->billing_state;
+			$state	= $this->billing_state;
 			$postcode = $this->billing_postcode;
-			$city     = $this->billing_city;
+			$city	 = $this->billing_city;
 		} elseif ( 'shipping' === $tax_based_on ) {
 			$country  = $this->shipping_country;
-			$state    = $this->shipping_state;
+			$state	= $this->shipping_state;
 			$postcode = $this->shipping_postcode;
-			$city     = $this->shipping_city;
+			$city	 = $this->shipping_city;
 		}
 
 		// Default to base
 		if ( 'base' === $tax_based_on || empty( $country ) ) {
 			$default  = wc_get_base_location();
 			$country  = $default['country'];
-			$state    = $default['state'];
+			$state	= $default['state'];
 			$postcode = '';
-			$city     = '';
+			$city	 = '';
 		}
 
 		// Get items
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 
-			$product           = $this->get_product_from_item( $item );
-			$line_total        = isset( $item['line_total'] ) ? $item['line_total'] : 0;
-			$line_subtotal     = isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0;
-			$tax_class         = $item['tax_class'];
+			$product		   = $this->get_product_from_item( $item );
+			$line_total		= isset( $item['line_total'] ) ? $item['line_total'] : 0;
+			$line_subtotal	 = isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0;
+			$tax_class		 = $item['tax_class'];
 			$item_tax_status   = $product ? $product->get_tax_status() : 'taxable';
 
 			if ( '0' !== $tax_class && 'taxable' === $item_tax_status ) {
 
 				$tax_rates = WC_Tax::find_rates( array(
 					'country'   => $country,
-					'state'     => $state,
+					'state'	 => $state,
 					'postcode'  => $postcode,
-					'city'      => $city,
+					'city'	  => $city,
 					'tax_class' => $tax_class
 				) );
 
 				$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal, $tax_rates, false );
-				$line_taxes          = WC_Tax::calc_tax( $line_total, $tax_rates, false );
+				$line_taxes		  = WC_Tax::calc_tax( $line_total, $tax_rates, false );
 				$line_subtotal_tax   = max( 0, array_sum( $line_subtotal_taxes ) );
-				$line_tax            = max( 0, array_sum( $line_taxes ) );
-				$tax_total           += $line_tax;
+				$line_tax			= max( 0, array_sum( $line_taxes ) );
+				$tax_total		   += $line_tax;
 
 				wc_update_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( $line_subtotal_tax ) );
 				wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax ) );
@@ -2194,11 +2223,11 @@ abstract class WC_Abstract_Order {
 
 		if ( ! empty( $shipping_methods ) ) {
 			$matched_tax_rates = array();
-			$tax_rates         = WC_Tax::find_rates( array(
+			$tax_rates		 = WC_Tax::find_rates( array(
 				'country'   => $country,
-				'state'     => $state,
+				'state'	 => $state,
 				'postcode'  => $postcode,
-				'city'      => $city,
+				'city'	  => $city,
 				'tax_class' => ''
 			) );
 
@@ -2210,10 +2239,10 @@ abstract class WC_Abstract_Order {
 				}
 			}
 
-			$shipping_taxes     = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
+			$shipping_taxes	 = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
 			$shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
 		} else {
-			$shipping_taxes     = array();
+			$shipping_taxes	 = array();
 			$shipping_tax_total = 0;
 		}
 
@@ -2240,11 +2269,11 @@ abstract class WC_Abstract_Order {
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
-		$cart_subtotal     = 0;
-		$cart_total        = 0;
-		$fee_total         = 0;
+		$cart_subtotal	 = 0;
+		$cart_total		= 0;
+		$fee_total		 = 0;
 		$cart_subtotal_tax = 0;
-		$cart_total_tax    = 0;
+		$cart_total_tax	= 0;
 
 		if ( $and_taxes && wc_tax_enabled() ) {
 			$this->calculate_taxes();
@@ -2252,10 +2281,10 @@ abstract class WC_Abstract_Order {
 
 		// line items
 		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal     += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
-			$cart_total        += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
+			$cart_subtotal	 += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
+			$cart_total		+= wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
 			$cart_subtotal_tax += wc_format_decimal( isset( $item['line_subtotal_tax'] ) ? $item['line_subtotal_tax'] : 0 );
-			$cart_total_tax    += wc_format_decimal( isset( $item['line_tax'] ) ? $item['line_tax'] : 0 );
+			$cart_total_tax	+= wc_format_decimal( isset( $item['line_tax'] ) ? $item['line_tax'] : 0 );
 		}
 
 		$this->calculate_shipping();
@@ -2322,7 +2351,7 @@ abstract class WC_Abstract_Order {
 	 * @return bool success or fail.
 	 */
 	public function update_taxes() {
-		$order_taxes          = array();
+		$order_taxes		  = array();
 		$order_shipping_taxes = array();
 
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
@@ -2426,12 +2455,12 @@ abstract class WC_Abstract_Order {
 		global $wpdb;
 
 		// Get cache key - uses get_cache_prefix to invalidate when needed
-		$cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $order_item_id;
+		$cache_key	   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $order_item_id;
 		$item_meta_array = wp_cache_get( $cache_key, 'orders' );
 
 		if ( false === $item_meta_array ) {
 			$item_meta_array = array();
-			$metadata        = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", absint( $order_item_id ) ) );
+			$metadata		= $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", absint( $order_item_id ) ) );
 			foreach ( $metadata as $metadata_row ) {
 				$item_meta_array[ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
 			}
@@ -2463,39 +2492,8 @@ abstract class WC_Abstract_Order {
 		return get_metadata( 'order_item', $order_item_id, $key, $single );
 	}
 
-	/** Total Getters order_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currency*/
 
-	/**
-	 * Gets the total discount amount.
-	 * @param  bool $ex_tax Show discount excl any tax.
-	 * @return float
-	 */
-	public function get_total_discount( $ex_tax = true ) {
-		if ( ! $this->order_version || version_compare( $this->order_version, '2.3.7', '<' ) ) {
-			// Backwards compatible total calculation - totals were not stored consistently in old versions.
-			if ( $ex_tax ) {
-				if ( $this->prices_include_tax ) {
-					$total_discount = (double) $this->cart_discount - (double) $this->cart_discount_tax;
-				} else {
-					$total_discount = (double) $this->cart_discount;
-				}
-			} else {
-				if ( $this->prices_include_tax ) {
-					$total_discount = (double) $this->cart_discount;
-				} else {
-					$total_discount = (double) $this->cart_discount + (double) $this->cart_discount_tax;
-				}
-			}
-		// New logic - totals are always stored exclusive of tax, tax total is stored in cart_discount_tax
-		} else {
-			if ( $ex_tax ) {
-				$total_discount = (double) $this->cart_discount;
-			} else {
-				$total_discount = (double) $this->cart_discount + (double) $this->cart_discount_tax;
-			}
-		}
-		return apply_filters( 'woocommerce_order_amount_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
-	}
+
 
 	/**
 	 * Get item subtotal - this is the cost before discount.
@@ -2601,24 +2599,6 @@ abstract class WC_Abstract_Order {
 	 */
 	public function get_line_tax( $item ) {
 		return apply_filters( 'woocommerce_order_amount_line_tax', wc_round_tax_total( $item['line_tax'] ), $item, $this );
-	}
-
-	/** End Total Getters order_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currencyorder_currency*/
-
-	/**
-	 * Gets formatted shipping method title.
-	 *
-	 * @return string
-	 */
-	public function get_shipping_method() {
-		$labels           = array();
-		$shipping_methods = $this->get_shipping_methods();
-
-		foreach ( $shipping_methods as $shipping ) {
-			$labels[] = $shipping['name'];
-		}
-
-		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $labels ), $this );
 	}
 
 	/**
@@ -2795,6 +2775,7 @@ abstract class WC_Abstract_Order {
 	 * @return WC_Product
 	 */
 	public function get_product_from_item( $item ) {
+
 		if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
 			$_product = wc_get_product( $item['variation_id'] );
 		} elseif ( ! empty( $item['product_id']  ) ) {
@@ -2927,7 +2908,7 @@ abstract class WC_Abstract_Order {
 		global $wpdb;
 
 		$product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
-		$product      = wc_get_product( $product_id );
+		$product	  = wc_get_product( $product_id );
 		if ( ! $product ) {
 			/**
 			 * $product can be `false`. Example: checking an old order, when a product or variation has been deleted.
@@ -2949,7 +2930,7 @@ abstract class WC_Abstract_Order {
 		foreach ( $download_ids as $download_id ) {
 
 			if ( $product->has_file( $download_id ) ) {
-				$files[ $download_id ]                 = $product->get_file( $download_id );
+				$files[ $download_id ]				 = $product->get_file( $download_id );
 				$files[ $download_id ]['download_url'] = $this->get_download_url( $product_id, $download_id );
 			}
 		}
@@ -2966,8 +2947,8 @@ abstract class WC_Abstract_Order {
 
 		if ( $product && $product->exists() && $product->is_downloadable() && $this->is_download_permitted() ) {
 			$download_files = $this->get_item_downloads( $item );
-			$i              = 0;
-			$links          = array();
+			$i			  = 0;
+			$links		  = array();
 
 			foreach ( $download_files as $download_id => $file ) {
 				$i++;
@@ -2989,9 +2970,9 @@ abstract class WC_Abstract_Order {
 	public function get_download_url( $product_id, $download_id ) {
 		return add_query_arg( array(
 			'download_file' => $product_id,
-			'order'         => $this->get_order_key(),
-			'email'         => urlencode( $this->billing_email ),
-			'key'           => $download_id
+			'order'		 => $this->get_order_key(),
+			'email'		 => urlencode( $this->billing_email ),
+			'key'		   => $download_id
 		), trailingslashit( home_url() ) );
 	}
 
@@ -3005,7 +2986,7 @@ abstract class WC_Abstract_Order {
 		$args  = array(
 			'post_id' => $this->get_order_id(),
 			'approve' => 'approve',
-			'type'    => ''
+			'type'	=> ''
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
@@ -3035,24 +3016,24 @@ abstract class WC_Abstract_Order {
 	 */
 	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
 		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_order_id() ) && $added_by_user ) {
-			$user                 = get_user_by( 'id', get_current_user_id() );
-			$comment_author       = $user->display_name;
+			$user				 = get_user_by( 'id', get_current_user_id() );
+			$comment_author	   = $user->display_name;
 			$comment_author_email = $user->user_email;
 		} else {
-			$comment_author       = __( 'WooCommerce', 'woocommerce' );
+			$comment_author	   = __( 'WooCommerce', 'woocommerce' );
 			$comment_author_email = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
 			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com';
 			$comment_author_email = sanitize_email( $comment_author_email );
 		}
 
-		$comment_post_ID        = $this->get_order_id();
-		$comment_author_url     = '';
-		$comment_content        = $note;
-		$comment_agent          = 'WooCommerce';
-		$comment_type           = 'order_note';
-		$comment_parent         = 0;
-		$comment_approved       = 1;
-		$commentdata            = apply_filters( 'woocommerce_new_order_note_data', compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' ), array( 'order_id' => $this->get_order_id(), 'is_customer_note' => $is_customer_note ) );
+		$comment_post_ID		= $this->get_order_id();
+		$comment_author_url	 = '';
+		$comment_content		= $note;
+		$comment_agent		  = 'WooCommerce';
+		$comment_type		   = 'order_note';
+		$comment_parent		 = 0;
+		$comment_approved	   = 1;
+		$commentdata			= apply_filters( 'woocommerce_new_order_note_data', compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' ), array( 'order_id' => $this->get_order_id(), 'is_customer_note' => $is_customer_note ) );
 
 		$comment_id = wp_insert_comment( $commentdata );
 
@@ -3064,6 +3045,17 @@ abstract class WC_Abstract_Order {
 
 		return $comment_id;
 	}
+
+
+
+
+
+
+
+
+
+
+
 
 	/*
 	|--------------------------------------------------------------------------
@@ -3202,8 +3194,8 @@ abstract class WC_Abstract_Order {
 			}
 
 			wp_update_post( array(
-				'ID'            => $this->get_order_id(),
-				'post_date'     => current_time( 'mysql', 0 ),
+				'ID'			=> $this->get_order_id(),
+				'post_date'	 => current_time( 'mysql', 0 ),
 				'post_date_gmt' => current_time( 'mysql', 1 )
 			) );
 
@@ -3315,7 +3307,7 @@ abstract class WC_Abstract_Order {
 					$_product = $this->get_product_from_item( $item );
 
 					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
-						$qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $this, $item );
+						$qty	   = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $this, $item );
 						$new_stock = $_product->reduce_stock( $qty );
 						$item_name = $_product->get_sku() ? $_product->get_sku(): $item['product_id'];
 
@@ -3423,7 +3415,7 @@ abstract class WC_Abstract_Order {
 	 */
 	public function has_shipping_method( $method_id ) {
 		$shipping_methods = $this->get_shipping_methods();
-		$has_method       = false;
+		$has_method	   = false;
 
 		if ( empty( $shipping_methods ) ) {
 			return false;
@@ -3543,11 +3535,6 @@ abstract class WC_Abstract_Order {
 	 */
 	public function is_editable() {
 		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ) ), $this );
-	}
-
-
-	public function get_item( $item_id ) {
-		return WC_Order_Factory::get_order_item( $item_id );
 	}
 
 	/*
