@@ -450,11 +450,16 @@ class WC_API_Resource {
 		$post_type = get_post_type_object( $post->post_type );
 
 		if ( 'read' === $context ) {
-			return ( 'revision' !== $post->post_type && current_user_can( $post_type->cap->read_private_posts, $post->ID ) );
+			$permission = false;
+			if ( 'revision' !== $post->post_type && current_user_can( $post_type->cap->read_private_posts, $post->ID ) )
+				$permission = true;
+			return apply_filters( 'woocommerce_api_validate_read_permission', $permission, $post, $post_type );
 		} elseif ( 'edit' === $context ) {
-			return current_user_can( $post_type->cap->edit_post, $post->ID );
+			$permission = current_user_can( $post_type->cap->edit_post, $post->ID );
+			return apply_filters( 'woocommerce_api_validate_edit_permission', $permission, $post, $post_type );
 		} elseif ( 'delete' === $context ) {
-			return current_user_can( $post_type->cap->delete_post, $post->ID );
+			$permission = current_user_can( $post_type->cap->delete_post, $post->ID );
+			return apply_filters( 'woocommerce_api_validate_delete_permission', $permission, $post, $post_type );
 		} else {
 			return false;
 		}
