@@ -81,17 +81,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="WP Debug Mode"><?php _e( 'WP Debug Mode', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) ); ?></td>
-			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">&#10004;</mark>'; else echo '<mark class="no">&ndash;</mark>'; ?></td>
+			<td>
+				<?php if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) : ?>
+					<mark class="yes">&#10004;</mark>
+				<?php else : ?>
+					<mark class="no">&ndash;</mark>
+				<?php endif; ?>
+			</td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Cron"><?php _e( 'WP Cron', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WP Cron Jobs are enabled.', 'woocommerce' ) ); ?></td>
-			<td><?php if ( defined('DISABLE_WP_CRON') && DISABLE_WP_CRON ) echo '<mark class="no">&ndash;</mark>'; else echo '<mark class="yes">&#10004;</mark>'; ?></td>
+			<td>
+				<?php if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) : ?>
+					<mark class="no">&ndash;</mark>
+				<?php else : ?>
+					<mark class="yes">&#10004;</mark>
+				<?php endif; ?>
+			</td>
 		</tr>
 		<tr>
 			<td data-export-label="Language"><?php _e( 'Language', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'The current language used by WordPress. Default = English', 'woocommerce' ) ); ?></td>
-			<td><?php echo get_locale() ?></td>
+			<td><?php echo get_locale(); ?></td>
 		</tr>
 	</tbody>
 </table>
