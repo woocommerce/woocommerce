@@ -109,6 +109,13 @@ abstract class WC_Abstract_Order {
 		'completed_date'       => '',
 		'customer_id'          => 0,
 
+		/*
+		date_created
+		date_modified
+		date_shipped?
+
+		 */
+
 		// Billing address
 		'billing_first_name'   => '',
 		'billing_last_name'    => '',
@@ -1227,7 +1234,6 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Add a fee to the order.
 	 * Order must be saved prior to adding items.
-
 	 * @param object $fee
 	 * @return int updated order item ID
 	 */
@@ -1311,13 +1317,47 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Add a tax row to the order.
 	 * Order must be saved prior to adding items.
-	 *
 	 * @since 2.2
 	 * @param int tax_rate_id
-	 * @return int|bool Item ID or false.
+	 * @return int updated order item ID
 	 */
 	public function add_tax( $tax_rate_id, $tax_amount = 0, $shipping_tax_amount = 0 ) {
 		if ( ! $code = WC_Tax::get_rate_code( $tax_rate_id ) ) {
+			return false;
+		}
+
+		$args = wp_parse_args( $args, array(
+	        'rate_code'          => $code,
+	        'rate_id'            => $tax_rate_id,
+	        'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
+	        'compound'           => WC_Tax::is_compound( $tax_rate_id ),
+	        'tax_total'          => $tax_amount,
+	        'shipping_tax_total' => $shipping_tax_amount
+		) );
+		$item = new WC_Order_Item_Tax();
+		$item->set_order_id( $this->get_order_id() );
+		$item_id = $this->update_tax( $item, $args );
+
+		do_action( 'woocommerce_order_add_tax', $this->get_order_id(), $item->get_order_item_id(), $tax_rate_id, $tax_amount, $shipping_tax_amount );
+
+		return $item_id;
+	}
+
+	/**
+	 * Update tax line on order.
+	 * Note this does not update order totals.
+	 *
+	 * @since 2.6
+	 * @param object|int $item
+	 * @param array $args
+	 * @return int updated order item ID
+	 */
+	public function update_tax( $item, $args ) {
+		if ( is_numeric( $item ) ) {
+			$item = $this->get_item( $item );
+		}
+
+		if ( ! is_object( $product ) || ! $item->is_type( 'tax' ) ) {
 			return false;
 		}
 
@@ -1325,18 +1365,41 @@ abstract class WC_Abstract_Order {
 			$this->save();
 		}
 
-		$item = new WC_Order_Item();
-		$item->set_order_id( $this->get_order_id() );
-		$item->set_order_item_name( $code );
-		$item->set_order_item_type( 'tax' );
-		$item->add_meta_data( 'rate_id', $tax_rate_id );
-		$item->add_meta_data( 'label', WC_Tax::get_rate_label( $tax_rate_id ) );
-		$item->add_meta_data( 'compound', WC_Tax::is_compound( $tax_rate_id ) ? 1 : 0 );
-		$item->add_meta_data( 'tax_amount', wc_format_decimal( $tax_amount ) );
-		$item->add_meta_data( 'shipping_tax_amount', wc_format_decimal( $shipping_tax_amount ) );
+		if ( ! $item->get_order_item_id() ) {
+			$inserting = true;
+		} else {
+			$inserting = false;
+		}
+
+		if ( isset( $args['rate_code'] ) ) {
+			$item->set_rate_code( $args['rate_code'] );
+		}
+
+		if ( isset( $args['rate_id'] ) ) {
+			$item->set_rate_id( $args['rate_id'] );
+		}
+
+		if ( isset( $args['label'] ) ) {
+			$item->set_label( $args['label'] );
+		}
+
+		if ( isset( $args['compound'] ) ) {
+			$item->set_compound( $args['compound'] );
+		}
+
+		if ( isset( $args['tax_total'] ) ) {
+			$item->set_tax_total( $args['tax_total'] );
+		}
+
+		if ( isset( $args['shipping_tax_total'] ) ) {
+			$item->set_shipping_tax_total( $args['shipping_tax_total'] );
+		}
+
 		$item->save();
 
-		do_action( 'woocommerce_order_add_tax', $this->get_order_id(), $item->get_order_item_id(), $tax_rate_id, $tax_amount, $shipping_tax_amount );
+		if ( ! $inserting ) {
+			do_action( 'woocommerce_order_update_tax', $this->get_order_id(), $item->get_order_item_id(), $args );
+		}
 
 		return $item->get_order_item_id();
 	}

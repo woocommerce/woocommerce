@@ -11,11 +11,60 @@
 class WC_Order_Item_Fee extends WC_Order_Item {
 
     /**
-	 * Constructor.
+	 * Data properties of this order item object.
+	 * @since 2.6.0
+	 * @var array
 	 */
-    public function __construct( $item = 0 ) {
-        $this->set_order_item_type( 'fee' );
-        parent::__construct( $item );
+    protected $data = array(
+        'order_id'        => 0,
+		'order_item_id'   => 0,
+        'name'            => '',
+        'tax_class'       => '',
+        'total'           => '',
+        'total_tax'       => '',
+        'taxes'           => array(
+            'total' => array()
+        )
+    );
+
+    /**
+     * Read/populate data properties specific to this order item.
+     */
+    protected function read() {
+        parent::read();
+        if ( $this->get_order_item_id() ) {
+            $this->set_tax_class( get_metadata( 'order_item', $this->get_order_item_id(), '_tax_class', true ) );
+            $this->set_total( get_metadata( 'order_item', $this->get_order_item_id(), '_line_total', true ) );
+            $this->set_total_tax( get_metadata( 'order_item', $this->get_order_item_id(), '_line_tax', true ) );
+            $this->set_taxes( get_metadata( 'order_item', $this->get_order_item_id(), '_line_tax_data', true ) );
+        }
+    }
+
+    /**
+     * Save properties specific to this order item.
+     */
+    protected function save() {
+        parent::save();
+        if ( $this->get_order_item_id() ) {
+            wc_update_order_item_meta( $this->get_order_item_id(), '_tax_class', $this->get_tax_class() );
+            wc_update_order_item_meta( $this->get_order_item_id(), '_line_total', $this->get_total() );
+            wc_update_order_item_meta( $this->get_order_item_id(), '_line_tax', $this->get_total_tax() );
+            wc_update_order_item_meta( $this->get_order_item_id(), '_line_tax_data', $this->get_taxes() );
+        }
+    }
+
+    /*
+	|--------------------------------------------------------------------------
+	| Setters
+	|--------------------------------------------------------------------------
+	*/
+
+    /**
+     * Set order item name.
+     * @param string $value
+     */
+    public function set_order_item_name( $value ) {
+        $this->data['name'] = wc_clean( $value );
     }
 
     /**
@@ -31,7 +80,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * @param string $value
      */
     public function set_tax_class( $value ) {
-        $this->meta_data['_tax_class'] = $value;
+        $this->data['tax_class'] = $value;
     }
 
     /**
@@ -39,7 +88,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * @param string $value
      */
     public function set_total( $value ) {
-        $this->meta_data['_line_total'] = $value;
+        $this->data['total'] = wc_format_decimal( $value );
     }
 
     /**
@@ -47,7 +96,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * @param string $value
      */
     public function set_total_tax( $value ) {
-        $this->meta_data['_line_tax'] = $value;
+        $this->data['total_tax'] = wc_format_decimal( $value );
     }
 
     /**
@@ -63,7 +112,29 @@ class WC_Order_Item_Fee extends WC_Order_Item {
         if ( ! empty( $raw_tax_data['total'] ) ) {
             $tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
         }
-        $this->meta_data['_line_tax_data'] = $tax_data;
+        $this->data['taxes'] = $tax_data;
+    }
+
+    /*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	*/
+
+    /**
+     * Get order item type.
+     * @return string
+     */
+    public function get_order_item_type() {
+        return 'fee';
+    }
+
+    /**
+     * Get order item name.
+     * @return string
+     */
+    public function get_order_item_name() {
+        return $this->data['name'];
     }
 
     /**
@@ -79,7 +150,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * @return string
      */
     public function get_tax_class() {
-        return $this->meta_data['_tax_class'];
+        return $this->data['tax_class'];
     }
 
     /**
@@ -87,7 +158,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * @return string
      */
     public function get_total() {
-        return $this->meta_data['_line_total'];
+        return wc_format_decimal( $this->data['total'] );
     }
 
     /**
@@ -95,7 +166,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * @return string
      */
     public function get_total_tax() {
-        return $this->meta_data['_line_tax'];
+        return wc_format_decimal( $this->data['total_tax'] );
     }
 
     /**
@@ -103,6 +174,6 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      * @return array
      */
     public function get_taxes() {
-        return $this->meta_data['_line_tax_data'];
+        return $this->data['taxes'];
     }
 }

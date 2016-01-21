@@ -21,15 +21,9 @@ abstract class WC_Order_Item {
 		'order_id'        => 0,
 		'order_item_id'   => 0,
 		'order_item_name' => '',
-		'order_item_type' => ''
+		'order_item_type' => '',
+        'meta_data'       => array(),
 	);
-
-    /**
-	 * Meta data array.
-	 * @since 2.6.0
-	 * @var array
-	 */
-    protected $meta_data = array();
 
     /**
 	 * Constructor.
@@ -38,13 +32,27 @@ abstract class WC_Order_Item {
     public function __construct( $item = 0 ) {
 		if ( is_numeric( $item ) && ! empty( $item ) ) {
         	$this->read( $item );
-		} elseif ( is_object( $item ) && ( empty( $this->get_order_item_type() ) || $this->is_type( $item->order_item_type ) ) ) {
-            $this->set_order_id( $item->order_id );
-			$this->set_order_item_id( $item->order_item_id );
-			$this->set_order_item_name( $item->order_item_name );
-            $this->set_order_item_type( $item->order_item_type );
-			$this->read_order_item_meta();
+		} elseif ( is_object( $item ) && $this->is_type( $item->get_order_item_type() ) ) {
+            $this->set_all( $item );
 		}
+    }
+
+    /**
+     * Set data based on input item.
+     * @access private
+     */
+    private function set_all( $item ) {
+        foreach ( $item->get_data() as $key => $value ) {
+            $this->data[ $key ] = $value;
+        }
+    }
+
+    /**
+     * Change data to JSON format.
+     * @return string Data in JSON format.
+     */
+    public function __toString() {
+        return json_encode( $this->get_data() );
     }
 
     /**
@@ -56,6 +64,33 @@ abstract class WC_Order_Item {
         return $type === $this->get_order_item_type();
     }
 
+    /**
+	 * Get all item meta data in array format in the order it was saved. Does not group meta by key.
+	 * @param mixed $order_item_id
+	 * @return array of objects
+	 */
+	public function get_all_item_meta_data() {
+		global $wpdb;
+
+        $item_meta_array = array();
+
+        if ( $this->get_order_item_id() ) {
+    		// Get cache key - uses get_cache_prefix to invalidate when needed
+    		$cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'all_item_meta_' . $this->get_order_item_id();
+    		$item_meta_array = wp_cache_get( $cache_key, 'orders' );
+
+    		if ( false === $item_meta_array ) {
+    			$metadata        = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_order_item_id() ) );
+    			foreach ( $metadata as $metadata_row ) {
+    				$item_meta_array[ $metadata_row->meta_key ] = $metadata_row->meta_value;
+    			}
+    			wp_cache_set( $cache_key, $item_meta_array, 'orders' );
+    		}
+        }
+
+		return $item_meta_array;
+	}
+
     /*
 	|--------------------------------------------------------------------------
 	| Getters
@@ -65,10 +100,9 @@ abstract class WC_Order_Item {
     /**
 	 * Get all class data in array format.
 	 * @since 2.6.0
-     * @access protected
 	 * @return array
 	 */
-	protected function get_data() {
+	public function get_data() {
 		return $this->data;
 	}
 
@@ -102,14 +136,6 @@ abstract class WC_Order_Item {
      */
     public function get_order_item_type() {
         return $this->data['order_item_type'];
-    }
-
-    /**
-     * Get order item meta data.
-     * @return array of date.
-     */
-    public function get_order_item_meta() {
-        return $this->meta_data;
     }
 
     /*
@@ -152,11 +178,13 @@ abstract class WC_Order_Item {
     }
 
     /**
-     * Add order item meta. @todo
-     * @param string $value
+     * Set meta data.
+     * @param array $data Key/Value pairs
      */
-    public function add_meta_data( $key, $value ) {
-        $this->meta_data[ $key ] = $value;
+    public function set_meta_data( $data ) {
+        foreach ( $data as $key => $value ) {
+            $this->data['meta_data'][ $key ] = $value;
+        }
     }
 
     /*
@@ -171,14 +199,25 @@ abstract class WC_Order_Item {
     /**
      * Insert data into the database.
 	 * @since 2.6.0
-     * @access protected
+     * @access private
      * @param array $data data to save
      */
-    protected function create( $data ) {
+    private function create( $data ) {
         global $wpdb;
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', $data );
 		$this->set_item_id( $wpdb->insert_id );
 	}
+
+    /**
+     * Update data in the database.
+	 * @since 2.6.0
+	 * @access private
+     * @param array $data data to save
+     */
+    private function update( $zone_data ) {
+        global $wpdb;
+		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $zone_data, array( 'order_item_id' => $this->get_order_item_id() ) );
+    }
 
 	/**
      * Read from the database.
@@ -193,41 +232,10 @@ abstract class WC_Order_Item {
 			$this->set_order_item_id( $data->order_item_id );
 			$this->set_order_item_name( $data->order_item_name );
             $this->set_order_item_type( $data->order_item_type );
-			$this->read_order_item_meta();
 		}
 	}
 
     /**
-     * Get item meta data from the database.
-     */
-    protected function read_order_item_meta() {
-        if ( $this->get_order_item_id() ) {
-            // @todo
-        }
-    }
-
-    /**
-     * Update data in the database.
-	 * @since 2.6.0
-	 * @access protected
-     * @param array $data data to save
-     */
-    protected function update( $zone_data ) {
-        global $wpdb;
-		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $zone_data, array( 'order_item_id' => $this->get_order_item_id() ) );
-    }
-
-	/**
-     * Delte data from the database.
-	 * @since 2.6.0
-	 * @access protected
-     */
-    protected function delete() {
-        global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_order_item_id() ) );
-    }
-
-	/**
      * Save data to the database.
 	 * @since 2.6.0
      * @access protected
@@ -238,6 +246,15 @@ abstract class WC_Order_Item {
         } else {
             $this->update();
         }
-        //do_action()?
 	}
+
+    /**
+     * Delte data from the database.
+	 * @since 2.6.0
+	 * @access protected
+     */
+    protected function delete() {
+        global $wpdb;
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_order_item_id() ) );
+    }
 }
