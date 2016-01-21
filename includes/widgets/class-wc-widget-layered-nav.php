@@ -233,6 +233,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 				// List display
 				echo '<ul>';
+				
+				// flip the filtered_products_ids array so that we can use the more efficient array_intersect_key
+				$filtered_product_ids = array_flip( WC()->query->filtered_product_ids );
 
 				foreach ( $terms as $term ) {
 
@@ -248,7 +251,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					// If this is an AND query, only show options with count > 0
 					if ( 'and' == $query_type ) {
 
-						$count = sizeof( array_intersect( $_products_in_term, WC()->query->filtered_product_ids ) );
+						// flip the product_in_term array so that we can use array_intersect_key 
+						$_products_in_term = array_flip( $_products_in_term );
+						
+						// Intersect both arrays now they have been flipped so that we can use their keys
+						$count = sizeof( array_intersect_key( $_products_in_term, $filtered_product_ids ) );
 
 						if ( 0 < $count && $current_term !== $term->term_id ) {
 							$found = true;
