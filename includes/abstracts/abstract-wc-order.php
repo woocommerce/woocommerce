@@ -12,8 +12,6 @@
  */
 abstract class WC_Abstract_Order {
 
-    public $post = array();
-
     /**
      * Get the order if ID is passed, otherwise the order is new and empty.
      * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
@@ -1648,7 +1646,7 @@ abstract class WC_Abstract_Order {
         $count = 0;
 
         foreach ( $items as $item ) {
-            $count += is_callable( array( $item, 'get_qty' ) ) ? $item->get_qty() : 1;
+            $count += $item->get_qty();
         }
 
         return apply_filters( 'woocommerce_get_item_count', $count, $item_type, $this );
@@ -2513,113 +2511,143 @@ abstract class WC_Abstract_Order {
     }
 
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Total Getters
+    |--------------------------------------------------------------------------
+    |
+    | Methods for getting totals e.g. for display on the frontend.
+    |
+    */
 
     /**
      * Get item subtotal - this is the cost before discount.
      *
-     * @param mixed $item
+     * @param object $item
      * @param bool $inc_tax (default: false).
      * @param bool $round (default: true).
      * @return float
      */
     public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
-        if ( $inc_tax ) {
-            $price = ( $item['line_subtotal'] + $item['line_subtotal_tax'] ) / max( 1, $item['qty'] );
-        } else {
-            $price = ( $item['line_subtotal'] / max( 1, $item['qty'] ) );
+        $subtotal = 0;
+
+        if ( is_callable( array( $item, 'get_subtotal' ) ) {
+            if ( $inc_tax ) {
+                $subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_qty() );
+            } else {
+                $subtotal = ( $item->get_subtotal() / max( 1, $$item->get_qty() ) );
+            }
+
+            $subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
         }
 
-        $price = $round ? number_format( (float) $price, wc_get_price_decimals(), '.', '' ) : $price;
-
-        return apply_filters( 'woocommerce_order_amount_item_subtotal', $price, $this, $item, $inc_tax, $round );
+        return apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );
     }
 
     /**
      * Get line subtotal - this is the cost before discount.
      *
-     * @param mixed $item
+     * @param object $item
      * @param bool $inc_tax (default: false).
      * @param bool $round (default: true).
      * @return float
      */
     public function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
-        if ( $inc_tax ) {
-            $price = $item['line_subtotal'] + $item['line_subtotal_tax'];
-        } else {
-            $price = $item['line_subtotal'];
+        $subtotal = 0;
+
+        if ( is_callable( array( $item, 'get_subtotal' ) ) {
+            if ( $inc_tax ) {
+                $subtotal = $item->get_subtotal() + $item->get_subtotal_tax();
+            } else {
+                $subtotal = $item->get_subtotal();
+            }
+
+            $subtotal = $round ? round( $subtotal, wc_get_price_decimals() ) : $subtotal;
         }
 
-        $price = $round ? round( $price, wc_get_price_decimals() ) : $price;
-
-        return apply_filters( 'woocommerce_order_amount_line_subtotal', $price, $this, $item, $inc_tax, $round );
+        return apply_filters( 'woocommerce_order_amount_line_subtotal', $subtotal, $this, $item, $inc_tax, $round );
     }
 
     /**
      * Calculate item cost - useful for gateways.
      *
-     * @param mixed $item
+     * @param object $item
      * @param bool $inc_tax (default: false).
      * @param bool $round (default: true).
      * @return float
      */
     public function get_item_total( $item, $inc_tax = false, $round = true ) {
+        $total = 0;
 
-        $qty = ( ! empty( $item['qty'] ) ) ? $item['qty'] : 1;
+        if ( is_callable( array( $item, 'get_total' ) ) {
+            if ( $inc_tax ) {
+                $total = ( $item->get_total() + $item->get_total_tax() ) / max( 1, $item->get_qty() );
+            } else {
+                $total = $item->get_total() / max( 1, $item->get_qty() );
+            }
 
-        if ( $inc_tax ) {
-            $price = ( $item['line_total'] + $item['line_tax'] ) / max( 1, $qty );
-        } else {
-            $price = $item['line_total'] / max( 1, $qty );
+            $total = $round ? round( $total, wc_get_price_decimals() ) : $total;
         }
 
-        $price = $round ? round( $price, wc_get_price_decimals() ) : $price;
-
-        return apply_filters( 'woocommerce_order_amount_item_total', $price, $this, $item, $inc_tax, $round );
+        return apply_filters( 'woocommerce_order_amount_item_total', $total, $this, $item, $inc_tax, $round );
     }
 
     /**
      * Calculate line total - useful for gateways.
      *
-     * @param mixed $item
+     * @param object $item
      * @param bool $inc_tax (default: false).
      * @param bool $round (default: true).
      * @return float
      */
     public function get_line_total( $item, $inc_tax = false, $round = true ) {
+        $total = 0;
 
-        // Check if we need to add line tax to the line total.
-        $line_total = $inc_tax ? $item['line_total'] + $item['line_tax'] : $item['line_total'];
+        if ( is_callable( array( $item, 'get_total' ) ) {
+            // Check if we need to add line tax to the line total.
+            $total = $inc_tax ? $item->get_total() + $item->get_total_tax() : $item->get_total();
 
-        // Check if we need to round.
-        $line_total = $round ? round( $line_total, wc_get_price_decimals() ) : $line_total;
+            // Check if we need to round.
+            $total = $round ? round( $total, wc_get_price_decimals() ) : $total;
+        }
 
-        return apply_filters( 'woocommerce_order_amount_line_total', $line_total, $this, $item, $inc_tax, $round );
+        return apply_filters( 'woocommerce_order_amount_line_total', $total, $this, $item, $inc_tax, $round );
     }
 
     /**
-     * Calculate item tax - useful for gateways.
+     * Get item tax - useful for gateways.
      *
      * @param mixed $item
      * @param bool $round (default: true).
      * @return float
      */
     public function get_item_tax( $item, $round = true ) {
-        $price = $item['line_tax'] / max( 1, $item['qty'] );
-        $price = $round ? wc_round_tax_total( $price ) : $price;
+        $tax = 0;
 
-        return apply_filters( 'woocommerce_order_amount_item_tax', $price, $item, $round, $this );
+        if ( is_callable( array( $item, 'get_total_tax' ) ) {
+            $tax = $item->get_total_tax() / max( 1, $item->get_qty() );
+            $tax = $round ? wc_round_tax_total( $tax ) : $tax;
+        }
+
+        return apply_filters( 'woocommerce_order_amount_item_tax', $tax, $item, $round, $this );
     }
 
     /**
-     * Calculate line tax - useful for gateways.
+     * Get line tax - useful for gateways.
      *
      * @param mixed $item
      * @return float
      */
     public function get_line_tax( $item ) {
-        return apply_filters( 'woocommerce_order_amount_line_tax', wc_round_tax_total( $item['line_tax'] ), $item, $this );
+        return apply_filters( 'woocommerce_order_amount_line_tax', is_callable( array( $item, 'get_total_tax' ) ? wc_round_tax_total( $item->get_total_tax() ) : 0, $item, $this );
     }
+
+
+
+
+
+
+
 
     /**
      * Gets line subtotal - formatted for display.

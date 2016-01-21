@@ -129,6 +129,14 @@ class WC_Order_Item implements ArrayAccess {
 		return $item_meta_array;
 	}
 
+    /**
+     * Get qty.
+     * @return int
+     */
+    public function get_qty() {
+        return 1;
+    }
+
     /*
 	|--------------------------------------------------------------------------
 	| Getters
