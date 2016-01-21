@@ -911,6 +911,36 @@ abstract class WC_Abstract_Order {
         return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', wp_list_pluck( $this->get_shipping_methods(), 'name' ) ), $this );
     }
 
+    /**
+     * List order notes (public) for the customer.
+     *
+     * @return array
+     */
+    public function get_customer_order_notes() {
+        $notes = array();
+        $args  = array(
+            'post_id' => $this->get_order_id(),
+            'approve' => 'approve',
+            'type'    => ''
+        );
+
+        remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
+
+        $comments = get_comments( $args );
+
+        foreach ( $comments as $comment ) {
+            if ( ! get_comment_meta( $comment->comment_ID, 'is_customer_note', true ) ) {
+                continue;
+            }
+            $comment->comment_content = make_clickable( $comment->comment_content );
+            $notes[] = $comment;
+        }
+
+        add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
+
+        return $notes;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Setters
@@ -2642,7 +2672,20 @@ abstract class WC_Abstract_Order {
         return apply_filters( 'woocommerce_order_amount_line_tax', is_callable( array( $item, 'get_total_tax' ) ? wc_round_tax_total( $item->get_total_tax() ) : 0, $item, $this );
     }
 
-
+    /**
+     * Get a product (either product or variation).
+     *
+     * @param object $item
+     * @return WC_Product|bool
+     */
+    public function get_product_from_item( $item ) {
+        if ( is_callable( $item, 'get_product' ) ) {
+            $product = $item->get_product();
+        } else {
+            $product = false;
+        }
+        return apply_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
+    }
 
 
 
@@ -2816,23 +2859,7 @@ abstract class WC_Abstract_Order {
     }
 
 
-    /**
-     * Get a product (either product or variation).
-     *
-     * @param mixed $item
-     * @return WC_Product
-     */
-    public function get_product_from_item( $item ) {
 
-        if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
-            $_product = wc_get_product( $item['variation_id'] );
-        } elseif ( ! empty( $item['product_id']  ) ) {
-            $_product = wc_get_product( $item['product_id'] );
-        } else {
-            $_product = false;
-        }
-        return apply_filters( 'woocommerce_get_product_from_item', $_product, $item, $this );
-    }
 
 
     /**
@@ -3024,35 +3051,7 @@ abstract class WC_Abstract_Order {
         ), trailingslashit( home_url() ) );
     }
 
-    /**
-     * List order notes (public) for the customer.
-     *
-     * @return array
-     */
-    public function get_customer_order_notes() {
-        $notes = array();
-        $args  = array(
-            'post_id' => $this->get_order_id(),
-            'approve' => 'approve',
-            'type'    => ''
-        );
 
-        remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
-
-        $comments = get_comments( $args );
-
-        foreach ( $comments as $comment ) {
-            if ( ! get_comment_meta( $comment->comment_ID, 'is_customer_note', true ) ) {
-                continue;
-            }
-            $comment->comment_content = make_clickable( $comment->comment_content );
-            $notes[] = $comment;
-        }
-
-        add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
-
-        return $notes;
-    }
 
 
 
