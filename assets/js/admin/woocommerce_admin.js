@@ -222,10 +222,11 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
-  
-  // load videos when help button is clicked.
-  $('#contextual-help-link').click(function(){
-    var src = $('#tab-panel-woocommerce_101_tab iframe').data('src');
-    $('#tab-panel-woocommerce_101_tab iframe').attr('src', src);
-  });
+
+	// Load videos when help button is clicked.
+	$( '#contextual-help-link' ).on( 'click', function() {
+		var frame = $( '#tab-panel-woocommerce_101_tab iframe' );
+
+		frame.attr( 'src', frame.data( 'src' ) );
+	});
 });
