@@ -1524,11 +1524,14 @@ abstract class WC_Abstract_Order {
 		$raw_items	   = $wpdb->get_results( $get_items_sql );
 
 		foreach ( $raw_items as $item ) {
-			$item                                = $this->get_item( $item );
-			$item['item_meta']                   = $this->get_item_meta( $item->get_order_item_id() );
-			$item['item_meta_array']             = $this->get_item_meta_array( $item->get_order_item_id() );
-			$item                                = $this->expand_item_meta( $item );
-			$items[ $item->get_order_item_id() ] = $item;
+			$item                    = $this->get_item( $item );
+			$item_id                 = $item->get_order_item_id();
+
+			// These are mainly here for BW compatility, and work becasue WC_Order_item implements ArrayAccess.
+			$item['item_meta']       = $this->get_item_meta( $item->get_order_item_id() );
+			$item['item_meta_array'] = $this->get_item_meta_array( $item->get_order_item_id() );
+			$item                    = $this->expand_item_meta( $item );
+			$items[ $item_id ]       = $item;
 		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this );
