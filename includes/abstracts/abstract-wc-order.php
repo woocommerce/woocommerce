@@ -2561,7 +2561,7 @@ abstract class WC_Abstract_Order {
     public function get_item_subtotal( $item, $inc_tax = false, $round = true ) {
         $subtotal = 0;
 
-        if ( is_callable( array( $item, 'get_subtotal' ) ) {
+        if ( is_callable( array( $item, 'get_subtotal' ) ) ) {
             if ( $inc_tax ) {
                 $subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_qty() );
             } else {
@@ -2585,7 +2585,7 @@ abstract class WC_Abstract_Order {
     public function get_line_subtotal( $item, $inc_tax = false, $round = true ) {
         $subtotal = 0;
 
-        if ( is_callable( array( $item, 'get_subtotal' ) ) {
+        if ( is_callable( array( $item, 'get_subtotal' ) ) ) {
             if ( $inc_tax ) {
                 $subtotal = $item->get_subtotal() + $item->get_subtotal_tax();
             } else {
@@ -2609,7 +2609,7 @@ abstract class WC_Abstract_Order {
     public function get_item_total( $item, $inc_tax = false, $round = true ) {
         $total = 0;
 
-        if ( is_callable( array( $item, 'get_total' ) ) {
+        if ( is_callable( array( $item, 'get_total' ) ) ) {
             if ( $inc_tax ) {
                 $total = ( $item->get_total() + $item->get_total_tax() ) / max( 1, $item->get_qty() );
             } else {
@@ -2633,7 +2633,7 @@ abstract class WC_Abstract_Order {
     public function get_line_total( $item, $inc_tax = false, $round = true ) {
         $total = 0;
 
-        if ( is_callable( array( $item, 'get_total' ) ) {
+        if ( is_callable( array( $item, 'get_total' ) ) ) {
             // Check if we need to add line tax to the line total.
             $total = $inc_tax ? $item->get_total() + $item->get_total_tax() : $item->get_total();
 
@@ -2654,7 +2654,7 @@ abstract class WC_Abstract_Order {
     public function get_item_tax( $item, $round = true ) {
         $tax = 0;
 
-        if ( is_callable( array( $item, 'get_total_tax' ) ) {
+        if ( is_callable( array( $item, 'get_total_tax' ) ) ) {
             $tax = $item->get_total_tax() / max( 1, $item->get_qty() );
             $tax = $round ? wc_round_tax_total( $tax ) : $tax;
         }
@@ -2669,7 +2669,7 @@ abstract class WC_Abstract_Order {
      * @return float
      */
     public function get_line_tax( $item ) {
-        return apply_filters( 'woocommerce_order_amount_line_tax', is_callable( array( $item, 'get_total_tax' ) ? wc_round_tax_total( $item->get_total_tax() ) : 0, $item, $this );
+        return apply_filters( 'woocommerce_order_amount_line_tax', is_callable( array( $item, 'get_total_tax' ) ) ? wc_round_tax_total( $item->get_total_tax() ) : 0, $item, $this );
     }
 
     /**
@@ -2700,10 +2700,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
-
-        if ( ! $tax_display ) {
-            $tax_display = $this->tax_display_cart;
-        }
+        $tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 
         if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) {
             return '';
@@ -2740,12 +2737,8 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
-
-        if ( ! $tax_display ) {
-            $tax_display = $this->tax_display_cart;
-        }
-
-        $subtotal = 0;
+        $tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
+        $subtotal    = 0;
 
         if ( ! $compound ) {
             foreach ( $this->get_items() as $item ) {
@@ -2809,9 +2802,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_to_display( $tax_display = '' ) {
-        if ( ! $tax_display ) {
-            $tax_display = $this->tax_display_cart;
-        }
+        $tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 
         if ( $this->order_shipping != 0 ) {
 
@@ -2852,9 +2843,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_discount_to_display( $tax_display = '' ) {
-        if ( ! $tax_display ) {
-            $tax_display = $this->tax_display_cart;
-        }
+        $tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
         return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( $tax_display === 'excl' && $this->display_totals_ex_tax ), array( 'currency' => $this->get_order_currency() ) ), $this );
     }
 
@@ -2869,12 +2858,8 @@ abstract class WC_Abstract_Order {
      * @return array
      */
     public function get_order_item_totals( $tax_display = '' ) {
-
-        if ( ! $tax_display ) {
-            $tax_display = $this->tax_display_cart;
-        }
-
-        $total_rows = array();
+        $tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
+        $total_rows  = array();
 
         if ( $subtotal = $this->get_subtotal_to_display( false, $tax_display ) ) {
             $total_rows['cart_subtotal'] = array(
