@@ -685,7 +685,7 @@ class WC_API_Products extends WC_API_Resource {
 			if ( is_numeric( $image ) ) {
 				$image_id = absint( $image );
 			} else if ( ! empty( $image ) ) {
-				$upload   = $this->upload_product_image( esc_url_raw( $image ) );
+				$upload   = $this->upload_product_category_image( esc_url_raw( $image ) );
 				$image_id = $this->set_product_category_image_as_attachment( $upload );
 			}
 
@@ -751,7 +751,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( is_numeric( $image ) ) {
 					$image_id = absint( $image );
 				} else if ( ! empty( $image ) ) {
-					$upload   = $this->upload_product_image( esc_url_raw( $image ) );
+					$upload   = $this->upload_product_category_image( esc_url_raw( $image ) );
 					$image_id = $this->set_product_category_image_as_attachment( $upload );
 				}
 
@@ -1780,16 +1780,29 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			// Thumbnail
+			// Thumbnail.
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
 					if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
 						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+
 						if ( is_wp_error( $upload ) ) {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
 						}
+
 						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
+
+						// Set the image alt if present.
+						if ( ! empty( $image['alt'] ) ) {
+							update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
+						}
+
+						// Set the image title if present.
+						if ( ! empty( $image['title'] ) ) {
+							wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['title'] ) );
+						}
+
 						update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
 					}
 				} else {
@@ -2236,7 +2249,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Save product images
+	 * Save product images.
 	 *
 	 * @since  2.2
 	 * @param  array $images
@@ -2272,19 +2285,19 @@ class WC_API_Products extends WC_API_Resource {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
 						}
 
-						$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
-					} else {
-						$gallery[] = $attachment_id;
+						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
 					}
+
+					$gallery[] = $attachment_id;
 				}
 
 				// Set the image alt if present.
-				if ( ! empty( $image['alt'] ) ) {
+				if ( ! empty( $image['alt'] ) && $attachment_id ) {
 					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
 				}
 
 				// Set the image title if present.
-				if ( ! empty( $image['title'] ) ) {
+				if ( ! empty( $image['title'] ) && $attachment_id ) {
 					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['title'] ) );
 				}
 			}
@@ -2306,14 +2319,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return int|WP_Error attachment id
 	 */
 	public function upload_product_image( $image_url ) {
-		return $this->upload_image_from_url( $image_url );
+		return $this->upload_image_from_url( $image_url, 'product_image' );
 	}
 
 	/**
 	 * Upload product category image from URL.
 	 *
-	 * @since  2.5.0
-	 * @param  string $image_url
+	 * @since 2.5.0
+	 * @param string $image_url
 	 * @return int|WP_Error attachment id
 	 */
 	public function upload_product_category_image( $image_url ) {
@@ -2325,9 +2338,9 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @throws WC_API_Exception
 	 *
-	 * @since  2.5.0
-	 * @param  string       $image_url
-	 * @param  string       $upload_for
+	 * @since 2.5.0
+	 * @param string $image_url
+	 * @param string $upload_for
 	 * @return int|WP_Error Attachment id
 	 */
 	protected function upload_image_from_url( $image_url, $upload_for = 'product_image' ) {
@@ -2340,10 +2353,10 @@ class WC_API_Products extends WC_API_Resource {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
-		// Ensure url is valid
+		// Ensure url is valid.
 		$image_url = str_replace( ' ', '%20', $image_url );
 
-		// Get the file
+		// Get the file.
 		$response = wp_safe_remote_get( $image_url, array(
 			'timeout' => 10
 		) );
@@ -2352,7 +2365,7 @@ class WC_API_Products extends WC_API_Resource {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
-		// Ensure we have a file name and type
+		// Ensure we have a file name and type.
 		if ( ! $wp_filetype['type'] ) {
 			$headers = wp_remote_retrieve_headers( $response );
 			if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
@@ -2365,14 +2378,14 @@ class WC_API_Products extends WC_API_Resource {
 			unset( $headers );
 		}
 
-		// Upload the file
+		// Upload the file.
 		$upload = wp_upload_bits( $file_name, '', wp_remote_retrieve_body( $response ) );
 
 		if ( $upload['error'] ) {
 			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_error', $upload['error'], 400 );
 		}
 
-		// Get filesize
+		// Get filesize.
 		$filesize = filesize( $upload['file'] );
 
 		if ( 0 == $filesize ) {
