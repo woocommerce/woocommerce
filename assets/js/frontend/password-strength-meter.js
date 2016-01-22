@@ -11,8 +11,7 @@ jQuery( function( $ ) {
 		 */
 		init: function() {
 			$( document.body )
-				.on( 'keyup', 'form.register #reg_password, form.checkout #account_password, form.edit-account #password_1, form.lost_reset_password #password_1', this.strengthMeter )
-				.on( 'change', 'form.checkout #createaccount', this.checkoutNeedsRegistration );
+				.on( 'keyup', 'form.register #reg_password, form.checkout #account_password, form.edit-account #password_1, form.lost_reset_password #password_1', this.strengthMeter );
 
 			$( 'form.checkout #createaccount' ).change();
 		},
@@ -30,9 +29,10 @@ jQuery( function( $ ) {
 
 			strength = wc_password_strength_meter.checkPasswordStrength( field );
 
+			// Stop form if password is weak... But not in checkout form!
 			if ( 3 === strength || 4 === strength ) {
 				submit.removeAttr( 'disabled' );
-			} else {
+			} else if ( ! wrapper.hasClass( 'checkout' ) ) {
 				submit.attr( 'disabled', 'disabled' );
 			}
 		},
@@ -86,19 +86,6 @@ jQuery( function( $ ) {
 			}
 
 			return strength;
-		},
-
-		/**
-		 * Check if user wants register on checkout.
-		 */
-		checkoutNeedsRegistration: function() {
-			var submit = $( 'form.checkout input[type="submit"]' );
-
-			if ( $( this ).is( ':checked' ) ) {
-				submit.attr( 'disabled', 'disabled' );
-			} else {
-				submit.removeAttr( 'disabled' );
-			}
 		}
 	};
 
