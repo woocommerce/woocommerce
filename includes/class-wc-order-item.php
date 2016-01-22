@@ -32,7 +32,21 @@ class WC_Order_Item implements ArrayAccess {
      * @param mixed $value
      */
     public function offsetSet( $offset, $value ) {
+        if ( 'item_meta_array' === $offset ) {
+            $offset = 'meta_data';
+        }
         $this->data[ $offset ] = $value;
+    }
+
+    /**
+     * offsetUnset for ArrayAccess
+     * @param string $offset
+     */
+    public function offsetUnset( $offset ) {
+        if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
+            $this->data['meta_data'] = array();
+        }
+        unset( $this->data[ $offset ] );
     }
 
     /**
@@ -41,15 +55,10 @@ class WC_Order_Item implements ArrayAccess {
      * @return bool
      */
     public function offsetExists( $offset ) {
+        if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
+            return true;
+        }
         return isset( $this->data[ $offset ] );
-    }
-
-    /**
-     * offsetUnset for ArrayAccess
-     * @param string $offset
-     */
-    public function offsetUnset( $offset ) {
-        unset( $this->data[ $offset ] );
     }
 
     /**
@@ -58,6 +67,13 @@ class WC_Order_Item implements ArrayAccess {
      * @return mixed
      */
     public function offsetGet( $offset ) {
+        if( 'item_meta_array' === $offset ) {
+            $offset = 'meta_data';
+        }
+        elseif( 'item_meta' === $offset ) {
+            $meta_values = wp_list_pluck( $this->data['meta_data'], 'value', 'key' );
+            return $meta_values;
+        }
         return isset( $this->data[ $offset ] ) ? $this->data[ $offset ] : null;
     }
 
@@ -103,31 +119,12 @@ class WC_Order_Item implements ArrayAccess {
     }
 
     /**
-	 * Get all item meta data in array format in the order it was saved. Does not group meta by key.
-	 * @param mixed $order_item_id
-	 * @return array of objects
-	 */
-	public function get_all_item_meta_data() {
-		global $wpdb;
-
-        $item_meta_array = array();
-
-        if ( $this->get_order_item_id() ) {
-    		// Get cache key - uses get_cache_prefix to invalidate when needed
-    		$cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'all_item_meta_' . $this->get_order_item_id();
-    		$item_meta_array = wp_cache_get( $cache_key, 'orders' );
-
-    		if ( false === $item_meta_array ) {
-    			$metadata        = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_order_item_id() ) );
-    			foreach ( $metadata as $metadata_row ) {
-    				$item_meta_array[ $metadata_row->meta_key ] = $metadata_row->meta_value;
-    			}
-    			wp_cache_set( $cache_key, $item_meta_array, 'orders' );
-    		}
-        }
-
-		return $item_meta_array;
-	}
+     * Internal meta keys we don't want exposed as part of meta_data.
+     * @return array()
+     */
+    protected function get_internal_meta_keys() {
+        return array();
+    }
 
     /**
      * Get qty.
@@ -184,6 +181,14 @@ class WC_Order_Item implements ArrayAccess {
         return $this->data['type'];
     }
 
+    /**
+     * Get meta data
+     * @return array
+     */
+    public function get_meta_data() {
+        return $this->data['meta_data'];
+    }
+
     /*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -230,6 +235,38 @@ class WC_Order_Item implements ArrayAccess {
     public function set_meta_data( $data ) {
         foreach ( $data as $key => $value ) {
             $this->data['meta_data'][ $key ] = $value;
+        }
+    }
+
+    /**
+     * Set meta data.
+     * @param array $data Key/Value pairs
+     */
+    public function add_meta_data( $key, $value, $unique = false ) {
+        if ( $unique ) {
+            $meta_ids = array_keys( wp_list_pluck( $this->data['meta_data'], 'key' ), $key );
+            $this->data['meta_data'] = array_diff_key( $this->data['meta_data'], array_fill_keys( $meta_ids, '' ) );
+        }
+        $this->data['meta_data'][] = array(
+            'key'   => $key,
+            'value' => $value
+        );
+    }
+
+    /**
+     * Update meta data by key or ID, if provided.
+     * @param  string $key
+     * @param  string $value
+     * @param  int $meta_id
+     */
+    public function update_meta_data( $key, $value, $meta_id = '' ) {
+        if ( $meta_id && isset( $this->data['meta_data'][ $meta_id ] ) ) {
+            $this->data['meta_data'][ $meta_id ] = array(
+                'key'   => $key,
+                'value' => $value
+            );
+        } else {
+            $this->add_meta_data( $key, $value, true );
         }
     }
 
@@ -293,8 +330,35 @@ class WC_Order_Item implements ArrayAccess {
 			$this->set_order_item_id( $data->order_item_id );
 			$this->set_name( $data->order_item_name );
             $this->set_type( $data->order_item_type );
+            $this->read_meta_data();
 		}
 	}
+
+    /**
+     * Read Meta Data from the database. Ignore any internal properties.
+     */
+    protected function read_meta_data() {
+        $this->data['meta_data'] = array();
+
+        if ( $this->get_order_item_id() ) {
+            // Get cache key - uses get_cache_prefix to invalidate when needed
+            $cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'meta_data_' . $this->get_order_item_id();
+            $item_meta_array = wp_cache_get( $cache_key, 'orders' );
+
+            if ( false === $item_meta_array ) {
+                global $wpdb;
+
+                $metadata = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_order_item_id() ) );
+                foreach ( $metadata as $metadata_row ) {
+                    if ( in_array( $metadata_row->meta_key, $this->get_internal_meta_keys() ) ) {
+                        continue;
+                    }
+                    $this->data['meta_data'][ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
+                }
+                wp_cache_set( $cache_key, $item_meta_array, 'orders' );
+            }
+        }
+    }
 
     /**
      * Save data to the database.

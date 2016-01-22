@@ -29,6 +29,37 @@ class WC_Order_Item_Fee extends WC_Order_Item {
     );
 
     /**
+     * offsetGet for ArrayAccess/Backwards compatibility.
+     * @todo Add deprecation notices in future release.
+     * @param string $offset
+     * @return mixed
+     */
+    public function offsetGet( $offset ) {
+        if ( 'line_total' === $offset ) {
+            $offset = 'total';
+        }
+        elseif ( 'line_tax' === $offset ) {
+            $offset = 'total_tax';
+        }
+        elseif ( 'line_tax_data' === $offset ) {
+            $offset = 'taxes';
+        }
+        return parent::offsetGet( $offset );
+    }
+
+    /**
+     * offsetExists for ArrayAccess
+     * @param string $offset
+     * @return bool
+     */
+    public function offsetExists( $offset ) {
+        if ( in_array( $offset, array( 'line_total', 'line_tax', 'line_tax_data' ) ) ) {
+            return true;
+        }
+        return parent::offsetExists( $offset );
+    }
+
+    /**
      * Read/populate data properties specific to this order item.
      */
     protected function read( $id ) {
@@ -120,6 +151,14 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	| Getters
 	|--------------------------------------------------------------------------
 	*/
+
+    /**
+     * Get order item name.
+     * @return string
+     */
+    public function get_name() {
+        return $this->data['name'] ? $this->data['name'] : __( 'Fee', 'woocommerce' );
+    }
 
     /**
      * Get order item type.

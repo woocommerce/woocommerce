@@ -49,24 +49,36 @@ abstract class WC_Abstract_Order {
     }
 
     /**
-     * Magic __get method.
+     * Magic __get method. Maps legacy vars to getters.
      * @param string $key
      * @return mixed
      */
     public function __get( $key ) {
-        // @todo needs to get data
-        //
-        // Get values or default if not set.
         if ( 'completed_date' === $key ) {
-            $value = ( $value = get_post_meta( $this->get_order_id(), '_completed_date', true ) ) ? $value : $this->modified_date;
-        } elseif ( 'user_id' === $key ) {
-            $value = ( $value = get_post_meta( $this->get_order_id(), '_customer_user', true ) ) ? absint( $value ) : '';
-        } elseif ( 'status' === $key ) {
-            $value = $this->get_status();
+            return $this->get_date_completed();
+        }
+
+        elseif ( 'id' === $key ) {
+            return $this->get_order_id();
 		}
 
+        elseif ( 'post' === $key ) {
+            return get_post( $this->get_order_id() );
+		}
 
-		if ( 'prices_include_tax' === $key ) {
+        elseif ( 'status' === $key || 'post_status' === $key ) {
+            return $this->get_status();
+		}
+
+        elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
+            return $this->get_customer_note();
+		}
+
+        elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
+            return $this->get_customer_id();
+        }
+
+		elseif ( 'prices_include_tax' === $key ) {
 			return 'yes' === get_option( 'woocommerce_prices_include_tax' );
 		}
 
@@ -82,20 +94,17 @@ abstract class WC_Abstract_Order {
 			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
 		}
 
+        elseif ( isset( $this->data[ $key ] ) ) {
+            return $this->data[ $key ];
+        }
+
 		else {
 			$value = get_post_meta( $this->get_order_id(), '_' . $key, true );
 		}
 
-        // @todo bw compat for
-        // customer_message and customer_note
-        // post_status
-        // post
         // order_date
         // modified_date
         // $order_type
-        // id
-        // customer_user
-        //
         // cart_discount
         // order_shipping
         // order_tax
@@ -103,11 +112,7 @@ abstract class WC_Abstract_Order {
         // order_shipping_tax
         // order_total
         // $this->order_date          = $post_object->post_date;
-        //$this->modified_date       = $post_object->post_modified;
-    //    $this->customer_message    = $post_object->post_excerpt;
-    //    $this->customer_note       = $post_object->post_excerpt;
-    //    $this->post_status         = $post_object->post_status;
-    //    completed_date
+        // $this->modified_date       = $post_object->post_modified;
 
         return $value;
     }
@@ -301,7 +306,7 @@ abstract class WC_Abstract_Order {
      * Get billing_address_1
      * @return string
      */
-    public function get_billing_address_1( $value ) {
+    public function get_billing_address_1() {
         return $this->data['billing_address_1'];
     }
 
@@ -514,32 +519,31 @@ abstract class WC_Abstract_Order {
     public function get_address( $type = 'billing' ) {
         if ( 'billing' === $type ) {
             $address = array(
-                'first_name' => $this->data['billing_first_name'],
-                'last_name'  => $this->data['billing_last_name'],
-                'company'    => $this->data['billing_company'],
-                'address_1'  => $this->data['billing_address_1'],
-                'address_2'  => $this->data['billing_address_2'],
-                'city'       => $this->data['billing_city'],
-                'state'      => $this->data['billing_state'],
-                'postcode'   => $this->data['billing_postcode'],
-                'country'    => $this->data['billing_country'],
-                'email'      => $this->data['billing_email'],
-                'phone'      => $this->data['billing_phone']
+                'first_name' => $this->get_billing_first_name(),
+                'last_name'  => $this->get_billing_last_name(),
+                'company'    => $this->get_billing_company(),
+                'address_1'  => $this->get_billing_address_1(),
+                'address_2'  => $this->get_billing_address_2(),
+                'city'       => $this->get_billing_city(),
+                'state'      => $this->get_billing_state(),
+                'postcode'   => $this->get_billing_postcode(),
+                'country'    => $this->get_billing_country(),
+                'email'      => $this->get_billing_email(),
+                'phone'      => $this->get_billing_phone()
             );
         } else {
             $address = array(
-                'first_name' => $this->data['shipping_first_name'],
-                'last_name'  => $this->data['shipping_last_name'],
-                'company'    => $this->data['shipping_company'],
-                'address_1'  => $this->data['shipping_address_1'],
-                'address_2'  => $this->data['shipping_address_2'],
-                'city'       => $this->data['shipping_city'],
-                'state'      => $this->data['shipping_state'],
-                'postcode'   => $this->data['shipping_postcode'],
-                'country'    => $this->data['shipping_country'],
+                'first_name' => $this->get_shipping_first_name(),
+                'last_name'  => $this->get_shipping_last_name(),
+                'company'    => $this->get_shipping_company(),
+                'address_1'  => $this->get_shipping_address_1(),
+                'address_2'  => $this->get_shipping_address_2(),
+                'city'       => $this->get_shipping_city(),
+                'state'      => $this->get_shipping_state(),
+                'postcode'   => $this->get_shipping_postcode(),
+                'country'    => $this->get_shipping_country()
             );
         }
-
         return apply_filters( 'woocommerce_get_order_address', $address, $type, $this );
     }
 
@@ -800,7 +804,11 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_method() {
-        return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', wp_list_pluck( $this->get_shipping_methods(), 'name' ) ), $this );
+        $names = array();
+        foreach ( $this->get_shipping_methods() as $shipping_method ) {
+            $names[] = $shipping_method->get_name();
+        }
+        return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $names ), $this );
     }
 
     /*
@@ -1423,14 +1431,8 @@ abstract class WC_Abstract_Order {
         $raw_items       = $wpdb->get_results( $get_items_sql );
 
         foreach ( $raw_items as $item ) {
-            $item                    = $this->get_item( $item );
-            $item_id                 = $item->get_order_item_id();
-
-            // These are mainly here for BW compatility, and work becasue WC_Order_item implements ArrayAccess.
-            $item['item_meta']       = $this->get_item_meta( $item->get_order_item_id() );
-            $item['item_meta_array'] = $this->get_item_meta_array( $item->get_order_item_id() );
-            $item                    = $this->expand_item_meta( $item );
-            $items[ $item_id ]       = $item;
+            $item                                = $this->get_item( $item );
+            $items[ $item->get_order_item_id() ] = $item;
         }
 
         return apply_filters( 'woocommerce_order_get_items', $items, $this );
@@ -1446,42 +1448,13 @@ abstract class WC_Abstract_Order {
     }
 
     /**
-     * Expand item meta into the $item array.
-     * @deprecated 2.6.0 Item meta no longer expanded.
-     * @since 2.4.0
-     * @param array $item before expansion.
-     * @return array
+     * Display meta data belonging to an item. @todo
+     * @param  array $item
      */
-    public function expand_item_meta( $item ) {
-        // Reserved meta keys
-        $reserved_item_meta_keys = array(
-            'name',
-            'type',
-            'item_meta',
-            'item_meta_array',
-            'qty',
-            'tax_class',
-            'product_id',
-            'variation_id',
-            'line_subtotal',
-            'line_total',
-            'line_tax',
-            'line_subtotal_tax'
-        );
-        // Expand item meta if set.
-        if ( ! empty( $item['item_meta'] ) ) {
-            foreach ( $item['item_meta'] as $name => $value ) {
-                if ( in_array( $name, $reserved_item_meta_keys ) ) {
-                    continue;
-                }
-                if ( '_' === substr( $name, 0, 1 ) ) {
-                    $item[ substr( $name, 1 ) ] = make_clickable( $value[0] );
-                } else {
-                    $item[ $name ] = make_clickable( $value[0] );
-                }
-            }
-        }
-        return $item;
+    public function display_item_meta( $item ) {
+        $product   = $this->get_product_from_item( $item );
+        $item_meta = new WC_Order_Item_Meta( $item, $product );
+        $item_meta->display();
     }
 
     /**
@@ -1636,7 +1609,7 @@ abstract class WC_Abstract_Order {
             $item->set_qty( $args['qty'] );
 
             if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-                $item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ) );
+                $item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
             }
 
             $item->set_line_subtotal( $product->get_price_excluding_tax( $args['qty'] ) );
@@ -1657,7 +1630,7 @@ abstract class WC_Abstract_Order {
 
         if ( isset( $args['variation'] ) && is_array( $args['variation'] ) ) {
             foreach ( $args['variation'] as $key => $value ) {
-                $item->add_meta_data( str_replace( 'attribute_', '', $key ), $value );
+                $item->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
             }
         }
 
@@ -2267,142 +2240,6 @@ abstract class WC_Abstract_Order {
         return $grand_total;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Get all item meta data in array format in the order it was saved. Does not group meta by key like get_item_meta().
-     *
-     * @param mixed $order_item_id
-     * @return array of objects
-     */
-    public function get_item_meta_array( $order_item_id ) {
-        global $wpdb;
-
-        // Get cache key - uses get_cache_prefix to invalidate when needed
-        $cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $order_item_id;
-        $item_meta_array = wp_cache_get( $cache_key, 'orders' );
-
-        if ( false === $item_meta_array ) {
-            $item_meta_array = array();
-            $metadata        = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", absint( $order_item_id ) ) );
-            foreach ( $metadata as $metadata_row ) {
-                $item_meta_array[ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
-            }
-            wp_cache_set( $cache_key, $item_meta_array, 'orders' );
-        }
-
-        return $item_meta_array ;
-    }
-
-    /**
-     * Display meta data belonging to an item.
-     * @param  array $item
-     */
-    public function display_item_meta( $item ) {
-        $product   = $this->get_product_from_item( $item );
-        $item_meta = new WC_Order_Item_Meta( $item, $product );
-        $item_meta->display();
-    }
-
-    /**
-     * Get order item meta.
-     *
-     * @param mixed $order_item_id
-     * @param string $key (default: '')
-     * @param bool $single (default: false)
-     * @return array|string
-     */
-    public function get_item_meta( $order_item_id, $key = '', $single = false ) {
-        return get_metadata( 'order_item', $order_item_id, $key, $single );
-    }
-
-
     /*
     |--------------------------------------------------------------------------
     | Total Getters
@@ -2411,6 +2248,21 @@ abstract class WC_Abstract_Order {
     | Methods for getting totals e.g. for display on the frontend.
     |
     */
+
+    /**
+     * Get a product (either product or variation).
+     *
+     * @param object $item
+     * @return WC_Product|bool
+     */
+    public function get_product_from_item( $item ) {
+        if ( is_callable( array( $item, 'get_product' ) ) ) {
+            $product = $item->get_product();
+        } else {
+            $product = false;
+        }
+        return apply_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
+    }
 
     /**
      * Get item subtotal - this is the cost before discount.
@@ -2427,7 +2279,7 @@ abstract class WC_Abstract_Order {
             if ( $inc_tax ) {
                 $subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / max( 1, $item->get_qty() );
             } else {
-                $subtotal = ( $item->get_subtotal() / max( 1, $$item->get_qty() ) );
+                $subtotal = ( $item->get_subtotal() / max( 1, $item->get_qty() ) );
             }
 
             $subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
@@ -2535,26 +2387,6 @@ abstract class WC_Abstract_Order {
     }
 
     /**
-     * Get a product (either product or variation).
-     *
-     * @param object $item
-     * @return WC_Product|bool
-     */
-    public function get_product_from_item( $item ) {
-        if ( is_callable( $item, 'get_product' ) ) {
-            $product = $item->get_product();
-        } else {
-            $product = false;
-        }
-        return apply_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
-    }
-
-
-
-
-
-
-    /**
      * Gets line subtotal - formatted for display.
      *
      * @param array  $item
@@ -2569,7 +2401,7 @@ abstract class WC_Abstract_Order {
         }
 
         if ( 'excl' == $tax_display ) {
-            $ex_tax_label = $this->prices_include_tax ? 1 : 0;
+            $ex_tax_label = $this->get_prices_include_tax() ? 1 : 0;
 
             $subtotal = wc_price( $this->get_line_subtotal( $item ), array( 'ex_tax_label' => $ex_tax_label, 'currency' => $this->get_order_currency() ) );
         } else {
@@ -2578,8 +2410,6 @@ abstract class WC_Abstract_Order {
 
         return apply_filters( 'woocommerce_order_formatted_line_subtotal', $subtotal, $item, $this );
     }
-
-
 
     /**
      * Gets order total - formatted for display.
@@ -2604,34 +2434,26 @@ abstract class WC_Abstract_Order {
 
         if ( ! $compound ) {
             foreach ( $this->get_items() as $item ) {
+                $subtotal += $item->get_subtotal();
 
-                if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) {
-                    return '';
-                }
-
-                $subtotal += $item['line_subtotal'];
-
-                if ( 'incl' == $tax_display ) {
-                    $subtotal += $item['line_subtotal_tax'];
+                if ( 'incl' === $tax_display ) {
+                    $subtotal += $item->get_subtotal_tax();
                 }
             }
 
-            $subtotal = wc_price( $subtotal, array('currency' => $this->get_order_currency()) );
+            $subtotal = wc_price( $subtotal, array( 'currency' => $this->get_order_currency() ) );
 
-            if ( $tax_display == 'excl' && $this->prices_include_tax ) {
+            if ( 'excl' === $tax_display && $this->get_prices_include_tax() ) {
                 $subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
             }
 
         } else {
-
-            if ( 'incl' == $tax_display ) {
+            if ( 'incl' === $tax_display ) {
                 return '';
             }
 
             foreach ( $this->get_items() as $item ) {
-
-                $subtotal += $item['line_subtotal'];
-
+                $subtotal += $item->get_subtotal();
             }
 
             // Add Shipping Costs.
@@ -2639,24 +2461,19 @@ abstract class WC_Abstract_Order {
 
             // Remove non-compound taxes.
             foreach ( $this->get_taxes() as $tax ) {
-
                 if ( ! empty( $tax['compound'] ) ) {
                     continue;
                 }
-
                 $subtotal = $subtotal + $tax['tax_amount'] + $tax['shipping_tax_amount'];
-
             }
 
             // Remove discounts.
             $subtotal = $subtotal - $this->get_total_discount();
-
-            $subtotal = wc_price( $subtotal, array('currency' => $this->get_order_currency()) );
+            $subtotal = wc_price( $subtotal, array( 'currency' => $this->get_order_currency() ) );
         }
 
         return apply_filters( 'woocommerce_order_subtotal_to_display', $subtotal, $compound, $this );
     }
-
 
     /**
      * Gets shipping (formatted).
@@ -2706,7 +2523,7 @@ abstract class WC_Abstract_Order {
      */
     public function get_discount_to_display( $tax_display = '' ) {
         $tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-        return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( $tax_display === 'excl' && $this->display_totals_ex_tax ), array( 'currency' => $this->get_order_currency() ) ), $this );
+        return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( 'excl' === $tax_display && 'excl' === get_option( 'woocommerce_tax_display_cart' ) ), array( 'currency' => $this->get_order_currency() ) ), $this );
     }
 
     /**
@@ -2742,25 +2559,13 @@ abstract class WC_Abstract_Order {
 
         if ( $fees = $this->get_fees() ) {
             foreach ( $fees as $id => $fee ) {
-
-                if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', $fee['line_total'] + $fee['line_tax'] == 0, $id ) ) {
+                if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', empty( $fee['line_total'] ) && empty( $fee['line_tax'] ), $id ) ) {
                     continue;
                 }
-
-                if ( 'excl' == $tax_display ) {
-
-                    $total_rows[ 'fee_' . $id ] = array(
-                        'label' => ( $fee['name'] ? $fee['name'] : __( 'Fee', 'woocommerce' ) ) . ':',
-                        'value'    => wc_price( $fee['line_total'], array('currency' => $this->get_order_currency()) )
-                    );
-
-                } else {
-
-                    $total_rows[ 'fee_' . $id ] = array(
-                        'label' => $fee['name'] . ':',
-                        'value'    => wc_price( $fee['line_total'] + $fee['line_tax'], array('currency' => $this->get_order_currency()) )
-                    );
-                }
+                $total_rows[ 'fee_' . $fee->get_order_item_id() ] = array(
+                    'label' => $fee->get_name() . ':',
+                    'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array('currency' => $this->get_order_currency()) )
+                );
             }
         }
 
@@ -2786,10 +2591,10 @@ abstract class WC_Abstract_Order {
             }
         }
 
-        if ( $this->get_total() > 0 && $this->payment_method_title ) {
+        if ( $this->get_total() > 0 && $this->get_payment_method_title() ) {
             $total_rows['payment_method'] = array(
                 'label' => __( 'Payment Method:', 'woocommerce' ),
-                'value' => $this->payment_method_title
+                'value' => $this->get_payment_method_title()
             );
         }
 
@@ -2889,6 +2694,44 @@ abstract class WC_Abstract_Order {
     | Will be removed after 2 major releases, or 1 year.
     |
     */
+
+    /**
+     * Get order item meta.
+     * @deprecated 2.6.0
+     * @param mixed $order_item_id
+     * @param string $key (default: '')
+     * @param bool $single (default: false)
+     * @return array|string
+     */
+    public function get_item_meta( $order_item_id, $key = '', $single = false ) {
+        _deprecated_function( 'get_item_meta', '2.6', 'wc_get_order_item_meta' );
+        return get_metadata( 'order_item', $order_item_id, $key, $single );
+    }
+
+    /**
+     * Get all item meta data in array format in the order it was saved. Does not group meta by key like get_item_meta().
+     *
+     * @param mixed $order_item_id
+     * @return array of objects
+     */
+    public function get_item_meta_array( $order_item_id ) {
+        _deprecated_function( 'get_item_meta_array', '2.6', 'WC_Order_Item::get_meta_data()' );
+        $item = $this->get_item( $order_item_id );
+        return $item->get_meta_data();
+    }
+
+    /**
+     * Expand item meta into the $item array.
+     * @deprecated 2.6.0 Item meta no longer expanded due to new order item
+     *        classes. This function now does nothing to avoid data breakage.
+     * @since 2.4.0
+     * @param array $item before expansion.
+     * @return array
+     */
+    public function expand_item_meta( $item ) {
+        _deprecated_function( 'expand_item_meta', '2.6', '' );
+        return $item;
+    }
 
 	/**
      * Load the order object. Called from the constructor.

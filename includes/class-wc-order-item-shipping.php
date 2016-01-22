@@ -28,6 +28,31 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
     );
 
     /**
+     * offsetGet for ArrayAccess/Backwards compatibility.
+     * @todo Add deprecation notices in future release.
+     * @param string $offset
+     * @return mixed
+     */
+    public function offsetGet( $offset ) {
+        if ( 'cost' === $offset ) {
+            $offset = 'subtotal';
+        }
+        return parent::offsetGet( $offset );
+    }
+
+    /**
+     * offsetExists for ArrayAccess
+     * @param string $offset
+     * @return bool
+     */
+    public function offsetExists( $offset ) {
+        if ( in_array( $offset, array( 'cost' ) ) ) {
+            return true;
+        }
+        return parent::offsetExists( $offset );
+    }
+
+    /**
      * Read/populate data properties specific to this order item.
      */
     protected function read( $id ) {
@@ -51,6 +76,14 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
             wc_update_order_item_meta( $this->get_order_item_id(), 'total_tax', $this->get_total_tax() );
             wc_update_order_item_meta( $this->get_order_item_id(), 'taxes', $this->get_taxes() );
         }
+    }
+
+    /**
+     * Internal meta keys we don't want exposed as part of meta_data.
+     * @return array()
+     */
+    protected function get_internal_meta_keys() {
+        return array( 'method_id', 'cost', 'total_tax', 'taxes' );
     }
 
     /*

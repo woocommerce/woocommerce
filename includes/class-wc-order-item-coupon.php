@@ -24,6 +24,34 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
     );
 
     /**
+     * offsetGet for ArrayAccess/Backwards compatibility.
+     * @todo Add deprecation notices in future release.
+     * @param string $offset
+     * @return mixed
+     */
+    public function offsetGet( $offset ) {
+        if ( 'discount_amount' === $offset ) {
+            $offset = 'discount';
+        }
+        elseif ( 'discount_amount_tax' === $offset ) {
+            $offset = 'discount_tax';
+        }
+        return parent::offsetGet( $offset );
+    }
+
+    /**
+     * offsetExists for ArrayAccess
+     * @param string $offset
+     * @return bool
+     */
+    public function offsetExists( $offset ) {
+        if ( in_array( $offset, array( 'discount_amount', 'discount_amount_tax' ) ) ) {
+            return true;
+        }
+        return parent::offsetExists( $offset );
+    }
+
+    /**
      * Read/populate data properties specific to this order item.
      */
     protected function read( $id ) {
@@ -43,6 +71,14 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
             wc_update_order_item_meta( $this->get_order_item_id(), 'discount_amount', $this->get_discount() );
             wc_update_order_item_meta( $this->get_order_item_id(), 'discount_amount_tax', $this->get_discount_tax() );
         }
+    }
+
+    /**
+     * Internal meta keys we don't want exposed as part of meta_data.
+     * @return array()
+     */
+    protected function get_internal_meta_keys() {
+        return array( 'discount_amount', 'discount_amount_tax' );
     }
 
     /*

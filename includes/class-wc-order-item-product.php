@@ -35,6 +35,43 @@ class WC_Order_Item_Product extends WC_Order_Item {
     );
 
     /**
+     * offsetGet for ArrayAccess/Backwards compatibility.
+     * @todo Add deprecation notices in future release.
+     * @param string $offset
+     * @return mixed
+     */
+    public function offsetGet( $offset ) {
+        if ( 'line_subtotal' === $offset ) {
+            $offset = 'subtotal';
+        }
+        elseif ( 'line_subtotal_tax' === $offset ) {
+            $offset = 'subtotal_tax';
+        }
+        elseif ( 'line_total' === $offset ) {
+            $offset = 'total';
+        }
+        elseif ( 'line_tax' === $offset ) {
+            $offset = 'total_tax';
+        }
+        elseif ( 'line_tax_data' === $offset ) {
+            $offset = 'taxes';
+        }
+        return parent::offsetGet( $offset );
+    }
+
+    /**
+     * offsetExists for ArrayAccess
+     * @param string $offset
+     * @return bool
+     */
+    public function offsetExists( $offset ) {
+        if ( in_array( $offset, array( 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'line_tax_data', 'item_meta_array', 'item_meta' ) ) ) {
+            return true;
+        }
+        return parent::offsetExists( $offset );
+    }
+
+    /**
      * Read/populate data properties specific to this order item.
      */
     protected function read( $id ) {
@@ -49,7 +86,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
             $this->set_total( get_metadata( 'order_item', $this->get_order_item_id(), '_line_total', true ) );
             $this->set_total_tax( get_metadata( 'order_item', $this->get_order_item_id(), '_line_tax', true ) );
             $this->set_taxes( get_metadata( 'order_item', $this->get_order_item_id(), '_line_tax_data', true ) );
-            $this->set_meta_data( $this->get_all_item_meta_data() );
         }
     }
 
@@ -69,6 +105,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
             wc_update_order_item_meta( $this->get_order_item_id(), '_line_tax', $this->get_total_tax() );
             wc_update_order_item_meta( $this->get_order_item_id(), '_line_tax_data', $this->get_taxes() );
         }
+    }
+
+    /**
+     * Internal meta keys we don't want exposed as part of meta_data.
+     * @return array()
+     */
+    protected function get_internal_meta_keys() {
+        return array( '_product_id', '_variation_id', '_qty', '_tax_class', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
     }
 
     /**
