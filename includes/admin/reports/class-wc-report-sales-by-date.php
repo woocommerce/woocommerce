@@ -266,19 +266,22 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 					'name'     => 'total_sales'
 				),
 				'_order_shipping' => array(
-					'type'     => 'meta',
-					'function' => '',
-					'name'     => 'total_shipping'
+					'type'      => 'meta',
+					'function'  => '',
+					'name'      => 'total_shipping',
+					'join_type' => 'LEFT'
 				),
 				'_order_tax' => array(
-					'type'     => 'meta',
-					'function' => '',
-					'name'     => 'total_tax'
+					'type'      => 'meta',
+					'function'  => '',
+					'name'      => 'total_tax',
+					'join_type' => 'LEFT'
 				),
 				'_order_shipping_tax' => array(
-					'type'     => 'meta',
-					'function' => '',
-					'name'     => 'total_shipping_tax'
+					'type'      => 'meta',
+					'function'  => '',
+					'name'      => 'total_shipping_tax',
+					'join_type' => 'LEFT'
 				),
 				'_qty' => array(
 					'type'            => 'order_item_meta',
@@ -292,34 +295,32 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'query_type'          => 'get_results',
 			'filter_range'        => true,
 			'order_status'        => false,
-			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),
+			'parent_order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 		) );
 
 		/**
-		 * Total up values by combining full refunds and partial refunds for line items.
+		 * Total up refunds. Note: when an order is fully refunded, a refund line will be added.
 		 */
-		$this->report_data->total_tax_refunded          = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->full_refunds, 'total_tax' ) ), 2 );
-		$this->report_data->total_shipping_refunded     = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->full_refunds, 'total_shipping' ) ), 2 );
-		$this->report_data->total_shipping_tax_refunded = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->full_refunds, 'total_shipping_tax' ) ), 2 );
-		$this->report_data->total_refunds               = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->full_refunds, 'total_refund' ) ), 2 );
+		$this->report_data->total_tax_refunded          = 0;
+		$this->report_data->total_shipping_refunded     = 0;
+		$this->report_data->total_shipping_tax_refunded = 0;
+		$this->report_data->total_refunds               = 0;
 
-		/**
-		 * Loop over partial refunds and increase the above values.
-		 */
 		foreach ( $this->report_data->partial_refunds as $key => $value ) {
-			switch ( $value->item_type ) {
-				case 'shipping' :
-					$this->report_data->total_shipping_tax_refunded += ( $value->total_shipping_tax * -1 );
-					$this->report_data->total_shipping_refunded     += wc_format_decimal( $value->total_refund, 2 );
-					$this->report_data->total_refunds               += $value->total_refund;
-
-
-					break;
-				case 'line_item' :
-					$this->report_data->total_tax_refunded   += ( $value->total_tax * -1 );
-					$this->report_data->refunded_order_items += absint( $value->order_item_count );
-					$this->report_data->total_refunds        += $value->total_refund;
-					break;
+			if ( is_null( $value->item_type ) ) {
+				// Null when the order was refunded, but not the line items themselves.
+				$this->report_data->total_tax_refunded   += ( $value->total_tax * -1 );
+				$this->report_data->total_refunds        += $value->total_refund;
+			}
+			elseif( 'shipping' === $value->item_type ) {
+				$this->report_data->total_shipping_tax_refunded += ( $value->total_shipping_tax * -1 );
+				$this->report_data->total_shipping_refunded     += wc_format_decimal( $value->total_refund, 2 );
+				$this->report_data->total_refunds               += $value->total_refund;
+			}
+			elseif( 'line_item' === $value->item_type ) {
+				$this->report_data->total_tax_refunded   += ( $value->total_tax * -1 );
+				$this->report_data->refunded_order_items += absint( $value->order_item_count );
+				$this->report_data->total_refunds        += $value->total_refund;
 			}
 		}
 
@@ -504,7 +505,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$order_amounts        = $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_sales', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$coupon_amounts       = $this->prepare_chart_data( $this->report_data->coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$shipping_amounts     = $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby );
-		$refund_amounts       = $this->prepare_chart_data( array_merge( $this->report_data->partial_refunds, $this->report_data->full_refunds ), 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby );
+		$refund_amounts       = $this->prepare_chart_data( $this->report_data->partial_refunds, 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$shipping_tax_amounts = $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_shipping_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$tax_amounts          = $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_tax', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
