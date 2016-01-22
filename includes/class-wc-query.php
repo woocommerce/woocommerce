@@ -553,7 +553,7 @@ class WC_Query {
 		$args    = array();
 
 		// default - menu_order
-		$args['orderby']  = 'menu_order title';
+		$args['orderby']  = 'menu_order';
 		$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 		$args['meta_key'] = '';
 
