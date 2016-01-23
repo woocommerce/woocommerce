@@ -182,6 +182,8 @@ abstract class WC_Abstract_Order {
 		'coupon_lines'         => array()
     );
 
+    public function add_meta_data(){}
+
     /*
     |--------------------------------------------------------------------------
     | Getters
@@ -1283,16 +1285,85 @@ abstract class WC_Abstract_Order {
      * @param array $data data to save
      */
     protected function create( $data ) {
-        $order_data                  = array();
-        $order_data['post_type']     = 'shop_order';
-        $order_data['post_status']   = 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) );
-        $order_data['ping_status']   = 'closed';
-        $order_data['post_author']   = 1;
-        $order_data['post_password'] = uniqid( 'order_' );
-        $order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-        $order_data['post_parent']   = absint( $args['parent'] );
-        $order_id                    = wp_insert_post( apply_filters( 'woocommerce_new_order_data', $order_data ), true );
+        $post_data                  = array();
+        $post_data['post_type']     = 'shop_order';
+        $post_data['post_status']   = 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) );
+        $post_data['ping_status']   = 'closed';
+        $post_data['post_author']   = 1;
+        $post_data['post_password'] = uniqid( 'order_' );
+        $post_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+        $post_data['post_parent']   = absint( $args['parent'] ); //  @todo
+        $order_id                    = wp_insert_post( apply_filters( 'woocommerce_new_order_data', $post_data ), true );
         $this->set_order_id( $order_id );
+        $this->set_order_key( uniqid( 'order_' ) );
+
+
+        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
+        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
+        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
+        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
+        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
+
+
+
+
+
+
+        'order_id'             => 0,
+        'status'               => '',
+        'order_type'           => 'simple',
+        'order_key'            => '',
+        'order_currency'       => '',
+        'date_created'         => '',
+        'date_modified'        => '',
+        'customer_id'          => 0,
+        'billing_first_name'   => '',
+        'billing_last_name'    => '',
+        'billing_company'      => '',
+        'billing_address_1'    => '',
+        'billing_address_2'    => '',
+        'billing_city'         => '',
+        'billing_state'        => '',
+        'billing_postcode'     => '',
+        'billing_country'      => '',
+        'billing_email'        => '',
+        'billing_phone'        => '',
+        'shipping_first_name'  => '',
+        'shipping_last_name'   => '',
+        'shipping_company'     => '',
+        'shipping_address_1'   => '',
+        'shipping_address_2'   => '',
+        'shipping_city'        => '',
+        'shipping_state'       => '',
+        'shipping_postcode'    => '',
+        'shipping_country'     => '',
+        'discount_total'       => 0,
+        'discount_tax'         => 0,
+        'shipping_total'       => 0,
+        'shipping_tax'         => 0,
+        'cart_tax'             => 0, // @todo cart tax maps to '_order_tax' in the current API. This is confusing and should be renamed.
+        'order_total'          => 0,
+        'order_tax'            => 0, // Sum of all taxes.
+
+        // These will be meta when moving to custom data
+        'payment_method'       => '',
+        'payment_method_title' => '',
+        'transaction_id'       => '',
+        'customer_ip_address'  => '',
+        'customer_user_agent'  => '',
+        'created_via'          => '',
+        'order_version'        => '',
+        'prices_include_tax'   => false,
+        'customer_note'        => '',
+        'date_completed'       => '',
+
+        // These will remain as order items @todo
+        'line_items'           => array(),
+        'tax_lines'            => array(),
+        'shipping_lines'       => array(),
+        'fees'                 => array(),
+        'fee_lines'            => array(),
+        'coupon_lines'         => array()
     }
 
     /**
@@ -1371,15 +1442,17 @@ abstract class WC_Abstract_Order {
      * @param array $data data to save
      */
     protected function update( $zone_data ) {
-        $order_data                  = array();
-        $order_data['post_type']     = 'shop_order';
-        $order_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
-        $order_data['ping_status']   = 'closed';
-        $order_data['post_author']   = 1;
-        $order_data['post_password'] = uniqid( 'order_' );
-        $order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-        $order_data['post_parent']   = absint( $args['parent'] );
-        wp_update_post( $order_data );
+        $post_data                  = array();
+        $post_data['post_type']     = 'shop_order';
+        $post_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
+        $post_data['ping_status']   = 'closed';
+        $post_data['post_author']   = 1;
+        $post_data['post_password'] = uniqid( 'order_' );
+        $post_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+        $post_data['post_parent']   = absint( $args['parent'] );
+        wp_update_post( $post_data );
+
+        //$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
     }
 
     /**
@@ -1403,6 +1476,7 @@ abstract class WC_Abstract_Order {
         } else {
             $this->update();
         }
+        wc_delete_shop_order_transients( $post_id );
     }
 
     /*

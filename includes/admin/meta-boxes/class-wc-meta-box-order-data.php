@@ -412,6 +412,62 @@ class WC_Meta_Box_Order_Data {
 
 		self::init_address_fields();
 
+		$order = wc_get_order( $post_id );
+		$order->set_customer_id( absint( $_POST['customer_user'] ) );
+		$order->set_transaction_id( wc_clean( $_POST['_transaction_id'] ) );
+
+		foreach ( self::$billing_fields as $key => $field ) {
+			if ( ! isset( $field['id'] ) ){
+				$field['id'] = '_billing_' . $key;
+			}
+			if ( is_callable( array( $order, "set{$field['id']}" ) ) ) {
+				$order->{"set{$field['id']}"}( wc_clean( $_POST[ $field['id'] ] ) );
+			} else {
+				$order->add_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+			}
+		}
+
+		foreach ( self::$shipping_fields as $key => $field ) {
+			if ( ! isset( $field['id'] ) ){
+				$field['id'] = '_shipping_' . $key;
+			}
+			if ( is_callable( array( $order, "set{$field['id']}" ) ) ) {
+				$order->{"set{$field['id']}"}( wc_clean( $_POST[ $field['id'] ] ) );
+			} else {
+				$order->add_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+			}
+		}
+
+		if ( $order->get_payment_method() !== wc_clean( $_POST['_payment_method'] ) ) {
+			$methods              = WC()->payment_gateways->payment_gateways();
+			$payment_method       = wc_clean( $_POST['_payment_method'] );
+			$payment_method_title = $payment_method;
+
+			if ( isset( $methods ) && isset( $methods[ $payment_method ] ) ) {
+				$payment_method_title = $methods[ $payment_method ]->get_title();
+			}
+
+			$order->set_payment_method( $payment_method );
+			$order->set_payment_method_title( $payment_method_title );
+		}
+
+
+		$order->save();
+
+
+
+
+		// @todo
+		if ( empty( $_POST['order_date'] ) ) {
+			$date = current_time( 'timestamp' );
+		} else {
+			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
+		}
+
+		$date = date_i18n( 'Y-m-d H:i:s', $date );
+
+
+
 		// Add key
 		add_post_meta( $post_id, '_order_key', uniqid( 'order_' ), true );
 
@@ -437,7 +493,7 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		if ( isset( $_POST['_transaction_id'] ) ) {
-			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST[ '_transaction_id' ] ) );
+			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST['_transaction_id'] ) );
 		}
 
 		// Payment method handling
