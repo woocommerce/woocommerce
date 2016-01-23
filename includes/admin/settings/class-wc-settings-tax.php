@@ -109,16 +109,15 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables.
 	 */
 	public function output_tax_rates() {
-		global $wpdb,
-				$current_section;
+		global $wpdb, $current_section;
 
 		$current_class = $this->get_current_tax_class();
 
 		$countries = array();
 		foreach ( WC()->countries->get_allowed_countries() as $value => $label ) {
 			$countries[] = array(
-				'label' => $label,
 				'value' => $value,
+				'label' => esc_js( html_entity_decode( $label ) ),
 			);
 		}
 
@@ -126,8 +125,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		foreach ( WC()->countries->get_allowed_country_states() as $label ) {
 			foreach ( $label as $code => $state ) {
 				$states[] = array(
-					'label' => $state,
 					'value' => $code,
+					'label' => esc_js( html_entity_decode( $state ) ),
 				);
 			}
 		}
