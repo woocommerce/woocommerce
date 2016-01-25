@@ -315,6 +315,7 @@ class WC_AJAX {
 
 			if ( isset( $_POST['country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['country'] );
+				WC()->customer->calculated_shipping( true );
 			}
 
 			if ( isset( $_POST['state'] ) ) {
@@ -340,6 +341,7 @@ class WC_AJAX {
 
 			if ( isset( $_POST['s_country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['s_country'] );
+				WC()->customer->calculated_shipping( true );
 			}
 
 			if ( isset( $_POST['s_state'] ) ) {
