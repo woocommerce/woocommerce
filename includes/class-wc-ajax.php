@@ -2537,11 +2537,6 @@ class WC_AJAX {
 				$variation_data['menu_order']     = $variation->menu_order;
 				$variation_data['_stock']         = wc_stock_amount( $variation_data['_stock'] );
 
-				// Stock BW compat
-				if ( '' !== $variation_data['_stock'] ) {
-					$variation_data['_manage_stock'] = 'yes';
-				}
-
 				include( 'admin/meta-boxes/views/html-variation-admin.php' );
 
 				$loop++;
