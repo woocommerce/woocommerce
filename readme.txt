@@ -55,22 +55,22 @@ We also support WooCommerce and all its extensions with comprehensive, easily-ac
 
 WordPress.org is home to some amazing extensions for WooCommerce, including:
 
-[Google Analytics](https://wordpress.org/plugins/woocommerce-google-analytics-integration/)
-[Delivery Notes](https://wordpress.org/plugins/woocommerce-delivery-notes/)
-[PDF Invoices and Packing Slips](https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips/)
-[Affiliates Integration Light](https://wordpress.org/plugins/affiliates-woocommerce-light/)
-[New Product Badges](https://wordpress.org/plugins/woocommerce-new-product-badge/)
+- [Google Analytics](https://wordpress.org/plugins/woocommerce-google-analytics-integration/)
+- [Delivery Notes](https://wordpress.org/plugins/woocommerce-delivery-notes/)
+- [PDF Invoices and Packing Slips](https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips/)
+- [Affiliates Integration Light](https://wordpress.org/plugins/affiliates-woocommerce-light/)
+- [New Product Badges](https://wordpress.org/plugins/woocommerce-new-product-badge/)
 
 Keen to see them all? Search WordPress.org for ‘WooCommerce’ to dive in.
 
 If you’re looking for something endorsed and maintained by the developers who built WooCommerce, there are a plethora of premium eCommerce extensions, the most popular of which include:
 
-[WooCommerce Subscriptions](http://www.woothemes.com/products/woocommerce-subscriptions/)
-[WooCommerce Memberships](http://www.woothemes.com/products/woocommerce-memberships/)
-[WooCommerce Bookings](http://www.woothemes.com/products/woocommerce-bookings/)
-[Dynamic Pricing](http://www.woothemes.com/products/dynamic-pricing/)
-[Table Rate Shipping](http://www.woothemes.com/products/table-rate-shipping/)
-[Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)
+- [WooCommerce Subscriptions](http://www.woothemes.com/products/woocommerce-subscriptions/)
+- [WooCommerce Memberships](http://www.woothemes.com/products/woocommerce-memberships/)
+- [WooCommerce Bookings](http://www.woothemes.com/products/woocommerce-bookings/)
+- [Dynamic Pricing](http://www.woothemes.com/products/dynamic-pricing/)
+- [Table Rate Shipping](http://www.woothemes.com/products/table-rate-shipping/)
+- [Product CSV Import Suite](http://www.woothemes.com/products/product-csv-import-suite/)
 
 And there’s plenty more where they came from. Visit our [extensions page](http://www.woothemes.com/product-category/woocommerce-extensions/) to find out everything you’re capable of and all that's possible with premium WooCommerce extensions.
 
