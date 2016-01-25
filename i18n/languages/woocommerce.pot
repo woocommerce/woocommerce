@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.5.1\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2016-01-25 15:01:18+00:00\n"
+"POT-Creation-Date: 2016-01-25 15:31:29+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -7402,11 +7402,9 @@ msgid "Your Store is Ready!"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:751
-#: includes/admin/views/html-notice-tracking.php:11
 msgid ""
 "Want to help make WooCommerce even more awesome? Allow WooThemes to collect "
-"non-sensitive diagnostic data and usage information, and get %s discount on "
-"your next WooThemes purchase. %sFind out more%s."
+"non-sensitive diagnostic data and usage information. %sFind out more%s."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:753
@@ -11932,6 +11930,13 @@ msgstr ""
 
 #: includes/admin/views/html-notice-theme-support.php:15
 msgid "Theme Integration Guide"
+msgstr ""
+
+#: includes/admin/views/html-notice-tracking.php:11
+msgid ""
+"Want to help make WooCommerce even more awesome? Allow WooThemes to collect "
+"non-sensitive diagnostic data and usage information, and get %s discount on "
+"your next WooThemes purchase. %sFind out more%s."
 msgstr ""
 
 #: includes/admin/views/html-notice-tracking.php:14
