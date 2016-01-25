@@ -264,22 +264,24 @@ class WC_Countries {
 	 * Gets the correct string for shipping - either 'to the' or 'to'
 	 * @return string
 	 */
-	public function shipping_to_prefix() {
-		$countries  = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
-		$return     = in_array( WC()->customer->get_shipping_country(), $countries ) ? __( 'to the', 'woocommerce' ) : __( 'to', 'woocommerce' );
+	public function shipping_to_prefix( $country_code = '' ) {
+		$country_code = $country_code ? $country_code : WC()->customer->get_shipping_country();
+		$countries    = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
+		$return       = in_array( $country_code, $countries ) ? __( 'to the', 'woocommerce' ) : __( 'to', 'woocommerce' );
 
-		return apply_filters( 'woocommerce_countries_shipping_to_prefix', $return, WC()->customer->get_shipping_country() );
+		return apply_filters( 'woocommerce_countries_shipping_to_prefix', $return, $country_code );
 	}
 
 	/**
 	 * Prefix certain countries with 'the'
 	 * @return string
 	 */
-	public function estimated_for_prefix() {
-		$countries  = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
-		$return     = in_array( $this->get_base_country(), $countries ) ? __( 'the', 'woocommerce' ) . ' ' : '';
+	public function estimated_for_prefix( $country_code = '' ) {
+		$country_code = $country_code ? $country_code : $this->get_base_country();
+		$countries    = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
+		$return       = in_array( $country_code, $countries ) ? __( 'the', 'woocommerce' ) . ' ' : '';
 
-		return apply_filters( 'woocommerce_countries_estimated_for_prefix', $return, $this->get_base_country() );
+		return apply_filters( 'woocommerce_countries_estimated_for_prefix', $return, $country_code );
 	}
 
 	/**
