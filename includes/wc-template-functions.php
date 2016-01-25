@@ -2024,7 +2024,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 
 		$html .= '</select>';
 
-		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html );
+		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html, $args );
 	}
 
 }
