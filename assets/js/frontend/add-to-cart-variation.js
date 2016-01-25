@@ -181,13 +181,23 @@
 			$form.wc_variations_image_update( variation );
 
 			// Output correct templates
+			var $template_html = '';
+			
 			if ( ! variation.variation_is_visible ) {
-				$single_variation.html( unavailable_template );
+				$template_html = unavailable_template;
+				// w3 total cache inline minification adds CDATA tags around our HTML (sigh)
+				$template_html = $template_html.replace( '/*<![CDATA[*/', '' );
+				$template_html = $template_html.replace( '/*]]>*/', '' );
+				$single_variation.html( $template_html );
 				$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).change();
 			} else {
-				$single_variation.html( template( {
+				$template_html = template( {
 					variation:    variation
-				} ) );
+				} );
+				// w3 total cache inline minification adds CDATA tags around our HTML (sigh)
+				$template_html = $template_html.replace( '/*<![CDATA[*/', '' );
+				$template_html = $template_html.replace( '/*]]>*/', '' );
+				$single_variation.html( $template_html );
 				$form.find( 'input[name="variation_id"], input.variation_id' ).val( variation.variation_id ).change();
 			}
 
