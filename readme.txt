@@ -163,7 +163,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Fix responsive product sizes when the columns class is missing.
 * Fix - Fix function exists check for woocommerce_template_loop_category_title.
 * Fix - check_version on all requests so that the installer runs after remote plugin updates.
-* Fix - Fix indexes on decimal and thousand values in REST API.
 * Fix - Only show the "add payment method" button when needed, and check for required fields on the add payment method page.
 * Fix - Correctly block UI to prevent attribute issues in backend when adding multiple attributes in quick succession.
 * Fix - Show SKU in admin emails.
@@ -175,8 +174,10 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Qty button can be hidden for variable products sold individually.
 * Fix - Show the taxable country rather than base country in "estimated for" text during checkout.
 * Fix - Prevent select2 gaining focus on IOS7 scroll.
+* Fix - API - Fix indexes on decimal and thousand values.
 * Tweak - Clear cron jobs on uninstall .
 * Tweak - Don't disable place order button on checkout if a weak password is used.
+* Tweak - Added password strength meter in lost password and edit accout pages.
 * Tweak - Pass $args to woocommerce_dropdown_variation_attribute_options_html hook.
 
 = 2.5.0 - 18/01/2016 =
