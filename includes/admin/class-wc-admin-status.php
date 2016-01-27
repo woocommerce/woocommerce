@@ -315,7 +315,7 @@ class WC_Admin_Status {
 		$update_theme_version = 0;
 
 		// Check .org for updates
-		if ( $api && ! is_wp_error( $api ) ) {
+		if ( ! is_wp_error( $api ) ) {
 			$update_theme_version = $api->version;
 
 		// Check WooThemes Theme Version
