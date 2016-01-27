@@ -1324,6 +1324,12 @@ p.demo_store {
 			padding: .25em 0 .25em 22px;
 			text-indent: -22px;
 			list-style: none outside;
+			input {
+				margin: 3px 0.5ex;
+			}
+			label {
+				display: inline;
+			}
 		}
 
 		.amount {
