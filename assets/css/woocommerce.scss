@@ -1908,6 +1908,11 @@ p.demo_store {
 	}
 }
 
+.woocommerce-password-hint {
+	margin: .5em 0 0 0;
+	display: block;
+}
+
 /* added to get around variation image flicker issue */
 .product.has-default-attributes.has-children {
 	> .images {
