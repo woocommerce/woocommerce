@@ -185,8 +185,10 @@ class WC_Frontend_Scripts {
 
 			// Password strength meter.
 			// Load in checkout, account login and edit account page.
-			if ( ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) || is_edit_account_page() ) {
-				self::enqueue_script( 'wc-password-strength-meter' );
+			if ( 'yes' !== get_option('woocommerce_disable_password_strength_meter') ) {
+				if ( ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) || is_edit_account_page() ) {
+					self::enqueue_script( 'wc-password-strength-meter' );
+				}
 			}
 		}
 		if ( is_checkout() ) {
