@@ -563,7 +563,7 @@ class WC_API_Products extends WC_API_Resource {
 	public function get_product_categories( $fields = null ) {
 		try {
 			// Permissions check
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_categories', __( 'You do not have permission to read product categories', 'woocommerce' ), 401 );
 			}
 
@@ -599,7 +599,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Permissions check
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_categories', __( 'You do not have permission to read product categories', 'woocommerce' ), 401 );
 			}
 
@@ -826,7 +826,7 @@ class WC_API_Products extends WC_API_Resource {
 	public function get_product_tags( $fields = null ) {
 		try {
 			// Permissions check
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_tags', __( 'You do not have permission to read product tags', 'woocommerce' ), 401 );
 			}
 
@@ -862,7 +862,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Permissions check
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_tags', __( 'You do not have permission to read product tags', 'woocommerce' ), 401 );
 			}
 
@@ -2501,7 +2501,7 @@ class WC_API_Products extends WC_API_Resource {
 	public function get_product_attributes( $fields = null ) {
 		try {
 			// Permissions check.
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attributes', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
 			}
 
@@ -2545,7 +2545,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Permissions check
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attributes', __( 'You do not have permission to read product attributes', 'woocommerce' ), 401 );
 			}
 
@@ -2846,7 +2846,7 @@ class WC_API_Products extends WC_API_Resource {
 	public function get_product_attribute_terms( $attribute_id, $fields = null ) {
 		try {
 			// Permissions check.
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attribute_terms', __( 'You do not have permission to read product attribute terms', 'woocommerce' ), 401 );
 			}
 
@@ -2913,7 +2913,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Permissions check
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attribute_terms', __( 'You do not have permission to read product attribute terms', 'woocommerce' ), 401 );
 			}
 
@@ -3214,7 +3214,7 @@ class WC_API_Products extends WC_API_Resource {
 	public function get_product_shipping_classes( $fields = null ) {
 		try {
 			// Permissions check
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_shipping_classes', __( 'You do not have permission to read product shipping classes', 'woocommerce' ), 401 );
 			}
 
@@ -3249,7 +3249,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// Permissions check
-			if ( ! current_user_can( 'manage_product_terms' ) ) {
+			if ( ! $this->validate_permission() ) {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_shipping_classes', __( 'You do not have permission to read product shipping classes', 'woocommerce' ), 401 );
 			}
 
@@ -3405,5 +3405,20 @@ class WC_API_Products extends WC_API_Resource {
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
+	}
+	
+	/**
+	 * Validate if the current user has the proper permissions
+	 *
+	 * @since 2.5
+	 * @return boolean
+	 */
+	public function validate_permission() {
+		$permission = current_user_can( 'manage_product_terms' );
+		$permission = apply_filters( 'woocommerce_api_manage_product_terms_permission', $permission );
+		if ( ! $permission ) {
+			return false;
+		}
+		return true;
 	}
 }
