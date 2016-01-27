@@ -26,7 +26,7 @@ echo date_i18n( __( 'jS F Y', 'woocommerce' ), strtotime( $order->order_date ) )
 echo "\n" . $order->email_order_items_table( array(
 	'show_sku'    => $sent_to_admin,
 	'show_image'  => false,
-	'$image_size' => array( 32, 32 ),
+	'image_size'  => array( 32, 32 ),
 	'plain_text'  => true
 ) );
 
