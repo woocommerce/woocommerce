@@ -119,7 +119,7 @@
 
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
-					$tbody.on( 'change', ':input', { view: this }, this.updateModelOnChange );
+					$tbody.on( 'change autocompletechange', ':input', { view: this }, this.updateModelOnChange );
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$search_field.on( 'keyup search', { view: this }, this.onSearchField );
 					$pagination.on( 'click', 'a', { view: this }, this.onPageChange );
