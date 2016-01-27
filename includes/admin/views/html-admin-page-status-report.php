@@ -320,7 +320,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<?php
-			$tables = array(
+			$tables = apply_filters( 'woocommerce_system_status_tables', array(
 				'woocommerce_sessions',
 				'woocommerce_api_keys',
 				'woocommerce_attribute_taxonomies',
@@ -330,7 +330,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'woocommerce_order_itemmeta',
 				'woocommerce_tax_rates',
 				'woocommerce_tax_rate_locations'
-			);
+			) );
 
 			foreach ( $tables as $table ) {
 				?>
