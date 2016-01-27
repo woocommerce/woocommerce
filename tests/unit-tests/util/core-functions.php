@@ -53,8 +53,8 @@ class Core_Functions extends \WC_Unit_Test_Case {
 			'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 			'JPY' => __( 'Japanese Yen', 'woocommerce' ),
 			'KES' => __( 'Kenyan shilling', 'woocommerce' ),
-			'LAK' => __( 'Lao Kip', 'woocommerce' ),
 			'KRW' => __( 'South Korean Won', 'woocommerce' ),
+			'LAK' => __( 'Lao Kip', 'woocommerce' ),
 			'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 			'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 			'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
@@ -67,6 +67,7 @@ class Core_Functions extends \WC_Unit_Test_Case {
 			'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 			'RON' => __( 'Romanian Leu', 'woocommerce' ),
 			'RUB' => __( 'Russian Ruble', 'woocommerce' ),
+			'SAR' => __( 'Saudi Riyal', 'woocommerce' ),
 			'SEK' => __( 'Swedish Krona', 'woocommerce' ),
 			'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
 			'THB' => __( 'Thai Baht', 'woocommerce' ),
@@ -77,7 +78,6 @@ class Core_Functions extends \WC_Unit_Test_Case {
 			'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
 			'ZAR' => __( 'South African rand', 'woocommerce' ),
 		);
-
 
 		$this->assertEquals( $expected_currencies, get_woocommerce_currencies() );
 	}
