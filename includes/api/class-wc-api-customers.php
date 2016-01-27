@@ -725,19 +725,25 @@ class WC_API_Customers extends WC_API_Resource {
 			switch ( $context ) {
 
 				case 'read':
-					if ( ! current_user_can( 'list_users' ) ) {
+					$permission = current_user_can( 'list_users' );
+					$permission = apply_filters( 'woocommerce_api_validate_user_read_permission', $permission, $customer, $context );
+					if ( ! $permission ) {
 						throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_customer', __( 'You do not have permission to read this customer', 'woocommerce' ), 401 );
 					}
 					break;
 
 				case 'edit':
-					if ( ! current_user_can( 'edit_users' ) ) {
+					$permission = current_user_can( 'edit_users' );
+					$permission = apply_filters( 'woocommerce_api_validate_user_edit_permission', $permission, $customer, $context );
+					if ( ! $permission ) {
 						throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_customer', __( 'You do not have permission to edit this customer', 'woocommerce' ), 401 );
 					}
 					break;
 
 				case 'delete':
-					if ( ! current_user_can( 'delete_users' ) ) {
+					$permission = current_user_can( 'delete_users' );
+					$permission = apply_filters( 'woocommerce_api_validate_user_delete_permission', $permission, $customer, $context );
+					if ( ! $permission ) {
 						throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_customer', __( 'You do not have permission to delete this customer', 'woocommerce' ), 401 );
 					}
 					break;
