@@ -44,6 +44,9 @@ jQuery( function( $ ) {
 			}
 		},
 
+		/**
+		 * When the form is submitted, prevent if weak.
+		 */
 		onSubmit: function() {
 			$( '.woocommerce-password-error' ).remove();
 
