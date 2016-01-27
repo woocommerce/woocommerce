@@ -395,8 +395,11 @@ class WC_Admin_Post_Types {
 				echo '</a>';
 				break;
 			case 'is_in_stock' :
-
-				if ( $the_product->is_in_stock() ) {
+				$stock_status = apply_filters( 'woocommerce_admin_column_stock_status', '', $the_product );
+				
+				if ( ! empty( $stock_status ) ) {
+		 			echo '<mark class="' . sanitize_title( $stock_status ) . '">' . esc_html( $stock_status ) . '</mark>';
+				} elseif ( $the_product->is_in_stock() ) {
 					echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';

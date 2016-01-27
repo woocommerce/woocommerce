@@ -240,14 +240,22 @@ class WC_Product {
 	 * Check if the stock status needs changing.
 	 */
 	public function check_stock_status() {
+		$stock_status = '';
+		
 		if ( ! $this->backorders_allowed() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			if ( $this->stock_status !== 'outofstock' ) {
-				$this->set_stock_status( 'outofstock' );
+				$stock_status = 'outofstock';
 			}
 		} elseif ( $this->backorders_allowed() || $this->get_total_stock() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 			if ( $this->stock_status !== 'instock' ) {
-				$this->set_stock_status( 'instock' );
+				$stock_status = 'instock';
 			}
+		}
+		
+		$stock_status = apply_filters( 'woocommerce_product_check_stock_status', $stock_status, $this );
+		
+		if ( ! empty( $stock_status ) ) {
+			$this->set_stock_status( $stock_status );
 		}
 	}
 
@@ -324,11 +332,10 @@ class WC_Product {
 	 * @param string $status
 	 */
 	public function set_stock_status( $status ) {
-
-		$status = ( 'outofstock' === $status ) ? 'outofstock' : 'instock';
+		$status = ! empty( $status ) ? $status : 'instock';
 
 		// Sanity check
-		if ( $this->managing_stock() ) {
+		if ( $this->managing_stock() && $status === 'instock' ) {
 			if ( ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
 				$status = 'outofstock';
 			}
@@ -608,13 +615,16 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
+		
 		if ( $this->managing_stock() && $this->backorders_allowed() ) {
-			return true;
+			$is_in_stock = true;
 		} elseif ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			return false;
+			$is_in_stock = false;
 		} else {
-			return $this->stock_status === 'instock';
+			$is_in_stock = $this->stock_status === 'instock';
 		}
+		
+		return apply_filters( 'woocommerce_product_is_in_stock', $is_in_stock, $this );
 	}
 
 	/**

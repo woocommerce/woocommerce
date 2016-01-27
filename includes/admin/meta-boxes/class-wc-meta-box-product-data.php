@@ -335,10 +335,10 @@ class WC_Meta_Box_Product_Data {
 				}
 
 				// Stock status
-				woocommerce_wp_select( array( 'id' => '_stock_status', 'wrapper_class' => 'hide_if_variable', 'label' => __( 'Stock status', 'woocommerce' ), 'options' => array(
+				woocommerce_wp_select( array( 'id' => '_stock_status', 'wrapper_class' => 'hide_if_variable', 'label' => __( 'Stock status', 'woocommerce' ), 'options' => apply_filters( 'woocommerce_stock_status_options', array(
 					'instock' => __( 'In stock', 'woocommerce' ),
 					'outofstock' => __( 'Out of stock', 'woocommerce' )
-				), 'desc_tip' => true, 'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ) ) );
+				) ), 'desc_tip' => true, 'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ) ) );
 
 				do_action( 'woocommerce_product_options_stock_status' );
 
