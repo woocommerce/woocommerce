@@ -360,12 +360,7 @@ class WC_Install {
 		$collate = '';
 
 		if ( $wpdb->has_cap( 'collation' ) ) {
-			if ( ! empty( $wpdb->charset ) ) {
-				$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-			}
-			if ( ! empty( $wpdb->collate ) ) {
-				$collate .= " COLLATE $wpdb->collate";
-			}
+			$collate = $wpdb->get_charset_collate();
 		}
 
 		return "
