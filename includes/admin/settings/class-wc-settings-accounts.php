@@ -153,6 +153,14 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false
 			),
 
+			array(
+				'desc'          => __( 'Disable password strength meter', 'woocommerce' ),
+				'id'            => 'woocommerce_disable_password_strength_meter',
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'autoload'      => false
+			),
+
 			array( 'type' => 'sectionend', 'id' => 'account_registration_options'),
 
 		) );
