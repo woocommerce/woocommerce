@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.5.1\n"
+"Project-Id-Version: WooCommerce 2.5.2\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2016-01-25 15:31:29+00:00\n"
+"POT-Creation-Date: 2016-01-28 11:25:18+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13065,7 +13065,7 @@ msgid ""
 "You won't be able to see it again!"
 msgstr ""
 
-#: includes/class-wc-ajax.php:2594
+#: includes/class-wc-ajax.php:2589
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -13759,6 +13759,17 @@ msgstr ""
 #: includes/class-wc-frontend-scripts.php:321
 #: templates/single-product/add-to-cart/variation.php:31
 msgid "Sorry, this product is unavailable. Please choose a different combination."
+msgstr ""
+
+#: includes/class-wc-frontend-scripts.php:344
+msgid "Please enter a stronger password to continue."
+msgstr ""
+
+#: includes/class-wc-frontend-scripts.php:345
+msgid ""
+"The password should be at least seven characters long. To make it stronger, "
+"use upper and lower case letters, numbers and symbols like ! \" ? $ % ^ "
+"&amp; )."
 msgstr ""
 
 #: includes/class-wc-install.php:76
@@ -15918,11 +15929,11 @@ msgid "Kenyan shilling"
 msgstr ""
 
 #: includes/wc-core-functions.php:300
-msgid "Lao Kip"
+msgid "South Korean Won"
 msgstr ""
 
 #: includes/wc-core-functions.php:301
-msgid "South Korean Won"
+msgid "Lao Kip"
 msgstr ""
 
 #: includes/wc-core-functions.php:302
@@ -15974,38 +15985,42 @@ msgid "Russian Ruble"
 msgstr ""
 
 #: includes/wc-core-functions.php:314
-msgid "Swedish Krona"
+msgid "Saudi Riyal"
 msgstr ""
 
 #: includes/wc-core-functions.php:315
-msgid "Singapore Dollar"
+msgid "Swedish Krona"
 msgstr ""
 
 #: includes/wc-core-functions.php:316
-msgid "Thai Baht"
+msgid "Singapore Dollar"
 msgstr ""
 
 #: includes/wc-core-functions.php:317
-msgid "Turkish Lira"
+msgid "Thai Baht"
 msgstr ""
 
 #: includes/wc-core-functions.php:318
-msgid "Taiwan New Dollars"
+msgid "Turkish Lira"
 msgstr ""
 
 #: includes/wc-core-functions.php:319
-msgid "Ukrainian Hryvnia"
+msgid "Taiwan New Dollars"
 msgstr ""
 
 #: includes/wc-core-functions.php:320
-msgid "US Dollars"
+msgid "Ukrainian Hryvnia"
 msgstr ""
 
 #: includes/wc-core-functions.php:321
-msgid "Vietnamese Dong"
+msgid "US Dollars"
 msgstr ""
 
 #: includes/wc-core-functions.php:322
+msgid "Vietnamese Dong"
+msgstr ""
+
+#: includes/wc-core-functions.php:323
 msgid "South African rand"
 msgstr ""
 
@@ -17330,7 +17345,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-permalink-settings.php:196
 #: includes/class-wc-post-types.php:233
 #: includes/updates/woocommerce-update-2.0.php:55
-#: includes/wc-core-functions.php:559 includes/wc-core-functions.php:594
+#: includes/wc-core-functions.php:561 includes/wc-core-functions.php:596
 msgctxt "slug"
 msgid "product"
 msgstr ""
