@@ -159,7 +159,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.5.2 - 28/01/2016 =
-* Fix -
 * Fix - Compatibility with w3 total cache inline minification.
 * Fix - Remove stock bw compat code which was preventing manage stock being disabled at variation level.
 * Fix - When calculating shipping total, force rounding.
