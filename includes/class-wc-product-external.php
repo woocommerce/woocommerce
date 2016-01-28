@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_External extends WC_Product {
 
 	/**
-	 * __construct function.
+	 * Constructor.
 	 *
 	 * @access public
 	 * @param mixed $product
@@ -69,7 +69,7 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
-	 * get_product_url function.
+	 * Get product url.
 	 *
 	 * @access public
 	 * @return string
@@ -79,7 +79,7 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
-	 * get_button_text function.
+	 * Get button text.
 	 *
 	 * @access public
 	 * @return string

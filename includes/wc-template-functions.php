@@ -448,7 +448,7 @@ if ( ! function_exists( 'woocommerce_page_title' ) ) {
 	/**
 	 * woocommerce_page_title function.
 	 *
-	 * @param  boolean $echo
+	 * @param  bool $echo
 	 * @return string
 	 */
 	function woocommerce_page_title( $echo = true ) {
@@ -524,7 +524,7 @@ if (  ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 		echo '<h3>' . get_the_title() . '</h3>';
 	}
 }
-if (  ! function_exists( 'woocommerce_template_loop_subcategory_title' ) ) {
+if (  ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
 
 	/**
 	 * Show the subcategory title in the product loop.
@@ -1145,6 +1145,9 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	 * Output the Review comments template.
 	 *
 	 * @subpackage	Product
+	 * @param WP_Comment $comment
+	 * @param array $args
+	 * @param int $depth
 	 */
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
@@ -1256,9 +1259,9 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	/**
 	 * Output the cart cross-sells.
 	 *
-	 * @param  integer $posts_per_page
-	 * @param  integer $columns
-	 * @param  string $orderby
+	 * @param  int $posts_per_page (default: 2)
+	 * @param  int $columns (default: 2)
+	 * @param  string $orderby (default: 'rand')
 	 */
 	function woocommerce_cross_sell_display( $posts_per_page = 2, $columns = 2, $orderby = 'rand' ) {
 		wc_get_template( 'cart/cross-sells.php', array(
@@ -1290,6 +1293,7 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 	/**
 	 * Output the Mini-cart - used by cart widget.
 	 *
+	 * @param array $args
 	 */
 	function woocommerce_mini_cart( $args = array() ) {
 
@@ -1311,6 +1315,7 @@ if ( ! function_exists( 'woocommerce_login_form' ) ) {
 	 * Output the WooCommerce Login Form.
 	 *
 	 * @subpackage	Forms
+	 * @param array $args
 	 */
 	function woocommerce_login_form( $args = array() ) {
 
@@ -1342,6 +1347,8 @@ if ( ! function_exists( 'woocommerce_breadcrumb' ) ) {
 
 	/**
 	 * Output the WooCommerce Breadcrumb.
+	 *
+	 * @param array $args
 	 */
 	function woocommerce_breadcrumb( $args = array() ) {
 		$args = wp_parse_args( $args, apply_filters( 'woocommerce_breadcrumb_defaults', array(
@@ -1687,6 +1694,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'placeholder'       => '',
 			'maxlength'         => false,
 			'required'          => false,
+			'autocomplete'      => false,
 			'id'                => $key,
 			'class'             => array(),
 			'label_class'       => array(),
@@ -1709,6 +1717,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		}
 
 		$args['maxlength'] = ( $args['maxlength'] ) ? 'maxlength="' . absint( $args['maxlength'] ) . '"' : '';
+
+		$args['autocomplete'] = ( $args['autocomplete'] ) ? 'autocomplete="' . esc_attr( $args['autocomplete'] ) . '"' : '';
 
 		if ( is_string( $args['label_class'] ) ) {
 			$args['label_class'] = array( $args['label_class'] );
@@ -1750,11 +1760,11 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				} else {
 
-					$field = '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="country_to_state country_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . '>'
+					$field = '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" ' . $args['autocomplete'] . ' class="country_to_state country_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . '>'
 							. '<option value="">'.__( 'Select a country&hellip;', 'woocommerce' ) .'</option>';
 
 					foreach ( $countries as $ckey => $cvalue ) {
-						$field .= '<option value="' . esc_attr( $ckey ) . '" '.selected( $value, $ckey, false ) .'>'.__( $cvalue, 'woocommerce' ) .'</option>';
+						$field .= '<option value="' . esc_attr( $ckey ) . '" '. selected( $value, $ckey, false ) . '>'. __( $cvalue, 'woocommerce' ) .'</option>';
 					}
 
 					$field .= '</select>';
@@ -1779,7 +1789,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				} elseif ( is_array( $states ) ) {
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '">
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['autocomplete'] . '>
 						<option value="">'.__( 'Select a state&hellip;', 'woocommerce' ) .'</option>';
 
 					foreach ( $states as $ckey => $cvalue ) {
@@ -1790,14 +1800,14 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				} else {
 
-					$field .= '<input type="text" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" value="' . esc_attr( $value ) . '"  placeholder="' . esc_attr( $args['placeholder'] ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+					$field .= '<input type="text" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" value="' . esc_attr( $value ) . '"  placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['autocomplete'] . ' name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
 
 				}
 
 				break;
 			case 'textarea' :
 
-				$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . '>'. esc_textarea( $value  ) .'</textarea>';
+				$field .= '<textarea name="' . esc_attr( $key ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . $args['autocomplete'] . ' ' . ( empty( $args['custom_attributes']['rows'] ) ? ' rows="2"' : '' ) . ( empty( $args['custom_attributes']['cols'] ) ? ' cols="5"' : '' ) . implode( ' ', $custom_attributes ) . '>'. esc_textarea( $value  ) .'</textarea>';
 
 				break;
 			case 'checkbox' :
@@ -1813,7 +1823,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			case 'tel' :
 			case 'number' :
 
-				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) .'" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['maxlength'] . ' ' . $args['autocomplete'] . ' value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
 
 				break;
 			case 'select' :
@@ -1832,7 +1842,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 						$options .= '<option value="' . esc_attr( $option_key ) . '" '. selected( $value, $option_key, false ) . '>' . esc_attr( $option_text ) .'</option>';
 					}
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '.esc_attr( implode( ' ', $args['input_class'] ) ) .'" ' . implode( ' ', $custom_attributes ) . ' placeholder="' . esc_attr( $args['placeholder'] ) . '">
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select '. esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '" ' . $args['autocomplete'] . '>
 							' . $options . '
 						</select>';
 				}
@@ -2014,7 +2024,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 
 		$html .= '</select>';
 
-		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html );
+		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html, $args );
 	}
 
 }

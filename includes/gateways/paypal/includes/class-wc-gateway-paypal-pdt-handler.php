@@ -16,6 +16,9 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param bool $sandbox
+	 * @param string $identity_token
 	 */
 	public function __construct( $sandbox = false, $identity_token = '' ) {
 		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response' ) );

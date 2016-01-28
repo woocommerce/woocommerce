@@ -13,7 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
-	/** @var string cost passed to [fee] shortcode */
+	/**
+	 * Cost passed to [fee] shortcode.
+	 *
+	 * @var string
+	 */
 	protected $fee_cost = '';
 
 	/**
@@ -30,7 +34,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	}
 
 	/**
-	 * init function.
+	 * Initialize flat rate shipping.
 	 */
 	public function init() {
 		// Load the settings.
@@ -48,7 +52,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	}
 
 	/**
-	 * Initialise Settings Form Fields.
+	 * Initialize Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = include( 'includes/settings-flat-rate.php' );
@@ -63,9 +67,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	protected function evaluate_cost( $sum, $args = array() ) {
 		include_once( 'includes/class-wc-eval-math.php' );
 
-		$locale   = localeconv();
-		$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
-
+		// Allow 3rd parties to process shipping cost arguments
+		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
+		$locale         = localeconv();
+		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 		$this->fee_cost = $args['cost'];
 
 		// Expand shortcodes

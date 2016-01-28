@@ -61,21 +61,29 @@ function wc_load_persistent_cart( $user_login, $user ) {
  * Add to cart messages.
  *
  * @access public
- * @param int|array $product_id
+ * @param int|array $products
+ * @param bool $show_qty Should qty's be shown? Added in 2.6.0
  */
-function wc_add_to_cart_message( $product_id ) {
+function wc_add_to_cart_message( $products, $show_qty = false ) {
 	$titles = array();
+	$count  = 0;
 
-	if ( is_array( $product_id ) ) {
-		foreach ( $product_id as $id ) {
-			$titles[] = get_the_title( $id );
-		}
-	} else {
-		$titles[] = get_the_title( $product_id );
+	if ( ! is_array( $products ) ) {
+		$products = array( $products );
+		$show_qty = false;
+	}
+
+	if ( ! $show_qty ) {
+		$products = array_fill_keys( array_values( $products ), 1 );
+	}
+
+	foreach ( $products as $product_id => $qty ) {
+		$titles[] = ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ) . sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) );
+		$count += $qty;
 	}
 
 	$titles     = array_filter( $titles );
-	$added_text = sprintf( _n( '%s has been added to your cart.', '%s have been added to your cart.', sizeof( $titles ), 'woocommerce' ), wc_format_list_of_items( $titles ) );
+	$added_text = sprintf( _n( '%s has been added to your cart.', '%s have been added to your cart.', $count, 'woocommerce' ), wc_format_list_of_items( $titles ) );
 
 	// Output success messages
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
@@ -97,7 +105,7 @@ function wc_format_list_of_items( $items ) {
 	$item_string = '';
 
 	foreach ( $items as $key => $item ) {
-		$item_string .= sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), $item );
+		$item_string .= $item;
 
 		if ( $key + 2 === sizeof( $items ) ) {
 			$item_string .= ' ' . __( 'and', 'woocommerce' ) . ' ';
@@ -258,8 +266,9 @@ function wc_cart_totals_order_total_html() {
 		}
 
 		if ( ! empty( $tax_string_array ) ) {
-			$estimated_text = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
-				? sprintf( ' ' . __( 'estimated for %s', 'woocommerce' ), WC()->countries->estimated_for_prefix() . __( WC()->countries->countries[ WC()->countries->get_base_country() ], 'woocommerce' ) )
+			$taxable_address = WC()->customer->get_taxable_address();
+			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
+				? sprintf( ' ' . __( 'estimated for %s', 'woocommerce' ), WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )
 				: '';
 			$value .= '<small class="includes_tax">' . sprintf( __( '(includes %s%s)', 'woocommerce' ), implode( ', ', $tax_string_array ), $estimated_text ) . '</small>';
 		}
@@ -319,34 +328,4 @@ function wc_cart_round_discount( $value, $precision ) {
 	} else {
 		return round( $value, $precision );
 	}
-}
-
-/**
- * Gets the url to the cart page.
- *
- * @since  2.5.0
- *
- * @return string Url to cart page
- */
-function wc_get_cart_url() {
-	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
-}
-
-/**
- * Gets the url to the checkout page.
- *
- * @since  2.5.0
- *
- * @return string Url to checkout page
- */
-function wc_get_checkout_url() {
-	$checkout_url = wc_get_page_permalink( 'checkout' );
-	if ( $checkout_url ) {
-		// Force SSL if needed
-		if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
-			$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
-		}
-	}
-
-	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 }

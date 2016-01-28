@@ -222,7 +222,7 @@ class WC_Admin_Post_Types {
 			$columns['sku'] = __( 'SKU', 'woocommerce' );
 		}
 
-		if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			$columns['is_in_stock'] = __( 'Stock', 'woocommerce' );
 		}
 
@@ -395,19 +395,18 @@ class WC_Admin_Post_Types {
 				echo '</a>';
 				break;
 			case 'is_in_stock' :
-
 				if ( $the_product->is_in_stock() ) {
 					echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
 
-				if ( $the_product->managing_stock() ) {
-					echo ' &times; ' . $the_product->get_total_stock();
+				// If the product has children, a single stock level would be misleading as some could be -ve and some +ve, some managed/some unmanaged etc so hide stock level in this case.
+				if ( $the_product->managing_stock() && ! sizeof( $the_product->get_children() ) ) {
+					echo ' (' . $the_product->get_total_stock() . ')';
 				}
 
 				break;
-
 			default :
 				break;
 		}

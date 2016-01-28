@@ -86,8 +86,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			return;
 		}
 
-		// Handle cost
-		$total_cost = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
+		// Total up the cost
+		$total_cost = wc_format_decimal( is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'], wc_get_price_decimals() );
 		$taxes      = $args['taxes'];
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable

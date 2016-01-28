@@ -148,7 +148,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * get_child function.
+	 * Get child product.
 	 *
 	 * @access public
 	 * @param mixed $child_id
@@ -263,73 +263,77 @@ class WC_Product_Variable extends WC_Product {
 
 		$price_hash = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
 
-		// If the value has already been generated, return it now
-		if ( ! empty( $this->prices_array[ $price_hash ] ) ) {
-			return $this->prices_array[ $price_hash ];
-		}
-
-		// Get value of transient
-		$this->prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
-
-		// If the product version has changed, reset cache
-		if ( empty( $this->prices_array['version'] ) || $this->prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
-			$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
-		}
-
-		// If the prices are not stored for this hash, generate them
+		// If the value has already been generated, we don't need to grab the values again.
 		if ( empty( $this->prices_array[ $price_hash ] ) ) {
-			$prices         = array();
-			$regular_prices = array();
-			$sale_prices    = array();
-			$variation_ids  = $this->get_children( true );
 
-			foreach ( $variation_ids as $variation_id ) {
-				if ( $variation = $this->get_child( $variation_id ) ) {
-					$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
-					$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
-					$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->sale_price, $variation, $this );
+			// Get value of transient
+			$this->prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
-					// If sale price does not equal price, the product is not yet on sale
-					if ( $sale_price === $regular_price || $sale_price !== $price ) {
-						$sale_price = $regular_price;
-					}
-
-					// If we are getting prices for display, we need to account for taxes
-					if ( $display ) {
-						if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
-							$price         = '' === $price ? ''         : $variation->get_price_including_tax( 1, $price );
-							$regular_price = '' === $regular_price ? '' : $variation->get_price_including_tax( 1, $regular_price );
-							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_including_tax( 1, $sale_price );
-						} else {
-							$price         = '' === $price ? ''         : $variation->get_price_excluding_tax( 1, $price );
-							$regular_price = '' === $regular_price ? '' : $variation->get_price_excluding_tax( 1, $regular_price );
-							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_excluding_tax( 1, $sale_price );
-						}
-					}
-
-					$prices[ $variation_id ]         = $price;
-					$regular_prices[ $variation_id ] = $regular_price;
-					$sale_prices[ $variation_id ]    = $sale_price;
-				}
+			// If the product version has changed, reset cache
+			if ( empty( $this->prices_array['version'] ) || $this->prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
+				$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
 			}
 
-			asort( $prices );
-			asort( $regular_prices );
-			asort( $sale_prices );
+			// If the prices are not stored for this hash, generate them
+			if ( empty( $this->prices_array[ $price_hash ] ) ) {
+				$prices         = array();
+				$regular_prices = array();
+				$sale_prices    = array();
+				$variation_ids  = $this->get_children( true );
 
-			$this->prices_array[ $price_hash ] = array(
-				'price'         => $prices,
-				'regular_price' => $regular_prices,
-				'sale_price'    => $sale_prices
-			);
+				foreach ( $variation_ids as $variation_id ) {
+					if ( $variation = $this->get_child( $variation_id ) ) {
+						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
+						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
+						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->sale_price, $variation, $this );
 
-			set_transient( $transient_name, json_encode( $this->prices_array ), DAY_IN_SECONDS * 30 );
+						// If sale price does not equal price, the product is not yet on sale
+						if ( $sale_price === $regular_price || $sale_price !== $price ) {
+							$sale_price = $regular_price;
+						}
+
+						// If we are getting prices for display, we need to account for taxes
+						if ( $display ) {
+							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
+								$price         = '' === $price ? ''         : $variation->get_price_including_tax( 1, $price );
+								$regular_price = '' === $regular_price ? '' : $variation->get_price_including_tax( 1, $regular_price );
+								$sale_price    = '' === $sale_price ? ''    : $variation->get_price_including_tax( 1, $sale_price );
+							} else {
+								$price         = '' === $price ? ''         : $variation->get_price_excluding_tax( 1, $price );
+								$regular_price = '' === $regular_price ? '' : $variation->get_price_excluding_tax( 1, $regular_price );
+								$sale_price    = '' === $sale_price ? ''    : $variation->get_price_excluding_tax( 1, $sale_price );
+							}
+						}
+
+						$prices[ $variation_id ]         = $price;
+						$regular_prices[ $variation_id ] = $regular_price;
+						$sale_prices[ $variation_id ]    = $sale_price;
+					}
+				}
+
+				asort( $prices );
+				asort( $regular_prices );
+				asort( $sale_prices );
+
+				$this->prices_array[ $price_hash ] = array(
+					'price'         => $prices,
+					'regular_price' => $regular_prices,
+					'sale_price'    => $sale_prices
+				);
+
+				set_transient( $transient_name, json_encode( $this->prices_array ), DAY_IN_SECONDS * 30 );
+			}
+
+			/**
+			 * Give plugins one last chance to filter the variation prices array which has been generated.
+			 */
+			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
 		}
 
 		/**
-		 * Give plugins one last chance to filter the variation prices array which is being returned.
+		 * Return the values.
 		 */
-		return $this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
+		return $this->prices_array[ $price_hash ];
 	}
 
 	/**

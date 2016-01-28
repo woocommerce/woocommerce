@@ -17,10 +17,27 @@ if ( ! class_exists( 'WC_Product_Cat_Dropdown_Walker' ) ) :
 
 class WC_Product_Cat_Dropdown_Walker extends Walker {
 
+	/**
+	 * What the class handles.
+	 *
+	 * @var string
+	 */
 	public $tree_type = 'category';
-	public $db_fields = array ('parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
 
 	/**
+	 * DB fields to use.
+	 *
+	 * @var array
+	 */
+	public $db_fields = array(
+		'parent' => 'parent',
+		'id'     => 'term_id',
+		'slug'   => 'slug'
+	);
+
+	/**
+	 * Starts the list before the elements are added.
+	 *
 	 * @see Walker::start_el()
 	 * @since 2.1.0
 	 *
@@ -46,7 +63,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 
 		$output .= '>';
 
-		$output .= $pad . __( $cat_name, 'woocommerce' );
+		$output .= $pad . _x( $cat_name, 'product category name', 'woocommerce' );
 
 		if ( ! empty( $args['show_count'] ) )
 			$output .= '&nbsp;(' . $cat->count . ')';

@@ -170,6 +170,22 @@ if ( ! function_exists( 'is_view_order_page' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_edit_account_page' ) ) {
+
+	/**
+	* Check for edit account page.
+	* Returns true when viewing the edit account page.
+	*
+	* @since 2.5.1
+	* @return bool
+	*/
+	function is_edit_account_page() {
+		global $wp;
+
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['edit-account'] ) );
+	}
+}
+
 if ( ! function_exists( 'is_order_received_page' ) ) {
 
 	/**
@@ -358,12 +374,21 @@ function wc_is_valid_url( $url ) {
 }
 
 /**
+ * Check if the home URL is https. If it is, we don't need to do things such as 'force ssl'.
+ *
+ * @since  2.4.13
+ * @return bool
+ */
+function wc_site_is_https() {
+	return strstr( get_option( 'home' ), 'https:' );
+}
+
+/**
  * Check if the checkout is configured for https. Look at options, WP HTTPS plugin, or the permalink itself.
  *
  * @since  2.5.0
- *
  * @return bool
  */
 function wc_checkout_is_https() {
-	return 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || class_exists( 'WordPressHTTPS' ) || strstr( wc_get_page_permalink( 'checkout' ), 'https:' );
+	return wc_site_is_https() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || class_exists( 'WordPressHTTPS' ) || strstr( wc_get_page_permalink( 'checkout' ), 'https:' );
 }

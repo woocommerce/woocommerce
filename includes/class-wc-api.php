@@ -18,15 +18,26 @@ if ( ! class_exists( 'WC_API' ) ) :
 
 class WC_API {
 
-	/** This is the major version for the REST API and takes
+	/**
+	 * This is the major version for the REST API and takes
 	 * first-order position in endpoint URLs.
+	 *
+	 * @var string
 	 */
 	const VERSION = '3.1.0';
 
-	/** @var WC_API_Server the REST API server */
+	/**
+	 * The REST API server.
+	 *
+	 * @var WC_API_Server
+	 */
 	public $server;
 
-	/** @var WC_API_Authentication REST API authentication class instance */
+	/**
+	 * REST API authentication class instance.
+	 *
+	 * @var WC_API_Authentication
+	 */
 	public $authentication;
 
 	/**
@@ -56,7 +67,7 @@ class WC_API {
 	 * Add new query vars.
 	 *
 	 * @since 2.0
-	 * @param $vars
+	 * @param array $vars
 	 * @return string[]
 	 */
 	public function add_query_vars( $vars ) {

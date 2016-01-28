@@ -14,12 +14,17 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+global $wpdb;
+
+wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
+wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
+wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
+wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
+
 $status_options = get_option( 'woocommerce_status_options', array() );
 
 if ( ! empty( $status_options['uninstall_data'] ) ) {
-
-	global $wpdb;
-
 	// Roles + caps.
 	include_once( 'includes/class-wc-install.php' );
 	WC_Install::remove_roles();
@@ -41,6 +46,7 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_termmeta" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rates" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rate_locations" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_sessions" );
 
 	// Delete options.
 	$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';");

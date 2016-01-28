@@ -105,7 +105,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * generate_account_details_html function.
+	 * Generate account details html.
+	 *
+	 * @return string
 	 */
 	public function generate_account_details_html() {
 
@@ -224,6 +226,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 	/**
 	 * Output for the order received page.
+	 *
+	 * @param int $order_id
 	 */
 	public function thankyou_page( $order_id ) {
 
@@ -254,6 +258,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 	/**
 	 * Get bank details and place into a list format.
+	 *
+	 * @param int $order_id
 	 */
 	private function bank_details( $order_id = '' ) {
 
@@ -350,7 +356,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 *
 	 * @return array
 	 */
-
 	public function get_country_locale() {
 
 		if ( ! $this->locale ) {

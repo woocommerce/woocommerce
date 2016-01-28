@@ -5,8 +5,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="wc-tax-rates-search" id="rates-search">
-	<input type="search" class="wc-tax-rates-search-field" placeholder="<?php esc_attr_e( 'Search…', 'woocommerce' ); ?>" value="<?php if ( isset( $_GET['s'] ) ) { echo esc_attr( $_GET['s'] ); } ?>" />
+	<input type="search" class="wc-tax-rates-search-field" placeholder="<?php esc_attr_e( 'Search&hellip;', 'woocommerce' ); ?>" value="<?php if ( isset( $_GET['s'] ) ) { echo esc_attr( $_GET['s'] ); } ?>" />
 </div>
+
+<div id="rates-pagination"></div>
 
 <h3><?php printf( __( '"%s" Tax Rates', 'woocommerce' ), $current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' ) ); ?></h3>
 
@@ -37,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tfoot>
 	<tbody id="rates">
 		<tr>
-			<th colspan="10" style="text-align: center;"><?php esc_html_e( 'Loading…', 'woocommerce' ); ?></th>
+			<th colspan="10" style="text-align: center;"><?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?></th>
 		</tr>
 	</tbody>
 </table>
@@ -47,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td class="sort"></td>
 
 		<td class="country">
-			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" />
+			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" style="text-transform:uppercase" />
 		</td>
 
 		<td class="state">

@@ -222,15 +222,17 @@ class WC_Product {
 	 */
 	public function get_total_stock() {
 		if ( empty( $this->total_stock ) ) {
-			$this->total_stock = max( 0, $this->get_stock_quantity() );
-
 			if ( sizeof( $this->get_children() ) > 0 ) {
+				$this->total_stock = max( 0, $this->get_stock_quantity() );
+
 				foreach ( $this->get_children() as $child_id ) {
 					if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
 						$stock = get_post_meta( $child_id, '_stock', true );
 						$this->total_stock += max( 0, wc_stock_amount( $stock ) );
 					}
 				}
+			} else {
+				$this->total_stock = $this->get_stock_quantity();
 			}
 		}
 		return wc_stock_amount( $this->total_stock );
@@ -1343,7 +1345,7 @@ class WC_Product {
 
 			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
 
-			if ( $attribute['is_taxonomy'] ) {
+			if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
 
 				return implode( ', ', wc_get_product_terms( $this->id, $attribute['name'], array( 'fields' => 'names' ) ) );
 

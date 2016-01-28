@@ -51,6 +51,8 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  *
  * Returns a new order object on success which can then be used to add additional data.
  *
+ * @param  array $args
+ *
  * @return WC_Order on success, WP_Error on failure.
  */
 function wc_create_order( $args = array() ) {
@@ -295,8 +297,8 @@ function get_woocommerce_currencies() {
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
 				'KES' => __( 'Kenyan shilling', 'woocommerce' ),
-				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
+				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
@@ -309,6 +311,7 @@ function get_woocommerce_currencies() {
 				'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'RON' => __( 'Romanian Leu', 'woocommerce' ),
 				'RUB' => __( 'Russian Ruble', 'woocommerce' ),
+				'SAR' => __( 'Saudi Riyal', 'woocommerce' ),
 				'SEK' => __( 'Swedish Krona', 'woocommerce' ),
 				'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
 				'THB' => __( 'Thai Baht', 'woocommerce' ),
@@ -361,8 +364,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'ISK' => 'Kr.',
 		'JPY' => '&yen;',
 		'KES' => 'KSh',
-		'LAK' => '&#8365;',
 		'KRW' => '&#8361;',
+		'LAK' => '&#8365;',
 		'MXN' => '&#36;',
 		'MYR' => '&#82;&#77;',
 		'NGN' => '&#8358;',
@@ -376,6 +379,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'RMB' => '&yen;',
 		'RON' => 'lei',
 		'RUB' => '&#1088;&#1091;&#1073;.',
+		'SAR' => '&#x631;.&#x633;',
 		'SEK' => '&#107;&#114;',
 		'SGD' => '&#36;',
 		'THB' => '&#3647;',
@@ -695,12 +699,13 @@ function wc_get_base_location() {
 }
 
 /**
- * Get the customer's default location. .
+ * Get the customer's default location.
  *
  * Filtered, and set to base location or left blank. If cache-busting,
  * this should only be used when 'location' is set in the querystring.
  *
  * @todo should the woocommerce_default_country option be renamed to contain 'base'?
+ * @todo deprecate woocommerce_customer_default_location and support an array filter only to cover all cases.
  * @since 2.3.0
  * @return array
  */
@@ -723,7 +728,7 @@ function wc_get_customer_default_location() {
 		break;
 	}
 
-	return $location;
+	return apply_filters( 'woocommerce_customer_default_location_array', $location );
 }
 
 // This function can be removed when WP 3.9.2 or greater is required.
@@ -855,16 +860,10 @@ function wc_array_cartesian( $input ) {
 function wc_transaction_query( $type = 'start' ) {
 	global $wpdb;
 
-	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
-		// Try to set isolation level to support dirty reads - if this is unsupported, do not use transactions
-		$wpdb->hide_errors();
-		$result = $wpdb->query( 'SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;' );
+	$wpdb->hide_errors();
 
-		if ( false === $result ) {
-			define( 'WC_USE_TRANSACTIONS', false );
-		} else {
-			define( 'WC_USE_TRANSACTIONS', true );
-		}
+	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
+		define( 'WC_USE_TRANSACTIONS', true );
 	}
 
 	if ( WC_USE_TRANSACTIONS ) {
@@ -880,4 +879,34 @@ function wc_transaction_query( $type = 'start' ) {
 			break;
 		}
 	}
+}
+
+/**
+ * Gets the url to the cart page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to cart page
+ */
+function wc_get_cart_url() {
+	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+}
+
+/**
+ * Gets the url to the checkout page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to checkout page
+ */
+function wc_get_checkout_url() {
+	$checkout_url = wc_get_page_permalink( 'checkout' );
+	if ( $checkout_url ) {
+		// Force SSL if needed
+		if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
+			$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
+		}
+	}
+
+	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 }

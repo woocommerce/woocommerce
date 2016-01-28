@@ -441,7 +441,7 @@ function wc_scheduled_sales() {
 add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
 
 /**
- * wc_get_attachment_image_attributes function.
+ * Get attachment image attributes.
  *
  * @access public
  * @param array $attr
@@ -458,7 +458,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
 
 
 /**
- * wc_prepare_attachment_for_js function.
+ * Prepare attachment for JavaScript.
  *
  * @access public
  * @param array $response
