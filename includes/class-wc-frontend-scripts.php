@@ -340,10 +340,11 @@ class WC_Frontend_Scripts {
 				);
 			break;
 			case 'wc-password-strength-meter' :
-			return array(
-				'i18n_password_error' => esc_attr__( 'Please enter a stronger password to continue.', 'woocommerce' ),
-				'i18n_password_hint'  => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' )
-			);
+				return array(
+					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
+					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
+					'i18n_password_hint'    => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' )
+				);
 			break;
 		}
 		return false;
