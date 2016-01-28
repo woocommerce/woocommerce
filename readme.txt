@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Make save button clickable in tax rate table after using autocomplete field.
 * Fix - Fix passed image_size variable in email templates.
 * Fix - Don't show purchase note to admin in emails.
+* Tweak - Remove notice and add styling for add payment page.
 * Tweak - Set input margin and label display for compatibility with themes using bootstrap CSS.
 * Tweak - Add context to category term localization.
 * Tweak - Moved cart URL functions to core-functions file to make them available in admin area.
