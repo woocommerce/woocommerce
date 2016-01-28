@@ -381,11 +381,11 @@ class WC_Product_Variable extends WC_Product {
 
 		// This will get us max possible count of unique values for attribute ($attribute_field_name)
 		$query_string = "SELECT DISTINCT `meta_value` FROM $wpdb->postmeta WHERE `meta_key` = %s AND `post_id` IN (SELECT `id` as `post_id` FROM $wpdb->posts as main_table WHERE `post_parent` = %d AND `post_type` = 'product_variation' AND `post_status` = 'publish' )";
-		$attrs = [$attribute_field_name, $this->id];
+		$attrs = array($attribute_field_name, $this->id);
 		$attr_values = $wpdb->get_results($wpdb->prepare($query_string, $attrs), ARRAY_N);
 		$max_values = $attr_values;
 
-		$values = [];
+		$values = array();
 
 		// Get used values from children variations
 		$variation_ids = $this->get_children();
