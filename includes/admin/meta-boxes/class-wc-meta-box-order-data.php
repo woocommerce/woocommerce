@@ -415,7 +415,7 @@ class WC_Meta_Box_Order_Data {
 		$order = wc_get_order( $post_id );
 		$order->set_customer_id( absint( $_POST['customer_user'] ) );
 		$order->set_transaction_id( wc_clean( $_POST['_transaction_id'] ) );
-		$order->set_status( wc_clean( $_POST['order_status'] ) );
+		$order->set_status( wc_clean( $_POST['order_status'] ), false, true );
 
 		// Billing address fields
 		foreach ( self::$billing_fields as $key => $field ) {
@@ -456,8 +456,5 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		$order->save();
-
-		// Order status
-		//$order->update_status( $_POST['order_status'], '', true ); @todo
 	}
 }

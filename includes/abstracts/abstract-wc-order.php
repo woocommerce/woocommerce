@@ -94,8 +94,8 @@ abstract class WC_Abstract_Order {
 			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
 		}
 
-        elseif ( isset( $this->data[ $key ] ) ) {
-            return $this->data[ $key ];
+        elseif ( isset( $this->_data[ $key ] ) ) {
+            return $this->_data[ $key ];
         }
 
 		else {
@@ -118,13 +118,19 @@ abstract class WC_Abstract_Order {
     }
 
     /**
+     * Stores data about status changes so relevant hooks can be fired.
+     * @var bool|array
+     */
+    protected $_status_transition = false;
+
+    /**
      * Data array, with defaults.
      *
      * @todo when migrating to custom tables, these will be columns
      * @since 2.6.0
      * @var array
      */
-    protected $data = array(
+    protected $_data = array(
 		'order_id'             => 0,
         'parent_id'            => 0,
 		'status'               => '',
@@ -201,7 +207,7 @@ abstract class WC_Abstract_Order {
      * @return array
      */
     protected function get_data() {
-        return $this->data;
+        return $this->_data;
     }
 
     /**
@@ -210,7 +216,7 @@ abstract class WC_Abstract_Order {
      * @return integer
      */
     public function get_order_id() {
-        return absint( $this->data['order_id'] );
+        return absint( $this->_data['order_id'] );
     }
 
     /**
@@ -219,7 +225,7 @@ abstract class WC_Abstract_Order {
      * @return integer
      */
     public function get_parent_id() {
-        return absint( $this->data['parent_id'] );
+        return absint( $this->_data['parent_id'] );
     }
 
     /**
@@ -239,7 +245,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_order_key() {
-        return $this->data['order_key'];
+        return $this->_data['order_key'];
     }
 
     /**
@@ -247,7 +253,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_order_currency() {
-        return apply_filters( 'woocommerce_get_order_currency', $this->data['order_currency'], $this );
+        return apply_filters( 'woocommerce_get_order_currency', $this->_data['order_currency'], $this );
     }
 
     /**
@@ -255,7 +261,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_order_type() {
-        return $this->data['order_type'];
+        return $this->_data['order_type'];
     }
 
     /**
@@ -263,7 +269,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_date_created() {
-        return $this->data['date_created'];
+        return $this->_data['date_created'];
     }
 
     /**
@@ -271,7 +277,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_date_modified() {
-        return $this->data['date_modified'];
+        return $this->_data['date_modified'];
     }
 
     /**
@@ -279,7 +285,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_date_completed() {
-        return $this->data['date_completed'];
+        return $this->_data['date_completed'];
     }
 
     /**
@@ -287,7 +293,7 @@ abstract class WC_Abstract_Order {
      * @return int
      */
     public function get_customer_id() {
-        return absint( $this->data['customer_id'] );
+        return absint( $this->_data['customer_id'] );
     }
 
     /**
@@ -295,7 +301,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_first_name() {
-        return $this->data['billing_first_name'];
+        return $this->_data['billing_first_name'];
     }
 
     /**
@@ -303,7 +309,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_last_name() {
-        return $this->data['billing_last_name'];
+        return $this->_data['billing_last_name'];
     }
 
     /**
@@ -311,7 +317,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_company() {
-        return $this->data['billing_company'];
+        return $this->_data['billing_company'];
     }
 
     /**
@@ -319,7 +325,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_address_1() {
-        return $this->data['billing_address_1'];
+        return $this->_data['billing_address_1'];
     }
 
     /**
@@ -327,7 +333,7 @@ abstract class WC_Abstract_Order {
      * @return string $value
      */
     public function get_billing_address_2() {
-        return $this->data['billing_address_2'];
+        return $this->_data['billing_address_2'];
     }
 
     /**
@@ -335,7 +341,7 @@ abstract class WC_Abstract_Order {
      * @return string $value
      */
     public function get_billing_city() {
-        return $this->data['billing_city'];
+        return $this->_data['billing_city'];
     }
 
     /**
@@ -343,7 +349,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_state() {
-        return $this->data['billing_state'];
+        return $this->_data['billing_state'];
     }
 
     /**
@@ -351,7 +357,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_postcode() {
-        return $this->data['billing_postcode'];
+        return $this->_data['billing_postcode'];
     }
 
     /**
@@ -359,7 +365,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_country() {
-        return $this->data['billing_country'];
+        return $this->_data['billing_country'];
     }
 
     /**
@@ -367,7 +373,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_email() {
-        return $this->data['billing_email'];
+        return $this->_data['billing_email'];
     }
 
     /**
@@ -375,7 +381,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_phone() {
-        return $this->data['billing_phone'];
+        return $this->_data['billing_phone'];
     }
 
     /**
@@ -383,7 +389,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_first_name() {
-        return $this->data['shipping_first_name'];
+        return $this->_data['shipping_first_name'];
     }
 
     /**
@@ -391,7 +397,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_last_name() {
-         return $this->data['shipping_last_name'];
+         return $this->_data['shipping_last_name'];
     }
 
     /**
@@ -399,7 +405,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_company() {
-        return $this->data['shipping_company'];
+        return $this->_data['shipping_company'];
     }
 
     /**
@@ -407,7 +413,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_address_1() {
-        return $this->data['shipping_address_1'];
+        return $this->_data['shipping_address_1'];
     }
 
     /**
@@ -415,7 +421,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_address_2() {
-        return $this->data['shipping_address_2'];
+        return $this->_data['shipping_address_2'];
     }
 
     /**
@@ -423,7 +429,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_city() {
-        return $this->data['shipping_city'];
+        return $this->_data['shipping_city'];
     }
 
     /**
@@ -431,7 +437,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_state() {
-        return $this->data['shipping_state'];
+        return $this->_data['shipping_state'];
     }
 
     /**
@@ -439,7 +445,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_postcode() {
-        return $this->data['shipping_postcode'];
+        return $this->_data['shipping_postcode'];
     }
 
     /**
@@ -447,7 +453,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_country() {
-        return $this->data['shipping_country'];
+        return $this->_data['shipping_country'];
     }
 
     /**
@@ -455,7 +461,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_payment_method() {
-        return $this->data['payment_method'];
+        return $this->_data['payment_method'];
     }
 
     /**
@@ -463,7 +469,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_payment_method_title() {
-        return $this->data['payment_method_title'];
+        return $this->_data['payment_method_title'];
     }
 
     /**
@@ -471,7 +477,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_transaction_id() {
-        return $this->data['transaction_id'];
+        return $this->_data['transaction_id'];
     }
 
     /**
@@ -479,7 +485,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_customer_ip_address() {
-        return $this->data['customer_ip_address'];
+        return $this->_data['customer_ip_address'];
     }
 
     /**
@@ -487,7 +493,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_customer_user_agent() {
-        return $this->data['customer_user_agent'];
+        return $this->_data['customer_user_agent'];
     }
 
     /**
@@ -495,7 +501,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_created_via() {
-        return $this->data['created_via'];
+        return $this->_data['created_via'];
     }
 
     /**
@@ -503,7 +509,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_order_version() {
-        return $this->data['order_version'];
+        return $this->_data['order_version'];
     }
 
     /**
@@ -511,7 +517,7 @@ abstract class WC_Abstract_Order {
      * @return bool
      */
     public function get_prices_include_tax() {
-        return (bool) $this->data['prices_include_tax'];
+        return (bool) $this->_data['prices_include_tax'];
     }
 
     /**
@@ -519,7 +525,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_customer_note() {
-        return $this->data['customer_note'];
+        return $this->_data['customer_note'];
     }
 
     /**
@@ -564,7 +570,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_status() {
-        return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $this->data['status'], 0, 3 ) ? substr( $this->data['status'], 3 ) : $this->data['status'], $this );
+        return apply_filters( 'woocommerce_order_get_status', 'wc-' === substr( $this->_data['status'], 0, 3 ) ? substr( $this->_data['status'], 3 ) : $this->_data['status'], $this );
     }
 
     /**
@@ -650,7 +656,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_discount_total() {
-        $discount_total = wc_format_decimal( $this->data['discount_total'] );
+        $discount_total = wc_format_decimal( $this->_data['discount_total'] );
 
         // Backwards compatible total calculation - totals were not stored consistently in old versions.
         if ( ( ! $this->get_order_version() || version_compare( $this->get_order_version(), '2.3.7', '<' ) ) && $this->get_prices_include_tax() ) {
@@ -665,7 +671,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_discount_tax() {
-        return wc_format_decimal( $this->data['discount_tax'] );
+        return wc_format_decimal( $this->_data['discount_tax'] );
     }
 
     /**
@@ -677,7 +683,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_total() {
-        return wc_format_decimal( $this->data['shipping_total'] );
+        return wc_format_decimal( $this->_data['shipping_total'] );
     }
 
     /**
@@ -690,7 +696,7 @@ abstract class WC_Abstract_Order {
      * @return float
      */
     public function get_cart_tax() {
-        return wc_format_decimal( $this->data['cart_tax'] );
+        return wc_format_decimal( $this->_data['cart_tax'] );
     }
 
     /**
@@ -703,7 +709,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_shipping_tax() {
-        return wc_format_decimal( $this->data['shipping_tax'] );
+        return wc_format_decimal( $this->_data['shipping_tax'] );
     }
 
     /**
@@ -711,7 +717,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_order_tax() {
-        return wc_round_tax_total( $this->data['order_tax'] );
+        return wc_round_tax_total( $this->_data['order_tax'] );
     }
 
     /**
@@ -719,7 +725,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_order_total() {
-        return wc_format_decimal( $this->data['order_total'], wc_get_price_decimals() );
+        return wc_format_decimal( $this->_data['order_total'], wc_get_price_decimals() );
     }
 
     /**
@@ -841,7 +847,7 @@ abstract class WC_Abstract_Order {
      * @param int $value
      */
     public function set_order_id( $value ) {
-        $this->data['order_id'] = absint( $value );
+        $this->_data['order_id'] = absint( $value );
     }
 
     /**
@@ -850,17 +856,30 @@ abstract class WC_Abstract_Order {
      * @param int $value
      */
     public function set_parent_id( $value ) {
-        $this->data['parent_id'] = absint( $value );
+        $this->_data['parent_id'] = absint( $value );
     }
 
     /**
      * Set order status.
      * @since 2.6.0
-     * @param string $value
+     * @param string $new_status Status to change the order to. No internal wc- prefix is required.
+     * @param string $note (default: '') Optional note to add.
+     * @param bool $manual is this a manual order status change?
      */
-    public function set_status( $value ) {
-        if ( in_array( $value, array_keys( wc_get_order_statuses() ) ) ) {
-            $this->data['status'] = $value;
+    public function set_status( $new_status, $note = '', $manual_update = false ) {
+        // Remove prefixes and standardize
+        $current_status = $this->get_status();
+        $new_status     = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+
+        if ( in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) && $new_status !== $current_status ) {
+            if ( ! empty( $current_status ) ) {
+                $this->_status_transition = array(
+                    'original' => ! empty( $this->_status_transition['original'] ) ? $this->_status_transition['original'] : $current_status,
+                    'note'     => $note ? $note : '',
+                    'manual'   => (bool) $manual_update
+                );
+            }
+            $this->_data['status'] = 'wc-' . $new_status;
         }
     }
 
@@ -869,7 +888,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_order_type( $value ) {
-        $this->data['order_type'] = $value;
+        $this->_data['order_type'] = $value;
     }
 
     /**
@@ -877,7 +896,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_order_key( $value ) {
-        $this->data['order_key'] = $value;
+        $this->_data['order_key'] = $value;
     }
 
     /**
@@ -885,7 +904,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_order_currency( $value ) {
-        $this->data['order_currency'] = $value;
+        $this->_data['order_currency'] = $value;
     }
 
     /**
@@ -893,7 +912,7 @@ abstract class WC_Abstract_Order {
      * @param string $timestamp Timestamp
      */
     public function set_date_created( $timestamp ) {
-        $this->data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+        $this->_data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
     /**
@@ -901,7 +920,7 @@ abstract class WC_Abstract_Order {
      * @param string $timestamp
      */
     public function set_date_modified( $timestamp ) {
-        $this->data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+        $this->_data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
     /**
@@ -909,7 +928,7 @@ abstract class WC_Abstract_Order {
      * @param string $timestamp
      */
     public function set_date_completed( $timestamp ) {
-        $this->data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+        $this->_data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
     /**
@@ -917,7 +936,7 @@ abstract class WC_Abstract_Order {
      * @param int $value
      */
     public function set_customer_id( $value ) {
-        $this->data['customer_id'] = absint( $value );
+        $this->_data['customer_id'] = absint( $value );
     }
 
     /**
@@ -925,7 +944,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_first_name( $value ) {
-        $this->data['billing_first_name'] = $value;
+        $this->_data['billing_first_name'] = $value;
     }
 
     /**
@@ -933,7 +952,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_last_name( $value ) {
-        $this->data['billing_last_name'] = $value;
+        $this->_data['billing_last_name'] = $value;
     }
 
     /**
@@ -941,7 +960,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_company( $value ) {
-        $this->data['billing_company'] = $value;
+        $this->_data['billing_company'] = $value;
     }
 
     /**
@@ -949,7 +968,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_address_1( $value ) {
-        $this->data['billing_address_1'] = $value;
+        $this->_data['billing_address_1'] = $value;
     }
 
     /**
@@ -957,7 +976,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_address_2( $value ) {
-        $this->data['billing_address_2'] = $value;
+        $this->_data['billing_address_2'] = $value;
     }
 
     /**
@@ -965,7 +984,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_city( $value ) {
-        $this->data['billing_city'] = $value;
+        $this->_data['billing_city'] = $value;
     }
 
     /**
@@ -973,7 +992,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_state( $value ) {
-        $this->data['billing_state'] = $value;
+        $this->_data['billing_state'] = $value;
     }
 
     /**
@@ -981,7 +1000,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_postcode( $value ) {
-        $this->data['billing_postcode'] = $value;
+        $this->_data['billing_postcode'] = $value;
     }
 
     /**
@@ -989,7 +1008,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_country( $value ) {
-        $this->data['billing_country'] = $value;
+        $this->_data['billing_country'] = $value;
     }
 
     /**
@@ -997,7 +1016,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_email( $value ) {
-        $this->data['billing_email'] = is_email( $value ) ? $value : '';
+        $this->_data['billing_email'] = is_email( $value ) ? $value : '';
     }
 
     /**
@@ -1005,7 +1024,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_phone( $value ) {
-        $this->data['billing_phone'] = $value;
+        $this->_data['billing_phone'] = $value;
     }
 
     /**
@@ -1013,7 +1032,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_first_name( $value ) {
-        $this->data['shipping_first_name'] = $value;
+        $this->_data['shipping_first_name'] = $value;
     }
 
     /**
@@ -1021,7 +1040,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_last_name( $value ) {
-        $this->data['shipping_last_name'] = $value;
+        $this->_data['shipping_last_name'] = $value;
     }
 
     /**
@@ -1029,7 +1048,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_company( $value ) {
-        $this->data['shipping_company'] = $value;
+        $this->_data['shipping_company'] = $value;
     }
 
     /**
@@ -1037,7 +1056,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_address_1( $value ) {
-        $this->data['shipping_address_1'] = $value;
+        $this->_data['shipping_address_1'] = $value;
     }
 
     /**
@@ -1045,7 +1064,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_address_2( $value ) {
-        $this->data['shipping_address_2'] = $value;
+        $this->_data['shipping_address_2'] = $value;
     }
 
     /**
@@ -1053,7 +1072,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_city( $value ) {
-        $this->data['shipping_city'] = $value;
+        $this->_data['shipping_city'] = $value;
     }
 
     /**
@@ -1061,7 +1080,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_state( $value ) {
-        $this->data['shipping_state'] = $value;
+        $this->_data['shipping_state'] = $value;
     }
 
     /**
@@ -1069,7 +1088,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_postcode( $value ) {
-        $this->data['shipping_postcode'] = $value;
+        $this->_data['shipping_postcode'] = $value;
     }
 
     /**
@@ -1077,7 +1096,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_country( $value ) {
-        $this->data['shipping_country'] = $value;
+        $this->_data['shipping_country'] = $value;
     }
 
     /**
@@ -1085,7 +1104,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_discount_total( $value ) {
-        $this->data['discount_total'] = wc_format_decimal( $value );
+        $this->_data['discount_total'] = wc_format_decimal( $value );
     }
 
     /**
@@ -1093,7 +1112,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_discount_tax( $value ) {
-        $this->data['discount_tax'] = wc_format_decimal( $value );
+        $this->_data['discount_tax'] = wc_format_decimal( $value );
     }
 
     /**
@@ -1101,7 +1120,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_total( $value ) {
-        $this->data['shipping_total'] = wc_format_decimal( $value );
+        $this->_data['shipping_total'] = wc_format_decimal( $value );
     }
 
     /**
@@ -1109,7 +1128,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_shipping_tax( $value ) {
-        $this->data['shipping_tax'] = wc_format_decimal( $value );
+        $this->_data['shipping_tax'] = wc_format_decimal( $value );
         $this->set_order_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
     }
 
@@ -1118,7 +1137,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_cart_tax( $value ) {
-        $this->data['cart_tax'] = wc_format_decimal( $value );
+        $this->_data['cart_tax'] = wc_format_decimal( $value );
         $this->set_order_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
     }
 
@@ -1128,7 +1147,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     protected function set_order_tax( $value ) {
-        $this->data['order_tax'] = wc_format_decimal( $value );
+        $this->_data['order_tax'] = wc_format_decimal( $value );
     }
 
     /**
@@ -1136,7 +1155,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_order_total( $value ) {
-        $this->data['order_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
+        $this->_data['order_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
     }
 
     /**
@@ -1151,7 +1170,7 @@ abstract class WC_Abstract_Order {
             $this->set_payment_method( $value->id );
             $this->set_payment_method_title( $value->get_title() );
         } else {
-            $this->data['payment_method'] = $value;
+            $this->_data['payment_method'] = $value;
         }
     }
 
@@ -1160,7 +1179,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_payment_method_title( $value ) {
-        $this->data['payment_method_title'] = $value;
+        $this->_data['payment_method_title'] = $value;
     }
 
     /**
@@ -1168,7 +1187,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_transaction_id( $value ) {
-        $this->data['transaction_id'] = $value;
+        $this->_data['transaction_id'] = $value;
     }
 
     /**
@@ -1176,7 +1195,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_customer_ip_address( $value ) {
-        $this->data['customer_ip_address'] = $value;
+        $this->_data['customer_ip_address'] = $value;
     }
 
     /**
@@ -1184,7 +1203,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_customer_user_agent( $value ) {
-        $this->data['customer_user_agent'] = $value;
+        $this->_data['customer_user_agent'] = $value;
     }
 
     /**
@@ -1192,7 +1211,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_created_via( $value ) {
-        $this->data['created_via'] = $value;
+        $this->_data['created_via'] = $value;
     }
 
     /**
@@ -1200,7 +1219,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_order_version( $value ) {
-        $this->data['order_version'] = $value;
+        $this->_data['order_version'] = $value;
     }
 
     /**
@@ -1208,7 +1227,7 @@ abstract class WC_Abstract_Order {
      * @param bool $value
      */
     public function set_prices_include_tax( $value ) {
-        $this->data['prices_include_tax'] = (bool) $value;
+        $this->_data['prices_include_tax'] = (bool) $value;
     }
 
     /**
@@ -1216,7 +1235,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_customer_note( $value ) {
-        $this->data['customer_note'] = $value;
+        $this->_data['customer_note'] = $value;
     }
 
     /**
@@ -1444,9 +1463,9 @@ abstract class WC_Abstract_Order {
         $wpdb->update(
             $wpdb->posts,
             array(
-                'post_date'     => date_i18n( 'Y-m-d H:i:s', $this->get_date_created() ),
-                'post_date_gmt' => get_gmt_from_date( date_i18n( 'Y-m-d H:i:s', $this->get_date_created() ) ),
-                'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ), // @todo hooks?
+                'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
+                'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
+                'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
                 'post_parent'   => $this->get_parent_id()
             ),
             array(
@@ -1484,7 +1503,6 @@ abstract class WC_Abstract_Order {
         update_post_meta( $order_id, '_created_via', $this->get_created_via() );
         update_post_meta( $order_id, '_order_version', $this->get_order_version() );
         update_post_meta( $order_id, '_prices_include_tax', $this->get_prices_include_tax() );
-        update_post_meta( $order_id, '_completed_date', $this->get_date_completed() );
         update_post_meta( $order_id, '_order_currency', $this->get_order_currency() );
         update_post_meta( $order_id, '_order_key', $this->get_order_key() );
         update_post_meta( $order_id, '_cart_discount', $this->get_discount_total() );
@@ -1493,6 +1511,45 @@ abstract class WC_Abstract_Order {
         update_post_meta( $order_id, '_order_shipping_tax', $this->get_shipping_tax() );
         update_post_meta( $order_id, '_order_tax', $this->get_cart_tax() );
         update_post_meta( $order_id, '_order_total', $this->get_order_total() );
+
+        if ( $this->_status_transition ) {
+            if ( ! empty( $this->_status_transition['original'] ) ) {
+                $transition_note = sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $this->_status_transition['original'] ), wc_get_order_status_name( $this->get_status() ) );
+
+                do_action( 'woocommerce_order_status_' . $this->_status_transition['original'] . '_to_' . $this->get_status(), $this->get_order_id() );
+                do_action( 'woocommerce_order_status_changed', $this->get_order_id(), $this->_status_transition['original'], $this->get_status() );
+            } else {
+                $transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->get_status() ) );
+            }
+
+            do_action( 'woocommerce_order_status_' . $this->get_status(), $this->get_order_id() );
+
+            // status related actions
+            switch ( $this->get_status() ) {
+                case 'completed' :
+                    $this->record_product_sales();
+                    $this->increase_coupon_usage_counts();
+                    $this->set_date_completed( current_time( 'timestamp' ) );
+                    break;
+                case 'processing' :
+                case 'on-hold' :
+                    $this->record_product_sales();
+                    $this->increase_coupon_usage_counts();
+                    break;
+                case 'cancelled' :
+                    $this->decrease_coupon_usage_counts();
+                    break;
+            }
+
+            // Note the transition occured
+            $this->add_order_note( trim( $this->_status_transition['note'] . ' ' . $transition_note ), 0, $this->_status_transition['manual'] );
+
+            // This has ran, so reset status transition variable
+            $this->_status_transition = false;
+        }
+
+        // Complete date set here as it could change based on status
+        update_post_meta( $order_id, '_completed_date', date( 'Y-m-d H:i:s', $this->get_date_completed() ) );  // @todo check date formats are bw compat and consistant
     }
 
     /**
