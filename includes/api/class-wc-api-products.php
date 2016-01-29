@@ -1061,6 +1061,8 @@ class WC_API_Products extends WC_API_Resource {
 			if ( ! is_array( $query_args['meta_query'] ) ) {
 				$query_args['meta_query'] = array();
 			}
+			
+			$args['sku'] = preg_replace('/\s/', '+', $args['sku']);
 
 			$query_args['meta_query'][] = array(
 				'key'     => '_sku',
