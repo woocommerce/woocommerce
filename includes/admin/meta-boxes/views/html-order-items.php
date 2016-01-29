@@ -81,7 +81,6 @@ if ( wc_tax_enabled() ) {
 		<?php
 			foreach ( $line_items as $item_id => $item ) {
 				$_product  = $order->get_product_from_item( $item );
-				$item_meta = $order->get_item_meta( $item_id );
 
 				include( 'html-order-item.php' );
 

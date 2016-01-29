@@ -183,7 +183,7 @@ abstract class WC_Abstract_Order {
 		'coupon_lines'         => array()
     );
 
-    public function add_meta_data(){}
+    public function add_meta_data(){} // @todo
 
     /*
     |--------------------------------------------------------------------------
@@ -1437,13 +1437,22 @@ abstract class WC_Abstract_Order {
      * @todo Convert to custom tables.
      */
     protected function update() {
+        global $wpdb;
+
         $order_id = $this->get_order_id();
 
-        wp_update_post( array(
-            'ID'          => $order_id,
-            'post_status' => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ), // @todo hooks?
-            'post_parent' => $this->get_parent_id()
-        ) );
+        $wpdb->update(
+            $wpdb->posts,
+            array(
+                'post_date'     => date_i18n( 'Y-m-d H:i:s', $this->get_date_created() ),
+                'post_date_gmt' => get_gmt_from_date( date_i18n( 'Y-m-d H:i:s', $this->get_date_created() ) ),
+                'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ), // @todo hooks?
+                'post_parent'   => $this->get_parent_id()
+            ),
+            array(
+                'ID' => $order_id
+            )
+        );
 
         // Update meta data
         update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
@@ -1501,7 +1510,7 @@ abstract class WC_Abstract_Order {
      * @since 2.6.0
      * @access protected
      */
-    protected function save() {
+    public function save() {
         if ( ! $this->get_order_id() ) {
             $this->create();
         } else {

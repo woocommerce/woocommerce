@@ -1158,7 +1158,7 @@ class WC_AJAX {
 			'order_item_type' 		=> 'line_item'
 		) );
 
-		// Add line item meta
+		// Add line item meta @todo
 		if ( $item_id ) {
 			wc_add_order_item_meta( $item_id, '_qty', $item['qty'] );
 			wc_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
