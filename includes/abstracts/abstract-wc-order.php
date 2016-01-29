@@ -126,6 +126,7 @@ abstract class WC_Abstract_Order {
      */
     protected $data = array(
 		'order_id'             => 0,
+        'parent_id'            => 0,
 		'status'               => '',
 		'order_type'           => 'simple',
 		'order_key'            => '',
@@ -210,6 +211,15 @@ abstract class WC_Abstract_Order {
      */
     public function get_order_id() {
         return absint( $this->data['order_id'] );
+    }
+
+    /**
+     * Get parent order ID.
+     * @since 2.6.0
+     * @return integer
+     */
+    public function get_parent_id() {
+        return absint( $this->data['parent_id'] );
     }
 
     /**
@@ -835,6 +845,15 @@ abstract class WC_Abstract_Order {
     }
 
     /**
+     * Set parent order ID.
+     * @since 2.6.0
+     * @param int $value
+     */
+    public function set_parent_id( $value ) {
+        $this->data['parent_id'] = absint( $value );
+    }
+
+    /**
      * Set order status.
      * @since 2.6.0
      * @param string $value
@@ -1282,88 +1301,64 @@ abstract class WC_Abstract_Order {
      * @since 2.6.0
      * @access protected
      * @todo Convert to custom tables.
-     * @param array $data data to save
      */
-    protected function create( $data ) {
-        $post_data                  = array();
-        $post_data['post_type']     = 'shop_order';
-        $post_data['post_status']   = 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) );
-        $post_data['ping_status']   = 'closed';
-        $post_data['post_author']   = 1;
-        $post_data['post_password'] = uniqid( 'order_' );
-        $post_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-        $post_data['post_parent']   = absint( $args['parent'] ); //  @todo
-        $order_id                    = wp_insert_post( apply_filters( 'woocommerce_new_order_data', $post_data ), true );
-        $this->set_order_id( $order_id );
+    protected function create() {
+        // Set random key
         $this->set_order_key( uniqid( 'order_' ) );
 
+        $order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
+            'post_type'     => 'shop_order',
+            'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
+            'ping_status'   => 'closed',
+            'post_author'   => 1,
+            'post_title'    => sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) ),
+            'post_password' => $this->get_order_key(),
+            'post_parent'   => $this->get_parent_id()
+        ) ), true );
 
-        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
-        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
-        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
-        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
-        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
+        if ( $order_id ) {
+            $this->set_order_id( $order_id );
 
-
-
-
-
-
-        'order_id'             => 0,
-        'status'               => '',
-        'order_type'           => 'simple',
-        'order_key'            => '',
-        'order_currency'       => '',
-        'date_created'         => '',
-        'date_modified'        => '',
-        'customer_id'          => 0,
-        'billing_first_name'   => '',
-        'billing_last_name'    => '',
-        'billing_company'      => '',
-        'billing_address_1'    => '',
-        'billing_address_2'    => '',
-        'billing_city'         => '',
-        'billing_state'        => '',
-        'billing_postcode'     => '',
-        'billing_country'      => '',
-        'billing_email'        => '',
-        'billing_phone'        => '',
-        'shipping_first_name'  => '',
-        'shipping_last_name'   => '',
-        'shipping_company'     => '',
-        'shipping_address_1'   => '',
-        'shipping_address_2'   => '',
-        'shipping_city'        => '',
-        'shipping_state'       => '',
-        'shipping_postcode'    => '',
-        'shipping_country'     => '',
-        'discount_total'       => 0,
-        'discount_tax'         => 0,
-        'shipping_total'       => 0,
-        'shipping_tax'         => 0,
-        'cart_tax'             => 0, // @todo cart tax maps to '_order_tax' in the current API. This is confusing and should be renamed.
-        'order_total'          => 0,
-        'order_tax'            => 0, // Sum of all taxes.
-
-        // These will be meta when moving to custom data
-        'payment_method'       => '',
-        'payment_method_title' => '',
-        'transaction_id'       => '',
-        'customer_ip_address'  => '',
-        'customer_user_agent'  => '',
-        'created_via'          => '',
-        'order_version'        => '',
-        'prices_include_tax'   => false,
-        'customer_note'        => '',
-        'date_completed'       => '',
-
-        // These will remain as order items @todo
-        'line_items'           => array(),
-        'tax_lines'            => array(),
-        'shipping_lines'       => array(),
-        'fees'                 => array(),
-        'fee_lines'            => array(),
-        'coupon_lines'         => array()
+            // Set meta data
+            update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
+            update_post_meta( $order_id, '_billing_last_name', $this->get_billing_last_name() );
+            update_post_meta( $order_id, '_billing_company', $this->get_billing_company() );
+            update_post_meta( $order_id, '_billing_address_1', $this->get_billing_address_1() );
+            update_post_meta( $order_id, '_billing_address_2', $this->get_billing_address_2() );
+            update_post_meta( $order_id, '_billing_city', $this->get_billing_city() );
+            update_post_meta( $order_id, '_billing_state', $this->get_billing_state() );
+            update_post_meta( $order_id, '_billing_postcode', $this->get_billing_postcode() );
+            update_post_meta( $order_id, '_billing_country', $this->get_billing_country() );
+            update_post_meta( $order_id, '_billing_email', $this->get_billing_email() );
+            update_post_meta( $order_id, '_billing_phone', $this->get_billing_phone() );
+            update_post_meta( $order_id, '_shipping_first_name', $this->get_shipping_first_name() );
+            update_post_meta( $order_id, '_shipping_last_name', $this->get_shipping_last_name() );
+            update_post_meta( $order_id, '_shipping_company', $this->get_shipping_company() );
+            update_post_meta( $order_id, '_shipping_address_1', $this->get_shipping_address_1() );
+            update_post_meta( $order_id, '_shipping_address_2', $this->get_shipping_address_2() );
+            update_post_meta( $order_id, '_shipping_city', $this->get_shipping_city() );
+            update_post_meta( $order_id, '_shipping_state', $this->get_shipping_state() );
+            update_post_meta( $order_id, '_shipping_postcode', $this->get_shipping_postcode() );
+            update_post_meta( $order_id, '_shipping_country', $this->get_shipping_country() );
+            update_post_meta( $order_id, '_payment_method', $this->get_payment_method() );
+            update_post_meta( $order_id, '_payment_method_title', $this->get_payment_method_title() );
+            update_post_meta( $order_id, '_transaction_id', $this->get_transaction_id() );
+            update_post_meta( $order_id, '_customer_user', $this->get_customer_id() );
+            update_post_meta( $order_id, '_customer_ip_address', $this->get_customer_ip_address() );
+            update_post_meta( $order_id, '_customer_user_agent', $this->get_customer_user_agent() );
+            update_post_meta( $order_id, '_created_via', $this->get_created_via() );
+            update_post_meta( $order_id, '_order_version', $this->get_order_version() );
+            update_post_meta( $order_id, '_prices_include_tax', $this->get_prices_include_tax() );
+            update_post_meta( $order_id, '_completed_date', $this->get_date_completed() );
+            update_post_meta( $order_id, '_order_currency', $this->get_order_currency() );
+            update_post_meta( $order_id, '_order_key', $this->get_order_key() );
+            update_post_meta( $order_id, '_cart_discount', $this->get_discount_total() );
+            update_post_meta( $order_id, '_cart_discount_tax', $this->get_discount_tax() );
+            update_post_meta( $order_id, '_order_shipping', $this->get_shipping_total() );
+            update_post_meta( $order_id, '_order_shipping_tax', $this->get_shipping_tax() );
+            update_post_meta( $order_id, '_order_tax', $this->get_cart_tax() );
+            update_post_meta( $order_id, '_order_total', $this->get_order_total() );
+        }
     }
 
     /**
@@ -1375,55 +1370,56 @@ abstract class WC_Abstract_Order {
      */
     protected function read( $id ) {
         $post_object = get_post( $id );
+        $order_id    = absint( $post_object->ID );
 
         // Map standard post data
-        $this->set_order_id( $post_object->ID );
+        $this->set_order_id( $order_id );
         $this->set_date_created( $post_object->post_date );
         $this->set_date_modified( $post_object->post_modified );
         $this->set_status( $post_object->post_status );
         $this->set_customer_note( $post_object->post_excerpt );
 
         // Map meta data
-        $this->set_customer_id( get_post_meta( $this->get_order_id(), '_customer_user', true ) );
-        $this->set_order_key( get_post_meta( $this->get_order_id(), '_order_key', true ) );
-        $this->set_order_currency( get_post_meta( $this->get_order_id(), '_order_currency', true ) );
-        $this->set_billing_first_name( get_post_meta( $this->get_order_id(), '_billing_first_name', true ) );
-        $this->set_billing_last_name( get_post_meta( $this->get_order_id(), '_billing_last_name', true ) );
-        $this->set_billing_company( get_post_meta( $this->get_order_id(), '_billing_company', true ) );
-        $this->set_billing_address_1( get_post_meta( $this->get_order_id(), '_billing_address_1', true ) );
-        $this->set_billing_address_2( get_post_meta( $this->get_order_id(), '_billing_address_2', true ) );
-        $this->set_billing_city( get_post_meta( $this->get_order_id(), '_billing_city', true ) );
-        $this->set_billing_state( get_post_meta( $this->get_order_id(), '_billing_state', true ) );
-        $this->set_billing_postcode( get_post_meta( $this->get_order_id(), '_billing_postcode', true ) );
-        $this->set_billing_country( get_post_meta( $this->get_order_id(), '_billing_country', true ) );
-        $this->set_billing_email( get_post_meta( $this->get_order_id(), 'billing_email', true ) );
-        $this->set_billing_phone( get_post_meta( $this->get_order_id(), '_billing_phone', true ) );
-        $this->set_shipping_first_name( get_post_meta( $this->get_order_id(), '_shipping_first_name', true ) );
-        $this->set_shipping_last_name( get_post_meta( $this->get_order_id(), '_shipping_last_name', true ) );
-        $this->set_shipping_company( get_post_meta( $this->get_order_id(), '_shipping_company', true ) );
-        $this->set_shipping_address_1( get_post_meta( $this->get_order_id(), '_shipping_address_1', true ) );
-        $this->set_shipping_address_2( get_post_meta( $this->get_order_id(), '_shipping_address_2', true ) );
-        $this->set_shipping_city( get_post_meta( $this->get_order_id(), '_shipping_city', true ) );
-        $this->set_shipping_state( get_post_meta( $this->get_order_id(), '_shipping_state', true ) );
-        $this->set_shipping_postcode( get_post_meta( $this->get_order_id(), '_shipping_postcode', true ) );
-        $this->set_shipping_country( get_post_meta( $this->get_order_id(), '_shipping_country', true ) );
-        $this->set_payment_method( get_post_meta( $this->get_order_id(), '_payment_method', true ) );
-        $this->set_payment_method_title( get_post_meta( $this->get_order_id(), '_payment_method_title', true ) );
-        $this->set_transaction_id( get_post_meta( $this->get_order_id(), '_transaction_id', true ) );
-        $this->set_customer_ip_address( get_post_meta( $this->get_order_id(), '_customer_ip_address', true ) );
-        $this->set_customer_user_agent(get_post_meta( $this->get_order_id(), '_customer_user_agent', true ) );
-        $this->set_created_via( get_post_meta( $this->get_order_id(), '_created_via', true ) );
-        $this->set_order_version( get_post_meta( $this->get_order_id(), '_order_version', true ) );
-        $this->set_prices_include_tax( get_post_meta( $this->get_order_id(), '_prices_include_tax', true ) );
-        $this->set_date_completed( get_post_meta( $this->get_order_id(), '_completed_date', true ) );
+        $this->set_customer_id( get_post_meta( $order_id, '_customer_user', true ) );
+        $this->set_order_key( get_post_meta( $order_id, '_order_key', true ) );
+        $this->set_order_currency( get_post_meta( $order_id, '_order_currency', true ) );
+        $this->set_billing_first_name( get_post_meta( $order_id, '_billing_first_name', true ) );
+        $this->set_billing_last_name( get_post_meta( $order_id, '_billing_last_name', true ) );
+        $this->set_billing_company( get_post_meta( $order_id, '_billing_company', true ) );
+        $this->set_billing_address_1( get_post_meta( $order_id, '_billing_address_1', true ) );
+        $this->set_billing_address_2( get_post_meta( $order_id, '_billing_address_2', true ) );
+        $this->set_billing_city( get_post_meta( $order_id, '_billing_city', true ) );
+        $this->set_billing_state( get_post_meta( $order_id, '_billing_state', true ) );
+        $this->set_billing_postcode( get_post_meta( $order_id, '_billing_postcode', true ) );
+        $this->set_billing_country( get_post_meta( $order_id, '_billing_country', true ) );
+        $this->set_billing_email( get_post_meta( $order_id, 'billing_email', true ) );
+        $this->set_billing_phone( get_post_meta( $order_id, '_billing_phone', true ) );
+        $this->set_shipping_first_name( get_post_meta( $order_id, '_shipping_first_name', true ) );
+        $this->set_shipping_last_name( get_post_meta( $order_id, '_shipping_last_name', true ) );
+        $this->set_shipping_company( get_post_meta( $order_id, '_shipping_company', true ) );
+        $this->set_shipping_address_1( get_post_meta( $order_id, '_shipping_address_1', true ) );
+        $this->set_shipping_address_2( get_post_meta( $order_id, '_shipping_address_2', true ) );
+        $this->set_shipping_city( get_post_meta( $order_id, '_shipping_city', true ) );
+        $this->set_shipping_state( get_post_meta( $order_id, '_shipping_state', true ) );
+        $this->set_shipping_postcode( get_post_meta( $order_id, '_shipping_postcode', true ) );
+        $this->set_shipping_country( get_post_meta( $order_id, '_shipping_country', true ) );
+        $this->set_payment_method( get_post_meta( $order_id, '_payment_method', true ) );
+        $this->set_payment_method_title( get_post_meta( $order_id, '_payment_method_title', true ) );
+        $this->set_transaction_id( get_post_meta( $order_id, '_transaction_id', true ) );
+        $this->set_customer_ip_address( get_post_meta( $order_id, '_customer_ip_address', true ) );
+        $this->set_customer_user_agent(get_post_meta( $order_id, '_customer_user_agent', true ) );
+        $this->set_created_via( get_post_meta( $order_id, '_created_via', true ) );
+        $this->set_order_version( get_post_meta( $order_id, '_order_version', true ) );
+        $this->set_prices_include_tax( get_post_meta( $order_id, '_prices_include_tax', true ) );
+        $this->set_date_completed( get_post_meta( $order_id, '_completed_date', true ) );
 
         // Map totals
-        $this->set_discount_total( get_post_meta( $this->get_order_id(), '_cart_discount', true ) );
-        $this->set_discount_tax( get_post_meta( $this->get_order_id(), '_cart_discount_tax', true ) );
-        $this->set_shipping_total( get_post_meta( $this->get_order_id(), '_order_shipping', true ) );
-        $this->set_shipping_tax( get_post_meta( $this->get_order_id(), '_order_shipping_tax', true ) );
-        $this->set_cart_tax( get_post_meta( $this->get_order_id(), '_order_tax', true ) );
-        $this->set_order_total( get_post_meta( $this->get_order_id(), '_order_total', true ) );
+        $this->set_discount_total( get_post_meta( $order_id, '_cart_discount', true ) );
+        $this->set_discount_tax( get_post_meta( $order_id, '_cart_discount_tax', true ) );
+        $this->set_shipping_total( get_post_meta( $order_id, '_order_shipping', true ) );
+        $this->set_shipping_tax( get_post_meta( $order_id, '_order_shipping_tax', true ) );
+        $this->set_cart_tax( get_post_meta( $order_id, '_order_tax', true ) );
+        $this->set_order_total( get_post_meta( $order_id, '_order_total', true ) );
 
         // Map user data
         if ( empty( $this->get_billing_email() ) && ( $user = $this->get_user() ) ) {
@@ -1431,7 +1427,7 @@ abstract class WC_Abstract_Order {
         }
 
         // Orders store the state of prices including tax when created.
-        $this->prices_include_tax = metadata_exists( 'post', $this->get_order_id(), '_prices_include_tax' ) ? get_post_meta( $this->get_order_id(), '_prices_include_tax', true ) === 'yes' : $this->prices_include_tax;
+        $this->prices_include_tax = metadata_exists( 'post', $order_id, '_prices_include_tax' ) ? get_post_meta( $order_id, '_prices_include_tax', true ) === 'yes' : $this->prices_include_tax;
     }
 
     /**
@@ -1439,20 +1435,55 @@ abstract class WC_Abstract_Order {
      * @since 2.6.0
      * @access protected
      * @todo Convert to custom tables.
-     * @param array $data data to save
      */
-    protected function update( $zone_data ) {
-        $post_data                  = array();
-        $post_data['post_type']     = 'shop_order';
-        $post_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
-        $post_data['ping_status']   = 'closed';
-        $post_data['post_author']   = 1;
-        $post_data['post_password'] = uniqid( 'order_' );
-        $post_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-        $post_data['post_parent']   = absint( $args['parent'] );
-        wp_update_post( $post_data );
+    protected function update() {
+        $order_id = $this->get_order_id();
 
-        //$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
+        wp_update_post( array(
+            'ID'          => $order_id,
+            'post_status' => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ), // @todo hooks?
+            'post_parent' => $this->get_parent_id()
+        ) );
+
+        // Update meta data
+        update_post_meta( $order_id, '_billing_first_name', $this->get_billing_first_name() );
+        update_post_meta( $order_id, '_billing_last_name', $this->get_billing_last_name() );
+        update_post_meta( $order_id, '_billing_company', $this->get_billing_company() );
+        update_post_meta( $order_id, '_billing_address_1', $this->get_billing_address_1() );
+        update_post_meta( $order_id, '_billing_address_2', $this->get_billing_address_2() );
+        update_post_meta( $order_id, '_billing_city', $this->get_billing_city() );
+        update_post_meta( $order_id, '_billing_state', $this->get_billing_state() );
+        update_post_meta( $order_id, '_billing_postcode', $this->get_billing_postcode() );
+        update_post_meta( $order_id, '_billing_country', $this->get_billing_country() );
+        update_post_meta( $order_id, '_billing_email', $this->get_billing_email() );
+        update_post_meta( $order_id, '_billing_phone', $this->get_billing_phone() );
+        update_post_meta( $order_id, '_shipping_first_name', $this->get_shipping_first_name() );
+        update_post_meta( $order_id, '_shipping_last_name', $this->get_shipping_last_name() );
+        update_post_meta( $order_id, '_shipping_company', $this->get_shipping_company() );
+        update_post_meta( $order_id, '_shipping_address_1', $this->get_shipping_address_1() );
+        update_post_meta( $order_id, '_shipping_address_2', $this->get_shipping_address_2() );
+        update_post_meta( $order_id, '_shipping_city', $this->get_shipping_city() );
+        update_post_meta( $order_id, '_shipping_state', $this->get_shipping_state() );
+        update_post_meta( $order_id, '_shipping_postcode', $this->get_shipping_postcode() );
+        update_post_meta( $order_id, '_shipping_country', $this->get_shipping_country() );
+        update_post_meta( $order_id, '_payment_method', $this->get_payment_method() );
+        update_post_meta( $order_id, '_payment_method_title', $this->get_payment_method_title() );
+        update_post_meta( $order_id, '_transaction_id', $this->get_transaction_id() );
+        update_post_meta( $order_id, '_customer_user', $this->get_customer_id() );
+        update_post_meta( $order_id, '_customer_ip_address', $this->get_customer_ip_address() );
+        update_post_meta( $order_id, '_customer_user_agent', $this->get_customer_user_agent() );
+        update_post_meta( $order_id, '_created_via', $this->get_created_via() );
+        update_post_meta( $order_id, '_order_version', $this->get_order_version() );
+        update_post_meta( $order_id, '_prices_include_tax', $this->get_prices_include_tax() );
+        update_post_meta( $order_id, '_completed_date', $this->get_date_completed() );
+        update_post_meta( $order_id, '_order_currency', $this->get_order_currency() );
+        update_post_meta( $order_id, '_order_key', $this->get_order_key() );
+        update_post_meta( $order_id, '_cart_discount', $this->get_discount_total() );
+        update_post_meta( $order_id, '_cart_discount_tax', $this->get_discount_tax() );
+        update_post_meta( $order_id, '_order_shipping', $this->get_shipping_total() );
+        update_post_meta( $order_id, '_order_shipping_tax', $this->get_shipping_tax() );
+        update_post_meta( $order_id, '_order_tax', $this->get_cart_tax() );
+        update_post_meta( $order_id, '_order_total', $this->get_order_total() );
     }
 
     /**
@@ -1476,7 +1507,7 @@ abstract class WC_Abstract_Order {
         } else {
             $this->update();
         }
-        wc_delete_shop_order_transients( $post_id );
+        wc_delete_shop_order_transients( $this->get_order_id() );
     }
 
     /*
