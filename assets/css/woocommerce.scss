@@ -1698,7 +1698,7 @@ p.demo_store {
 /**
  * Checkout
  */
-.woocommerce-checkout {
+.woocommerce-checkout, #add_payment_method {
 	.checkout {
 		.col-2 {
 			h3#ship-to-different-address {
@@ -1891,7 +1891,8 @@ p.demo_store {
 .woocommerce-password-strength {
 	text-align: center;
 	font-weight: 600;
-	padding: 3px 0px 3px 0px;
+	padding: 3px .5em;
+	font-size: 1em;
 
 	&.strong {
 		background-color: #c1e1b9;
