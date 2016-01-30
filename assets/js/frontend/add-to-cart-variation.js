@@ -32,7 +32,6 @@
 		.on( 'click', '.reset_variations', function() {
 			$form.find( '.variations select' ).val( '' ).change();
 			$form.trigger( 'reset_data' );
-			return false;
 		} )
 
 		// When the variation is hidden
