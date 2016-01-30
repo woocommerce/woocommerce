@@ -38,7 +38,6 @@
 		// When the variation is hidden
 		.on( 'hide_variation', function() {
 			$form.find( '.single_add_to_cart_button' ).attr( 'disabled', 'disabled' ).attr( 'title', wc_add_to_cart_variation_params.i18n_make_a_selection_text );
-			return false;
 		} )
 
 		// When the variation is revealed
@@ -48,7 +47,6 @@
 			} else {
 				$form.find( '.single_add_to_cart_button' ).attr( 'disabled', 'disabled' ).attr( 'title', wc_add_to_cart_variation_params.i18n_unavailable_text );
 			}
-			return false;
 		} )
 
 		// Reload product variations data
