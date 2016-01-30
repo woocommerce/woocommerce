@@ -31,6 +31,11 @@ if ( empty( $woocommerce_loop['columns'] ) ) {
 	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
 }
 
+// Store list type so that plugin authors and theme developers can see where the product is being shown
+if ( empty ( $woocommerce_loop['listtype'] ) ) {
+	$woocommerce_loop['listtype'] = 'general';
+}
+
 // Increase loop count
 $woocommerce_loop['loop'] ++;
 ?>
