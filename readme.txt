@@ -158,13 +158,18 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.5.2 - 28/01/2016 =
+= 2.5.2 - 01/02/2016 =
 * Fix - Compatibility with w3 total cache inline minification.
 * Fix - Remove stock bw compat code which was preventing manage stock being disabled at variation level.
 * Fix - When calculating shipping total, force rounding.
 * Fix - Make save button clickable in tax rate table after using autocomplete field.
 * Fix - Fix passed image_size variable in email templates.
 * Fix - Don't show purchase note to admin in emails.
+* Fix - Fix 'hide empty' setting in category widget .
+* Fix - Prevent notice in get_allowed_countries.
+* Fix - Prevent add-to-cart querystring in pagination links.
+* Tweak - Allow propagation in variation script.
+* Tweak - Product image alt text.
 * Tweak - Remove notice and add styling for add payment page.
 * Tweak - Set input margin and label display for compatibility with themes using bootstrap CSS.
 * Tweak - Add context to category term localization.
