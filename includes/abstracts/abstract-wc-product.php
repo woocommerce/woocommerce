@@ -610,13 +610,16 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
+		$status = false;
 		if ( $this->managing_stock() && $this->backorders_allowed() ) {
-			return true;
+			$status = true;
 		} elseif ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			return false;
+			$status = false;
 		} else {
-			return $this->stock_status === 'instock';
+			$status = $this->stock_status === 'instock';
 		}
+
+		return apply_filters( 'woocommerce_product_is_in_stock', $status);
 	}
 
 	/**
