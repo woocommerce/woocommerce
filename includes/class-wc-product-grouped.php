@@ -133,8 +133,10 @@ class WC_Product_Grouped extends WC_Product {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$child_prices     = array();
 
-		foreach ( $this->get_children() as $child_id )
-			$child_prices[] = get_post_meta( $child_id, '_price', true );
+		foreach ( $this->get_children() as $child_id ) {
+			$child = wc_get_product( $child_id );
+			$child_prices[] = $child->get_price();
+		}
 
 		$child_prices     = array_unique( $child_prices );
 		$get_price_method = 'get_price_' . $tax_display_mode . 'uding_tax';
