@@ -160,10 +160,12 @@ class WC_Countries {
 
 		$countries = array();
 
-		$raw_countries = get_option( 'woocommerce_specific_allowed_countries' );
+		$raw_countries = get_option( 'woocommerce_specific_allowed_countries', array() );
 
-		foreach ( $raw_countries as $country ) {
-			$countries[ $country ] = $this->countries[ $country ];
+		if ( $raw_countries ) {
+			foreach ( $raw_countries as $country ) {
+				$countries[ $country ] = $this->countries[ $country ];
+			}
 		}
 
 		return apply_filters( 'woocommerce_countries_allowed_countries', $countries );
