@@ -20,6 +20,7 @@ jQuery( function( $ ) {
 		 */
 		strengthMeter: function() {
 			var wrapper  = $( 'form.register, form.checkout, form.edit-account, form.lost_reset_password' ),
+				submit   = $( 'input[type="submit"]', wrapper ),
 				field    = $( '#reg_password, #account_password, #password_1', wrapper ),
 				strength = 1;
 
