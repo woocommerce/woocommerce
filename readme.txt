@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added password hint text and error messages when showing the password strength meter in forms.
 * Tweak - Added Saudi Riyal currency.
 * Tweak - Added Russian Ruble symbol.
+* Tweak - When COOKIEPATH is an empty string, set to '/' so cookies work across all pages.
 
 = 2.5.1 - 25/01/2016 =
 * Fix - Remove usage of get_currentuserinfo() which is deprecated in WordPress 4.5.
