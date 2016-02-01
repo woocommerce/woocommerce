@@ -1,9 +1,9 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
-Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, shipping, storefront
+Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.1
 Tested up to: 4.4
-Stable tag: 2.5.1
+Stable tag: 2.5.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,27 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.5.2 - 01/02/2016 =
+* Fix - Compatibility with w3 total cache inline minification.
+* Fix - Remove stock bw compat code which was preventing manage stock being disabled at variation level.
+* Fix - When calculating shipping total, force rounding.
+* Fix - Make save button clickable in tax rate table after using autocomplete field.
+* Fix - Fix passed image_size variable in email templates.
+* Fix - Don't show purchase note to admin in emails.
+* Fix - Fix 'hide empty' setting in category widget .
+* Fix - Prevent notice in get_allowed_countries.
+* Fix - Prevent add-to-cart querystring in pagination links.
+* Tweak - Allow propagation in variation script.
+* Tweak - Product image alt text.
+* Tweak - Remove notice and add styling for add payment page.
+* Tweak - Set input margin and label display for compatibility with themes using bootstrap CSS.
+* Tweak - Add context to category term localization.
+* Tweak - Moved cart URL functions to core-functions file to make them available in admin area.
+* Tweak - Added password hint text and error messages when showing the password strength meter in forms.
+* Tweak - Added Saudi Riyal currency.
+* Tweak - Added Russian Ruble symbol.
+* Tweak - When COOKIEPATH is an empty string, set to '/' so cookies work across all pages.
 
 = 2.5.1 - 25/01/2016 =
 * Fix - Remove usage of get_currentuserinfo() which is deprecated in WordPress 4.5.

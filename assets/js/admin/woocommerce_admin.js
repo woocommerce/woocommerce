@@ -53,7 +53,7 @@ jQuery( function ( $ ) {
 		})
 		.on( 'keyup change', '.wc_input_country_iso[type=text]', function() {
 			var value = $( this ).val();
-			var regex = new RegExp( '^([A-Z])?([A-Z])$' );
+			var regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
 
 			if ( ! regex.test( value ) ) {
 				$( this ).val( '' );

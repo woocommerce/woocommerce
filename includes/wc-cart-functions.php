@@ -262,7 +262,7 @@ function wc_cart_totals_order_total_html() {
 			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
 				? sprintf( ' ' . __( 'estimated for %s', 'woocommerce' ), WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )
 				: '';
-			$value .= '<small class="includes_tax">' . sprintf( __( '(includes %s%s)', 'woocommerce' ), implode( ', ', $tax_string_array ), $estimated_text ) . '</small>';
+			$value .= '<small class="includes_tax">' . sprintf( __( '(includes %s)', 'woocommerce' ), implode( ', ', $tax_string_array ) . $estimated_text ) . '</small>';
 		}
 	}
 
@@ -320,34 +320,4 @@ function wc_cart_round_discount( $value, $precision ) {
 	} else {
 		return round( $value, $precision );
 	}
-}
-
-/**
- * Gets the url to the cart page.
- *
- * @since  2.5.0
- *
- * @return string Url to cart page
- */
-function wc_get_cart_url() {
-	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
-}
-
-/**
- * Gets the url to the checkout page.
- *
- * @since  2.5.0
- *
- * @return string Url to checkout page
- */
-function wc_get_checkout_url() {
-	$checkout_url = wc_get_page_permalink( 'checkout' );
-	if ( $checkout_url ) {
-		// Force SSL if needed
-		if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
-			$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
-		}
-	}
-
-	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 }

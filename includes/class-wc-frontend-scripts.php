@@ -323,8 +323,8 @@ class WC_Frontend_Scripts {
 			break;
 			case 'wc-country-select' :
 				return array(
-					'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
-					'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
+					'countries'                 => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+					'i18n_select_state_text'    => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 					'i18n_matches_1'            => _x( 'One result is available, press enter to select it.', 'enhanced select', 'woocommerce' ),
 					'i18n_matches_n'            => _x( '%qty% results are available, use up and down arrow keys to navigate.', 'enhanced select', 'woocommerce' ),
 					'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
@@ -337,6 +337,13 @@ class WC_Frontend_Scripts {
 					'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
 					'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
 					'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+				);
+			break;
+			case 'wc-password-strength-meter' :
+				return array(
+					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
+					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
+					'i18n_password_hint'    => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' )
 				);
 			break;
 		}

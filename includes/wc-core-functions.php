@@ -297,8 +297,8 @@ function get_woocommerce_currencies() {
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
 				'KES' => __( 'Kenyan shilling', 'woocommerce' ),
-				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
+				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
@@ -311,6 +311,7 @@ function get_woocommerce_currencies() {
 				'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'RON' => __( 'Romanian Leu', 'woocommerce' ),
 				'RUB' => __( 'Russian Ruble', 'woocommerce' ),
+				'SAR' => __( 'Saudi Riyal', 'woocommerce' ),
 				'SEK' => __( 'Swedish Krona', 'woocommerce' ),
 				'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
 				'THB' => __( 'Thai Baht', 'woocommerce' ),
@@ -363,8 +364,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'ISK' => 'Kr.',
 		'JPY' => '&yen;',
 		'KES' => 'KSh',
-		'LAK' => '&#8365;',
 		'KRW' => '&#8361;',
+		'LAK' => '&#8365;',
 		'MXN' => '&#36;',
 		'MYR' => '&#82;&#77;',
 		'NGN' => '&#8358;',
@@ -377,7 +378,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'PYG' => '&#8370;',
 		'RMB' => '&yen;',
 		'RON' => 'lei',
-		'RUB' => '&#1088;&#1091;&#1073;.',
+		'RUB' => '&#8381;',
+		'SAR' => '&#x631;.&#x633;',
 		'SEK' => '&#107;&#114;',
 		'SGD' => '&#36;',
 		'THB' => '&#3647;',
@@ -494,7 +496,7 @@ function wc_print_js() {
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
-		setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
+		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure );
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE );
@@ -877,4 +879,34 @@ function wc_transaction_query( $type = 'start' ) {
 			break;
 		}
 	}
+}
+
+/**
+ * Gets the url to the cart page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to cart page
+ */
+function wc_get_cart_url() {
+	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+}
+
+/**
+ * Gets the url to the checkout page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to checkout page
+ */
+function wc_get_checkout_url() {
+	$checkout_url = wc_get_page_permalink( 'checkout' );
+	if ( $checkout_url ) {
+		// Force SSL if needed
+		if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
+			$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
+		}
+	}
+
+	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 }

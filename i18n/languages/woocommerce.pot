@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.5.1\n"
+"Project-Id-Version: WooCommerce 2.5.2\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2016-01-25 15:31:29+00:00\n"
+"POT-Creation-Date: 2016-02-01 12:27:09+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -6872,7 +6872,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-profile.php:121
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:67
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:116
-#: includes/class-wc-countries.php:597 includes/class-wc-countries.php:858
+#: includes/class-wc-countries.php:599 includes/class-wc-countries.php:860
 msgid "Postcode"
 msgstr ""
 
@@ -6883,7 +6883,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-setup-wizard.php:499
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:71
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:120
-#: includes/class-wc-countries.php:511
+#: includes/class-wc-countries.php:513
 msgid "Country"
 msgstr ""
 
@@ -7320,7 +7320,7 @@ msgid "Yes, please import some starter tax rates"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:500
-#: includes/class-wc-countries.php:600 includes/class-wc-countries.php:853
+#: includes/class-wc-countries.php:602 includes/class-wc-countries.php:855
 msgid "State"
 msgstr ""
 
@@ -8089,18 +8089,18 @@ msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:43
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:92
-#: includes/class-wc-countries.php:495 includes/class-wc-form-handler.php:177
+#: includes/class-wc-countries.php:497 includes/class-wc-form-handler.php:177
 msgid "First Name"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:47
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:96
-#: includes/class-wc-countries.php:500 includes/class-wc-form-handler.php:178
+#: includes/class-wc-countries.php:502 includes/class-wc-form-handler.php:178
 msgid "Last Name"
 msgstr ""
 
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:86
-#: includes/class-wc-countries.php:951
+#: includes/class-wc-countries.php:953
 msgid "Phone"
 msgstr ""
 
@@ -8155,7 +8155,7 @@ msgstr ""
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:254
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:337
 #: includes/admin/meta-boxes/class-wc-meta-box-order-data.php:339
-#: includes/class-wc-countries.php:516
+#: includes/class-wc-countries.php:518
 msgid "Address"
 msgstr ""
 
@@ -8963,7 +8963,7 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-order-items.php:64
 #: includes/admin/reports/class-wc-report-taxes-by-code.php:149
 #: includes/admin/settings/class-wc-settings-tax.php:33
-#: includes/class-wc-countries.php:292 includes/class-wc-tax.php:649
+#: includes/class-wc-countries.php:294 includes/class-wc-tax.php:649
 msgid "Tax"
 msgstr ""
 
@@ -12666,7 +12666,7 @@ msgstr ""
 #: includes/cli/class-wc-cli-product.php:914
 #: includes/cli/class-wc-cli-product.php:915
 #: includes/wc-product-functions.php:293
-#: templates/single-product/product-image.php:50
+#: templates/single-product/product-image.php:46
 msgid "Placeholder"
 msgstr ""
 
@@ -13065,7 +13065,7 @@ msgid ""
 "You won't be able to see it again!"
 msgstr ""
 
-#: includes/class-wc-ajax.php:2594
+#: includes/class-wc-ajax.php:2589
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -13325,104 +13325,104 @@ msgstr ""
 msgid "Please rate the product."
 msgstr ""
 
-#: includes/class-wc-countries.php:270
+#: includes/class-wc-countries.php:272
 msgid "to the"
 msgstr ""
 
-#: includes/class-wc-countries.php:270
+#: includes/class-wc-countries.php:272
 msgid "to"
 msgstr ""
 
-#: includes/class-wc-countries.php:282
+#: includes/class-wc-countries.php:284
 msgid "the"
 msgstr ""
 
-#: includes/class-wc-countries.php:292
+#: includes/class-wc-countries.php:294
 msgid "VAT"
 msgstr ""
 
-#: includes/class-wc-countries.php:302
+#: includes/class-wc-countries.php:304
 msgid "(incl. VAT)"
 msgstr ""
 
-#: includes/class-wc-countries.php:302
+#: includes/class-wc-countries.php:304
 msgid "(incl. tax)"
 msgstr ""
 
-#: includes/class-wc-countries.php:312
+#: includes/class-wc-countries.php:314
 msgid "(ex. VAT)"
 msgstr ""
 
-#: includes/class-wc-countries.php:312
+#: includes/class-wc-countries.php:314
 msgid "(ex. tax)"
 msgstr ""
 
-#: includes/class-wc-countries.php:506
+#: includes/class-wc-countries.php:508
 msgid "Company Name"
 msgstr ""
 
-#: includes/class-wc-countries.php:527
+#: includes/class-wc-countries.php:529
 msgid "Town / City"
 msgstr ""
 
-#: includes/class-wc-countries.php:533
+#: includes/class-wc-countries.php:535
 msgid "State / County"
 msgstr ""
 
-#: includes/class-wc-countries.php:539
+#: includes/class-wc-countries.php:541
 #: templates/cart/shipping-calculator.php:90
 msgid "Postcode / ZIP"
 msgstr ""
 
-#: includes/class-wc-countries.php:594
+#: includes/class-wc-countries.php:596
 msgid "Suburb"
 msgstr ""
 
-#: includes/class-wc-countries.php:614
+#: includes/class-wc-countries.php:616
 msgid "District"
 msgstr ""
 
-#: includes/class-wc-countries.php:621 includes/class-wc-countries.php:643
-#: includes/class-wc-countries.php:666 includes/class-wc-countries.php:727
-#: includes/class-wc-countries.php:746 includes/class-wc-countries.php:763
-#: includes/class-wc-countries.php:821 includes/class-wc-countries.php:845
-#: includes/class-wc-countries.php:887
+#: includes/class-wc-countries.php:623 includes/class-wc-countries.php:645
+#: includes/class-wc-countries.php:668 includes/class-wc-countries.php:729
+#: includes/class-wc-countries.php:748 includes/class-wc-countries.php:765
+#: includes/class-wc-countries.php:823 includes/class-wc-countries.php:847
+#: includes/class-wc-countries.php:889
 msgid "Province"
 msgstr ""
 
-#: includes/class-wc-countries.php:649
+#: includes/class-wc-countries.php:651
 msgid "Canton"
 msgstr ""
 
-#: includes/class-wc-countries.php:661 includes/class-wc-countries.php:717
+#: includes/class-wc-countries.php:663 includes/class-wc-countries.php:719
 msgid "Region"
 msgstr ""
 
-#: includes/class-wc-countries.php:714
+#: includes/class-wc-countries.php:716
 msgid "Town / District"
 msgstr ""
 
-#: includes/class-wc-countries.php:722 includes/class-wc-countries.php:861
+#: includes/class-wc-countries.php:724 includes/class-wc-countries.php:863
 msgid "County"
 msgstr ""
 
-#: includes/class-wc-countries.php:751
+#: includes/class-wc-countries.php:753
 msgid "Prefecture"
 msgstr ""
 
-#: includes/class-wc-countries.php:779
+#: includes/class-wc-countries.php:781
 msgid "State / Zone"
 msgstr ""
 
-#: includes/class-wc-countries.php:827
+#: includes/class-wc-countries.php:829
 msgid "Municipality"
 msgstr ""
 
-#: includes/class-wc-countries.php:850
+#: includes/class-wc-countries.php:852
 msgid "ZIP"
 msgstr ""
 
-#: includes/class-wc-countries.php:944
+#: includes/class-wc-countries.php:946
 msgid "Email Address"
 msgstr ""
 
@@ -13759,6 +13759,17 @@ msgstr ""
 #: includes/class-wc-frontend-scripts.php:321
 #: templates/single-product/add-to-cart/variation.php:31
 msgid "Sorry, this product is unavailable. Please choose a different combination."
+msgstr ""
+
+#: includes/class-wc-frontend-scripts.php:345
+msgid "Please enter a stronger password."
+msgstr ""
+
+#: includes/class-wc-frontend-scripts.php:346
+msgid ""
+"The password should be at least seven characters long. To make it stronger, "
+"use upper and lower case letters, numbers and symbols like ! \" ? $ % ^ "
+"&amp; )."
 msgstr ""
 
 #: includes/class-wc-install.php:76
@@ -15730,10 +15741,6 @@ msgstr ""
 msgid "Invalid key"
 msgstr ""
 
-#: includes/shortcodes/class-wc-shortcode-my-account.php:354
-msgid "Add a new payment method."
-msgstr ""
-
 #: includes/shortcodes/class-wc-shortcode-order-tracking.php:48
 msgid "Please enter a valid order ID"
 msgstr ""
@@ -15794,7 +15801,7 @@ msgid "estimated for %s"
 msgstr ""
 
 #: includes/wc-cart-functions.php:265
-msgid "(includes %s%s)"
+msgid "(includes %s)"
 msgstr ""
 
 #: includes/wc-cart-functions.php:304
@@ -15918,11 +15925,11 @@ msgid "Kenyan shilling"
 msgstr ""
 
 #: includes/wc-core-functions.php:300
-msgid "Lao Kip"
+msgid "South Korean Won"
 msgstr ""
 
 #: includes/wc-core-functions.php:301
-msgid "South Korean Won"
+msgid "Lao Kip"
 msgstr ""
 
 #: includes/wc-core-functions.php:302
@@ -15974,38 +15981,42 @@ msgid "Russian Ruble"
 msgstr ""
 
 #: includes/wc-core-functions.php:314
-msgid "Swedish Krona"
+msgid "Saudi Riyal"
 msgstr ""
 
 #: includes/wc-core-functions.php:315
-msgid "Singapore Dollar"
+msgid "Swedish Krona"
 msgstr ""
 
 #: includes/wc-core-functions.php:316
-msgid "Thai Baht"
+msgid "Singapore Dollar"
 msgstr ""
 
 #: includes/wc-core-functions.php:317
-msgid "Turkish Lira"
+msgid "Thai Baht"
 msgstr ""
 
 #: includes/wc-core-functions.php:318
-msgid "Taiwan New Dollars"
+msgid "Turkish Lira"
 msgstr ""
 
 #: includes/wc-core-functions.php:319
-msgid "Ukrainian Hryvnia"
+msgid "Taiwan New Dollars"
 msgstr ""
 
 #: includes/wc-core-functions.php:320
-msgid "US Dollars"
+msgid "Ukrainian Hryvnia"
 msgstr ""
 
 #: includes/wc-core-functions.php:321
-msgid "Vietnamese Dong"
+msgid "US Dollars"
 msgstr ""
 
 #: includes/wc-core-functions.php:322
+msgid "Vietnamese Dong"
+msgstr ""
+
+#: includes/wc-core-functions.php:323
 msgid "South African rand"
 msgstr ""
 
@@ -17330,7 +17341,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-permalink-settings.php:196
 #: includes/class-wc-post-types.php:233
 #: includes/updates/woocommerce-update-2.0.php:55
-#: includes/wc-core-functions.php:559 includes/wc-core-functions.php:594
+#: includes/wc-core-functions.php:561 includes/wc-core-functions.php:596
 msgctxt "slug"
 msgid "product"
 msgstr ""
@@ -17444,12 +17455,12 @@ msgctxt "placeholder"
 msgid "Notes about your order, e.g. special notes for delivery."
 msgstr ""
 
-#: includes/class-wc-countries.php:517
+#: includes/class-wc-countries.php:519
 msgctxt "placeholder"
 msgid "Street address"
 msgstr ""
 
-#: includes/class-wc-countries.php:522
+#: includes/class-wc-countries.php:524
 msgctxt "placeholder"
 msgid "Apartment, suite, unit etc. (optional)"
 msgstr ""

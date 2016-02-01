@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<td class="sort"></td>
 
 		<td class="country">
-			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" />
+			<input type="text" value="{{ data.tax_rate_country }}" placeholder="*" name="tax_rate_country[{{ data.tax_rate_id }}]" class="wc_input_country_iso" data-attribute="tax_rate_country" style="text-transform:uppercase" />
 		</td>
 
 		<td class="state">
