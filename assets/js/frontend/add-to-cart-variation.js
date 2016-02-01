@@ -29,26 +29,26 @@
 		$form
 
 		// On clicking the reset variation button
-		.on( 'click', '.reset_variations', function() {
+		.on( 'click', '.reset_variations', function( event ) {
+			event.preventDefault();
 			$form.find( '.variations select' ).val( '' ).change();
 			$form.trigger( 'reset_data' );
-			return false;
 		} )
 
 		// When the variation is hidden
-		.on( 'hide_variation', function() {
+		.on( 'hide_variation', function( event ) {
+			event.preventDefault();
 			$form.find( '.single_add_to_cart_button' ).attr( 'disabled', 'disabled' ).attr( 'title', wc_add_to_cart_variation_params.i18n_make_a_selection_text );
-			return false;
 		} )
 
 		// When the variation is revealed
 		.on( 'show_variation', function( event, variation, purchasable ) {
+			event.preventDefault();
 			if ( purchasable ) {
 				$form.find( '.single_add_to_cart_button' ).removeAttr( 'disabled' ).removeAttr( 'title' );
 			} else {
 				$form.find( '.single_add_to_cart_button' ).attr( 'disabled', 'disabled' ).attr( 'title', wc_add_to_cart_variation_params.i18n_unavailable_text );
 			}
-			return false;
 		} )
 
 		// Reload product variations data
@@ -182,7 +182,7 @@
 
 			// Output correct templates
 			var $template_html = '';
-			
+
 			if ( ! variation.variation_is_visible ) {
 				$template_html = unavailable_template;
 				// w3 total cache inline minification adds CDATA tags around our HTML (sigh)
