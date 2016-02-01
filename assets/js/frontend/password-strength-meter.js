@@ -64,7 +64,6 @@ jQuery( function( $ ) {
 			var hint_html = '<small class="woocommerce-password-hint">' + wc_password_strength_meter_params.i18n_password_hint + '</small>';
 			var strength  = wp.passwordStrength.meter( field.val(), wp.passwordStrength.userInputBlacklist() );
 			var error     = '';
-			var wrapper   = field.closest( 'form' );
 
 			// Reset
 			meter.removeClass( 'short bad good strong' );
