@@ -594,8 +594,6 @@ class WC_Shortcodes {
 
 		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
 
-		ob_start();
-
 		add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
 
 		$return = self::product_loop( $query_args, $atts, 'top_rated_products' );
