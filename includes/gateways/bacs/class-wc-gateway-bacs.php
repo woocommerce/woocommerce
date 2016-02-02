@@ -251,7 +251,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			if ( $this->instructions ) {
 				echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 			}
-			$this->bank_details( $order->id );
+			$this->bank_details( $order->get_order_id() );
 		}
 
 	}

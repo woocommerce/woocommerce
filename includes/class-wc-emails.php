@@ -292,7 +292,7 @@ class WC_Emails {
 
 				$fields[ $key ] = array(
 					'label' => wptexturize( $key ),
-					'value' => wptexturize( get_post_meta( $order->id, $field, true ) )
+					'value' => wptexturize( get_post_meta( $order->get_order_id(), $field, true ) )
 				);
 			}
 		}

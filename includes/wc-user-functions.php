@@ -407,7 +407,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 		$looped_downloads = array();
 		foreach ( $results as $result ) {
-			if ( ! $order || $order->id != $result->order_id ) {
+			if ( ! $order || $order->get_order_id() != $result->order_id ) {
 				// new order
 				$order    = wc_get_order( $result->order_id );
 				$_product = null;
@@ -467,7 +467,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				'download_id'         => $result->download_id,
 				'product_id'          => $product_id,
 				'download_name'       => $download_name,
-				'order_id'            => $order->id,
+				'order_id'            => $order->get_order_id(),
 				'order_key'           => $order->order_key,
 				'downloads_remaining' => $result->downloads_remaining,
 				'access_expires' 	  => $result->access_expires,

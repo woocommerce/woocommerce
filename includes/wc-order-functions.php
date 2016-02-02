@@ -264,7 +264,7 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
 		'product_id' 			=> $product_id,
 		'user_id' 				=> absint( $order->user_id ),
 		'user_email' 			=> $user_email,
-		'order_id' 				=> $order->id,
+		'order_id' 				=> $order->get_order_id(),
 		'order_key' 			=> $order->order_key,
 		'downloads_remaining' 	=> $limit,
 		'access_granted'		=> current_time( 'mysql' ),

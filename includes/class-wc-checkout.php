@@ -212,7 +212,7 @@ class WC_Checkout {
 				} elseif ( false === $order ) {
 					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 521 ) );
 				} else {
-					$order_id = $order->id;
+					$order_id = $order->get_order_id();
 					do_action( 'woocommerce_new_order', $order_id );
 				}
 			}

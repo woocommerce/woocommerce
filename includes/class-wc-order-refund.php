@@ -31,7 +31,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @uses   WP_POST
 	 */
 	protected function init( $refund ) {
-		if ( is_numeric( $refund ) ) {
+		/*if ( is_numeric( $refund ) ) {
 			$this->id   = absint( $refund );
 			$this->post = get_post( $refund );
 			$this->get_refund( $this->id );
@@ -43,7 +43,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 			$this->id   = absint( $refund->ID );
 			$this->post = $refund;
 			$this->get_refund( $this->id );
-		}
+		} @todo*/
 	}
 
 	/**

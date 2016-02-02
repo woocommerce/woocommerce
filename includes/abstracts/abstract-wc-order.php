@@ -29,7 +29,13 @@ abstract class WC_Abstract_Order {
 		'order_id'             => 0,
         'parent_id'            => 0,
 		'status'               => '',
-		'order_type'           => 'simple',
+        /**
+         * @todo confusion. Was 'simple'. But this was not the same as post_type, which is shop_order.. Other post types in core are shop_order_refund
+         * The order type for shop_order_refund is refund.
+         * Why do we need two separate variables? This should be unified, especially once this is in a custom table and post_type is redundent.
+         * Switching to 'shop_order', and then using this value in the order factory instead of post_type. @thenbrent might have feedback on this.
+         */
+		'order_type'           => 'shop_order',
 		'order_key'            => '',
 		'order_currency'       => '',
 		'date_created'         => '',
@@ -1248,7 +1254,7 @@ abstract class WC_Abstract_Order {
         $this->set_order_key( uniqid( 'order_' ) );
 
         $order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
-            'post_type'     => 'shop_order',
+            'post_type'     => $this->get_order_type(),
             'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
             'ping_status'   => 'closed',
             'post_author'   => 1,
@@ -1367,7 +1373,7 @@ abstract class WC_Abstract_Order {
         }
 
         // Orders store the state of prices including tax when created.
-        $this->prices_include_tax = metadata_exists( 'post', $order_id, '_prices_include_tax' ) ? get_post_meta( $order_id, '_prices_include_tax', true ) === 'yes' : $this->prices_include_tax;
+        $this->prices_include_tax = metadata_exists( 'post', $order_id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $order_id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' );
     }
 
     /**
@@ -2829,9 +2835,6 @@ abstract class WC_Abstract_Order {
 		} elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
             _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
             return $this->get_customer_id();
-        } elseif ( 'prices_include_tax' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
-			return 'yes' === get_option( 'woocommerce_prices_include_tax' );
 		} elseif ( 'tax_display_cart' === $key ) {
             _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
 			return get_option( 'woocommerce_tax_display_cart' );

@@ -735,7 +735,7 @@ class WC_Order extends WC_Abstract_Order {
 			$refund_items = get_posts(
 				array(
 					'post_type'      => 'shop_order_refund',
-					'post_parent'    => $this->id,
+					'post_parent'    => $this->get_order_id(),
 					'posts_per_page' => -1,
 					'post_status'    => 'any',
 					'fields'         => 'ids'
@@ -766,7 +766,7 @@ class WC_Order extends WC_Abstract_Order {
 			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
 			WHERE postmeta.meta_key = '_refund_amount'
 			AND postmeta.post_id = posts.ID
-		", $this->id ) );
+		", $this->get_order_id() ) );
 
 		return $total;
 	}
@@ -787,7 +787,7 @@ class WC_Order extends WC_Abstract_Order {
 			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
 			WHERE order_itemmeta.order_item_id = order_items.order_item_id
 			AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
-		", $this->id ) );
+		", $this->get_order_id() ) );
 
 		return abs( $total );
 	}
@@ -808,7 +808,7 @@ class WC_Order extends WC_Abstract_Order {
 			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
 			WHERE order_itemmeta.order_item_id = order_items.order_item_id
 			AND order_itemmeta.meta_key IN ('cost')
-		", $this->id ) );
+		", $this->get_order_id() ) );
 
 		return abs( $total );
 	}

@@ -151,8 +151,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 					throw new WC_CLI_Exception( 'woocommerce_invalid_payment_details', __( 'Payment method ID and title are required', 'woocommerce' ) );
 				}
 
-				update_post_meta( $order->id, '_payment_method', $data['payment_details']['method_id'] );
-				update_post_meta( $order->id, '_payment_method_title', $data['payment_details']['method_title'] );
+				update_post_meta( $order->get_order_id(), '_payment_method', $data['payment_details']['method_id'] );
+				update_post_meta( $order->get_order_id(), '_payment_method_title', $data['payment_details']['method_title'] );
 
 				// Mark as paid if set.
 				if ( isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
@@ -166,24 +166,24 @@ class WC_CLI_Order extends WC_CLI_Command {
 					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce') );
 				}
 
-				update_post_meta( $order->id, '_order_currency', $data['currency'] );
+				update_post_meta( $order->get_order_id(), '_order_currency', $data['currency'] );
 			}
 
 			// Set order meta.
 			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
-				$this->set_order_meta( $order->id, $data['order_meta'] );
+				$this->set_order_meta( $order->get_order_id(), $data['order_meta'] );
 			}
 
-			wc_delete_shop_order_transients( $order->id );
+			wc_delete_shop_order_transients( $order->get_order_id() );
 
-			do_action( 'woocommerce_cli_create_order', $order->id, $data );
+			do_action( 'woocommerce_cli_create_order', $order->get_order_id(), $data );
 
 			wc_transaction_query( 'commit' );
 
 			if ( $porcelain ) {
-				WP_CLI::line( $order->id );
+				WP_CLI::line( $order->get_order_id() );
 			} else {
-				WP_CLI::success( "Created order {$order->id}." );
+				WP_CLI::success( "Created order {$order->get_order_id()}." );
 			}
 		} catch ( WC_CLI_Exception $e ) {
 			wc_transaction_query( 'rollback' );
@@ -429,7 +429,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				throw new WC_CLI_Exception( 'woocommerce_cli_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ) );
 			}
 
-			$order_args = array( 'order_id' => $order->id );
+			$order_args = array( 'order_id' => $order->get_order_id() );
 
 			// customer note
 			if ( isset( $data['note'] ) ) {
@@ -450,7 +450,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 					throw new WC_CLI_Exception( 'woocommerce_cli_invalid_customer_id', __( 'Customer ID is invalid', 'woocommerce' ) );
 				}
 
-				update_post_meta( $order->id, '_customer_user', $data['customer_id'] );
+				update_post_meta( $order->get_order_id(), '_customer_user', $data['customer_id'] );
 			}
 
 			// billing/shipping address
@@ -500,12 +500,12 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 				// method ID
 				if ( isset( $data['payment_details']['method_id'] ) ) {
-					update_post_meta( $order->id, '_payment_method', $data['payment_details']['method_id'] );
+					update_post_meta( $order->get_order_id(), '_payment_method', $data['payment_details']['method_id'] );
 				}
 
 				// method title
 				if ( isset( $data['payment_details']['method_title'] ) ) {
-					update_post_meta( $order->id, '_payment_method_title', $data['payment_details']['method_title'] );
+					update_post_meta( $order->get_order_id(), '_payment_method_title', $data['payment_details']['method_title'] );
 				}
 
 				// mark as paid if set
@@ -521,13 +521,13 @@ class WC_CLI_Order extends WC_CLI_Command {
 					throw new WC_CLI_Exception( 'woocommerce_invalid_order_currency', __( 'Provided order currency is invalid', 'woocommerce' ) );
 				}
 
-				update_post_meta( $order->id, '_order_currency', $data['currency'] );
+				update_post_meta( $order->get_order_id(), '_order_currency', $data['currency'] );
 			}
 
 			// set order number
 			if ( isset( $data['order_number'] ) ) {
 
-				update_post_meta( $order->id, '_order_number', $data['order_number'] );
+				update_post_meta( $order->get_order_id(), '_order_number', $data['order_number'] );
 			}
 
 			// if items have changed, recalculate order totals
@@ -537,17 +537,17 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 			// update order meta
 			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
-				$this->set_order_meta( $order->id, $data['order_meta'] );
+				$this->set_order_meta( $order->get_order_id(), $data['order_meta'] );
 			}
 
 			// update the order post to set customer note/modified date
 			wc_update_order( $order_args );
 
-			wc_delete_shop_order_transients( $order->id );
+			wc_delete_shop_order_transients( $order->get_order_id() );
 
-			do_action( 'woocommerce_cli_update_order', $order->id, $data );
+			do_action( 'woocommerce_cli_update_order', $order->get_order_id(), $data );
 
-			WP_CLI::success( "Updated order {$order->id}." );
+			WP_CLI::success( "Updated order {$order->get_order_id()}." );
 
 		} catch ( WC_CLI_Exception $e ) {
 			WP_CLI::error( $e->getMessage() );
@@ -626,10 +626,10 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * @return array
 	 */
 	protected function get_order_data( $order ) {
-		$order_post = get_post( $order->id );
+		$order_post = get_post( $order->get_order_id() );
 		$dp         = wc_get_price_decimals();
 		$order_data = array(
-			'id'                        => $order->id,
+			'id'                        => $order->get_order_id(),
 			'order_number'              => $order->get_order_number(),
 			'created_at'                => $this->format_datetime( $order_post->post_date_gmt ),
 			'updated_at'                => $this->format_datetime( $order_post->post_modified_gmt ),
@@ -884,7 +884,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$result = $wpdb->get_row(
 				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
 				absint( $item['id'] ),
-				absint( $order->id )
+				absint( $order->get_order_id() )
 			) );
 
 			if ( is_null( $result ) ) {

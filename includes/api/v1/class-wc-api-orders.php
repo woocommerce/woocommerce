@@ -114,7 +114,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$order_post = get_post( $id );
 
 		$order_data = array(
-			'id'                        => $order->id,
+			'id'                        => $order->get_order_id(),
 			'order_number'              => $order->get_order_number(),
 			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
 			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
