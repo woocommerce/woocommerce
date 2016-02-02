@@ -13,111 +13,6 @@
 abstract class WC_Abstract_Order {
 
     /**
-     * Get the order if ID is passed, otherwise the order is new and empty.
-     * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
-     * should be used. It is possible, but the aforementioned are preferred and are the only.
-     * methods that will be maintained going forward.
-     *
-     * @param  int|object|WC_Order $order Order to init.
-     */
-    public function __construct( $order = 0 ) {
-		if ( is_numeric( $order ) ) {
-            $this->read( $order );
-        } elseif ( $order instanceof WC_Order ) {
-            $this->read( absint( $order->get_order_id() ) );
-        } elseif ( ! empty( $order->ID ) ) {
-            $this->read( absint( $order->ID ) );
-        }
-    }
-
-    /**
-     * Change data to JSON format.
-     * @return string Data in JSON format.
-     */
-    public function __toString() {
-        return json_encode( $this->get_data() );
-    }
-
-    /**
-     * Magic __isset method.
-     * @param string $key
-     * @return bool
-     */
-    public function __isset( $key ) {
-        // @todo needs to check data
-        return $this->get_order_id() ? metadata_exists( 'post', $this->get_order_id(), '_' . $key ) : false;
-    }
-
-    /**
-     * Magic __get method. Maps legacy vars to getters.
-     * @param string $key
-     * @return mixed
-     */
-    public function __get( $key ) {
-        if ( 'completed_date' === $key ) {
-            return $this->get_date_completed();
-        }
-
-        elseif ( 'id' === $key ) {
-            return $this->get_order_id();
-		}
-
-        elseif ( 'post' === $key ) {
-            return get_post( $this->get_order_id() );
-		}
-
-        elseif ( 'status' === $key || 'post_status' === $key ) {
-            return $this->get_status();
-		}
-
-        elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
-            return $this->get_customer_note();
-		}
-
-        elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
-            return $this->get_customer_id();
-        }
-
-		elseif ( 'prices_include_tax' === $key ) {
-			return 'yes' === get_option( 'woocommerce_prices_include_tax' );
-		}
-
-		elseif ( 'tax_display_cart' === $key ) {
-			return get_option( 'woocommerce_tax_display_cart' );
-		}
-
-		elseif ( 'display_totals_ex_tax' === $key ) {
-			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
-		}
-
-		elseif ( 'display_cart_ex_tax' === $key ) {
-			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
-		}
-
-        elseif ( isset( $this->_data[ $key ] ) ) {
-            return $this->_data[ $key ];
-        }
-
-		else {
-			$value = get_post_meta( $this->get_order_id(), '_' . $key, true );
-		}
-
-        // order_date
-        // modified_date
-        // $order_type
-        // cart_discount
-        // order_shipping
-        // order_tax
-        // cart_discount_tax
-        // order_shipping_tax
-        // order_total
-        // $this->order_date          = $post_object->post_date;
-        // $this->modified_date       = $post_object->post_modified;
-
-        return $value;
-    }
-
-    /**
      * Stores data about status changes so relevant hooks can be fired.
      * @var bool|array
      */
@@ -164,7 +59,7 @@ abstract class WC_Abstract_Order {
 		'discount_tax'         => 0,
 		'shipping_total'       => 0,
 		'shipping_tax'         => 0,
-		'cart_tax'             => 0, // @todo cart tax maps to '_order_tax' in the current API. This is confusing and should be renamed.
+		'cart_tax'             => 0, // cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
 		'order_total'          => 0,
 		'order_tax'            => 0, // Sum of all taxes.
 
@@ -189,7 +84,35 @@ abstract class WC_Abstract_Order {
 		'coupon_lines'         => array()
     );
 
+    /**
+     * Get the order if ID is passed, otherwise the order is new and empty.
+     * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
+     * should be used. It is possible, but the aforementioned are preferred and are the only.
+     * methods that will be maintained going forward.
+     *
+     * @param  int|object|WC_Order $order Order to init.
+     */
+    public function __construct( $order = 0 ) {
+		if ( is_numeric( $order ) ) {
+            $this->read( $order );
+        } elseif ( $order instanceof WC_Order ) {
+            $this->read( absint( $order->get_order_id() ) );
+        } elseif ( ! empty( $order->ID ) ) {
+            $this->read( absint( $order->ID ) );
+        }
+    }
+
+    /**
+     * Change data to JSON format.
+     * @return string Data in JSON format.
+     */
+    public function __toString() {
+        return json_encode( $this->get_data() );
+    }
+
     public function add_meta_data(){} // @todo
+    public function get_meta_data(){} // @todo
+    public function get_order_meta( $key ){} // @todo
 
     /*
     |--------------------------------------------------------------------------
@@ -1319,7 +1242,6 @@ abstract class WC_Abstract_Order {
      * Insert data into the database.
      * @since 2.6.0
      * @access protected
-     * @todo Convert to custom tables.
      */
     protected function create() {
         // Set random key
@@ -1384,7 +1306,6 @@ abstract class WC_Abstract_Order {
      * Read from the database.
      * @since 2.6.0
      * @access protected
-     * @todo Convert to custom tables.
      * @param int $id ID of object to read.
      */
     protected function read( $id ) {
@@ -1453,7 +1374,6 @@ abstract class WC_Abstract_Order {
      * Update data in the database.
      * @since 2.6.0
      * @access protected
-     * @todo Convert to custom tables.
      */
     protected function update() {
         global $wpdb;
@@ -1555,7 +1475,6 @@ abstract class WC_Abstract_Order {
     /**
      * Delete data from the database.
      * @since 2.6.0
-     * @todo Convert to custom tables.
      * @access protected
      */
     protected function delete() {
@@ -2865,6 +2784,94 @@ abstract class WC_Abstract_Order {
     | Will be removed after 2 major releases, or 1 year.
     |
     */
+
+    /**
+     * Magic __isset method for backwards compatibility.
+     * @param string $key
+     * @return bool
+     */
+    public function __isset( $key ) {
+        // Legacy properties which could be accessed directly in the past.
+        $legacy_props = array( 'completed_date', 'id', 'order_type', 'post', 'status', 'post_status', 'customer_note', 'customer_message', 'user_id', 'customer_user', 'prices_include_tax', 'tax_display_cart', 'display_totals_ex_tax', 'display_cart_ex_tax', 'order_date', 'modified_date', 'cart_discount', 'cart_discount_tax', 'order_shipping', 'order_shipping_tax', 'order_total', 'order_tax', 'billing_first_name', 'billing_last_name', 'billing_company', 'billing_address_1', 'billing_address_2', 'billing_city', 'billing_state', 'billing_postcode', 'billing_country', 'billing_phone', 'billing_email', 'shipping_first_name', 'shipping_last_name', 'shipping_company', 'shipping_address_1', 'shipping_address_2', 'shipping_city', 'shipping_state', 'shipping_postcode', 'shipping_country', 'customer_ip_address', 'customer_user_agent', 'payment_method_title', 'payment_method', 'order_currency' );
+        return $this->get_order_id() ? ( in_array( $key, $legacy_props ) || metadata_exists( 'post', $this->get_order_id(), '_' . $key ) ) : false;
+    }
+
+    /**
+     * Magic __get method for backwards compatibility.
+     * @param string $key
+     * @return mixed
+     */
+    public function __get( $key ) {
+        /**
+         * Maps legacy vars to new getters.
+         */
+        if ( 'completed_date' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            return $this->get_date_completed();
+        } elseif ( 'modified_date' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            return $this->get_date_modified();
+        } elseif ( 'order_date' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            return $this->get_date_created();
+        } elseif ( 'id' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            return $this->get_order_id();
+		} elseif ( 'post' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            return get_post( $this->get_order_id() );
+		} elseif ( 'status' === $key || 'post_status' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            return $this->get_status();
+		} elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            return $this->get_customer_note();
+		} elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            return $this->get_customer_id();
+        } elseif ( 'prices_include_tax' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+			return 'yes' === get_option( 'woocommerce_prices_include_tax' );
+		} elseif ( 'tax_display_cart' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+			return get_option( 'woocommerce_tax_display_cart' );
+		} elseif ( 'display_totals_ex_tax' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
+		} elseif ( 'display_cart_ex_tax' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
+        } elseif ( 'cart_discount' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+			return $this->get_discount();
+        } elseif ( 'cart_discount_tax' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+			return $this->get_discount_tax();
+        } elseif ( 'order_tax' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly. Use WC_Order::get_cart_tax()' );
+			return $this->get_cart_tax();
+        } elseif ( 'order_shipping_tax' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly. Use WC_Order::get_shipping_tax()' );
+            return $this->get_shipping_tax();
+        } elseif ( 'order_shipping' === $key ) {
+            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly. Use WC_Order::get_shipping()' );
+            return $this->get_shipping();
+        /**
+         * Map vars to getters with warning.
+         */
+        } elseif ( is_callable( $this, "get_{$key}" ) ) {
+            _deprecated_argument( $key, '2.6', 'Properties should not be accessed directly. Use get_' . $key . '()' );
+            return $this->{"get_{$key}"}();
+        /**
+         * Handle post meta
+         */
+        } else {
+            _deprecated_argument( $key, '2.6', 'Meta should not be accessed directly. Use WC_Order::get_order_meta( $key )' );
+			$value = get_post_meta( $this->get_order_id(), '_' . $key, true );
+		}
+
+        return $value;
+    }
 
     /**
      * Get order item meta.
