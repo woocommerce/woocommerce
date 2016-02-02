@@ -207,7 +207,7 @@ class WC_Email extends WC_Settings_API {
 		$this->heading     = $this->get_option( 'heading', $this->heading );
 		$this->subject     = $this->get_option( 'subject', $this->subject );
 		$this->email_type  = $this->get_option( 'email_type' );
-		$this->enabled     = $this->get_option( 'enabled' ) ? 'yes' : '';
+		$this->enabled     = $this->get_option( 'enabled' );
 
 		// Find/replace
 		$this->find['blogname']      = '{blogname}';
@@ -348,7 +348,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_enabled() {
-		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object );
+		return apply_filters( 'woocommerce_email_enabled_' . $this->id, __( 'yes' ) === $this->enabled, $this->object );
 	}
 
 	/**
