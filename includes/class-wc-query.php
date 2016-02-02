@@ -859,33 +859,37 @@ class WC_Query {
 			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 				$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
 
+				$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( "
+					SELECT DISTINCT ID, post_parent, post_type FROM {$wpdb->posts}
+					INNER JOIN {$wpdb->postmeta} pm1 ON ID = pm1.post_id
+					INNER JOIN {$wpdb->postmeta} pm2 ON ID = pm2.post_id
+					WHERE post_type IN ( 'product', 'product_variation' )
+					AND post_status = 'publish'
+					AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
+					AND pm1.meta_value BETWEEN %f AND %f
+					AND pm2.meta_key = '_tax_status'
+					AND pm2.meta_value = 'none'
+				", $min, $max ), OBJECT_K ), $min, $max );
+
 				foreach ( $tax_classes as $tax_class ) {
 					$tax_rates = WC_Tax::get_rates( $tax_class );
 					$min_class = $min - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $min, $tax_rates ) );
 					$max_class = $max - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $max, $tax_rates ) );
 
-					$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( "
+					$matched_products_query += apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( "
 						SELECT DISTINCT ID, post_parent, post_type FROM {$wpdb->posts}
 						INNER JOIN {$wpdb->postmeta} pm1 ON ID = pm1.post_id
 						INNER JOIN {$wpdb->postmeta} pm2 ON ID = pm2.post_id
+						INNER JOIN {$wpdb->postmeta} pm3 ON ID = pm3.post_id
 						WHERE post_type IN ( 'product', 'product_variation' )
 						AND post_status = 'publish'
 						AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
 						AND pm1.meta_value BETWEEN %f AND %f
 						AND pm2.meta_key = '_tax_class'
 						AND pm2.meta_value = %s
+						AND pm3.meta_key = '_tax_status'
+						AND pm3.meta_value = 'taxable'
 					", $min_class, $max_class, sanitize_title( $tax_class ) ), OBJECT_K ), $min_class, $max_class );
-
-					if ( $matched_products_query ) {
-						foreach ( $matched_products_query as $product ) {
-							if ( $product->post_type == 'product' ) {
-								$matched_products[] = $product->ID;
-							}
-							if ( $product->post_parent > 0 ) {
-								$matched_products[] = $product->post_parent;
-							}
-						}
-					}
 				}
 			} else {
 				$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( "
@@ -896,15 +900,15 @@ class WC_Query {
 					AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
 					AND pm1.meta_value BETWEEN %d AND %d
 				", $min, $max ), OBJECT_K ), $min, $max );
+			}
 
-				if ( $matched_products_query ) {
-					foreach ( $matched_products_query as $product ) {
-						if ( $product->post_type == 'product' ) {
-							$matched_products[] = $product->ID;
-						}
-						if ( $product->post_parent > 0 ) {
-							$matched_products[] = $product->post_parent;
-						}
+			if ( $matched_products_query ) {
+				foreach ( $matched_products_query as $product ) {
+					if ( $product->post_type == 'product' ) {
+						$matched_products[] = $product->ID;
+					}
+					if ( $product->post_parent > 0 ) {
+						$matched_products[] = $product->post_parent;
 					}
 				}
 			}

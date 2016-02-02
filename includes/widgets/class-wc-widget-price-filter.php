@@ -157,8 +157,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 			foreach ( $tax_classes as $tax_class ) {
 				$tax_rates = WC_Tax::get_rates( $tax_class );
-				$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
-				$class_max = $max + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
+				$class_min = floor( $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) ) );
+				$class_max = ceil( $max + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) ) );
 
 				if ( $min === 0 || $class_min < $min ) {
 					$min = $class_min;
