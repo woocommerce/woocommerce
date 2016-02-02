@@ -244,7 +244,7 @@ class WC_Product_Variable extends WC_Product {
 		 * @var string
 		 */
 		if ( $display ) {
-			$price_hash = array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() );
+			$price_hash = array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates(), $this->get_tax_class() );
 		} else {
 			$price_hash = array( false );
 		}
