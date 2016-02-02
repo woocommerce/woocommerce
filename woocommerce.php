@@ -256,6 +256,7 @@ final class WooCommerce {
 
 		include_once( 'includes/class-wc-auth.php' );                           // Auth Class
 		include_once( 'includes/class-wc-post-types.php' );                     // Registers post types
+		include_once( 'includes/abstracts/abstract-wc-payment-token.php' );     // Payment Tokens
 		include_once( 'includes/abstracts/abstract-wc-product.php' );           // Products
 		include_once( 'includes/abstracts/abstract-wc-order.php' );             // Orders
 		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );      // Settings API (for gateways, shipping, and integrations)
@@ -263,6 +264,7 @@ final class WooCommerce {
 		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' );   // A Payment gateway
 		include_once( 'includes/abstracts/abstract-wc-integration.php' );       // An integration with a service
 		include_once( 'includes/class-wc-product-factory.php' );                // Product factory
+		include_once( 'includes/class-wc-payment-tokens.php' );                 // Payment tokens controller
 		include_once( 'includes/class-wc-countries.php' );                      // Defines countries and states
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper

@@ -487,9 +487,25 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
   method_order bigint(20) NOT NULL,
   PRIMARY KEY  (instance_id)
 ) $collate;
+CREATE TABLE IF NOT EXISTS {$wpdb->prefix}woocommerce_payment_tokens (
+  `token_id` bigint(20) NOT NULL auto_increment,
+  `gateway_id` varchar(255) NOT NULL,
+  `token` text NOT NULL,
+  `customer_id` bigint(20) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `is_default` tinyint(1) NOT NULL,
+   PRIMARY KEY (token_id)
+) $collate;
+CREATE TABLE IF NOT EXISTS {$wpdb->prefix}woocommerce_payment_token_meta (
+  `meta_id` bigint(20)  NOT NULL auto_increment,
+  `token_id` bigint(20) NOT NULL,
+  `meta_key` varchar(255) NOT NULL,
+  `meta_value` text NOT NULL,
+  PRIMARY KEY (meta_id)
+) $collate;
 		";
 	}
-
+// Todo make sure the payment token tables are correct / up to date with final schema
 	/**
 	 * Create roles and capabilities.
 	 */
