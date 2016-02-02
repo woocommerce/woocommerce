@@ -169,7 +169,7 @@ abstract class WC_Settings_API {
 	/**
 	 * get_option function.
 	 *
-	 * Gets and option from the settings API, using defaults if necessary to prevent undefined notices.
+	 * Gets an option from the settings API, using defaults if necessary to prevent undefined notices.
 	 *
 	 * @param  string $key
 	 * @param  mixed  $empty_value
