@@ -302,7 +302,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_billing_email() {
-        return $this->_data['billing_email'];
+        return sanitize_email( $this->_data['billing_email'] );
     }
 
     /**
@@ -945,6 +945,7 @@ abstract class WC_Abstract_Order {
      * @param string $value
      */
     public function set_billing_email( $value ) {
+		$value = sanitize_email( $value );
         $this->_data['billing_email'] = is_email( $value ) ? $value : '';
     }
 
@@ -2812,64 +2813,64 @@ abstract class WC_Abstract_Order {
          * Maps legacy vars to new getters.
          */
         if ( 'completed_date' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_date_completed();
         } elseif ( 'modified_date' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_date_modified();
         } elseif ( 'order_date' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_date_created();
         } elseif ( 'id' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_order_id();
 		} elseif ( 'post' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return get_post( $this->get_order_id() );
 		} elseif ( 'status' === $key || 'post_status' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_status();
 		} elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_customer_note();
 		} elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_customer_id();
 		} elseif ( 'tax_display_cart' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'display_totals_ex_tax' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'display_cart_ex_tax' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
         } elseif ( 'cart_discount' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_discount();
         } elseif ( 'cart_discount_tax' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly.' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_discount_tax();
         } elseif ( 'order_tax' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly. Use WC_Order::get_cart_tax()' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_cart_tax();
         } elseif ( 'order_shipping_tax' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly. Use WC_Order::get_shipping_tax()' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_shipping_tax();
         } elseif ( 'order_shipping' === $key ) {
-            _deprecated_argument( $key, '2.6', 'Order properties should not be accessed directly. Use WC_Order::get_shipping()' );
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_shipping();
         /**
          * Map vars to getters with warning.
          */
-        } elseif ( is_callable( $this, "get_{$key}" ) ) {
-            _deprecated_argument( $key, '2.6', 'Properties should not be accessed directly. Use get_' . $key . '()' );
+	 	} elseif ( is_callable( array( $this, "get_{$key}" ) ) ) {
+			_doing_it_wrong( $key, 'Order properties should not be accessed directly Use get_' . $key . '().', '2.6' );
             return $this->{"get_{$key}"}();
         /**
          * Handle post meta
          */
         } else {
-            _deprecated_argument( $key, '2.6', 'Meta should not be accessed directly. Use WC_Order::get_order_meta( $key )' );
+            _doing_it_wrong( $key, 'Meta should not be accessed directly. Use WC_Order::get_order_meta( $key )', '2.6' );
 			$value = get_post_meta( $this->get_order_id(), '_' . $key, true );
 		}
 

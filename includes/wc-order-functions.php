@@ -245,7 +245,7 @@ function wc_register_order_type( $type, $args = array() ) {
 function wc_downloadable_file_permission( $download_id, $product_id, $order, $qty = 1 ) {
 	global $wpdb;
 
-	$user_email = sanitize_email( $order->billing_email );
+	$user_email = $order->get_billing_email();
 	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
 	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
 
@@ -768,7 +768,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
-	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
+	return isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
 }
 
 /**

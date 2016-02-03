@@ -104,7 +104,7 @@ class WC_Order extends WC_Abstract_Order {
         return add_query_arg( array(
             'download_file' => $product_id,
             'order'         => $this->get_order_key(),
-            'email'         => urlencode( $this->billing_email ),
+            'email'         => urlencode( $this->get_billing_email() ),
             'key'           => $download_id
         ), trailingslashit( home_url() ) );
     }
@@ -134,7 +134,7 @@ class WC_Order extends WC_Abstract_Order {
             AND order_key = %s
             AND product_id = %s
             ORDER BY permission_id
-        ", $this->billing_email, $this->get_order_key(), $product_id ) );
+        ", $this->get_billing_email(), $this->get_order_key(), $product_id ) );
 
         $files = array();
 
@@ -456,7 +456,7 @@ class WC_Order extends WC_Abstract_Order {
                 $used_by = $this->get_user_id();
 
                 if ( ! $used_by ) {
-                    $used_by = $this->billing_email;
+                    $used_by = $this->get_billing_email();
                 }
 
                 $coupon->inc_usage_count( $used_by );
@@ -486,7 +486,7 @@ class WC_Order extends WC_Abstract_Order {
 
                 $used_by = $this->get_user_id();
                 if ( ! $used_by ) {
-                    $used_by = $this->billing_email;
+                    $used_by = $this->get_billing_email();
                 }
 
                 $coupon->dcr_usage_count( $used_by );
