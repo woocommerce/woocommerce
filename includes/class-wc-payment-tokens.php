@@ -35,7 +35,7 @@ class WC_Payment_Tokens {
 		// contain their neccesary fields.
 		$is_valid = true;
 		$token_class = 'WC_Payment_Token_' . $args['type'];
-		if ( method_exists( $token_class, 'validate' ) ) {
+		if ( is_callable( $token_class, 'validate' ) ) {
 			$is_valid = $token_class::validate( $args );
 		}
 
