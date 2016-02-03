@@ -46,8 +46,10 @@ jQuery( function( $ ) {
 
 			if ( '' === field.val() ) {
 				meter.remove();
+				$( document.body ).trigger( 'wc-password-strength-removed' );
 			} else if ( 0 === meter.length ) {
 				field.after( '<div class="woocommerce-password-strength" aria-live="polite"></div>' );
+				$( document.body ).trigger( 'wc-password-strength-added' );
 			}
 		},
 
