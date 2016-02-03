@@ -2,7 +2,7 @@
 namespace WooCommerce\Tests\Util;
 
 /**
- * Class Log
+ * Class Log.
  * @package WooCommerce\Tests\Util
  * @since 2.3
  */
@@ -12,7 +12,7 @@ class Log extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test add()
+	 * Test add().
 	 *
 	 * @since 2.4
 	 */
@@ -26,7 +26,7 @@ class Log extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test clear()
+	 * Test clear().
 	 *
 	 * @since 2.4
 	 */

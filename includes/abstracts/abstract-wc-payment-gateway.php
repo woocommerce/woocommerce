@@ -1,11 +1,11 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
- * WooCommerce Payment Gateway class
+ * WooCommerce Payment Gateway class.
  *
  * Extended by individual payment gateways to handle payments.
  *
@@ -19,73 +19,73 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/**
-	 * Set if the place order button should be renamed on selection
+	 * Set if the place order button should be renamed on selection.
 	 * @var string
 	 */
 	public $order_button_text;
 
 	/**
-	 * Payment method title
+	 * Payment method title.
 	 * @var string
 	 */
 	public $title;
 
 	/**
-	 * Chosen payment method id
+	 * Chosen payment method id.
 	 * @var bool
 	 */
 	public $chosen;
 
 	/**
-	 * True if the gateway shows fields on the checkout
+	 * True if the gateway shows fields on the checkout.
 	 * @var bool
 	 */
 	public $has_fields;
 
 	/**
-	 * Countries this gateway is allowed for
+	 * Countries this gateway is allowed for.
 	 * @var array
 	 */
 	public $countries;
 
 	/**
-	 * Available for all counties or specific
+	 * Available for all counties or specific.
 	 * @var string
 	 */
 	public $availability;
 
 	/**
-	 * Icon for the gateway
+	 * Icon for the gateway.
 	 * @var string
 	 */
 	public $icon;
 
 	/**
-	 * Description for the gateway
+	 * Description for the gateway.
 	 * @var string
 	 */
 	public $description;
 
 	/**
-	 * Supported features such as 'default_credit_card_form', 'refunds'
+	 * Supported features such as 'default_credit_card_form', 'refunds'.
 	 * @var array
 	 */
 	public $supports = array( 'products' );
 
 	/**
-	 * Maximum transaction amount, zero does not define a maximum
+	 * Maximum transaction amount, zero does not define a maximum.
 	 * @var int
 	 */
 	public $max_amount = 0;
 
 	/**
-	 * Optional URL to view a transaction
+	 * Optional URL to view a transaction.
 	 * @var string
 	 */
 	public $view_transaction_url = '';
 
 	/**
-	 * Get the return url (thank you page)
+	 * Get the return url (thank you page).
 	 *
 	 * @param WC_Order $order
 	 * @return string
@@ -106,10 +106,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Get a link to the transaction on the 3rd party gateway size (if applicable)
+	 * Get a link to the transaction on the 3rd party gateway size (if applicable).
 	 *
-	 * @param  WC_Order $order the order object
-	 * @return string transaction URL, or empty string
+	 * @param  WC_Order $order the order object.
+	 * @return string transaction URL, or empty string.
 	 */
 	public function get_transaction_url( $order ) {
 
@@ -147,13 +147,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Check if the gateway is available for use
+	 * Check if the gateway is available for use.
 	 *
 	 * @return bool
 	 */
 	public function is_available() {
 
-		$is_available = ( 'yes' === $this->enabled ) ? true : false;
+		$is_available = ( 'yes' === $this->enabled );
 
 		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
 			$is_available = false;
@@ -163,7 +163,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * has_fields function.
+	 * Check if the gateway has fields on the checkout.
 	 *
 	 * @return bool
 	 */
@@ -172,7 +172,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the gateway's title
+	 * Return the gateway's title.
 	 *
 	 * @return string
 	 */
@@ -181,7 +181,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the gateway's description
+	 * Return the gateway's description.
 	 *
 	 * @return string
 	 */
@@ -190,7 +190,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * get_icon function.
+	 * Return the gateway's icon.
 	 *
 	 * @return string
 	 */
@@ -211,10 +211,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Process Payment
+	 * Process Payment.
 	 *
-	 * Process the payment. Override this in your gateway. When implemented, this should
-	 * return the success and redirect in an array. e.g.
+	 * Process the payment. Override this in your gateway. When implemented, this should.
+	 * return the success and redirect in an array. e.g:
 	 *
 	 *        return array(
 	 *            'result'   => 'success',
@@ -229,24 +229,26 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Process refund
+	 * Process refund.
 	 *
-	 * If the gateway declares 'refunds' support, this will allow it to refund
+	 * If the gateway declares 'refunds' support, this will allow it to refund.
 	 * a passed in amount.
 	 *
 	 * @param  int $order_id
 	 * @param  float $amount
 	 * @param  string $reason
-	 * @return bool|WP_Error True or false based on success, or a WP_Error object
+	 * @return bool|WP_Error True or false based on success, or a WP_Error object.
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		return false;
 	}
 
 	/**
-	 * Validate frontend fields
+	 * Validate frontend fields.
 	 *
 	 * Validate payment fields on the frontend.
+	 *
+	 * @return bool
 	 */
 	public function validate_fields() { return true; }
 
@@ -283,13 +285,14 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Core credit card form which gateways can used if needed.
 	 *
 	 * @param  array $args
+	 * @param  array $fields
 	 */
 	public function credit_card_form( $args = array(), $fields = array() ) {
 
 		wp_enqueue_script( 'wc-credit-card-form' );
 
 		$default_args = array(
-			'fields_have_names' => true, // Some gateways like stripe don't need names as the form is tokenized
+			'fields_have_names' => true, // Some gateways like stripe don't need names as the form is tokenized.
 		);
 
 		$args = wp_parse_args( $args, apply_filters( 'woocommerce_credit_card_form_args', $default_args, $this->id ) );

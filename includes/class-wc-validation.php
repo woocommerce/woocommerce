@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * Contains Validation functions
  *
@@ -11,7 +16,7 @@
 class WC_Validation {
 
 	/**
-	 * Validates an email using wordpress native is_email function
+	 * Validates an email using wordpress native is_email function.
 	 *
 	 * @param   string	email address
 	 * @return  bool
@@ -21,7 +26,7 @@ class WC_Validation {
 	}
 
 	/**
-	 * Validates a phone number using a regular expression
+	 * Validates a phone number using a regular expression.
 	 *
 	 * @param   string	phone number
 	 * @return  bool
@@ -35,7 +40,7 @@ class WC_Validation {
 	}
 
 	/**
-	 * Checks for a valid postcode
+	 * Checks for a valid postcode.
 	 *
 	 * @param   string	postcode
 	 * @param	string	country
@@ -131,7 +136,7 @@ class WC_Validation {
 	}
 
 	/**
-	 * Format the postcode according to the country and length of the postcode
+	 * Format the postcode according to the country and length of the postcode.
 	 *
 	 * @param   string	postcode
 	 * @param	string	country

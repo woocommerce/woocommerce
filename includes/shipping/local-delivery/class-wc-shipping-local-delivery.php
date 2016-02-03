@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Local Delivery Shipping Method
+ * Local Delivery Shipping Method.
  *
- * A simple shipping method allowing local delivery as a shipping method
+ * A simple shipping method allowing local delivery as a shipping method.
  *
  * @class 		WC_Shipping_Local_Delivery
  * @version		2.3.0
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->id                 = 'local_delivery';
@@ -27,7 +27,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 	}
 
 	/**
-	 * init function.
+	 * Initialize local delivery.
 	 */
 	public function init() {
 
@@ -48,7 +48,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 	}
 
 	/**
-	 * calculate_shipping function.
+	 * Calculate local delivery shipping.
 	 *
 	 * @param array $package (default: array())
 	 */
@@ -120,9 +120,9 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 				'placeholder' => wc_format_localized_price( 0 )
 			),
 			'codes' => array(
-				'title'       => __( 'Allowed Zip/Post Codes', 'woocommerce' ),
+				'title'       => __( 'Allowed ZIP/Post Codes', 'woocommerce' ),
 				'type'        => 'text',
-				'desc_tip'    => __( 'What zip/post codes are available for local delivery?', 'woocommerce' ),
+				'desc_tip'    => __( 'What ZIP/post codes are available for local delivery?', 'woocommerce' ),
 				'default'     => '',
 				'description' => __( 'Separate codes with a comma. Accepts wildcards, e.g. <code>P*</code> will match a postcode of PE30. Also accepts a pattern, e.g. <code>NG1___</code> would match NG1 1AA but not NG10 1AA', 'woocommerce' ),
 				'placeholder' => 'e.g. 12345, 56789'

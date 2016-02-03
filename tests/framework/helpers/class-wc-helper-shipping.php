@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class WC_Helper_Shipping
+ * Class WC_Helper_Shipping.
  *
- * This helper class should ONLY be used for unit tests!
+ * This helper class should ONLY be used for unit tests!.
  */
 class WC_Helper_Shipping {
 
 	/**
-	 * Create a simple flat rate at the cost of 10
+	 * Create a simple flat rate at the cost of 10.
 	 *
 	 * @since 2.3
 	 */
@@ -27,7 +27,7 @@ class WC_Helper_Shipping {
 	}
 
 	/**
-	 * Delete the simple flat rate
+	 * Delete the simple flat rate.
 	 *
 	 * @since 2.3
 	 */

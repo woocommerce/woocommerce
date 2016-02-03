@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Taxonomies {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		// Category/term ordering
@@ -57,7 +57,7 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param mixed $term_id
 	 * @param mixed $tt_id
-	 * @param mixed $taxonomy
+	 * @param string $taxonomy
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
 		if ( 'product_cat' != $taxonomy && ! taxonomy_is_product_attribute( $taxonomy ) ) {
@@ -257,6 +257,8 @@ class WC_Admin_Taxonomies {
 	 * save_category_fields function.
 	 *
 	 * @param mixed $term_id Term ID being saved
+	 * @param mixed $tt_id
+	 * @param string $taxonomy
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
 		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) {
@@ -307,9 +309,9 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Thumbnail column value added to category admin.
 	 *
-	 * @param mixed $columns
-	 * @param mixed $column
-	 * @param mixed $id
+	 * @param string $columns
+	 * @param string $column
+	 * @param int $id
 	 * @return array
 	 */
 	public function product_cat_column( $columns, $column, $id ) {

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Recent Reviews Widget
+ * Recent Reviews Widget.
  *
  * @author   WooThemes
  * @category Widgets
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Widget_Recent_Reviews extends WC_Widget {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_recent_reviews';
@@ -43,7 +43,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *

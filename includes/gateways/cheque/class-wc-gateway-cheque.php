@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Cheque Payment Gateway
+ * Cheque Payment Gateway.
  *
  * Provides a Cheque Payment Gateway, mainly for testing purposes.
  *
@@ -45,7 +45,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
     }
 
     /**
-     * Initialise Gateway Settings Form Fields
+     * Initialise Gateway Settings Form Fields.
      */
     public function init_form_fields() {
 
@@ -103,7 +103,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	}
 
     /**
-     * Process the payment and return the result
+     * Process the payment and return the result.
      *
      * @param int $order_id
      * @return array

@@ -223,7 +223,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	}
 
 	/**
-	 * Delete a product.
+	 * Delete products.
 	 *
 	 * ## OPTIONS
 	 *
@@ -512,6 +512,15 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * [--format=<format>]
 	 * : Accepted values: table, json, csv. Default: table.
 	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * rating
+	 * * reviewer_name
+	 * * reviewer_email
+	 * * verified
+	 * * created_at
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product reviews 123
@@ -539,7 +548,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 					'rating'         => get_comment_meta( $comment->comment_ID, 'rating', true ),
 					'reviewer_name'  => $comment->comment_author,
 					'reviewer_email' => $comment->comment_author_email,
-					'verified'       => (bool) wc_customer_bought_product( $comment->comment_author_email, $comment->user_id, $id ),
+					'verified'       => (bool) get_comment_meta( $comment->comment_ID, 'verified', true ),
 				);
 			}
 
@@ -578,7 +587,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * <id>
 	 * : Product ID
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
 	 * ## AVAILABLE_FIELDS
@@ -1052,6 +1061,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @param  int $product_id
 	 * @param  array $data
 	 * @return bool
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_product_meta( $product_id, $data ) {
 		global $wpdb;
@@ -1149,15 +1159,14 @@ class WC_CLI_Product extends WC_CLI_Command {
 				if ( $is_taxonomy ) {
 
 					if ( isset( $attribute['options'] ) ) {
-						// Select based attributes - Format values (posted values are slugs)
-						if ( is_array( $attribute['options'] ) ) {
-							$values = array_map( 'sanitize_title', $attribute['options'] );
+						$options = $attribute['options'];
 
-						// Text based attributes - Posted values are term names - don't change to slugs
-						} else {
-							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute['options'] ) ) );
+						if ( ! is_array( $attribute['options'] ) ) {
+							// Text based attributes - Posted values are term names
+							$options = explode( WC_DELIMITER, $options );
 						}
 
+						$values = array_map( 'wc_sanitize_term_text_based', $options );
 						$values = array_filter( $values, 'strlen' );
 					} else {
 						$values = array();
@@ -1514,6 +1523,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @param  int $id
 	 * @param  array $data
 	 * @return bool
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_variations( $id, $data ) {
 		global $wpdb;
@@ -1826,9 +1836,10 @@ class WC_CLI_Product extends WC_CLI_Command {
 	/**
 	 * Save product images.
 	 *
-	 * @since 2.5.0
-	 * @param array $images
-	 * @param int $id
+	 * @since  2.5.0
+	 * @param  array $images
+	 * @param  int $id
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_product_images( $id, $images ) {
 		if ( is_array( $images ) ) {
@@ -1993,6 +2004,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @since  2.5.0
 	 * @param  string $image_url
 	 * @return int|WP_Error attachment id
+	 * @throws WC_CLI_Exception
 	 */
 	private function upload_product_image( $image_url ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );

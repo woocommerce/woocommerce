@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2013, 2014 MasterCard International Incorporated
+ * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are 
@@ -31,10 +31,16 @@ class Simplify_Plan extends Simplify_Object {
     /**
      * Creates an Simplify_Plan object
      * @param     array $hash a map of parameters; valid keys are:<dl style="padding-left:10px;">
-     *     <dt><tt>amount</tt></dt>    <dd>Amount of payment for the plan in minor units. Example: 1000 = 10.00 [min value: 50, max value: 99999999] <strong>required </strong></dd>
+     *     <dt><tt>amount</tt></dt>    <dd>Amount of payment for the plan in the smallest unit of your currency. Example: 100 = $1.00USD <strong>required </strong></dd>
+     *     <dt><tt>billingCycle</tt></dt>    <dd>How the plan is billed to the customer. Values must be AUTO (indefinitely until the customer cancels) or FIXED (a fixed number of billing cycles). [default: AUTO] </dd>
+     *     <dt><tt>billingCycleLimit</tt></dt>    <dd>The number of fixed billing cycles for a plan. Only used if the billingCycle parameter is set to FIXED. Example: 4 </dd>
      *     <dt><tt>currency</tt></dt>    <dd>Currency code (ISO-4217) for the plan. Must match the currency associated with your account. [default: USD] <strong>required </strong></dd>
-     *     <dt><tt>frequency</tt></dt>    <dd>Frequency of payment for the plan. Example: Monthly <strong>required </strong></dd>
-     *     <dt><tt>name</tt></dt>    <dd>Name of the plan [max length: 50, min length: 2] <strong>required </strong></dd></dl>
+     *     <dt><tt>frequency</tt></dt>    <dd>Frequency of payment for the plan. Used in conjunction with frequencyPeriod. Valid values are "DAILY", "WEEKLY", "MONTHLY" and "YEARLY". [default: MONTHLY] <strong>required </strong></dd>
+     *     <dt><tt>frequencyPeriod</tt></dt>    <dd>Period of frequency of payment for the plan. Example: if the frequency is weekly, and periodFrequency is 2, then the subscription is billed bi-weekly. [min value: 1, default: 1] <strong>required </strong></dd>
+     *     <dt><tt>name</tt></dt>    <dd>Name of the plan [max length: 50, min length: 2] <strong>required </strong></dd>
+     *     <dt><tt>renewalReminderLeadDays</tt></dt>    <dd>If set, how many days before the next billing cycle that a renewal reminder is sent to the customer. If null, then no emails are sent. Minimum value is 7 if set. </dd>
+     *     <dt><tt>trialPeriod</tt></dt>    <dd>Plan free trial period selection.  Must be Days, Weeks, or Month [default: NONE] <strong>required </strong></dd>
+     *     <dt><tt>trialPeriodQuantity</tt></dt>    <dd>Quantity of the trial period.  Must be greater than 0 and a whole number. [min value: 1] </dd></dl>
      * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.<i/>
      * @return    Plan a Plan object.
      */
@@ -73,11 +79,11 @@ class Simplify_Plan extends Simplify_Object {
         * Retrieve Simplify_Plan objects.
         * @param     array criteria a map of parameters; valid keys are:<dl style="padding-left:10px;">
         *     <dt><tt>filter</tt></dt>    <dd>Filters to apply to the list.  </dd>
-        *     <dt><tt>max</tt></dt>    <dd>Allows up to a max of 50 list items to return. [max value: 50, default: 20]  </dd>
-        *     <dt><tt>offset</tt></dt>    <dd>Used in paging of the list.  This is the start offset of the page. [default: 0]  </dd>
+        *     <dt><tt>max</tt></dt>    <dd>Allows up to a max of 50 list items to return. [min value: 0, max value: 50, default: 20]  </dd>
+        *     <dt><tt>offset</tt></dt>    <dd>Used in paging of the list.  This is the start offset of the page. [min value: 0, default: 0]  </dd>
         *     <dt><tt>sorting</tt></dt>    <dd>Allows for ascending or descending sorting of the list.  The value maps properties to the sort direction (either <tt>asc</tt> for ascending or <tt>desc</tt> for descending).  Sortable properties are: <tt> dateCreated</tt><tt> amount</tt><tt> frequency</tt><tt> name</tt><tt> id</tt>.</dd></dl>
         * @param     $authentication -  information used for the API call.  If no value is passed the global keys Simplify::public_key and Simplify::private_key are used.  <i>For backwards compatibility the public and private keys may be passed instead of the authentication object.</i>
-        * @return    Simplify_ResourceList a ResourceList object that holds the list of Plan objects and the total
+        * @return    ResourceList a ResourceList object that holds the list of Plan objects and the total
         *            number of Plan objects available for the given criteria.
         * @see       ResourceList
         */

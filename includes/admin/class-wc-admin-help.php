@@ -1,6 +1,6 @@
 <?php
 /**
- * Add some content to the help tab.
+ * Add some content to the help tab
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Admin_Help' ) ) :
 
 /**
- * WC_Admin_Help Class
+ * WC_Admin_Help Class.
  */
 class WC_Admin_Help {
 
@@ -27,7 +27,7 @@ class WC_Admin_Help {
 	}
 
 	/**
-	 * Add Contextual help tabs
+	 * Add Contextual help tabs.
 	 */
 	public function add_tabs() {
 		$screen = get_current_screen();
@@ -56,10 +56,6 @@ class WC_Admin_Help {
 			'wc-settings-checkout' => array(
 				'title' => __( 'Checkout Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/65yjv96z51?videoFoam=true'
-			),
-			'wc-settings-shipping' => array(
-				'title' => __( 'Shipping Settings', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/9c9008dxnr?videoFoam=true'
 			),
 			'wc-settings-account' => array(
 				'title' => __( 'Account Settings', 'woocommerce' ),
@@ -163,8 +159,8 @@ class WC_Admin_Help {
 				'id'        => 'woocommerce_101_tab',
 				'title'     => __( 'WooCommerce 101', 'woocommerce' ),
 				'content'   =>
-					'<h2><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommerce&utm_medium=Wizard&utm_content=Videos&utm_campaign=Onboarding">' . __( 'WooCommerce 101', 'woocommerce' ) . '</a> &ndash; ' . esc_html( $video_map[ $video_key ]['title'] ) . '</h2>' .
-					'<iframe src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="480" height="298"></iframe>'
+					'<h2><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Videos&utm_campaign=Onboarding">' . __( 'WooCommerce 101', 'woocommerce' ) . '</a> &ndash; ' . esc_html( $video_map[ $video_key ]['title'] ) . '</h2>' .
+					'<iframe data-src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" src="" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="480" height="298"></iframe>'
 			) );
 		}
 
@@ -174,7 +170,7 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Documentation', 'woocommerce' ) . '</h2>' .
 				'<p>' . __( 'Should you need help understanding, using, or extending WooCommerce, please read our documentation. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ) . '</p>' .
-				'<p><a href="' . 'http://docs.woothemes.com/documentation/plugins/woocommerce/' . '" class="button button-primary">' . __( 'WooCommerce Documentation', 'woocommerce' ) . '</a> <a href="' . 'http://docs.woothemes.com/wc-apidocs/' . '" class="button">' . __( 'Developer API Docs', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . 'http://docs.woothemes.com/documentation/plugins/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Docs&utm_campaign=Onboarding' . '" class="button button-primary">' . __( 'WooCommerce Documentation', 'woocommerce' ) . '</a> <a href="' . 'http://docs.woothemes.com/wc-apidocs/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=APIDocs&utm_campaign=Onboarding' . '" class="button">' . __( 'Developer API Docs', 'woocommerce' ) . '</a></p>'
 
 		) );
 
@@ -183,9 +179,9 @@ class WC_Admin_Help {
 			'title'     => __( 'Support', 'woocommerce' ),
 			'content'   =>
 				'<h2>' . __( 'Support', 'woocommerce' ) . '</h2>' .
-				'<p>' . sprintf( __( 'After %sreading the documentation%s, for further assistance you can use the %scommunity forums%s on WordPress.org to talk with other users. If however you are a WooThemes customer, or need help with premium add-ons sold by WooThemes, please %suse our helpdesk%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/documentation/plugins/woocommerce/">', '</a>', '<a href="https://wordpress.org/support/plugin/woocommerce">', '</a>', '<a href="http://support.woothemes.com">', '</a>' ) . '</p>' .
+				'<p>' . sprintf( __( 'After %sreading the documentation%s, for further assistance you can use the %scommunity forums%s on WordPress.org to talk with other users. If however you are a WooThemes customer, or need help with premium add-ons sold by WooThemes, please %suse our helpdesk%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/documentation/plugins/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Docs&utm_campaign=Onboarding">', '</a>', '<a href="https://wordpress.org/support/plugin/woocommerce">', '</a>', '<a href="http://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding">', '</a>' ) . '</p>' .
 				'<p>' . __( 'Before asking for help we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'WordPress.org Forums', 'woocommerce' ) . '</a> <a href="' . 'http://support.woothemes.com' . '" class="button">' . __( 'WooThemes Customer Support', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'WordPress.org Forums', 'woocommerce' ) . '</a> <a href="' . 'http://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding' . '" class="button">' . __( 'WooThemes Customer Support', 'woocommerce' ) . '</a></p>'
 		) );
 
 		$screen->add_help_tab( array(
@@ -194,7 +190,7 @@ class WC_Admin_Help {
 			'content'   =>
 				'<h2>' . __( 'Education', 'woocommerce' ) . '</h2>' .
 				'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider following a WooCommerce course ran by one of our educational partners.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . 'http://www.woothemes.com/educational-partners/?utm_source=WooCommerce&utm_medium=Wizard&utm_content=Partners&utm_campaign=Onboarding' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . 'http://www.woothemes.com/educational-partners/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=EduPartners&utm_campaign=Onboarding' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>'
 		) );
 
 		$screen->add_help_tab( array(
@@ -209,21 +205,21 @@ class WC_Admin_Help {
 
 		$screen->add_help_tab( array(
 			'id'        => 'woocommerce_onboard_tab',
-			'title'     => __( 'Onboarding Wizard', 'woocommerce' ),
+			'title'     => __( 'Setup Wizard', 'woocommerce' ),
 			'content'   =>
-				'<h2>' . __( 'Onboarding Wizard', 'woocommerce' ) . '</h2>' .
-				'<p>' . __( 'If you need to access the onboarding wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Onboarding Wizard', 'woocommerce' ) . '</a></p>'
+				'<h2>' . __( 'Setup Wizard', 'woocommerce' ) . '</h2>' .
+				'<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
+				'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Setup Wizard', 'woocommerce' ) . '</a></p>'
 
 		) );
 
 		$screen->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
-			'<p><a href="' . 'http://www.woothemes.com/woocommerce/' . '" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . 'http://www.woothemes.com/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=WooCommerceProductPage&utm_campaign=Onboarding' . '" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="' . 'http://wordpress.org/extend/plugins/woocommerce/' . '" target="_blank">' . __( 'WordPress.org Project', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="' . 'https://github.com/woothemes/woocommerce' . '" target="_blank">' . __( 'Github Project', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="' . 'http://www.woothemes.com/product-category/themes/woocommerce/' . '" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="' . 'http://www.woothemes.com/product-category/woocommerce-extensions/' . '" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>'
+			'<p><a href="' . 'http://www.woothemes.com/product-category/themes/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=WCThemes&utm_campaign=Onboarding' . '" target="_blank">' . __( 'Official Themes', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="' . 'http://www.woothemes.com/product-category/woocommerce-extensions/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=WCExtensions&utm_campaign=Onboarding' . '" target="_blank">' . __( 'Official Extensions', 'woocommerce' ) . '</a></p>'
 		);
 	}
 

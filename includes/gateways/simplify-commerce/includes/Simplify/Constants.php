@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2013, 2014 MasterCard International Incorporated
+ * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
@@ -35,7 +35,7 @@ class Simplify_Constants
     /**
      * @var string VERSION SDK version information.
      */
-    const VERSION = '1.1.1';
+    const VERSION = '1.2.0';
 
     /**
      * @var string API_BASE_LIVE_URL URL for the live API endpoint
@@ -52,5 +52,3 @@ class Simplify_Constants
      */
     const OAUTH_BASE_URL = 'https://www.simplify.com/commerce/oauth';
 }
-
-?>

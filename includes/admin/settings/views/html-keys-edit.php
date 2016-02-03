@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="key_description"><?php _e( 'Description', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'Friendly name for identifying this key.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( __( 'Friendly name for identifying this key.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input id="key_description" type="text" class="input-text regular-input" value="<?php echo esc_attr( $key_data['description'] ); ?>" />
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="key_user"><?php _e( 'User', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'Owner of these keys.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( __( 'Owner of these keys.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<?php
@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="key_permissions"><?php _e( 'Permissions', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'Select the access type of these keys.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( __( 'Select the access type of these keys.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<select id="key_permissions" class="wc-enhanced-select">

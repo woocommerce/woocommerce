@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Product Variation Class
+ * Product Variation Class.
  *
  * The WooCommerce product variation class handles product variation data.
  *
@@ -148,6 +148,17 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Return the variation ID
+	 *
+	 * @since 2.5.0
+	 * @return int variation (post) ID
+	 */
+	public function get_id() {
+
+		return $this->variation_id;
+	}
+
+	/**
 	 * Returns whether or not the product post exists.
 	 *
 	 * @return bool
@@ -179,7 +190,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @return string
 	 */
@@ -249,7 +260,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get variation ID
+	 * Get variation ID.
 	 *
 	 * @return int
 	 */
@@ -258,7 +269,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get variation attribute values
+	 * Get variation attribute values.
 	 *
 	 * @return array of attributes and their values for this variation
 	 */
@@ -267,7 +278,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Check if all variation's attributes are set
+	 * Check if all variation's attributes are set.
 	 *
 	 * @return boolean
 	 */
@@ -460,7 +471,9 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * set_stock_status function.
+	 * Set stock status.
+	 *
+	 * @param string $status
 	 */
 	public function set_stock_status( $status ) {
 		$status = 'outofstock' === $status ? 'outofstock' : 'instock';
@@ -577,7 +590,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * is_on_backorder function.
+	 * Is on backorder?
 	 *
 	 * @param int $qty_in_cart (default: 0)
 	 * @return bool
@@ -675,7 +688,7 @@ class WC_Product_Variation extends WC_Product {
 
 					foreach ( $post_terms as $term ) {
 						if ( $variation_selected_value === $term->slug ) {
-							$description_value = apply_filters( 'woocommerce_variation_option_name', esc_html( $term->name ) );
+							$description_value = esc_html( apply_filters( 'woocommerce_variation_option_name', $term->name ) );
 						}
 					}
 
@@ -739,7 +752,7 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
-	 * Get product variation description
+	 * Get product variation description.
 	 *
 	 * @return string
 	 */

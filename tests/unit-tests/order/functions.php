@@ -3,14 +3,14 @@
 namespace WooCommerce\Tests\Order;
 
 /**
- * Class Functions
+ * Class Functions.
  * @package WooCommerce\Tests\Order
  * @since 2.3
  */
 class Functions extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test wc_get_order_statuses()
+	 * Test wc_get_order_statuses().
 	 *
 	 * @since 2.3.0
 	 */
@@ -30,7 +30,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_is_order_status()
+	 * Test wc_is_order_status().
 	 *
 	 * @since 2.3.0
 	 */
@@ -41,7 +41,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_order_status_name()
+	 * Test wc_get_order_status_name().
 	 *
 	 * @since 2.3.0
 	 */
@@ -52,7 +52,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_processing_order_count()
+	 * Test wc_processing_order_count().
 	 *
 	 * @todo needs improvement when we have an orders helper
 	 * @since 2.4
@@ -62,7 +62,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_orders_count()
+	 * Test wc_orders_count().
 	 *
 	 * @todo needs improvement when we have an orders helper
 	 * @since 2.4
@@ -77,7 +77,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_ship_to_billing_address_only()
+	 * Test wc_ship_to_billing_address_only().
 	 *
 	 * @since 2.3.0
 	 */
@@ -95,7 +95,7 @@ class Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_order()
+	 * Test wc_get_order().
 	 *
 	 * @since 2.4.0
 	 * @group test

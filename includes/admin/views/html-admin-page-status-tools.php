@@ -59,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<label><input type="checkbox" class="checkbox" name="woocommerce_status_options[uninstall_data]" value="1" <?php checked( '1', $options['uninstall_data'] ); ?> /> <?php _e( 'Enabled', 'woocommerce' ); ?></label>
 					</p>
 					<p>
-						<span class="description"><?php _e( 'This tool will remove all WooCommerce, Product and Order data when using the "Delete" link on the plugins screen.', 'woocommerce' ); ?></span>
+						<span class="description"><?php _e( 'This tool will remove all WooCommerce, Product and Order data when using the "Delete" link on the plugins screen. It will also remove any setting/option prepended with "woocommerce_" so may also affect installed WooCommerce Extensions.', 'woocommerce' ); ?></span>
 					</p>
 				</td>
 			</tr>

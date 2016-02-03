@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Download handler
+ * Download handler.
  *
  * Handle digital downloads.
  *
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Download_Handler {
 
 	/**
-	 * Hook in methods
+	 * Hook in methods.
 	 */
 	public static function init() {
 		if ( isset( $_GET['download_file'] ) && isset( $_GET['order'] ) && isset( $_GET['email'] ) ) {
@@ -30,7 +30,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Check if we need to download a file and check validity
+	 * Check if we need to download a file and check validity.
 	 */
 	public static function download_product() {
 		$product_id    = absint( $_GET['download_file'] );
@@ -77,7 +77,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Perform checks to see if the current user can download the file
+	 * Perform checks to see if the current user can download the file.
 	 * @param  object $download_data
 	 * @access private
 	 */
@@ -89,7 +89,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Check if an order is valid for downloading from
+	 * Check if an order is valid for downloading from.
 	 * @param  array $download_data
 	 * @access private
 	 */
@@ -100,7 +100,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Check if there are downloads remaining
+	 * Check if there are downloads remaining.
 	 * @param  array $download_data
 	 * @access private
 	 */
@@ -111,7 +111,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Check if the download has expired
+	 * Check if the download has expired.
 	 * @param  array $download_data
 	 * @access private
 	 */
@@ -122,7 +122,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Check if a download requires the user to login first
+	 * Check if a download requires the user to login first.
 	 * @param  array $download_data
 	 * @access private
 	 */
@@ -142,7 +142,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Log the download + increase counts
+	 * Log the download + increase counts.
 	 * @param object $download_data
 	 */
 	public static function count_download( $download_data ) {
@@ -189,7 +189,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Redirect to a file to start the download
+	 * Redirect to a file to start the download.
 	 * @param  string $file_path
 	 * @param  string $filename
 	 */
@@ -199,7 +199,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Parse file path and see if its remote or local
+	 * Parse file path and see if its remote or local.
 	 * @param  string $file_path
 	 * @return array
 	 */
@@ -239,7 +239,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Download a file using X-Sendfile, X-Lighttpd-Sendfile, or X-Accel-Redirect if available
+	 * Download a file using X-Sendfile, X-Lighttpd-Sendfile, or X-Accel-Redirect if available.
 	 * @param  string $file_path
 	 * @param  string $filename
 	 */
@@ -266,7 +266,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Force download - this is the default method
+	 * Force download - this is the default method.
 	 * @param  string $file_path
 	 * @param  string $filename
 	 */
@@ -287,7 +287,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Get content type of a download
+	 * Get content type of a download.
 	 * @param  string $file_path
 	 * @return string
 	 * @access private
@@ -308,7 +308,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Set headers for the download
+	 * Set headers for the download.
 	 * @param  string $file_path
 	 * @param  string $filename
 	 * @access private
@@ -347,9 +347,9 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Clean all output buffers
+	 * Clean all output buffers.
 	 *
-	 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read
+	 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read.
 	 *
 	 * @access private
 	 */
@@ -365,9 +365,9 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * readfile_chunked
+	 * readfile_chunked.
 	 *
-	 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/
+	 * Reads file in chunks so big downloads are possible without changing PHP.INI - http://codeigniter.com/wiki/Download_helper_for_large_files/.
 	 *
 	 * @param   string $file
 	 * @return 	bool Success or fail
@@ -393,7 +393,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Filter headers for IE to fix issues over SSL
+	 * Filter headers for IE to fix issues over SSL.
 	 *
 	 * IE bug prevents download via SSL when Cache Control and Pragma no-cache headers set.
 	 *
@@ -409,7 +409,7 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Die with an error message if the download fails
+	 * Die with an error message if the download fails.
 	 * @param  string $message
 	 * @param  string  $title
 	 * @param  integer $status

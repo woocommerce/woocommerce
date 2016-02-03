@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Setup_Wizard class
+ * WC_Admin_Setup_Wizard class.
  */
 class WC_Admin_Setup_Wizard {
 
@@ -48,7 +48,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Show the setup wizard
+	 * Show the setup wizard.
 	 */
 	public function setup_wizard() {
 		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) {
@@ -135,7 +135,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Setup Wizard Header
+	 * Setup Wizard Header.
 	 */
 	public function setup_wizard_header() {
 		?>
@@ -155,7 +155,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Setup Wizard Footer
+	 * Setup Wizard Footer.
 	 */
 	public function setup_wizard_footer() {
 		?>
@@ -168,7 +168,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Output the steps
+	 * Output the steps.
 	 */
 	public function setup_wizard_steps() {
 		$ouput_steps = $this->steps;
@@ -189,7 +189,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Output the content for the current step
+	 * Output the content for the current step.
 	 */
 	public function setup_wizard_content() {
 		echo '<div class="wc-setup-content">';
@@ -198,7 +198,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Introduction step
+	 * Introduction step.
 	 */
 	public function wc_setup_introduction() {
 		?>
@@ -207,13 +207,13 @@ class WC_Admin_Setup_Wizard {
 		<p><?php _e( 'No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard. Come back anytime if you change your mind!', 'woocommerce' ); ?></p>
 		<p class="wc-setup-actions step">
 			<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button-primary button button-large button-next"><?php _e( 'Let\'s Go!', 'woocommerce' ); ?></a>
-			<a href="<?php echo esc_url( wp_get_referer() ? wp_get_referer() : admin_url( 'plugins.php' ) ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( admin_url() ); ?>" class="button button-large"><?php _e( 'Not right now', 'woocommerce' ); ?></a>
 		</p>
 		<?php
 	}
 
 	/**
-	 * Page setup
+	 * Page setup.
 	 */
 	public function wc_setup_pages() {
 		?>
@@ -263,7 +263,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save Page Settings
+	 * Save Page Settings.
 	 */
 	public function wc_setup_pages_save() {
 		check_admin_referer( 'wc-setup' );
@@ -274,7 +274,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Locale settings
+	 * Locale settings.
 	 */
 	public function wc_setup_locale() {
 		$user_location  = WC_Geolocation::geolocate_ip();
@@ -286,6 +286,7 @@ class WC_Admin_Setup_Wizard {
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
 		$currency_pos   = get_option( 'woocommerce_currency_pos', 'left' );
 		$decimal_sep    = get_option( 'woocommerce_price_decimal_sep', '.' );
+		$num_decimals   = get_option( 'woocommerce_price_num_decimals', '2' );
 		$thousand_sep   = get_option( 'woocommerce_price_thousand_sep', ',' );
 		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
 		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
@@ -304,11 +305,11 @@ class WC_Admin_Setup_Wizard {
 				<tr>
 					<th scope="row"><label for="currency_code"><?php _e( 'Which currency will your store use?', 'woocommerce' ); ?></label></th>
 					<td>
-						<select id="currency_code" name="currency_code" required style="width:100%;" data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
+						<select id="currency_code" name="currency_code" style="width:100%;" data-placeholder="<?php esc_attr_e( 'Choose a currency&hellip;', 'woocommerce' ); ?>" class="wc-enhanced-select">
 							<option value=""><?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 							<?php
 							foreach ( get_woocommerce_currencies() as $code => $name ) {
-								echo '<option value="' . esc_attr( $code ) . '" ' . checked( $currency, $code, false ) . '>' . esc_html( $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')' ) . '</option>';
+								echo '<option value="' . esc_attr( $code ) . '" ' . selected( $currency, $code, false ) . '>' . esc_html( $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')' ) . '</option>';
 							}
 							?>
 						</select>
@@ -336,6 +337,12 @@ class WC_Admin_Setup_Wizard {
 					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="<?php echo esc_attr( $decimal_sep ) ; ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="num_decimals"><?php _e( 'Number of Decimals', 'woocommerce' ); ?></label></th>
+					<td>
+						<input type="text" id="num_decimals" name="num_decimals" size="2" value="<?php echo esc_attr( $num_decimals ) ; ?>" />
 					</td>
 				</tr>
 				<tr>
@@ -372,7 +379,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save Locale Settings
+	 * Save Locale Settings.
 	 */
 	public function wc_setup_locale_save() {
 		check_admin_referer( 'wc-setup' );
@@ -381,6 +388,7 @@ class WC_Admin_Setup_Wizard {
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
 		$decimal_sep    = sanitize_text_field( $_POST['decimal_sep'] );
+		$num_decimals   = sanitize_text_field( $_POST['num_decimals'] );
 		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
 		$weight_unit    = sanitize_text_field( $_POST['weight_unit'] );
 		$dimension_unit = sanitize_text_field( $_POST['dimension_unit'] );
@@ -389,6 +397,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_currency', $currency_code );
 		update_option( 'woocommerce_currency_pos', $currency_pos );
 		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_num_decimals', $num_decimals );
 		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
@@ -398,7 +407,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Shipping and taxes
+	 * Shipping and taxes.
 	 */
 	public function wc_setup_shipping_taxes() {
 		$domestic                         = new WC_Shipping_Flat_Rate();
@@ -529,7 +538,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Save shipping and tax options
+	 * Save shipping and tax options.
 	 */
 	public function wc_setup_shipping_taxes_save() {
 		check_admin_referer( 'wc-setup' );
@@ -623,7 +632,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Payments Step
+	 * Payments Step.
 	 */
 	public function wc_setup_payments() {
 		$paypal_settings = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
@@ -682,7 +691,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Payments Step save
+	 * Payments Step save.
 	 */
 	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
@@ -711,7 +720,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Actions on the final step
+	 * Actions on the final step.
 	 */
 	private function wc_setup_ready_actions() {
 		WC_Admin_Notices::remove_notice( 'install' );
@@ -726,7 +735,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Final step
+	 * Final step.
 	 */
 	public function wc_setup_ready() {
 		$this->wc_setup_ready_actions();
@@ -739,7 +748,7 @@ class WC_Admin_Setup_Wizard {
 
 		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 			<div class="woocommerce-message woocommerce-tracker">
-				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information, and get %s discount on your next WooThemes purchase. %sFind out more%s.', 'woocommerce' ), '20%', '<a href="http://www.woothemes.com/woocommerce/usage-tracking/" target="_blank">', '</a>' ); ?></p>
+				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information. %sFind out more%s.', 'woocommerce' ), '<a href="http://www.woothemes.com/woocommerce/usage-tracking/" target="_blank">', '</a>' ); ?></p>
 				<p class="submit">
 					<a class="button-primary button button-large" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optin', 'true' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'Allow', 'woocommerce' ); ?></a>
 					<a class="button-secondary button button-large skip"  href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optout', 'true' ), 'wc_tracker_optout', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'No thanks', 'woocommerce' ); ?></a>
@@ -757,10 +766,10 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-setup-next-steps-last">
 				<h2><?php _e( 'Learn More', 'woocommerce' ); ?></h2>
 				<ul>
-					<li class="video-walkthrough"><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommerce&amp;utm_medium=Wizard&amp;utm_content=Videos&amp;utm_campaign=Onboarding"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="newsletter"><a href="http://www.woothemes.com/woocommerce-onboarding-email/?utm_source=WooCommerce&amp;utm_medium=Wizard&amp;utm_content=Newsletter&amp;utm_campaign=Onboarding"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
+					<li class="video-walkthrough"><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Videos&amp;utm_campaign=Onboarding"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
+					<li class="newsletter"><a href="http://www.woothemes.com/woocommerce-onboarding-email/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Newsletter&amp;utm_campaign=Onboarding"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
 					<li class="sidekick"><a href="http://www.woothemes.com/sidekick/"><?php _e( 'Follow Sidekick interactive walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=WooCommerce&amp;utm_medium=Wizard&amp;utm_content=Docs&amp;utm_campaign=Onboarding"><?php _e( 'Read more about getting started', 'woocommerce' ); ?></a></li>
+					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Docs&amp;utm_campaign=Onboarding"><?php _e( 'Read more about getting started', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 		</div>

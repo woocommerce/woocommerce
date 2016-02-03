@@ -1,6 +1,6 @@
 <?php
 /**
- * Contains the query functions for WooCommerce which alter the front-end post queries and loops.
+ * Contains the query functions for WooCommerce which alter the front-end post queries and loops
  *
  * @class 		WC_Query
  * @version		2.3.0
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Query' ) ) :
 
 /**
- * WC_Query Class
+ * WC_Query Class.
  */
 class WC_Query {
 
@@ -68,7 +68,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get any errors from querystring
+	 * Get any errors from querystring.
 	 */
 	public function get_errors() {
 		if ( ! empty( $_GET['wc_error'] ) && ( $error = sanitize_text_field( $_GET['wc_error'] ) ) && ! wc_has_notice( $error, 'error' ) ) {
@@ -97,7 +97,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get page title for an endpoint
+	 * Get page title for an endpoint.
 	 * @param  string
 	 * @return string
 	 */
@@ -135,7 +135,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Add endpoints for query vars
+	 * Add endpoints for query vars.
 	 */
 	public function add_endpoints() {
 		foreach ( $this->query_vars as $key => $var ) {
@@ -144,7 +144,7 @@ class WC_Query {
 	}
 
 	/**
-	 * add_query_vars function.
+	 * Add query vars.
 	 *
 	 * @access public
 	 * @param array $vars
@@ -159,7 +159,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get query vars
+	 * Get query vars.
 	 *
 	 * @return array
 	 */
@@ -168,7 +168,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Get query current active query var
+	 * Get query current active query var.
 	 *
 	 * @return string
 	 */
@@ -183,7 +183,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Parse the request and look for query vars - endpoints may not be supported
+	 * Parse the request and look for query vars - endpoints may not be supported.
 	 */
 	public function parse_request() {
 		global $wp;
@@ -201,7 +201,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Hook into pre_get_posts to do the main product query
+	 * Hook into pre_get_posts to do the main product query.
 	 *
 	 * @param mixed $q query object
 	 */
@@ -212,7 +212,7 @@ class WC_Query {
 		}
 
 		// Fix for verbose page rules
-		if ( $GLOBALS['wp_rewrite']->use_verbose_page_rules && isset( $q->queried_object->ID ) && $q->queried_object->ID === wc_get_page_id('shop') ) {
+		if ( $GLOBALS['wp_rewrite']->use_verbose_page_rules && isset( $q->queried_object->ID ) && $q->queried_object->ID === wc_get_page_id( 'shop' ) ) {
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page', '' );
 			$q->set( 'pagename', '' );
@@ -225,34 +225,35 @@ class WC_Query {
 		}
 
 		// Fix for endpoints on the homepage
-		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') != $q->get('page_id') ) {
+		if ( $q->is_home() && 'page' === get_option( 'show_on_front' ) && absint( get_option( 'page_on_front' ) ) !== absint( $q->get( 'page_id' ) ) ) {
 			$_query = wp_parse_args( $q->query );
 			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->query_vars ) ) ) {
 				$q->is_page     = true;
 				$q->is_home     = false;
 				$q->is_singular = true;
-
-				$q->set( 'page_id', get_option('page_on_front') );
+				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
+				add_filter( 'redirect_canonical', '__return_false' );
 			}
 		}
 
 		// When orderby is set, WordPress shows posts. Get around that here.
-		if ( $q->is_home() && 'page' == get_option('show_on_front') && get_option('page_on_front') == wc_get_page_id('shop') ) {
+		if ( $q->is_home() && 'page' === get_option( 'show_on_front' ) && absint( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) {
 			$_query = wp_parse_args( $q->query );
 			if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
 				$q->is_page = true;
 				$q->is_home = false;
-				$q->set( 'page_id', get_option('page_on_front') );
+				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
 				$q->set( 'post_type', 'product' );
 			}
 		}
 
 		// Special check for shops with the product archive on front
-		if ( $q->is_page() && 'page' == get_option( 'show_on_front' ) && $q->get('page_id') == wc_get_page_id('shop') ) {
+		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 
 			// This is a front-page shop
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
+
 			if ( isset( $q->query['paged'] ) ) {
 				$q->set( 'paged', $q->query['paged'] );
 			}
@@ -264,7 +265,7 @@ class WC_Query {
 			// This is hacky but works. Awaiting http://core.trac.wordpress.org/ticket/21096
 			global $wp_post_types;
 
-			$shop_page 	= get_post( wc_get_page_id('shop') );
+			$shop_page 	= get_post( wc_get_page_id( 'shop' ) );
 
 			$wp_post_types['product']->ID 			= $shop_page->ID;
 			$wp_post_types['product']->post_title 	= $shop_page->post_title;
@@ -277,6 +278,9 @@ class WC_Query {
 			$q->is_post_type_archive = true;
 			$q->is_archive           = true;
 			$q->is_page              = true;
+
+			// Remove post type archive name from front page title tag
+			add_filter( 'post_type_archive_title', '__return_empty_string', 5 );
 
 			// Fix WP SEO
 			if ( class_exists( 'WPSEO_Meta' ) ) {
@@ -304,7 +308,7 @@ class WC_Query {
 	}
 
 	/**
-	 * search_post_excerpt function.
+	 * Search post excerpt.
 	 *
 	 * @access public
 	 * @param string $where (default: '')
@@ -325,21 +329,21 @@ class WC_Query {
 	}
 
 	/**
-	 * wpseo_metadesc function.
-	 * Hooked into wpseo_ hook already, so no need for function_exist
+	 * WP SEO meta description.
+	 *
+	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	public function wpseo_metadesc() {
 		return WPSEO_Meta::get_value( 'metadesc', wc_get_page_id('shop') );
-
 	}
 
-
 	/**
-	 * wpseo_metakey function.
-	 * Hooked into wpseo_ hook already, so no need for function_exist
+	 * WP SEO meta key.
+	 *
+	 * Hooked into wpseo_ hook already, so no need for function_exist.
 	 *
 	 * @access public
 	 * @return string
@@ -348,9 +352,8 @@ class WC_Query {
 		return WPSEO_Meta::get_value( 'metakey', wc_get_page_id('shop') );
 	}
 
-
 	/**
-	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility
+	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility.
 	 *
 	 * @access public
 	 * @param array $posts
@@ -406,7 +409,7 @@ class WC_Query {
 
 
 	/**
-	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop
+	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop.
 	 *
 	 * @param mixed $q
 	 */
@@ -445,14 +448,14 @@ class WC_Query {
 
 
 	/**
-	 * Remove the query
+	 * Remove the query.
 	 */
 	public function remove_product_query() {
 		remove_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 	}
 
 	/**
-	 * Remove ordering queries
+	 * Remove ordering queries.
 	 */
 	public function remove_ordering_args() {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
@@ -460,7 +463,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Remove the posts_where filter
+	 * Remove the posts_where filter.
 	 */
 	public function remove_posts_where() {
 		remove_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
@@ -486,23 +489,23 @@ class WC_Query {
 		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
 
 			// Get all visible posts, regardless of filters
-			$unfiltered_product_ids = get_posts(
-				array_merge(
-					$current_wp_query,
-					array(
-						'post_type'              => 'product',
-						'numberposts'            => -1,
-						'post_status'            => 'publish',
-						'meta_query'             => $this->meta_query,
-						'fields'                 => 'ids',
-						'no_found_rows'          => true,
-						'update_post_meta_cache' => false,
-						'update_post_term_cache' => false,
-						'pagename'               => '',
-						'wc_query'               => 'get_products_in_view'
-					)
+			$unfiltered_args = array_merge(
+				$current_wp_query,
+				array(
+					'post_type'              => 'product',
+					'numberposts'            => -1,
+					'post_status'            => 'publish',
+					'meta_query'             => $this->meta_query,
+					'fields'                 => 'ids',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+					'pagename'               => '',
+					'wc_query'               => 'get_products_in_view'
 				)
 			);
+
+			$unfiltered_product_ids = apply_filters( 'woocommerce_unfiltered_product_ids', get_posts( $unfiltered_args ), $unfiltered_args );
 
 			set_transient( $transient_name, $unfiltered_product_ids, DAY_IN_SECONDS * 30 );
 		}
@@ -527,7 +530,7 @@ class WC_Query {
 
 
 	/**
-	 * Returns an array of arguments for ordering products based on the selected values
+	 * Returns an array of arguments for ordering products based on the selected values.
 	 *
 	 * @access public
 	 * @return array
@@ -563,7 +566,7 @@ class WC_Query {
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 			break;
 			case 'price' :
-				$args['orderby']  = "meta_value_num {$wpdb->posts}.ID";
+				$args['orderby']  = "meta_value_num ID";
 				$args['order']    = $order == 'DESC' ? 'DESC' : 'ASC';
 				$args['meta_key'] = '_price';
 			break;
@@ -587,7 +590,7 @@ class WC_Query {
 	}
 
 	/**
-	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065
+	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065.
 	 *
 	 * This lets us sort by meta value desc, and have a second orderby param.
 	 *
@@ -604,7 +607,7 @@ class WC_Query {
 	}
 
 	/**
-	 * order_by_rating_post_clauses function.
+	 * Order by rating post clauses.
 	 *
 	 * @access public
 	 * @param array $args
@@ -646,7 +649,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Returns a meta query to handle product visibility
+	 * Returns a meta query to handle product visibility.
 	 *
 	 * @access public
 	 * @param string $compare (default: 'IN')
@@ -668,7 +671,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Returns a meta query to handle product stock status
+	 * Returns a meta query to handle product stock status.
 	 *
 	 * @access public
 	 * @param string $status (default: 'instock')
@@ -687,7 +690,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Layered Nav Init
+	 * Layered Nav Init.
 	 */
 	public function layered_nav_init( ) {
 
@@ -724,7 +727,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Layered Nav post filter
+	 * Layered Nav post filter.
 	 *
 	 * @param array $filtered_posts
 	 * @return array
@@ -750,29 +753,29 @@ class WC_Query {
 				if ( sizeof( $data['terms'] ) > 0 ) {
 					foreach ( $data['terms'] as $value ) {
 
-						$posts = get_posts(
-							array(
-								'post_type' 	=> 'product',
-								'numberposts' 	=> -1,
-								'post_status' 	=> 'publish',
-								'fields' 		=> 'ids',
-								'no_found_rows' => true,
-								'tax_query' => array(
-									array(
-										'taxonomy' 	=> $attribute,
-										'terms' 	=> $value,
-										'field' 	=> 'term_id'
-									)
+						$args = array(
+							'post_type' 	=> 'product',
+							'numberposts' 	=> -1,
+							'post_status' 	=> 'publish',
+							'fields' 		=> 'ids',
+							'no_found_rows' => true,
+							'tax_query' => array(
+								array(
+									'taxonomy' 	=> $attribute,
+									'terms' 	=> $value,
+									'field' 	=> 'term_id'
 								)
 							)
 						);
 
-						if ( ! is_wp_error( $posts ) ) {
+						$post_ids = apply_filters( 'woocommerce_layered_nav_query_post_ids', get_posts( $args ), $args, $attribute, $value );
+
+						if ( ! is_wp_error( $post_ids ) ) {
 
 							if ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) {
-								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $posts, $matched_products_from_attribute ) : array_intersect( $posts, $matched_products_from_attribute );
+								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $post_ids, $matched_products_from_attribute ) : array_intersect( $post_ids, $matched_products_from_attribute );
 							} else {
-								$matched_products_from_attribute = $posts;
+								$matched_products_from_attribute = $post_ids;
 							}
 
 							$filtered = true;
@@ -816,7 +819,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Price filter Init
+	 * Price filter Init.
 	 */
 	public function price_filter_init() {
 		if ( apply_filters( 'woocommerce_is_price_filter_active', is_active_widget( false, false, 'woocommerce_price_filter', true ) ) && ! is_admin() ) {
@@ -838,7 +841,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Price Filter post filter
+	 * Price Filter post filter.
 	 *
 	 * @param array $filtered_posts
 	 * @return array
@@ -868,7 +871,7 @@ class WC_Query {
 						WHERE post_type IN ( 'product', 'product_variation' )
 						AND post_status = 'publish'
 						AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-						AND pm1.meta_value BETWEEN %d AND %d
+						AND pm1.meta_value BETWEEN %f AND %f
 						AND pm2.meta_key = '_tax_class'
 						AND pm2.meta_value = %s
 					", $min_class, $max_class, sanitize_title( $tax_class ) ), OBJECT_K ), $min_class, $max_class );

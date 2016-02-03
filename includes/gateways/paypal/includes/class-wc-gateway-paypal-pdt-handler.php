@@ -1,13 +1,13 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 include_once( 'class-wc-gateway-paypal-response.php' );
 
 /**
- * Handle PDT Responses from PayPal
+ * Handle PDT Responses from PayPal.
  */
 class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
@@ -15,7 +15,10 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	protected $identity_token;
 
 	/**
-	 * Constructor
+	 * Constructor.
+	 *
+	 * @param bool $sandbox
+	 * @param string $identity_token
 	 */
 	public function __construct( $sandbox = false, $identity_token = '' ) {
 		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response' ) );
@@ -25,7 +28,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Validate a PDT transaction to ensure its authentic
+	 * Validate a PDT transaction to ensure its authentic.
 	 * @param  string $transaction
 	 * @return bool
 	 */
@@ -41,7 +44,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			'user-agent'	=> 'WooCommerce/' . WC_VERSION
 		);
 
-		// Post back to get a response
+		// Post back to get a response.
 		$response = wp_safe_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $pdt );
 
 		if ( is_wp_error( $response ) || ! strpos( $response['body'], "SUCCESS" ) === 0 ) {
@@ -52,7 +55,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check Response for PDT
+	 * Check Response for PDT.
 	 */
 	public function check_response() {
 		if ( empty( $_REQUEST['cm'] ) || empty( $_REQUEST['tx'] ) || empty( $_REQUEST['st'] ) ) {
@@ -76,7 +79,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 				$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );
 
 				if ( ! empty( $_REQUEST['mc_fee'] ) ) {
-					// log paypal transaction fee
+					// Log paypal transaction fee.
 					update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) );
 				}
 			}

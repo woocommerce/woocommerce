@@ -38,10 +38,23 @@
 
 			td {
 				display: block;
+				text-align: right !important; // Important to overwrite order status inline styling
+
+				&.order-actions {
+					text-align: left !important;
+				}
 
 				&:before {
 					content: attr(data-title) ': ';
 					font-weight: 700;
+					float: left;
+				}
+
+				&.product-remove,
+				&.actions {
+					&:before {
+						display: none;
+					}
 				}
 			}
 
@@ -86,16 +99,18 @@
 	/**
 	 * Products
 	 */
-	ul.products {
-		li.product {
-			width: 48%;
-			float: left;
-			clear: both;
-			margin: 0 0 2.992em;
+	&, &[class*="columns-"] {
+		ul.products {
+			li.product {
+				width: 48%;
+				float: left;
+				clear: both;
+				margin: 0 0 2.992em;
 
-			&:nth-child(2n) {
-				float: right;
-				clear: none !important;
+				&:nth-child(2n) {
+					float: right;
+					clear: none !important;
+				}
 			}
 		}
 	}

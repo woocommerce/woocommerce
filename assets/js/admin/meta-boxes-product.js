@@ -26,13 +26,13 @@ jQuery( function( $ ) {
 	});
 
 	// Type box
-	$( '.type_box' ).appendTo( '#woocommerce-product-data h3.hndle span' );
+	$( '.type_box' ).appendTo( '#woocommerce-product-data .hndle span' );
 
 	$( function() {
 		// Prevent inputs in meta box headings opening/closing contents
-		$( '#woocommerce-product-data' ).find( 'h3.hndle' ).unbind( 'click.postboxes' );
+		$( '#woocommerce-product-data' ).find( '.hndle' ).unbind( 'click.postboxes' );
 
-		jQuery( '#woocommerce-product-data' ).on( 'click', 'h3.hndle', function( event ) {
+		jQuery( '#woocommerce-product-data' ).on( 'click', '.hndle', function( event ) {
 
 			// If the user clicks on some form input inside the h3 the box should not be toggled
 			if ( $( event.target ).filter( 'input, option, label, select' ).length ) {
@@ -131,12 +131,12 @@ jQuery( function( $ ) {
 
 		// Hide/Show all with rules
 		var hide_classes = '.hide_if_downloadable, .hide_if_virtual';
-		var show_classes = '.show_if_downloadable, .show_if_virtual, .show_if_external';
+		var show_classes = '.show_if_downloadable, .show_if_virtual';
 
 		$.each( woocommerce_admin_meta_boxes.product_types, function( index, value ) {
 			hide_classes = hide_classes + ', .hide_if_' + value;
 			show_classes = show_classes + ', .show_if_' + value;
-		} );
+		});
 
 		$( hide_classes ).show();
 		$( show_classes ).hide();
@@ -270,7 +270,8 @@ jQuery( function( $ ) {
 	$( 'button.add_attribute' ).on( 'click', function() {
 		var size         = $( '.product_attributes .woocommerce_attribute' ).size();
 		var attribute    = $( 'select.attribute_taxonomy' ).val();
-		var $wrapper     = $( this ).closest( '#product_attributes' ).find( '.product_attributes' );
+		var $wrapper     = $( this ).closest( '#product_attributes' );
+		var $attributes  = $wrapper.find( '.product_attributes' );
 		var product_type = $( 'select#product-type' ).val();
 		var data         = {
 			action:   'woocommerce_add_attribute',
@@ -288,10 +289,10 @@ jQuery( function( $ ) {
 		});
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-			$wrapper.append( response );
+			$attributes.append( response );
 
 			if ( product_type !== 'variable' ) {
-				$wrapper.find( '.enable_variation' ).hide();
+				$attributes.find( '.enable_variation' ).hide();
 			}
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
@@ -485,7 +486,7 @@ jQuery( function( $ ) {
 				}
 			});
 
-			file_path_field.val( file_path );
+			file_path_field.val( file_path ).change();
 		});
 
 		// Set post to 0 and set our custom type

@@ -54,6 +54,7 @@
 		events: {
 			'click .modal-close': 'closeButton',
 			'click #btn-ok':      'addButton',
+			'touchstart #btn-ok': 'addButton',
 			'keydown':            'keyboardActions'
 		},
 		initialize: function( data ) {

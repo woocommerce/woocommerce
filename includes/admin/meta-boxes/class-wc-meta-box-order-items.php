@@ -15,12 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Order_Items Class
+ * WC_Meta_Box_Order_Items Class.
  */
 class WC_Meta_Box_Order_Items {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 		global $post, $thepostid, $theorder;
@@ -40,7 +42,10 @@ class WC_Meta_Box_Order_Items {
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
+	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
 		wc_save_order_items( $post_id, $_POST );

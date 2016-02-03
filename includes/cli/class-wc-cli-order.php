@@ -27,6 +27,13 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 * * customer_id
 	 *
+	 * Optional fields:
+	 *
+	 * * status
+	 * * note
+	 * * currency
+	 * * order_meta
+	 *
 	 * Payment detail fields:
 	 *
 	 * * payment_details.method_id
@@ -77,14 +84,15 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc order create --customer_id=1 --
+	 *     wp wc order create --customer_id=1 --status=pending ...
 	 *
 	 * @since  2.5.0
 	 */
 	public function create( $__, $assoc_args ) {
 		global $wpdb;
 
-		$wpdb->query( 'START TRANSACTION' );
+		wc_transaction_query( 'start' );
+
 		try {
 			$porcelain = isset( $assoc_args['porcelain'] );
 			unset( $assoc_args['porcelain'] );
@@ -161,11 +169,6 @@ class WC_CLI_Order extends WC_CLI_Command {
 				update_post_meta( $order->id, '_order_currency', $data['currency'] );
 			}
 
-			// Set order numberl
-			if ( isset( $data['order_number'] ) ) {
-				update_post_meta( $order->id, '_order_number', $data['order_number'] );
-			}
-
 			// Set order meta.
 			if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
 				$this->set_order_meta( $order->id, $data['order_meta'] );
@@ -175,7 +178,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 
 			do_action( 'woocommerce_cli_create_order', $order->id, $data );
 
-			$wpdb->query( 'COMMIT' );
+			wc_transaction_query( 'commit' );
 
 			if ( $porcelain ) {
 				WP_CLI::line( $order->id );
@@ -183,14 +186,19 @@ class WC_CLI_Order extends WC_CLI_Command {
 				WP_CLI::success( "Created order {$order->id}." );
 			}
 		} catch ( WC_CLI_Exception $e ) {
-			$wpdb->query( 'ROLLBACK' );
+			wc_transaction_query( 'rollback' );
 
 			WP_CLI::error( $e->getMessage() );
 		}
 	}
 
 	/**
-	 * Delete an order.
+	 * Delete one or more orders.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>...
+	 * : The order ID to delete.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -396,14 +404,14 @@ class WC_CLI_Order extends WC_CLI_Command {
 	 * <id>
 	 * : Product ID
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
-	 * ## AVAILABLE_FIELDS
+	 * ## AVAILABLE FIELDS
 	 *
 	 * For available fields, see: wp wc order create --help
 	 *
-	 * # EXAMPLES
+	 * ## EXAMPLES
 	 *
 	 *    wp wc order update 123 --status=completed
 	 *

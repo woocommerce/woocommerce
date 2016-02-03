@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Top Rated Products Widget
+ * Top Rated Products Widget.
  *
- * Gets and displays top rated products in an unordered list
+ * Gets and displays top rated products in an unordered list.
  *
  * @author   WooThemes
  * @category Widgets
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_top_rated_products';
@@ -45,7 +45,7 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *

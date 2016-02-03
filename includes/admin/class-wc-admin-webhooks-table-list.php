@@ -19,7 +19,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 	/**
-	 * Initialize the webhook table list
+	 * Initialize the webhook table list.
 	 */
 	public function __construct() {
 		parent::__construct( array(
@@ -30,7 +30,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Get list columns
+	 * Get list columns.
 	 *
 	 * @return array
 	 */
@@ -55,7 +55,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Get Webhook object
+	 * Get Webhook object.
 	 * @param  object $webhook
 	 * @return WC_Webhook
 	 */
@@ -70,7 +70,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Return title column
+	 * Return title column.
 	 * @param  object $webhook
 	 * @return string
 	 */
@@ -123,7 +123,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Return status column
+	 * Return status column.
 	 * @param  object $webhook
 	 * @return string
 	 */
@@ -132,7 +132,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Return topic column
+	 * Return topic column.
 	 * @param  object $webhook
 	 * @return string
 	 */
@@ -141,7 +141,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Return delivery URL column
+	 * Return delivery URL column.
 	 * @param  object $webhook
 	 * @return string
 	 */
@@ -150,7 +150,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Get the status label for webhooks
+	 * Get the status label for webhooks.
 	 *
 	 * @param  string   $status_name
 	 * @param  stdClass $status
@@ -193,7 +193,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Table list views
+	 * Table list views.
 	 *
 	 * @return array
 	 */
@@ -236,7 +236,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Get bulk actions
+	 * Get bulk actions.
 	 *
 	 * @return array
 	 */
@@ -254,7 +254,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Extra controls to be displayed between bulk actions and pagination
+	 * Extra controls to be displayed between bulk actions and pagination.
 	 *
 	 * @param string $which
 	 */

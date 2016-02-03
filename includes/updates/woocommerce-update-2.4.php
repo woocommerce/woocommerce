@@ -15,13 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $wpdb;
 
 /**
- * Coupon discount calculations
- * Maintain the old coupon logic for upgrades
+ * Coupon discount calculations.
+ * Maintain the old coupon logic for upgrades.
  */
 update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
 
 /**
- * Flat Rate Shipping
+ * Flat Rate Shipping.
  * Update legacy options to new math based options.
  */
 $shipping_methods = array(
@@ -82,7 +82,7 @@ foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 }
 
 /**
- * Update the old user API keys to the new Apps keys
+ * Update the old user API keys to the new Apps keys.
  */
 $api_users = $wpdb->get_results( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'woocommerce_api_consumer_key'" );
 $apps_keys = array();
@@ -125,8 +125,8 @@ if ( ! empty( $apps_keys ) ) {
 }
 
 /**
- * Webhooks
- * Make sure order.update webhooks get the woocommerce_order_edit_status hook
+ * Webhooks.
+ * Make sure order.update webhooks get the woocommerce_order_edit_status hook.
  */
 $order_update_webhooks = get_posts( array(
 	'posts_per_page' => -1,

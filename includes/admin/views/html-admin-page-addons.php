@@ -6,116 +6,54 @@
  * @var object $addons
  */
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
-
-$view 	= isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : '';
-$theme 	= wp_get_theme();
-
 ?>
-
 <div class="wrap woocommerce wc_addons_wrap">
 	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
-	<h2>
+	<h1>
 		<?php _e( 'WooCommerce Add-ons/Extensions', 'woocommerce' ); ?>
 		<a href="http://www.woothemes.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
-		<a href="http://www.woothemes.com/storefront/" class="add-new-h2"><?php _e( 'Need a theme? Try Storefront', 'woocommerce' ); ?></a>
-	</h2>
-	<?php if ( $addons ) : ?>
+		<?php WC_Admin_Addons::output_storefront_button(); ?>
+	</h1>
+	<?php if ( $sections ) : ?>
 		<ul class="subsubsub">
-			<?php
-				$links = array(
-					''                         => __( 'Popular', 'woocommerce' ),
-					'payment-gateways'         => __( 'Gateways', 'woocommerce' ),
-					'shipping-methods'         => __( 'Shipping', 'woocommerce' ),
-					'import-export-extensions' => __( 'Import/export', 'woocommerce' ),
-					'product-extensions'       => __( 'Products', 'woocommerce' ),
-					'marketing-extensions'     => __( 'Marketing', 'woocommerce' ),
-					'accounting-extensions'	   => __( 'Accounting', 'woocommerce' ),
-					'free-extensions'          => __( 'Free', 'woocommerce' ),
-					'third-party-extensions'   => __( 'Third-party', 'woocommerce' ),
-				);
-
-				$i = 0;
-
-				foreach ( $links as $link => $name ) {
-					$i ++;
-					?><li><a class="<?php if ( $view == $link ) echo 'current'; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&view=' . esc_attr( $link ) ); ?>"><?php echo $name; ?></a><?php if ( $i != sizeof( $links ) ) echo ' |'; ?></li><?php
-				}
-			?>
+			<?php foreach ( $sections as $section_id => $section ) : ?>
+				<li><a class="<?php echo $current_section === $section_id ? 'current' : ''; ?>" href="<?php echo admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section_id ) ); ?>"><?php echo esc_html( $section->title ); ?></a><?php if ( $section_id !== end( $section_keys ) ) echo ' |'; ?></li>
+			<?php endforeach; ?>
 		</ul>
 		<br class="clear" />
-		<ul class="products">
-		<?php
-			switch ( $view ) {
-				case '':
-					$addons = $addons->popular;
-				break;
-				case 'payment-gateways':
-					$addons = $addons->{'payment-gateways'};
-				break;
-				case 'shipping-methods':
-					$addons = $addons->{'shipping-methods'};
-				break;
-				case 'import-export-extensions':
-					$addons = $addons->{'import-export'};
-				break;
-				case 'product-extensions':
-					$addons = $addons->product;
-				break;
-				case 'marketing-extensions':
-					$addons = $addons->marketing;
-				break;
-				case 'accounting-extensions':
-					$addons = $addons->accounting;
-				break;
-				case 'free-extensions':
-					$addons = $addons->free;
-				break;
-				case 'third-party-extensions':
-					$addons = $addons->{'third-party'};
-				break;
-			}
-
-			foreach ( $addons as $addon ) {
-				echo '<li class="product">';
-				echo '<a href="' . $addon->link . '">';
-				if ( ! empty( $addon->image ) ) {
-					echo '<img src="' . $addon->image . '"/>';
-				} else {
-					echo '<h3>' . $addon->title . '</h3>';
-				}
-				echo '<span class="price">' . $addon->price . '</span>';
-				echo '<p>' . $addon->excerpt . '</p>';
-				echo '</a>';
-				echo '</li>';
-			}
-		?>
-		</ul>
+		<?php if ( $addons = WC_Admin_Addons::get_section_data( $current_section ) ) : ?>
+			<ul class="products">
+			<?php foreach ( $addons as $addon ) : ?>
+				<li class="product">
+					<a href="<?php echo esc_attr( $addon->link ); ?>">
+						<?php if ( ! empty( $addon->image ) ) : ?>
+							<img src="<?php echo esc_attr( $addon->image ); ?>"/>
+						<?php else : ?>
+							<h3><?php echo esc_html( $addon->title ); ?></h3>
+						<?php endif; ?>
+						<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
+						<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
+					</a>
+				</li>
+			<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
 	<?php else : ?>
 		<p><?php printf( __( 'Our catalog of WooCommerce Extensions can be found on WooThemes.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'http://www.woothemes.com/product-category/woocommerce-extensions/' ); ?></p>
 	<?php endif; ?>
 
-	<?php if ( 'Storefront' != $theme['Name'] ) : ?>
-
-	<div class="storefront">
-		<img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.jpg" alt="Storefront" />
-
-		<h3><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h3>
-
-		<p>
-			<?php printf( __( 'We recommend Storefront, the %sofficial%s WooCommerce theme.', 'woocommerce' ), '<em>', '</em>' ); ?>
-		</p>
-
-		<p>
-			<?php printf( __( 'Storefront is an intuitive &amp; flexible, %sfree%s WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ), '<strong>', '</strong>' ); ?>
-		</p>
-
-		<p>
-			<a href="<?php echo esc_url( 'http://www.woothemes.com/storefront/' ); ?>" target="_blank" class="button"><?php _e( 'Read all about it', 'woocommerce' ) ?></a>
-			<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php _e( 'Download &amp; install', 'woocommerce' ); ?></a>
-		</p>
-	</div>
-
+	<?php if ( 'Storefront' !== $theme['Name'] ) : ?>
+		<div class="storefront">
+			<img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.jpg" alt="Storefront" />
+			<h3><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h3>
+			<p><?php printf( __( 'We recommend Storefront, the %sofficial%s WooCommerce theme.', 'woocommerce' ), '<em>', '</em>' ); ?></p>
+			<p><?php printf( __( 'Storefront is an intuitive &amp; flexible, %sfree%s WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
+			<p>
+				<a href="<?php echo esc_url( 'http://www.woothemes.com/storefront/' ); ?>" target="_blank" class="button"><?php _e( 'Read all about it', 'woocommerce' ) ?></a>
+				<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php _e( 'Download &amp; install', 'woocommerce' ); ?></a>
+			</p>
+		</div>
 	<?php endif; ?>
 </div>

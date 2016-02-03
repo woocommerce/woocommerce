@@ -1,6 +1,6 @@
 <?php
 /**
- * Display notices in admin.
+ * Display notices in admin
  *
  * @author      WooThemes
  * @category    Admin
@@ -13,12 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Notices Class
+ * WC_Admin_Notices Class.
  */
 class WC_Admin_Notices {
 
 	/**
-	 * Array of notices - name => callback
+	 * Array of notices - name => callback.
 	 * @var array
 	 */
 	private $core_notices = array(
@@ -29,7 +29,7 @@ class WC_Admin_Notices {
 	);
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'switch_theme', array( $this, 'reset_admin_notices' ) );
@@ -42,14 +42,14 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Remove all notices
+	 * Remove all notices.
 	 */
 	public static function remove_all_notices() {
 		delete_option( 'woocommerce_admin_notices' );
 	}
 
 	/**
-	 * Reset notices for themes when switched or a new version of WC is installed
+	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public function reset_admin_notices() {
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
@@ -59,7 +59,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Show a notice
+	 * Show a notice.
 	 * @param  string $name
 	 */
 	public static function add_notice( $name ) {
@@ -68,7 +68,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Remove a notice from being displayed
+	 * Remove a notice from being displayed.
 	 * @param  string $name
 	 */
 	public static function remove_notice( $name ) {
@@ -77,7 +77,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * See if a notice is being shown
+	 * See if a notice is being shown.
 	 * @param  string  $name
 	 * @return boolean
 	 */
@@ -121,21 +121,21 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * If we need to update, include a message with the update button
+	 * If we need to update, include a message with the update button.
 	 */
 	public function update_notice() {
 		include( 'views/html-notice-update.php' );
 	}
 
 	/**
-	 * If we have just installed, show a message with the install pages button
+	 * If we have just installed, show a message with the install pages button.
 	 */
 	public function install_notice() {
 		include( 'views/html-notice-install.php' );
 	}
 
 	/**
-	 * Show the Theme Check notice
+	 * Show the Theme Check notice.
 	 */
 	public function theme_check_notice() {
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
@@ -146,7 +146,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Show a notice highlighting bad template files
+	 * Show a notice highlighting bad template files.
 	 */
 	public function template_file_check_notice() {
 		$core_templates = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates' );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Installation related functions and actions.
+ * Installation related functions and actions
  *
  * @author   WooThemes
  * @category Admin
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Install Class
+ * WC_Install Class.
  */
 class WC_Install {
 
@@ -25,14 +25,15 @@ class WC_Install {
 		'2.2.0' => 'updates/woocommerce-update-2.2.php',
 		'2.3.0' => 'updates/woocommerce-update-2.3.php',
 		'2.4.0' => 'updates/woocommerce-update-2.4.php',
-		'2.4.1' => 'updates/woocommerce-update-2.4.1.php'
+		'2.4.1' => 'updates/woocommerce-update-2.4.1.php',
+		'2.5.0' => 'updates/woocommerce-update-2.5.php',
 	);
 
 	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
-		add_action( 'admin_init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -42,17 +43,21 @@ class WC_Install {
 	}
 
 	/**
-	 * check_version function.
+	 * Check WooCommerce version and run the updater is required.
+	 *
+	 * This check is done on all requests and runs if he versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version ) ) {
+		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
 	}
 
 	/**
-	 * Install actions such as installing pages when a button is clicked.
+	 * Install actions when a update button is clicked within the admin area.
+	 *
+	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
@@ -74,7 +79,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Install WC
+	 * Install WC.
 	 */
 	public static function install() {
 		global $wpdb;
@@ -134,8 +139,8 @@ class WC_Install {
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		/*
-		 * Deletes all expired transients. The multi-table delete syntax is used
-		 * to delete the transient record from table a, and the corresponding
+		 * Deletes all expired transients. The multi-table delete syntax is used.
+		 * to delete the transient record from table a, and the corresponding.
 		 * transient_timeout record from table b.
 		 *
 		 * Based on code inside core's upgrade_network() function.
@@ -152,7 +157,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Update WC version to current
+	 * Update WC version to current.
 	 */
 	private static function update_wc_version() {
 		delete_option( 'woocommerce_version' );
@@ -160,7 +165,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Update DB version to current
+	 * Update DB version to current.
 	 */
 	private static function update_db_version( $version = null ) {
 		delete_option( 'woocommerce_db_version' );
@@ -168,7 +173,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Handle updates
+	 * Handle updates.
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
@@ -184,7 +189,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Add more cron schedules
+	 * Add more cron schedules.
 	 * @param  array $schedules
 	 * @return array
 	 */
@@ -197,7 +202,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Create cron jobs (clear them first)
+	 * Create cron jobs (clear them first).
 	 */
 	private static function create_cron_jobs() {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
@@ -253,12 +258,14 @@ class WC_Install {
 		foreach ( $pages as $key => $page ) {
 			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
 		}
+
+		delete_transient( 'woocommerce_cache_excluded_uris' );
 	}
 
 	/**
-	 * Default options
+	 * Default options.
 	 *
-	 * Sets up the default options used on the settings page
+	 * Sets up the default options used on the settings page.
 	 */
 	private static function create_options() {
 		// Include settings so that we can run through defaults
@@ -326,7 +333,7 @@ class WC_Install {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 		/**
-		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates
+		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates.
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
@@ -344,7 +351,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Get Table schema
+	 * Get Table schema.
 	 * @return string
 	 */
 	private static function get_schema() {
@@ -353,12 +360,7 @@ class WC_Install {
 		$collate = '';
 
 		if ( $wpdb->has_cap( 'collation' ) ) {
-			if ( ! empty( $wpdb->charset ) ) {
-				$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-			}
-			if ( ! empty( $wpdb->collate ) ) {
-				$collate .= " COLLATE $wpdb->collate";
-			}
+			$collate = $wpdb->get_charset_collate();
 		}
 
 		return "
@@ -367,8 +369,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_key char(32) NOT NULL,
   session_value longtext NOT NULL,
   session_expiry bigint(20) NOT NULL,
-  UNIQUE KEY  session_id (session_id),
-  PRIMARY KEY  session_key (session_key)
+  UNIQUE KEY session_id (session_id),
+  PRIMARY KEY  (session_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   key_id bigint(20) NOT NULL auto_increment,
@@ -467,7 +469,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	}
 
 	/**
-	 * Create roles and capabilities
+	 * Create roles and capabilities.
 	 */
 	public static function create_roles() {
 		global $wp_roles;
@@ -540,7 +542,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	}
 
 	/**
-	 * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset
+	 * Get capabilities for WooCommerce - these are assigned to admin/shop manager during installation or reset.
 	 *
 	 * @return array
 	 */
@@ -611,7 +613,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	}
 
 	/**
-	 * Create files/directories
+	 * Create files/directories.
 	 */
 	private static function create_files() {
 		// Install files and folders for uploading files and prevent hotlinking
@@ -673,7 +675,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	}
 
 	/**
-	 * Parse update notice from readme file
+	 * Parse update notice from readme file.
 	 * @param  string $content
 	 * @return string
 	 */
@@ -740,7 +742,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
 	/**
 	 * Uninstall tables when MU blog is deleted.
 	 * @param  array $tables
-	 * @return array
+	 * @return string[]
 	 */
 	public static function wpmu_drop_tables( $tables ) {
 		global $wpdb;

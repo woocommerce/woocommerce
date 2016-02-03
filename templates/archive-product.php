@@ -1,12 +1,12 @@
 <?php
 /**
- * The Template for displaying product archives, including the main shop page which is a post type archive.
+ * The Template for displaying product archives, including the main shop page which is a post type archive
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/archive-product.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/archive-product.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer)
- * will need to copy the new files to your theme to maintain compatibility. We try to do this
- * as little as possible, but it does happen. When this occurs the version of the template file will
+ * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
+ * will need to copy the new files to your theme to maintain compatibility. We try to do this.
+ * as little as possible, but it does happen. When this occurs the version of the template file will.
  * be bumped and the readme will list any important changes.
  *
  * @see 	    http://docs.woothemes.com/document/template-structure/
@@ -23,7 +23,7 @@ get_header( 'shop' ); ?>
 
 	<?php
 		/**
-		 * woocommerce_before_main_content hook
+		 * woocommerce_before_main_content hook.
 		 *
 		 * @hooked woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)
 		 * @hooked woocommerce_breadcrumb - 20
@@ -39,7 +39,7 @@ get_header( 'shop' ); ?>
 
 		<?php
 			/**
-			 * woocommerce_archive_description hook
+			 * woocommerce_archive_description hook.
 			 *
 			 * @hooked woocommerce_taxonomy_archive_description - 10
 			 * @hooked woocommerce_product_archive_description - 10
@@ -51,7 +51,7 @@ get_header( 'shop' ); ?>
 
 			<?php
 				/**
-				 * woocommerce_before_shop_loop hook
+				 * woocommerce_before_shop_loop hook.
 				 *
 				 * @hooked woocommerce_result_count - 20
 				 * @hooked woocommerce_catalog_ordering - 30
@@ -73,7 +73,7 @@ get_header( 'shop' ); ?>
 
 			<?php
 				/**
-				 * woocommerce_after_shop_loop hook
+				 * woocommerce_after_shop_loop hook.
 				 *
 				 * @hooked woocommerce_pagination - 10
 				 */
@@ -88,7 +88,7 @@ get_header( 'shop' ); ?>
 
 	<?php
 		/**
-		 * woocommerce_after_main_content hook
+		 * woocommerce_after_main_content hook.
 		 *
 		 * @hooked woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)
 		 */
@@ -97,7 +97,7 @@ get_header( 'shop' ); ?>
 
 	<?php
 		/**
-		 * woocommerce_sidebar hook
+		 * woocommerce_sidebar hook.
 		 *
 		 * @hooked woocommerce_get_sidebar - 10
 		 */

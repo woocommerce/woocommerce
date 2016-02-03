@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Get the count of notices added, either for all notices (default) or for one
+ * Get the count of notices added, either for all notices (default) or for one.
  * particular notice type specified by $notice_type.
  *
  * @since 2.1
@@ -47,7 +47,7 @@ function wc_notice_count( $notice_type = '' ) {
 }
 
 /**
- * Check if a notice has already been added
+ * Check if a notice has already been added.
  *
  * @since 2.1
  * @param string $message The text to display in the notice.
@@ -66,7 +66,7 @@ function wc_has_notice( $message, $notice_type = 'success' ) {
 }
 
 /**
- * Add and store a notice
+ * Add and store a notice.
  *
  * @since 2.1
  * @param string $message The text to display in the notice.
@@ -91,7 +91,7 @@ function wc_add_notice( $message, $notice_type = 'success' ) {
 }
 
 /**
- * Unset all notices
+ * Unset all notices.
  *
  * @since 2.1
  */
@@ -132,7 +132,7 @@ add_action( 'woocommerce_before_shop_loop', 'wc_print_notices', 10 );
 add_action( 'woocommerce_before_single_product', 'wc_print_notices', 10 );
 
 /**
- * Print a single notice immediately
+ * Print a single notice immediately.
  *
  * @since 2.1
  * @param string $message The text to display in the notice.
@@ -175,7 +175,7 @@ function wc_get_notices( $notice_type = '' ) {
 }
 
 /**
- * Add notices for WP Errors
+ * Add notices for WP Errors.
  * @param  WP_Error $errors
  */
 function wc_add_wp_error_notices( $errors ) {

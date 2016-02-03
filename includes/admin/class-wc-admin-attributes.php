@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Attributes Class
+ * WC_Admin_Attributes Class.
  */
 class WC_Admin_Attributes {
 
@@ -63,7 +63,7 @@ class WC_Admin_Attributes {
 	}
 
 	/**
-	 * Get and sanitize posted attribute data
+	 * Get and sanitize posted attribute data.
 	 * @return array
 	 */
 	private static function get_posted_attribute() {
@@ -89,7 +89,7 @@ class WC_Admin_Attributes {
 	}
 
 	/**
-	 * See if an attribute name is valid
+	 * See if an attribute name is valid.
 	 * @param  string $attribute_name
 	 * @return bool|WP_error result
 	 */
@@ -104,7 +104,7 @@ class WC_Admin_Attributes {
 	}
 
 	/**
-	 * Add an attribute
+	 * Add an attribute.
 	 * @return bool|WP_Error
 	 */
 	private static function process_add_attribute() {
@@ -132,7 +132,7 @@ class WC_Admin_Attributes {
 	}
 
 	/**
-	 * Edit an attribute
+	 * Edit an attribute.
 	 * @return bool|WP_Error
 	 */
 	private static function process_edit_attribute() {
@@ -199,7 +199,7 @@ class WC_Admin_Attributes {
 	}
 
 	/**
-	 * Delete an attribute
+	 * Delete an attribute.
 	 * @return bool
 	 */
 	private static function process_delete_attribute() {
@@ -230,9 +230,9 @@ class WC_Admin_Attributes {
 	}
 
 	/**
-	 * Edit Attribute admin panel
+	 * Edit Attribute admin panel.
 	 *
-	 * Shows the interface for changing an attributes type between select and text
+	 * Shows the interface for changing an attributes type between select and text.
 	 */
 	public static function edit_attribute() {
 		global $wpdb;
@@ -244,7 +244,7 @@ class WC_Admin_Attributes {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h2><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h2>
+			<h1><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h1>
 
 			<?php
 
@@ -302,7 +302,7 @@ class WC_Admin_Attributes {
 										<?php
 
 											/**
-											 * Deprecated action in favor of product_attributes_type_selector filter
+											 * Deprecated action in favor of product_attributes_type_selector filter.
 											 *
 											 * @deprecated 2.4.0
 											 */
@@ -337,15 +337,15 @@ class WC_Admin_Attributes {
 	}
 
 	/**
-	 * Add Attribute admin panel
+	 * Add Attribute admin panel.
 	 *
-	 * Shows the interface for adding new attributes
+	 * Shows the interface for adding new attributes.
 	 */
 	public static function add_attribute() {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h2><?php _e( 'Attributes', 'woocommerce' ); ?></h2>
+			<h1><?php _e( 'Attributes', 'woocommerce' ); ?></h1>
 			<br class="clear" />
 			<div id="col-container">
 				<div id="col-right">
@@ -459,7 +459,7 @@ class WC_Admin_Attributes {
 										<?php
 
 											/**
-											 * Deprecated action in favor of product_attributes_type_selector filter
+											 * Deprecated action in favor of product_attributes_type_selector filter.
 											 *
 											 * @deprecated 2.4.0
 											 */

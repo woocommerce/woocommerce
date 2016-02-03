@@ -79,7 +79,7 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
-	 * My account page
+	 * My account page.
 	 *
 	 * @param  array $atts
 	 */
@@ -95,7 +95,7 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
-	 * View order page
+	 * View order page.
 	 *
 	 * @param  int $order_id
 	 */
@@ -121,7 +121,7 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
-	 * Edit account details page
+	 * Edit account details page.
 	 */
 	private static function edit_account() {
 		wc_get_template( 'myaccount/form-edit-account.php', array( 'user' => get_user_by( 'id', get_current_user_id() ) ) );
@@ -134,11 +134,7 @@ class WC_Shortcode_My_Account {
 	 * @param string $load_address
 	 */
 	private static function edit_address( $load_address = 'billing' ) {
-
-		// Current user
-		global $current_user;
-		get_currentuserinfo();
-
+		$current_user = wp_get_current_user();
 		$load_address = sanitize_key( $load_address );
 
 		$address = WC()->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
@@ -179,7 +175,7 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
-	 * Lost password page
+	 * Lost password page.
 	 */
 	public static function lost_password() {
 		// arguments to pass to template
@@ -206,7 +202,7 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Handles sending password retrieval email to customer.
 	 *
-	 * Based on retrieve_password() in core wp-login.php
+	 * Based on retrieve_password() in core wp-login.php.
 	 *
 	 * @access public
 	 * @uses $wpdb WordPress Database object
@@ -285,7 +281,7 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
-	 * Retrieves a user row based on password reset key and login
+	 * Retrieves a user row based on password reset key and login.
 	 *
 	 * @uses $wpdb WordPress Database object
 	 *
@@ -342,7 +338,7 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
-	 * Show the add payment method page
+	 * Show the add payment method page.
 	 */
 	private static function add_payment_method() {
 
@@ -355,14 +351,9 @@ class WC_Shortcode_My_Account {
 
 			do_action( 'before_woocommerce_add_payment_method' );
 
-			wc_add_notice( __( 'Add a new payment method.', 'woocommerce' ), 'notice'  );
-
 			wc_print_notices();
 
-			// Add payment method form
 			wc_get_template( 'myaccount/form-add-payment-method.php' );
-
-			wc_print_notices();
 
 			do_action( 'after_woocommerce_add_payment_method' );
 

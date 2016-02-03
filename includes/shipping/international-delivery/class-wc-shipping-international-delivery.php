@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * International Delivery - Based on the Flat Rate Shipping Method
+ * International Delivery - Based on the Flat Rate Shipping Method.
  *
  * @class 		WC_Shipping_Flat_Rate
  * @version		2.4.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->id                 = 'international_delivery';
@@ -26,7 +26,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	}
 
 	/**
-	 * Initialise settings form fields
+	 * Initialize settings form fields.
 	 */
 	public function init_form_fields() {
 		parent::init_form_fields();
@@ -44,7 +44,7 @@ class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
 	}
 
 	/**
-	 * is_available function.
+	 * Check if international delivery is available.
 	 *
 	 * @param array $package
 	 * @return bool

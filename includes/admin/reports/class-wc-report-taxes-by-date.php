@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WC_Report_Taxes_By_Date
  *
@@ -10,7 +15,7 @@
 class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 
 	/**
-	 * Get the legend for the main chart sidebar
+	 * Get the legend for the main chart sidebar.
 	 * @return array
 	 */
 	public function get_chart_legend() {
@@ -18,7 +23,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output an export link
+	 * Output an export link.
 	 */
 	public function get_export_button() {
 
@@ -36,7 +41,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Output the report
+	 * Output the report.
 	 */
 	public function output_report() {
 
@@ -60,7 +65,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 	}
 
 	/**
-	 * Get the main chart
+	 * Get the main chart.
 	 *
 	 * @return string
 	 */
@@ -146,10 +151,10 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 				<tr>
 					<th><?php _e( 'Period', 'woocommerce' ); ?></th>
 					<th class="total_row"><?php _e( 'Number of Orders', 'woocommerce' ); ?></th>
-					<th class="total_row"><?php _e( 'Total Sales', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e("This is the sum of the 'Order Total' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
-					<th class="total_row"><?php _e( 'Total Shipping', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e("This is the sum of the 'Shipping Total' field within your orders.", 'woocommerce'); ?>" href="#">[?]</a></th>
-					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ); ?>" href="#">[?]</a></th>
-					<th class="total_row"><?php _e( 'Net profit', 'woocommerce' ); ?> <a class="tips" data-tip="<?php esc_attr_e("Total sales minus shipping and tax.", 'woocommerce'); ?>" href="#">[?]</a></th>
+					<th class="total_row"><?php _e( 'Total Sales', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Order Total' field within your orders.", 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Total Shipping', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "This is the sum of the 'Shipping Total' field within your orders.", 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
+					<th class="total_row"><?php _e( 'Net profit', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "Total sales minus shipping and tax.", 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>
 			<?php if ( $tax_rows ) : ?>

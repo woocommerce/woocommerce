@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included)
+ * is_woocommerce - Returns true if on a page which uses WooCommerce templates (cart and checkout are standard pages with shortcodes and thus are not included).
  * @return bool
  */
 function is_woocommerce() {
@@ -29,7 +29,7 @@ if ( ! function_exists( 'is_shop' ) ) {
 	 * @return bool
 	 */
 	function is_shop() {
-		return ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) ? true : false;
+		return ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) );
 	}
 }
 
@@ -97,7 +97,7 @@ if ( ! function_exists( 'is_checkout' ) ) {
 	 * @return bool
 	 */
 	function is_checkout() {
-		return is_page( wc_get_page_id( 'checkout' ) ) || apply_filters( 'woocommerce_is_checkout', false ) ? true : false;
+		return is_page( wc_get_page_id( 'checkout' ) ) || apply_filters( 'woocommerce_is_checkout', false );
 	}
 }
 
@@ -110,14 +110,14 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 	function is_checkout_pay_page() {
 		global $wp;
 
-		return is_checkout() && ! empty( $wp->query_vars['order-pay'] ) ? true : false;
+		return is_checkout() && ! empty( $wp->query_vars['order-pay'] );
 	}
 }
 
 if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
 
 	/**
-	 * is_wc_endpoint_url - Check if an endpoint is showing
+	 * is_wc_endpoint_url - Check if an endpoint is showing.
 	 * @param  string $endpoint
 	 * @return bool
 	 */
@@ -153,7 +153,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return is_page( wc_get_page_id( 'myaccount' ) ) || apply_filters( 'woocommerce_is_account_page', false ) ? true : false;
+		return is_page( wc_get_page_id( 'myaccount' ) ) || apply_filters( 'woocommerce_is_account_page', false );
 	}
 }
 
@@ -166,7 +166,23 @@ if ( ! function_exists( 'is_view_order_page' ) ) {
 	function is_view_order_page() {
 		global $wp;
 
-		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['view-order'] ) ) ? true : false;
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['view-order'] ) );
+	}
+}
+
+if ( ! function_exists( 'is_edit_account_page' ) ) {
+
+	/**
+	* Check for edit account page.
+	* Returns true when viewing the edit account page.
+	*
+	* @since 2.5.1
+	* @return bool
+	*/
+	function is_edit_account_page() {
+		global $wp;
+
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['edit-account'] ) );
 	}
 }
 
@@ -179,7 +195,7 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 	function is_order_received_page() {
 		global $wp;
 
-		return ( is_page( wc_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['order-received'] ) ) ? true : false;
+		return ( is_page( wc_get_page_id( 'checkout' ) ) && isset( $wp->query_vars['order-received'] ) );
 	}
 }
 
@@ -192,7 +208,7 @@ if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 	function is_add_payment_method_page() {
 		global $wp;
 
-		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['add-payment-method'] ) ) ? true : false;
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['add-payment-method'] ) );
 	}
 }
 
@@ -205,7 +221,7 @@ if ( ! function_exists( 'is_lost_password_page' ) ) {
 	function is_lost_password_page() {
 		global $wp;
 
-		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['lost-password'] ) ) ? true : false;
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['lost-password'] ) );
 	}
 }
 
@@ -227,7 +243,7 @@ if ( ! function_exists( 'is_store_notice_showing' ) ) {
 	 * @return bool
 	 */
 	function is_store_notice_showing() {
-		return get_option( 'woocommerce_demo_store' ) !== 'no' ? true : false;
+		return 'no' !== get_option( 'woocommerce_demo_store' );
 	}
 }
 
@@ -299,15 +315,15 @@ if ( ! function_exists( 'wc_prices_include_tax' ) ) {
 	 * @return bool
 	 */
 	function wc_prices_include_tax() {
-		return wc_tax_enabled() && get_option( 'woocommerce_prices_include_tax' ) === 'yes';
+		return wc_tax_enabled() && 'yes' === get_option( 'woocommerce_prices_include_tax' );
 	}
 }
 
 /**
  * Check if the given topic is a valid webhook topic, a topic is valid if:
  *
- * + starts with `action.woocommerce_` or `action.wc_`
- * + it has a valid resource & event
+ * + starts with `action.woocommerce_` or `action.wc_`.
+ * + it has a valid resource & event.
  *
  * @param  string $topic webhook topic
  * @return bool true if valid, false otherwise
@@ -337,8 +353,8 @@ function wc_is_webhook_valid_topic( $topic ) {
 
 
 /**
- * Simple check for validating a URL, it must start with http:// or https://
- * and pass FILTER_VALIDATE_URL validation
+ * Simple check for validating a URL, it must start with http:// or https://.
+ * and pass FILTER_VALIDATE_URL validation.
  * @param  string $url
  * @return bool
  */
@@ -355,4 +371,24 @@ function wc_is_valid_url( $url ) {
 	}
 
 	return true;
+}
+
+/**
+ * Check if the home URL is https. If it is, we don't need to do things such as 'force ssl'.
+ *
+ * @since  2.4.13
+ * @return bool
+ */
+function wc_site_is_https() {
+	return strstr( get_option( 'home' ), 'https:' );
+}
+
+/**
+ * Check if the checkout is configured for https. Look at options, WP HTTPS plugin, or the permalink itself.
+ *
+ * @since  2.5.0
+ * @return bool
+ */
+function wc_checkout_is_https() {
+	return wc_site_is_https() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || class_exists( 'WordPressHTTPS' ) || strstr( wc_get_page_permalink( 'checkout' ), 'https:' );
 }

@@ -1,6 +1,11 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
- * Performs tax calculations and loads tax rates.
+ * Performs tax calculations and loads tax rates
  *
  * @class 		WC_Tax
  * @version		2.2.0
@@ -10,11 +15,22 @@
  */
 class WC_Tax {
 
+	/**
+	 * Precision.
+	 *
+	 * @var int
+	 */
 	public static $precision;
+
+	/**
+	 * Round at subtotal.
+	 *
+	 * @var bool
+	 */
 	public static $round_at_subtotal;
 
 	/**
-	 * Load options
+	 * Load options.
 	 *
 	 * @access public
 	 */
@@ -24,7 +40,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Calculate tax for a line
+	 * Calculate tax for a line.
 	 * @param  float  $price              Price to calc tax on
 	 * @param  array  $rates              Rates to apply
 	 * @param  boolean $price_includes_tax Whether the passed price has taxes included
@@ -65,7 +81,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Multiply cost by pow precision
+	 * Multiply cost by pow precision.
 	 * @param  float $price
 	 * @return float
 	 */
@@ -74,7 +90,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Divide cost by pow precision
+	 * Divide cost by pow precision.
 	 * @param  float $price
 	 * @return float
 	 */
@@ -98,7 +114,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Calc tax from inclusive price
+	 * Calc tax from inclusive price.
 	 *
 	 * @param  float $price
 	 * @param  array $rates
@@ -142,7 +158,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Calc tax from exclusive price
+	 * Calc tax from exclusive price.
 	 *
 	 * @param  float $price
 	 * @param  array $rates
@@ -217,13 +233,14 @@ class WC_Tax {
 			return array();
 		}
 
-		$valid_postcodes     = self::_get_wildcard_postcodes( wc_clean( $postcode ) );
-		$rates_transient_key = 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, implode( ',', $valid_postcodes), $tax_class ) );
-		$matched_tax_rates   = get_transient( $rates_transient_key );
+		$postcode          = wc_clean( $postcode );
+		$valid_postcodes   = self::_get_wildcard_postcodes( $postcode );
+		$cache_key         = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, $postcode, $tax_class ) );
+		$matched_tax_rates = wp_cache_get( $cache_key, 'taxes' );
 
 		if ( false === $matched_tax_rates ) {
 			$matched_tax_rates = self::get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes );
-			set_transient( $rates_transient_key, $matched_tax_rates, WEEK_IN_SECONDS );
+			wp_cache_set( $cache_key, $matched_tax_rates, 'taxes' );
 		}
 
 		return apply_filters( 'woocommerce_find_rates', $matched_tax_rates, $args );
@@ -251,7 +268,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Loop through a set of tax rates and get the matching rates (1 per priority)
+	 * Loop through a set of tax rates and get the matching rates (1 per priority).
 	 *
 	 * @param  string $country
 	 * @param  string $state
@@ -327,9 +344,9 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get the customer tax location based on their status and the current page
+	 * Get the customer tax location based on their status and the current page.
 	 *
-	 * Used by get_rates(), get_shipping_rates()
+	 * Used by get_rates(), get_shipping_rates().
 	 *
 	 * @param  $tax_class string Optional, passed to the filter for advanced tax setups.
 	 * @return array
@@ -393,7 +410,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Alias for get_base_tax_rates()
+	 * Alias for get_base_tax_rates().
 	 *
 	 * @deprecated 2.3
 	 * @param   string	Tax Class
@@ -436,11 +453,12 @@ class WC_Tax {
 				// This will be per order shipping - loop through the order and find the highest tax class rate
 				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes();
 
-				// If multiple classes are found, use highest. Don't bother with standard rate, we can get that later.
+				// If multiple classes are found, use the first one. Don't bother with standard rate, we can get that later.
 				if ( sizeof( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes ) ) {
 					$tax_classes = self::get_tax_classes();
 
 					foreach ( $tax_classes as $tax_class ) {
+						$tax_class = sanitize_title( $tax_class );
 						if ( in_array( $tax_class, $cart_tax_classes ) ) {
 							$matched_tax_rates = self::find_shipping_rates( array(
 								'country' 	=> $country,
@@ -535,7 +553,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get a rates code. Code is made up of COUNTRY-STATE-NAME-Priority. E.g GB-VAT-1, US-AL-TAX-1
+	 * Get a rates code. Code is made up of COUNTRY-STATE-NAME-Priority. E.g GB-VAT-1, US-AL-TAX-1.
 	 *
 	 * @access public
 	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format
@@ -577,7 +595,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get store tax classes
+	 * Get store tax classes.
 	 * @return array
 	 */
 	public static function get_tax_classes() {
@@ -585,7 +603,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the postcodes
+	 * format the postcodes.
 	 * @param  string $postcode
 	 * @return string
 	 */
@@ -594,7 +612,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the city
+	 * format the city.
 	 * @param  string $city
 	 * @return string
 	 */
@@ -603,7 +621,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the state
+	 * format the state.
 	 * @param  string $state
 	 * @return string
 	 */
@@ -613,7 +631,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the country
+	 * format the country.
 	 * @param  string $country
 	 * @return string
 	 */
@@ -623,7 +641,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the tax rate name
+	 * format the tax rate name.
 	 * @param  string $name
 	 * @return string
 	 */
@@ -632,7 +650,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the rate
+	 * format the rate.
 	 * @param  double $rate
 	 * @return string
 	 */
@@ -641,7 +659,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the priority
+	 * format the priority.
 	 * @param  string $priority
 	 * @return int
 	 */
@@ -650,7 +668,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * format the class
+	 * format the class.
 	 * @param  string $class
 	 * @return string
 	 */
@@ -664,7 +682,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Prepare and format tax rate for DB insertion
+	 * Prepare and format tax rate for DB insertion.
 	 * @param  array $tax_rate
 	 * @return array
 	 */
@@ -678,7 +696,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Insert a new tax rate
+	 * Insert a new tax rate.
 	 *
 	 * Internal use only.
 	 *
@@ -694,13 +712,15 @@ class WC_Tax {
 
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', self::prepare_tax_rate( $tax_rate ) );
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
 		do_action( 'woocommerce_tax_rate_added', $wpdb->insert_id, $tax_rate );
 
 		return $wpdb->insert_id;
 	}
 
 	/**
-	 * Get tax rate
+	 * Get tax rate.
 	 *
 	 * Internal use only.
 	 *
@@ -722,7 +742,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Update a tax rate
+	 * Update a tax rate.
 	 *
 	 * Internal use only.
 	 *
@@ -745,11 +765,13 @@ class WC_Tax {
 			)
 		);
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
 		do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $tax_rate );
 	}
 
 	/**
-	 * Delete a tax rate from the database
+	 * Delete a tax rate from the database.
 	 *
 	 * Internal use only.
 	 *
@@ -764,11 +786,13 @@ class WC_Tax {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
 		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
 	}
 
 	/**
-	 * Update postcodes for a tax rate in the DB
+	 * Update postcodes for a tax rate in the DB.
 	 *
 	 * Internal use only.
 	 *
@@ -790,7 +814,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Update cities for a tax rate in the DB
+	 * Update cities for a tax rate in the DB.
 	 *
 	 * Internal use only.
 	 *
@@ -811,7 +835,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Updates locations (postcode and city)
+	 * Updates locations (postcode and city).
 	 *
 	 * Internal use only.
 	 *
@@ -841,10 +865,12 @@ class WC_Tax {
 				INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES $sql;
 				" );
 		}
+
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 	}
 
 	/**
-	 * Expands ranges in an array (used for zipcodes). e.g. 101-105 would expand to 101, 102, 103, 104, 105
+	 * Expands ranges in an array (used for zipcodes). e.g. 101-105 would expand to 101, 102, 103, 104, 105.
 	 *
 	 * Internal use only.
 	 *
@@ -874,7 +900,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get postcode wildcards in array format
+	 * Get postcode wildcards in array format.
 	 *
 	 * Internal use only.
 	 *
@@ -899,7 +925,7 @@ class WC_Tax {
 	/**
 	 * Used by admin settings page.
 	 *
-	 * @param $tax_class
+	 * @param string $tax_class
 	 *
 	 * @return array|null|object
 	 */

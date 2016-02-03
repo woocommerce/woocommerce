@@ -27,6 +27,17 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * [--format=<format>]
 	 * : Accepted values: table, json, csv. Default: table.
 	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * name
+	 * * slug
+	 * * parent
+	 * * description
+	 * * display
+	 * * image
+	 * * count
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product category get 123
@@ -61,6 +72,17 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * [--format=<format>]
 	 * : Acceptec values: table, csv, json, count, ids. Default: table.
 	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * name
+	 * * slug
+	 * * parent
+	 * * description
+	 * * display
+	 * * image
+	 * * count
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product category list
@@ -92,6 +114,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * @since  2.5.0
 	 * @param  int $term_id Category term ID
 	 * @return array
+	 * @throws WC_CLI_Exception
 	 */
 	protected function get_product_category( $term_id ) {
 		$term_id = absint( $term_id );

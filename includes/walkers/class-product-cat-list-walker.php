@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Product_Cat_List_Walker class.
+ * WC_Product_Cat_List_Walker class
  *
  * @extends 	Walker
  * @class 		WC_Product_Cat_Dropdown_Walker
@@ -17,10 +17,27 @@ if ( ! class_exists( 'WC_Product_Cat_List_Walker' ) ) :
 
 class WC_Product_Cat_List_Walker extends Walker {
 
+	/**
+	 * What the class handles.
+	 *
+	 * @var string
+	 */
 	public $tree_type = 'product_cat';
-	public $db_fields = array ( 'parent' => 'parent', 'id' => 'term_id', 'slug' => 'slug' );
 
 	/**
+	 * DB fields to use.
+	 *
+	 * @var array
+	 */
+	public $db_fields = array(
+		'parent' => 'parent',
+		'id'     => 'term_id',
+		'slug'   => 'slug'
+	);
+
+	/**
+	 * Starts the list before the elements are added.
+	 *
 	 * @see Walker::start_lvl()
 	 * @since 2.1.0
 	 *
@@ -37,6 +54,8 @@ class WC_Product_Cat_List_Walker extends Walker {
 	}
 
 	/**
+	 * Ends the list of after the elements are added.
+	 *
 	 * @see Walker::end_lvl()
 	 * @since 2.1.0
 	 *
@@ -53,6 +72,8 @@ class WC_Product_Cat_List_Walker extends Walker {
 	}
 
 	/**
+	 * Start the element output.
+	 *
 	 * @see Walker::start_el()
 	 * @since 2.1.0
 	 *
@@ -75,7 +96,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 			$output .= ' current-cat-parent';
 		}
 
-		$output .=  '"><a href="' . get_term_link( (int) $cat->term_id, $this->tree_type ) . '">' . __( $cat->name, 'woocommerce' ) . '</a>';
+		$output .=  '"><a href="' . get_term_link( (int) $cat->term_id, $this->tree_type ) . '">' . _x( $cat->name, 'product category name', 'woocommerce' ) . '</a>';
 
 		if ( $args['show_count'] ) {
 			$output .= ' <span class="count">(' . $cat->count . ')</span>';
@@ -83,6 +104,8 @@ class WC_Product_Cat_List_Walker extends Walker {
 	}
 
 	/**
+	 * Ends the element output, if needed.
+	 *
 	 * @see Walker::end_el()
 	 * @since 2.1.0
 	 *
@@ -98,8 +121,8 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * Traverse elements to create list from elements.
 	 *
 	 * Display one element if the element doesn't have any children otherwise,
-	 * display the element and its children. Will only traverse up to the max
-	 * depth and no ignore elements under that depth. It is possible to set the
+	 * display the element and its children. Will only traverse up to the max.
+	 * depth and no ignore elements under that depth. It is possible to set the.
 	 * max depth to include all depths, see walk() method.
 	 *
 	 * This method shouldn't be called directly, use the walk() method instead.
@@ -115,7 +138,7 @@ class WC_Product_Cat_List_Walker extends Walker {
 	 * @return null Null on failure with no changes to parameters.
 	 */
 	public function display_element( $element, &$children_elements, $max_depth, $depth = 0, $args, &$output ) {
-		if ( ! $element || 0 === $element->count ) {
+		if ( ! $element || ( 0 === $element->count && ! empty( $args['hide_empty'] ) ) ) {
 			return;
 		}
 		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );

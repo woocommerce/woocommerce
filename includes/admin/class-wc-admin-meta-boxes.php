@@ -2,7 +2,7 @@
 /**
  * WooCommerce Meta Boxes
  *
- * Sets up the write panels used by products and orders (custom post types)
+ * Sets up the write panels used by products and orders (custom post types).
  *
  * @author      WooThemes
  * @category    Admin
@@ -15,15 +15,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Meta_Boxes
+ * WC_Admin_Meta_Boxes.
  */
 class WC_Admin_Meta_Boxes {
 
+	/**
+	 * Is meta boxes saved once?
+	 *
+	 * @var boolean
+	 */
 	private static $saved_meta_boxes = false;
+
+	/**
+	 * Meta box error messages.
+	 *
+	 * @var array
+	 */
 	public static $meta_box_errors  = array();
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'remove_meta_boxes' ), 10 );
@@ -32,12 +43,12 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
 
 		/**
-		 * Save Order Meta Boxes
+		 * Save Order Meta Boxes.
 		 *
 		 * In order:
-		 *      Save the order items
-		 *      Save the order totals
-		 *      Save the order downloads
+		 *      Save the order items.
+		 *      Save the order totals.
+		 *      Save the order downloads.
 		 *      Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
 		 *      Save actions - sends out other emails. Last to show latest data.
 		 */
@@ -62,7 +73,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Add an error message
+	 * Add an error message.
 	 * @param string $text
 	 */
 	public static function add_error( $text ) {
@@ -70,7 +81,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Save errors to an option
+	 * Save errors to an option.
 	 */
 	public function save_errors() {
 		update_option( 'woocommerce_meta_box_errors', self::$meta_box_errors );
@@ -84,7 +95,7 @@ class WC_Admin_Meta_Boxes {
 
 		if ( ! empty( $errors ) ) {
 
-			echo '<div id="woocommerce_errors" class="error">';
+			echo '<div id="woocommerce_errors" class="error notice is-dismissible">';
 
 			foreach ( $errors as $error ) {
 				echo '<p>' . wp_kses_post( $error ) . '</p>';
@@ -98,7 +109,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Add WC Meta boxes
+	 * Add WC Meta boxes.
 	 */
 	public function add_meta_boxes() {
 		// Products
@@ -112,7 +123,7 @@ class WC_Admin_Meta_Boxes {
 			add_meta_box( 'woocommerce-order-data', sprintf( __( '%s Data', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
 			add_meta_box( 'woocommerce-order-items', sprintf( __( '%s Items', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
 			add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s Notes', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
-			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . ' <span class="tips" data-tip="' . esc_attr__( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) . '">[?]</span>', 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
+			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable Product Permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
 			add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s Actions', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
 			remove_meta_box( 'submitdiv', $type, 'side' );
 		}
@@ -129,7 +140,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Remove bloat
+	 * Remove bloat.
 	 */
 	public function remove_meta_boxes() {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
@@ -150,7 +161,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Rename core meta boxes
+	 * Rename core meta boxes.
 	 */
 	public function rename_meta_boxes() {
 		global $post;
@@ -164,7 +175,7 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Check if we're saving, the trigger an action based on the post type
+	 * Check if we're saving, the trigger an action based on the post type.
 	 *
 	 * @param  int $post_id
 	 * @param  object $post
@@ -198,7 +209,7 @@ class WC_Admin_Meta_Boxes {
 		// We need this save event to run once to avoid potential endless loops. This would have been perfect:
 		//	remove_action( current_filter(), __METHOD__ );
 		// But cannot be used due to https://github.com/woothemes/woocommerce/issues/6485
-		// When that is patched in core we cna use the above. For now:
+		// When that is patched in core we can use the above. For now:
 		self::$saved_meta_boxes = true;
 
 		// Check the post type

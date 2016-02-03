@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Simplify Commerce Gateway for Subscriptions < 2.0
+ * Simplify Commerce Gateway for Subscriptions < 2.0.
  *
  * @class 		WC_Addons_Gateway_Simplify_Commerce_Deprecated
  * @extends		WC_Addons_Gateway_Simplify_Commerce
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_Simplify_Commerce {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		parent::__construct();
@@ -30,7 +30,7 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 	}
 
 	/**
-	 * Store the customer and card IDs on the order and subscriptions in the order
+	 * Store the customer and card IDs on the order and subscriptions in the order.
 	 *
 	 * @param int $order_id
 	 * @param string $customer_id
@@ -73,7 +73,7 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 		try {
 			// Charge the customer
 			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $amount * 100, // In cents
+				'amount'              => $amount * 100, // In cents.
 				'customer'            => $customer_id,
 				'description'         => trim( substr( $subscription_name, 0, 1024 ) ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
@@ -162,7 +162,7 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 	}
 
 	/**
-	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for
+	 * Update the customer_id for a subscription after using Simplify to complete a payment to make up for.
 	 * an automatic renewal payment which previously failed.
 	 *
 	 * @param WC_Order $original_order The original order in which the subscription was purchased.

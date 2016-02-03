@@ -1,11 +1,11 @@
 <?php
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
- * Handles refunds
+ * Handles Responses.
  */
 abstract class WC_Gateway_Paypal_Response {
 
@@ -13,13 +13,12 @@ abstract class WC_Gateway_Paypal_Response {
 	protected $sandbox = false;
 
 	/**
-	 * Get the order from the PayPal 'Custom' variable
-	 *
+	 * Get the order from the PayPal 'Custom' variable.
 	 * @param  string $raw_custom JSON Data passed back by PayPal
 	 * @return bool|WC_Order object
 	 */
 	protected function get_paypal_order( $raw_custom ) {
-		// We have the data in the correct format, so get the order
+		// We have the data in the correct format, so get the order.
 		if ( ( $custom = json_decode( $raw_custom ) ) && is_object( $custom ) ) {
 			$order_id  = $custom->order_id;
 			$order_key = $custom->order_key;
@@ -29,14 +28,14 @@ abstract class WC_Gateway_Paypal_Response {
 			$order_id  = $custom[0];
 			$order_key = $custom[1];
 
-		// Nothing was found
+		// Nothing was found.
 		} else {
 			WC_Gateway_Paypal::log( 'Error: Order ID and key were not found in "custom".' );
 			return false;
 		}
 
 		if ( ! $order = wc_get_order( $order_id ) ) {
-			// We have an invalid $order_id, probably because invoice_prefix has changed
+			// We have an invalid $order_id, probably because invoice_prefix has changed.
 			$order_id = wc_get_order_id_by_order_key( $order_key );
 			$order    = wc_get_order( $order_id );
 		}
@@ -50,10 +49,10 @@ abstract class WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Complete order, add transaction ID and note
+	 * Complete order, add transaction ID and note.
 	 * @param  WC_Order $order
-	 * @param  string $txn_id
-	 * @param  string $note
+	 * @param  string   $txn_id
+	 * @param  string   $note
 	 */
 	protected function payment_complete( $order, $txn_id = '', $note = '' ) {
 		$order->add_order_note( $note );
@@ -61,9 +60,9 @@ abstract class WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Hold order and add note
+	 * Hold order and add note.
 	 * @param  WC_Order $order
-	 * @param  string $reason
+	 * @param  string   $reason
 	 */
 	protected function payment_on_hold( $order, $reason = '' ) {
 		$order->update_status( 'on-hold', $reason );

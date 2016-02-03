@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_name"><?php _e( 'Name', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php echo sprintf( __( 'Friendly name for identifying this webhook, defaults to Webhook created on %s.', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( sprintf( __( 'Friendly name for identifying this webhook, defaults to Webhook created on %s.', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_name" id="webhook_name" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_name() ); ?>" />
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_status"><?php _e( 'Status', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; (does not deliver), or &quot;Disabled&quot; (does not deliver due delivery failures).', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php wc_help_tip( __( 'The options are &quot;Active&quot; (delivers payload), &quot;Paused&quot; (does not deliver), or &quot;Disabled&quot; (does not deliver due delivery failures).', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<select name="webhook_status" id="webhook_status" class="wc-enhanced-select">
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_topic"><?php _e( 'Topic', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'Select when the webhook will fire.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( __( 'Select when the webhook will fire.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<select name="webhook_topic" id="webhook_topic" class="wc-enhanced-select">
@@ -73,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" id="webhook-action-event-wrap">
 				<th scope="row" class="titledesc">
 					<label for="webhook_action_event"><?php _e( 'Action Event', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'Enter the Action that will trigger this webhook.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( __( 'Enter the Action that will trigger this webhook.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_action_event" id="webhook_action_event" type="text" class="input-text regular-input" value="<?php echo esc_attr( $topic_data['event'] ); ?>" />
@@ -82,7 +82,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top" id="webhook-custom-topic-wrap">
 				<th scope="row" class="titledesc">
 					<label for="webhook_custom_topic"><?php _e( 'Custom Topic', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'Enter the Custom Topic that will trigger this webhook.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( __( 'Enter the Custom Topic that will trigger this webhook.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_custom_topic" id="webhook_custom_topic" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_topic() ); ?>" />
@@ -91,7 +91,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_delivery_url"><?php _e( 'Delivery URL', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'URL where the webhook payload is delivered.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( __( 'URL where the webhook payload is delivered.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_delivery_url" id="webhook_delivery_url" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_delivery_url() ); ?>" />
@@ -100,7 +100,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_secret"><?php _e( 'Secret', 'woocommerce' ); ?></label>
-					<img class="help_tip" data-tip="<?php esc_attr_e( 'The Secret Key is used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user\'s consumer secret if not provided.', 'woocommerce' ); ?>" src="<?php echo WC()->plugin_url(); ?>/assets/images/help.png" height="16" width="16" />
+					<?php echo wc_help_tip( __( 'The Secret Key is used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user\'s consumer secret if not provided.', 'woocommerce' ) ); ?>
 				</th>
 				<td class="forminp">
 					<input name="webhook_secret" id="webhook_secret" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_secret() ); ?>" />

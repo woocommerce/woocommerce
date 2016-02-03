@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class WC_Helper_Customer
+ * Class WC_Helper_Customer.
  *
- * This helper class should ONLY be used for unit tests!
+ * This helper class should ONLY be used for unit tests!.
  */
 class WC_Helper_Customer {
 

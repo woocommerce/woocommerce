@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Settings_Shipping' ) ) :
 
 /**
- * WC_Settings_Shipping
+ * WC_Settings_Shipping.
  */
 class WC_Settings_Shipping extends WC_Settings_Page {
 
@@ -34,7 +34,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections
+	 * Get sections.
 	 *
 	 * @return array
 	 */
@@ -60,7 +60,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
 	 * @return array
 	 */
@@ -95,20 +95,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
 				'autoload'      => false
-			),
-
-			array(
-				'title'    => __( 'Shipping Display Mode', 'woocommerce' ),
-				'desc'     => __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
-				'id'       => 'woocommerce_shipping_method_format',
-				'default'  => '',
-				'type'     => 'radio',
-				'options'  => array(
-					''       => __( 'Display shipping methods with "radio" buttons', 'woocommerce' ),
-					'select' => __( 'Display shipping methods in a dropdown', 'woocommerce' ),
-				),
-				'desc_tip' =>  true,
-				'autoload' => false
 			),
 
 			array(
@@ -163,7 +149,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
 		global $current_section;
@@ -203,7 +189,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 							<th class="name"><?php _e( 'Name', 'woocommerce' ); ?></th>
 							<th class="id"><?php _e( 'ID', 'woocommerce' ); ?></th>
 							<th class="status"><?php _e( 'Enabled', 'woocommerce' ); ?></th>
-							<th class="priority"><?php _e( 'Selection Priority', 'woocommerce' ); ?> <span class="tips" data-tip="<?php echo esc_attr( __( 'Available methods will be chosen by default in this order. If multiple methods have the same priority, they will be sorted by cost.', 'woocommerce' ) ); ?>">[?]</span></th>
+							<th class="priority"><?php _e( 'Selection Priority', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Available methods will be chosen by default in this order. If multiple methods have the same priority, they will be sorted by cost.', 'woocommerce' ) ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -246,7 +232,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		global $current_section;
@@ -258,7 +244,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$wc_shipping->process_admin_options();
 
 		} else {
-			foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
+			foreach ( $wc_shipping->load_shipping_methods() as $method_id => $method ) {
 				if ( $current_section === sanitize_title( get_class( $method ) ) ) {
 					do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
 				}

@@ -2,14 +2,14 @@
 namespace WooCommerce\Tests\Util;
 
 /**
- * Class Conditional_Functions
+ * Class Conditional_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.3.0
  */
 class Conditional_Functions extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test is_store_notice_showing()
+	 * Test is_store_notice_showing().
 	 *
 	 * @since 2.3.0
 	 */
@@ -19,7 +19,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_tax_enabled()
+	 * Test wc_tax_enabled().
 	 *
 	 * @since 2.3.0
 	 */
@@ -29,7 +29,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_prices_include_tax()
+	 * Test wc_prices_include_tax().
 	 *
 	 * @since 2.3.0
 	 */
@@ -39,7 +39,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_wc_is_webhook_valid_topic
+	 * Data provider for test_wc_is_webhook_valid_topic.
 	 *
 	 * @since 2.4
 	 */
@@ -67,7 +67,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_is_webhook_valid_topic()
+	 * Test wc_is_webhook_valid_topic().
 	 *
 	 * @dataProvider data_provider_test_wc_is_webhook_valid_topic
 	 * @since 2.4
@@ -77,7 +77,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_wc_is_valid_url
+	 * Data provider for test_wc_is_valid_url.
 	 *
 	 * @since 2.4
 	 */
@@ -99,7 +99,7 @@ class Conditional_Functions extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_is_valid_url()
+	 * Test wc_is_valid_url().
 	 *
 	 * @dataProvider data_provider_test_wc_is_valid_url
 	 * @since 2.3.0

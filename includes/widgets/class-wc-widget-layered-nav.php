@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Layered Navigation Widget
+ * Layered Navigation Widget.
  *
  * @author   WooThemes
  * @category Widgets
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Widget_Layered_Nav extends WC_Widget {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->widget_cssclass    = 'woocommerce widget_layered_nav';
@@ -28,7 +28,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * update function.
+	 * Updates a particular instance of a widget.
 	 *
 	 * @see WP_Widget->update
 	 *
@@ -44,7 +44,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * form function.
+	 * Outputs the settings update form.
 	 *
 	 * @see WP_Widget->form
 	 *
@@ -57,7 +57,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * Init settings after post types are registered
+	 * Init settings after post types are registered.
 	 */
 	public function init_settings() {
 		$attribute_array      = array();
@@ -105,7 +105,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *
@@ -187,17 +187,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 							continue;
 						}
 
-						// Get count based on current view - uses transients
-						$transient_name = 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $term->term_taxonomy_id ) );
-
-						if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
-
-							$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
-
-							set_transient( $transient_name, $_products_in_term, DAY_IN_SECONDS * 30 );
-						}
-
-						$option_is_set = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
+						// Get count based on current view
+						$_products_in_term = wc_get_term_product_ids( $term->term_id, $taxonomy );
+						$option_is_set     = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
 
 						// If this is an AND query, only show options with count > 0
 						if ( 'and' == $query_type ) {
@@ -245,16 +237,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				foreach ( $terms as $term ) {
 
 					// Get count based on current view - uses transients
-					$transient_name = 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $term->term_taxonomy_id ) );
-
-					if ( false === ( $_products_in_term = get_transient( $transient_name ) ) ) {
-
-						$_products_in_term = get_objects_in_term( $term->term_id, $taxonomy );
-
-						set_transient( $transient_name, $_products_in_term );
-					}
-
-					$option_is_set = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
+					$_products_in_term = wc_get_term_product_ids( $term->term_id, $taxonomy );
+					$option_is_set     = ( isset( $_chosen_attributes[ $taxonomy ] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) );
 
 					// skip the term for the current archive
 					if ( $current_term == $term->term_id ) {
