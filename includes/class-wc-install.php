@@ -494,14 +494,14 @@ CREATE TABLE IF NOT EXISTS {$wpdb->prefix}woocommerce_payment_tokens (
   `customer_id` bigint(20) NOT NULL,
   `type` varchar(255) NOT NULL,
   `is_default` tinyint(1) NOT NULL,
-   PRIMARY KEY (token_id)
+   PRIMARY KEY  (token_id)
 ) $collate;
 CREATE TABLE IF NOT EXISTS {$wpdb->prefix}woocommerce_payment_token_meta (
   `meta_id` bigint(20)  NOT NULL auto_increment,
   `token_id` bigint(20) NOT NULL,
   `meta_key` varchar(255) NOT NULL,
   `meta_value` text NOT NULL,
-  PRIMARY KEY (meta_id)
+  PRIMARY KEY  (meta_id)
 ) $collate;
 		";
 	}
