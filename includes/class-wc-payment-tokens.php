@@ -187,7 +187,7 @@ class WC_Payment_Tokens {
 			return array();
 		}
 
-		$wc_tokens_meta = get_post_meta( $order_id, '_wc_tokens', true );
+		$wc_tokens_meta = get_post_meta( $order_id, '_wc_payment_tokens', true );
 
 		if ( empty ( $wc_tokens_meta ) ) {
 			return array();
