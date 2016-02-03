@@ -2368,6 +2368,9 @@ abstract class WC_Abstract_Order {
 							$order_needs_processing = true;
 							break;
 						}
+					} else {
+						$order_needs_processing = true;
+						break;
 					}
 				}
 			}
