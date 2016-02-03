@@ -504,7 +504,15 @@ class WC_Product_Variation extends WC_Product {
 	 */
 	public function reduce_stock( $amount = 1 ) {
 		if ( true === $this->managing_stock() ) {
-			return $this->set_stock( $amount, 'subtract' );
+			$new_stock = $this->set_stock( $amount, 'subtract' );
+
+			if ( 'yes' === get_option( 'woocommerce_notify_no_stock' ) && get_option( 'woocommerce_notify_no_stock_amount' ) >= $new_stock ) {
+	            do_action( 'woocommerce_no_stock', $this );
+	        } elseif ( 'yes' === get_option( 'woocommerce_notify_low_stock' ) && get_option( 'woocommerce_notify_low_stock_amount' ) >= $new_stock ) {
+				do_action( 'woocommerce_low_stock', $this );
+			}
+
+			return $new_stock;
 		} else {
 			return $this->parent->reduce_stock( $amount );
 		}

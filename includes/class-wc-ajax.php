@@ -1365,9 +1365,7 @@ class WC_AJAX {
 					$item_name    = $_product->get_sku() ? $_product->get_sku() : $order_item['product_id'];
 					$note         = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
 					$return[]     = $note;
-
 					$order->add_order_note( $note );
-					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
 				}
 			}
 

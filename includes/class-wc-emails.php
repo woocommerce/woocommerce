@@ -344,7 +344,7 @@ class WC_Emails {
 				'value' => wptexturize( $order->customer_note )
 			);
 		}
-		
+
 		if ( $order->billing_email ) {
 			$fields['billing_email'] = array(
 				'label' => __( 'Email', 'woocommerce' ),

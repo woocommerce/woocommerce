@@ -17,8 +17,53 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Order extends WC_Abstract_Order {
 
-	/** @public string Order type */
-	public $order_type = 'simple';
+	/**
+     * When a payment is complete this function is called.
+     *
+     * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
+     * If the cart contains only downloadable items then the order is 'completed' since the admin needs to take no action.
+     * Stock levels are reduced at this point.
+     * Sales are also recorded for products.
+     * Finally, record the date of payment.
+     *
+     * @param string $transaction_id Optional transaction id to store in post meta.
+     */
+    public function payment_complete( $transaction_id = '' ) {
+        do_action( 'woocommerce_pre_payment_complete', $this->get_order_id() );
+
+        if ( ! empty( WC()->session ) ) {
+            WC()->session->set( 'order_awaiting_payment', false );
+        }
+
+        if ( $this->get_order_id() && $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
+            $order_needs_processing = false;
+
+            if ( sizeof( $this->get_items() ) > 0 ) {
+                foreach ( $this->get_items() as $item ) {
+					if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
+						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+
+						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_order_id() ) ) {
+                            $order_needs_processing = true;
+                            break;
+                        }
+					}
+                }
+            }
+
+			if ( ! empty( $transaction_id ) ) {
+				$this->set_transaction_id( $transaction_id );
+			}
+
+			$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_order_id() ) );
+			$this->set_date_paid( current_time( 'timestamp' ) );
+			$this->save();
+
+            do_action( 'woocommerce_payment_complete', $this->get_order_id() );
+        } else {
+            do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_order_id() );
+        }
+    }
 
 	/*
     |--------------------------------------------------------------------------
@@ -31,7 +76,6 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
      * Checks if an order can be edited, specifically for use on the Edit Order screen.
-     *
      * @return bool
      */
     public function is_editable() {
@@ -39,9 +83,26 @@ class WC_Order extends WC_Abstract_Order {
     }
 
 	/**
-     * Checks if an order needs display the shipping address, based on shipping method.
+     * Returns if an order has been paid for based on the order status.
+     * @since 2.5.0
+     * @return bool
+     */
+    public function is_paid() {
+        return apply_filters( 'woocommerce_order_is_paid', $this->has_status( apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) ) ), $this );
+    }
+
+    /**
+     * Checks if product download is permitted.
      *
-     * @return boolean
+     * @return bool
+     */
+    public function is_download_permitted() {
+        return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( 'completed' ) || ( 'yes' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) && $this->has_status( 'processing' ) ), $this );
+    }
+
+	/**
+     * Checks if an order needs display the shipping address, based on shipping method.
+     * @return bool
      */
     public function needs_shipping_address() {
         if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
@@ -67,11 +128,9 @@ class WC_Order extends WC_Abstract_Order {
      */
     public function has_downloadable_item() {
         foreach ( $this->get_items() as $item ) {
-            $_product = $this->get_product_from_item( $item );
-
-            if ( $_product && $_product->exists() && $_product->is_downloadable() && $_product->has_file() ) {
-                return true;
-            }
+            if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->is_downloadable() && $product->has_file() ) {
+				return true;
+			}
         }
         return false;
     }
@@ -83,15 +142,14 @@ class WC_Order extends WC_Abstract_Order {
      */
     public function needs_payment() {
         $valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
-
-        if ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ) {
-            $needs_payment = true;
-        } else {
-            $needs_payment = false;
-        }
-
-        return apply_filters( 'woocommerce_order_needs_payment', $needs_payment, $this, $valid_order_statuses );
+        return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ), $this, $valid_order_statuses );
     }
+
+	/*
+    |--------------------------------------------------------------------------
+    | Downloadable file permissions
+    |--------------------------------------------------------------------------
+    */
 
 	/**
      * Get the Download URL.
@@ -172,37 +230,6 @@ class WC_Order extends WC_Abstract_Order {
     }
 
 	/**
-	 * Output items for display in html emails.
-	 * @param array $args Items args.
-	 * @return string
-	 */
-	public function email_order_items_table( $args = array() ) {
-		ob_start();
-
-		$defaults = array(
-			'show_sku'   => false,
-			'show_image' => false,
-			'image_size' => array( 32, 32 ),
-			'plain_text' => false
-		);
-
-		$args     = wp_parse_args( $args, $defaults );
-		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
-
-		wc_get_template( $template, array(
-			'order'               => $this,
-			'items'               => $this->get_items(),
-			'show_download_links' => $this->is_download_permitted(),
-			'show_sku'            => $args['show_sku'],
-			'show_purchase_note'  => $this->is_paid(),
-			'show_image'          => $args['show_image'],
-			'image_size'          => $args['image_size'],
-		) );
-
-		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
-	}
-
-	/**
 	 * Gets order total - formatted for display.
 	 * @return string
 	 */
@@ -239,361 +266,11 @@ class WC_Order extends WC_Abstract_Order {
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
 
-	/**
-     * Returns if an order has been paid for based on the order status.
-     * @since 2.5.0
-     * @return bool
-     */
-    public function is_paid() {
-        return apply_filters( 'woocommerce_order_is_paid', $this->has_status( apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) ) ), $this );
-    }
-
-    /**
-     * Checks if product download is permitted.
-     *
-     * @return bool
-     */
-    public function is_download_permitted() {
-        return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( 'completed' ) || ( get_option( 'woocommerce_downloads_grant_access_after_payment' ) == 'yes' && $this->has_status( 'processing' ) ), $this );
-    }
-
-    /*
+	/*
     |--------------------------------------------------------------------------
-    | Status Updates and actions
+    | URLs and Endpoints
     |--------------------------------------------------------------------------
-    |
-    | Methods which update the order immediately. Order must exist prior to use.
-    |
     */
-
-    /**
-     * Updates status of order.
-     *
-     * @param string $new_status Status to change the order to. No internal wc- prefix is required.
-     * @param string $note (default: '') Optional note to add.
-     * @param bool $manual is this a manual order status change?
-     * @return bool Successful change or not
-     */
-    public function update_status( $new_status, $note = '', $manual = false ) {
-        if ( ! $this->get_order_id() ) {
-            return false;
-        }
-
-        // Standardise status names.
-        $new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
-        $old_status = $this->get_status();
-
-        // If the statuses are the same there is no need to update, unless the post status is not a valid 'wc' status.
-        if ( $new_status === $old_status && in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
-            return false;
-        }
-
-        // Update the order.
-        wp_update_post( array( 'ID' => $this->get_order_id(), 'post_status' => 'wc-' . $new_status ) );
-        $this->post_status = 'wc-' . $new_status;
-
-        $this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
-
-        // Status was changed.
-        do_action( 'woocommerce_order_status_' . $new_status, $this->get_order_id() );
-        do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->get_order_id() );
-        do_action( 'woocommerce_order_status_changed', $this->get_order_id(), $old_status, $new_status );
-
-        switch ( $new_status ) {
-
-            case 'completed' :
-                // Record the sales.
-                $this->record_product_sales();
-
-                // Increase coupon usage counts.
-                $this->increase_coupon_usage_counts();
-
-                // Record the completed date of the order.
-                update_post_meta( $this->get_order_id(), '_completed_date', current_time('mysql') );
-
-                // Update reports.
-                wc_delete_shop_order_transients( $this->get_order_id() );
-                break;
-
-            case 'processing' :
-            case 'on-hold' :
-                // Record the sales.
-                $this->record_product_sales();
-
-                // Increase coupon usage counts.
-                $this->increase_coupon_usage_counts();
-
-                // Update reports.
-                wc_delete_shop_order_transients( $this->get_order_id() );
-                break;
-
-            case 'cancelled' :
-                // If the order is cancelled, restore used coupons.
-                $this->decrease_coupon_usage_counts();
-
-                // Update reports.
-                wc_delete_shop_order_transients( $this->get_order_id() );
-                break;
-        }
-
-        return true;
-    }
-
-    /**
-     * Cancel the order and restore the cart (before payment).
-     *
-     * @param string $note (default: '') Optional note to add.
-     */
-    public function cancel_order( $note = '' ) {
-        WC()->session->set( 'order_awaiting_payment', false );
-        $this->update_status( 'cancelled', $note );
-    }
-
-    /**
-     * When a payment is complete this function is called.
-     *
-     * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
-     * If the cart contains only downloadable items then the order is 'completed' since the admin needs to take no action.
-     * Stock levels are reduced at this point.
-     * Sales are also recorded for products.
-     * Finally, record the date of payment.
-     *
-     * @param string $transaction_id Optional transaction id to store in post meta.
-     */
-    public function payment_complete( $transaction_id = '' ) {
-        do_action( 'woocommerce_pre_payment_complete', $this->get_order_id() );
-
-        if ( null !== WC()->session ) {
-            WC()->session->set( 'order_awaiting_payment', false );
-        }
-
-        $valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this );
-
-        if ( $this->get_order_id() && $this->has_status( $valid_order_statuses ) ) {
-            $order_needs_processing = false;
-
-            if ( sizeof( $this->get_items() ) > 0 ) {
-                foreach ( $this->get_items() as $item ) {
-                    if ( $_product = $this->get_product_from_item( $item ) ) {
-                        $virtual_downloadable_item = $_product->is_downloadable() && $_product->is_virtual();
-
-                        if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $_product, $this->get_order_id() ) ) {
-                            $order_needs_processing = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $this->update_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_order_id() ) );
-
-            add_post_meta( $this->get_order_id(), '_paid_date', current_time( 'mysql' ), true );
-
-            if ( ! empty( $transaction_id ) ) {
-                update_post_meta( $this->get_order_id(), '_transaction_id', $transaction_id );
-            }
-
-            wp_update_post( array(
-                'ID'            => $this->get_order_id(),
-                'post_date'     => current_time( 'mysql', 0 ),
-                'post_date_gmt' => current_time( 'mysql', 1 )
-            ) );
-
-            // Payment is complete so reduce stock levels
-            if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $this->get_order_id(), '_order_stock_reduced', true ), $this->get_order_id() ) ) {
-                $this->reduce_order_stock();
-            }
-
-            do_action( 'woocommerce_payment_complete', $this->get_order_id() );
-        } else {
-            do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_order_id() );
-        }
-    }
-
-    /**
-     * Record sales.
-     */
-    public function record_product_sales() {
-        if ( 'yes' === get_post_meta( $this->get_order_id(), '_recorded_sales', true ) ) {
-            return;
-        }
-
-        if ( sizeof( $this->get_items() ) > 0 ) {
-            foreach ( $this->get_items() as $item ) {
-                if ( $item['product_id'] > 0 ) {
-                    update_post_meta( $item['product_id'], 'total_sales', absint( get_post_meta( $item['product_id'], 'total_sales', true ) ) + absint( $item['qty'] ) );
-                }
-            }
-        }
-
-        update_post_meta( $this->get_order_id(), '_recorded_sales', 'yes' );
-
-        /**
-         * Called when sales for an order are recorded
-         *
-         * @param int $order_id order id
-         */
-        do_action( 'woocommerce_recorded_sales', $this->get_order_id() );
-    }
-
-    /**
-     * Increase applied coupon counts.
-     */
-    public function increase_coupon_usage_counts() {
-        if ( 'yes' === get_post_meta( $this->get_order_id(), '_recorded_coupon_usage_counts', true ) ) {
-            return;
-        }
-
-        if ( sizeof( $this->get_used_coupons() ) > 0 ) {
-
-            foreach ( $this->get_used_coupons() as $code ) {
-                if ( ! $code ) {
-                    continue;
-                }
-
-                $coupon = new WC_Coupon( $code );
-
-                $used_by = $this->get_user_id();
-
-                if ( ! $used_by ) {
-                    $used_by = $this->get_billing_email();
-                }
-
-                $coupon->inc_usage_count( $used_by );
-            }
-
-            update_post_meta( $this->get_order_id(), '_recorded_coupon_usage_counts', 'yes' );
-        }
-    }
-
-    /**
-     * Decrease applied coupon counts.
-     */
-    public function decrease_coupon_usage_counts() {
-        if ( 'yes' !== get_post_meta( $this->get_order_id(), '_recorded_coupon_usage_counts', true ) ) {
-            return;
-        }
-
-        if ( sizeof( $this->get_used_coupons() ) > 0 ) {
-
-            foreach ( $this->get_used_coupons() as $code ) {
-
-                if ( ! $code ) {
-                    continue;
-                }
-
-                $coupon = new WC_Coupon( $code );
-
-                $used_by = $this->get_user_id();
-                if ( ! $used_by ) {
-                    $used_by = $this->get_billing_email();
-                }
-
-                $coupon->dcr_usage_count( $used_by );
-            }
-
-            delete_post_meta( $this->get_order_id(), '_recorded_coupon_usage_counts' );
-        }
-    }
-
-    /**
-     * Reduce stock levels for all line items in the order.
-     * Runs if stock management is enabled, but can be disabled on per-order basis by extensions @since 2.4.0 via woocommerce_can_reduce_order_stock hook.
-     */
-    public function reduce_order_stock() {
-        if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && apply_filters( 'woocommerce_can_reduce_order_stock', true, $this ) && sizeof( $this->get_items() ) > 0 ) {
-            foreach ( $this->get_items() as $item ) {
-                if ( $item['product_id'] > 0 ) {
-                    $_product = $this->get_product_from_item( $item );
-
-                    if ( $_product && $_product->exists() && $_product->managing_stock() ) {
-                        $qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $this, $item );
-                        $new_stock = $_product->reduce_stock( $qty );
-                        $item_name = $_product->get_sku() ? $_product->get_sku(): $item['product_id'];
-
-                        if ( isset( $item['variation_id'] ) && $item['variation_id'] ) {
-                            $this->add_order_note( sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock) );
-                        } else {
-                            $this->add_order_note( sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock) );
-                        }
-                        $this->send_stock_notifications( $_product, $new_stock, $item['qty'] );
-                    }
-                }
-            }
-
-            add_post_meta( $this->get_order_id(), '_order_stock_reduced', '1', true );
-
-            do_action( 'woocommerce_reduce_order_stock', $this );
-        }
-    }
-
-    /**
-     * Send the stock notifications.
-     *
-     * @param WC_Product $product
-     * @param int $new_stock
-     * @param int $qty_ordered
-     */
-    public function send_stock_notifications( $product, $new_stock, $qty_ordered ) {
-        // Backorders
-        if ( $new_stock < 0 ) {
-            do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $this->get_order_id(), 'quantity' => $qty_ordered ) );
-        }
-
-        // stock status notifications
-        $notification_sent = false;
-
-        if ( 'yes' == get_option( 'woocommerce_notify_no_stock' ) && get_option( 'woocommerce_notify_no_stock_amount' ) >= $new_stock ) {
-            do_action( 'woocommerce_no_stock', $product );
-            $notification_sent = true;
-        }
-
-        if ( ! $notification_sent && 'yes' == get_option( 'woocommerce_notify_low_stock' ) && get_option( 'woocommerce_notify_low_stock_amount' ) >= $new_stock ) {
-            do_action( 'woocommerce_low_stock', $product );
-        }
-
-        do_action( 'woocommerce_after_send_stock_notifications', $product, $new_stock, $qty_ordered );
-    }
-
-	/**
-     * Adds a note (comment) to the order.
-     *
-     * @param string $note Note to add.
-     * @param int $is_customer_note (default: 0) Is this a note for the customer?
-     * @param  bool added_by_user Was the note added by a user?
-     * @return int Comment ID.
-     */
-    public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
-        if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_order_id() ) && $added_by_user ) {
-            $user                 = get_user_by( 'id', get_current_user_id() );
-            $comment_author       = $user->display_name;
-            $comment_author_email = $user->user_email;
-        } else {
-            $comment_author       = __( 'WooCommerce', 'woocommerce' );
-            $comment_author_email = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
-            $comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com';
-            $comment_author_email = sanitize_email( $comment_author_email );
-        }
-
-        $comment_post_ID        = $this->get_order_id();
-        $comment_author_url     = '';
-        $comment_content        = $note;
-        $comment_agent          = 'WooCommerce';
-        $comment_type           = 'order_note';
-        $comment_parent         = 0;
-        $comment_approved       = 1;
-        $commentdata            = apply_filters( 'woocommerce_new_order_note_data', compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' ), array( 'order_id' => $this->get_order_id(), 'is_customer_note' => $is_customer_note ) );
-
-        $comment_id = wp_insert_comment( $commentdata );
-
-        if ( $is_customer_note ) {
-            add_comment_meta( $comment_id, 'is_customer_note', 1 );
-
-            do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->get_order_id(), 'customer_note' => $commentdata['comment_content'] ) );
-        }
-
-        return $comment_id;
-    }
 
     /**
      * Generates a URL so that a customer can pay for their (unpaid - pending) order. Pass 'true' for the checkout version which doesn't offer gateway choices.
@@ -694,6 +371,52 @@ class WC_Order extends WC_Abstract_Order {
         return apply_filters( 'woocommerce_get_view_order_url', wc_get_endpoint_url( 'view-order', $this->get_order_id(), wc_get_page_permalink( 'myaccount' ) ), $this );
     }
 
+	/*
+    |--------------------------------------------------------------------------
+    | Order notes.
+    |--------------------------------------------------------------------------
+    */
+
+	/**
+     * Adds a note (comment) to the order.
+     *
+     * @param string $note Note to add.
+     * @param int $is_customer_note (default: 0) Is this a note for the customer?
+     * @param  bool added_by_user Was the note added by a user?
+     * @return int Comment ID.
+     */
+    public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
+        if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_order_id() ) && $added_by_user ) {
+            $user                 = get_user_by( 'id', get_current_user_id() );
+            $comment_author       = $user->display_name;
+            $comment_author_email = $user->user_email;
+        } else {
+            $comment_author       = __( 'WooCommerce', 'woocommerce' );
+            $comment_author_email = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
+            $comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com';
+            $comment_author_email = sanitize_email( $comment_author_email );
+        }
+
+        $comment_post_ID        = $this->get_order_id();
+        $comment_author_url     = '';
+        $comment_content        = $note;
+        $comment_agent          = 'WooCommerce';
+        $comment_type           = 'order_note';
+        $comment_parent         = 0;
+        $comment_approved       = 1;
+        $commentdata            = apply_filters( 'woocommerce_new_order_note_data', compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' ), array( 'order_id' => $this->get_order_id(), 'is_customer_note' => $is_customer_note ) );
+
+        $comment_id = wp_insert_comment( $commentdata );
+
+        if ( $is_customer_note ) {
+            add_comment_meta( $comment_id, 'is_customer_note', 1 );
+
+            do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->get_order_id(), 'customer_note' => $commentdata['comment_content'] ) );
+        }
+
+        return $comment_id;
+    }
+
 	/**
      * List order notes (public) for the customer.
      *
@@ -723,6 +446,12 @@ class WC_Order extends WC_Abstract_Order {
 
         return $notes;
     }
+
+	/*
+    |--------------------------------------------------------------------------
+    | Refunds
+    |--------------------------------------------------------------------------
+    */
 
 	/**
 	 * Get order refunds.

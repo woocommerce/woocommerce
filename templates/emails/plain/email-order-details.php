@@ -23,10 +23,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 
 echo strtoupper( sprintf( __( 'Order number: %s', 'woocommerce' ), $order->get_order_number() ) ) . "\n";
 echo date_i18n( __( 'jS F Y', 'woocommerce' ), strtotime( $order->order_date ) ) . "\n";
-echo "\n" . $order->email_order_items_table( array(
-	'show_sku'    => false,
-	'show_image'  => false,
-	'$image_size' => array( 32, 32 ),
+echo "\n" . wc_get_email_order_items( $order, array(
 	'plain_text'  => true
 ) );
 

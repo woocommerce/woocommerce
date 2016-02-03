@@ -2025,3 +2025,37 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 	}
 
 }
+
+if ( ! function_exists( 'wc_get_email_order_items' ) ) {
+	/**
+	 * Get HTML for the order items to be shown in emails.
+	 * @param WC_Order $order
+	 * @param array $args
+	 * @since 2.6.0
+	 */
+	function wc_get_email_order_items( $order, $args = array() ) {
+		ob_start();
+
+		$defaults = array(
+			'show_sku'   => false,
+			'show_image' => false,
+			'image_size' => array( 32, 32 ),
+			'plain_text' => false
+		);
+
+		$args     = wp_parse_args( $args, $defaults );
+		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
+
+		wc_get_template( $template, array(
+			'order'               => $order,
+			'items'               => $order->get_items(),
+			'show_download_links' => $order->is_download_permitted(),
+			'show_sku'            => $args['show_sku'],
+			'show_purchase_note'  => $order->is_paid(),
+			'show_image'          => $args['show_image'],
+			'image_size'          => $args['image_size'],
+		) );
+
+		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );
+	}
+}

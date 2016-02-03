@@ -306,7 +306,7 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
  * @param int $order_id
  */
 function wc_downloadable_product_permissions( $order_id ) {
-	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 ) {
+	if ( '1' === get_post_meta( $order_id, '_download_permissions_granted', true ) ) {
 		return; // Only do this once
 	}
 
@@ -337,6 +337,135 @@ function wc_downloadable_product_permissions( $order_id ) {
 add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
 add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_permissions' );
 
+/**
+ * Update total sales amount for each product within a paid order.
+ *
+ * @since 2.6.0
+ * @param int $order_id
+ */
+function wc_update_total_sales_counts( $order_id ) {
+	$order = wc_get_order( $order_id );
+
+	if ( ! $order || 'yes' === get_post_meta( $order_id, '_recorded_sales', true ) ) {
+		return;
+	}
+
+	if ( sizeof( $order->get_items() ) > 0 ) {
+		foreach ( $order->get_items() as $item ) {
+			if ( $item['product_id'] > 0 ) {
+				update_post_meta( $item['product_id'], 'total_sales', absint( get_post_meta( $item['product_id'], 'total_sales', true ) ) + absint( $item['qty'] ) );
+			}
+		}
+	}
+
+	update_post_meta( $order_id, '_recorded_sales', 'yes' );
+
+	/**
+	 * Called when sales for an order are recorded
+	 *
+	 * @param int $order_id order id
+	 */
+	do_action( 'woocommerce_recorded_sales', $order_id );
+}
+add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
+
+/**
+ * Update used coupon amount for each coupon within an order.
+ *
+ * @since 2.6.0
+ * @param int $order_id
+ */
+function wc_update_coupon_usage_counts( $order_id ) {
+	$order        = wc_get_order( $order_id );
+	$has_recorded = get_post_meta( $order_id, '_recorded_coupon_usage_counts', true );
+
+	if ( ! $order ) {
+		return;
+	}
+
+	if ( $order->has_status( 'cancelled' ) && 'yes' === $has_recorded ) {
+		$action = 'reduce';
+		delete_post_meta( $order_id, '_recorded_coupon_usage_counts' );
+	} elseif ( ! $order->has_status( 'cancelled' ) && 'yes' !== $has_recorded ) {
+		$action = 'increase';
+		update_post_meta( $order_id, '_recorded_coupon_usage_counts', 'yes' );
+	} else {
+		return;
+	}
+
+	if ( sizeof( $order->get_used_coupons() ) > 0 ) {
+		foreach ( $order->get_used_coupons() as $code ) {
+			if ( ! $code ) {
+				continue;
+			}
+
+			$coupon = new WC_Coupon( $code );
+
+			if ( ! $used_by = $order->get_user_id() ) {
+				$used_by = $order->get_billing_email();
+			}
+
+			switch ( $action ) {
+				case 'reduce' :
+					$coupon->dcr_usage_count( $used_by );
+				break;
+				case 'increase' :
+					$coupon->inc_usage_count( $used_by );
+				break;
+			}
+		}
+	}
+}
+add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_cancelled', 'wc_update_total_sales_counts' );
+
+/**
+ * When a payment is complete, we can reduce stock levels for items within an order.
+ * @since 2.6.0
+ * @param int $order_id
+ */
+function wc_maybe_reduce_stock_levels( $order_id ) {
+	if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $order_id, '_order_stock_reduced', true ), $order_id ) ) {
+		wc_reduce_stock_levels( $order_id );
+		add_post_meta( $order_id, '_order_stock_reduced', '1', true );
+	}
+}
+add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
+
+/**
+ * Reduce stock levels for items within an order.
+ * @since 2.6.0
+ * @param int $order_id
+ */
+function wc_reduce_stock_levels( $order_id ) {
+	$order = wc_get_order( $order_id );
+
+	if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && $order && apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) && sizeof( $order->get_items() ) > 0 ) {
+		foreach ( $order->get_items() as $item ) {
+			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->managing_stock() ) {
+				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $order, $item );
+				$new_stock = $product->reduce_stock( $qty );
+				$item_name = $product->get_sku() ? $product->get_sku(): $item['product_id'];
+
+				if ( ! empty( $item['variation_id'] ) ) {
+					$order->add_order_note( sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock ) );
+				} else {
+					$order->add_order_note( sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
+				}
+
+				if ( $new_stock < 0 ) {
+		            do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty_ordered ) );
+		        }
+			}
+		}
+
+		do_action( 'woocommerce_reduce_order_stock', $order );
+	}
+}
 
 /**
  * Add a item to an order (for example a line item).

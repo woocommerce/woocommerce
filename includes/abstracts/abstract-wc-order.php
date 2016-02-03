@@ -2,13 +2,15 @@
 /**
  * Abstract Order
  *
- * The WooCommerce order class handles order data.
+ * Handles order data and database interaction.
  *
  * @class       WC_Abstract_Order
  * @version     2.6.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
+ *
+ * @todo check date formats are bw compat and consistant
  */
 abstract class WC_Abstract_Order {
 
@@ -30,7 +32,7 @@ abstract class WC_Abstract_Order {
         'parent_id'            => 0,
 		'status'               => '',
         /**
-         * @todo confusion. Was 'simple'. But this was not the same as post_type, which is shop_order.. Other post types in core are shop_order_refund
+         * @todo confusion. Was 'simple'. But this was not the same as post_type, which is shop_order. Other post types in core are shop_order_refund
          * The order type for shop_order_refund is refund.
          * Why do we need two separate variables? This should be unified, especially once this is in a custom table and post_type is redundent.
          * Switching to 'shop_order', and then using this value in the order factory instead of post_type. @thenbrent might have feedback on this.
@@ -80,6 +82,7 @@ abstract class WC_Abstract_Order {
 		'prices_include_tax'   => false,
 		'customer_note'        => '',
 		'date_completed'       => '',
+		'date_paid'            => '',
 
 		// These will remain as order items @todo
 		'line_items'           => array(),
@@ -215,6 +218,14 @@ abstract class WC_Abstract_Order {
      */
     public function get_date_completed() {
         return $this->_data['date_completed'];
+    }
+
+	/**
+     * Get date_paid
+     * @return string
+     */
+    public function get_date_paid() {
+        return $this->_data['date_paid'];
     }
 
     /**
@@ -807,9 +818,25 @@ abstract class WC_Abstract_Order {
                     'note'     => $note ? $note : '',
                     'manual'   => (bool) $manual_update
                 );
+				if ( 'completed' === $new_status ) {
+					$this->set_date_completed( current_time( 'timestamp' ) );
+				}
             }
             $this->_data['status'] = 'wc-' . $new_status;
         }
+    }
+
+	/**
+     * Updates status of order immediately.
+     * @uses WC_Order::set_status()
+     */
+    public function update_status( $new_status, $note = '', $manual = false ) {
+        if ( ! $this->get_order_id() ) {
+            return false;
+        }
+		$this->set_status( $new_status, $note, $manual );
+		$this->save();
+        return true;
     }
 
     /**
@@ -858,6 +885,14 @@ abstract class WC_Abstract_Order {
      */
     public function set_date_completed( $timestamp ) {
         $this->_data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+    }
+
+	/**
+     * Set date_paid
+     * @param string $timestamp
+     */
+    public function set_date_paid( $timestamp ) {
+        $this->_data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
     /**
@@ -1298,6 +1333,7 @@ abstract class WC_Abstract_Order {
             update_post_meta( $order_id, '_order_version', $this->get_order_version() );
             update_post_meta( $order_id, '_prices_include_tax', $this->get_prices_include_tax() );
             update_post_meta( $order_id, '_completed_date', $this->get_date_completed() );
+			update_post_meta( $order_id, '_paid_date', $this->get_date_paid() );
             update_post_meta( $order_id, '_order_currency', $this->get_order_currency() );
             update_post_meta( $order_id, '_order_key', $this->get_order_key() );
             update_post_meta( $order_id, '_cart_discount', $this->get_discount_total() );
@@ -1359,6 +1395,7 @@ abstract class WC_Abstract_Order {
         $this->set_order_version( get_post_meta( $order_id, '_order_version', true ) );
         $this->set_prices_include_tax( get_post_meta( $order_id, '_prices_include_tax', true ) );
         $this->set_date_completed( get_post_meta( $order_id, '_completed_date', true ) );
+		$this->set_date_paid( get_post_meta( $order_id, '_paid_date', true ) );
 
         // Map totals
         $this->set_discount_total( get_post_meta( $order_id, '_cart_discount', true ) );
@@ -1451,32 +1488,12 @@ abstract class WC_Abstract_Order {
 
             do_action( 'woocommerce_order_status_' . $this->get_status(), $this->get_order_id() );
 
-            // status related actions
-            switch ( $this->get_status() ) {
-                case 'completed' :
-                    $this->record_product_sales();
-                    $this->increase_coupon_usage_counts();
-                    $this->set_date_completed( current_time( 'timestamp' ) );
-                    break;
-                case 'processing' :
-                case 'on-hold' :
-                    $this->record_product_sales();
-                    $this->increase_coupon_usage_counts();
-                    break;
-                case 'cancelled' :
-                    $this->decrease_coupon_usage_counts();
-                    break;
-            }
-
             // Note the transition occured
             $this->add_order_note( trim( $this->_status_transition['note'] . ' ' . $transition_note ), 0, $this->_status_transition['manual'] );
 
             // This has ran, so reset status transition variable
             $this->_status_transition = false;
         }
-
-        // Complete date set here as it could change based on status
-        update_post_meta( $order_id, '_completed_date', date( 'Y-m-d H:i:s', $this->get_date_completed() ) );  // @todo check date formats are bw compat and consistant
     }
 
     /**
@@ -2815,6 +2832,9 @@ abstract class WC_Abstract_Order {
         if ( 'completed_date' === $key ) {
             _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_date_completed();
+		} elseif ( 'paid_date' === $key ) {
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
+            return $this->get_date_paid();
         } elseif ( 'modified_date' === $key ) {
             _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_date_modified();
@@ -2958,4 +2978,69 @@ abstract class WC_Abstract_Order {
         _deprecated_function( 'populate', '2.6', 'read' );
         $this->read( $result->ID );
     }
+
+	/**
+     * Cancel the order and restore the cart (before payment).
+     * @deprecated 2.6.0 Moved to event handler.
+     * @param string $note (default: '') Optional note to add.
+     */
+    public function cancel_order( $note = '' ) {
+		_deprecated_function( 'cancel_order', '2.6', 'update_status' );
+        WC()->session->set( 'order_awaiting_payment', false );
+        $this->update_status( 'cancelled', $note );
+    }
+
+	/**
+     * Record sales.
+     * @deprecated 2.6.0
+     */
+    public function record_product_sales() {
+		_deprecated_function( 'record_product_sales', '2.6', 'wc_update_total_sales_counts' );
+		wc_update_total_sales_counts( $this->get_order_id() );
+    }
+
+	/**
+     * Increase applied coupon counts.
+     * @deprecated 2.6.0
+     */
+    public function increase_coupon_usage_counts() {
+		_deprecated_function( 'increase_coupon_usage_counts', '2.6', 'wc_update_coupon_usage_counts' );
+		wc_update_coupon_usage_counts( $this->get_order_id() );
+    }
+
+    /**
+     * Decrease applied coupon counts.
+     * @deprecated 2.6.0
+     */
+    public function decrease_coupon_usage_counts() {
+		_deprecated_function( 'decrease_coupon_usage_counts', '2.6', 'wc_update_coupon_usage_counts' );
+		wc_update_coupon_usage_counts( $this->get_order_id() );
+    }
+
+	/**
+     * Reduce stock levels for all line items in the order.
+	 * @deprecated 2.6.0
+     */
+    public function reduce_order_stock() {
+        _deprecated_function( 'reduce_order_stock', '2.6', 'wc_reduce_stock_levels' );
+		wc_reduce_stock_levels( $this->get_order_id() );
+    }
+
+	/**
+     * Send the stock notifications.
+	 * @deprecated 2.6.0 No longer needs to be called directly.
+     */
+    public function send_stock_notifications( $product, $new_stock, $qty_ordered ) {
+        _deprecated_function( 'send_stock_notifications', '2.6' );
+    }
+
+	/**
+	 * Output items for display in html emails.
+	 * @deprecated 2.6.0 Moved to template functions.
+	 * @param array $args Items args.
+	 * @return string
+	 */
+	public function email_order_items_table( $args = array() ) {
+		return wc_get_email_order_items( $this, $args );
+	}
 }
