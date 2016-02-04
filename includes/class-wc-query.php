@@ -894,7 +894,7 @@ class WC_Query {
 					WHERE post_type IN ( 'product', 'product_variation' )
 					AND post_status = 'publish'
 					AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-					AND pm1.meta_value BETWEEN %d AND %d
+					AND pm1.meta_value BETWEEN %f AND %f
 				", $min, $max ), OBJECT_K ), $min, $max );
 
 				if ( $matched_products_query ) {
