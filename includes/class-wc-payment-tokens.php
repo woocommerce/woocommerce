@@ -68,14 +68,8 @@ class WC_Payment_Tokens {
 		// Store the main token in the database
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_tokens', $core_fields_to_create );
 		$token_id = $wpdb->insert_id;
-
-		// Insert any other meta and associate it with the new token
 		foreach ( $args as $meta_key => $meta_value ) {
-			$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_token_meta', array(
-				'meta_key'   => $meta_key,
-				'meta_value' => $meta_value,
-				'token_id'   => $token_id
-			) );
+			add_metadata( 'payment_token', $token_id, $meta_key, $meta_value, true );
 		}
 
 		do_action( 'woocommerce_payment_token_created', $token_id );
@@ -89,6 +83,10 @@ class WC_Payment_Tokens {
 	 * @return WC_Payment_Token Updated token
 	 */
 	public static function update( $token_id, $token ) {
+		if ( ! ( $token instanceof WC_Payment_Token ) ) {
+			return; // @todo throw an error
+		}
+
 		$args = $token->__data_format();
 		unset( $args['token_id'] );
 		if ( ! self::validate( $args ) ) {
@@ -107,25 +105,10 @@ class WC_Payment_Tokens {
 
 		global $wpdb;
 
-		// Update our core fields
+		// Update our fields
 		$wpdb->update( $wpdb->prefix . 'woocommerce_payment_tokens', $core_fields_to_update, array( 'token_id' => $token_id ) );
-
-		// Grab a list of our existing meta, and update if we have a matching value in $args, otherise, create a new meta row
-		$existing_meta = $wpdb->get_col( $wpdb->prepare(
-			"SELECT meta_key FROM {$wpdb->prefix}woocommerce_payment_token_meta WHERE token_id = %d", $token_id
-		) );
 		foreach ( $args as $meta_key => $meta_value ) {
-			if ( in_array( $meta_key, $existing_meta ) ) {
-				$wpdb->update( $wpdb->prefix . 'woocommerce_payment_token_meta', array(
-					'meta_value' => $meta_value
-				), array( 'token_id'   => $token_id, 'meta_key'   => $meta_key ) );
-			} else {
-				$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_token_meta', array(
-					'meta_key'   => $meta_key,
-					'meta_value' => $meta_value,
-					'token_id'   => $token_id
-				) );
-			}
+			update_metadata( 'payment_token', $token_id, $meta_key, $meta_value );
 		}
 
 		do_action( 'woocommerce_payment_token_updated', $token_id );
@@ -139,7 +122,7 @@ class WC_Payment_Tokens {
 	public static function delete( $token_id ) {
 		global $wpdb;
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokens', array( 'token_id' => $token_id ), array( '%d' ) );
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_token_meta', array( 'token_id' => $token_id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokenmeta', array( 'payment_token_id' => $token_id ), array( '%d' ) );
 		do_action( 'woocommerce_payment_token_deleted', $token_id );
 	}
 
@@ -232,17 +215,14 @@ class WC_Payment_Tokens {
 		global $wpdb;
 		$token_class = 'WC_Payment_Token_' . $token_result['type'];
 		if ( class_exists( $token_class ) ) {
-			$meta = array();
-			$meta_rows = $wpdb->get_results( $wpdb->prepare(
-				"SELECT meta_key,meta_value FROM {$wpdb->prefix}woocommerce_payment_token_meta WHERE token_id = %d",
-				$token_id
-			) );
-			if ( ! empty( $meta_rows ) ) {
-				foreach( $meta_rows as $meta_row ) {
-					$meta[ $meta_row->meta_key ] = $meta_row->meta_value;
+			$meta =  get_metadata( 'payment_token', $token_id );
+			$passed_meta = array();
+			if ( ! empty( $meta ) ) {
+				foreach( $meta as $meta_key => $meta_value ) {
+					$passed_meta[ $meta_key ] = $meta_value[0];
 				}
 			}
-			return new $token_class( $token_id, $token_result, $meta );
+			return new $token_class( $token_id, $token_result, $passed_meta );
 		}
 	}
 
