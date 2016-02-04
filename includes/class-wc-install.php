@@ -491,11 +491,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (
   token_id bigint(20) NOT NULL auto_increment,
   gateway_id varchar(255) NOT NULL,
   token text NOT NULL,
-  customer_id bigint(20) NOT NULL DEFAULT '0',
+  user_id bigint(20) NOT NULL DEFAULT '0',
   type varchar(255) NOT NULL,
   is_default tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY  (token_id),
-  KEY customer_id (customer_id)
+  KEY user_id (user_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
   meta_id bigint(20) NOT NULL auto_increment,

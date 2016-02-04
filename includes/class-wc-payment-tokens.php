@@ -147,7 +147,7 @@ class WC_Payment_Tokens {
 		global $wpdb;
 
 		$token_results = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE customer_id = %d",
+			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE user_id = %d",
 			$customer_id
 		) );
 
@@ -210,7 +210,7 @@ class WC_Payment_Tokens {
 	 * @return array Core fields
 	 */
 	private static function get_token_core_fields() {
-		return apply_filters( 'woocommerce_payment_token_core_fields', array( 'gateway_id', 'token', 'customer_id', 'type', 'is_default' ) );
+		return apply_filters( 'woocommerce_payment_token_core_fields', array( 'gateway_id', 'token', 'user_id', 'type', 'is_default' ) );
 	}
 
 	/**

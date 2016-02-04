@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * type         - string  Required - WC core ships with 'cc' or 'echeck' but other values can be used for custom payment token types
 	 * token        - string  Required - The actual token to store
 	 * gateway_id   - string  Required - Identifier for the gateway this token is associated with
-	 * customer_id  - int     Optional - ID for the customer this token is associated with. 0 if this token is not associated with a user
+	 * user_id      - int     Optional - ID for the user this token is associated with. 0 if this token is not associated with a user
 	 *
 	 * @since 2.6.0
 	 * @param string $id Token ID
@@ -97,23 +97,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns the customer ID associated with the token or false if this token is not associated
+	 * Returns the user ID associated with the token or false if this token is not associated
 	 *
 	 * @since 2.6.0
-	 * @return mixed Customer ID if this token is associated with a user or false.
+	 * @return mixed User ID if this token is associated with a user or false.
 	 */
-	public function get_customer_id() {
-		return ( $this->data['customer_id'] > 0 ) ? $this->data['customer_id'] : false;
+	public function get_user_id() {
+		return ( $this->data['user_id'] > 0 ) ? $this->data['user_id'] : false;
 	}
 
 	/**
-	 * Set the customer ID
+	 * Set the user ID for the user associated with this order
 	 *
 	 * @since 2.6.0
-	 * @param int $customer_id
+	 * @param int $user_id
 	 */
-	public function set_customer_id( $customer_id ) {
-		$this->data['customer_id'] = $customer_id;
+	public function set_user_id( $user_id ) {
+		$this->data['user_id'] = $user_id;
 	}
 
 	/**
