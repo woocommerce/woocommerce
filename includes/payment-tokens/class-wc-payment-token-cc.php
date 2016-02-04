@@ -8,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WooCommerce Credit Card Payment Token
  *
  * Representation of a payment token for credit cards
+ * Extends from WC_Payment_Token_eCheck since both types contain last4 digits.
  *
  * @class 		WC_Payment_Token_CC
  * @since		2.6.0
@@ -15,31 +16,32 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package 	WooCommerce/PaymentTokens
  * @author		WooThemes
  */
-class WC_Payment_Token_CC extends WC_Payment_Token {
+class WC_Payment_Token_CC extends WC_Payment_Token_eCheck {
 
  	/**
-	 * Validate credit card payment tokens.
+	 * Validate credit card payment tokens
 	 *
 	 * These fields are required by all credit card payment tokens:
-	 * expiry_month  - string. Expiration date (MM) for the card
-	 * expiry_year   - string. Expiration date (YYYY) for the card
-	 * last4         - string. Last 4 digits of the card
-	 * card_type     - string. Card type (visa, mastercard, etc)
+	 * expiry_month  - string Expiration date (MM) for the card
+	 * expiry_year   - string Expiration date (YYYY) for the card
+	 * last4         - string Last 4 digits of the card
+	 * card_type     - string Card type (visa, mastercard, etc)
 	 *
 	 * @since 2.6.0
 	 * @param array $args Data to validate
 	 * @return boolean    True if the passed data is valid
 	 */
 	public static function validate( $args ) {
+		$validate = parent::validate( $args );
+		if ( ! $validate ) {
+			return false;
+		}
+
 		if ( empty( $args['expiry_year'] ) ) {
 			return false;
 		}
 
 		if ( empty( $args['expiry_month'] ) ) {
-			return false;
-		}
-
-		if ( empty( $args['last4'] ) ) {
 			return false;
 		}
 
@@ -108,26 +110,6 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 */
 	public function set_expiry_month( $month ) {
 		$this->meta['expiry_month'] = $month;
-	}
-
-	/**
-	 * Returns the last four digits of a card
-	 *
-	 * @since 2.6.0
-	 * @return string Last 4 card digits
-	 */
-	public function get_last4() {
-		return isset( $this->meta['last4'] ) ? $this->meta['last4'] : null;
-	}
-
-	/**
-	 * Set the last four digits for the card
-	 *
-	 * @since 2.6.0
-	 * @param string $last4
-	 */
-	public function set_last4( $last4 ) {
-		$this->meta['last4'] = $last4;
 	}
 
 }

@@ -21,7 +21,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * Validate eCheck payment tokens.
 	 *
 	 * These fields are required by all credit card payment tokens:
-	 * last4         - string. Last 4 digits of the check
+	 * last4  - string Last 4 digits of the check
 	 *
 	 * @since 2.6.0
 	 * @param array $args Data to validate
@@ -35,7 +35,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	}
 
 	/**
-	 * Returns the last four digits of an eCheck
+	 * Returns the last four digits
 	 *
 	 * @since 2.6.0
 	 * @return string Last 4 digits
@@ -45,7 +45,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	}
 
 	/**
-	 * Set the last four digits of an eCheck
+	 * Set the last four digits
 	 *
 	 * @since 2.6.0
 	 * @param string $last4
