@@ -121,9 +121,17 @@ class WC_Payment_Tokens {
 	 */
 	public static function delete( $token_id ) {
 		global $wpdb;
+
+		// Generate a token object for this token so we can return it in our action hook
+		$token_result = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d",
+			$token_id
+		) );
+		$_token = self::generate_token( $token_id, (array) $token_result );
+
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokens', array( 'token_id' => $token_id ), array( '%d' ) );
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokenmeta', array( 'payment_token_id' => $token_id ), array( '%d' ) );
-		do_action( 'woocommerce_payment_token_deleted', $token_id );
+		do_action( 'woocommerce_payment_token_deleted', $token_id, $_token );
 	}
 
 	/**
