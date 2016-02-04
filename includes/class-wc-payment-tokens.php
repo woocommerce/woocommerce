@@ -163,7 +163,7 @@ class WC_Payment_Tokens {
 			}
 		}
 
-		return $tokens;
+		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id );
 	}
 
 	/**
@@ -202,7 +202,7 @@ class WC_Payment_Tokens {
 			}
 		}
 
-		return $tokens;
+		return apply_filters( 'woocommerce_get_order_payment_tokens', $tokens, $order_id );
 	}
 
 	/**
