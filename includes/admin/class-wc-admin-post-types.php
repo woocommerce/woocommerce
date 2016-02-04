@@ -708,7 +708,7 @@ class WC_Admin_Post_Types {
 
 					$latest_note = current( $latest_notes );
 
-					if ( $post->comment_count == 1 ) {
+					if ( isset( $latest_note->comment_content ) && $post->comment_count == 1 ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} elseif ( isset( $latest_note->comment_content ) ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
