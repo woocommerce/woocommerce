@@ -166,14 +166,14 @@ abstract class WC_Abstract_Order {
 			return false;
 		}
 
-		$token_ids = get_post_meta( $this->id, '_wc_payment_tokens', true );
+		$token_ids = get_post_meta( $this->id, '_payment_tokens', true );
 		if ( empty ( $token_ids ) ) {
 			$token_ids = array();
 		}
 		$token_ids[] = $token->get_id();
 
-		update_post_meta( $this->id, '_wc_payment_tokens', $token_ids );
-		do_action( 'woocommerce_payment_token_added_to_order', $this->id, $token_id, $token, $token_ids );
+		update_post_meta( $this->id, '_payment_tokens', $token_ids );
+		do_action( 'woocommerce_payment_token_added_to_order', $this->id, $token->get_id(), $token, $token_ids );
 		return true;
 	}
 
