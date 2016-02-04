@@ -18,22 +18,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
  abstract class WC_Payment_Token {
 
- 	/** @protected int Token ID. */
+ 	/** @protected int Token ID */
  	protected $id;
- 	/** @protected array Core Token Data (stored in the payment_tokens table). */
+ 	/** @protected array Core Token Data (stored in the payment_tokens table) */
  	protected $data;
- 	/** @protected array Meta Token Data (extra data associated with a payment token, stored in the payment_token_meta table). */
+ 	/** @protected array Meta Token Data (extra data associated with a payment token, stored in the payment_token_meta table) */
  	protected $meta;
 
  	/**
-	 * Initialize a payment token.
+	 * Initialize a payment token
 	 *
-	 * These fields are accept by all payment tokens
-	 * default      - boolean optional indicates this is the default payment token for a user
-	 * type         - string. WC core ships with 'cc' or 'echeck' but other values can be used for custom payment token types
-	 * token        - string. The actual token to store.
-	 * gateway_id   - string. Identifier for the gateway this token is associated with.
-	 * customer_id  - int. ID for the customer this token is associated with. 0 if this token is not associated with a user.
+	 * These fields are accepted by all payment tokens:
+	 * default      - boolean Optional - Indicates this is the default payment token for a user
+	 * type         - string  Required - WC core ships with 'cc' or 'echeck' but other values can be used for custom payment token types
+	 * token        - string  Required - The actual token to store
+	 * gateway_id   - string  Required - Identifier for the gateway this token is associated with
+	 * customer_id  - int     Optional - ID for the customer this token is associated with. 0 if this token is not associated with a user
 	 *
 	 * @since 2.6.0
 	 * @param string $id Token ID

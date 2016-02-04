@@ -168,7 +168,7 @@ class WC_Payment_Tokens {
 		foreach ( $token_results as $token_result ) {
 			$_token = self::generate_token( $token_result->token_id, (array) $token_result );
 			if ( ! empty( $_token ) ) {
-				$tokens[$token_result->token_id] = $_token;
+				$tokens[ $token_result->token_id ] = $_token;
 			}
 		}
 
@@ -187,17 +187,16 @@ class WC_Payment_Tokens {
 			return array();
 		}
 
-		$wc_tokens_meta = get_post_meta( $order_id, '_wc_payment_tokens', true );
-
-		if ( empty ( $wc_tokens_meta ) ) {
+		$token_ids = get_post_meta( $order_id, '_wc_payment_tokens', true );
+		if ( empty ( $token_ids ) ) {
 			return array();
 		}
 
 		global $wpdb;
 
-		$wc_tokens_meta_string = implode( ',', array_map( 'intval', $wc_tokens_meta ) );
+		$token_ids_as_string = implode( ',', array_map( 'intval', $token_ids ) );
 		$token_results = $wpdb->get_results(
-			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id IN ( {$wc_tokens_meta_string} )"
+			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id IN ( {$token_ids_as_string} )"
 		);
 
 		if ( empty( $token_results ) ) {
@@ -208,7 +207,7 @@ class WC_Payment_Tokens {
 		foreach ( $token_results as $token_result ) {
 			$_token = self::generate_token( $token_result->token_id, (array) $token_result );
 			if ( ! empty( $_token ) ) {
-				$tokens[$token_result->token_id] = $_token;
+				$tokens[ $token_result->token_id ] = $_token;
 			}
 		}
 
@@ -240,7 +239,7 @@ class WC_Payment_Tokens {
 			) );
 			if ( ! empty( $meta_rows ) ) {
 				foreach( $meta_rows as $meta_row ) {
-					$meta[$meta_row->meta_key] = $meta_row->meta_value;
+					$meta[ $meta_row->meta_key ] = $meta_row->meta_value;
 				}
 			}
 			return new $token_class( $token_id, $token_result, $meta );

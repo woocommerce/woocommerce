@@ -158,24 +158,22 @@ abstract class WC_Abstract_Order {
 	 * Add a payment token to an order
 	 *
 	 * @since 2.6
-	 * @param  int                $token_id  ID for the token we are adding to the order
 	 * @param  WC_Payment_Token   $token     Payment token object
 	 * @return boolean True if the token was added, false if not
 	 */
-	public function add_payment_token( $token_id, $token ) {
-		if ( empty( $token ) || ! ( $token instanceof WC_Payment_Token ) || $token_id < 1 ) {
+	public function add_payment_token( $token ) {
+		if ( empty( $token ) || ! ( $token instanceof WC_Payment_Token ) ) {
 			return false;
 		}
 
-		$wc_tokens_meta = get_post_meta( $this->id, '_wc_payment_tokens', true );
-		if ( empty ( $wc_tokens_meta ) ) {
-			$wc_tokens_meta = array();
+		$token_ids = get_post_meta( $this->id, '_wc_payment_tokens', true );
+		if ( empty ( $token_ids ) ) {
+			$token_ids = array();
 		}
+		$token_ids[] = $token->get_id();
 
-		$wc_tokens_meta[] = $token_id;
-
-		update_post_meta( $this->id, '_wc_payment_tokens', $wc_tokens_meta );
-		do_action( 'woocommerce_payment_token_added_to_order', $this->id, $token_id, $token, $wc_tokens_meta );
+		update_post_meta( $this->id, '_wc_payment_tokens', $token_ids );
+		do_action( 'woocommerce_payment_token_added_to_order', $this->id, $token_id, $token, $token_ids );
 		return true;
 	}
 
