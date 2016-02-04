@@ -53,27 +53,18 @@ class WC_Payment_Tokens {
 		}
 
 		global $wpdb;
-		unset( $args['token_id'] );
 
-		// We need to separate our meta fields since they are stored in a separate table
-		$core_fields = self::get_token_core_fields();
-		$core_fields_to_create = array();
-		foreach ( $core_fields as $core_field ) {
-			if ( isset( $args[ $core_field ] ) ) {
-				$core_fields_to_create[ $core_field ] = $args[ $core_field ];
-				unset( $args[ $core_field ] );
-			}
-		}
+		$meta = $args['meta'];
+		unset( $args['token_id'], $args['meta'] );
 
-		// Store the main token in the database
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_tokens', $core_fields_to_create );
+		$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_tokens', $args );
 		$token_id = $wpdb->insert_id;
-		foreach ( $args as $meta_key => $meta_value ) {
+		foreach ( $meta as $meta_key => $meta_value ) {
 			add_metadata( 'payment_token', $token_id, $meta_key, $meta_value, true );
 		}
 
 		do_action( 'woocommerce_payment_token_created', $token_id );
-		return self::generate_token( $token_id, $core_fields_to_create );
+		return self::generate_token( $token_id, $args );
 	}
 
 	/**
@@ -88,31 +79,22 @@ class WC_Payment_Tokens {
 		}
 
 		$args = $token->__data_format();
-		unset( $args['token_id'] );
+		$meta = $args['meta'];
+
 		if ( ! self::validate( $args ) ) {
 			return; // @todo throw an error
 		}
 
-		// We need to separate our meta fields since they are stored in a separate table
-		$core_fields = self::get_token_core_fields();
-		$core_fields_to_create = array();
-		foreach ( $core_fields as $core_field ) {
-			if ( isset( $args[ $core_field ] ) ) {
-				$core_fields_to_update[ $core_field ] = $args[ $core_field ];
-				unset( $args[ $core_field ] );
-			}
-		}
-
+		unset( $args['token_id'], $args['meta'] );
 		global $wpdb;
 
-		// Update our fields
-		$wpdb->update( $wpdb->prefix . 'woocommerce_payment_tokens', $core_fields_to_update, array( 'token_id' => $token_id ) );
-		foreach ( $args as $meta_key => $meta_value ) {
+		$wpdb->update( $wpdb->prefix . 'woocommerce_payment_tokens', $args, array( 'token_id' => $token_id ) );
+		foreach ( $meta as $meta_key => $meta_value ) {
 			update_metadata( 'payment_token', $token_id, $meta_key, $meta_value );
 		}
 
 		do_action( 'woocommerce_payment_token_updated', $token_id );
-		return self::generate_token( $token_id, $core_fields_to_update );
+		return self::generate_token( $token_id, $args );
 	}
 
 	/**
@@ -203,14 +185,6 @@ class WC_Payment_Tokens {
 		}
 
 		return apply_filters( 'woocommerce_get_order_payment_tokens', $tokens, $order_id );
-	}
-
-	/**
-	 * Returns an array of fields used in all payment tokens
-	 * @return array Core fields
-	 */
-	private static function get_token_core_fields() {
-		return apply_filters( 'woocommerce_payment_token_core_fields', array( 'gateway_id', 'token', 'user_id', 'type', 'is_default' ) );
 	}
 
 	/**

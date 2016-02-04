@@ -33,19 +33,19 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 */
 	public static function validate( $args ) {
 
-		if ( empty( $args['last4'] ) ) {
+		if ( empty( $args['meta']['last4'] ) ) {
 			return false;
 		}
 
-		if ( empty( $args['expiry_year'] ) ) {
+		if ( empty( $args['meta']['expiry_year'] ) ) {
 			return false;
 		}
 
-		if ( empty( $args['expiry_month'] ) ) {
+		if ( empty( $args['meta']['expiry_month'] ) ) {
 			return false;
 		}
 
-		if ( empty ( $args['card_type'] ) ) {
+		if ( empty ( $args['meta']['card_type'] ) ) {
 			return false;
 		}
 
@@ -110,6 +110,26 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 */
 	public function set_expiry_month( $month ) {
 		$this->meta['expiry_month'] = $month;
+	}
+
+	/**
+	 * Returns the last four digits
+	 *
+	 * @since 2.6.0
+	 * @return string Last 4 digits
+	 */
+	public function get_last4() {
+		return isset( $this->meta['last4'] ) ? $this->meta['last4'] : null;
+	}
+
+	/**
+	 * Set the last four digits
+	 *
+	 * @since 2.6.0
+	 * @param string $last4
+	 */
+	public function set_last4( $last4 ) {
+		$this->meta['last4'] = $last4;
 	}
 
 }

@@ -163,7 +163,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return mixed array representation
 	 */
 	public function __data_format() {
-		return array_merge( $this->data, $this->meta );
+		return array_merge( $this->data, array( 'meta' => $this->meta ) );
 	}
 
 }

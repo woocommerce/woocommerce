@@ -28,7 +28,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * @return boolean    True if the passed data is valid
 	 */
 	public static function validate( $args ) {
-		if ( empty( $args['last4'] ) ) {
+		if ( empty( $args['meta']['last4'] ) ) {
 			return false;
 		}
 		return true;
