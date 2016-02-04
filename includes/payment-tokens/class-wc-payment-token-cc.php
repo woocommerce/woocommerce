@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package 	WooCommerce/PaymentTokens
  * @author		WooThemes
  */
-class WC_Payment_Token_CC extends WC_Payment_Token_eCheck {
+class WC_Payment_Token_CC extends WC_Payment_Token {
 
  	/**
 	 * Validate credit card payment tokens
@@ -32,8 +32,8 @@ class WC_Payment_Token_CC extends WC_Payment_Token_eCheck {
 	 * @return boolean    True if the passed data is valid
 	 */
 	public static function validate( $args ) {
-		$validate = parent::validate( $args );
-		if ( ! $validate ) {
+
+		if ( empty( $args['last4'] ) ) {
 			return false;
 		}
 
