@@ -417,7 +417,7 @@ class WC_Admin_Post_Types {
 	 * Since WordPress 4.3 we don't have to build the row actions.
 	 *
 	 * @param WP_Post $post
-	 * @param string $title
+	 * @param string  $title
 	 */
 	private function _render_product_row_actions( $post, $title ) {
 		global $wp_version;
@@ -550,7 +550,7 @@ class WC_Admin_Post_Types {
 	 * Since WordPress 4.3 we don't have to build the row actions.
 	 *
 	 * @param WP_Post $post
-	 * @param string $title
+	 * @param string  $title
 	 */
 	private function _render_shop_coupon_row_actions( $post, $title ) {
 		global $wp_version;
@@ -598,7 +598,7 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Output custom columns for coupons.
-	 * @param  string $column
+	 * @param string $column
 	 */
 	public function render_shop_order_columns( $column ) {
 		global $post, $woocommerce, $the_order;
@@ -809,7 +809,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Make columns sortable - https://gist.github.com/906872.
 	 *
-	 * @param array $columns
+	 * @param  array $columns
 	 * @return array
 	 */
 	public function product_sortable_columns( $columns ) {
@@ -825,7 +825,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Make columns sortable - https://gist.github.com/906872.
 	 *
-	 * @param array $columns
+	 * @param  array $columns
 	 * @return array
 	 */
 	public function shop_coupon_sortable_columns( $columns ) {
@@ -835,7 +835,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Make columns sortable - https://gist.github.com/906872.
 	 *
-	 * @param array $columns
+	 * @param  array $columns
 	 * @return array
 	 */
 	public function shop_order_sortable_columns( $columns ) {
@@ -903,13 +903,7 @@ class WC_Admin_Post_Types {
 			return array_merge( array( 'id' => 'ID: ' . $post->ID ), $actions );
 		}
 
-		if ( 'shop_order' === $post->post_type ) {
-			if ( isset( $actions['inline hide-if-no-js'] ) ) {
-				unset( $actions['inline hide-if-no-js'] );
-			}
-		}
-
-		if ( 'shop_coupon' === $post->post_type ) {
+		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) ) {
 			if ( isset( $actions['inline hide-if-no-js'] ) ) {
 				unset( $actions['inline hide-if-no-js'] );
 			}
@@ -923,13 +917,13 @@ class WC_Admin_Post_Types {
 	 *
 	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/).
 	 *
-	 * @param array $views
+	 * @param  array $views
 	 * @return array
 	 */
 	public function product_sorting_link( $views ) {
 		global $post_type, $wp_query;
 
-		if ( ! current_user_can('edit_others_pages') ) {
+		if ( ! current_user_can( 'edit_others_pages' ) ) {
 			return $views;
 		}
 
