@@ -1692,11 +1692,11 @@ class WC_Cart {
 
 		/**
 		 * Returns whether or not a discount has been applied.
-		 *
+		 * @param string $coupon_code
 		 * @return bool
 		 */
-		public function has_discount( $coupon_code ) {
-			return in_array( apply_filters( 'woocommerce_coupon_code', $coupon_code ), $this->applied_coupons );
+		public function has_discount( $coupon_code = '' ) {
+			return $coupon_code ? in_array( apply_filters( 'woocommerce_coupon_code', $coupon_code ), $this->applied_coupons ) : sizeof( $this->applied_coupons ) > 0;
 		}
 
 		/**
