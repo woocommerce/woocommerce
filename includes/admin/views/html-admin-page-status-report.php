@@ -786,7 +786,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		try {
 			jQuery( '#debug-report' ).slideDown();
-			jQuery( '#debug-report' ).find( 'textarea' ).val( report ).focus().select();
+			jQuery( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).focus().select();
 			jQuery( this ).fadeOut();
 			return false;
 		} catch ( e ) {
