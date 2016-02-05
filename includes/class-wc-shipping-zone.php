@@ -79,7 +79,7 @@ class WC_Shipping_Zone implements WC_Data {
 	}
 
 	/**
-	 * Insert zone into the database
+	 * Read zone.
 	 * @param int ID to read from DB
 	 */
 	public function read( $id ) {
