@@ -268,7 +268,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 			if ( empty( $_POST['woocommerce_save_method_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_save_method_nonce'], 'woocommerce_save_method' )) {
 				echo '<div class="updated error"><p>' . __( 'Edit failed. Please try again.', 'woocommerce' ) . '</p></div>';
-
 			}
 
 			$shipping_method->process_admin_options();

@@ -181,7 +181,7 @@ abstract class WC_Settings_API {
 	/**
 	 * get_option function.
 	 *
-	 * Gets and option from the settings API, using defaults if necessary to prevent undefined notices.
+	 * Gets an option from the settings API, using defaults if necessary to prevent undefined notices.
 	 *
 	 * @param  string $key
 	 * @param  mixed  $empty_value
@@ -656,6 +656,7 @@ abstract class WC_Settings_API {
 			'desc_tip'          => false,
 			'description'       => '',
 			'custom_attributes' => array(),
+			'select_buttons'    => false,
 			'options'           => array()
 		);
 
@@ -678,6 +679,9 @@ abstract class WC_Settings_API {
 						<?php endforeach; ?>
 					</select>
 					<?php echo $this->get_description_html( $data ); ?>
+					<?php if ( $data['select_buttons'] ) : ?>
+						<br/><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
+					<?php endif; ?>
 				</fieldset>
 			</td>
 		</tr>

@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.5.0-RC1
+ * Version: 2.6.0-dev
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 4.1
@@ -222,6 +222,7 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
+		include_once( 'includes/interfaces/interface-wc-data.php' );
 		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/wc-widget-functions.php' );

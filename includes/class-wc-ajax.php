@@ -319,6 +319,7 @@ class WC_AJAX {
 
 			if ( isset( $_POST['country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['country'] );
+				WC()->customer->calculated_shipping( true );
 			}
 
 			if ( isset( $_POST['state'] ) ) {
@@ -344,6 +345,7 @@ class WC_AJAX {
 
 			if ( isset( $_POST['s_country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['s_country'] );
+				WC()->customer->calculated_shipping( true );
 			}
 
 			if ( isset( $_POST['s_state'] ) ) {
@@ -397,6 +399,8 @@ class WC_AJAX {
 			) )
 		);
 
+		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
+
 		wp_send_json( $data );
 
 		die();
@@ -418,7 +422,7 @@ class WC_AJAX {
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
 			if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) {
-				wc_add_to_cart_message( $product_id );
+				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}
 
 			// Return fragments
@@ -2535,11 +2539,7 @@ class WC_AJAX {
 				$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
 				$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
 				$variation_data['menu_order']     = $variation->menu_order;
-
-				// Stock BW compat
-				if ( '' !== $variation_data['_stock'] ) {
-					$variation_data['_manage_stock'] = 'yes';
-				}
+				$variation_data['_stock']         = '' === $variation_data['_stock'] ? '' : wc_stock_amount( $variation_data['_stock'] );
 
 				include( 'admin/meta-boxes/views/html-variation-admin.php' );
 

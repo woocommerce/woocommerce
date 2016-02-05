@@ -170,6 +170,22 @@ if ( ! function_exists( 'is_view_order_page' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_edit_account_page' ) ) {
+
+	/**
+	* Check for edit account page.
+	* Returns true when viewing the edit account page.
+	*
+	* @since 2.5.1
+	* @return bool
+	*/
+	function is_edit_account_page() {
+		global $wp;
+
+		return ( is_page( wc_get_page_id( 'myaccount' ) ) && isset( $wp->query_vars['edit-account'] ) );
+	}
+}
+
 if ( ! function_exists( 'is_order_received_page' ) ) {
 
 	/**

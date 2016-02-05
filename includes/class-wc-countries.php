@@ -189,10 +189,12 @@ class WC_Countries {
 
 		$countries = array();
 
-		$raw_countries = get_option( 'woocommerce_specific_allowed_countries' );
+		$raw_countries = get_option( 'woocommerce_specific_allowed_countries', array() );
 
-		foreach ( $raw_countries as $country ) {
-			$countries[ $country ] = $this->countries[ $country ];
+		if ( $raw_countries ) {
+			foreach ( $raw_countries as $country ) {
+				$countries[ $country ] = $this->countries[ $country ];
+			}
 		}
 
 		return apply_filters( 'woocommerce_countries_allowed_countries', $countries );
@@ -293,22 +295,24 @@ class WC_Countries {
 	 * Gets the correct string for shipping - either 'to the' or 'to'
 	 * @return string
 	 */
-	public function shipping_to_prefix() {
-		$countries  = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
-		$return     = in_array( WC()->customer->get_shipping_country(), $countries ) ? __( 'to the', 'woocommerce' ) : __( 'to', 'woocommerce' );
+	public function shipping_to_prefix( $country_code = '' ) {
+		$country_code = $country_code ? $country_code : WC()->customer->get_shipping_country();
+		$countries    = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
+		$return       = in_array( $country_code, $countries ) ? __( 'to the', 'woocommerce' ) : __( 'to', 'woocommerce' );
 
-		return apply_filters( 'woocommerce_countries_shipping_to_prefix', $return, WC()->customer->get_shipping_country() );
+		return apply_filters( 'woocommerce_countries_shipping_to_prefix', $return, $country_code );
 	}
 
 	/**
 	 * Prefix certain countries with 'the'
 	 * @return string
 	 */
-	public function estimated_for_prefix() {
-		$countries  = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
-		$return     = in_array( $this->get_base_country(), $countries ) ? __( 'the', 'woocommerce' ) . ' ' : '';
+	public function estimated_for_prefix( $country_code = '' ) {
+		$country_code = $country_code ? $country_code : $this->get_base_country();
+		$countries    = array( 'GB', 'US', 'AE', 'CZ', 'DO', 'NL', 'PH', 'USAF' );
+		$return       = in_array( $country_code, $countries ) ? __( 'the', 'woocommerce' ) . ' ' : '';
 
-		return apply_filters( 'woocommerce_countries_estimated_for_prefix', $return, $this->get_base_country() );
+		return apply_filters( 'woocommerce_countries_estimated_for_prefix', $return, $country_code );
 	}
 
 	/**
@@ -519,55 +523,64 @@ class WC_Countries {
 	public function get_default_address_fields() {
 		$fields = array(
 			'first_name' => array(
-				'label'    => __( 'First Name', 'woocommerce' ),
-				'required' => true,
-				'class'    => array( 'form-row-first' ),
+				'label'        => __( 'First Name', 'woocommerce' ),
+				'required'     => true,
+				'class'        => array( 'form-row-first' ),
+				'autocomplete' => 'given-name',
 			),
 			'last_name' => array(
-				'label'    => __( 'Last Name', 'woocommerce' ),
-				'required' => true,
-				'class'    => array( 'form-row-last' ),
-				'clear'    => true
+				'label'        => __( 'Last Name', 'woocommerce' ),
+				'required'     => true,
+				'class'        => array( 'form-row-last' ),
+				'clear'        => true,
+				'autocomplete' => 'family-name',
 			),
 			'company' => array(
-				'label' => __( 'Company Name', 'woocommerce' ),
-				'class' => array( 'form-row-wide' ),
+				'label'        => __( 'Company Name', 'woocommerce' ),
+				'class'        => array( 'form-row-wide' ),
+				'autocomplete' => 'organization',
 			),
 			'country' => array(
-				'type'     => 'country',
-				'label'    => __( 'Country', 'woocommerce' ),
-				'required' => true,
-				'class'    => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
+				'type'         => 'country',
+				'label'        => __( 'Country', 'woocommerce' ),
+				'required'     => true,
+				'class'        => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
+				'autocomplete' => 'country',
 			),
 			'address_1' => array(
-				'label'       => __( 'Address', 'woocommerce' ),
-				'placeholder' => _x( 'Street address', 'placeholder', 'woocommerce' ),
-				'required'    => true,
-				'class'       => array( 'form-row-wide', 'address-field' )
+				'label'        => __( 'Address', 'woocommerce' ),
+				'placeholder'  => _x( 'Street address', 'placeholder', 'woocommerce' ),
+				'required'     => true,
+				'class'        => array( 'form-row-wide', 'address-field' ),
+				'autocomplete' => 'address-line1',
 			),
 			'address_2' => array(
-				'placeholder' => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
-				'class'       => array( 'form-row-wide', 'address-field' ),
-				'required'    => false
+				'placeholder'  => _x( 'Apartment, suite, unit etc. (optional)', 'placeholder', 'woocommerce' ),
+				'class'        => array( 'form-row-wide', 'address-field' ),
+				'required'     => false,
+				'autocomplete' => 'address-line2',
 			),
 			'city' => array(
-				'label'       => __( 'Town / City', 'woocommerce' ),
-				'required'    => true,
-				'class'       => array( 'form-row-wide', 'address-field' )
+				'label'        => __( 'Town / City', 'woocommerce' ),
+				'required'     => true,
+				'class'        => array( 'form-row-wide', 'address-field' ),
+				'autocomplete' => 'address-level2',
 			),
 			'state' => array(
-				'type'        => 'state',
-				'label'       => __( 'State / County', 'woocommerce' ),
-				'required'    => true,
-				'class'       => array( 'form-row-first', 'address-field' ),
-				'validate'    => array( 'state' )
+				'type'         => 'state',
+				'label'        => __( 'State / County', 'woocommerce' ),
+				'required'     => true,
+				'class'        => array( 'form-row-first', 'address-field' ),
+				'validate'     => array( 'state' ),
+				'autocomplete' => 'address-level1',
 			),
 			'postcode' => array(
-				'label'       => __( 'Postcode / ZIP', 'woocommerce' ),
-				'required'    => true,
-				'class'       => array( 'form-row-last', 'address-field' ),
-				'clear'       => true,
-				'validate'    => array( 'postcode' )
+				'label'        => __( 'Postcode / ZIP', 'woocommerce' ),
+				'required'     => true,
+				'class'        => array( 'form-row-last', 'address-field' ),
+				'clear'        => true,
+				'validate'     => array( 'postcode' ),
+				'autocomplete' => 'postal-code',
 			),
 		);
 
@@ -968,19 +981,21 @@ class WC_Countries {
 			// Add email and phone after company or last
 			if ( $type == 'billing_' && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && $key === end( $keys ) ) ) ) {
 				$address_fields['billing_email'] = array(
-					'label'		=> __( 'Email Address', 'woocommerce' ),
-					'required'	=> true,
-					'type'		=> 'email',
-					'class'		=> array( 'form-row-first' ),
-					'validate'	=> array( 'email' ),
+					'label'        => __( 'Email Address', 'woocommerce' ),
+					'required'     => true,
+					'type'         => 'email',
+					'class'        => array( 'form-row-first' ),
+					'validate'     => array( 'email' ),
+					'autocomplete' => 'email',
 				);
 				$address_fields['billing_phone'] = array(
-					'label'    	=> __( 'Phone', 'woocommerce' ),
-					'required' 	=> true,
-					'type'		=> 'tel',
-					'class'    	=> array( 'form-row-last' ),
-					'clear'    	=> true,
-					'validate' 	=> array( 'phone' ),
+					'label'        => __( 'Phone', 'woocommerce' ),
+					'required'     => true,
+					'type'         => 'tel',
+					'class'        => array( 'form-row-last' ),
+					'clear'        => true,
+					'validate'     => array( 'phone' ),
+					'autocomplete' => 'tel',
 				);
 			}
 		}

@@ -226,7 +226,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			return;
 		}
 
-		// Handle cost
+		// Total up the cost
 		$total_cost = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
 		$taxes      = $args['taxes'];
 
@@ -234,6 +234,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		if ( ! is_array( $taxes ) && $taxes !== false && $total_cost > 0 && $this->is_taxable() ) {
 			$taxes = 'per_item' === $args['calc_tax'] ? $this->get_taxes_per_item( $args['cost'] ) : WC_Tax::calc_shipping_tax( $total_cost, WC_Tax::get_shipping_tax_rates() );
 		}
+
+		// Round the total cost after taxes have been calculated.
+		$total_cost = wc_format_decimal( $total_cost, wc_get_price_decimals() );
 
 		// Create rate object
 		$rate = new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, $taxes, $this->id );

@@ -62,7 +62,8 @@ function wc_create_order( $args = array() ) {
 		'customer_note' => null,
 		'order_id'      => 0,
 		'created_via'   => '',
-		'parent'        => 0
+		'cart_hash'     => '',
+		'parent'        => 0,
 	);
 
 	$args       = wp_parse_args( $args, $default_args );
@@ -111,6 +112,7 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 		update_post_meta( $order_id, '_customer_user', 0 );
 		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
+		update_post_meta( $order_id, '_cart_hash', sanitize_text_field( $args['cart_hash'] ) );
 	}
 
 	if ( is_numeric( $args['customer_id'] ) ) {
@@ -297,8 +299,8 @@ function get_woocommerce_currencies() {
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
 				'KES' => __( 'Kenyan shilling', 'woocommerce' ),
-				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
+				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
@@ -311,6 +313,7 @@ function get_woocommerce_currencies() {
 				'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'RON' => __( 'Romanian Leu', 'woocommerce' ),
 				'RUB' => __( 'Russian Ruble', 'woocommerce' ),
+				'SAR' => __( 'Saudi Riyal', 'woocommerce' ),
 				'SEK' => __( 'Swedish Krona', 'woocommerce' ),
 				'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
 				'THB' => __( 'Thai Baht', 'woocommerce' ),
@@ -363,8 +366,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'ISK' => 'Kr.',
 		'JPY' => '&yen;',
 		'KES' => 'KSh',
-		'LAK' => '&#8365;',
 		'KRW' => '&#8361;',
+		'LAK' => '&#8365;',
 		'MXN' => '&#36;',
 		'MYR' => '&#82;&#77;',
 		'NGN' => '&#8358;',
@@ -377,7 +380,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'PYG' => '&#8370;',
 		'RMB' => '&yen;',
 		'RON' => 'lei',
-		'RUB' => '&#1088;&#1091;&#1073;.',
+		'RUB' => '&#8381;',
+		'SAR' => '&#x631;.&#x633;',
 		'SEK' => '&#107;&#114;',
 		'SGD' => '&#36;',
 		'THB' => '&#3647;',
@@ -494,7 +498,7 @@ function wc_print_js() {
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
-		setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
+		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure );
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE );
@@ -858,16 +862,10 @@ function wc_array_cartesian( $input ) {
 function wc_transaction_query( $type = 'start' ) {
 	global $wpdb;
 
-	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
-		// Try to set isolation level to support dirty reads - if this is unsupported, do not use transactions
-		$wpdb->hide_errors();
-		$result = $wpdb->query( 'SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;' );
+	$wpdb->hide_errors();
 
-		if ( false === $result ) {
-			define( 'WC_USE_TRANSACTIONS', false );
-		} else {
-			define( 'WC_USE_TRANSACTIONS', true );
-		}
+	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
+		define( 'WC_USE_TRANSACTIONS', true );
 	}
 
 	if ( WC_USE_TRANSACTIONS ) {

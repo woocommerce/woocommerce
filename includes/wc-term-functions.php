@@ -138,7 +138,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		$args['orderby']            = $deprecated_orderby;
 	}
 
-	$current_product_cat = isset( $wp_query->query['product_cat'] ) ? $wp_query->query['product_cat'] : '';
+	$current_product_cat = isset( $wp_query->query_vars['product_cat'] ) ? $wp_query->query_vars['product_cat'] : '';
 	$defaults            = array(
 		'pad_counts'         => 1,
 		'show_count'         => 1,

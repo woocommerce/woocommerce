@@ -222,7 +222,7 @@ class WC_Admin_Post_Types {
 			$columns['sku'] = __( 'SKU', 'woocommerce' );
 		}
 
-		if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			$columns['is_in_stock'] = __( 'Stock', 'woocommerce' );
 		}
 
@@ -395,19 +395,18 @@ class WC_Admin_Post_Types {
 				echo '</a>';
 				break;
 			case 'is_in_stock' :
-
 				if ( $the_product->is_in_stock() ) {
 					echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
 
-				if ( $the_product->managing_stock() ) {
-					echo ' &times; ' . $the_product->get_total_stock();
+				// If the product has children, a single stock level would be misleading as some could be -ve and some +ve, some managed/some unmanaged etc so hide stock level in this case.
+				if ( $the_product->managing_stock() && ! sizeof( $the_product->get_children() ) ) {
+					echo ' (' . $the_product->get_total_stock() . ')';
 				}
 
 				break;
-
 			default :
 				break;
 		}
@@ -708,7 +707,7 @@ class WC_Admin_Post_Types {
 
 					$latest_note = current( $latest_notes );
 
-					if ( $post->comment_count == 1 ) {
+					if ( isset( $latest_note->comment_content ) && $post->comment_count == 1 ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} elseif ( isset( $latest_note->comment_content ) ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
@@ -905,7 +904,9 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( 'shop_order' === $post->post_type ) {
-			return array();
+			if ( isset( $actions['inline hide-if-no-js'] ) ) {
+				unset( $actions['inline hide-if-no-js'] );
+			}
 		}
 
 		if ( 'shop_coupon' === $post->post_type ) {
@@ -2289,7 +2290,7 @@ class WC_Admin_Post_Types {
 	public function disable_dfw_feature_pointer() {
 		$screen = get_current_screen();
 
-		if ( 'product' === $screen->id && 'post' === $screen->base ) {
+		if ( $screen && 'product' === $screen->id && 'post' === $screen->base ) {
 			remove_action( 'admin_print_footer_scripts', array( 'WP_Internal_Pointers', 'pointer_wp410_dfw' ) );
 		}
 	}

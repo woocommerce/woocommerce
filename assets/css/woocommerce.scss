@@ -1324,6 +1324,12 @@ p.demo_store {
 			padding: .25em 0 .25em 22px;
 			text-indent: -22px;
 			list-style: none outside;
+			input {
+				margin: 3px 0.5ex;
+			}
+			label {
+				display: inline;
+			}
 		}
 
 		.amount {
@@ -1692,7 +1698,7 @@ p.demo_store {
 /**
  * Checkout
  */
-.woocommerce-checkout {
+.woocommerce-checkout, #add_payment_method {
 	.checkout {
 		.col-2 {
 			h3#ship-to-different-address {
@@ -1885,7 +1891,8 @@ p.demo_store {
 .woocommerce-password-strength {
 	text-align: center;
 	font-weight: 600;
-	padding: 3px 0px 3px 0px;
+	padding: 3px .5em;
+	font-size: 1em;
 
 	&.strong {
 		background-color: #c1e1b9;
@@ -1906,6 +1913,11 @@ p.demo_store {
 		background-color: #ffe399;
 		border-color: #ffc733;
 	}
+}
+
+.woocommerce-password-hint {
+	margin: .5em 0 0 0;
+	display: block;
 }
 
 /* added to get around variation image flicker issue */

@@ -1885,6 +1885,13 @@ a.import_rates {
 		font-size: 1.2em;
 	}
 }
+#rates-pagination {
+	float: right;
+	margin-right: .5em;
+	.tablenav {
+		margin: 0;
+	}
+}
 
 table.wc_tax_rates,
 table.wc_input_table {
