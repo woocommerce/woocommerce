@@ -2289,7 +2289,7 @@ class WC_Admin_Post_Types {
 	public function disable_dfw_feature_pointer() {
 		$screen = get_current_screen();
 
-		if ( 'product' === $screen->id && 'post' === $screen->base ) {
+		if ( $screen && 'product' === $screen->id && 'post' === $screen->base ) {
 			remove_action( 'admin_print_footer_scripts', array( 'WP_Internal_Pointers', 'pointer_wp410_dfw' ) );
 		}
 	}

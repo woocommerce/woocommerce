@@ -118,7 +118,7 @@ class WC_Admin_Menus {
 			break;
 			case 'product' :
 				$screen = get_current_screen();
-				if ( taxonomy_is_product_attribute( $screen->taxonomy ) ) {
+				if ( $screen && taxonomy_is_product_attribute( $screen->taxonomy ) ) {
 					$submenu_file = 'product_attributes';
 					$parent_file  = 'edit.php?post_type=product';
 				}
