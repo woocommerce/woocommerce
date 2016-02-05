@@ -34,8 +34,9 @@ interface WC_Data {
 
     /**
      * Read object from the database.
+     * @param int ID of the object to load.
      */
-    public function read();
+    public function read( $id );
 
     /**
      * Updates object data in the database.
