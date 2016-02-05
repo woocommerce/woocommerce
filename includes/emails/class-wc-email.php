@@ -240,7 +240,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), __( $string ) );
 	}
 
 	/**
@@ -340,7 +340,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		$value = parent::get_option( $key, $empty_value );
-		return apply_filters( 'woocommerce_email_get_option', __( $value ), $this, $value, $key, $empty_value );
+		return apply_filters( 'woocommerce_email_get_option', $value, $this, $value, $key, $empty_value );
 	}
 
 	/**
