@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                             $class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
 							echo '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
 						}
-                        echo '<a href="#" class="add_shipping_method button">' . __( 'Add Shipping Method', 'woocommerce' ) . '</a>';
+                        echo '<li><a href="#" class="add_shipping_method button">' . __( 'Add Shipping Method', 'woocommerce' ) . '</a></li>';
 						echo '</ul>';
 					}
 				?>
