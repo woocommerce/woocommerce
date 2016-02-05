@@ -904,7 +904,9 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( 'shop_order' === $post->post_type ) {
-			return array();
+			if ( isset( $actions['inline hide-if-no-js'] ) ) {
+				unset( $actions['inline hide-if-no-js'] );
+			}
 		}
 
 		if ( 'shop_coupon' === $post->post_type ) {
