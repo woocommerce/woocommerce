@@ -222,6 +222,7 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
+		include_once( 'includes/interfaces/interface-wc-data.php' );
 		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/wc-widget-functions.php' );
