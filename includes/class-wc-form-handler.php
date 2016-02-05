@@ -273,9 +273,9 @@ class WC_Form_Handler {
 			$order_id   = absint( $wp->query_vars['order-pay'] );
 			$order      = wc_get_order( $order_id );
 
-			do_action( 'woocommerce_before_pay_action', $order, $order_key );
-
 			if ( $order->id == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
+
+				do_action( 'woocommerce_before_pay_action', $order );
 
 				// Set customer location to order location
 				if ( $order->billing_country ) {
@@ -339,9 +339,10 @@ class WC_Form_Handler {
 					wp_safe_redirect( $order->get_checkout_order_received_url() );
 					exit;
 				}
-			}
 
-			do_action( 'woocommerce_after_pay_action', $order, $order_key );
+				do_action( 'woocommerce_after_pay_action', $order );
+
+			}
 
 		}
 	}
