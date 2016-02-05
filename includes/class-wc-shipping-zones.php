@@ -104,11 +104,8 @@ class WC_Shipping_Zones {
 	 * @since 2.6.0
 	 */
     public static function delete_zone( $zone_id ) {
-        global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'zone_id' => $zone_id ) );
-        $wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $zone_id ) );
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zones', array( 'zone_id' => $zone_id ) );
-		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+        $zone = new WC_Shipping_Zone( $zone_id );
+		$zone->delete();
     }
 
 	/**
