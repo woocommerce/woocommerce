@@ -273,6 +273,8 @@ class WC_Form_Handler {
 			$order_id   = absint( $wp->query_vars['order-pay'] );
 			$order      = wc_get_order( $order_id );
 
+			do_action( 'woocommerce_before_pay_action', $order, $order_key );
+
 			if ( $order->id == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
 
 				// Set customer location to order location
@@ -338,6 +340,8 @@ class WC_Form_Handler {
 					exit;
 				}
 			}
+
+			do_action( 'woocommerce_after_pay_action', $order, $order_key );
 
 		}
 	}
