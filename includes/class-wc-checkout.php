@@ -184,14 +184,20 @@ class WC_Checkout {
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 				'customer_id'   => $this->customer_id,
 				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
+				'cart_hash'     => md5( json_encode( WC()->cart->get_cart_for_session() ) . WC()->cart->total ),
 				'created_via'   => 'checkout'
 			);
 
 			// Insert or update the post data
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
-			// Resume the unpaid order if its pending
-			if ( $order_id > 0 && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
+			/**
+			 * If there is an order pending payment, we can resume it here so
+			 * long as it has not changed. If the order has changed, i.e.
+			 * different items or cost, create a new order. We use a hash to
+			 * detect changes which is based on cart items + order total.
+			 */
+			if ( $order_id && $order_data['cart_hash'] === get_post_meta( $order_id, '_cart_hash', true ) && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
 
 				$order_data['order_id'] = $order_id;
 				$order                  = wc_update_order( $order_data );

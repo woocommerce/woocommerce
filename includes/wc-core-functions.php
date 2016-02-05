@@ -62,7 +62,8 @@ function wc_create_order( $args = array() ) {
 		'customer_note' => null,
 		'order_id'      => 0,
 		'created_via'   => '',
-		'parent'        => 0
+		'cart_hash'     => '',
+		'parent'        => 0,
 	);
 
 	$args       = wp_parse_args( $args, $default_args );
@@ -111,6 +112,7 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 		update_post_meta( $order_id, '_customer_user', 0 );
 		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
+		update_post_meta( $order_id, '_cart_hash', sanitize_text_field( $args['cart_hash'] ) );
 	}
 
 	if ( is_numeric( $args['customer_id'] ) ) {
