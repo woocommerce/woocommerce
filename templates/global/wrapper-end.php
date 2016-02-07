@@ -39,7 +39,7 @@ switch( $template ) {
 		echo '</div></div>';
 		break;
 	case 'twentysixteen' :
-		echo '</div></main>';
+		echo '</main></div>';
 		break;
 	default :
 		echo '</div></div>';
