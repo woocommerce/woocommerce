@@ -1979,8 +1979,8 @@ class WC_Admin_Post_Types {
 				$user_id = get_post_meta( $id, '_customer_user', true );
 
 				if ( $user_id > 0 ) {
-					update_user_meta( $user_id, '_order_count', '' );
-					update_user_meta( $user_id, '_money_spent', '' );
+					delete_user_meta( $user_id, '_money_spent' );
+					delete_user_meta( $user_id, '_order_count' );
 				}
 
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
@@ -2014,8 +2014,8 @@ class WC_Admin_Post_Types {
 				$user_id = get_post_meta( $id, '_customer_user', true );
 
 				if ( $user_id > 0 ) {
-					update_user_meta( $user_id, '_order_count', '' );
-					update_user_meta( $user_id, '_money_spent', '' );
+					delete_user_meta( $user_id, '_money_spent' );
+					delete_user_meta( $user_id, '_order_count' );
 				}
 
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
