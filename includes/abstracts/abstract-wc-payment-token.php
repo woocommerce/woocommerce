@@ -77,10 +77,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns the type of this payment token (cc, echeck, or something else)
+	 * Returns the type of this payment token (CC, eCheck, or something else)
 	 *
 	 * @since 2.6.0
-	 * @return string Payment token type
+	 * @return string Payment Token Type (CC, eCheck)
 	 */
 	public function get_type() {
 		return isset( $this->data['type'] ) ? $this->data['type'] : '';

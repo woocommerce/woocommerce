@@ -54,6 +54,14 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 			return false;
 		}
 
+		if ( 4 !== strlen( $this->meta['expiry_year'] ) ) {
+			return false;
+		}
+
+		if ( 2 !== strlen( $this->meta['expiry_month'] ) ) {
+			return false;
+		}
+
 		return true;
 	}
 
