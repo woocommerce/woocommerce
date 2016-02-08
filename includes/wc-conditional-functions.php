@@ -86,7 +86,7 @@ if ( ! function_exists( 'is_cart' ) ) {
 	 * @return bool
 	 */
 	function is_cart() {
-		return is_page( wc_get_page_id( 'cart' ) ) || defined( 'WOOCOMMERCE_CART' ) || ( ! empty( $post ) && strstr( $post->post_content, '[woocommerce_cart' ) );
+		return is_page( wc_get_page_id( 'cart' ) ) || defined( 'WOOCOMMERCE_CART' ) || is_shortcode_tag( 'woocommerce_cart' );
 	}
 }
 
@@ -97,8 +97,7 @@ if ( ! function_exists( 'is_checkout' ) ) {
 	 * @return bool
 	 */
 	function is_checkout() {
-		global $post;
-		return is_page( wc_get_page_id( 'checkout' ) ) || ( ! empty( $post ) && strstr( $post->post_content, '[woocommerce_checkout' ) ) || apply_filters( 'woocommerce_is_checkout', false );
+		return is_page( wc_get_page_id( 'checkout' ) ) || is_shortcode_tag( 'woocommerce_checkout' ) || apply_filters( 'woocommerce_is_checkout', false );
 	}
 }
 
@@ -154,7 +153,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return is_page( wc_get_page_id( 'myaccount' ) ) || ( ! empty( $post ) && strstr( $post->post_content, '[woocommerce_my_account' ) ) || apply_filters( 'woocommerce_is_account_page', false );
+		return is_page( wc_get_page_id( 'myaccount' ) ) || is_shortcode_tag( 'woocommerce_my_account' ) || apply_filters( 'woocommerce_is_account_page', false );
 	}
 }
 
@@ -234,6 +233,20 @@ if ( ! function_exists( 'is_ajax' ) ) {
 	 */
 	function is_ajax() {
 		return defined( 'DOING_AJAX' );
+	}
+}
+
+if ( ! function_exists( 'is_shortcode_tag' ) ) {
+
+	/**
+	 * is_shortcode_tag - Returns true when the shortcode tag is found.
+	 * @param  string $tag Shortcode tag to check.
+	 * @return bool
+	 */
+	function is_shortcode_tag( $tag = '' ) {
+		global $post;
+
+		return is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, $tag );
 	}
 }
 
