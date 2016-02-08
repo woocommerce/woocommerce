@@ -5,6 +5,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * WooCommerce Payment Token Meta API - set table name
+ */
+function wc_payment_token_metadata_wpdbfix() {
+	global $wpdb;
+	$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
+	$wpdb->tables[] = 'woocommerce_payment_tokenmeta';
+}
+add_action( 'init', 'wc_payment_token_metadata_wpdbfix', 0 );
+
+/**
  * WooCommerce Payment Token
  *
  * Representation of a general payment token to be extended by individuals types of tokens

@@ -91,7 +91,7 @@ class WC_Payment_Tokens {
 	/**
 	 * Get a token object by ID
 	 * @param  int $token_id Token ID
-	 * @return WC_Payment_Token
+	 * @return WC_Payment_Token|null Returns a valid payment token or null if no token can be found
 	 */
 	public static function get( $token_id, $token_result = null ) {
 		global $wpdb;
@@ -100,6 +100,10 @@ class WC_Payment_Tokens {
 				"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d",
 				$token_id
 			) );
+			// Still empty? Token doesn't exist? Don't continue
+			if ( empty( $token_result) ) {
+				return null;
+			}
 		}
 		$token_class = 'WC_Payment_Token_' . $token_result->type;
 		if ( class_exists( $token_class ) ) {
