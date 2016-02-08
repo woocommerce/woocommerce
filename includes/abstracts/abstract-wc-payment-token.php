@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category	Abstract Class
  * @author		WooThemes
  */
- abstract class WC_Payment_Token {
+ abstract class WC_Payment_Token implements WC_Data {
 
  	/** @protected int Token ID */
  	protected $id;
@@ -162,8 +162,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @since 2.6.0
 	 * @return mixed array representation
 	 */
-	public function __data_format() {
+	public function get_data() {
 		return array_merge( $this->data, array( 'meta' => $this->meta ) );
+	}
+
+	/**
+	 * Get this payment token from the database.
+	 * @param  int   $token_id Token ID
+	 * @return class           Database row
+	 */
+	public function read( $token_id ) {
+
+	}
+
+	public function update() {
+
+	}
+
+	public function create() {
+
+	}
+
+	public function save() {
+
+	}
+
+	/**
+	 * Remove a payment token from the database
+	 * @param int $token_id Token ID
+	 */
+	public function delete() {
+		global $wpdb;
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokens', array( 'token_id' => $this->get_id() ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokenmeta', array( 'payment_token_id' => $this->get_id() ), array( '%d' ) );
+		do_action( 'woocommerce_payment_token_deleted', $this->get_id(), $this );
 	}
 
 }
