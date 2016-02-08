@@ -1635,12 +1635,18 @@ ul.order_notes {
 		  border-color: #efefef transparent;
 		}
 	}
-
 	li.customer-note {
+		.note_content {
+			background: #A7CEDC;
+		}
+		.note_content:after {
+			border-color: #A7CEDC transparent;
+		}
+	}
+	li.system-note {
 		.note_content {
 			background: #d7cad2;
 		}
-
 		.note_content:after {
 			border-color: #d7cad2 transparent;
 		}
