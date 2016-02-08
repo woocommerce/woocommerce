@@ -18,6 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Payment_Token_CC extends WC_Payment_Token {
 
+	/** @protected string Token Type String */
+	protected $type = 'CC';
+
  	/**
 	 * Validate credit card payment tokens
 	 *
@@ -28,24 +31,26 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * card_type     - string Card type (visa, mastercard, etc)
 	 *
 	 * @since 2.6.0
-	 * @param array $args Data to validate
-	 * @return boolean    True if the passed data is valid
+	 * @return boolean True if the passed data is valid
 	 */
-	public static function validate( $args ) {
-
-		if ( empty( $args['meta']['last4'] ) ) {
+	public function validate() {
+		if ( false === parent::validate() ) {
 			return false;
 		}
 
-		if ( empty( $args['meta']['expiry_year'] ) ) {
+		if ( empty( $this->meta['last4'] ) ) {
 			return false;
 		}
 
-		if ( empty( $args['meta']['expiry_month'] ) ) {
+		if ( empty( $this->meta['expiry_year'] ) ) {
 			return false;
 		}
 
-		if ( empty ( $args['meta']['card_type'] ) ) {
+		if ( empty( $this->meta['expiry_month'] ) ) {
+			return false;
+		}
+
+		if ( empty ( $this->meta['card_type'] ) ) {
 			return false;
 		}
 

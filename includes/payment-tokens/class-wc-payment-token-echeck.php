@@ -17,18 +17,24 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Payment_Token_eCheck extends WC_Payment_Token {
 
+	/** @protected string Token Type String */
+	protected $type = 'eCheck';
+
  	/**
 	 * Validate eCheck payment tokens.
 	 *
-	 * These fields are required by all credit card payment tokens:
+	 * These fields are required by all eCheck payment tokens:
 	 * last4  - string Last 4 digits of the check
 	 *
 	 * @since 2.6.0
-	 * @param array $args Data to validate
-	 * @return boolean    True if the passed data is valid
+	 * @return boolean True if the passed data is valid
 	 */
-	public static function validate( $args ) {
-		if ( empty( $args['meta']['last4'] ) ) {
+	public static function validate() {
+		if ( false === parent::validate() ) {
+			return false;
+		}
+
+		if ( empty( $this->meta['last4'] ) ) {
 			return false;
 		}
 		return true;
