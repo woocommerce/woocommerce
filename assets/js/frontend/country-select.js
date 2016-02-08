@@ -80,12 +80,10 @@ jQuery( function( $ ) {
 	/* State/Country select boxes */
 	var states_json = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
 		states = $.parseJSON( states_json );
-
-	$( document.body ).on( 'change', 'select.country_to_state, input.country_to_state', function() {
-
-		var country     = $( this ).val(),
-			$wrapper    = $( this ).closest('.form-row').parent(), // Grab wrapping form-row parent to target stateboxes in same 'group'
-			$statebox   = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' ),
+		
+	$( document.body ).on('wc_country_to_state', function(event, country, $wrapper ){
+		
+		var $statebox   = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' ),
 			$parent     = $statebox.parent(),
 			input_name  = $statebox.attr( 'name' ),
 			input_id    = $statebox.attr( 'id' ),
@@ -144,7 +142,12 @@ jQuery( function( $ ) {
 		}
 
 		$( document.body ).trigger( 'country_to_state_changing', [country, $wrapper ] );
+		
+	}).on( 'change.wc_country_to_state', 'select.country_to_state, input.country_to_state', function() {
 
+		var $wrapper    = $( this ).closest('.form-row').parent(); // Grab wrapping form-row parent to target stateboxes in same 'group'
+		$( document.body ).trigger( 'wc_country_to_state', [this.value, $wrapper ] );
+		
 	});
 
 	$(function() {
