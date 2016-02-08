@@ -86,7 +86,7 @@ if ( ! function_exists( 'is_cart' ) ) {
 	 * @return bool
 	 */
 	function is_cart() {
-		return is_page( wc_get_page_id( 'cart' ) ) || defined( 'WOOCOMMERCE_CART' );
+		return is_page( wc_get_page_id( 'cart' ) ) || defined( 'WOOCOMMERCE_CART' ) || ( ! empty( $post ) && strstr( $post->post_content, '[woocommerce_cart' ) );
 	}
 }
 
@@ -97,7 +97,8 @@ if ( ! function_exists( 'is_checkout' ) ) {
 	 * @return bool
 	 */
 	function is_checkout() {
-		return is_page( wc_get_page_id( 'checkout' ) ) || apply_filters( 'woocommerce_is_checkout', false );
+		global $post;
+		return is_page( wc_get_page_id( 'checkout' ) ) || ( ! empty( $post ) && strstr( $post->post_content, '[woocommerce_checkout' ) ) || apply_filters( 'woocommerce_is_checkout', false );
 	}
 }
 
@@ -153,7 +154,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return is_page( wc_get_page_id( 'myaccount' ) ) || apply_filters( 'woocommerce_is_account_page', false );
+		return is_page( wc_get_page_id( 'myaccount' ) ) || ( ! empty( $post ) && strstr( $post->post_content, '[woocommerce_my_account' ) ) || apply_filters( 'woocommerce_is_account_page', false );
 	}
 }
 
