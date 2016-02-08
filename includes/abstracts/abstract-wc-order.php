@@ -2383,11 +2383,13 @@ abstract class WC_Abstract_Order {
 				update_post_meta( $this->id, '_transaction_id', $transaction_id );
 			}
 
-			wp_update_post( array(
-				'ID'            => $this->id,
-				'post_date'     => current_time( 'mysql', 0 ),
-				'post_date_gmt' => current_time( 'mysql', 1 )
-			) );
+			if ( apply_filters( 'woocommerce_payment_complete_update_order_date', true, $this->id ) ) {
+				wp_update_post( array(
+					'ID'            => $this->id,
+					'post_date'     => current_time( 'mysql', 0 ),
+					'post_date_gmt' => current_time( 'mysql', 1 )
+				) );
+			}
 
 			// Payment is complete so reduce stock levels
 			if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $this->id, '_order_stock_reduced', true ), $this->id ) ) {
