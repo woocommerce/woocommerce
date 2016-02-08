@@ -29,7 +29,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * @since 2.6.0
 	 * @return boolean True if the passed data is valid
 	 */
-	public static function validate() {
+	public function validate() {
 		if ( false === parent::validate() ) {
 			return false;
 		}

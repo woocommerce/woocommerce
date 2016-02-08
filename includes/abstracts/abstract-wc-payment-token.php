@@ -93,7 +93,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @return int User ID if this token is associated with a user or 0 if no user is associated
 	 */
 	public function get_user_id() {
-		return ( $this->data['user_id'] > 0 ) ? $this->data['user_id'] : 0;
+		return ( isset( $this->data['user_id'] ) && $this->data['user_id'] > 0 ) ? $this->data['user_id'] : 0;
 	}
 
 	/**
