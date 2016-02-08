@@ -38,16 +38,30 @@
 		// When the variation is hidden
 		.on( 'hide_variation', function( event ) {
 			event.preventDefault();
-			$form.find( '.single_add_to_cart_button' ).attr( 'disabled', 'disabled' ).attr( 'title', wc_add_to_cart_variation_params.i18n_make_a_selection_text );
+			$form.find( '.single_add_to_cart_button' ).removeClass( 'wc-variation-is-unavailable' ).addClass( 'disabled wc-variation-selection-needed' );
 		} )
 
 		// When the variation is revealed
 		.on( 'show_variation', function( event, variation, purchasable ) {
 			event.preventDefault();
 			if ( purchasable ) {
-				$form.find( '.single_add_to_cart_button' ).removeAttr( 'disabled' ).removeAttr( 'title' );
+				$form.find( '.single_add_to_cart_button' ).removeClass( 'disabled wc-variation-selection-needed wc-variation-is-unavailable' );
 			} else {
-				$form.find( '.single_add_to_cart_button' ).attr( 'disabled', 'disabled' ).attr( 'title', wc_add_to_cart_variation_params.i18n_unavailable_text );
+				$form.find( '.single_add_to_cart_button' ).removeClass( 'wc-variation-selection-needed' ).addClass( 'disabled wc-variation-is-unavailable' );
+			}
+		} )
+
+		.on( 'click', '.single_add_to_cart_button', function( event ) {
+			var $this = $( this );
+
+			if ( $this.is('.disabled') ) {
+				event.preventDefault();
+
+				if ( $this.is('.wc-variation-is-unavailable') ) {
+					window.alert( wc_add_to_cart_variation_params.i18n_unavailable_text );
+				} else if ( $this.is('.wc-variation-selection-needed') ) {
+					window.alert( wc_add_to_cart_variation_params.i18n_make_a_selection_text );
+				}
 			}
 		} )
 
