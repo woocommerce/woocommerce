@@ -301,24 +301,25 @@ class WC_Admin_Status {
 
 	/**
 	 * Get latest version of a theme by slug.
-	 * @param  object $theme WP_Theme object
-	 * @return string Version number if found
+	 * @param  object $theme WP_Theme object.
+	 * @return string Version number if found.
 	 */
 	public static function get_latest_theme_version( $theme ) {
 		$api = themes_api( 'theme_information', array(
 			'slug'     => $theme->get_stylesheet(),
 			'fields'   => array(
-			'sections' => false,
-			'tags'     => false
-		) ) );
+				'sections' => false,
+				'tags'     => false,
+			)
+		) );
 
 		$update_theme_version = 0;
 
-		// Check .org for updates
-		if ( $api && ! is_wp_error( $api ) ) {
+		// Check .org for updates.
+		if ( is_object( $api ) && ! is_wp_error( $api ) ) {
 			$update_theme_version = $api->version;
 
-		// Check WooThemes Theme Version
+		// Check WooThemes Theme Version.
 		} elseif ( strstr( $theme->{'Author URI'}, 'woothemes' ) ) {
 			$theme_dir = substr( strtolower( str_replace( ' ','', $theme->Name ) ), 0, 45 );
 
