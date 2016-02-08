@@ -275,6 +275,8 @@ class WC_Form_Handler {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
 
+				do_action( 'woocommerce_before_pay_action', $order );
+
 				// Set customer location to order location
 				if ( $order->billing_country ) {
 					WC()->customer->set_country( $order->billing_country );
@@ -337,6 +339,9 @@ class WC_Form_Handler {
 					wp_safe_redirect( $order->get_checkout_order_received_url() );
 					exit;
 				}
+
+				do_action( 'woocommerce_after_pay_action', $order );
+
 			}
 
 		}
