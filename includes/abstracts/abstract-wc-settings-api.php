@@ -100,20 +100,22 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_field_value( $key, $field ) {
-		$type = $this->get_field_type( $field );
+		$type      = $this->get_field_type( $field );
+		$field_key = $this->get_field_key( $key );
+		$value     = isset( $_POST[ $field_key ] ) ? $_POST[ $field_key ] : null;
 
 		// Look for a validate_FIELDID_field method for special handling
-		if ( method_exists( $this, 'validate_' . $key . '_field' ) ) {
-			return $this->{'validate_' . $key . '_field'}( $key );
+		if ( is_callable( array( $this, 'validate_' . $key . '_field' ) ) ) {
+			return $this->{'validate_' . $key . '_field'}( $key, $value );
 		}
 
 		// Look for a validate_FIELDTYPE_field method
-		if ( method_exists( $this, 'validate_' . $type . '_field' ) ) {
-			return $this->{'validate_' . $type . '_field'}( $key );
+		if ( is_callable( array( $this, 'validate_' . $type . '_field' ) ) ) {
+			return $this->{'validate_' . $type . '_field'}( $key, $value );
 		}
 
 		// Fallback to text
-		return $this->validate_text_field( $key );
+		return $this->validate_text_field( $key, $value );
 	}
 
 	/**
@@ -725,18 +727,13 @@ abstract class WC_Settings_API {
 	 *
 	 * Make sure the data is escaped correctly, etc.
 	 *
-	 * @param  string $key
+	 * @param  string $key Field key
+	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
-	public function validate_text_field( $key ) {
-		$text      = $this->get_option( $key );
-		$field_key = $this->get_field_key( $key );
-
-		if ( isset( $_POST[ $field_key ] ) ) {
-			$text = wp_kses_post( trim( stripslashes( $_POST[ $field_key ] ) ) );
-		}
-
-		return $text;
+	public function validate_text_field( $key, $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		return wp_kses_post( trim( stripslashes( $value ) ) );
 	}
 
 	/**
@@ -745,22 +742,12 @@ abstract class WC_Settings_API {
 	 * Make sure the data is escaped correctly, etc.
 	 *
 	 * @param  string $key
+	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
-	public function validate_price_field( $key ) {
-		$text      = $this->get_option( $key );
-		$field_key = $this->get_field_key( $key );
-
-		if ( isset( $_POST[ $field_key ] ) ) {
-
-			if ( $_POST[ $field_key ] !== '' ) {
-				$text = wc_format_decimal( trim( stripslashes( $_POST[ $field_key ] ) ) );
-			} else {
-				$text = '';
-			}
-		}
-
-		return $text;
+	public function validate_price_field( $key, $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		return $value === '' ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
 	}
 
 	/**
@@ -769,22 +756,12 @@ abstract class WC_Settings_API {
 	 * Make sure the data is escaped correctly, etc.
 	 *
 	 * @param  string $key
+	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
-	public function validate_decimal_field( $key ) {
-		$text      = $this->get_option( $key );
-		$field_key = $this->get_field_key( $key );
-
-		if ( isset( $_POST[ $field_key ] ) ) {
-
-			if ( $_POST[ $field_key ] !== '' ) {
-				$text = wc_format_decimal( trim( stripslashes( $_POST[ $field_key ] ) ) );
-			} else {
-				$text = '';
-			}
-		}
-
-		return $text;
+	public function validate_decimal_field( $key, $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		return $value === '' ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
 	}
 
 	/**
@@ -793,37 +770,31 @@ abstract class WC_Settings_API {
 	 * Make sure the data is escaped correctly, etc.
 	 *
 	 * @param  string $key
+	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
-	public function validate_password_field( $key ) {
-		$field_key = $this->get_field_key( $key );
-		$value     = wp_kses_post( trim( stripslashes( $_POST[ $field_key ] ) ) );
-		return $value;
+	public function validate_password_field( $key, $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		return wp_kses_post( trim( stripslashes( $value ) ) );
 	}
 
 	/**
 	 * Validate Textarea Field.
 	 *
 	 * @param  string $key
+	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
-	public function validate_textarea_field( $key ) {
-		$field_key = $this->get_field_key( $key );
-
-		if ( isset( $_POST[ $field_key ] ) ) {
-			$text = wp_kses( trim( stripslashes( $_POST[ $field_key ] ) ),
-				array_merge(
-					array(
-						'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
-					),
-					wp_kses_allowed_html( 'post' )
-				)
-			);
-		} else {
-			$text = $this->get_option( $key );
-		}
-
-		return $text;
+	public function validate_textarea_field( $key, $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		return wp_kses( trim( stripslashes( $value ) ),
+			array_merge(
+				array(
+					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
+				),
+				wp_kses_allowed_html( 'post' )
+			)
+		);
 	}
 
 	/**
@@ -832,33 +803,34 @@ abstract class WC_Settings_API {
 	 * If not set, return "no", otherwise return "yes".
 	 *
 	 * @param  string $key
+	 * @param  string|null $value Posted Value
 	 * @return string
 	 */
-	public function validate_checkbox_field( $key ) {
-		$field_key = $this->get_field_key( $key );
-		return isset( $_POST[ $field_key ] ) && '1' === $_POST[ $field_key ] ? 'yes' : 'no';
+	public function validate_checkbox_field( $key, $value ) {
+		return ! is_null( $value ) ? 'yes' : 'no';
 	}
 
 	/**
 	 * Validate Select Field.
 	 *
 	 * @param  string $key
+	 * @param  string $value Posted Value
 	 * @return string
 	 */
-	public function validate_select_field( $key ) {
-		$field_key = $this->get_field_key( $key );
-		return isset( $_POST[ $field_key ] ) ? wc_clean( stripslashes( $_POST[ $field_key ] ) ) : $this->get_option( $key );
+	public function validate_select_field( $key, $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		return wc_clean( stripslashes( $value ) );
 	}
 
 	/**
 	 * Validate Multiselect Field.
 	 *
 	 * @param  string $key
+	 * @param  string $value Posted Value
 	 * @return string
 	 */
-	public function validate_multiselect_field( $key ) {
-		$field_key = $this->get_field_key( $key );
-		return isset( $_POST[ $field_key ] ) ? array_map( 'wc_clean', array_map( 'stripslashes', (array) $_POST[ $field_key ] ) ) : '';
+	public function validate_multiselect_field( $key, $value ) {
+		return is_array( $value ) ? array_map( 'wc_clean', array_map( 'stripslashes', $value ) ) : '';
 	}
 
 	/**
