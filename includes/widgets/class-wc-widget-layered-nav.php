@@ -301,6 +301,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$link = add_query_arg( 'post_type', wc_clean( $_GET['post_type'] ), $link );
 		}
 
+		// Min Rating Arg
+		if ( isset( $_GET['min_rating'] ) ) {
+			$link = add_query_arg( 'min_rating', wc_clean( $_GET['min_rating'] ), $link );
+		}
+
 		return $link;
 	}
 

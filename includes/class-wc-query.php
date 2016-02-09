@@ -53,6 +53,7 @@ class WC_Query {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		add_action( 'init', array( $this, 'layered_nav_init' ) );
 		add_action( 'init', array( $this, 'price_filter_init' ) );
+		add_action( 'init', array( $this, 'rating_filter_init' ) );
 
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
@@ -902,6 +903,58 @@ class WC_Query {
 							$matched_products[] = $product->post_parent;
 						}
 					}
+				}
+			}
+
+			$matched_products = array_unique( $matched_products );
+
+			// Filter the id's
+			if ( 0 === sizeof( $filtered_posts ) ) {
+				$filtered_posts = $matched_products;
+			} else {
+				$filtered_posts = array_intersect( $filtered_posts, $matched_products );
+			}
+			$filtered_posts[] = 0;
+		}
+
+		return (array) $filtered_posts;
+	}
+
+	/**
+	 * Rating filter Init.
+	 */
+	public function rating_filter_init() {
+		if ( apply_filters( 'woocommerce_is_rating_filter_active', is_active_widget( false, false, 'woocommerce_rating_filter', true ) ) && ! is_admin() ) {
+			add_filter( 'loop_shop_post_in', array( $this, 'rating_filter' ) );
+		}
+	}
+
+	/**
+	 * Rating Filter post filter.
+	 *
+	 * @param array $filtered_posts
+	 * @return array
+	 */
+	public function rating_filter( $filtered_posts = array() ) {
+		global $wpdb;
+
+		if( isset( $_GET['min_rating'] ) ) {
+			$matched_products = array();
+			$min              = isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0;
+
+			$matched_products_query = apply_filters( 'woocommerce_rating_filter_results', $wpdb->get_results( $wpdb->prepare( "
+					SELECT comment_post_ID, ROUND( AVG( meta_value ), 2 ) as average_rating FROM {$wpdb->commentmeta}
+					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+					WHERE meta_key = 'rating'
+					AND comment_approved = '1'
+					AND meta_value > 0
+					GROUP BY comment_post_ID
+					HAVING ROUND( AVG( meta_value ), 2 ) >= %d
+				", $min ), OBJECT_K ), $min );
+
+			if ( $matched_products_query ) {
+				foreach ( $matched_products_query as $commentmeta ) {
+					$matched_products[] = $commentmeta->comment_post_ID;
 				}
 			}
 
