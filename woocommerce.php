@@ -167,6 +167,7 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
+		add_action( 'init', array( $this, 'payment_token_metadata_wpdbfix' ), 0 );
 	}
 
 	/**
@@ -466,6 +467,15 @@ final class WooCommerce {
 			$webhook = new WC_Webhook( $webhook_id );
 			$webhook->enqueue();
 		}
+	}
+
+	/**
+	 * WooCommerce Payment Token Meta API - set table name
+	 */
+	function payment_token_metadata_wpdbfix() {
+		global $wpdb;
+		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
+		$wpdb->tables[] = 'woocommerce_payment_tokenmeta';
 	}
 
 	/**

@@ -202,6 +202,25 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			),
 
 			array(
+				'title'    => __( 'Delete Payment Method', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the delete payment method page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_delete_payment_method_endpoint',
+				'type'     => 'text',
+				'default'  => 'delete-payment-method',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Set Default Payment Method', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the setting a default payment page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_set_default_payment_method_endpoint',
+				'type'     => 'text',
+				'default'  => 'set-default-payment-method',
+				'desc_tip' => true,
+			),
+
+
+			array(
 				'type' => 'sectionend',
 				'id' => 'checkout_endpoint_options',
 			),

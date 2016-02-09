@@ -19,6 +19,7 @@ class WC_Payment_Tokens {
 
 	/**
 	 * Returns an array of payment token objects associated with the passed customer ID
+	 * @since 2.6
 	 * @param int $customer_id Customer ID
 	 * @return array Array of token objects
 	 */
@@ -51,6 +52,8 @@ class WC_Payment_Tokens {
 
 	/**
 	 * Returns an array of payment token objects associated with the passed order ID
+	 *
+	 * @since 2.6
 	 * @param int $order_id Order ID
 	 * @return array Array of token objects
 	 */
@@ -90,6 +93,8 @@ class WC_Payment_Tokens {
 
 	/**
 	 * Get a token object by ID
+	 *
+	 * @since 2.6
 	 * @param  int $token_id Token ID
 	 * @return WC_Payment_Token|null Returns a valid payment token or null if no token can be found
 	 */
@@ -120,6 +125,8 @@ class WC_Payment_Tokens {
 
 	/**
 	 * Remove a payment token from the database by ID
+	 *
+	 * @since 2.6
 	 * @param WC_Payment_Token $token_id Token ID
 	 */
 	public static function delete( $token_id ) {
@@ -132,7 +139,28 @@ class WC_Payment_Tokens {
 	}
 
 	/**
+	 * Loops through all of a users payment tokens and sets is_default to false for all but a specific token
+	 *
+	 * @since 2.6
+	 * @param int $user_id  User to set a default for
+	 * @param int $token_id The ID of the token that should be default
+	 */
+	public static function set_users_default( $user_id, $token_id ) {
+		$users_tokens = self::get_customer_tokens( $user_id );
+		foreach ( $users_tokens as $token ) {
+			if ( $token_id === $token->get_id() ) {
+				$token->set_default( true );
+			} else {
+				$token->set_default( false );
+			}
+			$token->update();
+		}
+	}
+
+	/**
 	 * Returns what type (credit card, echeck, etc) of token a token is by ID
+	 *
+	 * @since 2.6
 	 * @param  int $token_id Token ID
 	 * @return string        Type
 	 */

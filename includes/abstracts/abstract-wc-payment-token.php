@@ -5,16 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce Payment Token Meta API - set table name
- */
-function wc_payment_token_metadata_wpdbfix() {
-	global $wpdb;
-	$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-	$wpdb->tables[] = 'woocommerce_payment_tokenmeta';
-}
-add_action( 'init', 'wc_payment_token_metadata_wpdbfix', 0 );
-
-/**
  * WooCommerce Payment Token
  *
  * Representation of a general payment token to be extended by individuals types of tokens
@@ -63,7 +53,7 @@ add_action( 'init', 'wc_payment_token_metadata_wpdbfix', 0 );
 	 * @return ID Token ID
 	 */
 	public function get_id() {
-		return $this->id;
+		return absint( $this->id );
 	}
 
 	/**
@@ -103,7 +93,7 @@ add_action( 'init', 'wc_payment_token_metadata_wpdbfix', 0 );
 	 * @return int User ID if this token is associated with a user or 0 if no user is associated
 	 */
 	public function get_user_id() {
-		return ( isset( $this->data['user_id'] ) && $this->data['user_id'] > 0 ) ? $this->data['user_id'] : 0;
+		return ( isset( $this->data['user_id'] ) && $this->data['user_id'] > 0 ) ? absint( $this->data['user_id'] ) : 0;
 	}
 
 	/**

@@ -76,4 +76,36 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'CC', \WC_Payment_Tokens::get_token_type_by_id( $token_id ) );
 	}
 
+	/**
+	 * Test setting a users default token
+	 *
+	 * @since 2.6
+	 */
+	function test_wc_payment_tokens_set_users_default() {
+		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token_id = $token->get_id();
+		$token->set_user_id( 1 );
+		$token->save();
+
+		$token2 = \WC_Helper_Payment_Token::create_cc_token();
+		$token_id_2 = $token2->get_id();
+		$token2->set_user_id( 1 );
+		$token2->save();
+
+		$this->assertFalse( $token->is_default() );
+		$this->assertFalse( $token2->is_default() );
+
+		\WC_Payment_Tokens::set_users_default( 1, $token_id_2 );
+		$token->read( $token_id );
+		$token2->read( $token_id_2 );
+		$this->assertFalse( $token->is_default() );
+		$this->assertTrue( $token2->is_default() );
+
+		\WC_Payment_Tokens::set_users_default( 1, $token_id );
+		$token->read( $token_id );
+		$token2->read( $token_id_2 );
+		$this->assertTrue( $token->is_default() );
+		$this->assertFalse( $token2->is_default() );
+	}
+
 }
