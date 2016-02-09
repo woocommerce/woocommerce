@@ -82,8 +82,18 @@ class Validation extends \WC_Unit_Test_Case {
 			array( false, \WC_Validation::is_postcode( '99999 999', 'BR' ) ),
 			array( false, \WC_Validation::is_postcode( '99999-ABC', 'BR' ) )
 		);
+        
+        $ca = array(
+            array( true, \WC_Validation::is_postcode( 'A9A 9A9', 'CA' ) ),
+			array( true, \WC_Validation::is_postcode( 'A9A9A9', 'CA' ) ),
+            array( true, \WC_Validation::is_postcode( 'a9a9a9', 'CA' ) ),
+			array( false, \WC_Validation::is_postcode( 'D0A 9A9', 'CA' ) ),
+            array( false, \WC_Validation::is_postcode( '99999', 'CA' ) ),
+            array( false, \WC_Validation::is_postcode( 'ABC999', 'CA' ) ),
+			array( false, \WC_Validation::is_postcode( '0A0A0A', 'CA' ) )
+        );
 
-		return array_merge( $generic, $gb, $us, $ch, $br );
+		return array_merge( $generic, $gb, $us, $ch, $br, $ca );
 	}
 
 	/**
