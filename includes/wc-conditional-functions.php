@@ -86,7 +86,7 @@ if ( ! function_exists( 'is_cart' ) ) {
 	 * @return bool
 	 */
 	function is_cart() {
-		return is_page( wc_get_page_id( 'cart' ) ) || defined( 'WOOCOMMERCE_CART' ) || is_wc_shortcode_tag( 'woocommerce_cart' );
+		return is_page( wc_get_page_id( 'cart' ) ) || defined( 'WOOCOMMERCE_CART' ) || wc_post_content_has_shortcode( 'woocommerce_cart' );
 	}
 }
 
@@ -97,7 +97,7 @@ if ( ! function_exists( 'is_checkout' ) ) {
 	 * @return bool
 	 */
 	function is_checkout() {
-		return is_page( wc_get_page_id( 'checkout' ) ) || is_wc_shortcode_tag( 'woocommerce_checkout' ) || apply_filters( 'woocommerce_is_checkout', false );
+		return is_page( wc_get_page_id( 'checkout' ) ) || wc_post_content_has_shortcode( 'woocommerce_checkout' ) || apply_filters( 'woocommerce_is_checkout', false );
 	}
 }
 
@@ -111,20 +111,6 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 		global $wp;
 
 		return is_checkout() && ! empty( $wp->query_vars['order-pay'] );
-	}
-}
-
-if ( ! function_exists( 'is_wc_shortcode_tag' ) ) {
-
-	/**
-	 * is_wc_shortcode_tag - Returns true when the shortcode tag is found.
-	 * @param  string $tag Shortcode tag to check.
-	 * @return bool
-	 */
-	function is_wc_shortcode_tag( $tag = '' ) {
-		global $post;
-
-		return is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, $tag );
 	}
 }
 
@@ -167,7 +153,7 @@ if ( ! function_exists( 'is_account_page' ) ) {
 	 * @return bool
 	 */
 	function is_account_page() {
-		return is_page( wc_get_page_id( 'myaccount' ) ) || is_wc_shortcode_tag( 'woocommerce_my_account' ) || apply_filters( 'woocommerce_is_account_page', false );
+		return is_page( wc_get_page_id( 'myaccount' ) ) || wc_post_content_has_shortcode( 'woocommerce_my_account' ) || apply_filters( 'woocommerce_is_account_page', false );
 	}
 }
 
@@ -404,4 +390,16 @@ function wc_site_is_https() {
  */
 function wc_checkout_is_https() {
 	return wc_site_is_https() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || class_exists( 'WordPressHTTPS' ) || strstr( wc_get_page_permalink( 'checkout' ), 'https:' );
+}
+
+/**
+ * Checks whether the content passed contains a specific short code.
+ *
+ * @param  string $tag Shortcode tag to check.
+ * @return bool
+ */
+function wc_post_content_has_shortcode( $tag = '' ) {
+	global $post;
+
+	return is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, $tag );
 }
