@@ -96,7 +96,7 @@ class WC_Admin_Permalink_Settings {
 		echo wpautop( __( 'These settings control the permalinks used specifically for products.', 'woocommerce' ) );
 
 		$permalinks        = get_option( 'woocommerce_permalinks' );
-		$product_permalink = $permalinks['product_base'];
+		$product_permalink = isset( $permalinks['product_base'] ) ? $permalinks['product_base'] : '';
 
 		// Get shop page
 		$shop_page_id   = wc_get_page_id( 'shop' );
