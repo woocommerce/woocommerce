@@ -229,7 +229,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 				// If this is an AND query, only show options with count > 0
 				if ( 'and' === $query_type ) {
-					$count = sizeof( array_intersect( $_products_in_term, WC()->query->filtered_product_ids ) );
+					$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
 
 					if ( 0 < $count ) {
 						$found = true;
@@ -241,7 +241,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 				// If this is an OR query, show all options so search can be expanded
 				} else {
-					$count = sizeof( array_intersect( $_products_in_term, WC()->query->unfiltered_product_ids ) );
+					$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
 
 					if ( 0 < $count ) {
 						$found = true;
@@ -310,6 +310,55 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
+	 * Count terms after other filters have occured by adjusting the main query.
+	 * @param  object $term
+	 * @param  string $taxonomy
+	 * @param  string $query_type
+	 * @return int
+	 */
+	protected function get_filtered_term_count( $term, $taxonomy, $query_type ) {
+		global $wpdb, $wp_the_query;
+
+		$args       = $wp_the_query->query_vars;
+		$tax_query  = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
+		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
+
+		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => $args['taxonomy'],
+				'terms'    => array( $args['term'] ),
+				'field'    => 'slug',
+			);
+		}
+
+		if ( 'or' === $query_type ) {
+			foreach ( $tax_query as $key => $query ) {
+				if ( $taxonomy === $query['taxonomy'] ) {
+					unset( $tax_query[ $key ] );
+				}
+			}
+		}
+		$tax_query[] = array(
+			'taxonomy' => $taxonomy,
+			'field'    => 'slug',
+			'terms'    => $term->slug
+		);
+
+		$meta_query = new WP_Meta_Query( $meta_query );
+		$tax_query  = new WP_Tax_Query( $tax_query );
+
+		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
+		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
+
+		$sql  = "SELECT COUNT( {$wpdb->posts}.ID ) FROM {$wpdb->posts} ";
+		$sql .= $tax_query_sql['join'] . $meta_query_sql['join'];
+		$sql .= " WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' ";
+		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
+
+		return absint( $wpdb->get_var( $sql ) );
+	}
+
+	/**
 	 * Show list based layered nav.
 	 * @param  array $terms
 	 * @param  string $taxonomy
@@ -322,10 +371,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		// List display
 		echo '<ul>';
 
-		// flip the filtered_products_ids array so that we can use the more efficient array_intersect_key
-		$filtered_product_ids   = array_flip( WC()->query->filtered_product_ids );
-		$unfiltered_product_ids = array_flip( WC()->query->unfiltered_product_ids );
-		$found                  = false;
+		$found = false;
 
 		foreach ( $terms as $term ) {
 			// Get count based on current view - uses transients
@@ -341,8 +387,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 			// If this is an AND query, only show options with count > 0
 			if ( 'and' === $query_type ) {
-				// Intersect both arrays now they have been flipped so that we can use their keys
-				$count = sizeof( array_intersect_key( $_products_in_term, $filtered_product_ids ) );
+				$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
 
 				if ( 0 < $count ) {
 					$found = true;
@@ -354,8 +399,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 			// If this is an OR query, show all options so search can be expanded
 			} else {
-				// Intersect both arrays now they have been flipped so that we can use their keys
-				$count = sizeof( array_intersect_key( $_products_in_term, $unfiltered_product_ids ) );
+				$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
 
 				if ( 0 < $count ) {
 					$found = true;
