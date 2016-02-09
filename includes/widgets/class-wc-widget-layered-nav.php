@@ -327,7 +327,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$tax_query[] = array(
 				'taxonomy' => $args['taxonomy'],
 				'terms'    => array( $args['term'] ),
-				'field'    => 'slug',
+				'field'    => 'slug'
 			);
 		}
 
@@ -339,9 +339,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 		}
 		$tax_query[] = array(
-			'taxonomy' => $taxonomy,
-			'field'    => 'slug',
-			'terms'    => $term->slug
+			'taxonomy'         => $taxonomy,
+			'field'            => 'term_id',
+			'terms'            => $term->term_id,
+			'include_children' => false
 		);
 
 		$meta_query = new WP_Meta_Query( $meta_query );
