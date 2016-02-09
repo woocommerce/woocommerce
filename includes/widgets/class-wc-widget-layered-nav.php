@@ -215,7 +215,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 						}
 
-						echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( isset( $_GET[ 'filter_' . $taxonomy_filter ] ) ? $_GET[ 'filter_' . $taxonomy_filter ] : '' , $term->term_id, false ) . '>' . esc_html( $term->name ) . '</option>';
+						echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( isset( $_GET[ 'filter_' . $taxonomy_filter ] ) ? $_GET[ 'filter_' . $taxonomy_filter ] : '' , $term->slug, false ) . '>' . esc_html( $term->name ) . '</option>';
 					}
 
 					echo '</select>';
@@ -278,8 +278,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 					$current_filter = array_map( 'esc_attr', $current_filter );
 
-					if ( ! in_array( $term->term_id, $current_filter ) ) {
-						$current_filter[] = $term->term_id;
+					if ( ! in_array( $term->slug, $current_filter ) ) {
+						$current_filter[] = $term->slug;
 					}
 
 					// Base Link decided by current page
@@ -331,13 +331,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					}
 
 					// Current Filter = this widget
-					if ( isset( $_chosen_attributes[ $taxonomy ] ) && is_array( $_chosen_attributes[ $taxonomy ]['terms'] ) && in_array( $term->term_id, $_chosen_attributes[ $taxonomy ]['terms'] ) ) {
+					if ( isset( $_chosen_attributes[ $taxonomy ] ) && is_array( $_chosen_attributes[ $taxonomy ]['terms'] ) && in_array( $term->slug, $_chosen_attributes[ $taxonomy ]['terms'] ) ) {
 
 						$class = 'class="chosen"';
 
 						// Remove this term is $current_filter has more than 1 term filtered
 						if ( sizeof( $current_filter ) > 1 ) {
-							$current_filter_without_this = array_diff( $current_filter, array( $term->term_id ) );
+							$current_filter_without_this = array_diff( $current_filter, array( $term->slug ) );
 							$link = add_query_arg( $arg, implode( ',', $current_filter_without_this ), $link );
 						}
 

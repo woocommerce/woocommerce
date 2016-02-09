@@ -763,7 +763,7 @@ class WC_Query {
 								array(
 									'taxonomy' 	=> $attribute,
 									'terms' 	=> $value,
-									'field' 	=> 'term_id'
+									'field' 	=> 'slug'
 								)
 							)
 						);
