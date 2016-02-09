@@ -62,26 +62,23 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			// Attributes
 			if ( ! is_null( $_chosen_attributes ) ) {
 				foreach ( $_chosen_attributes as $taxonomy => $data ) {
-
 					foreach ( $data['terms'] as $term_slug ) {
-						$term = get_term_by( 'slug', $term_slug, $taxonomy );
-
-						if ( ! isset( $term->name ) ) {
+						if ( ! $term = get_term_by( 'slug', $term_slug, $taxonomy ) ) {
 							continue;
 						}
 
-						$taxonomy_filter = str_replace( 'pa_', '', $taxonomy );
-						$current_filter  = ! empty( $_GET[ 'filter_' . $taxonomy_filter ] ) ? $_GET[ 'filter_' . $taxonomy_filter ] : '';
-						$new_filter      = array_map( 'sanitize_text_field', explode( ',', $current_filter ) );
-						$new_filter      = array_diff( $new_filter, array( $term_slug ) );
+						$filter_name    = 'filter_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) );
+						$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( $_GET[ $filter_name ] ) ) : array();
+						$current_filter = array_map( 'sanitize_title', $current_filter );
+						$new_filter      = array_diff( $current_filter, array( $term_slug ) );
 
-						$link = remove_query_arg( array( 'add-to-cart', 'filter_' . $taxonomy_filter ) );
+						$link = remove_query_arg( array( 'add-to-cart', $filter_name ) );
 
 						if ( sizeof( $new_filter ) > 0 ) {
-							$link = add_query_arg( 'filter_' . $taxonomy_filter, implode( ',', $new_filter ), $link );
+							$link = add_query_arg( $filter_name, implode( ',', $new_filter ), $link );
 						}
 
-						echo '<li class="chosen"><a title="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . $term->name . '</a></li>';
+						echo '<li class="chosen"><a title="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a></li>';
 					}
 				}
 			}

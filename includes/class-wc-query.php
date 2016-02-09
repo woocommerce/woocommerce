@@ -693,36 +693,32 @@ class WC_Query {
 	 * Layered Nav Init.
 	 */
 	public function layered_nav_init( ) {
-
 		if ( apply_filters( 'woocommerce_is_layered_nav_active', is_active_widget( false, false, 'woocommerce_layered_nav', true ) ) && ! is_admin() ) {
 
 			global $_chosen_attributes;
 
 			$_chosen_attributes = array();
 
-			$attribute_taxonomies = wc_get_attribute_taxonomies();
-			if ( $attribute_taxonomies ) {
+			if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
 				foreach ( $attribute_taxonomies as $tax ) {
+					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
+					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
+					$name         = 'filter_' . $attribute;
+					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( $_GET[ 'filter_' . $attribute ] ) ) : array();
+					$query_type   = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
 
-					$attribute       = wc_sanitize_taxonomy_name( $tax->attribute_name );
-					$taxonomy        = wc_attribute_taxonomy_name( $attribute );
-					$name            = 'filter_' . $attribute;
-					$query_type_name = 'query_type_' . $attribute;
+					if ( ! $query_type ) {
+						$query_type = apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
+					}
 
-					if ( ! empty( $_GET[ $name ] ) && taxonomy_exists( $taxonomy ) ) {
-
-						$_chosen_attributes[ $taxonomy ]['terms'] = explode( ',', $_GET[ $name ] );
-
-						if ( empty( $_GET[ $query_type_name ] ) || ! in_array( strtolower( $_GET[ $query_type_name ] ), array( 'and', 'or' ) ) )
-							$_chosen_attributes[ $taxonomy ]['query_type'] = apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
-						else
-							$_chosen_attributes[ $taxonomy ]['query_type'] = strtolower( $_GET[ $query_type_name ] );
-
+					if ( ! empty( $filter_terms ) && taxonomy_exists( $taxonomy ) ) {
+						$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
+						$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type;
 					}
 				}
 			}
 
-			add_filter('loop_shop_post_in', array( $this, 'layered_nav_query' ) );
+			add_filter( 'loop_shop_post_in', array( $this, 'layered_nav_query' ) );
 		}
 	}
 
