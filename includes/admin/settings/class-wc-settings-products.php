@@ -323,8 +323,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'min'  => 0,
 						'step' => 1
 					),
-					'default'           => '0',
-					'autoload'          => false
+					'default'           => '0'
 				),
 
 				array(
@@ -473,8 +472,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'         => 'yes',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'start',
-					'show_if_checked' => 'option',
-					'autoload'        => false
+					'show_if_checked' => 'option'
 				),
 
 				array(
