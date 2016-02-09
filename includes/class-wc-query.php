@@ -329,9 +329,8 @@ class WC_Query {
 	 * @param mixed $q
 	 */
 	public function product_query( $q ) {
-		$ordering  = $this->get_catalog_ordering_args();
-
 		// Ordering query vars
+		$ordering  = $this->get_catalog_ordering_args();
 		$q->set( 'orderby', $ordering['orderby'] );
 		$q->set( 'order', $ordering['order'] );
 		if ( isset( $ordering['meta_key'] ) ) {
@@ -342,11 +341,7 @@ class WC_Query {
 		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ) ) );
 		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ) ) );
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
-
-		// Set a special variable
 		$q->set( 'wc_query', 'product_query' );
-
-		// Filterable post__in
 		$q->set( 'post__in', array_unique( apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		do_action( 'woocommerce_product_query', $q, $this );
@@ -461,16 +456,12 @@ class WC_Query {
 		global $wpdb;
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
-
-		$args['where'] .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
-
-		$args['join'] .= "
+		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
+		$args['join']   .= "
 			LEFT OUTER JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID)
 			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
 		";
-
 		$args['orderby'] = "average_rating DESC, $wpdb->posts.post_date DESC";
-
 		$args['groupby'] = "$wpdb->posts.ID";
 
 		return $args;
@@ -537,23 +528,17 @@ class WC_Query {
 	 * @return array
 	 */
 	public function rating_filter_meta_query() {
-		if ( isset( $_GET['min_rating'] ) ) {
-			$min = isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0;
-			return array(
-				'key'           => '_wc_average_rating',
-				'value'         => $min,
-				'compare'       => '>=',
-				'type'          => 'DECIMAL',
-				'rating_filter' => true
-			);
-		}
-		return array();
+		return isset( $_GET['min_rating'] ) ? array(
+			'key'           => '_wc_average_rating',
+			'value'         => isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0,
+			'compare'       => '>=',
+			'type'          => 'DECIMAL',
+			'rating_filter' => true
+		) : array();
 	}
 
 	/**
 	 * Returns a meta query to handle product visibility.
-	 *
-	 * @access public
 	 * @param string $compare (default: 'IN')
 	 * @return array
 	 */
@@ -599,7 +584,8 @@ class WC_Query {
 					'taxonomy' => $taxonomy,
 					'field'    => 'slug',
 					'terms'    => $data['terms'],
-					'operator' => 'and' === $data['query_type'] ? 'AND' : 'IN'
+					'operator' => 'and' === $data['query_type'] ? 'AND' : 'IN',
+					'include_children' => false
 				);
 			}
 		}
