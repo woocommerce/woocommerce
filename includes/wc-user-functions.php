@@ -605,10 +605,21 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  * @param  string $_meta_value Value of the meta that was changed
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
-	if ( 'last_update' === $meta_key ) {
-		return;
+	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
+	$update_time   = false;
+	if ( in_array( $meta_key, $keys_to_track ) ) {
+		$update_time = true;
 	}
-	wc_set_user_last_update_time( $user_id );
+	if ( 'billing_' === substr( $meta_key, 0, 8 ) ) {
+		$update_time = true;
+	}
+	if ( 'shipping_' === substr( $meta_key, 0, 9 ) ) {
+		$update_time = true;
+	}
+
+	if ( $update_time ) {
+		wc_set_user_last_update_time( $user_id );
+	}
 }
 
 add_action( "update_user_meta", 'wc_meta_update_last_update_time', 10, 4 );
