@@ -386,22 +386,18 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				continue;
 			}
 
+			$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
+
 			// If this is an AND query, only show options with count > 0
 			if ( 'and' === $query_type ) {
-				$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
-
 				if ( 0 < $count ) {
 					$found = true;
 				}
-
 				if ( 0 === $count && ! $option_is_set ) {
 					continue;
 				}
-
 			// If this is an OR query, show all options so search can be expanded
 			} else {
-				$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
-
 				if ( 0 < $count ) {
 					$found = true;
 				}
