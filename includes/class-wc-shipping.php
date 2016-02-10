@@ -118,9 +118,7 @@ class WC_Shipping {
 			}
 		}
 
-		$shipping_methods = apply_filters( 'woocommerce_shipping_methods', $shipping_methods );
-
-		return $shipping_methods;
+		return apply_filters( 'woocommerce_shipping_methods', $shipping_methods );
 	}
 
 	/**
