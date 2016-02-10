@@ -72,7 +72,8 @@ class WC_Post_types {
 						'edit_item'         => __( 'Edit Product Category', 'woocommerce' ),
 						'update_item'       => __( 'Update Product Category', 'woocommerce' ),
 						'add_new_item'      => __( 'Add New Product Category', 'woocommerce' ),
-						'new_item_name'     => __( 'New Product Category Name', 'woocommerce' )
+						'new_item_name'     => __( 'New Product Category Name', 'woocommerce' ),
+						'not_found'         => __( 'No Product Category found', 'woocommerce' ),
 					),
 				'show_ui'               => true,
 				'query_var'             => true,
@@ -183,7 +184,8 @@ class WC_Post_types {
 								'edit_item'         => sprintf( __( 'Edit %s', 'woocommerce' ), $label ),
 								'update_item'       => sprintf( __( 'Update %s', 'woocommerce' ), $label ),
 								'add_new_item'      => sprintf( __( 'Add New %s', 'woocommerce' ), $label ),
-								'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label )
+								'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label ),
+								'not_found'         => sprintf( __( 'No &quot;%s&quot; found', 'woocommerce' ), $label ),
 							),
 						'show_ui'            => true,
 						'show_in_quick_edit' => false,
