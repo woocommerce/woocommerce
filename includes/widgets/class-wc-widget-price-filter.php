@@ -195,7 +195,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$sql .= " 	WHERE {$wpdb->posts}.post_type = 'product'
 					AND {$wpdb->posts}.post_status = 'publish'
 					AND price_meta.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-					AND price_meta.meta_value != '' ";
+					AND price_meta.meta_value > '' ";
 		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
 
 		return floor( $wpdb->get_var( $sql ) );
@@ -237,7 +237,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$sql .= " 	WHERE {$wpdb->posts}.post_type = 'product'
 					AND {$wpdb->posts}.post_status = 'publish'
 					AND price_meta.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-					AND price_meta.meta_value != '' ";
+					AND price_meta.meta_value > '' ";
 		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
 
 		return ceil( $wpdb->get_var( $sql ) );
