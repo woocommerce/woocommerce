@@ -222,7 +222,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				}
 
 				// Get count based on current view
-				$_products_in_term = wc_get_term_product_ids( $term->term_id, $taxonomy );
 				$current_values    = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
 				$option_is_set     = in_array( $term->slug, $current_values );
 				$count             = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
@@ -254,7 +253,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * Get current page URL for layered nav items.
 	 * @return string
 	 */
-	protected function get_page_base_url() {
+	protected function get_page_base_url( $taxonomy ) {
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
 			$link = home_url();
 		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id('shop') ) ) {
@@ -290,6 +289,22 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		// Min Rating Arg
 		if ( isset( $_GET['min_rating'] ) ) {
 			$link = add_query_arg( 'min_rating', wc_clean( $_GET['min_rating'] ), $link );
+		}
+
+		// All current filters
+		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
+			foreach ( $_chosen_attributes as $name => $data ) {
+				if ( $name === $taxonomy ) {
+					continue;
+				}
+				$filter_name = sanitize_title( str_replace( 'pa_', '', $name ) );
+				if ( ! empty( $data['terms'] ) ) {
+					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
+				}
+				if ( 'or' == $data['query_type'] ) {
+					$link = add_query_arg( 'query_type_' . $filter_name, 'or', $link );
+				}
+			}
 		}
 
 		return $link;
@@ -352,9 +367,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$found              = false;
 
 		foreach ( $terms as $term ) {
-			// Get count based on current view - uses transients
-			// flip the product_in_term array so that we can use array_intersect_key
-			$_products_in_term = array_flip( wc_get_term_product_ids( $term->term_id, $taxonomy ) );
 			$current_values    = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
 			$option_is_set     = in_array( $term->slug, $current_values );
 			$count             = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
@@ -379,7 +391,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$current_filter[] = $term->slug;
 			}
 
-			$link = $this->get_page_base_url();
+			$link = $this->get_page_base_url( $taxonomy );
 
 			// Add current filters to URL.
 			foreach ( $current_filter as $key => $value ) {

@@ -71,6 +71,19 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$link = add_query_arg( 'post_type', wc_clean( $_GET['post_type'] ), $link );
 		}
 
+		// All current filters
+		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
+			foreach ( $_chosen_attributes as $name => $data ) {
+				$filter_name = sanitize_title( str_replace( 'pa_', '', $name ) );
+				if ( ! empty( $data['terms'] ) ) {
+					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
+				}
+				if ( 'or' == $data['query_type'] ) {
+					$link = add_query_arg( 'query_type_' . $filter_name, 'or', $link );
+				}
+			}
+		}
+
 		return $link;
 	}
 
