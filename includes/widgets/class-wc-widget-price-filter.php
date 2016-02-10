@@ -53,7 +53,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		global $_chosen_attributes, $wpdb, $wp, $wp_the_query;
+		global $wp, $wp_the_query;
 
 		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
 			return;
@@ -95,7 +95,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$fields .= '<input type="hidden" name="min_rating" value="' . esc_attr( $_GET['min_rating'] ) . '" />';
 		}
 
-		if ( $_chosen_attributes ) {
+		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
 			foreach ( $_chosen_attributes as $attribute => $data ) {
 				$taxonomy_filter = 'filter_' . str_replace( 'pa_', '', $attribute );
 

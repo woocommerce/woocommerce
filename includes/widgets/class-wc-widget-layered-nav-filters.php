@@ -43,18 +43,14 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		global $_chosen_attributes;
-
 		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
 			return;
 		}
 
-		// Price
-		$min_price = isset( $_GET['min_price'] ) ? wc_clean( $_GET['min_price'] ) : 0;
-		$max_price = isset( $_GET['max_price'] ) ? wc_clean( $_GET['max_price'] ) : 0;
-
-		// Rating
-		$min_rating = isset( $_GET['min_rating'] ) ? wc_clean( $_GET['min_rating'] ) : 0;
+		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
+		$min_price          = isset( $_GET['min_price'] ) ? wc_clean( $_GET['min_price'] )   : 0;
+		$max_price          = isset( $_GET['max_price'] ) ? wc_clean( $_GET['max_price'] )   : 0;
+		$min_rating         = isset( $_GET['min_rating'] ) ? wc_clean( $_GET['min_rating'] ) : 0;
 
 		if ( 0 < count( $_chosen_attributes ) || 0 < $min_price || 0 < $max_price || 0 < $min_rating ) {
 
@@ -63,7 +59,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			echo '<ul>';
 
 			// Attributes
-			if ( ! is_null( $_chosen_attributes ) ) {
+			if ( $_chosen_attributes ) {
 				foreach ( $_chosen_attributes as $taxonomy => $data ) {
 					foreach ( $data['terms'] as $term_slug ) {
 						if ( ! $term = get_term_by( 'slug', $term_slug, $taxonomy ) ) {

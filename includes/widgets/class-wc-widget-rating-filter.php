@@ -124,7 +124,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		global $_chosen_attributes, $wpdb, $wp, $wp_the_query;
+		global $wp_the_query;
 
 		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
 			return;

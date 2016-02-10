@@ -24,6 +24,12 @@ class WC_Query {
 	public $query_vars = array();
 
 	/**
+	 * Stores chosen attributes
+	 * @var array
+	 */
+	private static $_chosen_attributes;
+
+	/**
 	 * Constructor for the query class. Hooks in methods.
 	 *
 	 * @access public
@@ -571,14 +577,12 @@ class WC_Query {
 	 * @return array
 	 */
 	public function get_tax_query( $tax_query = array() ) {
-		global $_chosen_attributes;
-
 		if ( ! is_array( $tax_query ) ) {
 			$tax_query = array();
 		}
 
 		// Layered nav filters on terms
-		if ( $_chosen_attributes ) {
+		if ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) {
 			foreach ( $_chosen_attributes as $taxonomy => $data ) {
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
@@ -630,27 +634,33 @@ class WC_Query {
 	/**
 	 * Layered Nav Init.
 	 */
-	public function layered_nav_init( ) {
-		global $_chosen_attributes;
+	public static function get_layered_nav_chosen_attributes() {
+		if ( ! is_array( self::$_chosen_attributes ) ) {
+			self::$_chosen_attributes = array();
 
-		$_chosen_attributes = array();
+			if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
+				foreach ( $attribute_taxonomies as $tax ) {
+					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
+					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
+					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( $_GET[ 'filter_' . $attribute ] ) ) : array();
 
-		if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
-			foreach ( $attribute_taxonomies as $tax ) {
-				$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
-				$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-				$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( $_GET[ 'filter_' . $attribute ] ) ) : array();
+					if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
+						continue;
+					}
 
-				if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
-					continue;
+					$query_type = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
+					self::$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
+					self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 				}
-
-				$query_type = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
-				$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
-				$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 			}
 		}
+		return self::$_chosen_attributes;
 	}
+
+	/**
+	 * @deprecated 2.6.0
+	 */
+	public function layered_nav_init() {}
 
 	/**
 	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.

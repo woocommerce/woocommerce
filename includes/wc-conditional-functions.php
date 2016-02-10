@@ -254,9 +254,7 @@ if ( ! function_exists( 'is_filtered' ) ) {
 	 * @return bool
 	 */
 	function is_filtered() {
-		global $_chosen_attributes;
-
-		return apply_filters( 'woocommerce_is_filtered', ( sizeof( $_chosen_attributes ) > 0 || isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) );
+		return apply_filters( 'woocommerce_is_filtered', ( sizeof( WC_Query::get_layered_nav_chosen_attributes() ) > 0 || isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) || isset( $_GET['min_rating'] ) ) );
 	}
 }
 

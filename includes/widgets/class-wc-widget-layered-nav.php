@@ -110,15 +110,14 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		global $_chosen_attributes;
-
 		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
 			return;
 		}
 
-		$taxonomy     = isset( $instance['attribute'] ) ? wc_attribute_taxonomy_name( $instance['attribute'] ) : $this->settings['attribute']['std'];
-		$query_type   = isset( $instance['query_type'] ) ? $instance['query_type'] : $this->settings['query_type']['std'];
-		$display_type = isset( $instance['display_type'] ) ? $instance['display_type'] : $this->settings['display_type']['std'];
+		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
+		$taxonomy           = isset( $instance['attribute'] ) ? wc_attribute_taxonomy_name( $instance['attribute'] ) : $this->settings['attribute']['std'];
+		$query_type         = isset( $instance['query_type'] ) ? $instance['query_type'] : $this->settings['query_type']['std'];
+		$display_type       = isset( $instance['display_type'] ) ? $instance['display_type'] : $this->settings['display_type']['std'];
 
 		if ( ! taxonomy_exists( $taxonomy ) ) {
 			return;
@@ -205,11 +204,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @return bool Will nav display?
 	 */
 	protected function layered_nav_dropdown( $terms, $taxonomy, $query_type ) {
-		global $_chosen_attributes;
-
 		$found = false;
 
 		if ( $taxonomy !== $this->get_current_taxonomy() ) {
+			$_chosen_attributes   = WC_Query::get_layered_nav_chosen_attributes();
 			$taxonomy_filter_name = str_replace( 'pa_', '', $taxonomy );
 
 			echo '<select class="dropdown_layered_nav_' . esc_attr( $taxonomy_filter_name ) . '">';
@@ -345,12 +343,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @return bool Will nav display?
 	 */
 	protected function layered_nav_list( $terms, $taxonomy, $query_type ) {
-		global $_chosen_attributes;
-
 		// List display
 		echo '<ul>';
 
-		$found = false;
+		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
+		$found              = false;
 
 		foreach ( $terms as $term ) {
 			// Get count based on current view - uses transients
