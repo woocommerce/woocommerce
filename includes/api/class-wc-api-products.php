@@ -673,7 +673,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
-				$parent = get_term_by( 'term_taxonomy_id', $data['parent'], 'product_cat' );
+				$parent = get_term_by( 'id', $data['parent'], 'product_cat' );
 				if ( ! $parent ) {
 					throw new WC_API_Exception( 'woocommerce_api_invalid_product_category_parent', __( 'Product category parent is invalid', 'woocommerce' ), 400 );
 				}
@@ -694,18 +694,20 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_category', $insert->get_error_message(), 400 );
 			}
 
-			update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'display_type', esc_attr( $data['display'] ) );
+			$id = $insert['term_id'];
+
+			update_woocommerce_term_meta( $id, 'display_type', esc_attr( $data['display'] ) );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-				update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'thumbnail_id', $image_id );
+				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
-			do_action( 'woocommerce_api_create_product_category', $insert['term_taxonomy_id'], $data );
+			do_action( 'woocommerce_api_create_product_category', $id, $data );
 
 			$this->server->send_status( 201 );
 
-			return $this->get_product_category( $insert['term_taxonomy_id'] );
+			return $this->get_product_category( $id );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -767,11 +769,11 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( ! empty( $data['display'] ) ) {
-				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', sanitize_text_field( $data['display'] ) );
+				update_woocommerce_term_meta( $id, 'display_type', sanitize_text_field( $data['display'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
-				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'thumbnail_id', $image_id );
+				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
 			do_action( 'woocommerce_api_edit_product_category', $id, $data );
@@ -920,12 +922,13 @@ class WC_API_Products extends WC_API_Resource {
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_tag', $insert->get_error_message(), 400 );
 			}
+			$id = $insert['term_id'];
 
-			do_action( 'woocommerce_api_create_product_tag', $insert['term_taxonomy_id'], $data );
+			do_action( 'woocommerce_api_create_product_tag', $id, $data );
 
 			$this->server->send_status( 201 );
 
-			return $this->get_product_tag( $insert['term_taxonomy_id'] );
+			return $this->get_product_tag( $id );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -3310,7 +3313,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
-				$parent = get_term_by( 'term_taxonomy_id', $data['parent'], 'product_shipping_class' );
+				$parent = get_term_by( 'id', $data['parent'], 'product_shipping_class' );
 				if ( ! $parent ) {
 					throw new WC_API_Exception( 'woocommerce_api_invalid_product_shipping_class_parent', __( 'Product shipping class parent is invalid', 'woocommerce' ), 400 );
 				}
@@ -3321,11 +3324,13 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_shipping_class', $insert->get_error_message(), 400 );
 			}
 
-			do_action( 'woocommerce_api_create_product_shipping_class', $insert['term_taxonomy_id'], $data );
+			$id = $insert['term_id'];
+
+			do_action( 'woocommerce_api_create_product_shipping_class', $id, $data );
 
 			$this->server->send_status( 201 );
 
-			return $this->get_product_shipping_class( $insert['term_taxonomy_id'] );
+			return $this->get_product_shipping_class( $id );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
