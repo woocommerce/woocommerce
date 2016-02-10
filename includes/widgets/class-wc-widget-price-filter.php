@@ -190,12 +190,12 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		$sql  = "SELECT min(price_meta.meta_value + 0) FROM {$wpdb->posts} ";
+		$sql  = "SELECT min( CAST( price_meta.meta_value AS UNSIGNED ) ) FROM {$wpdb->posts} ";
 		$sql .= " LEFT JOIN {$wpdb->postmeta} as price_meta ON {$wpdb->posts}.ID = price_meta.post_id " . $tax_query_sql['join'] . $meta_query_sql['join'];
 		$sql .= " 	WHERE {$wpdb->posts}.post_type = 'product'
 					AND {$wpdb->posts}.post_status = 'publish'
 					AND price_meta.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-					AND price_meta.meta_value > '' ";
+					AND price_meta.meta_value != '' ";
 		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
 
 		return floor( $wpdb->get_var( $sql ) );
@@ -232,12 +232,12 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		$sql  = "SELECT max(price_meta.meta_value + 0) FROM {$wpdb->posts} ";
+		$sql  = "SELECT MAX( CAST( price_meta.meta_value AS UNSIGNED ) ) FROM {$wpdb->posts} ";
 		$sql .= " LEFT JOIN {$wpdb->postmeta} as price_meta ON {$wpdb->posts}.ID = price_meta.post_id " . $tax_query_sql['join'] . $meta_query_sql['join'];
 		$sql .= " 	WHERE {$wpdb->posts}.post_type = 'product'
 					AND {$wpdb->posts}.post_status = 'publish'
 					AND price_meta.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-					AND price_meta.meta_value > '' ";
+					AND price_meta.meta_value != '' ";
 		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
 
 		return ceil( $wpdb->get_var( $sql ) );
