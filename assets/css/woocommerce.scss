@@ -1509,6 +1509,43 @@ p.demo_store {
 			right: -1px;
 		}
 	}
+
+	/**
+	 * Rating Filter Widget
+	 */
+	.widget_rating_filter {
+		ul {
+			margin: 0;
+			padding: 0;
+			border: 0;
+			list-style: none outside;
+
+			li {
+				@include clearfix();
+				padding: 0 0 1px;
+				list-style: none;
+
+				a {
+					padding: 1px 0;
+					text-decoration: none;
+				}
+
+				.star-rating {
+					float: none;
+					display: inline-block;
+				}
+			}
+
+			li.chosen {
+				a {
+					&:before {
+						@include iconbefore( "\e013" );
+						color: $red;
+					}
+				}
+			}
+		}
+	}
 }
 
 /**

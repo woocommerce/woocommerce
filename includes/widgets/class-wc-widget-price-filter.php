@@ -83,6 +83,10 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$fields .= '<input type="hidden" name="orderby" value="' . esc_attr( $_GET['orderby'] ) . '" />';
 		}
 
+		if ( ! empty( $_GET['min_rating'] ) ) {
+			$fields .= '<input type="hidden" name="min_rating" value="' . esc_attr( $_GET['min_rating'] ) . '" />';
+		}
+
 		if ( $_chosen_attributes ) {
 			foreach ( $_chosen_attributes as $attribute => $data ) {
 				$taxonomy_filter = 'filter_' . str_replace( 'pa_', '', $attribute );

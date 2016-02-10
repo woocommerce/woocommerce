@@ -53,6 +53,7 @@ class WC_Query {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		add_action( 'init', array( $this, 'layered_nav_init' ) );
 		add_action( 'init', array( $this, 'price_filter_init' ) );
+		add_action( 'init', array( $this, 'rating_filter_init' ) );
 
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
@@ -693,36 +694,32 @@ class WC_Query {
 	 * Layered Nav Init.
 	 */
 	public function layered_nav_init( ) {
-
 		if ( apply_filters( 'woocommerce_is_layered_nav_active', is_active_widget( false, false, 'woocommerce_layered_nav', true ) ) && ! is_admin() ) {
 
 			global $_chosen_attributes;
 
 			$_chosen_attributes = array();
 
-			$attribute_taxonomies = wc_get_attribute_taxonomies();
-			if ( $attribute_taxonomies ) {
+			if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
 				foreach ( $attribute_taxonomies as $tax ) {
+					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
+					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
+					$name         = 'filter_' . $attribute;
+					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( $_GET[ 'filter_' . $attribute ] ) ) : array();
+					$query_type   = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
 
-					$attribute       = wc_sanitize_taxonomy_name( $tax->attribute_name );
-					$taxonomy        = wc_attribute_taxonomy_name( $attribute );
-					$name            = 'filter_' . $attribute;
-					$query_type_name = 'query_type_' . $attribute;
+					if ( ! $query_type ) {
+						$query_type = apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
+					}
 
-					if ( ! empty( $_GET[ $name ] ) && taxonomy_exists( $taxonomy ) ) {
-
-						$_chosen_attributes[ $taxonomy ]['terms'] = explode( ',', $_GET[ $name ] );
-
-						if ( empty( $_GET[ $query_type_name ] ) || ! in_array( strtolower( $_GET[ $query_type_name ] ), array( 'and', 'or' ) ) )
-							$_chosen_attributes[ $taxonomy ]['query_type'] = apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
-						else
-							$_chosen_attributes[ $taxonomy ]['query_type'] = strtolower( $_GET[ $query_type_name ] );
-
+					if ( ! empty( $filter_terms ) && taxonomy_exists( $taxonomy ) ) {
+						$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
+						$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type;
 					}
 				}
 			}
 
-			add_filter('loop_shop_post_in', array( $this, 'layered_nav_query' ) );
+			add_filter( 'loop_shop_post_in', array( $this, 'layered_nav_query' ) );
 		}
 	}
 
@@ -763,7 +760,7 @@ class WC_Query {
 								array(
 									'taxonomy' 	=> $attribute,
 									'terms' 	=> $value,
-									'field' 	=> 'term_id'
+									'field' 	=> 'slug'
 								)
 							)
 						);
@@ -906,6 +903,58 @@ class WC_Query {
 							$matched_products[] = $product->post_parent;
 						}
 					}
+				}
+			}
+
+			$matched_products = array_unique( $matched_products );
+
+			// Filter the id's
+			if ( 0 === sizeof( $filtered_posts ) ) {
+				$filtered_posts = $matched_products;
+			} else {
+				$filtered_posts = array_intersect( $filtered_posts, $matched_products );
+			}
+			$filtered_posts[] = 0;
+		}
+
+		return (array) $filtered_posts;
+	}
+
+	/**
+	 * Rating filter Init.
+	 */
+	public function rating_filter_init() {
+		if ( apply_filters( 'woocommerce_is_rating_filter_active', is_active_widget( false, false, 'woocommerce_rating_filter', true ) ) && ! is_admin() ) {
+			add_filter( 'loop_shop_post_in', array( $this, 'rating_filter' ) );
+		}
+	}
+
+	/**
+	 * Rating Filter post filter.
+	 *
+	 * @param array $filtered_posts
+	 * @return array
+	 */
+	public function rating_filter( $filtered_posts = array() ) {
+		global $wpdb;
+
+		if( isset( $_GET['min_rating'] ) ) {
+			$matched_products = array();
+			$min              = isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0;
+
+			$matched_products_query = apply_filters( 'woocommerce_rating_filter_results', $wpdb->get_results( $wpdb->prepare( "
+					SELECT comment_post_ID, ROUND( AVG( meta_value ), 2 ) as average_rating FROM {$wpdb->commentmeta}
+					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+					WHERE meta_key = 'rating'
+					AND comment_approved = '1'
+					AND meta_value > 0
+					GROUP BY comment_post_ID
+					HAVING ROUND( AVG( meta_value ), 2 ) >= %d
+				", $min ), OBJECT_K ), $min );
+
+			if ( $matched_products_query ) {
+				foreach ( $matched_products_query as $commentmeta ) {
+					$matched_products[] = $commentmeta->comment_post_ID;
 				}
 			}
 

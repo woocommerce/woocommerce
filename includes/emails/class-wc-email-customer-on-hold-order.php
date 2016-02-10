@@ -7,33 +7,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Processing_Order' ) ) :
 
 /**
- * Customer Processing Order Email.
+ * Customer On-hold Order Email.
  *
- * An email sent to the customer when a new order is paid for.
+ * An email sent to the customer when a new order is on-hold for.
  *
- * @class       WC_Email_Customer_Processing_Order
+ * @class       WC_Email_Customer_On_Hold_Order
  * @version     2.0.0
  * @package     WooCommerce/Classes/Emails
  * @author      WooThemes
  * @extends     WC_Email
  */
-class WC_Email_Customer_Processing_Order extends WC_Email {
+class WC_Email_Customer_On_Hold_Order extends WC_Email {
 
 	/**
 	 * Constructor.
 	 */
 	function __construct() {
-		$this->id               = 'customer_processing_order';
+		$this->id               = 'customer_on_hold_order';
 		$this->customer_email   = true;
-		$this->title            = __( 'Processing order', 'woocommerce' );
-		$this->description      = __( 'This is an order notification sent to customers containing order details after payment.', 'woocommerce' );
+		$this->title            = __( 'Order on-hold', 'woocommerce' );
+		$this->description      = __( 'This is an order notification sent to customers containing order details after an order is placed on-hold.', 'woocommerce' );
 		$this->heading          = __( 'Thank you for your order', 'woocommerce' );
 		$this->subject          = __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
-		$this->template_html    = 'emails/customer-processing-order.php';
-		$this->template_plain   = 'emails/plain/customer-processing-order.php';
+		$this->template_html    = 'emails/customer-on-hold-order.php';
+		$this->template_plain   = 'emails/plain/customer-on-hold-order.php';
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ) );
 
 		// Call parent constructor
 		parent::__construct();
@@ -99,4 +99,4 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 
 endif;
 
-return new WC_Email_Customer_Processing_Order();
+return new WC_Email_Customer_On_Hold_Order();

@@ -68,7 +68,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'options'		=> array(
 					'' 				=> __( 'N/A', 'woocommerce' ),
 					'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
-					'min_amount' 	=> __( 'A minimum order amount (defined below)', 'woocommerce' ),
+					'min_amount' 	=> __( 'A minimum order amount', 'woocommerce' ),
 					'either' 		=> __( 'A minimum order amount OR a coupon', 'woocommerce' ),
 					'both' 			=> __( 'A minimum order amount AND a coupon', 'woocommerce' ),
 				)
@@ -82,6 +82,18 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'desc_tip'		=> true
 			)
 		);
+
+		wc_enqueue_js( "
+			jQuery( function( $ ) {
+				$('#woocommerce_free_shipping_requires').change(function(){
+					if ( $(this).val() === 'coupon' || $(this).val() === '' ) {
+						$('#woocommerce_free_shipping_min_amount').closest('tr').hide();
+					} else {
+						$('#woocommerce_free_shipping_min_amount').closest('tr').show();
+					}
+				}).change();
+			});
+		" );
 	}
 
 	/**

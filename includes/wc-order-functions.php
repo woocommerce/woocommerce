@@ -579,6 +579,12 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		delete_transient( $transient );
 	}
 
+	// Clear money spent for user associated with order
+	if ( $post_id && ( $user_id = get_post_meta( $post_id, '_customer_user', true ) ) ) {
+		delete_user_meta( $user_id, '_money_spent' );
+		delete_user_meta( $user_id, '_order_count' );
+	}
+
 	// Increments the transient version to invalidate cache
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 

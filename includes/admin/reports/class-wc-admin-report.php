@@ -505,7 +505,7 @@ class WC_Admin_Report {
 				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 
 				if ( ! $this->end_date ) {
-					$this->end_date = current_time('timestamp');
+					$this->end_date = current_time( 'timestamp' );
 				}
 
 				$interval = 0;

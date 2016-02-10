@@ -936,8 +936,10 @@ class WC_Tax {
 		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $tax_class ) ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
-		// Set the rates keys equal to their ids.
-		$rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
+		if ( ! empty( $rates ) ) {
+			// Set the rates keys equal to their ids.
+			$rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
+		}
 
 		// Drop the locations into the rates array.
 		foreach ( $locations as $location ) {
