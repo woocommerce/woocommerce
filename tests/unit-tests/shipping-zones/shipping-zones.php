@@ -145,10 +145,10 @@ class Shipping_Zones extends \WC_Unit_Test_Case {
         ) );
 
         // Assert
-        $this->assertEquals( $zone1->get_zone_name(), 'Local' );
-        $this->assertEquals( $zone2->get_zone_name(), 'Europe' );
-        $this->assertEquals( $zone3->get_zone_name(), 'California' );
-        $this->assertEquals( $zone4->get_zone_name(), 'US' );
+        $this->assertEquals( 'Local', $zone1->get_zone_name() );
+        $this->assertEquals( 'Europe', $zone2->get_zone_name() );
+        $this->assertEquals( 'California', $zone3->get_zone_name() );
+        $this->assertEquals( 'US', $zone4->get_zone_name() );
 
         // Clean
         \WC_Helper_Shipping_Zones::remove_mock_zones();

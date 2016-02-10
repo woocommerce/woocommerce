@@ -24,31 +24,31 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * - settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
 	 * @var array
 	 */
-	public $supports             = array( 'settings' );
+	public $supports = array( 'settings' );
 
 	/**
 	 * Unique ID for the shipping method - must be set.
 	 * @var string
 	 */
-	public $id                   = '';
+	public $id = '';
 
 	/**
 	 * Method title.
 	 * @var string
 	 */
-	public $method_title         = '';
+	public $method_title = '';
 
 	/**
 	 * Method description.
 	 * @var string
 	 */
-	public $method_description   = '';
+	public $method_description = '';
 
 	/**
 	 * yes or no based on whether the method is enabled.
 	 * @var string
 	 */
-	public $enabled              = 'yes';
+	public $enabled = 'yes';
 
 	/**
 	 * Shipping method title for the frontend.
@@ -60,32 +60,32 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * This is an array of rates - methods must populate this array to register shipping costs.
 	 * @var array
 	 */
-	public $rates                = array();
+	public $rates = array();
 
 	/**
 	 * If 'taxable' tax will be charged for this method (if applicable).
 	 * @var string
 	 */
-	public $tax_status           = 'taxable';
+	public $tax_status = 'taxable';
 
 	/**
 	 * Fee for the method (if applicable).
 	 * @var string
 	 */
-	public $fee                  = null;
+	public $fee = null;
 
 	/** @var float Minimum fee for the method */
 	/**
 	 * Minimum fee for the method (if applicable).
 	 * @var string
 	 */
-	public $minimum_fee          = null;
+	public $minimum_fee = null;
 
 	/**
 	 * Instance ID if used.
 	 * @var int
 	 */
-	public $instance_id          = 0;
+	public $instance_id = 0;
 
 	/**
 	 * Instance form fields.
@@ -97,7 +97,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Instance settings.
 	 * @var array
 	 */
-	public $instance_settings    = array();
+	public $instance_settings = array();
 
 	/**
 	 * Availability - legacy. Used for method Availability.
@@ -111,9 +111,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Availability countries - legacy. Used for method Availability.
 	 * No longer useful for instance based shipping methods.
 	 * @deprecated 2.6.0
-	 * @var string
+	 * @var array
 	 */
-	public $countries            = array();
+	public $countries = array();
 
 	/**
 	 * Constructor.
@@ -370,7 +370,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		// Instance options take priority over global options
-		if ( in_array( $key, array_keys( $this->get_instance_form_fields() ) ) ) {
+		if ( array_key_exists( $key, $this->get_instance_form_fields() ) ) {
 			return $this->get_instance_option( $key, $empty_value );
 		}
 
@@ -447,7 +447,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$this->init_instance_settings();
 
 			foreach ( $this->get_instance_form_fields() as $key => $field ) {
-				if ( ! in_array( $this->get_field_type( $field ), array( 'title' ) ) ) {
+				if ( 'title' !== $this->get_field_type( $field ) ) {
 					try {
 						$this->instance_settings[ $key ] = $this->get_field_value( $key, $field );
 					} catch ( Exception $e ) {

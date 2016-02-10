@@ -3251,6 +3251,7 @@ class WC_AJAX {
 				$update_args = array_filter( $update_args );
 				if ( empty( $update_args['name'] ) ) {
 					wp_send_json_error( __( 'Shipping Class name is required', 'woocommerce' ) );
+					exit;
 				}
 				$result      = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
 			} else {

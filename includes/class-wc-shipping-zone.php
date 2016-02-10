@@ -123,15 +123,10 @@ class WC_Shipping_Zone implements WC_Data {
 	 * Save zone data to the database.
 	 */
 	public function save() {
-		$data = array(
-			'zone_name'  => $this->get_zone_name(),
-			'zone_order' => $this->get_zone_order(),
-		);
-
 		if ( ! $this->get_zone_id() ) {
-			$this->create( $data );
+			$this->create();
 		} else {
-			$this->update( $data );
+			$this->update();
 		}
 
 		$this->save_locations();

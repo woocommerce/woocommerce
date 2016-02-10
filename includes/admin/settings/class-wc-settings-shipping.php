@@ -204,7 +204,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		}
 
 		wp_localize_script( 'wc-shipping-zone-methods', 'shippingZoneMethodsLocalizeScript', array(
-            'methods'                 => $zone->get_shipping_methods(),
+			'methods'                 => $zone->get_shipping_methods(),
 			'zone_id'                 => $zone->get_zone_id(),
 			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'                 => array(

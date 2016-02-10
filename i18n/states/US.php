@@ -63,5 +63,5 @@ $states['US'] = array(
 	'WY' => __( 'Wyoming', 'woocommerce' ),
 	'AA' => __( 'Armed Forces (AA)', 'woocommerce' ),
 	'AE' => __( 'Armed Forces (AE)', 'woocommerce' ),
-	'AP' => __( 'Armed Forces (AP)', 'woocommerce' )
+	'AP' => __( 'Armed Forces (AP)', 'woocommerce' ),
 );

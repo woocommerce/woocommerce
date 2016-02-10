@@ -127,7 +127,7 @@ abstract class WC_Settings_API {
 		$this->init_settings();
 
 		foreach ( $this->get_form_fields() as $key => $field ) {
-			if ( ! in_array( $this->get_field_type( $field ), array( 'title' ) ) ) {
+			if ( 'title' !== $this->get_field_type( $field ) ) {
 				try {
 					$this->settings[ $key ] = $this->get_field_value( $key, $field );
 				} catch ( Exception $e ) {
@@ -325,7 +325,7 @@ abstract class WC_Settings_API {
 			'type'              => 'text',
 			'desc_tip'          => false,
 			'description'       => '',
-			'custom_attributes' => array()
+			'custom_attributes' => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -369,7 +369,7 @@ abstract class WC_Settings_API {
 			'type'              => 'text',
 			'desc_tip'          => false,
 			'description'       => '',
-			'custom_attributes' => array()
+			'custom_attributes' => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -413,7 +413,7 @@ abstract class WC_Settings_API {
 			'type'              => 'text',
 			'desc_tip'          => false,
 			'description'       => '',
-			'custom_attributes' => array()
+			'custom_attributes' => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -469,7 +469,7 @@ abstract class WC_Settings_API {
 			'placeholder'       => '',
 			'desc_tip'          => false,
 			'description'       => '',
-			'custom_attributes' => array()
+			'custom_attributes' => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -515,7 +515,7 @@ abstract class WC_Settings_API {
 			'type'              => 'text',
 			'desc_tip'          => false,
 			'description'       => '',
-			'custom_attributes' => array()
+			'custom_attributes' => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -559,7 +559,7 @@ abstract class WC_Settings_API {
 			'type'              => 'text',
 			'desc_tip'          => false,
 			'description'       => '',
-			'custom_attributes' => array()
+			'custom_attributes' => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -609,7 +609,7 @@ abstract class WC_Settings_API {
 			'desc_tip'          => false,
 			'description'       => '',
 			'custom_attributes' => array(),
-			'options'           => array()
+			'options'           => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -659,7 +659,7 @@ abstract class WC_Settings_API {
 			'description'       => '',
 			'custom_attributes' => array(),
 			'select_buttons'    => false,
-			'options'           => array()
+			'options'           => array(),
 		);
 
 		$data  = wp_parse_args( $data, $defaults );
@@ -704,7 +704,7 @@ abstract class WC_Settings_API {
 		$field_key = $this->get_field_key( $key );
 		$defaults  = array(
 			'title' => '',
-			'class' => ''
+			'class' => '',
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -837,7 +837,9 @@ abstract class WC_Settings_API {
 	 * Validate the data on the "Settings" form.
 	 * @deprecated 2.6.0 No longer used
 	 */
-	public function validate_settings_fields( $form_fields = array() ) {}
+	public function validate_settings_fields( $form_fields = array() ) {
+		_deprecated_function( 'validate_settings_fields', '2.6' );
+	}
 
 	/**
 	 * Format settings if needed.
@@ -846,6 +848,7 @@ abstract class WC_Settings_API {
 	 * @return array
 	 */
 	public function format_settings( $value ) {
+		_deprecated_function( 'format_settings', '2.6' );
 		return $value;
 	}
 }

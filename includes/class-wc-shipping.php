@@ -103,9 +103,9 @@ class WC_Shipping {
 	public function get_shipping_method_class_names() {
 		// Unique Method ID => Method Class name
 		$shipping_methods = apply_filters( 'woocommerce_shipping_methods', array(
-			'flat_rate'              => 'WC_Shipping_Flat_Rate',
-			'free_shipping'                 => 'WC_Shipping_Free_Shipping',
-			'local_pickup'                  => 'WC_Shipping_Local_Pickup'
+			'flat_rate'     => 'WC_Shipping_Flat_Rate',
+			'free_shipping' => 'WC_Shipping_Free_Shipping',
+			'local_pickup'  => 'WC_Shipping_Local_Pickup',
 		) );
 
 		// For backwards compatibility with 2.5.x we load any ENABLED legacy shipping methods here

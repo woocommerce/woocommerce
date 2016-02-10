@@ -87,7 +87,7 @@ class WC_Shipping_Zones {
 	 */
 	public static function get_shipping_method( $instance_id ) {
 		global $wpdb;
-        $raw_shipping_method = $wpdb->get_row( $wpdb->prepare( "SELECT instance_id, method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d LIMIT 1;", $instance_id ) );
+		$raw_shipping_method = $wpdb->get_row( $wpdb->prepare( "SELECT instance_id, method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d LIMIT 1;", $instance_id ) );
 		$wc_shipping         = WC_Shipping::instance();
 		$allowed_classes     = $wc_shipping->get_shipping_method_class_names();
 
@@ -104,7 +104,7 @@ class WC_Shipping_Zones {
 	 * @since 2.6.0
 	 */
     public static function delete_zone( $zone_id ) {
-        $zone = new WC_Shipping_Zone( $zone_id );
+		$zone = new WC_Shipping_Zone( $zone_id );
 		$zone->delete();
     }
 
