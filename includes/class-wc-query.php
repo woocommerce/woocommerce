@@ -631,28 +631,23 @@ class WC_Query {
 	 * Layered Nav Init.
 	 */
 	public function layered_nav_init( ) {
-		if ( apply_filters( 'woocommerce_is_layered_nav_active', is_active_widget( false, false, 'woocommerce_layered_nav', true ) ) && ! is_admin() ) {
-			global $_chosen_attributes;
+		global $_chosen_attributes;
 
-			$_chosen_attributes = array();
+		$_chosen_attributes = array();
 
-			if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
-				foreach ( $attribute_taxonomies as $tax ) {
-					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
-					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-					$name         = 'filter_' . $attribute;
-					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( $_GET[ 'filter_' . $attribute ] ) ) : array();
-					$query_type   = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
+		if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
+			foreach ( $attribute_taxonomies as $tax ) {
+				$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
+				$taxonomy     = wc_attribute_taxonomy_name( $attribute );
+				$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( $_GET[ 'filter_' . $attribute ] ) ) : array();
 
-					if ( ! $query_type ) {
-						$query_type = apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
-					}
-
-					if ( ! empty( $filter_terms ) && taxonomy_exists( $taxonomy ) ) {
-						$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
-						$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type;
-					}
+				if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
+					continue;
 				}
+
+				$query_type = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
+				$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
+				$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 			}
 		}
 	}
