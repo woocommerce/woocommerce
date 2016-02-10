@@ -226,26 +226,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$_products_in_term = wc_get_term_product_ids( $term->term_id, $taxonomy );
 				$current_values    = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
 				$option_is_set     = in_array( $term->slug, $current_values );
+				$count             = $this->get_filtered_term_product_count( $term, $taxonomy, $query_type );
 
-				// If this is an AND query, only show options with count > 0
-				if ( 'and' === $query_type ) {
-					$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
-
-					if ( 0 < $count ) {
-						$found = true;
-					}
-
-					if ( 0 === $count && ! $option_is_set ) {
-						continue;
-					}
-
-				// If this is an OR query, show all options so search can be expanded
-				} else {
-					$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
-
-					if ( 0 < $count ) {
-						$found = true;
-					}
+				// Only show options with count > 0
+				if ( 0 < $count ) {
+					$found = true;
+				} elseif ( 'and' === $query_type && 0 === $count && ! $option_is_set ) {
+					continue;
 				}
 
 				echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( $option_is_set, true, false ) . '>' . esc_html( $term->name ) . '</option>';
@@ -310,26 +297,17 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * Count terms after other filters have occured by adjusting the main query.
+	 * Count products after other filters have occured by adjusting the main query.
 	 * @param  object $term
 	 * @param  string $taxonomy
 	 * @param  string $query_type
 	 * @return int
 	 */
-	protected function get_filtered_term_count( $term, $taxonomy, $query_type ) {
-		global $wpdb, $wp_the_query;
+	protected function get_filtered_term_product_count( $term, $taxonomy, $query_type ) {
+		global $wpdb;
 
-		$args       = $wp_the_query->query_vars;
-		$tax_query  = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
-		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
-
-		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
-			$tax_query[] = array(
-				'taxonomy' => $args['taxonomy'],
-				'terms'    => array( $args['term'] ),
-				'field'    => 'slug'
-			);
-		}
+		$tax_query  = WC_Query::get_main_tax_query();
+		$meta_query = WC_Query::get_main_meta_query();
 
 		if ( 'or' === $query_type ) {
 			foreach ( $tax_query as $key => $query ) {
@@ -386,21 +364,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				continue;
 			}
 
-			$count = $this->get_filtered_term_count( $term, $taxonomy, $query_type );
+			$count = $this->get_filtered_term_product_count( $term, $taxonomy, $query_type );
 
-			// If this is an AND query, only show options with count > 0
-			if ( 'and' === $query_type ) {
-				if ( 0 < $count ) {
-					$found = true;
-				}
-				if ( 0 === $count && ! $option_is_set ) {
-					continue;
-				}
-			// If this is an OR query, show all options so search can be expanded
-			} else {
-				if ( 0 < $count ) {
-					$found = true;
-				}
+			// Only show options with count > 0
+			if ( 0 < $count ) {
+				$found = true;
+			} elseif ( 'and' === $query_type && 0 === $count && ! $option_is_set ) {
+				continue;
 			}
 
 			$filter_name    = 'filter_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) );

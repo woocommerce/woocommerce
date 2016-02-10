@@ -594,6 +594,40 @@ class WC_Query {
 	}
 
 	/**
+	 * Get the tax query which was used by the main query.
+	 * @return array
+	 */
+	public static function get_main_tax_query() {
+		global $wp_the_query;
+
+		$args      = $wp_the_query->query_vars;
+		$tax_query = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
+
+		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => $args['taxonomy'],
+				'terms'    => array( $args['term'] ),
+				'field'    => 'slug'
+			);
+		}
+
+		return $tax_query;
+	}
+
+	/**
+	 * Get the meta query which was used by the main query.
+	 * @return array
+	 */
+	public static function get_main_meta_query() {
+		global $wp_the_query;
+
+		$args       = $wp_the_query->query_vars;
+		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
+
+		return $meta_query;
+	}
+
+	/**
 	 * Layered Nav Init.
 	 */
 	public function layered_nav_init( ) {

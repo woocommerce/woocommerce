@@ -75,6 +75,47 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	}
 
 	/**
+	 * Count products after other filters have occured by adjusting the main query.
+	 * @param  int $rating
+	 * @return int
+	 */
+	protected function get_filtered_product_count( $rating ) {
+		global $wpdb;
+
+		$tax_query  = WC_Query::get_main_tax_query();
+		$meta_query = WC_Query::get_main_meta_query();
+
+		// Unset current rating filter
+		foreach ( $meta_query as $key => $query ) {
+			if ( ! empty( $query['rating_filter'] ) ) {
+				unset( $meta_query[ $key ] );
+			}
+		}
+
+		// Set new rating filter
+		$meta_query[] = array(
+			'key'           => '_wc_average_rating',
+			'value'         => $rating,
+			'compare'       => '>=',
+			'type'          => 'DECIMAL',
+			'rating_filter' => true
+		);
+
+		$meta_query = new WP_Meta_Query( $meta_query );
+		$tax_query  = new WP_Tax_Query( $tax_query );
+
+		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
+		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
+
+		$sql  = "SELECT COUNT( {$wpdb->posts}.ID ) FROM {$wpdb->posts} ";
+		$sql .= $tax_query_sql['join'] . $meta_query_sql['join'];
+		$sql .= " WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' ";
+		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
+
+		return absint( $wpdb->get_var( $sql ) );
+	}
+
+	/**
 	 * widget function.
 	 *
 	 * @see WP_Widget
@@ -93,6 +134,8 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			return;
 		}
 
+		ob_start();
+
 		$min_rating = isset( $_GET['min_rating'] ) ? absint( $_GET['min_rating'] ) : '';
 
 		$this->widget_start( $args, $instance );
@@ -100,8 +143,15 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		echo '<ul>';
 
 		for ( $rating = 4; $rating >= 1; $rating-- ) {
-			$link = $this->get_page_base_url();
-			$link = $min_rating !== $rating ? add_query_arg( 'min_rating', $rating, $link ) : $link;
+			$count = $this->get_filtered_product_count( $rating );
+
+			if ( ! $count ) {
+				continue;
+			}
+
+			$found = true;
+			$link  = $this->get_page_base_url();
+			$link  = $min_rating !== $rating ? add_query_arg( 'min_rating', $rating, $link ) : $link;
 
 			echo '<li class="wc-layered-nav-rating ' . ( ! empty( $_GET['min_rating'] ) && $rating === absint( $_GET['min_rating'] ) ? 'chosen' : '' ) . '">';
 
@@ -109,7 +159,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 			echo '<span class="star-rating" title="' . esc_attr( sprintf( __( 'Rated %s and above', 'woocommerce' ), $rating ) ). '">
 					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( 'Rated %s and above', 'woocommerce'), $rating ) . '</span>
-				</span>';
+				</span> (' . $count . ')';
 
 			echo '</a>';
 
@@ -119,5 +169,11 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		echo '</ul>';
 
 		$this->widget_end( $args );
+
+		if ( ! $found ) {
+			ob_end_clean();
+		} else {
+			echo ob_get_clean();
+		}
 	}
 }
