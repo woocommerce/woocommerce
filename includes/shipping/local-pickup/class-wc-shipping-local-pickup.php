@@ -70,7 +70,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				'title'   => __( 'Enable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable local pickup', 'woocommerce' ),
-				'default' => 'no'
+				'default' => 'yes'
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
