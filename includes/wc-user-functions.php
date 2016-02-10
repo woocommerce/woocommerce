@@ -583,7 +583,7 @@ function wc_disable_author_archives_for_customers() {
 add_action( 'template_redirect', 'wc_disable_author_archives_for_customers' );
 
 /**
- * Hooks into the `profile_update` hook to set the user last updated timestamp
+ * Hooks into the `profile_update` hook to set the user last updated timestamp.
  *
  * @since 2.6
  * @param  int   $user_id    The user that was updated
@@ -596,7 +596,7 @@ function wc_update_profile_last_update_time( $user_id, $old ) {
 add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
 
 /**
- * Hooks into the update user meta function to set the user last updated timestamp
+ * Hooks into the update user meta function to set the user last updated timestamp.
  *
  * @since  2.6
  * @param  int    $meta_id     ID of the meta object that was changed
@@ -622,10 +622,10 @@ function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_
 	}
 }
 
-add_action( "update_user_meta", 'wc_meta_update_last_update_time', 10, 4 );
+add_action( 'update_user_meta', 'wc_meta_update_last_update_time', 10, 4 );
 
 /**
- * Sets a user's "last update" time to the current timestamp
+ * Sets a user's "last update" time to the current timestamp.
  *
  * @since  2.6
  * @param  int $user_id The user to set a timestamp for
