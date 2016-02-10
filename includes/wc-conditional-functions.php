@@ -308,6 +308,17 @@ if ( ! function_exists( 'wc_tax_enabled' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wc_shipping_enabled' ) ) {
+
+	/**
+	 * Is shipping enabled?
+	 * @return bool
+	 */
+	function wc_shipping_enabled() {
+		return apply_filters( 'wc_shipping_enabled', get_option( 'woocommerce_ship_to_countries' ) !== 'disabled' );
+	}
+}
+
 if ( ! function_exists( 'wc_prices_include_tax' ) ) {
 
 	/**

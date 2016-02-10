@@ -46,6 +46,9 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_termmeta" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rates" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rate_locations" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zone_methods" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zone_locations" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zones" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_sessions" );
 
 	// Delete options.

@@ -761,3 +761,34 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
 function wc_sanitize_term_text_based( $term ) {
 	return trim( wp_unslash( strip_tags( $term ) ) );
 }
+
+if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
+	/**
+	 * Make numeric postcode.
+	 *
+	 * Converts letters to numbers so we can do a simple range check on postcodes.
+	 * E.g. PE30 becomes 16050300 (P = 16, E = 05, 3 = 03, 0 = 00)
+	 *
+	 * @since 2.6.0
+	 * @param string $postcode Regular postcode
+	 * @return string
+	 */
+	function wc_make_numeric_postcode( $postcode ) {
+		$postcode_length    = strlen( $postcode );
+		$letters_to_numbers = array_merge( array( 0 ), range( 'A', 'Z' ) );
+		$letters_to_numbers = array_flip( $letters_to_numbers );
+		$numeric_postcode   = '';
+
+		for ( $i = 0; $i < $postcode_length; $i ++ ) {
+			if ( is_numeric( $postcode[ $i ] ) ) {
+				$numeric_postcode .= str_pad( $postcode[ $i ], 2, '0', STR_PAD_LEFT );
+			} elseif ( isset( $letters_to_numbers[ $postcode[ $i ] ] ) ) {
+				$numeric_postcode .= str_pad( $letters_to_numbers[ $postcode[ $i ] ], 2, '0', STR_PAD_LEFT );
+			} else {
+				$numeric_postcode .= '00';
+			}
+		}
+
+		return $numeric_postcode;
+	}
+}

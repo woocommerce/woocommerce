@@ -284,6 +284,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-form-handler.php' );                   // Form Handlers
 		include_once( 'includes/class-wc-cart.php' );                           // The main cart class
 		include_once( 'includes/class-wc-tax.php' );                            // Tax class
+		include_once( 'includes/class-wc-shipping-zones.php' );                 // Shipping Zones class
 		include_once( 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( 'includes/class-wc-https.php' );                          // https Helper

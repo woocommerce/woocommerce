@@ -51,6 +51,35 @@ class WC_Countries {
 	}
 
 	/**
+	 * Get all continents.
+	 * @return array
+	 */
+	public function get_continents() {
+		if ( empty( $this->continents ) ) {
+			$this->continents = apply_filters( 'woocommerce_continents', include( WC()->plugin_path() . '/i18n/continents.php' ) );
+		}
+		return $this->continents;
+	}
+
+	/**
+	 * Get continent code for a country code.
+	 * @since 2.6.0
+	 * @param $cc string
+	 * @return string
+	 */
+	public function get_continent_code_for_country( $cc ) {
+		$cc                 = trim( strtoupper( $cc ) );
+		$continents         = $this->get_continents();
+		$continents_and_ccs = wp_list_pluck( $continents, 'countries' );
+		foreach ( $continents_and_ccs as $continent_code => $countries ) {
+			if ( false !== array_search( $cc, $countries ) ) {
+				return $continent_code;
+			}
+		}
+		return '';
+	}
+
+	/**
 	 * Load the states.
 	 */
 	public function load_country_states() {

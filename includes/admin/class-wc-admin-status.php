@@ -108,8 +108,8 @@ class WC_Admin_Status {
 				break;
 				case 'delete_taxes' :
 
-					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rates" );
-					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rate_locations" );
+					$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
+					$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
 					WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 
 					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';

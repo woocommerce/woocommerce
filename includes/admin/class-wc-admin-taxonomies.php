@@ -38,7 +38,6 @@ class WC_Admin_Taxonomies {
 
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
-		add_action( 'product_shipping_class_pre_add_form', array( $this, 'shipping_class_description' ) );
 
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
@@ -274,13 +273,6 @@ class WC_Admin_Taxonomies {
 	 */
 	public function product_cat_description() {
 		echo wpautop( __( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woocommerce' ) );
-	}
-
-	/**
-	 * Description for shipping class page to aid users.
-	 */
-	public function shipping_class_description() {
-		echo wpautop( __( 'Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woocommerce' ) );
 	}
 
 	/**

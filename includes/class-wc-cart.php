@@ -1502,7 +1502,7 @@ class WC_Cart {
 		 * @return bool whether or not the cart needs shipping
 		 */
 		public function needs_shipping() {
-			if ( get_option( 'woocommerce_calc_shipping' ) === 'no' ) {
+			if ( ! wc_shipping_enabled() ) {
 				return false;
 			}
 
@@ -1542,7 +1542,7 @@ class WC_Cart {
 		 * @return bool
 		 */
 		public function show_shipping() {
-			if ( get_option('woocommerce_calc_shipping') == 'no' || ! is_array( $this->cart_contents ) )
+			if ( ! wc_shipping_enabled() || ! is_array( $this->cart_contents ) )
 				return false;
 
 			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {

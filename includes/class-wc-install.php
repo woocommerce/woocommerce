@@ -27,6 +27,7 @@ class WC_Install {
 		'2.4.0' => 'updates/woocommerce-update-2.4.php',
 		'2.4.1' => 'updates/woocommerce-update-2.4.1.php',
 		'2.5.0' => 'updates/woocommerce-update-2.5.php',
+		'2.6.0' => 'updates/woocommerce-update-2.6.php'
 	);
 
 	/**
@@ -176,6 +177,10 @@ class WC_Install {
 	 * Handle updates.
 	 */
 	private static function update() {
+		if ( ! defined( 'WC_UPDATING' ) ) {
+			define( 'WC_UPDATING', true );
+		}
+
 		$current_db_version = get_option( 'woocommerce_db_version' );
 
 		foreach ( self::$db_updates as $version => $updater ) {
@@ -464,6 +469,29 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
   KEY tax_rate_id (tax_rate_id),
   KEY location_type (location_type),
   KEY location_type_code (location_type(40),location_code(90))
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zones (
+  zone_id bigint(20) NOT NULL auto_increment,
+  zone_name varchar(255) NOT NULL,
+  zone_order bigint(20) NOT NULL,
+  PRIMARY KEY  (zone_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
+  location_id bigint(20) NOT NULL auto_increment,
+  zone_id bigint(20) NOT NULL,
+  location_code varchar(255) NOT NULL,
+  location_type varchar(40) NOT NULL,
+  PRIMARY KEY  (location_id),
+  KEY location_id (location_id),
+  KEY location_type (location_type),
+  KEY location_type_code (location_type(40),location_code(90))
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
+  zone_id bigint(20) NOT NULL,
+  instance_id bigint(20) NOT NULL auto_increment,
+  method_id varchar(255) NOT NULL,
+  method_order bigint(20) NOT NULL,
+  PRIMARY KEY  (instance_id)
 ) $collate;
 		";
 	}

@@ -93,7 +93,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			),
 
 			array(
-				'title'         => _x( 'Checkout', 'Settings group label', 'woocommerce' ),
+				'title'         => _x( 'Checkout Process', 'Settings group label', 'woocommerce' ),
 				'desc'          => __( 'Enable guest checkout', 'woocommerce' ),
 				'desc_tip'      =>  __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_guest_checkout',
