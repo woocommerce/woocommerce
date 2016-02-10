@@ -451,7 +451,8 @@ abstract class WC_Abstract_Order {
 		wc_add_order_item_meta( $item_id, 'taxes', $taxes );
 
 		// Store meta
-		if ( ! empty( $shipping_rate->get_meta_data() ) ) {
+		$shipping_meta = $shipping_rate->get_meta_data();
+		if ( ! empty( $shipping_meta ) ) {
 			foreach ( $shipping_rate->get_meta_data() as $key => $value ) {
 				wc_add_order_item_meta( $item_id, $key, $value );
 			}
