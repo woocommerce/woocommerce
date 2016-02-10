@@ -4,8 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?></h2>
-<p><?php _e( 'Shipping Zones let you group regions with similar Shipping Methods and rates. WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them. If there are no Shipping Methods within the matching zone, the customer will see a notice stating that there are no shipping methods available for the address they&lsquo;ve provided.', 'woocommerce' ); ?><p>
+<h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Shipping Zones let you group regions with similar Shipping Methods and rates. WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them.', 'woocommerce' ) ); ?></h2>
 
 <table class="wc-shipping-zones widefat">
     <thead>
