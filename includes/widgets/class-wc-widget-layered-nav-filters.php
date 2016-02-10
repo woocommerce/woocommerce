@@ -50,7 +50,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
 		$min_price          = isset( $_GET['min_price'] ) ? wc_clean( $_GET['min_price'] )   : 0;
 		$max_price          = isset( $_GET['max_price'] ) ? wc_clean( $_GET['max_price'] )   : 0;
-		$min_rating         = isset( $_GET['min_rating'] ) ? wc_clean( $_GET['min_rating'] ) : 0;
+		$min_rating         = isset( $_GET['min_rating'] ) ? absint( $_GET['min_rating'] ) : 0;
 
 		if ( 0 < count( $_chosen_attributes ) || 0 < $min_price || 0 < $max_price || 0 < $min_rating ) {
 
