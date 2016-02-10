@@ -207,6 +207,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$found = false;
 
 		if ( $taxonomy !== $this->get_current_taxonomy() ) {
+			$term_counts          = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
 			$_chosen_attributes   = WC_Query::get_layered_nav_chosen_attributes();
 			$taxonomy_filter_name = str_replace( 'pa_', '', $taxonomy );
 
@@ -224,7 +225,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$_products_in_term = wc_get_term_product_ids( $term->term_id, $taxonomy );
 				$current_values    = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
 				$option_is_set     = in_array( $term->slug, $current_values );
-				$count             = $this->get_filtered_term_product_count( $term, $taxonomy, $query_type );
+				$count             = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
 				// Only show options with count > 0
 				if ( 0 < $count ) {
@@ -295,13 +296,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * Count products after other filters have occured by adjusting the main query.
-	 * @param  object $term
+	 * Count products within certain terms, taking the main WP query into consideration.
+	 * @param  array $term_ids
 	 * @param  string $taxonomy
 	 * @param  string $query_type
-	 * @return int
+	 * @return array
 	 */
-	protected function get_filtered_term_product_count( $term, $taxonomy, $query_type ) {
+	protected function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
 		global $wpdb;
 
 		$tax_query  = WC_Query::get_main_tax_query();
@@ -314,25 +315,25 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				}
 			}
 		}
-		$tax_query[] = array(
-			'taxonomy'         => $taxonomy,
-			'field'            => 'term_id',
-			'terms'            => $term->term_id,
-			'include_children' => false
-		);
 
-		$meta_query = new WP_Meta_Query( $meta_query );
-		$tax_query  = new WP_Tax_Query( $tax_query );
-
+		$meta_query     = new WP_Meta_Query( $meta_query );
+		$tax_query      = new WP_Tax_Query( $tax_query );
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		$sql  = "SELECT COUNT( {$wpdb->posts}.ID ) FROM {$wpdb->posts} ";
-		$sql .= $tax_query_sql['join'] . $meta_query_sql['join'];
-		$sql .= " WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' ";
-		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
+		$sql  = "
+			SELECT COUNT( {$wpdb->posts}.ID ) as term_count, term_count_relationships.term_taxonomy_id as term_count_id FROM {$wpdb->posts}
+			INNER JOIN {$wpdb->term_relationships} AS term_count_relationships ON ({$wpdb->posts}.ID = term_count_relationships.object_id)
+			" . $tax_query_sql['join'] . $meta_query_sql['join'] . "
+			WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish'
+			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
+			AND term_count_relationships.term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
+			GROUP BY term_count_relationships.term_taxonomy_id;
+		";
 
-		return absint( $wpdb->get_var( $sql ) );
+		$results = $wpdb->get_results( $sql );
+
+		return wp_list_pluck( $results, 'term_count', 'term_count_id' );
 	}
 
 	/**
@@ -346,6 +347,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		// List display
 		echo '<ul>';
 
+		$term_counts        = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
 		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
 		$found              = false;
 
@@ -355,13 +357,12 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$_products_in_term = array_flip( wc_get_term_product_ids( $term->term_id, $taxonomy ) );
 			$current_values    = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
 			$option_is_set     = in_array( $term->slug, $current_values );
+			$count             = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
 			// skip the term for the current archive
 			if ( $this->get_current_term_id() === $term->term_id ) {
 				continue;
 			}
-
-			$count = $this->get_filtered_term_product_count( $term, $taxonomy, $query_type );
 
 			// Only show options with count > 0
 			if ( 0 < $count ) {
