@@ -58,13 +58,21 @@ jQuery( function( $ ) {
 		});
 	};
 
+	// Clears previous notices and shows new one above form.
+	var show_notice = function( html_element ) {
+		var $form = $( 'div.woocommerce > form' );
+
+		$( '.woocommerce-error, .woocommerce-message' ).remove();
+		$form.before( html_element );
+	};
+
 	// Coupon code
 	$( '[name="apply_coupon"]' ).on( 'click', function( evt ) {
 		evt.preventDefault();
 
-		var text_field = $( '#coupon_code' );
-		var coupon_code = text_field.val();
-		text_field.val( '' );
+		var $text_field = $( '#coupon_code' );
+		var coupon_code = $text_field.val();
+		$text_field.val( '' );
 
 		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' );
 		var data = {
@@ -73,12 +81,12 @@ jQuery( function( $ ) {
 		};
 
 		$.ajax( {
-			type:    'POST',
-			url:     url,
-			data:    data,
+			type:     'POST',
+			url:      url,
+			data:     data,
+			dataType: 'html',
 			success: function( response ) {
-				window.console.log( 'apply coupon response:' );
-				window.console.log( response );
+				show_notice( response );
 			},
 			complete: function() {
 				update_cart_totals();
