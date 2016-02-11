@@ -546,6 +546,7 @@ class WC_Webhook {
 			'customer.created' => array(
 				'user_register',
 				'woocommerce_created_customer',
+				'woocommerce_api_create_customer'
 			),
 			'customer.updated' => array(
 				'profile_update',
