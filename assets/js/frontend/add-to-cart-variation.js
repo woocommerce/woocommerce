@@ -475,7 +475,7 @@
 		if ( variation && variation.image_src && variation.image_src.length > 1 ) {
 			$product_img.wc_set_variation_attr( 'src', variation.image_src );
 			$product_img.wc_set_variation_attr( 'title', variation.image_title );
-			$product_img.wc_set_variation_attr( 'alt', variation.image_title );
+			$product_img.wc_set_variation_attr( 'alt', variation.image_alt );
 			$product_img.wc_set_variation_attr( 'srcset', variation.image_srcset );
 			$product_img.wc_set_variation_attr( 'sizes', variation.image_sizes );
 			$product_link.wc_set_variation_attr( 'href', variation.image_link );
