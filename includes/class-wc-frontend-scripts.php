@@ -289,6 +289,7 @@ class WC_Frontend_Scripts {
 					'ajax_url'                     => WC()->ajax_url(),
 					'wc_ajax_url'                  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 					'update_shipping_method_nonce' => wp_create_nonce( "update-shipping-method" ),
+					'apply_coupon_nonce'           => wp_create_nonce( "apply-coupon" ),
 				);
 			break;
 			case 'wc-cart-fragments' :

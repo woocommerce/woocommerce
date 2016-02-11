@@ -37,4 +37,52 @@ jQuery( function( $ ) {
 	});
 
 	$( '.shipping-calculator-form' ).hide();
+
+	// Update the cart after something has changed.
+	var update_cart_totals = function() {
+		$( 'div.cart_totals' ).block({
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+
+		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_cart_totals' );
+
+		$.ajax( {
+			url:     url,
+			success: function( response ) {
+				$( 'div.cart_totals' ).replaceWith( response );
+			}
+		});
+	};
+
+	// Coupon code
+	$( '[name="apply_coupon"]' ).on( 'click', function( evt ) {
+		evt.preventDefault();
+
+		var text_field = $( '#coupon_code' );
+		var coupon_code = text_field.val();
+		text_field.val( '' );
+
+		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' );
+		var data = {
+			security: wc_cart_params.apply_coupon_nonce,
+			coupon_code: coupon_code
+		};
+
+		$.ajax( {
+			type:    'POST',
+			url:     url,
+			data:    data,
+			success: function( response ) {
+				window.console.log( 'apply coupon response:' );
+				window.console.log( response );
+			},
+			complete: function() {
+				update_cart_totals();
+			}
+		});
+	});
 });
