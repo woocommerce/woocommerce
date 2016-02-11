@@ -544,6 +544,7 @@ class WC_Webhook {
 				'wp_trash_post',
 			),
 			'customer.created' => array(
+				'user_register',
 				'woocommerce_created_customer',
 			),
 			'customer.updated' => array(
