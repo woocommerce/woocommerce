@@ -226,8 +226,23 @@ class WC_Shipping_Zone implements WC_Data {
 		foreach ( $raw_methods as $raw_method ) {
 			if ( in_array( $raw_method->method_id, array_keys( $allowed_classes ) ) ) {
 				$class_name = $allowed_classes[ $raw_method->method_id ];
-				if ( class_exists( $class_name ) ) {
-					$methods[ $raw_method->instance_id ]               = new $class_name( $raw_method->instance_id );
+
+				// The returned array may contain instances of shipping methods, as well
+				// as classes. If the "class" is an instance, just use it. If not,
+				// create an instance.
+				if ( is_object( $class_name ) ) {
+					$methods[ $raw_method->instance_id ] = $class_name;
+				} else {
+					// If the class is not an object, it should be a string. It's better
+					// to double check, to be sure (a class must be a string, anything)
+					// else would be useless
+					if ( is_string( $class_name ) && class_exists( $class_name ) ) {
+						$methods[ $raw_method->instance_id ] = new $class_name( $raw_method->instance_id );
+					}
+				}
+
+				// Let's make sure that we have an instance before setting its attributes
+				if ( is_object( $methods[ $raw_method->instance_id ] ) ) {
 					$methods[ $raw_method->instance_id ]->method_order = absint( $raw_method->method_order );
 					$methods[ $raw_method->instance_id ]->has_settings = $methods[ $raw_method->instance_id ]->has_settings();
 				}
