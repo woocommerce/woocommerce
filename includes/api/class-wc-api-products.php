@@ -1137,7 +1137,7 @@ class WC_API_Products extends WC_API_Resource {
 			'related_ids'        => array_map( 'absint', array_values( $product->get_related() ) ),
 			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sells() ),
-			'parent_id'          => $product->post->post_parent,
+			'parent_id'          => $product->is_type( 'variation' ) ? $product->parent->id : $product->post->post_parent,
 			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
@@ -1152,8 +1152,26 @@ class WC_API_Products extends WC_API_Resource {
 			'variations'         => array(),
 			'parent'             => array(),
 			'grouped_products'   => array(),
-			'menu_order'         => $product->post->menu_order,
+			'menu_order'         => $this->get_product_menu_order( $product ),
 		);
+	}
+
+	/**
+	 * Get product menu order.
+	 *
+	 * @since 2.5.3
+	 * @param WC_Product $product
+	 * @return int
+	 */
+	private function get_product_menu_order( $product ) {
+		$menu_order = $product->post->menu_order;
+
+		if ( $product->is_type( 'variation' ) ) {
+			$_product = get_post( $product->get_variation_id() );
+			$menu_order = $_product->menu_order;
+		}
+
+		return apply_filters( 'woocommerce_api_product_menu_order', $menu_order, $product );
 	}
 
 	/**
