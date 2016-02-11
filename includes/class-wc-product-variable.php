@@ -178,6 +178,7 @@ class WC_Product_Variable extends WC_Product {
 	public function is_on_sale() {
 		$is_on_sale = false;
 		$prices     = $this->get_variation_prices();
+
 		if ( $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'] ) {
 			$is_on_sale = true;
 		}
@@ -305,9 +306,9 @@ class WC_Product_Variable extends WC_Product {
 							}
 						}
 
-						$prices[ $variation_id ]         = $price;
-						$regular_prices[ $variation_id ] = $regular_price;
-						$sale_prices[ $variation_id ]    = $sale_price;
+						$prices[ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
+						$regular_prices[ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
+						$sale_prices[ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
 					}
 				}
 
@@ -318,7 +319,7 @@ class WC_Product_Variable extends WC_Product {
 				$this->prices_array[ $price_hash ] = array(
 					'price'         => $prices,
 					'regular_price' => $regular_prices,
-					'sale_price'    => $sale_prices
+					'sale_price'    => $sale_prices,
 				);
 
 				set_transient( $transient_name, json_encode( $this->prices_array ), DAY_IN_SECONDS * 30 );
