@@ -329,7 +329,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'woocommerce_order_items',
 				'woocommerce_order_itemmeta',
 				'woocommerce_tax_rates',
-				'woocommerce_tax_rate_locations'
+				'woocommerce_tax_rate_locations',
+				'woocommerce_shipping_zones',
+				'woocommerce_shipping_zone_locations',
+				'woocommerce_shipping_zone_methods',
 			);
 
 			foreach ( $tables as $table ) {
