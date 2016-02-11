@@ -37,7 +37,6 @@ class WC_Query {
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
 		if ( ! is_admin() ) {
-			add_action( 'init', array( $this, 'layered_nav_init' ) );
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
 			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
@@ -498,8 +497,8 @@ class WC_Query {
 	 */
 	private function price_filter_meta_query() {
 		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
-			$min          = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
-			$max          = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
+			$min = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
+			$max = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
 
 			// If displaying prices in the shop including taxes, but prices don't include taxes..
 			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
@@ -523,7 +522,7 @@ class WC_Query {
 				'value'        => array( $min, $max ),
 				'compare'      => 'BETWEEN',
 				'type'         => 'DECIMAL',
-				'price_filter' => true
+				'price_filter' => true,
 			);
 		}
 		return array();
@@ -539,7 +538,7 @@ class WC_Query {
 			'value'         => isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0,
 			'compare'       => '>=',
 			'type'          => 'DECIMAL',
-			'rating_filter' => true
+			'rating_filter' => true,
 		) : array();
 	}
 
@@ -552,7 +551,7 @@ class WC_Query {
 		return array(
 			'key'     => '_visibility',
 			'value'   => is_search() ? array( 'visible', 'search' ) : array( 'visible', 'catalog' ),
-			'compare' => $compare
+			'compare' => $compare,
 		);
 	}
 
@@ -567,7 +566,7 @@ class WC_Query {
 		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array(
 			'key' 		=> '_stock_status',
 			'value' 	=> $status,
-			'compare' 	=> '='
+			'compare' 	=> '=',
 		) : array();
 	}
 
@@ -589,7 +588,7 @@ class WC_Query {
 					'field'    => 'slug',
 					'terms'    => $data['terms'],
 					'operator' => 'and' === $data['query_type'] ? 'AND' : 'IN',
-					'include_children' => false
+					'include_children' => false,
 				);
 			}
 		}
@@ -611,7 +610,7 @@ class WC_Query {
 			$tax_query[] = array(
 				'taxonomy' => $args['taxonomy'],
 				'terms'    => array( $args['term'] ),
-				'field'    => 'slug'
+				'field'    => 'slug',
 			);
 		}
 
@@ -660,7 +659,9 @@ class WC_Query {
 	/**
 	 * @deprecated 2.6.0
 	 */
-	public function layered_nav_init() {}
+	public function layered_nav_init() {
+		_deprecated_function( 'layered_nav_init', '2.6', '' );
+	}
 
 	/**
 	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.

@@ -172,7 +172,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 			echo '<span class="star-rating" title="' . esc_attr( sprintf( __( 'Rated %s and above', 'woocommerce' ), $rating ) ). '">
 					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( 'Rated %s and above', 'woocommerce'), $rating ) . '</span>
-				</span> (' . $count . ')';
+				</span> (' . esc_html( $count ) . ')';
 
 			echo '</a>';
 
