@@ -1,6 +1,14 @@
 /* global wc_cart_params */
 jQuery( function( $ ) {
 
+	// Gets a url for a given AJAX endpoint.
+	var get_url = function( endpoint ) {
+		return wc_cart_params.wc_ajax_url.toString().replace(
+			'%%endpoint%%',
+			endpoint
+		);
+	};
+
 	// Check if a node is blocked for processing.
 	var is_blocked = function( $node ) {
 		return $node.is( '.processing' );
@@ -45,7 +53,7 @@ jQuery( function( $ ) {
 			shipping_method: shipping_methods
 		};
 
-		$.post( wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'update_shipping_method' ), data, function( response ) {
+		$.post( get_url( 'update_shipping_method' ), data, function( response ) {
 			$( 'div.cart_totals' ).replaceWith( response );
 			$( document.body ).trigger( 'updated_shipping_method' );
 		});
@@ -57,17 +65,16 @@ jQuery( function( $ ) {
 	var update_cart_totals = function() {
 		block( $( 'div.cart_totals' ) );
 
-		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_cart_totals' );
-
 		$.ajax( {
-			url:     url,
+			url:      get_url( 'get_cart_totals' ),
+			dataType: 'html',
 			success: function( response ) {
 				$( 'div.cart_totals' ).replaceWith( response );
 			}
 		});
 	};
 
-	// Clears previous notices and shows new one above form.
+	// clears previous notices and shows new one above form.
 	var show_notice = function( html_element ) {
 		var $form = $( 'div.woocommerce > form' );
 
@@ -90,7 +97,6 @@ jQuery( function( $ ) {
 		var $text_field = $( '#coupon_code' );
 		var coupon_code = $text_field.val();
 
-		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' );
 		var data = {
 			security: wc_cart_params.apply_coupon_nonce,
 			coupon_code: coupon_code
@@ -98,7 +104,7 @@ jQuery( function( $ ) {
 
 		$.ajax( {
 			type:     'POST',
-			url:      url,
+			url:      get_url( 'apply_coupon' ),
 			data:     data,
 			dataType: 'html',
 			success: function( response ) {
@@ -120,7 +126,6 @@ jQuery( function( $ ) {
 
 		block( $tr.parents( 'table' ) );
 
-		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_coupon' );
 		var data = {
 			security: wc_cart_params.remove_coupon_nonce,
 			coupon: coupon
@@ -128,7 +133,7 @@ jQuery( function( $ ) {
 
 		$.ajax( {
 			type:    'POST',
-			url:      url,
+			url:      get_url( 'remove_coupon' ),
 			data:     data,
 			dataType: 'html',
 			success: function( response ) {
