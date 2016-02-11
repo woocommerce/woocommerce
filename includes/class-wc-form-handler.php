@@ -180,7 +180,8 @@ class WC_Form_Handler {
 		) );
 
 		foreach ( $required_fields as $field_key => $field_name ) {
-			if ( empty( $_POST[ $field_key ] ) ) {
+			$value = wc_clean( $_POST[ $field_key ] );
+			if ( empty( $value ) ) {
 				wc_add_notice( '<strong>' . esc_html( $field_name ) . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 		}
