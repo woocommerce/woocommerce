@@ -1,6 +1,27 @@
 /* global wc_cart_params */
 jQuery( function( $ ) {
 
+	// Check if a node is blocked for processing.
+	var is_blocked = function( $node ) {
+		return $node.is( '.processing' );
+	};
+
+	// Block a node for processing.
+	var block = function( $node ) {
+		$node.addClass( 'processing' ).block( {
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		});
+	};
+
+	// Unblock a node after processing is complete.
+	var unblock = function( $node ) {
+		$node.removeClass( 'processing' ).unblock();
+	};
+
 	// wc_cart_params is required to continue, ensure the object exists
 	if ( typeof wc_cart_params === 'undefined' ) {
 		return false;
@@ -17,13 +38,7 @@ jQuery( function( $ ) {
 			shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 		});
 
-		$( 'div.cart_totals' ).block({
-			message: null,
-			overlayCSS: {
-				background: '#fff',
-				opacity: 0.6
-			}
-		});
+		block( $( 'div.cart_totals' ) );
 
 		var data = {
 			security: wc_cart_params.update_shipping_method_nonce,
@@ -40,13 +55,7 @@ jQuery( function( $ ) {
 
 	// Update the cart after something has changed.
 	var update_cart_totals = function() {
-		$( 'div.cart_totals' ).block({
-			message: null,
-			overlayCSS: {
-				background: '#fff',
-				opacity: 0.6
-			}
-		});
+		block( $( 'div.cart_totals' ) );
 
 		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_cart_totals' );
 
@@ -70,9 +79,16 @@ jQuery( function( $ ) {
 	$( '[name="apply_coupon"]' ).on( 'click', function( evt ) {
 		evt.preventDefault();
 
+		var $form = $( 'div.woocommerce > form' );
+
+		if ( is_blocked( $form ) ) {
+			return false;
+		}
+
+		block( $form );
+
 		var $text_field = $( '#coupon_code' );
 		var coupon_code = $text_field.val();
-		$text_field.val( '' );
 
 		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' );
 		var data = {
@@ -89,6 +105,8 @@ jQuery( function( $ ) {
 				show_notice( response );
 			},
 			complete: function() {
+				unblock( $form );
+				$text_field.val( '' );
 				update_cart_totals();
 			}
 		});
