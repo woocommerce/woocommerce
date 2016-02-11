@@ -111,4 +111,33 @@ jQuery( function( $ ) {
 			}
 		});
 	});
+
+	$( document ).on( 'click', 'a.woocommerce-remove-coupon', function( evt ) {
+		evt.preventDefault();
+
+		var $tr = $( this ).parents( 'tr' );
+		var coupon = $( this ).attr( 'data-coupon' );
+
+		block( $tr.parents( 'table' ) );
+
+		var url = wc_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_coupon' );
+		var data = {
+			security: wc_cart_params.remove_coupon_nonce,
+			coupon: coupon
+		};
+
+		$.ajax( {
+			type:    'POST',
+			url:      url,
+			data:     data,
+			dataType: 'html',
+			success: function( response ) {
+				show_notice( response );
+				unblock( $tr.parents( 'table' ) );
+			},
+			complete: function() {
+				update_cart_totals();
+			}
+		});
+	});
 });
