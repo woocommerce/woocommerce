@@ -19,13 +19,25 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password' ) ) :
  */
 class WC_Email_Customer_Reset_Password extends WC_Email {
 
-	/** @var string */
+	/**
+	 * User login name.
+	 *
+	 * @var string
+	 */
 	public $user_login;
 
-	/** @var string */
+	/**
+	 * User email.
+	 *
+	 * @var string
+	 */
 	public $user_email;
 
-	/** @var string */
+	/**
+	 * Reset key.
+	 *
+	 * @var string
+	 */
 	public $reset_key;
 
 	/**
@@ -53,6 +65,9 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param string $user_login
+	 * @param string $reset_key
 	 */
 	function trigger( $user_login = '', $reset_key = '' ) {
 		if ( $user_login && $reset_key ) {
@@ -73,14 +88,13 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	function get_content_html() {
-		ob_start();
-		wc_get_template( $this->template_html, array(
+		return wc_get_template_html( $this->template_html, array(
 			'email_heading' => $this->get_heading(),
 			'user_login'    => $this->user_login,
 			'reset_key'     => $this->reset_key,
@@ -89,18 +103,16 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 			'plain_text'    => false,
 			'email'			=> $this
 		) );
-		return ob_get_clean();
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	function get_content_plain() {
-		ob_start();
-		wc_get_template( $this->template_plain, array(
+		return wc_get_template_html( $this->template_plain, array(
 			'email_heading' => $this->get_heading(),
 			'user_login'    => $this->user_login,
 			'reset_key'     => $this->reset_key,
@@ -109,7 +121,6 @@ class WC_Email_Customer_Reset_Password extends WC_Email {
 			'plain_text'    => true,
 			'email'			=> $this
 		) );
-		return ob_get_clean();
 	}
 }
 

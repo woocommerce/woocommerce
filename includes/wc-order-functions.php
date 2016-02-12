@@ -51,6 +51,10 @@ function wc_is_order_status( $maybe_status ) {
  * @return WC_Order
  */
 function wc_get_order( $the_order = false ) {
+	if ( ! did_action( 'woocommerce_init' ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+		return false;
+	}
 	return WC()->order_factory->get_order( $the_order );
 }
 
@@ -573,6 +577,12 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 	// Clear transients where we have names
 	foreach( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
+	}
+
+	// Clear money spent for user associated with order
+	if ( $post_id && ( $user_id = get_post_meta( $post_id, '_customer_user', true ) ) ) {
+		delete_user_meta( $user_id, '_money_spent' );
+		delete_user_meta( $user_id, '_order_count' );
 	}
 
 	// Increments the transient version to invalidate cache

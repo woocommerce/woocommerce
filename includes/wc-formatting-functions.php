@@ -42,96 +42,106 @@ function wc_get_filename_from_url( $file_url ) {
 /**
  * Normalise dimensions, unify to cm then convert to wanted unit value.
  *
- * Usage: wc_get_dimension(55, 'in');
+ * Usage:
+ * wc_get_dimension(55, 'in');
+ * wc_get_dimension(55, 'in', 'm');
  *
- * @param mixed $dim
- * @param mixed $to_unit 'in', 'm', 'cm', 'm'
+ * @param int|float $dimension
+ * @param string $to_unit 'in', 'm', 'cm', 'm'
+ * @param string $from_unit (optional) 'in', 'm', 'cm', 'm'
  * @return float
  */
-function wc_get_dimension( $dim, $to_unit ) {
+function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
+	$to_unit = strtolower( $to_unit );
 
-	$from_unit 	= strtolower( get_option( 'woocommerce_dimension_unit' ) );
-	$to_unit	= strtolower( $to_unit );
+	if ( empty( $from_unit ) ) {
+		$from_unit = strtolower( get_option( 'woocommerce_dimension_unit' ) );
+	}
 
-	// Unify all units to cm first
+	// Unify all units to cm first.
 	if ( $from_unit !== $to_unit ) {
-
 		switch ( $from_unit ) {
-			case 'in':
-				$dim *= 2.54;
-			break;
-			case 'm':
-				$dim *= 100;
-			break;
-			case 'mm':
-				$dim *= 0.1;
-			break;
-			case 'yd':
-				$dim *= 91.44;
-			break;
+			case 'in' :
+				$dimension *= 2.54;
+				break;
+			case 'm' :
+				$dimension *= 100;
+				break;
+			case 'mm' :
+				$dimension *= 0.1;
+				break;
+			case 'yd' :
+				$dimension *= 91.44;
+				break;
 		}
 
-		// Output desired unit
+		// Output desired unit.
 		switch ( $to_unit ) {
-			case 'in':
-				$dim *= 0.3937;
-			break;
-			case 'm':
-				$dim *= 0.01;
-			break;
-			case 'mm':
-				$dim *= 10;
-			break;
-			case 'yd':
-				$dim *= 0.010936133;
-			break;
+			case 'in' :
+				$dimension *= 0.3937;
+				break;
+			case 'm' :
+				$dimension *= 0.01;
+				break;
+			case 'mm' :
+				$dimension *= 10;
+				break;
+			case 'yd' :
+				$dimension *= 0.010936133;
+				break;
 		}
 	}
-	return ( $dim < 0 ) ? 0 : $dim;
+
+	return ( $dimension < 0 ) ? 0 : $dimension;
 }
 
 /**
  * Normalise weights, unify to kg then convert to wanted unit value.
  *
- * Usage: wc_get_weight(55, 'kg');
+ * Usage:
+ * wc_get_weight(55, 'kg');
+ * wc_get_weight(55, 'kg', 'lbs');
  *
- * @param mixed $weight
- * @param mixed $to_unit 'g', 'kg', 'lbs'
+ * @param int|float $weight
+ * @param string $to_unit 'g', 'kg', 'lbs', 'oz'
+ * @param string $from_unit (optional) 'g', 'kg', 'lbs', 'oz'
  * @return float
  */
-function wc_get_weight( $weight, $to_unit ) {
+function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
+	$to_unit = strtolower( $to_unit );
 
-	$from_unit 	= strtolower( get_option('woocommerce_weight_unit') );
-	$to_unit	= strtolower( $to_unit );
+	if ( empty( $from_unit ) ) {
+		$from_unit = strtolower( get_option( 'woocommerce_weight_unit' ) );
+	}
 
-	//Unify all units to kg first
+	// Unify all units to kg first.
 	if ( $from_unit !== $to_unit ) {
-
 		switch ( $from_unit ) {
-			case 'g':
+			case 'g' :
 				$weight *= 0.001;
-			break;
-			case 'lbs':
+				break;
+			case 'lbs' :
 				$weight *= 0.453592;
-			break;
-			case 'oz':
+				break;
+			case 'oz' :
 				$weight *= 0.0283495;
-			break;
+				break;
 		}
 
-		// Output desired unit
+		// Output desired unit.
 		switch ( $to_unit ) {
-			case 'g':
+			case 'g' :
 				$weight *= 1000;
-			break;
-			case 'lbs':
+				break;
+			case 'lbs' :
 				$weight *= 2.20462;
-			break;
-			case 'oz':
+				break;
+			case 'oz' :
 				$weight *= 35.274;
-			break;
+				break;
 		}
 	}
+
 	return ( $weight < 0 ) ? 0 : $weight;
 }
 
@@ -179,7 +189,7 @@ function wc_format_refund_total( $amount ) {
  *
  * @param  float|string $number Expects either a float or a string with a decimal separator only (no thousands)
  * @param  mixed $dp number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
- * @param  boolean $trim_zeros from end of string
+ * @param  bool $trim_zeros from end of string
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
@@ -750,4 +760,35 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
  */
 function wc_sanitize_term_text_based( $term ) {
 	return trim( wp_unslash( strip_tags( $term ) ) );
+}
+
+if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
+	/**
+	 * Make numeric postcode.
+	 *
+	 * Converts letters to numbers so we can do a simple range check on postcodes.
+	 * E.g. PE30 becomes 16050300 (P = 16, E = 05, 3 = 03, 0 = 00)
+	 *
+	 * @since 2.6.0
+	 * @param string $postcode Regular postcode
+	 * @return string
+	 */
+	function wc_make_numeric_postcode( $postcode ) {
+		$postcode_length    = strlen( $postcode );
+		$letters_to_numbers = array_merge( array( 0 ), range( 'A', 'Z' ) );
+		$letters_to_numbers = array_flip( $letters_to_numbers );
+		$numeric_postcode   = '';
+
+		for ( $i = 0; $i < $postcode_length; $i ++ ) {
+			if ( is_numeric( $postcode[ $i ] ) ) {
+				$numeric_postcode .= str_pad( $postcode[ $i ], 2, '0', STR_PAD_LEFT );
+			} elseif ( isset( $letters_to_numbers[ $postcode[ $i ] ] ) ) {
+				$numeric_postcode .= str_pad( $letters_to_numbers[ $postcode[ $i ] ], 2, '0', STR_PAD_LEFT );
+			} else {
+				$numeric_postcode .= '00';
+			}
+		}
+
+		return $numeric_postcode;
+	}
 }

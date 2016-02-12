@@ -2,13 +2,10 @@
 /**
  * Admin View: Settings
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
-
 ?>
-
 <div class="wrap woocommerce">
 	<form method="<?php echo esc_attr( apply_filters( 'woocommerce_settings_form_method_tab_' . $current_tab, 'post' ) ); ?>" id="mainform" action="" enctype="multipart/form-data">
 		<div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br /></div>
@@ -23,9 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</h2>
 
 		<?php
+			do_action( 'woocommerce_sections_' . $current_tab );
+
 			self::show_messages();
 
-			do_action( 'woocommerce_sections_' . $current_tab );
 			do_action( 'woocommerce_settings_' . $current_tab );
 			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated hook
 		?>

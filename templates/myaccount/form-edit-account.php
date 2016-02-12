@@ -12,7 +12,7 @@
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.2.7
+ * @version     2.5.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php wc_print_notices(); ?>
 
-<form action="" method="post">
+<form class="edit-account" action="" method="post">
 
 	<?php do_action( 'woocommerce_edit_account_form_start' ); ?>
 

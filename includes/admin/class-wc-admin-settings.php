@@ -19,8 +19,25 @@ if ( ! class_exists( 'WC_Admin_Settings' ) ) :
  */
 class WC_Admin_Settings {
 
+	/**
+	 * Setting pages.
+	 *
+	 * @var array
+	 */
 	private static $settings = array();
+
+	/**
+	 * Error messages.
+	 *
+	 * @var array
+	 */
 	private static $errors   = array();
+
+	/**
+	 * Update messages.
+	 *
+	 * @var array
+	 */
 	private static $messages = array();
 
 	/**
@@ -35,8 +52,8 @@ class WC_Admin_Settings {
 			$settings[] = include( 'settings/class-wc-settings-general.php' );
 			$settings[] = include( 'settings/class-wc-settings-products.php' );
 			$settings[] = include( 'settings/class-wc-settings-tax.php' );
-			$settings[] = include( 'settings/class-wc-settings-checkout.php' );
 			$settings[] = include( 'settings/class-wc-settings-shipping.php' );
+			$settings[] = include( 'settings/class-wc-settings-checkout.php' );
 			$settings[] = include( 'settings/class-wc-settings-accounts.php' );
 			$settings[] = include( 'settings/class-wc-settings-emails.php' );
 			$settings[] = include( 'settings/class-wc-settings-integrations.php' );
@@ -63,13 +80,11 @@ class WC_Admin_Settings {
 		do_action( 'woocommerce_update_options_' . $current_tab );
 		do_action( 'woocommerce_update_options' );
 
-		// Clear any unwanted data
-		delete_transient( 'woocommerce_cache_excluded_uris' );
-
 		self::add_message( __( 'Your settings have been saved.', 'woocommerce' ) );
 		self::check_download_folder_protection();
 
-		// Re-add endpoints and flush rules
+		// Clear any unwanted data and flush rules
+		delete_transient( 'woocommerce_cache_excluded_uris' );
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
 		flush_rewrite_rules();

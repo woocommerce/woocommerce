@@ -27,6 +27,9 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 
 	/**
 	 * Get Products matching stock criteria.
+	 *
+	 * @param int $current_page
+	 * @param int $per_page
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;

@@ -25,14 +25,16 @@ class WC_Install {
 		'2.2.0' => 'updates/woocommerce-update-2.2.php',
 		'2.3.0' => 'updates/woocommerce-update-2.3.php',
 		'2.4.0' => 'updates/woocommerce-update-2.4.php',
-		'2.4.1' => 'updates/woocommerce-update-2.4.1.php'
+		'2.4.1' => 'updates/woocommerce-update-2.4.1.php',
+		'2.5.0' => 'updates/woocommerce-update-2.5.php',
+		'2.6.0' => 'updates/woocommerce-update-2.6.php'
 	);
 
 	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
-		add_action( 'admin_init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -42,17 +44,21 @@ class WC_Install {
 	}
 
 	/**
-	 * check_version function.
+	 * Check WooCommerce version and run the updater is required.
+	 *
+	 * This check is done on all requests and runs if he versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version ) ) {
+		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
 	}
 
 	/**
-	 * Install actions when a update button is clicked.
+	 * Install actions when a update button is clicked within the admin area.
+	 *
+	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
@@ -171,6 +177,10 @@ class WC_Install {
 	 * Handle updates.
 	 */
 	private static function update() {
+		if ( ! defined( 'WC_UPDATING' ) ) {
+			define( 'WC_UPDATING', true );
+		}
+
 		$current_db_version = get_option( 'woocommerce_db_version' );
 
 		foreach ( self::$db_updates as $version => $updater ) {
@@ -253,6 +263,8 @@ class WC_Install {
 		foreach ( $pages as $key => $page ) {
 			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
 		}
+
+		delete_transient( 'woocommerce_cache_excluded_uris' );
 	}
 
 	/**
@@ -353,12 +365,7 @@ class WC_Install {
 		$collate = '';
 
 		if ( $wpdb->has_cap( 'collation' ) ) {
-			if ( ! empty( $wpdb->charset ) ) {
-				$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-			}
-			if ( ! empty( $wpdb->collate ) ) {
-				$collate .= " COLLATE $wpdb->collate";
-			}
+			$collate = $wpdb->get_charset_collate();
 		}
 
 		return "
@@ -462,6 +469,29 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
   KEY tax_rate_id (tax_rate_id),
   KEY location_type (location_type),
   KEY location_type_code (location_type(40),location_code(90))
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zones (
+  zone_id bigint(20) NOT NULL auto_increment,
+  zone_name varchar(255) NOT NULL,
+  zone_order bigint(20) NOT NULL,
+  PRIMARY KEY  (zone_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
+  location_id bigint(20) NOT NULL auto_increment,
+  zone_id bigint(20) NOT NULL,
+  location_code varchar(255) NOT NULL,
+  location_type varchar(40) NOT NULL,
+  PRIMARY KEY  (location_id),
+  KEY location_id (location_id),
+  KEY location_type (location_type),
+  KEY location_type_code (location_type(40),location_code(90))
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
+  zone_id bigint(20) NOT NULL,
+  instance_id bigint(20) NOT NULL auto_increment,
+  method_id varchar(255) NOT NULL,
+  method_order bigint(20) NOT NULL,
+  PRIMARY KEY  (instance_id)
 ) $collate;
 		";
 	}

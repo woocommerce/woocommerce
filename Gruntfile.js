@@ -235,6 +235,12 @@ module.exports = function( grunt ) {
 		'css'
 	]);
 
+	grunt.registerTask( 'js', [
+		'jshint',
+		'uglify:admin',
+		'uglify:frontend'
+	]);
+
 	grunt.registerTask( 'css', [
 		'sass',
 		'cssmin'

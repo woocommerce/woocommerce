@@ -389,7 +389,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 	 * <coupon>
 	 * : The ID or code of the coupon to update.
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
 	 * ## AVAILABLE FIELDS

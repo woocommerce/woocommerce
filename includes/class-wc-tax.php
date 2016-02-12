@@ -15,7 +15,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Tax {
 
+	/**
+	 * Precision.
+	 *
+	 * @var int
+	 */
 	public static $precision;
+
+	/**
+	 * Round at subtotal.
+	 *
+	 * @var bool
+	 */
 	public static $round_at_subtotal;
 
 	/**
@@ -442,11 +453,12 @@ class WC_Tax {
 				// This will be per order shipping - loop through the order and find the highest tax class rate
 				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes();
 
-				// If multiple classes are found, use highest. Don't bother with standard rate, we can get that later.
+				// If multiple classes are found, use the first one. Don't bother with standard rate, we can get that later.
 				if ( sizeof( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes ) ) {
 					$tax_classes = self::get_tax_classes();
 
 					foreach ( $tax_classes as $tax_class ) {
+						$tax_class = sanitize_title( $tax_class );
 						if ( in_array( $tax_class, $cart_tax_classes ) ) {
 							$matched_tax_rates = self::find_shipping_rates( array(
 								'country' 	=> $country,
@@ -924,8 +936,10 @@ class WC_Tax {
 		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $tax_class ) ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
-		// Set the rates keys equal to their ids.
-		$rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
+		if ( ! empty( $rates ) ) {
+			// Set the rates keys equal to their ids.
+			$rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
+		}
 
 		// Drop the locations into the rates array.
 		foreach ( $locations as $location ) {

@@ -21,6 +21,8 @@ class WC_Meta_Box_Product_Data {
 
 	/**
 	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 		global $post, $thepostid;
@@ -132,19 +134,6 @@ class WC_Meta_Box_Product_Data {
 				?>
 			</ul>
 			<div id="general_product_data" class="panel woocommerce_options_panel"><?php
-
-				echo '<div class="options_group hide_if_grouped">';
-
-					// SKU
-					if ( wc_product_sku_enabled() ) {
-						woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="'. __( 'Stock Keeping Unit', 'woocommerce' ) .'">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
-					} else {
-						echo '<input type="hidden" name="_sku" value="' . esc_attr( get_post_meta( $thepostid, '_sku', true ) ) . '" />';
-					}
-
-					do_action( 'woocommerce_product_options_sku' );
-
-				echo '</div>';
 
 				echo '<div class="options_group show_if_external">';
 
@@ -297,7 +286,16 @@ class WC_Meta_Box_Product_Data {
 
 				echo '<div class="options_group">';
 
-				if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) {
+				// SKU
+				if ( wc_product_sku_enabled() ) {
+					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="'. __( 'Stock Keeping Unit', 'woocommerce' ) .'">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
+				} else {
+					echo '<input type="hidden" name="_sku" value="' . esc_attr( get_post_meta( $thepostid, '_sku', true ) ) . '" />';
+				}
+
+				do_action( 'woocommerce_product_options_sku' );
+
+				if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
 					// manage stock
 					woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __( 'Manage stock?', 'woocommerce' ), 'description' => __( 'Enable stock management at product level', 'woocommerce' ) ) );
@@ -984,7 +982,6 @@ class WC_Meta_Box_Product_Data {
 			update_post_meta( $post_id, '_sale_price', '' );
 			update_post_meta( $post_id, '_sale_price_dates_from', '' );
 			update_post_meta( $post_id, '_sale_price_dates_to', '' );
-			update_post_meta( $post_id, '_price', '' );
 
 		} else {
 			$date_from     = isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';
@@ -1234,6 +1231,8 @@ class WC_Meta_Box_Product_Data {
 	/**
 	 * Save meta box data.
 	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
 	 */
 	public static function save_variations( $post_id, $post ) {
 		global $wpdb;

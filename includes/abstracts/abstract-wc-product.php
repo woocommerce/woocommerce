@@ -167,12 +167,23 @@ class WC_Product {
 	}
 
 	/**
-	 * get_gallery_attachment_ids function.
+	 * Return the product ID
+	 *
+	 * @since 2.5.0
+	 * @return int product (post) ID
+	 */
+	public function get_id() {
+
+		return $this->id;
+	}
+
+	/**
+	 * Returns the gallery attachment ids.
 	 *
 	 * @return array
 	 */
 	public function get_gallery_attachment_ids() {
-		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( (array) explode( ',', $this->product_image_gallery ) ), $this );
+		return apply_filters( 'woocommerce_product_gallery_attachment_ids', array_filter( array_filter( (array) explode( ',', $this->product_image_gallery ) ), 'wp_attachment_is_image' ), $this );
 	}
 
 	/**
@@ -211,15 +222,17 @@ class WC_Product {
 	 */
 	public function get_total_stock() {
 		if ( empty( $this->total_stock ) ) {
-			$this->total_stock = max( 0, $this->get_stock_quantity() );
-
 			if ( sizeof( $this->get_children() ) > 0 ) {
+				$this->total_stock = max( 0, $this->get_stock_quantity() );
+
 				foreach ( $this->get_children() as $child_id ) {
 					if ( 'yes' === get_post_meta( $child_id, '_manage_stock', true ) ) {
 						$stock = get_post_meta( $child_id, '_stock', true );
 						$this->total_stock += max( 0, wc_stock_amount( $stock ) );
 					}
 				}
+			} else {
+				$this->total_stock = $this->get_stock_quantity();
 			}
 		}
 		return wc_stock_amount( $this->total_stock );
@@ -308,7 +321,7 @@ class WC_Product {
 	}
 
 	/**
-	 * set_stock_status function.
+	 * Set stock status of the product.
 	 *
 	 * @param string $status
 	 */
@@ -453,7 +466,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_virtual() {
-		return $this->virtual == 'yes' ? true : false;
+		return apply_filters( 'woocommerce_is_virtual', $this->virtual == 'yes' ? true : false, $this );
 	}
 
 	/**
@@ -482,17 +495,17 @@ class WC_Product {
 	}
 
 	/**
-	 * get_child function.
+	 * Returns the child product.
 	 *
 	 * @param mixed $child_id
-	 * @return WC_Product WC_Product or WC_Product_variation
+	 * @return WC_Product|WC_Product|WC_Product_variation
 	 */
 	public function get_child( $child_id ) {
 		return wc_get_product( $child_id );
 	}
 
 	/**
-	 * get_children function.
+	 * Returns the children.
 	 *
 	 * @return array
 	 */
@@ -597,13 +610,16 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
+		$status = false;
 		if ( $this->managing_stock() && $this->backorders_allowed() ) {
-			return true;
+			$status = true;
 		} elseif ( $this->managing_stock() && $this->get_total_stock() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-			return false;
+			$status = false;
 		} else {
-			return $this->stock_status === 'instock';
+			$status = $this->stock_status === 'instock';
 		}
+
+		return apply_filters( 'woocommerce_product_is_in_stock', $status);
 	}
 
 	/**
@@ -834,6 +850,7 @@ class WC_Product {
 	/**
 	 * Returns the price (including tax). Uses customer tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
+	 * @param  int $qty
 	 * @param  string $price to calculate, left blank to just use get_price()
 	 * @return string
 	 */
@@ -893,6 +910,7 @@ class WC_Product {
 	 * Returns the price (excluding tax) - ignores tax_class filters since the price may *include* tax and thus needs subtracting.
 	 * Uses store base tax rates. Can work for a specific $qty for more accurate taxes.
 	 *
+	 * @param  int $qty
 	 * @param  string $price to calculate, left blank to just use get_price()
 	 * @return string
 	 */
@@ -1330,7 +1348,7 @@ class WC_Product {
 
 			$attribute = isset( $attributes[ $attr ] ) ? $attributes[ $attr ] : $attributes[ 'pa_' . $attr ];
 
-			if ( $attribute['is_taxonomy'] ) {
+			if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
 
 				return implode( ', ', wc_get_product_terms( $this->id, $attribute['name'], array( 'fields' => 'names' ) ) );
 
@@ -1494,6 +1512,7 @@ class WC_Product {
 	 * Returns the main product image.
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
+	 * @param array $attr
 	 * @return string
 	 */
 	public function get_image( $size = 'shop_thumbnail', $attr = array() ) {

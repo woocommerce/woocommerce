@@ -51,6 +51,8 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  *
  * Returns a new order object on success which can then be used to add additional data.
  *
+ * @param  array $args
+ *
  * @return WC_Order on success, WP_Error on failure.
  */
 function wc_create_order( $args = array() ) {
@@ -60,7 +62,8 @@ function wc_create_order( $args = array() ) {
 		'customer_note' => null,
 		'order_id'      => 0,
 		'created_via'   => '',
-		'parent'        => 0
+		'cart_hash'     => '',
+		'parent'        => 0,
 	);
 
 	$args       = wp_parse_args( $args, $default_args );
@@ -109,6 +112,7 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 		update_post_meta( $order_id, '_customer_user', 0 );
 		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
+		update_post_meta( $order_id, '_cart_hash', sanitize_text_field( $args['cart_hash'] ) );
 	}
 
 	if ( is_numeric( $args['customer_id'] ) ) {
@@ -136,6 +140,8 @@ function wc_update_order( $args ) {
 /**
  * Get template part (for templates like the shop-loop).
  *
+ * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
+ *
  * @access public
  * @param mixed $slug
  * @param string $name (default: '')
@@ -158,10 +164,8 @@ function wc_get_template_part( $slug, $name = '' ) {
 		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
 	}
 
-	// Allow 3rd party plugin filter template file from their plugin.
-	if ( ( ! $template && WC_TEMPLATE_DEBUG_MODE ) || $template ) {
-		$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
-	}
+	// Allow 3rd party plugins to filter template file from their plugin.
+	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
 
 	if ( $template ) {
 		load_template( $template, false );
@@ -197,6 +201,17 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	include( $located );
 
 	do_action( 'woocommerce_after_template_part', $template_name, $template_path, $located, $args );
+}
+
+/**
+ * Like wc_get_template, but returns the HTML instead of outputting.
+ * @see wc_get_template
+ * @since 2.5.0
+ */
+function wc_get_template_html( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
+	ob_start();
+	wc_get_template( $template_name, $args, $template_path, $default_path );
+	return ob_get_clean();
 }
 
 /**
@@ -283,8 +298,9 @@ function get_woocommerce_currencies() {
 				'INR' => __( 'Indian Rupee', 'woocommerce' ),
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
-				'KIP' => __( 'Lao Kip', 'woocommerce' ),
+				'KES' => __( 'Kenyan shilling', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
+				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
@@ -297,6 +313,7 @@ function get_woocommerce_currencies() {
 				'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'RON' => __( 'Romanian Leu', 'woocommerce' ),
 				'RUB' => __( 'Russian Ruble', 'woocommerce' ),
+				'SAR' => __( 'Saudi Riyal', 'woocommerce' ),
 				'SEK' => __( 'Swedish Krona', 'woocommerce' ),
 				'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
 				'THB' => __( 'Thai Baht', 'woocommerce' ),
@@ -322,134 +339,61 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		$currency = get_woocommerce_currency();
 	}
 
-	switch ( $currency ) {
-		case 'AED' :
-			$currency_symbol = 'د.إ';
-			break;
-		case 'AUD' :
-		case 'ARS' :
-		case 'CAD' :
-		case 'CLP' :
-		case 'COP' :
-		case 'HKD' :
-		case 'MXN' :
-		case 'NZD' :
-		case 'SGD' :
-		case 'USD' :
-			$currency_symbol = '&#36;';
-			break;
-		case 'BDT':
-			$currency_symbol = '&#2547;&nbsp;';
-			break;
-		case 'BGN' :
-			$currency_symbol = '&#1083;&#1074;.';
-			break;
-		case 'BRL' :
-			$currency_symbol = '&#82;&#36;';
-			break;
-		case 'CHF' :
-			$currency_symbol = '&#67;&#72;&#70;';
-			break;
-		case 'CNY' :
-		case 'JPY' :
-		case 'RMB' :
-			$currency_symbol = '&yen;';
-			break;
-		case 'CZK' :
-			$currency_symbol = '&#75;&#269;';
-			break;
-		case 'DKK' :
-			$currency_symbol = 'DKK';
-			break;
-		case 'DOP' :
-			$currency_symbol = 'RD&#36;';
-			break;
-		case 'EGP' :
-			$currency_symbol = 'EGP';
-			break;
-		case 'EUR' :
-			$currency_symbol = '&euro;';
-			break;
-		case 'GBP' :
-			$currency_symbol = '&pound;';
-			break;
-		case 'HRK' :
-			$currency_symbol = 'Kn';
-			break;
-		case 'HUF' :
-			$currency_symbol = '&#70;&#116;';
-			break;
-		case 'IDR' :
-			$currency_symbol = 'Rp';
-			break;
-		case 'ILS' :
-			$currency_symbol = '&#8362;';
-			break;
-		case 'INR' :
-			$currency_symbol = '&#8377;';
-			break;
-		case 'ISK' :
-			$currency_symbol = 'Kr.';
-			break;
-		case 'KIP' :
-			$currency_symbol = '&#8365;';
-			break;
-		case 'KRW' :
-			$currency_symbol = '&#8361;';
-			break;
-		case 'MYR' :
-			$currency_symbol = '&#82;&#77;';
-			break;
-		case 'NGN' :
-			$currency_symbol = '&#8358;';
-			break;
-		case 'NOK' :
-			$currency_symbol = '&#107;&#114;';
-			break;
-		case 'NPR' :
-		case 'PKR' :
-			$currency_symbol = '&#8360;';
-			break;
-		case 'PHP' :
-			$currency_symbol = '&#8369;';
-			break;
-		case 'PLN' :
-			$currency_symbol = '&#122;&#322;';
-			break;
-		case 'PYG' :
-			$currency_symbol = '&#8370;';
-			break;
-		case 'RON' :
-			$currency_symbol = 'lei';
-			break;
-		case 'RUB' :
-			$currency_symbol = '&#1088;&#1091;&#1073;.';
-			break;
-		case 'SEK' :
-			$currency_symbol = '&#107;&#114;';
-			break;
-		case 'THB' :
-			$currency_symbol = '&#3647;';
-			break;
-		case 'TRY' :
-			$currency_symbol = '&#8378;';
-			break;
-		case 'TWD' :
-			$currency_symbol = '&#78;&#84;&#36;';
-			break;
-		case 'UAH' :
-			$currency_symbol = '&#8372;';
-			break;
-		case 'VND' :
-			$currency_symbol = '&#8363;';
-			break;
-		case 'ZAR' :
-			$currency_symbol = '&#82;';
-			break;
-		default :
-			$currency_symbol = '';
-			break;
-	}
+	$symbols = apply_filters( 'woocommerce_currency_symbols', array(
+		'AED' => 'د.إ',
+		'ARS' => '&#36;',
+		'AUD' => '&#36;',
+		'BDT' => '&#2547;&nbsp;',
+		'BGN' => '&#1083;&#1074;.',
+		'BRL' => '&#82;&#36;',
+		'CAD' => '&#36;',
+		'CHF' => '&#67;&#72;&#70;',
+		'CLP' => '&#36;',
+		'CNY' => '&yen;',
+		'COP' => '&#36;',
+		'CZK' => '&#75;&#269;',
+		'DKK' => 'DKK',
+		'DOP' => 'RD&#36;',
+		'EGP' => 'EGP',
+		'EUR' => '&euro;',
+		'GBP' => '&pound;',
+		'HKD' => '&#36;',
+		'HRK' => 'Kn',
+		'HUF' => '&#70;&#116;',
+		'IDR' => 'Rp',
+		'ILS' => '&#8362;',
+		'INR' => '&#8377;',
+		'ISK' => 'Kr.',
+		'JPY' => '&yen;',
+		'KES' => 'KSh',
+		'KRW' => '&#8361;',
+		'LAK' => '&#8365;',
+		'MXN' => '&#36;',
+		'MYR' => '&#82;&#77;',
+		'NGN' => '&#8358;',
+		'NOK' => '&#107;&#114;',
+		'NPR' => '&#8360;',
+		'NZD' => '&#36;',
+		'PHP' => '&#8369;',
+		'PKR' => '&#8360;',
+		'PLN' => '&#122;&#322;',
+		'PYG' => '&#8370;',
+		'RMB' => '&yen;',
+		'RON' => 'lei',
+		'RUB' => '&#8381;',
+		'SAR' => '&#x631;.&#x633;',
+		'SEK' => '&#107;&#114;',
+		'SGD' => '&#36;',
+		'THB' => '&#3647;',
+		'TRY' => '&#8378;',
+		'TWD' => '&#78;&#84;&#36;',
+		'UAH' => '&#8372;',
+		'USD' => '&#36;',
+		'VND' => '&#8363;',
+		'ZAR' => '&#82;',
+	) );
+
+	$currency_symbol = isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : '';
 
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }
@@ -554,7 +498,7 @@ function wc_print_js() {
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
-		setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
+		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure );
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE );
@@ -757,12 +701,13 @@ function wc_get_base_location() {
 }
 
 /**
- * Get the customer's default location. .
+ * Get the customer's default location.
  *
  * Filtered, and set to base location or left blank. If cache-busting,
  * this should only be used when 'location' is set in the querystring.
  *
  * @todo should the woocommerce_default_country option be renamed to contain 'base'?
+ * @todo deprecate woocommerce_customer_default_location and support an array filter only to cover all cases.
  * @since 2.3.0
  * @return array
  */
@@ -785,7 +730,7 @@ function wc_get_customer_default_location() {
 		break;
 	}
 
-	return $location;
+	return apply_filters( 'woocommerce_customer_default_location_array', $location );
 }
 
 // This function can be removed when WP 3.9.2 or greater is required.
@@ -917,16 +862,10 @@ function wc_array_cartesian( $input ) {
 function wc_transaction_query( $type = 'start' ) {
 	global $wpdb;
 
-	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
-		// Try to set isolation level to support dirty reads - if this is unsupported, do not use transactions
-		$wpdb->hide_errors();
-		$result = $wpdb->query( 'SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;' );
+	$wpdb->hide_errors();
 
-		if ( false === $result ) {
-			define( 'WC_USE_TRANSACTIONS', false );
-		} else {
-			define( 'WC_USE_TRANSACTIONS', true );
-		}
+	if ( ! defined( 'WC_USE_TRANSACTIONS' ) ) {
+		define( 'WC_USE_TRANSACTIONS', true );
 	}
 
 	if ( WC_USE_TRANSACTIONS ) {
@@ -942,4 +881,56 @@ function wc_transaction_query( $type = 'start' ) {
 			break;
 		}
 	}
+}
+
+/**
+ * Gets the url to the cart page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to cart page
+ */
+function wc_get_cart_url() {
+	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+}
+
+/**
+ * Gets the url to the checkout page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to checkout page
+ */
+function wc_get_checkout_url() {
+	$checkout_url = wc_get_page_permalink( 'checkout' );
+	if ( $checkout_url ) {
+		// Force SSL if needed
+		if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
+			$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
+		}
+	}
+
+	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
+}
+
+/**
+ * Register a shipping method.
+ *
+ * @since 1.5.7
+ * @param string|object $shipping_method class name (string) or a class object.
+ */
+function woocommerce_register_shipping_method( $shipping_method ) {
+	WC()->shipping->register_shipping_method( $shipping_method );
+}
+
+/**
+ * Get the shipping zone matching a given package from the cart.
+ *
+ * @since  2.6.0
+ * @uses   WC_Shipping_Zones::get_zone_matching_package
+ * @param  array $package
+ * @return WC_Shipping_Zone
+ */
+function wc_get_shipping_zone( $package ) {
+	return WC_Shipping_Zones::get_zone_matching_package( $package );
 }

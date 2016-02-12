@@ -7,23 +7,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Local Delivery Shipping Method.
  *
- * A simple shipping method allowing local delivery as a shipping method.
+ * This class is here for backwards commpatility for methods existing before zones existed.
  *
- * @class 		WC_Shipping_Local_Delivery
+ * @deprecated  2.6.0
  * @version		2.3.0
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
-class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
+class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'local_delivery';
-		$this->method_title       = __( 'Local Delivery', 'woocommerce' );
-		$this->method_description = __( 'Local delivery is a simple shipping method for delivering orders locally.', 'woocommerce' );
+		$this->id                 = 'legacy_local_delivery';
+		$this->method_title       = __( 'Local Delivery (Legacy)', 'woocommerce' );
+		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
 		$this->init();
+	}
+
+	/**
+	 * Return the name of the option in the WP DB.
+	 * @since 2.6.0
+	 * @return string
+	 */
+	public function get_option_key() {
+		return $this->plugin_id . 'local_delivery' . '_settings';
 	}
 
 	/**
@@ -88,7 +97,7 @@ class WC_Shipping_Local_Delivery extends WC_Shipping_Local_Pickup {
 			'enabled' => array(
 				'title'   => __( 'Enable', 'woocommerce' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Enable local delivery', 'woocommerce' ),
+				'label'   => __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
 				'default' => 'no'
 			),
 			'title' => array(

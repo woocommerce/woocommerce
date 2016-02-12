@@ -44,6 +44,8 @@ class WC_Email_Failed_Order extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param int $order_id
 	 */
 	public function trigger( $order_id ) {
 		if ( $order_id ) {
@@ -62,21 +64,19 @@ class WC_Email_Failed_Order extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	public function get_content_html() {
-		ob_start();
-		wc_get_template( $this->template_html, array(
+		return wc_get_template_html( $this->template_html, array(
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
 			'plain_text'    => false,
 			'email'			=> $this
 		) );
-		return ob_get_clean();
 	}
 
 	/**
@@ -85,15 +85,13 @@ class WC_Email_Failed_Order extends WC_Email {
 	 * @return string
 	 */
 	public function get_content_plain() {
-		ob_start();
-		wc_get_template( $this->template_plain, array(
+		return wc_get_template_html( $this->template_plain, array(
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
 			'plain_text'    => true,
 			'email'			=> $this
 		) );
-		return ob_get_clean();
 	}
 
 	/**

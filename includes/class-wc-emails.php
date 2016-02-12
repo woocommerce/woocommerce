@@ -132,6 +132,7 @@ class WC_Emails {
 		$this->emails['WC_Email_New_Order'] 		                 = include( 'emails/class-wc-email-new-order.php' );
 		$this->emails['WC_Email_Cancelled_Order'] 		             = include( 'emails/class-wc-email-cancelled-order.php' );
 		$this->emails['WC_Email_Failed_Order'] 		                 = include( 'emails/class-wc-email-failed-order.php' );
+		$this->emails['WC_Email_Customer_On_Hold_Order'] 		     = include( 'emails/class-wc-email-customer-on-hold-order.php' );
 		$this->emails['WC_Email_Customer_Processing_Order'] 		 = include( 'emails/class-wc-email-customer-processing-order.php' );
 		$this->emails['WC_Email_Customer_Completed_Order'] 		     = include( 'emails/class-wc-email-customer-completed-order.php' );
 		$this->emails['WC_Email_Customer_Refunded_Order'] 		     = include( 'emails/class-wc-email-customer-refunded-order.php' );
@@ -275,16 +276,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
-		$fields = array();
-
-		if ( $order->customer_note ) {
-			$fields['customer_note'] = array(
-				'label' => __( 'Note', 'woocommerce' ),
-				'value' => wptexturize( $order->customer_note )
-			);
-		}
-
-		$fields = apply_filters( 'woocommerce_email_order_meta_fields', $fields, $sent_to_admin, $order );
+		$fields = apply_filters( 'woocommerce_email_order_meta_fields', array(), $sent_to_admin, $order );
 
 		/**
 		 * Deprecated woocommerce_email_order_meta_keys filter.
@@ -346,6 +338,13 @@ class WC_Emails {
 	 */
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
 		$fields = array();
+
+		if ( $order->customer_note ) {
+			$fields['customer_note'] = array(
+				'label' => __( 'Note', 'woocommerce' ),
+				'value' => wptexturize( $order->customer_note )
+			);
+		}
 
 		if ( $order->billing_email ) {
 			$fields['billing_email'] = array(

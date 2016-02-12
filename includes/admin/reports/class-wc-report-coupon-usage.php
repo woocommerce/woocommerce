@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * WC_Report_Coupon_Usage
  *
@@ -10,11 +15,15 @@
 class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 	/**
+	 * Chart colours.
+	 *
 	 * @var array
 	 */
 	public $chart_colours = array();
 
 	/**
+	 * Coupon codes.
+	 *
 	 * @var array
 	 */
 	public $coupon_codes = array();
@@ -139,7 +148,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	}
 
 	/**
-	 * [get_chart_widgets description].
+	 * Get chart widgets.
 	 *
 	 * @return array
 	 */
@@ -155,7 +164,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	}
 
 	/**
-	 * Product selection.
+	 * Output coupons widget.
 	 */
 	public function coupons_widget() {
 		?>

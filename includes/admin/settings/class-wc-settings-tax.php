@@ -19,6 +19,11 @@ if ( ! class_exists( 'WC_Settings_Tax' ) ) :
  */
 class WC_Settings_Tax extends WC_Settings_Page {
 
+	/**
+	 * Setting page id.
+	 *
+	 * @var string
+	 */
 	protected $id = 'tax';
 
 	/**
@@ -27,6 +32,17 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function __construct() {
 		$this->label = __( 'Tax', 'woocommerce' );
 		parent::__construct();
+	}
+
+	/**
+	 * Add this page to settings.
+	 */
+	public function add_settings_page( $pages ) {
+		if ( wc_tax_enabled() ) {
+			return parent::add_settings_page( $pages );
+		} else {
+			return $pages;
+		}
 	}
 
 	/**
@@ -104,16 +120,15 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Output tax rate tables.
 	 */
 	public function output_tax_rates() {
-		global $wpdb,
-				$current_section;
+		global $wpdb, $current_section;
 
 		$current_class = $this->get_current_tax_class();
 
 		$countries = array();
 		foreach ( WC()->countries->get_allowed_countries() as $value => $label ) {
 			$countries[] = array(
-				'label' => $label,
 				'value' => $value,
+				'label' => esc_js( html_entity_decode( $label ) ),
 			);
 		}
 
@@ -121,8 +136,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		foreach ( WC()->countries->get_allowed_country_states() as $label ) {
 			foreach ( $label as $code => $state ) {
 				$states[] = array(
-					'label' => $state,
 					'value' => $code,
+					'label' => esc_js( html_entity_decode( $state ) ),
 				);
 			}
 		}

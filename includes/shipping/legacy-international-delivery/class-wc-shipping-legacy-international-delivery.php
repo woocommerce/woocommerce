@@ -6,23 +6,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * International Delivery - Based on the Flat Rate Shipping Method.
  *
- * @class 		WC_Shipping_Flat_Rate
+ * This class is here for backwards commpatility for methods existing before zones existed.
+ *
+ * @deprecated  2.6.0
  * @version		2.4.0
  * @package		WooCommerce/Classes/Shipping
  * @author 		WooThemes
  */
-class WC_Shipping_International_Delivery extends WC_Shipping_Flat_Rate {
+class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_Rate {
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'international_delivery';
-		$this->method_title       = __( 'International Flat Rate', 'woocommerce' );
-		$this->method_description = __( 'International Flat Rate Shipping lets you charge a fixed rate for shipping.', 'woocommerce' );
+		$this->id                 = 'legacy_international_delivery';
+		$this->method_title       = __( 'International Flat Rate (Legacy)', 'woocommerce' );
+		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
 		$this->init();
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+	}
+
+	/**
+	 * Return the name of the option in the WP DB.
+	 * @since 2.6.0
+	 * @return string
+	 */
+	public function get_option_key() {
+		return $this->plugin_id . 'international_delivery' . '_settings';
 	}
 
 	/**

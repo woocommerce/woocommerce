@@ -53,7 +53,7 @@ jQuery( function ( $ ) {
 		})
 		.on( 'keyup change', '.wc_input_country_iso[type=text]', function() {
 			var value = $( this ).val();
-			var regex = new RegExp( '^([A-Z])?([A-Z])$' );
+			var regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
 
 			if ( ! regex.test( value ) ) {
 				$( this ).val( '' );
@@ -125,15 +125,16 @@ jQuery( function ( $ ) {
 	});
 
 	var controlled = false;
-	var shifted = false;
-	var hasFocus = false;
+	var shifted    = false;
+	var hasFocus   = false;
 
 	$( document.body ).bind( 'keyup keydown', function( e ) {
-		shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey;
+		shifted    = e.shiftKey;
+		controlled = e.ctrlKey || e.metaKey;
 	});
 
 	$( '.wc_input_table' ).on( 'focus click', 'input', function( e ) {
-		var $this_table = $( this ).closest( 'table' );
+		var $this_table = $( this ).closest( 'table, tbody' );
 		var $this_row   = $( this ).closest( 'tr' );
 
 		if ( ( e.type === 'focus' && hasFocus !== $this_row.index() ) || ( e.type === 'click' && $( this ).is( ':focus' ) ) ) {
@@ -221,4 +222,11 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+
+	// Load videos when help button is clicked.
+	$( '#contextual-help-link' ).on( 'click', function() {
+		var frame = $( '#tab-panel-woocommerce_101_tab iframe' );
+
+		frame.attr( 'src', frame.data( 'src' ) );
+	});
 });

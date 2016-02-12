@@ -22,6 +22,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return WC_Product
  */
 function wc_get_product( $the_product = false, $args = array() ) {
+	if ( ! did_action( 'woocommerce_init' ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'wc_get_product should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+		return false;
+	}
 	return WC()->product_factory->get_product( $the_product, $args );
 }
 
@@ -437,7 +441,7 @@ function wc_scheduled_sales() {
 add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
 
 /**
- * wc_get_attachment_image_attributes function.
+ * Get attachment image attributes.
  *
  * @access public
  * @param array $attr
@@ -454,7 +458,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
 
 
 /**
- * wc_prepare_attachment_for_js function.
+ * Prepare attachment for JavaScript.
  *
  * @access public
  * @param array $response

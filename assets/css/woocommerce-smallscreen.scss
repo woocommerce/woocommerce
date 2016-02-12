@@ -99,16 +99,18 @@
 	/**
 	 * Products
 	 */
-	ul.products {
-		li.product {
-			width: 48%;
-			float: left;
-			clear: both;
-			margin: 0 0 2.992em;
+	&, &[class*="columns-"] {
+		ul.products {
+			li.product {
+				width: 48%;
+				float: left;
+				clear: both;
+				margin: 0 0 2.992em;
 
-			&:nth-child(2n) {
-				float: right;
-				clear: none !important;
+				&:nth-child(2n) {
+					float: right;
+					clear: none !important;
+				}
 			}
 		}
 	}

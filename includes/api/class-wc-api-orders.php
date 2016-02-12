@@ -131,31 +131,37 @@ class WC_API_Orders extends WC_API_Resource {
 
 
 	/**
-	 * Get the order for the given ID
+	 * Get the order for the given ID.
 	 *
 	 * @since 2.1
-	 * @param int $id the order ID
-	 * @param array $fields
-	 * @param array $filter
+	 * @param int $id The order ID.
+	 * @param array $fields Request fields.
+	 * @param array $filter Request filters.
 	 * @return array
 	 */
 	public function get_order( $id, $fields = null, $filter = array() ) {
 
-		// ensure order ID is valid & user has permission to read
+		// Ensure order ID is valid & user has permission to read.
 		$id = $this->validate_request( $id, $this->post_type, 'read' );
 
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
 
-		// Get the decimal precession
+		// Get the decimal precession.
 		$dp         = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
 		$order      = wc_get_order( $id );
 		$order_post = get_post( $id );
+		$expand     = array();
+
+		if ( ! empty( $filter['expand'] ) ) {
+			$expand = explode( ',', $filter['expand'] );
+		}
 
 		$order_data = array(
 			'id'                        => $order->id,
 			'order_number'              => $order->get_order_number(),
+			'order_key'                 => $order->order_key,
 			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
 			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
@@ -211,9 +217,8 @@ class WC_API_Orders extends WC_API_Resource {
 			'coupon_lines'              => array(),
 		);
 
-		// add line items
+		// Add line items.
 		foreach ( $order->get_items() as $item_id => $item ) {
-
 			$product     = $order->get_product_from_item( $item );
 			$product_id  = null;
 			$product_sku = null;
@@ -228,7 +233,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$item_meta = array();
 
-			$hideprefix = ( isset( $filter['all_item_meta'] ) && $filter['all_item_meta'] === 'true' ) ? null : '_';
+			$hideprefix = ( isset( $filter['all_item_meta'] ) && 'true' === $filter['all_item_meta'] ) ? null : '_';
 
 			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
@@ -238,7 +243,7 @@ class WC_API_Orders extends WC_API_Resource {
 				);
 			}
 
-			$order_data['line_items'][] = array(
+			$line_item = array(
 				'id'           => $item_id,
 				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
 				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
@@ -252,11 +257,20 @@ class WC_API_Orders extends WC_API_Resource {
 				'sku'          => $product_sku,
 				'meta'         => $item_meta,
 			);
+
+			if ( in_array( 'products', $expand ) ) {
+				$_product_data = WC()->api->WC_API_Products->get_product( $product_id );
+
+				if ( isset( $_product_data['product'] ) ) {
+					$line_item['product_data'] = $_product_data['product'];
+				}
+			}
+
+			$order_data['line_items'][] = $line_item;
 		}
 
-		// add shipping
+		// Add shipping.
 		foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
-
 			$order_data['shipping_lines'][] = array(
 				'id'           => $shipping_item_id,
 				'method_id'    => $shipping_item['method_id'],
@@ -265,10 +279,9 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
-		// add taxes
+		// Add taxes.
 		foreach ( $order->get_tax_totals() as $tax_code => $tax ) {
-
-			$order_data['tax_lines'][] = array(
+			$tax_line = array(
 				'id'       => $tax->id,
 				'rate_id'  => $tax->rate_id,
 				'code'     => $tax_code,
@@ -276,11 +289,20 @@ class WC_API_Orders extends WC_API_Resource {
 				'total'    => wc_format_decimal( $tax->amount, $dp ),
 				'compound' => (bool) $tax->is_compound,
 			);
+
+			if ( in_array( 'taxes', $expand ) ) {
+				$_rate_data = WC()->api->WC_API_Taxes->get_tax( $tax->rate_id );
+
+				if ( isset( $_rate_data['tax'] ) ) {
+					$tax_line['rate_data'] = $_rate_data['tax'];
+				}
+			}
+
+			$order_data['tax_lines'][] = $tax_line;
 		}
 
-		// add fees
+		// Add fees.
 		foreach ( $order->get_fees() as $fee_item_id => $fee_item ) {
-
 			$order_data['fee_lines'][] = array(
 				'id'        => $fee_item_id,
 				'title'     => $fee_item['name'],
@@ -290,14 +312,23 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
-		// add coupons
+		// Add coupons.
 		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
-
-			$order_data['coupon_lines'][] = array(
+			$coupon_line = array(
 				'id'     => $coupon_item_id,
 				'code'   => $coupon_item['name'],
 				'amount' => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
 			);
+
+			if ( in_array( 'coupons', $expand ) ) {
+				$_coupon_data = WC()->api->WC_API_Coupons->get_coupon_by_code( $coupon_item['name'] );
+
+				if ( isset( $_coupon_data['coupon'] ) ) {
+					$coupon_line['coupon_data'] = $_coupon_data['coupon'];
+				}
+			}
+
+			$order_data['coupon_lines'][] = $coupon_line;
 		}
 
 		return array( 'order' => apply_filters( 'woocommerce_api_order_response', $order_data, $order, $fields, $this->server ) );

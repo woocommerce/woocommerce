@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Factory {
 
 	/**
-	 * get_order function.
+	 * Get order.
 	 *
 	 * @param bool $the_order (default: false)
 	 * @return WC_Order|bool

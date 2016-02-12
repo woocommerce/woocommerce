@@ -138,7 +138,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		$args['orderby']            = $deprecated_orderby;
 	}
 
-	$current_product_cat = isset( $wp_query->query['product_cat'] ) ? $wp_query->query['product_cat'] : '';
+	$current_product_cat = isset( $wp_query->query_vars['product_cat'] ) ? $wp_query->query_vars['product_cat'] : '';
 	$defaults            = array(
 		'pad_counts'         => 1,
 		'show_count'         => 1,
@@ -457,10 +457,10 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 /**
  * Function for recounting product terms, ignoring hidden products.
  *
- * @param  array  $terms
- * @param  string  $taxonomy
- * @param  boolean $callback
- * @param  boolean $terms_are_term_taxonomy_ids
+ * @param  array $terms
+ * @param  string $taxonomy
+ * @param  bool $callback
+ * @param  bool $terms_are_term_taxonomy_ids
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
 	global $wpdb;

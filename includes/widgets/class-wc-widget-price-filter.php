@@ -37,7 +37,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *
@@ -81,6 +81,10 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		if ( ! empty( $_GET['orderby'] ) ) {
 			$fields .= '<input type="hidden" name="orderby" value="' . esc_attr( $_GET['orderby'] ) . '" />';
+		}
+
+		if ( ! empty( $_GET['min_rating'] ) ) {
+			$fields .= '<input type="hidden" name="min_rating" value="' . esc_attr( $_GET['min_rating'] ) . '" />';
 		}
 
 		if ( $_chosen_attributes ) {

@@ -96,7 +96,7 @@ abstract class WC_Abstract_Order {
 	 * should be used. It is possible, but the aforementioned are preferred and are the only.
 	 * methods that will be maintained going forward.
 	 *
-	 * @param int $order
+	 * @param  int|object|WC_Order $order Order to init.
 	 */
 	public function __construct( $order = 0 ) {
 		$this->prices_include_tax    = get_option('woocommerce_prices_include_tax') == 'yes' ? true : false;
@@ -147,7 +147,6 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Set the payment method for the order.
 	 *
-	 * @param WC_Payment_Gateway
 	 * @param WC_Payment_Gateway $payment_method
 	 */
 	public function set_payment_method( $payment_method ) {
@@ -337,8 +336,8 @@ abstract class WC_Abstract_Order {
 	 * Add coupon code to the order.
 	 *
 	 * @param string $code
-	 * @param integer $discount_amount
-	 * @param integer $discount_amount_tax "Discounted" tax - used for tax inclusive prices.
+	 * @param int $discount_amount
+	 * @param int $discount_amount_tax "Discounted" tax - used for tax inclusive prices.
 	 * @return int|bool Item ID or false.
 	 */
 	public function add_coupon( $code, $discount_amount = 0, $discount_amount_tax = 0 ) {
@@ -450,6 +449,14 @@ abstract class WC_Abstract_Order {
 		// Save shipping taxes - Since 2.2
 		$taxes = array_map( 'wc_format_decimal', $shipping_rate->taxes );
 		wc_add_order_item_meta( $item_id, 'taxes', $taxes );
+
+		// Store meta
+		$shipping_meta = $shipping_rate->get_meta_data();
+		if ( ! empty( $shipping_meta ) ) {
+			foreach ( $shipping_rate->get_meta_data() as $key => $value ) {
+				wc_add_order_item_meta( $item_id, $key, $value );
+			}
+		}
 
 		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
 
@@ -683,25 +690,32 @@ abstract class WC_Abstract_Order {
 		}
 
 		// Now calculate shipping tax
-		$matched_tax_rates = array();
-		$tax_rates         = WC_Tax::find_rates( array(
-			'country'   => $country,
-			'state'     => $state,
-			'postcode'  => $postcode,
-			'city'      => $city,
-			'tax_class' => ''
-		) );
+		$shipping_methods = $this->get_shipping_methods();
 
-		if ( ! empty( $tax_rates ) ) {
-			foreach ( $tax_rates as $key => $rate ) {
-				if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
-					$matched_tax_rates[ $key ] = $rate;
+		if ( ! empty( $shipping_methods ) ) {
+			$matched_tax_rates = array();
+			$tax_rates         = WC_Tax::find_rates( array(
+				'country'   => $country,
+				'state'     => $state,
+				'postcode'  => $postcode,
+				'city'      => $city,
+				'tax_class' => ''
+			) );
+
+			if ( ! empty( $tax_rates ) ) {
+				foreach ( $tax_rates as $key => $rate ) {
+					if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
+						$matched_tax_rates[ $key ] = $rate;
+					}
 				}
 			}
-		}
 
-		$shipping_taxes     = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
-		$shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
+			$shipping_taxes     = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
+			$shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
+		} else {
+			$shipping_taxes     = array();
+			$shipping_tax_total = 0;
+		}
 
 		// Save tax totals
 		$this->set_total( $shipping_tax_total, 'shipping_tax' );
@@ -798,7 +812,7 @@ abstract class WC_Abstract_Order {
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
-	 * @param  $and_taxes bool Calc taxes if true.
+	 * @param  bool $and_taxes Calc taxes if true.
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
@@ -1359,7 +1373,7 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Gets the total discount amount.
-	 * @param  $ex_tax Show discount excl any tax.
+	 * @param  bool $ex_tax Show discount excl any tax.
 	 * @return float
 	 */
 	public function get_total_discount( $ex_tax = true ) {
@@ -1386,7 +1400,7 @@ abstract class WC_Abstract_Order {
 				$total_discount = (double) $this->cart_discount + (double) $this->cart_discount_tax;
 			}
 		}
-		return apply_filters( 'woocommerce_order_amount_total_discount', $total_discount, $this );
+		return apply_filters( 'woocommerce_order_amount_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
 	}
 
 	/**
@@ -1820,6 +1834,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Get totals for display on pages and in emails.
 	 *
+	 * @param mixed $tax_display
 	 * @return array
 	 */
 	public function get_order_item_totals( $tax_display = '' ) {
@@ -1912,7 +1927,7 @@ abstract class WC_Abstract_Order {
 				);
 			}
 		}
-		
+
 		$total_rows['order_total'] = array(
 			'label' => __( 'Total:', 'woocommerce' ),
 			'value'	=> $this->get_formatted_order_total( $tax_display )
@@ -1924,22 +1939,28 @@ abstract class WC_Abstract_Order {
 
 	/**
 	 * Output items for display in html emails.
-	 * @param array $args
-	 * @param bool plain text
+	 *
+	 * @param array $args Items args.
+	 * @param null $deprecated1 Deprecated arg.
+	 * @param null $deprecated2 Deprecated arg.
+	 * @param null $deprecated3 Deprecated arg.
+	 * @param null $deprecated4 Deprecated arg.
+	 * @param null $deprecated5 Deprecated arg.
 	 * @return string
 	 */
-	public function email_order_items_table( $args = array(), $deprecated = null, $deprecated = null, $deprecated = null, $deprecated = null, $deprecated = null ) {
+	public function email_order_items_table( $args = array(), $deprecated1 = null, $deprecated2 = null, $deprecated3 = null, $deprecated4 = null, $deprecated5 = null ) {
 		ob_start();
 
-		if ( ! is_null( $deprecated ) ) {
+		if ( ! is_null( $deprecated1 ) || ! is_null( $deprecated2 ) || ! is_null( $deprecated3 ) || ! is_null( $deprecated4 ) || ! is_null( $deprecated5 ) ) {
 			_deprecated_argument( __FUNCTION__, '2.5.0' );
 		}
 
 		$defaults = array(
-			'show_sku'   => false,
-			'show_image' => false,
-			'image_size' => array( 32, 32 ),
-			'plain_text' => false
+			'show_sku'      => false,
+			'show_image'    => false,
+			'image_size'    => array( 32, 32 ),
+			'plain_text'    => false,
+			'sent_to_admin' => false
 		);
 
 		$args     = wp_parse_args( $args, $defaults );
@@ -1948,11 +1969,12 @@ abstract class WC_Abstract_Order {
 		wc_get_template( $template, array(
 			'order'               => $this,
 			'items'               => $this->get_items(),
-			'show_download_links' => $this->is_download_permitted(),
+			'show_download_links' => $this->is_download_permitted() && ! $args['sent_to_admin'],
 			'show_sku'            => $args['show_sku'],
-			'show_purchase_note'  => $this->is_paid(),
+			'show_purchase_note'  => $this->is_paid() && ! $args['sent_to_admin'],
 			'show_image'          => $args['show_image'],
 			'image_size'          => $args['image_size'],
+			'sent_to_admin'       => $args['sent_to_admin']
 		) );
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
@@ -2008,7 +2030,7 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Generates a URL so that a customer can pay for their (unpaid - pending) order. Pass 'true' for the checkout version which doesn't offer gateway choices.
 	 *
-	 * @param  boolean $on_checkout
+	 * @param  bool $on_checkout
 	 * @return string
 	 */
 	public function get_checkout_payment_url( $on_checkout = false ) {
@@ -2244,67 +2266,71 @@ abstract class WC_Abstract_Order {
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual is this a manual order status change?
+	 * @return bool Successful change or not
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
 		if ( ! $this->id ) {
-			return;
+			return false;
 		}
 
 		// Standardise status names.
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 		$old_status = $this->get_status();
 
-		// Only update if they differ - and ensure post_status is a 'wc' status.
-		if ( $new_status !== $old_status || ! in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
-
-			// Update the order.
-			wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
-			$this->post_status = 'wc-' . $new_status;
-
-			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
-
-			// Status was changed.
-			do_action( 'woocommerce_order_status_' . $new_status, $this->id );
-			do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
-			do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
-
-			switch ( $new_status ) {
-
-				case 'completed' :
-					// Record the sales.
-					$this->record_product_sales();
-
-					// Increase coupon usage counts.
-					$this->increase_coupon_usage_counts();
-
-					// Record the completed date of the order.
-					update_post_meta( $this->id, '_completed_date', current_time('mysql') );
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-
-				case 'processing' :
-				case 'on-hold' :
-					// Record the sales.
-					$this->record_product_sales();
-
-					// Increase coupon usage counts.
-					$this->increase_coupon_usage_counts();
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-
-				case 'cancelled' :
-					// If the order is cancelled, restore used coupons.
-					$this->decrease_coupon_usage_counts();
-
-					// Update reports.
-					wc_delete_shop_order_transients( $this->id );
-					break;
-			}
+		// If the statuses are the same there is no need to update, unless the post status is not a valid 'wc' status.
+		if ( $new_status === $old_status && in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
+			return false;
 		}
+
+		// Update the order.
+		wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
+		$this->post_status = 'wc-' . $new_status;
+
+		$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+
+		// Status was changed.
+		do_action( 'woocommerce_order_status_' . $new_status, $this->id );
+		do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
+		do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
+
+		switch ( $new_status ) {
+
+			case 'completed' :
+				// Record the sales.
+				$this->record_product_sales();
+
+				// Increase coupon usage counts.
+				$this->increase_coupon_usage_counts();
+
+				// Record the completed date of the order.
+				update_post_meta( $this->id, '_completed_date', current_time('mysql') );
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+
+			case 'processing' :
+			case 'on-hold' :
+				// Record the sales.
+				$this->record_product_sales();
+
+				// Increase coupon usage counts.
+				$this->increase_coupon_usage_counts();
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+
+			case 'cancelled' :
+				// If the order is cancelled, restore used coupons.
+				$this->decrease_coupon_usage_counts();
+
+				// Update reports.
+				wc_delete_shop_order_transients( $this->id );
+				break;
+		}
+
+		return true;
 	}
 
 
@@ -2327,7 +2353,7 @@ abstract class WC_Abstract_Order {
 	 * Sales are also recorded for products.
 	 * Finally, record the date of payment.
 	 *
-	 * @param $transaction_id string Optional transaction id to store in post meta.
+	 * @param string $transaction_id Optional transaction id to store in post meta.
 	 */
 	public function payment_complete( $transaction_id = '' ) {
 		do_action( 'woocommerce_pre_payment_complete', $this->id );
@@ -2350,6 +2376,9 @@ abstract class WC_Abstract_Order {
 							$order_needs_processing = true;
 							break;
 						}
+					} else {
+						$order_needs_processing = true;
+						break;
 					}
 				}
 			}
@@ -2359,7 +2388,7 @@ abstract class WC_Abstract_Order {
 			add_post_meta( $this->id, '_paid_date', current_time( 'mysql' ), true );
 
 			if ( ! empty( $transaction_id ) ) {
-				add_post_meta( $this->id, '_transaction_id', $transaction_id, true );
+				update_post_meta( $this->id, '_transaction_id', $transaction_id );
 			}
 
 			wp_update_post( array(
@@ -2609,7 +2638,7 @@ abstract class WC_Abstract_Order {
 	 * @return boolean
 	 */
 	public function needs_shipping_address() {
-		if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
+		if ( ! wc_shipping_enabled() ) {
 			return false;
 		}
 
