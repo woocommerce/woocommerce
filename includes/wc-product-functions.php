@@ -207,17 +207,17 @@ function wc_get_featured_product_ids() {
  * @return string
  */
 function wc_product_post_type_link( $permalink, $post ) {
-	// Abort if post is not a product
+	// Abort if post is not a product.
 	if ( $post->post_type !== 'product' ) {
 		return $permalink;
 	}
 
-	// Abort early if the placeholder rewrite tag isn't in the generated URL
+	// Abort early if the placeholder rewrite tag isn't in the generated URL.
 	if ( false === strpos( $permalink, '%' ) ) {
 		return $permalink;
 	}
 
-	// Get the custom taxonomy terms in use by this post
+	// Get the custom taxonomy terms in use by this post.
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
 	if ( ! empty( $terms ) ) {
