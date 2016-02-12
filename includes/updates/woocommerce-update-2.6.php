@@ -89,3 +89,14 @@ if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone
 if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
 	update_option( 'woocommerce_ship_to_countries', 'disabled' );
 }
+
+/**
+ * Refund item qty should be negative
+ */
+$wpdb->query( "
+UPDATE {$wpdb->prefix}woocommerce_order_itemmeta as item_meta
+LEFT JOIN {$wpdb->prefix}woocommerce_order_items as items ON item_meta.order_item_id = items.order_item_id
+LEFT JOIN {$wpdb->posts} as posts ON items.order_id = posts.ID
+SET item_meta.meta_value = item_meta.meta_value * -1
+WHERE item_meta.meta_value > 0 AND item_meta.meta_key = '_qty' AND posts.post_type = 'shop_order_refund'
+" );

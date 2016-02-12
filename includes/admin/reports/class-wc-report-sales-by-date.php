@@ -191,7 +191,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'order_by'            => 'post_date ASC',
 			'query_type'          => 'get_results',
 			'filter_range'        => true,
-			'order_types'         => wc_get_order_types( 'sales-reports' ), // Orders, not refunds
+			'order_types'         => wc_get_order_types( 'sales-reports' ),
 			'order_status'        => array( 'completed', 'processing', 'on-hold', 'refunded' )
 		) );
 
@@ -343,7 +343,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_refunded_orders = absint( count( $this->report_data->full_refunds ) );
 
 		// Item counts
-		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) );
+		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) ) - $this->report_data->refunded_order_items;
 	}
 
 	/**

@@ -79,7 +79,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
 				'desc_tip'      =>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
-				'autoload'      => false,
 			),
 
 			array(

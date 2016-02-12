@@ -102,58 +102,9 @@ class WC_Cart {
 	public $fees = array();
 
 	/**
-	 * Prices include tax.
-	 *
-	 * @var bool
-	 */
-	public $prices_include_tax;
-
-	/**
-	 * Round at subtotal.
-	 *
-	 * @var bool
-	 */
-	public $round_at_subtotal;
-
-	/**
-	 * Tax display cart.
-	 *
-	 * @var string
-	 */
-	public $tax_display_cart;
-
-	/**
-	 * Prices inc tax.
-	 *
-	 * @var int
-	 */
-	public $dp;
-
-	/**
-	 * Display totals excluding tax.
-	 *
-	 * @var bool
-	 */
-	public $display_totals_ex_tax;
-
-	/**
-	 * Display cart excluding tax.
-	 *
-	 * @var bool
-	 */
-	public $display_cart_ex_tax;
-
-	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
 	 */
 	public function __construct() {
-		$this->prices_include_tax    = wc_prices_include_tax();
-		$this->round_at_subtotal     = get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes';
-		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
-		$this->dp                    = wc_get_price_decimals();
-		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
-		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl';
-
 		add_action( 'wp_loaded', array( $this, 'init' ) ); // Get cart after WP and plugins are loaded.
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 ); // Set cookies before shutdown and ob flushing
@@ -169,6 +120,22 @@ class WC_Cart {
 	 */
 	public function __get( $key ) {
 		switch ( $key ) {
+			case 'prices_include_tax' :
+				return wc_prices_include_tax();
+			break;
+			case 'round_at_subtotal' :
+				return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
+			break;
+			case 'tax_display_cart' :
+				return get_option( 'woocommerce_tax_display_cart' );
+			break;
+			case 'dp' :
+				return wc_get_price_decimals();
+			break;
+			case 'display_totals_ex_tax' :
+			case 'display_cart_ex_tax' :
+				return $this->tax_display_cart === 'excl';
+			break;
 			case 'cart_contents_weight' :
 				return $this->get_cart_contents_weight();
 			break;
@@ -256,6 +223,9 @@ class WC_Cart {
 			}
 
 			if ( is_array( $cart ) ) {
+				// Prime meta cache to reduce future queries
+				update_meta_cache( 'post', wp_list_pluck( $cart, 'product_id' ) );
+
 				foreach ( $cart as $key => $values ) {
 					$_product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 

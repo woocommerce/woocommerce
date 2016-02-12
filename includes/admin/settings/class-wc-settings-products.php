@@ -323,8 +323,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'min'  => 0,
 						'step' => 1
 					),
-					'default'           => '0',
-					'autoload'          => false
+					'default'           => '0'
 				),
 
 				array(
@@ -456,14 +455,14 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'type' 	=> 'sectionend',
-					'id' 	=> 'product_measurement_options'
+					'id' 	=> 'product_measurement_options',
 				),
 
 				array(
 					'title' => __( 'Reviews', 'woocommerce' ),
 					'type' 	=> 'title',
 					'desc' 	=> '',
-					'id' 	=> 'product_rating_options'
+					'id' 	=> 'product_rating_options',
 				),
 
 				array(
@@ -474,7 +473,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'start',
 					'show_if_checked' => 'option',
-					'autoload'        => false
 				),
 
 				array(
@@ -484,7 +482,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'            => 'checkbox',
 					'checkboxgroup'   => '',
 					'show_if_checked' => 'yes',
-					'autoload'        => false
+					'autoload'        => false,
 				),
 
 				array(
@@ -494,7 +492,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'            => 'checkbox',
 					'checkboxgroup'   => '',
 					'show_if_checked' => 'yes',
-					'autoload'        => false
+					'autoload'        => false,
 				),
 
 				array(
@@ -504,7 +502,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'end',
 					'show_if_checked' => 'yes',
-					'autoload'        => false
+					'autoload'        => false,
 				),
 
 				array(
