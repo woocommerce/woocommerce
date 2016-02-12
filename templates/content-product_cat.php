@@ -19,21 +19,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-global $woocommerce_loop;
-
-// Store loop count we're currently on.
-if ( empty( $woocommerce_loop['loop'] ) ) {
-	$woocommerce_loop['loop'] = 0;
-}
-
-// Store column count for displaying the grid.
-if ( empty( $woocommerce_loop['columns'] ) ) {
-	$woocommerce_loop['columns'] = apply_filters( 'loop_shop_columns', 4 );
-}
-
-// Increase loop count.
-$woocommerce_loop['loop']++;
 ?>
 <li <?php wc_product_cat_class( '', $category ); ?>>
 	<?php

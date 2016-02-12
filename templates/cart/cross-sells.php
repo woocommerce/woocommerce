@@ -17,16 +17,14 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 global $product, $woocommerce_loop;
 
-$crosssells = WC()->cart->get_cross_sells();
-
-if ( 0 === sizeof( $crosssells ) ) return;
-
-$meta_query = WC()->query->get_meta_query();
+if ( ! $crosssells = WC()->cart->get_cross_sells() ) {
+	return;
+}
 
 $args = array(
 	'post_type'           => 'product',
@@ -35,11 +33,11 @@ $args = array(
 	'posts_per_page'      => apply_filters( 'woocommerce_cross_sells_total', $posts_per_page ),
 	'orderby'             => $orderby,
 	'post__in'            => $crosssells,
-	'meta_query'          => $meta_query
+	'meta_query'          => WC()->query->get_meta_query()
 );
 
-$products = new WP_Query( $args );
-
+$products                    = new WP_Query( $args );
+$woocommerce_loop['name']    = 'cross-sells';
 $woocommerce_loop['columns'] = apply_filters( 'woocommerce_cross_sells_columns', $columns );
 
 if ( $products->have_posts() ) : ?>

@@ -17,7 +17,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 global $product, $woocommerce_loop;
@@ -26,9 +26,9 @@ if ( empty( $product ) || ! $product->exists() ) {
 	return;
 }
 
-$related = $product->get_related( $posts_per_page );
-
-if ( sizeof( $related ) === 0 ) return;
+if ( ! $related = $product->get_related( $posts_per_page ) ) {
+	return;
+}
 
 $args = apply_filters( 'woocommerce_related_products_args', array(
 	'post_type'            => 'product',
@@ -40,9 +40,9 @@ $args = apply_filters( 'woocommerce_related_products_args', array(
 	'post__not_in'         => array( $product->id )
 ) );
 
-$products = new WP_Query( $args );
-
-$woocommerce_loop['columns'] = $columns;
+$products                    = new WP_Query( $args );
+$woocommerce_loop['name']    = 'related';
+$woocommerce_loop['columns'] = apply_filters( 'woocommerce_related_products_columns', $columns );
 
 if ( $products->have_posts() ) : ?>
 
