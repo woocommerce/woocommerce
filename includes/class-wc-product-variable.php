@@ -824,8 +824,10 @@ class WC_Product_Variable extends WC_Product {
 				update_post_meta( $product_id, '_max_' . $price_type . '_variation_id', ${"max_{$price_type}_id"} );
 			}
 
-			// The VARIABLE PRODUCT price should equal the min price of any type
-			update_post_meta( $product_id, '_price', $min_price );
+			// Sync _price meta
+			delete_post_meta( $product_id, '_price' );
+			add_post_meta( $product_id, '_price', $min_price, false );
+			add_post_meta( $product_id, '_price', $max_price, false );
 			delete_transient( 'wc_products_onsale' );
 
 			// Sync attributes
