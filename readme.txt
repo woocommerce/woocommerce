@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.6.0 - TBD =
 * Dev - Made coupon optional in cart has_discount() method.
+* Tweak - Removed 'product-tag-' classes from loops due to performance concerns. Can be added back via snippet https://gist.github.com/mikejolley/485d52994a7643f799fa.
 * Tweak - Added hash check for orders so that if the cart changes before payment, a new order is made.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).

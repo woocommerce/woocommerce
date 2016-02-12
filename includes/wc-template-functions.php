@@ -291,31 +291,21 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		if ( $product->get_type() ) {
 			$classes[] = "product-type-" . $product->get_type();
 		}
-
-		// add category slugs
+		if ( $product->is_type( 'variable' ) ) {
+			if ( $product->has_default_attributes() ) {
+				$classes[] = 'has-default-attributes';
+			}
+			if ( $product->has_child() ) {
+				$classes[] = 'has-children';
+			}
+		}
 		$categories = get_the_terms( $product->id, 'product_cat' );
 		if ( ! empty( $categories ) ) {
-			foreach ( $categories as $key => $value ) {
-				$classes[] = 'product-cat-' . $value->slug;
+			$slugs = wp_list_pluck( $categories, 'slug' );
+			foreach ( $slugs as $slug ) {
+				$classes[] = 'product-cat-' . $slug;
 			}
 		}
-
-		// add tag slugs
-		$tags = get_the_terms( $product->id, 'product_tag' );
-		if ( ! empty( $tags ) ) {
-			foreach ( $tags as $key => $value ) {
-				$classes[] = 'product-tag-' . $value->slug;
-			}
-		}
-
-		if ('variable' === $product->product_type && $product->has_default_attributes() ) {
-			$classes[] = 'has-default-attributes';
-		}
-
-		if ( 'variable' === $product->product_type && $product->has_child() ) {
-			$classes[] = 'has-children';
-		}
-
 		$classes[] = $product->stock_status;
 	}
 
