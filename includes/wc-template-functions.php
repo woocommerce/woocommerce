@@ -313,14 +313,6 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 				$classes[] = 'has-children';
 			}
 		}
-
-		$categories = get_the_terms( $product->id, 'product_cat' );
-		if ( ! empty( $categories ) ) {
-			$slugs = wp_list_pluck( $categories, 'slug' );
-			foreach ( $slugs as $slug ) {
-				$classes[] = 'product-cat-' . $slug;
-			}
-		}
 	}
 
 	if ( false !== ( $key = array_search( 'hentry', $classes ) ) ) {
