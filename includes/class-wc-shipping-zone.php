@@ -249,7 +249,7 @@ class WC_Shipping_Zone implements WC_Data {
 			}
 		}
 
-		return $methods;
+		return apply_filters( 'woocommerce_shipping_zone_shipping_methods', $methods, $raw_methods, $allowed_classes, $this );
 	}
 
 	/**
