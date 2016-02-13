@@ -236,7 +236,8 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 		$zone->clear_locations();
 
         // Assert
-        $this->assertTrue( empty( $zone->get_zone_locations() ) );
+        $zone_locations = $zone->get_zone_locations();
+        $this->assertTrue( empty( $zone_locations ) );
 
         // Clean
         \WC_Helper_Shipping_Zones::remove_mock_zones();

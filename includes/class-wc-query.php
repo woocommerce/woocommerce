@@ -3,7 +3,7 @@
  * Contains the query functions for WooCommerce which alter the front-end post queries and loops
  *
  * @class 		WC_Query
- * @version		2.3.0
+ * @version		2.6.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes
@@ -23,26 +23,11 @@ class WC_Query {
 	/** @public array Query vars to add to wp */
 	public $query_vars = array();
 
-	/** @public array Unfiltered product ids (before layered nav etc) */
-	public $unfiltered_product_ids 	= array();
-
-	/** @public array Filtered product ids (after layered nav) */
-	public $filtered_product_ids 	= array();
-
-	/** @public array Filtered product ids (after layered nav, per taxonomy) */
-	public $filtered_product_ids_for_taxonomy 	= array();
-
-	/** @public array Product IDs that match the layered nav + price filter */
-	public $post__in 		= array();
-
-	/** @public array|string The meta query for the page */
-	public $meta_query 		= '';
-
-	/** @public array Post IDs matching layered nav only */
-	public $layered_nav_post__in 	= array();
-
-	/** @public array Stores post IDs matching layered nav, so price filter can find max price in view */
-	public $layered_nav_product_ids = array();
+	/**
+	 * Stores chosen attributes
+	 * @var array
+	 */
+	private static $_chosen_attributes;
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
@@ -51,20 +36,14 @@ class WC_Query {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'add_endpoints' ) );
-		add_action( 'init', array( $this, 'layered_nav_init' ) );
-		add_action( 'init', array( $this, 'price_filter_init' ) );
-		add_action( 'init', array( $this, 'rating_filter_init' ) );
-
 		if ( ! is_admin() ) {
 			add_action( 'wp_loaded', array( $this, 'get_errors' ), 20 );
 			add_filter( 'query_vars', array( $this, 'add_query_vars'), 0 );
 			add_action( 'parse_request', array( $this, 'parse_request'), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-			add_filter( 'the_posts', array( $this, 'the_posts' ), 11, 2 );
 			add_action( 'wp', array( $this, 'remove_product_query' ) );
 			add_action( 'wp', array( $this, 'remove_ordering_args' ) );
 		}
-
 		$this->init_query_vars();
 	}
 
@@ -155,7 +134,6 @@ class WC_Query {
 		foreach ( $this->query_vars as $key => $var ) {
 			$vars[] = $key;
 		}
-
 		return $vars;
 	}
 
@@ -301,9 +279,6 @@ class WC_Query {
 			add_filter( 'wp', array( $this, 'remove_posts_where' ) );
 		}
 
-		// We're on a shop page so queue the woocommerce_get_products_in_view function
-		add_action( 'wp', array( $this, 'get_products_in_view' ), 2);
-
 		// And remove the pre_get_posts hook
 		$this->remove_product_query();
 	}
@@ -338,7 +313,7 @@ class WC_Query {
 	 * @return string
 	 */
 	public function wpseo_metadesc() {
-		return WPSEO_Meta::get_value( 'metadesc', wc_get_page_id('shop') );
+		return WPSEO_Meta::get_value( 'metadesc', wc_get_page_id( 'shop' ) );
 	}
 
 	/**
@@ -350,64 +325,8 @@ class WC_Query {
 	 * @return string
 	 */
 	public function wpseo_metakey() {
-		return WPSEO_Meta::get_value( 'metakey', wc_get_page_id('shop') );
+		return WPSEO_Meta::get_value( 'metakey', wc_get_page_id( 'shop' ) );
 	}
-
-	/**
-	 * Hook into the_posts to do the main product query if needed - relevanssi compatibility.
-	 *
-	 * @access public
-	 * @param array $posts
-	 * @param WP_Query|bool $query (default: false)
-	 * @return array
-	 */
-	public function the_posts( $posts, $query = false ) {
-		// Abort if there's no query
-		if ( ! $query )
-			return $posts;
-
-		// Abort if we're not filtering posts
-		if ( empty( $this->post__in ) )
-			return $posts;
-
-		// Abort if this query has already been done
-		if ( ! empty( $query->wc_query ) )
-			return $posts;
-
-		// Abort if this isn't a search query
-		if ( empty( $query->query_vars["s"] ) )
-			return $posts;
-
-		// Abort if we're not on a post type archive/product taxonomy
-		if 	( ! $query->is_post_type_archive( 'product' ) && ! $query->is_tax( get_object_taxonomies( 'product' ) ) )
-			return $posts;
-
-		$filtered_posts   = array();
-		$queried_post_ids = array();
-
-		foreach ( $posts as $post ) {
-			if ( in_array( $post->ID, $this->post__in ) ) {
-				$filtered_posts[] = $post;
-				$queried_post_ids[] = $post->ID;
-			}
-		}
-
-		$query->posts = $filtered_posts;
-		$query->post_count = count( $filtered_posts );
-
-		// Ensure filters are set
-		$this->unfiltered_product_ids = $queried_post_ids;
-		$this->filtered_product_ids   = $queried_post_ids;
-
-		if ( sizeof( $this->layered_nav_post__in ) > 0 ) {
-			$this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
-		} else {
-			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
-		}
-
-		return $filtered_posts;
-	}
-
 
 	/**
 	 * Query the products, applying sorting/ordering etc. This applies to the main wordpress loop.
@@ -415,17 +334,8 @@ class WC_Query {
 	 * @param mixed $q
 	 */
 	public function product_query( $q ) {
-
-		// Meta query
-		$meta_query = $this->get_meta_query( $q->get( 'meta_query' ) );
-
-		// Ordering
-		$ordering   = $this->get_catalog_ordering_args();
-
-		// Get a list of post id's which match the current filters set (in the layered nav and price filter)
-		$post__in   = array_unique( apply_filters( 'loop_shop_post_in', array() ) );
-
 		// Ordering query vars
+		$ordering  = $this->get_catalog_ordering_args();
 		$q->set( 'orderby', $ordering['orderby'] );
 		$q->set( 'order', $ordering['order'] );
 		if ( isset( $ordering['meta_key'] ) ) {
@@ -433,16 +343,11 @@ class WC_Query {
 		}
 
 		// Query vars that affect posts shown
-		$q->set( 'meta_query', $meta_query );
-		$q->set( 'post__in', $post__in );
+		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ) ) );
+		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ) ) );
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ) );
-
-		// Set a special variable
 		$q->set( 'wc_query', 'product_query' );
-
-		// Store variables
-		$this->post__in   = $post__in;
-		$this->meta_query = $meta_query;
+		$q->set( 'post__in', array_unique( apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -469,66 +374,6 @@ class WC_Query {
 	public function remove_posts_where() {
 		remove_filter( 'posts_where', array( $this, 'search_post_excerpt' ) );
 	}
-
-
-	/**
-	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
-	 */
-	public function get_products_in_view() {
-		global $wp_the_query;
-
-		// Get main query
-		$current_wp_query = $wp_the_query->query;
-
-		// Get WP Query for current page (without 'paged')
-		unset( $current_wp_query['paged'] );
-
-		// Generate a transient name based on current query
-		$transient_name = 'wc_uf_pid_' . md5( http_build_query( $current_wp_query ) . WC_Cache_Helper::get_transient_version( 'product_query' ) );
-		$transient_name = ( is_search() ) ? $transient_name . '_s' : $transient_name;
-
-		if ( false === ( $unfiltered_product_ids = get_transient( $transient_name ) ) ) {
-
-			// Get all visible posts, regardless of filters
-			$unfiltered_args = array_merge(
-				$current_wp_query,
-				array(
-					'post_type'              => 'product',
-					'numberposts'            => -1,
-					'post_status'            => 'publish',
-					'meta_query'             => $this->meta_query,
-					'fields'                 => 'ids',
-					'no_found_rows'          => true,
-					'update_post_meta_cache' => false,
-					'update_post_term_cache' => false,
-					'pagename'               => '',
-					'wc_query'               => 'get_products_in_view'
-				)
-			);
-
-			$unfiltered_product_ids = apply_filters( 'woocommerce_unfiltered_product_ids', get_posts( $unfiltered_args ), $unfiltered_args );
-
-			set_transient( $transient_name, $unfiltered_product_ids, DAY_IN_SECONDS * 30 );
-		}
-
-		// Store the variable
-		$this->unfiltered_product_ids = $unfiltered_product_ids;
-
-		// Also store filtered posts ids...
-		if ( sizeof( $this->post__in ) > 0 ) {
-			$this->filtered_product_ids = array_intersect( $this->unfiltered_product_ids, $this->post__in );
-		} else {
-			$this->filtered_product_ids = $this->unfiltered_product_ids;
-		}
-
-		// And filtered post ids which just take layered nav into consideration (to find max price in the price widget)
-		if ( sizeof( $this->layered_nav_post__in ) > 0 ) {
-			$this->layered_nav_product_ids = array_intersect( $this->unfiltered_product_ids, $this->layered_nav_post__in );
-		} else {
-			$this->layered_nav_product_ids = $this->unfiltered_product_ids;
-		}
-	}
-
 
 	/**
 	 * Returns an array of arguments for ordering products based on the selected values.
@@ -601,9 +446,7 @@ class WC_Query {
 	 */
 	public function order_by_popularity_post_clauses( $args ) {
 		global $wpdb;
-
 		$args['orderby'] = "$wpdb->postmeta.meta_value+0 DESC, $wpdb->posts.post_date DESC";
-
 		return $args;
 	}
 
@@ -618,16 +461,12 @@ class WC_Query {
 		global $wpdb;
 
 		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
-
-		$args['where'] .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
-
-		$args['join'] .= "
+		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
+		$args['join']   .= "
 			LEFT OUTER JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID)
 			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
 		";
-
 		$args['orderby'] = "average_rating DESC, $wpdb->posts.post_date DESC";
-
 		$args['groupby'] = "$wpdb->posts.ID";
 
 		return $args;
@@ -640,35 +479,80 @@ class WC_Query {
 	 * @return array
 	 */
 	public function get_meta_query( $meta_query = array() ) {
-		if ( ! is_array( $meta_query ) )
+		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
+		}
 
 		$meta_query[] = $this->visibility_meta_query();
 		$meta_query[] = $this->stock_status_meta_query();
+		$meta_query[] = $this->price_filter_meta_query();
+		$meta_query[] = $this->rating_filter_meta_query();
 
-		return array_filter( $meta_query );
+		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
+	}
+
+	/**
+	 * Return a meta query for filtering by price.
+	 * @return array
+	 */
+	private function price_filter_meta_query() {
+		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
+			$min = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
+			$max = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
+
+			// If displaying prices in the shop including taxes, but prices don't include taxes..
+			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+				$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+
+				foreach ( $tax_classes as $tax_class ) {
+					$tax_rates = WC_Tax::get_rates( $tax_class );
+					$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $min, $tax_rates ) );
+					$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $max, $tax_rates ) );
+					if ( $class_min < $min ) {
+						$min = $class_min;
+					}
+					if ( $class_max > $max ) {
+						$max = $class_max;
+					}
+				}
+			}
+
+			return array(
+				'key'          => '_price',
+				'value'        => array( $min, $max ),
+				'compare'      => 'BETWEEN',
+				'type'         => 'DECIMAL',
+				'price_filter' => true,
+			);
+		}
+		return array();
+	}
+
+	/**
+	 * Return a meta query for filtering by rating.
+	 * @return array
+	 */
+	public function rating_filter_meta_query() {
+		return isset( $_GET['min_rating'] ) ? array(
+			'key'           => '_wc_average_rating',
+			'value'         => isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0,
+			'compare'       => '>=',
+			'type'          => 'DECIMAL',
+			'rating_filter' => true,
+		) : array();
 	}
 
 	/**
 	 * Returns a meta query to handle product visibility.
-	 *
-	 * @access public
 	 * @param string $compare (default: 'IN')
 	 * @return array
 	 */
 	public function visibility_meta_query( $compare = 'IN' ) {
-		if ( is_search() )
-			$in = array( 'visible', 'search' );
-		else
-			$in = array( 'visible', 'catalog' );
-
-		$meta_query = array(
+		return array(
 			'key'     => '_visibility',
-			'value'   => $in,
-			'compare' => $compare
+			'value'   => is_search() ? array( 'visible', 'search' ) : array( 'visible', 'catalog' ),
+			'compare' => $compare,
 		);
-
-		return $meta_query;
 	}
 
 	/**
@@ -679,299 +563,121 @@ class WC_Query {
 	 * @return array
 	 */
 	public function stock_status_meta_query( $status = 'instock' ) {
-		$meta_query = array();
-		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) == 'yes' ) {
-			$meta_query = array(
-				'key' 		=> '_stock_status',
-				'value' 	=> $status,
-				'compare' 	=> '='
+		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array(
+			'key' 		=> '_stock_status',
+			'value' 	=> $status,
+			'compare' 	=> '=',
+		) : array();
+	}
+
+	/**
+	 * Appends tax queries to an array.
+	 * @param array $tax_query
+	 * @return array
+	 */
+	public function get_tax_query( $tax_query = array() ) {
+		if ( ! is_array( $tax_query ) ) {
+			$tax_query = array();
+		}
+
+		// Layered nav filters on terms
+		if ( $_chosen_attributes = $this->get_layered_nav_chosen_attributes() ) {
+			foreach ( $_chosen_attributes as $taxonomy => $data ) {
+				$tax_query[] = array(
+					'taxonomy' => $taxonomy,
+					'field'    => 'slug',
+					'terms'    => $data['terms'],
+					'operator' => 'and' === $data['query_type'] ? 'AND' : 'IN',
+					'include_children' => false,
+				);
+			}
+		}
+
+		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
+	}
+
+	/**
+	 * Get the tax query which was used by the main query.
+	 * @return array
+	 */
+	public static function get_main_tax_query() {
+		global $wp_the_query;
+
+		$args      = $wp_the_query->query_vars;
+		$tax_query = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
+
+		if ( ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => $args['taxonomy'],
+				'terms'    => array( $args['term'] ),
+				'field'    => 'slug',
 			);
 		}
+
+		return $tax_query;
+	}
+
+	/**
+	 * Get the meta query which was used by the main query.
+	 * @return array
+	 */
+	public static function get_main_meta_query() {
+		global $wp_the_query;
+
+		$args       = $wp_the_query->query_vars;
+		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
+
 		return $meta_query;
 	}
 
 	/**
 	 * Layered Nav Init.
 	 */
-	public function layered_nav_init( ) {
-		if ( apply_filters( 'woocommerce_is_layered_nav_active', is_active_widget( false, false, 'woocommerce_layered_nav', true ) ) && ! is_admin() ) {
-
-			global $_chosen_attributes;
-
-			$_chosen_attributes = array();
+	public static function get_layered_nav_chosen_attributes() {
+		if ( ! is_array( self::$_chosen_attributes ) ) {
+			self::$_chosen_attributes = array();
 
 			if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) {
 				foreach ( $attribute_taxonomies as $tax ) {
 					$attribute    = wc_sanitize_taxonomy_name( $tax->attribute_name );
 					$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-					$name         = 'filter_' . $attribute;
 					$filter_terms = ! empty( $_GET[ 'filter_' . $attribute ] ) ? explode( ',', wc_clean( $_GET[ 'filter_' . $attribute ] ) ) : array();
-					$query_type   = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
 
-					if ( ! $query_type ) {
-						$query_type = apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
+					if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
+						continue;
 					}
 
-					if ( ! empty( $filter_terms ) && taxonomy_exists( $taxonomy ) ) {
-						$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
-						$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type;
-					}
+					$query_type = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ) ) ? wc_clean( $_GET[ 'query_type_' . $attribute ] ) : '';
+					self::$_chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding
+					self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 				}
 			}
-
-			add_filter( 'loop_shop_post_in', array( $this, 'layered_nav_query' ) );
 		}
+		return self::$_chosen_attributes;
+	}
+
+	/**
+	 * @deprecated 2.6.0
+	 */
+	public function layered_nav_init() {
+		_deprecated_function( 'layered_nav_init', '2.6', '' );
+	}
+
+	/**
+	 * Get an unpaginated list all product ID's (both filtered and unfiltered). Makes use of transients.
+	 * @deprecated 2.6.0 due to performance concerns
+	 */
+	public function get_products_in_view() {
+		_deprecated_function( 'get_products_in_view', '2.6', '' );
 	}
 
 	/**
 	 * Layered Nav post filter.
-	 *
-	 * @param array $filtered_posts
-	 * @return array
+	 * @deprecated 2.6.0 due to performance concerns
 	 */
 	public function layered_nav_query( $filtered_posts ) {
-		global $_chosen_attributes;
-
-		if ( sizeof( $_chosen_attributes ) > 0 ) {
-
-			$matched_products   = array(
-				'and' => array(),
-				'or'  => array()
-			);
-			$filtered_attribute = array(
-				'and' => false,
-				'or'  => false
-			);
-
-			foreach ( $_chosen_attributes as $attribute => $data ) {
-				$matched_products_from_attribute = array();
-				$filtered = false;
-
-				if ( sizeof( $data['terms'] ) > 0 ) {
-					foreach ( $data['terms'] as $value ) {
-
-						$args = array(
-							'post_type' 	=> 'product',
-							'numberposts' 	=> -1,
-							'post_status' 	=> 'publish',
-							'fields' 		=> 'ids',
-							'no_found_rows' => true,
-							'tax_query' => array(
-								array(
-									'taxonomy' 	=> $attribute,
-									'terms' 	=> $value,
-									'field' 	=> 'slug'
-								)
-							)
-						);
-
-						$post_ids = apply_filters( 'woocommerce_layered_nav_query_post_ids', get_posts( $args ), $args, $attribute, $value );
-
-						if ( ! is_wp_error( $post_ids ) ) {
-
-							if ( sizeof( $matched_products_from_attribute ) > 0 || $filtered ) {
-								$matched_products_from_attribute = $data['query_type'] == 'or' ? array_merge( $post_ids, $matched_products_from_attribute ) : array_intersect( $post_ids, $matched_products_from_attribute );
-							} else {
-								$matched_products_from_attribute = $post_ids;
-							}
-
-							$filtered = true;
-						}
-					}
-				}
-
-				if ( sizeof( $matched_products[ $data['query_type'] ] ) > 0 || $filtered_attribute[ $data['query_type'] ] === true ) {
-					$matched_products[ $data['query_type'] ] = ( $data['query_type'] == 'or' ) ? array_merge( $matched_products_from_attribute, $matched_products[ $data['query_type'] ] ) : array_intersect( $matched_products_from_attribute, $matched_products[ $data['query_type'] ] );
-				} else {
-					$matched_products[ $data['query_type'] ] = $matched_products_from_attribute;
-				}
-
-				$filtered_attribute[ $data['query_type'] ] = true;
-
-				$this->filtered_product_ids_for_taxonomy[ $attribute ] = $matched_products_from_attribute;
-			}
-
-			// Combine our AND and OR result sets
-			if ( $filtered_attribute['and'] && $filtered_attribute['or'] )
-				$results = array_intersect( $matched_products[ 'and' ], $matched_products[ 'or' ] );
-			else
-				$results = array_merge( $matched_products[ 'and' ], $matched_products[ 'or' ] );
-
-			if ( $filtered ) {
-
-				WC()->query->layered_nav_post__in   = $results;
-				WC()->query->layered_nav_post__in[] = 0;
-
-				if ( sizeof( $filtered_posts ) == 0 ) {
-					$filtered_posts   = $results;
-					$filtered_posts[] = 0;
-				} else {
-					$filtered_posts   = array_intersect( $filtered_posts, $results );
-					$filtered_posts[] = 0;
-				}
-
-			}
-		}
-		return (array) $filtered_posts;
+		_deprecated_function( 'layered_nav_query', '2.6', '' );
 	}
-
-	/**
-	 * Price filter Init.
-	 */
-	public function price_filter_init() {
-		if ( apply_filters( 'woocommerce_is_price_filter_active', is_active_widget( false, false, 'woocommerce_price_filter', true ) ) && ! is_admin() ) {
-
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-
-			wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
-			wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch' ), WC_VERSION, true );
-
-			wp_localize_script( 'wc-price-slider', 'woocommerce_price_slider_params', array(
-				'currency_symbol' 	=> get_woocommerce_currency_symbol(),
-				'currency_pos'      => get_option( 'woocommerce_currency_pos' ),
-				'min_price'			=> isset( $_GET['min_price'] ) ? esc_attr( $_GET['min_price'] ) : '',
-				'max_price'			=> isset( $_GET['max_price'] ) ? esc_attr( $_GET['max_price'] ) : ''
-			) );
-
-			add_filter( 'loop_shop_post_in', array( $this, 'price_filter' ) );
-		}
-	}
-
-	/**
-	 * Price Filter post filter.
-	 *
-	 * @param array $filtered_posts
-	 * @return array
-	 */
-	public function price_filter( $filtered_posts = array() ) {
-		global $wpdb;
-
-		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) {
-
-			$matched_products = array();
-			$min              = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
-			$max              = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
-
-			// If displaying prices in the shop including taxes, but prices don't include taxes..
-			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
-				$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
-
-				foreach ( $tax_classes as $tax_class ) {
-					$tax_rates = WC_Tax::get_rates( $tax_class );
-					$min_class = $min - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $min, $tax_rates ) );
-					$max_class = $max - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $max, $tax_rates ) );
-
-					$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( "
-						SELECT DISTINCT ID, post_parent, post_type FROM {$wpdb->posts}
-						INNER JOIN {$wpdb->postmeta} pm1 ON ID = pm1.post_id
-						INNER JOIN {$wpdb->postmeta} pm2 ON ID = pm2.post_id
-						WHERE post_type IN ( 'product', 'product_variation' )
-						AND post_status = 'publish'
-						AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-						AND pm1.meta_value BETWEEN %f AND %f
-						AND pm2.meta_key = '_tax_class'
-						AND pm2.meta_value = %s
-					", $min_class, $max_class, sanitize_title( $tax_class ) ), OBJECT_K ), $min_class, $max_class );
-
-					if ( $matched_products_query ) {
-						foreach ( $matched_products_query as $product ) {
-							if ( $product->post_type == 'product' ) {
-								$matched_products[] = $product->ID;
-							}
-							if ( $product->post_parent > 0 ) {
-								$matched_products[] = $product->post_parent;
-							}
-						}
-					}
-				}
-			} else {
-				$matched_products_query = apply_filters( 'woocommerce_price_filter_results', $wpdb->get_results( $wpdb->prepare( "
-					SELECT DISTINCT ID, post_parent, post_type FROM {$wpdb->posts}
-					INNER JOIN {$wpdb->postmeta} pm1 ON ID = pm1.post_id
-					WHERE post_type IN ( 'product', 'product_variation' )
-					AND post_status = 'publish'
-					AND pm1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-					AND pm1.meta_value BETWEEN %f AND %f
-				", $min, $max ), OBJECT_K ), $min, $max );
-
-				if ( $matched_products_query ) {
-					foreach ( $matched_products_query as $product ) {
-						if ( $product->post_type == 'product' ) {
-							$matched_products[] = $product->ID;
-						}
-						if ( $product->post_parent > 0 ) {
-							$matched_products[] = $product->post_parent;
-						}
-					}
-				}
-			}
-
-			$matched_products = array_unique( $matched_products );
-
-			// Filter the id's
-			if ( 0 === sizeof( $filtered_posts ) ) {
-				$filtered_posts = $matched_products;
-			} else {
-				$filtered_posts = array_intersect( $filtered_posts, $matched_products );
-			}
-			$filtered_posts[] = 0;
-		}
-
-		return (array) $filtered_posts;
-	}
-
-	/**
-	 * Rating filter Init.
-	 */
-	public function rating_filter_init() {
-		if ( apply_filters( 'woocommerce_is_rating_filter_active', is_active_widget( false, false, 'woocommerce_rating_filter', true ) ) && ! is_admin() ) {
-			add_filter( 'loop_shop_post_in', array( $this, 'rating_filter' ) );
-		}
-	}
-
-	/**
-	 * Rating Filter post filter.
-	 *
-	 * @param array $filtered_posts
-	 * @return array
-	 */
-	public function rating_filter( $filtered_posts = array() ) {
-		global $wpdb;
-
-		if( isset( $_GET['min_rating'] ) ) {
-			$matched_products = array();
-			$min              = isset( $_GET['min_rating'] ) ? floatval( $_GET['min_rating'] ) : 0;
-
-			$matched_products_query = apply_filters( 'woocommerce_rating_filter_results', $wpdb->get_results( $wpdb->prepare( "
-					SELECT comment_post_ID, ROUND( AVG( meta_value ), 2 ) as average_rating FROM {$wpdb->commentmeta}
-					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-					WHERE meta_key = 'rating'
-					AND comment_approved = '1'
-					AND meta_value > 0
-					GROUP BY comment_post_ID
-					HAVING ROUND( AVG( meta_value ), 2 ) >= %d
-				", $min ), OBJECT_K ), $min );
-
-			if ( $matched_products_query ) {
-				foreach ( $matched_products_query as $commentmeta ) {
-					$matched_products[] = $commentmeta->comment_post_ID;
-				}
-			}
-
-			$matched_products = array_unique( $matched_products );
-
-			// Filter the id's
-			if ( 0 === sizeof( $filtered_posts ) ) {
-				$filtered_posts = $matched_products;
-			} else {
-				$filtered_posts = array_intersect( $filtered_posts, $matched_products );
-			}
-			$filtered_posts[] = 0;
-		}
-
-		return (array) $filtered_posts;
-	}
-
 }
 
 endif;

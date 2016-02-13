@@ -78,7 +78,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : '';
 
 				if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
-					echo '<small class="refunded">-' . $refunded_qty . '</small>';
+					echo '<small class="refunded">' . $refunded_qty . '</small>';
 				}
 			?>
 		</div>

@@ -106,13 +106,14 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 
 	/**
 	 * Reset the loop's index and columns when we're done outputting a product loop.
-	 *
 	 * @subpackage	Loop
 	 */
 	function woocommerce_reset_loop() {
-		global $woocommerce_loop;
-		// Reset loop/columns globals when starting a new loop
-		$woocommerce_loop['loop'] = $woocommerce_loop['columns'] = '';
+		$GLOBALS['woocommerce_loop'] = array(
+			'loop'    => '',
+			'columns' => '',
+			'name'    => '',
+		);
 	}
 }
 add_filter( 'loop_end', 'woocommerce_reset_loop' );
@@ -221,6 +222,26 @@ function wc_product_cat_class( $class = '', $category = null ) {
 }
 
 /**
+ * Get classname for loops based on $woocommerce_loop global.
+ * @since 2.6.0
+ * @return string
+ */
+function wc_get_loop_class() {
+	global $woocommerce_loop;
+
+	$woocommerce_loop['loop']    = ! empty( $woocommerce_loop['loop'] ) ? $woocommerce_loop['loop'] + 1   : 1;
+	$woocommerce_loop['columns'] = ! empty( $woocommerce_loop['columns'] ) ? $woocommerce_loop['columns'] : apply_filters( 'loop_shop_columns', 4 );
+
+	if ( 0 === ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 === $woocommerce_loop['columns'] ) {
+		return 'first';
+	} elseif ( 0 === $woocommerce_loop['loop'] % $woocommerce_loop['columns'] ) {
+		return 'last';
+	} else {
+		return '';
+	}
+}
+
+/**
  * Get the classes for the product cat div.
  *
  * @since 2.4.0
@@ -228,21 +249,11 @@ function wc_product_cat_class( $class = '', $category = null ) {
  * @param object $category object Optional.
  */
 function wc_get_product_cat_class( $class = '', $category = null ) {
-	global $woocommerce_loop;
-
 	$classes   = is_array( $class ) ? $class : array_map( 'trim', explode( ' ', $class ) );
 	$classes[] = 'product-category';
 	$classes[] = 'product';
-
-	if ( 0 === ( $woocommerce_loop['loop'] - 1 ) % $woocommerce_loop['columns'] || 1 === $woocommerce_loop['columns'] ) {
-		$classes[] = 'first';
-	}
-
-	if ( 0 === $woocommerce_loop['loop'] % $woocommerce_loop['columns'] ) {
-		$classes[] = 'last';
-	}
-
-	$classes = apply_filters( 'product_cat_class', $classes, $class, $category );
+	$classes[] = wc_get_loop_class();
+	$classes   = apply_filters( 'product_cat_class', $classes, $class, $category );
 
 	return array_unique( array_filter( $classes ) );
 }
@@ -264,6 +275,9 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 	$product = wc_get_product( $post_id );
 
 	if ( $product ) {
+		$classes[] = wc_get_loop_class();
+		$classes[] = $product->stock_status;
+
 		if ( $product->is_on_sale() ) {
 			$classes[] = 'sale';
 		}
@@ -291,32 +305,14 @@ function wc_product_post_class( $classes, $class = '', $post_id = '' ) {
 		if ( $product->get_type() ) {
 			$classes[] = "product-type-" . $product->get_type();
 		}
-
-		// add category slugs
-		$categories = get_the_terms( $product->id, 'product_cat' );
-		if ( ! empty( $categories ) ) {
-			foreach ( $categories as $key => $value ) {
-				$classes[] = 'product-cat-' . $value->slug;
+		if ( $product->is_type( 'variable' ) ) {
+			if ( $product->has_default_attributes() ) {
+				$classes[] = 'has-default-attributes';
+			}
+			if ( $product->has_child() ) {
+				$classes[] = 'has-children';
 			}
 		}
-
-		// add tag slugs
-		$tags = get_the_terms( $product->id, 'product_tag' );
-		if ( ! empty( $tags ) ) {
-			foreach ( $tags as $key => $value ) {
-				$classes[] = 'product-tag-' . $value->slug;
-			}
-		}
-
-		if ('variable' === $product->product_type && $product->has_default_attributes() ) {
-			$classes[] = 'has-default-attributes';
-		}
-
-		if ( 'variable' === $product->product_type && $product->has_child() ) {
-			$classes[] = 'has-children';
-		}
-
-		$classes[] = $product->stock_status;
 	}
 
 	if ( false !== ( $key = array_search( 'hentry', $classes ) ) ) {
@@ -489,6 +485,7 @@ if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 	 */
 	function woocommerce_product_loop_start( $echo = true ) {
 		ob_start();
+		$GLOBALS['woocommerce_loop']['loop'] = 0;
 		wc_get_template( 'loop/loop-start.php' );
 		if ( $echo )
 			echo ob_get_clean();

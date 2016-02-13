@@ -1083,29 +1083,12 @@ class WC_Product {
 	 * @return string
 	 */
 	public function get_average_rating() {
-		global $wpdb;
-
-		// No meta date? Do the calculation
+		// No meta data? Do the calculation
 		if ( ! metadata_exists( 'post', $this->id, '_wc_average_rating' ) ) {
-			if ( $count = $this->get_rating_count() ) {
-				$ratings = $wpdb->get_var( $wpdb->prepare("
-					SELECT SUM(meta_value) FROM $wpdb->commentmeta
-					LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-					WHERE meta_key = 'rating'
-					AND comment_post_ID = %d
-					AND comment_approved = '1'
-					AND meta_value > 0
-				", $this->id ) );
-				$average = number_format( $ratings / $count, 2, '.', '' );
-			} else {
-				$average = 0;
-			}
-			update_post_meta( $this->id, '_wc_average_rating', $average );
-		} else {
-			$average = get_post_meta( $this->id, '_wc_average_rating', true );
+			$this->sync_average_rating( $this->id );
 		}
 
-		return (string) floatval( $average );
+		return (string) floatval( get_post_meta( $this->id, '_wc_average_rating', true ) );
 	}
 
 	/**
@@ -1114,35 +1097,72 @@ class WC_Product {
 	 * @return int
 	 */
 	public function get_rating_count( $value = null ) {
-		global $wpdb;
-
-		// No meta date? Do the calculation
+		// No meta data? Do the calculation
 		if ( ! metadata_exists( 'post', $this->id, '_wc_rating_count' ) ) {
-			$counts     = array();
-			$raw_counts = $wpdb->get_results( $wpdb->prepare("
-				SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
-				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-				WHERE meta_key = 'rating'
-				AND comment_post_ID = %d
-				AND comment_approved = '1'
-				AND meta_value > 0
-				GROUP BY meta_value
-			", $this->id ) );
-
-			foreach ( $raw_counts as $count ) {
-				$counts[ $count->meta_value ] = $count->meta_value_count;
-			}
-
-			update_post_meta( $this->id, '_wc_rating_count', $counts );
-		} else {
-			$counts = get_post_meta( $this->id, '_wc_rating_count', true );
+			$this->sync_rating_count( $this->id );
 		}
+
+		$counts = get_post_meta( $this->id, '_wc_rating_count', true );
 
 		if ( is_null( $value ) ) {
 			return array_sum( $counts );
 		} else {
 			return isset( $counts[ $value ] ) ? $counts[ $value ] : 0;
 		}
+	}
+
+	/**
+	 * Sync product rating. Can be called statically.
+	 * @param  int $post_id
+	 */
+	public static function sync_average_rating( $post_id ) {
+		if ( ! metadata_exists( 'post', $post_id, '_wc_rating_count' ) ) {
+			self::sync_rating_count( $post_id );
+		}
+
+		$count = array_sum( (array) get_post_meta( $post_id, '_wc_rating_count', true ) );
+
+		if ( $count ) {
+			global $wpdb;
+
+			$ratings = $wpdb->get_var( $wpdb->prepare("
+				SELECT SUM(meta_value) FROM $wpdb->commentmeta
+				LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+				WHERE meta_key = 'rating'
+				AND comment_post_ID = %d
+				AND comment_approved = '1'
+				AND meta_value > 0
+			", $post_id ) );
+			$average = number_format( $ratings / $count, 2, '.', '' );
+		} else {
+			$average = 0;
+		}
+		update_post_meta( $post_id, '_wc_average_rating', $average );
+	}
+
+	/**
+	 * Sync product rating count. Can be called statically.
+	 * @param  int $post_id
+	 */
+	public static function sync_rating_count( $post_id ) {
+		global $wpdb;
+
+		$counts     = array();
+		$raw_counts = $wpdb->get_results( $wpdb->prepare("
+			SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
+			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
+			WHERE meta_key = 'rating'
+			AND comment_post_ID = %d
+			AND comment_approved = '1'
+			AND meta_value > 0
+			GROUP BY meta_value
+		", $post_id ) );
+
+		foreach ( $raw_counts as $count ) {
+			$counts[ $count->meta_value ] = $count->meta_value_count;
+		}
+
+		update_post_meta( $post_id, '_wc_rating_count', $counts );
 	}
 
 	/**

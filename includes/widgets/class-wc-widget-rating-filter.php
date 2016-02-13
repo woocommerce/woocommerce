@@ -71,7 +71,61 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$link = add_query_arg( 'post_type', wc_clean( $_GET['post_type'] ), $link );
 		}
 
+		// All current filters
+		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
+			foreach ( $_chosen_attributes as $name => $data ) {
+				$filter_name = sanitize_title( str_replace( 'pa_', '', $name ) );
+				if ( ! empty( $data['terms'] ) ) {
+					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
+				}
+				if ( 'or' == $data['query_type'] ) {
+					$link = add_query_arg( 'query_type_' . $filter_name, 'or', $link );
+				}
+			}
+		}
+
 		return $link;
+	}
+
+	/**
+	 * Count products after other filters have occured by adjusting the main query.
+	 * @param  int $rating
+	 * @return int
+	 */
+	protected function get_filtered_product_count( $rating ) {
+		global $wpdb;
+
+		$tax_query  = WC_Query::get_main_tax_query();
+		$meta_query = WC_Query::get_main_meta_query();
+
+		// Unset current rating filter
+		foreach ( $meta_query as $key => $query ) {
+			if ( ! empty( $query['rating_filter'] ) ) {
+				unset( $meta_query[ $key ] );
+			}
+		}
+
+		// Set new rating filter
+		$meta_query[] = array(
+			'key'           => '_wc_average_rating',
+			'value'         => $rating,
+			'compare'       => '>=',
+			'type'          => 'DECIMAL',
+			'rating_filter' => true
+		);
+
+		$meta_query = new WP_Meta_Query( $meta_query );
+		$tax_query  = new WP_Tax_Query( $tax_query );
+
+		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
+		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
+
+		$sql  = "SELECT COUNT( {$wpdb->posts}.ID ) FROM {$wpdb->posts} ";
+		$sql .= $tax_query_sql['join'] . $meta_query_sql['join'];
+		$sql .= " WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' ";
+		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
+
+		return absint( $wpdb->get_var( $sql ) );
 	}
 
 	/**
@@ -83,15 +137,17 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		global $_chosen_attributes, $wpdb, $wp;
+		global $wp_the_query;
 
 		if ( ! is_post_type_archive( 'product' ) && ! is_tax( get_object_taxonomies( 'product' ) ) ) {
 			return;
 		}
 
-		if ( ! sizeof( WC()->query->unfiltered_product_ids ) ) {
-			return; // None shown - return
+		if ( ! $wp_the_query->post_count ) {
+			return;
 		}
+
+		ob_start();
 
 		$min_rating = isset( $_GET['min_rating'] ) ? absint( $_GET['min_rating'] ) : '';
 
@@ -100,8 +156,15 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		echo '<ul>';
 
 		for ( $rating = 4; $rating >= 1; $rating-- ) {
-			$link = $this->get_page_base_url();
-			$link = $min_rating !== $rating ? add_query_arg( 'min_rating', $rating, $link ) : $link;
+			$count = $this->get_filtered_product_count( $rating );
+
+			if ( ! $count ) {
+				continue;
+			}
+
+			$found = true;
+			$link  = $this->get_page_base_url();
+			$link  = $min_rating !== $rating ? add_query_arg( 'min_rating', $rating, $link ) : $link;
 
 			echo '<li class="wc-layered-nav-rating ' . ( ! empty( $_GET['min_rating'] ) && $rating === absint( $_GET['min_rating'] ) ? 'chosen' : '' ) . '">';
 
@@ -109,7 +172,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 			echo '<span class="star-rating" title="' . esc_attr( sprintf( __( 'Rated %s and above', 'woocommerce' ), $rating ) ). '">
 					<span style="width:' . esc_attr( ( $rating / 5 ) * 100 ) . '%">' . sprintf( __( 'Rated %s and above', 'woocommerce'), $rating ) . '</span>
-				</span>';
+				</span> (' . esc_html( $count ) . ')';
 
 			echo '</a>';
 
@@ -119,5 +182,11 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		echo '</ul>';
 
 		$this->widget_end( $args );
+
+		if ( ! $found ) {
+			ob_end_clean();
+		} else {
+			echo ob_get_clean();
+		}
 	}
 }

@@ -63,7 +63,7 @@ class WC_Product_Factory {
 			if ( isset( $args['product_type'] ) ) {
 				$product_type = $args['product_type'];
 			} else {
-				$terms        = get_the_terms( $product_id, 'product_type' );
+				$terms        = get_the_terms( $the_product, 'product_type' );
 				$product_type = ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
 			}
 		} elseif( 'product_variation' === $post_type ) {
