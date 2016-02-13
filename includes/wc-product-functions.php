@@ -202,23 +202,22 @@ function wc_get_featured_product_ids() {
 /**
  * Filter to allow product_cat in the permalinks for products.
  *
- * @access public
- * @param string $permalink The existing permalink URL.
- * @param WP_Post $post
+ * @param  string  $permalink The existing permalink URL.
+ * @param  WP_Post $post
  * @return string
  */
 function wc_product_post_type_link( $permalink, $post ) {
-	// Abort if post is not a product
+	// Abort if post is not a product.
 	if ( $post->post_type !== 'product' ) {
 		return $permalink;
 	}
 
-	// Abort early if the placeholder rewrite tag isn't in the generated URL
+	// Abort early if the placeholder rewrite tag isn't in the generated URL.
 	if ( false === strpos( $permalink, '%' ) ) {
 		return $permalink;
 	}
 
-	// Get the custom taxonomy terms in use by this post
+	// Get the custom taxonomy terms in use by this post.
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
 	if ( ! empty( $terms ) ) {
@@ -228,7 +227,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		$category_object = get_term( $category_object, 'product_cat' );
 		$product_cat     = $category_object->slug;
 
-		if ( $parent = $category_object->parent ) {
+		if ( $category_object->parent ) {
 			$ancestors = get_ancestors( $category_object->term_id, 'product_cat' );
 			foreach ( $ancestors as $ancestor ) {
 				$ancestor_object = get_term( $ancestor, 'product_cat' );
