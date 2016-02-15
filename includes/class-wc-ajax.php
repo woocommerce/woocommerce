@@ -260,7 +260,7 @@ class WC_AJAX {
 	 */
 	public static function get_cart_totals() {
 
-		if ( !defined( 'WOOCOMMERCE_CART' ) ) {
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
 
