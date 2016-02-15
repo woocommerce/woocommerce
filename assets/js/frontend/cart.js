@@ -66,6 +66,34 @@ jQuery( function( $ ) {
 		} );
 	} );
 
+	$( document ).on( 'submit', 'form.woocommerce-shipping-calculator', function( evt ) {
+		evt.preventDefault();
+
+		var $form = $( evt.target );
+
+		block( $form );
+
+		// Provide the submit button value because wc-form-handler expects it.
+		$( '<input />' ).attr( 'type', 'hidden' )
+		                .attr( 'name', 'calc_shipping' )
+		                .attr( 'value', 'x' )
+		                .appendTo( $form );
+
+		// Make call to actual form post URL.
+		$.ajax( {
+			type:     $form.attr( 'method' ),
+			url:      $form.attr( 'action' ),
+			data:     $form.serialize(),
+			dataType: 'html',
+			success:  function( response ) {
+				update_wc_div(response );
+			},
+			complete: function() {
+				unblock( $form );
+			}
+		} );
+	} );
+
 	$( '.shipping-calculator-form' ).hide();
 
 	// Update the cart after something has changed.
