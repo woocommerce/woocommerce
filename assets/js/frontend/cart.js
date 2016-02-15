@@ -39,7 +39,7 @@ jQuery( function( $ ) {
 	var update_wc_div = function( html_str ) {
 		var $html = $.parseHTML( html_str );
 		var $new_div = $( 'div.woocommerce', $html );
-		$( 'div.woocommerce').replaceWith( $new_div );
+		$( 'div.woocommerce' ).replaceWith( $new_div );
 	};
 
 	// Shipping calculator
@@ -160,10 +160,12 @@ jQuery( function( $ ) {
 		var $form = $( 'div.woocommerce > form' );
 
 		// Provide the submit button value because wc-form-handler expects it.
-		$( '<input />').attr( 'type', 'hidden' )
-		               .attr( 'name', 'update_cart' )
-		               .attr( 'value', 'Update Cart' )
-		               .appendTo( $form );
+		$( '<input />' ).attr( 'type', 'hidden' )
+		                .attr( 'name', 'update_cart' )
+		                .attr( 'value', 'Update Cart' )
+		                .appendTo( $form );
+
+		block( $form );
 
 		// Make call to actual form post URL.
 		$.ajax( {
@@ -171,7 +173,10 @@ jQuery( function( $ ) {
 			url:      $form.attr( 'action' ),
 			data:     $form.serialize(),
 			dataType: 'html',
-			success: update_wc_div
+			success:  update_wc_div,
+			complete: function() {
+				unblock( $form );
+			}
 		});
 	});
 
@@ -181,11 +186,16 @@ jQuery( function( $ ) {
 
 		var $a = $( evt.target );
 
+		block( $a.parent( 'form' ) );
+
 		$.ajax( {
 			type:     'GET',
 			url:      $a.attr( 'href' ),
 			dataType: 'html',
-			success: update_wc_div
+			success: update_wc_div,
+			complete: function() {
+				unblock( $a.parent( 'form' ) );
+			}
 		});
 	});
 });
