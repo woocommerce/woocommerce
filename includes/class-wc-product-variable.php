@@ -371,6 +371,53 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Returns an array of possible values for attribute $attribute_field_name in chlidren variations.
+	 *
+	 * @access public
+	 * @param string $attribute_field_name
+	 * @return array of available values for atrribute on input
+	 */
+	public function get_variation_children_attribute_values($attribute_field_name) {
+		global $wpdb;
+
+		// This will get us max possible count of unique values for attribute ($attribute_field_name)
+		$query_string = "SELECT DISTINCT `meta_value` FROM $wpdb->postmeta WHERE `meta_key` = %s AND `post_id` IN (SELECT `id` as `post_id` FROM $wpdb->posts as main_table WHERE `post_parent` = %d AND `post_type` = 'product_variation' AND `post_status` = 'publish' )";
+		$attrs = array($attribute_field_name, $this->id);
+		$attr_values = $wpdb->get_results($wpdb->prepare($query_string, $attrs), ARRAY_N);
+		$max_values = $attr_values;
+
+		$values = array();
+
+		// Get used values from children variations
+		$variation_ids = $this->get_children();
+
+		// lower probability of bad distribution of attribute values
+		shuffle($variation_ids);
+		foreach ($variation_ids  as $child_id ) {
+			$variation = $this->get_child( $child_id );
+
+			if ( ! empty( $variation->variation_id ) ) {
+				if ( ! $variation->variation_is_visible() ) {
+					continue; // Disabled or hidden
+				}
+
+				$child_variation_attributes = $variation->get_variation_attributes();
+
+				if ( isset( $child_variation_attributes[ $attribute_field_name ] ) && !in_array($child_variation_attributes[ $attribute_field_name ], $values) ) {
+					$values[] = $child_variation_attributes[ $attribute_field_name ];
+				}
+			}
+
+			// early stopping, if we know that we have all possible values already
+			if (count($max_values) == count($values)) {
+				break;
+			}
+		}
+
+		return $values;
+	}
+
+	/**
 	 * Return an array of attributes used for variations, as well as their possible values.
 	 *
 	 * @return array of attributes and their available values
@@ -389,25 +436,8 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			$values               = array();
 			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
-
-			// Get used values from children variations
-			foreach ( $this->get_children() as $child_id ) {
-				$variation = $this->get_child( $child_id );
-
-				if ( ! empty( $variation->variation_id ) ) {
-					if ( ! $variation->variation_is_visible() ) {
-						continue; // Disabled or hidden
-					}
-
-					$child_variation_attributes = $variation->get_variation_attributes();
-
-					if ( isset( $child_variation_attributes[ $attribute_field_name ] ) ) {
-						$values[] = $child_variation_attributes[ $attribute_field_name ];
-					}
-				}
-			}
+			$values = $this->get_variation_children_attribute_values($attribute_field_name);
 
 			// empty value indicates that all options for given attribute are available
 			if ( in_array( '', $values ) ) {
