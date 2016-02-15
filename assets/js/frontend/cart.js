@@ -145,4 +145,31 @@ jQuery( function( $ ) {
 			}
 		});
 	});
+
+	// Quantity Update
+	$( document ).on( 'click', '[name=update_cart]', function( evt ) {
+		evt.preventDefault();
+
+		var $form = $( 'div.woocommerce > form' );
+
+		// Provide the submit button value because wc-form-handler expects it.
+		$( '<input />').attr( 'type', 'hidden' )
+		               .attr( 'name', 'update_cart' )
+		               .attr( 'value', 'Update Cart' )
+		               .appendTo( $form );
+
+		// Make call to actual form post URL.
+		$.ajax( {
+			type:     $form.attr( 'method' ),
+			url:      $form.attr( 'action' ),
+			data:     $form.serialize(),
+			dataType: 'html',
+			success: function( response ) {
+				// Grab html response and replace the new .woocommerce div.
+				var $html = $.parseHTML( response );
+				var $new_div = $( 'div.woocommerce', $html );
+				$( 'div.woocommerce').replaceWith( $new_div );
+			}
+		});
+	});
 });
