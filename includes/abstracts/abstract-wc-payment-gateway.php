@@ -313,6 +313,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 		if ( $this->supports( 'default_credit_card_form' ) ) {
 			$this->credit_card_form();
+		} else {
+			new WC_Payment_Gateway_Form( $this );
 		}
 	}
 

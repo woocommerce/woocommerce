@@ -36,7 +36,9 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'subscription_payment_method_change_admin',
 			'subscription_date_changes',
 			'multiple_subscriptions',
-			'default_credit_card_form',
+			'credit_card_form',
+			'credit_card_form_cvc_on_saved_method',
+			'tokenization',
 			'refunds',
 			'pre-orders'
 		);
@@ -274,7 +276,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		}
 
 		if ( 'standard' == $this->mode ) {
-			$this->credit_card_form( array( 'fields_have_names' => false ) );
+			new WC_Payment_Gateway_Form( $this );
 		}
 	}
 
