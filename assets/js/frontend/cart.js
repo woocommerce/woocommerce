@@ -89,16 +89,31 @@ jQuery( function( $ ) {
 		$form.before( html_element );
 	};
 
-	// Coupon code
-	$( '[name="apply_coupon"]' ).on( 'click', function( evt ) {
+	// Handle form submit and route to correct logic.
+	$( document ).on( 'submit', 'div.woocommerce > form',  function( evt ) {
 		evt.preventDefault();
 
-		var $form = $( 'div.woocommerce > form' );
+		var $form = $( evt.target );
+		var $submit = $( document.activeElement );
+
+		window.console.log( $submit );
 
 		if ( is_blocked( $form ) ) {
 			return false;
 		}
 
+		if ( $submit.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+			window.console.log( 'update cart' );
+			quantity_update( $form );
+
+		} else if ( $submit.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+			window.console.log( 'apply coupon' );
+			apply_coupon( $form );
+		}
+	} );
+
+	// Coupon code
+	var apply_coupon = function( $form ) {
 		block( $form );
 
 		var $text_field = $( '#coupon_code' );
@@ -123,7 +138,7 @@ jQuery( function( $ ) {
 				update_cart_totals();
 			}
 		} );
-	} );
+	};
 
 	$( document ).on( 'click', 'a.woocommerce-remove-coupon', function( evt ) {
 		evt.preventDefault();
@@ -154,10 +169,7 @@ jQuery( function( $ ) {
 	} );
 
 	// Quantity Update
-	$( document ).on( 'submit', 'div.woocommerce > form',  function( evt ) {
-		evt.preventDefault();
-
-		var $form = $( evt.target );
+	var quantity_update = function( $form ) {
 
 		// Provide the submit button value because wc-form-handler expects it.
 		$( '<input />' ).attr( 'type', 'hidden' )
@@ -178,7 +190,7 @@ jQuery( function( $ ) {
 				unblock( $form );
 			}
 		} );
-	} );
+	};
 
 	// Item Remove
 	$( document ).on( 'click', 'td.product-remove > a', function( evt ) {
