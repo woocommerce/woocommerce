@@ -1,6 +1,11 @@
 /* global wc_cart_params */
 jQuery( function( $ ) {
 
+	// wc_cart_params is required to continue, ensure the object exists
+	if ( typeof wc_cart_params === 'undefined' ) {
+		return false;
+	}
+
 	// Gets a url for a given AJAX endpoint.
 	var get_url = function( endpoint ) {
 		return wc_cart_params.wc_ajax_url.toString().replace(
@@ -30,10 +35,12 @@ jQuery( function( $ ) {
 		$node.removeClass( 'processing' ).unblock();
 	};
 
-	// wc_cart_params is required to continue, ensure the object exists
-	if ( typeof wc_cart_params === 'undefined' ) {
-		return false;
-	}
+	// Updates the .woocommerce div with a string of html.
+	var update_wc_div = function( html_str ) {
+		var $html = $.parseHTML( html_str );
+		var $new_div = $( 'div.woocommerce', $html );
+		$( 'div.woocommerce').replaceWith( $new_div );
+	};
 
 	// Shipping calculator
 	$( document ).on( 'click', '.shipping-calculator-button', function() {
@@ -164,12 +171,21 @@ jQuery( function( $ ) {
 			url:      $form.attr( 'action' ),
 			data:     $form.serialize(),
 			dataType: 'html',
-			success: function( response ) {
-				// Grab html response and replace the new .woocommerce div.
-				var $html = $.parseHTML( response );
-				var $new_div = $( 'div.woocommerce', $html );
-				$( 'div.woocommerce').replaceWith( $new_div );
-			}
+			success: update_wc_div
+		});
+	});
+
+	// Item Remove
+	$( document ).on( 'click', 'td.product-remove > a', function( evt ) {
+		evt.preventDefault();
+
+		var $a = $( evt.target );
+
+		$.ajax( {
+			type:     'GET',
+			url:      $a.attr( 'href' ),
+			dataType: 'html',
+			success: update_wc_div
 		});
 	});
 });
