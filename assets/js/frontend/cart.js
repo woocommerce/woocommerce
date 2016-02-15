@@ -27,7 +27,7 @@ jQuery( function( $ ) {
 				background: '#fff',
 				opacity: 0.6
 			}
-		});
+		} );
 	};
 
 	// Unblock a node after processing is complete.
@@ -46,12 +46,12 @@ jQuery( function( $ ) {
 	$( document ).on( 'click', '.shipping-calculator-button', function() {
 		$( '.shipping-calculator-form' ).slideToggle( 'slow' );
 		return false;
-	}).on( 'change', 'select.shipping_method, input[name^=shipping_method]', function() {
+	} ).on( 'change', 'select.shipping_method, input[name^=shipping_method]', function() {
 		var shipping_methods = [];
 
 		$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
 			shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
-		});
+		} );
 
 		block( $( 'div.cart_totals' ) );
 
@@ -63,8 +63,8 @@ jQuery( function( $ ) {
 		$.post( get_url( 'update_shipping_method' ), data, function( response ) {
 			$( 'div.cart_totals' ).replaceWith( response );
 			$( document.body ).trigger( 'updated_shipping_method' );
-		});
-	});
+		} );
+	} );
 
 	$( '.shipping-calculator-form' ).hide();
 
@@ -78,7 +78,7 @@ jQuery( function( $ ) {
 			success: function( response ) {
 				$( 'div.cart_totals' ).replaceWith( response );
 			}
-		});
+		} );
 	};
 
 	// clears previous notices and shows new one above form.
@@ -122,8 +122,8 @@ jQuery( function( $ ) {
 				$text_field.val( '' );
 				update_cart_totals();
 			}
-		});
-	});
+		} );
+	} );
 
 	$( document ).on( 'click', 'a.woocommerce-remove-coupon', function( evt ) {
 		evt.preventDefault();
@@ -150,8 +150,8 @@ jQuery( function( $ ) {
 			complete: function() {
 				update_cart_totals();
 			}
-		});
-	});
+		} );
+	} );
 
 	// Quantity Update
 	$( document ).on( 'click', '[name=update_cart]', function( evt ) {
@@ -177,8 +177,8 @@ jQuery( function( $ ) {
 			complete: function() {
 				unblock( $form );
 			}
-		});
-	});
+		} );
+	} );
 
 	// Item Remove
 	$( document ).on( 'click', 'td.product-remove > a', function( evt ) {
@@ -196,6 +196,6 @@ jQuery( function( $ ) {
 			complete: function() {
 				unblock( $a.parent( 'form' ) );
 			}
-		});
-	});
-});
+		} );
+	} );
+} );
