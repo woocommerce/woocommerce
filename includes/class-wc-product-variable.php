@@ -376,68 +376,54 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array of attributes and their available values
 	 */
 	public function get_variation_attributes() {
+		global $wpdb;
+
 		$variation_attributes = array();
+		$attributes           = $this->get_attributes();
+		$child_ids            = $this->get_children( true );
 
-		if ( ! $this->has_child() ) {
-			return $variation_attributes;
-		}
-
-		$attributes = $this->get_attributes();
-
-		foreach ( $attributes as $attribute ) {
-			if ( ! $attribute['is_variation'] ) {
-				continue;
-			}
-
-			$values               = array();
-			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
-
-			// Get used values from children variations
-			foreach ( $this->get_children() as $child_id ) {
-				$variation = $this->get_child( $child_id );
-
-				if ( ! empty( $variation->variation_id ) ) {
-					if ( ! $variation->variation_is_visible() ) {
-						continue; // Disabled or hidden
-					}
-
-					$child_variation_attributes = $variation->get_variation_attributes();
-
-					if ( isset( $child_variation_attributes[ $attribute_field_name ] ) ) {
-						$values[] = $child_variation_attributes[ $attribute_field_name ];
-					}
+		if ( ! empty( $child_ids ) ) {
+			foreach ( $attributes as $attribute ) {
+				if ( empty( $attribute['is_variation'] ) ) {
+					continue;
 				}
-			}
 
-			// empty value indicates that all options for given attribute are available
-			if ( in_array( '', $values ) ) {
-				$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
+				// Get possible values for this attribute, for only visible variations.
+				$values = array_unique( $wpdb->get_col( $wpdb->prepare(
+					"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'esc_sql', $child_ids ) ) . ")",
+					wc_variation_attribute_name( $attribute['name'] )
+				) ) );
 
-			// Get custom attributes (non taxonomy) as defined
-			} elseif ( ! $attribute['is_taxonomy'] ) {
-				$text_attributes          = wc_get_text_attributes( $attribute['value'] );
-				$assigned_text_attributes = $values;
-				$values                   = array();
+				// empty value indicates that all options for given attribute are available
+				if ( in_array( '', $values ) ) {
+					$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
 
-				// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
-				if ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
-					$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
+				// Get custom attributes (non taxonomy) as defined
+				} elseif ( ! $attribute['is_taxonomy'] ) {
+					$text_attributes          = wc_get_text_attributes( $attribute['value'] );
+					$assigned_text_attributes = $values;
+					$values                   = array();
 
-					foreach ( $text_attributes as $text_attribute ) {
-						if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
-							$values[] = $text_attribute;
+					// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
+					if ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
+						$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
+
+						foreach ( $text_attributes as $text_attribute ) {
+							if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
+								$values[] = $text_attribute;
+							}
 						}
-					}
-				} else {
-					foreach ( $text_attributes as $text_attribute ) {
-						if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
-							$values[] = $text_attribute;
+					} else {
+						foreach ( $text_attributes as $text_attribute ) {
+							if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
+								$values[] = $text_attribute;
+							}
 						}
 					}
 				}
-			}
 
-			$variation_attributes[ $attribute['name'] ] = array_unique( $values );
+				$variation_attributes[ $attribute['name'] ] = array_unique( $values );
+			}
 		}
 
 		return $variation_attributes;
