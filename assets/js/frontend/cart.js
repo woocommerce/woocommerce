@@ -154,10 +154,10 @@ jQuery( function( $ ) {
 	} );
 
 	// Quantity Update
-	$( document ).on( 'click', '[name=update_cart]', function( evt ) {
+	$( document ).on( 'submit', 'div.woocommerce > form',  function( evt ) {
 		evt.preventDefault();
 
-		var $form = $( 'div.woocommerce > form' );
+		var $form = $( evt.target );
 
 		// Provide the submit button value because wc-form-handler expects it.
 		$( '<input />' ).attr( 'type', 'hidden' )
