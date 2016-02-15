@@ -185,8 +185,9 @@ jQuery( function( $ ) {
 		evt.preventDefault();
 
 		var $a = $( evt.target );
+		var $form = $a.parents( 'form' );
 
-		block( $a.parent( 'form' ) );
+		block( $form );
 
 		$.ajax( {
 			type:     'GET',
@@ -194,7 +195,7 @@ jQuery( function( $ ) {
 			dataType: 'html',
 			success: update_wc_div,
 			complete: function() {
-				unblock( $a.parent( 'form' ) );
+				unblock( $form );
 			}
 		} );
 	} );
