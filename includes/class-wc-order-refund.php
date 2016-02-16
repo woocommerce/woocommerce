@@ -23,6 +23,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 		'prices_include_tax' => false,
 		'refund_amount'      => '',
 		'refund_reason'      => '',
+		'refunded_by'        => 0,
     );
 
     /**
@@ -39,6 +40,17 @@ class WC_Order_Refund extends WC_Abstract_Order {
         }
 		$this->set_order_type( 'refund' );
     }
+
+	/**
+     * Read from the database.
+     * @since 2.6.0
+     * @param int $id ID of object to read.
+     */
+    public function read( $id ) {
+        $post_object = get_post( $id );
+		$this->_meta['refunded_by'] = absint( $post_object->post_author ); // post_author was used before refunded_by meta.
+		parent::read( $post_object );
+	}
 
 	/**
 	 * Get refunded amount.
@@ -65,6 +77,15 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 */
 	public function get_refund_reason() {
 		return apply_filters( 'woocommerce_refund_reason', $this->get_meta( 'refund_reason' ), $this );
+	}
+
+	/**
+	 * Get ID of user who did the refund.
+	 * @since 2.6
+	 * @return int
+	 */
+	public function get_refunded_by() {
+		return absint( $this->get_meta( 'refunded_by' ) );
 	}
 
 	/**

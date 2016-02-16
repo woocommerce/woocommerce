@@ -1371,7 +1371,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     /**
      * Read from the database.
      * @since 2.6.0
-     * @access protected
      * @param int $id ID of object to read.
      */
     public function read( $id ) {
@@ -1434,7 +1433,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 		// Set meta data. Remove _ from key for hidden meta.
 		foreach ( $meta_data as $key => $value ) {
-			$this->_meta[ ltrim( $key, '_' ) ] = $value[0];
+			$key = ltrim( $key, '_' );
+			if ( is_callable( array( $this, "set_$key" ) ) ) {
+				$this->{"set_$key"}( $value[0] );
+			} else {
+				$this->_meta[ $key ] = $value[0];
+			}
 		}
 
         // Orders store the state of prices including tax when created.

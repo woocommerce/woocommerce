@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * @var object $refund The refund object.
  */
-$who_refunded = new WP_User( $refund->post->post_author );
+$who_refunded = new WP_User( $refund->get_refunded_by() );
 ?>
 <tr class="refund <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_refund_id="<?php echo $refund->get_id(); ?>">
 	<td class="check-column"></td>
@@ -15,7 +15,7 @@ $who_refunded = new WP_User( $refund->post->post_author );
 
 	<td class="name">
 		<?php
-			echo esc_attr__( 'Refund', 'woocommerce' ) . ' #' . absint( $refund->get_id() ) . ' - ' . esc_attr( date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), strtotime( $refund->post->post_date ) ) );
+			echo esc_attr__( 'Refund', 'woocommerce' ) . ' #' . absint( $refund->get_id() ) . ' - ' . esc_attr( date_i18n( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), $refund->get_date_created() ) );
 
 			if ( $who_refunded->exists() ) {
 				echo ' ' . esc_attr_x( 'by', 'Ex: Refund - $date >by< $username', 'woocommerce' ) . ' ' . '<abbr class="refund_by" title="' . esc_attr__( 'ID: ', 'woocommerce' ) . absint( $who_refunded->ID ) . '">' . esc_attr( $who_refunded->display_name ) . '</abbr>' ;
