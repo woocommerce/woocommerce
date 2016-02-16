@@ -124,7 +124,7 @@ class WC_Meta_Box_Order_Actions {
 				if ( ! empty( $mails ) ) {
 					foreach ( $mails as $mail ) {
 						if ( $mail->id == $email_to_send ) {
-							$mail->trigger( $order->get_order_id() );
+							$mail->trigger( $order->get_id() );
 							$order->add_order_note( sprintf( __( '%s email notification manually sent.', 'woocommerce' ), $mail->title ), false, true );
 						}
 					}

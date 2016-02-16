@@ -392,7 +392,7 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 /**
  * @deprecated
  */
-function woocommerce_get_order_id_by_order_key( $order_key ) {
+function woocommerce_get_id_by_order_key( $order_key ) {
 	return wc_get_order_id_by_order_key( $order_key );
 }
 /**

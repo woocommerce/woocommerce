@@ -55,10 +55,10 @@ class WC_Shortcode_Order_Tracking {
 
 				$order = wc_get_order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
 
-				if ( $order && $order->get_order_id() && $order_email ) {
+				if ( $order && $order->get_id() && $order_email ) {
 
 					if ( strtolower( $order->billing_email ) == strtolower( $order_email ) ) {
-						do_action( 'woocommerce_track_order', $order->get_order_id() );
+						do_action( 'woocommerce_track_order', $order->get_id() );
 						wc_get_template( 'order/tracking.php', array(
 							'order' => $order
 						) );

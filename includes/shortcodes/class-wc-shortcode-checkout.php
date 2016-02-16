@@ -90,7 +90,7 @@ class WC_Shortcode_Checkout {
 				return;
 			}
 
-			if ( $order->get_order_id() == $order_id && $order->order_key == $order_key ) {
+			if ( $order->get_id() == $order_id && $order->order_key == $order_key ) {
 
 				if ( $order->needs_payment() ) {
 
@@ -131,7 +131,7 @@ class WC_Shortcode_Checkout {
 			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 			$order                = wc_get_order( $order_id );
 
-			if ( $order->get_order_id() == $order_id && $order->order_key == $order_key ) {
+			if ( $order->get_id() == $order_id && $order->order_key == $order_key ) {
 
 				if ( $order->needs_payment() ) {
 

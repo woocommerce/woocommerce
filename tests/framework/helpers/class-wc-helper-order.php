@@ -85,6 +85,6 @@ class WC_Helper_Order {
 		$order->set_total( 0, 'shipping_tax' );
 		$order->set_total( 40, 'total' ); // 4 x $10 simple helper product
 
-		return wc_get_order( $order->get_order_id() );
+		return wc_get_order( $order->get_id() );
 	}
 }

@@ -153,7 +153,7 @@ class WC_Order_Item implements ArrayAccess {
      * Get order ID this meta belongs to.
      * @return int
      */
-    public function get_order_id() {
+    public function get_id() {
         return absint( $this->data['order_id'] );
     }
 
@@ -289,7 +289,7 @@ class WC_Order_Item implements ArrayAccess {
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
             'order_item_name' => $this->get_name(),
             'order_item_type' => $this->get_type(),
-            'order_id'        => $this->get_order_id()
+            'order_id'        => $this->get_id()
         ) );
 		$this->set_item_id( $wpdb->insert_id );
 	}
@@ -304,7 +304,7 @@ class WC_Order_Item implements ArrayAccess {
 		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
             'order_item_name' => $this->get_name(),
             'order_item_type' => $this->get_type(),
-            'order_id'        => $this->get_order_id()
+            'order_id'        => $this->get_id()
         ), array( 'order_item_id' => $this->get_order_item_id() ) );
     }
 

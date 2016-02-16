@@ -29,13 +29,13 @@ class WC_Order extends WC_Abstract_Order {
      * @param string $transaction_id Optional transaction id to store in post meta.
      */
     public function payment_complete( $transaction_id = '' ) {
-        do_action( 'woocommerce_pre_payment_complete', $this->get_order_id() );
+        do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
         if ( ! empty( WC()->session ) ) {
             WC()->session->set( 'order_awaiting_payment', false );
         }
 
-        if ( $this->get_order_id() && $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
+        if ( $this->get_id() && $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
             $order_needs_processing = false;
 
             if ( sizeof( $this->get_items() ) > 0 ) {
@@ -43,7 +43,7 @@ class WC_Order extends WC_Abstract_Order {
 					if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
 						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
 
-						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_order_id() ) ) {
+						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
                             $order_needs_processing = true;
                             break;
                         }
@@ -55,13 +55,13 @@ class WC_Order extends WC_Abstract_Order {
 				$this->set_transaction_id( $transaction_id );
 			}
 
-			$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_order_id() ) );
+			$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $order_needs_processing ? 'processing' : 'completed', $this->get_id() ) );
 			$this->set_date_paid( current_time( 'timestamp' ) );
 			$this->save();
 
-            do_action( 'woocommerce_payment_complete', $this->get_order_id() );
+            do_action( 'woocommerce_payment_complete', $this->get_id() );
         } else {
-            do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_order_id() );
+            do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
         }
     }
 
@@ -279,7 +279,7 @@ class WC_Order extends WC_Abstract_Order {
      * @return string
      */
     public function get_checkout_payment_url( $on_checkout = false ) {
-        $pay_url = wc_get_endpoint_url( 'order-pay', $this->get_order_id(), wc_get_page_permalink( 'checkout' ) );
+        $pay_url = wc_get_endpoint_url( 'order-pay', $this->get_id(), wc_get_page_permalink( 'checkout' ) );
 
         if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
             $pay_url = str_replace( 'http:', 'https:', $pay_url );
@@ -300,7 +300,7 @@ class WC_Order extends WC_Abstract_Order {
      * @return string
      */
     public function get_checkout_order_received_url() {
-        $order_received_url = wc_get_endpoint_url( 'order-received', $this->get_order_id(), wc_get_page_permalink( 'checkout' ) );
+        $order_received_url = wc_get_endpoint_url( 'order-received', $this->get_id(), wc_get_page_permalink( 'checkout' ) );
 
         if ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
             $order_received_url = str_replace( 'http:', 'https:', $order_received_url );
@@ -322,7 +322,7 @@ class WC_Order extends WC_Abstract_Order {
         return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
             'cancel_order' => 'true',
             'order'        => $this->get_order_key(),
-            'order_id'     => $this->get_order_id(),
+            'order_id'     => $this->get_id(),
             'redirect'     => $redirect
         ), $this->get_cancel_endpoint() ), 'woocommerce-cancel_order' ) );
     }
@@ -338,7 +338,7 @@ class WC_Order extends WC_Abstract_Order {
         return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array(
             'cancel_order' => 'true',
             'order'        => $this->get_order_key(),
-            'order_id'     => $this->get_order_id(),
+            'order_id'     => $this->get_id(),
             'redirect'     => $redirect,
             '_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
         ), $this->get_cancel_endpoint() ) );
@@ -368,7 +368,7 @@ class WC_Order extends WC_Abstract_Order {
      * @return string
      */
     public function get_view_order_url() {
-        return apply_filters( 'woocommerce_get_view_order_url', wc_get_endpoint_url( 'view-order', $this->get_order_id(), wc_get_page_permalink( 'myaccount' ) ), $this );
+        return apply_filters( 'woocommerce_get_view_order_url', wc_get_endpoint_url( 'view-order', $this->get_id(), wc_get_page_permalink( 'myaccount' ) ), $this );
     }
 
 	/*
@@ -386,7 +386,7 @@ class WC_Order extends WC_Abstract_Order {
      * @return int Comment ID.
      */
     public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
-        if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_order_id() ) && $added_by_user ) {
+        if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_id() ) && $added_by_user ) {
             $user                 = get_user_by( 'id', get_current_user_id() );
             $comment_author       = $user->display_name;
             $comment_author_email = $user->user_email;
@@ -397,21 +397,21 @@ class WC_Order extends WC_Abstract_Order {
             $comment_author_email = sanitize_email( $comment_author_email );
         }
 
-        $comment_post_ID        = $this->get_order_id();
+        $comment_post_ID        = $this->get_id();
         $comment_author_url     = '';
         $comment_content        = $note;
         $comment_agent          = 'WooCommerce';
         $comment_type           = 'order_note';
         $comment_parent         = 0;
         $comment_approved       = 1;
-        $commentdata            = apply_filters( 'woocommerce_new_order_note_data', compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' ), array( 'order_id' => $this->get_order_id(), 'is_customer_note' => $is_customer_note ) );
+        $commentdata            = apply_filters( 'woocommerce_new_order_note_data', compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' ), array( 'order_id' => $this->get_id(), 'is_customer_note' => $is_customer_note ) );
 
         $comment_id = wp_insert_comment( $commentdata );
 
         if ( $is_customer_note ) {
             add_comment_meta( $comment_id, 'is_customer_note', 1 );
 
-            do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->get_order_id(), 'customer_note' => $commentdata['comment_content'] ) );
+            do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->get_id(), 'customer_note' => $commentdata['comment_content'] ) );
         }
 
         return $comment_id;
@@ -425,7 +425,7 @@ class WC_Order extends WC_Abstract_Order {
     public function get_customer_order_notes() {
         $notes = array();
         $args  = array(
-            'post_id' => $this->get_order_id(),
+            'post_id' => $this->get_id(),
             'approve' => 'approve',
             'type'    => ''
         );
@@ -464,7 +464,7 @@ class WC_Order extends WC_Abstract_Order {
 			$refund_items = get_posts(
 				array(
 					'post_type'      => 'shop_order_refund',
-					'post_parent'    => $this->get_order_id(),
+					'post_parent'    => $this->get_id(),
 					'posts_per_page' => -1,
 					'post_status'    => 'any',
 					'fields'         => 'ids'
@@ -495,7 +495,7 @@ class WC_Order extends WC_Abstract_Order {
 			INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
 			WHERE postmeta.meta_key = '_refund_amount'
 			AND postmeta.post_id = posts.ID
-		", $this->get_order_id() ) );
+		", $this->get_id() ) );
 
 		return $total;
 	}
@@ -516,7 +516,7 @@ class WC_Order extends WC_Abstract_Order {
 			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
 			WHERE order_itemmeta.order_item_id = order_items.order_item_id
 			AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
-		", $this->get_order_id() ) );
+		", $this->get_id() ) );
 
 		return abs( $total );
 	}
@@ -537,7 +537,7 @@ class WC_Order extends WC_Abstract_Order {
 			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
 			WHERE order_itemmeta.order_item_id = order_items.order_item_id
 			AND order_itemmeta.meta_key IN ('cost')
-		", $this->get_order_id() ) );
+		", $this->get_id() ) );
 
 		return abs( $total );
 	}

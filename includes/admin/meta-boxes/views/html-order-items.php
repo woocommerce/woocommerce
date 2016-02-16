@@ -86,7 +86,7 @@ if ( wc_tax_enabled() ) {
 
 				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item, $order );
 			}
-			do_action( 'woocommerce_admin_order_items_after_line_items', $order->get_order_id() );
+			do_action( 'woocommerce_admin_order_items_after_line_items', $order->get_id() );
 		?>
 		</tbody>
 		<tbody id="order_shipping_line_items">
@@ -95,7 +95,7 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items_shipping as $item_id => $item ) {
 				include( 'html-order-shipping.php' );
 			}
-			do_action( 'woocommerce_admin_order_items_after_shipping', $order->get_order_id() );
+			do_action( 'woocommerce_admin_order_items_after_shipping', $order->get_id() );
 		?>
 		</tbody>
 		<tbody id="order_fee_line_items">
@@ -103,7 +103,7 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items_fee as $item_id => $item ) {
 				include( 'html-order-fee.php' );
 			}
-			do_action( 'woocommerce_admin_order_items_after_fees', $order->get_order_id() );
+			do_action( 'woocommerce_admin_order_items_after_fees', $order->get_id() );
 		?>
 		</tbody>
 		<tbody id="order_refunds">
@@ -112,7 +112,7 @@ if ( wc_tax_enabled() ) {
 				foreach ( $refunds as $refund ) {
 					include( 'html-order-refund.php' );
 				}
-				do_action( 'woocommerce_admin_order_items_after_refunds', $order->get_order_id() );
+				do_action( 'woocommerce_admin_order_items_after_refunds', $order->get_id() );
 			}
 		?>
 		</tbody>
@@ -147,7 +147,7 @@ if ( wc_tax_enabled() ) {
 			<td width="1%"></td>
 		</tr>
 
-		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->get_order_id() ); ?>
+		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->get_id() ); ?>
 
 		<tr>
 			<td class="label"><?php echo wc_help_tip( __( 'This is the shipping and handling total costs for the order.', 'woocommerce' ) ); ?> <?php _e( 'Shipping', 'woocommerce' ); ?>:</td>
@@ -163,7 +163,7 @@ if ( wc_tax_enabled() ) {
 			<td width="1%"></td>
 		</tr>
 
-		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $order->get_order_id() ); ?>
+		<?php do_action( 'woocommerce_admin_order_totals_after_shipping', $order->get_id() ); ?>
 
 		<?php if ( wc_tax_enabled() ) : ?>
 			<?php foreach ( $order->get_tax_totals() as $code => $tax ) : ?>
@@ -181,7 +181,7 @@ if ( wc_tax_enabled() ) {
 			<?php endforeach; ?>
 		<?php endif; ?>
 
-		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->get_order_id() ); ?>
+		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->get_id() ); ?>
 
 		<tr>
 			<td class="label"><?php _e( 'Order Total', 'woocommerce' ); ?>:</td>
@@ -201,7 +201,7 @@ if ( wc_tax_enabled() ) {
 			</td>
 		</tr>
 
-		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->get_order_id() ); ?>
+		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->get_id() ); ?>
 
 		<tr>
 			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
@@ -209,7 +209,7 @@ if ( wc_tax_enabled() ) {
 			<td width="1%"></td>
 		</tr>
 
-		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_order_id() ); ?>
+		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
 
 	</table>
 	<div class="clear"></div>

@@ -603,7 +603,7 @@ class WC_Admin_Post_Types {
 	public function render_shop_order_columns( $column ) {
 		global $post, $woocommerce, $the_order;
 
-		if ( empty( $the_order ) || $the_order->get_order_id() != $post->ID ) {
+		if ( empty( $the_order ) || $the_order->get_id() != $post->ID ) {
 			$the_order = wc_get_order( $post->ID );
 		}
 
@@ -2248,12 +2248,12 @@ class WC_Admin_Post_Types {
 			foreach ( $existing_permissions as $existing_permission ) {
 				$order = wc_get_order( $existing_permission->order_id );
 
-				if ( $order->get_order_id() ) {
+				if ( $order->get_id() ) {
 					// Remove permissions
 					if ( ! empty( $removed_download_ids ) ) {
 						foreach ( $removed_download_ids as $download_id ) {
 							if ( apply_filters( 'woocommerce_process_product_file_download_paths_remove_access_to_old_file', true, $download_id, $product_id, $order ) ) {
-								$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->get_order_id(), $product_id, $download_id ) );
+								$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->get_id(), $product_id, $download_id ) );
 							}
 						}
 					}
@@ -2264,7 +2264,7 @@ class WC_Admin_Post_Types {
 
 							if ( apply_filters( 'woocommerce_process_product_file_download_paths_grant_access_to_new_file', true, $download_id, $product_id, $order ) ) {
 								// grant permission if it doesn't already exist
-								if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1=1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->get_order_id(), $product_id, $download_id ) ) ) {
+								if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1=1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->get_id(), $product_id, $download_id ) ) ) {
 									wc_downloadable_file_permission( $download_id, $product_id, $order );
 								}
 							}

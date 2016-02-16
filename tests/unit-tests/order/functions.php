@@ -111,7 +111,7 @@ class Functions extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order ) );
 
 		// Assert that wc_get_order() accepts a order post id.
-		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->get_order_id() ) );
+		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->get_id() ) );
 
 		// Assert that a non-shop_order post returns false
 		$post = $this->factory->post->create_and_get( array( 'post_type' => 'post' ) );

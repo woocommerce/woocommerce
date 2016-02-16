@@ -274,7 +274,7 @@ class WC_Form_Handler {
 			$order_id   = absint( $wp->query_vars['order-pay'] );
 			$order      = wc_get_order( $order_id );
 
-			if ( $order->get_order_id() == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
+			if ( $order->get_id() == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
@@ -506,7 +506,7 @@ class WC_Form_Handler {
 		// Load the previous order - Stop if the order does not exist
 		$order = wc_get_order( absint( $_GET['order_again'] ) );
 
-		if ( ! $order->get_order_id() ) {
+		if ( ! $order->get_id() ) {
 			return;
 		}
 
@@ -516,7 +516,7 @@ class WC_Form_Handler {
 
 		// Make sure the user is allowed to order again. By default it check if the
 		// previous order belonged to the current user.
-		if ( ! current_user_can( 'order_again', $order->get_order_id() ) ) {
+		if ( ! current_user_can( 'order_again', $order->get_id() ) ) {
 			return;
 		}
 
@@ -545,7 +545,7 @@ class WC_Form_Handler {
 			WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data );
 		}
 
-		do_action( 'woocommerce_ordered_again', $order->get_order_id() );
+		do_action( 'woocommerce_ordered_again', $order->get_id() );
 
 		// Redirect to cart
 		wc_add_notice( __( 'The cart has been filled with the items from your previous order.', 'woocommerce' ) );
@@ -568,7 +568,7 @@ class WC_Form_Handler {
 
 			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_order_id() == $order_id && $order->order_key == $order_key && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() == $order_id && $order->order_key == $order_key && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
 
 				// Cancel the order + restore stock
 		        $order->update_status( 'cancelled', __( 'Order cancelled by customer.', 'woocommerce' ) );
@@ -579,7 +579,7 @@ class WC_Form_Handler {
 				// Message
 				wc_add_notice( apply_filters( 'woocommerce_order_cancelled_notice', __( 'Your order was cancelled.', 'woocommerce' ) ), apply_filters( 'woocommerce_order_cancelled_notice_type', 'notice' ) );
 
-				do_action( 'woocommerce_cancelled_order', $order->get_order_id() );
+				do_action( 'woocommerce_cancelled_order', $order->get_id() );
 
 			} elseif ( $user_can_cancel && ! $order_can_cancel ) {
 				wc_add_notice( __( 'Your order can no longer be cancelled. Please contact us if you need assistance.', 'woocommerce' ), 'error' );

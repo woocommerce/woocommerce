@@ -31,7 +31,7 @@ class WC_Order_Factory {
 		} elseif ( is_numeric( $the_order ) ) {
 			$the_order = get_post( $the_order );
 		} elseif ( $the_order instanceof WC_Order ) {
-			$the_order = get_post( $the_order->get_order_id() );
+			$the_order = get_post( $the_order->get_id() );
 		}
 
 		if ( ! $the_order || ! is_object( $the_order ) ) {

@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Abstract Order
  *
@@ -12,13 +16,32 @@
  *
  * @todo check date formats are bw compat and consistant
  */
-abstract class WC_Abstract_Order {
+abstract class WC_Abstract_Order implements WC_Data {
 
     /**
      * Stores data about status changes so relevant hooks can be fired.
      * @var bool|array
      */
     protected $_status_transition = false;
+
+    /**
+     * Stores meta data.
+     * @var array
+     */
+    protected $_meta = array();
+
+    /**
+     * Stores line item objects.
+     * @var array
+     */
+    protected $_items = array(
+        'line_items'     => array(),
+		'tax_lines'      => array(),
+		'shipping_lines' => array(),
+		'fees'           => array(),
+		'fee_lines'      => array(),
+		'coupon_lines'   => array(),
+    );
 
     /**
      * Data array, with defaults.
@@ -82,15 +105,7 @@ abstract class WC_Abstract_Order {
 		'prices_include_tax'   => false,
 		'customer_note'        => '',
 		'date_completed'       => '',
-		'date_paid'            => '',
-
-		// These will remain as order items @todo
-		'line_items'           => array(),
-		'tax_lines'            => array(),
-		'shipping_lines'       => array(),
-		'fees'                 => array(),
-		'fee_lines'            => array(),
-		'coupon_lines'         => array()
+		'date_paid'            => ''
     );
 
     /**
@@ -105,7 +120,7 @@ abstract class WC_Abstract_Order {
 		if ( is_numeric( $order ) ) {
             $this->read( $order );
         } elseif ( $order instanceof WC_Order ) {
-            $this->read( absint( $order->get_order_id() ) );
+            $this->read( absint( $order->get_id() ) );
         } elseif ( ! empty( $order->ID ) ) {
             $this->read( absint( $order->ID ) );
         }
@@ -135,11 +150,19 @@ abstract class WC_Abstract_Order {
     /**
      * Get all class data in array format.
      * @since 2.6.0
-     * @access protected
      * @return array
      */
-    protected function get_data() {
+    public function get_data() {
         return $this->_data;
+    }
+
+    /**
+     * Get order ID.
+     * @since 2.6.0
+     * @return integer
+     */
+    public function get_id() {
+        return $this->get_order_id();
     }
 
     /**
@@ -168,7 +191,7 @@ abstract class WC_Abstract_Order {
      * @return string
      */
     public function get_order_number() {
-        return apply_filters( 'woocommerce_order_number', $this->get_order_id(), $this );
+        return apply_filters( 'woocommerce_order_number', $this->get_id(), $this );
     }
 
     /**
@@ -831,7 +854,7 @@ abstract class WC_Abstract_Order {
      * @uses WC_Order::set_status()
      */
     public function update_status( $new_status, $note = '', $manual = false ) {
-        if ( ! $this->get_order_id() ) {
+        if ( ! $this->get_id() ) {
             return false;
         }
 		$this->set_status( $new_status, $note, $manual );
@@ -1130,8 +1153,8 @@ abstract class WC_Abstract_Order {
      */
     public function set_payment_method( $value ) {
         if ( is_object( $value ) ) {
-            update_post_meta( $this->get_order_id(), '_payment_method', $value->id );
-            update_post_meta( $this->get_order_id(), '_payment_method_title', $value->get_title() );
+            update_post_meta( $this->get_id(), '_payment_method', $value->id );
+            update_post_meta( $this->get_id(), '_payment_method_title', $value->get_title() );
             $this->set_payment_method( $value->id );
             $this->set_payment_method_title( $value->get_title() );
         } else {
@@ -1211,7 +1234,7 @@ abstract class WC_Abstract_Order {
      */
     public function set_address( $address, $type = 'billing' ) {
         foreach ( $address as $key => $value ) {
-            update_post_meta( $this->get_order_id(), "_{$type}_" . $key, $value );
+            update_post_meta( $this->get_id(), "_{$type}_" . $key, $value );
             if ( method_exists( $this, "set_{$type}_{$key}" ) ) {
                 $this->{"set_{$type}_{$key}"}( $value );
             }
@@ -1234,32 +1257,32 @@ abstract class WC_Abstract_Order {
             case 'total' :
                 $amount = wc_format_decimal( $amount, wc_get_price_decimals() );
                 $this->set_order_total( $amount );
-                update_post_meta( $this->get_order_id(), '_order_total', $amount );
+                update_post_meta( $this->get_id(), '_order_total', $amount );
                 break;
             case 'cart_discount' :
                 $amount = wc_format_decimal( $amount );
                 $this->set_discount_total( $amount );
-                update_post_meta( $this->get_order_id(), '_cart_discount', $amount );
+                update_post_meta( $this->get_id(), '_cart_discount', $amount );
                 break;
             case 'cart_discount_tax' :
                 $amount = wc_format_decimal( $amount );
                 $this->set_discount_tax( $amount );
-                update_post_meta( $this->get_order_id(), '_cart_discount_tax', $amount );
+                update_post_meta( $this->get_id(), '_cart_discount_tax', $amount );
                 break;
             case 'shipping' :
                 $amount = wc_format_decimal( $amount );
                 $this->set_shipping_total( $amount );
-                update_post_meta( $this->get_order_id(), '_order_shipping', $amount );
+                update_post_meta( $this->get_id(), '_order_shipping', $amount );
                 break;
             case 'shipping_tax' :
                 $amount = wc_format_decimal( $amount );
                 $this->set_shipping_tax( $amount );
-                update_post_meta( $this->get_order_id(), '_order_shipping_tax', $amount );
+                update_post_meta( $this->get_id(), '_order_shipping_tax', $amount );
                 break;
             case 'tax' :
                 $amount = wc_format_decimal( $amount );
                 $this->set_cart_tax( $amount );
-                update_post_meta( $this->get_order_id(), '_order_tax', $amount );
+                update_post_meta( $this->get_id(), '_order_tax', $amount );
                 break;
         }
 
@@ -1285,7 +1308,7 @@ abstract class WC_Abstract_Order {
      * @since 2.6.0
      * @access protected
      */
-    protected function create() {
+    public function create() {
         // Set random key
         $this->set_order_key( uniqid( 'order_' ) );
 
@@ -1351,7 +1374,7 @@ abstract class WC_Abstract_Order {
      * @access protected
      * @param int $id ID of object to read.
      */
-    protected function read( $id ) {
+    public function read( $id ) {
         $post_object = get_post( $id );
         $order_id    = absint( $post_object->ID );
 
@@ -1419,10 +1442,10 @@ abstract class WC_Abstract_Order {
      * @since 2.6.0
      * @access protected
      */
-    protected function update() {
+    public function update() {
         global $wpdb;
 
-        $order_id = $this->get_order_id();
+        $order_id = $this->get_id();
 
         $wpdb->update(
             $wpdb->posts,
@@ -1480,13 +1503,13 @@ abstract class WC_Abstract_Order {
             if ( ! empty( $this->_status_transition['original'] ) ) {
                 $transition_note = sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $this->_status_transition['original'] ), wc_get_order_status_name( $this->get_status() ) );
 
-                do_action( 'woocommerce_order_status_' . $this->_status_transition['original'] . '_to_' . $this->get_status(), $this->get_order_id() );
-                do_action( 'woocommerce_order_status_changed', $this->get_order_id(), $this->_status_transition['original'], $this->get_status() );
+                do_action( 'woocommerce_order_status_' . $this->_status_transition['original'] . '_to_' . $this->get_status(), $this->get_id() );
+                do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->_status_transition['original'], $this->get_status() );
             } else {
                 $transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->get_status() ) );
             }
 
-            do_action( 'woocommerce_order_status_' . $this->get_status(), $this->get_order_id() );
+            do_action( 'woocommerce_order_status_' . $this->get_status(), $this->get_id() );
 
             // Note the transition occured
             $this->add_order_note( trim( $this->_status_transition['note'] . ' ' . $transition_note ), 0, $this->_status_transition['manual'] );
@@ -1501,8 +1524,8 @@ abstract class WC_Abstract_Order {
      * @since 2.6.0
      * @access protected
      */
-    protected function delete() {
-        wp_delete_post( $this->get_order_id() );
+    public function delete() {
+        wp_delete_post( $this->get_id() );
     }
 
     /**
@@ -1511,12 +1534,12 @@ abstract class WC_Abstract_Order {
      * @access protected
      */
     public function save() {
-        if ( ! $this->get_order_id() ) {
+        if ( ! $this->get_id() ) {
             $this->create();
         } else {
             $this->update();
         }
-        wc_delete_shop_order_transients( $this->get_order_id() );
+        wc_delete_shop_order_transients( $this->get_id() );
     }
 
     /*
@@ -1540,7 +1563,7 @@ abstract class WC_Abstract_Order {
 
         $type            = ! is_array( $type ) ? array( $type ) : $type;
         $items           = array();
-        $get_items_sql   = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->get_order_id() );
+        $get_items_sql   = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->get_id() );
         $get_items_sql  .= "AND order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', $type ) ) . "' ) ORDER BY order_item_id;";
         $raw_items       = $wpdb->get_results( $get_items_sql );
 
@@ -1640,11 +1663,11 @@ abstract class WC_Abstract_Order {
         global $wpdb;
 
         if ( ! empty( $type ) ) {
-            $wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->get_order_id(), $type ) );
-            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->get_order_id(), $type ) );
+            $wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->get_id(), $type ) );
+            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->get_id(), $type ) );
         } else {
-            $wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $this->get_order_id() ) );
-            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $this->get_order_id() ) );
+            $wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $this->get_id() ) );
+            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $this->get_id() ) );
         }
     }
 
@@ -1678,7 +1701,7 @@ abstract class WC_Abstract_Order {
         $item = new WC_Order_Item_Product();
         $item_id = $this->update_product( $item, $product, $args );
 
-		do_action( 'woocommerce_order_add_product', $this->get_order_id(), $item->get_order_item_id(), $product, $qty, $args );
+		do_action( 'woocommerce_order_add_product', $this->get_id(), $item->get_order_item_id(), $product, $qty, $args );
 
 		return $item_id;
     }
@@ -1703,11 +1726,11 @@ abstract class WC_Abstract_Order {
             return false;
         }
 
-        if ( ! $this->get_order_id() ) {
+        if ( ! $this->get_id() ) {
             $this->save();
         }
 
-		$item->set_order_id( $this->get_order_id() );
+		$item->set_order_id( $this->get_id() );
 
         if ( ! $item->get_order_item_id() ) {
             $inserting = true;
@@ -1786,7 +1809,7 @@ abstract class WC_Abstract_Order {
         $item->save();
 
         if ( ! $inserting ) {
-            do_action( 'woocommerce_order_edit_product', $this->get_order_id(), $item->get_order_item_id(), $args, $product );
+            do_action( 'woocommerce_order_edit_product', $this->get_id(), $item->get_order_item_id(), $args, $product );
         }
 
         return $item->get_order_item_id();
@@ -1810,7 +1833,7 @@ abstract class WC_Abstract_Order {
         $item = new WC_Order_Item_Coupon();
         $item_id = $this->update_coupon( $item, $args );
 
-		do_action( 'woocommerce_order_add_coupon', $this->get_order_id(), $item->get_order_item_id(), $code, $discount_amount, $discount_amount_tax );
+		do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item->get_order_item_id(), $code, $discount_amount, $discount_amount_tax );
 
 		return $item_id;
     }
@@ -1831,11 +1854,11 @@ abstract class WC_Abstract_Order {
             return false;
         }
 
-        if ( ! $this->get_order_id() ) {
+        if ( ! $this->get_id() ) {
             $this->save();
         }
 
-		$item->set_order_id( $this->get_order_id() );
+		$item->set_order_id( $this->get_id() );
 
         if ( ! $item->get_order_item_id() ) {
             $inserting = true;
@@ -1856,7 +1879,7 @@ abstract class WC_Abstract_Order {
         $item->save();
 
         if ( ! $inserting ) {
-            do_action( 'woocommerce_order_update_coupon', $this->get_order_id(), $item->get_order_item_id(), $args );
+            do_action( 'woocommerce_order_update_coupon', $this->get_id(), $item->get_order_item_id(), $args );
         }
 
         return $item->get_order_item_id();
@@ -1881,7 +1904,7 @@ abstract class WC_Abstract_Order {
         $item = new WC_Order_Item_Shipping();
         $item_id = $this->update_shipping( $item, $args );
 
-		do_action( 'woocommerce_order_add_shipping', $this->get_order_id(), $item->get_order_item_id(), $shipping_rate );
+		do_action( 'woocommerce_order_add_shipping', $this->get_id(), $item->get_order_item_id(), $shipping_rate );
 
 		return $item_id;
     }
@@ -1905,11 +1928,11 @@ abstract class WC_Abstract_Order {
             return false;
         }
 
-        if ( ! $this->get_order_id() ) {
+        if ( ! $this->get_id() ) {
             $this->save();
         }
 
-		$item->set_order_id( $this->get_order_id() );
+		$item->set_order_id( $this->get_id() );
 
         if ( ! $item->get_order_item_id() ) {
             $inserting = true;
@@ -1949,7 +1972,7 @@ abstract class WC_Abstract_Order {
         $item->save();
 
         if ( ! $inserting ) {
-            do_action( 'woocommerce_order_update_shipping', $this->get_order_id(), $item->get_order_item_id(), $args );
+            do_action( 'woocommerce_order_update_shipping', $this->get_id(), $item->get_order_item_id(), $args );
         }
 
         return $item->get_order_item_id();
@@ -1974,7 +1997,7 @@ abstract class WC_Abstract_Order {
         $item = new WC_Order_Item_Fee();
         $item_id = $this->update_fee( $item, $args );
 
-        do_action( 'woocommerce_order_add_fee', $this->get_order_id(), $item->get_order_item_id(), $fee );
+        do_action( 'woocommerce_order_add_fee', $this->get_id(), $item->get_order_item_id(), $fee );
 
         return $item_id;
     }
@@ -1998,11 +2021,11 @@ abstract class WC_Abstract_Order {
             return false;
         }
 
-        if ( ! $this->get_order_id() ) {
+        if ( ! $this->get_id() ) {
             $this->save();
         }
 
-		$item->set_order_id( $this->get_order_id() );
+		$item->set_order_id( $this->get_id() );
 
         if ( ! $item->get_order_item_id() ) {
             $inserting = true;
@@ -2033,7 +2056,7 @@ abstract class WC_Abstract_Order {
         $item->save();
 
         if ( ! $inserting ) {
-            do_action( 'woocommerce_order_update_fee', $this->get_order_id(), $item->get_order_item_id(), $args );
+            do_action( 'woocommerce_order_update_fee', $this->get_id(), $item->get_order_item_id(), $args );
         }
 
         return $item->get_order_item_id();
@@ -2062,7 +2085,7 @@ abstract class WC_Abstract_Order {
         $item = new WC_Order_Item_Tax();
         $item_id = $this->update_tax( $item, $args );
 
-        do_action( 'woocommerce_order_add_tax', $this->get_order_id(), $item->get_order_item_id(), $tax_rate_id, $tax_amount, $shipping_tax_amount );
+        do_action( 'woocommerce_order_add_tax', $this->get_id(), $item->get_order_item_id(), $tax_rate_id, $tax_amount, $shipping_tax_amount );
 
         return $item_id;
     }
@@ -2085,11 +2108,11 @@ abstract class WC_Abstract_Order {
             return false;
         }
 
-        if ( ! $this->get_order_id() ) {
+        if ( ! $this->get_id() ) {
             $this->save();
         }
 
-		$item->set_order_id( $this->get_order_id() );
+		$item->set_order_id( $this->get_id() );
 
         if ( ! $item->get_order_item_id() ) {
             $inserting = true;
@@ -2124,7 +2147,7 @@ abstract class WC_Abstract_Order {
         $item->save();
 
         if ( ! $inserting ) {
-            do_action( 'woocommerce_order_update_tax', $this->get_order_id(), $item->get_order_item_id(), $args );
+            do_action( 'woocommerce_order_update_tax', $this->get_id(), $item->get_order_item_id(), $args );
         }
 
         return $item->get_order_item_id();
@@ -2825,7 +2848,7 @@ abstract class WC_Abstract_Order {
     public function __isset( $key ) {
         // Legacy properties which could be accessed directly in the past.
         $legacy_props = array( 'completed_date', 'id', 'order_type', 'post', 'status', 'post_status', 'customer_note', 'customer_message', 'user_id', 'customer_user', 'prices_include_tax', 'tax_display_cart', 'display_totals_ex_tax', 'display_cart_ex_tax', 'order_date', 'modified_date', 'cart_discount', 'cart_discount_tax', 'order_shipping', 'order_shipping_tax', 'order_total', 'order_tax', 'billing_first_name', 'billing_last_name', 'billing_company', 'billing_address_1', 'billing_address_2', 'billing_city', 'billing_state', 'billing_postcode', 'billing_country', 'billing_phone', 'billing_email', 'shipping_first_name', 'shipping_last_name', 'shipping_company', 'shipping_address_1', 'shipping_address_2', 'shipping_city', 'shipping_state', 'shipping_postcode', 'shipping_country', 'customer_ip_address', 'customer_user_agent', 'payment_method_title', 'payment_method', 'order_currency' );
-        return $this->get_order_id() ? ( in_array( $key, $legacy_props ) || metadata_exists( 'post', $this->get_order_id(), '_' . $key ) ) : false;
+        return $this->get_id() ? ( in_array( $key, $legacy_props ) || metadata_exists( 'post', $this->get_id(), '_' . $key ) ) : false;
     }
 
     /**
@@ -2851,10 +2874,10 @@ abstract class WC_Abstract_Order {
             return $this->get_date_created();
         } elseif ( 'id' === $key ) {
             _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
-            return $this->get_order_id();
+            return $this->get_id();
 		} elseif ( 'post' === $key ) {
             _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
-            return get_post( $this->get_order_id() );
+            return get_post( $this->get_id() );
 		} elseif ( 'status' === $key || 'post_status' === $key ) {
             _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_status();
@@ -2899,7 +2922,7 @@ abstract class WC_Abstract_Order {
          */
         } else {
             _doing_it_wrong( $key, 'Meta should not be accessed directly. Use WC_Order::get_order_meta( $key )', '2.6' );
-			$value = get_post_meta( $this->get_order_id(), '_' . $key, true );
+			$value = get_post_meta( $this->get_id(), '_' . $key, true );
 		}
 
         return $value;
@@ -2953,7 +2976,7 @@ abstract class WC_Abstract_Order {
         if ( is_numeric( $order ) ) {
             $this->read( $order );
         } elseif ( $order instanceof WC_Order ) {
-            $this->read( absint( $order->get_order_id() ) );
+            $this->read( absint( $order->get_id() ) );
         } elseif ( isset( $order->ID ) ) {
             $this->read( absint( $order->ID ) );
         }
@@ -3004,7 +3027,7 @@ abstract class WC_Abstract_Order {
      */
     public function record_product_sales() {
 		_deprecated_function( 'record_product_sales', '2.6', 'wc_update_total_sales_counts' );
-		wc_update_total_sales_counts( $this->get_order_id() );
+		wc_update_total_sales_counts( $this->get_id() );
     }
 
 	/**
@@ -3013,7 +3036,7 @@ abstract class WC_Abstract_Order {
      */
     public function increase_coupon_usage_counts() {
 		_deprecated_function( 'increase_coupon_usage_counts', '2.6', 'wc_update_coupon_usage_counts' );
-		wc_update_coupon_usage_counts( $this->get_order_id() );
+		wc_update_coupon_usage_counts( $this->get_id() );
     }
 
     /**
@@ -3022,7 +3045,7 @@ abstract class WC_Abstract_Order {
      */
     public function decrease_coupon_usage_counts() {
 		_deprecated_function( 'decrease_coupon_usage_counts', '2.6', 'wc_update_coupon_usage_counts' );
-		wc_update_coupon_usage_counts( $this->get_order_id() );
+		wc_update_coupon_usage_counts( $this->get_id() );
     }
 
 	/**
@@ -3031,7 +3054,7 @@ abstract class WC_Abstract_Order {
      */
     public function reduce_order_stock() {
         _deprecated_function( 'reduce_order_stock', '2.6', 'wc_reduce_stock_levels' );
-		wc_reduce_stock_levels( $this->get_order_id() );
+		wc_reduce_stock_levels( $this->get_id() );
     }
 
 	/**

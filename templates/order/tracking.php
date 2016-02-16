@@ -50,4 +50,4 @@ if ( $notes ) : ?>
 	</ol>
 <?php endif; ?>
 
-<?php do_action( 'woocommerce_view_order', $order->get_order_id() ); ?>
+<?php do_action( 'woocommerce_view_order', $order->get_id() ); ?>
