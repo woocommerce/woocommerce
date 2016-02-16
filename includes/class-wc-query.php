@@ -60,16 +60,19 @@ class WC_Query {
 	 * Init query vars by loading options.
 	 */
 	public function init_query_vars() {
-		// Query vars to add to WP
+		// Query vars to add to WP.
 		$this->query_vars = array(
-			// Checkout actions
+			// Checkout actions.
 			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
 			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
 
-			// My account actions
+			// My account actions.
+			'orders'             => get_option( 'woocommerce_myaccount_orders_endpoint', 'orders' ),
 			'view-order'         => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
+			'downloads'          => get_option( 'woocommerce_myaccount_downloads_endpoint', 'downloads' ),
 			'edit-account'       => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
 			'edit-address'       => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
+			'payment-methods'    => get_option( 'woocommerce_myaccount_payment_methods_endpoint', 'payment-methods' ),
 			'lost-password'      => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
 			'customer-logout'    => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
 			'add-payment-method' => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
@@ -91,15 +94,28 @@ class WC_Query {
 			case 'order-received' :
 				$title = __( 'Order Received', 'woocommerce' );
 			break;
+			case 'orders' :
+				if ( ! empty( $wp->query_vars['orders'] ) ) {
+					$title = sprintf( __( 'Orders (page %d)', 'woocommerce' ), intval( $wp->query_vars['orders'] ) );
+				} else {
+					$title = __( 'Orders', 'woocommerce' );
+				}
+			break;
 			case 'view-order' :
 				$order = wc_get_order( $wp->query_vars['view-order'] );
 				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
+			break;
+			case 'downloads' :
+				$title = __( 'Downloads', 'woocommerce' );
 			break;
 			case 'edit-account' :
 				$title = __( 'Edit Account Details', 'woocommerce' );
 			break;
 			case 'edit-address' :
 				$title = __( 'Edit Address', 'woocommerce' );
+			break;
+			case 'payment-methods' :
+				$title = __( 'Payment Methods', 'woocommerce' );
 			break;
 			case 'add-payment-method' :
 				$title = __( 'Add Payment Method', 'woocommerce' );
@@ -108,9 +124,10 @@ class WC_Query {
 				$title = __( 'Lost Password', 'woocommerce' );
 			break;
 			default :
-				$title = '';
+				$title = apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', '' );
 			break;
 		}
+
 		return $title;
 	}
 

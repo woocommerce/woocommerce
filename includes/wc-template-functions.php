@@ -2023,5 +2023,84 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 
 		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html, $args );
 	}
+}
 
+if ( ! function_exists( 'woocommerce_account_orders' ) ) {
+
+	/**
+	 * My Account > Orders template.
+	 *
+	 * @param int $current_page Current page number.
+	 */
+	function woocommerce_account_orders( $current_page ) {
+		$current_page = empty( $current_page ) ? 1 : $current_page;
+
+		wc_get_template( 'myaccount/orders.php', array( 'current_page' => absint( $current_page ) ) );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_view_order' ) ) {
+
+	/**
+	 * My Account > View order template.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	function woocommerce_account_view_order( $order_id ) {
+		WC_Shortcode_My_Account::view_order( absint( $order_id ) );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_downloads' ) ) {
+
+	/**
+	 * My Account > Downloads template.
+	 */
+	function woocommerce_account_downloads() {
+		wc_get_template( 'myaccount/downloads.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
+
+	/**
+	 * My Account > Edit address template.
+	 *
+	 * @param string $type Address type.
+	 */
+	function woocommerce_account_edit_address( $type ) {
+		$type = wc_edit_address_i18n( sanitize_title( $type ), true );
+
+		WC_Shortcode_My_Account::edit_address( $type );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_payment_methods' ) ) {
+
+	/**
+	 * My Account > Downloads template.
+	 */
+	function woocommerce_account_payment_methods() {
+		wc_get_template( 'myaccount/payment-methods.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_add_payment_method' ) ) {
+
+	/**
+	 * My Account > Add payment method template.
+	 */
+	function woocommerce_account_add_payment_method() {
+		WC_Shortcode_My_Account::add_payment_method();
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
+
+	/**
+	 * My Account > Edit account template.
+	 */
+	function woocommerce_account_edit_account() {
+		WC_Shortcode_My_Account::edit_account();
+	}
 }

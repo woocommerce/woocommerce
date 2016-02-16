@@ -1552,6 +1552,20 @@ p.demo_store {
  * Account page
  */
 .woocommerce-account {
+	.woocommerce {
+		@include clearfix();
+	}
+
+	.my-account-navigation {
+		float: left;
+		width: 30%;
+	}
+
+	.my-account-content {
+		float: right;
+		width: 68%;
+	}
+
 	.addresses {
 		.title {
 			@include clearfix();
@@ -1923,7 +1937,7 @@ p.demo_store {
 }
 
 /**
- *  Password strength meter
+ * Password strength meter
  */
 .woocommerce-password-strength {
 	text-align: center;
