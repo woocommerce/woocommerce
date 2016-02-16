@@ -48,17 +48,7 @@ wc_print_notices(); ?>
 					<?php foreach ( wc_get_account_payment_methods_columns() as $column_id => $column_name ) : ?>
 						<td class="payment-method-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
 							<?php
-								if ( has_action( 'woocommerce_account_payment_methods_column_' . $column_id ) ) {
-									do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
-								} else if ( 'method' === $column_id ) {
-									echo esc_html( $method['method'] );
-								} else if ( 'expires' === $column_id ) {
-									echo esc_html( $method['expires'] );
-								} else if ( 'actions' === $column_id ) {
-									foreach ( $method['actions'] as $key => $action ) {
-										echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';
-									}
-								}
+								// @TODO
 							?>
 						</td>
 					<?php endforeach; ?>
