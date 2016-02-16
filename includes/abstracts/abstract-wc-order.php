@@ -15,8 +15,6 @@ include_once( 'abstract-wc-legacy-order.php' );
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
- *
- * @todo check date formats are bw compat and consistant
  */
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_Data {
 
@@ -1138,14 +1136,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     }
 
     /**
-     * Set the payment method ID.
+     * Set the payment method.
      * @since 2.2.0
      * @param string $value Supports WC_Payment_Gateway for bw compatibility with < 2.6
      */
     public function set_payment_method( $value ) {
         if ( is_object( $value ) ) {
-            update_post_meta( $this->get_id(), '_payment_method', $value->id );
-            update_post_meta( $this->get_id(), '_payment_method_title', $value->get_title() );
             $this->set_payment_method( $value->id );
             $this->set_payment_method_title( $value->get_title() );
         } else {
@@ -1231,69 +1227,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      */
     public function set_date_paid( $timestamp ) {
         $this->_meta['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
-    }
-
-    /**
-     * Set the customer address.
-     * @since 2.2.0
-     * @param array $address Address data.
-     * @param string $type billing or shipping.
-     */
-    public function set_address( $address, $type = 'billing' ) {
-        foreach ( $address as $key => $value ) {
-            update_post_meta( $this->get_id(), "_{$type}_" . $key, $value );
-            if ( method_exists( $this, "set_{$type}_{$key}" ) ) {
-                $this->{"set_{$type}_{$key}"}( $value );
-            }
-        }
-    }
-
-    /**
-     * Set an order total.
-     * @since 2.2.0
-     * @param float $amount
-     * @param string $total_type
-     * @return bool
-     */
-    public function set_total( $amount, $total_type = 'total' ) {
-        if ( ! in_array( $total_type, array( 'shipping', 'tax', 'shipping_tax', 'total', 'cart_discount', 'cart_discount_tax' ) ) ) {
-            return false;
-        }
-
-        switch ( $total_type ) {
-            case 'total' :
-                $amount = wc_format_decimal( $amount, wc_get_price_decimals() );
-                $this->set_order_total( $amount );
-                update_post_meta( $this->get_id(), '_order_total', $amount );
-                break;
-            case 'cart_discount' :
-                $amount = wc_format_decimal( $amount );
-                $this->set_discount_total( $amount );
-                update_post_meta( $this->get_id(), '_cart_discount', $amount );
-                break;
-            case 'cart_discount_tax' :
-                $amount = wc_format_decimal( $amount );
-                $this->set_discount_tax( $amount );
-                update_post_meta( $this->get_id(), '_cart_discount_tax', $amount );
-                break;
-            case 'shipping' :
-                $amount = wc_format_decimal( $amount );
-                $this->set_shipping_total( $amount );
-                update_post_meta( $this->get_id(), '_order_shipping', $amount );
-                break;
-            case 'shipping_tax' :
-                $amount = wc_format_decimal( $amount );
-                $this->set_shipping_tax( $amount );
-                update_post_meta( $this->get_id(), '_order_shipping_tax', $amount );
-                break;
-            case 'tax' :
-                $amount = wc_format_decimal( $amount );
-                $this->set_cart_tax( $amount );
-                update_post_meta( $this->get_id(), '_order_tax', $amount );
-                break;
-        }
-
-        return true;
     }
 
     /*
@@ -1489,16 +1422,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         update_post_meta( $order_id, '_shipping_state', $this->get_shipping_state() );
         update_post_meta( $order_id, '_shipping_postcode', $this->get_shipping_postcode() );
         update_post_meta( $order_id, '_shipping_country', $this->get_shipping_country() );
-
-		update_post_meta( $order_id, '_payment_method', $this->get_payment_method() );
-        update_post_meta( $order_id, '_payment_method_title', $this->get_payment_method_title() );
-        update_post_meta( $order_id, '_transaction_id', $this->get_transaction_id() );
-        update_post_meta( $order_id, '_customer_user', $this->get_customer_id() );
-        update_post_meta( $order_id, '_customer_ip_address', $this->get_customer_ip_address() );
-        update_post_meta( $order_id, '_customer_user_agent', $this->get_customer_user_agent() );
-        update_post_meta( $order_id, '_created_via', $this->get_created_via() );
-        update_post_meta( $order_id, '_order_version', $this->get_order_version() );
-        update_post_meta( $order_id, '_prices_include_tax', $this->get_prices_include_tax() );
         update_post_meta( $order_id, '_order_currency', $this->get_order_currency() );
         update_post_meta( $order_id, '_order_key', $this->get_order_key() );
         update_post_meta( $order_id, '_cart_discount', $this->get_discount_total() );
@@ -1507,6 +1430,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         update_post_meta( $order_id, '_order_shipping_tax', $this->get_shipping_tax() );
         update_post_meta( $order_id, '_order_tax', $this->get_cart_tax() );
         update_post_meta( $order_id, '_order_total', $this->get_order_total() );
+
+		foreach ( $this->get_meta() as $key => $value ) {
+			update_post_meta( $order_id, '_' . $key, $value );
+		}
 
         if ( $this->_status_transition ) {
             if ( ! empty( $this->_status_transition['original'] ) ) {
@@ -1531,7 +1458,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     /**
      * Delete data from the database.
      * @since 2.6.0
-     * @access protected
      */
     public function delete() {
         wp_delete_post( $this->get_id() );

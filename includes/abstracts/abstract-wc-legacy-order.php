@@ -18,6 +18,69 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Legacy_Order {
 
     /**
+     * Set the customer address.
+     * @since 2.2.0
+     * @param array $address Address data.
+     * @param string $type billing or shipping.
+     */
+    public function set_address( $address, $type = 'billing' ) {
+        foreach ( $address as $key => $value ) {
+            update_post_meta( $this->get_id(), "_{$type}_" . $key, $value );
+            if ( is_callable( array( $this, "set_{$type}_{$key}" ) ) ) {
+                $this->{"set_{$type}_{$key}"}( $value );
+            }
+        }
+    }
+
+    /**
+     * Set an order total.
+     * @since 2.2.0
+     * @param float $amount
+     * @param string $total_type
+     * @return bool
+     */
+    public function set_total( $amount, $total_type = 'total' ) {
+        if ( ! in_array( $total_type, array( 'shipping', 'tax', 'shipping_tax', 'total', 'cart_discount', 'cart_discount_tax' ) ) ) {
+            return false;
+        }
+
+        switch ( $total_type ) {
+            case 'total' :
+                $amount = wc_format_decimal( $amount, wc_get_price_decimals() );
+                $this->set_order_total( $amount );
+                update_post_meta( $this->get_id(), '_order_total', $amount );
+                break;
+            case 'cart_discount' :
+                $amount = wc_format_decimal( $amount );
+                $this->set_discount_total( $amount );
+                update_post_meta( $this->get_id(), '_cart_discount', $amount );
+                break;
+            case 'cart_discount_tax' :
+                $amount = wc_format_decimal( $amount );
+                $this->set_discount_tax( $amount );
+                update_post_meta( $this->get_id(), '_cart_discount_tax', $amount );
+                break;
+            case 'shipping' :
+                $amount = wc_format_decimal( $amount );
+                $this->set_shipping_total( $amount );
+                update_post_meta( $this->get_id(), '_order_shipping', $amount );
+                break;
+            case 'shipping_tax' :
+                $amount = wc_format_decimal( $amount );
+                $this->set_shipping_tax( $amount );
+                update_post_meta( $this->get_id(), '_order_shipping_tax', $amount );
+                break;
+            case 'tax' :
+                $amount = wc_format_decimal( $amount );
+                $this->set_cart_tax( $amount );
+                update_post_meta( $this->get_id(), '_order_tax', $amount );
+                break;
+        }
+
+        return true;
+    }
+
+    /**
      * Magic __isset method for backwards compatibility.
      * @param string $key
      * @return bool
