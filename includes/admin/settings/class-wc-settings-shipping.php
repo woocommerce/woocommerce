@@ -180,7 +180,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	/**
 	 * Handles output of the shipping zones page in admin.
 	 */
-	private function output_zones_screen() {
+	protected function output_zones_screen() {
 		if ( isset( $_REQUEST['zone_id'] ) ) {
 			$this->zone_methods_screen( absint( $_REQUEST['zone_id'] ) );
 		} elseif ( isset( $_REQUEST['instance_id'] ) ) {
@@ -194,7 +194,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Show method for a zone
 	 * @param  int $zone_id
 	 */
-	private function zone_methods_screen( $zone_id ) {
+	protected function zone_methods_screen( $zone_id ) {
 		$wc_shipping      = WC_Shipping      ::instance();
 		$zone             = WC_Shipping_Zones::get_zone( $zone_id );
 		$shipping_methods = $wc_shipping ->get_shipping_methods();
@@ -222,7 +222,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	/**
 	 * Show zones
 	 */
-	private function zones_screen() {
+	protected function zones_screen() {
 		$allowed_countries = WC()->countries->get_allowed_countries();
         $continents        = WC()->countries->get_continents();
 
@@ -250,7 +250,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Show instance settings
 	 * @param  int $instance_id
 	 */
-	private function instance_settings_screen( $instance_id ) {
+	protected function instance_settings_screen( $instance_id ) {
 		$zone            = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
 		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 
@@ -280,7 +280,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	/**
 	 * Handles output of the shipping class settings screen.
 	 */
-	private function output_shipping_class_screen() {
+	protected function output_shipping_class_screen() {
 		$wc_shipping = WC_Shipping::instance();
 		wp_localize_script( 'wc-shipping-classes', 'shippingClassesLocalizeScript', array(
             'classes'         => $wc_shipping->get_shipping_classes(),
