@@ -5,7 +5,7 @@
 	function simplifyFormHandler() {
 		var $form = $( 'form.checkout, form#order_review' );
 
-		if ( $( '#payment_method_simplify_commerce' ).is( ':checked' ) ) {
+		if ( $( '#payment_method_simplify_commerce' ).is( ':checked' ) && $( '#wc-simplify_commerce-new' ).is( ':checked' ) ) {
 
 			if ( 0 === $( 'input.simplify-token' ).length ) {
 
@@ -55,8 +55,9 @@
 
 	// Handle Simplify response
 	function simplifyResponseHandler( data ) {
+
 		var $form  = $( 'form.checkout, form#order_review' ),
-			ccForm = $( '#simplify_commerce-cc-form' );
+			ccForm = $( '#wc-simplify_commerce-cc-form' );
 
 		if ( data.error ) {
 
@@ -102,7 +103,7 @@
 		});
 
 		/* Both Forms */
-		$( 'form.checkout, form#order_review' ).on( 'change', '#simplify_commerce-cc-form input', function() {
+		$( 'form.checkout, form#order_review' ).on( 'change', '#wc-simplify_commerce-cc-form input', function() {
 			$( '.simplify-token' ).remove();
 		});
 
