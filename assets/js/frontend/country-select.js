@@ -82,9 +82,14 @@ jQuery( function( $ ) {
 		states = $.parseJSON( states_json );
 
 	$( document.body ).on( 'change', 'select.country_to_state, input.country_to_state', function() {
+		// Grab wrapping element to target only stateboxes in same 'group'
+		var $wrapper    = $( this ).closest('.woocommerce-billing-fields, .woocommerce-shipping-fields, .woocommerce-shipping-calculator');
+
+		if ( ! $wrapper.size() ) {
+			$wrapper = $( this ).closest('.form-row').parent();
+		}
 
 		var country     = $( this ).val(),
-			$wrapper    = $( this ).closest('.form-row').parent(), // Grab wrapping form-row parent to target stateboxes in same 'group'
 			$statebox   = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' ),
 			$parent     = $statebox.parent(),
 			input_name  = $statebox.attr( 'name' ),

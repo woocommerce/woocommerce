@@ -118,7 +118,7 @@ class WC_Admin_Menus {
 			break;
 			case 'product' :
 				$screen = get_current_screen();
-				if ( taxonomy_is_product_attribute( $screen->taxonomy ) ) {
+				if ( $screen && taxonomy_is_product_attribute( $screen->taxonomy ) ) {
 					$submenu_file = 'product_attributes';
 					$parent_file  = 'edit.php?post_type=product';
 				}
@@ -173,7 +173,7 @@ class WC_Admin_Menus {
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
 				unset( $menu_order[ $woocommerce_separator ] );
 				unset( $menu_order[ $woocommerce_product ] );
-			} elseif ( !in_array( $item, array( 'separator-woocommerce' ) ) ) {
+			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 

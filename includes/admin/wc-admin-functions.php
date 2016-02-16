@@ -23,6 +23,7 @@ function wc_get_screen_ids() {
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
 		$wc_screen_id . '_page_wc-reports',
+		$wc_screen_id . '_page_wc-shipping',
 		$wc_screen_id . '_page_wc-settings',
 		$wc_screen_id . '_page_wc-status',
 		$wc_screen_id . '_page_wc-addons',
@@ -34,7 +35,6 @@ function wc_get_screen_ids() {
 		'shop_coupon',
 		'edit-product_cat',
 		'edit-product_tag',
-		'edit-product_shipping_class',
 		'profile',
 		'user-edit'
 	);

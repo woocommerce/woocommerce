@@ -25,16 +25,40 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $order_button_text;
 
 	/**
-	 * Payment method title.
+	 * yes or no based on whether the method is enabled.
+	 * @var string
+	 */
+	public $enabled = 'yes';
+
+	/**
+	 * Payment method title for the frontend.
 	 * @var string
 	 */
 	public $title;
+
+	/**
+	 * Payment method description for the frontend.
+	 * @var string
+	 */
+	public $description;
 
 	/**
 	 * Chosen payment method id.
 	 * @var bool
 	 */
 	public $chosen;
+
+	/**
+	 * Gateway title.
+	 * @var string
+	 */
+	public $method_title = '';
+
+	/**
+	 * Gateway description.
+	 * @var string
+	 */
+	public $method_description = '';
 
 	/**
 	 * True if the gateway shows fields on the checkout.
@@ -61,12 +85,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $icon;
 
 	/**
-	 * Description for the gateway.
-	 * @var string
-	 */
-	public $description;
-
-	/**
 	 * Supported features such as 'default_credit_card_form', 'refunds'.
 	 * @var array
 	 */
@@ -85,13 +103,45 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $view_transaction_url = '';
 
 	/**
+	 * Return the title for admin screens.
+	 * @return string
+	 */
+	public function get_method_title() {
+		return apply_filters( 'woocommerce_gateway_method_title', $this->method_title, $this );
+	}
+
+	/**
+	 * Return the description for admin screens.
+	 * @return string
+	 */
+	public function get_method_description() {
+		return apply_filters( 'woocommerce_gateway_method_description', $this->method_description, $this );
+	}
+
+	/**
+	 * Output the gateway settings screen.
+	 */
+	public function admin_options() {
+		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
+		echo wp_kses_post( wpautop( $this->get_method_description() ) );
+		parent::admin_options();
+	}
+
+	/**
+	 * Init settings for gateways.
+	 */
+	public function init_settings() {
+		parent::init_settings();
+		$this->enabled  = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
+	}
+
+	/**
 	 * Get the return url (thank you page).
 	 *
 	 * @param WC_Order $order
 	 * @return string
 	 */
 	public function get_return_url( $order = null ) {
-
 		if ( $order ) {
 			$return_url = $order->get_checkout_order_received_url();
 		} else {
@@ -152,8 +202,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_available() {
-
-		$is_available = ( 'yes' === $this->enabled ) ? true : false;
+		$is_available = ( 'yes' === $this->enabled );
 
 		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
 			$is_available = false;

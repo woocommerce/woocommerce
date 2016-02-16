@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class    WC_Integration
  * @extends  WC_Settings_API
- * @version  2.0.0
+ * @version  2.6.0
  * @package  WooCommerce/Abstracts
  * @category Abstract Class
  * @author   WooThemes
@@ -19,24 +19,54 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Integration extends WC_Settings_API {
 
 	/**
-	 * Admin Options.
-	 *
-	 * Setup the gateway settings screen.
-	 * Override this in your gateway.
+	 * yes or no based on whether the integration is enabled.
+	 * @var string
 	 */
-	public function admin_options() { ?>
+	public $enabled = 'yes';
 
-		<h3><?php echo isset( $this->method_title ) ? $this->method_title : __( 'Settings', 'woocommerce' ) ; ?></h3>
+	/**
+	 * Integration title.
+	 * @var string
+	 */
+	public $method_title = '';
 
-		<?php echo isset( $this->method_description ) ? wpautop( $this->method_description ) : ''; ?>
+	/**
+	 * Integration description.
+	 * @var string
+	 */
+	public $method_description = '';
 
-		<table class="form-table">
-			<?php $this->generate_settings_html(); ?>
-		</table>
+	/**
+	 * Return the title for admin screens.
+	 * @return string
+	 */
+	public function get_method_title() {
+		return apply_filters( 'woocommerce_integration_title', $this->method_title, $this );
+	}
 
-		<!-- Section -->
-		<div><input type="hidden" name="section" value="<?php echo $this->id; ?>" /></div>
+	/**
+	 * Return the description for admin screens.
+	 * @return string
+	 */
+	public function get_method_description() {
+		return apply_filters( 'woocommerce_integration_description', $this->method_description, $this );
+	}
 
-		<?php
+	/**
+	 * Output the gateway settings screen.
+	 */
+	public function admin_options() {
+		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
+		echo wp_kses_post( wpautop( $this->get_method_description() ) );
+		echo '<div><input type="hidden" name="section" value="' . esc_attr( $this->id ) . '" /></div>';
+		parent::admin_options();
+	}
+
+	/**
+	 * Init settings for gateways.
+	 */
+	public function init_settings() {
+		parent::init_settings();
+		$this->enabled  = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
 	}
 }

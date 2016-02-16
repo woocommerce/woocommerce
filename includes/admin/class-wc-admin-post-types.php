@@ -222,7 +222,7 @@ class WC_Admin_Post_Types {
 			$columns['sku'] = __( 'SKU', 'woocommerce' );
 		}
 
-		if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			$columns['is_in_stock'] = __( 'Stock', 'woocommerce' );
 		}
 
@@ -395,19 +395,18 @@ class WC_Admin_Post_Types {
 				echo '</a>';
 				break;
 			case 'is_in_stock' :
-
 				if ( $the_product->is_in_stock() ) {
 					echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 				} else {
 					echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
 
-				if ( $the_product->managing_stock() ) {
-					echo ' &times; ' . $the_product->get_total_stock();
+				// If the product has children, a single stock level would be misleading as some could be -ve and some +ve, some managed/some unmanaged etc so hide stock level in this case.
+				if ( $the_product->managing_stock() && ! sizeof( $the_product->get_children() ) ) {
+					echo ' (' . $the_product->get_total_stock() . ')';
 				}
 
 				break;
-
 			default :
 				break;
 		}
@@ -418,7 +417,7 @@ class WC_Admin_Post_Types {
 	 * Since WordPress 4.3 we don't have to build the row actions.
 	 *
 	 * @param WP_Post $post
-	 * @param string $title
+	 * @param string  $title
 	 */
 	private function _render_product_row_actions( $post, $title ) {
 		global $wp_version;
@@ -551,7 +550,7 @@ class WC_Admin_Post_Types {
 	 * Since WordPress 4.3 we don't have to build the row actions.
 	 *
 	 * @param WP_Post $post
-	 * @param string $title
+	 * @param string  $title
 	 */
 	private function _render_shop_coupon_row_actions( $post, $title ) {
 		global $wp_version;
@@ -599,7 +598,7 @@ class WC_Admin_Post_Types {
 
 	/**
 	 * Output custom columns for coupons.
-	 * @param  string $column
+	 * @param string $column
 	 */
 	public function render_shop_order_columns( $column ) {
 		global $post, $woocommerce, $the_order;
@@ -706,7 +705,7 @@ class WC_Admin_Post_Types {
 
 					$latest_note = current( $latest_notes );
 
-					if ( $post->comment_count == 1 ) {
+					if ( isset( $latest_note->comment_content ) && $post->comment_count == 1 ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 					} elseif ( isset( $latest_note->comment_content ) ) {
 						echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $latest_note->comment_content . '<br/><small style="display:block">' . sprintf( _n( 'plus %d other note', 'plus %d other notes', ( $post->comment_count - 1 ), 'woocommerce' ), $post->comment_count - 1 ) . '</small>' ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
@@ -808,7 +807,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Make columns sortable - https://gist.github.com/906872.
 	 *
-	 * @param array $columns
+	 * @param  array $columns
 	 * @return array
 	 */
 	public function product_sortable_columns( $columns ) {
@@ -824,7 +823,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Make columns sortable - https://gist.github.com/906872.
 	 *
-	 * @param array $columns
+	 * @param  array $columns
 	 * @return array
 	 */
 	public function shop_coupon_sortable_columns( $columns ) {
@@ -834,7 +833,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Make columns sortable - https://gist.github.com/906872.
 	 *
-	 * @param array $columns
+	 * @param  array $columns
 	 * @return array
 	 */
 	public function shop_order_sortable_columns( $columns ) {
@@ -902,11 +901,7 @@ class WC_Admin_Post_Types {
 			return array_merge( array( 'id' => 'ID: ' . $post->ID ), $actions );
 		}
 
-		if ( 'shop_order' === $post->post_type ) {
-			return array();
-		}
-
-		if ( 'shop_coupon' === $post->post_type ) {
+		if ( in_array( $post->post_type, array( 'shop_order', 'shop_coupon' ) ) ) {
 			if ( isset( $actions['inline hide-if-no-js'] ) ) {
 				unset( $actions['inline hide-if-no-js'] );
 			}
@@ -920,13 +915,13 @@ class WC_Admin_Post_Types {
 	 *
 	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/).
 	 *
-	 * @param array $views
+	 * @param  array $views
 	 * @return array
 	 */
 	public function product_sorting_link( $views ) {
 		global $post_type, $wp_query;
 
-		if ( ! current_user_can('edit_others_pages') ) {
+		if ( ! current_user_can( 'edit_others_pages' ) ) {
 			return $views;
 		}
 
@@ -1982,8 +1977,8 @@ class WC_Admin_Post_Types {
 				$user_id = get_post_meta( $id, '_customer_user', true );
 
 				if ( $user_id > 0 ) {
-					update_user_meta( $user_id, '_order_count', '' );
-					update_user_meta( $user_id, '_money_spent', '' );
+					delete_user_meta( $user_id, '_money_spent' );
+					delete_user_meta( $user_id, '_order_count' );
 				}
 
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
@@ -2017,8 +2012,8 @@ class WC_Admin_Post_Types {
 				$user_id = get_post_meta( $id, '_customer_user', true );
 
 				if ( $user_id > 0 ) {
-					update_user_meta( $user_id, '_order_count', '' );
-					update_user_meta( $user_id, '_money_spent', '' );
+					delete_user_meta( $user_id, '_money_spent' );
+					delete_user_meta( $user_id, '_order_count' );
 				}
 
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
@@ -2287,7 +2282,7 @@ class WC_Admin_Post_Types {
 	public function disable_dfw_feature_pointer() {
 		$screen = get_current_screen();
 
-		if ( 'product' === $screen->id && 'post' === $screen->base ) {
+		if ( $screen && 'product' === $screen->id && 'post' === $screen->base ) {
 			remove_action( 'admin_print_footer_scripts', array( 'WP_Internal_Pointers', 'pointer_wp410_dfw' ) );
 		}
 	}

@@ -673,7 +673,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
-				$parent = get_term_by( 'term_taxonomy_id', $data['parent'], 'product_cat' );
+				$parent = get_term_by( 'id', $data['parent'], 'product_cat' );
 				if ( ! $parent ) {
 					throw new WC_API_Exception( 'woocommerce_api_invalid_product_category_parent', __( 'Product category parent is invalid', 'woocommerce' ), 400 );
 				}
@@ -685,7 +685,7 @@ class WC_API_Products extends WC_API_Resource {
 			if ( is_numeric( $image ) ) {
 				$image_id = absint( $image );
 			} else if ( ! empty( $image ) ) {
-				$upload   = $this->upload_product_image( esc_url_raw( $image ) );
+				$upload   = $this->upload_product_category_image( esc_url_raw( $image ) );
 				$image_id = $this->set_product_category_image_as_attachment( $upload );
 			}
 
@@ -694,18 +694,20 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_category', $insert->get_error_message(), 400 );
 			}
 
-			update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'display_type', esc_attr( $data['display'] ) );
+			$id = $insert['term_id'];
+
+			update_woocommerce_term_meta( $id, 'display_type', esc_attr( $data['display'] ) );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-				update_woocommerce_term_meta( $insert['term_taxonomy_id'], 'thumbnail_id', $image_id );
+				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
-			do_action( 'woocommerce_api_create_product_category', $insert['term_taxonomy_id'], $data );
+			do_action( 'woocommerce_api_create_product_category', $id, $data );
 
 			$this->server->send_status( 201 );
 
-			return $this->get_product_category( $insert['term_taxonomy_id'] );
+			return $this->get_product_category( $id );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -751,7 +753,7 @@ class WC_API_Products extends WC_API_Resource {
 				if ( is_numeric( $image ) ) {
 					$image_id = absint( $image );
 				} else if ( ! empty( $image ) ) {
-					$upload   = $this->upload_product_image( esc_url_raw( $image ) );
+					$upload   = $this->upload_product_category_image( esc_url_raw( $image ) );
 					$image_id = $this->set_product_category_image_as_attachment( $upload );
 				}
 
@@ -767,11 +769,11 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( ! empty( $data['display'] ) ) {
-				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'display_type', sanitize_text_field( $data['display'] ) );
+				update_woocommerce_term_meta( $id, 'display_type', sanitize_text_field( $data['display'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
-				update_woocommerce_term_meta( $update['term_taxonomy_id'], 'thumbnail_id', $image_id );
+				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
 			do_action( 'woocommerce_api_edit_product_category', $id, $data );
@@ -920,12 +922,13 @@ class WC_API_Products extends WC_API_Resource {
 			if ( is_wp_error( $insert ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_tag', $insert->get_error_message(), 400 );
 			}
+			$id = $insert['term_id'];
 
-			do_action( 'woocommerce_api_create_product_tag', $insert['term_taxonomy_id'], $data );
+			do_action( 'woocommerce_api_create_product_tag', $id, $data );
 
 			$this->server->send_status( 201 );
 
-			return $this->get_product_tag( $insert['term_taxonomy_id'] );
+			return $this->get_product_tag( $id );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1134,7 +1137,7 @@ class WC_API_Products extends WC_API_Resource {
 			'related_ids'        => array_map( 'absint', array_values( $product->get_related() ) ),
 			'upsell_ids'         => array_map( 'absint', $product->get_upsells() ),
 			'cross_sell_ids'     => array_map( 'absint', $product->get_cross_sells() ),
-			'parent_id'          => $product->post->post_parent,
+			'parent_id'          => $product->is_type( 'variation' ) ? $product->parent->id : $product->post->post_parent,
 			'categories'         => wp_get_post_terms( $product->id, 'product_cat', array( 'fields' => 'names' ) ),
 			'tags'               => wp_get_post_terms( $product->id, 'product_tag', array( 'fields' => 'names' ) ),
 			'images'             => $this->get_images( $product ),
@@ -1149,8 +1152,26 @@ class WC_API_Products extends WC_API_Resource {
 			'variations'         => array(),
 			'parent'             => array(),
 			'grouped_products'   => array(),
-			'menu_order'         => $product->post->menu_order,
+			'menu_order'         => $this->get_product_menu_order( $product ),
 		);
+	}
+
+	/**
+	 * Get product menu order.
+	 *
+	 * @since 2.5.3
+	 * @param WC_Product $product
+	 * @return int
+	 */
+	private function get_product_menu_order( $product ) {
+		$menu_order = $product->post->menu_order;
+
+		if ( $product->is_type( 'variation' ) ) {
+			$_product = get_post( $product->get_variation_id() );
+			$menu_order = $_product->menu_order;
+		}
+
+		return apply_filters( 'woocommerce_api_product_menu_order', $menu_order, $product );
 	}
 
 	/**
@@ -1420,59 +1441,36 @@ class WC_API_Products extends WC_API_Resource {
 
 		} else {
 
-			// Regular Price.
+			// Regular Price
 			if ( isset( $data['regular_price'] ) ) {
-				$regular_price = ( '' === $data['regular_price'] ) ? '' : wc_format_decimal( $data['regular_price'] );
-				update_post_meta( $product_id, '_regular_price', $regular_price );
+				$regular_price = ( '' === $data['regular_price'] ) ? '' : $data['regular_price'];
 			} else {
 				$regular_price = get_post_meta( $product_id, '_regular_price', true );
 			}
 
-			// Sale Price.
+			// Sale Price
 			if ( isset( $data['sale_price'] ) ) {
-				$sale_price = ( '' === $data['sale_price'] ) ? '' : wc_format_decimal( $data['sale_price'] );
-				update_post_meta( $product_id, '_sale_price', $sale_price );
+				$sale_price = ( '' === $data['sale_price'] ) ? '' : $data['sale_price'];
 			} else {
 				$sale_price = get_post_meta( $product_id, '_sale_price', true );
 			}
 
-			$date_from = isset( $data['sale_price_dates_from'] ) ? strtotime( $data['sale_price_dates_from'] ) : get_post_meta( $product_id, '_sale_price_dates_from', true );
-			$date_to   = isset( $data['sale_price_dates_to'] ) ? strtotime( $data['sale_price_dates_to'] ) : get_post_meta( $product_id, '_sale_price_dates_to', true );
-
-			// Dates
-			if ( $date_from ) {
-				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
+			if ( isset( $data['sale_price_dates_from'] ) ) {
+				$date_from = $data['sale_price_dates_from'];
 			} else {
-				update_post_meta( $product_id, '_sale_price_dates_from', '' );
+				$date_from = get_post_meta( $product_id, '_sale_price_dates_from', true );
+				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
 			}
 
-			if ( $date_to ) {
-				update_post_meta( $product_id, '_sale_price_dates_to', $date_to );
+			if ( isset( $data['sale_price_dates_to'] ) ) {
+				$date_to = $data['sale_price_dates_to'];
 			} else {
-				update_post_meta( $product_id, '_sale_price_dates_to', '' );
+				$date_to = get_post_meta( $product_id, '_sale_price_dates_to', true );
+				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
 			}
 
-			if ( $date_to && ! $date_from ) {
-				$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
-				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
-			}
+			_wc_save_product_price( $product_id, $regular_price, $sale_price, $date_from, $date_to );
 
-			// Update price if on sale.
-			if ( '' !== $sale_price && '' == $date_to && '' == $date_from ) {
-				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
-			} else {
-				update_post_meta( $product_id, '_price', $regular_price );
-			}
-
-			if ( '' !== $sale_price && $date_from && $date_from <= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
-			}
-
-			if ( $date_to && $date_to < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $product_id, '_price', $regular_price );
-				update_post_meta( $product_id, '_sale_price_dates_from', '' );
-				update_post_meta( $product_id, '_sale_price_dates_to', '' );
-			}
 		}
 
 		// Product parent ID for groups.
@@ -1780,16 +1778,29 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			// Thumbnail
+			// Thumbnail.
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
 					if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
 						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+
 						if ( is_wp_error( $upload ) ) {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
 						}
+
 						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
+
+						// Set the image alt if present.
+						if ( ! empty( $image['alt'] ) ) {
+							update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
+						}
+
+						// Set the image title if present.
+						if ( ! empty( $image['title'] ) ) {
+							wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['title'] ) );
+						}
+
 						update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
 					}
 				} else {
@@ -1856,56 +1867,33 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Regular Price
 			if ( isset( $variation['regular_price'] ) ) {
-				$regular_price = ( '' === $variation['regular_price'] ) ? '' : wc_format_decimal( $variation['regular_price'] );
-				update_post_meta( $variation_id, '_regular_price', $regular_price );
+				$regular_price = ( '' === $variation['regular_price'] ) ? '' : $variation['regular_price'];
 			} else {
 				$regular_price = get_post_meta( $variation_id, '_regular_price', true );
 			}
 
 			// Sale Price
 			if ( isset( $variation['sale_price'] ) ) {
-				$sale_price = ( '' === $variation['sale_price'] ) ? '' : wc_format_decimal( $variation['sale_price'] );
-				update_post_meta( $variation_id, '_sale_price', $sale_price );
+				$sale_price = ( '' === $variation['sale_price'] ) ? '' : $variation['sale_price'];
 			} else {
 				$sale_price = get_post_meta( $variation_id, '_sale_price', true );
 			}
 
-			$date_from = isset( $variation['sale_price_dates_from'] ) ? strtotime( $variation['sale_price_dates_from'] ) : get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = isset( $variation['sale_price_dates_to'] ) ? strtotime( $variation['sale_price_dates_to'] ) : get_post_meta( $variation_id, '_sale_price_dates_to', true );
-
-			// Save Dates
-			if ( $date_from ) {
-				update_post_meta( $variation_id, '_sale_price_dates_from', $date_from );
+			if ( isset( $variation['sale_price_dates_from'] ) ) {
+				$date_from = $variation['sale_price_dates_from'];
 			} else {
-				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
+				$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
 			}
 
-			if ( $date_to ) {
-				update_post_meta( $variation_id, '_sale_price_dates_to', $date_to );
+			if ( isset( $variation['sale_price_dates_to'] ) ) {
+				$date_to = $variation['sale_price_dates_to'];
 			} else {
-				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
+				$date_to = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
 			}
 
-			if ( $date_to && ! $date_from ) {
-				update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
-			}
-
-			// Update price if on sale
-			if ( '' != $sale_price && '' == $date_to && '' == $date_from ) {
-				update_post_meta( $variation_id, '_price', $sale_price );
-			} else {
-				update_post_meta( $variation_id, '_price', $regular_price );
-			}
-
-			if ( '' != $sale_price && $date_from && $date_from < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $variation_id, '_price', $sale_price );
-			}
-
-			if ( $date_to && $date_to < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $variation_id, '_price', $regular_price );
-				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
-				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
-			}
+			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
 
 			// Tax class
 			if ( isset( $variation['tax_class'] ) ) {
@@ -2236,7 +2224,7 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
-	 * Save product images
+	 * Save product images.
 	 *
 	 * @since  2.2
 	 * @param  array $images
@@ -2272,19 +2260,19 @@ class WC_API_Products extends WC_API_Resource {
 							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
 						}
 
-						$gallery[] = $this->set_product_image_as_attachment( $upload, $id );
-					} else {
-						$gallery[] = $attachment_id;
+						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
 					}
+
+					$gallery[] = $attachment_id;
 				}
 
 				// Set the image alt if present.
-				if ( ! empty( $image['alt'] ) ) {
+				if ( ! empty( $image['alt'] ) && $attachment_id ) {
 					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
 				}
 
 				// Set the image title if present.
-				if ( ! empty( $image['title'] ) ) {
+				if ( ! empty( $image['title'] ) && $attachment_id ) {
 					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['title'] ) );
 				}
 			}
@@ -2306,14 +2294,14 @@ class WC_API_Products extends WC_API_Resource {
 	 * @return int|WP_Error attachment id
 	 */
 	public function upload_product_image( $image_url ) {
-		return $this->upload_image_from_url( $image_url );
+		return $this->upload_image_from_url( $image_url, 'product_image' );
 	}
 
 	/**
 	 * Upload product category image from URL.
 	 *
-	 * @since  2.5.0
-	 * @param  string $image_url
+	 * @since 2.5.0
+	 * @param string $image_url
 	 * @return int|WP_Error attachment id
 	 */
 	public function upload_product_category_image( $image_url ) {
@@ -2325,9 +2313,9 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @throws WC_API_Exception
 	 *
-	 * @since  2.5.0
-	 * @param  string       $image_url
-	 * @param  string       $upload_for
+	 * @since 2.5.0
+	 * @param string $image_url
+	 * @param string $upload_for
 	 * @return int|WP_Error Attachment id
 	 */
 	protected function upload_image_from_url( $image_url, $upload_for = 'product_image' ) {
@@ -2340,10 +2328,10 @@ class WC_API_Products extends WC_API_Resource {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
-		// Ensure url is valid
+		// Ensure url is valid.
 		$image_url = str_replace( ' ', '%20', $image_url );
 
-		// Get the file
+		// Get the file.
 		$response = wp_safe_remote_get( $image_url, array(
 			'timeout' => 10
 		) );
@@ -2352,7 +2340,7 @@ class WC_API_Products extends WC_API_Resource {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
-		// Ensure we have a file name and type
+		// Ensure we have a file name and type.
 		if ( ! $wp_filetype['type'] ) {
 			$headers = wp_remote_retrieve_headers( $response );
 			if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
@@ -2365,14 +2353,14 @@ class WC_API_Products extends WC_API_Resource {
 			unset( $headers );
 		}
 
-		// Upload the file
+		// Upload the file.
 		$upload = wp_upload_bits( $file_name, '', wp_remote_retrieve_body( $response ) );
 
 		if ( $upload['error'] ) {
 			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_error', $upload['error'], 400 );
 		}
 
-		// Get filesize
+		// Get filesize.
 		$filesize = filesize( $upload['file'] );
 
 		if ( 0 == $filesize ) {
@@ -3343,7 +3331,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Check parent.
 			$data['parent'] = absint( $data['parent'] );
 			if ( $data['parent'] ) {
-				$parent = get_term_by( 'term_taxonomy_id', $data['parent'], 'product_shipping_class' );
+				$parent = get_term_by( 'id', $data['parent'], 'product_shipping_class' );
 				if ( ! $parent ) {
 					throw new WC_API_Exception( 'woocommerce_api_invalid_product_shipping_class_parent', __( 'Product shipping class parent is invalid', 'woocommerce' ), 400 );
 				}
@@ -3354,11 +3342,13 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_product_shipping_class', $insert->get_error_message(), 400 );
 			}
 
-			do_action( 'woocommerce_api_create_product_shipping_class', $insert['term_taxonomy_id'], $data );
+			$id = $insert['term_id'];
+
+			do_action( 'woocommerce_api_create_product_shipping_class', $id, $data );
 
 			$this->server->send_status( 201 );
 
-			return $this->get_product_shipping_class( $insert['term_taxonomy_id'] );
+			return $this->get_product_shipping_class( $id );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}

@@ -277,12 +277,19 @@ jQuery( function( $ ) {
 						return;
 					}
 
+					var termsCheckBoxChecked = $( '#terms' ).prop( 'checked' );
+
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
 							$( key ).replaceWith( value );
 							$( key ).unblock();
 						} );
+					}
+
+					// Recheck the terms and conditions box, if needed
+					if ( termsCheckBoxChecked ) {
+						$( '#terms' ).prop( 'checked', true );
 					}
 
 					// Check for error

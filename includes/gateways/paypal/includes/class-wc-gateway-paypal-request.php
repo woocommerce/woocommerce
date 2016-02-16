@@ -161,12 +161,21 @@ class WC_Gateway_Paypal_Request {
 		 */
 		if ( ( ! wc_tax_enabled() || ! wc_prices_include_tax() ) && $this->prepare_line_items( $order ) ) {
 
-			$line_item_args             = $this->get_line_items();
+			$line_item_args             = array();
 			$line_item_args['tax_cart'] = $this->number_format( $order->get_total_tax(), $order );
 
 			if ( $order->get_total_discount() > 0 ) {
 				$line_item_args['discount_amount_cart'] = $this->number_format( $this->round( $order->get_total_discount(), $order ), $order );
 			}
+
+			// Add shipping costs. Paypal ignores anything over 5 digits (999.99 is the max).
+			if ( $order->get_total_shipping() > 0 && $order->get_total_shipping() < 999.99 ) {
+				$line_item_args['shipping_1'] = $this->number_format( $order->get_total_shipping(), $order );
+			} elseif ( $order->get_total_shipping() > 0 ) {
+				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->number_format( $order->get_total_shipping(), $order ) );
+			}
+
+			$line_item_args = array_merge( $line_item_args, $this->get_line_items() );
 
 		/**
 		 * Send order as a single item.
@@ -177,11 +186,18 @@ class WC_Gateway_Paypal_Request {
 
 			$this->delete_line_items();
 
+			$line_item_args = array();
 			$all_items_name = $this->get_order_item_names( $order );
 			$this->add_line_item( $all_items_name ? $all_items_name : __( 'Order', 'woocommerce' ), 1, $this->number_format( $order->get_total() - $this->round( $order->get_total_shipping() + $order->get_shipping_tax(), $order ), $order ), $order->get_order_number() );
-			$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), ucwords( $order->get_shipping_method() ) ), 1, $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) );
 
-			$line_item_args = $this->get_line_items();
+			// Add shipping costs. Paypal ignores anything over 5 digits (999.99 is the max).
+			if ( $order->get_total_shipping() > 0 && $order->get_total_shipping() < 999.99 ) {
+				$line_item_args['shipping_1'] = $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order );
+			} elseif ( $order->get_total_shipping() > 0 ) {
+				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) );
+			}
+
+			$line_item_args = array_merge( $line_item_args, $this->get_line_items() );
 		}
 
 		return $line_item_args;
@@ -258,11 +274,6 @@ class WC_Gateway_Paypal_Request {
 			if ( ! $line_item ) {
 				return false;
 			}
-		}
-
-		// Shipping Cost item - paypal only allows shipping per item, we want to send shipping for the order.
-		if ( $order->get_total_shipping() > 0 && ! $this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->round( $order->get_total_shipping(), $order ) ) ) {
-			return false;
 		}
 
 		// Check for mismatched totals.

@@ -1874,8 +1874,10 @@ abstract class WC_Abstract_Order {
             'method_title' => $shipping_rate->label,
             'method_id'    => $shipping_rate->id,
             'cost'         => wc_format_decimal( $shipping_rate->cost ),
-            'taxes'        => $shipping_rate->taxes
+            'taxes'        => $shipping_rate->taxes,
+            'meta'         => $shipping_rate->get_meta_data(),
         ) );
+
         $item = new WC_Order_Item_Shipping();
         $item_id = $this->update_shipping( $item, $args );
 
@@ -1937,6 +1939,12 @@ abstract class WC_Abstract_Order {
         if ( isset( $args['taxes'] ) && is_array( $args['taxes'] ) ) {
             $item->set_taxes( $args['taxes'] );
         }
+
+        if ( isset( $args['meta'] ) && is_array( $args['meta'] ) ) {
+			foreach ( $args['meta'] as $key => $value ) {
+				$item->update_meta_data( $key, $value );
+			}
+		}
 
         $item->save();
 

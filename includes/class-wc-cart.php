@@ -102,58 +102,9 @@ class WC_Cart {
 	public $fees = array();
 
 	/**
-	 * Prices include tax.
-	 *
-	 * @var bool
-	 */
-	public $prices_include_tax;
-
-	/**
-	 * Round at subtotal.
-	 *
-	 * @var bool
-	 */
-	public $round_at_subtotal;
-
-	/**
-	 * Tax display cart.
-	 *
-	 * @var string
-	 */
-	public $tax_display_cart;
-
-	/**
-	 * Prices inc tax.
-	 *
-	 * @var int
-	 */
-	public $dp;
-
-	/**
-	 * Display totals excluding tax.
-	 *
-	 * @var bool
-	 */
-	public $display_totals_ex_tax;
-
-	/**
-	 * Display cart excluding tax.
-	 *
-	 * @var bool
-	 */
-	public $display_cart_ex_tax;
-
-	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
 	 */
 	public function __construct() {
-		$this->prices_include_tax    = wc_prices_include_tax();
-		$this->round_at_subtotal     = get_option( 'woocommerce_tax_round_at_subtotal' ) == 'yes';
-		$this->tax_display_cart      = get_option( 'woocommerce_tax_display_cart' );
-		$this->dp                    = wc_get_price_decimals();
-		$this->display_totals_ex_tax = $this->tax_display_cart == 'excl';
-		$this->display_cart_ex_tax   = $this->tax_display_cart == 'excl';
-
 		add_action( 'wp_loaded', array( $this, 'init' ) ); // Get cart after WP and plugins are loaded.
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 ); // Set cookies
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 ); // Set cookies before shutdown and ob flushing
@@ -169,6 +120,22 @@ class WC_Cart {
 	 */
 	public function __get( $key ) {
 		switch ( $key ) {
+			case 'prices_include_tax' :
+				return wc_prices_include_tax();
+			break;
+			case 'round_at_subtotal' :
+				return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
+			break;
+			case 'tax_display_cart' :
+				return get_option( 'woocommerce_tax_display_cart' );
+			break;
+			case 'dp' :
+				return wc_get_price_decimals();
+			break;
+			case 'display_totals_ex_tax' :
+			case 'display_cart_ex_tax' :
+				return $this->tax_display_cart === 'excl';
+			break;
 			case 'cart_contents_weight' :
 				return $this->get_cart_contents_weight();
 			break;
@@ -256,6 +223,9 @@ class WC_Cart {
 			}
 
 			if ( is_array( $cart ) ) {
+				// Prime meta cache to reduce future queries
+				update_meta_cache( 'post', wp_list_pluck( $cart, 'product_id' ) );
+
 				foreach ( $cart as $key => $values ) {
 					$_product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
@@ -1502,7 +1472,7 @@ class WC_Cart {
 		 * @return bool whether or not the cart needs shipping
 		 */
 		public function needs_shipping() {
-			if ( get_option( 'woocommerce_calc_shipping' ) === 'no' ) {
+			if ( ! wc_shipping_enabled() ) {
 				return false;
 			}
 
@@ -1542,7 +1512,7 @@ class WC_Cart {
 		 * @return bool
 		 */
 		public function show_shipping() {
-			if ( get_option('woocommerce_calc_shipping') == 'no' || ! is_array( $this->cart_contents ) )
+			if ( ! wc_shipping_enabled() || ! is_array( $this->cart_contents ) )
 				return false;
 
 			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
@@ -1692,11 +1662,11 @@ class WC_Cart {
 
 		/**
 		 * Returns whether or not a discount has been applied.
-		 *
+		 * @param string $coupon_code
 		 * @return bool
 		 */
-		public function has_discount( $coupon_code ) {
-			return in_array( apply_filters( 'woocommerce_coupon_code', $coupon_code ), $this->applied_coupons );
+		public function has_discount( $coupon_code = '' ) {
+			return $coupon_code ? in_array( apply_filters( 'woocommerce_coupon_code', $coupon_code ), $this->applied_coupons ) : sizeof( $this->applied_coupons ) > 0;
 		}
 
 		/**

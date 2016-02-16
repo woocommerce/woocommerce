@@ -94,6 +94,7 @@ class WC_AJAX {
 			'apply_coupon'                                     => true,
 			'remove_coupon'                                    => true,
 			'update_shipping_method'                           => true,
+			'get_cart_totals'                                  => true,
 			'update_order_review'                              => true,
 			'add_to_cart'                                      => true,
 			'checkout'                                         => true,
@@ -141,6 +142,10 @@ class WC_AJAX {
 			'save_variations'                                  => false,
 			'bulk_edit_variations'                             => false,
 			'tax_rates_save_changes'                           => false,
+			'shipping_zones_save_changes'                      => false,
+			'shipping_zone_add_method'                         => false,
+			'shipping_zone_methods_save_changes'               => false,
+			'shipping_classes_save_changes'                    => false,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -251,6 +256,22 @@ class WC_AJAX {
 	}
 
 	/**
+	 * AJAX receive updated cart_totals div.
+	 */
+	public static function get_cart_totals() {
+
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
+
+		WC()->cart->calculate_totals();
+
+		woocommerce_cart_totals();
+
+		die();
+	}
+
+	/**
 	 * AJAX update order review on checkout.
 	 */
 	public static function update_order_review() {
@@ -315,6 +336,7 @@ class WC_AJAX {
 
 			if ( isset( $_POST['country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['country'] );
+				WC()->customer->calculated_shipping( true );
 			}
 
 			if ( isset( $_POST['state'] ) ) {
@@ -340,6 +362,7 @@ class WC_AJAX {
 
 			if ( isset( $_POST['s_country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['s_country'] );
+				WC()->customer->calculated_shipping( true );
 			}
 
 			if ( isset( $_POST['s_state'] ) ) {
@@ -393,6 +416,8 @@ class WC_AJAX {
 			) )
 		);
 
+		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
+
 		wp_send_json( $data );
 
 		die();
@@ -414,7 +439,7 @@ class WC_AJAX {
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
 			if ( get_option( 'woocommerce_cart_redirect_after_add' ) == 'yes' ) {
-				wc_add_to_cart_message( $product_id );
+				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}
 
 			// Return fragments
@@ -2529,11 +2554,7 @@ class WC_AJAX {
 				$variation_data['image']          = $variation_data['_thumbnail_id'] ? wp_get_attachment_thumb_url( $variation_data['_thumbnail_id'] ) : '';
 				$variation_data['shipping_class'] = $shipping_classes && ! is_wp_error( $shipping_classes ) ? current( $shipping_classes )->term_id : '';
 				$variation_data['menu_order']     = $variation->menu_order;
-
-				// Stock BW compat
-				if ( '' !== $variation_data['_stock'] ) {
-					$variation_data['_manage_stock'] = 'yes';
-				}
+				$variation_data['_stock']         = '' === $variation_data['_stock'] ? '' : wc_stock_amount( $variation_data['_stock'] );
 
 				include( 'admin/meta-boxes/views/html-variation-admin.php' );
 
@@ -3026,6 +3047,242 @@ class WC_AJAX {
 
 		wp_send_json_success( array(
 			'rates' => WC_Tax::get_rates_for_tax_class( $current_class ),
+		) );
+	}
+
+	/**
+	 * Handle submissions from assets/js/wc-shipping-zones.js Backbone model.
+	 */
+	public static function shipping_zones_save_changes() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		// Check User Caps
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$changes = $_POST['changes'];
+		foreach ( $changes as $zone_id => $data ) {
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					// So the user added and deleted a new row.
+					// That's fine, it's not in the database anyways. NEXT!
+					continue;
+				}
+				WC_Shipping_Zones::delete_zone( $zone_id );
+				continue;
+			}
+
+			$zone_data = array_intersect_key( $data, array(
+				'zone_id'        => 1,
+				'zone_name'      => 1,
+				'zone_order'     => 1,
+				'zone_locations' => 1,
+				'zone_postcodes' => 1
+			) );
+
+			if ( isset( $zone_data['zone_id'] ) ) {
+				$zone = new WC_Shipping_Zone( $zone_data['zone_id'] );
+
+				if ( isset( $zone_data['zone_name'] ) ) {
+					$zone->set_zone_name( $zone_data['zone_name'] );
+				}
+
+				if ( isset( $zone_data['zone_order'] ) ) {
+					$zone->set_zone_order( $zone_data['zone_order'] );
+				}
+
+				if ( isset( $zone_data['zone_locations'] ) ) {
+					$zone->clear_locations( array( 'state', 'country', 'continent' ) );
+					$locations = array_filter( array_map( 'wc_clean', (array) $zone_data['zone_locations'] ) );
+					foreach ( $locations as $location ) {
+						// Each posted location will be in the format type:code
+						$location_parts = explode( ':', $location );
+						switch ( $location_parts[0] ) {
+							case 'state' :
+								$zone->add_location( $location_parts[1] . ':' . $location_parts[2], 'state' );
+							break;
+							case 'country' :
+								$zone->add_location( $location_parts[1], 'country' );
+							break;
+							case 'continent' :
+								$zone->add_location( $location_parts[1], 'continent' );
+							break;
+						}
+					}
+				}
+
+				if ( isset( $zone_data['zone_postcodes'] ) ) {
+					$zone->clear_locations( 'postcode' );
+					$postcodes = array_filter( array_map( 'strtoupper', array_map( 'wc_clean', explode( "\n", $zone_data['zone_postcodes'] ) ) ) );
+					foreach ( $postcodes as $postcode ) {
+						$zone->add_location( $postcode, 'postcode' );
+					}
+				}
+
+				$zone->save();
+			}
+		}
+
+		wp_send_json_success( array(
+			'zones' => WC_Shipping_Zones::get_zones()
+		) );
+	}
+
+	/**
+	 * Handle submissions from assets/js/wc-shipping-zone-methods.js Backbone model.
+	 */
+	public static function shipping_zone_add_method() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['method_id'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		// Check User Caps
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$zone_id     = absint( $_POST['zone_id'] );
+		$zone        = WC_Shipping_Zones::get_zone( $zone_id );
+		$instance_id = $zone->add_shipping_method( wc_clean( $_POST['method_id'] ) );
+
+		wp_send_json_success( array(
+			'instance_id' => $instance_id,
+			'zone_id'     => $zone_id,
+			'methods'     => $zone->get_shipping_methods()
+		) );
+	}
+
+	/**
+	 * Handle submissions from assets/js/wc-shipping-zone-methods.js Backbone model.
+	 */
+	public static function shipping_zone_methods_save_changes() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['zone_id'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		global $wpdb;
+
+		$zone_id = absint( $_POST['zone_id'] );
+		$zone    = new WC_Shipping_Zone( $zone_id );
+		$changes = $_POST['changes'];
+
+		foreach ( $changes as $instance_id => $data ) {
+			if ( isset( $data['deleted'] ) ) {
+				$wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) );
+				continue;
+			}
+
+			$method_data = array_intersect_key( $data, array(
+				'method_order' => 1
+			) );
+
+			if ( isset( $method_data['method_order'] ) ) {
+				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $method_data['method_order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
+			}
+		}
+
+		wp_send_json_success( array(
+			'methods' => $zone->get_shipping_methods()
+		) );
+	}
+
+	/**
+	 * Handle submissions from assets/js/wc-shipping-classes.js Backbone model.
+	 */
+	public static function shipping_classes_save_changes() {
+		if ( ! isset( $_POST['wc_shipping_classes_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_classes_nonce'], 'wc_shipping_classes_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$changes = $_POST['changes'];
+
+		foreach ( $changes as $term_id => $data ) {
+			$term_id = absint( $term_id );
+
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					// So the user added and deleted a new row.
+					// That's fine, it's not in the database anyways. NEXT!
+					continue;
+				}
+				wp_delete_term( $term_id, 'product_shipping_class' );
+				continue;
+			}
+
+			$update_args = array();
+
+			if ( isset( $data['name'] ) ) {
+				$update_args['name'] = wc_clean( $data['name'] );
+			}
+
+			if ( isset( $data['slug'] ) ) {
+				$update_args['slug'] = wc_clean( $data['slug'] );
+			}
+
+			if ( isset( $data['description'] ) ) {
+				$update_args['description'] = wc_clean( $data['description'] );
+			}
+
+			if ( isset( $data['newRow'] ) ) {
+				$update_args = array_filter( $update_args );
+				if ( empty( $update_args['name'] ) ) {
+					wp_send_json_error( __( 'Shipping Class name is required', 'woocommerce' ) );
+					exit;
+				}
+				$result      = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+			} else {
+				$result = wp_update_term( $term_id, 'product_shipping_class', $update_args );
+			}
+
+			if ( is_wp_error( $result ) ) {
+				wp_send_json_error( $result->get_error_message() );
+				exit;
+			}
+		}
+
+		$wc_shipping = WC_Shipping::instance();
+
+		wp_send_json_success( array(
+			'shipping_classes' => $wc_shipping->get_shipping_classes()
 		) );
 	}
 }

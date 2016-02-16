@@ -184,14 +184,20 @@ class WC_Checkout {
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 				'customer_id'   => $this->customer_id,
 				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
+				'cart_hash'     => md5( json_encode( WC()->cart->get_cart_for_session() ) . WC()->cart->total ),
 				'created_via'   => 'checkout'
 			);
 
 			// Insert or update the post data
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
-			// Resume the unpaid order if its pending
-			if ( $order_id > 0 && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
+			/**
+			 * If there is an order pending payment, we can resume it here so
+			 * long as it has not changed. If the order has changed, i.e.
+			 * different items or cost, create a new order. We use a hash to
+			 * detect changes which is based on cart items + order total.
+			 */
+			if ( $order_id && $order_data['cart_hash'] === get_post_meta( $order_id, '_cart_hash', true ) && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
 
 				$order_data['order_id'] = $order_id;
 				$order                  = wc_update_order( $order_data );
@@ -759,18 +765,22 @@ class WC_Checkout {
 			}
 
 			// Get the billing_ and shipping_ address fields
-			$address_fields = array_merge( WC()->countries->get_address_fields(), WC()->countries->get_address_fields( '', 'shipping_' ) );
+			if ( isset( $this->checkout_fields['shipping'] ) && isset( $this->checkout_fields['billing'] ) ) {
 
-			if ( is_user_logged_in() && array_key_exists( $input, $address_fields ) ) {
-				$current_user = wp_get_current_user();
+				$address_fields = array_merge( $this->checkout_fields['billing'], $this->checkout_fields['shipping'] );
 
-				if ( $meta = get_user_meta( $current_user->ID, $input, true ) ) {
-					return $meta;
+				if ( is_user_logged_in() && is_array( $address_fields ) && array_key_exists( $input, $address_fields ) ) {
+					$current_user = wp_get_current_user();
+
+					if ( $meta = get_user_meta( $current_user->ID, $input, true ) ) {
+						return $meta;
+					}
+
+					if ( $input == 'billing_email' ) {
+						return $current_user->user_email;
+					}
 				}
 
-				if ( $input == 'billing_email' ) {
-					return $current_user->user_email;
-				}
 			}
 
 			switch ( $input ) {

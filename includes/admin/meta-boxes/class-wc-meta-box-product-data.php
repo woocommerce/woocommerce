@@ -135,19 +135,6 @@ class WC_Meta_Box_Product_Data {
 			</ul>
 			<div id="general_product_data" class="panel woocommerce_options_panel"><?php
 
-				echo '<div class="options_group hide_if_grouped">';
-
-					// SKU
-					if ( wc_product_sku_enabled() ) {
-						woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="'. __( 'Stock Keeping Unit', 'woocommerce' ) .'">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
-					} else {
-						echo '<input type="hidden" name="_sku" value="' . esc_attr( get_post_meta( $thepostid, '_sku', true ) ) . '" />';
-					}
-
-					do_action( 'woocommerce_product_options_sku' );
-
-				echo '</div>';
-
 				echo '<div class="options_group show_if_external">';
 
 					// External URL
@@ -299,7 +286,16 @@ class WC_Meta_Box_Product_Data {
 
 				echo '<div class="options_group">';
 
-				if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) {
+				// SKU
+				if ( wc_product_sku_enabled() ) {
+					woocommerce_wp_text_input( array( 'id' => '_sku', 'label' => '<abbr title="'. __( 'Stock Keeping Unit', 'woocommerce' ) .'">' . __( 'SKU', 'woocommerce' ) . '</abbr>', 'desc_tip' => 'true', 'description' => __( 'SKU refers to a Stock-keeping unit, a unique identifier for each distinct product and service that can be purchased.', 'woocommerce' ) ) );
+				} else {
+					echo '<input type="hidden" name="_sku" value="' . esc_attr( get_post_meta( $thepostid, '_sku', true ) ) . '" />';
+				}
+
+				do_action( 'woocommerce_product_options_sku' );
+
+				if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
 					// manage stock
 					woocommerce_wp_checkbox( array( 'id' => '_manage_stock', 'wrapper_class' => 'show_if_simple show_if_variable', 'label' => __( 'Manage stock?', 'woocommerce' ), 'description' => __( 'Enable stock management at product level', 'woocommerce' ) ) );

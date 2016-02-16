@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: http://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.5.0-RC2
+ * Version: 2.6.0-dev
  * Author: WooThemes
  * Author URI: http://woothemes.com
  * Requires at least: 4.1
@@ -35,7 +35,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '2.5.0';
+	public $version = '2.6.0';
 
 	/**
 	 * The single instance of the class.
@@ -222,6 +222,7 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
+		include_once( 'includes/interfaces/interface-wc-data.php' );
 		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/wc-widget-functions.php' );
@@ -283,6 +284,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-form-handler.php' );                   // Form Handlers
 		include_once( 'includes/class-wc-cart.php' );                           // The main cart class
 		include_once( 'includes/class-wc-tax.php' );                            // Tax class
+		include_once( 'includes/class-wc-shipping-zones.php' );                 // Shipping Zones class
 		include_once( 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( 'includes/class-wc-https.php' );                          // https Helper
