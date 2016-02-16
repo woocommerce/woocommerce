@@ -125,8 +125,12 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param  string $key
      * @return mixed
      */
-    public function get_meta( $key ){
-        return isset( $this->_meta[ $key ] ) ? $this->_meta[ $key ] : null;
+    public function get_meta( $key = null ){
+		if ( is_null( $key ) ) {
+			return $this->_meta;
+		} else {
+        	return isset( $this->_meta[ $key ] ) ? $this->_meta[ $key ] : null;
+		}
     }
 
     /*
@@ -234,22 +238,6 @@ abstract class WC_Abstract_Order implements WC_Data {
      */
     public function get_date_modified() {
         return $this->_data['date_modified'];
-    }
-
-    /**
-     * Get date_completed
-     * @return string
-     */
-    public function get_date_completed() {
-        return $this->_data['date_completed'];
-    }
-
-	/**
-     * Get date_paid
-     * @return string
-     */
-    public function get_date_paid() {
-        return $this->_data['date_paid'];
     }
 
     /**
@@ -425,7 +413,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return string
      */
     public function get_payment_method() {
-        return $this->_data['payment_method'];
+        return $this->_meta['payment_method'];
     }
 
     /**
@@ -433,7 +421,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return string
      */
     public function get_payment_method_title() {
-        return $this->_data['payment_method_title'];
+        return $this->_meta['payment_method_title'];
     }
 
     /**
@@ -441,7 +429,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return string
      */
     public function get_transaction_id() {
-        return $this->_data['transaction_id'];
+        return $this->_meta['transaction_id'];
     }
 
     /**
@@ -449,7 +437,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return string
      */
     public function get_customer_ip_address() {
-        return $this->_data['customer_ip_address'];
+        return $this->_meta['customer_ip_address'];
     }
 
     /**
@@ -457,7 +445,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return string
      */
     public function get_customer_user_agent() {
-        return $this->_data['customer_user_agent'];
+        return $this->_meta['customer_user_agent'];
     }
 
     /**
@@ -465,7 +453,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return string
      */
     public function get_created_via() {
-        return $this->_data['created_via'];
+        return $this->_meta['created_via'];
     }
 
     /**
@@ -473,7 +461,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return string
      */
     public function get_order_version() {
-        return $this->_data['order_version'];
+        return $this->_meta['order_version'];
     }
 
     /**
@@ -481,7 +469,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return bool
      */
     public function get_prices_include_tax() {
-        return (bool) $this->_data['prices_include_tax'];
+        return (bool) $this->_meta['prices_include_tax'];
     }
 
     /**
@@ -489,7 +477,23 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return string
      */
     public function get_customer_note() {
-        return $this->_data['customer_note'];
+        return $this->_meta['customer_note'];
+    }
+
+	/**
+     * Get date_completed
+     * @return string
+     */
+    public function get_date_completed() {
+        return $this->_meta['date_completed'];
+    }
+
+	/**
+     * Get date_paid
+     * @return string
+     */
+    public function get_date_paid() {
+        return $this->_meta['date_paid'];
     }
 
     /**
@@ -904,22 +908,6 @@ abstract class WC_Abstract_Order implements WC_Data {
     }
 
     /**
-     * Set date_completed
-     * @param string $timestamp
-     */
-    public function set_date_completed( $timestamp ) {
-        $this->_data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
-    }
-
-	/**
-     * Set date_paid
-     * @param string $timestamp
-     */
-    public function set_date_paid( $timestamp ) {
-        $this->_data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
-    }
-
-    /**
      * Set customer_id
      * @param int $value
      */
@@ -1159,7 +1147,7 @@ abstract class WC_Abstract_Order implements WC_Data {
             $this->set_payment_method( $value->id );
             $this->set_payment_method_title( $value->get_title() );
         } else {
-            $this->_data['payment_method'] = $value;
+            $this->_meta['payment_method'] = $value;
         }
     }
 
@@ -1168,7 +1156,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param string $value
      */
     public function set_payment_method_title( $value ) {
-        $this->_data['payment_method_title'] = $value;
+        $this->_meta['payment_method_title'] = $value;
     }
 
     /**
@@ -1176,7 +1164,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param string $value
      */
     public function set_transaction_id( $value ) {
-        $this->_data['transaction_id'] = $value;
+        $this->_meta['transaction_id'] = $value;
     }
 
     /**
@@ -1184,7 +1172,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param string $value
      */
     public function set_customer_ip_address( $value ) {
-        $this->_data['customer_ip_address'] = $value;
+        $this->_meta['customer_ip_address'] = $value;
     }
 
     /**
@@ -1192,7 +1180,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param string $value
      */
     public function set_customer_user_agent( $value ) {
-        $this->_data['customer_user_agent'] = $value;
+        $this->_meta['customer_user_agent'] = $value;
     }
 
     /**
@@ -1200,7 +1188,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param string $value
      */
     public function set_created_via( $value ) {
-        $this->_data['created_via'] = $value;
+        $this->_meta['created_via'] = $value;
     }
 
     /**
@@ -1208,7 +1196,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param string $value
      */
     public function set_order_version( $value ) {
-        $this->_data['order_version'] = $value;
+        $this->_meta['order_version'] = $value;
     }
 
     /**
@@ -1216,7 +1204,7 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param bool $value
      */
     public function set_prices_include_tax( $value ) {
-        $this->_data['prices_include_tax'] = (bool) $value;
+        $this->_meta['prices_include_tax'] = (bool) $value;
     }
 
     /**
@@ -1224,7 +1212,23 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @param string $value
      */
     public function set_customer_note( $value ) {
-        $this->_data['customer_note'] = $value;
+        $this->_meta['customer_note'] = $value;
+    }
+
+	/**
+     * Set date_completed
+     * @param string $timestamp
+     */
+    public function set_date_completed( $timestamp ) {
+        $this->_meta['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+    }
+
+	/**
+     * Set date_paid
+     * @param string $timestamp
+     */
+    public function set_date_paid( $timestamp ) {
+        $this->_meta['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
     /**
@@ -1347,17 +1351,6 @@ abstract class WC_Abstract_Order implements WC_Data {
             update_post_meta( $order_id, '_shipping_state', $this->get_shipping_state() );
             update_post_meta( $order_id, '_shipping_postcode', $this->get_shipping_postcode() );
             update_post_meta( $order_id, '_shipping_country', $this->get_shipping_country() );
-            update_post_meta( $order_id, '_payment_method', $this->get_payment_method() );
-            update_post_meta( $order_id, '_payment_method_title', $this->get_payment_method_title() );
-            update_post_meta( $order_id, '_transaction_id', $this->get_transaction_id() );
-            update_post_meta( $order_id, '_customer_user', $this->get_customer_id() );
-            update_post_meta( $order_id, '_customer_ip_address', $this->get_customer_ip_address() );
-            update_post_meta( $order_id, '_customer_user_agent', $this->get_customer_user_agent() );
-            update_post_meta( $order_id, '_created_via', $this->get_created_via() );
-            update_post_meta( $order_id, '_order_version', $this->get_order_version() );
-            update_post_meta( $order_id, '_prices_include_tax', $this->get_prices_include_tax() );
-            update_post_meta( $order_id, '_completed_date', $this->get_date_completed() );
-			update_post_meta( $order_id, '_paid_date', $this->get_date_paid() );
             update_post_meta( $order_id, '_order_currency', $this->get_order_currency() );
             update_post_meta( $order_id, '_order_key', $this->get_order_key() );
             update_post_meta( $order_id, '_cart_discount', $this->get_discount_total() );
@@ -1366,6 +1359,10 @@ abstract class WC_Abstract_Order implements WC_Data {
             update_post_meta( $order_id, '_order_shipping_tax', $this->get_shipping_tax() );
             update_post_meta( $order_id, '_order_tax', $this->get_cart_tax() );
             update_post_meta( $order_id, '_order_total', $this->get_order_total() );
+
+			foreach ( $this->get_meta() as $key => $value ) {
+				update_post_meta( $order_id, '_' . $key, $value );
+			}
         }
     }
 
@@ -1399,7 +1396,7 @@ abstract class WC_Abstract_Order implements WC_Data {
         $this->set_billing_state( get_post_meta( $order_id, '_billing_state', true ) );
         $this->set_billing_postcode( get_post_meta( $order_id, '_billing_postcode', true ) );
         $this->set_billing_country( get_post_meta( $order_id, '_billing_country', true ) );
-        $this->set_billing_email( get_post_meta( $order_id, 'billing_email', true ) );
+        $this->set_billing_email( get_post_meta( $order_id, '_billing_email', true ) );
         $this->set_billing_phone( get_post_meta( $order_id, '_billing_phone', true ) );
         $this->set_shipping_first_name( get_post_meta( $order_id, '_shipping_first_name', true ) );
         $this->set_shipping_last_name( get_post_meta( $order_id, '_shipping_last_name', true ) );
@@ -1410,18 +1407,8 @@ abstract class WC_Abstract_Order implements WC_Data {
         $this->set_shipping_state( get_post_meta( $order_id, '_shipping_state', true ) );
         $this->set_shipping_postcode( get_post_meta( $order_id, '_shipping_postcode', true ) );
         $this->set_shipping_country( get_post_meta( $order_id, '_shipping_country', true ) );
-        $this->set_payment_method( get_post_meta( $order_id, '_payment_method', true ) );
-        $this->set_payment_method_title( get_post_meta( $order_id, '_payment_method_title', true ) );
-        $this->set_transaction_id( get_post_meta( $order_id, '_transaction_id', true ) );
-        $this->set_customer_ip_address( get_post_meta( $order_id, '_customer_ip_address', true ) );
-        $this->set_customer_user_agent(get_post_meta( $order_id, '_customer_user_agent', true ) );
-        $this->set_created_via( get_post_meta( $order_id, '_created_via', true ) );
-        $this->set_order_version( get_post_meta( $order_id, '_order_version', true ) );
-        $this->set_prices_include_tax( get_post_meta( $order_id, '_prices_include_tax', true ) );
-        $this->set_date_completed( get_post_meta( $order_id, '_completed_date', true ) );
-		$this->set_date_paid( get_post_meta( $order_id, '_paid_date', true ) );
 
-        // Map totals
+		// Map totals
         $this->set_discount_total( get_post_meta( $order_id, '_cart_discount', true ) );
         $this->set_discount_tax( get_post_meta( $order_id, '_cart_discount_tax', true ) );
         $this->set_shipping_total( get_post_meta( $order_id, '_order_shipping', true ) );
@@ -1433,6 +1420,20 @@ abstract class WC_Abstract_Order implements WC_Data {
         if ( empty( $this->get_billing_email() ) && ( $user = $this->get_user() ) ) {
             $this->set_billing_email( $user->user_email );
         }
+
+        // This is meta data, but due to the keys not matching the props, load here
+		$this->set_date_completed( get_post_meta( $order_id, '_completed_date', true ) );
+		$this->set_date_paid( get_post_meta( $order_id, '_paid_date', true ) );
+
+		// Load meta data, including anything custom set.
+		$ignore_keys = array( '_customer_user', '_order_key', '_order_currency', '_billing_first_name', '_billing_last_name', '_billing_company', '_billing_address_1', '_billing_address_2', '_billing_city', '_billing_state', '_billing_postcode', '_billing_country', '_billing_email', '_billing_phone', '_shipping_first_name', '_shipping_last_name', '_shipping_company', '_shipping_address_1', '_shipping_address_2', '_shipping_city', '_shipping_state', '_shipping_postcode', '_shipping_country', '_completed_date', '_paid_date', '_edit_lock', '_cart_discount', '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_order_total', '_order_total' );
+		$meta_data   = get_post_meta( $order_id );
+		$meta_data   = array_diff_key( $meta_data, array_fill_keys( $ignore_keys, '' ) );
+
+		// Set meta data. Remove _ from key for hidden meta.
+		foreach ( $meta_data as $key => $value ) {
+			$this->_meta[ ltrim( $key, '_' ) ] = $value[0];
+		}
 
         // Orders store the state of prices including tax when created.
         $this->prices_include_tax = metadata_exists( 'post', $order_id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $order_id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' );
@@ -1482,7 +1483,8 @@ abstract class WC_Abstract_Order implements WC_Data {
         update_post_meta( $order_id, '_shipping_state', $this->get_shipping_state() );
         update_post_meta( $order_id, '_shipping_postcode', $this->get_shipping_postcode() );
         update_post_meta( $order_id, '_shipping_country', $this->get_shipping_country() );
-        update_post_meta( $order_id, '_payment_method', $this->get_payment_method() );
+
+		update_post_meta( $order_id, '_payment_method', $this->get_payment_method() );
         update_post_meta( $order_id, '_payment_method_title', $this->get_payment_method_title() );
         update_post_meta( $order_id, '_transaction_id', $this->get_transaction_id() );
         update_post_meta( $order_id, '_customer_user', $this->get_customer_id() );
