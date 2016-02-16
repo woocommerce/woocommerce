@@ -210,6 +210,19 @@ function wc_get_account_payment_methods_columns() {
 }
 
 /**
+ * Get My Account > Payment methods types
+ *
+ * @since 2.6.0
+ * @return array
+ */
+function wc_get_account_payment_methods_types() {
+	return apply_filters( 'woocommerce_payment_methods_types', array(
+		'cc'     => __( 'Credit Card', 'woocommerce' ),
+		'echeck' => __( 'eCheck', 'woocommerce' ),
+	) );
+}
+
+/**
  * Returns an array of a user's saved payments list for output on the account tab.
  *
  * @since  2.6

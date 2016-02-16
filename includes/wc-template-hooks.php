@@ -250,3 +250,5 @@ add_action( 'woocommerce_account_edit-address_endpoint', 'woocommerce_account_ed
 add_action( 'woocommerce_account_payment-methods_endpoint', 'woocommerce_account_payment_methods' );
 add_action( 'woocommerce_account_add-payment-method_endpoint', 'woocommerce_account_add_payment_method' );
 add_action( 'woocommerce_account_edit-account_endpoint', 'woocommerce_account_edit_account' );
+add_action( 'woocommerce_account_set-default-payment-method_endpoint', array( 'WC_Shortcode_My_Account', 'set_default_payment_method' ) );
+add_action( 'woocommerce_account_delete-payment-method_endpoint', array( 'WC_Shortcode_My_Account', 'delete_payment_method' ) );
