@@ -17,15 +17,14 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-$page_title   = ( $load_address === 'billing' ) ? __( 'Billing Address', 'woocommerce' ) : __( 'Shipping Address', 'woocommerce' );
-?>
+$page_title = ( $load_address === 'billing' ) ? __( 'Billing Address', 'woocommerce' ) : __( 'Shipping Address', 'woocommerce' );
 
-<?php wc_print_notices(); ?>
+wc_print_notices();
 
-<?php wc_get_template( 'myaccount/navigation.php' ); ?>
+wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="my-account-content">
 	<?php if ( ! $load_address ) : ?>
