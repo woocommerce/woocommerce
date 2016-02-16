@@ -1,5 +1,5 @@
 === WooCommerce ===
-Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothemes
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, coderkevin, woothemes
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.1
 Tested up to: 4.4
