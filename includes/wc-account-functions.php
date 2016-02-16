@@ -187,7 +187,7 @@ function wc_get_account_orders_query_args( $current_page = 1 ) {
  * @return array
  */
 function wc_get_account_downloads_columns() {
-	return apply_filters( 'woocommerce_account_orders_columns', array(
+	return apply_filters( 'woocommerce_account_downloads_columns', array(
 		'download-file'      => __( 'File', 'woocommerce' ),
 		'download-remaining' => __( 'Remaining', 'woocommerce' ),
 		'download-expires'   => __( 'Expires', 'woocommerce' ),
@@ -202,7 +202,7 @@ function wc_get_account_downloads_columns() {
  * @return array
  */
 function wc_get_account_payment_methods_columns() {
-	return apply_filters( 'woocommerce_account_orders_columns', array(
+	return apply_filters( 'woocommerce_account_payment_methods_columns', array(
 		'method'  => __( 'Method', 'woocommerce' ),
 		'expires' => __( 'Expires', 'woocommerce' ),
 		'actions' => '&nbsp;',
