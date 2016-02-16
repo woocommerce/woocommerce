@@ -19,9 +19,15 @@ if ( ! class_exists( 'WC_API' ) ) :
 class WC_API {
 
 	/**
+	 * WP REST API namespace/version.
+	 */
+	const REST_API_NAMESPACE = 'wc/v1';
+
+	/**
 	 * This is the major version for the REST API and takes
 	 * first-order position in endpoint URLs.
 	 *
+	 * @deprecated 2.6.0
 	 * @var string
 	 */
 	const VERSION = '3.1.0';
@@ -29,16 +35,16 @@ class WC_API {
 	/**
 	 * The REST API server.
 	 *
-	 * @var WC_API_Server
 	 * @deprecated 2.6.0
+	 * @var WC_API_Server
 	 */
 	public $server;
 
 	/**
 	 * REST API authentication class instance.
 	 *
-	 * @var WC_API_Authentication
 	 * @deprecated 2.6.0
+	 * @var WC_API_Authentication
 	 */
 	public $authentication;
 
@@ -49,20 +55,26 @@ class WC_API {
 	 * @return WC_API
 	 */
 	public function __construct() {
-		// add query vars
+		// Include REST API classes.
+		$this->rest_api_includes();
+
+		// Add query vars.
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 
-		// register API endpoints
+		// Register API endpoints.
 		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
 
-		// handle REST API requests
+		// Handle REST API requests.
 		add_action( 'parse_request', array( $this, 'handle_rest_api_requests' ), 0 );
 
-		// handle wc-api endpoint requests
+		// Handle wc-api endpoint requests.
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
 
-		// Ensure payment gateways are initialized in time for API requests
+		// Ensure payment gateways are initialized in time for API requests.
 		add_action( 'woocommerce_api_request', array( 'WC_Payment_Gateways', 'instance' ), 0 );
+
+		// WP REST API.
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 	}
 
 	/**
@@ -331,6 +343,38 @@ class WC_API {
 			// Done, clear buffer and exit
 			ob_end_clean();
 			die('-1');
+		}
+	}
+
+	/**
+	 * Include REST API classes.
+	 *
+	 * @since 2.6.0
+	 */
+	public function rest_api_includes() {
+		if ( ! class_exists( 'WP_REST_Controller' ) ) {
+			include_once( 'vendor/class-wp-rest-controller.php' );
+		}
+
+		include_once( 'abstracts/abstract-wc-rest-controller.php' );
+	}
+
+	/**
+	 * Register REST API routes.
+	 *
+	 * @since 2.6.0
+	 */
+	public function register_rest_routes() {
+		$controllers = array();
+
+		foreach ( $controllers as $controller ) {
+			$_controller = new $controller();
+			if ( ! is_subclass_of( $_controller, 'WC_REST_Controller' ) ) {
+				continue;
+			}
+
+			$this->$controller = $_controller;
+			$this->$controller->register_routes();
 		}
 	}
 }
