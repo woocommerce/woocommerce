@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Made coupon optional in cart has_discount() method.
 * Tweak - Removed tag/cat classes from loops since WP does the same.
 * Tweak - Added hash check for orders so that if the cart changes before payment, a new order is made.
+* Feature - Cart operations now use ajax (item quantities/remove, coupon apply/remove, shipping options)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 
