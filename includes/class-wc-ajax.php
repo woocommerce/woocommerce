@@ -94,6 +94,7 @@ class WC_AJAX {
 			'apply_coupon'                                     => true,
 			'remove_coupon'                                    => true,
 			'update_shipping_method'                           => true,
+			'get_cart_totals'                                  => true,
 			'update_order_review'                              => true,
 			'add_to_cart'                                      => true,
 			'checkout'                                         => true,
@@ -246,6 +247,22 @@ class WC_AJAX {
 		}
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+
+		WC()->cart->calculate_totals();
+
+		woocommerce_cart_totals();
+
+		die();
+	}
+
+	/**
+	 * AJAX receive updated cart_totals div.
+	 */
+	public static function get_cart_totals() {
+
+		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+			define( 'WOOCOMMERCE_CART', true );
+		}
 
 		WC()->cart->calculate_totals();
 

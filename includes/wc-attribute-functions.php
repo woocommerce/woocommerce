@@ -50,6 +50,17 @@ function wc_attribute_taxonomy_name( $attribute_name ) {
 }
 
 /**
+ * Get the attribute name used when storing values in post meta.
+ *
+ * @param string $attribute_name Attribute name.
+ * @since 2.6.0
+ * @return string
+ */
+function wc_variation_attribute_name( $attribute_name ) {
+	return 'attribute_' . sanitize_title( $attribute_name );
+}
+
+/**
  * Get a product attribute name by ID.
  *
  * @since  2.4.0

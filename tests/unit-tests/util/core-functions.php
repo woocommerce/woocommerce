@@ -153,5 +153,17 @@ class Core_Functions extends \WC_Unit_Test_Case {
 		$this->assertEquals( '', $default['state'] );
 	}
 
+	/**
+	 * Test wc_format_country_state_string().
+	 *
+	 * @since 2.6.0
+	 */
+	public function test_wc_format_country_state_string() {
+		// Test with correct values.
+		$this->assertEquals( array( 'country' => 'US', 'state' => 'CA' ), wc_format_country_state_string( 'US:CA' ) );
+		// Test what happens when we pass an incorrect value.
+		$this->assertEquals( array( 'country' => 'US-CA', 'state' => '' ), wc_format_country_state_string( 'US-CA' ) );
+	}
+
 }
 
