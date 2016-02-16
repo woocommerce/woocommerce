@@ -120,9 +120,14 @@ abstract class WC_Abstract_Order implements WC_Data {
         return json_encode( $this->get_data() );
     }
 
-    public function add_meta_data(){} // @todo
-    public function get_meta_data(){} // @todo
-    public function get_order_meta( $key ){} // @todo
+    /**
+     * Get Meta Data by Key
+     * @param  string $key
+     * @return mixed
+     */
+    public function get_meta( $key ){
+        return isset( $this->_meta[ $key ] ) ? $this->_meta[ $key ] : null;
+    }
 
     /*
     |--------------------------------------------------------------------------

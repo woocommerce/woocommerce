@@ -2252,15 +2252,15 @@ class WC_AJAX {
 				 * @since 2.4.0
 				 * Note: 3rd arg was added in err. Kept for bw compat. 2.4.3.
 				 */
-				do_action( 'woocommerce_order_partially_refunded', $order_id, $refund->id, $refund->id );
+				do_action( 'woocommerce_order_partially_refunded', $order_id, $refund->get_id(), $refund->get_id() );
 			} else {
-				do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->id );
+				do_action( 'woocommerce_order_fully_refunded', $order_id, $refund->get_id() );
 
-				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order_id, $refund->id ) );
+				$order->update_status( apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order_id, $refund->get_id() ) );
 				$response_data['status'] = 'fully_refunded';
 			}
 
-			do_action( 'woocommerce_order_refunded', $order_id, $refund->id );
+			do_action( 'woocommerce_order_refunded', $order_id, $refund->get_id() );
 
 			// Clear transients
 			wc_delete_shop_order_transients( $order_id );
@@ -2268,7 +2268,7 @@ class WC_AJAX {
 
 		} catch ( Exception $e ) {
 			if ( $refund && is_a( $refund, 'WC_Order_Refund' ) ) {
-				wp_delete_post( $refund->id, true );
+				wp_delete_post( $refund->get_id(), true );
 			}
 
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );

@@ -15,26 +15,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Order_Refund extends WC_Abstract_Order {
 
-	/** @public string Order type */
-	public $order_type = 'refund';
-
-	/** @var string Date */
-	public $date;
-
-	/** @var string Refund reason */
-	public $reason;
-
 	/**
-     * Data array, with defaults.
-     *
-     * @todo when migrating to custom tables, these will be columns
-     * @since 2.6.0
+     * Stores meta data.
      * @var array
      */
-    protected $_refund_data = array(
-		'refund_amount' => '',
-		'refund_reason' => '',
-	);
+    protected $_meta = array(
+		'prices_include_tax' => false,
+		'refund_amount'      => '',
+		'refund_reason'      => '',
+    );
 
     /**
      * Get the refund if ID is passed, otherwise the refund is new and empty.
@@ -44,40 +33,58 @@ class WC_Order_Refund extends WC_Abstract_Order {
 		if ( is_numeric( $refund ) ) {
             $this->read( $refund );
         } elseif ( $order instanceof WC_Order_Refund ) {
-            $this->read( absint( $refund->get_id() ) );
+            $this->read( $refund->get_id() );
         } elseif ( ! empty( $refund->ID ) ) {
             $this->read( absint( $refund->ID ) );
         }
+		$this->set_order_type( 'refund' );
     }
 
 	/**
 	 * Get refunded amount.
-	 *
 	 * @since 2.2
 	 * @return int|float
 	 */
 	public function get_refund_amount() {
-		return apply_filters( 'woocommerce_refund_amount', (double) $this->refund_amount, $this );
+		return apply_filters( 'woocommerce_refund_amount', (double) $this->get_meta( 'refund_amount' ), $this );
 	}
 
 	/**
 	 * Get formatted refunded amount.
-	 *
 	 * @since 2.4
 	 * @return string
 	 */
 	public function get_formatted_refund_amount() {
-		return apply_filters( 'woocommerce_formatted_refund_amount', wc_price( $this->refund_amount, array('currency' => $this->get_order_currency()) ), $this );
+		return apply_filters( 'woocommerce_formatted_refund_amount', wc_price( $this->get_refund_amount(), array( 'currency' => $this->get_order_currency() ) ), $this );
 	}
 
 	/**
 	 * Get refunded amount.
-	 *
 	 * @since 2.2
 	 * @return int|float
 	 */
 	public function get_refund_reason() {
-		return apply_filters( 'woocommerce_refund_reason', $this->reason, $this );
+		return apply_filters( 'woocommerce_refund_reason', $this->get_meta( 'refund_reason' ), $this );
+	}
+
+	/**
+     * Magic __get method for backwards compatibility.
+     * @param string $key
+     * @return mixed
+     */
+    public function __get( $key ) {
+        /**
+         * Maps legacy vars to new getters.
+         */
+        if ( 'reason' === $key ) {
+            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
+            return $this->get_date_completed();
+		} elseif ( 'refund_amount' === $key ) {
+			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
+            return $this->get_date_completed();
+		}
+
+		return parent::__get( $key );
 	}
 
 	/**

@@ -1587,7 +1587,7 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			$order_refund = array(
-				'id'         => $refund->id,
+				'id'         => $refund->get_id(),
 				'created_at' => $this->server->format_datetime( $refund->date ),
 				'amount'     => wc_format_decimal( $refund->get_refund_amount(), 2 ),
 				'reason'     => $refund->get_refund_reason(),
@@ -1669,9 +1669,9 @@ class WC_API_Orders extends WC_API_Resource {
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
-			do_action( 'woocommerce_api_create_order_refund', $refund->id, $order_id, $this );
+			do_action( 'woocommerce_api_create_order_refund', $refund->get_id(), $order_id, $this );
 
-			return $this->get_order_refund( $order_id, $refund->id );
+			return $this->get_order_refund( $order_id, $refund->get_id() );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
