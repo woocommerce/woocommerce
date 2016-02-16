@@ -11,14 +11,14 @@
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-class WC_Order_Item implements ArrayAccess {
+class WC_Order_Item implements ArrayAccess, WC_Data {
 
     /**
 	 * Data array, with defaults.
 	 * @since 2.6.0
 	 * @var array
 	 */
-    protected $data = array(
+    protected $_data = array(
 		'order_id'      => 0,
 		'order_item_id' => 0,
 		'name'          => '',
@@ -35,7 +35,7 @@ class WC_Order_Item implements ArrayAccess {
         if ( 'item_meta_array' === $offset ) {
             $offset = 'meta_data';
         }
-        $this->data[ $offset ] = $value;
+        $this->_data[ $offset ] = $value;
     }
 
     /**
@@ -44,9 +44,9 @@ class WC_Order_Item implements ArrayAccess {
      */
     public function offsetUnset( $offset ) {
         if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
-            $this->data['meta_data'] = array();
+            $this->_data['meta_data'] = array();
         }
-        unset( $this->data[ $offset ] );
+        unset( $this->_data[ $offset ] );
     }
 
     /**
@@ -58,7 +58,7 @@ class WC_Order_Item implements ArrayAccess {
         if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
             return true;
         }
-        return isset( $this->data[ $offset ] );
+        return isset( $this->_data[ $offset ] );
     }
 
     /**
@@ -71,10 +71,10 @@ class WC_Order_Item implements ArrayAccess {
             $offset = 'meta_data';
         }
         elseif( 'item_meta' === $offset ) {
-            $meta_values = wp_list_pluck( $this->data['meta_data'], 'value', 'key' );
+            $meta_values = wp_list_pluck( $this->_data['meta_data'], 'value', 'key' );
             return $meta_values;
         }
-        return isset( $this->data[ $offset ] ) ? $this->data[ $offset ] : null;
+        return isset( $this->_data[ $offset ] ) ? $this->_data[ $offset ] : null;
     }
 
     /**
@@ -97,7 +97,7 @@ class WC_Order_Item implements ArrayAccess {
      */
     private function set_all( $item ) {
         foreach ( $item->get_data() as $key => $value ) {
-            $this->data[ $key ] = $value;
+            $this->_data[ $key ] = $value;
         }
     }
 
@@ -146,7 +146,7 @@ class WC_Order_Item implements ArrayAccess {
 	 * @return array
 	 */
 	public function get_data() {
-		return $this->data;
+		return $this->_data;
 	}
 
     /**
@@ -154,7 +154,7 @@ class WC_Order_Item implements ArrayAccess {
      * @return int
      */
     public function get_id() {
-        return absint( $this->data['order_id'] );
+        return absint( $this->_data['order_id'] );
     }
 
     /**
@@ -162,7 +162,7 @@ class WC_Order_Item implements ArrayAccess {
      * @return int
      */
     public function get_order_item_id() {
-        return absint( $this->data['order_item_id'] );
+        return absint( $this->_data['order_item_id'] );
     }
 
     /**
@@ -170,7 +170,7 @@ class WC_Order_Item implements ArrayAccess {
      * @return string
      */
     public function get_name() {
-        return $this->data['name'];
+        return $this->_data['name'];
     }
 
     /**
@@ -178,7 +178,7 @@ class WC_Order_Item implements ArrayAccess {
      * @return string
      */
     public function get_type() {
-        return $this->data['type'];
+        return $this->_data['type'];
     }
 
     /**
@@ -186,7 +186,7 @@ class WC_Order_Item implements ArrayAccess {
      * @return array
      */
     public function get_meta_data() {
-        return $this->data['meta_data'];
+        return $this->_data['meta_data'];
     }
 
     /*
@@ -200,7 +200,7 @@ class WC_Order_Item implements ArrayAccess {
      * @param int $value
      */
     public function set_order_id( $value ) {
-        $this->data['order_id'] = absint( $value );
+        $this->_data['order_id'] = absint( $value );
     }
 
     /**
@@ -208,7 +208,7 @@ class WC_Order_Item implements ArrayAccess {
      * @param int $value
      */
     public function set_order_item_id( $value ) {
-        $this->data['order_item_id'] = absint( $value );
+        $this->_data['order_item_id'] = absint( $value );
     }
 
     /**
@@ -216,7 +216,7 @@ class WC_Order_Item implements ArrayAccess {
      * @param string $value
      */
     public function set_name( $value ) {
-        $this->data['name'] = wc_clean( $value );
+        $this->_data['name'] = wc_clean( $value );
     }
 
     /**
@@ -224,7 +224,7 @@ class WC_Order_Item implements ArrayAccess {
      * @param string $value
      */
     public function set_type( $value ) {
-        $this->data['type'] = wc_clean( $value );
+        $this->_data['type'] = wc_clean( $value );
 
     }
 
@@ -234,7 +234,7 @@ class WC_Order_Item implements ArrayAccess {
      */
     public function set_meta_data( $data ) {
         foreach ( $data as $key => $value ) {
-            $this->data['meta_data'][ $key ] = $value;
+            $this->_data['meta_data'][ $key ] = $value;
         }
     }
 
@@ -244,10 +244,10 @@ class WC_Order_Item implements ArrayAccess {
      */
     public function add_meta_data( $key, $value, $unique = false ) {
         if ( $unique ) {
-            $meta_ids = array_keys( wp_list_pluck( $this->data['meta_data'], 'key' ), $key );
-            $this->data['meta_data'] = array_diff_key( $this->data['meta_data'], array_fill_keys( $meta_ids, '' ) );
+            $meta_ids = array_keys( wp_list_pluck( $this->_data['meta_data'], 'key' ), $key );
+            $this->_data['meta_data'] = array_diff_key( $this->_data['meta_data'], array_fill_keys( $meta_ids, '' ) );
         }
-        $this->data['meta_data'][] = array(
+        $this->_data['meta_data'][] = array(
             'key'   => $key,
             'value' => $value
         );
@@ -260,8 +260,8 @@ class WC_Order_Item implements ArrayAccess {
      * @param  int $meta_id
      */
     public function update_meta_data( $key, $value, $meta_id = '' ) {
-        if ( $meta_id && isset( $this->data['meta_data'][ $meta_id ] ) ) {
-            $this->data['meta_data'][ $meta_id ] = array(
+        if ( $meta_id && isset( $this->_data['meta_data'][ $meta_id ] ) ) {
+            $this->_data['meta_data'][ $meta_id ] = array(
                 'key'   => $key,
                 'value' => $value
             );
@@ -282,9 +282,8 @@ class WC_Order_Item implements ArrayAccess {
     /**
      * Insert data into the database.
 	 * @since 2.6.0
-     * @access private
      */
-    private function create() {
+    public function create() {
         global $wpdb;
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
             'order_item_name' => $this->get_name(),
@@ -297,9 +296,8 @@ class WC_Order_Item implements ArrayAccess {
     /**
      * Update data in the database.
 	 * @since 2.6.0
-	 * @access private
      */
-    private function update() {
+    public function update() {
         global $wpdb;
 		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
             'order_item_name' => $this->get_name(),
@@ -311,10 +309,9 @@ class WC_Order_Item implements ArrayAccess {
 	/**
      * Read from the database.
 	 * @since 2.6.0
-     * @access protected
      * @param int|object $item ID of object to read, or already queried object.
      */
-    protected function read( $item ) {
+    public function read( $item ) {
 		global $wpdb;
 
         if ( is_numeric( $item ) && ! empty( $item ) ) {
@@ -338,7 +335,7 @@ class WC_Order_Item implements ArrayAccess {
      * Read Meta Data from the database. Ignore any internal properties.
      */
     protected function read_meta_data() {
-        $this->data['meta_data'] = array();
+        $this->_data['meta_data'] = array();
 
         if ( $this->get_order_item_id() ) {
             // Get cache key - uses get_cache_prefix to invalidate when needed
@@ -353,7 +350,7 @@ class WC_Order_Item implements ArrayAccess {
                     if ( in_array( $metadata_row->meta_key, $this->get_internal_meta_keys() ) ) {
                         continue;
                     }
-                    $this->data['meta_data'][ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
+                    $this->_data['meta_data'][ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
                 }
                 wp_cache_set( $cache_key, $item_meta_array, 'orders' );
             }
@@ -363,9 +360,8 @@ class WC_Order_Item implements ArrayAccess {
     /**
      * Save data to the database.
 	 * @since 2.6.0
-     * @access protected
      */
-    protected function save() {
+    public function save() {
         if ( ! $this->get_order_item_id() ) {
 			$this->create();
         } else {
@@ -374,11 +370,10 @@ class WC_Order_Item implements ArrayAccess {
 	}
 
     /**
-     * Delte data from the database.
+     * Delete data from the database.
 	 * @since 2.6.0
-	 * @access protected
      */
-    protected function delete() {
+    public function delete() {
         global $wpdb;
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_order_item_id() ) );
     }

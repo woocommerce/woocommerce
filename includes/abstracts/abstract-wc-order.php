@@ -19,31 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Order implements WC_Data {
 
     /**
-     * Stores data about status changes so relevant hooks can be fired.
-     * @var bool|array
-     */
-    protected $_status_transition = false;
-
-    /**
-     * Stores meta data.
-     * @var array
-     */
-    protected $_meta = array();
-
-    /**
-     * Stores line item objects.
-     * @var array
-     */
-    protected $_items = array(
-        'line_items'     => array(),
-		'tax_lines'      => array(),
-		'shipping_lines' => array(),
-		'fees'           => array(),
-		'fee_lines'      => array(),
-		'coupon_lines'   => array(),
-    );
-
-    /**
      * Data array, with defaults.
      *
      * @todo when migrating to custom tables, these will be columns
@@ -93,9 +68,14 @@ abstract class WC_Abstract_Order implements WC_Data {
 		'cart_tax'             => 0, // cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
 		'order_total'          => 0,
 		'order_tax'            => 0, // Sum of all taxes.
+    );
 
-		// These will be meta when moving to custom data
-		'payment_method'       => '',
+    /**
+     * Stores meta data.
+     * @var array
+     */
+    protected $_meta = array(
+        'payment_method'       => '',
 		'payment_method_title' => '',
 		'transaction_id'       => '',
 		'customer_ip_address'  => '',
@@ -105,8 +85,14 @@ abstract class WC_Abstract_Order implements WC_Data {
 		'prices_include_tax'   => false,
 		'customer_note'        => '',
 		'date_completed'       => '',
-		'date_paid'            => ''
+		'date_paid'            => '',
     );
+
+    /**
+     * Stores data about status changes so relevant hooks can be fired.
+     * @var bool|array
+     */
+    protected $_status_transition = false;
 
     /**
      * Get the order if ID is passed, otherwise the order is new and empty.
@@ -153,7 +139,17 @@ abstract class WC_Abstract_Order implements WC_Data {
      * @return array
      */
     public function get_data() {
-        return $this->_data;
+        return array_merge(
+            $this->_data,
+            $this->_meta,
+            array(
+                'line_items'     => $this->get_items( 'line_item' ),
+                'tax_lines'      => $this->get_items( 'tax' ),
+                'shipping_lines' => $this->get_items( 'shipping' ),
+                'fee_lines'      => $this->get_items( 'fee' ),
+                'coupon_lines'   => $this->get_items( 'coupon' ),
+            )
+        );
     }
 
     /**

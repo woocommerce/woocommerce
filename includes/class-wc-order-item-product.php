@@ -15,7 +15,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @since 2.6.0
 	 * @var array
 	 */
-    protected $data = array(
+    protected $_data = array(
         'order_id'      => 0,
 		'order_item_id' => 0,
         'name'          => '',
@@ -74,7 +74,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
     /**
      * Read/populate data properties specific to this order item.
      */
-    protected function read( $id ) {
+    public function read( $id ) {
         parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_product_id( get_metadata( 'order_item', $this->get_order_item_id(), '_product_id', true ) );
@@ -92,7 +92,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
     /**
      * Save properties specific to this order item.
      */
-    protected function save() {
+    public function save() {
         parent::save();
         if ( $this->get_order_item_id() ) {
             wc_update_order_item_meta( $this->get_order_item_id(), '_product_id', $this->get_product_id() );
@@ -147,7 +147,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param int $value
      */
     public function set_qty( $value ) {
-        $this->data['qty'] = wc_stock_amount( $value );
+        $this->_data['qty'] = wc_stock_amount( $value );
     }
 
     /**
@@ -155,7 +155,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param string $value
      */
     public function set_tax_class( $value ) {
-        $this->data['tax_class'] = $value;
+        $this->_data['tax_class'] = $value;
     }
 
     /**
@@ -163,7 +163,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param int $value
      */
     public function set_product_id( $value ) {
-        $this->data['product_id'] = absint( $value );
+        $this->_data['product_id'] = absint( $value );
     }
 
     /**
@@ -171,7 +171,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param int $value
      */
     public function set_variation_id( $value ) {
-        $this->data['variation_id'] = absint( $value );
+        $this->_data['variation_id'] = absint( $value );
     }
 
     /**
@@ -179,7 +179,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param string $value
      */
     public function set_subtotal( $value ) {
-        $this->data['subtotal'] = wc_format_decimal( $value );
+        $this->_data['subtotal'] = wc_format_decimal( $value );
     }
 
     /**
@@ -187,7 +187,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param string $value
      */
     public function set_total( $value ) {
-        $this->data['total'] = wc_format_decimal( $value );
+        $this->_data['total'] = wc_format_decimal( $value );
     }
 
     /**
@@ -195,7 +195,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param string $value
      */
     public function set_subtotal_tax( $value ) {
-        $this->data['subtotal_tax'] = wc_format_decimal( $value );
+        $this->_data['subtotal_tax'] = wc_format_decimal( $value );
     }
 
     /**
@@ -203,7 +203,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @param string $value
      */
     public function set_total_tax( $value ) {
-        $this->data['total_tax'] = wc_format_decimal( $value );
+        $this->_data['total_tax'] = wc_format_decimal( $value );
     }
 
     /**
@@ -220,7 +220,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
             $tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
             $tax_data['subtotal'] = array_map( 'wc_format_decimal', $raw_tax_data['subtotal'] );
         }
-        $this->data['taxes'] = $tax_data;
+        $this->_data['taxes'] = $tax_data;
     }
 
     /**
@@ -229,7 +229,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      */
     public function set_variations( $data ) {
         foreach ( $data as $key => $value ) {
-            $this->data['meta_data'][ str_replace( 'attribute_', '', $key ) ] = $value;
+            $this->_data['meta_data'][ str_replace( 'attribute_', '', $key ) ] = $value;
         }
     }
 
@@ -252,7 +252,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return int
      */
     public function get_product_id() {
-        return absint( $this->data['product_id'] );
+        return absint( $this->_data['product_id'] );
     }
 
     /**
@@ -260,7 +260,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return int
      */
     public function get_variation_id() {
-        return absint( $this->data['variation_id'] );
+        return absint( $this->_data['variation_id'] );
     }
 
     /**
@@ -268,7 +268,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return int
      */
     public function get_qty() {
-        return wc_stock_amount( $this->data['qty'] );
+        return wc_stock_amount( $this->_data['qty'] );
     }
 
     /**
@@ -276,7 +276,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return string
      */
     public function get_tax_class() {
-        return $this->data['tax_class'];
+        return $this->_data['tax_class'];
     }
 
     /**
@@ -284,7 +284,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return string
      */
     public function get_subtotal() {
-        return wc_format_decimal( $this->data['subtotal'] );
+        return wc_format_decimal( $this->_data['subtotal'] );
     }
 
     /**
@@ -292,7 +292,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return string
      */
     public function get_subtotal_tax() {
-        return wc_format_decimal( $this->data['subtotal_tax'] );
+        return wc_format_decimal( $this->_data['subtotal_tax'] );
     }
 
     /**
@@ -300,7 +300,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return string
      */
     public function get_total() {
-        return wc_format_decimal( $this->data['total'] );
+        return wc_format_decimal( $this->_data['total'] );
     }
 
     /**
@@ -308,7 +308,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return string
      */
     public function get_total_tax() {
-        return wc_format_decimal( $this->data['total_tax'] );
+        return wc_format_decimal( $this->_data['total_tax'] );
     }
 
     /**
@@ -316,7 +316,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return array
      */
     public function get_taxes() {
-        return $this->data['taxes'];
+        return $this->_data['taxes'];
     }
 
     /**
@@ -324,6 +324,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return array of key/value pairs
      */
     public function get_meta_data() {
-        return $this->data['meta_data'];
+        return $this->_data['meta_data'];
     }
 }

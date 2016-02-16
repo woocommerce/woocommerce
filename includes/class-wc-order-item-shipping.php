@@ -15,7 +15,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @since 2.6.0
 	 * @var array
 	 */
-    protected $data = array(
+    protected $_data = array(
         'order_id'      => 0,
 		'order_item_id' => 0,
         'name'          => '',
@@ -55,7 +55,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
     /**
      * Read/populate data properties specific to this order item.
      */
-    protected function read( $id ) {
+    public function read( $id ) {
         parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_method_id( get_metadata( 'order_item', $this->get_order_item_id(), 'method_id', true ) );
@@ -68,7 +68,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
     /**
      * Save properties specific to this order item.
      */
-    protected function save() {
+    public function save() {
         parent::save();
         if ( $this->get_order_item_id() ) {
             wc_update_order_item_meta( $this->get_order_item_id(), 'method_id', $this->get_method_id() );
@@ -97,7 +97,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @param string $value
      */
     public function set_method_id( $value ) {
-        $this->data['method_id'] = wc_clean( $value );
+        $this->_data['method_id'] = wc_clean( $value );
     }
 
     /**
@@ -105,7 +105,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @param string $value
      */
     public function set_total( $value ) {
-        $this->data['total'] = wc_format_decimal( $value );
+        $this->_data['total'] = wc_format_decimal( $value );
     }
 
     /**
@@ -113,7 +113,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @param string $value
      */
     public function set_total_tax( $value ) {
-        $this->data['total_tax'] = wc_format_decimal( $value );
+        $this->_data['total_tax'] = wc_format_decimal( $value );
     }
 
     /**
@@ -130,7 +130,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
         if ( ! empty( $raw_tax_data['total'] ) ) {
             $tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
         }
-        $this->data['taxes'] = $tax_data;
+        $this->_data['taxes'] = $tax_data;
         $this->set_total_tax( array_sum( $tax_data['total'] ) );
     }
 
@@ -161,7 +161,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @return string
      */
     public function get_total() {
-        return wc_format_decimal( $this->data['total'] );
+        return wc_format_decimal( $this->_data['total'] );
     }
 
     /**
@@ -169,7 +169,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @return string
      */
     public function get_total_tax() {
-        return wc_format_decimal( $this->data['total_tax'] );
+        return wc_format_decimal( $this->_data['total_tax'] );
     }
 
     /**
@@ -177,6 +177,6 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @return array
      */
     public function get_taxes() {
-        return $this->data['taxes'];
+        return $this->_data['taxes'];
     }
 }

@@ -15,7 +15,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 * @since 2.6.0
 	 * @var array
 	 */
-    protected $data = array(
+    protected $_data = array(
         'order_id'           => 0,
 		'order_item_id'      => 0,
         'rate_code'          => '',
@@ -29,7 +29,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
     /**
      * Read/populate data properties specific to this order item.
      */
-    protected function read( $id ) {
+    public function read( $id ) {
         parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_rate_id( get_metadata( 'order_item', $this->get_order_item_id(), 'rate_id', true ) );
@@ -43,7 +43,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
     /**
      * Save properties specific to this order item.
      */
-    protected function save() {
+    public function save() {
         parent::save();
         if ( $this->get_order_item_id() ) {
             wc_update_order_item_meta( $this->get_order_item_id(), 'rate_id', $this->get_rate_id() );
@@ -73,7 +73,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @param string $value
      */
     public function set_name( $value ) {
-        $this->data['rate_code'] = wc_clean( $value );
+        $this->_data['rate_code'] = wc_clean( $value );
     }
 
     /**
@@ -89,7 +89,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @param int $value
      */
     public function set_rate_id( $value ) {
-        $this->data['rate_id'] = absint( $value );
+        $this->_data['rate_id'] = absint( $value );
     }
 
     /**
@@ -97,7 +97,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @param string $value
      */
     public function set_tax_amount( $value ) {
-        $this->data['tax_amount'] = wc_format_decimal( $value );
+        $this->_data['tax_amount'] = wc_format_decimal( $value );
     }
 
     /**
@@ -105,7 +105,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @param string $value
      */
     public function set_shipping_tax_amount( $value ) {
-        $this->data['shipping_tax_amount'] = wc_format_decimal( $value );
+        $this->_data['shipping_tax_amount'] = wc_format_decimal( $value );
     }
 
     /**
@@ -113,7 +113,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @param bool $value
      */
     public function set_compound( $value ) {
-        $this->data['compound'] = (bool) $value;
+        $this->_data['compound'] = (bool) $value;
     }
 
     /*
@@ -143,7 +143,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @return int
      */
     public function get_rate_id() {
-        return absint( $this->data['rate_id'] );
+        return absint( $this->_data['rate_id'] );
     }
 
     /**
@@ -151,7 +151,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @return string
      */
     public function get_tax_amount() {
-        return wc_format_decimal( $this->data['tax_amount'] );
+        return wc_format_decimal( $this->_data['tax_amount'] );
     }
 
     /**
@@ -159,7 +159,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @return string
      */
     public function get_shipping_tax_amount() {
-        return wc_format_decimal( $this->data['shipping_tax_amount'] );
+        return wc_format_decimal( $this->_data['shipping_tax_amount'] );
     }
 
     /**
@@ -167,6 +167,6 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @return bool
      */
     public function get_compound() {
-        return (bool) $this->data['compound'];
+        return (bool) $this->_data['compound'];
     }
 }

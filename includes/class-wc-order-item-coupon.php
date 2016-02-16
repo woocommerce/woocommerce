@@ -15,7 +15,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @since 2.6.0
 	 * @var array
 	 */
-    protected $data = array(
+    protected $_data = array(
         'order_id'      => 0,
 		'order_item_id' => 0,
         'code'          => '',
@@ -54,7 +54,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
     /**
      * Read/populate data properties specific to this order item.
      */
-    protected function read( $id ) {
+    public function read( $id ) {
         parent::read( $id );
         if ( $this->get_order_item_id() ) {
             $this->set_discount( get_metadata( 'order_item', $this->get_order_item_id(), 'discount_amount', true ) );
@@ -65,7 +65,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
     /**
      * Save properties specific to this order item.
      */
-    protected function save() {
+    public function save() {
         parent::save();
         if ( $this->get_order_item_id() ) {
             wc_update_order_item_meta( $this->get_order_item_id(), 'discount_amount', $this->get_discount() );
@@ -92,7 +92,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * @param string $value
      */
     public function set_name( $value ) {
-        $this->data['code'] = wc_clean( $value );
+        $this->_data['code'] = wc_clean( $value );
     }
 
     /**
@@ -100,7 +100,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * @param string $value
      */
     public function set_discount( $value ) {
-        $this->data['discount'] =  wc_format_decimal( $value );
+        $this->_data['discount'] =  wc_format_decimal( $value );
     }
 
     /**
@@ -108,7 +108,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * @param string $value
      */
     public function set_discount_tax( $value ) {
-        $this->data['discount_tax'] = wc_format_decimal( $value );
+        $this->_data['discount_tax'] = wc_format_decimal( $value );
     }
 
     /*
@@ -130,7 +130,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * @return string
      */
     public function get_name() {
-        return $this->data['code'];
+        return $this->_data['code'];
     }
 
     /**
@@ -146,7 +146,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * @return string
      */
     public function get_discount() {
-        return  wc_format_decimal( $this->data['discount'] );
+        return  wc_format_decimal( $this->_data['discount'] );
     }
 
     /**
@@ -154,6 +154,6 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      * @return string
      */
     public function get_discount_tax() {
-        return  wc_format_decimal( $this->data['discount_tax'] );
+        return  wc_format_decimal( $this->_data['discount_tax'] );
     }
 }
