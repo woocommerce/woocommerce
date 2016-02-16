@@ -1964,10 +1964,15 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$term = wc_clean( stripslashes( $_GET['term'] ) );
+		$term    = wc_clean( stripslashes( $_GET['term'] ) );
+		$exclude = array();
 
 		if ( empty( $term ) ) {
 			die();
+		}
+
+		if ( ! empty( $_GET['exclude'] ) ) {
+			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
 		}
 
 		$found_customers = array();
@@ -1978,6 +1983,7 @@ class WC_AJAX {
 			'fields'         => 'all',
 			'orderby'        => 'display_name',
 			'search'         => '*' . $term . '*',
+			'exclude'        => $exclude,
 			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
 		) ) );
 
