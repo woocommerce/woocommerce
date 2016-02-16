@@ -165,9 +165,10 @@ class WC_Payment_Gateway_Form {
 		$fields         = array();
 		$cvc_class      = '';
 
-		if ( $this->gateway->supports( 'credit_card_form_cvc_on_saved_method' ) ) {
-			$cvc_class = ' show-if-payment-method-selected';
-		}
+		$cvc_field = '<p class="form-row form-row-wide">
+			<label for="' . esc_attr( $this->gateway->id ) . '-card-cvc">' . __( 'Card Code', 'woocommerce' ) . ' <span class="required">*</span></label>
+			<input id="' . esc_attr( $this->gateway->id ) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc" type="text" autocomplete="off" placeholder="' . esc_attr__( 'CVC', 'woocommerce' ) . '" name="' . esc_attr( $this->gateway->id ) . '-card-cvc" style="width:100px" />
+		</p>';
 
 		$default_fields = array(
 			'card-number-field' => '<p class="form-row form-row-wide">
@@ -177,12 +178,12 @@ class WC_Payment_Gateway_Form {
 			'card-expiry-field' => '<p class="form-row form-row-first">
 				<label for="' . esc_attr( $this->gateway->id ) . '-card-expiry">' . __( 'Expiry (MM/YY)', 'woocommerce' ) . ' <span class="required">*</span></label>
 				<input id="' . esc_attr( $this->gateway->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" type="text" autocomplete="off" placeholder="' . esc_attr__( 'MM / YY', 'woocommerce' ) . '" name="' . esc_attr( $this->gateway->id ) . '-card-expiry" />
-			</p>',
-			'card-cvc-field' => '<p class="form-row form-row-last' . esc_attr( $cvc_class ) . '">
-				<label for="' . esc_attr( $this->gateway->id ) . '-card-cvc">' . __( 'Card Code', 'woocommerce' ) . ' <span class="required">*</span></label>
-				<input id="' . esc_attr( $this->gateway->id ) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc" type="text" autocomplete="off" placeholder="' . esc_attr__( 'CVC', 'woocommerce' ) . '" name="' . esc_attr( $this->gateway->id ) . '-card-cvc" />
-			</p>',
+			</p>'
 		);
+
+		if ( ! $this->gateway->supports( 'credit_card_form_cvc_on_saved_method' ) ) {
+			$default_fields['card-cvc-field'] = $cvc_field;
+		}
 
 		$fields = wp_parse_args( $fields, apply_filters( 'woocommerce_credit_card_form_fields', $default_fields, $this->gateway->id ) );
 		?>
@@ -196,7 +197,11 @@ class WC_Payment_Gateway_Form {
 			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->gateway->id ); ?>
 			<div class="clear"></div>
-		</fieldset><?php
+		</fieldset>
+		<?php
+		if ( $this->gateway->supports( 'credit_card_form_cvc_on_saved_method' ) ) {
+			echo '<fieldset>' . $cvc_field . '</fieldset>';
+		}
 	}
 
 	/**

@@ -37,7 +37,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'subscription_date_changes',
 			'multiple_subscriptions',
 			'credit_card_form',
-			'credit_card_form_cvc_on_saved_method',
 			'tokenization',
 			'refunds',
 			'pre-orders'
