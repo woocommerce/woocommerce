@@ -1983,7 +1983,6 @@ class WC_AJAX {
 			'fields'         => 'all',
 			'orderby'        => 'display_name',
 			'search'         => '*' . $term . '*',
-			'exclude'        => $exclude,
 			'search_columns' => array( 'ID', 'user_login', 'user_email', 'user_nicename' )
 		) ) );
 
@@ -1993,7 +1992,9 @@ class WC_AJAX {
 
 		if ( ! empty( $customers ) ) {
 			foreach ( $customers as $customer ) {
-				$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+				if ( ! in_array( $customer->ID, $exclude ) ) {
+					$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+				}
 			}
 		}
 
