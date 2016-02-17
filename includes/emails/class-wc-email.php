@@ -704,7 +704,8 @@ class WC_Email extends WC_Settings_API {
 		// Do admin actions.
 		$this->admin_actions();
 		?>
-		<h2><?php echo esc_html( $this->get_title() ); ?></h2>
+		<h2><?php echo esc_html( $this->get_title() ); ?> <?php wc_back_link( __( 'Return to Emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?></h2>
+
 		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); ?>
 
 		<?php
