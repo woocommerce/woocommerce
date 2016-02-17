@@ -1618,10 +1618,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
                 'total'    => array()
             )
         ) );
-        $item = new WC_Order_Item_Product();
+        $item    = new WC_Order_Item_Product();
         $item_id = $this->update_product( $item, $product, $args );
 
-		do_action( 'woocommerce_order_add_product', $this->get_id(), $item->get_order_item_id(), $product, $qty, $args );
+		do_action( 'woocommerce_order_add_product', $this->get_id(), $item_id, $product, $qty, $args );
 
 		return $item_id;
     }
@@ -1638,61 +1638,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function update_product( $item, $product, $args ) {
-        if ( is_numeric( $item ) ) {
+		if ( is_numeric( $item ) ) {
             $item = $this->get_item( $item );
         }
-
-        if ( ! is_object( $product ) || ! $item->is_type( 'line_item' ) ) {
+        if ( ! is_object( $item ) || ! $item->is_type( 'line_item' ) ) {
             return false;
         }
-
         if ( ! $this->get_id() ) {
-            $this->save();
+            $this->save(); // Order must exist
         }
 
-		$item->set_order_id( $this->get_id() );
-
-        if ( ! $item->get_order_item_id() ) {
+		if ( ! $item->get_order_item_id() ) {
             $inserting = true;
         } else {
             $inserting = false;
         }
 
-        if ( isset( $args['name'] ) ) {
-            $item->set_name( $args['name'] );
-        }
-
-        if ( isset( $args['qty'] ) ) {
-            $item->set_qty( $args['qty'] );
-
-            if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-                $item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
-            }
-
-            $item->set_subtotal( $product->get_price_excluding_tax( $args['qty'] ) );
-            $item->set_total( $product->get_price_excluding_tax( $args['qty'] ) );
-        }
-
-        if ( isset( $args['tax_class'] ) ) {
-            $item->set_tax_class( $args['tax_class'] );
-        }
-
-        if ( isset( $args['product_id'] ) ) {
-            $item->set_product_id( $args['product_id'] );
-        }
-
-        if ( isset( $args['variation_id'] ) ) {
-            $item->set_variation_id( $args['variation_id'] );
-        }
-
-        if ( isset( $args['variation'] ) && is_array( $args['variation'] ) ) {
-            foreach ( $args['variation'] as $key => $value ) {
-                $item->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
-            }
-        }
-
+		// BW compatibility with old args
         if ( isset( $args['totals'] ) ) {
-            // BW compatibility with old args
             if ( isset( $args['totals']['subtotal'] ) ) {
                 $args['subtotal'] = $args['totals']['subtotal'];
             }
@@ -1710,22 +1673,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             }
         }
 
-        if ( isset( $args['subtotal'] ) ) {
-            $item->set_subtotal( $args['subtotal'] );
-        }
-        if ( isset( $args['total'] ) ) {
-            $item->set_total( $args['total'] );
-        }
-        if ( isset( $args['subtotal_tax'] ) ) {
-            $item->set_subtotal_tax( $args['subtotal_tax'] );
-        }
-        if ( isset( $args['total_tax'] ) ) {
-            $item->set_total_tax( $args['total_tax'] );
-        }
-        if ( isset( $args['taxes'] ) ) {
-            $item->set_taxes( $args['taxes'] );
-        }
+		// Handly qty if set
+		if ( isset( $args['qty'] ) ) {
+			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
+				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
+			}
+			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : $product->get_price_excluding_tax( $args['qty'] );
+			$args['total']    = $args['total'] ? $args['total'] : $product->get_price_excluding_tax( $args['qty'] );
+		}
 
+		$item->set_order_id( $this->get_id() );
+		$item->set_all( $args );
         $item->save();
 
         if ( ! $inserting ) {

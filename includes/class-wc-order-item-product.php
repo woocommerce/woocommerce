@@ -265,7 +265,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * Set variation data (stored as meta data - write only).
      * @param array $data Key/Value pairs
      */
-    public function set_variations( $data ) {
+    public function set_variation( $data ) {
         foreach ( $data as $key => $value ) {
             $this->_data['meta_data'][ str_replace( 'attribute_', '', $key ) ] = $value;
         }
