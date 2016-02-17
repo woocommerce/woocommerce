@@ -18,13 +18,14 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
     protected $_data = array(
         'order_id'      => 0,
 		'order_item_id' => 0,
-        'name'          => '',
+        'method_title'  => '',
         'method_id'     => '',
         'total'         => 0,
         'total_tax'     => 0,
         'taxes'         => array(
             'total' => array()
-        )
+        ),
+        'meta_data'     => array(),
     );
 
     /**
@@ -35,7 +36,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      */
     public function offsetGet( $offset ) {
         if ( 'cost' === $offset ) {
-            $offset = 'subtotal';
+            $offset = 'total';
         }
         return parent::offsetGet( $offset );
     }
@@ -93,6 +94,22 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	*/
 
     /**
+     * Set order item name.
+     * @param string $value
+     */
+    public function set_name( $value ) {
+        $this->set_method_title( $value );
+    }
+
+    /**
+     * Set code.
+     * @param string $value
+     */
+    public function set_method_title( $value ) {
+        $this->_data['method_title'] = wc_clean( $value );
+    }
+
+    /**
      * Set shipping method id.
      * @param string $value
      */
@@ -146,6 +163,22 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      */
     public function get_type() {
         return 'shipping';
+    }
+
+    /**
+     * Get order item name.
+     * @return string
+     */
+    public function get_name() {
+        return $this->get_method_title();
+    }
+
+    /**
+     * Get title.
+     * @return string
+     */
+    public function get_method_title() {
+        return $this->_data['method_title'];
     }
 
     /**

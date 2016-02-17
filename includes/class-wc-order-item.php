@@ -23,7 +23,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 		'order_item_id' => 0,
 		'name'          => '',
 		'type'          => '',
-        'meta_data'     => array(),
+        'meta_data'     => array(), // @todo handle save
 	);
 
     /**

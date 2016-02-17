@@ -1124,7 +1124,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
     /**
      * Sets order tax (sum of cart and shipping tax). Used internaly only.
-     * @access protected
      * @param string $value
      */
     protected function set_order_tax( $value ) {
@@ -1250,7 +1249,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     /**
      * Insert data into the database.
      * @since 2.6.0
-     * @access protected
      */
     public function create() {
         // Set random key
@@ -1385,7 +1383,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     /**
      * Update data in the database.
      * @since 2.6.0
-     * @access protected
      */
     public function update() {
         global $wpdb;
@@ -1470,7 +1467,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     /**
      * Save data to the database.
      * @since 2.6.0
-     * @access protected
      */
     public function save() {
         if ( ! $this->get_id() ) {
@@ -1761,7 +1757,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             'discount_tax' => $discount_tax,
         ) );
 
-		do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item->get_order_item_id(), $code, $discount, $discount_tax );
+		do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item_id, $code, $discount, $discount_tax );
 
 		return $item_id;
     }
@@ -1817,18 +1813,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function add_shipping( $shipping_rate ) {
-        $args = array(
+        $item    = new WC_Order_Item_Shipping();
+        $item_id = $this->update_shipping( $item, array(
             'method_title' => $shipping_rate->label,
             'method_id'    => $shipping_rate->id,
-            'cost'         => wc_format_decimal( $shipping_rate->cost ),
+            'total'        => wc_format_decimal( $shipping_rate->cost ),
             'taxes'        => $shipping_rate->taxes,
-            'meta'         => $shipping_rate->get_meta_data(),
-        );
+            'meta_data'    => $shipping_rate->get_meta_data(),
+        ) );
 
-        $item = new WC_Order_Item_Shipping();
-        $item_id = $this->update_shipping( $item, $args );
-
-		do_action( 'woocommerce_order_add_shipping', $this->get_id(), $item->get_order_item_id(), $shipping_rate );
+		do_action( 'woocommerce_order_add_shipping', $this->get_id(), $item_id, $shipping_rate );
 
 		return $item_id;
     }
@@ -1847,53 +1841,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         if ( is_numeric( $item ) ) {
             $item = $this->get_item( $item );
         }
-
         if ( ! is_object( $item ) || ! $item->is_type( 'shipping' ) ) {
             return false;
         }
-
         if ( ! $this->get_id() ) {
-            $this->save();
+            $this->save(); // Order must exist
         }
 
-		$item->set_order_id( $this->get_id() );
-
-        if ( ! $item->get_order_item_id() ) {
+		if ( ! $item->get_order_item_id() ) {
             $inserting = true;
         } else {
             $inserting = false;
         }
 
-        if ( isset( $args['method_title'] ) ) {
-            $item->set_name( $args['method_title'] );
-        }
-
-        if ( isset( $args['method_id'] ) ) {
-            $item->set_method_id( $args['method_id'] );
-        }
-
-        if ( isset( $args['cost'] ) ) {
-            // Get old cost before updating
-            $old_cost = $item->get_total();
-
-            // Update
-            $item->set_total( $args['cost'] );
-
-            // Update total
-            $this->set_total( $this->get_total_shipping() - wc_format_decimal( $old_cost ) + $item->get_total(), 'shipping' );
-        }
-
-        if ( isset( $args['taxes'] ) && is_array( $args['taxes'] ) ) {
-            $item->set_taxes( $args['taxes'] );
-        }
-
-        if ( isset( $args['meta'] ) && is_array( $args['meta'] ) ) {
-			foreach ( $args['meta'] as $key => $value ) {
-				$item->update_meta_data( $key, $value );
-			}
+		// BW compatibility for old args
+		if ( isset( $args['cost'] ) ) {
+			$args['total'] = $args['cost'];
 		}
 
-        $item->save();
+		$item->set_order_id( $this->get_id() );
+		$item->set_all( $args );
+		$item->save();
+		$this->calculate_shipping();
 
         if ( ! $inserting ) {
             do_action( 'woocommerce_order_update_shipping', $this->get_id(), $item->get_order_item_id(), $args );
