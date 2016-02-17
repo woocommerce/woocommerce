@@ -765,18 +765,22 @@ class WC_Checkout {
 			}
 
 			// Get the billing_ and shipping_ address fields
-			$address_fields = array_merge( WC()->countries->get_address_fields(), WC()->countries->get_address_fields( '', 'shipping_' ) );
+			if ( isset( $this->checkout_fields['shipping'] ) && isset( $this->checkout_fields['billing'] ) ) {
 
-			if ( is_user_logged_in() && array_key_exists( $input, $address_fields ) ) {
-				$current_user = wp_get_current_user();
+				$address_fields = array_merge( $this->checkout_fields['billing'], $this->checkout_fields['shipping'] );
 
-				if ( $meta = get_user_meta( $current_user->ID, $input, true ) ) {
-					return $meta;
+				if ( is_user_logged_in() && is_array( $address_fields ) && array_key_exists( $input, $address_fields ) ) {
+					$current_user = wp_get_current_user();
+
+					if ( $meta = get_user_meta( $current_user->ID, $input, true ) ) {
+						return $meta;
+					}
+
+					if ( $input == 'billing_email' ) {
+						return $current_user->user_email;
+					}
 				}
 
-				if ( $input == 'billing_email' ) {
-					return $current_user->user_email;
-				}
 			}
 
 			switch ( $input ) {

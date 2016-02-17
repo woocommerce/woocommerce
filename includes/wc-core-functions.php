@@ -23,6 +23,7 @@ include( 'wc-formatting-functions.php' );
 include( 'wc-order-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
+include( 'wc-account-functions.php' );
 include( 'wc-term-functions.php' );
 include( 'wc-attribute-functions.php' );
 
