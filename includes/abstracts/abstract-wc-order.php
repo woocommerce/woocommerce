@@ -1937,27 +1937,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * Order must be saved prior to adding items.
      * @since 2.2
      * @param int tax_rate_id
+     * @param int $tax_total
+     * @param int $shipping_tax_total
      * @return int updated order item ID
      */
-    public function add_tax( $tax_rate_id, $tax_amount = 0, $shipping_tax_amount = 0 ) {
-        if ( ! $code = WC_Tax::get_rate_code( $tax_rate_id ) ) {
-            return false;
-        }
+    public function add_tax( $tax_rate_id, $tax_total = 0, $shipping_tax_total = 0 ) {
+        if ( $code = WC_Tax::get_rate_code( $tax_rate_id ) ) {
+	        $item    = new WC_Order_Item_Tax();
+	        $item_id = $this->update_tax( $item, array(
+	            'rate_code'          => $code,
+	            'rate_id'            => $tax_rate_id,
+	            'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
+	            'compound'           => WC_Tax::is_compound( $tax_rate_id ),
+	            'tax_total'          => $tax_total,
+	            'shipping_tax_total' => $shipping_tax_total
+	        ) );
 
-        $args = array(
-            'rate_code'          => $code,
-            'rate_id'            => $tax_rate_id,
-            'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-            'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-            'tax_total'          => $tax_amount,
-            'shipping_tax_total' => $shipping_tax_amount
-        );
-        $item = new WC_Order_Item_Tax();
-        $item_id = $this->update_tax( $item, $args );
+	        do_action( 'woocommerce_order_add_tax', $this->get_id(), $item_id, $tax_rate_id, $tax_total, $shipping_tax_total );
 
-        do_action( 'woocommerce_order_add_tax', $this->get_id(), $item->get_order_item_id(), $tax_rate_id, $tax_amount, $shipping_tax_amount );
-
-        return $item_id;
+	        return $item_id;
+		} else {
+			return false;
+		}
     }
 
     /**
@@ -1970,51 +1971,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function update_tax( $item, $args ) {
-        if ( is_numeric( $item ) ) {
+		if ( is_numeric( $item ) ) {
             $item = $this->get_item( $item );
         }
-
         if ( ! is_object( $item ) || ! $item->is_type( 'tax' ) ) {
             return false;
         }
-
         if ( ! $this->get_id() ) {
-            $this->save();
+            $this->save(); // Order must exist
         }
 
-		$item->set_order_id( $this->get_id() );
-
-        if ( ! $item->get_order_item_id() ) {
+		if ( ! $item->get_order_item_id() ) {
             $inserting = true;
         } else {
             $inserting = false;
         }
 
-        if ( isset( $args['rate_code'] ) ) {
-            $item->set_rate_code( $args['rate_code'] );
-        }
-
-        if ( isset( $args['rate_id'] ) ) {
-            $item->set_rate_id( $args['rate_id'] );
-        }
-
-        if ( isset( $args['label'] ) ) {
-            $item->set_name( $args['label'] );
-        }
-
-        if ( isset( $args['compound'] ) ) {
-            $item->set_compound( $args['compound'] );
-        }
-
-        if ( isset( $args['tax_total'] ) ) {
-            $item->set_tax_amount( $args['tax_total'] );
-        }
-
-        if ( isset( $args['shipping_tax_total'] ) ) {
-            $item->set_shipping_tax_amount( $args['shipping_tax_total'] );
-        }
-
-        $item->save();
+		$item->set_order_id( $this->get_id() );
+		$item->set_all( $args );
+		$item->save();
 
         if ( ! $inserting ) {
             do_action( 'woocommerce_order_update_tax', $this->get_id(), $item->get_order_item_id(), $args );
@@ -2025,7 +2000,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
      * Update tax lines at order level by looking at the line item taxes themselves.
-     * @return bool success or fail.
+     * @return bool success or fail. @todo
      */
     public function update_taxes() {
         $cart_taxes     = array();

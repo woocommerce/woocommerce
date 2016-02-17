@@ -73,7 +73,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @param string $value
      */
     public function set_name( $value ) {
-        $this->_data['rate_code'] = wc_clean( $value );
+        $this->set_rate_code( $value );
     }
 
     /**
@@ -81,7 +81,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @param string $value
      */
     public function set_rate_code( $value ) {
-        $this->set_name( $value );
+        $this->_data['rate_code'] = wc_clean( $value );
     }
 
     /**
