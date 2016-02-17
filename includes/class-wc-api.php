@@ -357,6 +357,20 @@ class WC_API {
 		}
 
 		include_once( 'abstracts/abstract-wc-rest-controller.php' );
+		include_once( 'api/wc-rest-coupons-controller.php' );
+		include_once( 'api/wc-rest-customers-controller.php' );
+		include_once( 'api/wc-rest-order-notes-controller.php' );
+		include_once( 'api/wc-rest-order-refunds-controller.php' );
+		include_once( 'api/wc-rest-orders-controller.php' );
+		include_once( 'api/wc-rest-product-attributes-controller.php' );
+		include_once( 'api/wc-rest-product-attribute-terms-controller.php' );
+		include_once( 'api/wc-rest-product-categories-controller.php' );
+		include_once( 'api/wc-rest-products-controller.php' );
+		include_once( 'api/wc-rest-product-shipping-classes-controller.php' );
+		include_once( 'api/wc-rest-product-tags-controller.php' );
+		include_once( 'api/wc-rest-reports-controller.php' );
+		include_once( 'api/wc-rest-tax-classes-controller.php' );
+		include_once( 'api/wc-rest-taxes-controller.php' );
 	}
 
 	/**
@@ -365,7 +379,22 @@ class WC_API {
 	 * @since 2.6.0
 	 */
 	public function register_rest_routes() {
-		$controllers = array();
+		$controllers = array(
+			'WC_REST_Coupons_Controller',
+			'WC_REST_Customers_Controller',
+			'WC_REST_Order_Notes_Controller',
+			'WC_REST_Order_Refunds_Controller',
+			'WC_REST_Orders_Controller',
+			'WC_REST_Product_Attribute_Terms_Controller',
+			'WC_REST_Product_Attributes_Controller',
+			'WC_REST_Product_Categories_Controller',
+			'WC_REST_Product_Shipping_Classes_Controller',
+			'WC_REST_Product_Tags_Controller',
+			'WC_REST_Products_Controller',
+			'WC_REST_Reports_Controller',
+			'WC_REST_Tax_Classes_Controller',
+			'WC_REST_Taxes_Controller',
+		);
 
 		foreach ( $controllers as $controller ) {
 			$_controller = new $controller();
