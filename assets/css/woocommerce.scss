@@ -1091,6 +1091,32 @@ p.demo_store {
 				}
 			}
 		}
+		dl.variation {
+			margin: .25em 0;
+			@include clearfix();
+
+			dt,
+			dd {
+				display: inline-block;
+				float: left;
+				margin-bottom: 1em;
+			}
+
+			dt {
+				font-weight: 700;
+				padding: 0 0 .25em 0;
+				margin: 0 4px 0 0;
+				clear: left;
+			}
+
+			dd {
+				padding: 0 0 .25em 0;
+
+				p:last-child {
+					margin-bottom: 0;
+				}
+			}
+		}
 		p.backorder_notification {
 			font-size: 0.83em;
 		}
