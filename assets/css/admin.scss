@@ -216,6 +216,11 @@ mark.amount {
 table.wc_status_table {
 	margin-bottom: 1em;
 
+	h2 {
+		font-size: 14px;
+		margin: 0;
+	}
+
 	tr {
 		&:nth-child(2n) {
 			th,

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php if ( $logs ) : ?>
 	<div id="log-viewer-select">
 		<div class="alignleft">
-			<h3><?php printf( __( 'Log file: %s (%s)', 'woocommerce' ), esc_html( $viewed_log ), date_i18n( get_option( 'date_format') . ' ' . get_option( 'time_format'), filemtime( WC_LOG_DIR . $viewed_log ) ) ); ?></h3>
+			<h2><?php printf( __( 'Log file: %s (%s)', 'woocommerce' ), esc_html( $viewed_log ), date_i18n( get_option( 'date_format') . ' ' . get_option( 'time_format'), filemtime( WC_LOG_DIR . $viewed_log ) ) ); ?></h2>
 		</div>
 		<div class="alignright">
 			<form action="<?php echo admin_url( 'admin.php?page=wc-status&tab=logs' ); ?>" method="post">
