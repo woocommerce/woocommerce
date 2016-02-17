@@ -508,7 +508,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
 ) $collate;
 		";
 	}
-// Todo make sure the payment token tables are correct / up to date with final schema
+
 	/**
 	 * Create roles and capabilities.
 	 */
