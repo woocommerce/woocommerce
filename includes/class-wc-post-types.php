@@ -256,6 +256,8 @@ class WC_Post_types {
 							'set_featured_image'    => __( 'Set product image', 'woocommerce' ),
 							'remove_featured_image' => __( 'Remove product image', 'woocommerce' ),
 							'use_featured_image'    => __( 'Use as product image', 'woocommerce' ),
+							'insert_into_item'      => __( 'Insert into product', 'woocommerce' ),
+							'uploaded_to_this_item' => __( 'Uploaded to this product', 'woocommerce' ),
 						),
 					'description'         => __( 'This is where you can add new products to your store.', 'woocommerce' ),
 					'public'              => true,

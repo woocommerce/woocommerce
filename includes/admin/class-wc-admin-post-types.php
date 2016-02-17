@@ -2105,9 +2105,9 @@ class WC_Admin_Post_Types {
 	 * @return array
 	 */
 	public function change_insert_into_post( $strings ) {
-		global $post_type;
+		global $wp_version, $post_type;
 
-		if ( in_array( $post_type, array( 'product', 'shop_coupon' ) ) || in_array( $post_type, wc_get_order_types() ) ) {
+		if ( version_compare( $wp_version, '4.4', '<' ) && ( in_array( $post_type, array( 'product', 'shop_coupon' ) ) || in_array( $post_type, wc_get_order_types() ) ) ) {
 			$obj = get_post_type_object( $post_type );
 
 			$strings['insertIntoPost']     = sprintf( __( 'Insert into %s', 'woocommerce' ), $obj->labels->singular_name );
