@@ -131,11 +131,27 @@ class WC_Order_Item_Tax extends WC_Order_Item {
     }
 
     /**
-     * Get fee name.
+     * Get rate code/name.
+     * @return string
+     */
+    public function get_name() {
+        return $this->get_rate_code();
+    }
+
+    /**
+     * Get rate code/name.
      * @return string
      */
     public function get_rate_code() {
-        return $this->get_name();
+        return $this->_data['rate_code'];
+    }
+
+    /**
+     * Get label.
+     * @return string
+     */
+    public function get_label() {
+        return $this->_data['label'];
     }
 
     /**

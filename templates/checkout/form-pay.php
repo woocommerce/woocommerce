@@ -13,7 +13,7 @@
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author   WooThemes
  * @package  WooCommerce/Templates
- * @version  2.5.0
+ * @version  2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<tr>
 						<td class="product-name">
 							<?php echo esc_html( $item['name'] ); ?>
-							<?php $order->display_item_meta( $item ); ?>
+							<?php wc_display_item_meta( $item ); ?>
 						</td>
 						<td class="product-quantity"><?php echo esc_html( $item['qty'] ); ?></td>
 						<td class="product-subtotal"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>

@@ -74,7 +74,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * Stores meta data.
      * @var array
      */
-    protected $_meta = array(
+    protected $_meta_data = array(
         'payment_method'       => '',
 		'payment_method_title' => '',
 		'transaction_id'       => '',
@@ -125,12 +125,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param  string $key
      * @return mixed
      */
-    public function get_meta( $key = null ){
-		if ( is_null( $key ) ) {
-			return $this->_meta;
-		} else {
-        	return isset( $this->_meta[ $key ] ) ? $this->_meta[ $key ] : null;
-		}
+    public function get_meta( $key = '' ){
+		return isset( $this->_meta_data[ $key ] ) ? $this->_meta_data[ $key ] : null;
     }
 
     /*
@@ -142,6 +138,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     |
     */
 
+	/**
+     * Get All Meta Data
+     * @return array
+     */
+    public function get_meta_data( $key = null ){
+		return $this->_meta_data;
+    }
+
     /**
      * Get all class data in array format.
      * @since 2.6.0
@@ -150,7 +154,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     public function get_data() {
         return array_merge(
             $this->_data,
-            $this->_meta,
+            $this->get_meta_data(),
             array(
                 'line_items'     => $this->get_items( 'line_item' ),
                 'tax_lines'      => $this->get_items( 'tax' ),
@@ -413,7 +417,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_payment_method() {
-        return $this->_meta['payment_method'];
+        return $this->_meta_data['payment_method'];
     }
 
     /**
@@ -421,7 +425,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_payment_method_title() {
-        return $this->_meta['payment_method_title'];
+        return $this->_meta_data['payment_method_title'];
     }
 
     /**
@@ -429,7 +433,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_transaction_id() {
-        return $this->_meta['transaction_id'];
+        return $this->_meta_data['transaction_id'];
     }
 
     /**
@@ -437,7 +441,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_customer_ip_address() {
-        return $this->_meta['customer_ip_address'];
+        return $this->_meta_data['customer_ip_address'];
     }
 
     /**
@@ -445,7 +449,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_customer_user_agent() {
-        return $this->_meta['customer_user_agent'];
+        return $this->_meta_data['customer_user_agent'];
     }
 
     /**
@@ -453,7 +457,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_created_via() {
-        return $this->_meta['created_via'];
+        return $this->_meta_data['created_via'];
     }
 
     /**
@@ -461,7 +465,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_order_version() {
-        return $this->_meta['order_version'];
+        return $this->_meta_data['order_version'];
     }
 
     /**
@@ -469,7 +473,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return bool
      */
     public function get_prices_include_tax() {
-        return (bool) $this->_meta['prices_include_tax'];
+        return (bool) $this->_meta_data['prices_include_tax'];
     }
 
     /**
@@ -477,7 +481,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_customer_note() {
-        return $this->_meta['customer_note'];
+        return $this->_meta_data['customer_note'];
     }
 
 	/**
@@ -485,7 +489,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_date_completed() {
-        return $this->_meta['date_completed'];
+        return $this->_meta_data['date_completed'];
     }
 
 	/**
@@ -493,7 +497,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_date_paid() {
-        return $this->_meta['date_paid'];
+        return $this->_meta_data['date_paid'];
     }
 
     /**
@@ -1145,7 +1149,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $this->set_payment_method( $value->id );
             $this->set_payment_method_title( $value->get_title() );
         } else {
-            $this->_meta['payment_method'] = $value;
+            $this->_meta_data['payment_method'] = $value;
         }
     }
 
@@ -1154,7 +1158,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_payment_method_title( $value ) {
-        $this->_meta['payment_method_title'] = $value;
+        $this->_meta_data['payment_method_title'] = $value;
     }
 
     /**
@@ -1162,7 +1166,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_transaction_id( $value ) {
-        $this->_meta['transaction_id'] = $value;
+        $this->_meta_data['transaction_id'] = $value;
     }
 
     /**
@@ -1170,7 +1174,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_customer_ip_address( $value ) {
-        $this->_meta['customer_ip_address'] = $value;
+        $this->_meta_data['customer_ip_address'] = $value;
     }
 
     /**
@@ -1178,7 +1182,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_customer_user_agent( $value ) {
-        $this->_meta['customer_user_agent'] = $value;
+        $this->_meta_data['customer_user_agent'] = $value;
     }
 
     /**
@@ -1186,7 +1190,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_created_via( $value ) {
-        $this->_meta['created_via'] = $value;
+        $this->_meta_data['created_via'] = $value;
     }
 
     /**
@@ -1194,7 +1198,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_order_version( $value ) {
-        $this->_meta['order_version'] = $value;
+        $this->_meta_data['order_version'] = $value;
     }
 
     /**
@@ -1202,7 +1206,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param bool $value
      */
     public function set_prices_include_tax( $value ) {
-        $this->_meta['prices_include_tax'] = (bool) $value;
+        $this->_meta_data['prices_include_tax'] = (bool) $value;
     }
 
     /**
@@ -1210,7 +1214,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_customer_note( $value ) {
-        $this->_meta['customer_note'] = $value;
+        $this->_meta_data['customer_note'] = $value;
     }
 
 	/**
@@ -1218,7 +1222,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $timestamp
      */
     public function set_date_completed( $timestamp ) {
-        $this->_meta['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+        $this->_meta_data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
 	/**
@@ -1226,7 +1230,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $timestamp
      */
     public function set_date_paid( $timestamp ) {
-        $this->_meta['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+        $this->_meta_data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
     /*
@@ -1295,7 +1299,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             update_post_meta( $order_id, '_order_tax', $this->get_cart_tax() );
             update_post_meta( $order_id, '_order_total', $this->get_order_total() );
 
-			foreach ( $this->get_meta() as $key => $value ) {
+			foreach ( $this->get_meta_data() as $key => $value ) {
 				update_post_meta( $order_id, '_' . $key, $value );
 			}
         }
@@ -1370,7 +1374,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			if ( is_callable( array( $this, "set_$key" ) ) ) {
 				$this->{"set_$key"}( $value[0] );
 			} else {
-				$this->_meta[ $key ] = $value[0];
+				$this->_meta_data[ $key ] = $value[0];
 			}
 		}
 
@@ -1431,7 +1435,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         update_post_meta( $order_id, '_order_tax', $this->get_cart_tax() );
         update_post_meta( $order_id, '_order_total', $this->get_order_total() );
 
-		foreach ( $this->get_meta() as $key => $value ) {
+		foreach ( $this->get_meta_data() as $key => $value ) {
 			update_post_meta( $order_id, '_' . $key, $value );
 		}
 
@@ -1517,16 +1521,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      */
     public function get_item( $item_id ) {
         return WC_Order_Factory::get_order_item( $item_id );
-    }
-
-    /**
-     * Display meta data belonging to an item. @todo
-     * @param  array $item
-     */
-    public function display_item_meta( $item ) {
-        $product   = $this->get_product_from_item( $item );
-        $item_meta = new WC_Order_Item_Meta( $item, $product );
-        $item_meta->display();
     }
 
     /**
@@ -1684,8 +1678,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
                 $item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
             }
 
-            $item->set_line_subtotal( $product->get_price_excluding_tax( $args['qty'] ) );
-            $item->set_line_total( $product->get_price_excluding_tax( $args['qty'] ) );
+            $item->set_subtotal( $product->get_price_excluding_tax( $args['qty'] ) );
+            $item->set_total( $product->get_price_excluding_tax( $args['qty'] ) );
         }
 
         if ( isset( $args['tax_class'] ) ) {
@@ -1732,7 +1726,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $item->set_total( $args['total'] );
         }
         if ( isset( $args['subtotal_tax'] ) ) {
-            $item->set_line_subtotal_tax( $args['subtotal_tax'] );
+            $item->set_subtotal_tax( $args['subtotal_tax'] );
         }
         if ( isset( $args['total_tax'] ) ) {
             $item->set_total_tax( $args['total_tax'] );
@@ -1760,11 +1754,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function add_coupon( $code, $discount_amount = 0, $discount_amount_tax = 0 ) {
-        $args = wp_parse_args( $args, array(
+        $args = array(
             'code'                => $code,
             'discount_amount'     => $discount_amount,
             'discount_amount_tax' => $discount_amount_tax
-        ) );
+        );
         $item = new WC_Order_Item_Coupon();
         $item_id = $this->update_coupon( $item, $args );
 
@@ -1785,7 +1779,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $item = $this->get_item( $item );
         }
 
-        if ( ! is_object( $product ) || ! $item->is_type( 'coupon' ) ) {
+        if ( ! is_object( $item ) || ! $item->is_type( 'coupon' ) ) {
             return false;
         }
 
@@ -1828,13 +1822,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function add_shipping( $shipping_rate ) {
-        $args = wp_parse_args( $args, array(
+        $args = array(
             'method_title' => $shipping_rate->label,
             'method_id'    => $shipping_rate->id,
             'cost'         => wc_format_decimal( $shipping_rate->cost ),
             'taxes'        => $shipping_rate->taxes,
             'meta'         => $shipping_rate->get_meta_data(),
-        ) );
+        );
 
         $item = new WC_Order_Item_Shipping();
         $item_id = $this->update_shipping( $item, $args );
@@ -1859,7 +1853,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $item = $this->get_item( $item );
         }
 
-        if ( ! is_object( $product ) || ! $item->is_type( 'shipping' ) ) {
+        if ( ! is_object( $item ) || ! $item->is_type( 'shipping' ) ) {
             return false;
         }
 
@@ -1876,7 +1870,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         }
 
         if ( isset( $args['method_title'] ) ) {
-            $item->set_method_title( $args['method_title'] );
+            $item->set_name( $args['method_title'] );
         }
 
         if ( isset( $args['method_id'] ) ) {
@@ -1885,13 +1879,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
         if ( isset( $args['cost'] ) ) {
             // Get old cost before updating
-            $old_cost = $item->get_cost();
+            $old_cost = $item->get_total();
 
             // Update
-            $item->set_cost( $args['cost'] );
+            $item->set_total( $args['cost'] );
 
             // Update total
-            $this->set_total( $this->get_total_shipping() - wc_format_decimal( $old_cost ) + $item->get_cost(), 'shipping' );
+            $this->set_total( $this->get_total_shipping() - wc_format_decimal( $old_cost ) + $item->get_total(), 'shipping' );
         }
 
         if ( isset( $args['taxes'] ) && is_array( $args['taxes'] ) ) {
@@ -1920,7 +1914,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function add_fee( $fee ) {
-        $args = wp_parse_args( $args, array(
+        $args = array(
             'name'      => $fee->name,
             'tax_class' => $fee->taxable ? $fee->tax_class : 0,
             'total'     => $fee->amount,
@@ -1928,7 +1922,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             'taxes'     => array(
                 'total' => $fee->tax_data
             )
-        ) );
+        );
         $item = new WC_Order_Item_Fee();
         $item_id = $this->update_fee( $item, $args );
 
@@ -1952,7 +1946,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $item = $this->get_item( $item );
         }
 
-        if ( ! is_object( $product ) || ! $item->is_type( 'fee' ) ) {
+        if ( ! is_object( $item ) || ! $item->is_type( 'fee' ) ) {
             return false;
         }
 
@@ -2009,14 +2003,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             return false;
         }
 
-        $args = wp_parse_args( $args, array(
+        $args = array(
             'rate_code'          => $code,
             'rate_id'            => $tax_rate_id,
             'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
             'compound'           => WC_Tax::is_compound( $tax_rate_id ),
             'tax_total'          => $tax_amount,
             'shipping_tax_total' => $shipping_tax_amount
-        ) );
+        );
         $item = new WC_Order_Item_Tax();
         $item_id = $this->update_tax( $item, $args );
 
@@ -2039,7 +2033,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $item = $this->get_item( $item );
         }
 
-        if ( ! is_object( $product ) || ! $item->is_type( 'tax' ) ) {
+        if ( ! is_object( $item ) || ! $item->is_type( 'tax' ) ) {
             return false;
         }
 
@@ -2064,7 +2058,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         }
 
         if ( isset( $args['label'] ) ) {
-            $item->set_label( $args['label'] );
+            $item->set_name( $args['label'] );
         }
 
         if ( isset( $args['compound'] ) ) {
@@ -2072,11 +2066,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         }
 
         if ( isset( $args['tax_total'] ) ) {
-            $item->set_tax_total( $args['tax_total'] );
+            $item->set_tax_amount( $args['tax_total'] );
         }
 
         if ( isset( $args['shipping_tax_total'] ) ) {
-            $item->set_shipping_tax_total( $args['shipping_tax_total'] );
+            $item->set_shipping_tax_amount( $args['shipping_tax_total'] );
         }
 
         $item->save();

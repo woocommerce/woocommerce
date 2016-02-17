@@ -150,15 +150,23 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	}
 
     /**
-     * Get order ID this meta belongs to.
+     * Get order item ID.
      * @return int
      */
     public function get_id() {
+        return $this->get_order_item_id();
+    }
+
+    /**
+     * Get order ID this meta belongs to.
+     * @return int
+     */
+    public function get_order_id() {
         return absint( $this->_data['order_id'] );
     }
 
     /**
-     * Get order item ID.
+     * Get order ID this meta belongs to.
      * @return int
      */
     public function get_order_item_id() {
@@ -288,9 +296,9 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
             'order_item_name' => $this->get_name(),
             'order_item_type' => $this->get_type(),
-            'order_id'        => $this->get_id()
+            'order_id'        => $this->get_order_id()
         ) );
-		$this->set_item_id( $wpdb->insert_id );
+		$this->set_order_item_id( $wpdb->insert_id );
 	}
 
     /**
@@ -302,8 +310,8 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
             'order_item_name' => $this->get_name(),
             'order_item_type' => $this->get_type(),
-            'order_id'        => $this->get_id()
-        ), array( 'order_item_id' => $this->get_order_item_id() ) );
+            'order_id'        => $this->get_order_id()
+        ), array( 'order_item_id' => $this->get_id() ) );
     }
 
 	/**
@@ -337,15 +345,15 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
     protected function read_meta_data() {
         $this->_data['meta_data'] = array();
 
-        if ( $this->get_order_item_id() ) {
+        if ( $this->get_id() ) {
             // Get cache key - uses get_cache_prefix to invalidate when needed
-            $cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'meta_data_' . $this->get_order_item_id();
+            $cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'meta_data_' . $this->get_id();
             $item_meta_array = wp_cache_get( $cache_key, 'orders' );
 
             if ( false === $item_meta_array ) {
                 global $wpdb;
 
-                $metadata = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_order_item_id() ) );
+                $metadata = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_id() ) );
                 foreach ( $metadata as $metadata_row ) {
                     if ( in_array( $metadata_row->meta_key, $this->get_internal_meta_keys() ) ) {
                         continue;
@@ -362,7 +370,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	 * @since 2.6.0
      */
     public function save() {
-        if ( ! $this->get_order_item_id() ) {
+        if ( ! $this->get_id() ) {
 			$this->create();
         } else {
             $this->update();
@@ -375,6 +383,6 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     public function delete() {
         global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_order_item_id() ) );
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_id() ) );
     }
 }

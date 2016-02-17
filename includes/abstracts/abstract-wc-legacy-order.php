@@ -150,7 +150,7 @@ abstract class WC_Abstract_Legacy_Order {
             return $this->get_shipping_tax();
         } elseif ( 'order_shipping' === $key ) {
             _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
-            return $this->get_shipping();
+            return $this->get_total_shipping();
         /**
          * Map vars to getters with warning.
          */
@@ -168,6 +168,95 @@ abstract class WC_Abstract_Legacy_Order {
         return $value;
     }
 
+	/**
+     * Display meta data belonging to an item. @todo
+     * @param  array $item
+     */
+    public function display_item_meta( $item ) {
+		_deprecated_function( 'get_item_meta', '2.6', 'wc_display_item_meta' );
+        $product   = $this->get_product_from_item( $item );
+        $item_meta = new WC_Order_Item_Meta( $item, $product );
+        $item_meta->display();
+    }
+
+	/**
+     * Display download links for an order item.
+     * @param  array $item
+     */
+    public function display_item_downloads( $item ) {
+        $product = $this->get_product_from_item( $item );
+
+        if ( $product && $product->exists() && $product->is_downloadable() && $this->is_download_permitted() ) {
+            $download_files = $this->get_item_downloads( $item );
+            $i              = 0;
+            $links          = array();
+
+            foreach ( $download_files as $download_id => $file ) {
+                $i++;
+                $prefix  = count( $download_files ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
+                $links[] = '<small class="download-url">' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
+            }
+
+            echo '<br/>' . implode( '<br/>', $links );
+        }
+    }
+
+	/**
+     * Get the Download URL.
+     *
+     * @param  int $product_id
+     * @param  int $download_id
+     * @return string
+     */
+    public function get_download_url( $product_id, $download_id ) {
+        return add_query_arg( array(
+            'download_file' => $product_id,
+            'order'         => $this->get_order_key(),
+            'email'         => urlencode( $this->get_billing_email() ),
+            'key'           => $download_id
+        ), trailingslashit( home_url() ) );
+    }
+
+	/**
+     * Get the downloadable files for an item in this order.
+     *
+     * @param  array $item
+     * @return array
+     */
+    public function get_item_downloads( $item ) {
+        global $wpdb;
+
+        $product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
+        $product      = wc_get_product( $product_id );
+        if ( ! $product ) {
+            /**
+             * $product can be `false`. Example: checking an old order, when a product or variation has been deleted.
+             * @see \WC_Product_Factory::get_product
+             */
+            return array();
+        }
+        $download_ids = $wpdb->get_col( $wpdb->prepare("
+            SELECT download_id
+            FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+            WHERE user_email = %s
+            AND order_key = %s
+            AND product_id = %s
+            ORDER BY permission_id
+        ", $this->get_billing_email(), $this->get_order_key(), $product_id ) );
+
+        $files = array();
+
+        foreach ( $download_ids as $download_id ) {
+
+            if ( $product->has_file( $download_id ) ) {
+                $files[ $download_id ]                 = $product->get_file( $download_id );
+                $files[ $download_id ]['download_url'] = $this->get_download_url( $product_id, $download_id );
+            }
+        }
+
+        return apply_filters( 'woocommerce_get_item_downloads', $files, $item, $this );
+    }
+	
     /**
      * Get order item meta.
      * @deprecated 2.6.0

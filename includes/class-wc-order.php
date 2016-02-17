@@ -65,15 +65,6 @@ class WC_Order extends WC_Abstract_Order {
         }
     }
 
-	/*
-    |--------------------------------------------------------------------------
-    | Conditionals
-    |--------------------------------------------------------------------------
-    |
-    | Checks if a condition is true or false.
-    |
-    */
-
 	/**
      * Checks if an order can be edited, specifically for use on the Edit Order screen.
      * @return bool
@@ -143,90 +134,6 @@ class WC_Order extends WC_Abstract_Order {
     public function needs_payment() {
         $valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
         return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ), $this, $valid_order_statuses );
-    }
-
-	/*
-    |--------------------------------------------------------------------------
-    | Downloadable file permissions
-    |--------------------------------------------------------------------------
-    */
-
-	/**
-     * Get the Download URL.
-     *
-     * @param  int $product_id
-     * @param  int $download_id
-     * @return string
-     */
-    public function get_download_url( $product_id, $download_id ) {
-        return add_query_arg( array(
-            'download_file' => $product_id,
-            'order'         => $this->get_order_key(),
-            'email'         => urlencode( $this->get_billing_email() ),
-            'key'           => $download_id
-        ), trailingslashit( home_url() ) );
-    }
-
-	/**
-     * Get the downloadable files for an item in this order.
-     *
-     * @param  array $item
-     * @return array
-     */
-    public function get_item_downloads( $item ) {
-        global $wpdb;
-
-        $product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
-        $product      = wc_get_product( $product_id );
-        if ( ! $product ) {
-            /**
-             * $product can be `false`. Example: checking an old order, when a product or variation has been deleted.
-             * @see \WC_Product_Factory::get_product
-             */
-            return array();
-        }
-        $download_ids = $wpdb->get_col( $wpdb->prepare("
-            SELECT download_id
-            FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-            WHERE user_email = %s
-            AND order_key = %s
-            AND product_id = %s
-            ORDER BY permission_id
-        ", $this->get_billing_email(), $this->get_order_key(), $product_id ) );
-
-        $files = array();
-
-        foreach ( $download_ids as $download_id ) {
-
-            if ( $product->has_file( $download_id ) ) {
-                $files[ $download_id ]                 = $product->get_file( $download_id );
-                $files[ $download_id ]['download_url'] = $this->get_download_url( $product_id, $download_id );
-            }
-        }
-
-        return apply_filters( 'woocommerce_get_item_downloads', $files, $item, $this );
-    }
-
-    /**
-     * Display download links for an order item.
-     * @param  array $item
-     */
-    public function display_item_downloads( $item ) {
-        $product = $this->get_product_from_item( $item );
-
-        if ( $product && $product->exists() && $product->is_downloadable() && $this->is_download_permitted() ) {
-            $download_files = $this->get_item_downloads( $item );
-            $i              = 0;
-            $links          = array();
-
-            foreach ( $download_files as $download_id => $file ) {
-                $i++;
-                $prefix  = count( $download_files ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
-                $links[] = '<small class="download-url">' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
-            }
-
-            echo '<br/>' . implode( '<br/>', $links );
-        }
     }
 
 	/**
