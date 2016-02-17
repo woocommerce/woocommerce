@@ -1681,7 +1681,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * @param string $key
 	 * @param mixed $args
 	 * @param string $value (default: null)
-	 * @todo This function needs to be broken up in smaller pieces
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
 		$defaults = array(

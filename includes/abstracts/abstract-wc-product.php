@@ -1475,7 +1475,6 @@ class WC_Product {
 
 	/**
 	 * Returns the product's weight.
-	 * @todo   refactor filters in this class to naming woocommerce_product_METHOD
 	 * @return string
 	 */
 	public function get_weight() {

@@ -605,7 +605,6 @@ class WC_Countries {
 	/**
 	 * Get country locale settings.
 	 * @return array
-	 * @todo  [2.4] Check select2 4.0.0 compatibility with `placeholder` attribute and uncomment relevant lines. https://github.com/woothemes/woocommerce/issues/7729
 	 */
 	public function get_country_locale() {
 		if ( ! $this->locale ) {

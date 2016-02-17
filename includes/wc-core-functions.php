@@ -690,7 +690,6 @@ function wc_format_country_state_string( $country_string ) {
 /**
  * Get the store's base location.
  *
- * @todo should the woocommerce_default_country option be renamed to contain 'base'?
  * @since 2.3.0
  * @return array
  */
@@ -706,8 +705,6 @@ function wc_get_base_location() {
  * Filtered, and set to base location or left blank. If cache-busting,
  * this should only be used when 'location' is set in the querystring.
  *
- * @todo should the woocommerce_default_country option be renamed to contain 'base'?
- * @todo deprecate woocommerce_customer_default_location and support an array filter only to cover all cases.
  * @since 2.3.0
  * @return array
  */

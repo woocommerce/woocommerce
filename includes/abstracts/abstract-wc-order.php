@@ -21,7 +21,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     /**
      * Data array, with defaults.
      *
-     * @todo when migrating to custom tables, these will be columns
+     * When migrating to custom tables, these will be columns.
+     *
      * @since 2.6.0
      * @var array
      */
@@ -29,12 +30,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		'order_id'             => 0,
         'parent_id'            => 0,
 		'status'               => '',
-        /**
-         * @todo confusion. Was 'simple'. But this was not the same as post_type, which is shop_order. Other post types in core are shop_order_refund
-         * The order type for shop_order_refund is refund.
-         * Why do we need two separate variables? This should be unified, especially once this is in a custom table and post_type is redundent.
-         * Switching to 'shop_order', and then using this value in the order factory instead of post_type. @thenbrent might have feedback on this.
-         */
 		'order_type'           => 'shop_order',
 		'order_key'            => '',
 		'order_currency'       => '',

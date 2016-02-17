@@ -169,7 +169,7 @@ abstract class WC_Abstract_Legacy_Order {
     }
 
 	/**
-     * Display meta data belonging to an item. @todo
+     * Display meta data belonging to an item.
      * @param  array $item
      */
     public function display_item_meta( $item ) {
@@ -256,7 +256,7 @@ abstract class WC_Abstract_Legacy_Order {
 
         return apply_filters( 'woocommerce_get_item_downloads', $files, $item, $this );
     }
-	
+
     /**
      * Get order item meta.
      * @deprecated 2.6.0

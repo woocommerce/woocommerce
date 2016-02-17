@@ -290,7 +290,6 @@ class WC_API_Orders extends WC_API_Resource {
 	/**
 	 * Delete an order
 	 *
-	 * @TODO enable along with POST in 2.2
 	 * @param int $id the order ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array

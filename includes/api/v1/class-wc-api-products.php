@@ -150,7 +150,6 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Edit a product
 	 *
-	 * @TODO implement in 2.2
 	 * @param int $id the product ID
 	 * @param array $data
 	 * @return array
@@ -168,7 +167,6 @@ class WC_API_Products extends WC_API_Resource {
 	/**
 	 * Delete a product
 	 *
-	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the product ID
 	 * @param bool $force true to permanently delete order, false to move to trash
 	 * @return array

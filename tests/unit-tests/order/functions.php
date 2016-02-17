@@ -54,7 +54,6 @@ class Functions extends \WC_Unit_Test_Case {
 	/**
 	 * Test wc_processing_order_count().
 	 *
-	 * @todo needs improvement when we have an orders helper
 	 * @since 2.4
 	 */
 	public function test_wc_processing_order_count() {
@@ -64,7 +63,6 @@ class Functions extends \WC_Unit_Test_Case {
 	/**
 	 * Test wc_orders_count().
 	 *
-	 * @todo needs improvement when we have an orders helper
 	 * @since 2.4
 	 */
 	public function test_wc_orders_count() {
