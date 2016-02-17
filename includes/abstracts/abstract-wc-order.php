@@ -1878,7 +1878,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function add_fee( $fee ) {
-        $args = array(
+        $item    = new WC_Order_Item_Fee();
+        $item_id = $this->update_fee( $item, array(
             'name'      => $fee->name,
             'tax_class' => $fee->taxable ? $fee->tax_class : 0,
             'total'     => $fee->amount,
@@ -1886,11 +1887,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             'taxes'     => array(
                 'total' => $fee->tax_data
             )
-        );
-        $item = new WC_Order_Item_Fee();
-        $item_id = $this->update_fee( $item, $args );
+        ) );
 
-        do_action( 'woocommerce_order_add_fee', $this->get_id(), $item->get_order_item_id(), $fee );
+        do_action( 'woocommerce_order_add_fee', $this->get_id(), $item_id, $fee );
 
         return $item_id;
     }
@@ -1906,47 +1905,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function update_fee( $item, $args ) {
-        if ( is_numeric( $item ) ) {
+		if ( is_numeric( $item ) ) {
             $item = $this->get_item( $item );
         }
-
         if ( ! is_object( $item ) || ! $item->is_type( 'fee' ) ) {
             return false;
         }
-
         if ( ! $this->get_id() ) {
-            $this->save();
+            $this->save(); // Order must exist
         }
 
-		$item->set_order_id( $this->get_id() );
-
-        if ( ! $item->get_order_item_id() ) {
+		if ( ! $item->get_order_item_id() ) {
             $inserting = true;
         } else {
             $inserting = false;
         }
 
-        if ( isset( $args['name'] ) ) {
-            $item->set_name( $args['name'] );
-        }
-
-        if ( isset( $args['tax_class'] ) ) {
-            $item->set_tax_class( $args['tax_class'] );
-        }
-
-        if ( isset( $args['total'] ) ) {
-            $item->set_total( $args['total'] );
-        }
-
-        if ( isset( $args['total_tax'] ) ) {
-            $item->set_total_tax( $args['total_tax'] );
-        }
-
-        if ( isset( $args['taxes'] ) ) {
-            $item->set_taxes( $args['taxes'] );
-        }
-
-        $item->save();
+		$item->set_order_id( $this->get_id() );
+		$item->set_all( $args );
+		$item->save();
 
         if ( ! $inserting ) {
             do_action( 'woocommerce_order_update_fee', $this->get_id(), $item->get_order_item_id(), $args );
