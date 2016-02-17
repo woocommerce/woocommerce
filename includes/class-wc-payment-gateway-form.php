@@ -28,7 +28,7 @@ class WC_Payment_Gateway_Form {
 		$this->gateway = $gateway;
 		$gateway_id    = $this->gateway->id;
 
-		if ( is_user_logged_in() && $this->gateway->supports( 'tokenization' ) ) {
+		if ( is_user_logged_in() && $this->gateway->supports( 'tokenization' ) && is_checkout() ) {
 			$this->tokens = $this->filter_tokens_by_gateway(
 				$gateway_id,
 				WC_Payment_Tokens::get_customer_tokens( get_current_user_id() )
@@ -36,7 +36,7 @@ class WC_Payment_Gateway_Form {
 			$this->saved_payment_methods();
 		}
 
-		if ( $this->gateway->supports( 'tokenization' ) ) {
+		if ( $this->gateway->supports( 'tokenization' ) && is_checkout() ) {
 			$this->use_new_payment_method_checkbox();
 		}
 
@@ -124,12 +124,12 @@ class WC_Payment_Gateway_Form {
 	public function payment_fields() {
 		if ( $this->gateway->supports( 'credit_card_form' ) ) {
 			echo $this->credit_card_payment_fields();
-			if ( $this->gateway->supports( 'tokenization' ) ) {
+			if ( $this->gateway->supports( 'tokenization' ) && is_checkout() ) {
 				$this->save_payment_method_checkbox();
 			}
 		} else if ( $this->gateway->supports( 'echeck_form' ) ) {
 			echo $this->echeck_payment_fields();
-			if ( $this->gateway->supports( 'tokenization' ) ) {
+			if ( $this->gateway->supports( 'tokenization' ) && is_checkout() ) {
 				$this->save_payment_method_checkbox();
 			}
 		} else {
@@ -284,6 +284,7 @@ class WC_Payment_Gateway_Form {
 			'gatewayID'    => $this->gateway->id,
 			'userLoggedIn' => (bool) is_user_logged_in(),
 		) );
+
 	}
 
 }

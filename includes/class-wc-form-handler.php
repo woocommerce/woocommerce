@@ -359,17 +359,15 @@ class WC_Form_Handler {
 			$payment_method = wc_clean( $_POST['payment_method'] );
 
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
 			// Validate
 			$available_gateways[ $payment_method ]->validate_fields();
 
 			// Process
 			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
 				$result = $available_gateways[ $payment_method ]->add_payment_method();
-
 				// Redirect to success/confirmation/payment page
 				if ( $result['result'] == 'success' ) {
-					wc_add_message( __( 'Payment method added.', 'woocommerce' ) );
+					wc_add_notice( __( 'Payment method added.', 'woocommerce' ) );
 					wp_redirect( $result['redirect'] );
 					exit();
 				}

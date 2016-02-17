@@ -373,6 +373,7 @@ class WC_Shortcode_My_Account {
 		}
 
 		WC_Payment_Tokens::delete( $id );
+		wc_add_notice( __( 'Payment method deleted.', 'woocommerce' ) );
 		woocommerce_account_payment_methods();
 	}
 
@@ -404,6 +405,7 @@ class WC_Shortcode_My_Account {
 		}
 
 		WC_Payment_Tokens::set_users_default( $token->get_user_id(), intval( $id ) );
+		wc_add_notice( __( 'This payment method was successfully set as your default.', 'woocommerce' ) );
 		woocommerce_account_payment_methods();
 	}
 

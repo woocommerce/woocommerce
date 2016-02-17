@@ -283,7 +283,16 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 * Outputs scripts used for simplify payment.
 	 */
 	public function payment_scripts() {
-		if ( ! is_checkout() || ! $this->is_available() ) {
+		$load_scripts = false;
+
+		if ( is_checkout() ) {
+			$load_scripts = true;
+		}
+		if ( $this->is_available() ) {
+			$load_scripts = true;
+		}
+
+		if ( false === $load_scripts ) {
 			return;
 		}
 
@@ -302,6 +311,77 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		) );
 	}
 
+	public function add_payment_method() {
+		if ( empty ( $_POST['simplify_token'] ) ) {
+			wc_add_notice( __( 'There was a problem adding this card.', 'woocommerce' ), 'error' );
+			return;
+		}
+
+		$cart_token     = wc_clean( $_POST['simplify_token'] );
+		$customer_token = $this->get_users_token();
+		$current_user   = wp_get_current_user();
+		$customer_info  = array(
+			'email' => $current_user->user_email,
+			'name'  => $current_user->display_name,
+		);
+
+		$token = $this->save_token( $customer_token, $cart_token, $customer_info );
+		if ( is_null( $token ) ) {
+			wc_add_notice( __( 'There was a problem adding this card.', 'woocommerce' ), 'error' );
+			return;
+		}
+
+		return array(
+			'result'   => 'success',
+			'redirect' => wc_get_endpoint_url( 'payment-methods' ),
+		);
+	}
+
+	/**
+	 * Actualy saves a customer token to the database.
+	 *
+	 * @param  WC_Payment_Token   $customer_token Payment Token
+	 * @param  string             $cart_token     CC Token
+	 * @param  array              $customer_info  'email', 'name'
+	 */
+	public function save_token( $customer_token, $cart_token, $customer_info ) {
+		if ( ! is_null( $customer_token ) ) {
+			$customer = Simplify_Customer::findCustomer( $customer_token->get_token() );
+			$updates = array( 'token' => $cart_token );
+			$customer->setAll( $updates );
+			$customer->updateCustomer();
+			$customer = Simplify_Customer::findCustomer( $customer_token->get_token() ); // get updated customer with new set card
+			$token = $customer_token;
+		} else {
+			$customer = Simplify_Customer::createCustomer( array(
+				'token'     => $cart_token,
+				'email'     => $customer_info['email'],
+				'name'      => $customer_info['name'],
+			) );
+			$token = new WC_Payment_Token_CC();
+			$token->set_token( $customer->id );
+		}
+
+		// If we were able to create an save our card, save the data on our side too
+		if ( is_object( $customer ) && '' != $customer->id ) {
+			$customer_properties = $customer->getProperties();
+			$card = $customer_properties['card'];
+			$token->set_gateway_id( $this->id );
+			$token->set_card_type( strtolower( $card->type ) );
+			$token->set_last4( $card->last4 );
+			$expiry_month = ( 1 === strlen( $card->expMonth ) ? '0' . $card->expMonth : $card->expMonth );
+			$token->set_expiry_month( $expiry_month );
+			$token->set_expiry_year( '20' . $card->expYear );
+			if ( is_user_logged_in() ) {
+				$token->set_user_id( get_current_user_id() );
+			}
+			$token->save();
+			return $token;
+		}
+
+		return null;
+	}
+
 	/**
 	 * Process customer: updating or creating a new customer/saved CC
 	 *
@@ -312,39 +392,12 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	protected function process_customer( $order, $customer_token = null, $cart_token = '' ) {
 		// Are we saving a new payment method?
 		if ( is_user_logged_in() && isset( $_POST['wc-simplify_commerce-new-payment-method'] ) && true === (bool) $_POST['wc-simplify_commerce-new-payment-method'] ) {
-			// Update or Create a new Customer on Simplify and start building a WC token object
-			if ( ! is_null( $customer_token ) ) {
-				$customer = Simplify_Customer::findCustomer( $customer_token->get_token() );
-				$updates = array( 'token' => $cart_token );
-				$customer->setAll( $updates );
-				$customer->updateCustomer();
-				$customer = Simplify_Customer::findCustomer( $customer_token->get_token() ); // get updated customer with new set card
-				$token = $customer_token;
-			} else {
-				$customer = Simplify_Customer::createCustomer( array(
-					'token'     => $cart_token,
-					'email'     => $order->billing_email,
-					'name'      => trim( $order->get_formatted_billing_full_name() ),
-					'reference' => $order->id,
-				) );
-				$token = new WC_Payment_Token_CC();
-				$token->set_token( $customer->id );
-			}
-
-			// If we were able to create an save our card, save the data on our side too
-			if ( is_object( $customer ) && '' != $customer->id ) {
-				$customer_properties = $customer->getProperties();
-				$card = $customer_properties['card'];
-				$token->set_gateway_id( $this->id );
-				$token->set_card_type( strtolower( $card->type ) );
-				$token->set_last4( $card->last4 );
-				$expiry_month = ( 1 === strlen( $card->expMonth ) ? '0' . $card->expMonth : $card->expMonth );
-				$token->set_expiry_month( $expiry_month );
-				$token->set_expiry_year( '20' . $card->expYear );
-				if ( is_user_logged_in() ) {
-					$token->set_user_id( get_current_user_id() );
-				}
-				$token->save();
+			$customer_info = array(
+				'email' => $order->billing_email,
+				'name'  => trim( $order->get_formatted_billing_full_name() ),
+			);
+			$token = $this->save_token( $customer_token, $cart_token, $customer_info );
+			if ( ! is_null( $token ) ) {
 				$order->add_payment_token( $token );
 			}
 		}
@@ -524,7 +577,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			return $this->process_hosted_payments( $order );
 		}
 
-		// Don't create a customer - this user is logged out or did not create an account/save a payment method
+		// New CC info was entered
 		if ( isset( $_POST['simplify_token'] ) ) {
 			$cart_token           = wc_clean( $_POST['simplify_token'] );
 			$customer_token       = $this->get_users_token();
@@ -533,7 +586,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			return $this->process_standard_payments( $order, $cart_token, $customer_token_value );
 		}
 
-		// Create (or update) customer, save payment token, and then process the payment
+		// Possibly Create (or update) customer/save payment token, use an existing token, and then process the payment
 		if ( isset( $_POST['wc-simplify_commerce-payment-token'] ) && 'new' !== $_POST['wc-simplify_commerce-payment-token'] ) {
 			$token_id = wc_clean( $_POST['wc-simplify_commerce-payment-token'] );
 			$token    = WC_Payment_Tokens::get( $token_id );
