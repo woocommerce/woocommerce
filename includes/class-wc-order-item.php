@@ -27,64 +27,13 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	);
 
     /**
-     * offsetSet for ArrayAccess
-     * @param string $offset
-     * @param mixed $value
-     */
-    public function offsetSet( $offset, $value ) {
-        if ( 'item_meta_array' === $offset ) {
-            $offset = 'meta_data';
-        }
-        $this->_data[ $offset ] = $value;
-    }
-
-    /**
-     * offsetUnset for ArrayAccess
-     * @param string $offset
-     */
-    public function offsetUnset( $offset ) {
-        if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
-            $this->_data['meta_data'] = array();
-        }
-        unset( $this->_data[ $offset ] );
-    }
-
-    /**
-     * offsetExists for ArrayAccess
-     * @param string $offset
-     * @return bool
-     */
-    public function offsetExists( $offset ) {
-        if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
-            return true;
-        }
-        return isset( $this->_data[ $offset ] );
-    }
-
-    /**
-     * offsetGet for ArrayAccess
-     * @param string $offset
-     * @return mixed
-     */
-    public function offsetGet( $offset ) {
-        if( 'item_meta_array' === $offset ) {
-            $offset = 'meta_data';
-        }
-        elseif( 'item_meta' === $offset ) {
-            $meta_values = wp_list_pluck( $this->_data['meta_data'], 'value', 'key' );
-            return $meta_values;
-        }
-        return isset( $this->_data[ $offset ] ) ? $this->_data[ $offset ] : null;
-    }
-
-    /**
 	 * Constructor.
 	 * @param int|object $order_item ID to load from the DB (optional) or already queried data.
 	 */
     public function __construct( $item = 0 ) {
 		if ( $item instanceof WC_Order_Item ) {
             if ( $this->is_type( $item->get_type() ) ) {
-                $this->set_all( $item );
+                $this->set_all( $item->get_data() );
             }
 		} else {
             $this->read( $item );
@@ -92,12 +41,17 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
     }
 
     /**
-     * Set data based on input item.
+     * Set all data based on input array.
+     * @param array $data
      * @access private
      */
-    private function set_all( $item ) {
-        foreach ( $item->get_data() as $key => $value ) {
-            $this->_data[ $key ] = $value;
+    private function set_all( $data ) {
+        foreach ( $data as $key => $value ) {
+            if ( is_callable( array( $this, "set_$key" ) ) ) {
+                $this->{"set_$key"}( $value );
+            } else {
+                $this->_data[ $key ] = $value;
+            }
         }
     }
 
@@ -384,5 +338,56 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
     public function delete() {
         global $wpdb;
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_id() ) );
+    }
+
+    /**
+     * offsetSet for ArrayAccess
+     * @param string $offset
+     * @param mixed $value
+     */
+    public function offsetSet( $offset, $value ) {
+        if ( 'item_meta_array' === $offset ) {
+            $offset = 'meta_data';
+        }
+        $this->_data[ $offset ] = $value;
+    }
+
+    /**
+     * offsetUnset for ArrayAccess
+     * @param string $offset
+     */
+    public function offsetUnset( $offset ) {
+        if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
+            $this->_data['meta_data'] = array();
+        }
+        unset( $this->_data[ $offset ] );
+    }
+
+    /**
+     * offsetExists for ArrayAccess
+     * @param string $offset
+     * @return bool
+     */
+    public function offsetExists( $offset ) {
+        if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
+            return true;
+        }
+        return isset( $this->_data[ $offset ] );
+    }
+
+    /**
+     * offsetGet for ArrayAccess
+     * @param string $offset
+     * @return mixed
+     */
+    public function offsetGet( $offset ) {
+        if( 'item_meta_array' === $offset ) {
+            $offset = 'meta_data';
+        }
+        elseif( 'item_meta' === $offset ) {
+            $meta_values = wp_list_pluck( $this->_data['meta_data'], 'value', 'key' );
+            return $meta_values;
+        }
+        return isset( $this->_data[ $offset ] ) ? $this->_data[ $offset ] : null;
     }
 }

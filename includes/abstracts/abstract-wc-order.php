@@ -1749,20 +1749,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * Order must be saved prior to adding items.
      *
      * @param string $code
-     * @param int $discount_amount
-     * @param int $discount_amount_tax "Discounted" tax - used for tax inclusive prices.
+     * @param int $discount
+     * @param int $discount_tax "Discounted" tax - used for tax inclusive prices.
      * @return int updated order item ID
      */
-    public function add_coupon( $code, $discount_amount = 0, $discount_amount_tax = 0 ) {
-        $args = array(
-            'code'                => $code,
-            'discount_amount'     => $discount_amount,
-            'discount_amount_tax' => $discount_amount_tax
-        );
-        $item = new WC_Order_Item_Coupon();
-        $item_id = $this->update_coupon( $item, $args );
+    public function add_coupon( $code, $discount = 0, $discount_tax = 0 ) {
+        $item    = new WC_Order_Item_Coupon();
+        $item_id = $this->update_coupon( $item, array(
+            'code'         => $code,
+            'discount'     => $discount,
+            'discount_tax' => $discount_tax,
+        ) );
 
-		do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item->get_order_item_id(), $code, $discount_amount, $discount_amount_tax );
+		do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item->get_order_item_id(), $code, $discount, $discount_tax );
 
 		return $item_id;
     }
@@ -1778,33 +1777,29 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         if ( is_numeric( $item ) ) {
             $item = $this->get_item( $item );
         }
-
         if ( ! is_object( $item ) || ! $item->is_type( 'coupon' ) ) {
             return false;
         }
-
         if ( ! $this->get_id() ) {
-            $this->save();
+            $this->save(); // Order must exist
         }
 
-		$item->set_order_id( $this->get_id() );
-
-        if ( ! $item->get_order_item_id() ) {
+		if ( ! $item->get_order_item_id() ) {
             $inserting = true;
         } else {
             $inserting = false;
         }
 
-        if ( isset( $args['code'] ) ) {
-            $item->set_coupon_code( $args['code'] );
-        }
-        if ( isset( $args['discount_amount'] ) ) {
-            $item->set_discount_amount( $args['discount_amount'] );
-        }
-        if ( isset( $args['discount_amount_tax'] ) ) {
-            $item->set_discount_amount_tax( $args['discount_amount_tax'] );
-        }
+		// BW compatibility for old args
+		if ( isset( $args['discount_amount'] ) ) {
+			$args['discount'] = $args['discount_amount'];
+		}
+		if ( isset( $args['discount_amount_tax'] ) ) {
+			$args['discount_tax'] = $args['discount_amount_tax'];
+		}
 
+		$item->set_order_id( $this->get_id() );
+		$item->set_all( $args );
         $item->save();
 
         if ( ! $inserting ) {
