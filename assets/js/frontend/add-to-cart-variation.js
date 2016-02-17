@@ -184,7 +184,7 @@
 			var $template_html = '';
 
 			if ( ! variation.variation_is_visible ) {
-				$template_html = unavailable_template;
+				$template_html = unavailable_template();
 				// w3 total cache inline minification adds CDATA tags around our HTML (sigh)
 				$template_html = $template_html.replace( '/*<![CDATA[*/', '' );
 				$template_html = $template_html.replace( '/*]]>*/', '' );
