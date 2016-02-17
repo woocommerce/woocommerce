@@ -49,8 +49,8 @@ class WC_Order_Item_Tax extends WC_Order_Item {
             wc_update_order_item_meta( $this->get_order_item_id(), 'rate_id', $this->get_rate_id() );
             wc_update_order_item_meta( $this->get_order_item_id(), 'label', $this->get_label() );
             wc_update_order_item_meta( $this->get_order_item_id(), 'compound', $this->get_compound() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'tax_amount', $this->get_tax_amount() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'shipping_tax_amount', $this->get_shipping_tax_amount() );
+            wc_update_order_item_meta( $this->get_order_item_id(), 'tax_amount', $this->get_tax_total() );
+            wc_update_order_item_meta( $this->get_order_item_id(), 'shipping_tax_amount', $this->get_shipping_tax_total() );
         }
     }
 
@@ -93,19 +93,19 @@ class WC_Order_Item_Tax extends WC_Order_Item {
     }
 
     /**
-     * Set tax_amount.
+     * Set tax total.
      * @param string $value
      */
-    public function set_tax_amount( $value ) {
-        $this->_data['tax_amount'] = wc_format_decimal( $value );
+    public function set_tax_total( $value ) {
+        $this->_data['tax_total'] = wc_format_decimal( $value );
     }
 
     /**
-     * Set shipping_tax_amount
+     * Set shipping_tax_total
      * @param string $value
      */
-    public function set_shipping_tax_amount( $value ) {
-        $this->_data['shipping_tax_amount'] = wc_format_decimal( $value );
+    public function set_shipping_tax_total( $value ) {
+        $this->_data['shipping_tax_total'] = wc_format_decimal( $value );
     }
 
     /**
@@ -163,19 +163,19 @@ class WC_Order_Item_Tax extends WC_Order_Item {
     }
 
     /**
-     * Get tax_amount
+     * Get tax_total
      * @return string
      */
-    public function get_tax_amount() {
-        return wc_format_decimal( $this->_data['tax_amount'] );
+    public function get_tax_total() {
+        return wc_format_decimal( $this->_data['tax_total'] );
     }
 
     /**
-     * Get shipping_tax_amount
+     * Get shipping_tax_total
      * @return string
      */
-    public function get_shipping_tax_amount() {
-        return wc_format_decimal( $this->_data['shipping_tax_amount'] );
+    public function get_shipping_tax_total() {
+        return wc_format_decimal( $this->_data['shipping_tax_total'] );
     }
 
     /**

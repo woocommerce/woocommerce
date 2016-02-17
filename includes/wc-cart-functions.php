@@ -133,7 +133,7 @@ function wc_clear_cart_after_payment() {
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order->order_key === $order_key ) {
+			if ( $order->get_order_key() === $order_key ) {
 				WC()->cart->empty_cart();
 			}
 		}

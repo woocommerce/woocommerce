@@ -186,7 +186,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @return string
      */
     public function get_method_id() {
-        return $this->meta_data['method_id'];
+        return $this->_data['method_id'];
     }
 
     /**

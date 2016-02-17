@@ -203,7 +203,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$order->update_status( 'processing', __( 'Payment to be made upon delivery.', 'woocommerce' ) );
 
 		// Reduce stock levels
-		$order->reduce_order_stock();
+		wc_reduce_stock_levels( $order_id );
 
 		// Remove cart
 		WC()->cart->empty_cart();
@@ -233,7 +233,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * @param bool $plain_text
      */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-		if ( $this->instructions && ! $sent_to_admin && 'cod' === $order->payment_method ) {
+		if ( $this->instructions && ! $sent_to_admin && 'cod' === $order->get_payment_method() ) {
 			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 		}
 	}

@@ -45,7 +45,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      * @param array $data
      * @access private
      */
-    private function set_all( $data ) {
+    public function set_all( $data ) {
         foreach ( $data as $key => $value ) {
             if ( is_callable( array( $this, "set_$key" ) ) ) {
                 $this->{"set_$key"}( $value );

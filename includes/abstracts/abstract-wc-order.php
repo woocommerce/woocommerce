@@ -2166,7 +2166,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
                 }
             }
 
-            $shipping_taxes     = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
+            $shipping_taxes     = WC_Tax::calc_shipping_tax( $this->get_shipping_total(), $matched_tax_rates );
             $shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
         } else {
             $shipping_taxes     = array();
@@ -2473,23 +2473,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     public function get_shipping_to_display( $tax_display = '' ) {
         $tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 
-        if ( $this->order_shipping != 0 ) {
+        if ( $this->get_shipping_total() != 0 ) {
 
             if ( $tax_display == 'excl' ) {
 
                 // Show shipping excluding tax.
-                $shipping = wc_price( $this->order_shipping, array('currency' => $this->get_order_currency()) );
+                $shipping = wc_price( $this->get_shipping_total(), array('currency' => $this->get_order_currency()) );
 
-                if ( $this->order_shipping_tax != 0 && $this->prices_include_tax ) {
+                if ( $this->get_shipping_tax() != 0 && $this->prices_include_tax ) {
                     $shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
                 }
 
             } else {
 
                 // Show shipping including tax.
-                $shipping = wc_price( $this->order_shipping + $this->order_shipping_tax, array('currency' => $this->get_order_currency()) );
+                $shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array('currency' => $this->get_order_currency()) );
 
-                if ( $this->order_shipping_tax != 0 && ! $this->prices_include_tax ) {
+                if ( $this->get_shipping_tax() != 0 && ! $this->prices_include_tax ) {
                     $shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
                 }
 

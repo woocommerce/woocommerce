@@ -625,7 +625,7 @@ class WC_API_Customers extends WC_API_Resource {
 			// add customer data from order
 			$order_data['customer'] = array(
 				'id'               => 0,
-				'email'            => $order->billing_email,
+				'email'            => $order->get_billing_email(),
 				'first_name'       => $order->billing_first_name,
 				'last_name'        => $order->billing_last_name,
 				'billing_address'  => array(
@@ -638,8 +638,8 @@ class WC_API_Customers extends WC_API_Resource {
 					'state'      => $order->billing_state,
 					'postcode'   => $order->billing_postcode,
 					'country'    => $order->billing_country,
-					'email'      => $order->billing_email,
-					'phone'      => $order->billing_phone,
+					'email'      => $order->get_billing_email(),
+					'phone'      => $order->get_billing_phone(),
 				),
 				'shipping_address' => array(
 					'first_name' => $order->shipping_first_name,

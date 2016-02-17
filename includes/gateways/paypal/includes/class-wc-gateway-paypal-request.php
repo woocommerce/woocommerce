@@ -75,7 +75,7 @@ class WC_Gateway_Paypal_Request {
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
 				'bn'            => 'WooThemes_Cart',
 				'invoice'       => $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(),
-				'custom'        => json_encode( array( 'order_id' => $order->get_id(), 'order_key' => $order->order_key ) ),
+				'custom'        => json_encode( array( 'order_id' => $order->get_id(), 'order_key' => $order->get_order_key() ) ),
 				'notify_url'    => $this->notify_url,
 				'first_name'    => $order->billing_first_name,
 				'last_name'     => $order->billing_last_name,
@@ -86,7 +86,7 @@ class WC_Gateway_Paypal_Request {
 				'state'         => $this->get_paypal_state( $order->billing_country, $order->billing_state ),
 				'zip'           => $order->billing_postcode,
 				'country'       => $order->billing_country,
-				'email'         => $order->billing_email
+				'email'         => $order->get_billing_email()
 			),
 			$this->get_phone_number_args( $order ),
 			$this->get_shipping_args( $order ),
@@ -101,7 +101,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_phone_number_args( $order ) {
 		if ( in_array( $order->billing_country, array( 'US','CA' ) ) ) {
-			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->billing_phone );
+			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone() );
 			$phone_number = ltrim( $phone_number, '+1' );
 			$phone_args   = array(
 				'night_phone_a' => substr( $phone_number, 0, 3 ),
@@ -113,8 +113,8 @@ class WC_Gateway_Paypal_Request {
 			);
 		} else {
 			$phone_args = array(
-				'night_phone_b' => $order->billing_phone,
-				'day_phone_b' 	=> $order->billing_phone
+				'night_phone_b' => $order->get_billing_phone(),
+				'day_phone_b' 	=> $order->get_billing_phone()
 			);
 		}
 		return $phone_args;

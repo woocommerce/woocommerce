@@ -646,8 +646,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
-				'method_id'    => $order->payment_method,
-				'method_title' => $order->payment_method_title,
+				'method_id'    => $order->get_payment_method(),
+				'method_title' => $order->get_payment_method_title(),
 				'paid'         => isset( $order->paid_date ),
 			),
 			'billing_address' => array(
@@ -660,8 +660,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 				'state'      => $order->billing_state,
 				'postcode'   => $order->billing_postcode,
 				'country'    => $order->billing_country,
-				'email'      => $order->billing_email,
-				'phone'      => $order->billing_phone,
+				'email'      => $order->get_billing_email(),
+				'phone'      => $order->get_billing_phone(),
 			),
 			'shipping_address' => array(
 				'first_name' => $order->shipping_first_name,
@@ -674,7 +674,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 				'postcode'   => $order->shipping_postcode,
 				'country'    => $order->shipping_country,
 			),
-			'note'                      => $order->customer_note,
+			'note'                      => $order->get_customer_note(),
 			'customer_ip'               => $order->customer_ip_address,
 			'customer_user_agent'       => $order->customer_user_agent,
 			'customer_id'               => $order->get_user_id(),

@@ -161,7 +161,7 @@ class WC_API_Orders extends WC_API_Resource {
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'order_key'                 => $order->order_key,
+			'order_key'                 => $order->get_order_key(),
 			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
 			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
 			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
@@ -177,8 +177,8 @@ class WC_API_Orders extends WC_API_Resource {
 			'total_discount'            => wc_format_decimal( $order->get_total_discount(), $dp ),
 			'shipping_methods'          => $order->get_shipping_method(),
 			'payment_details' => array(
-				'method_id'    => $order->payment_method,
-				'method_title' => $order->payment_method_title,
+				'method_id'    => $order->get_payment_method(),
+				'method_title' => $order->get_payment_method_title(),
 				'paid'         => isset( $order->paid_date ),
 			),
 			'billing_address' => array(
@@ -191,8 +191,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'state'      => $order->billing_state,
 				'postcode'   => $order->billing_postcode,
 				'country'    => $order->billing_country,
-				'email'      => $order->billing_email,
-				'phone'      => $order->billing_phone,
+				'email'      => $order->get_billing_email(),
+				'phone'      => $order->get_billing_phone(),
 			),
 			'shipping_address' => array(
 				'first_name' => $order->shipping_first_name,
@@ -205,7 +205,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'postcode'   => $order->shipping_postcode,
 				'country'    => $order->shipping_country,
 			),
-			'note'                      => $order->customer_note,
+			'note'                      => $order->get_customer_note(),
 			'customer_ip'               => $order->customer_ip_address,
 			'customer_user_agent'       => $order->customer_user_agent,
 			'customer_id'               => $order->get_user_id(),
@@ -1655,8 +1655,8 @@ class WC_API_Orders extends WC_API_Resource {
 
 				$order = wc_get_order( $order_id );
 
-				if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
-					$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
+				if ( isset( $payment_gateways[ $order->get_payment_method() ] ) && $payment_gateways[ $order->get_payment_method() ]->supports( 'refunds' ) ) {
+					$result = $payment_gateways[ $order->get_payment_method() ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
 
 					if ( is_wp_error( $result ) ) {
 						return $result;
