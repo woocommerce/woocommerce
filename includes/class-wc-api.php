@@ -55,9 +55,6 @@ class WC_API {
 	 * @return WC_API
 	 */
 	public function __construct() {
-		// Include REST API classes.
-		$this->rest_api_includes();
-
 		// Add query vars.
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 
@@ -74,7 +71,7 @@ class WC_API {
 		add_action( 'woocommerce_api_request', array( 'WC_Payment_Gateways', 'instance' ), 0 );
 
 		// WP REST API.
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		$this->rest_api_init();
 	}
 
 	/**
@@ -103,7 +100,7 @@ class WC_API {
 		add_rewrite_rule( '^wc-api/v([1-3]{1})/?$', 'index.php?wc-api-version=$matches[1]&wc-api-route=/', 'top' );
 		add_rewrite_rule( '^wc-api/v([1-3]{1})(.*)?', 'index.php?wc-api-version=$matches[1]&wc-api-route=$matches[2]', 'top' );
 
-		// WC API for payment gateway IPNs, etc
+		// WC API for payment gateway IPNs, etc.
 		add_rewrite_endpoint( 'wc-api', EP_ALL );
 	}
 
@@ -125,13 +122,13 @@ class WC_API {
 			$wp->query_vars['wc-api-route'] = $_GET['wc-api-route'];
 		}
 
-		// REST API request
+		// REST API request.
 		if ( ! empty( $wp->query_vars['wc-api-version'] ) && ! empty( $wp->query_vars['wc-api-route'] ) ) {
 
 			define( 'WC_API_REQUEST', true );
 			define( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
 
-			// legacy v1 API request
+			// Legacy v1 API request.
 			if ( 1 === WC_API_REQUEST_VERSION ) {
 				$this->handle_v1_rest_api_request();
 			} else if ( 2 === WC_API_REQUEST_VERSION ) {
@@ -141,10 +138,10 @@ class WC_API {
 
 				$this->server = new WC_API_Server( $wp->query_vars['wc-api-route'] );
 
-				// load API resource classes
+				// load API resource classes.
 				$this->register_resources( $this->server );
 
-				// Fire off the request
+				// Fire off the request.
 				$this->server->serve_request();
 			}
 
@@ -160,13 +157,13 @@ class WC_API {
 	 */
 	public function includes() {
 
-		// API server / response handlers
+		// API server / response handlers.
 		include_once( 'api/legacy/v3/class-wc-api-exception.php' );
 		include_once( 'api/legacy/v3/class-wc-api-server.php' );
 		include_once( 'api/legacy/v3/interface-wc-api-handler.php' );
 		include_once( 'api/legacy/v3/class-wc-api-json-handler.php' );
 
-		// authentication
+		// Authentication.
 		include_once( 'api/legacy/v3/class-wc-api-authentication.php' );
 		$this->authentication = new WC_API_Authentication();
 
@@ -179,7 +176,7 @@ class WC_API {
 		include_once( 'api/legacy/v3/class-wc-api-taxes.php' );
 		include_once( 'api/legacy/v3/class-wc-api-webhooks.php' );
 
-		// allow plugins to load other response handlers or resource classes
+		// Allow plugins to load other response handlers or resource classes.
 		do_action( 'woocommerce_api_loaded' );
 	}
 
@@ -218,7 +215,7 @@ class WC_API {
 	 */
 	private function handle_v1_rest_api_request() {
 
-		// include legacy required files for v1 REST API request
+		// Include legacy required files for v1 REST API request.
 		include_once( 'api/legacy/v1/class-wc-api-server.php' );
 		include_once( 'api/legacy/v1/interface-wc-api-handler.php' );
 		include_once( 'api/legacy/v1/class-wc-api-json-handler.php' );
@@ -234,12 +231,12 @@ class WC_API {
 		include_once( 'api/legacy/v1/class-wc-api-products.php' );
 		include_once( 'api/legacy/v1/class-wc-api-reports.php' );
 
-		// allow plugins to load other response handlers or resource classes
+		// Allow plugins to load other response handlers or resource classes.
 		do_action( 'woocommerce_api_loaded' );
 
 		$this->server = new WC_API_Server( $GLOBALS['wp']->query_vars['wc-api-route'] );
 
-		// Register available resources for legacy v1 REST API request
+		// Register available resources for legacy v1 REST API request.
 		$api_classes = apply_filters( 'woocommerce_api_classes',
 			array(
 				'WC_API_Customers',
@@ -254,7 +251,7 @@ class WC_API {
 			$this->$api_class = new $api_class( $this->server );
 		}
 
-		// Fire off the request
+		// Fire off the request.
 		$this->server->serve_request();
 	}
 
@@ -281,12 +278,12 @@ class WC_API {
 		include_once( 'api/legacy/v2/class-wc-api-reports.php' );
 		include_once( 'api/legacy/v2/class-wc-api-webhooks.php' );
 
-		// allow plugins to load other response handlers or resource classes
+		// allow plugins to load other response handlers or resource classes.
 		do_action( 'woocommerce_api_loaded' );
 
 		$this->server = new WC_API_Server( $GLOBALS['wp']->query_vars['wc-api-route'] );
 
-		// Register available resources for legacy v2 REST API request
+		// Register available resources for legacy v2 REST API request.
 		$api_classes = apply_filters( 'woocommerce_api_classes',
 			array(
 				'WC_API_Customers',
@@ -302,7 +299,7 @@ class WC_API {
 			$this->$api_class = new $api_class( $this->server );
 		}
 
-		// Fire off the request
+		// Fire off the request.
 		$this->server->serve_request();
 	}
 
@@ -319,31 +316,50 @@ class WC_API {
 			$wp->query_vars['wc-api'] = $_GET['wc-api'];
 		}
 
-		// wc-api endpoint requests
+		// wc-api endpoint requests.
 		if ( ! empty( $wp->query_vars['wc-api'] ) ) {
 
-			// Buffer, we won't want any output here
+			// Buffer, we won't want any output here.
 			ob_start();
 
-			// No cache headers
+			// No cache headers.
 			nocache_headers();
 
-			// Clean the API request
+			// Clean the API request.
 			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
 
-			// Trigger generic action before request hook
+			// Trigger generic action before request hook.
 			do_action( 'woocommerce_api_request', $api_request );
 
-			// Is there actually something hooked into this API request? If not trigger 400 - Bad request
+			// Is there actually something hooked into this API request? If not trigger 400 - Bad request.
 			status_header( has_action( 'woocommerce_api_' . $api_request ) ? 200 : 400 );
 
-			// Trigger an action which plugins can hook into to fulfill the request
+			// Trigger an action which plugins can hook into to fulfill the request.
 			do_action( 'woocommerce_api_' . $api_request );
 
-			// Done, clear buffer and exit
+			// Done, clear buffer and exit.
 			ob_end_clean();
-			die('-1');
+			die( '-1' );
 		}
+	}
+
+	/**
+	 * Init WP REST API.
+	 *
+	 * @since 2.6.0
+	 */
+	private function rest_api_init() {
+		global $wp_version;
+
+		// REST API was included starting WordPress 4.4.
+		if ( version_compare( $wp_version, 4.4, '<' ) ) {
+			return;
+		}
+
+		$this->rest_api_includes();
+
+		// Init REST API routes.
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 	}
 
 	/**
@@ -351,7 +367,7 @@ class WC_API {
 	 *
 	 * @since 2.6.0
 	 */
-	public function rest_api_includes() {
+	private function rest_api_includes() {
 		if ( ! class_exists( 'WP_REST_Controller' ) ) {
 			include_once( 'vendor/class-wp-rest-controller.php' );
 		}
@@ -397,12 +413,7 @@ class WC_API {
 		);
 
 		foreach ( $controllers as $controller ) {
-			$_controller = new $controller();
-			if ( ! is_subclass_of( $_controller, 'WC_REST_Controller' ) ) {
-				continue;
-			}
-
-			$this->$controller = $_controller;
+			$this->$controller = new $controller();
 			$this->$controller->register_routes();
 		}
 	}
