@@ -58,8 +58,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		if ( ! isset( $report['hide_title'] ) || $report['hide_title'] != true ) {
 			echo '<h2>' . esc_html( $report['title'] ) . '</h2>';
-		}
-		else {
+		} else {
 			echo '<h2 class="screen-reader-text">' . esc_html( $report['title'] ) . '</h2>';
 		}
 
