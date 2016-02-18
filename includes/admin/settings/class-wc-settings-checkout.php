@@ -50,7 +50,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			foreach ( $payment_gateways as $gateway ) {
 				$title = empty( $gateway->method_title ) ? ucfirst( $gateway->id ) : $gateway->method_title;
-				$sections[ strtolower( get_class( $gateway ) ) ] = esc_html( $title );
+				$sections[ strtolower( $gateway->id ) ] = esc_html( $title );
 			}
 		}
 
@@ -244,7 +244,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			foreach ( $payment_gateways as $gateway ) {
 
-				if ( strtolower( get_class( $gateway ) ) == strtolower( $current_section ) ) {
+				if ( strtolower( $current_section ) === $gateway->id ) {
 					$gateway->admin_options();
 					break;
 				}
