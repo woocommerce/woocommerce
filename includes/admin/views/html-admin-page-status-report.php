@@ -509,7 +509,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					echo '<mark class="error">' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 					$error = true;
 				} else if ( get_post_status( $page_id ) !== 'publish' ) {
-					echo '<mark class="error">' . sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) . '</mark>';
+					echo '<mark class="error">' . sprintf( __( 'Page visibility should be %spublic%s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
 					$error = true;
 				} else {
 
