@@ -23,6 +23,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		$this->id                 = 'simplify_commerce';
 		$this->method_title       = __( 'Simplify Commerce', 'woocommerce' );
 		$this->method_description = __( 'Take payments via Simplify Commerce - uses simplify.js to create card tokens and the Simplify Commerce SDK. Requires SSL when sandbox is disabled.', 'woocommerce' );
+		$this->new_method_label   = __( 'Use a new card', 'woocommerce' );
 		$this->has_fields         = true;
 		$this->supports           = array(
 			'subscriptions',

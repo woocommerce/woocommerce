@@ -103,6 +103,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $view_transaction_url = '';
 
 	/**
+	 * Optional label to show for "new payment method" in the payment
+	 * method/token selection radio selection.
+	 * @var string
+	 */
+	public $new_method_label = '';
+
+	/**
 	 * Return the title for admin screens.
 	 * @return string
 	 */

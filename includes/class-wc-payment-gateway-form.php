@@ -264,9 +264,11 @@ class WC_Payment_Gateway_Form {
 	}
 
 	public function use_new_payment_method_checkbox() {
+		$label = ( ! empty( $this->gateway->new_method_label ) ? esc_html( $this->gateway->new_method_label ) : esc_html__( 'Use a new payment method', 'woocommerce' ) );
+
 		$html = '<input type="radio" id="wc-' . esc_attr( $this->gateway->id ). '-new" name="wc-' . esc_attr( $this->gateway->id ) . '-payment-token" value="new" style="width:auto;">';
 		$html .= '<label class="wc-' . esc_attr( $this->gateway->id ) . '-payment-form-new-checkbox wc-gateway-payment-token-label" for="wc-' . esc_attr( $this->gateway->id ) . '-new">';
-		$html .=  esc_html__( 'Use a new payment method', 'woocommerce' );
+		$html .=  apply_filters( 'woocommerce_payment_gateway_form_new_method_label', $label, $this->gateway );
 		$html .= '</label>';
 		echo '<div class="wc-' . esc_attr( $this->gateway->id ) . '-payment-form-new-checkbox-wrap">' . $html . '</div>';
 	}
