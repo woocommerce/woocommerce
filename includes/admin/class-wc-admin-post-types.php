@@ -81,7 +81,6 @@ class WC_Admin_Post_Types {
 		// Edit post screens
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
-		add_filter( 'media_view_strings', array( $this, 'change_insert_into_post' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
@@ -2097,24 +2096,6 @@ class WC_Admin_Post_Types {
 			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // This is already escaped in core ?></textarea>
 			<?php
 		}
-	}
-
-	/**
-	 * Change label for insert buttons.
-	 * @param  array $strings
-	 * @return array
-	 */
-	public function change_insert_into_post( $strings ) {
-		global $post_type;
-
-		if ( in_array( $post_type, array( 'product', 'shop_coupon' ) ) || in_array( $post_type, wc_get_order_types() ) ) {
-			$obj = get_post_type_object( $post_type );
-
-			$strings['insertIntoPost']     = sprintf( __( 'Insert into %s', 'woocommerce' ), $obj->labels->singular_name );
-			$strings['uploadedToThisPost'] = sprintf( __( 'Uploaded to this %s', 'woocommerce' ), $obj->labels->singular_name );
-		}
-
-		return $strings;
 	}
 
 	/**
