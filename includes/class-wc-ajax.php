@@ -1521,7 +1521,7 @@ class WC_AJAX {
 		// Action
 		$items = apply_filters( 'woocommerce_ajax_calc_line_taxes', $items, $order_id, $country, $_POST );
 
-		$is_vat_exempt = get_post_meta ( $order_id, '_is_vat_exempt', true );
+		$is_vat_exempt = get_post_meta( $order_id, '_is_vat_exempt', true );
 	
 		// Tax is calculated only if tax is enabled and order is not vat exempted
 		if ( wc_tax_enabled() && $is_vat_exempt != 'yes' ) {
