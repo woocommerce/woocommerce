@@ -626,7 +626,7 @@ abstract class WC_Abstract_Order {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		// If is_vat_exempt is 'yes', or wc_tax_enabled is false, return and do nothing.
-		if ( 'yes' == $this->is_vat_exempt or ! wc_tax_enabled() ) {
+		if ( 'yes' === $this->is_vat_exempt or ! wc_tax_enabled() ) {
 			return false;
 		}
 
