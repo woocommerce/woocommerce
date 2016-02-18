@@ -1526,90 +1526,90 @@ class WC_AJAX {
 		// Tax is calculated only if tax is enabled and order is not vat exempted
 		if ( wc_tax_enabled() && $is_vat_exempt !== 'yes' ) {
 		
-		// Get items and fees taxes
-		if ( isset( $items['order_item_id'] ) ) {
-			$line_total = $line_subtotal = $order_item_tax_class = array();
-
-			foreach ( $items['order_item_id'] as $item_id ) {
-				$item_id                          = absint( $item_id );
-				$line_total[ $item_id ]           = isset( $items['line_total'][ $item_id ] ) ? wc_format_decimal( $items['line_total'][ $item_id ] ) : 0;
-				$line_subtotal[ $item_id ]        = isset( $items['line_subtotal'][ $item_id ] ) ? wc_format_decimal( $items['line_subtotal'][ $item_id ] ) : $line_total[ $item_id ];
-				$order_item_tax_class[ $item_id ] = isset( $items['order_item_tax_class'][ $item_id ] ) ? sanitize_text_field( $items['order_item_tax_class'][ $item_id ] ) : '';
-				$product_id                       = $order->get_item_meta( $item_id, '_product_id', true );
-
-				// Get product details
-				if ( get_post_type( $product_id ) == 'product' ) {
-					$_product        = wc_get_product( $product_id );
-					$item_tax_status = $_product->get_tax_status();
-				} else {
-					$item_tax_status = 'taxable';
-				}
-
-				if ( '0' !== $order_item_tax_class[ $item_id ] && 'taxable' === $item_tax_status ) {
-					$tax_rates = WC_Tax::find_rates( array(
-						'country'   => $country,
-						'state'     => $state,
-						'postcode'  => $postcode,
-						'city'      => $city,
-						'tax_class' => $order_item_tax_class[ $item_id ]
-					) );
-
-					$line_taxes          = WC_Tax::calc_tax( $line_total[ $item_id ], $tax_rates, false );
-					$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal[ $item_id ], $tax_rates, false );
-
-					// Set the new line_tax
-					foreach ( $line_taxes as $_tax_id => $_tax_value ) {
-						$items['line_tax'][ $item_id ][ $_tax_id ] = $_tax_value;
+			// Get items and fees taxes
+			if ( isset( $items['order_item_id'] ) ) {
+				$line_total = $line_subtotal = $order_item_tax_class = array();
+	
+				foreach ( $items['order_item_id'] as $item_id ) {
+					$item_id                          = absint( $item_id );
+					$line_total[ $item_id ]           = isset( $items['line_total'][ $item_id ] ) ? wc_format_decimal( $items['line_total'][ $item_id ] ) : 0;
+					$line_subtotal[ $item_id ]        = isset( $items['line_subtotal'][ $item_id ] ) ? wc_format_decimal( $items['line_subtotal'][ $item_id ] ) : $line_total[ $item_id ];
+					$order_item_tax_class[ $item_id ] = isset( $items['order_item_tax_class'][ $item_id ] ) ? sanitize_text_field( $items['order_item_tax_class'][ $item_id ] ) : '';
+					$product_id                       = $order->get_item_meta( $item_id, '_product_id', true );
+	
+					// Get product details
+					if ( get_post_type( $product_id ) == 'product' ) {
+						$_product        = wc_get_product( $product_id );
+						$item_tax_status = $_product->get_tax_status();
+					} else {
+						$item_tax_status = 'taxable';
 					}
-
-					// Set the new line_subtotal_tax
-					foreach ( $line_subtotal_taxes as $_tax_id => $_tax_value ) {
-						$items['line_subtotal_tax'][ $item_id ][ $_tax_id ] = $_tax_value;
-					}
-
-					// Sum the item taxes
-					foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
-						$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
-					}
-				}
-			}
-		}
-
-		// Get shipping taxes
-		if ( isset( $items['shipping_method_id'] ) ) {
-			$matched_tax_rates = array();
-
-			$tax_rates = WC_Tax::find_rates( array(
-				'country'   => $country,
-				'state'     => $state,
-				'postcode'  => $postcode,
-				'city'      => $city,
-				'tax_class' => ''
-			) );
-
-			if ( $tax_rates ) {
-				foreach ( $tax_rates as $key => $rate ) {
-					if ( isset( $rate['shipping'] ) && 'yes' == $rate['shipping'] ) {
-						$matched_tax_rates[ $key ] = $rate;
+	
+					if ( '0' !== $order_item_tax_class[ $item_id ] && 'taxable' === $item_tax_status ) {
+						$tax_rates = WC_Tax::find_rates( array(
+							'country'   => $country,
+							'state'     => $state,
+							'postcode'  => $postcode,
+							'city'      => $city,
+							'tax_class' => $order_item_tax_class[ $item_id ]
+						) );
+	
+						$line_taxes          = WC_Tax::calc_tax( $line_total[ $item_id ], $tax_rates, false );
+						$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal[ $item_id ], $tax_rates, false );
+	
+						// Set the new line_tax
+						foreach ( $line_taxes as $_tax_id => $_tax_value ) {
+							$items['line_tax'][ $item_id ][ $_tax_id ] = $_tax_value;
+						}
+	
+						// Set the new line_subtotal_tax
+						foreach ( $line_subtotal_taxes as $_tax_id => $_tax_value ) {
+							$items['line_subtotal_tax'][ $item_id ][ $_tax_id ] = $_tax_value;
+						}
+	
+						// Sum the item taxes
+						foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
+							$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+						}
 					}
 				}
 			}
-
-			$shipping_cost = $shipping_taxes = array();
-
-			foreach ( $items['shipping_method_id'] as $item_id ) {
-				$item_id                   = absint( $item_id );
-				$shipping_cost[ $item_id ] = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : 0;
-				$_shipping_taxes           = WC_Tax::calc_shipping_tax( $shipping_cost[ $item_id ], $matched_tax_rates );
-
-				// Set the new shipping_taxes
-				foreach ( $_shipping_taxes as $_tax_id => $_tax_value ) {
-					$items['shipping_taxes'][ $item_id ][ $_tax_id ] = $_tax_value;
-
-					$shipping_taxes[ $_tax_id ] = isset( $shipping_taxes[ $_tax_id ] ) ? $shipping_taxes[ $_tax_id ] + $_tax_value : $_tax_value;
+	
+			// Get shipping taxes
+			if ( isset( $items['shipping_method_id'] ) ) {
+				$matched_tax_rates = array();
+	
+				$tax_rates = WC_Tax::find_rates( array(
+					'country'   => $country,
+					'state'     => $state,
+					'postcode'  => $postcode,
+					'city'      => $city,
+					'tax_class' => ''
+				) );
+	
+				if ( $tax_rates ) {
+					foreach ( $tax_rates as $key => $rate ) {
+						if ( isset( $rate['shipping'] ) && 'yes' == $rate['shipping'] ) {
+							$matched_tax_rates[ $key ] = $rate;
+						}
+					}
+				}
+	
+				$shipping_cost = $shipping_taxes = array();
+	
+				foreach ( $items['shipping_method_id'] as $item_id ) {
+					$item_id                   = absint( $item_id );
+					$shipping_cost[ $item_id ] = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : 0;
+					$_shipping_taxes           = WC_Tax::calc_shipping_tax( $shipping_cost[ $item_id ], $matched_tax_rates );
+	
+					// Set the new shipping_taxes
+					foreach ( $_shipping_taxes as $_tax_id => $_tax_value ) {
+						$items['shipping_taxes'][ $item_id ][ $_tax_id ] = $_tax_value;
+	
+						$shipping_taxes[ $_tax_id ] = isset( $shipping_taxes[ $_tax_id ] ) ? $shipping_taxes[ $_tax_id ] + $_tax_value : $_tax_value;
+					}
 				}
 			}
-		}
 		}
 		
 		// Remove old tax rows
