@@ -1524,7 +1524,7 @@ class WC_AJAX {
 		$is_vat_exempt = get_post_meta( $order_id, '_is_vat_exempt', true );
 	
 		// Tax is calculated only if tax is enabled and order is not vat exempted
-		if ( wc_tax_enabled() && $is_vat_exempt != 'yes' ) {
+		if ( wc_tax_enabled() && $is_vat_exempt !== 'yes' ) {
 		
 		// Get items and fees taxes
 		if ( isset( $items['order_item_id'] ) ) {
