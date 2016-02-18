@@ -508,7 +508,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! $page_id ) {
 					echo '<mark class="error">' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 					$error = true;
-				} else if ( get_post_status ( $page_id ) != 'publish' ) { // make sure the page isn't private or a draft
+				} else if ( get_post_status( $page_id ) !== 'publish' ) {
 					echo '<mark class="error">' . sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) . '</mark>';
 					$error = true;
 				} else {
