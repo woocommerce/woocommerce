@@ -215,7 +215,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'tax_lines'                 => array(),
 			'fee_lines'                 => array(),
 			'coupon_lines'              => array(),
-			'is_vat_exempt'             => $order->is_vat_exempt,
+			'is_vat_exempt'             => $order->is_vat_exempt === 'yes' ? true : false,
 		);
 
 		// Add line items.
@@ -474,7 +474,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// set is vat exempt
 			if ( isset( $data['is_vat_exempt'] ) ) {
-				update_post_meta( $order->id, '_is_vat_exempt', $data['is_vat_exempt'] );
+				update_post_meta( $order->id, '_is_vat_exempt', $data['is_vat_exempt'] ? 'yes' : 'no' );
 			}
 
 			// calculate totals and set them
