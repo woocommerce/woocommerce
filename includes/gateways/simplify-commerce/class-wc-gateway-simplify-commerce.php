@@ -323,26 +323,35 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				throw new Simplify_ApiException( $error_msg );
 			}
 
-			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $order->order_total * 100, // In cents.
-				'token'               => $cart_token,
-				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
-				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id
+			// Create customer
+			$customer = Simplify_Customer::createCustomer( array(
+				'token'     => $cart_token,
+				'email'     => $order->billing_email,
+				'name'      => trim( $order->get_formatted_billing_full_name() ),
+				'reference' => $order->id
 			) );
 
-			$order_complete = $this->process_order_status( $order, $payment->id, $payment->paymentStatus, $payment->authCode );
+			if ( is_object( $customer ) && '' != $customer->id ) {
+				update_post_meta( $order->id, '_simplify_customer_id', $customer->id );
+			} else {
+				$error_msg = __( 'Error creating user in Simplify Commerce.', 'woocommerce' );
 
-			if ( $order_complete ) {
+				throw new Simplify_ApiException( $error_msg );
+			}
+
+			$payment_response = $this->do_payment( $order, $order->get_total() );
+
+			if ( is_wp_error( $payment_response ) ) {
+				throw new Exception( $payment_response->get_error_message() );
+			} else {
+				// Remove cart
+				WC()->cart->empty_cart();
+
 				// Return thank you page redirect
 				return array(
 					'result'   => 'success',
 					'redirect' => $this->get_return_url( $order )
 				);
-			} else {
-				$order->add_order_note( __( 'Simplify payment declined', 'woocommerce' ) );
-
-				throw new Simplify_ApiException( __( 'Payment was declined - please try another card.', 'woocommerce' ) );
 			}
 
 		} catch ( Simplify_ApiException $e ) {
@@ -372,6 +381,66 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'result'   => 'success',
 			'redirect' => $order->get_checkout_payment_url( true )
 		);
+	}
+
+	/**
+	 * do payment function.
+	 *
+	 * @param WC_order $order
+	 * @param int $amount (default: 0)
+	 * @uses  Simplify_BadRequestException
+	 * @return bool|WP_Error
+	 */
+	public function do_payment( $order, $amount = 0 ) {
+		if ( $amount * 100 < 50 ) {
+			return new WP_Error( 'simplify_error', __( 'Sorry, the minimum allowed order total is 0.50 to use this payment method.', 'woocommerce' ) );
+		}
+
+		$customer_id = get_post_meta( $order->id, '_simplify_customer_id', true );
+
+		if ( ! $customer_id ) {
+			return new WP_Error( 'simplify_error', __( 'Customer not found', 'woocommerce' ) );
+		}
+
+		try {
+			// Charge the customer
+			$payment = Simplify_Payment::createPayment( array(
+				'amount'              => $amount * 100, // In cents.
+				'customer'            => $customer_id,
+				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
+				'currency'            => strtoupper( get_woocommerce_currency() ),
+				'reference'           => $order->id
+			) );
+
+		} catch ( Exception $e ) {
+
+			$error_message = $e->getMessage();
+
+			if ( $e instanceof Simplify_BadRequestException && $e->hasFieldErrors() && $e->getFieldErrors() ) {
+				$error_message = '';
+				foreach ( $e->getFieldErrors() as $error ) {
+					$error_message .= ' ' . $error->getFieldName() . ': "' . $error->getMessage() . '" (' . $error->getErrorCode() . ')';
+				}
+			}
+
+			$order->add_order_note( sprintf( __( 'Simplify payment error: %s', 'woocommerce' ), $error_message ) );
+
+			return new WP_Error( 'simplify_payment_declined', $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+
+		if ( 'APPROVED' == $payment->paymentStatus ) {
+			// Payment complete
+			$order->payment_complete( $payment->id );
+
+			// Add order note
+			$order->add_order_note( sprintf( __( 'Simplify payment approved (ID: %s, Auth Code: %s)', 'woocommerce' ), $payment->id, $payment->authCode ) );
+
+			return true;
+		} else {
+			$order->add_order_note( __( 'Simplify payment declined', 'woocommerce' ) );
+
+			return new WP_Error( 'simplify_payment_declined', __( 'Payment was declined - please try another card.', 'woocommerce' ) );
+		}
 	}
 
 	/**
@@ -411,7 +480,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'address-city'    => $order->billing_city,
 			'address-state'   => $order->billing_state,
 			'address-zip'     => $order->billing_postcode,
-			'address-country' => $order->billing_country
+			'address-country' => $order->billing_country,
+			'operation'       => 'create.token'
 		), $order->id );
 
 		return $args;
