@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php if ( ! empty( $addon->image ) ) : ?>
 							<img src="<?php echo esc_attr( $addon->image ); ?>"/>
 						<?php else : ?>
-							<h3><?php echo esc_html( $addon->title ); ?></h3>
+							<h2><?php echo esc_html( $addon->title ); ?></h2>
 						<?php endif; ?>
 						<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
 						<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php if ( 'Storefront' !== $theme['Name'] ) : ?>
 		<div class="storefront">
 			<img src="<?php echo WC()->plugin_url(); ?>/assets/images/storefront.jpg" alt="Storefront" />
-			<h3><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h3>
+			<h2><?php _e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
 			<p><?php printf( __( 'We recommend Storefront, the %sofficial%s WooCommerce theme.', 'woocommerce' ), '<em>', '</em>' ); ?></p>
 			<p><?php printf( __( 'Storefront is an intuitive &amp; flexible, %sfree%s WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ), '<strong>', '</strong>' ); ?></p>
 			<p>

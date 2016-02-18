@@ -10,7 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="wrap woocommerce">
-	<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
+	<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div>
+
+	<h1><?php echo sprintf( esc_html__( '%s Report' ), $reports[ $current_tab ]['title'] ); ?></h1>
+
+	<p class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
 			foreach ( $reports as $key => $report_group ) {
 				echo '<a href="'.admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ).'" class="nav-tab ';
@@ -19,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 		?>
 		<?php do_action('wc_reports_tabs'); ?>
-	</h2>
+	</p>
 
 	<?php if ( sizeof( $reports[ $current_tab ]['reports'] ) > 1 ) {
 		?>
@@ -52,8 +56,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		$report = $reports[ $current_tab ][ 'reports' ][ $current_report ];
 
-		if ( ! isset( $report['hide_title'] ) || $report['hide_title'] != true )
-			echo '<h3>' . $report['title'] . '</h3>';
+		if ( ! isset( $report['hide_title'] ) || $report['hide_title'] != true ) {
+			echo '<h2>' . esc_html( $report['title'] ) . '</h2>';
+		} else {
+			echo '<h2 class="screen-reader-text">' . esc_html( $report['title'] ) . '</h2>';
+		}
 
 		if ( $report['description'] )
 			echo '<p>' . $report['description'] . '</p>';

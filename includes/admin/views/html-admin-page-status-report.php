@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="WordPress Environment"><?php _e( 'WordPress Environment', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="WordPress Environment"><h2><?php _e( 'WordPress Environment', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -110,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Server Environment"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Server Environment"><h2><?php _e( 'Server Environment', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -309,7 +309,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Database"><?php _e( 'Database', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Database"><h2><?php _e( 'Database', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -351,7 +351,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</th>
+			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><h2><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -423,7 +423,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Settings"><?php _e( 'Settings', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Settings"><h2><?php _e( 'Settings', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -462,7 +462,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="API"><?php _e( 'API', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="API"><h2><?php _e( 'API', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -481,7 +481,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="WC Pages"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="WC Pages"><h2><?php _e( 'WC Pages', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -559,7 +559,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Taxonomies"><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); ?></th>
+			<th colspan="3" data-export-label="Taxonomies"><h2><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -580,7 +580,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Theme"><?php _e( 'Theme', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Theme"><h2><?php _e( 'Theme', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 		<?php
@@ -662,7 +662,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Templates"><?php _e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></th>
+			<th colspan="3" data-export-label="Templates"><h2><?php _e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>

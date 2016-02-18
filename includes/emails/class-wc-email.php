@@ -704,7 +704,7 @@ class WC_Email extends WC_Settings_API {
 		// Do admin actions.
 		$this->admin_actions();
 		?>
-		<h3><?php echo esc_html( $this->get_title() ); ?></h3>
+		<h2><?php echo esc_html( $this->get_title() ); ?></h2>
 		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); ?>
 
 		<?php

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div id="key-fields" class="settings-panel">
-	<h3><?php _e( 'Key Details', 'woocommerce' ); ?></h3>
+	<h2><?php _e( 'Key Details', 'woocommerce' ); ?></h2>
 
 	<input type="hidden" id="key_id" value="<?php echo esc_attr( $key_id ); ?>" />
 

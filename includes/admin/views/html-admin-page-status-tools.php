@@ -13,11 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php settings_fields( 'woocommerce_status_settings_fields' ); ?>
 	<?php $options = wp_parse_args( get_option( 'woocommerce_status_options', array() ), array( 'uninstall_data' => 0, 'template_debug_mode' => 0, 'shipping_debug_mode' => 0 ) ); ?>
 	<table class="wc_status_table widefat" cellspacing="0">
-		<thead class="tools">
-			<tr>
-				<th colspan="2"><?php _e( 'Tools', 'woocommerce' ); ?></th>
-			</tr>
-		</thead>
 		<tbody class="tools">
 			<?php foreach ( $tools as $action => $tool ) : ?>
 				<tr class="<?php echo sanitize_html_class( $action ); ?>">
