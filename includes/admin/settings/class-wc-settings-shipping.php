@@ -59,7 +59,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					continue;
 				}
 				$title = empty( $method->method_title ) ? ucfirst( $method->id ) : $method->method_title;
-				$sections[ strtolower( get_class( $method ) ) ] = esc_html( $title );
+				$sections[ strtolower( $method->id ) ] = esc_html( $title );
 			}
 		}
 
@@ -137,7 +137,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			return;
 		} else {
 			foreach ( $shipping_methods as $method ) {
-				if ( strtolower( get_class( $method ) ) === strtolower( $current_section ) && $method->has_settings() ) {
+				if ( ( strtolower( $current_section ) === $method->id ) && $method->has_settings() ) {
 					$method->admin_options();
 					return;
 				}
