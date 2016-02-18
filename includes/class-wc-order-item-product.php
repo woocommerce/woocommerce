@@ -31,7 +31,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
             'subtotal' => array(),
             'total'    => array()
         ),
-        'meta_data'     => array(),
     );
 
     /**
@@ -171,7 +170,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      */
     public function get_tax_status() {
         $product = $this->get_product();
-        return $product ? $product->get_tax_class() : 'taxable';
+        return $product ? $product->get_tax_status() : 'taxable';
     }
 
     /*
@@ -267,7 +266,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
      */
     public function set_variation( $data ) {
         foreach ( $data as $key => $value ) {
-            $this->_data['meta_data'][ str_replace( 'attribute_', '', $key ) ] = $value;
+            $this->_meta_data[ str_replace( 'attribute_', '', $key ) ] = $value;
         }
     }
 
@@ -362,6 +361,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
      * @return array of key/value pairs
      */
     public function get_meta_data() {
-        return $this->_data['meta_data'];
+        return $this->_meta_data;
     }
 }

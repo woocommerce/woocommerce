@@ -1951,53 +1951,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         return $item->get_order_item_id();
     }
 
-	/**
-     * Update tax lines at order level by looking at the line item taxes themselves.
-     * @return bool success or fail. @todo
-     */
-    public function update_taxes() {
-        $cart_taxes     = array();
-        $shipping_taxes = array();
-
-        foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
-            $taxes = $item->get_taxes();
-            if ( isset( $taxes['total'] ) ) {
-                foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-                    if ( ! isset( $cart_taxes[ $tax_rate_id ] ) ) {
-                        $cart_taxes[ $tax_rate_id ] = 0;
-                    }
-                    $cart_taxes[ $tax_rate_id ] += $tax;
-                }
-            }
-        }
-
-        foreach ( $this->get_items( array( 'shipping' ) ) as $item_id => $item ) {
-			$taxes = $item->get_taxes();
-            if ( isset( $taxes['total'] ) ) {
-                foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-                    if ( ! isset( $shipping_taxes[ $tax_rate_id ] ) ) {
-                        $shipping_taxes[ $tax_rate_id ] = 0;
-                    }
-                    $shipping_taxes[ $tax_rate_id ] += $tax;
-                }
-            }
-        }
-
-        // Remove old existing tax rows.
-        $this->remove_order_items( 'tax' );
-
-        // Now merge to keep tax rows.
-        foreach ( array_keys( $cart_taxes + $shipping_taxes ) as $tax_rate_id ) {
-            $this->add_tax( $tax_rate_id, isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
-        }
-
-        // Save tax totals
-        $this->set_total( WC_Tax::round( array_sum( $shipping_taxes ) ), 'shipping_tax' );
-        $this->set_total( WC_Tax::round( array_sum( $cart_taxes ) ), 'tax' );
-
-        return true;
-    }
-
     /*
     |--------------------------------------------------------------------------
     | Calculations.
@@ -2029,55 +1982,43 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * Calculate taxes for all line items and shipping, and store the totals and tax rows.
      *
      * Will use the base country unless customer addresses are set.
-     *
-     * @return bool success or fail.
      */
-    public function calculate_taxes() {
-        $cart_tax     = 0;
-        $cart_taxes   = array();
-        $tax_based_on = get_option( 'woocommerce_tax_based_on' );
-
-        if ( 'billing' === $tax_based_on ) {
-            $country  = $this->get_billing_country();
-            $state    = $this->get_billing_state();
-            $postcode = $this->get_billing_postcode();
-            $city     = $this->get_billing_city();
-        } elseif ( 'shipping' === $tax_based_on ) {
-            $country  = $this->get_shipping_country();
-            $state    = $this->get_shipping_state();
-            $postcode = $this->get_shipping_postcode();
-            $city     = $this->get_shipping_city();
-        }
+    public function calculate_taxes( $args = array() ) {
+		$found_tax_classes = array();
+        $tax_based_on      = get_option( 'woocommerce_tax_based_on' );
+		$args              = wp_parse_args( $args, array(
+			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country()  : $this->get_shipping_country(),
+			'state'    => 'billing' === $tax_based_on ? $this->get_billing_state()    : $this->get_shipping_state(),
+			'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
+			'city'     => 'billing' === $tax_based_on ? $this->get_billing_city()     : $this->get_shipping_city(),
+		) );
 
         // Default to base
-        if ( 'base' === $tax_based_on || empty( $country ) ) {
-            $default  = wc_get_base_location();
-            $country  = $default['country'];
-            $state    = $default['state'];
-            $postcode = '';
-            $city     = '';
+        if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
+            $default          = wc_get_base_location();
+            $args['country']  = $default['country'];
+            $args['state']    = $default['state'];
+            $args['postcode'] = '';
+            $args['city']     = '';
         }
 
-        // Get items
+        // Calc taxes for line items
         foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
-			$tax_class  = $item->get_tax_class();
-			$tax_status = $item->get_tax_status();
+			$tax_class           = $item->get_tax_class();
+			$tax_status          = $item->get_tax_status();
+			$found_tax_classes[] = $tax_class;
 
-            if ( '0' !== $tax_class && 'taxable' === $item_tax_status ) {
-
+            if ( '0' !== $tax_class && 'taxable' === $tax_status ) {
                 $tax_rates = WC_Tax::find_rates( array(
-                    'country'   => $country,
-                    'state'     => $state,
-                    'postcode'  => $postcode,
-                    'city'      => $city,
+                    'country'   => $args['country'],
+                    'state'     => $args['state'],
+                    'postcode'  => $args['postcode'],
+                    'city'      => $args['city'],
                     'tax_class' => $tax_class
                 ) );
 
-				$total     = $item->get_total();
-				$taxes     = WC_Tax::calc_tax( $total, $tax_rates, false );
-				$total_tax = max( 0, array_sum( $taxes ) );
-				$cart_tax += $total_tax;
-				$item->set_total_tax( $total_tax );
+				$total = $item->get_total();
+				$taxes = WC_Tax::calc_tax( $total, $tax_rates, false );
 
 				if ( $item->is_type( 'line_item' ) ) {
 					$subtotal       = $item->get_subtotal();
@@ -2088,57 +2029,79 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 				} else {
 					$item->set_taxes( array( 'total' => $taxes ) );
 				}
-
-				$item->save(); //@todo store items to self, don't save right away
-
-                // Sum the item taxes
-                foreach ( array_keys( $cart_taxes + $taxes ) as $key ) {
-                    $cart_taxes[ $key ] = ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $cart_taxes[ $key ] : 0 );
-                }
+				$item->save();
             }
         }
 
-        // Now calculate shipping tax
-        $shipping_methods = $this->get_shipping_methods();
+		// Calc taxes for shipping
+		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
+			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
-        if ( ! empty( $shipping_methods ) ) {
-            $matched_tax_rates = array();
-            $tax_rates         = WC_Tax::find_rates( array(
-                'country'   => $country,
-                'state'     => $state,
-                'postcode'  => $postcode,
-                'city'      => $city,
-                'tax_class' => ''
-            ) );
+			// Inherit tax class from items
+			if ( '' === $shipping_tax_class ) {
+				$tax_classes = WC_Tax::get_tax_classes();
 
-            if ( ! empty( $tax_rates ) ) {
-                foreach ( $tax_rates as $key => $rate ) {
-                    if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
-                        $matched_tax_rates[ $key ] = $rate;
-                    }
-                }
+				foreach ( $tax_classes as $tax_class ) {
+					$tax_class = sanitize_title( $tax_class );
+					if ( in_array( $tax_class, $found_tax_classes ) ) {
+						$tax_rates = WC_Tax::find_shipping_rates( array(
+							'country'   => $args['country'],
+		                    'state'     => $args['state'],
+		                    'postcode'  => $args['postcode'],
+		                    'city'      => $args['city'],
+							'tax_class' => $tax_class
+						) );
+						break;
+					}
+				}
+			} else {
+				$tax_rates = WC_Tax::find_shipping_rates( array(
+					'country'   => $args['country'],
+                    'state'     => $args['state'],
+                    'postcode'  => $args['postcode'],
+                    'city'      => $args['city'],
+					'tax_class' => 'standard' === $shipping_tax_class ? '' : $shipping_tax_class
+				) );
+			}
+			$item->set_taxes( array( 'total' => WC_Tax::calc_tax( $item->get_total(), $tax_rates, false ) ) );
+			$item->save();
+		}
+		$this->update_taxes();
+    }
+
+	/**
+     * Update tax lines for the order based on the line item taxes themselves.
+     */
+    public function update_taxes() {
+        $cart_taxes     = array();
+        $shipping_taxes = array();
+
+        foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
+            $taxes = $item->get_taxes();
+            foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
+                $cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + $tax : $tax;
             }
+        }
 
-            $shipping_taxes     = WC_Tax::calc_shipping_tax( $this->get_shipping_total(), $matched_tax_rates );
-            $shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
-        } else {
-            $shipping_taxes     = array();
-            $shipping_tax_total = 0;
+        foreach ( $this->get_shipping_methods() as $item_id => $item ) {
+			$taxes = $item->get_taxes();
+            foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
+				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + $tax : $tax;
+            }
+        }
+
+        // Remove old existing tax rows.
+        $this->remove_order_items( 'tax' );
+
+        // Now merge to keep tax rows.
+        foreach ( array_keys( $cart_taxes + $shipping_taxes ) as $tax_rate_id ) {
+            $this->add_tax( $tax_rate_id, isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
         }
 
         // Save tax totals
-        $this->set_total( $shipping_tax_total, 'shipping_tax' );
-        $this->set_total( $tax_total, 'tax' );
-
-        // Tax rows
-        $this->remove_order_items( 'tax' );
-
-        // Now merge to keep tax rows
-        foreach ( array_keys( $taxes + $shipping_taxes ) as $tax_rate_id ) {
-            $this->add_tax( $tax_rate_id, isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
-        }
-
-        return true;
+        $this->set_total( WC_Tax::round( array_sum( $shipping_taxes ) ), 'shipping_tax' );
+        $this->set_total( WC_Tax::round( array_sum( $cart_taxes ) ), 'tax' );
+		$this->save();
     }
 
     /**
@@ -2179,6 +2142,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         $grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
 
         $this->set_total( $grand_total, 'total' );
+		$this->save();
 
         return $grand_total;
     }

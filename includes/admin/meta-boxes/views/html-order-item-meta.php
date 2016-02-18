@@ -16,6 +16,7 @@
                     '_line_subtotal_tax',
                     '_line_total',
                     '_line_tax',
+                    'total_tax',
                     'method_id',
                     'cost'
                 ) ) ) ) {
@@ -49,7 +50,7 @@
             if ( $metadata = $order->has_meta( $item_id )) {
                 foreach ( $metadata as $meta ) {
 
-                    // Skip hidden core fields
+                    // Skip hidden core fields @todo
                     if ( in_array( $meta['meta_key'], apply_filters( 'woocommerce_hidden_order_itemmeta', array(
                         '_qty',
                         '_tax_class',
@@ -59,6 +60,7 @@
                         '_line_subtotal_tax',
                         '_line_total',
                         '_line_tax',
+                        'total_tax',
                         'method_id',
                         'cost'
                     ) ) ) ) {
@@ -76,8 +78,8 @@
 
                     echo '<tr data-meta_id="' . esc_attr( $meta['meta_id'] ) . '">
                         <td>
-                            <input type="text" name="meta_key[' . $meta['meta_id'] . ']" value="' . esc_attr( $meta['meta_key'] ) . '" />
-                            <textarea name="meta_value[' . $meta['meta_id'] . ']">' . $meta['meta_value'] . '</textarea>
+                            <input type="text" name="meta_key[' . esc_attr( $item_id ) . '][' . esc_attr( $meta['meta_id'] ) . ']" value="' . esc_attr( $meta['meta_key'] ) . '" />
+                            <textarea name="meta_value[' . esc_attr( $item_id ) . '][' . esc_attr( $meta['meta_id'] ) . ']">' . $meta['meta_value'] . '</textarea>
                         </td>
                         <td width="1%"><button class="remove_order_item_meta button">&times;</button></td>
                     </tr>';

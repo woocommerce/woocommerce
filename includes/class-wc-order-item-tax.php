@@ -85,6 +85,14 @@ class WC_Order_Item_Tax extends WC_Order_Item {
     }
 
     /**
+     * Set item name.
+     * @param string $value
+     */
+    public function set_label( $value ) {
+        $this->_data['label'] = wc_clean( $value );
+    }
+
+    /**
      * Set tax rate id.
      * @param int $value
      */

@@ -93,6 +93,9 @@ class WC_Order_Factory {
 				case "shipping" :
 					return new WC_Order_Item_Shipping( $item_data );
 				break;
+				case "tax" :
+					return new WC_Order_Item_Tax( $item_data );
+				break;
 			}
 		}
 		return new WC_Order_Item();

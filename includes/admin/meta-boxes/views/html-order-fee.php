@@ -1,6 +1,6 @@
 <?php
 /**
- * Shows an order item fee
+ * Shows an order item fee @todo
  *
  * @var object $item The item being displayed
  * @var int $item_id The id of the item being displayed

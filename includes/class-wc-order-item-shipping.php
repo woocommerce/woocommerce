@@ -25,7 +25,6 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
         'taxes'         => array(
             'total' => array()
         ),
-        'meta_data'     => array(),
     );
 
     /**
@@ -178,7 +177,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      * @return string
      */
     public function get_method_title() {
-        return $this->_data['method_title'];
+        return $this->_data['method_title'] ? $this->_data['method_title'] : __( 'Shipping', 'woocommerce' );
     }
 
     /**

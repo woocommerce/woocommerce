@@ -17,19 +17,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<td class="name">
 		<div class="view">
-			<?php echo ! empty( $item['name'] ) ? wc_clean( $item['name'] ) : __( 'Shipping', 'woocommerce' ); ?>
+			<?php echo esc_html( $item->get_method_title() ); ?>
 		</div>
 		<div class="edit" style="display: none;">
 			<input type="hidden" name="shipping_method_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
-			<input type="text" class="shipping_method_name" placeholder="<?php esc_attr_e( 'Shipping Name', 'woocommerce' ); ?>" name="shipping_method_title[<?php echo $item_id; ?>]" value="<?php echo ( isset( $item['name'] ) ) ? wc_clean( $item['name'] ) : ''; ?>" />
+			<input type="text" class="shipping_method_name" placeholder="<?php esc_attr_e( 'Shipping Name', 'woocommerce' ); ?>" name="shipping_method_title[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $item->get_method_title() ); ?>" />
 			<select class="shipping_method" name="shipping_method[<?php echo esc_attr( $item_id ); ?>]">
 				<optgroup label="<?php esc_attr_e( 'Shipping Method', 'woocommerce' ); ?>">
 					<option value=""><?php _e( 'N/A', 'woocommerce' ); ?></option>
 					<?php
 						$found_method = false;
+						$method_id    = $item->get_method_id();
 
 						foreach ( $shipping_methods as $method ) {
-							$method_id = isset( $item['method_id'] ) ? $item['method_id'] : '';
 							$current_method = ( 0 === strpos( $method_id, $method->id ) ) ? $method_id : $method->id;
 
 							echo '<option value="' . esc_attr( $current_method ) . '" ' . selected( $method_id == $current_method, true, false ) . '>' . esc_html( $method->get_title() ) . '</option>';
@@ -62,7 +62,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<td class="line_cost" width="1%">
 		<div class="view">
 			<?php
-				echo ( isset( $item['cost'] ) ) ? wc_price( wc_round_tax_total( $item['cost'] ), array( 'currency' => $order->get_order_currency() ) ) : '';
+				echo wc_price( $item->get_total(), array( 'currency' => $order->get_order_currency() ) );
 
 				if ( $refunded = $order->get_total_refunded_for_item( $item_id, 'shipping' ) ) {
 					echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</small>';
@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 		</div>
 		<div class="edit" style="display: none;">
-			<input type="text" name="shipping_cost[<?php echo $item_id; ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $item['cost'] ) ) ? esc_attr( wc_format_localized_price( $item['cost'] ) ) : ''; ?>" class="line_total wc_input_price" />
+			<input type="text" name="shipping_cost[<?php echo $item_id; ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( $item->get_total() ); ?>" class="line_total wc_input_price" />
 		</div>
 		<div class="refund" style="display: none;">
 			<input type="text" name="refund_line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" class="refund_line_total wc_input_price" />
@@ -79,12 +79,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php
 		if ( empty( $legacy_order ) && wc_tax_enabled() ) :
-			$shipping_taxes = isset( $item['taxes'] ) ? $item['taxes'] : '';
-			$tax_data       = maybe_unserialize( $shipping_taxes );
+			$tax_data = $item->get_taxes();
 
 			foreach ( $order_taxes as $tax_item ) :
 				$tax_item_id       = $tax_item['rate_id'];
-				$tax_item_total    = isset( $tax_data[ $tax_item_id ] ) ? $tax_data[ $tax_item_id ] : '';
+				$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
 				?>
 					<td class="line_tax" width="1%">
 						<div class="view">

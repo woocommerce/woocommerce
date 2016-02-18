@@ -1,6 +1,6 @@
 <?php
 /**
- * Shows an order item
+ * Shows an order item @todo
  *
  * @var object $item The item being displayed
  * @var int $item_id The id of the item being displayed
@@ -122,8 +122,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php
 		if ( empty( $legacy_order ) && wc_tax_enabled() ) :
-			$line_tax_data = isset( $item['line_tax_data'] ) ? $item['line_tax_data'] : '';
-			$tax_data      = maybe_unserialize( $line_tax_data );
+			$line_tax_data = $item->get_taxes();
 
 			foreach ( $order_taxes as $tax_item ) :
 				$tax_item_id       = $tax_item['rate_id'];

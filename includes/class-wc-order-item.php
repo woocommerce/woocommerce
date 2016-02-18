@@ -23,8 +23,13 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 		'order_item_id' => 0,
 		'name'          => '',
 		'type'          => '',
-        'meta_data'     => array(), // @todo handle save
 	);
+
+    /**
+     * Stores additonal meta data.
+     * @var array
+     */
+    protected $_meta_data = array();
 
     /**
 	 * Constructor.
@@ -49,8 +54,12 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
         foreach ( $data as $key => $value ) {
             if ( is_callable( array( $this, "set_$key" ) ) ) {
                 $this->{"set_$key"}( $value );
-            } else {
+            } elseif ( 'meta_data' !== $key ) {
                 $this->_data[ $key ] = $value;
+            } else {
+                foreach ( $value as $meta_id => $meta ) {
+                    $this->_meta_data[ $meta_id ] = $meta;
+                }
             }
         }
     }
@@ -100,7 +109,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	 * @return array
 	 */
 	public function get_data() {
-		return $this->_data;
+		return array_merge( $this->_data, array( 'meta_data' => $this->meta_data ) );
 	}
 
     /**
@@ -148,7 +157,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      * @return array
      */
     public function get_meta_data() {
-        return $this->_data['meta_data'];
+        return $this->_meta_data;
     }
 
     /*
@@ -188,48 +197,6 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
     public function set_type( $value ) {
         $this->_data['type'] = wc_clean( $value );
 
-    }
-
-    /**
-     * Set meta data.
-     * @param array $data Key/Value pairs
-     */
-    public function set_meta_data( $data ) {
-        foreach ( $data as $key => $value ) {
-            $this->_data['meta_data'][ $key ] = $value;
-        }
-    }
-
-    /**
-     * Set meta data.
-     * @param array $data Key/Value pairs
-     */
-    public function add_meta_data( $key, $value, $unique = false ) {
-        if ( $unique ) {
-            $meta_ids = array_keys( wp_list_pluck( $this->_data['meta_data'], 'key' ), $key );
-            $this->_data['meta_data'] = array_diff_key( $this->_data['meta_data'], array_fill_keys( $meta_ids, '' ) );
-        }
-        $this->_data['meta_data'][] = array(
-            'key'   => $key,
-            'value' => $value
-        );
-    }
-
-    /**
-     * Update meta data by key or ID, if provided.
-     * @param  string $key
-     * @param  string $value
-     * @param  int $meta_id
-     */
-    public function update_meta_data( $key, $value, $meta_id = '' ) {
-        if ( $meta_id && isset( $this->_data['meta_data'][ $meta_id ] ) ) {
-            $this->_data['meta_data'][ $meta_id ] = array(
-                'key'   => $key,
-                'value' => $value
-            );
-        } else {
-            $this->add_meta_data( $key, $value, true );
-        }
     }
 
     /*
@@ -294,32 +261,6 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	}
 
     /**
-     * Read Meta Data from the database. Ignore any internal properties.
-     */
-    protected function read_meta_data() {
-        $this->_data['meta_data'] = array();
-
-        if ( $this->get_id() ) {
-            // Get cache key - uses get_cache_prefix to invalidate when needed
-            $cache_key       = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'meta_data_' . $this->get_id();
-            $item_meta_array = wp_cache_get( $cache_key, 'orders' );
-
-            if ( false === $item_meta_array ) {
-                global $wpdb;
-
-                $metadata = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_id() ) );
-                foreach ( $metadata as $metadata_row ) {
-                    if ( in_array( $metadata_row->meta_key, $this->get_internal_meta_keys() ) ) {
-                        continue;
-                    }
-                    $this->_data['meta_data'][ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
-                }
-                wp_cache_set( $cache_key, $item_meta_array, 'orders' );
-            }
-        }
-    }
-
-    /**
      * Save data to the database.
 	 * @since 2.6.0
      */
@@ -329,6 +270,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
         } else {
             $this->update();
         }
+        $this->save_meta_data();
 	}
 
     /**
@@ -339,6 +281,139 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
         global $wpdb;
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_id() ) );
     }
+
+    /*
+	|--------------------------------------------------------------------------
+	| Item Meta Handling
+	|--------------------------------------------------------------------------
+	*/
+
+    /**
+     * Set meta data.
+     * @param array $data Key/Value pairs
+     */
+    public function set_meta_data( $data ) {
+        foreach ( $data as $meta_id => $meta ) {
+            if ( isset( $meta['key'], $meta['value'] ) ) {
+                $this->_meta_data[ $meta_id ] = (object) array(
+                    'key'   => $meta['key'],
+                    'value' => $meta['value']
+                );
+            }
+        }
+    }
+
+    /**
+     * Set meta data.
+     * @param array $data Key/Value pairs
+     */
+    public function add_meta_data( $key, $value, $unique = false ) {
+        if ( $unique ) {
+            $meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key ); // @todo ?
+            $this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $meta_ids, '' ) );
+        }
+        $this->_meta_data[ 'new-' . sizeof( $this->_meta_data ) ] = (object) array(
+            'key'   => $key,
+            'value' => $value
+        );
+    }
+
+    /**
+     * Update meta data by key or ID, if provided.
+     * @param  string $key
+     * @param  string $value
+     * @param  int $meta_id
+     */
+    public function update_meta_data( $key, $value, $meta_id = '' ) {
+        if ( $meta_id && isset( $this->_meta_data[ $meta_id ] ) ) {
+            $this->_meta_data[ $meta_id ] = (object) array(
+                'key'   => $key,
+                'value' => $value
+            );
+        } else {
+            $this->add_meta_data( $key, $value, true );
+        }
+    }
+
+    /**
+     * Read Meta Data from the database. Ignore any internal properties.
+     */
+    protected function read_meta_data() {
+        $this->_meta_data = array();
+
+        if ( $this->get_id() ) {
+            // Get cache key - uses get_cache_prefix to invalidate when needed
+            $cache_key       = WC_Cache_Helper::get_cache_prefix( 'order_itemmeta' );
+            $item_meta_array = wp_cache_get( $cache_key, 'order_itemmeta' );
+
+            if ( false === $item_meta_array ) {
+                global $wpdb;
+
+                $metadata = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_id() ) );
+                foreach ( $metadata as $metadata_row ) {
+                    if ( in_array( $metadata_row->meta_key, $this->get_internal_meta_keys() ) ) {
+                        continue;
+                    }
+                    $this->_meta_data[ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
+                }
+                wp_cache_set( $cache_key, $item_meta_array, 'order_itemmeta' );
+            }
+        }
+    }
+
+    /**
+     * Update Meta Data in the database.
+     */
+    protected function save_meta_data() {
+        global $wpdb;
+
+        $set_meta_ids = array();
+        $all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');", $this->get_id() ) ) );
+
+        foreach ( $this->_meta_data as $meta_id => $meta ) {
+            if ( 'new' === substr( $meta_id, 0, 3 ) ) {
+                $wpdb->insert(
+                    "{$wpdb->prefix}woocommerce_order_itemmeta",
+                    array(
+                        'meta_key'   => $meta->key,
+                        'meta_value' => $meta->value,
+                    )
+                );
+                $set_meta_ids[] = absint( $wpdb->insert_id );
+            } else {
+                $wpdb->update(
+                    "{$wpdb->prefix}woocommerce_order_itemmeta",
+                    array(
+                        'meta_key'   => $meta->key,
+                        'meta_value' => $meta->value,
+                    ),
+                    array(
+                        'meta_id' => $meta_id,
+                    )
+                );
+                $set_meta_ids[] = absint( $meta_id );
+            }
+        }
+
+        // Delete no longer set meta data
+        $delete_meta_ids = array_diff( $all_meta_ids, $set_meta_ids );
+
+        foreach ( $delete_meta_ids as $meta_id ) {
+            $wpdb->delete( "{$wpdb->prefix}woocommerce_order_itemmeta", array( 'meta_id' => $meta_id ) );
+        }
+
+        WC_Cache_Helper::incr_cache_prefix( 'order_itemmeta' );
+        $this->read_meta_data();
+    }
+
+    /*
+	|--------------------------------------------------------------------------
+	| Array Access Methods
+	|--------------------------------------------------------------------------
+	|
+	| For backwards compat with legacy arrays.
+	|
+	*/
 
     /**
      * offsetSet for ArrayAccess
@@ -358,7 +433,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     public function offsetUnset( $offset ) {
         if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
-            $this->_data['meta_data'] = array();
+            $this->_meta_data = array();
         }
         unset( $this->_data[ $offset ] );
     }
@@ -385,7 +460,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
             $offset = 'meta_data';
         }
         elseif( 'item_meta' === $offset ) {
-            $meta_values = wp_list_pluck( $this->_data['meta_data'], 'value', 'key' );
+            $meta_values = wp_list_pluck( $this->_meta_data, 'value', 'key' );
             return $meta_values;
         }
         return isset( $this->_data[ $offset ] ) ? $this->_data[ $offset ] : null;
