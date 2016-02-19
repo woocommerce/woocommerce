@@ -85,8 +85,9 @@ function wc_get_page_permalink( $page ) {
  * @return string
  */
 function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
-	if ( ! $permalink )
+	if ( ! $permalink ) {
 		$permalink = get_permalink();
+	}
 
 	// Map endpoint to options
 	$endpoint = ! empty( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
