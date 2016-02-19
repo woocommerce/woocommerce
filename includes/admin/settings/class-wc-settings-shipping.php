@@ -166,7 +166,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				$wc_shipping = WC_Shipping::instance();
 
 				foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
-					if ( $current_section === sanitize_title( get_class( $method ) ) ) {
+					if ( strtolower( $current_section ) === $method->id ) {
 						do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
 					}
 				}

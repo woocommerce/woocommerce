@@ -349,7 +349,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		} else {
 			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
-				if ( $current_section === sanitize_title( get_class( $gateway ) ) ) {
+				if ( strtolower( $current_section ) === $gateway->id ) {
 					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
 					$wc_payment_gateways->init();
 				}
