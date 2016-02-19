@@ -528,6 +528,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! $page_id ) {
 					echo '<mark class="error">' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 					$error = true;
+				} else if ( get_post_status( $page_id ) !== 'publish' ) {
+					echo '<mark class="error">' . sprintf( __( 'Page visibility should be %spublic%s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
+					$error = true;
 				} else {
 
 					// Shortcode check
