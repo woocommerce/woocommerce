@@ -66,86 +66,103 @@ jQuery( function( $ ) {
 		$( 'div.woocommerce' ).replaceWith( $new_div );
 	};
 
-	/**
-	 * Toggle Shipping Calculator panel
-	 */
-	var toggle_shipping = function() {
-		$( '.shipping-calculator-form' ).slideToggle( 'slow' );
-		return false;
-	};
 
 	/**
-	 * Handles when a shipping method is selected.
-	 *
-	 * @param {Object} evt The JQuery event.
+	 * Object to handle AJAX calls for cart shipping changes.
 	 */
-	var shipping_method_selected = function( evt ) {
-		var target = evt.target;
+	var cart_shipping = {
 
-		var shipping_methods = [];
+		/**
+		 * Initialize event handlers and UI state.
+		 */
+		init: function() {
+			$( document ).on(
+				'click',
+				'.shipping-calculator-button',
+				this.toggle_shipping
+			);
+			$( document ).on(
+				'change',
+				'select.shipping_method, input[name^=shipping_method]',
+				this.shipping_method_selected
+			);
+			$( document ).on(
+				'submit',
+				'form.woocommerce-shipping-calculator',
+				this.shipping_calculator_submit
+			);
 
-		$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
-			shipping_methods[ $( target ).data( 'index' ) ] = $( target ).val();
-		} );
+			$( '.shipping-calculator-form' ).hide();
+		},
 
-		block( $( 'div.cart_totals' ) );
+		/**
+		 * Toggle Shipping Calculator panel
+		 */
+		toggle_shipping: function() {
+			$( '.shipping-calculator-form' ).slideToggle( 'slow' );
+			return false;
+		},
 
-		var data = {
-			security: wc_cart_params.update_shipping_method_nonce,
-			shipping_method: shipping_methods
-		};
+		/**
+		 * Handles when a shipping method is selected.
+		 *
+		 * @param {Object} evt The JQuery event.
+		 */
+		shipping_method_selected: function( evt ) {
+			var target = evt.target;
 
-		$.post( get_url( 'update_shipping_method' ), data, function( response ) {
-			$( 'div.cart_totals' ).replaceWith( response );
-			$( document.body ).trigger( 'updated_shipping_method' );
-		} );
+			var shipping_methods = [];
+
+			$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
+				shipping_methods[ $( target ).data( 'index' ) ] = $( target ).val();
+			} );
+
+			block( $( 'div.cart_totals' ) );
+
+			var data = {
+				security: wc_cart_params.update_shipping_method_nonce,
+				shipping_method: shipping_methods
+			};
+
+			$.post( get_url( 'update_shipping_method' ), data, function( response ) {
+				$( 'div.cart_totals' ).replaceWith( response );
+				$( document.body ).trigger( 'updated_shipping_method' );
+			} );
+		},
+
+		/**
+		 * Handles a shipping calculator form submit.
+		 *
+		 * @param {Object} evt The JQuery event.
+		 */
+		shipping_calculator_submit: function( evt ) {
+			evt.preventDefault();
+
+			var $form = $( evt.target );
+
+			block( $form );
+
+			// Provide the submit button value because wc-form-handler expects it.
+			$( '<input />' ).attr( 'type', 'hidden' )
+											.attr( 'name', 'calc_shipping' )
+											.attr( 'value', 'x' )
+											.appendTo( $form );
+
+			// Make call to actual form post URL.
+			$.ajax( {
+				type:     $form.attr( 'method' ),
+				url:      $form.attr( 'action' ),
+				data:     $form.serialize(),
+				dataType: 'html',
+				success:  function( response ) {
+					update_wc_div(response );
+				},
+				complete: function() {
+					unblock( $form );
+				}
+			} );
+		}
 	};
-
-	/**
-	 * Handles a shipping calculator form submit.
-	 *
-	 * @param {Object} evt The JQuery event.
-	 */
-	var shipping_calculator_submit = function( evt ) {
-		evt.preventDefault();
-
-		var $form = $( evt.target );
-
-		block( $form );
-
-		// Provide the submit button value because wc-form-handler expects it.
-		$( '<input />' ).attr( 'type', 'hidden' )
-		                .attr( 'name', 'calc_shipping' )
-		                .attr( 'value', 'x' )
-		                .appendTo( $form );
-
-		// Make call to actual form post URL.
-		$.ajax( {
-			type:     $form.attr( 'method' ),
-			url:      $form.attr( 'action' ),
-			data:     $form.serialize(),
-			dataType: 'html',
-			success:  function( response ) {
-				update_wc_div(response );
-			},
-			complete: function() {
-				unblock( $form );
-			}
-		} );
-	};
-
-	$( document ).on( 'click', '.shipping-calculator-button', toggle_shipping );
-	$( document ).on(
-		'change', 'select.shipping_method, input[name^=shipping_method]',
-		shipping_method_selected
-	);
-	$( document ).on(
-		'submit',
-		'form.woocommerce-shipping-calculator',
-		shipping_calculator_submit
-	);
-
-	$( '.shipping-calculator-form' ).hide();
 
 	/**
 	 * Update the cart after something has changed.
@@ -321,4 +338,6 @@ jQuery( function( $ ) {
 	$( document ).on( 'submit', 'div.woocommerce > form', cart_submit );
 	$( document ).on( 'click', 'a.woocommerce-remove-coupon', remove_coupon_clicked );
 	$( document ).on( 'click', 'td.product-remove > a', item_remove_clicked );
+
+	cart_shipping.init();
 } );
