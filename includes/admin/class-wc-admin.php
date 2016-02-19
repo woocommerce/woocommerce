@@ -29,7 +29,6 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
-		add_filter( 'view_mode_post_types', array( $this, 'remove_post_types_from_view_mode' ) );
 	}
 
 	/**
@@ -209,21 +208,6 @@ class WC_Admin {
 
 		return $footer_text;
 	}
-
-	/**
-	 * Removes products, orders, and coupons from the list of post types that support "View Mode" switching.
-	 * View mode is seen on posts where you can switch between list or excerpt. Our post types don't support
-	 * it, so we want to hide the useless UI from the screen options tab.
-	 *
-	 * @since 2.6
-	 * @param  array $post_types Array of post types supporting view mode
-	 * @return array             Array of post types supporting view mode, without products, orders, and coupons
-	 */
-	public function remove_post_types_from_view_mode( $post_types ) {
-		unset( $post_types['product'], $post_types['shop_order'], $post_types['shop_coupon'] );
-		return $post_types;
-	}
-
 }
 
 return new WC_Admin();
