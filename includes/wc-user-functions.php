@@ -404,8 +404,6 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) ), $customer_id );
 
 	if ( $results ) {
-
-		$looped_downloads = array();
 		foreach ( $results as $result ) {
 			if ( ! $order || $order->id != $result->order_id ) {
 				// new order
@@ -437,13 +435,6 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			}
 
 			$download_file = $_product->get_file( $result->download_id );
-
-			// Check if the file has been already added to the downloads list
-			if ( in_array( $download_file, $looped_downloads ) ) {
-				continue;
-			}
-
-			array_push( $looped_downloads, $download_file );
 
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
 			$download_name = apply_filters(
