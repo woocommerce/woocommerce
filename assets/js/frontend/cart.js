@@ -42,15 +42,24 @@ jQuery( function( $ ) {
 		$( 'div.woocommerce' ).replaceWith( $new_div );
 	};
 
-	// Shipping calculator
-	$( document ).on( 'click', '.shipping-calculator-button', function() {
+	/**
+	 * Toggle Shipping Calculator panel
+	 */
+	var toggle_shipping = function() {
 		$( '.shipping-calculator-form' ).slideToggle( 'slow' );
 		return false;
-	} ).on( 'change', 'select.shipping_method, input[name^=shipping_method]', function() {
+	};
+
+	/**
+	 * Handles when a shipping method is selected.
+	 */
+	var shipping_method_selected = function( evt ) {
+		var target = evt.target;
+
 		var shipping_methods = [];
 
 		$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
-			shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
+			shipping_methods[ $( target ).data( 'index' ) ] = $( target ).val();
 		} );
 
 		block( $( 'div.cart_totals' ) );
@@ -64,9 +73,9 @@ jQuery( function( $ ) {
 			$( 'div.cart_totals' ).replaceWith( response );
 			$( document.body ).trigger( 'updated_shipping_method' );
 		} );
-	} );
+	};
 
-	$( document ).on( 'submit', 'form.woocommerce-shipping-calculator', function( evt ) {
+	var shipping_calculator_submit = function( evt ) {
 		evt.preventDefault();
 
 		var $form = $( evt.target );
@@ -92,7 +101,18 @@ jQuery( function( $ ) {
 				unblock( $form );
 			}
 		} );
-	} );
+	};
+
+	$( document ).on( 'click', '.shipping-calculator-button', toggle_shipping );
+	$( document ).on(
+		'change', 'select.shipping_method, input[name^=shipping_method]',
+		shipping_method_selected
+	);
+	$( document ).on(
+		'submit',
+		'form.woocommerce-shipping-calculator',
+		shipping_calculator_submit
+	);
 
 	$( '.shipping-calculator-form' ).hide();
 
@@ -118,7 +138,7 @@ jQuery( function( $ ) {
 	};
 
 	// Handle form submit and route to correct logic.
-	$( document ).on( 'submit', 'div.woocommerce > form',  function( evt ) {
+	var cart_submit = function( evt ) {
 		evt.preventDefault();
 
 		var $form = $( evt.target );
@@ -138,7 +158,7 @@ jQuery( function( $ ) {
 			window.console.log( 'apply coupon' );
 			apply_coupon( $form );
 		}
-	} );
+	};
 
 	// Coupon code
 	var apply_coupon = function( $form ) {
@@ -168,7 +188,7 @@ jQuery( function( $ ) {
 		} );
 	};
 
-	$( document ).on( 'click', 'a.woocommerce-remove-coupon', function( evt ) {
+	var remove_coupon_clicked = function( evt ) {
 		evt.preventDefault();
 
 		var $tr = $( this ).parents( 'tr' );
@@ -194,7 +214,7 @@ jQuery( function( $ ) {
 				update_cart_totals();
 			}
 		} );
-	} );
+	};
 
 	// Quantity Update
 	var quantity_update = function( $form ) {
@@ -221,7 +241,7 @@ jQuery( function( $ ) {
 	};
 
 	// Item Remove
-	$( document ).on( 'click', 'td.product-remove > a', function( evt ) {
+	var item_remove_clicked = function( evt ) {
 		evt.preventDefault();
 
 		var $a = $( evt.target );
@@ -238,5 +258,9 @@ jQuery( function( $ ) {
 				unblock( $form );
 			}
 		} );
-	} );
+	};
+
+	$( document ).on( 'submit', 'div.woocommerce > form', cart_submit );
+	$( document ).on( 'click', 'a.woocommerce-remove-coupon', remove_coupon_clicked );
+	$( document ).on( 'click', 'td.product-remove > a', item_remove_clicked );
 } );
