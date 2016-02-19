@@ -6,7 +6,14 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	// Gets a url for a given AJAX endpoint.
+	// Utility functions for the file.
+
+	/**
+	 * Gets a url for a given AJAX endpoint.
+	 *
+	 * @param {String} endpoint The AJAX Endpoint
+	 * @return {String} The URL to use for the request
+	 */
 	var get_url = function( endpoint ) {
 		return wc_cart_params.wc_ajax_url.toString().replace(
 			'%%endpoint%%',
@@ -14,12 +21,21 @@ jQuery( function( $ ) {
 		);
 	};
 
-	// Check if a node is blocked for processing.
+	/**
+	 * Check if a node is blocked for processing.
+	 *
+	 * @param {JQuery Object} $node
+	 * @return {bool} True if the DOM Element is UI Blocked, false if not.
+	 */
 	var is_blocked = function( $node ) {
 		return $node.is( '.processing' );
 	};
 
-	// Block a node for processing.
+	/**
+	 * Block a node visually for processing.
+	 *
+	 * @param {JQuery Object} $node
+	 */
 	var block = function( $node ) {
 		$node.addClass( 'processing' ).block( {
 			message: null,
@@ -30,12 +46,20 @@ jQuery( function( $ ) {
 		} );
 	};
 
-	// Unblock a node after processing is complete.
+	/**
+	 * Unblock a node after processing is complete.
+	 *
+	 * @param {JQuery Object} $node
+	 */
 	var unblock = function( $node ) {
 		$node.removeClass( 'processing' ).unblock();
 	};
 
-	// Updates the .woocommerce div with a string of html.
+	/**
+	 * Update the .woocommerce div with a string of html.
+	 *
+	 * @param {String} html_str The HTML string with which to replace the div.
+	 */
 	var update_wc_div = function( html_str ) {
 		var $html = $.parseHTML( html_str );
 		var $new_div = $( 'div.woocommerce', $html );
@@ -52,6 +76,8 @@ jQuery( function( $ ) {
 
 	/**
 	 * Handles when a shipping method is selected.
+	 *
+	 * @param {Object} evt The JQuery event.
 	 */
 	var shipping_method_selected = function( evt ) {
 		var target = evt.target;
@@ -75,6 +101,11 @@ jQuery( function( $ ) {
 		} );
 	};
 
+	/**
+	 * Handles a shipping calculator form submit.
+	 *
+	 * @param {Object} evt The JQuery event.
+	 */
 	var shipping_calculator_submit = function( evt ) {
 		evt.preventDefault();
 
@@ -116,7 +147,9 @@ jQuery( function( $ ) {
 
 	$( '.shipping-calculator-form' ).hide();
 
-	// Update the cart after something has changed.
+	/**
+	 * Update the cart after something has changed.
+	 */
 	var update_cart_totals = function() {
 		block( $( 'div.cart_totals' ) );
 
@@ -129,7 +162,11 @@ jQuery( function( $ ) {
 		} );
 	};
 
-	// clears previous notices and shows new one above form.
+	/**
+	 * Clear previous notices and shows new one above form.
+	 *
+	 * @param {Object} The Notice HTML Element in string or object form.
+	 */
 	var show_notice = function( html_element ) {
 		var $form = $( 'div.woocommerce > form' );
 
@@ -137,7 +174,11 @@ jQuery( function( $ ) {
 		$form.before( html_element );
 	};
 
-	// Handle form submit and route to correct logic.
+	/**
+	 * Handle cart form submit and route to correct logic.
+	 *
+	 * @param {Object} evt The JQuery event
+	 */
 	var cart_submit = function( evt ) {
 		evt.preventDefault();
 
@@ -160,7 +201,11 @@ jQuery( function( $ ) {
 		}
 	};
 
-	// Coupon code
+	/**
+	 * Apply Coupon code
+	 *
+	 * @param {JQuery Object} $form The cart form.
+	 */
 	var apply_coupon = function( $form ) {
 		block( $form );
 
@@ -188,6 +233,11 @@ jQuery( function( $ ) {
 		} );
 	};
 
+	/**
+	 * Handle when a remove coupon link is clicked.
+	 *
+	 * @param {Object} evt The JQuery event
+	 */
 	var remove_coupon_clicked = function( evt ) {
 		evt.preventDefault();
 
@@ -216,7 +266,11 @@ jQuery( function( $ ) {
 		} );
 	};
 
-	// Quantity Update
+	/**
+	 * Handle a cart Quantity Update
+	 *
+	 * @param {JQuery Object} $form The cart form.
+	 */
 	var quantity_update = function( $form ) {
 
 		// Provide the submit button value because wc-form-handler expects it.
@@ -240,7 +294,11 @@ jQuery( function( $ ) {
 		} );
 	};
 
-	// Item Remove
+	/**
+	 * Handle when a remvoe item link is clicked.
+	 *
+	 * @param {Object} evt The JQuery event
+	 */
 	var item_remove_clicked = function( evt ) {
 		evt.preventDefault();
 
