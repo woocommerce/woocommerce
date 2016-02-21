@@ -37,7 +37,7 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
-		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
+		add_filter( 'plugin_action_links', array( __CLASS__, 'plugin_action_links' ), 10, 2 );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
@@ -727,38 +727,41 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
 	}
 
 	/**
-	 * Show action links on the plugin screen.
-	 *
-	 * @param	mixed $links Plugin Action links
-	 * @return	array
+	 * Display action links in the Plugins list table.
+	 * @param  array  $actions
+	 * @param  string $plugin_file
+	 * @return array
 	 */
-	public static function plugin_action_links( $links ) {
-		$action_links = array(
-			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
-		);
+	public static function plugin_action_links( $actions, $plugin_file ) {
+		if ( $plugin_file == WC_PLUGIN_BASENAME ) {
+			$new_actions = array(
+				'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+			);
 
-		return array_merge( $action_links, $links );
+			return array_merge( $custom_actions, $actions );
+		}
+
+		return (array) $actions;
 	}
 
 	/**
-	 * Show row meta on the plugin screen.
-	 *
-	 * @param	mixed $links Plugin Row Meta
-	 * @param	mixed $file  Plugin Base file
-	 * @return	array
+	 * Display row meta in the Plugins list table.
+	 * @param  array  $plugin_meta
+	 * @param  string $plugin_file
+	 * @return array
 	 */
-	public static function plugin_row_meta( $links, $file ) {
-		if ( $file == WC_PLUGIN_BASENAME ) {
-			$row_meta = array(
+	public static function plugin_row_meta( $plugin_meta, $plugin_file ) {
+		if ( $plugin_file == WC_PLUGIN_BASENAME ) {
+			$new_plugin_meta = array(
 				'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/documentation/plugins/woocommerce/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce Documentation', 'woocommerce' ) ) . '">' . __( 'Docs', 'woocommerce' ) . '</a>',
 				'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'http://docs.woothemes.com/wc-apidocs/' ) ) . '" title="' . esc_attr( __( 'View WooCommerce API Docs', 'woocommerce' ) ) . '">' . __( 'API Docs', 'woocommerce' ) . '</a>',
 				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
 			);
 
-			return array_merge( $links, $row_meta );
+			return array_merge( $plugin_meta, $custom_plugin_meta );
 		}
 
-		return (array) $links;
+		return (array) $plugin_meta;
 	}
 
 	/**
