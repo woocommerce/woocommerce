@@ -938,9 +938,9 @@ function wc_get_shipping_zone( $package ) {
 
 /**
  * Outputs a "back" link so admin screens can easily jump back a page.
-
- * @param  string $label Title of the page to return to
- * @param  string $url   URL of the page to return to
+ *
+ * @param string $label Title of the page to return to.
+ * @param string $url   URL of the page to return to.
  */
 function wc_back_link( $label, $url ) {
 	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" title="' . esc_attr( $label ) . '">&#x21a9;</a></small>';
