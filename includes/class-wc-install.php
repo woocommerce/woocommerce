@@ -738,7 +738,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
 				'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
 			);
 
-			return array_merge( $custom_actions, $actions );
+			return array_merge( $new_actions, $actions );
 		}
 
 		return (array) $actions;
@@ -758,7 +758,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
 				'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'http://support.woothemes.com/' ) ) . '" title="' . esc_attr( __( 'Visit Premium Customer Support Forum', 'woocommerce' ) ) . '">' . __( 'Premium Support', 'woocommerce' ) . '</a>',
 			);
 
-			return array_merge( $plugin_meta, $custom_plugin_meta );
+			return array_merge( $plugin_meta, $new_plugin_meta );
 		}
 
 		return (array) $plugin_meta;
