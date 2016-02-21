@@ -37,7 +37,7 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
-		add_filter( 'plugin_action_links', array( __CLASS__, 'plugin_action_links' ), 10, 2 );
+		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
@@ -728,20 +728,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
 
 	/**
 	 * Display action links in the Plugins list table.
-	 * @param  array  $actions
-	 * @param  string $plugin_file
+	 * @param  array $actions
 	 * @return array
 	 */
-	public static function plugin_action_links( $actions, $plugin_file ) {
-		if ( $plugin_file == WC_PLUGIN_BASENAME ) {
-			$new_actions = array(
-				'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
-			);
+	public static function plugin_action_links( $actions ) {
+		$new_actions = array(
+			'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings' ) . '" title="' . esc_attr( __( 'View WooCommerce Settings', 'woocommerce' ) ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
+		);
 
-			return array_merge( $new_actions, $actions );
-		}
-
-		return (array) $actions;
+		return array_merge( $new_actions, $actions );
 	}
 
 	/**
