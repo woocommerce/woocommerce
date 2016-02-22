@@ -27,7 +27,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'orders/(?P<order_id>[\d]+)/notes';
+	protected $rest_base = 'orders/(?P<order_id>[\d]+)/notes';
 
 	/**
 	 * Type of object.

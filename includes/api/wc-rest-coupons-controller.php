@@ -27,7 +27,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'coupons';
+	protected $rest_base = 'coupons';
 
 	/**
 	 * Type of object.

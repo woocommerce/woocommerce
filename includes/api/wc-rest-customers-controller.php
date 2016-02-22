@@ -27,7 +27,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'customers';
+	protected $rest_base = 'customers';
 
 	/**
 	 * Register the routes for customers.

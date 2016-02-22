@@ -27,7 +27,7 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'products/attributes/(?P<attribute_id>[\d]+)/terms';
+	protected $rest_base = 'products/attributes/(?P<attribute_id>[\d]+)/terms';
 
 	/**
 	 * Register the routes for coupons.

@@ -27,7 +27,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'products/shipping_classes';
+	protected $rest_base = 'products/shipping_classes';
 
 	/**
 	 * Type of object.

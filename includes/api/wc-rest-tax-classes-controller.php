@@ -27,7 +27,7 @@ class WC_REST_Tax_Classes_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'taxes/classes';
+	protected $rest_base = 'taxes/classes';
 
 	/**
 	 * Register the routes for coupons.

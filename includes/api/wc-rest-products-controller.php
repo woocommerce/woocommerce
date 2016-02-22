@@ -27,7 +27,7 @@ class WC_REST_Products_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'products';
+	protected $rest_base = 'products';
 
 	/**
 	 * Type of object.

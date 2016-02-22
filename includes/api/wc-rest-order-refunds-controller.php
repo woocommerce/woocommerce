@@ -27,7 +27,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'orders/(?P<order_id>[\d]+)/refunds';
+	protected $rest_base = 'orders/(?P<order_id>[\d]+)/refunds';
 
 	/**
 	 * Type of object.

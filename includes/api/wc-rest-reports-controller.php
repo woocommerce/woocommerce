@@ -27,7 +27,7 @@ class WC_REST_Reports_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $base = 'reports';
+	protected $rest_base = 'reports';
 
 	/**
 	 * Register the routes for coupons.
