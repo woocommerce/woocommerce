@@ -235,18 +235,14 @@ jQuery( function( $ ) {
 			var $form = $( evt.target );
 			var $submit = $( document.activeElement );
 
-			window.console.log( $submit );
-
 			if ( is_blocked( $form ) ) {
 				return false;
 			}
 
 			if ( $submit.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
-				window.console.log( 'update cart' );
 				this.quantity_update( $form );
 
 			} else if ( $submit.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
-				window.console.log( 'apply coupon' );
 				this.apply_coupon( $form );
 			}
 		},
@@ -302,9 +298,6 @@ jQuery( function( $ ) {
 				security: wc_cart_params.remove_coupon_nonce,
 				coupon: coupon
 			};
-
-			window.console.log( 'data' );
-			window.console.log( data );
 
 			$.ajax( {
 				type:    'POST',
