@@ -1547,21 +1547,21 @@ class WC_AJAX {
 		$items = apply_filters( 'woocommerce_ajax_calc_line_taxes', $items, $order_id, $country, $_POST );
 
 		$is_vat_exempt = get_post_meta( $order_id, '_is_vat_exempt', true );
-	
+
 		// Tax is calculated only if tax is enabled and order is not vat exempted
 		if ( wc_tax_enabled() && $is_vat_exempt !== 'yes' ) {
-		
+
 			// Get items and fees taxes
 			if ( isset( $items['order_item_id'] ) ) {
 				$line_total = $line_subtotal = $order_item_tax_class = array();
-	
+
 				foreach ( $items['order_item_id'] as $item_id ) {
 					$item_id                          = absint( $item_id );
 					$line_total[ $item_id ]           = isset( $items['line_total'][ $item_id ] ) ? wc_format_decimal( $items['line_total'][ $item_id ] ) : 0;
 					$line_subtotal[ $item_id ]        = isset( $items['line_subtotal'][ $item_id ] ) ? wc_format_decimal( $items['line_subtotal'][ $item_id ] ) : $line_total[ $item_id ];
 					$order_item_tax_class[ $item_id ] = isset( $items['order_item_tax_class'][ $item_id ] ) ? sanitize_text_field( $items['order_item_tax_class'][ $item_id ] ) : '';
 					$product_id                       = $order->get_item_meta( $item_id, '_product_id', true );
-	
+
 					// Get product details
 					if ( get_post_type( $product_id ) == 'product' ) {
 						$_product        = wc_get_product( $product_id );
@@ -1569,7 +1569,7 @@ class WC_AJAX {
 					} else {
 						$item_tax_status = 'taxable';
 					}
-	
+
 					if ( '0' !== $order_item_tax_class[ $item_id ] && 'taxable' === $item_tax_status ) {
 						$tax_rates = WC_Tax::find_rates( array(
 							'country'   => $country,
@@ -1578,20 +1578,20 @@ class WC_AJAX {
 							'city'      => $city,
 							'tax_class' => $order_item_tax_class[ $item_id ]
 						) );
-	
+
 						$line_taxes          = WC_Tax::calc_tax( $line_total[ $item_id ], $tax_rates, false );
 						$line_subtotal_taxes = WC_Tax::calc_tax( $line_subtotal[ $item_id ], $tax_rates, false );
-	
+
 						// Set the new line_tax
 						foreach ( $line_taxes as $_tax_id => $_tax_value ) {
 							$items['line_tax'][ $item_id ][ $_tax_id ] = $_tax_value;
 						}
-	
+
 						// Set the new line_subtotal_tax
 						foreach ( $line_subtotal_taxes as $_tax_id => $_tax_value ) {
 							$items['line_subtotal_tax'][ $item_id ][ $_tax_id ] = $_tax_value;
 						}
-	
+
 						// Sum the item taxes
 						foreach ( array_keys( $taxes + $line_taxes ) as $key ) {
 							$taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
@@ -1599,11 +1599,11 @@ class WC_AJAX {
 					}
 				}
 			}
-	
+
 			// Get shipping taxes
 			if ( isset( $items['shipping_method_id'] ) ) {
 				$matched_tax_rates = array();
-	
+
 				$tax_rates = WC_Tax::find_rates( array(
 					'country'   => $country,
 					'state'     => $state,
@@ -1611,7 +1611,7 @@ class WC_AJAX {
 					'city'      => $city,
 					'tax_class' => ''
 				) );
-	
+
 				if ( $tax_rates ) {
 					foreach ( $tax_rates as $key => $rate ) {
 						if ( isset( $rate['shipping'] ) && 'yes' == $rate['shipping'] ) {
@@ -1619,24 +1619,24 @@ class WC_AJAX {
 						}
 					}
 				}
-	
+
 				$shipping_cost = $shipping_taxes = array();
-	
+
 				foreach ( $items['shipping_method_id'] as $item_id ) {
 					$item_id                   = absint( $item_id );
 					$shipping_cost[ $item_id ] = isset( $items['shipping_cost'][ $item_id ] ) ? wc_format_decimal( $items['shipping_cost'][ $item_id ] ) : 0;
 					$_shipping_taxes           = WC_Tax::calc_shipping_tax( $shipping_cost[ $item_id ], $matched_tax_rates );
-	
+
 					// Set the new shipping_taxes
 					foreach ( $_shipping_taxes as $_tax_id => $_tax_value ) {
 						$items['shipping_taxes'][ $item_id ][ $_tax_id ] = $_tax_value;
-	
+
 						$shipping_taxes[ $_tax_id ] = isset( $shipping_taxes[ $_tax_id ] ) ? $shipping_taxes[ $_tax_id ] + $_tax_value : $_tax_value;
 					}
 				}
 			}
 		}
-		
+
 		// Remove old tax rows
 		$order->remove_order_items( 'tax' );
 
@@ -2992,12 +2992,12 @@ class WC_AJAX {
 	 * Handle submissions from assets/js/settings-views-html-settings-tax.js Backbone model.
 	 */
 	public static function tax_rates_save_changes() {
-		if ( ! isset( $_POST['current_class'], $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
+		if ( ! isset( $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			exit;
 		}
 
-		$current_class = $_POST['current_class']; // This is sanitized seven lines later.
+		$current_class = ! empty( $_POST['current_class'] ) ? $_POST['current_class'] : ''; // This is sanitized seven lines later.
 
 		if ( ! wp_verify_nonce( $_POST['wc_tax_nonce'], 'wc_tax_nonce-class:' . $current_class ) ) {
 			wp_send_json_error( 'bad_nonce' );
