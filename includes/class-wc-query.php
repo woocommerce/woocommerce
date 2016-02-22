@@ -517,21 +517,22 @@ class WC_Query {
 			$min = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
 			$max = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
 
-			// If displaying prices in the shop including taxes, but prices don't include taxes..
+			/**
+			 * Adjust if the store taxes are not displayed how they are stored.
+			 * Max is left alone because the filter was already increased.
+			 * Kicks in when prices excluding tax are displayed including tax.
+			 */
 			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 				$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+				$class_min   = $min;
 
 				foreach ( $tax_classes as $tax_class ) {
-					$tax_rates = WC_Tax::get_rates( $tax_class );
-					$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $min, $tax_rates ) );
-					$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $max, $tax_rates ) );
-					if ( $class_min < $min ) {
-						$min = $class_min;
-					}
-					if ( $class_max > $max ) {
-						$max = $class_max;
+					if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
+						$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
 					}
 				}
+
+				$min = $class_min;
 			}
 
 			return array(

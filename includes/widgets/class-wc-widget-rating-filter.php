@@ -149,6 +149,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 		ob_start();
 
+		$found      = false;
 		$min_rating = isset( $_GET['min_rating'] ) ? absint( $_GET['min_rating'] ) : '';
 
 		$this->widget_start( $args, $instance );
