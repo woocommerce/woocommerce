@@ -1740,6 +1740,7 @@ class WC_API_Products extends WC_API_Resource {
 				$variation_id = wp_insert_post( $new_variation );
 
 				do_action( 'woocommerce_create_product_variation', $variation_id );
+				do_action( 'woocommerce_api_create_product_variation', $variation_id, $data );
 			} else {
 				$update_variation = array( 'post_title' => $variation_post_title, 'menu_order' => $menu_order );
 				if ( isset( $variation['visible'] ) ) {
@@ -1750,6 +1751,7 @@ class WC_API_Products extends WC_API_Resource {
 				$wpdb->update( $wpdb->posts, $update_variation, array( 'ID' => $variation_id ) );
 
 				do_action( 'woocommerce_update_product_variation', $variation_id );
+				do_action( 'woocommerce_api_edit_product_variation', $variation_id, $data );
 			}
 
 			// Stop with we don't have a variation ID
