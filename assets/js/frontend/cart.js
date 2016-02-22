@@ -66,6 +66,18 @@ jQuery( function( $ ) {
 		$( 'div.woocommerce' ).replaceWith( $new_div );
 	};
 
+	/**
+	 * Clear previous notices and shows new one above form.
+	 *
+	 * @param {Object} The Notice HTML Element in string or object form.
+	 */
+	var show_notice = function( html_element ) {
+		var $form = $( 'div.woocommerce > form' );
+
+		$( '.woocommerce-error, .woocommerce-message' ).remove();
+		$form.before( html_element );
+	};
+
 
 	/**
 	 * Object to handle AJAX calls for cart shipping changes.
@@ -76,6 +88,10 @@ jQuery( function( $ ) {
 		 * Initialize event handlers and UI state.
 		 */
 		init: function() {
+			this.toggle_shipping = this.toggle_shipping.bind( this );
+			this.shipping_method_selected = this.shipping_method_selected.bind( this );
+			this.shipping_calculator_submit = this.shipping_calculator_submit.bind( this );
+
 			$( document ).on(
 				'click',
 				'.shipping-calculator-button',
@@ -165,179 +181,199 @@ jQuery( function( $ ) {
 	};
 
 	/**
-	 * Update the cart after something has changed.
+	 * Object to handle cart UI.
 	 */
-	var update_cart_totals = function() {
-		block( $( 'div.cart_totals' ) );
+	var cart = {
+		/**
+		 * Initialize cart UI events.
+		 */
+		init: function() {
+			this.update_cart_totals = this.update_cart_totals.bind( this );
+			this.cart_submit = this.cart_submit.bind( this );
+			this.apply_coupon = this.apply_coupon.bind( this );
+			this.remove_coupon_clicked = this.remove_coupon_clicked.bind( this );
+			this.quantity_update = this.quantity_update.bind( this );
+			this.item_remove_clicked = this.item_remove_clicked.bind( this );
 
-		$.ajax( {
-			url:      get_url( 'get_cart_totals' ),
-			dataType: 'html',
-			success: function( response ) {
-				$( 'div.cart_totals' ).replaceWith( response );
+			$( document ).on(
+				'submit',
+				'div.woocommerce > form',
+				this.cart_submit );
+			$( document ).on(
+				'click',
+				'a.woocommerce-remove-coupon',
+				this.remove_coupon_clicked );
+			$( document ).on(
+				'click',
+				'td.product-remove > a',
+				this.item_remove_clicked );
+		},
+
+		/**
+		 * Update the cart after something has changed.
+		 */
+		update_cart_totals: function() {
+			block( $( 'div.cart_totals' ) );
+
+			$.ajax( {
+				url:      get_url( 'get_cart_totals' ),
+				dataType: 'html',
+				success: function( response ) {
+					$( 'div.cart_totals' ).replaceWith( response );
+				}
+			} );
+		},
+
+		/**
+		 * Handle cart form submit and route to correct logic.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		cart_submit: function( evt ) {
+			evt.preventDefault();
+
+			var $form = $( evt.target );
+			var $submit = $( document.activeElement );
+
+			window.console.log( $submit );
+
+			if ( is_blocked( $form ) ) {
+				return false;
 			}
-		} );
-	};
 
-	/**
-	 * Clear previous notices and shows new one above form.
-	 *
-	 * @param {Object} The Notice HTML Element in string or object form.
-	 */
-	var show_notice = function( html_element ) {
-		var $form = $( 'div.woocommerce > form' );
+			if ( $submit.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+				window.console.log( 'update cart' );
+				this.quantity_update( $form );
 
-		$( '.woocommerce-error, .woocommerce-message' ).remove();
-		$form.before( html_element );
-	};
+			} else if ( $submit.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+				window.console.log( 'apply coupon' );
+				this.apply_coupon( $form );
+			}
+		},
 
-	/**
-	 * Handle cart form submit and route to correct logic.
-	 *
-	 * @param {Object} evt The JQuery event
-	 */
-	var cart_submit = function( evt ) {
-		evt.preventDefault();
+		/**
+		 * Apply Coupon code
+		 *
+		 * @param {JQuery Object} $form The cart form.
+		 */
+		apply_coupon: function( $form ) {
+			block( $form );
 
-		var $form = $( evt.target );
-		var $submit = $( document.activeElement );
+			var cart = this;
+			var $text_field = $( '#coupon_code' );
+			var coupon_code = $text_field.val();
 
-		window.console.log( $submit );
+			var data = {
+				security: wc_cart_params.apply_coupon_nonce,
+				coupon_code: coupon_code
+			};
 
-		if ( is_blocked( $form ) ) {
-			return false;
+			$.ajax( {
+				type:     'POST',
+				url:      get_url( 'apply_coupon' ),
+				data:     data,
+				dataType: 'html',
+				success: function( response ) {
+					show_notice( response );
+				},
+				complete: function() {
+					unblock( $form );
+					$text_field.val( '' );
+					cart.update_cart_totals();
+				}
+			} );
+		},
+
+		/**
+		 * Handle when a remove coupon link is clicked.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		remove_coupon_clicked: function( evt ) {
+			evt.preventDefault();
+
+			var cart = this;
+			var $tr = $( evt.target ).parents( 'tr' );
+			var coupon = $( evt.target ).attr( 'data-coupon' );
+
+			block( $tr.parents( 'table' ) );
+
+			var data = {
+				security: wc_cart_params.remove_coupon_nonce,
+				coupon: coupon
+			};
+
+			window.console.log( 'data' );
+			window.console.log( data );
+
+			$.ajax( {
+				type:    'POST',
+				url:      get_url( 'remove_coupon' ),
+				data:     data,
+				dataType: 'html',
+				success: function( response ) {
+					show_notice( response );
+					unblock( $tr.parents( 'table' ) );
+				},
+				complete: function() {
+					cart.update_cart_totals();
+				}
+			} );
+		},
+
+		/**
+		 * Handle a cart Quantity Update
+		 *
+		 * @param {JQuery Object} $form The cart form.
+		 */
+		quantity_update: function( $form ) {
+
+			// Provide the submit button value because wc-form-handler expects it.
+			$( '<input />' ).attr( 'type', 'hidden' )
+											.attr( 'name', 'update_cart' )
+											.attr( 'value', 'Update Cart' )
+											.appendTo( $form );
+
+			block( $form );
+
+			// Make call to actual form post URL.
+			$.ajax( {
+				type:     $form.attr( 'method' ),
+				url:      $form.attr( 'action' ),
+				data:     $form.serialize(),
+				dataType: 'html',
+				success:  update_wc_div,
+				complete: function() {
+					unblock( $form );
+				}
+			} );
+		},
+
+		/**
+		 * Handle when a remove item link is clicked.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		item_remove_clicked: function( evt ) {
+			evt.preventDefault();
+
+			var $a = $( evt.target );
+			var $form = $a.parents( 'form' );
+
+			block( $form );
+
+			$.ajax( {
+				type:     'GET',
+				url:      $a.attr( 'href' ),
+				dataType: 'html',
+				success: update_wc_div,
+				complete: function() {
+					unblock( $form );
+				}
+			} );
 		}
-
-		if ( $submit.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
-			window.console.log( 'update cart' );
-			quantity_update( $form );
-
-		} else if ( $submit.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
-			window.console.log( 'apply coupon' );
-			apply_coupon( $form );
-		}
 	};
-
-	/**
-	 * Apply Coupon code
-	 *
-	 * @param {JQuery Object} $form The cart form.
-	 */
-	var apply_coupon = function( $form ) {
-		block( $form );
-
-		var $text_field = $( '#coupon_code' );
-		var coupon_code = $text_field.val();
-
-		var data = {
-			security: wc_cart_params.apply_coupon_nonce,
-			coupon_code: coupon_code
-		};
-
-		$.ajax( {
-			type:     'POST',
-			url:      get_url( 'apply_coupon' ),
-			data:     data,
-			dataType: 'html',
-			success: function( response ) {
-				show_notice( response );
-			},
-			complete: function() {
-				unblock( $form );
-				$text_field.val( '' );
-				update_cart_totals();
-			}
-		} );
-	};
-
-	/**
-	 * Handle when a remove coupon link is clicked.
-	 *
-	 * @param {Object} evt The JQuery event
-	 */
-	var remove_coupon_clicked = function( evt ) {
-		evt.preventDefault();
-
-		var $tr = $( this ).parents( 'tr' );
-		var coupon = $( this ).attr( 'data-coupon' );
-
-		block( $tr.parents( 'table' ) );
-
-		var data = {
-			security: wc_cart_params.remove_coupon_nonce,
-			coupon: coupon
-		};
-
-		$.ajax( {
-			type:    'POST',
-			url:      get_url( 'remove_coupon' ),
-			data:     data,
-			dataType: 'html',
-			success: function( response ) {
-				show_notice( response );
-				unblock( $tr.parents( 'table' ) );
-			},
-			complete: function() {
-				update_cart_totals();
-			}
-		} );
-	};
-
-	/**
-	 * Handle a cart Quantity Update
-	 *
-	 * @param {JQuery Object} $form The cart form.
-	 */
-	var quantity_update = function( $form ) {
-
-		// Provide the submit button value because wc-form-handler expects it.
-		$( '<input />' ).attr( 'type', 'hidden' )
-		                .attr( 'name', 'update_cart' )
-		                .attr( 'value', 'Update Cart' )
-		                .appendTo( $form );
-
-		block( $form );
-
-		// Make call to actual form post URL.
-		$.ajax( {
-			type:     $form.attr( 'method' ),
-			url:      $form.attr( 'action' ),
-			data:     $form.serialize(),
-			dataType: 'html',
-			success:  update_wc_div,
-			complete: function() {
-				unblock( $form );
-			}
-		} );
-	};
-
-	/**
-	 * Handle when a remvoe item link is clicked.
-	 *
-	 * @param {Object} evt The JQuery event
-	 */
-	var item_remove_clicked = function( evt ) {
-		evt.preventDefault();
-
-		var $a = $( evt.target );
-		var $form = $a.parents( 'form' );
-
-		block( $form );
-
-		$.ajax( {
-			type:     'GET',
-			url:      $a.attr( 'href' ),
-			dataType: 'html',
-			success: update_wc_div,
-			complete: function() {
-				unblock( $form );
-			}
-		} );
-	};
-
-	$( document ).on( 'submit', 'div.woocommerce > form', cart_submit );
-	$( document ).on( 'click', 'a.woocommerce-remove-coupon', remove_coupon_clicked );
-	$( document ).on( 'click', 'td.product-remove > a', item_remove_clicked );
 
 	cart_shipping.init();
+	cart.init();
 } );
