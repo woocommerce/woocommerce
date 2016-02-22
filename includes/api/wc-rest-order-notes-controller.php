@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Order Notes controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_Posts_Controller
  */
-class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
+class WC_REST_Order_Notes_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Route base.
@@ -30,11 +30,11 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	protected $rest_base = 'orders/(?P<order_id>[\d]+)/notes';
 
 	/**
-	 * Type of object.
+	 * Post type.
 	 *
 	 * @var string
 	 */
-	protected $object = 'order_note';
+	protected $post_type = 'order_note';
 
 	/**
 	 * Register the routes for order notes.

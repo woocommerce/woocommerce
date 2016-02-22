@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Product Categories controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_Terms_Controller
  */
-class WC_REST_Product_Categories_Controller extends WC_REST_Controller {
+class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 
 	/**
 	 * Route base.

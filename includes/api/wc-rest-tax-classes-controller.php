@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Tax Classes controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WP_REST_Controller
  */
-class WC_REST_Tax_Classes_Controller extends WC_REST_Controller {
+class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 
 	/**
 	 * Route base.

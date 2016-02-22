@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Products controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_Posts_Controller
  */
-class WC_REST_Products_Controller extends WC_REST_Controller {
+class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Route base.
@@ -30,11 +30,11 @@ class WC_REST_Products_Controller extends WC_REST_Controller {
 	protected $rest_base = 'products';
 
 	/**
-	 * Type of object.
+	 * Post type.
 	 *
 	 * @var string
 	 */
-	protected $object = 'product';
+	protected $post_type = 'product';
 
 	/**
 	 * Register the routes for coupons.

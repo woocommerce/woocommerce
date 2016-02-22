@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Order Refunds controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_Posts_Controller
  */
-class WC_REST_Order_Refunds_Controller extends WC_REST_Controller {
+class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Route base.
@@ -30,11 +30,11 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Controller {
 	protected $rest_base = 'orders/(?P<order_id>[\d]+)/refunds';
 
 	/**
-	 * Type of object.
+	 * Post type.
 	 *
 	 * @var string
 	 */
-	protected $object = 'shop_order_refund';
+	protected $post_type = 'shop_order_refund';
 
 	/**
 	 * Register the routes for order refunds.

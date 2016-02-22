@@ -368,11 +368,16 @@ class WC_API {
 	 * @since 2.6.0
 	 */
 	private function rest_api_includes() {
+		// WP REST Controller (vendor while not implemented in WP core).
 		if ( ! class_exists( 'WP_REST_Controller' ) ) {
 			include_once( 'vendor/class-wp-rest-controller.php' );
 		}
 
-		include_once( 'abstracts/abstract-wc-rest-controller.php' );
+		// Abstract controllers.
+		include_once( 'abstracts/abstract-wc-rest-posts-controller.php' );
+		include_once( 'abstracts/abstract-wc-rest-terms-controller.php' );
+
+		// REST API controllers.
 		include_once( 'api/wc-rest-coupons-controller.php' );
 		include_once( 'api/wc-rest-customers-controller.php' );
 		include_once( 'api/wc-rest-order-notes-controller.php' );
