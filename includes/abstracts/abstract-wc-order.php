@@ -2157,21 +2157,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     */
 
     /**
-     * Get a product (either product or variation).
-     *
-     * @param object $item
-     * @return WC_Product|bool
-     */
-    public function get_product_from_item( $item ) {
-        if ( is_callable( array( $item, 'get_product' ) ) ) {
-            $product = $item->get_product();
-        } else {
-            $product = false;
-        }
-        return apply_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
-    }
-
-    /**
      * Get item subtotal - this is the cost before discount. @todo
      *
      * @param object $item

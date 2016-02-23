@@ -18,6 +18,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Legacy_Order {
 
     /**
+     * Get a product (either product or variation).
+     * @todo Add deprecation notices in future release. Replaced with $item->get_product()
+     * @param object $item
+     * @return WC_Product|bool
+     */
+    public function get_product_from_item( $item ) {
+        if ( is_callable( array( $item, 'get_product' ) ) ) {
+            $product = $item->get_product();
+        } else {
+            $product = false;
+        }
+        return apply_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
+    }
+
+    /**
      * Set the customer address.
      * @since 2.2.0
      * @param array $address Address data.
@@ -174,7 +189,7 @@ abstract class WC_Abstract_Legacy_Order {
      */
     public function display_item_meta( $item ) {
 		_deprecated_function( 'get_item_meta', '2.6', 'wc_display_item_meta' );
-        $product   = $this->get_product_from_item( $item );
+        $product   = $item->get_product();
         $item_meta = new WC_Order_Item_Meta( $item, $product );
         $item_meta->display();
     }
@@ -184,7 +199,7 @@ abstract class WC_Abstract_Legacy_Order {
      * @param  array $item
      */
     public function display_item_downloads( $item ) {
-        $product = $this->get_product_from_item( $item );
+        $product   = $item->get_product();
 
         if ( $product && $product->exists() && $product->is_downloadable() && $this->is_download_permitted() ) {
             $download_files = $this->get_item_downloads( $item );

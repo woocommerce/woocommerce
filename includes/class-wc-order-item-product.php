@@ -120,10 +120,17 @@ class WC_Order_Item_Product extends WC_Order_Item {
      */
     public function get_product() {
         if ( $this->get_variation_id() ) {
-			return wc_get_product( $this->get_variation_id() );
+			$product = wc_get_product( $this->get_variation_id() );
 		} else {
-			return wc_get_product( $this->get_product_id() );
+			$product = wc_get_product( $this->get_product_id() );
 		}
+
+        // Backwards compatible filter from WC_Order::get_product_from_item()
+        if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
+            $product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, wc_get_order( $this->get_order_id() ) );
+        }
+
+        return apply_filters( 'woocommerce_order_item_product', $product, $this );
     }
 
     /**

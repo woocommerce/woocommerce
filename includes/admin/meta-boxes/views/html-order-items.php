@@ -80,10 +80,7 @@ if ( wc_tax_enabled() ) {
 		<tbody id="order_line_items">
 		<?php
 			foreach ( $line_items as $item_id => $item ) {
-				$_product  = $order->get_product_from_item( $item );
-
 				include( 'html-order-item.php' );
-
 				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item, $order );
 			}
 			do_action( 'woocommerce_admin_order_items_after_line_items', $order->get_id() );

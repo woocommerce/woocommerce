@@ -176,7 +176,7 @@ class WC_API_Orders extends WC_API_Resource {
 		// add line items
 		foreach( $order->get_items() as $item_id => $item ) {
 
-			$product = $order->get_product_from_item( $item );
+			$product = $item->get_product();
 
 			$order_data['line_items'][] = array(
 				'id'         => $item_id,

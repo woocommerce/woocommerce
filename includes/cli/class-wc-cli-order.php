@@ -688,7 +688,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 		// add line items
 		foreach ( $order->get_items() as $item_id => $item ) {
 
-			$product     = $order->get_product_from_item( $item );
+			$product     = $item->get_product();
 			$product_id  = null;
 			$product_sku = null;
 

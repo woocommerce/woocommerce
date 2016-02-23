@@ -1262,9 +1262,11 @@ class WC_AJAX {
 			$order_item_ids = array( $order_item_ids );
 		}
 
+		$order_item_ids = array_map( 'absint', $order_item_ids );
+
 		if ( sizeof( $order_item_ids ) > 0 ) {
 			foreach( $order_item_ids as $id ) {
-				wc_delete_order_item( absint( $id ) );
+				wc_delete_order_item( $id );
 			}
 		}
 
@@ -1283,14 +1285,12 @@ class WC_AJAX {
 
 		$order_id = absint( $_POST['order_id'] );
 		$rate_id  = absint( $_POST['rate_id'] );
+		$order    = wc_get_order( $order_id );
 
 		wc_delete_order_item( $rate_id );
 
 		// Return HTML items
-		$order = wc_get_order( $order_id );
-		$data  = get_post_meta( $order_id );
 		include( 'admin/meta-boxes/views/html-order-items.php' );
-
 		die();
 	}
 
@@ -1320,7 +1320,7 @@ class WC_AJAX {
 					continue;
 				}
 
-				$_product = $order->get_product_from_item( $order_item );
+				$_product = $order_item->get_product();
 
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
@@ -1370,7 +1370,7 @@ class WC_AJAX {
 					continue;
 				}
 
-				$_product = $order->get_product_from_item( $order_item );
+				$_product = $order_item->get_product();
 
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$old_stock    = $_product->get_stock_quantity();
@@ -2044,7 +2044,7 @@ class WC_AJAX {
 			foreach ( $line_item_qtys as $item_id => $qty ) {
 				if ( $restock_refunded_items && $qty && isset( $order_items[ $item_id ] ) ) {
 					$order_item = $order_items[ $item_id ];
-					$_product   = $order->get_product_from_item( $order_item );
+					$_product   = $order_item->get_product();
 
 					if ( $_product && $_product->exists() && $_product->managing_stock() ) {
 						$old_stock    = wc_stock_amount( $_product->stock );

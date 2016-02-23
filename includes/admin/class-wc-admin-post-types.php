@@ -640,7 +640,7 @@ class WC_Admin_Post_Types {
 					echo '<table class="order_items" cellspacing="0">';
 
 					foreach ( $the_order->get_items() as $item ) {
-						$product        = apply_filters( 'woocommerce_order_item_product', $the_order->get_product_from_item( $item ), $item );
+						$product        = $item->get_product();
 						$item_meta      = new WC_Order_Item_Meta( $item, $product );
 						$item_meta_html = $item_meta->display( true, true );
 						?>

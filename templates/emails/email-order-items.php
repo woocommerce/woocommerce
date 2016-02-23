@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 foreach ( $items as $item_id => $item ) :
-	$_product     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-	$item_meta    = new WC_Order_Item_Meta( $item, $_product );
+	$product   = $item->get_product();
+	$item_meta = new WC_Order_Item_Meta( $item, $product );
 
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 		?>
@@ -31,15 +31,15 @@ foreach ( $items as $item_id => $item ) :
 
 				// Show title/image etc
 				if ( $show_image ) {
-					echo apply_filters( 'woocommerce_order_item_thumbnail', '<div style="margin-bottom: 5px"><img src="' . ( $_product->get_image_id() ? current( wp_get_attachment_image_src( $_product->get_image_id(), 'thumbnail') ) : wc_placeholder_img_src() ) .'" alt="' . esc_attr__( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" /></div>', $item );
+					echo apply_filters( 'woocommerce_order_item_thumbnail', '<div style="margin-bottom: 5px"><img src="' . ( $product->get_image_id() ? current( wp_get_attachment_image_src( $product->get_image_id(), 'thumbnail') ) : wc_placeholder_img_src() ) .'" alt="' . esc_attr__( 'Product Image', 'woocommerce' ) . '" height="' . esc_attr( $image_size[1] ) . '" width="' . esc_attr( $image_size[0] ) . '" style="vertical-align:middle; margin-right: 10px;" /></div>', $item );
 				}
 
 				// Product name
 				echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
 
 				// SKU
-				if ( $show_sku && is_object( $_product ) && $_product->get_sku() ) {
-					echo ' (#' . $_product->get_sku() . ')';
+				if ( $show_sku && is_object( $product ) && $product->get_sku() ) {
+					echo ' (#' . $product->get_sku() . ')';
 				}
 
 				// allow other plugins to add additional product information here
@@ -65,7 +65,7 @@ foreach ( $items as $item_id => $item ) :
 		<?php
 	}
 
-	if ( $show_purchase_note && is_object( $_product ) && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) : ?>
+	if ( $show_purchase_note && is_object( $product ) && ( $purchase_note = get_post_meta( $product->id, '_purchase_note', true ) ) ) : ?>
 		<tr>
 			<td colspan="3" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); ?></td>
 		</tr>

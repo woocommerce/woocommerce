@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 foreach ( $items as $item_id => $item ) :
-	$_product     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-	$item_meta    = new WC_Order_Item_Meta( $item, $_product );
+	$product   = $item->get_product();
+	$item_meta = new WC_Order_Item_Meta( $item, $product ); // @todo deprecated WC_Order_Item_Meta ?
 
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 
@@ -30,8 +30,8 @@ foreach ( $items as $item_id => $item ) :
 		echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
 
 		// SKU
-		if ( $show_sku && $_product->get_sku() ) {
-			echo ' (#' . $_product->get_sku() . ')';
+		if ( $show_sku && $product->get_sku() ) {
+			echo ' (#' . $product->get_sku() . ')';
 		}
 
 		// allow other plugins to add additional product information here
@@ -47,7 +47,7 @@ foreach ( $items as $item_id => $item ) :
 		echo "\n" . sprintf( __( 'Cost: %s', 'woocommerce' ), $order->get_formatted_line_subtotal( $item ) );
 
 		// Download URLs
-		if ( $show_download_links && $_product->exists() && $_product->is_downloadable() ) {
+		if ( $show_download_links && $product->exists() && $product->is_downloadable() ) {
 			$download_files = $order->get_item_downloads( $item );
 			$i              = 0;
 
@@ -70,7 +70,7 @@ foreach ( $items as $item_id => $item ) :
 	}
 
 	// Note
-	if ( $show_purchase_note && ( $purchase_note = get_post_meta( $_product->id, '_purchase_note', true ) ) ) {
+	if ( $show_purchase_note && ( $purchase_note = get_post_meta( $product->id, '_purchase_note', true ) ) ) {
 		echo "\n" . do_shortcode( wp_kses_post( $purchase_note ) );
 	}
 
