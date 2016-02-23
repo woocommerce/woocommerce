@@ -167,6 +167,7 @@ class WC_Checkout {
 	 * @access public
 	 * @throws Exception
 	 * @return int|WP_ERROR
+	 * @todo
 	 */
 	public function create_order() {
 		global $wpdb;
@@ -309,12 +310,13 @@ class WC_Checkout {
 			$order->set_address( $billing_address, 'billing' );
 			$order->set_address( $shipping_address, 'shipping' );
 			$order->set_payment_method( $this->payment_method );
-			$order->set_total( WC()->cart->shipping_total, 'shipping' );
-			$order->set_total( WC()->cart->get_cart_discount_total(), 'cart_discount' );
-			$order->set_total( WC()->cart->get_cart_discount_tax_total(), 'cart_discount_tax' );
-			$order->set_total( WC()->cart->tax_total, 'tax' );
-			$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
-			$order->set_total( WC()->cart->total );
+			$order->set_cart_tax( WC()->cart->tax_total );
+			$order->set_discount_total( WC()->cart->get_cart_discount_total() );
+			$order->set_discount_tax( WC()->cart->get_cart_discount_tax_total() );
+			$order->set_shipping_total( WC()->cart->shipping_total );
+			$order->set_shipping_tax( WC()->cart->shipping_tax_total );
+			$order->set_order_total( WC()->cart->total );
+			$order->save();
 
 			// Update user meta
 			if ( $this->customer_id ) {

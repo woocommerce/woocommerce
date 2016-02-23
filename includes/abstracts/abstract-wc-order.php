@@ -1973,7 +1973,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $shipping_total += $shipping->get_total();
         }
 
-        $this->set_total( $shipping_total, 'shipping' );
+		$this->set_shipping_total( $shipping_total );
+		$this->save();
 
         return $this->get_shipping_total();
     }
@@ -2099,8 +2100,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         }
 
         // Save tax totals
-        $this->set_total( WC_Tax::round( array_sum( $shipping_taxes ) ), 'shipping_tax' );
-        $this->set_total( WC_Tax::round( array_sum( $cart_taxes ) ), 'tax' );
+		$this->set_shipping_tax( WC_Tax::round( array_sum( $shipping_taxes ) ) );
+		$this->set_cart_tax( WC_Tax::round( array_sum( $cart_taxes ) ) );
 		$this->save();
     }
 
@@ -2136,12 +2137,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $fee_total += $item->get_total();
         }
 
-        $this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
-        $this->set_total( $cart_subtotal_tax - $cart_total_tax, 'cart_discount_tax' );
+		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
 
-        $grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
-
-        $this->set_total( $grand_total, 'total' );
+		$this->set_discount_total( $cart_subtotal - $cart_total );
+		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax );
+		$this->set_order_total( $grand_total );
 		$this->save();
 
         return $grand_total;
