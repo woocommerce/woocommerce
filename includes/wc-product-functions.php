@@ -51,7 +51,9 @@ function wc_update_product_stock( $product_id, $new_stock_level ) {
  */
 function wc_update_product_stock_status( $product_id, $status ) {
 	$product = wc_get_product( $product_id );
-	$product->set_stock_status( $status );
+	if ( $product ) {
+		$product->set_stock_status( $status );
+	}
 }
 
 /**
