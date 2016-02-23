@@ -275,7 +275,15 @@ class WC_Checkout {
 			// Store shipping for all packages
 			foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
 				if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
-					$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
+					$shipping_rate = $package['rates'][ $this->shipping_methods[ $package_key ] ];
+					$item          = new WC_Order_Item_Shipping( array(
+			            'method_title' => $shipping_rate->label,
+			            'method_id'    => $shipping_rate->id,
+			            'total'        => wc_format_decimal( $shipping_rate->cost ),
+			            'taxes'        => $shipping_rate->taxes,
+			            'meta_data'    => $shipping_rate->get_meta_data(),
+			        ) );
+					$item_id = $item->save();
 
 					if ( ! $item_id ) {
 						throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 527 ) );
