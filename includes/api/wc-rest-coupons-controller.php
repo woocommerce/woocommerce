@@ -40,6 +40,15 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * Register the routes for coupons.
 	 */
 	public function register_routes() {
+		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base, array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_collection_params(),
+			),
+		) );
+
 		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -109,6 +118,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		 * @param WP_Post            $post       Post object.
 		 * @param WP_REST_Request    $request    Request object.
 		 */
-		return apply_filters( 'woocommerce_rest_api_prepare_' . $this->post_type, $response, $post, $request );
+		return apply_filters( 'woocommerce_rest_prepare_' . $this->post_type, $response, $post, $request );
 	}
 }
