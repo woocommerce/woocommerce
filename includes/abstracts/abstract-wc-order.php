@@ -1842,7 +1842,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             )
         ) );
 
-        do_action( 'woocommerce_order_add_fee', $this->get_id(), $item_id, $fee );
+        do_action( 'woocommerce_order_add_fee', $this->get_id(), $item_id, $fee ); // @todo deprecate hooks
 
         return $item_id;
     }
@@ -2172,7 +2172,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     }
 
     /**
-     * Get item subtotal - this is the cost before discount.
+     * Get item subtotal - this is the cost before discount. @todo
      *
      * @param object $item
      * @param bool $inc_tax (default: false).

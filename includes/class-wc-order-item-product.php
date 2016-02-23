@@ -270,6 +270,20 @@ class WC_Order_Item_Product extends WC_Order_Item {
         }
     }
 
+    /**
+     * Set properties based on passed in product object.
+     * @param WC_Product $product
+     */
+    public function set_product( $product ) {
+        if ( $product ) {
+            $this->set_product_id( $product->get_id() );
+            $this->set_name( $product->get_title() );
+            $this->set_tax_class( $product->get_tax_class() );
+            $this->set_variation_id( is_callable( array( $product, 'get_variation_id' ) ) ? $product->get_variation_id() : 0 );
+            $this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
+        }
+    }
+
     /*
 	|--------------------------------------------------------------------------
 	| Getters

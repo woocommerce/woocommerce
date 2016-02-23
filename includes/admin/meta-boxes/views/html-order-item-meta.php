@@ -2,7 +2,7 @@
     <?php
         global $wpdb;
 
-        if ( $metadata = $order->has_meta( $item_id ) ) {
+        if ( $metadata = $order->has_meta( $item->get_id() ) ) {
             echo '<table cellspacing="0" class="display_meta">';
             foreach ( $metadata as $meta ) {
 
@@ -47,7 +47,7 @@
     <table class="meta" cellspacing="0">
         <tbody class="meta_items">
         <?php
-            if ( $metadata = $order->has_meta( $item_id )) {
+            if ( $metadata = $order->has_meta( $item->get_id() )) {
                 foreach ( $metadata as $meta ) {
 
                     // Skip hidden core fields @todo
@@ -78,8 +78,8 @@
 
                     echo '<tr data-meta_id="' . esc_attr( $meta['meta_id'] ) . '">
                         <td>
-                            <input type="text" name="meta_key[' . esc_attr( $item_id ) . '][' . esc_attr( $meta['meta_id'] ) . ']" value="' . esc_attr( $meta['meta_key'] ) . '" />
-                            <textarea name="meta_value[' . esc_attr( $item_id ) . '][' . esc_attr( $meta['meta_id'] ) . ']">' . $meta['meta_value'] . '</textarea>
+                            <input type="text" name="meta_key[' . esc_attr( $item->get_id() ) . '][' . esc_attr( $meta['meta_id'] ) . ']" value="' . esc_attr( $meta['meta_key'] ) . '" />
+                            <textarea name="meta_value[' . esc_attr( $item->get_id() ) . '][' . esc_attr( $meta['meta_id'] ) . ']">' . $meta['meta_value'] . '</textarea>
                         </td>
                         <td width="1%"><button class="remove_order_item_meta button">&times;</button></td>
                     </tr>';

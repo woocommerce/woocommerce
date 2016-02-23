@@ -188,7 +188,7 @@ if ( wc_tax_enabled() ) {
 			<td class="total">
 				<div class="view"><?php echo $order->get_formatted_order_total(); ?></div>
 				<div class="edit" style="display: none;">
-					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo ( isset( $data['_order_total'][0] ) ) ? esc_attr( wc_format_localized_price( $data['_order_total'][0] ) ) : ''; ?>" />
+					<input type="text" class="wc_input_price" id="_order_total" name="_order_total" placeholder="<?php echo wc_format_localized_price( 0 ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $order->get_order_total() ) ); ?>" />
 					<div class="clear"></div>
 				</div>
 			</td>

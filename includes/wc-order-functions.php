@@ -470,6 +470,8 @@ function wc_reduce_stock_levels( $order_id ) {
 /**
  * Add a item to an order (for example a line item).
  *
+ * @todo
+ *
  * @access public
  * @param int $order_id
  * @return mixed
