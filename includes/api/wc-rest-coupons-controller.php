@@ -58,6 +58,17 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'context'         => $this->get_context_param( array( 'default' => 'view' ) ),
 				),
 			),
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'default'     => false,
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+					),
+				),
+			),
 		) );
 	}
 

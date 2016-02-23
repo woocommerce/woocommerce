@@ -52,6 +52,35 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to read items.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		$post_type = get_post_type_object( $this->post_type );
+
+		return current_user_can( $post_type->cap->read_private_posts );
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error
+	 */
+	public function delete_item_permissions_check( $request ) {
+
+		$post = get_post( $request['id'] );
+
+		if ( $post && ! $this->check_delete_permission( $post ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if we can read an item.
 	 *
 	 * Correctly handles posts with the inherit status.
@@ -65,15 +94,14 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to read items.
+	 * Check if we can delete a post.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @param object $post Post object.
+	 * @return boolean Can we delete it?
 	 */
-	public function get_items_permissions_check( $request ) {
+	protected function check_delete_permission( $post ) {
 		$post_type = get_post_type_object( $this->post_type );
-
-		return current_user_can( $post_type->cap->read_private_posts );
+		return current_user_can( $post_type->cap->delete_post, $post->ID );
 	}
 
 	/**
@@ -396,6 +424,76 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Delete a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$id = (int) $request['id'];
+		$force = (bool) $request['force'];
+
+		$post = get_post( $id );
+
+		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$supports_trash = EMPTY_TRASH_DAYS > 0;
+
+		/**
+		 * Filter whether an item is trashable.
+		 *
+		 * Return false to disable trash support for the item.
+		 *
+		 * @param boolean $supports_trash Whether the item type support trashing.
+		 * @param WP_Post $post           The Post object being considered for trashing support.
+		 */
+		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );
+
+		if ( ! $this->check_delete_permission( $post ) ) {
+			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+
+		// If we're forcing, then delete permanently.
+		if ( $force ) {
+			$result = wp_delete_post( $id, true );
+		} else {
+			// If we don't support trashing for this type, error out.
+			if ( ! $supports_trash ) {
+				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
+			}
+
+			// Otherwise, only trash if we haven't already.
+			if ( 'trash' === $post->post_status ) {
+				return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.' ), $this->post_type ), array( 'status' => 410 ) );
+			}
+
+			// (Note that internally this falls through to `wp_delete_post` if
+			// the trash is disabled.)
+			$result = wp_trash_post( $id );
+		}
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.' ), $this->post_type ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a single item is deleted or trashed via the REST API.
+		 *
+		 * @param object           $post     The deleted or trashed item.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( "woocommerce_rest_delete_{$this->post_type}", $post, $response, $request );
+
+		return $response;
 	}
 
 	/**
