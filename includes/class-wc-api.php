@@ -368,7 +368,8 @@ class WC_API {
 	 * @since 2.6.0
 	 */
 	private function rest_api_includes() {
-		// WP REST Controller (vendor while not implemented in WP core).
+		// WP-API classes and functions.
+		include_once( 'vendor/wp-api-functions.php' );
 		if ( ! class_exists( 'WP_REST_Controller' ) ) {
 			include_once( 'vendor/class-wp-rest-controller.php' );
 		}
