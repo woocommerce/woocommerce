@@ -1,6 +1,12 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
+/**
+ * @version 2.0-beta12
+ */
 abstract class WP_REST_Controller {
 
 	/**
