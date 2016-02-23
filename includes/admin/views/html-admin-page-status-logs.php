@@ -8,7 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-
 <?php if ( $logs ) : ?>
 	<div id="log-viewer-select">
 		<div class="alignleft">

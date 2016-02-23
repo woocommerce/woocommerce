@@ -5,6 +5,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
 ?>
 <div class="wrap woocommerce">
 	<form method="<?php echo esc_attr( apply_filters( 'woocommerce_settings_form_method_tab_' . $current_tab, 'post' ) ); ?>" id="mainform" action="" enctype="multipart/form-data">
