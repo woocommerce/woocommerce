@@ -226,20 +226,21 @@ class WC_Checkout {
 
 			// Store the line items to the new/resumed order
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
-				$item_id = $order->add_product(
-					$values['data'],
-					$values['quantity'],
-					array(
-						'variation' => $values['variation'],
-						'totals'    => array(
-							'subtotal'     => $values['line_subtotal'],
-							'subtotal_tax' => $values['line_subtotal_tax'],
-							'total'        => $values['line_total'],
-							'tax'          => $values['line_tax'],
-							'tax_data'     => $values['line_tax_data'] // Since 2.2
-						)
-					)
-				);
+				$item = new WC_Order_Item_Product( array(
+					'order_id'     => $order_id,
+		            'name'         => $values['data']->get_title(),
+		            'tax_class'    => $values['data']->get_tax_class(),
+		            'product_id'   => $values['data']->get_id(),
+		            'variation_id' => isset( $values['data']->variation_id ) ? $values['data']->variation_id : 0,
+					'qty'          => $values['quantity'],
+		            'variation'    => $values['variation'],
+		            'subtotal'     => $values['line_subtotal'],
+		            'subtotal_tax' => $values['line_subtotal_tax'],
+		            'total'        => $values['line_total'],
+		            'total_tax'    => $values['line_tax'],
+		            'taxes'        => $values['line_tax_data'],
+		        ) );
+		        $item_id = $item->save();
 
 				if ( ! $item_id ) {
 					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 525 ) );
@@ -307,7 +308,7 @@ class WC_Checkout {
 				}
 			}
 
-			$order->set_address( $billing_address, 'billing' );
+			$order->set_address( $billing_address, 'billing' ); // @todo remove set_address
 			$order->set_address( $shipping_address, 'shipping' );
 			$order->set_payment_method( $this->payment_method );
 			$order->set_cart_tax( WC()->cart->tax_total );

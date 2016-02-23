@@ -33,13 +33,15 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
     /**
 	 * Constructor.
-	 * @param int|object $order_item ID to load from the DB (optional) or already queried data.
+	 * @param int|object|array $order_item ID to load from the DB (optional) or already queried data.
 	 */
     public function __construct( $item = 0 ) {
 		if ( $item instanceof WC_Order_Item ) {
             if ( $this->is_type( $item->get_type() ) ) {
                 $this->set_all( $item->get_data() );
             }
+        } elseif ( is_array( $item ) ) {
+            $this->set_all( $item );
 		} else {
             $this->read( $item );
         }
@@ -263,6 +265,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
     /**
      * Save data to the database.
 	 * @since 2.6.0
+     * @return int Item ID
      */
     public function save() {
         if ( ! $this->get_id() ) {
@@ -271,6 +274,8 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
             $this->update();
         }
         $this->save_meta_data();
+
+        return $this->get_id();
 	}
 
     /**

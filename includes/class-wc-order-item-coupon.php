@@ -56,21 +56,24 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
      */
     public function read( $id ) {
         parent::read( $id );
-        if ( $this->get_order_item_id() ) {
-            $this->set_discount( get_metadata( 'order_item', $this->get_order_item_id(), 'discount_amount', true ) );
-            $this->set_discount_tax( get_metadata( 'order_item', $this->get_order_item_id(), 'discount_amount_tax', true ) );
+        if ( $this->get_id() ) {
+            $this->set_discount( get_metadata( 'order_item', $this->get_id(), 'discount_amount', true ) );
+            $this->set_discount_tax( get_metadata( 'order_item', $this->get_id(), 'discount_amount_tax', true ) );
         }
     }
 
     /**
      * Save properties specific to this order item.
+     * @return int Item ID
      */
     public function save() {
         parent::save();
-        if ( $this->get_order_item_id() ) {
-            wc_update_order_item_meta( $this->get_order_item_id(), 'discount_amount', $this->get_discount() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'discount_amount_tax', $this->get_discount_tax() );
+        if ( $this->get_id() ) {
+            wc_update_order_item_meta( $this->get_id(), 'discount_amount', $this->get_discount() );
+            wc_update_order_item_meta( $this->get_id(), 'discount_amount_tax', $this->get_discount_tax() );
         }
+
+        return $this->get_id();
     }
 
     /**

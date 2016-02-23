@@ -31,27 +31,30 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      */
     public function read( $id ) {
         parent::read( $id );
-        if ( $this->get_order_item_id() ) {
-            $this->set_rate_id( get_metadata( 'order_item', $this->get_order_item_id(), 'rate_id', true ) );
-            $this->set_label( get_metadata( 'order_item', $this->get_order_item_id(), 'label', true ) );
-            $this->set_compound( get_metadata( 'order_item', $this->get_order_item_id(), 'compound', true ) );
-            $this->set_tax_total( get_metadata( 'order_item', $this->get_order_item_id(), 'tax_amount', true ) );
-            $this->set_shipping_tax_total( get_metadata( 'order_item', $this->get_order_item_id(), 'shipping_tax_amount', true ) );
+        if ( $this->get_id() ) {
+            $this->set_rate_id( get_metadata( 'order_item', $this->get_id(), 'rate_id', true ) );
+            $this->set_label( get_metadata( 'order_item', $this->get_id(), 'label', true ) );
+            $this->set_compound( get_metadata( 'order_item', $this->get_id(), 'compound', true ) );
+            $this->set_tax_total( get_metadata( 'order_item', $this->get_id(), 'tax_amount', true ) );
+            $this->set_shipping_tax_total( get_metadata( 'order_item', $this->get_id(), 'shipping_tax_amount', true ) );
         }
     }
 
     /**
      * Save properties specific to this order item.
+     * @return int Item ID
      */
     public function save() {
         parent::save();
-        if ( $this->get_order_item_id() ) {
-            wc_update_order_item_meta( $this->get_order_item_id(), 'rate_id', $this->get_rate_id() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'label', $this->get_label() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'compound', $this->get_compound() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'tax_amount', $this->get_tax_total() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'shipping_tax_amount', $this->get_shipping_tax_total() );
+        if ( $this->get_id() ) {
+            wc_update_order_item_meta( $this->get_id(), 'rate_id', $this->get_rate_id() );
+            wc_update_order_item_meta( $this->get_id(), 'label', $this->get_label() );
+            wc_update_order_item_meta( $this->get_id(), 'compound', $this->get_compound() );
+            wc_update_order_item_meta( $this->get_id(), 'tax_amount', $this->get_tax_total() );
+            wc_update_order_item_meta( $this->get_id(), 'shipping_tax_amount', $this->get_shipping_tax_total() );
         }
+
+        return $this->get_id();
     }
 
     /**

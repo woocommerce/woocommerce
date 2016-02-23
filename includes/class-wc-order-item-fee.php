@@ -64,27 +64,30 @@ class WC_Order_Item_Fee extends WC_Order_Item {
      */
     public function read( $id ) {
         parent::read( $id );
-        if ( $this->get_order_item_id() ) {
-            $this->set_tax_class( get_metadata( 'order_item', $this->get_order_item_id(), '_tax_class', true ) );
-            $this->set_tax_status( get_metadata( 'order_item', $this->get_order_item_id(), '_tax_status', true ) );
-            $this->set_total( get_metadata( 'order_item', $this->get_order_item_id(), '_line_total', true ) );
-            $this->set_total_tax( get_metadata( 'order_item', $this->get_order_item_id(), '_line_tax', true ) );
-            $this->set_taxes( get_metadata( 'order_item', $this->get_order_item_id(), '_line_tax_data', true ) );
+        if ( $this->get_id() ) {
+            $this->set_tax_class( get_metadata( 'order_item', $this->get_id(), '_tax_class', true ) );
+            $this->set_tax_status( get_metadata( 'order_item', $this->get_id(), '_tax_status', true ) );
+            $this->set_total( get_metadata( 'order_item', $this->get_id(), '_line_total', true ) );
+            $this->set_total_tax( get_metadata( 'order_item', $this->get_id(), '_line_tax', true ) );
+            $this->set_taxes( get_metadata( 'order_item', $this->get_id(), '_line_tax_data', true ) );
         }
     }
 
     /**
      * Save properties specific to this order item.
+     * @return int Item ID
      */
     public function save() {
         parent::save();
-        if ( $this->get_order_item_id() ) {
-            wc_update_order_item_meta( $this->get_order_item_id(), '_tax_class', $this->get_tax_class() );
-            wc_update_order_item_meta( $this->get_order_item_id(), '_tax_status', $this->get_tax_status() );
-            wc_update_order_item_meta( $this->get_order_item_id(), '_line_total', $this->get_total() );
-            wc_update_order_item_meta( $this->get_order_item_id(), '_line_tax', $this->get_total_tax() );
-            wc_update_order_item_meta( $this->get_order_item_id(), '_line_tax_data', $this->get_taxes() );
+        if ( $this->get_id() ) {
+            wc_update_order_item_meta( $this->get_id(), '_tax_class', $this->get_tax_class() );
+            wc_update_order_item_meta( $this->get_id(), '_tax_status', $this->get_tax_status() );
+            wc_update_order_item_meta( $this->get_id(), '_line_total', $this->get_total() );
+            wc_update_order_item_meta( $this->get_id(), '_line_tax', $this->get_total_tax() );
+            wc_update_order_item_meta( $this->get_id(), '_line_tax_data', $this->get_taxes() );
         }
+
+        return $this->get_id();
     }
 
     /*

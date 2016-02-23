@@ -57,25 +57,28 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
      */
     public function read( $id ) {
         parent::read( $id );
-        if ( $this->get_order_item_id() ) {
-            $this->set_method_id( get_metadata( 'order_item', $this->get_order_item_id(), 'method_id', true ) );
-            $this->set_total( get_metadata( 'order_item', $this->get_order_item_id(), 'cost', true ) );
-            $this->set_total_tax( get_metadata( 'order_item', $this->get_order_item_id(), 'total_tax', true ) );
-            $this->set_taxes( get_metadata( 'order_item', $this->get_order_item_id(), 'taxes', true ) );
+        if ( $this->get_id() ) {
+            $this->set_method_id( get_metadata( 'order_item', $this->get_id(), 'method_id', true ) );
+            $this->set_total( get_metadata( 'order_item', $this->get_id(), 'cost', true ) );
+            $this->set_total_tax( get_metadata( 'order_item', $this->get_id(), 'total_tax', true ) );
+            $this->set_taxes( get_metadata( 'order_item', $this->get_id(), 'taxes', true ) );
         }
     }
 
     /**
      * Save properties specific to this order item.
+     * @return int Item ID
      */
     public function save() {
         parent::save();
-        if ( $this->get_order_item_id() ) {
-            wc_update_order_item_meta( $this->get_order_item_id(), 'method_id', $this->get_method_id() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'cost', $this->get_total() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'total_tax', $this->get_total_tax() );
-            wc_update_order_item_meta( $this->get_order_item_id(), 'taxes', $this->get_taxes() );
+        if ( $this->get_id() ) {
+            wc_update_order_item_meta( $this->get_id(), 'method_id', $this->get_method_id() );
+            wc_update_order_item_meta( $this->get_id(), 'cost', $this->get_total() );
+            wc_update_order_item_meta( $this->get_id(), 'total_tax', $this->get_total_tax() );
+            wc_update_order_item_meta( $this->get_id(), 'taxes', $this->get_taxes() );
         }
+
+        return $this->get_id();
     }
 
     /**
