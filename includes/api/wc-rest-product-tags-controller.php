@@ -37,7 +37,7 @@ class WC_REST_Product_Tags_Controller extends WC_REST_Terms_Controller {
 	protected $object = 'product_tag';
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the routes for product tags.
 	 */
 	public function register_routes() {
 

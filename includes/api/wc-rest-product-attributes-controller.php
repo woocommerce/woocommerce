@@ -30,7 +30,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	protected $rest_base = 'products/attributes';
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the routes for product attributes.
 	 */
 	public function register_routes() {
 

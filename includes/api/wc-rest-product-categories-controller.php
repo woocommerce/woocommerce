@@ -37,7 +37,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 	protected $object = 'product_cat';
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the routes for product categories.
 	 */
 	public function register_routes() {
 

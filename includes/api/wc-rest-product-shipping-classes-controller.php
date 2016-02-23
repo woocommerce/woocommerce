@@ -37,7 +37,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 	protected $object = 'product_shipping_class';
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the routes for product shipping classes.
 	 */
 	public function register_routes() {
 
