@@ -37,9 +37,21 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	protected $post_type = 'product';
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the routes for products.
 	 */
 	public function register_routes() {
-
+		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'default'     => false,
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+					),
+				),
+			),
+		) );
 	}
 }
