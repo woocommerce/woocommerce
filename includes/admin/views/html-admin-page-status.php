@@ -13,13 +13,12 @@ $tabs        = array(
 	'tools'  => __( 'Tools', 'woocommerce' ),
 	'logs'   => __( 'Logs', 'woocommerce' ),
 );
+
 ?>
 <div class="wrap woocommerce">
 	<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div>
-
 	<h1><?php echo esc_html( $tabs[ $current_tab ] ); ?></h1>
-
-	<p class="nav-tab-wrapper woo-nav-tab-wrapper">
+	<h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
 			foreach ( $tabs as $name => $label ) {
 				echo '<a href="' . admin_url( 'admin.php?page=wc-status&tab=' . $name ) . '" class="nav-tab ';
@@ -27,7 +26,7 @@ $tabs        = array(
 				echo '">' . $label . '</a>';
 			}
 		?>
-	</p>
+	</h2>
 	<?php
 		switch ( $current_tab ) {
 			case "tools" :

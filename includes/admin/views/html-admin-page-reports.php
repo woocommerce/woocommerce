@@ -8,23 +8,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-
 <div class="wrap woocommerce">
 	<div class="icon32 icon32-woocommerce-reports" id="icon-woocommerce"><br /></div>
-
 	<h1><?php echo sprintf( esc_html__( '%s Report' ), $reports[ $current_tab ]['title'] ); ?></h1>
-
-	<p class="nav-tab-wrapper woo-nav-tab-wrapper">
+	<h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
 			foreach ( $reports as $key => $report_group ) {
 				echo '<a href="'.admin_url( 'admin.php?page=wc-reports&tab=' . urlencode( $key ) ).'" class="nav-tab ';
 				if ( $current_tab == $key ) echo 'nav-tab-active';
 				echo '">' . esc_html( $report_group[ 'title' ] ) . '</a>';
 			}
-		?>
-		<?php do_action('wc_reports_tabs'); ?>
-	</p>
 
+			do_action( 'wc_reports_tabs' );
+		?>
+	</h2>
 	<?php if ( sizeof( $reports[ $current_tab ]['reports'] ) > 1 ) {
 		?>
 		<ul class="subsubsub">
