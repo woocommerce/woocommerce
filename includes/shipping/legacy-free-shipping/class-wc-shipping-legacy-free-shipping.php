@@ -154,7 +154,7 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 
 			if ( $coupons = WC()->cart->get_coupons() ) {
 				foreach ( $coupons as $code => $coupon ) {
-					if ( $coupon->is_valid() && $coupon->enable_free_shipping() ) {
+					if ( $coupon->is_valid() && true === $coupon->get_free_shipping_enabled() ) {
 						$has_coupon = true;
 					}
 				}

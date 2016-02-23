@@ -170,14 +170,14 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 	public function delete( $args, $assoc_args ) {
 		$exit_code = 0;
 		foreach ( $this->get_many_coupons_from_ids_or_codes( $args, true ) as $coupon ) {
-			do_action( 'woocommerce_cli_delete_coupon', $coupon->id );
-			$r = wp_delete_post( $coupon->id, true );
+			do_action( 'woocommerce_cli_delete_coupon', $coupon->get_id() );
+			$r = wp_delete_post( $coupon->get_id(), true );
 
 			if ( $r ) {
-				WP_CLI::success( "Deleted coupon {$coupon->id}." );
+				WP_CLI::success( "Deleted coupon " . $coupon->get_id() );
 			} else {
 				$exit_code += 1;
-				WP_CLI::warning( "Failed deleting coupon {$coupon->id}." );
+				WP_CLI::warning( "Failed deleting coupon " . $coupon->get_id() );
 			}
 		}
 		exit( $exit_code ? 1 : 0 );
@@ -243,27 +243,27 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 
 			$coupon_post = get_post( $coupon->id );
 			$coupon_data = array(
-				'id'                           => $coupon->id,
-				'code'                         => $coupon->code,
-				'type'                         => $coupon->type,
+				'id'                           => $coupon->get_id(),
+				'code'                         => $coupon->get_code(),
+				'type'                         => $coupon->get_discount_type(),
 				'created_at'                   => $this->format_datetime( $coupon_post->post_date_gmt ),
 				'updated_at'                   => $this->format_datetime( $coupon_post->post_modified_gmt ),
-				'amount'                       => wc_format_decimal( $coupon->coupon_amount, 2 ),
-				'individual_use'               => $coupon->individual_use,
-				'product_ids'                  => $coupon_post->product_ids,
-				'exclude_product_ids'          => $coupon_post->exclude_product_ids,
-				'usage_limit'                  => ( ! empty( $coupon->usage_limit ) ) ? $coupon->usage_limit : null,
-				'usage_limit_per_user'         => ( ! empty( $coupon->usage_limit_per_user ) ) ? $coupon->usage_limit_per_user : null,
-				'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
-				'usage_count'                  => (int) $coupon->usage_count,
-				'expiry_date'                  => ( ! empty( $coupon->expiry_date ) ) ? $this->format_datetime( $coupon->expiry_date ) : null,
-				'enable_free_shipping'         => $coupon->free_shipping,
-				'product_category_ids'         => implode( ', ', $coupon->product_categories ),
-				'exclude_product_category_ids' => implode( ', ', $coupon->exclude_product_categories ),
-				'exclude_sale_items'           => $coupon->exclude_sale_items,
-				'minimum_amount'               => wc_format_decimal( $coupon->minimum_amount, 2 ),
-				'maximum_amount'               => wc_format_decimal( $coupon->maximum_amount, 2 ),
-				'customer_emails'              => implode( ', ', $coupon->customer_email ),
+				'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
+				'individual_use'               => $coupon->get_is_individual_use(),
+				'product_ids'                  => implode( ', ', $coupon->get_product_ids() ),
+				'exclude_product_ids'          => implode( ', ', $coupon->get_excluded_product_ids() ),
+				'usage_limit'                  => ( ! empty( $coupon->get_usage_limit() ) ) ? $coupon->get_usage_limit() : null,
+				'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+				'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
+				'usage_count'                  => (int) $coupon->get_usage_count(),
+				'expiry_date'                  => ( ! empty( $coupon->get_expiry_date() ) ) ? $this->format_datetime( $coupon->get_expiry_date() ) : null,
+				'enable_free_shipping'         => $coupon->get_free_shipping_enabled(),
+				'product_category_ids'         => implode( ', ', $coupon->get_product_categories() ),
+				'exclude_product_category_ids' => implode( ', ', $coupon->get_excluded_product_categories() ),
+				'exclude_sale_items'           => $coupon->get_should_exclude_sale_items(),
+				'minimum_amount'               => wc_format_decimal( $coupon->get_minimum_amount(), 2 ),
+				'maximum_amount'               => wc_format_decimal( $coupon->get_maximum_amount(), 2 ),
+				'customer_emails'              => implode( ', ', $coupon->get_email_restrictions() ),
 				'description'                  => $coupon_post->post_excerpt,
 			);
 
@@ -431,8 +431,8 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				throw new WC_CLI_Exception( 'woocommerce_cli_invalid_coupon', sprintf( __( 'Invalid coupon ID or code: %s', 'woocommerce' ), $args[0] ) );
 			}
 
-			$id          = $coupon->id;
-			$coupon_code = $coupon->code;
+			$id          = $coupon->get_id();
+			$coupon_code = $coupon->get_code();
 			$data        = apply_filters( 'woocommerce_cli_update_coupon_data', $assoc_args, $id );
 			if ( isset( $data['code'] ) ) {
 				global $wpdb;
@@ -575,28 +575,30 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 	protected function format_posts_to_items( $posts ) {
 		$items = array();
 		foreach ( $posts as $post ) {
+			$coupon = new WC_Coupon;
+			$coupon->read( $post->ID );
 			$items[] = array(
 				'id'                           => $post->ID,
 				'code'                         => $post->post_title,
-				'type'                         => $post->discount_type,
+				'type'                         => $coupon->get_discount_type(),
 				'created_at'                   => $this->format_datetime( $post->post_date_gmt ),
 				'updated_at'                   => $this->format_datetime( $post->post_modified_gmt ),
-				'amount'                       => wc_format_decimal( $post->coupon_amount, 2 ),
-				'individual_use'               => $post->individual_use,
-				'product_ids'                  => $post->product_ids,
-				'exclude_product_ids'          => $post->exclude_product_ids,
-				'usage_limit'                  => ( ! empty( $post->usage_limit ) ) ? $post->usage_limit : null,
-				'usage_limit_per_user'         => ( ! empty( $post->usage_limit_per_user ) ) ? $post->usage_limit_per_user : null,
-				'limit_usage_to_x_items'       => (int) $post->limit_usage_to_x_items,
-				'usage_count'                  => (int) $post->usage_count,
-				'expiry_date'                  => ( ! empty( $post->expiry_date ) ) ? $this->format_datetime( $post->expiry_date ) : null,
-				'free_shipping'                => $post->free_shipping,
-				'product_category_ids'         => implode( ', ', is_array( $post->product_categories ) ? $post->product_categories : array() ),
-				'exclude_product_category_ids' => implode( ', ', is_array( $post->exclude_product_categories ) ? $post->exclude_product_categories : array() ),
-				'exclude_sale_items'           => $post->exclude_sale_items,
-				'minimum_amount'               => wc_format_decimal( $post->minimum_amount, 2 ),
-				'maximum_amount'               => wc_format_decimal( $post->maximum_amount, 2 ),
-				'customer_emails'              => implode( ', ', is_array( $post->customer_email ) ? $post->customer_email : array() ),
+				'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
+				'individual_use'               => $coupon->get_is_individual_use(),
+				'product_ids'                  => implode( ', ', is_array( $coupon->get_product_ids() ) ? $coupon->get_product_ids() : array() ),
+				'exclude_product_ids'          => implode( ', ', is_array( $coupon->get_excluded_product_ids() ) ? $coupon->get_excluded_product_ids() : array() ),
+				'usage_limit'                  => ( ! empty( $coupon->get_usage_limit() ) ) ? $coupon->get_usage_limit() : null,
+				'usage_limit_per_user'         => ( ! empty( $coupon->get_usage_limit_per_user() ) ) ? $coupon->get_usage_limit_per_user() : null,
+				'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
+				'usage_count'                  => (int) $coupon->get_usage_count(),
+				'expiry_date'                  => ( ! empty( $coupon->get_expiry_date() ) ) ? $this->format_datetime( $coupon->get_expiry_date() ) : null,
+				'free_shipping'                => $coupon->get_free_shipping_enabled(),
+				'product_category_ids'         => implode( ', ', is_array( $coupon->get_product_categories() ) ? $coupon->get_product_categories() : array() ),
+				'exclude_product_category_ids' => implode( ', ', is_array( $coupon->get_excluded_product_categories() ) ? $coupon->get_excluded_product_categories() : array() ),
+				'exclude_sale_items'           => $coupon->get_should_exclude_sale_items(),
+				'minimum_amount'               => wc_format_decimal( $coupon->get_minimum_amount(), 2 ),
+				'maximum_amount'               => wc_format_decimal( $coupon->get_maximum_amount(), 2 ),
+				'customer_emails'              => implode( ', ', is_array( $coupon->get_email_restrictions() ) ? $coupon->get_email_restrictions() : array() ),
 				'description'                  => $post->post_excerpt,
 			);
 		}
