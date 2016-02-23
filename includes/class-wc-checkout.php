@@ -252,7 +252,17 @@ class WC_Checkout {
 
 			// Store fees
 			foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-				$item_id = $order->add_fee( $fee );
+				$item = new WC_Order_Item_Fee( array(
+					'order_id'  => $order_id,
+		            'name'      => $fee->name,
+		            'tax_class' => $fee->taxable ? $fee->tax_class : 0,
+		            'total'     => $fee->amount,
+		            'total_tax' => $fee->tax,
+		            'taxes'     => array(
+		                'total' => $fee->tax_data
+		            )
+		        ) );
+		        $item_id = $item->save();
 
 				if ( ! $item_id ) {
 					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 526 ) );
