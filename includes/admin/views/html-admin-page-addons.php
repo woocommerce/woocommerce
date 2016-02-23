@@ -8,6 +8,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
 	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
