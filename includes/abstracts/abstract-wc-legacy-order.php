@@ -241,8 +241,8 @@ abstract class WC_Abstract_Legacy_Order {
     public function get_item_downloads( $item ) {
         global $wpdb;
 
-        $product_id   = $item['variation_id'] > 0 ? $item['variation_id'] : $item['product_id'];
-        $product      = wc_get_product( $product_id );
+        $product = $item->get_product();
+
         if ( ! $product ) {
             /**
              * $product can be `false`. Example: checking an old order, when a product or variation has been deleted.

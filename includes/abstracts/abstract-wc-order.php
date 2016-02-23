@@ -751,7 +751,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         $subtotal = 0;
 
         foreach ( $this->get_items() as $item ) {
-            $subtotal += isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0;
+            $subtotal += $item->get_subtotal();
         }
 
         return apply_filters( 'woocommerce_order_amount_subtotal', (double) $subtotal, $this );
@@ -2124,16 +2124,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
         // line items
         foreach ( $this->get_items() as $item ) {
-            $cart_subtotal     += wc_format_decimal( isset( $item['line_subtotal'] ) ? $item['line_subtotal'] : 0 );
-            $cart_total        += wc_format_decimal( isset( $item['line_total'] ) ? $item['line_total'] : 0 );
-            $cart_subtotal_tax += wc_format_decimal( isset( $item['line_subtotal_tax'] ) ? $item['line_subtotal_tax'] : 0 );
-            $cart_total_tax    += wc_format_decimal( isset( $item['line_tax'] ) ? $item['line_tax'] : 0 );
+            $cart_subtotal     += wc_format_decimal( $item->get_subtotal() );
+            $cart_total        += wc_format_decimal( $item->get_total() );
+            $cart_subtotal_tax += wc_format_decimal( $item->get_subtotal_tax() );
+            $cart_total_tax    += wc_format_decimal( $item->get_total_tax() );
         }
 
         $this->calculate_shipping();
 
         foreach ( $this->get_fees() as $item ) {
-            $fee_total += $item['line_total'];
+            $fee_total += $item->get_total();
         }
 
         $this->set_total( $cart_subtotal - $cart_total, 'cart_discount' );
@@ -2287,10 +2287,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      */
     public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
         $tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-
-        if ( ! isset( $item['line_subtotal'] ) || ! isset( $item['line_subtotal_tax'] ) ) {
-            return '';
-        }
 
         if ( 'excl' == $tax_display ) {
             $ex_tax_label = $this->get_prices_include_tax() ? 1 : 0;
