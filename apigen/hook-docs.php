@@ -208,13 +208,13 @@ class WC_HookFinder {
 		echo '</div><div id="footer">';
 
 		$html   = file_get_contents( '../wc-apidocs/tree.html' );
-		$header = current( explode( '<div id="content">', $html ) );
-		$header = str_replace( '<li class="active">', '<li>', $header );
+		$header = explode( '<div id="content">', $html );
+		$header = str_replace( '<li class="active">', '<li>', current( $header ) );
 		$header = str_replace( '<li class="hooks">', '<li class="active">', $header );
 		$header = str_replace( 'Tree | ', 'Hook Reference | ', $header );
-		$footer = end( explode( '<div id="footer">', $html ) );
+		$footer = explode( '<div id="footer">', $html );
 
-		file_put_contents( '../wc-apidocs/hook-docs.html', $header . ob_get_clean() . $footer );
+		file_put_contents( '../wc-apidocs/hook-docs.html', $header . ob_get_clean() . end( $footer ) );
 		echo "Hook docs generated :)\n";
 	}
 }
