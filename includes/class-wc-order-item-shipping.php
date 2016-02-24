@@ -29,7 +29,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 
     /**
      * offsetGet for ArrayAccess/Backwards compatibility.
-     * @todo Add deprecation notices in future release.
+     * @deprecated Add deprecation notices in future release.
      * @param string $offset
      * @return mixed
      */

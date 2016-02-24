@@ -212,7 +212,7 @@ class WC_Gateway_Paypal_Request {
 		$item_names = array();
 
 		foreach ( $order->get_items() as $item ) {
-			$item_names[] = $item['name'] . ' x ' . $item['qty'];
+			$item_names[] = $item->get_name() . ' x ' . $item->get_qty();
 		}
 
 		return implode( ', ', $item_names );
@@ -266,15 +266,15 @@ class WC_Gateway_Paypal_Request {
 
 		// Products
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
-			if ( 'fee' === $item['type'] ) { // @todo
-				$item_line_total  = $this->number_format( $item['line_total'], $order );
-				$line_item        = $this->add_line_item( $item['name'], 1, $item_line_total );
+			if ( 'fee' === $item->get_type() ) {
+				$item_line_total  = $this->number_format( $item->get_total(), $order );
+				$line_item        = $this->add_line_item( $item->get_name(), 1, $item_line_total );
 				$calculated_total += $item_line_total;
 			} else {
 				$product          = $item->get_product();
 				$item_line_total  = $this->number_format( $order->get_item_subtotal( $item, false ), $order );
-				$line_item        = $this->add_line_item( $this->get_order_item_name( $order, $item ), $item['qty'], $item_line_total, $product->get_sku() );
-				$calculated_total += $item_line_total * $item['qty'];
+				$line_item        = $this->add_line_item( $this->get_order_item_name( $order, $item ), $item->get_qty(), $item_line_total, $product->get_sku() );
+				$calculated_total += $item_line_total * $item->get_qty();
 			}
 
 			if ( ! $line_item ) {

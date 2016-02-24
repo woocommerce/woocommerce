@@ -50,7 +50,7 @@
             if ( $metadata = $order->has_meta( $item->get_id() )) {
                 foreach ( $metadata as $meta ) {
 
-                    // Skip hidden core fields @todo
+                    // Skip hidden core fields
                     if ( in_array( $meta['meta_key'], apply_filters( 'woocommerce_hidden_order_itemmeta', array(
                         '_qty',
                         '_tax_class',

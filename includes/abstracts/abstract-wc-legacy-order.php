@@ -19,7 +19,7 @@ abstract class WC_Abstract_Legacy_Order {
 
     /**
      * Get a product (either product or variation).
-     * @todo Add deprecation notices in future release. Replaced with $item->get_product()
+     * @deprecated Add deprecation notices in future release. Replaced with $item->get_product()
      * @param object $item
      * @return WC_Product|bool
      */
