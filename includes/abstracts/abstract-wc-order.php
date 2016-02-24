@@ -1367,7 +1367,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         $this->set_order_total( get_post_meta( $order_id, '_order_total', true ) );
 
         // Map user data
-        if ( empty( $this->get_billing_email() ) && ( $user = $this->get_user() ) ) {
+        if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
             $this->set_billing_email( $user->user_email );
         }
 
