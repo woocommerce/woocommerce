@@ -766,7 +766,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     /**
      * Get taxes, merged by code, formatted ready for output.
      *
-     * @return array
+     * @return array @todo
      */
     public function get_tax_totals() {
         $tax_totals = array();
