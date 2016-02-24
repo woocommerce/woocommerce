@@ -242,6 +242,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     public function create() {
         global $wpdb;
+
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_order_items', array(
             'order_item_name' => $this->get_name(),
             'order_item_type' => $this->get_type(),
@@ -249,8 +250,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
         ) );
 		$this->set_id( $wpdb->insert_id );
 
-        // @todo do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
-        // do_action( 'woocommerce_update_order_item', $item_id, $args );
+        do_action( 'woocommerce_new_order_item', $this->get_id(), $this, $this->get_order_id() );
 	}
 
     /**
@@ -259,11 +259,14 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     public function update() {
         global $wpdb;
+
 		$wpdb->update( $wpdb->prefix . 'woocommerce_order_items', array(
             'order_item_name' => $this->get_name(),
             'order_item_type' => $this->get_type(),
             'order_id'        => $this->get_order_id()
         ), array( 'order_item_id' => $this->get_id() ) );
+
+        do_action( 'woocommerce_update_order_item', $this->get_id(), $this, $this->get_order_id() );
     }
 
 	/**

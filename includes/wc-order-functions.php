@@ -476,7 +476,7 @@ function wc_reduce_stock_levels( $order_id ) {
 function wc_add_order_item( $order_id, $args ) {
 	$order_id = absint( $order_id );
 
-	if ( ! $order_id || ! in_array( get_post_type( $order_id ), wc_get_order_types() ) ) ) {
+	if ( ! $order_id || ! in_array( get_post_type( $order_id ), wc_get_order_types() ) ) {
 		return 0;
 	}
 
@@ -495,7 +495,7 @@ function wc_add_order_item( $order_id, $args ) {
 		$args['name'] = $args['order_item_name'];
 	}
 
-	if ( ! in_array( $args['type'], array( 'line_item', 'coupon', 'fee', 'tax', 'shipping' ) ) {
+	if ( ! in_array( $args['type'], array( 'line_item', 'coupon', 'fee', 'tax', 'shipping' ) ) ) {
 		return 0;
 	}
 
@@ -517,7 +517,6 @@ function wc_delete_order_item( $item_id ) {
 
 /**
  * WooCommerce Order Item Meta API - Update term meta.
- * @todo should these be used?
  * @access public
  * @param mixed $item_id
  * @param mixed $meta_key
@@ -537,7 +536,7 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
  * @param mixed $meta_key
  * @param mixed $meta_value
  * @param bool $unique (default: false)
- * @return bool
+ * @return bool|int
  */
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
 	return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
@@ -566,7 +565,7 @@ function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $dele
  * @param bool $single (default: true)
  * @return mixed
  */
-function wc_get_order_item_meta( $item_id, $key, $single = true ) {
+function wc_get_order_item_meta( $item_id, $key = '', $single = true ) {
 	return get_metadata( 'order_item', $item_id, $key, $single );
 }
 
