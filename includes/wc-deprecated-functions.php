@@ -736,3 +736,23 @@ function woocommerce_calc_shipping_backwards_compatibility( $value ) {
 }
 
 add_filter( 'pre_option_woocommerce_calc_shipping', 'woocommerce_calc_shipping_backwards_compatibility' );
+
+/**
+ * Update an item for an order.
+ * @deprecated since 2.6.0 No need to interact with DB directly.
+ */
+function wc_update_order_item( $item_id, $args ) {
+	_deprecated_function( 'wc_update_order_item', '2.6' );
+
+	global $wpdb;
+
+	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
+
+	if ( false === $update ) {
+		return false;
+	}
+
+	do_action( 'woocommerce_update_order_item', $item_id, $args );
+
+	return true;
+}

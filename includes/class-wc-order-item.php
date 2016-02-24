@@ -76,11 +76,11 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
     /**
      * Type checking
-     * @param  string  $Type
+     * @param  string|array  $Type
      * @return boolean
      */
     public function is_type( $type ) {
-        return $type === $this->get_type();
+        return is_array( $type ) ? in_array( $this->get_type(), $type ) : $type === $this->get_type();
     }
 
     /**
@@ -248,6 +248,9 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
             'order_id'        => $this->get_order_id()
         ) );
 		$this->set_id( $wpdb->insert_id );
+
+        // @todo do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
+        // do_action( 'woocommerce_update_order_item', $item_id, $args );
 	}
 
     /**
@@ -309,8 +312,13 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	 * @since 2.6.0
      */
     public function delete() {
-        global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_id() ) );
+        if ( $this->get_id() ) {
+            global $wpdb;
+            do_action( 'woocommerce_before_delete_order_item', $this->get_id() );
+    		$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $this->get_id() ) );
+            $wpdb->delete( $wpdb->prefix . 'woocommerce_order_itemmeta', array( 'order_item_id' => $this->get_id() ) );
+            do_action( 'woocommerce_delete_order_item', $this->get_id() );
+        }
     }
 
     /*

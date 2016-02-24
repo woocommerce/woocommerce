@@ -469,97 +469,55 @@ function wc_reduce_stock_levels( $order_id ) {
 
 /**
  * Add a item to an order (for example a line item).
- *
- * @todo
- *
- * @access public
  * @param int $order_id
- * @return mixed
+ * @param array $args
+ * @return int New item ID, 0 on failure
  */
-function wc_add_order_item( $order_id, $item ) {
-	global $wpdb;
-
+function wc_add_order_item( $order_id, $args ) {
 	$order_id = absint( $order_id );
 
-	if ( ! $order_id )
-		return false;
-
-	$defaults = array(
-		'order_item_name' 		=> '',
-		'order_item_type' 		=> 'line_item',
-	);
-
-	$item = wp_parse_args( $item, $defaults );
-
-	$wpdb->insert(
-		$wpdb->prefix . "woocommerce_order_items",
-		array(
-			'order_item_name' 		=> $item['order_item_name'],
-			'order_item_type' 		=> $item['order_item_type'],
-			'order_id'				=> $order_id
-		),
-		array(
-			'%s', '%s', '%d'
-		)
-	);
-
-	$item_id = absint( $wpdb->insert_id );
-
-	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
-
-	return $item_id;
-}
-
-/**
- * Update an item for an order.
- *
- * @since 2.2
- * @param int $item_id
- * @param array $args either `order_item_type` or `order_item_name`
- * @return bool true if successfully updated, false otherwise
- */
-function wc_update_order_item( $item_id, $args ) {
-	global $wpdb;
-
-	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
-
-	if ( false === $update ) {
-		return false;
+	if ( ! $order_id || ! in_array( get_post_type( $order_id ), wc_get_order_types() ) ) ) {
+		return 0;
 	}
 
-	do_action( 'woocommerce_update_order_item', $item_id, $args );
+	$args = wp_parse_args( $args, array(
+		'order_item_name' => '', // @deprecated
+		'order_item_type' => '', // @deprecated
+		'name'            => '',
+		'type'            => 'line_item', // Valid values line_item, coupon, fee, tax, shipping
+	) );
 
-	return true;
+	if ( $args['order_item_type'] ) {
+		$args['type'] = $args['order_item_type'];
+	}
+
+	if ( $args['order_item_name'] ) {
+		$args['name'] = $args['order_item_name'];
+	}
+
+	if ( ! in_array( $args['type'], array( 'line_item', 'coupon', 'fee', 'tax', 'shipping' ) ) {
+		return 0;
+	}
+
+	$item = WC_Order_Factory::get_order_item();
+	$item->set_type( $args['type'] );
+	$item->set_name( $args['name'] );
+	$item->set_order_id( $order_id );
+	return $item->save();
 }
 
 /**
  * Delete an item from the order it belongs to based on item id.
- *
- * @access public
  * @param int $item_id
- * @return bool
  */
 function wc_delete_order_item( $item_id ) {
-	global $wpdb;
-
-	$item_id = absint( $item_id );
-
-	if ( ! $item_id )
-		return false;
-
-	do_action( 'woocommerce_before_delete_order_item', $item_id );
-
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
-
-	do_action( 'woocommerce_delete_order_item', $item_id );
-
-	return true;
+	$item = WC_Order_Factory::get_order_item( absint( $item_id ) );
+	$item->delete();
 }
 
 /**
  * WooCommerce Order Item Meta API - Update term meta.
- *
+ * @todo should these be used?
  * @access public
  * @param mixed $item_id
  * @param mixed $meta_key

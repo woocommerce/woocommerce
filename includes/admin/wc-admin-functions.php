@@ -192,7 +192,11 @@ function wc_save_order_items( $order_id, $items ) {
 				continue;
 			}
 
-			$item    = WC_Order_Factory::get_order_item( $item_id );
+			$item = WC_Order_Factory::get_order_item( $item_id );
+
+			if ( ! $item->is_type( array( 'line_item', 'fee' ) ) ) {
+				continue;
+			}
 
 			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
 				$item->set_name( $items['order_item_name'][ $item_id ] );
@@ -242,6 +246,10 @@ function wc_save_order_items( $order_id, $items ) {
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			$item_id = absint( $item_id );
 			$item    = WC_Order_Factory::get_order_item( $item_id );
+
+			if ( ! $item->is_type( 'shipping' ) ) {
+				continue;
+			}
 
 			if ( isset( $items['shipping_method'][ $item_id ] ) ) {
 				$item->set_method_id( $items['shipping_method'][ $item_id ] );

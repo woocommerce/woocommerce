@@ -60,7 +60,7 @@ class WC_Order_Factory {
 	/**
 	 * Get order item.
 	 * @param int
-	 * @return WC_Order_Item|bool
+	 * @return WC_Order_Item
 	 */
 	public static function get_order_item( $item_id = 0 ) {
 		global $wpdb;
@@ -82,6 +82,7 @@ class WC_Order_Factory {
 		if ( $item_data && $item_type ) {
 			switch ( $item_type ) {
 				case "line_item" :
+				case "product" :
 					return new WC_Order_Item_Product( $item_data );
 				break;
 				case "coupon" :
