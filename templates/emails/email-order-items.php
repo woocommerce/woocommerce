@@ -13,18 +13,16 @@
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails
- * @version     2.1.2
+ * @version     2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 foreach ( $items as $item_id => $item ) :
-	$product   = $item->get_product();
-	$item_meta = new WC_Order_Item_Meta( $item, $product );
-
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
+		$product = $item->get_product();
 		?>
 		<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
 			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;"><?php
@@ -45,14 +43,10 @@ foreach ( $items as $item_id => $item ) :
 				// allow other plugins to add additional product information here
 				do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
-				// Variation
-				if ( ! empty( $item_meta->meta ) ) {
-					echo '<br/><small>' . nl2br( $item_meta->display( true, true, '_', "\n" ) ) . '</small>';
-				}
+				wc_display_item_meta( $item );
 
-				// File URLs
 				if ( $show_download_links ) {
-					$order->display_item_downloads( $item );
+					wc_display_item_downloads( $item );
 				}
 
 				// allow other plugins to add additional product information here

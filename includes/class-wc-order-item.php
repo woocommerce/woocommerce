@@ -314,7 +314,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     public function add_meta_data( $key, $value, $unique = false ) {
         if ( $unique ) {
-            $meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key ); // @todo ?
+            $meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
             $this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $meta_ids, '' ) );
         }
         $this->_meta_data[ 'new-' . sizeof( $this->_meta_data ) ] = (object) array(
@@ -427,7 +427,8 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     public function offsetSet( $offset, $value ) {
         if ( 'item_meta_array' === $offset ) {
-            $offset = 'meta_data';
+            $this->_meta_data = $value;
+            return;
         }
         $this->_data[ $offset ] = $value;
     }
@@ -439,6 +440,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
     public function offsetUnset( $offset ) {
         if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
             $this->_meta_data = array();
+            return;
         }
         unset( $this->_data[ $offset ] );
     }
@@ -462,7 +464,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     public function offsetGet( $offset ) {
         if( 'item_meta_array' === $offset ) {
-            $offset = 'meta_data';
+            return $this->_meta_data;
         }
         elseif( 'item_meta' === $offset ) {
             $meta_values = wp_list_pluck( $this->_meta_data, 'value', 'key' );

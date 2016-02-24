@@ -13,60 +13,50 @@
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates/Emails/Plain
- * @version     2.1.2
+ * @version     2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 foreach ( $items as $item_id => $item ) :
-	$product   = $item->get_product();
-	$item_meta = new WC_Order_Item_Meta( $item, $product ); // @todo deprecated WC_Order_Item_Meta ?
-
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 
-		// Title
-		echo apply_filters( 'woocommerce_order_item_name', $item['name'], $item, false );
+		$product = $item->get_product();
 
-		// SKU
+		echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
+
 		if ( $show_sku && $product->get_sku() ) {
 			echo ' (#' . $product->get_sku() . ')';
 		}
 
+		echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item );
+		echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
+
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
 
-		// Variation
-		echo ( $item_meta_content = $item_meta->display( true, true ) ) ? "\n" . $item_meta_content : '';
+		echo strip_tags( wc_display_item_meta( $item, array(
+			'before'    => "\n- ",
+			'separator' => "\n- ",
+			'after'     => "",
+			'echo'      => false,
+			'autop'     => false,
+		) ) );
 
-		// Quantity
-		echo "\n" . sprintf( __( 'Quantity: %s', 'woocommerce' ), apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item ) );
-
-		// Cost
-		echo "\n" . sprintf( __( 'Cost: %s', 'woocommerce' ), $order->get_formatted_line_subtotal( $item ) );
-
-		// Download URLs
-		if ( $show_download_links && $product->exists() && $product->is_downloadable() ) {
-			$download_files = $order->get_item_downloads( $item );
-			$i              = 0;
-
-			foreach ( $download_files as $download_id => $file ) {
-				$i++;
-
-				if ( count( $download_files ) > 1 ) {
-					$prefix = sprintf( __( 'Download %d', 'woocommerce' ), $i );
-				} elseif ( $i == 1 ) {
-					$prefix = __( 'Download', 'woocommerce' );
-				}
-
-				echo "\n" . $prefix . '(' . esc_html( $file['name'] ) . '): ' . esc_url( $file['download_url'] );
-			}
+		if ( $show_download_links ) {
+			echo strip_tags( wc_display_item_downloads( $item, array(
+				'before'    => "\n- ",
+				'separator' => "\n- ",
+				'after'     => "",
+				'echo'      => false,
+				'show_url'  => true,
+			) ) );
 		}
 
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
-
 	}
 
 	// Note

@@ -641,8 +641,13 @@ class WC_Admin_Post_Types {
 
 					foreach ( $the_order->get_items() as $item ) {
 						$product        = $item->get_product();
-						$item_meta      = new WC_Order_Item_Meta( $item, $product );
-						$item_meta_html = $item_meta->display( true, true );
+						$item_meta_html = wc_display_item_meta( $item, array(
+							'before'    => "",
+							'separator' => "</br>",
+							'after'     => "",
+							'echo'      => false,
+							'autop'     => false,
+						) );
 						?>
 						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item ); ?>">
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>

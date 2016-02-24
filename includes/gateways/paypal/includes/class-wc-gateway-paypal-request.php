@@ -225,11 +225,17 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	protected function get_order_item_name( $order, $item ) {
-		$item_name = $item['name'];
-		$item_meta = new WC_Order_Item_Meta( $item );
+		$item_name      = $item->get_name();
+		$item_meta_html = wc_display_item_meta( $item, array(
+			'before'    => "",
+			'separator' => ", ",
+			'after'     => "",
+			'echo'      => false,
+			'autop'     => false,
+		) );
 
-		if ( $meta = $item_meta->display( true, true ) ) {
-			$item_name .= ' ( ' . $meta . ' )';
+		if ( $item_meta_html ) {
+			$item_name .= ' ( ' . $item_meta_html . ' )';
 		}
 
 		return $item_name;

@@ -2063,22 +2063,38 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 	/**
 	 * Display item meta data.
 	 * @param  WC_Item $item
-	 * @param  string $before
-	 * @param  string $sep
-	 * @param  string $after
+	 * @param  array   $args
+	 * @return string|void
 	 */
-	function wc_display_item_meta( $item, $before = '<ul class="wc-item-meta"><li>', $sep = '</li><li>', $after = '</li></ul>' ) {
+	function wc_display_item_meta( $item, $args = array() ) {
 		$strings = array();
+		$html    = '';
+		$args    = wp_parse_args( $args, array(
+			'before'    => '<ul class="wc-item-meta"><li>',
+			'after'     => '</li></ul>',
+			'separator' => '</li><li>',
+			'echo'      => true,
+			'autop'     => false,
+		) );
 
 		foreach ( $item->get_meta_data() as $meta_id => $meta ) {
 			if ( '_' === substr( $meta->key, 0, 1 ) ) {
 				continue;
 			}
-			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( wc_attribute_label( $meta->key ) ) . ':</strong> ' . wp_kses_post( wpautop( make_clickable( $meta->value ) ) );
+			$value = $args['autop'] ? wp_kses_post( wpautop( make_clickable( $meta->value ) ) ) : wp_kses_post( make_clickable( $meta->value ) );
+			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( wc_attribute_label( $meta->key ) ) . ':</strong> ' . $value;
 		}
 
 		if ( $strings ) {
-			echo $before . implode( $sep, $strings ) . $after;
+			$html = $args['before'] . implode( $args['separator'], $strings ) . $args['after'];
+		}
+
+		$html = apply_filters( 'woocommerce_display_item_meta', $html, $item, $args );
+
+		if ( $args['echo'] ) {
+			echo $html;
+		} else {
+			return $html;
 		}
 	}
 }
@@ -2087,24 +2103,44 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 	/**
 	 * Display item download links.
 	 * @param  WC_Item $item
-	 * @param  string $before
-	 * @param  string $sep
-	 * @param  string $after
+	 * @param  array   $args
+	 * @return string|void
 	 */
-	function wc_display_item_downloads( $item, $before = '<ul class="wc-item-downloads"><li>', $sep = '</li><li>', $after = '</li></ul>' ) {
-		$links = array();
+	function wc_display_item_downloads( $item, $args = array() ) {
+		$strings = array();
+		$html    = '';
+		$args    = wp_parse_args( $args, array(
+			'before'    => '<ul class ="wc-item-downloads"><li>',
+			'after'     => '</li></ul>',
+			'separator' => '</li><li>',
+			'echo'      => true,
+			'show_url'  => false,
+		) );
 
 		if ( is_object( $item ) && $item->is_type( 'line_item' ) && ( $downloads = $item->get_item_downloads() ) ) {
 			$i = 0;
 			foreach ( $downloads as $file ) {
-				$i++;
-				$prefix  = sizeof( $downloads ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
-				$links[] = '<strong class="wc-item-download-label">' . $prefix . ':</strong> <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a>';
+				$i ++;
+
+				if ( $args['show_url'] ) {
+					$strings[] = '<strong class="wc-item-download-label">' .  esc_html( $file['name'] ) . ':</strong> ' . esc_html( $file['download_url'] );
+				} else {
+					$prefix = sizeof( $downloads ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
+					$strings[] = '<strong class="wc-item-download-label">' . $prefix . ':</strong> <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a>';
+				}
 			}
 		}
 
-		if ( $links ) {
-			echo $before . implode( $sep, $links ) . $after;
+		if ( $strings ) {
+			$html = $args['before'] . implode( $args['separator'], $strings ) . $args['after'];
+		}
+
+		$html = apply_filters( 'woocommerce_display_item_downloads', $html, $item, $args );
+
+		if ( $args['echo'] ) {
+			echo $html;
+		} else {
+			return $html;
 		}
 	}
 }
