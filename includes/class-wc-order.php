@@ -463,7 +463,7 @@ class WC_Order extends WC_Abstract_Order {
 
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				$count += empty( $refunded_item['qty'] ) ? 0 : $refunded_item['qty'];
+				$count += $refunded_item->get_qty();
 			}
 		}
 
@@ -481,7 +481,7 @@ class WC_Order extends WC_Abstract_Order {
 		$qty = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				$qty += $refunded_item['qty'];
+				$qty += $refunded_item->get_qty();
 			}
 		}
 		return $qty;
@@ -498,8 +498,8 @@ class WC_Order extends WC_Abstract_Order {
 		$qty = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				if ( isset( $refunded_item['refunded_item_id'] ) && $refunded_item['refunded_item_id'] == $item_id ) {
-					$qty += $refunded_item['qty'];
+				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
+					$qty += $refunded_item->get_qty();
 				}
 			}
 		}
@@ -517,15 +517,8 @@ class WC_Order extends WC_Abstract_Order {
 		$total = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				if ( isset( $refunded_item['refunded_item_id'] ) && $refunded_item['refunded_item_id'] == $item_id ) {
-					switch ( $item_type ) {
-						case 'shipping' :
-							$total += $refunded_item['cost'];
-						break;
-						default :
-							$total += $refunded_item['line_total'];
-						break;
-					}
+				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
+					$total += $refunded_item->get_total();
 				}
 			}
 		}
@@ -544,21 +537,8 @@ class WC_Order extends WC_Abstract_Order {
 		$total = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
-				if ( isset( $refunded_item['refunded_item_id'] ) && $refunded_item['refunded_item_id'] == $item_id ) {
-					switch ( $item_type ) {
-						case 'shipping' :
-							$tax_data = maybe_unserialize( $refunded_item['taxes'] );
-							if ( isset( $tax_data[ $tax_id ] ) ) {
-								$total += $tax_data[ $tax_id ];
-							}
-						break;
-						default :
-							$tax_data = maybe_unserialize( $refunded_item['line_tax_data'] );
-							if ( isset( $tax_data['total'][ $tax_id ] ) ) {
-								$total += $tax_data['total'][ $tax_id ];
-							}
-						break;
-					}
+				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
+					$total += $refunded_item->get_total_tax();
 				}
 			}
 		}
@@ -576,8 +556,8 @@ class WC_Order extends WC_Abstract_Order {
 		$total = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( 'tax' ) as $refunded_item ) {
-				if ( isset( $refunded_item['rate_id'] ) && $refunded_item['rate_id'] == $rate_id ) {
-					$total += abs( $refunded_item['tax_amount'] ) + abs( $refunded_item['shipping_tax_amount'] );
+				if ( absint( $refunded_item->get_rate_id() ) === $rate_id ) {
+					$total += abs( $refunded_item->tax_total() ) + abs( $refunded_item->shipping_tax_total() );
 				}
 			}
 		}

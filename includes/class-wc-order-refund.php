@@ -19,11 +19,10 @@ class WC_Order_Refund extends WC_Abstract_Order {
      * Stores meta data.
      * @var array
      */
-    protected $_meta = array(
-		'prices_include_tax' => false,
-		'refund_amount'      => '',
-		'refund_reason'      => '',
-		'refunded_by'        => 0,
+    protected $_meta_data = array(
+		'refund_amount' => '',
+		'refund_reason' => '',
+		'refunded_by'   => 0,
     );
 
     /**
@@ -33,12 +32,12 @@ class WC_Order_Refund extends WC_Abstract_Order {
     public function __construct( $refund = 0 ) {
 		if ( is_numeric( $refund ) ) {
             $this->read( $refund );
-        } elseif ( $order instanceof WC_Order_Refund ) {
+        } elseif ( $refund instanceof WC_Order_Refund ) {
             $this->read( $refund->get_id() );
         } elseif ( ! empty( $refund->ID ) ) {
             $this->read( absint( $refund->ID ) );
         }
-		$this->set_order_type( 'refund' );
+		$this->set_order_type( 'shop_order_refund' );
     }
 
 	/**
@@ -47,9 +46,28 @@ class WC_Order_Refund extends WC_Abstract_Order {
      * @param int $id ID of object to read.
      */
     public function read( $id ) {
-        $post_object = get_post( $id );
-		$this->_meta['refunded_by'] = absint( $post_object->post_author ); // post_author was used before refunded_by meta.
+		if ( empty( $id ) ) {
+			return;
+		}
+        $post_object                       = get_post( $id );
+		$this->_meta_data['refunded_by']   = absint( $post_object->post_author ); // post_author was used before refunded_by meta.
+		$this->_meta_data['refund_reason'] = absint( $post_object->post_excerpt ); // post_excerpt was used before refund_reason meta.
 		parent::read( $post_object );
+	}
+
+	/**
+	 * Get a title for the new post type.
+	 */
+	protected function get_post_title() {
+		return sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+	}
+
+	/**
+	 * Set refunded amount.
+	 * @param string $value
+	 */
+	public function set_refund_amount( $value ) {
+		$this->_meta_data['refund_amount'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -58,7 +76,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_refund_amount() {
-		return apply_filters( 'woocommerce_refund_amount', (double) $this->get_meta( 'refund_amount' ), $this );
+		return apply_filters( 'woocommerce_refund_amount', (double) $this->_meta_data['refund_amount'], $this );
 	}
 
 	/**
@@ -71,12 +89,28 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get refunded amount.
+	 * Set refund reason.
+	 * @param string $value
+	 */
+	public function set_refund_reason( $value ) {
+		$this->_meta_data['refund_reason'] = $value;
+	}
+
+	/**
+	 * Get refund reason.
 	 * @since 2.2
 	 * @return int|float
 	 */
 	public function get_refund_reason() {
-		return apply_filters( 'woocommerce_refund_reason', $this->get_meta( 'refund_reason' ), $this );
+		return apply_filters( 'woocommerce_refund_reason', $this->_meta_data['refund_reason'], $this );
+	}
+
+	/**
+	 * Set refunded by.
+	 * @param int $value
+	 */
+	public function set_refunded_by( $value ) {
+		$this->_meta_data['refunded_by'] = absint( $value );
 	}
 
 	/**
@@ -85,7 +119,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_refunded_by() {
-		return absint( $this->get_meta( 'refunded_by' ) );
+		return absint( $this->_meta_data['refunded_by'] );
 	}
 
 	/**
@@ -99,12 +133,11 @@ class WC_Order_Refund extends WC_Abstract_Order {
          */
         if ( 'reason' === $key ) {
             _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
-            return $this->get_date_completed();
+            return $this->get_refund_reason();
 		} elseif ( 'refund_amount' === $key ) {
 			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
-            return $this->get_date_completed();
+            return $this->get_refund_amount();
 		}
-
 		return parent::__get( $key );
 	}
 

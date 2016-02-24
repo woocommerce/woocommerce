@@ -1,6 +1,6 @@
 <?php
 /**
- * Shows an order item @todo
+ * Shows an order item
  *
  * @var object $item The item being displayed
  */

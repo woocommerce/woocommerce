@@ -163,7 +163,6 @@ function woocommerce_update_options( $options ) {
  * @return string
  */
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
-
 	if ( ! class_exists( 'WC_Admin_Settings' ) ) {
 		include 'class-wc-admin-settings.php';
 	}
@@ -172,7 +171,7 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 }
 
 /**
- * Save order items. @todo
+ * Save order items.
  *
  * @since 2.2
  * @param int $order_id Order ID
@@ -181,23 +180,30 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
 function wc_save_order_items( $order_id, $items ) {
 	global $wpdb;
 
+	$items = wc_clean( wp_unslash( $items ) );
+
 	if ( isset( $items['order_item_id'] ) ) {
 		$line_total = $line_subtotal = $line_tax = $line_subtotal_tax = array();
 
 		foreach ( $items['order_item_id'] as $item_id ) {
 			$item_id = absint( $item_id );
+
+			if ( ! $item_id ) {
+				continue;
+			}
+
 			$item    = WC_Order_Factory::get_order_item( $item_id );
 
 			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
-				$item->set_name( wc_clean( wp_unslash( $items['order_item_name'][ $item_id ] ) ) );
+				$item->set_name( $items['order_item_name'][ $item_id ] );
 			}
 
 			if ( isset( $items['order_item_qty'][ $item_id ] ) ) {
-				$item->set_qty( wc_stock_amount( $items['order_item_qty'][ $item_id ] ) );
+				$item->set_qty( $items['order_item_qty'][ $item_id ] );
 			}
 
 			if ( isset( $items['order_item_tax_class'][ $item_id ] ) ) {
-				$item->set_tax_class( wc_clean( $items['order_item_tax_class'][ $item_id ] ) );
+				$item->set_tax_class( $items['order_item_tax_class'][ $item_id ] );
 			}
 
 			// Get values. Subtotals might not exist, in which case copy value from total field
@@ -221,7 +227,6 @@ function wc_save_order_items( $order_id, $items ) {
 				}
 			}
 
-			// Update values
 			$item->set_meta_data( $meta_data );
 			$item->set_subtotal( $line_subtotal[ $item_id ] );
 			$item->set_subtotal_tax( array_sum( $line_subtotal_taxes ) );
@@ -239,19 +244,19 @@ function wc_save_order_items( $order_id, $items ) {
 			$item    = WC_Order_Factory::get_order_item( $item_id );
 
 			if ( isset( $items['shipping_method'][ $item_id ] ) ) {
-				$item->set_method_id( wc_clean( $items['shipping_method'][ $item_id ] ) );
+				$item->set_method_id( $items['shipping_method'][ $item_id ] );
 			}
 
 			if ( isset( $items['shipping_method_title'][ $item_id ] ) ) {
-				$item->set_method_title( wc_clean( $items['shipping_method_title'][ $item_id ] ) );
+				$item->set_method_title( $items['shipping_method_title'][ $item_id ] );
 			}
 
 			if ( isset( $items['shipping_cost'][ $item_id ] ) ) {
-				$item->set_total( wc_format_decimal( $items['shipping_cost'][ $item_id ] ) );
+				$item->set_total( $items['shipping_cost'][ $item_id ] );
 			}
 
 			if ( isset( $items['shipping_taxes'][ $item_id ] ) ) {
-				$item->set_taxes( array( 'taxes' => array_map( 'wc_format_decimal', $items['shipping_taxes'][ $item_id ] ) ) );
+				$item->set_taxes( array( 'taxes' => $items['shipping_taxes'][ $item_id ] ) );
 			}
 
 			// Format meta data
@@ -265,7 +270,6 @@ function wc_save_order_items( $order_id, $items ) {
 				}
 			}
 
-			// Update values
 			$item->set_meta_data( $meta_data );
 			$item->save();
 		}
@@ -274,7 +278,6 @@ function wc_save_order_items( $order_id, $items ) {
 	// Update order totals
 	$order = wc_get_order( $order_id );
 	$order->calculate_totals();
-	$order->set_order_version( WC_VERSION );
 	$order->save();
 
 	// inform other plugins that the items have been saved

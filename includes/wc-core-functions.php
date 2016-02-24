@@ -52,76 +52,57 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  * Returns a new order object on success which can then be used to add additional data.
  *
  * @param  array $args
- *
  * @return WC_Order on success, WP_Error on failure.
  */
 function wc_create_order( $args = array() ) {
-	$default_args = array(
+	$args = wp_parse_args( $args, array(
 		'status'        => '',
 		'customer_id'   => null,
 		'customer_note' => null,
 		'order_id'      => 0,
 		'created_via'   => '',
 		'cart_hash'     => '',
-		'parent'        => 0,
-	);
+		'parent'        => null,
+	) );
 
-	$args       = wp_parse_args( $args, $default_args );
-	$order_data = array();
+	$order    = new WC_Order( $args['order_id'] );
+	$updating = $order->get_id() > 0;
 
-	if ( $args['order_id'] > 0 ) {
-		$updating         = true;
-		$order_data['ID'] = $args['order_id'];
-	} else {
-		$updating                    = false;
-		$order_data['post_type']     = 'shop_order';
-		$order_data['post_status']   = 'wc-' . apply_filters( 'woocommerce_default_order_status', 'pending' );
-		$order_data['ping_status']   = 'closed';
-		$order_data['post_author']   = 1;
-		$order_data['post_password'] = uniqid( 'order_' );
-		$order_data['post_title']    = sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-		$order_data['post_parent']   = absint( $args['parent'] );
+	if ( ! $updating ) {
+		$order->set_order_currency( get_woocommerce_currency() );
+		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+		$order->set_customer_user_agent( isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
+		$order->set_created_via( sanitize_text_field( $args['created_via'] ) );
+		$order->add_meta_data( '_cart_hash', sanitize_text_field( $args['cart_hash'] ) );
 	}
 
 	if ( $args['status'] ) {
 		if ( ! in_array( 'wc-' . $args['status'], array_keys( wc_get_order_statuses() ) ) ) {
 			return new WP_Error( 'woocommerce_invalid_order_status', __( 'Invalid order status', 'woocommerce' ) );
 		}
-		$order_data['post_status']  = 'wc-' . $args['status'];
+		$order->set_status( $args['status'] );
+	}
+
+	if ( ! is_null( $args['parent'] ) ) {
+		$order->set_parent_id( $args['parent'] );
 	}
 
 	if ( ! is_null( $args['customer_note'] ) ) {
-		$order_data['post_excerpt'] = $args['customer_note'];
-	}
-
-	if ( $updating ) {
-		$order_id = wp_update_post( $order_data );
-	} else {
-		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', $order_data ), true );
-	}
-
-	if ( is_wp_error( $order_id ) ) {
-		return $order_id;
-	}
-
-	if ( ! $updating ) {
-		update_post_meta( $order_id, '_order_key', 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
-		update_post_meta( $order_id, '_order_currency', get_woocommerce_currency() );
-		update_post_meta( $order_id, '_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) );
-		update_post_meta( $order_id, '_customer_ip_address', WC_Geolocation::get_ip_address() );
-		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
-		update_post_meta( $order_id, '_customer_user', 0 );
-		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
-		update_post_meta( $order_id, '_cart_hash', sanitize_text_field( $args['cart_hash'] ) );
+		$order->set_customer_note( $args['customer_note'] );
 	}
 
 	if ( is_numeric( $args['customer_id'] ) ) {
-		update_post_meta( $order_id, '_customer_user', $args['customer_id'] );
+		$order->set_customer_id( $args['customer_id'] );
 	}
 
-	update_post_meta( $order_id, '_order_version', WC_VERSION );
+	$order_id = $order->save();
 
-	return wc_get_order( $order_id );
+	if ( ! $order_id ) {
+		return new WP_Error( 'woocommerce_save_order', __( 'Error: New order could not be created.', 'woocommerce' ) );
+	}
+
+	return $order;
 }
 
 /**
@@ -132,7 +113,7 @@ function wc_create_order( $args = array() ) {
  */
 function wc_update_order( $args ) {
 	if ( ! $args['order_id'] ) {
-		return new WP_Error( __( 'Invalid order ID', 'woocommerce' ) );
+		return new WP_Error( 'woocommerce_invalid_order_id', __( 'Invalid order ID', 'woocommerce' ) );
 	}
 	return wc_create_order( $args );
 }
