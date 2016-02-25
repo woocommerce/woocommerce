@@ -231,7 +231,7 @@ class WC_Shipping_Zone implements WC_Data {
 				// as classes. If the "class" is an instance, just use it. If not,
 				// create an instance.
 				if ( is_object( $class_name ) ) {
-					$methods[ $raw_method->instance_id ] = $class_name;
+					$methods[ $raw_method->instance_id ] = new $class_name( $raw_method->instance_id );
 				} else {
 					// If the class is not an object, it should be a string. It's better
 					// to double check, to be sure (a class must be a string, anything)
