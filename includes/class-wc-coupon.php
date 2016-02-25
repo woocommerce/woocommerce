@@ -683,6 +683,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		if ( $coupon_id ) {
 			$this->_data['id'] = $coupon_id;
 			$this->update_post_meta( $coupon_id );
+			do_action( 'woocommerce_new_coupon', $coupon_id );
 		}
 	}
 
@@ -701,6 +702,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 		wp_update_post( $post_data );
 		$this->update_post_meta( $coupon_id );
+		do_action( 'woocommerce_update_coupon', $coupon_id );
 	}
 
 	/**
@@ -721,6 +723,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 */
 	public function delete() {
 		wp_delete_post( $this->get_id() );
+		do_action( 'woocommerce_delete_coupon', $this->get_id() );
 	}
 
 	/**
