@@ -1,7 +1,6 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -18,52 +17,93 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Legacy_Coupon {
 
-	/** @public bool Coupon exists */
-	public $exists = false;
-
-	public function __construct() {
-		$this->exists = ( $this->get_id() > 0 ) ? true : false;
-	}
-
 	/**
-	 * Magic __isset method for backwards compatibility.
+	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
 	 * @param  string $key
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		// Legacy properties which could be accessed directly in the past.
-		if ( in_array( $key, array( 'coupon_custom_fields', 'type', 'amount', 'code' ) ) ) {
+		$legacy_keys = array(
+			'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
+			'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit', 'usage_limit_per_user',
+			'limit_usage_to_x_items', 'usage_count', 'expiry_date', 'product_categories',
+			'exclude_product_categories', 'minimum_amount', 'maximum_amount', 'customer_email',
+		);
+		if ( in_array( $key, $legacy_keys ) ) {
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * Magic __get method for backwards compatibility.
+	 * Magic __get method for backwards compatibility. Maps legacy vars to new getters.
 	 * @param  string $key
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		/**
-		 * Maps legacy vars to new getters.
-		 * @todo finish mapping these..
-		 */
-		if ( 'coupon_custom_fields' === $key ) {
-			_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.6' );
-			$value = $this->id ? $this->get_custom_fields() : array();
-		} elseif ( 'type' === $key ) {
-			_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.6' );
-			$value = $this->get_discount_type();
-		} elseif ( 'amount' === $key ) {
-			_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.6' );
-			$value = $this->get_amount();
-		} elseif ( 'code' === $key ) {
-			_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.6' );
-			$value = $this->get_code();
-		} else {
-			_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.6' );
-			$value = '';
+		_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.6' );
+
+		switch( $key ) {
+			case 'exists' :
+				$value = ( $this->get_id() > 0 ) ? true : false;
+			break;
+			case 'coupon_custom_fields' :
+				$value = $this->get_id() ? $this->get_custom_fields() : array();
+			break;
+			case 'type' :
+			case 'discount_type' :
+				$value = $this->get_discount_type();
+			break;
+			case 'amount' :
+				$value = $this->get_amount();
+			break;
+			case 'code' :
+				$value = $this->get_code();
+			break;
+			case 'individual_use' :
+				$value = ( true === $this->get_is_individual_use() ) ? 'yes' : 'no';
+			break;
+			case 'product_ids' :
+				$value = $this->get_product_ids();
+			break;
+			case 'exclude_product_ids' :
+				$value = $this->get_excluded_product_ids();
+			break;
+			case 'usage_limit' :
+				$value = $this->get_usage_limit();
+			break;
+			case 'usage_limit_per_user' :
+				$value = $this->get_usage_limit_per_user();
+			break;
+			case 'limit_usage_to_x_items' :
+				$value = $this->get_limit_usage_to_x_items();
+			break;
+			case 'usage_count' :
+				$value = $this->get_usage_count();
+			break;
+			case 'expiry_date' :
+				$value = $this->get_expiry_date();
+			break;
+			case 'product_categories' :
+				$value = $this->get_product_categories();
+			break;
+			case 'exclude_product_categories' :
+				$value = $this->get_excluded_product_categories();
+			break;
+			case 'minimum_amount' :
+				$value = $this->get_minimum_amount();
+			break;
+			case 'maximum_amount' :
+				$value = $this->get_maximum_amount();
+			break;
+			case 'customer_email' :
+				$value = $this->get_email_restrictions();
+			break;
+			default :
+				$value = '';
+			break;
 		}
+
 		return $value;
 	}
 

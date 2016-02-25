@@ -2,7 +2,7 @@
 include_once( 'legacy/class-wc-legacy-coupon.php' );
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -95,7 +95,6 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 			$this->set_code( $code );
 			$this->read( absint( self::get_coupon_id_from_code( $code ) ) );
 		}
-		parent::__construct(); // Call legacy constructor
 	}
 
 	/**
@@ -819,7 +818,6 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @throws Exception
 	 */
 	private function validate_exists() {
-		error_log( print_r ( $this->get_id(), 1 ) );
 		if ( ! $this->get_id() ) {
 			throw new Exception( self::E_WC_COUPON_NOT_EXIST );
 		}

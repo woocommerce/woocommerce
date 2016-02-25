@@ -92,5 +92,43 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$this->assertNotEquals( 0, $new_coupon_id  );
 	}
 
+	/**
+	 * Test that properties can still be accessed directly for backwards
+	 * compat sake. They throw a deprecated notice.
+	 * @since 2.6.0
+	 */
+	public function test_coupon_backwards_compat_props_use_correct_getters() {
+		// Accessing properties directly will throw some wanted deprected notices
+		// So we need to let PHPUnit know we are expecting them and it's fine to continue
+		$legacy_keys = array(
+			'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
+			'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit', 'usage_limit_per_user',
+			'limit_usage_to_x_items', 'usage_count', 'expiry_date', 'product_categories',
+			'exclude_product_categories', 'minimum_amount', 'maximum_amount', 'customer_email',
+		);
+		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
+
+		$coupon = \WC_Helper_Coupon::create_coupon();
+		$this->assertEquals( ( ( $coupon->get_id() > 0 ) ? true : false ), $coupon->exists );
+		$this->assertEquals( $coupon->get_custom_fields(), $coupon->coupon_custom_fields );
+		$this->assertEquals( $coupon->get_discount_type(), $coupon->type );
+		$this->assertEquals( $coupon->get_discount_type(), $coupon->discount_type );
+		$this->assertEquals( $coupon->get_amount(), $coupon->amount );
+		$this->assertEquals( $coupon->get_code(), $coupon->code );
+		$this->assertEquals( $coupon->get_is_individual_use(), ( 'yes' === $coupon->individual_use ? true : false ) );
+		$this->assertEquals( $coupon->get_product_ids(), $coupon->product_ids );
+		$this->assertEquals( $coupon->get_excluded_product_ids(), $coupon->exclude_product_ids );
+		$this->assertEquals( $coupon->get_usage_limit(), $coupon->usage_limit );
+		$this->assertEquals( $coupon->get_usage_limit_per_user(), $coupon->usage_limit_per_user );
+		$this->assertEquals( $coupon->get_limit_usage_to_x_items(), $coupon->limit_usage_to_x_items );
+		$this->assertEquals( $coupon->get_usage_count(), $coupon->usage_count );
+		$this->assertEquals( $coupon->get_expiry_date(), $coupon->expiry_date );
+		$this->assertEquals( $coupon->get_product_categories(), $coupon->product_categories );
+		$this->assertEquals( $coupon->get_excluded_product_categories(), $coupon->exclude_product_categories );
+		$this->assertEquals( $coupon->get_minimum_amount(), $coupon->minimum_amount );
+		$this->assertEquals( $coupon->get_maximum_amount(), $coupon->maximum_amount );
+		$this->assertEquals( $coupon->get_email_restrictions(), $coupon->customer_email );
+	}
+
 
 }
