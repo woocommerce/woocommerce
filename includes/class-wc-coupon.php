@@ -810,6 +810,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 			update_post_meta( $this->get_id(), 'usage_count', $this->get_usage_count() );
 			if ( $used_by ) {
 				add_post_meta( $this->get_id(), '_used_by', strtolower( $used_by ) );
+				$this->set_used_by( (array) get_post_meta( $this->get_id(), '_used_by' ) );
 			}
 		}
 	}
@@ -832,6 +833,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 				$meta_id = $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE meta_key = '_used_by' AND meta_value = %s AND post_id = %d LIMIT 1;", $used_by, $this->get_id() ) );
 				if ( $meta_id ) {
 					delete_metadata_by_mid( 'post', $meta_id );
+					$this->set_used_by( (array) get_post_meta( $this->get_id(), '_used_by' ) );
 				}
 			}
 		}
