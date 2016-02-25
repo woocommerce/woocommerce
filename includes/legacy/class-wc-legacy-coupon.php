@@ -24,7 +24,7 @@ class WC_Legacy_Coupon {
 	 */
 	public function __isset( $key ) {
 		$legacy_keys = array(
-			'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
+			'id', 'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
 			'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit', 'usage_limit_per_user',
 			'limit_usage_to_x_items', 'usage_count', 'expiry_date', 'product_categories',
 			'exclude_product_categories', 'minimum_amount', 'maximum_amount', 'customer_email',
@@ -44,6 +44,9 @@ class WC_Legacy_Coupon {
 		_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '2.6' );
 
 		switch( $key ) {
+			case 'id' :
+				$value = $this->get_id();
+			break;
 			case 'exists' :
 				$value = ( $this->get_id() > 0 ) ? true : false;
 			break;
@@ -61,7 +64,7 @@ class WC_Legacy_Coupon {
 				$value = $this->get_code();
 			break;
 			case 'individual_use' :
-				$value = ( true === $this->get_is_individual_use() ) ? 'yes' : 'no';
+				$value = ( true === $this->get_individual_use() ) ? 'yes' : 'no';
 			break;
 			case 'product_ids' :
 				$value = $this->get_product_ids();
@@ -141,8 +144,8 @@ class WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function enable_free_shipping() {
-		_deprecated_function( 'enable_free_shipping', '2.6', 'get_free_shipping_enabled' );
-		return $this->get_free_shipping_enabled();
+		_deprecated_function( 'enable_free_shipping', '2.6', 'get_free_shipping' );
+		return $this->get_free_shipping();
 	}
 
 	/**
@@ -151,8 +154,8 @@ class WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function exclude_sale_items() {
-		_deprecated_function( 'exclude_sale_items', '2.6', 'get_should_exclude_sale_items' );
-		return $this->get_should_exclude_sale_items();
+		_deprecated_function( 'exclude_sale_items', '2.6', 'get_exclude_sale_items' );
+		return $this->get_exclude_sale_items();
 	}
 
 }

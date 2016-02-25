@@ -1603,8 +1603,6 @@ class WC_Cart {
 						// Limit to defined email addresses
 						if ( is_array( $coupon->get_email_restrictions() ) && sizeof( $coupon->get_email_restrictions() ) > 0 ) {
 							$check_emails           = array();
-							$coupon->set_email_restrictions( array_map( 'sanitize_email', $coupon->get_email_restrictions() ) );
-
 							if ( is_user_logged_in() ) {
 								$current_user   = wp_get_current_user();
 								$check_emails[] = $current_user->user_email;
@@ -1701,7 +1699,7 @@ class WC_Cart {
 			}
 
 			// If its individual use then remove other coupons
-			if ( true === $the_coupon->get_is_individual_use() ) {
+			if ( $the_coupon->get_individual_use() ) {
 				$this->applied_coupons = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $the_coupon, $this->applied_coupons );
 			}
 
@@ -1709,7 +1707,7 @@ class WC_Cart {
 				foreach ( $this->applied_coupons as $code ) {
 					$coupon = new WC_Coupon( $code );
 
-					if ( true === $coupon->get_is_individual_use() && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
+					if ( $coupon->get_individual_use() && false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $the_coupon, $coupon, $this->applied_coupons ) ) {
 
 						// Reject new coupon
 						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
@@ -1722,7 +1720,7 @@ class WC_Cart {
 			$this->applied_coupons[] = $coupon_code;
 
 			// Choose free shipping
-			if ( $the_coupon->get_free_shipping_enabled() ) {
+			if ( $the_coupon->get_free_shipping() ) {
 				$packages = WC()->shipping->get_packages();
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 

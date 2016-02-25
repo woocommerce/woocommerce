@@ -21,9 +21,6 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	// @todo apply_filters( 'woocommerce_coupon_code', $code )
 
-	/** @public int Coupon ID. */
-	public $id = 0;
-
 	/**
 	 * Data array, with defaults.
 	 *
@@ -33,6 +30,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @var array
 	 */
 	protected $_data = array(
+		'id'            => 0,
 		'code'          => '',
 		'description'   => '',
 		'discount_type' => 'fixed_cart',
@@ -131,7 +129,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
     * @return integer
     */
 	public function get_id() {
-		return absint( $this->id );
+		return absint( $this->_data['id'] );
 	}
 
 	/**
@@ -193,7 +191,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @since  2.6.0
 	 * @return bool
 	 */
-	public function get_is_individual_use() {
+	public function get_individual_use() {
 		return (bool) $this->_meta_data['individual_use'];
 	}
 
@@ -247,7 +245,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @since  2.6.0
 	 * @return bool
 	 */
-	public function get_free_shipping_enabled() {
+	public function get_free_shipping() {
 		return (bool) $this->_meta_data['free_shipping'];
 	}
 
@@ -274,7 +272,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @since  2.6.0
 	 * @return bool
 	 */
-	public function get_should_exclude_sale_items() {
+	public function get_exclude_sale_items() {
 		return (bool) $this->_meta_data['exclude_sale_items'];
 	}
 
@@ -471,7 +469,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @since  2.6.0
 	 * @param  bool $is_individual_use
 	 */
-	public function set_is_individual_use( $is_individual_use ) {
+	public function set_individual_use( $is_individual_use ) {
 		$this->_meta_data['individual_use'] = (bool) $is_individual_use;
 	}
 
@@ -525,7 +523,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @since  2.6.0
 	 * @param  bool $free_shipping
 	 */
-	public function set_free_shipping_enabled( $free_shipping ) {
+	public function set_free_shipping( $free_shipping ) {
 		$this->_meta_data['free_shipping'] = (bool) $free_shipping;
 	}
 
@@ -552,7 +550,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @since  2.6.0
 	 * @param  bool $exclude_sale_items
 	 */
-	public function set_should_exclude_sale_items( $exclude_sale_items ) {
+	public function set_exclude_sale_items( $exclude_sale_items ) {
 		$this->_meta_data['exclude_sale_items'] = (bool) $exclude_sale_items;
 	}
 
@@ -580,7 +578,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @param  array $emails
 	 */
 	public function set_email_restrictions( $emails ) {
-		$this->_meta_data['customer_email'] = $emails;
+		$this->_meta_data['customer_email'] = array_map( 'sanitize_email', $emails );
 	}
 
 	/**
@@ -611,7 +609,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 */
 	public function read( $id ) {
 		if ( 0 === $id ) {
-			$this->id = 0;
+			$this->_data['id'] = 0;
 			return;
 		}
 
@@ -619,11 +617,11 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 		// Only continue reading if this coupon exists...
 		if ( empty( $post_object ) || empty( $post_object->ID ) ) {
-			$this->id = 0;
+			$this->_data['id'] = 0;
 			return;
 		}
 
-		$coupon_id   = $this->id = absint( $post_object->ID );
+		$coupon_id   = $this->_data['id'] = absint( $post_object->ID );
 
 		// Map standard coupon data
 		$this->set_code( $post_object->post_title );
@@ -635,7 +633,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 		// Map meta data
 		$individual_use = ( 'yes' === get_post_meta( $coupon_id, 'individual_use', true ) ? true : false );
-		$this->set_is_individual_use( $individual_use );
+		$this->set_individual_use( $individual_use );
 		$product_ids = ( ! empty ( get_post_meta( $coupon_id, 'product_ids', true ) ) ? explode( ',', get_post_meta( $coupon_id, 'product_ids', true ) ) : array() );
 		$this->set_product_ids( $product_ids );
 		$exclude_product_ids = ( ! empty ( get_post_meta( $coupon_id, 'exclude_product_ids', true ) ) ? explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ) ) : array() );
@@ -644,7 +642,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		$this->set_usage_limit_per_user( get_post_meta( $coupon_id, 'usage_limit_per_user', true ) );
 		$this->set_limit_usage_to_x_items( get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) );
 		$free_shipping = ( 'yes' === get_post_meta( $coupon_id, 'free_shipping', true ) ? true : false );
-		$this->set_free_shipping_enabled( $free_shipping );
+		$this->set_free_shipping( $free_shipping );
 		$product_categories = get_post_meta( $coupon_id, 'product_categories', true );
 		$product_categories = ( ! empty( $product_categories ) ? $product_categories : array() );
 		$this->set_product_categories( $product_categories );
@@ -652,7 +650,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		$exclude_product_categories = ( ! empty( $exclude_product_categories ) ? $exclude_product_categories : array() );
 		$this->set_excluded_product_categories( $exclude_product_categories );
 		$exclude_sale_items = ( 'yes' === get_post_meta( $coupon_id, 'exclude_sale_items', true ) ? true : false );
-		$this->set_should_exclude_sale_items( $exclude_sale_items );
+		$this->set_exclude_sale_items( $exclude_sale_items );
 		$this->set_minimum_amount( get_post_meta( $coupon_id, 'minimum_amount', true ) );
 		$this->set_maximum_amount( get_post_meta( $coupon_id, 'maximum_amount', true ) );
 		$this->set_email_restrictions( get_post_meta( $coupon_id, 'customer_email', true ) );
@@ -685,7 +683,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		) ), true );
 
 		if ( $coupon_id ) {
-			$this->id = $coupon_id;
+			$this->_data['id'] = $coupon_id;
 			$this->update_post_meta( $coupon_id );
 		}
 	}
@@ -727,30 +725,30 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		wp_delete_post( $this->get_id() );
 	}
 
-    /**
-     * Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
-     * @since 2.6.0
-     * @param int $coupon_id
-     */
-    private function update_post_meta( $coupon_id ) {
-    	update_post_meta( $coupon_id, 'discount_type', $this->get_discount_type() );
-    	update_post_meta( $coupon_id, 'coupon_amount', $this->get_amount() );
-    	update_post_meta( $coupon_id, 'individual_use', ( true === $this->get_is_individual_use() ) ? 'yes' : 'no' );
-    	update_post_meta( $coupon_id, 'product_ids', implode( ',', array_filter( array_map( 'intval', $this->get_product_ids() ) ) ) );
-    	update_post_meta( $coupon_id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $this->get_excluded_product_categories() ) ) ) );
-    	update_post_meta( $coupon_id, 'usage_limit', $this->get_usage_limit() );
-    	update_post_meta( $coupon_id, 'usage_limit_per_user', $this->get_usage_limit_per_user() );
-    	update_post_meta( $coupon_id, 'limit_usage_to_x_items', $this->get_limit_usage_to_x_items() );
-    	update_post_meta( $coupon_id, 'usage_count', $this->get_usage_count() );
-    	update_post_meta( $coupon_id, 'expiry_date', $this->get_expiry_date() );
-    	update_post_meta( $coupon_id, 'free_shipping', ( true === $this->get_free_shipping_enabled() ) ? 'yes' : 'no' );
-    	update_post_meta( $coupon_id, 'product_categories', array_filter( array_map( 'intval', $this->get_product_categories() ) ) );
-    	update_post_meta( $coupon_id, 'exclude_product_categories', array_filter( array_map( 'intval', $this->get_excluded_product_categories() ) ) );
-    	update_post_meta( $coupon_id, 'exclude_sale_items', ( true === $this->get_should_exclude_sale_items() ) ? 'yes' : 'no' );
-    	update_post_meta( $coupon_id, 'minimum_amount', $this->get_minimum_amount() );
-    	update_post_meta( $coupon_id, 'maximum_amount', $this->get_maximum_amount() );
-    	update_post_meta( $coupon_id, 'customer_email', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) );
-    }
+	/**
+	* Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
+	* @since 2.6.0
+	* @param int $coupon_id
+	*/
+	private function update_post_meta( $coupon_id ) {
+		update_post_meta( $coupon_id, 'discount_type', $this->get_discount_type() );
+		update_post_meta( $coupon_id, 'coupon_amount', $this->get_amount() );
+		update_post_meta( $coupon_id, 'individual_use', ( true === $this->get_individual_use() ) ? 'yes' : 'no' );
+		update_post_meta( $coupon_id, 'product_ids', implode( ',', array_filter( array_map( 'intval', $this->get_product_ids() ) ) ) );
+		update_post_meta( $coupon_id, 'exclude_product_ids', implode( ',', array_filter( array_map( 'intval', $this->get_excluded_product_categories() ) ) ) );
+		update_post_meta( $coupon_id, 'usage_limit', $this->get_usage_limit() );
+		update_post_meta( $coupon_id, 'usage_limit_per_user', $this->get_usage_limit_per_user() );
+		update_post_meta( $coupon_id, 'limit_usage_to_x_items', $this->get_limit_usage_to_x_items() );
+		update_post_meta( $coupon_id, 'usage_count', $this->get_usage_count() );
+		update_post_meta( $coupon_id, 'expiry_date', $this->get_expiry_date() );
+		update_post_meta( $coupon_id, 'free_shipping', ( true === $this->get_free_shipping() ) ? 'yes' : 'no' );
+		update_post_meta( $coupon_id, 'product_categories', array_filter( array_map( 'intval', $this->get_product_categories() ) ) );
+		update_post_meta( $coupon_id, 'exclude_product_categories', array_filter( array_map( 'intval', $this->get_excluded_product_categories() ) ) );
+		update_post_meta( $coupon_id, 'exclude_sale_items', ( true === $this->get_exclude_sale_items() ) ? 'yes' : 'no' );
+		update_post_meta( $coupon_id, 'minimum_amount', $this->get_minimum_amount() );
+		update_post_meta( $coupon_id, 'maximum_amount', $this->get_maximum_amount() );
+		update_post_meta( $coupon_id, 'customer_email', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) );
+	}
 
 	/*
     |--------------------------------------------------------------------------
@@ -847,7 +845,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		if ( ! $user_id ) {
 			$user_id = get_current_user_id();
 		}
-		if ( $this->get_usage_limit_per_user() > 0 && is_user_logged_in() && $this->id ) {
+		if ( $this->get_usage_limit_per_user() > 0 && is_user_logged_in() && $this->get_id() ) {
 			global $wpdb;
 			$usage_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %d;", $this->get_id(), $user_id ) );
 
@@ -965,7 +963,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @throws Exception
 	 */
 	private function validate_sale_items() {
-		if ( true === $this->get_should_exclude_sale_items() && $this->is_type( wc_get_product_coupon_types() ) ) {
+		if ( $this->get_exclude_sale_items() && $this->is_type( wc_get_product_coupon_types() ) ) {
 			$valid_for_cart      = false;
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
@@ -1047,7 +1045,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @throws Exception
 	 */
 	private function validate_cart_excluded_sale_items() {
-		if ( true === $this->get_should_exclude_sale_items() ) {
+		if ( $this->get_exclude_sale_items() ) {
 			$valid_for_cart = true;
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 			if ( ! WC()->cart->is_empty() ) {
@@ -1155,7 +1153,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		}
 
 		// Sale Items excluded from discount
-		if ( true === $this->get_should_exclude_sale_items() ) {
+		if ( $this->get_exclude_sale_items() ) {
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
 			if ( isset( $product->variation_id ) ) {

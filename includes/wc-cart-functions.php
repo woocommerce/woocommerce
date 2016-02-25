@@ -243,7 +243,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$value[] = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_html, $coupon );
 
-	if ( true === $coupon->get_free_shipping_enabled() ) {
+	if ( $coupon->get_free_shipping() ) {
 		$value[] = __( 'Free shipping coupon', 'woocommerce' );
 	}
 

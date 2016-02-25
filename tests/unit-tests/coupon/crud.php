@@ -101,7 +101,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		// Accessing properties directly will throw some wanted deprected notices
 		// So we need to let PHPUnit know we are expecting them and it's fine to continue
 		$legacy_keys = array(
-			'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
+			'id', 'exists', 'coupon_custom_fields', 'type', 'discount_type', 'amount', 'code',
 			'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit', 'usage_limit_per_user',
 			'limit_usage_to_x_items', 'usage_count', 'expiry_date', 'product_categories',
 			'exclude_product_categories', 'minimum_amount', 'maximum_amount', 'customer_email',
@@ -109,13 +109,14 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 
 		$coupon = \WC_Helper_Coupon::create_coupon();
+		$this->assertEquals( $coupon->get_id(), $coupon->id );
 		$this->assertEquals( ( ( $coupon->get_id() > 0 ) ? true : false ), $coupon->exists );
 		$this->assertEquals( $coupon->get_custom_fields(), $coupon->coupon_custom_fields );
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->type );
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->discount_type );
 		$this->assertEquals( $coupon->get_amount(), $coupon->amount );
 		$this->assertEquals( $coupon->get_code(), $coupon->code );
-		$this->assertEquals( $coupon->get_is_individual_use(), ( 'yes' === $coupon->individual_use ? true : false ) );
+		$this->assertEquals( $coupon->get_individual_use(), ( 'yes' === $coupon->individual_use ? true : false ) );
 		$this->assertEquals( $coupon->get_product_ids(), $coupon->product_ids );
 		$this->assertEquals( $coupon->get_excluded_product_ids(), $coupon->exclude_product_ids );
 		$this->assertEquals( $coupon->get_usage_limit(), $coupon->usage_limit );
