@@ -14,17 +14,23 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/** @var string Receiver email address to validate */
 	protected $receiver_email;
 
+	/** @var string Business email address to validate (instead of the receiver_email) */
+	protected $business;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param bool $sandbox
 	 * @param string $receiver_email
 	 */
-	public function __construct( $sandbox = false, $receiver_email = '' ) {
+	public function __construct( $sandbox = false, $business = '' ) {
 		add_action( 'woocommerce_api_wc_gateway_paypal', array( $this, 'check_response' ) );
 		add_action( 'valid-paypal-standard-ipn-request', array( $this, 'valid_response' ) );
 
-		$this->receiver_email = $receiver_email;
+		// TODO: DEPRECATE receiver_email as it is used only to reference the 'main' PayPal account,
+		// as there can be sub-emails (which get referenced to by this 'business' field) attached to the same PayPal account.
+		$this->receiver_email = $business;
+		$this->business = $business;
 		$this->sandbox        = $sandbox;
 	}
 
@@ -151,17 +157,17 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check receiver email from PayPal. If the receiver email in the IPN is different than what is stored in.
+	 * Check payment recepient email from PayPal. If the receiver email in the IPN is different than what is stored in.
 	 * WooCommerce -> Settings -> Checkout -> PayPal, it will log an error about it.
 	 * @param WC_Order $order
-	 * @param string $receiver_email
+	 * @param string $business
 	 */
-	protected function validate_receiver_email( $order, $receiver_email ) {
-		if ( strcasecmp( trim( $receiver_email ), trim( $this->receiver_email ) ) != 0 ) {
-			WC_Gateway_Paypal::log( "IPN Response is for another account: {$receiver_email}. Your email is {$this->receiver_email}" );
+	protected function validate_business( $order, $business ) {
+		if ( strcasecmp( trim( $business ), trim( $this->business ) ) != 0 ) {
+			WC_Gateway_Paypal::log( "IPN Response is for another account: {$business}. Your email is current PayPal email is: {$this->business}" );
 
 			// Put this order on-hold for manual checking.
-			$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal IPN response from a different email address (%s).', 'woocommerce' ), $receiver_email ) );
+			$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal IPN response from a different email address (%s).', 'woocommerce' ), $business ) );
 			exit;
 		}
 	}
@@ -180,7 +186,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		$this->validate_transaction_type( $posted['txn_type'] );
 		$this->validate_currency( $order, $posted['mc_currency'] );
 		$this->validate_amount( $order, $posted['mc_gross'] );
-		$this->validate_receiver_email( $order, $posted['receiver_email'] );
+		$this->validate_business( $order, $posted['business'] );
 		$this->save_paypal_meta_data( $order, $posted );
 
 		if ( 'completed' === $posted['payment_status'] ) {
