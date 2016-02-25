@@ -216,7 +216,7 @@ class WC_Email extends WC_Settings_API {
 		$this->replace['site-title'] = $this->get_blogname();
 
 		// For multipart messages
-		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
+		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 	}
 
 	/**
