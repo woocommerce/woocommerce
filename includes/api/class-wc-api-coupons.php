@@ -121,7 +121,7 @@ class WC_API_Coupons extends WC_API_Resource {
 			}
 
 			$coupon      = new WC_Coupon( $code );
-			$coupon_post = get_post( $coupon->id );
+			$coupon_post = get_post( $coupon->get_id() );
 			$coupon_data = array(
 				'id'                           => $coupon->get_id(),
 				'code'                         => $coupon->get_code(),
@@ -139,7 +139,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'expiry_date'                  => ( ! empty( $coupon->get_expiry_date() ) ) ? $this->server->format_datetime( $coupon->get_expiry_date() ) : null,
 				'enable_free_shipping'         => $coupon->get_free_shipping(),
 				'product_category_ids'         => array_map( 'absint', (array) $coupon->get_product_categories() ),
-				'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->get_exclude_product_categories() ),
+				'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->get_excluded_product_categories() ),
 				'exclude_sale_items'           => $coupon->get_exclude_sale_items(),
 				'minimum_amount'               => wc_format_decimal( $coupon->get_minimum_amount(), 2 ),
 				'maximum_amount'               => wc_format_decimal( $coupon->get_maximum_amount(), 2 ),

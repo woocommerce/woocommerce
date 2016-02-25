@@ -110,7 +110,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupon = new WC_Coupon( $code );
 
-		$coupon_post = get_post( $coupon->id );
+		$coupon_post = get_post( $coupon->get_id() );
 
 		$coupon_data = array(
 			'id'                           => $coupon->get_id(),
