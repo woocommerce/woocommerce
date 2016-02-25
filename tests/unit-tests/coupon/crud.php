@@ -131,5 +131,71 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$this->assertEquals( $coupon->get_email_restrictions(), $coupon->customer_email );
 	}
 
+	/**
+	 * Developers can create manual coupons (code only). This test will make sure this works correctly
+	 * and some of our backwards compat handling works correctly as well.
+	 * @since 2.6.0
+	 */
+	public function test_read_manual_coupon() {
+		$code = 'manual_coupon_' . time();
+		$coupon = new \WC_Coupon( $code );
+		$coupon->read_manual_coupon( $code, array(
+			'id'                         => true,
+			'type'                       => 'fixed_cart',
+			'amount'                     => 0,
+			'individual_use'             => true,
+			'product_ids'                => array(),
+			'exclude_product_ids'        => array(),
+			'usage_limit'                => '',
+			'usage_count'                => '',
+			'expiry_date'                => '',
+			'free_shipping'              => false,
+			'product_categories'         => array(),
+			'exclude_product_categories' => array(),
+			'exclude_sale_items'         => false,
+			'minimum_amount'             => '',
+			'maximum_amount'             => 100,
+			'customer_email'             => ''
+		) );
+		$this->assertEquals( $code, $coupon->get_code() );
+		$this->assertEquals( true, $coupon->get_individual_use() );
+		$this->assertEquals( 100, $coupon->get_maximum_amount() );
+
+		/**
+		 * test our back compat logic: passing in product_ids/exclude_product_ids in as strings
+		 * and passing free_shipping, exclude_sale_items, and individual_use in as yes|no strings.
+		 * setting these values this way will also throw a deprecated notice so we will let
+		 * PHPUnit know that its okay to continue.
+		 */
+		$legacy_keys = array( 'product_ids', 'exclude_product_ids', 'individual_use', 'free_shipping', 'exclude_sale_items' );
+		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
+		$code = 'bc_manual_coupon_' . time();
+		$coupon = new \WC_Coupon( $code );
+		$coupon->read_manual_coupon( $code, array(
+			'id'                         => true,
+			'type'                       => 'fixed_cart',
+			'amount'                     => 0,
+			'individual_use'             => 'yes',
+			'product_ids'                => '',
+			'exclude_product_ids'        => '5,6',
+			'usage_limit'                => '',
+			'usage_count'                => '',
+			'expiry_date'                => '',
+			'free_shipping'              => 'no',
+			'product_categories'         => array(),
+			'exclude_product_categories' => array(),
+			'exclude_sale_items'         => 'no',
+			'minimum_amount'             => '',
+			'maximum_amount'             => 100,
+			'customer_email'             => ''
+		) );
+		$this->assertEquals( $code, $coupon->get_code() );
+		$this->assertEquals( true, $coupon->get_individual_use() );
+		$this->assertEquals( false, $coupon->get_free_shipping() );
+		$this->assertEquals( false, $coupon->get_exclude_sale_items() );
+		$this->assertEquals( array( 5, 6 ), $coupon->get_excluded_product_ids() );
+		$this->assertEquals( array(), $coupon->get_product_ids() );
+	}
+
 
 }

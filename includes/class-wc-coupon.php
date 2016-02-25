@@ -19,8 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
-	// @todo apply_filters( 'woocommerce_coupon_code', $code )
-
 	/**
 	 * Data array, with defaults.
 	 *
@@ -87,8 +85,8 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	public function __construct( $code = '' ) {
 		if ( $code instanceof WC_Coupon ) {
 			$this->read( absint( $code->get_id() ) );
-		} elseif ( apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
-			// @todo coupon data lets developers create coupons through code
+		} elseif ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
+			$this->read_manual_coupon( $code, $coupon );
 		} elseif ( ! empty( $code ) ) {
 			$this->set_code( $code );
 			$this->read( absint( self::get_coupon_id_from_code( $code ) ) );
@@ -416,7 +414,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @param  string $code
 	 */
 	public function set_code( $code ) {
-		$this->_data['code'] = $code;
+		$this->_data['code'] = apply_filters( 'woocommerce_coupon_code', $code );
 	}
 
 	/**
@@ -748,6 +746,51 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		update_post_meta( $coupon_id, 'minimum_amount', $this->get_minimum_amount() );
 		update_post_meta( $coupon_id, 'maximum_amount', $this->get_maximum_amount() );
 		update_post_meta( $coupon_id, 'customer_email', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) );
+	}
+
+	/**
+	 * Developers can programically return coupons. This function will read those values into our WC_Coupon class.
+	 * @since 2.6.0
+	 * @param  string $code  Coupon code
+	 * @param  array $coupon Array of coupon properties
+	 */
+	public function read_manual_coupon( $code, $coupon ) {
+		// This will set most of our fields correctly
+		foreach ( $this->_data as $key => $value ) {
+			if ( isset( $coupon[ $key ] ) ) {
+				$this->_data[ $key ] = $coupon[ $key ];
+			}
+		}
+		foreach ( $this->_meta_data as $key => $value ) {
+			if ( isset( $coupon[ $key ] ) ) {
+				$this->_meta_data[ $key ] = $coupon[ $key ];
+			}
+		}
+
+		// product_ids and exclude_product_ids could be passed in as an empty string '', or comma separated values, when it should be an empty array for the new format.
+		$convert_fields_to_array = array( 'product_ids', 'exclude_product_ids' );
+		foreach ( $convert_fields_to_array as $field ) {
+			if ( ! is_array( $coupon[ $field ] ) ) {
+				_doing_it_wrong( $field, $field . ' should be an array instead of a string.', '2.6' );
+				if ( empty( $coupon[ $field ] ) ) {
+					$this->_meta_data[ $field ] = array();
+				} else {
+					$this->_meta_data[ $field ] = explode( ',', $coupon[ $field ] );
+				}
+			}
+		}
+
+		// flip yes|no to true|false
+		$yes_no_fields = array( 'individual_use', 'free_shipping', 'exclude_sale_items' );
+		foreach ( $yes_no_fields as $field ) {
+			if ( 'yes' === $coupon[ $field ] || 'no' === $coupon[ $field ] ) {
+				_doing_it_wrong( $field, $field . ' should be true or false instead of yes or no.', '2.6' );
+				$this->_meta_data[ $field ] = ( 'yes' === $coupon[ $field ] ? true : false );
+			}
+		}
+
+		// set our code
+		$this->set_code( $code );
 	}
 
 	/*
