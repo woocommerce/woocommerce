@@ -120,7 +120,7 @@ function wc_print_notices() {
 	foreach ( $notice_types as $notice_type ) {
 		if ( wc_notice_count( $notice_type ) > 0 ) {
 			wc_get_template( "notices/{$notice_type}.php", array(
-				'messages' => $all_notices[$notice_type]
+				'messages' => array_filter( $all_notices[ $notice_type ] )
 			) );
 		}
 	}

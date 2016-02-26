@@ -59,7 +59,7 @@ class WC_Admin_API_Keys {
 	 * Table list output.
 	 */
 	private static function table_list_output() {
-		echo '<h3>' . __( 'Keys/Apps', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . __( 'Add Key', 'woocommerce' ) . '</a></h3>';
+		echo '<h2>' . __( 'Keys/Apps', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=keys&create-key=1' ) ) . '" class="add-new-h2">' . __( 'Add Key', 'woocommerce' ) . '</a></h2>';
 
 		$keys_table_list = new WC_Admin_API_Keys_Table_List();
 		$keys_table_list->prepare_items();

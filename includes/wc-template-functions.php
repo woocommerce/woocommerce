@@ -906,7 +906,7 @@ if ( ! function_exists( 'woocommerce_template_single_add_to_cart' ) ) {
 	 */
 	function woocommerce_template_single_add_to_cart() {
 		global $product;
-		do_action( 'woocommerce_' . $product->product_type . '_add_to_cart'  );
+		do_action( 'woocommerce_' . $product->product_type . '_add_to_cart' );
 	}
 }
 if ( ! function_exists( 'woocommerce_simple_add_to_cart' ) ) {
@@ -997,11 +997,13 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		}
 
 		$defaults = array(
-			'input_name'  	=> 'quantity',
-			'input_value'  	=> '1',
-			'max_value'  	=> apply_filters( 'woocommerce_quantity_input_max', '', $product ),
-			'min_value'  	=> apply_filters( 'woocommerce_quantity_input_min', '', $product ),
-			'step' 			=> apply_filters( 'woocommerce_quantity_input_step', '1', $product )
+			'input_name'  => 'quantity',
+			'input_value' => '1',
+			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', '', $product ),
+			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', '', $product ),
+			'step'        => apply_filters( 'woocommerce_quantity_input_step', '1', $product ),
+			'pattern'     => apply_filters( 'woocommerce_quantity_input_pattern', has_filter( 'woocommerce_stock_amount', 'intval' ) ? '[0-9]*' : '' ),
+			'inputmode'   => apply_filters( 'woocommerce_quantity_input_inputmode', has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'numeric' : '' ),
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
@@ -1474,8 +1476,8 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 					$products_will_display = false;
 				} else {
 					// If we get here, the parents were empty so we're forced to check children
-					foreach ( $has_children as $term ) {
-						$children = get_term_children( $term, $term->taxonomy );
+					foreach ( $has_children as $term_id ) {
+						$children = get_term_children( $term_id, $term->taxonomy );
 
 						if ( sizeof( get_objects_in_term( $children, $term->taxonomy ) ) > 0 ) {
 							$products_will_display = false;
@@ -2023,5 +2025,84 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 
 		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html, $args );
 	}
+}
 
+if ( ! function_exists( 'woocommerce_account_orders' ) ) {
+
+	/**
+	 * My Account > Orders template.
+	 *
+	 * @param int $current_page Current page number.
+	 */
+	function woocommerce_account_orders( $current_page ) {
+		$current_page = empty( $current_page ) ? 1 : $current_page;
+
+		wc_get_template( 'myaccount/orders.php', array( 'current_page' => absint( $current_page ) ) );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_view_order' ) ) {
+
+	/**
+	 * My Account > View order template.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	function woocommerce_account_view_order( $order_id ) {
+		WC_Shortcode_My_Account::view_order( absint( $order_id ) );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_downloads' ) ) {
+
+	/**
+	 * My Account > Downloads template.
+	 */
+	function woocommerce_account_downloads() {
+		wc_get_template( 'myaccount/downloads.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
+
+	/**
+	 * My Account > Edit address template.
+	 *
+	 * @param string $type Address type.
+	 */
+	function woocommerce_account_edit_address( $type ) {
+		$type = wc_edit_address_i18n( sanitize_title( $type ), true );
+
+		WC_Shortcode_My_Account::edit_address( $type );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_payment_methods' ) ) {
+
+	/**
+	 * My Account > Downloads template.
+	 */
+	function woocommerce_account_payment_methods() {
+		wc_get_template( 'myaccount/payment-methods.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_add_payment_method' ) ) {
+
+	/**
+	 * My Account > Add payment method template.
+	 */
+	function woocommerce_account_add_payment_method() {
+		WC_Shortcode_My_Account::add_payment_method();
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
+
+	/**
+	 * My Account > Edit account template.
+	 */
+	function woocommerce_account_edit_account() {
+		WC_Shortcode_My_Account::edit_account();
+	}
 }

@@ -173,39 +173,19 @@ class WC_Session_Handler extends WC_Session {
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
 
-			$session_id = $wpdb->get_var( $wpdb->prepare( "SELECT session_id FROM $this->_table WHERE session_key = %s;", $this->_customer_id ) );
-
-			if ( $session_id ) {
-				$wpdb->update(
-					$this->_table,
-					array(
-						'session_key'    => $this->_customer_id,
-						'session_value'  => maybe_serialize( $this->_data ),
-						'session_expiry' => $this->_session_expiration
-					),
-					array( 'session_id' => $session_id ),
-					array(
-						'%s',
-						'%s',
-						'%d'
-					),
-					array( '%d' )
-				);
-			} else {
-				$wpdb->insert(
-					$this->_table,
-					array(
-						'session_key'    => $this->_customer_id,
-						'session_value'  => maybe_serialize( $this->_data ),
-						'session_expiry' => $this->_session_expiration
-					),
-					array(
-						'%s',
-						'%s',
-						'%d'
-					)
-				);
-			}
+			$wpdb->replace(
+				$this->_table,
+				array(
+					'session_key' => $this->_customer_id,
+					'session_value' => maybe_serialize( $this->_data ),
+					'session_expiry' => $this->_session_expiration
+				),
+				array(
+					'%s',
+					'%s',
+					'%d'
+				)
+			);
 
 			// Set cache
 			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );

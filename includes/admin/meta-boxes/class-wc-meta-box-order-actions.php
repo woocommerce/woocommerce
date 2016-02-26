@@ -49,7 +49,7 @@ class WC_Meta_Box_Order_Actions {
 
 						if ( ! empty( $mails ) ) {
 							foreach ( $mails as $mail ) {
-								if ( in_array( $mail->id, $available_emails ) ) {
+								if ( in_array( $mail->id, $available_emails ) && 'yes' === $mail->enabled ) {
 									echo '<option value="send_email_'. esc_attr( $mail->id ) .'">' . esc_html( $mail->title ) . '</option>';
 								}
 							}

@@ -60,16 +60,19 @@ class WC_Query {
 	 * Init query vars by loading options.
 	 */
 	public function init_query_vars() {
-		// Query vars to add to WP
+		// Query vars to add to WP.
 		$this->query_vars = array(
-			// Checkout actions
+			// Checkout actions.
 			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
 			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
 
-			// My account actions
+			// My account actions.
+			'orders'             => get_option( 'woocommerce_myaccount_orders_endpoint', 'orders' ),
 			'view-order'         => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
+			'downloads'          => get_option( 'woocommerce_myaccount_downloads_endpoint', 'downloads' ),
 			'edit-account'       => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
 			'edit-address'       => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
+			'payment-methods'    => get_option( 'woocommerce_myaccount_payment_methods_endpoint', 'payment-methods' ),
 			'lost-password'      => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
 			'customer-logout'    => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
 			'add-payment-method' => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
@@ -91,15 +94,28 @@ class WC_Query {
 			case 'order-received' :
 				$title = __( 'Order Received', 'woocommerce' );
 			break;
+			case 'orders' :
+				if ( ! empty( $wp->query_vars['orders'] ) ) {
+					$title = sprintf( __( 'Orders (page %d)', 'woocommerce' ), intval( $wp->query_vars['orders'] ) );
+				} else {
+					$title = __( 'Orders', 'woocommerce' );
+				}
+			break;
 			case 'view-order' :
 				$order = wc_get_order( $wp->query_vars['view-order'] );
 				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
+			break;
+			case 'downloads' :
+				$title = __( 'Downloads', 'woocommerce' );
 			break;
 			case 'edit-account' :
 				$title = __( 'Edit Account Details', 'woocommerce' );
 			break;
 			case 'edit-address' :
 				$title = __( 'Edit Address', 'woocommerce' );
+			break;
+			case 'payment-methods' :
+				$title = __( 'Payment Methods', 'woocommerce' );
 			break;
 			case 'add-payment-method' :
 				$title = __( 'Add Payment Method', 'woocommerce' );
@@ -108,9 +124,10 @@ class WC_Query {
 				$title = __( 'Lost Password', 'woocommerce' );
 			break;
 			default :
-				$title = '';
+				$title = apply_filters( 'woocommerce_endpoint_' . $endpoint . '_title', '' );
 			break;
 		}
+
 		return $title;
 	}
 
@@ -500,21 +517,22 @@ class WC_Query {
 			$min = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
 			$max = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
 
-			// If displaying prices in the shop including taxes, but prices don't include taxes..
+			/**
+			 * Adjust if the store taxes are not displayed how they are stored.
+			 * Max is left alone because the filter was already increased.
+			 * Kicks in when prices excluding tax are displayed including tax.
+			 */
 			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 				$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+				$class_min   = $min;
 
 				foreach ( $tax_classes as $tax_class ) {
-					$tax_rates = WC_Tax::get_rates( $tax_class );
-					$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $min, $tax_rates ) );
-					$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $max, $tax_rates ) );
-					if ( $class_min < $min ) {
-						$min = $class_min;
-					}
-					if ( $class_max > $max ) {
-						$max = $class_max;
+					if ( $tax_rates = WC_Tax::get_rates( $tax_class ) ) {
+						$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
 					}
 				}
+
+				$min = $class_min;
 			}
 
 			return array(

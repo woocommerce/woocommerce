@@ -1313,7 +1313,7 @@ class WC_Product {
 	 *  	This means if a related product is edited and no longer related, it won't be removed for 24 hours. Acceptable trade-off for performance.
 	 *  - Saving a product will flush caches for that product.
 	 *
-	 * @param int $limit (default: 5)
+	 * @param int $limit (default: 5) Should be an integer greater than 0.
 	 * @return array Array of post IDs
 	 */
 	public function get_related( $limit = 5 ) {
@@ -1321,6 +1321,7 @@ class WC_Product {
 
 		$transient_name = 'wc_related_' . $this->id;
 		$related_posts  = get_transient( $transient_name );
+		$limit          = $limit > 0 ? $limit : 5;
 
 		// We want to query related posts if they are not cached, or we don't have enough
 		if ( false === $related_posts || sizeof( $related_posts ) < $limit ) {

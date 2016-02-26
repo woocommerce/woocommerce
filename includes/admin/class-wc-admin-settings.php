@@ -115,11 +115,11 @@ class WC_Admin_Settings {
 	public static function show_messages() {
 		if ( sizeof( self::$errors ) > 0 ) {
 			foreach ( self::$errors as $error ) {
-				echo '<div id="message" class="error"><p><strong>' . esc_html( $error ) . '</strong></p></div>';
+				echo '<div id="message" class="error inline"><p><strong>' . esc_html( $error ) . '</strong></p></div>';
 			}
 		} elseif ( sizeof( self::$messages ) > 0 ) {
 			foreach ( self::$messages as $message ) {
-				echo '<div id="message" class="updated"><p><strong>' . esc_html( $message ) . '</strong></p></div>';
+				echo '<div id="message" class="updated inline"><p><strong>' . esc_html( $message ) . '</strong></p></div>';
 			}
 		}
 	}
@@ -265,7 +265,7 @@ class WC_Admin_Settings {
 				// Section Titles
 				case 'title':
 					if ( ! empty( $value['title'] ) ) {
-						echo '<h3>' . esc_html( $value['title'] ) . '</h3>';
+						echo '<h2>' . esc_html( $value['title'] ) . '</h2>';
 					}
 					if ( ! empty( $value['desc'] ) ) {
 						echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );

@@ -10,10 +10,10 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.2.0
+ * @see     http://docs.woothemes.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 2.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,13 +24,13 @@ $customer_id = get_current_user_id();
 
 if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
 	$page_title = apply_filters( 'woocommerce_my_account_my_address_title', __( 'My Addresses', 'woocommerce' ) );
-	$get_addresses    = apply_filters( 'woocommerce_my_account_get_addresses', array(
+	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
 		'billing' => __( 'Billing Address', 'woocommerce' ),
 		'shipping' => __( 'Shipping Address', 'woocommerce' )
 	), $customer_id );
 } else {
 	$page_title = apply_filters( 'woocommerce_my_account_my_address_title', __( 'My Address', 'woocommerce' ) );
-	$get_addresses    = apply_filters( 'woocommerce_my_account_get_addresses', array(
+	$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
 		'billing' =>  __( 'Billing Address', 'woocommerce' )
 	), $customer_id );
 }
@@ -51,7 +51,7 @@ $col = 1;
 	<div class="col-<?php echo ( ( $col = $col * -1 ) < 0 ) ? 1 : 2; ?> address">
 		<header class="title">
 			<h3><?php echo $title; ?></h3>
-			<a href="<?php echo wc_get_endpoint_url( 'edit-address', $name ); ?>" class="edit"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 		</header>
 		<address>
 			<?php

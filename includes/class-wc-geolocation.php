@@ -84,7 +84,9 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Get user IP Address using a service.
+	 * Get user IP Address using an external service.
+	 * This is used mainly as a fallback for users on localhost where
+	 * get_ip_address() will be a local IP and non-geolocatable.
 	 * @return string
 	 */
 	public static function get_external_ip_address() {
