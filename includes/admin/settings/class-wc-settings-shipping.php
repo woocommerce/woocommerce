@@ -137,7 +137,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			return;
 		} else {
 			foreach ( $shipping_methods as $method ) {
-				if ( ( strtolower( $current_section ) === $method->id ) && $method->has_settings() ) {
+				if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ) ) && $method->has_settings() ) {
 					$method->admin_options();
 					return;
 				}
@@ -166,7 +166,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				$wc_shipping = WC_Shipping::instance();
 
 				foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
-					if ( strtolower( $current_section ) === $method->id ) {
+					if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ) ) ) {
 						do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
 					}
 				}

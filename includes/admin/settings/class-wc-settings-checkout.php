@@ -241,10 +241,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 
 		if ( $current_section ) {
-
 			foreach ( $payment_gateways as $gateway ) {
-
-				if ( strtolower( $current_section ) === $gateway->id ) {
+				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ) ) ) {
 					$gateway->admin_options();
 					break;
 				}
@@ -349,7 +347,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		} else {
 			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
-				if ( strtolower( $current_section ) === $gateway->id ) {
+				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ) ) ) {
 					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
 					$wc_payment_gateways->init();
 				}
