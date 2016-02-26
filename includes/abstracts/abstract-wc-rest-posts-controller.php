@@ -52,6 +52,23 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to create an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function create_item_permissions_check( $request ) {
+
+		$post_type = get_post_type_object( $this->post_type );
+
+		if ( ! current_user_can( $post_type->cap->create_posts ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create', sprintf( __( 'Sorry, you are not allowed to create a new %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if a given request has access to read items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
@@ -64,13 +81,29 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$post = get_post( $request['id'] );
+		$post_type = get_post_type_object( $this->post_type );
+
+		if ( $post && ! $this->check_update_permission( $post ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', sprintf( __( 'Sorry, you are not allowed to update this %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if a given request has access to delete an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-
 		$post = get_post( $request['id'] );
 
 		if ( $post && ! $this->check_delete_permission( $post ) ) {
@@ -94,7 +127,18 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if we can delete a post.
+	 * Check if we can edit an item.
+	 *
+	 * @param object $post Post object.
+	 * @return boolean Can we edit it?
+	 */
+	protected function check_update_permission( $post ) {
+		$post_type = get_post_type_object( $this->post_type );
+		return current_user_can( $post_type->cap->edit_post, $post->ID );
+	}
+
+	/**
+	 * Check if we can delete an item.
 	 *
 	 * @param object $post Post object.
 	 * @return boolean Can we delete it?
@@ -126,6 +170,178 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Create a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+		}
+
+		$post = $this->prepare_item_for_database( $request );
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}
+
+		$post->post_type = $this->post_type;
+		$post_id = wp_insert_post( $post, true );
+
+		if ( is_wp_error( $post_id ) ) {
+
+			if ( in_array( $post_id->get_error_code(), array( 'db_insert_error' ) ) ) {
+				$post_id->add_data( array( 'status' => 500 ) );
+			} else {
+				$post_id->add_data( array( 'status' => 400 ) );
+			}
+			return $post_id;
+		}
+		$post->ID = $post_id;
+
+		$schema = $this->get_item_schema();
+
+		// if ( ! empty( $schema['properties']['sticky'] ) ) {
+		// 	if ( ! empty( $request['sticky'] ) ) {
+		// 		stick_post( $post_id );
+		// 	} else {
+		// 		unstick_post( $post_id );
+		// 	}
+		// }
+
+		// if ( ! empty( $schema['properties']['featured_media'] ) && isset( $request['featured_media'] ) ) {
+		// 	$this->handle_featured_media( $request['featured_media'], $post->ID );
+		// }
+
+		// $terms_update = $this->handle_terms( $post->ID, $request );
+		// if ( is_wp_error( $terms_update ) ) {
+		// 	return $terms_update;
+		// }
+
+		$post = get_post( $post_id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		// Add meta fields.
+		$meta_fields = $this->add_post_meta_fields( $post, $request );
+		if ( is_wp_error( $meta_fields ) ) {
+			// Remove post.
+			wp_delete_post( $post->ID, true );
+
+			return $meta_fields;
+		}
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', WC_API::REST_API_NAMESPACE, $this->rest_base, $post_id ) ) );
+
+		return $response;
+	}
+
+	/**
+	 * Add post meta fields.
+	 *
+	 * @param WP_Post $post
+	 * @param WP_REST_Request $request
+	 * @return bool|WP_Error
+	 */
+	protected function add_post_meta_fields( $post, $request ) {
+		return true;
+	}
+
+	/**
+	 * Update a single post.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$id = (int) $request['id'];
+		$post = get_post( $id );
+
+		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$post = $this->prepare_item_for_database( $request );
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}
+		// Convert the post object to an array, otherwise wp_update_post will expect non-escaped input.
+		$post_id = wp_update_post( (array) $post, true );
+		if ( is_wp_error( $post_id ) ) {
+			if ( in_array( $post_id->get_error_code(), array( 'db_update_error' ) ) ) {
+				$post_id->add_data( array( 'status' => 500 ) );
+			} else {
+				$post_id->add_data( array( 'status' => 400 ) );
+			}
+			return $post_id;
+		}
+
+		$schema = $this->get_item_schema();
+
+		// if ( ! empty( $schema['properties']['featured_media'] ) && isset( $request['featured_media'] ) ) {
+			// $this->handle_featured_media( $request['featured_media'], $post_id );
+		// }
+
+		// if ( ! empty( $schema['properties']['sticky'] ) && isset( $request['sticky'] ) ) {
+		// 	if ( ! empty( $request['sticky'] ) ) {
+		// 		stick_post( $post_id );
+		// 	} else {
+		// 		unstick_post( $post_id );
+		// 	}
+		// }
+
+		// $terms_update = $this->handle_terms( $post->ID, $request );
+		// if ( is_wp_error( $terms_update ) ) {
+		// 	return $terms_update;
+		// }
+
+		$post = get_post( $post_id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		// Update meta fields.
+		$meta_fields = $this->update_post_meta_fields( $post, $request );
+		if ( is_wp_error( $meta_fields ) ) {
+			return $meta_fields;
+		}
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Update post meta fields.
+	 *
+	 * @param WP_Post $post
+	 * @param WP_REST_Request $request
+	 * @return bool|WP_Error
+	 */
+	protected function update_post_meta_fields( $post, $request ) {
+		return true;
 	}
 
 	/**
