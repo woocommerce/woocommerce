@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothe
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.1
 Tested up to: 4.4
-Stable tag: 2.5.2
+Stable tag: 2.5.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,28 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.5.3 - 01/03/2016 =
+* Fix - Correct the 'unavailable template' call for variations so the message is displayed correctly, fixing a JS error.
+* Fix - Add 'media-models' dependency to write panel scripts.
+* Fix - Fix hide empty check in category walkers.
+* Fix - Current class fix on some servers when empty.
+* Fix - Multibyte safe trim string function.
+* Fix - Prevent a notice by stopping a loop in woocommerce_products_will_display from stomping on other variables.
+* Fix - If an attribute meta key is not set, technically its 'any', so should match. Prevents issues when meta data is missing after renaming attributes.
+* Fix - Make wc_get_product_variation_attributes ignore non variation attributes.
+* Fix - Notice when no order notes exist.
+* Fix - Removed extra tab from plain email shipping address.
+* Fix - Round shipping after tax calculation instead of before to prevent wrong taxes being calculated.
+* Fix - CLI - Allow setting of a single category.
+* Fix - API - Replace term_taxonomy_id for term_id whilst creating/editing terms.
+* Fix - API - Fix parent_id and menu_order for variations.
+* Tweak - Wrap status report in backticks to stop people breaking .org forums.
+* Tweak - Error handling for screen ids.
+* Tweak - Use $wpdb->replace instead of doing a select and then deciding to do an update or insert in session handler.
+* Tweak - Added check for private WooCommerce pages in status report.
+* Tweak - Transactional emails for failed -> on hold.
+* Dev - Include new triggers when removing and adding the password strength meter.
 
 = 2.5.2 - 01/02/2016 =
 * Fix - Compatibility with w3 total cache inline minification.
