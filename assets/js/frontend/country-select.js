@@ -133,7 +133,7 @@ jQuery( function( $ ) {
 
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
 
-			} else if ( $statebox.is( '.hidden' ) ) {
+			} else if ( $statebox.is( 'input[type="hidden"]' ) ) {
 
 				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
