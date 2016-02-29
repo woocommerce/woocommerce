@@ -2298,7 +2298,10 @@ abstract class WC_Abstract_Order {
 			$update_post_data[ 'post_date_gmt' ] = current_time( 'mysql', 1 );
 		}
 
-		wp_update_post( $update_post_data );
+		if ( ! wp_update_post( $update_post_data ) ) {
+			$this->add_order_note( sprintf( __( 'Unable to update order from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ), 0, $manual );
+			return false;
+		}
 
 		$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
 
