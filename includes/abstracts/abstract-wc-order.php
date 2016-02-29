@@ -766,13 +766,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     /**
      * Get taxes, merged by code, formatted ready for output.
      *
-     * @return array @todo
+     * @return array
      */
     public function get_tax_totals() {
         $tax_totals = array();
 
         foreach ( $this->get_items( 'tax' ) as $key => $tax ) {
-            $code = $tax[ 'name' ];
+            $code = $tax->get_rate_code();
 
             if ( ! isset( $tax_totals[ $code ] ) ) {
                 $tax_totals[ $code ] = new stdClass();
@@ -780,11 +780,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             }
 
             $tax_totals[ $code ]->id                = $key;
-            $tax_totals[ $code ]->rate_id           = $tax['rate_id'];
-            $tax_totals[ $code ]->is_compound       = $tax[ 'compound' ];
-            $tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
-            $tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
-            $tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array('currency' => $this->get_order_currency()) );
+            $tax_totals[ $code ]->rate_id           = $tax->get_rate_id();
+            $tax_totals[ $code ]->is_compound       = $tax->is_compound();
+            $tax_totals[ $code ]->label             = $tax->get_label();
+            $tax_totals[ $code ]->amount           += $tax->get_tax_total() + $tax->get_shipping_tax_total();
+            $tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_order_currency() ) );
         }
 
         return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
@@ -1740,9 +1740,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			'rate_id'            => '',
 			'tax_total'          => 0,
 			'shipping_tax_total' => 0,
-			'rate_code'          => isset( $args['rate_id'] ) ? WC_Tax::get_rate_code( $rate_id ) : '',
-			'label'              => isset( $args['rate_id'] ) ? WC_Tax::get_rate_label( $rate_id ) : '',
-			'compound'           => isset( $args['rate_id'] ) ? WC_Tax::is_compound( $rate_id ) : '',
+			'rate_code'          => isset( $args['rate_id'] ) ? WC_Tax::get_rate_code( $args['rate_id'] ) : '',
+			'label'              => isset( $args['rate_id'] ) ? WC_Tax::get_rate_label( $args['rate_id'] ) : '',
+			'compound'           => isset( $args['rate_id'] ) ? WC_Tax::is_compound( $args['rate_id'] ) : '',
         ) );
 
 		$item = new WC_Order_Item_Tax( $args );
@@ -1751,7 +1751,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 		if ( has_action( 'woocommerce_order_add_tax' ) ) {
 			_deprecated_function( 'Action: woocommerce_order_add_tax', '2.6', 'Use woocommerce_new_order_item action instead.' );
-			do_action( 'woocommerce_order_add_tax', $this->get_id(), $item->get_id(), $tax_rate_id, $tax_total, $shipping_tax_total );
+			do_action( 'woocommerce_order_add_tax', $this->get_id(), $item->get_id(), $args['rate_id'], $args['tax_total'], $args['shipping_tax_total'] );
 		}
 
 		return $item->get_id();
@@ -1955,7 +1955,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
         // Now merge to keep tax rows.
         foreach ( array_keys( $cart_taxes + $shipping_taxes ) as $tax_rate_id ) {
-            $this->add_tax( $tax_rate_id, isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0, isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+            $this->add_tax( array(
+				'rate_id'            => $tax_rate_id,
+				'tax_total'          => isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0,
+				'shipping_tax_total' => isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0,
+			) );
         }
 
         // Save tax totals
@@ -2208,10 +2212,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
             // Remove non-compound taxes.
             foreach ( $this->get_taxes() as $tax ) {
-                if ( ! empty( $tax['compound'] ) ) {
+                if ( $this->is_compound() ) {
                     continue;
                 }
-                $subtotal = $subtotal + $tax['tax_amount'] + $tax['shipping_tax_amount'];
+                $subtotal = $subtotal + $tax->get_tax_total() + $tax->get_shipping_tax_total();
             }
 
             // Remove discounts.

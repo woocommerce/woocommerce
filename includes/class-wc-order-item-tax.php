@@ -65,6 +65,14 @@ class WC_Order_Item_Tax extends WC_Order_Item {
         return array( 'rate_id', 'label', 'compound', 'tax_amount', 'shipping_tax_amount' );
     }
 
+    /**
+     * Is this a compound tax rate?
+     * @return boolean
+     */
+    public function is_compound() {
+        return $this->get_compound();
+    }
+
     /*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -162,7 +170,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
      * @return string
      */
     public function get_label() {
-        return $this->_data['label'];
+        return $this->_data['label'] ? $this->_data['label'] : __( 'Tax', 'woocommerce' );
     }
 
     /**

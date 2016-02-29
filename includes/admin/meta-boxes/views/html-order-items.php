@@ -59,15 +59,14 @@ if ( wc_tax_enabled() ) {
 				<?php
 					if ( empty( $legacy_order ) && ! empty( $order_taxes ) ) :
 						foreach ( $order_taxes as $tax_id => $tax_item ) :
-							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
+							$tax_class      = wc_get_tax_class_by_tax_id( $tax_item->get_rate_id() );
 							$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
-							$column_label   = ! empty( $tax_item['label'] ) ? $tax_item['label'] : __( 'Tax', 'woocommerce' );
 							?>
 								<th class="line_tax tips" data-tip="<?php
-										echo esc_attr( $tax_item['name'] . ' (' . $tax_class_name . ')' );
+										echo esc_attr( $tax_item->get_rate_code() . ' (' . $tax_class_name . ')' );
 									?>">
-									<?php echo esc_attr( $column_label ); ?>
-									<input type="hidden" class="order-tax-id" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
+									<?php echo esc_attr( $tax_item->get_label() ); ?>
+									<input type="hidden" class="order-tax-id" name="order_taxes[<?php echo $tax_id; ?>]" value="<?php echo esc_attr( $tax_item->get_rate_id() ); ?>">
 									<a class="delete-order-tax" href="#" data-rate_id="<?php echo $tax_id; ?>"></a>
 								</th>
 							<?php

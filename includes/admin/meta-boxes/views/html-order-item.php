@@ -119,7 +119,7 @@ $_product = $item->get_product();
 			$tax_data = $item->get_taxes();
 
 			foreach ( $order_taxes as $tax_item ) :
-				$tax_item_id       = $tax_item['rate_id'];
+				$tax_item_id       = $tax_item->get_rate_id();
 				$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
 				$tax_item_subtotal = isset( $tax_data['subtotal'][ $tax_item_id ] ) ? $tax_data['subtotal'][ $tax_item_id ] : '';
 				?>
