@@ -9,8 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Legacy and deprecated functions are here to keep the WC_Abstract_Order clean.
  * This class will be removed in future versions.
  *
- * @todo remove usage of legacy functions
- *
  * @class       WC_Abstract_Order
  * @version     2.6.0
  * @package     WooCommerce/Classes

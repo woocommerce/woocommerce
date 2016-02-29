@@ -10,7 +10,7 @@ include_once( 'abstract-wc-legacy-order.php' );
  *
  * Handles order data and database interaction.
  *
- * @todo update API to use new functions
+ * @todo update API and CLI to use new functions instead of legacy
  *
  * @class       WC_Abstract_Order
  * @version     2.6.0
