@@ -152,7 +152,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
         if ( $meta_ids ) {
 			if ( $single ) {
-				$value   = $this->_meta_data[ current( $meta_ids ) ]->value;
+				$value = $this->_meta_data[ current( $meta_ids ) ]->value;
 			} else {
 				$value = array_intersect_key( $this->_meta_data, $meta_ids );
 			}
