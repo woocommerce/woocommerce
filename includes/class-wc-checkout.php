@@ -396,12 +396,6 @@ class WC_Checkout {
 			$this->posted['shipping_method']           = isset( $_POST['shipping_method'] ) ? $_POST['shipping_method'] : '';
 			$this->posted['ship_to_different_address'] = isset( $_POST['ship_to_different_address'] ) ? true : false;
 
-			if ( isset( $_POST['shiptobilling'] ) ) {
-				_deprecated_argument( 'WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. The template files are out of date' );
-
-				$this->posted['ship_to_different_address'] = $_POST['shiptobilling'] ? false : true;
-			}
-
 			// Ship to billing only option
 			if ( wc_ship_to_billing_address_only() ) {
 				$this->posted['ship_to_different_address']  = false;
