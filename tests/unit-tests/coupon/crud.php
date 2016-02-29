@@ -563,5 +563,20 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$this->assertEquals( array(), $coupon->get_used_by() );
 	}
 
+	/**
+	 * Test getting custom fields
+	 * @since 2.6.0
+	 */
+	public function test_get_custom_fields() {
+		$coupon     = \WC_Helper_Coupon::create_coupon();
+		$coupon_id  = $coupon->get_id();
+		$meta_value = time() . '-custom-value';
+		add_post_meta( $coupon_id, 'test_coupon_field', $meta_value, true );
+		$coupon->read( $coupon_id );
+		$custom_fields = $coupon->get_custom_fields();
+
+		$this->assertEquals( $meta_value, $custom_fields['test_coupon_field'][0] );
+	}
+
 
 }
