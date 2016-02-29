@@ -218,21 +218,15 @@ class WC_Checkout {
 
 			// Store the line items to the new/resumed order
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
-				$item = new WC_Order_Item_Product( array(
-					'order_id'     => $order_id,
-		            'name'         => $values['data']->get_title(),
-		            'tax_class'    => $values['data']->get_tax_class(),
-		            'product_id'   => $values['data']->get_id(),
-		            'variation_id' => isset( $values['data']->variation_id ) ? $values['data']->variation_id : 0,
+				$item_id = $order->add_product( $values['data'], array(
 					'qty'          => $values['quantity'],
-		            'variation'    => $values['variation'],
+					'variation'    => $values['variation'],
 		            'subtotal'     => $values['line_subtotal'],
 		            'subtotal_tax' => $values['line_subtotal_tax'],
 		            'total'        => $values['line_total'],
 		            'total_tax'    => $values['line_tax'],
 		            'taxes'        => $values['line_tax_data'],
-		        ) );
-		        $item_id = $item->save();
+				) );
 
 				if ( ! $item_id ) {
 					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 525 ) );
@@ -244,17 +238,7 @@ class WC_Checkout {
 
 			// Store fees
 			foreach ( WC()->cart->get_fees() as $fee_key => $fee ) {
-				$item = new WC_Order_Item_Fee( array(
-					'order_id'  => $order_id,
-		            'name'      => $fee->name,
-		            'tax_class' => $fee->taxable ? $fee->tax_class : 0,
-		            'total'     => $fee->amount,
-		            'total_tax' => $fee->tax,
-		            'taxes'     => array(
-		                'total' => $fee->tax_data
-		            )
-		        ) );
-		        $item_id = $item->save();
+				$item_id = $order->add_fee( $fee );
 
 				if ( ! $item_id ) {
 					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 526 ) );
@@ -267,16 +251,7 @@ class WC_Checkout {
 			// Store shipping for all packages
 			foreach ( WC()->shipping->get_packages() as $package_key => $package ) {
 				if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
-					$shipping_rate = $package['rates'][ $this->shipping_methods[ $package_key ] ];
-					$item          = new WC_Order_Item_Shipping( array(
-						'order_id'     => $order_id,
-			            'method_title' => $shipping_rate->label,
-			            'method_id'    => $shipping_rate->id,
-			            'total'        => wc_format_decimal( $shipping_rate->cost ),
-			            'taxes'        => $shipping_rate->taxes,
-			            'meta_data'    => $shipping_rate->get_meta_data(),
-			        ) );
-					$item_id = $item->save();
+					$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
 
 					if ( ! $item_id ) {
 						throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 527 ) );
@@ -290,16 +265,11 @@ class WC_Checkout {
 			// Store tax rows
 			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
 				if ( apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-					$item = new WC_Order_Item_Tax( array(
-						'order_id'           => $order_id,
+					$item_id = $order->add_tax( array(
 						'rate_id'            => $tax_rate_id,
-						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
-						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
 						'tax_total'          => WC()->cart->get_tax_amount( $tax_rate_id ),
-						'shipping_tax_total' => WC()->cart->get_shipping_tax_amount( $tax_rate_id ),
+						'shipping_tax_total' => WC()->cart->get_shipping_tax_amount( $tax_rate_id )
 					) );
-					$item_id = $item->save();
 
 					if ( ! $item_id ) {
 						throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 528 ) );
@@ -309,13 +279,11 @@ class WC_Checkout {
 
 			// Store coupons
 			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-				$item = new WC_Order_Item_Coupon( array(
-					'order_id'     => $order_id,
+				$item_id = $order->add_coupon( array(
 					'code'         => $code,
 					'discount'     => WC()->cart->get_coupon_discount_amount( $code ),
 					'discount_tax' => WC()->cart->get_coupon_discount_tax_amount( $code ),
 				) );
-				$item_id = $item->save();
 
 				if ( ! $item_id ) {
 					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 529 ) );

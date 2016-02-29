@@ -1522,41 +1522,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     |
     */
 
+	/**
+     * Remove all line items (products, coupons, shipping, taxes) from the order.
+     * @param string $type Order item type. Default null.
+     */
+    public function remove_order_items( $type = null ) {
+        global $wpdb;
+        if ( ! empty( $type ) ) {
+            $wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->get_id(), $type ) );
+            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->get_id(), $type ) );
+        } else {
+            $wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $this->get_id() ) );
+            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $this->get_id() ) );
+        }
+    }
+
     /**
      * Return an array of items/products within this order.
-     *
      * @param string|array $type Types of line items to get (array or string).
      * @return Array of WC_Order_item
      */
     public function get_items( $type = 'line_item' ) {
         global $wpdb;
-
-        $type            = ! is_array( $type ) ? array( $type ) : $type;
-        $items           = array();
-        $get_items_sql   = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->get_id() );
-        $get_items_sql  .= "AND order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', $type ) ) . "' ) ORDER BY order_item_id;";
-        $raw_items       = $wpdb->get_results( $get_items_sql );
-
-        foreach ( $raw_items as $item ) {
-            $item                                = $this->get_item( $item );
-            $items[ $item->get_order_item_id() ] = $item;
-        }
+        $get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->get_id() ) . "AND order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', (array) $type ) ) . "' ) ORDER BY order_item_id;";
+		$items         = $wpdb->get_results( $get_items_sql );
+		$items         = array_map( array( $this, 'get_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
 
         return apply_filters( 'woocommerce_order_get_items', $items, $this );
     }
 
     /**
-     * Get an order item object, based on it's type.
-     * @param  int $item_id
-     * @return WC_Order_Item
-     */
-    public function get_item( $item_id ) {
-        return WC_Order_Factory::get_order_item( $item_id );
-    }
-
-    /**
      * Return an array of fees within this order.
-     *
      * @return array
      */
     public function get_fees() {
@@ -1565,7 +1561,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
     /**
      * Return an array of taxes within this order.
-     *
      * @return array
      */
     public function get_taxes() {
@@ -1574,7 +1569,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
     /**
      * Return an array of shipping costs within this order.
-     *
      * @return array
      */
     public function get_shipping_methods() {
@@ -1583,7 +1577,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
     /**
      * Get coupon codes only.
-     *
      * @return array
      */
     public function get_used_coupons() {
@@ -1597,14 +1590,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_item_count( $item_type = '' ) {
-        if ( empty( $item_type ) ) {
-            $item_type = array( 'line_item' );
-        }
-        if ( ! is_array( $item_type ) ) {
-            $item_type = array( $item_type );
-        }
-
-        $items = $this->get_items( $item_type );
+        $items = $this->get_items( empty( $item_type ) ? 'line_item' : $item_type );
         $count = 0;
 
         foreach ( $items as $item ) {
@@ -1614,254 +1600,186 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         return apply_filters( 'woocommerce_get_item_count', $count, $item_type, $this );
     }
 
-    /**
-     * Remove all line items (products, coupons, shipping, taxes) from the order.
-     *
-     * @param string $type Order item type. Default null.
+	/**
+     * Get an order item object, based on it's type.
+     * @since  2.6.0
+     * @param  int $item_id
+     * @return WC_Order_Item
      */
-    public function remove_order_items( $type = null ) {
-        global $wpdb;
-
-        if ( ! empty( $type ) ) {
-            $wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $this->get_id(), $type ) );
-            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $this->get_id(), $type ) );
-        } else {
-            $wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $this->get_id() ) );
-            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $this->get_id() ) );
-        }
+    public function get_item( $item_id ) {
+        return WC_Order_Factory::get_order_item( $item_id );
     }
 
-    /**
+	/**
      * Add a product line item to the order.
      * Order must be saved prior to adding items.
-     *
-     * @since 2.2
      * @param \WC_Product $product
-     * @param int $qty Line item quantity.
      * @param array $args
-     * @return int updated order item ID
+     * @param array $deprecated qty was passed as arg 2 prior to 2.6.0
+     * @return int order item ID
      */
-    public function add_product( $product, $qty = 1, $args = array() ) {
+    public function add_product( $product, $args = array(), $deprecated = array() ) {
+		if ( is_numeric( $args ) ) {
+			_deprecated_argument( 'qty', '2.6', 'Pass only product and args' );
+			$qty         = $args;
+			$args        = $deprecated;
+			$args['qty'] = $qty;
+		}
+
         $args = wp_parse_args( $args, array(
-            'name'         => $product->get_title(),
-            'qty'          => absint( $qty ),
-            'tax_class'    => $product->get_tax_class(),
-            'product_id'   => $product->id,
-            'variation_id' => isset( $product->variation_id ) ? $product->variation_id : 0,
-            'variation'    => array(),
-            'subtotal'     => $product->get_price_excluding_tax( $qty ),
-            'subtotal_tax' => 0,
-            'total'        => $product->get_price_excluding_tax( $qty ),
+			'qty'          => 1,
+            'name'         => $product ? $product->get_title() : '',
+            'tax_class'    => $product ? $product->get_tax_class() : '',
+            'product_id'   => $product ? $product->get_id() : '',
+            'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
+            'subtotal'     => $product ? $product->get_price_excluding_tax( $qty ) : '',
+            'total'        => $product ? $product->get_price_excluding_tax( $qty ) : '',
+		    'subtotal_tax' => 0,
             'total_tax'    => 0,
+			'variation'    => array(),
             'taxes'        => array(
                 'subtotal' => array(),
                 'total'    => array()
             )
         ) );
-        $item    = new WC_Order_Item_Product();
-        $item_id = $this->update_product( $item, $product, $args );
-
-		do_action( 'woocommerce_order_add_product', $this->get_id(), $item_id, $product, $qty, $args );
-
-		return $item_id;
-    }
-
-    /**
-     * Update a line item for the order.
-     *
-     * Note this does not update order totals.
-     *
-     * @since 2.2
-     * @param object|int $item order item ID or item object.
-     * @param WC_Product $product
-     * @param array $args data to update.
-     * @return int updated order item ID
-     */
-    public function update_product( $item, $product, $args ) {
-		if ( is_numeric( $item ) ) {
-            $item = $this->get_item( $item );
-        }
-        if ( ! is_object( $item ) || ! $item->is_type( 'line_item' ) ) {
-            return false;
-        }
-        if ( ! $this->get_id() ) {
-            $this->save(); // Order must exist
-        }
-
-		if ( ! $item->get_order_item_id() ) {
-            $inserting = true;
-        } else {
-            $inserting = false;
-        }
 
 		// BW compatibility with old args
-        if ( isset( $args['totals'] ) ) {
-            if ( isset( $args['totals']['subtotal'] ) ) {
-                $args['subtotal'] = $args['totals']['subtotal'];
-            }
-            if ( isset( $args['totals']['total'] ) ) {
-                $args['total'] = $args['totals']['total'];
-            }
-            if ( isset( $args['totals']['subtotal_tax'] ) ) {
-                $args['subtotal_tax'] = $args['totals']['subtotal_tax'];
-            }
-            if ( isset( $args['totals']['tax'] ) ) {
-                $args['total_tax'] = $args['totals']['tax'];
-            }
-            if ( isset( $args['totals']['tax_data'] ) ) {
-                $args['taxes'] = $args['totals']['tax_data'];
-            }
-        }
-
-		// Handly qty if set
-		if ( isset( $args['qty'] ) ) {
-			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
-				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
+		if ( isset( $args['totals'] ) ) {
+			_deprecated_argument( 'totals', '2.6', 'Set taxes, total, total tax, subtotal and subtotal_tax separately' );
+			if ( isset( $args['totals']['subtotal'] ) ) {
+				$args['subtotal'] = $args['totals']['subtotal'];
 			}
-			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : $product->get_price_excluding_tax( $args['qty'] );
-			$args['total']    = $args['total'] ? $args['total'] : $product->get_price_excluding_tax( $args['qty'] );
+			if ( isset( $args['totals']['total'] ) ) {
+				$args['total'] = $args['totals']['total'];
+			}
+			if ( isset( $args['totals']['subtotal_tax'] ) ) {
+				$args['subtotal_tax'] = $args['totals']['subtotal_tax'];
+			}
+			if ( isset( $args['totals']['tax'] ) ) {
+				$args['total_tax'] = $args['totals']['tax'];
+			}
+			if ( isset( $args['totals']['tax_data'] ) ) {
+				$args['taxes'] = $args['totals']['tax_data'];
+			}
 		}
 
-		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
-        $item->save();
+		$item = new WC_Order_Item_Product( $args );
 
-        if ( ! $inserting ) {
-            do_action( 'woocommerce_order_edit_product', $this->get_id(), $item->get_order_item_id(), $args, $product );
-        }
+		// Handle backorders
+		if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
+			$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ) ), $args['qty'] - max( 0, $product->get_total_stock() ), true );
+		}
 
-        return $item->get_order_item_id();
+		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->save();
+
+		if ( has_action( 'woocommerce_order_add_product' ) ) {
+			_deprecated_function( 'Action: woocommerce_order_add_product', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			do_action( 'woocommerce_order_add_product', $this->get_id(), $item->get_id(), $product, $qty, $args );
+		}
+
+		return $item->get_id();
     }
 
-    /**
+	/**
      * Add coupon code to the order.
      * Order must be saved prior to adding items.
-     *
-     * @param string $code
-     * @param int $discount
-     * @param int $discount_tax "Discounted" tax - used for tax inclusive prices.
-     * @return int updated order item ID
+     * @param array $args
+     * @param int $deprecated1 2.6.0 code, discount, tax were passed.
+     * @param int $deprecated2 2.6.0 code, discount, tax were passed.
+     * @return int order item ID
      */
-    public function add_coupon( $code, $discount = 0, $discount_tax = 0 ) {
-        $item    = new WC_Order_Item_Coupon();
-        $item_id = $this->update_coupon( $item, array(
-            'code'         => $code,
-            'discount'     => $discount,
-            'discount_tax' => $discount_tax,
+    public function add_coupon( $args = array(), $deprecated1 = 0, $deprecated2 = 0 ) {
+		if ( ! is_array( $args ) ) {
+			_deprecated_argument( 'code', '2.6', 'Pass only an array of args' );
+			$args = array(
+				'code'         => $args,
+				'discount'     => $deprecated1,
+		        'discount_tax' => $deprecated2,
+			);
+		}
+
+		$args = wp_parse_args( $args, array(
+			'code'         => '',
+	        'discount'     => 0,
+	        'discount_tax' => 0,
         ) );
 
-		do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item_id, $code, $discount, $discount_tax );
+		$item = new WC_Order_Item_Coupon( $args );
+		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->save();
 
-		return $item_id;
+		if ( has_action( 'woocommerce_order_add_coupon' ) ) {
+			_deprecated_function( 'Action: woocommerce_order_add_coupon', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item->get_id(), $args['code'], $args['discount'], $args['discount_tax'] );
+		}
+
+		return $item->get_id();
     }
 
-    /**
-     * Update coupon for order. Note this does not update order totals.
+	/**
+     * Add a tax row to the order.
+     * Order must be saved prior to adding items.
      * @since 2.2
-     * @param object|int $item
-     * @param array $args
-     * @return int updated order item ID
+	 * @param array $args
+     * @param int $deprecated1 2.6.0 tax_rate_id, amount, shipping amount.
+     * @param int $deprecated2 2.6.0 tax_rate_id, amount, shipping amount.
+     * @return int order item ID
      */
-    public function update_coupon( $item, $args ) {
-        if ( is_numeric( $item ) ) {
-            $item = $this->get_item( $item );
-        }
-        if ( ! is_object( $item ) || ! $item->is_type( 'coupon' ) ) {
-            return false;
-        }
-        if ( ! $this->get_id() ) {
-            $this->save(); // Order must exist
-        }
-
-		if ( ! $item->get_order_item_id() ) {
-            $inserting = true;
-        } else {
-            $inserting = false;
-        }
-
-		// BW compatibility for old args
-		if ( isset( $args['discount_amount'] ) ) {
-			$args['discount'] = $args['discount_amount'];
-		}
-		if ( isset( $args['discount_amount_tax'] ) ) {
-			$args['discount_tax'] = $args['discount_amount_tax'];
+    public function add_tax( $args = array(), $deprecated1 = 0, $deprecated2 = 0 ) {
+		if ( ! is_array( $args ) ) {
+			_deprecated_argument( 'tax_rate_id', '2.6', 'Pass only an array of args' );
+			$args = array(
+				'rate_id'            => $args,
+				'tax_total'          => $deprecated1,
+		        'shipping_tax_total' => $deprecated2,
+			);
 		}
 
-		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
-        $item->save();
+		$args = wp_parse_args( $args, array(
+			'rate_id'            => '',
+			'tax_total'          => 0,
+			'shipping_tax_total' => 0,
+			'rate_code'          => isset( $args['rate_id'] ) ? WC_Tax::get_rate_code( $rate_id ) : '',
+			'label'              => isset( $args['rate_id'] ) ? WC_Tax::get_rate_label( $rate_id ) : '',
+			'compound'           => isset( $args['rate_id'] ) ? WC_Tax::is_compound( $rate_id ) : '',
+        ) );
 
-        if ( ! $inserting ) {
-            do_action( 'woocommerce_order_update_coupon', $this->get_id(), $item->get_order_item_id(), $args );
-        }
+		$item = new WC_Order_Item_Tax( $args );
+		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->save();
 
-        return $item->get_order_item_id();
+		if ( has_action( 'woocommerce_order_add_tax' ) ) {
+			_deprecated_function( 'Action: woocommerce_order_add_tax', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			do_action( 'woocommerce_order_add_tax', $this->get_id(), $item->get_id(), $tax_rate_id, $tax_total, $shipping_tax_total );
+		}
+
+		return $item->get_id();
     }
 
-    /**
+	/**
      * Add a shipping row to the order.
      * Order must be saved prior to adding items.
-     *
      * @param WC_Shipping_Rate shipping_rate
-     * @return int updated order item ID
+     * @return int order item ID
      */
     public function add_shipping( $shipping_rate ) {
-        $item    = new WC_Order_Item_Shipping();
-        $item_id = $this->update_shipping( $item, array(
+        $item = new WC_Order_Item_Shipping( array(
             'method_title' => $shipping_rate->label,
             'method_id'    => $shipping_rate->id,
             'total'        => wc_format_decimal( $shipping_rate->cost ),
             'taxes'        => $shipping_rate->taxes,
             'meta_data'    => $shipping_rate->get_meta_data(),
         ) );
+		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
+		$item->save();
 
-		do_action( 'woocommerce_order_add_shipping', $this->get_id(), $item_id, $shipping_rate );
-
-		return $item_id;
-    }
-
-    /**
-     * Update shipping method for order.
-     *
-     * Note this does not update the order total.
-     *
-     * @since 2.2
-     * @param object|int $item
-     * @param array $args
-     * @return int updated order item ID
-     */
-    public function update_shipping( $item, $args ) {
-        if ( is_numeric( $item ) ) {
-            $item = $this->get_item( $item );
-        }
-        if ( ! is_object( $item ) || ! $item->is_type( 'shipping' ) ) {
-            return false;
-        }
-        if ( ! $this->get_id() ) {
-            $this->save(); // Order must exist
-        }
-
-		if ( ! $item->get_order_item_id() ) {
-            $inserting = true;
-        } else {
-            $inserting = false;
-        }
-
-		// BW compatibility for old args
-		if ( isset( $args['cost'] ) ) {
-			$args['total'] = $args['cost'];
+		if ( has_action( 'woocommerce_order_add_shipping' ) ) {
+			_deprecated_function( 'Action: woocommerce_order_add_shipping', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			do_action( 'woocommerce_order_add_shipping', $this->get_id(), $item->get_id(), $shipping_rate );
 		}
 
-		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
-		$item->save();
-		$this->calculate_shipping();
-
-        if ( ! $inserting ) {
-            do_action( 'woocommerce_order_update_shipping', $this->get_id(), $item->get_order_item_id(), $args );
-        }
-
-        return $item->get_order_item_id();
+		return $item->get_id();
     }
 
     /**
@@ -1871,8 +1789,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int updated order item ID
      */
     public function add_fee( $fee ) {
-        $item    = new WC_Order_Item_Fee();
-        $item_id = $this->update_fee( $item, array(
+        $item = new WC_Order_Item_Fee( array(
             'name'      => $fee->name,
             'tax_class' => $fee->taxable ? $fee->tax_class : 0,
             'total'     => $fee->amount,
@@ -1882,113 +1799,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             )
         ) );
 
-        do_action( 'woocommerce_order_add_fee', $this->get_id(), $item_id, $fee ); // @todo deprecate hooks
-
-        return $item_id;
-    }
-
-    /**
-     * Update fee for order.
-     *
-     * Note this does not update order totals.
-     *
-     * @since 2.2
-     * @param object|int $item
-     * @param array $args
-     * @return int updated order item ID
-     */
-    public function update_fee( $item, $args ) {
-		if ( is_numeric( $item ) ) {
-            $item = $this->get_item( $item );
-        }
-        if ( ! is_object( $item ) || ! $item->is_type( 'fee' ) ) {
-            return false;
-        }
-        if ( ! $this->get_id() ) {
-            $this->save(); // Order must exist
-        }
-
-		if ( ! $item->get_order_item_id() ) {
-            $inserting = true;
-        } else {
-            $inserting = false;
-        }
-
-		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
+		$item->set_order_id( $this->get_id() ? $this->get_id() : $this->save() );
 		$item->save();
 
-        if ( ! $inserting ) {
-            do_action( 'woocommerce_order_update_fee', $this->get_id(), $item->get_order_item_id(), $args );
-        }
-
-        return $item->get_order_item_id();
-    }
-
-    /**
-     * Add a tax row to the order.
-     * Order must be saved prior to adding items.
-     * @since 2.2
-     * @param int tax_rate_id
-     * @param int $tax_total
-     * @param int $shipping_tax_total
-     * @return int updated order item ID
-     */
-    public function add_tax( $tax_rate_id, $tax_total = 0, $shipping_tax_total = 0 ) {
-        if ( $code = WC_Tax::get_rate_code( $tax_rate_id ) ) {
-	        $item    = new WC_Order_Item_Tax();
-	        $item_id = $this->update_tax( $item, array(
-	            'rate_code'          => $code,
-	            'rate_id'            => $tax_rate_id,
-	            'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-	            'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-	            'tax_total'          => $tax_total,
-	            'shipping_tax_total' => $shipping_tax_total
-	        ) );
-
-	        do_action( 'woocommerce_order_add_tax', $this->get_id(), $item_id, $tax_rate_id, $tax_total, $shipping_tax_total );
-
-	        return $item_id;
-		} else {
-			return false;
+		if ( has_action( 'woocommerce_order_add_fee' ) ) {
+			_deprecated_function( 'Action: woocommerce_order_add_fee', '2.6', 'Use woocommerce_new_order_item action instead.' );
+        	do_action( 'woocommerce_order_add_fee', $this->get_id(), $item->get_id(), $fee );
 		}
-    }
 
-    /**
-     * Update tax line on order.
-     * Note this does not update order totals.
-     *
-     * @since 2.6
-     * @param object|int $item
-     * @param array $args
-     * @return int updated order item ID
-     */
-    public function update_tax( $item, $args ) {
-		if ( is_numeric( $item ) ) {
-            $item = $this->get_item( $item );
-        }
-        if ( ! is_object( $item ) || ! $item->is_type( 'tax' ) ) {
-            return false;
-        }
-        if ( ! $this->get_id() ) {
-            $this->save(); // Order must exist
-        }
-
-		if ( ! $item->get_order_item_id() ) {
-            $inserting = true;
-        } else {
-            $inserting = false;
-        }
-
-		$item->set_order_id( $this->get_id() );
-		$item->set_all( $args );
-		$item->save();
-
-        if ( ! $inserting ) {
-            do_action( 'woocommerce_order_update_tax', $this->get_id(), $item->get_order_item_id(), $args );
-        }
-
-        return $item->get_order_item_id();
+        return $item->get_id();
     }
 
     /*
