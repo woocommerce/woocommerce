@@ -182,6 +182,11 @@ class WC_Cache_Helper {
 				}
 			}
 		}
+
+		// Noindex for endpoints
+		if ( is_wc_endpoint_url() || isset( $_GET['download_file'] ) ) {
+			self::noindex();
+		}
 	}
 
 	/**
@@ -189,16 +194,24 @@ class WC_Cache_Helper {
 	 * @access private
 	 */
 	private static function nocache() {
-		if ( ! defined( 'DONOTCACHEPAGE' ) )
-			define( "DONOTCACHEPAGE", "true" );
-
-		if ( ! defined( 'DONOTCACHEOBJECT' ) )
-			define( "DONOTCACHEOBJECT", "true" );
-
-		if ( ! defined( 'DONOTCACHEDB' ) )
-			define( "DONOTCACHEDB", "true" );
-
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( "DONOTCACHEPAGE", true );
+		}
+		if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
+			define( "DONOTCACHEOBJECT", true );
+		}
+		if ( ! defined( 'DONOTCACHEDB' ) ) {
+			define( "DONOTCACHEDB", true );
+		}
 		nocache_headers();
+	}
+
+	/**
+	 * Set noindex headers.
+	 * @access private
+	 */
+	private static function noindex() {
+		@header( 'X-Robots-Tag: noindex' );
 	}
 
 	/**
