@@ -1311,6 +1311,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			foreach ( $this->get_meta_data() as $key => $value ) {
 				$this->update_post_meta( '_' . $key, $value );
 			}
+
+			do_action( 'woocommerce_new_order', $order_id );
         }
     }
 
@@ -2558,6 +2560,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     public function has_status( $status ) {
         return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status ) ) || $this->get_status() === $status ? true : false, $this, $status );
     }
+
+	/**
+     * See if order matches cart_hash.
+     * @return bool
+     */
+    public function has_cart_hash( $cart_hash ) {
+        return $cart_hash === get_post_meta( $this->get_id(), '_cart_hash', true );
+	}
 
     /**
      * has_meta function for order items.
