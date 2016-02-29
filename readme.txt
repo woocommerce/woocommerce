@@ -170,9 +170,13 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Notice when no order notes exist.
 * Fix - Removed extra tab from plain email shipping address.
 * Fix - Round shipping after tax calculation instead of before to prevent wrong taxes being calculated.
+* Fix - State input box was not reappearing when switching from a hidden input to a text input.
+* Fix - Don't duplicate rating and review counts.
 * Fix - CLI - Allow setting of a single category.
 * Fix - API - Replace term_taxonomy_id for term_id whilst creating/editing terms.
 * Fix - API - Fix parent_id and menu_order for variations.
+* Fix - Combine update post calls when update_status is ran.
+* Tweak - Show customer details for logged in users only on thanks page to prevent customer details being revealed if someone finds out the URL.
 * Tweak - Wrap status report in backticks to stop people breaking .org forums.
 * Tweak - Error handling for screen ids.
 * Tweak - Use $wpdb->replace instead of doing a select and then deciding to do an update or insert in session handler.
