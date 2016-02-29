@@ -308,26 +308,37 @@ class WC_Checkout {
 				}
 			}
 
-			// Billing address
-			$billing_address = array();
+			// Store billing and shipping addresses.
+			$update_customer_data = apply_filters( 'woocommerce_checkout_update_customer_data', true, $this );
+
 			if ( $this->checkout_fields['billing'] ) {
 				foreach ( array_keys( $this->checkout_fields['billing'] ) as $field ) {
-					$field_name = str_replace( 'billing_', '', $field );
-					$billing_address[ $field_name ] = $this->get_posted_address_data( $field_name );
+					$value = $this->get_posted_address_data( str_replace( 'billing_', '', $field ) );
+
+					if ( is_callable( array( $order, "set_{$field_name}" ) ) ) {
+						$order->{"set_{$field_name}"}( $value );
+					}
+
+					if ( $this->customer_id && $update_customer_data ) {
+						update_user_meta( $this->customer_id, $field_name, $value );
+					}
 				}
 			}
 
-			// Shipping address.
-			$shipping_address = array();
 			if ( $this->checkout_fields['shipping'] ) {
 				foreach ( array_keys( $this->checkout_fields['shipping'] ) as $field ) {
-					$field_name = str_replace( 'shipping_', '', $field );
-					$shipping_address[ $field_name ] = $this->get_posted_address_data( $field_name, 'shipping' );
+					$value = $this->get_posted_address_data( str_replace( 'shipping_', '', $field ), 'shipping' );
+
+					if ( is_callable( array( $order, "set_{$field_name}" ) ) ) {
+						$order->{"set_{$field_name}"}( $value );
+					}
+
+					if ( $this->customer_id && $update_customer_data && WC()->cart->needs_shipping() ) {
+						update_user_meta( $this->customer_id, $field_name, $value );
+					}
 				}
 			}
 
-			$order->set_address( $billing_address, 'billing' ); // @todo remove set_address
-			$order->set_address( $shipping_address, 'shipping' );
 			$order->set_payment_method( $this->payment_method );
 			$order->set_cart_tax( WC()->cart->tax_total );
 			$order->set_discount_total( WC()->cart->get_cart_discount_total() );
@@ -337,22 +348,8 @@ class WC_Checkout {
 			$order->set_order_total( WC()->cart->total );
 			$order->save();
 
-			// Update user meta
-			if ( $this->customer_id ) {
-				if ( apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
-					foreach ( $billing_address as $key => $value ) {
-						update_user_meta( $this->customer_id, 'billing_' . $key, $value );
-					}
-					if ( WC()->cart->needs_shipping() ) {
-						foreach ( $shipping_address as $key => $value ) {
-							update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
-						}
-					}
-				}
-				do_action( 'woocommerce_checkout_update_user_meta', $this->customer_id, $this->posted );
-			}
-
-			// Let plugins add meta
+			// Fire actions for plugins to use.
+			do_action( 'woocommerce_checkout_update_user_meta', $this->customer_id, $this->posted );
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $this->posted );
 
 			// If we got here, the order was created without problems!
@@ -755,12 +752,6 @@ class WC_Checkout {
 			$return = isset( $this->posted[ 'billing_' . $key ] ) ? $this->posted[ 'billing_' . $key ] : '';
 		} else {
 			$return = isset( $this->posted[ 'shipping_' . $key ] ) ? $this->posted[ 'shipping_' . $key ] : '';
-		}
-
-		// Use logged in user's billing email if neccessary
-		if ( 'email' === $key && empty( $return ) && is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			$return       = $current_user->user_email;
 		}
 		return $return;
 	}
