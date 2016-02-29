@@ -133,7 +133,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @return string
 	 */
 	public function get_code() {
-		return $this->_data['code'];
+		return apply_filters( 'woocommerce_coupon_code', $this->_data['code'] );
 	}
 
 	/**
@@ -447,7 +447,11 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 * @param  string $date
 	 */
 	public function set_expiry_date( $date ) {
-		$this->_data['expiry_date'] = $date;
+		if ( ! is_numeric( $date ) ) {
+			$this->_data['expiry_date'] = strtotime( $date );
+		} else {
+			$this->_data['expiry_date'] = $date;
+		}
 	}
 
 	/**
@@ -629,9 +633,9 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		// Map meta data
 		$individual_use = ( 'yes' === get_post_meta( $coupon_id, 'individual_use', true ) );
 		$this->set_individual_use( $individual_use );
-		$product_ids = ( ! empty ( get_post_meta( $coupon_id, 'product_ids', true ) ) ? explode( ',', get_post_meta( $coupon_id, 'product_ids', true ) ) : array() );
+		$product_ids = explode( ',', get_post_meta( $coupon_id, 'product_ids', true ), -1 );
 		$this->set_product_ids( $product_ids );
-		$exclude_product_ids = ( ! empty ( get_post_meta( $coupon_id, 'exclude_product_ids', true ) ) ? explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ) ) : array() );
+		$exclude_product_ids = explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ), -1 );
 		$this->set_excluded_product_ids( $exclude_product_ids );
 		$this->set_usage_limit( get_post_meta( $coupon_id, 'usage_limit', true ) );
 		$this->set_usage_limit_per_user( get_post_meta( $coupon_id, 'usage_limit_per_user', true ) );
