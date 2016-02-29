@@ -84,32 +84,6 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
     }
 
     /**
-     * Get Meta Data by Key
-     * @param  string $key
-     * @return mixed
-     */
-    public function get_meta( $key = '' ){
-		$meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-
-        if ( $meta_ids ) {
-            $meta_id = current( $meta_ids );
-            $value   = $this->_meta_data[ $meta_id ]->value;
-        } else {
-            $value = '';
-        }
-
-        return $value;
-    }
-
-    /**
-     * Internal meta keys we don't want exposed as part of meta_data.
-     * @return array()
-     */
-    protected function get_internal_meta_keys() {
-        return array();
-    }
-
-    /**
      * Get qty.
      * @return int
      */
@@ -129,7 +103,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	 * @return array
 	 */
 	public function get_data() {
-		return array_merge( $this->_data, array( 'meta_data' => $this->_meta_data ) );
+		return array_merge( $this->_data, array( 'meta_data' => $this->get_meta_data() ) );
 	}
 
     /**
@@ -170,14 +144,6 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     public function get_type() {
         return $this->_data['type'];
-    }
-
-    /**
-     * Get meta data
-     * @return array
-     */
-    public function get_meta_data() {
-        return $this->_meta_data;
     }
 
     /*
@@ -326,12 +292,49 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
     /*
 	|--------------------------------------------------------------------------
-	| Item Meta Handling
+	| Meta Data Handling
 	|--------------------------------------------------------------------------
 	*/
 
+	/**
+     * Get All Meta Data
+     * @return array
+     */
+    public function get_meta_data() {
+		return $this->_meta_data;
+    }
+
     /**
-     * Set meta data.
+     * Internal meta keys we don't want exposed as part of meta_data.
+     * @return array()
+     */
+    protected function get_internal_meta_keys() {
+        return array();
+    }
+
+	/**
+     * Get Meta Data by Key
+     * @param string $key
+     * @param bool $single return first found meta with key, or all with $key
+     * @return mixed
+     */
+    public function get_meta( $key = '', $single = true ) {
+		$meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$value    = '';
+
+        if ( $meta_ids ) {
+			if ( $single ) {
+				$value   = $this->_meta_data[ current( $meta_ids ) ]->value;
+			} else {
+				$value = array_intersect_key( $this->_meta_data, $meta_ids );
+			}
+        }
+
+        return $value;
+    }
+
+    /**
+     * Set all meta data from array.
      * @param array $data Key/Value pairs
      */
     public function set_meta_data( $data ) {
@@ -349,7 +352,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
     }
 
     /**
-     * Set meta data.
+     * Add meta data.
      * @param array $data Key/Value pairs
      */
     public function add_meta_data( $key, $value, $unique = false ) {
@@ -384,25 +387,30 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      * Read Meta Data from the database. Ignore any internal properties.
      */
     protected function read_meta_data() {
-        $this->_meta_data = array();
+		$this->_meta_data = array();
 
-        if ( $this->get_id() ) {
-            // Get cache key - uses get_cache_prefix to invalidate when needed
-            $cache_key       = WC_Cache_Helper::get_cache_prefix( 'order_itemmeta' );
-            $item_meta_array = wp_cache_get( $cache_key, 'order_itemmeta' );
+        if ( ! $this->get_id() ) {
+			return;
+		}
 
-            if ( false === $item_meta_array ) {
-                global $wpdb;
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'order_itemmeta' );
+        $cached_meta = wp_cache_get( $cache_key, 'order_itemmeta' );
 
-                $metadata = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_id() ) );
-                foreach ( $metadata as $metadata_row ) {
-                    if ( in_array( $metadata_row->meta_key, $this->get_internal_meta_keys() ) ) {
-                        continue;
-                    }
-                    $this->_meta_data[ $metadata_row->meta_id ] = (object) array( 'key' => $metadata_row->meta_key, 'value' => $metadata_row->meta_value );
+		if ( false !== $cached_meta ) {
+			$this->_meta_data = $cached_meta;
+		} else {
+            global $wpdb;
+
+            $raw_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d ORDER BY meta_id", $this->get_id() ) );
+
+			foreach ( $raw_meta_data as $meta ) {
+                if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
+                    continue;
                 }
-                wp_cache_set( $cache_key, $item_meta_array, 'order_itemmeta' );
+                $this->_meta_data[ $meta->meta_id ] = (object) array( 'key' => $meta->meta_key, 'value' => $meta->meta_value );
             }
+
+            wp_cache_set( $cache_key, $this->_meta_data, 'order_itemmeta' );
         }
     }
 
@@ -411,34 +419,15 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
      */
     protected function save_meta_data() {
         global $wpdb;
-
-        $set_meta_ids = array();
-        $all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');", $this->get_id() ) ) );
+        $all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d", $this->get_id() ) . " AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');" ) );
+		$set_meta_ids = array();
 
         foreach ( $this->_meta_data as $meta_id => $meta ) {
             if ( 'new' === substr( $meta_id, 0, 3 ) ) {
-                $wpdb->insert(
-                    "{$wpdb->prefix}woocommerce_order_itemmeta",
-                    array(
-                        'meta_key'      => $meta->key,
-                        'meta_value'    => $meta->value,
-                        'order_item_id' => $this->get_id(),
-                    )
-                );
-                $set_meta_ids[] = absint( $wpdb->insert_id );
+				$set_meta_ids[] = add_metadata( 'order_item', $this->get_id(), $meta->key, $meta->value, false );
             } else {
-                $wpdb->update(
-                    "{$wpdb->prefix}woocommerce_order_itemmeta",
-                    array(
-                        'meta_key'      => $meta->key,
-                        'meta_value'    => $meta->value,
-                        'order_item_id' => $this->get_id(),
-                    ),
-                    array(
-                        'meta_id' => $meta_id,
-                    )
-                );
-                $set_meta_ids[] = absint( $meta_id );
+				update_metadata_by_mid( 'order_item', $meta_id, $meta->value, $meta->key );
+				$set_meta_ids[] = absint( $meta_id );
             }
         }
 
@@ -446,7 +435,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
         $delete_meta_ids = array_diff( $all_meta_ids, $set_meta_ids );
 
         foreach ( $delete_meta_ids as $meta_id ) {
-            $wpdb->delete( "{$wpdb->prefix}woocommerce_order_itemmeta", array( 'meta_id' => $meta_id ) );
+			delete_metadata_by_mid( 'order_item', $meta_id );
         }
 
         WC_Cache_Helper::incr_cache_prefix( 'order_itemmeta' );

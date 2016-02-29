@@ -10,6 +10,8 @@ include_once( 'abstract-wc-legacy-order.php' );
  *
  * Handles order data and database interaction.
  *
+ * @todo update API to use new functions
+ *
  * @class       WC_Abstract_Order
  * @version     2.6.0
  * @package     WooCommerce/Classes
@@ -19,14 +21,13 @@ include_once( 'abstract-wc-legacy-order.php' );
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_Data {
 
     /**
-     * Data array, with defaults.
-     *
-     * When migrating to custom tables, these will be columns.
-     *
+     * Order Data array, with defaults. This is the core order data exposed
+     * in APIs since 2.6.0.
      * @since 2.6.0
      * @var array
      */
     protected $_data = array(
+		// When migrating to custom tables, these will be columns.
 		'order_id'             => 0,
         'parent_id'            => 0,
 		'status'               => '',
@@ -63,14 +64,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		'cart_tax'             => 0, // cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
 		'order_total'          => 0,
 		'order_tax'            => 0, // Sum of all taxes.
-    );
 
-    /**
-     * Stores meta data.
-     * @var array
-     */
-    protected $_meta_data = array(
-        'payment_method'       => '',
+		// When migrating to tables, these will be stored in order meta
+		'payment_method'       => '',
 		'payment_method_title' => '',
 		'transaction_id'       => '',
 		'customer_ip_address'  => '',
@@ -82,6 +78,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		'date_completed'       => '',
 		'date_paid'            => '',
     );
+
+	/**
+     * Stores additonal meta data.
+     * Order meta keys can be used once.
+     * @var array
+     */
+    protected $_meta_data = array();
 
     /**
      * Stores data about status changes so relevant hooks can be fired.
@@ -115,19 +118,156 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         return json_encode( $this->get_data() );
     }
 
+	/*
+	|--------------------------------------------------------------------------
+	| Meta Data Handling
+	|--------------------------------------------------------------------------
+	*/
 
-	// add_meta_data @todo
-	public function add_meta_data( $key, $value ) {
+	/**
+     * Get All Meta Data
+     * @return array
+     */
+    public function get_meta_data() {
+		return $this->_meta_data;
+    }
 
-	}
+	/**
+     * Internal meta keys we don't want exposed as part of meta_data.
+     * @return array()
+     */
+    protected function get_internal_meta_keys() {
+        return array( '_customer_user', '_order_key', '_order_currency', '_billing_first_name', '_billing_last_name', '_billing_company', '_billing_address_1', '_billing_address_2', '_billing_city', '_billing_state', '_billing_postcode', '_billing_country', '_billing_email', '_billing_phone', '_shipping_first_name', '_shipping_last_name', '_shipping_company', '_shipping_address_1', '_shipping_address_2', '_shipping_city', '_shipping_state', '_shipping_postcode', '_shipping_country', '_completed_date', '_paid_date', '_edit_lock', '_cart_discount', '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_order_total', '_order_total', '_payment_method', '_payment_method_title', '_transaction_id', '_customer_ip_address', '_customer_user_agent', '_created_via', '_order_version', '_prices_include_tax', '_customer_note', '_date_completed', '_date_paid' );
+    }
 
-    /**
+	/**
      * Get Meta Data by Key
-     * @param  string $key
+     * @param string $key
+     * @param bool $single return first found meta with key, or all with $key
      * @return mixed
      */
-    public function get_meta( $key = '' ){
-		return isset( $this->_meta_data[ $key ] ) ? $this->_meta_data[ $key ] : null;
+    public function get_meta( $key = '', $single = true ) {
+		$meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$value    = '';
+
+        if ( $meta_ids ) {
+			if ( $single ) {
+				$value   = $this->_meta_data[ current( $meta_ids ) ]->value;
+			} else {
+				$value = array_intersect_key( $this->_meta_data, $meta_ids );
+			}
+        }
+
+        return $value;
+    }
+
+    /**
+     * Set all meta data from array.
+     * @param array $data Key/Value pairs
+     */
+    public function set_meta_data( $data ) {
+        if ( ! empty( $data ) && is_array( $data ) ) {
+            foreach ( $data as $meta_id => $meta ) {
+                $meta = (array) $meta;
+                if ( isset( $meta['key'], $meta['value'] ) ) {
+                    $this->_meta_data[ $meta_id ] = (object) array(
+                        'key'   => $meta['key'],
+                        'value' => $meta['value']
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Add meta data.
+     * @param array $data Key/Value pairs
+     */
+    public function add_meta_data( $key, $value, $unique = false ) {
+        if ( $unique ) {
+            $meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+            $this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $meta_ids, '' ) );
+        }
+        $this->_meta_data[ 'new-' . sizeof( $this->_meta_data ) ] = (object) array(
+            'key'   => $key,
+            'value' => $value
+        );
+    }
+
+    /**
+     * Update meta data by key or ID, if provided.
+     * @param  string $key
+     * @param  string $value
+     * @param  int $meta_id
+     */
+    public function update_meta_data( $key, $value, $meta_id = '' ) {
+        if ( $meta_id && isset( $this->_meta_data[ $meta_id ] ) ) {
+            $this->_meta_data[ $meta_id ] = (object) array(
+                'key'   => $key,
+                'value' => $value
+            );
+        } else {
+            $this->add_meta_data( $key, $value, true );
+        }
+    }
+
+    /**
+     * Read Meta Data from the database. Ignore any internal properties.
+     */
+    protected function read_meta_data() {
+		$this->_meta_data = array();
+
+        if ( ! $this->get_id() ) {
+			return;
+		}
+
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'order_meta' );
+        $cached_meta = wp_cache_get( $cache_key, 'order_meta' );
+
+		if ( false !== $cached_meta ) {
+			$this->_meta_data = $cached_meta;
+		} else {
+            global $wpdb;
+
+            $raw_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d ORDER BY meta_id", $this->get_id() ) );
+
+			foreach ( $raw_meta_data as $meta ) {
+                if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
+                    continue;
+                }
+                $this->_meta_data[ $meta->meta_id ] = (object) array( 'key' => $meta->meta_key, 'value' => $meta->meta_value );
+            }
+
+            wp_cache_set( $cache_key, $this->_meta_data, 'order_meta' );
+        }
+    }
+
+    /**
+     * Update Meta Data in the database.
+     */
+    protected function save_meta_data() {
+		global $wpdb;
+        $all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d", $this->get_id() ) . " AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');" ) );
+		$set_meta_ids = array();
+
+        foreach ( $this->_meta_data as $meta_id => $meta ) {
+            if ( 'new' === substr( $meta_id, 0, 3 ) ) {
+				$set_meta_ids[] = add_metadata( 'post', $this->get_id(), $meta->key, $meta->value, false );
+            } else {
+				update_metadata_by_mid( 'post', $meta_id, $meta->value, $meta->key );
+				$set_meta_ids[] = absint( $meta_id );
+            }
+        }
+
+        // Delete no longer set meta data
+        $delete_meta_ids = array_diff( $all_meta_ids, $set_meta_ids );
+
+        foreach ( $delete_meta_ids as $meta_id ) {
+			delete_metadata_by_mid( 'post', $meta_id );
+        }
+
+        WC_Cache_Helper::incr_cache_prefix( 'order_meta' );
+        $this->read_meta_data();
     }
 
     /*
@@ -139,14 +279,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     |
     */
 
-	/**
-     * Get All Meta Data
-     * @return array
-     */
-    public function get_meta_data( $key = null ){
-		return $this->_meta_data;
-    }
-
     /**
      * Get all class data in array format.
      * @since 2.6.0
@@ -155,8 +287,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
     public function get_data() {
         return array_merge(
             $this->_data,
-            $this->get_meta_data(),
             array(
+				'meta_data'      => $this->get_meta_data(),
                 'line_items'     => $this->get_items( 'line_item' ),
                 'tax_lines'      => $this->get_items( 'tax' ),
                 'shipping_lines' => $this->get_items( 'shipping' ),
@@ -418,7 +550,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_payment_method() {
-        return $this->_meta_data['payment_method'];
+        return $this->_data['payment_method'];
     }
 
     /**
@@ -426,7 +558,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_payment_method_title() {
-        return $this->_meta_data['payment_method_title'];
+        return $this->_data['payment_method_title'];
     }
 
     /**
@@ -434,7 +566,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_transaction_id() {
-        return $this->_meta_data['transaction_id'];
+        return $this->_data['transaction_id'];
     }
 
     /**
@@ -442,7 +574,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_customer_ip_address() {
-        return $this->_meta_data['customer_ip_address'];
+        return $this->_data['customer_ip_address'];
     }
 
     /**
@@ -450,7 +582,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_customer_user_agent() {
-        return $this->_meta_data['customer_user_agent'];
+        return $this->_data['customer_user_agent'];
     }
 
     /**
@@ -458,7 +590,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_created_via() {
-        return $this->_meta_data['created_via'];
+        return $this->_data['created_via'];
     }
 
     /**
@@ -466,7 +598,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_order_version() {
-        return $this->_meta_data['order_version'];
+        return $this->_data['order_version'];
     }
 
     /**
@@ -474,7 +606,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return bool
      */
     public function get_prices_include_tax() {
-        return (bool) $this->_meta_data['prices_include_tax'];
+        return (bool) $this->_data['prices_include_tax'];
     }
 
     /**
@@ -482,7 +614,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return string
      */
     public function get_customer_note() {
-        return $this->_meta_data['customer_note'];
+        return $this->_data['customer_note'];
     }
 
 	/**
@@ -490,7 +622,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int
      */
     public function get_date_completed() {
-        return absint( $this->_meta_data['date_completed'] );
+        return absint( $this->_data['date_completed'] );
     }
 
 	/**
@@ -498,7 +630,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @return int
      */
     public function get_date_paid() {
-        return absint( $this->_meta_data['date_paid'] );
+        return absint( $this->_data['date_paid'] );
     }
 
     /**
@@ -1149,7 +1281,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $this->set_payment_method( $value->id );
             $this->set_payment_method_title( $value->get_title() );
         } else {
-            $this->_meta_data['payment_method'] = $value;
+            $this->_data['payment_method'] = $value;
         }
     }
 
@@ -1158,7 +1290,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_payment_method_title( $value ) {
-        $this->_meta_data['payment_method_title'] = $value;
+        $this->_data['payment_method_title'] = $value;
     }
 
     /**
@@ -1166,7 +1298,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_transaction_id( $value ) {
-        $this->_meta_data['transaction_id'] = $value;
+        $this->_data['transaction_id'] = $value;
     }
 
     /**
@@ -1174,7 +1306,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_customer_ip_address( $value ) {
-        $this->_meta_data['customer_ip_address'] = $value;
+        $this->_data['customer_ip_address'] = $value;
     }
 
     /**
@@ -1182,7 +1314,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_customer_user_agent( $value ) {
-        $this->_meta_data['customer_user_agent'] = $value;
+        $this->_data['customer_user_agent'] = $value;
     }
 
     /**
@@ -1190,7 +1322,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_created_via( $value ) {
-        $this->_meta_data['created_via'] = $value;
+        $this->_data['created_via'] = $value;
     }
 
     /**
@@ -1198,7 +1330,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_order_version( $value ) {
-        $this->_meta_data['order_version'] = $value;
+        $this->_data['order_version'] = $value;
     }
 
     /**
@@ -1206,7 +1338,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param bool $value
      */
     public function set_prices_include_tax( $value ) {
-        $this->_meta_data['prices_include_tax'] = (bool) $value;
+        $this->_data['prices_include_tax'] = (bool) $value;
     }
 
     /**
@@ -1214,7 +1346,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $value
      */
     public function set_customer_note( $value ) {
-        $this->_meta_data['customer_note'] = $value;
+        $this->_data['customer_note'] = $value;
     }
 
 	/**
@@ -1222,7 +1354,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $timestamp
      */
     public function set_date_completed( $timestamp ) {
-        $this->_meta_data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+        $this->_data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
 	/**
@@ -1230,7 +1362,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
      * @param string $timestamp
      */
     public function set_date_paid( $timestamp ) {
-        $this->_meta_data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+        $this->_data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
     }
 
     /*
@@ -1308,6 +1440,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $this->update_post_meta( '_order_tax', $this->get_cart_tax() );
             $this->update_post_meta( '_order_total', $this->get_order_total() );
 
+			$this->update_post_meta( '_payment_method', $this->get_payment_method() );
+			$this->update_post_meta( '_payment_method_title', $this->get_payment_method_title() );
+			$this->update_post_meta( '_transaction_id', $this->get_transaction_id() );
+			$this->update_post_meta( '_customer_ip_address', $this->get_customer_ip_address() );
+			$this->update_post_meta( '_customer_user_agent', $this->get_customer_user_agent() );
+			$this->update_post_meta( '_created_via', $this->get_created_via() );
+			$this->update_post_meta( '_order_version', $this->get_order_version() );
+			$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
+			$this->update_post_meta( '_customer_note', $this->get_customer_note() );
+			$this->update_post_meta( '_date_completed', $this->get_date_completed() );
+			$this->update_post_meta( '_date_paid', $this->get_date_paid() );
+
 			foreach ( $this->get_meta_data() as $key => $value ) {
 				$this->update_post_meta( '_' . $key, $value );
 			}
@@ -1377,24 +1521,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$this->set_date_completed( get_post_meta( $order_id, '_completed_date', true ) );
 		$this->set_date_paid( get_post_meta( $order_id, '_paid_date', true ) );
 
-		// Load meta data, including anything custom set.
-		$ignore_keys = array( '_customer_user', '_order_key', '_order_currency', '_billing_first_name', '_billing_last_name', '_billing_company', '_billing_address_1', '_billing_address_2', '_billing_city', '_billing_state', '_billing_postcode', '_billing_country', '_billing_email', '_billing_phone', '_shipping_first_name', '_shipping_last_name', '_shipping_company', '_shipping_address_1', '_shipping_address_2', '_shipping_city', '_shipping_state', '_shipping_postcode', '_shipping_country', '_completed_date', '_paid_date', '_edit_lock', '_cart_discount', '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_order_total', '_order_total' );
-		$meta_data   = get_post_meta( $order_id );
-		$meta_data   = array_diff_key( $meta_data, array_fill_keys( $ignore_keys, '' ) );
-
-		// Set meta data. Remove _ from key for hidden meta.
-		foreach ( $meta_data as $key => $value ) {
-			$key = ltrim( $key, '_' );
-			if ( is_callable( array( $this, "set_$key" ) ) ) {
-				$this->{"set_$key"}( $value[0] );
-			} else {
-				$this->_meta_data[ $key ] = $value[0];
-			}
-		}
-
         // Orders store the state of prices including tax when created.
 		$this->set_prices_include_tax( metadata_exists( 'post', $order_id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $order_id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-    }
+
+		// Load meta data
+		$this->read_meta_data();
+	}
 
 	/**
 	 * Post meta update wrapper. Sets or deletes based on value.
@@ -1461,6 +1593,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
         $this->update_post_meta( '_order_tax', $this->get_cart_tax() );
         $this->update_post_meta( '_order_total', $this->get_order_total() );
 
+		$this->update_post_meta( '_payment_method', $this->get_payment_method() );
+		$this->update_post_meta( '_payment_method_title', $this->get_payment_method_title() );
+		$this->update_post_meta( '_transaction_id', $this->get_transaction_id() );
+		$this->update_post_meta( '_customer_ip_address', $this->get_customer_ip_address() );
+		$this->update_post_meta( '_customer_user_agent', $this->get_customer_user_agent() );
+		$this->update_post_meta( '_created_via', $this->get_created_via() );
+		$this->update_post_meta( '_order_version', $this->get_order_version() );
+		$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
+		$this->update_post_meta( '_customer_note', $this->get_customer_note() );
+		$this->update_post_meta( '_date_completed', $this->get_date_completed() );
+		$this->update_post_meta( '_date_paid', $this->get_date_paid() );
+
 		foreach ( $this->get_meta_data() as $key => $value ) {
 			$this->update_post_meta( '_' . $key, $value );
 		}
@@ -1507,6 +1651,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
             $this->update();
         }
 
+		$this->save_meta_data();
         wc_delete_shop_order_transients( $this->get_id() );
 
 		return $this->get_id();
