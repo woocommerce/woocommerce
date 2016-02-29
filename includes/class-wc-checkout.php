@@ -164,14 +164,10 @@ class WC_Checkout {
 	 * 		527 - Cannot create shipping item.
 	 * 		528 - Cannot create tax item.
 	 * 		529 - Cannot create coupon item.
-	 * @access public
 	 * @throws Exception
 	 * @return int|WP_ERROR
-	 * @todo
 	 */
 	public function create_order() {
-		global $wpdb;
-
 		// Give plugins the opportunity to create an order themselves
 		if ( $order_id = apply_filters( 'woocommerce_create_order', null, $this ) ) {
 			return $order_id;
@@ -198,8 +194,7 @@ class WC_Checkout {
 			 * different items or cost, create a new order. We use a hash to
 			 * detect changes which is based on cart items + order total.
 			 */
-			if ( $order_id && $order_data['cart_hash'] === get_post_meta( $order_id, '_cart_hash', true ) && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
-
+			if ( $order_id && ( $order = wc_get_order( $order_id ) ) && $order->has_cart_hash( $order_data['cart_hash'] ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
 				$order_data['order_id'] = $order_id;
 				$order                  = wc_update_order( $order_data );
 
@@ -209,9 +204,7 @@ class WC_Checkout {
 					$order->remove_order_items();
 					do_action( 'woocommerce_resume_order', $order_id );
 				}
-
 			} else {
-
 				$order = wc_create_order( $order_data );
 
 				if ( is_wp_error( $order ) ) {
@@ -220,7 +213,6 @@ class WC_Checkout {
 					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 521 ) );
 				} else {
 					$order_id = $order->get_id();
-					do_action( 'woocommerce_new_order', $order_id );
 				}
 			}
 
@@ -277,6 +269,7 @@ class WC_Checkout {
 				if ( isset( $package['rates'][ $this->shipping_methods[ $package_key ] ] ) ) {
 					$shipping_rate = $package['rates'][ $this->shipping_methods[ $package_key ] ];
 					$item          = new WC_Order_Item_Shipping( array(
+						'order_id'     => $order_id,
 			            'method_title' => $shipping_rate->label,
 			            'method_id'    => $shipping_rate->id,
 			            'total'        => wc_format_decimal( $shipping_rate->cost ),
@@ -296,14 +289,35 @@ class WC_Checkout {
 
 			// Store tax rows
 			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
-				if ( $tax_rate_id && ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 528 ) );
+				if ( apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
+					$item = new WC_Order_Item_Tax( array(
+						'order_id'           => $order_id,
+						'rate_id'            => $tax_rate_id,
+						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
+						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
+						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
+						'tax_total'          => WC()->cart->get_tax_amount( $tax_rate_id ),
+						'shipping_tax_total' => WC()->cart->get_shipping_tax_amount( $tax_rate_id ),
+					) );
+					$item_id = $item->save();
+
+					if ( ! $item_id ) {
+						throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 528 ) );
+					}
 				}
 			}
 
 			// Store coupons
 			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ), WC()->cart->get_coupon_discount_tax_amount( $code ) ) ) {
+				$item = new WC_Order_Item_Coupon( array(
+					'order_id'     => $order_id,
+					'code'         => $code,
+					'discount'     => WC()->cart->get_coupon_discount_amount( $code ),
+					'discount_tax' => WC()->cart->get_coupon_discount_tax_amount( $code ),
+				) );
+				$item_id = $item->save();
+
+				if ( ! $item_id ) {
 					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 529 ) );
 				}
 			}
@@ -315,12 +329,12 @@ class WC_Checkout {
 				foreach ( array_keys( $this->checkout_fields['billing'] ) as $field ) {
 					$value = $this->get_posted_address_data( str_replace( 'billing_', '', $field ) );
 
-					if ( is_callable( array( $order, "set_{$field_name}" ) ) ) {
-						$order->{"set_{$field_name}"}( $value );
+					if ( is_callable( array( $order, "set_{$field}" ) ) ) {
+						$order->{"set_{$field}"}( $value );
 					}
 
 					if ( $this->customer_id && $update_customer_data ) {
-						update_user_meta( $this->customer_id, $field_name, $value );
+						update_user_meta( $this->customer_id, $field, $value );
 					}
 				}
 			}
@@ -329,12 +343,12 @@ class WC_Checkout {
 				foreach ( array_keys( $this->checkout_fields['shipping'] ) as $field ) {
 					$value = $this->get_posted_address_data( str_replace( 'shipping_', '', $field ), 'shipping' );
 
-					if ( is_callable( array( $order, "set_{$field_name}" ) ) ) {
-						$order->{"set_{$field_name}"}( $value );
+					if ( is_callable( array( $order, "set_{$field}" ) ) ) {
+						$order->{"set_{$field}"}( $value );
 					}
 
 					if ( $this->customer_id && $update_customer_data && WC()->cart->needs_shipping() ) {
-						update_user_meta( $this->customer_id, $field_name, $value );
+						update_user_meta( $this->customer_id, $field, $value );
 					}
 				}
 			}
