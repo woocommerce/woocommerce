@@ -111,18 +111,16 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$order = wc_get_order( $id );
 
-		$order_post = get_post( $id );
-
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'created_at'                => $this->server->format_datetime( $order_post->post_date_gmt ),
-			'updated_at'                => $this->server->format_datetime( $order_post->post_modified_gmt ),
-			'completed_at'              => $this->server->format_datetime( $order->completed_date, true ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created(), true ),
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified(), true ),
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed(), true ),
 			'status'                    => $order->get_status(),
-			'currency'                  => $order->order_currency,
+			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), 2 ),
-			'subtotal'                  => wc_format_decimal( $this->get_order_subtotal( $order ), 2 ),
+			'subtotal'                  => wc_format_decimal( $order->get_subtotal(), 2 ),
 			'total_line_items_quantity' => $order->get_item_count(),
 			'total_tax'                 => wc_format_decimal( $order->get_total_tax(), 2 ),
 			'total_shipping'            => wc_format_decimal( $order->get_shipping_total(), 2 ),
@@ -135,36 +133,36 @@ class WC_API_Orders extends WC_API_Resource {
 			'payment_details' => array(
 				'method_id'    => $order->get_payment_method(),
 				'method_title' => $order->get_payment_method_title(),
-				'paid'         => isset( $order->paid_date ),
+				'paid'         => ! empty( $order->get_date_paid() ),
 			),
 			'billing_address' => array(
-				'first_name' => $order->billing_first_name,
-				'last_name'  => $order->billing_last_name,
-				'company'    => $order->billing_company,
-				'address_1'  => $order->billing_address_1,
-				'address_2'  => $order->billing_address_2,
-				'city'       => $order->billing_city,
-				'state'      => $order->billing_state,
-				'postcode'   => $order->billing_postcode,
-				'country'    => $order->billing_country,
+				'first_name' => $order->get_billing_first_name(),
+				'last_name'  => $order->get_billing_last_name(),
+				'company'    => $order->get_billing_company(),
+				'address_1'  => $order->get_billing_address_1(),
+				'address_2'  => $order->get_billing_address_2(),
+				'city'       => $order->get_billing_city(),
+				'state'      => $order->get_billing_state(),
+				'postcode'   => $order->get_billing_postcode(),
+				'country'    => $order->get_billing_country(),
 				'email'      => $order->get_billing_email(),
 				'phone'      => $order->get_billing_phone(),
 			),
 			'shipping_address' => array(
-				'first_name' => $order->shipping_first_name,
-				'last_name'  => $order->shipping_last_name,
-				'company'    => $order->shipping_company,
-				'address_1'  => $order->shipping_address_1,
-				'address_2'  => $order->shipping_address_2,
-				'city'       => $order->shipping_city,
-				'state'      => $order->shipping_state,
-				'postcode'   => $order->shipping_postcode,
-				'country'    => $order->shipping_country,
+				'first_name' => $order->get_shipping_first_name(),
+				'last_name'  => $order->get_shipping_last_name(),
+				'company'    => $order->get_shipping_company(),
+				'address_1'  => $order->get_shipping_address_1(),
+				'address_2'  => $order->get_shipping_address_2(),
+				'city'       => $order->get_shipping_city(),
+				'state'      => $order->get_shipping_state(),
+				'postcode'   => $order->get_shipping_postcode(),
+				'country'    => $order->get_shipping_country(),
 			),
 			'note'                      => $order->get_customer_note(),
-			'customer_ip'               => $order->customer_ip_address,
-			'customer_user_agent'       => $order->customer_user_agent,
-			'customer_id'               => $order->customer_user,
+			'customer_ip'               => $order->get_customer_ip_address(),
+			'customer_user_agent'       => $order->get_customer_user_agent(),
+			'customer_id'               => $order->get_user_id(),
 			'view_order_url'            => $order->get_view_order_url(),
 			'line_items'                => array(),
 			'shipping_lines'            => array(),
@@ -184,9 +182,9 @@ class WC_API_Orders extends WC_API_Resource {
 				'total'      => wc_format_decimal( $order->get_line_total( $item ), 2 ),
 				'total_tax'  => wc_format_decimal( $order->get_line_tax( $item ), 2 ),
 				'price'      => wc_format_decimal( $order->get_item_total( $item ), 2 ),
-				'quantity'   => (int) $item['qty'],
-				'tax_class'  => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
-				'name'       => $item['name'],
+				'quantity'   => $item->get_qty(),
+				'tax_class'  => $item->get_tax_class(),
+				'name'       => $item->get_name(),
 				'product_id' => ( isset( $product->variation_id ) ) ? $product->variation_id : $product->id,
 				'sku'        => is_object( $product ) ? $product->get_sku() : null,
 			);
@@ -375,25 +373,4 @@ class WC_API_Orders extends WC_API_Resource {
 
 		return new WP_Query( $query_args );
 	}
-
-	/**
-	 * Helper method to get the order subtotal
-	 *
-	 * @since 2.1
-	 * @param WC_Order $order
-	 * @return float
-	 */
-	private function get_order_subtotal( $order ) {
-
-		$subtotal = 0;
-
-		// subtotal
-		foreach ( $order->get_items() as $item ) {
-
-			$subtotal += ( isset( $item['line_subtotal'] ) ) ? $item['line_subtotal'] : 0;
-		}
-
-		return $subtotal;
-	}
-
 }
