@@ -18,38 +18,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order extends WC_Abstract_Order {
 
 	/**
-     * When a payment is complete this function is called.
-     *
-     * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
-     * If the cart contains only downloadable items then the order is 'completed' since the admin needs to take no action.
-     * Stock levels are reduced at this point.
-     * Sales are also recorded for products.
-     * Finally, record the date of payment.
-     *
-     * @param string $transaction_id Optional transaction id to store in post meta.
-     */
-    public function payment_complete( $transaction_id = '' ) {
-        do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
+	 * When a payment is complete this function is called.
+	 *
+	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
+	 * If the cart contains only downloadable items then the order is 'completed' since the admin needs to take no action.
+	 * Stock levels are reduced at this point.
+	 * Sales are also recorded for products.
+	 * Finally, record the date of payment.
+	 *
+	 * @param string $transaction_id Optional transaction id to store in post meta.
+	 */
+	public function payment_complete( $transaction_id = '' ) {
+		do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
-        if ( ! empty( WC()->session ) ) {
-            WC()->session->set( 'order_awaiting_payment', false );
-        }
+		if ( ! empty( WC()->session ) ) {
+			WC()->session->set( 'order_awaiting_payment', false );
+		}
 
-        if ( $this->get_id() && $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
-            $order_needs_processing = false;
+		if ( $this->get_id() && $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
+			$order_needs_processing = false;
 
-            if ( sizeof( $this->get_items() ) > 0 ) {
-                foreach ( $this->get_items() as $item ) {
+			if ( sizeof( $this->get_items() ) > 0 ) {
+				foreach ( $this->get_items() as $item ) {
 					if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) ) {
 						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
 
 						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-                            $order_needs_processing = true;
-                            break;
-                        }
+							$order_needs_processing = true;
+							break;
+						}
 					}
-                }
-            }
+				}
+			}
 
 			if ( ! empty( $transaction_id ) ) {
 				$this->set_transaction_id( $transaction_id );
@@ -59,82 +59,82 @@ class WC_Order extends WC_Abstract_Order {
 			$this->set_date_paid( current_time( 'timestamp' ) );
 			$this->save();
 
-            do_action( 'woocommerce_payment_complete', $this->get_id() );
-        } else {
-            do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
-        }
-    }
+			do_action( 'woocommerce_payment_complete', $this->get_id() );
+		} else {
+			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
+		}
+	}
 
 	/**
-     * Checks if an order can be edited, specifically for use on the Edit Order screen.
-     * @return bool
-     */
-    public function is_editable() {
-        return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ) ), $this );
-    }
+	 * Checks if an order can be edited, specifically for use on the Edit Order screen.
+	 * @return bool
+	 */
+	public function is_editable() {
+		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ) ), $this );
+	}
 
 	/**
-     * Returns if an order has been paid for based on the order status.
-     * @since 2.5.0
-     * @return bool
-     */
-    public function is_paid() {
-        return apply_filters( 'woocommerce_order_is_paid', $this->has_status( apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) ) ), $this );
-    }
-
-    /**
-     * Checks if product download is permitted.
-     *
-     * @return bool
-     */
-    public function is_download_permitted() {
-        return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( 'completed' ) || ( 'yes' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) && $this->has_status( 'processing' ) ), $this );
-    }
+	 * Returns if an order has been paid for based on the order status.
+	 * @since 2.5.0
+	 * @return bool
+	 */
+	public function is_paid() {
+		return apply_filters( 'woocommerce_order_is_paid', $this->has_status( apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) ) ), $this );
+	}
 
 	/**
-     * Checks if an order needs display the shipping address, based on shipping method.
-     * @return bool
-     */
-    public function needs_shipping_address() {
-        if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
-            return false;
-        }
-
-        $hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
-        $needs_address = false;
-
-        foreach ( $this->get_shipping_methods() as $shipping_method ) {
-            if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
-                $needs_address = true;
-                break;
-            }
-        }
-
-        return apply_filters( 'woocommerce_order_needs_shipping_address', $needs_address, $hide, $this );
-    }
+	 * Checks if product download is permitted.
+	 *
+	 * @return bool
+	 */
+	public function is_download_permitted() {
+		return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( 'completed' ) || ( 'yes' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) && $this->has_status( 'processing' ) ), $this );
+	}
 
 	/**
-     * Returns true if the order contains a downloadable product.
-     * @return bool
-     */
-    public function has_downloadable_item() {
-        foreach ( $this->get_items() as $item ) {
-            if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->is_downloadable() && $product->has_file() ) {
+	 * Checks if an order needs display the shipping address, based on shipping method.
+	 * @return bool
+	 */
+	public function needs_shipping_address() {
+		if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
+			return false;
+		}
+
+		$hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
+		$needs_address = false;
+
+		foreach ( $this->get_shipping_methods() as $shipping_method ) {
+			if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
+				$needs_address = true;
+				break;
+			}
+		}
+
+		return apply_filters( 'woocommerce_order_needs_shipping_address', $needs_address, $hide, $this );
+	}
+
+	/**
+	 * Returns true if the order contains a downloadable product.
+	 * @return bool
+	 */
+	public function has_downloadable_item() {
+		foreach ( $this->get_items() as $item ) {
+			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->is_downloadable() && $product->has_file() ) {
 				return true;
 			}
-        }
-        return false;
-    }
+		}
+		return false;
+	}
 
 	/**
-     * Checks if an order needs payment, based on status and order total.
-     *
-     * @return bool
-     */
-    public function needs_payment() {
-        $valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
-        return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ), $this, $valid_order_statuses );
-    }
+	 * Checks if an order needs payment, based on status and order total.
+	 *
+	 * @return bool
+	 */
+	public function needs_payment() {
+		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
+		return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ), $this, $valid_order_statuses );
+	}
 
 	/**
 	 * Gets order total - formatted for display.
@@ -174,191 +174,193 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/*
-    |--------------------------------------------------------------------------
-    | URLs and Endpoints
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Generates a URL so that a customer can pay for their (unpaid - pending) order. Pass 'true' for the checkout version which doesn't offer gateway choices.
-     *
-     * @param  bool $on_checkout
-     * @return string
-     */
-    public function get_checkout_payment_url( $on_checkout = false ) {
-        $pay_url = wc_get_endpoint_url( 'order-pay', $this->get_id(), wc_get_page_permalink( 'checkout' ) );
-
-        if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
-            $pay_url = str_replace( 'http:', 'https:', $pay_url );
-        }
-
-        if ( $on_checkout ) {
-            $pay_url = add_query_arg( 'key', $this->get_order_key(), $pay_url );
-        } else {
-            $pay_url = add_query_arg( array( 'pay_for_order' => 'true', 'key' => $this->get_order_key() ), $pay_url );
-        }
-
-        return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
-    }
-
-    /**
-     * Generates a URL for the thanks page (order received).
-     *
-     * @return string
-     */
-    public function get_checkout_order_received_url() {
-        $order_received_url = wc_get_endpoint_url( 'order-received', $this->get_id(), wc_get_page_permalink( 'checkout' ) );
-
-        if ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
-            $order_received_url = str_replace( 'http:', 'https:', $order_received_url );
-        }
-
-        $order_received_url = add_query_arg( 'key', $this->get_order_key(), $order_received_url );
-
-        return apply_filters( 'woocommerce_get_checkout_order_received_url', $order_received_url, $this );
-    }
-
-    /**
-     * Generates a URL so that a customer can cancel their (unpaid - pending) order.
-     *
-     * @param string $redirect
-     *
-     * @return string
-     */
-    public function get_cancel_order_url( $redirect = '' ) {
-        return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
-            'cancel_order' => 'true',
-            'order'        => $this->get_order_key(),
-            'order_id'     => $this->get_id(),
-            'redirect'     => $redirect
-        ), $this->get_cancel_endpoint() ), 'woocommerce-cancel_order' ) );
-    }
-
-    /**
-     * Generates a raw (unescaped) cancel-order URL for use by payment gateways.
-     *
-     * @param string $redirect
-     *
-     * @return string The unescaped cancel-order URL.
-     */
-    public function get_cancel_order_url_raw( $redirect = '' ) {
-        return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array(
-            'cancel_order' => 'true',
-            'order'        => $this->get_order_key(),
-            'order_id'     => $this->get_id(),
-            'redirect'     => $redirect,
-            '_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
-        ), $this->get_cancel_endpoint() ) );
-    }
-
-    /**
-     * Helper method to return the cancel endpoint.
-     *
-     * @return string the cancel endpoint; either the cart page or the home page.
-     */
-    public function get_cancel_endpoint() {
-        $cancel_endpoint = wc_get_page_permalink( 'cart' );
-        if ( ! $cancel_endpoint ) {
-            $cancel_endpoint = home_url();
-        }
-
-        if ( false === strpos( $cancel_endpoint, '?' ) ) {
-            $cancel_endpoint = trailingslashit( $cancel_endpoint );
-        }
-
-        return $cancel_endpoint;
-    }
-
-    /**
-     * Generates a URL to view an order from the my account page.
-     *
-     * @return string
-     */
-    public function get_view_order_url() {
-        return apply_filters( 'woocommerce_get_view_order_url', wc_get_endpoint_url( 'view-order', $this->get_id(), wc_get_page_permalink( 'myaccount' ) ), $this );
-    }
-
-	/*
-    |--------------------------------------------------------------------------
-    | Order notes.
-    |--------------------------------------------------------------------------
-    */
+	|--------------------------------------------------------------------------
+	| URLs and Endpoints
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
-     * Adds a note (comment) to the order.
-     *
-     * @param string $note Note to add.
-     * @param int $is_customer_note (default: 0) Is this a note for the customer?
-     * @param  bool added_by_user Was the note added by a user?
-     * @return int Comment ID.
-     */
-    public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
-        if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_id() ) && $added_by_user ) {
-            $user                 = get_user_by( 'id', get_current_user_id() );
-            $comment_author       = $user->display_name;
-            $comment_author_email = $user->user_email;
-        } else {
-            $comment_author       = __( 'WooCommerce', 'woocommerce' );
-            $comment_author_email = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
-            $comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com';
-            $comment_author_email = sanitize_email( $comment_author_email );
-        }
+	 * Generates a URL so that a customer can pay for their (unpaid - pending) order. Pass 'true' for the checkout version which doesn't offer gateway choices.
+	 *
+	 * @param  bool $on_checkout
+	 * @return string
+	 */
+	public function get_checkout_payment_url( $on_checkout = false ) {
+		$pay_url = wc_get_endpoint_url( 'order-pay', $this->get_id(), wc_get_page_permalink( 'checkout' ) );
 
-        $comment_post_ID        = $this->get_id();
-        $comment_author_url     = '';
-        $comment_content        = $note;
-        $comment_agent          = 'WooCommerce';
-        $comment_type           = 'order_note';
-        $comment_parent         = 0;
-        $comment_approved       = 1;
-        $commentdata            = apply_filters( 'woocommerce_new_order_note_data', compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_agent', 'comment_type', 'comment_parent', 'comment_approved' ), array( 'order_id' => $this->get_id(), 'is_customer_note' => $is_customer_note ) );
+		if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
+			$pay_url = str_replace( 'http:', 'https:', $pay_url );
+		}
 
-        $comment_id = wp_insert_comment( $commentdata );
+		if ( $on_checkout ) {
+			$pay_url = add_query_arg( 'key', $this->get_order_key(), $pay_url );
+		} else {
+			$pay_url = add_query_arg( array( 'pay_for_order' => 'true', 'key' => $this->get_order_key() ), $pay_url );
+		}
 
-        if ( $is_customer_note ) {
-            add_comment_meta( $comment_id, 'is_customer_note', 1 );
-
-            do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->get_id(), 'customer_note' => $commentdata['comment_content'] ) );
-        }
-
-        return $comment_id;
-    }
+		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
+	}
 
 	/**
-     * List order notes (public) for the customer.
-     *
-     * @return array
-     */
-    public function get_customer_order_notes() {
-        $notes = array();
-        $args  = array(
-            'post_id' => $this->get_id(),
-            'approve' => 'approve',
-            'type'    => ''
-        );
+	 * Generates a URL for the thanks page (order received).
+	 *
+	 * @return string
+	 */
+	public function get_checkout_order_received_url() {
+		$order_received_url = wc_get_endpoint_url( 'order-received', $this->get_id(), wc_get_page_permalink( 'checkout' ) );
 
-        remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
+		if ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
+			$order_received_url = str_replace( 'http:', 'https:', $order_received_url );
+		}
 
-        $comments = get_comments( $args );
+		$order_received_url = add_query_arg( 'key', $this->get_order_key(), $order_received_url );
 
-        foreach ( $comments as $comment ) {
-            if ( ! get_comment_meta( $comment->comment_ID, 'is_customer_note', true ) ) {
-                continue;
-            }
-            $comment->comment_content = make_clickable( $comment->comment_content );
-            $notes[] = $comment;
-        }
+		return apply_filters( 'woocommerce_get_checkout_order_received_url', $order_received_url, $this );
+	}
 
-        add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
+	/**
+	 * Generates a URL so that a customer can cancel their (unpaid - pending) order.
+	 *
+	 * @param string $redirect
+	 *
+	 * @return string
+	 */
+	public function get_cancel_order_url( $redirect = '' ) {
+		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
+			'cancel_order' => 'true',
+			'order'        => $this->get_order_key(),
+			'order_id'     => $this->get_id(),
+			'redirect'     => $redirect
+		), $this->get_cancel_endpoint() ), 'woocommerce-cancel_order' ) );
+	}
 
-        return $notes;
-    }
+	/**
+	 * Generates a raw (unescaped) cancel-order URL for use by payment gateways.
+	 *
+	 * @param string $redirect
+	 *
+	 * @return string The unescaped cancel-order URL.
+	 */
+	public function get_cancel_order_url_raw( $redirect = '' ) {
+		return apply_filters( 'woocommerce_get_cancel_order_url_raw', add_query_arg( array(
+			'cancel_order' => 'true',
+			'order'        => $this->get_order_key(),
+			'order_id'     => $this->get_id(),
+			'redirect'     => $redirect,
+			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
+		), $this->get_cancel_endpoint() ) );
+	}
+
+	/**
+	 * Helper method to return the cancel endpoint.
+	 *
+	 * @return string the cancel endpoint; either the cart page or the home page.
+	 */
+	public function get_cancel_endpoint() {
+		$cancel_endpoint = wc_get_page_permalink( 'cart' );
+		if ( ! $cancel_endpoint ) {
+			$cancel_endpoint = home_url();
+		}
+
+		if ( false === strpos( $cancel_endpoint, '?' ) ) {
+			$cancel_endpoint = trailingslashit( $cancel_endpoint );
+		}
+
+		return $cancel_endpoint;
+	}
+
+	/**
+	 * Generates a URL to view an order from the my account page.
+	 *
+	 * @return string
+	 */
+	public function get_view_order_url() {
+		return apply_filters( 'woocommerce_get_view_order_url', wc_get_endpoint_url( 'view-order', $this->get_id(), wc_get_page_permalink( 'myaccount' ) ), $this );
+	}
 
 	/*
-    |--------------------------------------------------------------------------
-    | Refunds
-    |--------------------------------------------------------------------------
-    */
+	|--------------------------------------------------------------------------
+	| Order notes.
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Adds a note (comment) to the order.
+	 *
+	 * @param string $note Note to add.
+	 * @param int $is_customer_note (default: 0) Is this a note for the customer?
+	 * @param  bool added_by_user Was the note added by a user?
+	 * @return int Comment ID.
+	 */
+	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
+		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_id() ) && $added_by_user ) {
+			$user                 = get_user_by( 'id', get_current_user_id() );
+			$comment_author       = $user->display_name;
+			$comment_author_email = $user->user_email;
+		} else {
+			$comment_author       = __( 'WooCommerce', 'woocommerce' );
+			$comment_author_email = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
+			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com';
+			$comment_author_email = sanitize_email( $comment_author_email );
+		}
+		$commentdata = apply_filters( 'woocommerce_new_order_note_data', array(
+			'comment_post_ID'      => $this->get_id(),
+			'comment_author'       => $comment_author,
+			'comment_author_email' => $comment_author_email,
+			'comment_author_url'   => '',
+			'comment_content'      => $note,
+			'comment_agent'        => 'WooCommerce',
+			'comment_type'         => 'order_note',
+			'comment_parent'       => 0,
+			'comment_approved'     => 1,
+		), array( 'order_id' => $this->get_id(), 'is_customer_note' => $is_customer_note ) );
+
+		$comment_id = wp_insert_comment( $commentdata );
+
+		if ( $is_customer_note ) {
+			add_comment_meta( $comment_id, 'is_customer_note', 1 );
+
+			do_action( 'woocommerce_new_customer_note', array( 'order_id' => $this->get_id(), 'customer_note' => $commentdata['comment_content'] ) );
+		}
+
+		return $comment_id;
+	}
+
+	/**
+	 * List order notes (public) for the customer.
+	 *
+	 * @return array
+	 */
+	public function get_customer_order_notes() {
+		$notes = array();
+		$args  = array(
+			'post_id' => $this->get_id(),
+			'approve' => 'approve',
+			'type'    => ''
+		);
+
+		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
+
+		$comments = get_comments( $args );
+
+		foreach ( $comments as $comment ) {
+			if ( ! get_comment_meta( $comment->comment_ID, 'is_customer_note', true ) ) {
+				continue;
+			}
+			$comment->comment_content = make_clickable( $comment->comment_content );
+			$notes[] = $comment;
+		}
+
+		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ) );
+
+		return $notes;
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Refunds
+	|--------------------------------------------------------------------------
+	*/
 
 	/**
 	 * Get order refunds.
