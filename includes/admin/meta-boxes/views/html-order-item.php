@@ -62,9 +62,9 @@ $_product = $item->get_product();
 		<div class="view">
 			<?php
 				if ( $item->get_subtotal() && $item->get_subtotal() !== $item->get_total() ) {
-					echo '<del>' . wc_price( $order->get_item_subtotal( $item, false, true ), array( 'currency' => $order->get_order_currency() ) ) . '</del> ';
+					echo '<del>' . wc_price( $order->get_item_subtotal( $item, false, true ), array( 'currency' => $order->get_currency() ) ) . '</del> ';
 				}
-				echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_order_currency() ) );
+				echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_currency() ) );
 			?>
 		</div>
 	</td>
@@ -91,12 +91,12 @@ $_product = $item->get_product();
 		<div class="view">
 			<?php
 				if ( $item->get_subtotal() && $item->get_subtotal() !== $item->get_total() ) {
-					echo '<del>' . wc_price( $item->get_subtotal(), array( 'currency' => $order->get_order_currency() ) ) . '</del> ';
+					echo '<del>' . wc_price( $item->get_subtotal(), array( 'currency' => $order->get_currency() ) ) . '</del> ';
 				}
-				echo wc_price( $item->get_total(), array( 'currency' => $order->get_order_currency() ) );
+				echo wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );
 
 				if ( $refunded = $order->get_total_refunded_for_item( $item->get_id() ) ) {
-					echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</small>';
+					echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
 				}
 			?>
 		</div>
@@ -128,16 +128,16 @@ $_product = $item->get_product();
 							<?php
 								if ( '' != $tax_item_total ) {
 									if ( isset( $tax_item_subtotal ) && $tax_item_subtotal != $tax_item_total ) {
-										echo '<del>' . wc_price( wc_round_tax_total( $tax_item_subtotal ), array( 'currency' => $order->get_order_currency() ) ) . '</del> ';
+										echo '<del>' . wc_price( wc_round_tax_total( $tax_item_subtotal ), array( 'currency' => $order->get_currency() ) ) . '</del> ';
 									}
 
-									echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_order_currency() ) );
+									echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) );
 								} else {
 									echo '&ndash;';
 								}
 
 								if ( $refunded = $order->get_tax_refunded_for_item( $item->get_id(), $tax_item_id ) ) {
-									echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</small>';
+									echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
 								}
 							?>
 						</div>

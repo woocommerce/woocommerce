@@ -126,8 +126,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param string $currency
 	 */
 	protected function validate_currency( $order, $currency ) {
-		if ( $order->get_order_currency() != $currency ) {
-			WC_Gateway_Paypal::log( 'Payment error: Currencies do not match (sent "' . $order->get_order_currency() . '" | returned "' . $currency . '")' );
+		if ( $order->get_currency() != $currency ) {
+			WC_Gateway_Paypal::log( 'Payment error: Currencies do not match (sent "' . $order->get_currency() . '" | returned "' . $currency . '")' );
 
 			// Put this order on-hold for manual checking.
 			$order->update_status( 'on-hold', sprintf( __( 'Validation error: PayPal currencies do not match (code %s).', 'woocommerce' ), $currency ) );

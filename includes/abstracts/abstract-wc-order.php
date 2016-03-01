@@ -127,7 +127,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 			// Set meta data
 			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
-			$this->update_post_meta( '_order_currency', $this->get_order_currency() );
+			$this->update_post_meta( '_order_currency', $this->get_currency() );
 			$this->update_post_meta( '_order_key', $this->get_order_key() );
 			$this->update_post_meta( '_cart_discount', $this->get_discount_total() );
 			$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax() );
@@ -164,7 +164,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$this->set_order_type( $post_object->post_type );
 		$this->set_customer_id( get_post_meta( $order_id, '_customer_user', true ) );
 		$this->set_order_key( get_post_meta( $order_id, '_order_key', true ) );
-		$this->set_order_currency( get_post_meta( $order_id, '_order_currency', true ) );
+		$this->set_currency( get_post_meta( $order_id, '_order_currency', true ) );
 		$this->set_discount_total( get_post_meta( $order_id, '_cart_discount', true ) );
 		$this->set_discount_tax( get_post_meta( $order_id, '_cart_discount_tax', true ) );
 		$this->set_shipping_total( get_post_meta( $order_id, '_order_shipping', true ) );
@@ -220,7 +220,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 		// Update meta data
 		$this->update_post_meta( '_customer_user', $this->get_customer_id() );
-		$this->update_post_meta( '_order_currency', $this->get_order_currency() );
+		$this->update_post_meta( '_order_currency', $this->get_currency() );
 		$this->update_post_meta( '_order_key', $this->get_order_key() );
 		$this->update_post_meta( '_cart_discount', $this->get_discount_total() );
 		$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax() );
@@ -495,8 +495,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * Gets order currency.
 	 * @return string
 	 */
-	public function get_order_currency() {
-		return apply_filters( 'woocommerce_get_order_currency', $this->_data['order_currency'], $this );
+	public function get_currency() {
+		return apply_filters( 'woocommerce_get_currency', $this->_data['order_currency'], $this );
 	}
 
 	/**
@@ -734,7 +734,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			$tax_totals[ $code ]->is_compound       = $tax->is_compound();
 			$tax_totals[ $code ]->label             = $tax->get_label();
 			$tax_totals[ $code ]->amount           += $tax->get_tax_total() + $tax->get_shipping_tax_total();
-			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_order_currency() ) );
+			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array( 'currency' => $this->get_currency() ) );
 		}
 
 		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
@@ -820,7 +820,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * Set order_currency
 	 * @param string $value
 	 */
-	public function set_order_currency( $value ) {
+	public function set_currency( $value ) {
 		$this->_data['order_currency'] = $value;
 	}
 
@@ -1552,9 +1552,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		if ( 'excl' == $tax_display ) {
 			$ex_tax_label = $this->get_prices_include_tax() ? 1 : 0;
 
-			$subtotal = wc_price( $this->get_line_subtotal( $item ), array( 'ex_tax_label' => $ex_tax_label, 'currency' => $this->get_order_currency() ) );
+			$subtotal = wc_price( $this->get_line_subtotal( $item ), array( 'ex_tax_label' => $ex_tax_label, 'currency' => $this->get_currency() ) );
 		} else {
-			$subtotal = wc_price( $this->get_line_subtotal( $item, true ), array('currency' => $this->get_order_currency()) );
+			$subtotal = wc_price( $this->get_line_subtotal( $item, true ), array('currency' => $this->get_currency()) );
 		}
 
 		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $subtotal, $item, $this );
@@ -1565,7 +1565,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @return string
 	 */
 	public function get_formatted_order_total() {
-		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_order_currency() ) );
+		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_currency() ) );
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
 
@@ -1589,7 +1589,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 				}
 			}
 
-			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_order_currency() ) );
+			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 
 			if ( 'excl' === $tax_display && $this->get_prices_include_tax() ) {
 				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
@@ -1617,7 +1617,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 			// Remove discounts.
 			$subtotal = $subtotal - $this->get_total_discount();
-			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_order_currency() ) );
+			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 		}
 
 		return apply_filters( 'woocommerce_order_subtotal_to_display', $subtotal, $compound, $this );
@@ -1636,7 +1636,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			if ( $tax_display == 'excl' ) {
 
 				// Show shipping excluding tax.
-				$shipping = wc_price( $this->get_shipping_total(), array('currency' => $this->get_order_currency()) );
+				$shipping = wc_price( $this->get_shipping_total(), array('currency' => $this->get_currency()) );
 
 				if ( $this->get_shipping_tax() != 0 && $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
@@ -1645,7 +1645,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			} else {
 
 				// Show shipping including tax.
-				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array('currency' => $this->get_order_currency()) );
+				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array('currency' => $this->get_currency()) );
 
 				if ( $this->get_shipping_tax() != 0 && ! $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
@@ -1671,7 +1671,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function get_discount_to_display( $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( 'excl' === $tax_display && 'excl' === get_option( 'woocommerce_tax_display_cart' ) ), array( 'currency' => $this->get_order_currency() ) ), $this );
+		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( 'excl' === $tax_display && 'excl' === get_option( 'woocommerce_tax_display_cart' ) ), array( 'currency' => $this->get_currency() ) ), $this );
 	}
 
 	/**
@@ -1712,7 +1712,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 				}
 				$total_rows[ 'fee_' . $fee->get_order_item_id() ] = array(
 					'label' => $fee->get_name() . ':',
-					'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array('currency' => $this->get_order_currency()) )
+					'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array('currency' => $this->get_currency()) )
 				);
 			}
 		}
@@ -1734,7 +1734,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 				$total_rows['tax'] = array(
 					'label' => WC()->countries->tax_or_vat() . ':',
-					'value'    => wc_price( $this->get_total_tax(), array( 'currency' => $this->get_order_currency() ) ),
+					'value'    => wc_price( $this->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}
@@ -1750,7 +1750,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			foreach ( $refunds as $id => $refund ) {
 				$total_rows[ 'refund_' . $id ] = array(
 					'label' => $refund->get_refund_reason() ? $refund->get_refund_reason() : __( 'Refund', 'woocommerce' ) . ':',
-					'value'    => wc_price( '-' . $refund->get_refund_amount(), array( 'currency' => $this->get_order_currency() ) ),
+					'value'    => wc_price( '-' . $refund->get_refund_amount(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}

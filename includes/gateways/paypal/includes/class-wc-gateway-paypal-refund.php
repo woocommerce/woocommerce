@@ -38,7 +38,7 @@ class WC_Gateway_Paypal_Refund {
 		);
 		if ( ! is_null( $amount ) ) {
 			$request['AMT']          = number_format( $amount, 2, '.', '' );
-			$request['CURRENCYCODE'] = $order->get_order_currency();
+			$request['CURRENCYCODE'] = $order->get_currency();
 			$request['REFUNDTYPE']   = 'Partial';
 		}
 		return apply_filters( 'woocommerce_paypal_refund_request', $request, $order, $amount, $reason );

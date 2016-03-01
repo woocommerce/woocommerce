@@ -720,7 +720,7 @@ function wc_create_refund( $args = array() ) {
 	$refund->set_parent_id( $args['order_id'] );
 	$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
 	$refund->set_refund_amount( $args['amount'] );
-	$refund->set_order_currency( $order->get_order_currency() );
+	$refund->set_currency( $order->get_currency() );
 
 	if ( ! is_null( $args['reason'] ) ) {
 		$refund->set_refund_reason( wc_clean( $args['reason'] ) );

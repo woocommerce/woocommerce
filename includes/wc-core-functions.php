@@ -69,7 +69,7 @@ function wc_create_order( $args = array() ) {
 	$updating = $order->get_id() > 0;
 
 	if ( ! $updating ) {
-		$order->set_order_currency( get_woocommerce_currency() );
+		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );

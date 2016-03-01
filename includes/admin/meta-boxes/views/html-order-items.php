@@ -127,7 +127,7 @@ if ( wc_tax_enabled() ) {
 
 						$link = $post_id ? add_query_arg( array( 'post' => $post_id, 'action' => 'edit' ), admin_url( 'post.php' ) ) : add_query_arg( array( 's' => $item['name'], 'post_status' => 'all', 'post_type' => 'shop_coupon' ), admin_url( 'edit.php' ) );
 
-						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item['discount_amount'], array( 'currency' => $order->get_order_currency() ) ) ) . '"><span>' . esc_html( $item['name'] ). '</span></a></li>';
+						echo '<li class="code"><a href="' . esc_url( $link ) . '" class="tips" data-tip="' . esc_attr( wc_price( $item['discount_amount'], array( 'currency' => $order->get_currency() ) ) ) . '"><span>' . esc_html( $item['name'] ). '</span></a></li>';
 					}
 				?></ul>
 			</div>
@@ -138,7 +138,7 @@ if ( wc_tax_enabled() ) {
 		<tr>
 			<td class="label"><?php echo wc_help_tip( __( 'This is the total discount. Discounts are defined per line item.', 'woocommerce' ) ); ?> <?php _e( 'Discount', 'woocommerce' ); ?>:</td>
 			<td class="total">
-				<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_order_currency() ) ); ?>
+				<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); ?>
 			</td>
 			<td width="1%"></td>
 		</tr>
@@ -149,9 +149,9 @@ if ( wc_tax_enabled() ) {
 			<td class="label"><?php echo wc_help_tip( __( 'This is the shipping and handling total costs for the order.', 'woocommerce' ) ); ?> <?php _e( 'Shipping', 'woocommerce' ); ?>:</td>
 			<td class="total"><?php
 				if ( ( $refunded = $order->get_total_shipping_refunded() ) > 0 ) {
-					echo '<del>' . strip_tags( wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_order_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_total_shipping() - $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</ins>';
+					echo '<del>' . strip_tags( wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_total_shipping() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
 				} else {
-					echo wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_order_currency() ) );
+					echo wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_currency() ) );
 				}
 
 
@@ -167,7 +167,7 @@ if ( wc_tax_enabled() ) {
 					<td class="label"><?php echo $tax->label; ?>:</td>
 					<td class="total"><?php
 						if ( ( $refunded = $order->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ) > 0 ) {
-							echo '<del>' . strip_tags( $tax->formatted_amount ) . '</del> <ins>' . wc_price( WC_Tax::round( $tax->amount, wc_get_price_decimals() ) - WC_Tax::round( $refunded, wc_get_price_decimals() ), array( 'currency' => $order->get_order_currency() ) ) . '</ins>';
+							echo '<del>' . strip_tags( $tax->formatted_amount ) . '</del> <ins>' . wc_price( WC_Tax::round( $tax->amount, wc_get_price_decimals() ) - WC_Tax::round( $refunded, wc_get_price_decimals() ), array( 'currency' => $order->get_currency() ) ) . '</ins>';
 						} else {
 							echo $tax->formatted_amount;
 						}
@@ -201,7 +201,7 @@ if ( wc_tax_enabled() ) {
 
 		<tr>
 			<td class="label refunded-total"><?php _e( 'Refunded', 'woocommerce' ); ?>:</td>
-			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
+			<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
 			<td width="1%"></td>
 		</tr>
 
@@ -269,11 +269,11 @@ if ( wc_tax_enabled() ) {
 		</tr>
 		<tr>
 			<td class="label"><?php _e( 'Amount already refunded', 'woocommerce' ); ?>:</td>
-			<td class="total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
+			<td class="total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
 		</tr>
 		<tr>
 			<td class="label"><?php _e( 'Total available to refund', 'woocommerce' ); ?>:</td>
-			<td class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_order_currency() ) ); ?></td>
+			<td class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); ?></td>
 		</tr>
 		<tr>
 			<td class="label"><label for="refund_amount"><?php _e( 'Refund amount', 'woocommerce' ); ?>:</label></td>
@@ -293,7 +293,7 @@ if ( wc_tax_enabled() ) {
 	<div class="clear"></div>
 	<div class="refund-actions">
 		<?php
-		$refund_amount            = '<span class="wc-order-refund-amount">' . wc_price( 0, array( 'currency' => $order->get_order_currency() ) ) . '</span>';
+		$refund_amount            = '<span class="wc-order-refund-amount">' . wc_price( 0, array( 'currency' => $order->get_currency() ) ) . '</span>';
 		$gateway_supports_refunds = false !== $payment_gateway && $payment_gateway->supports( 'refunds' );
 		$gateway_name             = false !== $payment_gateway ? ( ! empty( $payment_gateway->method_title ) ? $payment_gateway->method_title : $payment_gateway->get_title() ) : __( 'Payment Gateway', 'woocommerce' );
 		?>
