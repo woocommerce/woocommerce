@@ -1,9 +1,9 @@
-/*global jQuery, woocommercePaymentGatewayParams */
+/*global jQuery,  woocommerceTokenizationParams */
 jQuery( function( $ ) {
 
-	var wcPaymentGatewayForm = {
-		gatewayID: woocommercePaymentGatewayParams.gatewayID,
-		userLoggedIn: woocommercePaymentGatewayParams.userLoggedIn,
+	var  wcTokenizationForm = {
+		gatewayID: woocommerceTokenizationParams.gatewayID,
+		userLoggedIn:  woocommerceTokenizationParams.userLoggedIn,
 
 		hideForm: function() {
 			$( '#wc-' + this.gatewayID + '-cc-form, #wc-' + this.gatewayID + '-echeck-form' ).hide();
@@ -33,43 +33,43 @@ jQuery( function( $ ) {
 	$(  document.body ).on( 'updated_checkout', function() {
 
 		// Make sure a radio button (1st) is selected if there is no is_default for this payment method..
-		if ( ! $( 'input[name="wc-' + woocommercePaymentGatewayParams.gatewayID + '-payment-token"]' ).is( ':checked' ) ) {
-			$( 'input:radio[name="wc-' + woocommercePaymentGatewayParams.gatewayID + '-payment-token"]:first' ).attr( 'checked', true );
-			if ( 'new' === $( 'input:radio[name="wc-' + woocommercePaymentGatewayParams.gatewayID + '-payment-token"]:first' ).val() ) {
-				wcPaymentGatewayForm.showForm();
-				wcPaymentGatewayForm.showSaveNewCheckboxForLoggedInOnly();
+		if ( ! $( 'input[name="wc-' +  woocommerceTokenizationParams.gatewayID + '-payment-token"]' ).is( ':checked' ) ) {
+			$( 'input:radio[name="wc-' +  woocommerceTokenizationParams.gatewayID + '-payment-token"]:first' ).attr( 'checked', true );
+			if ( 'new' === $( 'input:radio[name="wc-' +  woocommerceTokenizationParams.gatewayID + '-payment-token"]:first' ).val() ) {
+				 wcTokenizationForm.showForm();
+				 wcTokenizationForm.showSaveNewCheckboxForLoggedInOnly();
 			} else {
-				wcPaymentGatewayForm.hideForm();
-				wcPaymentGatewayForm.hideSaveNewCheckbox();
+				 wcTokenizationForm.hideForm();
+				 wcTokenizationForm.hideSaveNewCheckbox();
 			}
 		} else {
-			wcPaymentGatewayForm.hideForm();
-			wcPaymentGatewayForm.hideSaveNewCheckbox();
+			 wcTokenizationForm.hideForm();
+			 wcTokenizationForm.hideSaveNewCheckbox();
 		}
 
 		// When a radio button is changed, make sure to show/hide our new CC info area
-		$( 'input[name="wc-' + woocommercePaymentGatewayParams.gatewayID + '-payment-token"]' ).change( function () {
-			if ( 'new' === $( 'input[name="wc-' + woocommercePaymentGatewayParams.gatewayID + '-payment-token"]:checked' ).val() ) {
-				wcPaymentGatewayForm.showForm();
-				wcPaymentGatewayForm.showSaveNewCheckboxForLoggedInOnly();
+		$( 'input[name="wc-' +  woocommerceTokenizationParams.gatewayID + '-payment-token"]' ).change( function () {
+			if ( 'new' === $( 'input[name="wc-' +  woocommerceTokenizationParams.gatewayID + '-payment-token"]:checked' ).val() ) {
+				 wcTokenizationForm.showForm();
+				 wcTokenizationForm.showSaveNewCheckboxForLoggedInOnly();
 			} else {
-				wcPaymentGatewayForm.hideForm();
-				wcPaymentGatewayForm.hideSaveNewCheckbox();
+				 wcTokenizationForm.hideForm();
+				 wcTokenizationForm.hideSaveNewCheckbox();
 			}
 		} );
 
 		// OR if create account is checked
 		$ ( 'input#createaccount' ).change( function() {
 			if ( $( this ).is( ':checked' ) ) {
-				wcPaymentGatewayForm.showSaveNewCheckbox();
+				 wcTokenizationForm.showSaveNewCheckbox();
 			} else {
-				wcPaymentGatewayForm.hideSaveNewCheckbox();
+				 wcTokenizationForm.hideSaveNewCheckbox();
 			}
 		} );
 
 		// Don't show the "use new" radio button if we are a guest or only have one method..
-		if ( 0 === $( '#wc-' + woocommercePaymentGatewayParams.gatewayID + '-method-count' ).data( 'count' ) || ! woocommercePaymentGatewayParams.userLoggedIn ) {
-			$( '.wc-' + woocommercePaymentGatewayParams.gatewayID + '-payment-form-new-checkbox-wrap' ).hide();
+		if ( 0 === $( '#wc-' +  woocommerceTokenizationParams.gatewayID + '-method-count' ).data( 'count' ) || !  woocommerceTokenizationParams.userLoggedIn ) {
+			$( '.wc-' +  woocommerceTokenizationParams.gatewayID + '-payment-form-new-checkbox-wrap' ).hide();
 		}
 
 	} );

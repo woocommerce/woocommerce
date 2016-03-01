@@ -366,12 +366,12 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public function tokenization_script() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_script(
-			'woocommerce-payment-gateway-form',
-			plugins_url(  '/assets/js/frontend/payment-gateway-form' . $suffix . '.js', WC_PLUGIN_FILE ),
+			'woocommerce-tokenization-form',
+			plugins_url(  '/assets/js/frontend/tokenization-form' . $suffix . '.js', WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			WC()->version
 		);
-		wp_localize_script( 'woocommerce-payment-gateway-form', 'woocommercePaymentGatewayParams', array(
+		wp_localize_script( 'woocommerce-tokenization-form', 'woocommerceTokenizationParams', array(
 			'gatewayID'    => $this->id,
 			'userLoggedIn' => (bool) is_user_logged_in(),
 		) );
