@@ -396,7 +396,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 			return;
 		}
 
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'order_itemmeta' );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'order_itemmeta' ) . $this->get_id();
 		$cached_meta = wp_cache_get( $cache_key, 'order_itemmeta' );
 
 		if ( false !== $cached_meta ) {
@@ -404,7 +404,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 		} else {
 			global $wpdb;
 
-			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d ORDER BY meta_id", $this->get_id() ) );
+			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d ORDER BY meta_id", $this->get_id() ) );
 
 			foreach ( $raw_meta_data as $meta ) {
 				if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
@@ -422,7 +422,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	 */
 	protected function save_meta_data() {
 		global $wpdb;
-		$all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d", $this->get_id() ) . " AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');" ) );
+		$all_meta_ids = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $this->get_id() ) . " AND meta_key NOT IN ('" . implode( "','", array_map( 'esc_sql', $this->get_internal_meta_keys() ) ) . "');" ) );
 		$set_meta_ids = array();
 
 		foreach ( $this->_meta_data as $meta_id => $meta ) {

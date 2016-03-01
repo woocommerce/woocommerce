@@ -178,7 +178,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 		if ( WC_Pre_Orders_Order::order_requires_payment_tokenization( $order->get_id() ) ) {
 
 			try {
-				if ( $order->order_total * 100 < 50 ) {
+				if ( $order->get_order_total() * 100 < 50 ) {
 					$error_msg = __( 'Sorry, the minimum allowed order total is 0.50 to use this payment method.', 'woocommerce' );
 
 					throw new Simplify_ApiException( $error_msg );
@@ -437,7 +437,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 
 			// Charge the customer
 			$payment = Simplify_Payment::createPayment( array(
-				'amount'              => $order->order_total * 100, // In cents.
+				'amount'              => $order->get_order_total() * 100, // In cents.
 				'customer'            => $customer_id,
 				'description'         => trim( substr( $pre_order_name, 0, 1024 ) ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
@@ -484,7 +484,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 			$amount      = absint( $_REQUEST['amount'] );
 			$order_id    = absint( $_REQUEST['reference'] );
 			$order       = wc_get_order( $order_id );
-			$order_total = absint( $order->order_total * 100 );
+			$order_total = absint( $order->get_order_total() * 100 );
 
 			if ( $amount === $order_total ) {
 				if ( $this->order_contains_subscription( $order->get_id() ) ) {

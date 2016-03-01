@@ -7,7 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Order refund. Refunds are based on orders (essentially negative orders) and
  * contain much of the same data.
  *
- * @class    WC_Order_Refund
  * @version  2.6.0
  * @package  WooCommerce/Classes
  * @category Class
@@ -16,29 +15,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
-     * Stores meta data.
-     * @var array
-     */
-    protected $_meta_data = array(
-		'refund_amount' => '',
-		'refund_reason' => '',
-		'refunded_by'   => 0,
-    );
-
-    /**
-     * Get the refund if ID is passed, otherwise the refund is new and empty.
-     * @param  int|object|WC_Order_Refund $refund Refund to init.
-     */
-    public function __construct( $refund = 0 ) {
-		if ( is_numeric( $refund ) ) {
-            $this->read( $refund );
-        } elseif ( $refund instanceof WC_Order_Refund ) {
-            $this->read( $refund->get_id() );
-        } elseif ( ! empty( $refund->ID ) ) {
-            $this->read( absint( $refund->ID ) );
-        }
-		$this->set_order_type( 'shop_order_refund' );
-    }
+	 * Extend the abstract _data properties and then read the order object.
+	 *
+	 * @param  int|object|WC_Order $order Order to init.
+	 */
+	public function __construct( $order = 0 ) {
+		$this->_data = array_merge( $this->_data, array(
+			'refund_amount' => '',
+			'refund_reason' => '',
+			'refunded_by'   => 0,
+		) );
+		parent::__construct( $order );
+	}
 
 	/**
      * Read from the database.
@@ -46,13 +34,19 @@ class WC_Order_Refund extends WC_Abstract_Order {
      * @param int $id ID of object to read.
      */
     public function read( $id ) {
-		if ( empty( $id ) ) {
-			return;
+		parent::read( $id );
+
+		// Read additonal order data
+		if ( $this->get_id() ) {
+			$post_object = get_post( $id );
+			$this->set_refund_amount( get_post_meta( $this->get_id(), '_refund_amount', true ) );
+
+			// post_author was used before refunded_by meta.
+			$this->set_refunded_by( metadata_exists( 'post', $this->get_id(), '_refunded_by' ) ? get_post_meta( $this->get_id(), '_refunded_by', true ) : absint( $post_object->post_author ) );
+
+			// post_excerpt was used before refund_reason meta.
+			$this->set_refund_reason( metadata_exists( 'post', $this->get_id(), '_refund_reason' ) ? get_post_meta( $this->get_id(), '_refund_reason', true ) : absint( $post_object->post_excerpt ) );
 		}
-        $post_object                       = get_post( $id );
-		$this->_meta_data['refunded_by']   = absint( $post_object->post_author ); // post_author was used before refunded_by meta.
-		$this->_meta_data['refund_reason'] = absint( $post_object->post_excerpt ); // post_excerpt was used before refund_reason meta.
-		parent::read( $post_object );
 	}
 
 	/**
@@ -76,7 +70,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_refund_amount() {
-		return apply_filters( 'woocommerce_refund_amount', (double) $this->_meta_data['refund_amount'], $this );
+		return apply_filters( 'woocommerce_refund_amount', (double) $this->_data['refund_amount'], $this );
 	}
 
 	/**
@@ -102,7 +96,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int|float
 	 */
 	public function get_refund_reason() {
-		return apply_filters( 'woocommerce_refund_reason', $this->_meta_data['refund_reason'], $this );
+		return apply_filters( 'woocommerce_refund_reason', $this->_data['refund_reason'], $this );
 	}
 
 	/**
@@ -119,7 +113,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return int
 	 */
 	public function get_refunded_by() {
-		return absint( $this->_meta_data['refunded_by'] );
+		return absint( $this->_data['refunded_by'] );
 	}
 
 	/**
@@ -128,14 +122,14 @@ class WC_Order_Refund extends WC_Abstract_Order {
      * @return mixed
      */
     public function __get( $key ) {
+		_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '2.6' );
+
         /**
          * Maps legacy vars to new getters.
          */
         if ( 'reason' === $key ) {
-            _doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_refund_reason();
 		} elseif ( 'refund_amount' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
             return $this->get_refund_amount();
 		}
 		return parent::__get( $key );

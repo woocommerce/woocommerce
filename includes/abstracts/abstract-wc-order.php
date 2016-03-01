@@ -28,56 +28,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @var array
 	 */
 	protected $_data = array(
-		// When migrating to custom tables, these will be columns.
-		'id'                   => 0,
-		'parent_id'            => 0,
-		'status'               => '',
-		'order_type'           => 'shop_order',
-		'order_key'            => '',
-		'order_currency'       => '',
-		'date_created'         => '',
-		'date_modified'        => '',
-		'customer_id'          => 0,
-		'billing_first_name'   => '',
-		'billing_last_name'    => '',
-		'billing_company'      => '',
-		'billing_address_1'    => '',
-		'billing_address_2'    => '',
-		'billing_city'         => '',
-		'billing_state'        => '',
-		'billing_postcode'     => '',
-		'billing_country'      => '',
-		'billing_email'        => '',
-		'billing_phone'        => '',
-		'shipping_first_name'  => '',
-		'shipping_last_name'   => '',
-		'shipping_company'     => '',
-		'shipping_address_1'   => '',
-		'shipping_address_2'   => '',
-		'shipping_city'        => '',
-		'shipping_state'       => '',
-		'shipping_postcode'    => '',
-		'shipping_country'     => '',
-		'discount_total'       => 0,
-		'discount_tax'         => 0,
-		'shipping_total'       => 0,
-		'shipping_tax'         => 0,
-		'cart_tax'             => 0, // cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
-		'order_total'          => 0,
-		'order_tax'            => 0, // Sum of all taxes.
-
-		// When migrating to tables, these will be stored in order meta
-		'payment_method'       => '',
-		'payment_method_title' => '',
-		'transaction_id'       => '',
-		'customer_ip_address'  => '',
-		'customer_user_agent'  => '',
-		'created_via'          => '',
-		'order_version'        => '',
-		'prices_include_tax'   => false,
-		'customer_note'        => '',
-		'date_completed'       => '',
-		'date_paid'            => '',
+		'id'                 => 0,
+		'parent_id'          => 0,
+		'status'             => '',
+		'order_type'         => 'shop_order',
+		'order_key'          => '',
+		'order_currency'     => '',
+		'order_version'      => '',
+		'prices_include_tax' => false,
+		'date_created'       => '',
+		'date_modified'      => '',
+		'customer_id'        => 0,
+		'discount_total'     => 0,
+		'discount_tax'       => 0,
+		'shipping_total'     => 0,
+		'shipping_tax'       => 0,
+		'cart_tax'           => 0, // cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
+		'order_total'        => 0,
+		'order_tax'          => 0, // Sum of all taxes.
 	);
 
 	/**
@@ -115,6 +83,188 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/*
 	|--------------------------------------------------------------------------
+	| CRUD methods
+	|--------------------------------------------------------------------------
+	|
+	| Methods which create, read, update and delete orders from the database.
+	| Written in abstract fashion so that the way orders are stored can be
+	| changed more easily in the future.
+	|
+	| A save method is included for convenience (chooses update or create based
+	| on if the order exists yet).
+	|
+	*/
+
+	/**
+	 * Get a title for the new post type.
+	 */
+	protected function get_post_title() {
+		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+	}
+
+	/**
+	 * Insert data into the database.
+	 * @since 2.6.0
+	 */
+	public function create() {
+		$this->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
+		$this->set_date_created( current_time( 'timestamp' ) );
+
+		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
+			'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
+			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
+			'post_type'     => $this->get_order_type(),
+			'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
+			'ping_status'   => 'closed',
+			'post_author'   => 1,
+			'post_title'    => $this->get_post_title(),
+			'post_password' => uniqid( 'order_' ),
+			'post_parent'   => $this->get_parent_id(),
+		) ), true );
+
+		if ( $order_id ) {
+			$this->set_id( $order_id );
+
+			// Set meta data
+			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
+			$this->update_post_meta( '_order_currency', $this->get_order_currency() );
+			$this->update_post_meta( '_order_key', $this->get_order_key() );
+			$this->update_post_meta( '_cart_discount', $this->get_discount_total() );
+			$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax() );
+			$this->update_post_meta( '_order_shipping', $this->get_shipping_total() );
+			$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
+			$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
+			$this->update_post_meta( '_order_total', $this->get_order_total() );
+			$this->update_post_meta( '_order_version', $this->get_order_version() );
+			$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
+
+			foreach ( $this->get_meta_data() as $key => $value ) {
+				$this->update_post_meta( '_' . $key, $value );
+			}
+		}
+	}
+
+	/**
+	 * Read from the database.
+	 * @since 2.6.0
+	 * @param int $id ID of object to read.
+	 */
+	public function read( $id ) {
+		if ( empty( $id ) || ! ( $post_object = get_post( $id ) ) ) {
+			return;
+		}
+		$order_id = absint( $post_object->ID );
+
+		// Map standard post data
+		$this->set_id( $order_id );
+		$this->set_date_created( $post_object->post_date );
+		$this->set_date_modified( $post_object->post_modified );
+		$this->set_status( $post_object->post_status );
+		$this->set_customer_note( $post_object->post_excerpt );
+		$this->set_order_type( $post_object->post_type );
+		$this->set_customer_id( get_post_meta( $order_id, '_customer_user', true ) );
+		$this->set_order_key( get_post_meta( $order_id, '_order_key', true ) );
+		$this->set_order_currency( get_post_meta( $order_id, '_order_currency', true ) );
+		$this->set_discount_total( get_post_meta( $order_id, '_cart_discount', true ) );
+		$this->set_discount_tax( get_post_meta( $order_id, '_cart_discount_tax', true ) );
+		$this->set_shipping_total( get_post_meta( $order_id, '_order_shipping', true ) );
+		$this->set_shipping_tax( get_post_meta( $order_id, '_order_shipping_tax', true ) );
+		$this->set_cart_tax( get_post_meta( $order_id, '_order_tax', true ) );
+		$this->set_order_total( get_post_meta( $order_id, '_order_total', true ) );
+
+		// Map user data
+		if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
+			$this->set_billing_email( $user->user_email );
+		}
+
+		// Orders store the state of prices including tax when created.
+		$this->set_prices_include_tax( metadata_exists( 'post', $order_id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $order_id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+
+		// Load meta data
+		$this->read_meta_data();
+	}
+
+	/**
+	 * Post meta update wrapper. Sets or deletes based on value.
+	 * @since 2.6.0
+	 */
+	protected function update_post_meta( $key, $value ) {
+		if ( '' !== $value ) {
+			update_post_meta( $this->get_id(), $key, $value );
+		} else {
+			delete_post_meta( $this->get_id(), $key );
+		}
+	}
+
+	/**
+	 * Update data in the database.
+	 * @since 2.6.0
+	 */
+	public function update() {
+		global $wpdb;
+
+		$order_id = $this->get_id();
+
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
+				'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
+				'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
+				'post_parent'   => $this->get_parent_id(),
+			),
+			array(
+				'ID' => $order_id
+			)
+		);
+
+		// Update meta data
+		$this->update_post_meta( '_customer_user', $this->get_customer_id() );
+		$this->update_post_meta( '_order_currency', $this->get_order_currency() );
+		$this->update_post_meta( '_order_key', $this->get_order_key() );
+		$this->update_post_meta( '_cart_discount', $this->get_discount_total() );
+		$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax() );
+		$this->update_post_meta( '_order_shipping', $this->get_shipping_total() );
+		$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
+		$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
+		$this->update_post_meta( '_order_total', $this->get_order_total() );
+		$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
+
+		foreach ( $this->get_meta_data() as $key => $value ) {
+			$this->update_post_meta( '_' . $key, $value );
+		}
+	}
+
+	/**
+	 * Delete data from the database.
+	 * @since 2.6.0
+	 */
+	public function delete() {
+		wp_delete_post( $this->get_id() );
+	}
+
+	/**
+	 * Save data to the database.
+	 * @since 2.6.0
+	 * @return int order ID
+	 */
+	public function save() {
+		$this->set_order_version( WC_VERSION );
+
+		if ( ! $this->get_id() ) {
+			$this->create();
+		} else {
+			$this->update();
+		}
+
+		$this->save_meta_data();
+		wc_delete_shop_order_transients( $this->get_id() );
+
+		return $this->get_id();
+	}
+
+	/*
+	|--------------------------------------------------------------------------
 	| Meta Data Handling
 	|--------------------------------------------------------------------------
 	*/
@@ -128,11 +278,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	}
 
 	/**
-	 * Internal meta keys we don't want exposed as part of meta_data.
+	 * Internal meta keys we don't want exposed as part of meta_data. This is in
+	 * addition to all data props with _ prefix.
+	 * @return array()
+	 */
+	protected function prefix_key( $key ) {
+		return '_' === substr( $key, 0, 1 ) ? $key : '_' . $key;
+	}
+
+	/**
+	 * Internal meta keys we don't want exposed as part of meta_data. This is in
+	 * addition to all data props with _ prefix.
 	 * @return array()
 	 */
 	protected function get_internal_meta_keys() {
-		return array( '_customer_user', '_order_key', '_order_currency', '_billing_first_name', '_billing_last_name', '_billing_company', '_billing_address_1', '_billing_address_2', '_billing_city', '_billing_state', '_billing_postcode', '_billing_country', '_billing_email', '_billing_phone', '_shipping_first_name', '_shipping_last_name', '_shipping_company', '_shipping_address_1', '_shipping_address_2', '_shipping_city', '_shipping_state', '_shipping_postcode', '_shipping_country', '_completed_date', '_paid_date', '_edit_lock', '_cart_discount', '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_order_total', '_order_total', '_payment_method', '_payment_method_title', '_transaction_id', '_customer_ip_address', '_customer_user_agent', '_created_via', '_order_version', '_prices_include_tax', '_customer_note', '_date_completed', '_date_paid' );
+		return array_merge( array_map( array( $this, 'prefix_key' ), array_keys( $this->_data ) ), array( '_customer_user', '_order_key', '_order_currency', '_billing_first_name', '_billing_last_name', '_billing_company', '_billing_address_1', '_billing_address_2', '_billing_city', '_billing_state', '_billing_postcode', '_billing_country', '_billing_email', '_billing_phone', '_shipping_first_name', '_shipping_last_name', '_shipping_company', '_shipping_address_1', '_shipping_address_2', '_shipping_city', '_shipping_state', '_shipping_postcode', '_shipping_country', '_completed_date', '_paid_date', '_edit_lock', '_edit_last', '_cart_discount', '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_order_total', '_order_total', '_payment_method', '_payment_method_title', '_transaction_id', '_customer_ip_address', '_customer_user_agent', '_created_via', '_order_version', '_prices_include_tax', '_customer_note', '_date_completed', '_date_paid' ) );
 	}
 
 	/**
@@ -216,7 +376,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			return;
 		}
 
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'order_meta' );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'order_meta' ) . $this->get_id();
 		$cached_meta = wp_cache_get( $cache_key, 'order_meta' );
 
 		if ( false !== $cached_meta ) {
@@ -340,6 +500,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	}
 
 	/**
+	 * Get order_version
+	 * @return string
+	 */
+	public function get_order_version() {
+		return $this->_data['order_version'];
+	}
+
+	/**
+	 * Get prices_include_tax
+	 * @return bool
+	 */
+	public function get_prices_include_tax() {
+		return (bool) $this->_data['prices_include_tax'];
+	}
+
+	/**
 	 * Get Order Type
 	 * @return string
 	 */
@@ -372,291 +548,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	}
 
 	/**
-	 * Get billing_first_name
-	 * @return string
-	 */
-	public function get_billing_first_name() {
-		return $this->_data['billing_first_name'];
-	}
-
-	/**
-	 * Get billing_last_name
-	 * @return string
-	 */
-	public function get_billing_last_name() {
-		return $this->_data['billing_last_name'];
-	}
-
-	/**
-	 * Get billing_company
-	 * @return string
-	 */
-	public function get_billing_company() {
-		return $this->_data['billing_company'];
-	}
-
-	/**
-	 * Get billing_address_1
-	 * @return string
-	 */
-	public function get_billing_address_1() {
-		return $this->_data['billing_address_1'];
-	}
-
-	/**
-	 * Get billing_address_2
-	 * @return string $value
-	 */
-	public function get_billing_address_2() {
-		return $this->_data['billing_address_2'];
-	}
-
-	/**
-	 * Get billing_city
-	 * @return string $value
-	 */
-	public function get_billing_city() {
-		return $this->_data['billing_city'];
-	}
-
-	/**
-	 * Get billing_state
-	 * @return string
-	 */
-	public function get_billing_state() {
-		return $this->_data['billing_state'];
-	}
-
-	/**
-	 * Get billing_postcode
-	 * @return string
-	 */
-	public function get_billing_postcode() {
-		return $this->_data['billing_postcode'];
-	}
-
-	/**
-	 * Get billing_country
-	 * @return string
-	 */
-	public function get_billing_country() {
-		return $this->_data['billing_country'];
-	}
-
-	/**
-	 * Get billing_email
-	 * @return string
-	 */
-	public function get_billing_email() {
-		return sanitize_email( $this->_data['billing_email'] );
-	}
-
-	/**
-	 * Get billing_phone
-	 * @return string
-	 */
-	public function get_billing_phone() {
-		return $this->_data['billing_phone'];
-	}
-
-	/**
-	 * Get shipping_first_name
-	 * @return string
-	 */
-	public function get_shipping_first_name() {
-		return $this->_data['shipping_first_name'];
-	}
-
-	/**
-	 * Get shipping_last_name
-	 * @return string
-	 */
-	public function get_shipping_last_name() {
-		 return $this->_data['shipping_last_name'];
-	}
-
-	/**
-	 * Get shipping_company
-	 * @return string
-	 */
-	public function get_shipping_company() {
-		return $this->_data['shipping_company'];
-	}
-
-	/**
-	 * Get shipping_address_1
-	 * @return string
-	 */
-	public function get_shipping_address_1() {
-		return $this->_data['shipping_address_1'];
-	}
-
-	/**
-	 * Get shipping_address_2
-	 * @return string
-	 */
-	public function get_shipping_address_2() {
-		return $this->_data['shipping_address_2'];
-	}
-
-	/**
-	 * Get shipping_city
-	 * @return string
-	 */
-	public function get_shipping_city() {
-		return $this->_data['shipping_city'];
-	}
-
-	/**
-	 * Get shipping_state
-	 * @return string
-	 */
-	public function get_shipping_state() {
-		return $this->_data['shipping_state'];
-	}
-
-	/**
-	 * Get shipping_postcode
-	 * @return string
-	 */
-	public function get_shipping_postcode() {
-		return $this->_data['shipping_postcode'];
-	}
-
-	/**
-	 * Get shipping_country
-	 * @return string
-	 */
-	public function get_shipping_country() {
-		return $this->_data['shipping_country'];
-	}
-
-	/**
-	 * Get the payment method.
-	 * @return string
-	 */
-	public function get_payment_method() {
-		return $this->_data['payment_method'];
-	}
-
-	/**
-	 * Get payment_method_title
-	 * @return string
-	 */
-	public function get_payment_method_title() {
-		return $this->_data['payment_method_title'];
-	}
-
-	/**
-	 * Get transaction_id
-	 * @return string
-	 */
-	public function get_transaction_id() {
-		return $this->_data['transaction_id'];
-	}
-
-	/**
-	 * Get customer_ip_address
-	 * @return string
-	 */
-	public function get_customer_ip_address() {
-		return $this->_data['customer_ip_address'];
-	}
-
-	/**
-	 * Get customer_user_agent
-	 * @return string
-	 */
-	public function get_customer_user_agent() {
-		return $this->_data['customer_user_agent'];
-	}
-
-	/**
-	 * Get created_via
-	 * @return string
-	 */
-	public function get_created_via() {
-		return $this->_data['created_via'];
-	}
-
-	/**
-	 * Get order_version
-	 * @return string
-	 */
-	public function get_order_version() {
-		return $this->_data['order_version'];
-	}
-
-	/**
-	 * Get prices_include_tax
-	 * @return bool
-	 */
-	public function get_prices_include_tax() {
-		return (bool) $this->_data['prices_include_tax'];
-	}
-
-	/**
-	 * Get customer_note
-	 * @return string
-	 */
-	public function get_customer_note() {
-		return $this->_data['customer_note'];
-	}
-
-	/**
-	 * Get date_completed
-	 * @return int
-	 */
-	public function get_date_completed() {
-		return absint( $this->_data['date_completed'] );
-	}
-
-	/**
-	 * Get date_paid
-	 * @return int
-	 */
-	public function get_date_paid() {
-		return absint( $this->_data['date_paid'] );
-	}
-
-	/**
-	 * Returns the requested address in raw, non-formatted way.
-	 * @since  2.4.0
-	 * @param  string $type Billing or shipping. Anything else besides 'billing' will return shipping address.
-	 * @return array The stored address after filter.
-	 */
-	public function get_address( $type = 'billing' ) {
-		if ( 'billing' === $type ) {
-			$address = array(
-				'first_name' => $this->get_billing_first_name(),
-				'last_name'  => $this->get_billing_last_name(),
-				'company'    => $this->get_billing_company(),
-				'address_1'  => $this->get_billing_address_1(),
-				'address_2'  => $this->get_billing_address_2(),
-				'city'       => $this->get_billing_city(),
-				'state'      => $this->get_billing_state(),
-				'postcode'   => $this->get_billing_postcode(),
-				'country'    => $this->get_billing_country(),
-				'email'      => $this->get_billing_email(),
-				'phone'      => $this->get_billing_phone(),
-			);
-		} else {
-			$address = array(
-				'first_name' => $this->get_shipping_first_name(),
-				'last_name'  => $this->get_shipping_last_name(),
-				'company'    => $this->get_shipping_company(),
-				'address_1'  => $this->get_shipping_address_1(),
-				'address_2'  => $this->get_shipping_address_2(),
-				'city'       => $this->get_shipping_city(),
-				'state'      => $this->get_shipping_state(),
-				'postcode'   => $this->get_shipping_postcode(),
-				'country'    => $this->get_shipping_country(),
-			);
-		}
-		return apply_filters( 'woocommerce_get_order_address', $address, $type, $this );
-	}
-
-	/**
 	 * Return the order statuses without wc- internal prefix.
 	 * @return string
 	 */
@@ -681,65 +572,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function get_user() {
 		return $this->get_user_id() ? get_user_by( 'id', $this->get_user_id() ) : false;
-	}
-
-	/**
-	 * Get a formatted billing address for the order.
-	 * @return string
-	 */
-	public function get_formatted_billing_address() {
-		return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this ) );
-	}
-
-	/**
-	 * Get a formatted shipping address for the order.
-	 * @return string
-	 */
-	public function get_formatted_shipping_address() {
-		if ( $this->get_shipping_address_1() || $this->get_shipping_address_2() ) {
-			return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_order_formatted_shipping_address', $this->get_address( 'shipping' ), $this ) );
-		} else {
-			return '';
-		}
-	}
-
-	/**
-	 * Get a formatted shipping address for the order.
-	 *
-	 * @return string
-	 */
-	public function get_shipping_address_map_url() {
-		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', array(
-			'address_1' => $this->get_shipping_address_1(),
-			'address_2' => $this->get_shipping_address_2(),
-			'city'      => $this->get_shipping_city(),
-			'state'     => $this->get_shipping_state(),
-			'postcode'  => $this->get_shipping_postcode(),
-			'country'   => $this->get_shipping_country(),
-		), $this );
-		return apply_filters( 'woocommerce_shipping_address_map_url', 'http://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
-	}
-
-	/**
-	 * Get a formatted billing full name.
-	 *
-	 * @since 2.4.0
-	 *
-	 * @return string
-	 */
-	public function get_formatted_billing_full_name() {
-		return sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ),  $this->get_billing_first_name(), $this->get_billing_last_name() );
-	}
-
-	/**
-	 * Get a formatted shipping full name.
-	 *
-	 * @since 2.4.0
-	 *
-	 * @return string
-	 */
-	public function get_formatted_shipping_full_name() {
-		return sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ),  $this->get_shipping_first_name(), $this->get_shipping_last_name() );
 	}
 
 	/**
@@ -908,18 +740,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
 	}
 
-	/**
-	 * Gets formatted shipping method title.
-	 * @return string
-	 */
-	public function get_shipping_method() {
-		$names = array();
-		foreach ( $this->get_shipping_methods() as $shipping_method ) {
-			$names[] = $shipping_method->get_name();
-		}
-		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $names ), $this );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -954,41 +774,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * Set order status.
 	 * @since 2.6.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
-	 * @param string $note (default: '') Optional note to add.
-	 * @param bool $manual is this a manual order status change?
+	 * @param array details of change
 	 */
-	public function set_status( $new_status, $note = '', $manual_update = false ) {
-		// Remove prefixes and standardize
-		$current_status = $this->get_status();
-		$new_status     = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+	 public function set_status( $new_status ) {
+ 		$old_status = $this->get_status();
+ 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
-		if ( in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) && $new_status !== $current_status ) {
-			if ( ! empty( $current_status ) ) {
-				$this->_status_transition = array(
-					'original' => ! empty( $this->_status_transition['original'] ) ? $this->_status_transition['original'] : $current_status,
-					'note'     => $note ? $note : '',
-					'manual'   => (bool) $manual_update,
-				);
-				if ( 'completed' === $new_status ) {
-					$this->set_date_completed( current_time( 'timestamp' ) );
-				}
-			}
-			$this->_data['status'] = 'wc-' . $new_status;
+ 		if ( in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) && $new_status !== $old_status ) {
+ 			$this->_data['status'] = 'wc-' . $new_status;
+ 		} else {
+			$new_status = $old_status;
 		}
-	}
 
-	/**
-	 * Updates status of order immediately.
-	 * @uses WC_Order::set_status()
-	 */
-	public function update_status( $new_status, $note = '', $manual = false ) {
-		if ( ! $this->get_id() ) {
-			return false;
-		}
-		$this->set_status( $new_status, $note, $manual );
-		$this->save();
-		return true;
-	}
+		return array(
+			'from' => $old_status,
+			'to'   => $new_status
+		);
+ 	}
 
 	/**
 	 * Set Order Type
@@ -1007,11 +809,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	}
 
 	/**
+	 * Set order_version
+	 * @param string $value
+	 */
+	public function set_order_version( $value ) {
+		$this->_data['order_version'] = $value;
+	}
+
+	/**
 	 * Set order_currency
 	 * @param string $value
 	 */
 	public function set_order_currency( $value ) {
 		$this->_data['order_currency'] = $value;
+	}
+
+	/**
+	 * Set prices_include_tax
+	 * @param bool $value
+	 */
+	public function set_prices_include_tax( $value ) {
+		$this->_data['prices_include_tax'] = (bool) $value;
 	}
 
 	/**
@@ -1036,167 +854,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function set_customer_id( $value ) {
 		$this->_data['customer_id'] = absint( $value );
-	}
-
-	/**
-	 * Set billing_first_name
-	 * @param string $value
-	 */
-	public function set_billing_first_name( $value ) {
-		$this->_data['billing_first_name'] = $value;
-	}
-
-	/**
-	 * Set billing_last_name
-	 * @param string $value
-	 */
-	public function set_billing_last_name( $value ) {
-		$this->_data['billing_last_name'] = $value;
-	}
-
-	/**
-	 * Set billing_company
-	 * @param string $value
-	 */
-	public function set_billing_company( $value ) {
-		$this->_data['billing_company'] = $value;
-	}
-
-	/**
-	 * Set billing_address_1
-	 * @param string $value
-	 */
-	public function set_billing_address_1( $value ) {
-		$this->_data['billing_address_1'] = $value;
-	}
-
-	/**
-	 * Set billing_address_2
-	 * @param string $value
-	 */
-	public function set_billing_address_2( $value ) {
-		$this->_data['billing_address_2'] = $value;
-	}
-
-	/**
-	 * Set billing_city
-	 * @param string $value
-	 */
-	public function set_billing_city( $value ) {
-		$this->_data['billing_city'] = $value;
-	}
-
-	/**
-	 * Set billing_state
-	 * @param string $value
-	 */
-	public function set_billing_state( $value ) {
-		$this->_data['billing_state'] = $value;
-	}
-
-	/**
-	 * Set billing_postcode
-	 * @param string $value
-	 */
-	public function set_billing_postcode( $value ) {
-		$this->_data['billing_postcode'] = $value;
-	}
-
-	/**
-	 * Set billing_country
-	 * @param string $value
-	 */
-	public function set_billing_country( $value ) {
-		$this->_data['billing_country'] = $value;
-	}
-
-	/**
-	 * Set billing_email
-	 * @param string $value
-	 */
-	public function set_billing_email( $value ) {
-		$value = sanitize_email( $value );
-		$this->_data['billing_email'] = is_email( $value ) ? $value : '';
-	}
-
-	/**
-	 * Set billing_phone
-	 * @param string $value
-	 */
-	public function set_billing_phone( $value ) {
-		$this->_data['billing_phone'] = $value;
-	}
-
-	/**
-	 * Set shipping_first_name
-	 * @param string $value
-	 */
-	public function set_shipping_first_name( $value ) {
-		$this->_data['shipping_first_name'] = $value;
-	}
-
-	/**
-	 * Set shipping_last_name
-	 * @param string $value
-	 */
-	public function set_shipping_last_name( $value ) {
-		$this->_data['shipping_last_name'] = $value;
-	}
-
-	/**
-	 * Set shipping_company
-	 * @param string $value
-	 */
-	public function set_shipping_company( $value ) {
-		$this->_data['shipping_company'] = $value;
-	}
-
-	/**
-	 * Set shipping_address_1
-	 * @param string $value
-	 */
-	public function set_shipping_address_1( $value ) {
-		$this->_data['shipping_address_1'] = $value;
-	}
-
-	/**
-	 * Set shipping_address_2
-	 * @param string $value
-	 */
-	public function set_shipping_address_2( $value ) {
-		$this->_data['shipping_address_2'] = $value;
-	}
-
-	/**
-	 * Set shipping_city
-	 * @param string $value
-	 */
-	public function set_shipping_city( $value ) {
-		$this->_data['shipping_city'] = $value;
-	}
-
-	/**
-	 * Set shipping_state
-	 * @param string $value
-	 */
-	public function set_shipping_state( $value ) {
-		$this->_data['shipping_state'] = $value;
-	}
-
-	/**
-	 * Set shipping_postcode
-	 * @param string $value
-	 */
-	public function set_shipping_postcode( $value ) {
-		$this->_data['shipping_postcode'] = $value;
-	}
-
-	/**
-	 * Set shipping_country
-	 * @param string $value
-	 */
-	public function set_shipping_country( $value ) {
-		$this->_data['shipping_country'] = $value;
 	}
 
 	/**
@@ -1255,391 +912,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function set_order_total( $value ) {
 		$this->_data['order_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
-	}
-
-	/**
-	 * Set the payment method.
-	 * @since 2.2.0
-	 * @param string $value Supports WC_Payment_Gateway for bw compatibility with < 2.6
-	 */
-	public function set_payment_method( $value ) {
-		if ( is_object( $value ) ) {
-			$this->set_payment_method( $value->id );
-			$this->set_payment_method_title( $value->get_title() );
-		} else {
-			$this->_data['payment_method'] = $value;
-		}
-	}
-
-	/**
-	 * Set payment_method_title
-	 * @param string $value
-	 */
-	public function set_payment_method_title( $value ) {
-		$this->_data['payment_method_title'] = $value;
-	}
-
-	/**
-	 * Set transaction_id
-	 * @param string $value
-	 */
-	public function set_transaction_id( $value ) {
-		$this->_data['transaction_id'] = $value;
-	}
-
-	/**
-	 * Set customer_ip_address
-	 * @param string $value
-	 */
-	public function set_customer_ip_address( $value ) {
-		$this->_data['customer_ip_address'] = $value;
-	}
-
-	/**
-	 * Set customer_user_agent
-	 * @param string $value
-	 */
-	public function set_customer_user_agent( $value ) {
-		$this->_data['customer_user_agent'] = $value;
-	}
-
-	/**
-	 * Set created_via
-	 * @param string $value
-	 */
-	public function set_created_via( $value ) {
-		$this->_data['created_via'] = $value;
-	}
-
-	/**
-	 * Set order_version
-	 * @param string $value
-	 */
-	public function set_order_version( $value ) {
-		$this->_data['order_version'] = $value;
-	}
-
-	/**
-	 * Set prices_include_tax
-	 * @param bool $value
-	 */
-	public function set_prices_include_tax( $value ) {
-		$this->_data['prices_include_tax'] = (bool) $value;
-	}
-
-	/**
-	 * Set customer_note
-	 * @param string $value
-	 */
-	public function set_customer_note( $value ) {
-		$this->_data['customer_note'] = $value;
-	}
-
-	/**
-	 * Set date_completed
-	 * @param string $timestamp
-	 */
-	public function set_date_completed( $timestamp ) {
-		$this->_data['date_completed'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
-	}
-
-	/**
-	 * Set date_paid
-	 * @param string $timestamp
-	 */
-	public function set_date_paid( $timestamp ) {
-		$this->_data['date_paid'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| CRUD methods
-	|--------------------------------------------------------------------------
-	|
-	| Methods which create, read, update and delete orders from the database.
-	| Written in abstract fashion so that the way orders are stored can be
-	| changed more easily in the future.
-	|
-	| A save method is included for convenience (chooses update or create based
-	| on if the order exists yet).
-	|
-	*/
-
-	/**
-	 * Get a title for the new post type.
-	 */
-	protected function get_post_title() {
-		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-	}
-
-	/**
-	 * Insert data into the database.
-	 * @since 2.6.0
-	 */
-	public function create() {
-		$this->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
-		$this->set_date_created( current_time( 'timestamp' ) );
-
-		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
-			'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
-			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
-			'post_type'     => $this->get_order_type(),
-			'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-			'ping_status'   => 'closed',
-			'post_author'   => 1,
-			'post_title'    => $this->get_post_title(),
-			'post_password' => uniqid( 'order_' ),
-			'post_parent'   => $this->get_parent_id(),
-		) ), true );
-
-		if ( $order_id ) {
-			$this->set_id( $order_id );
-
-			// Set meta data
-			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
-			$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
-			$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
-			$this->update_post_meta( '_billing_company', $this->get_billing_company() );
-			$this->update_post_meta( '_billing_address_1', $this->get_billing_address_1() );
-			$this->update_post_meta( '_billing_address_2', $this->get_billing_address_2() );
-			$this->update_post_meta( '_billing_city', $this->get_billing_city() );
-			$this->update_post_meta( '_billing_state', $this->get_billing_state() );
-			$this->update_post_meta( '_billing_postcode', $this->get_billing_postcode() );
-			$this->update_post_meta( '_billing_country', $this->get_billing_country() );
-			$this->update_post_meta( '_billing_email', $this->get_billing_email() );
-			$this->update_post_meta( '_billing_phone', $this->get_billing_phone() );
-			$this->update_post_meta( '_shipping_first_name', $this->get_shipping_first_name() );
-			$this->update_post_meta( '_shipping_last_name', $this->get_shipping_last_name() );
-			$this->update_post_meta( '_shipping_company', $this->get_shipping_company() );
-			$this->update_post_meta( '_shipping_address_1', $this->get_shipping_address_1() );
-			$this->update_post_meta( '_shipping_address_2', $this->get_shipping_address_2() );
-			$this->update_post_meta( '_shipping_city', $this->get_shipping_city() );
-			$this->update_post_meta( '_shipping_state', $this->get_shipping_state() );
-			$this->update_post_meta( '_shipping_postcode', $this->get_shipping_postcode() );
-			$this->update_post_meta( '_shipping_country', $this->get_shipping_country() );
-			$this->update_post_meta( '_order_currency', $this->get_order_currency() );
-			$this->update_post_meta( '_order_key', $this->get_order_key() );
-			$this->update_post_meta( '_cart_discount', $this->get_discount_total() );
-			$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax() );
-			$this->update_post_meta( '_order_shipping', $this->get_shipping_total() );
-			$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
-			$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
-			$this->update_post_meta( '_order_total', $this->get_order_total() );
-
-			$this->update_post_meta( '_payment_method', $this->get_payment_method() );
-			$this->update_post_meta( '_payment_method_title', $this->get_payment_method_title() );
-			$this->update_post_meta( '_transaction_id', $this->get_transaction_id() );
-			$this->update_post_meta( '_customer_ip_address', $this->get_customer_ip_address() );
-			$this->update_post_meta( '_customer_user_agent', $this->get_customer_user_agent() );
-			$this->update_post_meta( '_created_via', $this->get_created_via() );
-			$this->update_post_meta( '_order_version', $this->get_order_version() );
-			$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
-			$this->update_post_meta( '_customer_note', $this->get_customer_note() );
-			$this->update_post_meta( '_date_completed', $this->get_date_completed() );
-			$this->update_post_meta( '_date_paid', $this->get_date_paid() );
-
-			foreach ( $this->get_meta_data() as $key => $value ) {
-				$this->update_post_meta( '_' . $key, $value );
-			}
-
-			do_action( 'woocommerce_new_order', $order_id );
-		}
-	}
-
-	/**
-	 * Read from the database.
-	 * @since 2.6.0
-	 * @param int $id ID of object to read.
-	 */
-	public function read( $id ) {
-		if ( empty( $id ) || ! ( $post_object = get_post( $id ) ) ) {
-			return;
-		}
-		$order_id = absint( $post_object->ID );
-
-		// Map standard post data
-		$this->set_id( $order_id );
-		$this->set_date_created( $post_object->post_date );
-		$this->set_date_modified( $post_object->post_modified );
-		$this->set_status( $post_object->post_status );
-		$this->set_customer_note( $post_object->post_excerpt );
-
-		// Map meta data
-		$this->set_customer_id( get_post_meta( $order_id, '_customer_user', true ) );
-		$this->set_order_key( get_post_meta( $order_id, '_order_key', true ) );
-		$this->set_order_currency( get_post_meta( $order_id, '_order_currency', true ) );
-		$this->set_billing_first_name( get_post_meta( $order_id, '_billing_first_name', true ) );
-		$this->set_billing_last_name( get_post_meta( $order_id, '_billing_last_name', true ) );
-		$this->set_billing_company( get_post_meta( $order_id, '_billing_company', true ) );
-		$this->set_billing_address_1( get_post_meta( $order_id, '_billing_address_1', true ) );
-		$this->set_billing_address_2( get_post_meta( $order_id, '_billing_address_2', true ) );
-		$this->set_billing_city( get_post_meta( $order_id, '_billing_city', true ) );
-		$this->set_billing_state( get_post_meta( $order_id, '_billing_state', true ) );
-		$this->set_billing_postcode( get_post_meta( $order_id, '_billing_postcode', true ) );
-		$this->set_billing_country( get_post_meta( $order_id, '_billing_country', true ) );
-		$this->set_billing_email( get_post_meta( $order_id, '_billing_email', true ) );
-		$this->set_billing_phone( get_post_meta( $order_id, '_billing_phone', true ) );
-		$this->set_shipping_first_name( get_post_meta( $order_id, '_shipping_first_name', true ) );
-		$this->set_shipping_last_name( get_post_meta( $order_id, '_shipping_last_name', true ) );
-		$this->set_shipping_company( get_post_meta( $order_id, '_shipping_company', true ) );
-		$this->set_shipping_address_1( get_post_meta( $order_id, '_shipping_address_1', true ) );
-		$this->set_shipping_address_2( get_post_meta( $order_id, '_shipping_address_2', true ) );
-		$this->set_shipping_city( get_post_meta( $order_id, '_shipping_city', true ) );
-		$this->set_shipping_state( get_post_meta( $order_id, '_shipping_state', true ) );
-		$this->set_shipping_postcode( get_post_meta( $order_id, '_shipping_postcode', true ) );
-		$this->set_shipping_country( get_post_meta( $order_id, '_shipping_country', true ) );
-
-		// Map totals
-		$this->set_discount_total( get_post_meta( $order_id, '_cart_discount', true ) );
-		$this->set_discount_tax( get_post_meta( $order_id, '_cart_discount_tax', true ) );
-		$this->set_shipping_total( get_post_meta( $order_id, '_order_shipping', true ) );
-		$this->set_shipping_tax( get_post_meta( $order_id, '_order_shipping_tax', true ) );
-		$this->set_cart_tax( get_post_meta( $order_id, '_order_tax', true ) );
-		$this->set_order_total( get_post_meta( $order_id, '_order_total', true ) );
-
-		// Map user data
-		if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
-			$this->set_billing_email( $user->user_email );
-		}
-
-		// This is meta data, but due to the keys not matching the props, load here
-		$this->set_date_completed( get_post_meta( $order_id, '_completed_date', true ) );
-		$this->set_date_paid( get_post_meta( $order_id, '_paid_date', true ) );
-
-		// Orders store the state of prices including tax when created.
-		$this->set_prices_include_tax( metadata_exists( 'post', $order_id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $order_id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-
-		// Load meta data
-		$this->read_meta_data();
-	}
-
-	/**
-	 * Post meta update wrapper. Sets or deletes based on value.
-	 * @since 2.6.0
-	 */
-	protected function update_post_meta( $key, $value ) {
-		if ( '' !== $value ) {
-			update_post_meta( $this->get_id(), $key, $value );
-		} else {
-			delete_post_meta( $this->get_id(), $key );
-		}
-	}
-
-	/**
-	 * Update data in the database.
-	 * @since 2.6.0
-	 */
-	public function update() {
-		global $wpdb;
-
-		$order_id = $this->get_id();
-
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
-				'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
-				'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
-				'post_parent'   => $this->get_parent_id(),
-			),
-			array(
-				'ID' => $order_id
-			)
-		);
-
-		// Update meta data
-		$this->update_post_meta( '_customer_user', $this->get_customer_id() );
-		$this->update_post_meta( '_billing_first_name', $this->get_billing_first_name() );
-		$this->update_post_meta( '_billing_last_name', $this->get_billing_last_name() );
-		$this->update_post_meta( '_billing_company', $this->get_billing_company() );
-		$this->update_post_meta( '_billing_address_1', $this->get_billing_address_1() );
-		$this->update_post_meta( '_billing_address_2', $this->get_billing_address_2() );
-		$this->update_post_meta( '_billing_city', $this->get_billing_city() );
-		$this->update_post_meta( '_billing_state', $this->get_billing_state() );
-		$this->update_post_meta( '_billing_postcode', $this->get_billing_postcode() );
-		$this->update_post_meta( '_billing_country', $this->get_billing_country() );
-		$this->update_post_meta( '_billing_email', $this->get_billing_email() );
-		$this->update_post_meta( '_billing_phone', $this->get_billing_phone() );
-		$this->update_post_meta( '_shipping_first_name', $this->get_shipping_first_name() );
-		$this->update_post_meta( '_shipping_last_name', $this->get_shipping_last_name() );
-		$this->update_post_meta( '_shipping_company', $this->get_shipping_company() );
-		$this->update_post_meta( '_shipping_address_1', $this->get_shipping_address_1() );
-		$this->update_post_meta( '_shipping_address_2', $this->get_shipping_address_2() );
-		$this->update_post_meta( '_shipping_city', $this->get_shipping_city() );
-		$this->update_post_meta( '_shipping_state', $this->get_shipping_state() );
-		$this->update_post_meta( '_shipping_postcode', $this->get_shipping_postcode() );
-		$this->update_post_meta( '_shipping_country', $this->get_shipping_country() );
-		$this->update_post_meta( '_order_currency', $this->get_order_currency() );
-		$this->update_post_meta( '_order_key', $this->get_order_key() );
-		$this->update_post_meta( '_cart_discount', $this->get_discount_total() );
-		$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax() );
-		$this->update_post_meta( '_order_shipping', $this->get_shipping_total() );
-		$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
-		$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
-		$this->update_post_meta( '_order_total', $this->get_order_total() );
-
-		$this->update_post_meta( '_payment_method', $this->get_payment_method() );
-		$this->update_post_meta( '_payment_method_title', $this->get_payment_method_title() );
-		$this->update_post_meta( '_transaction_id', $this->get_transaction_id() );
-		$this->update_post_meta( '_customer_ip_address', $this->get_customer_ip_address() );
-		$this->update_post_meta( '_customer_user_agent', $this->get_customer_user_agent() );
-		$this->update_post_meta( '_created_via', $this->get_created_via() );
-		$this->update_post_meta( '_order_version', $this->get_order_version() );
-		$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
-		$this->update_post_meta( '_customer_note', $this->get_customer_note() );
-		$this->update_post_meta( '_date_completed', $this->get_date_completed() );
-		$this->update_post_meta( '_date_paid', $this->get_date_paid() );
-
-		foreach ( $this->get_meta_data() as $key => $value ) {
-			$this->update_post_meta( '_' . $key, $value );
-		}
-
-		if ( $this->_status_transition ) {
-			if ( ! empty( $this->_status_transition['original'] ) ) {
-				$transition_note = sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $this->_status_transition['original'] ), wc_get_order_status_name( $this->get_status() ) );
-
-				do_action( 'woocommerce_order_status_' . $this->_status_transition['original'] . '_to_' . $this->get_status(), $this->get_id() );
-				do_action( 'woocommerce_order_status_changed', $this->get_id(), $this->_status_transition['original'], $this->get_status() );
-			} else {
-				$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $this->get_status() ) );
-			}
-
-			do_action( 'woocommerce_order_status_' . $this->get_status(), $this->get_id() );
-
-			// Note the transition occured
-			$this->add_order_note( trim( $this->_status_transition['note'] . ' ' . $transition_note ), 0, $this->_status_transition['manual'] );
-
-			// This has ran, so reset status transition variable
-			$this->_status_transition = false;
-		}
-	}
-
-	/**
-	 * Delete data from the database.
-	 * @since 2.6.0
-	 */
-	public function delete() {
-		wp_delete_post( $this->get_id() );
-	}
-
-	/**
-	 * Save data to the database.
-	 * @since 2.6.0
-	 * @return int order ID
-	 */
-	public function save() {
-		$this->set_order_version( WC_VERSION );
-
-		if ( ! $this->get_id() ) {
-			$this->create();
-		} else {
-			$this->update();
-		}
-
-		$this->save_meta_data();
-		wc_delete_shop_order_transients( $this->get_id() );
-
-		return $this->get_id();
 	}
 
 	/*
@@ -1703,6 +975,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function get_shipping_methods() {
 		return $this->get_items( 'shipping' );
+	}
+
+	/**
+	 * Gets formatted shipping method title.
+	 * @return string
+	 */
+	public function get_shipping_method() {
+		$names = array();
+		foreach ( $this->get_shipping_methods() as $shipping_method ) {
+			$names[] = $shipping_method->get_name();
+		}
+		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $names ), $this );
 	}
 
 	/**
@@ -2133,15 +1417,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		return $grand_total;
 	}
 
-	/*
-	|--------------------------------------------------------------------------
-	| Total Getters
-	|--------------------------------------------------------------------------
-	|
-	| Methods for getting totals e.g. for display on the frontend.
-	|
-	*/
-
 	/**
 	 * Get item subtotal - this is the cost before discount.
 	 *
@@ -2287,7 +1562,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Gets order total - formatted for display.
-	 *
 	 * @return string
 	 */
 	public function get_formatted_order_total() {
@@ -2505,28 +1779,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function has_status( $status ) {
 		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status ) ) || $this->get_status() === $status ? true : false, $this, $status );
-	}
-
-	/**
-	 * See if order matches cart_hash.
-	 * @return bool
-	 */
-	public function has_cart_hash( $cart_hash ) {
-		return $cart_hash === get_post_meta( $this->get_id(), '_cart_hash', true );
-	}
-
-	/**
-	 * has_meta function for order items.
-	 *
-	 * @param string $order_item_id
-	 * @return array of meta data.
-	 */
-	public function has_meta( $order_item_id ) {
-		global $wpdb;
-
-		return $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id, order_item_id
-			FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d
-			ORDER BY meta_id", absint( $order_item_id ) ), ARRAY_A );
 	}
 
 	/**
