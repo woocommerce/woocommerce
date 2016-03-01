@@ -82,6 +82,19 @@ function wc_send_frame_options_header() {
 add_action( 'template_redirect', 'wc_send_frame_options_header' );
 
 /**
+ * No index our endpoints.
+ * Prevent indexing pages like order-received.
+ *
+ * @since 2.5.3
+ */
+function wc_prevent_endpoint_indexing() {
+	if ( is_wc_endpoint_url() || isset( $_GET['download_file'] ) ) {
+		@header( 'X-Robots-Tag: noindex' );
+	}
+}
+add_action( 'template_redirect', 'wc_prevent_endpoint_indexing' );
+
+/**
  * When the_post is called, put product data into a global.
  *
  * @param mixed $post
