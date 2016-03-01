@@ -81,20 +81,20 @@ class WC_Order_Factory {
 
 		if ( $item_data && $item_type ) {
 			switch ( $item_type ) {
-				case "line_item" :
-				case "product" :
+				case 'line_item" :
+				case 'product' :
 					return new WC_Order_Item_Product( $item_data );
 				break;
-				case "coupon" :
+				case 'coupon' :
 					return new WC_Order_Item_Coupon( $item_data );
 				break;
-				case "fee" :
+				case 'fee' :
 					return new WC_Order_Item_Fee( $item_data );
 				break;
-				case "shipping" :
+				case 'shipping' :
 					return new WC_Order_Item_Shipping( $item_data );
 				break;
-				case "tax" :
+				case 'tax' :
 					return new WC_Order_Item_Tax( $item_data );
 				break;
 			}

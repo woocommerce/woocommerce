@@ -298,75 +298,47 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		/**
-		 * Maps legacy vars to new getters.
-		 */
+		_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
+
 		if ( 'completed_date' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_date_completed();
 		} elseif ( 'paid_date' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_date_paid();
 		} elseif ( 'modified_date' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_date_modified();
 		} elseif ( 'order_date' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_date_created();
 		} elseif ( 'id' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_id();
 		} elseif ( 'post' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return get_post( $this->get_id() );
 		} elseif ( 'status' === $key || 'post_status' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_status();
 		} elseif ( 'customer_message' === $key || 'customer_note' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_customer_note();
 		} elseif ( in_array( $key, array( 'user_id', 'customer_user' ) ) ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_customer_id();
 		} elseif ( 'tax_display_cart' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'display_totals_ex_tax' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'display_cart_ex_tax' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'cart_discount' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_discount();
 		} elseif ( 'cart_discount_tax' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_discount_tax();
 		} elseif ( 'order_tax' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_cart_tax();
 		} elseif ( 'order_shipping_tax' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_shipping_tax();
 		} elseif ( 'order_shipping' === $key ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
 			return $this->get_total_shipping();
-		/**
-		 * Map vars to getters with warning.
-		 */
 	 	} elseif ( is_callable( array( $this, "get_{$key}" ) ) ) {
-			_doing_it_wrong( $key, 'Order properties should not be accessed directly Use get_' . $key . '().', '2.6' );
 			return $this->{"get_{$key}"}();
-		/**
-		 * Handle post meta
-		 */
 		} else {
-			_doing_it_wrong( $key, 'Meta should not be accessed directly. Use WC_Order::get_order_meta( $key )', '2.6' );
-			$value = get_post_meta( $this->get_id(), '_' . $key, true );
+			return get_post_meta( $this->get_id(), '_' . $key, true );
 		}
-
-		return $value;
 	}
 
 	/**
@@ -412,9 +384,9 @@ abstract class WC_Abstract_Legacy_Order {
 	public function get_download_url( $product_id, $download_id ) {
 		return add_query_arg( array(
 			'download_file' => $product_id,
-			'order'		 => $this->get_order_key(),
-			'email'		 => urlencode( $this->get_billing_email() ),
-			'key'		   => $download_id
+			'order'         => $this->get_order_key(),
+			'email'         => urlencode( $this->get_billing_email() ),
+			'key'           => $download_id,
 		), trailingslashit( home_url() ) );
 	}
 
@@ -441,7 +413,7 @@ abstract class WC_Abstract_Legacy_Order {
 			FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 			WHERE user_email = %s
 			AND order_key = %s
-			AND product_id = %s
+			AND product_id = %d
 			ORDER BY permission_id
 		", $this->get_billing_email(), $this->get_order_key(), $product_id ) );
 

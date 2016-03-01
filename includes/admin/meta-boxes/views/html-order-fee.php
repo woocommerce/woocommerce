@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<tr class="fee <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_item_id="<?php echo $item->get_id(); ?>">
+<tr class="fee <?php echo esc_attr( ! empty( $class ) ? $class : '' ); ?>" data-order_item_id="<?php echo esc_attr( $item->get_id() ); ?>">
 	<td class="check-column"><input type="checkbox" /></td>
 
 	<td class="thumb"><div></div></td>
