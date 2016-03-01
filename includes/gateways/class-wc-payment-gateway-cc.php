@@ -12,6 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
+	/**
+	 * Builds our payment fields area - including tokenization fields and the actualy payment fields.
+	 * If tokenization is displayed, just the fields will be displayed.
+	 * @since 2.6.0
+	 */
 	public function payment_fields() {
 		$display_tokenization = $this->supports( 'tokenization' ) && is_checkout();
 

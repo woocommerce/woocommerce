@@ -109,8 +109,17 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public $new_method_label = '';
 
+	/**
+	 * Contains a users saved tokens for this gateway.
+	 * @var array
+	 */
 	protected $tokens = array();
 
+	/**
+	 * Returns a users saved tokens for this gateway.
+	 * @since 2.6.0
+	 * @return array
+	 */
 	public function get_tokens() {
 		if ( sizeof( $this->tokens ) > 0 ) {
 			return $this->tokens;
@@ -332,7 +341,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		}
 
 		if ( $this->supports( 'default_credit_card_form' ) ) {
-			$this->credit_card_form();
+			$this->credit_card_form(); // Deprecated, will be removed in a future version.
 		}
 	}
 
@@ -350,7 +359,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
 	}
 
-	public function payment_gateway_script() {
+	/**
+	 * Enqueues our tokenization script to handle some of the new form options.
+	 * @since 2.6.0
+	 */
+	public function tokenization_script() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_script(
 			'woocommerce-payment-gateway-form',
@@ -369,7 +382,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 2.6.0
 	 */
 	public function saved_payment_methods() {
-		$this->payment_gateway_script();
+		$this->tokenization_script();
 		$html = '<p>';
 		foreach ( $this->get_tokens() as $token ) {
 			$html .= $this->saved_payment_method( $token );
@@ -432,7 +445,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Outputs a checkbox for saving a new payment method.
+	 * Outputs a checkbox for saving a new payment method to the database.
 	 * @since 2.6.0
 	 */
 	public function save_payment_method_checkbox() {
@@ -453,9 +466,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		echo $html;
 	}
 
+	/**
+	 * Displays a radio button for entering a new payment method (new CC details) instead of using a saved method.
+	 * Only displayed when a gateway supports tokenization.
+	 * @since 2.6.0
+	 */
 	public function use_new_payment_method_checkbox() {
 		$label = ( ! empty( $this->new_method_label ) ? esc_html( $this->new_method_label ) : esc_html__( 'Use a new payment method', 'woocommerce' ) );
-
 		$html = '<input type="radio" id="wc-' . esc_attr( $this->id ). '-new" name="wc-' . esc_attr( $this->id ) . '-payment-token" value="new" style="width:auto;">';
 		$html .= '<label class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox wc-gateway-payment-token-label" for="wc-' . esc_attr( $this->id ) . '-new">';
 		$html .=  apply_filters( 'woocommerce_payment_gateway_form_new_method_label', $label, $this );
@@ -464,8 +481,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Core credit card form which gateways can used if needed.
-	 *
+	 * Core credit card form which gateways can used if needed. Deprecated - inheirt WC_Payment_Gateway_CC instead.
 	 * @param  array $args
 	 * @param  array $fields
 	 */
