@@ -24,6 +24,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	/**
 	 * Order Data array, with defaults. This is the core order data exposed
 	 * in APIs since 2.6.0.
+	 *
+	 * Notes:
+	 * order_tax = Sum of all taxes.
+	 * cart_tax = cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
+	 *
 	 * @since 2.6.0
 	 * @var array
 	 */
@@ -31,7 +36,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
-		'type'         => 'shop_order',
+		'type'               => 'shop_order',
 		'order_key'          => '',
 		'currency'           => '',
 		'version'            => '',
@@ -43,9 +48,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		'discount_tax'       => 0,
 		'shipping_total'     => 0,
 		'shipping_tax'       => 0,
-		'cart_tax'           => 0, // cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
-		'order_total'        => 0,
-		'order_tax'          => 0, // Sum of all taxes.
+		'cart_tax'           => 0,
+		'total'              => 0,
+		'order_tax'          => 0,
 	);
 
 	/**
@@ -134,7 +139,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			$this->update_post_meta( '_order_shipping', $this->get_shipping_total() );
 			$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
 			$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
-			$this->update_post_meta( '_order_total', $this->get_order_total() );
+			$this->update_post_meta( '_order_total', $this->get_total() );
 			$this->update_post_meta( '_order_version', $this->get_version() );
 			$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
 
@@ -170,7 +175,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$this->set_shipping_total( get_post_meta( $order_id, '_order_shipping', true ) );
 		$this->set_shipping_tax( get_post_meta( $order_id, '_order_shipping_tax', true ) );
 		$this->set_cart_tax( get_post_meta( $order_id, '_order_tax', true ) );
-		$this->set_order_total( get_post_meta( $order_id, '_order_total', true ) );
+		$this->set_total( get_post_meta( $order_id, '_order_total', true ) );
 
 		// Map user data
 		if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
@@ -227,7 +232,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$this->update_post_meta( '_order_shipping', $this->get_shipping_total() );
 		$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
 		$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
-		$this->update_post_meta( '_order_total', $this->get_order_total() );
+		$this->update_post_meta( '_order_total', $this->get_total() );
 		$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
 
 		foreach ( $this->get_meta_data() as $key => $value ) {
@@ -644,14 +649,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	}
 
 	/**
-	 * Get the stored order total. Includes taxes and everything else.
-	 * @return string
-	 */
-	public function get_order_total() {
-		return wc_format_decimal( $this->_data['order_total'], wc_get_price_decimals() );
-	}
-
-	/**
 	 * Gets the total discount amount.
 	 * @param  bool $ex_tax Show discount excl any tax.
 	 * @return float
@@ -696,7 +693,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @return float
 	 */
 	public function get_total() {
-		return apply_filters( 'woocommerce_order_amount_total', $this->get_order_total(), $this );
+		return apply_filters( 'woocommerce_order_amount_total', wc_format_decimal( $this->_data['total'], wc_get_price_decimals() ), $this );
 	}
 
 	/**
@@ -907,11 +904,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	}
 
 	/**
-	 * Set order_total
+	 * Set total
 	 * @param string $value
 	 */
-	public function set_order_total( $value ) {
-		$this->_data['order_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
+	public function set_total( $value ) {
+		$this->_data['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
 	/*
@@ -1411,7 +1408,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 		$this->set_discount_total( $cart_subtotal - $cart_total );
 		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax );
-		$this->set_order_total( $grand_total );
+		$this->set_total( $grand_total );
 		$this->save();
 
 		return $grand_total;

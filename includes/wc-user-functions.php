@@ -197,7 +197,7 @@ function wc_paying_customer( $order_id ) {
 		update_user_meta( $order->get_user_id(), 'paying_customer', 1 );
 
 		$old_spent = absint( get_user_meta( $order->get_user_id(), '_money_spent', true ) );
-		update_user_meta( $order->get_user_id(), '_money_spent', $old_spent + $order->get_order_total() );
+		update_user_meta( $order->get_user_id(), '_money_spent', $old_spent + $order->get_total() );
 	}
 	if ( $order->get_user_id() > 0 && 'shop_order' === $order->get_type() ) {
 		$old_count = absint( get_user_meta( $order->get_user_id(), '_order_count', true ) );
