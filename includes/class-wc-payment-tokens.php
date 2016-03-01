@@ -1,11 +1,10 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
- * WooCommerce Payment Tokens
+ * WooCommerce Payment Tokens.
  *
  * An API for storing and managing tokens for gateways and customers.
  *
@@ -18,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Payment_Tokens {
 
 	/**
-	 * Returns an array of payment token objects associated with the passed customer ID
+	 * Returns an array of payment token objects associated with the passed customer ID.
 	 * @since 2.6.0
 	 * @param  int    $customer_id  Customer ID
 	 * @param  string $gateway      Optional Gateway ID for getting tokens for a specific gateway
@@ -54,9 +53,33 @@ class WC_Payment_Tokens {
 	}
 
 	/**
-	 * Returns an array of payment token objects associated with the passed order ID
-	 *
-	 * @since 2.6
+	 * Returns a customers default token or NULL if there is no default token.
+	 * @since 2.6.0
+	 * @param  int $customer_id
+	 * @return WC_Payment_Token|null
+	 */
+	public static function get_customer_default_token( $customer_id ) {
+		if ( $customer_id < 1 ) {
+			return null;
+		}
+
+		global $wpdb;
+
+		$token = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE user_id = %d AND is_default = 1",
+			$customer_id
+		) );
+
+		if ( $token ) {
+			return self::get( $token->token_id, $token );
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns an array of payment token objects associated with the passed order ID.
+	 * @since 2.6.0
 	 * @param int $order_id Order ID
 	 * @return array Array of token objects
 	 */
@@ -95,9 +118,8 @@ class WC_Payment_Tokens {
 	}
 
 	/**
-	 * Get a token object by ID
-	 *
-	 * @since 2.6
+	 * Get a token object by ID.
+	 * @since 2.6.0
 	 * @param  int $token_id Token ID
 	 * @return WC_Payment_Token|null Returns a valid payment token or null if no token can be found
 	 */
@@ -109,7 +131,7 @@ class WC_Payment_Tokens {
 				$token_id
 			) );
 			// Still empty? Token doesn't exist? Don't continue
-			if ( empty( $token_result) ) {
+			if ( empty( $token_result ) ) {
 				return null;
 			}
 		}
@@ -127,9 +149,8 @@ class WC_Payment_Tokens {
 	}
 
 	/**
-	 * Remove a payment token from the database by ID
-	 *
-	 * @since 2.6
+	 * Remove a payment token from the database by ID.
+	 * @since 2.6.0
 	 * @param WC_Payment_Token $token_id Token ID
 	 */
 	public static function delete( $token_id ) {
@@ -142,9 +163,8 @@ class WC_Payment_Tokens {
 	}
 
 	/**
-	 * Loops through all of a users payment tokens and sets is_default to false for all but a specific token
-	 *
-	 * @since 2.6
+	 * Loops through all of a users payment tokens and sets is_default to false for all but a specific token.
+	 * @since 2.6.0
 	 * @param int $user_id  User to set a default for
 	 * @param int $token_id The ID of the token that should be default
 	 */
@@ -161,9 +181,8 @@ class WC_Payment_Tokens {
 	}
 
 	/**
-	 * Returns what type (credit card, echeck, etc) of token a token is by ID
-	 *
-	 * @since 2.6
+	 * Returns what type (credit card, echeck, etc) of token a token is by ID.
+	 * @since 2.6.0
 	 * @param  int $token_id Token ID
 	 * @return string        Type
 	 */

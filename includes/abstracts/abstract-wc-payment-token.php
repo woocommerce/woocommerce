@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce Payment Token
+ * WooCommerce Payment Token.
  *
  * Representation of a general payment token to be extended by individuals types of tokens
  * examples: Credit Card, eCheck.
@@ -18,15 +18,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
  abstract class WC_Payment_Token implements WC_Data {
 
- 	/** @protected int Token ID */
+ 	/** @protected int Token ID. */
  	protected $id;
- 	/** @protected array Core Token Data (stored in the payment_tokens table) */
+ 	/** @protected array Core Token Data (stored in the payment_tokens table). */
  	protected $data;
- 	/** @protected array Meta Token Data (extra data associated with a payment token, stored in the payment_token_meta table) */
+ 	/** @protected array Meta Token Data (extra data associated with a payment token, stored in the payment_token_meta table). */
  	protected $meta;
 
  	/**
-	 * Initialize a payment token
+	 * Initialize a payment token.
 	 *
 	 * These fields are accepted by all payment tokens:
 	 * default      - boolean Optional - Indicates this is the default payment token for a user
@@ -47,8 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns the payment token ID
-	 *
+	 * Returns the payment token ID.
 	 * @since 2.6.0
 	 * @return ID Token ID
 	 */
@@ -57,8 +56,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns the raw payment token
-	 *
+	 * Returns the raw payment token.
 	 * @since 2.6.0
 	 * @return string Raw token
 	 */
@@ -67,8 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Set the raw payment token
-	 *
+	 * Set the raw payment token.
 	 * @since 2.6.0
 	 * @param string $token
 	 */
@@ -77,8 +74,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns the type of this payment token (CC, eCheck, or something else)
-	 *
+	 * Returns the type of this payment token (CC, eCheck, or something else).
 	 * @since 2.6.0
 	 * @return string Payment Token Type (CC, eCheck)
 	 */
@@ -87,8 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns the user ID associated with the token or false if this token is not associated
-	 *
+	 * Returns the user ID associated with the token or false if this token is not associated.
 	 * @since 2.6.0
 	 * @return int User ID if this token is associated with a user or 0 if no user is associated
 	 */
@@ -97,8 +92,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Set the user ID for the user associated with this order
-	 *
+	 * Set the user ID for the user associated with this order.
 	 * @since 2.6.0
 	 * @param int $user_id
 	 */
@@ -107,8 +101,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns the ID of the gateway associated with this payment token
-	 *
+	 * Returns the ID of the gateway associated with this payment token.
 	 * @since 2.6.0
 	 * @return string Gateway ID
 	 */
@@ -117,8 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Set the gateway ID
-	 *
+	 * Set the gateway ID.
 	 * @since 2.6.0
 	 * @param string $gateway_id
 	 */
@@ -127,8 +119,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns if the token is marked as default
-	 *
+	 * Returns if the token is marked as default.
 	 * @since 2.6.0
 	 * @return boolean True if the token is default
 	 */
@@ -137,8 +128,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Marks the payment as default or non-default
-	 *
+	 * Marks the payment as default or non-default.
 	 * @since 2.6.0
 	 * @param boolean $is_default True or false
 	 */
@@ -147,8 +137,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Returns a dump of the token data (combined data and meta)
-	 *
+	 * Returns a dump of the token data (combined data and meta).
 	 * @since 2.6.0
 	 * @return mixed array representation
 	 */
@@ -157,8 +146,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Validate basic token info (token and type are required)
-	 *
+	 * Validate basic token info (token and type are required).
 	 * @since 2.6.0
 	 * @return boolean True if the passed data is valid
 	 */
@@ -175,8 +163,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Get a token from the database
-	 *
+	 * Get a token from the database.
 	 * @since 2.6.0
 	 * @param  int $token_id Token ID
 	 */
@@ -199,8 +186,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Update a payment token
-	 *
+	 * Update a payment token.
 	 * @since 2.6.0
 	 * @return True on success, false if validation failed and a payment token could not be updated
 	 */
@@ -221,8 +207,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Create a new payment token in the database
-	 *
+	 * Create a new payment token in the database.
 	 * @since 2.6.0
 	 * @return True on success, false if validation failed and a payment token could not be created
 	 */
@@ -232,6 +217,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		global $wpdb;
+
+		// Are there any other tokens? If not, set this token as default
+		if ( ! $this->is_default() && is_user_logged_in() ) {
+			$default_token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
+			if ( is_null( $default_token ) ) {
+				$this->set_default( true );
+			}
+		}
 
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_payment_tokens', $this->data );
 		$this->id = $token_id = $wpdb->insert_id;
@@ -244,8 +237,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Saves a payment token to the database - does not require you to know if this is a new token or an update token
-	 *
+	 * Saves a payment token to the database - does not require you to know if this is a new token or an update token.
 	 * @since 2.6.0
 	 * @return True on success, false if validation failed and a payment token could not be saved
 	 */
@@ -258,7 +250,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
-	 * Remove a payment token from the database
+	 * Remove a payment token from the database.
+	 * @since 2.6.0
 	 */
 	public function delete() {
 		global $wpdb;

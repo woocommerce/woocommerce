@@ -66,6 +66,49 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting a customers default token.
+	 * @since 2.6.0
+	 */
+	function test_wc_get_customer_default_token() {
+		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token->set_user_id( 1 );
+		$token->set_gateway_id( 'simplify_commerce' );
+		$token->save();
+
+		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token->set_user_id( 1 );
+		$token->set_default( true );
+		$token->set_gateway_id( 'paypal' );
+		$token->save();
+
+		$this->assertCount( 2, \WC_Payment_Tokens::get_customer_tokens( 1 ) );
+
+		$default_token = \WC_Payment_Tokens::get_customer_default_token( 1 );
+		$this->assertEquals( 'paypal', $default_token->get_gateway_id() );
+	}
+
+	/**
+	 * Test getting a customers default token, when there is no default token.
+	 * @since 2.6.0
+	 */
+	function test_wc_get_customer_default_token_returns_null_when_no_default_token() {
+		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token->set_user_id( 1 );
+		$token->set_gateway_id( 'simplify_commerce' );
+		$token->save();
+
+		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token->set_user_id( 1 );
+		$token->set_gateway_id( 'paypal' );
+		$token->save();
+
+		$this->assertCount( 2, \WC_Payment_Tokens::get_customer_tokens( 1 ) );
+
+		$default_token = \WC_Payment_Tokens::get_customer_default_token( 1 );
+		$this->assertNull( $default_token );
+	}
+
+	/**
 	 * Test getting a token by ID.
 	 * @since 2.6.0
 	 */

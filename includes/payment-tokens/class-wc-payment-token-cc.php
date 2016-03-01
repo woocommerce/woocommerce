@@ -5,10 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce Credit Card Payment Token
+ * WooCommerce Credit Card Payment Token.
  *
- * Representation of a payment token for credit cards
- * Extends from WC_Payment_Token_eCheck since both types contain last4 digits.
+ * Representation of a payment token for credit cards.
  *
  * @class 		WC_Payment_Token_CC
  * @since		2.6.0
@@ -18,11 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Payment_Token_CC extends WC_Payment_Token {
 
-	/** @protected string Token Type String */
+	/** @protected string Token Type String. */
 	protected $type = 'CC';
 
  	/**
-	 * Validate credit card payment tokens
+	 * Validate credit card payment tokens.
 	 *
 	 * These fields are required by all credit card payment tokens:
 	 * expiry_month  - string Expiration date (MM) for the card
@@ -66,8 +65,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Returns the card type (mastercard, visa, ...)
-	 *
+	 * Returns the card type (mastercard, visa, ...).
 	 * @since 2.6.0
 	 * @return string Card type
 	 */
@@ -76,8 +74,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Set the card type (mastercard, visa, ...)
-	 *
+	 * Set the card type (mastercard, visa, ...).
 	 * @since 2.6.0
 	 * @param string $type
 	 */
@@ -86,8 +83,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Returns the card expiration year (YYYY)
-	 *
+	 * Returns the card expiration year (YYYY).
 	 * @since 2.6.0
 	 * @return string Expiration year
 	 */
@@ -96,8 +92,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Set the expiration year for the card (YYYY format)
-	 *
+	 * Set the expiration year for the card (YYYY format).
 	 * @since 2.6.0
 	 * @param string $year
 	 */
@@ -106,8 +101,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Returns the card expiration month (MM)
-	 *
+	 * Returns the card expiration month (MM).
 	 * @since 2.6.0
 	 * @return string Expiration month
 	 */
@@ -116,8 +110,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Set the expiration month for the card (MM format)
-	 *
+	 * Set the expiration month for the card (MM format).
 	 * @since 2.6.0
 	 * @param string $month
 	 */
@@ -126,8 +119,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Returns the last four digits
-	 *
+	 * Returns the last four digits.
 	 * @since 2.6.0
 	 * @return string Last 4 digits
 	 */
@@ -136,8 +128,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Set the last four digits
-	 *
+	 * Set the last four digits.
 	 * @since 2.6.0
 	 * @param string $last4
 	 */

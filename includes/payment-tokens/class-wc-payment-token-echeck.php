@@ -5,9 +5,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce eCheck Payment Token
+ * WooCommerce eCheck Payment Token.
  *
- * Representation of a payment token for eChecks
+ * Representation of a payment token for eChecks.
  *
  * @class 		WC_Payment_Token_eCheck
  * @since		2.6.0
@@ -41,8 +41,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	}
 
 	/**
-	 * Returns the last four digits
-	 *
+	 * Returns the last four digits.
 	 * @since 2.6.0
 	 * @return string Last 4 digits
 	 */
@@ -51,8 +50,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	}
 
 	/**
-	 * Set the last four digits
-	 *
+	 * Set the last four digits.
 	 * @since 2.6.0
 	 * @param string $last4
 	 */
