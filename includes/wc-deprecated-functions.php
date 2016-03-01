@@ -508,8 +508,9 @@ function woocommerce_list_pages( $pages ) {
 global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
-	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
-	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect'
+	'woocommerce_add_to_cart_fragments'       => 'add_to_cart_fragments',
+	'woocommerce_add_to_cart_redirect'        => 'add_to_cart_redirect',
+	'woocommerce_order_amount_total_shipping' => 'woocommerce_order_amount_shipping_total',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {

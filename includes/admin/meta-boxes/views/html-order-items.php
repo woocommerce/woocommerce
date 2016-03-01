@@ -149,9 +149,9 @@ if ( wc_tax_enabled() ) {
 			<td class="label"><?php echo wc_help_tip( __( 'This is the shipping and handling total costs for the order.', 'woocommerce' ) ); ?> <?php _e( 'Shipping', 'woocommerce' ); ?>:</td>
 			<td class="total"><?php
 				if ( ( $refunded = $order->get_total_shipping_refunded() ) > 0 ) {
-					echo '<del>' . strip_tags( wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_total_shipping() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
+					echo '<del>' . strip_tags( wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_shipping_total() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>';
 				} else {
-					echo wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_currency() ) );
+					echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) );
 				}
 
 

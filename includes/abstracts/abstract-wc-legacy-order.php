@@ -248,7 +248,7 @@ abstract class WC_Abstract_Legacy_Order {
 		switch ( $total_type ) {
 			case 'total' :
 				$amount = wc_format_decimal( $amount, wc_get_price_decimals() );
-				$this->set_order_total( $amount );
+				$this->set_total( $amount );
 				update_post_meta( $this->get_id(), '_order_total', $amount );
 				break;
 			case 'cart_discount' :
@@ -333,7 +333,15 @@ abstract class WC_Abstract_Legacy_Order {
 		} elseif ( 'order_shipping_tax' === $key ) {
 			return $this->get_shipping_tax();
 		} elseif ( 'order_shipping' === $key ) {
-			return $this->get_total_shipping();
+			return $this->get_shipping_total();
+		} elseif ( 'order_total' === $key ) {
+			return $this->get_total();
+		} elseif ( 'order_type' === $key ) {
+			return $this->get_type();
+		} elseif ( 'order_currency' === $key ) {
+			return $this->get_currency();
+		} elseif ( 'order_version' === $key ) {
+			return $this->get_version();
 	 	} elseif ( is_callable( array( $this, "get_{$key}" ) ) ) {
 			return $this->{"get_{$key}"}();
 		} else {
@@ -444,6 +452,15 @@ abstract class WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_get_item_downloads', $files, $item, $this );
+	}
+
+	/**
+	 * Gets shipping total. Alias of WC_Order::get_shipping_total().
+	 * @deprecated 2.6.0 since this is an alias only.
+	 * @return float
+	 */
+	public function get_total_shipping() {
+		return $this->get_shipping_total();
 	}
 
 	/**

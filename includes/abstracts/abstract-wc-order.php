@@ -50,7 +50,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		'shipping_tax'       => 0,
 		'cart_tax'           => 0,
 		'total'              => 0,
-		'order_tax'          => 0,
+		'total_tax'          => 0,
 	);
 
 	/**
@@ -134,12 +134,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
 			$this->update_post_meta( '_order_currency', $this->get_currency() );
 			$this->update_post_meta( '_order_key', $this->get_order_key() );
-			$this->update_post_meta( '_cart_discount', $this->get_discount_total() );
-			$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax() );
-			$this->update_post_meta( '_order_shipping', $this->get_shipping_total() );
-			$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
-			$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
-			$this->update_post_meta( '_order_total', $this->get_total() );
+			$this->update_post_meta( '_cart_discount', $this->get_discount_total( true ) );
+			$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax( true ) );
+			$this->update_post_meta( '_order_shipping', $this->get_shipping_total( true ) );
+			$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax( true ) );
+			$this->update_post_meta( '_order_tax', $this->get_cart_tax( true ) );
+			$this->update_post_meta( '_order_total', $this->get_total( true ) );
 			$this->update_post_meta( '_order_version', $this->get_version() );
 			$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
 
@@ -227,12 +227,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$this->update_post_meta( '_customer_user', $this->get_customer_id() );
 		$this->update_post_meta( '_order_currency', $this->get_currency() );
 		$this->update_post_meta( '_order_key', $this->get_order_key() );
-		$this->update_post_meta( '_cart_discount', $this->get_discount_total() );
-		$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax() );
-		$this->update_post_meta( '_order_shipping', $this->get_shipping_total() );
-		$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
-		$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
-		$this->update_post_meta( '_order_total', $this->get_total() );
+		$this->update_post_meta( '_cart_discount', $this->get_discount_total( true ) );
+		$this->update_post_meta( '_cart_discount_tax', $this->get_discount_tax( true ) );
+		$this->update_post_meta( '_order_shipping', $this->get_shipping_total( true ) );
+		$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax( true ) );
+		$this->update_post_meta( '_order_tax', $this->get_cart_tax( true ) );
+		$this->update_post_meta( '_order_total', $this->get_total( true ) );
 		$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
 
 		foreach ( $this->get_meta_data() as $key => $value ) {
@@ -581,71 +581,77 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Get discount_total
+	 * @param bool $raw Gets raw unfiltered value.
 	 * @return string
 	 */
-	public function get_discount_total() {
-		$discount_total = wc_format_decimal( $this->_data['discount_total'] );
-
-		// Backwards compatible total calculation - totals were not stored consistently in old versions.
-		if ( ( ! $this->get_version() || version_compare( $this->get_version(), '2.3.7', '<' ) ) && $this->get_prices_include_tax() ) {
-			$discount_total = $discount_total - $this->get_discount_tax();
-		}
-
-		return $discount_total;
+	public function get_discount_total( $raw = false ) {
+		$value = wc_format_decimal( $this->_data['discount_total'] );
+		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_total', $value, $this );
 	}
 
 	/**
 	 * Get discount_tax
+	 * @param bool $raw Gets raw unfiltered value.
 	 * @return string
 	 */
-	public function get_discount_tax() {
-		return wc_format_decimal( $this->_data['discount_tax'] );
+	public function get_discount_tax( $raw = false ) {
+		$value = wc_format_decimal( $this->_data['discount_tax'] );
+		return $raw ? $value : apply_filters( 'woocommerce_order_amount_discount_tax', $value, $this );
 	}
 
 	/**
 	 * Get shipping_total
-	 * woocommerce_order_amount_total_shipping filter has been removed to avoid
-	 * these values being modified and then saved back to the DB. There are
-	 * other, later hooks available to change totals on display. e.g.
-	 * woocommerce_get_order_item_totals.
+	 * @param bool $raw Gets raw unfiltered value.
 	 * @return string
 	 */
-	public function get_shipping_total() {
-		return wc_format_decimal( $this->_data['shipping_total'] );
-	}
-
-	/**
-	 * Gets cart tax amount.
-	 *
-	 * @since 2.6.0 woocommerce_order_amount_cart_tax filter has been removed to avoid
-	 * these values being modified and then saved back to the DB or used in
-	 * calculations. There are other, later hooks available to change totals on
-	 * display. e.g. woocommerce_get_order_item_totals.
-	 * @return float
-	 */
-	public function get_cart_tax() {
-		return wc_format_decimal( $this->_data['cart_tax'] );
+	public function get_shipping_total( $raw = false ) {
+		$value = wc_format_decimal( $this->_data['shipping_total'] );
+		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_total', $value, $this );
 	}
 
 	/**
 	 * Get shipping_tax.
-	 *
-	 * @since 2.6.0 woocommerce_order_amount_shipping_tax filter has been removed to avoid
-	 * these values being modified and then saved back to the DB or used in
-	 * calculations. There are other, later hooks available to change totals on
-	 * display. e.g. woocommerce_get_order_item_totals.
+	 * @param bool $raw Gets raw unfiltered value.
 	 * @return string
 	 */
-	public function get_shipping_tax() {
-		return wc_format_decimal( $this->_data['shipping_tax'] );
+	public function get_shipping_tax( $raw = false ) {
+		$value = wc_format_decimal( $this->_data['shipping_tax'] );
+		return $raw ? $value : apply_filters( 'woocommerce_order_amount_shipping_tax', $value, $this );
 	}
 
 	/**
-	 * Order tax is the sum of all taxes.
-	 * @return string
+	 * Gets cart tax amount.
+	 * @param bool $raw Gets raw unfiltered value.
+	 * @return float
 	 */
-	public function get_order_tax() {
-		return wc_round_tax_total( $this->_data['order_tax'] );
+	public function get_cart_tax( $raw = false ) {
+		$value = wc_format_decimal( $this->_data['cart_tax'] );
+		return $raw ? $value : apply_filters( 'woocommerce_order_amount_cart_tax', $value, $this );
+	}
+
+	/**
+	 * Gets order grand total. incl. taxes. Used in gateways. Filtered.
+	 * @param bool $raw Gets raw unfiltered value.
+	 * @return float
+	 */
+	public function get_total( $raw = false ) {
+		$value = wc_format_decimal( $this->_data['total'], wc_get_price_decimals() );
+		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total', $value, $this );
+	}
+
+	/**
+	 * Get total tax amount. Alias for get_order_tax().
+	 *
+	 * @since 2.6.0 woocommerce_order_amount_total_tax filter has been removed to avoid
+	 * these values being modified and then saved back to the DB. There are
+	 * other, later hooks available to change totals on display. e.g.
+	 * woocommerce_get_order_item_totals.
+	 * @param bool $raw Gets raw unfiltered value.
+	 * @return float
+	 */
+	public function get_total_tax( $raw = false ) {
+		$value = wc_format_decimal( $this->_data['total_tax'] );
+		return $raw ? $value : apply_filters( 'woocommerce_order_amount_total_tax', $value, $this );
 	}
 
 	/**
@@ -660,40 +666,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			$total_discount = $this->get_discount_total() + $this->get_discount_tax();
 		}
 		return apply_filters( 'woocommerce_order_amount_total_discount', round( $total_discount, WC_ROUNDING_PRECISION ), $this );
-	}
-
-	/**
-	 * Get total tax amount. Alias for get_order_tax().
-	 *
-	 * @since 2.6.0 woocommerce_order_amount_total_tax filter has been removed to avoid
-	 * these values being modified and then saved back to the DB. There are
-	 * other, later hooks available to change totals on display. e.g.
-	 * woocommerce_get_order_item_totals.
-	 * @return float
-	 */
-	public function get_total_tax() {
-		return $this->get_order_tax();
-	}
-
-	/**
-	 * Gets shipping total. Alias of WC_Order::get_shipping_total().
-	 *
-	 * @since 2.6.0 woocommerce_order_amount_total_shipping filter has been removed to avoid
-	 * these values being modified and then saved back to the DB or used in
-	 * calculations. There are other, later hooks available to change totals on
-	 * display. e.g. woocommerce_get_order_item_totals.
-	 * @return float
-	 */
-	public function get_total_shipping() {
-		return $this->get_shipping_total();
-	}
-
-	/**
-	 * Gets order grand total. incl. taxes. Used in gateways. Filtered.
-	 * @return float
-	 */
-	public function get_total() {
-		return apply_filters( 'woocommerce_order_amount_total', wc_format_decimal( $this->_data['total'], wc_get_price_decimals() ), $this );
 	}
 
 	/**
@@ -883,7 +855,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function set_shipping_tax( $value ) {
 		$this->_data['shipping_tax'] = wc_format_decimal( $value );
-		$this->set_order_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
 	}
 
 	/**
@@ -892,15 +864,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function set_cart_tax( $value ) {
 		$this->_data['cart_tax'] = wc_format_decimal( $value );
-		$this->set_order_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
+		$this->set_total_tax( $this->get_cart_tax() + $this->get_shipping_tax() );
 	}
 
 	/**
 	 * Sets order tax (sum of cart and shipping tax). Used internaly only.
 	 * @param string $value
 	 */
-	protected function set_order_tax( $value ) {
-		$this->_data['order_tax'] = wc_format_decimal( $value );
+	protected function set_total_tax( $value ) {
+		$this->_data['total_tax'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -1404,7 +1376,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			$fee_total += $item->get_total();
 		}
 
-		$grand_total = round( $cart_total + $fee_total + $this->get_total_shipping() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
+		$grand_total = round( $cart_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() );
 
 		$this->set_discount_total( $cart_subtotal - $cart_total );
 		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax );
@@ -1602,7 +1574,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			}
 
 			// Add Shipping Costs.
-			$subtotal += $this->get_total_shipping();
+			$subtotal += $this->get_shipping_total();
 
 			// Remove non-compound taxes.
 			foreach ( $this->get_taxes() as $tax ) {
