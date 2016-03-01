@@ -240,7 +240,7 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @param string $total_type
 	 * @return bool
 	 */
-	public function set_total( $amount, $total_type = 'total' ) {
+	public function legacy_set_total( $amount, $total_type = 'total' ) {
 		if ( ! in_array( $total_type, array( 'shipping', 'tax', 'shipping_tax', 'total', 'cart_discount', 'cart_discount_tax' ) ) ) {
 			return false;
 		}

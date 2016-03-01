@@ -878,8 +878,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	/**
 	 * Set total
 	 * @param string $value
+	 * @param string $deprecated Function used to set different totals based on this.
 	 */
-	public function set_total( $value ) {
+	public function set_total( $value, $deprecated = '' ) {
+		if ( $deprecated ) {
+			_deprecated_argument( 'total_type', '2.6', 'Use dedicated total setter methods instead.' );
+			return $this->legacy_set_total( $value, $deprecated );
+		}
 		$this->_data['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
 	}
 
