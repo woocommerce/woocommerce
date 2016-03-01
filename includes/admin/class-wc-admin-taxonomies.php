@@ -88,7 +88,7 @@ class WC_Admin_Taxonomies {
 	 */
 	public function add_category_fields() {
 		?>
-		<div class="form-field">
+		<div class="form-field term-display-type-wrap">
 			<label for="display_type"><?php _e( 'Display type', 'woocommerce' ); ?></label>
 			<select id="display_type" name="display_type" class="postform">
 				<option value=""><?php _e( 'Default', 'woocommerce' ); ?></option>
@@ -97,7 +97,7 @@ class WC_Admin_Taxonomies {
 				<option value="both"><?php _e( 'Both', 'woocommerce' ); ?></option>
 			</select>
 		</div>
-		<div class="form-field">
+		<div class="form-field term-thumbnail-wrap">
 			<label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label>
 			<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_placeholder_img_src() ); ?>" width="60px" height="60px" /></div>
 			<div style="line-height: 60px;">
