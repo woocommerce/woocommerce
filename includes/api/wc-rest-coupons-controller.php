@@ -51,7 +51,11 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'code' => array(
+						'required' => true,
+					),
+				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -390,7 +394,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Coupon code.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'required'    => true,
 				),
 				'type' => array(
 					'description' => __( 'Determines the type of discount that will be applied.', 'woocommerce' ),
