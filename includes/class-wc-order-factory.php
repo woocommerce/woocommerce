@@ -81,7 +81,7 @@ class WC_Order_Factory {
 
 		if ( $item_data && $item_type ) {
 			switch ( $item_type ) {
-				case 'line_item" :
+				case 'line_item' :
 				case 'product' :
 					return new WC_Order_Item_Product( $item_data );
 				break;
