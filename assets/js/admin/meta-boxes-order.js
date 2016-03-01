@@ -666,7 +666,7 @@ jQuery( function ( $ ) {
 						line_item_totals:       JSON.stringify( line_item_totals, null, '' ),
 						line_item_tax_totals:   JSON.stringify( line_item_tax_totals, null, '' ),
 						api_refund:             $( this ).is( '.do-api-refund' ),
-						restock_refunded_items: $( '#restock_refunded_items:checked' ).size() ? 'true' : 'false',
+						restock_refunded_items: $( '#restock_refunded_items:checked' ).length ? 'true' : 'false',
 						security:               woocommerce_admin_meta_boxes.order_item_nonce
 					};
 
@@ -1188,7 +1188,7 @@ jQuery( function ( $ ) {
 			var data = {
 				action:      'woocommerce_grant_access_to_download',
 				product_ids: products,
-				loop:        $('.order_download_permissions .wc-metabox').size(),
+				loop:        $('.order_download_permissions .wc-metabox').length,
 				order_id:    woocommerce_admin_meta_boxes.post_id,
 				security:    woocommerce_admin_meta_boxes.grant_access_nonce
 			};

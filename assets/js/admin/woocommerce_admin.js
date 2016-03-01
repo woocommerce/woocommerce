@@ -10,7 +10,7 @@ jQuery( function ( $ ) {
 		.on( 'wc_add_error_tip', function( e, element, error_type ) {
 			var offset = element.position();
 
-			if ( element.parent().find( '.wc_error_tip' ).size() === 0 ) {
+			if ( element.parent().find( '.wc_error_tip' ).length === 0 ) {
 				element.after( '<div class="wc_error_tip ' + error_type + '">' + woocommerce_admin[error_type] + '</div>' );
 				element.parent().find( '.wc_error_tip' )
 					.css( 'left', offset.left + element.width() - ( element.width() / 2 ) - ( $( '.wc_error_tip' ).width() / 2 ) )
@@ -115,7 +115,7 @@ jQuery( function ( $ ) {
 
 	$( '.wc_input_table .remove_rows' ).click( function() {
 		var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
-		if ( $tbody.find( 'tr.current' ).size() > 0 ) {
+		if ( $tbody.find( 'tr.current' ).length > 0 ) {
 			var $current = $tbody.find( 'tr.current' );
 			$current.each( function() {
 				$( this ).remove();
@@ -147,7 +147,7 @@ jQuery( function ( $ ) {
 				$( 'tr', $this_table ).removeClass( 'current' );
 				$this_row.addClass( 'selected_now' ).addClass( 'current' );
 
-				if ( $( 'tr.last_selected', $this_table ).size() > 0 ) {
+				if ( $( 'tr.last_selected', $this_table ).length > 0 ) {
 					if ( $this_row.index() > $( 'tr.last_selected', $this_table ).index() ) {
 						$( 'tr', $this_table ).slice( $( 'tr.last_selected', $this_table ).index(), $this_row.index() ).addClass( 'current' );
 					} else {
