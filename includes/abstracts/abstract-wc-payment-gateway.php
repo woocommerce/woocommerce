@@ -425,7 +425,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public function saved_payment_method_title( $token ) {
 		if ( 'CC' == $token->get_type() && is_callable( array( $token, 'get_card_type' ) ) ) {
-			$type = esc_html__( ucfirst( $token->get_card_type() ), 'woocommerce' );
+			$type = esc_html__( wc_get_credit_card_type_label( $token->get_card_type() ), 'woocommerce' );
 		} else if ( 'eCheck' === $token->get_type() ) {
 			$type = esc_html__( 'eCheck', 'woocommerce' );
 		}

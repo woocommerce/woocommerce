@@ -58,9 +58,9 @@ wc_print_notices(); ?>
 									do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
 								} else if ( 'method' === $column_id ) {
 									if ( ! empty ( $method['method']['last4'] ) ) {
-										echo sprintf( __( '%s ending in %s', 'woocommerce' ), esc_html( $method['method']['brand'] ), esc_html( $method['method']['last4'] ) );
+										echo sprintf( __( '%s ending in %s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
 									} else {
-										echo esc_html( $method['method']['brand'] );
+										echo esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) );
 									}
 								} else if ( 'expires' === $column_id ) {
 									echo esc_html( $method['expires'] );
