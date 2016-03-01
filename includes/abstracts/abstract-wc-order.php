@@ -8,7 +8,8 @@ include_once( 'abstract-wc-legacy-order.php' );
 /**
  * Abstract Order
  *
- * Handles order data and database interaction.
+ * Handles generic order data and database interaction which is extended by both
+ * WC_Order (regular orders) and WC_Order_Refund (refunds are negative orders).
  *
  * @todo update API and CLI to use new functions instead of legacy
  *
@@ -28,7 +29,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	protected $_data = array(
 		// When migrating to custom tables, these will be columns.
-		'order_id'             => 0,
+		'id'                   => 0,
 		'parent_id'            => 0,
 		'status'               => '',
 		'order_type'           => 'shop_order',
@@ -87,12 +88,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	protected $_meta_data = array();
 
 	/**
-	 * Stores data about status changes so relevant hooks can be fired.
-	 * @var bool|array
-	 */
-	protected $_status_transition = false;
-
-	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
 	 * This class should NOT be instantiated, but the get_order function or new WC_Order_Factory.
 	 * should be used. It is possible, but the aforementioned are preferred and are the only.
@@ -103,7 +98,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	public function __construct( $order = 0 ) {
 		if ( is_numeric( $order ) && $order > 0 ) {
 			$this->read( $order );
-		} elseif ( $order instanceof WC_Order ) {
+		} elseif ( $order instanceof self ) {
 			$this->read( absint( $order->get_id() ) );
 		} elseif ( ! empty( $order->ID ) ) {
 			$this->read( absint( $order->ID ) );
@@ -304,16 +299,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @return integer
 	 */
 	public function get_id() {
-		return $this->get_order_id();
-	}
-
-	/**
-	 * Get order ID.
-	 * @since 2.6.0
-	 * @return integer
-	 */
-	public function get_order_id() {
-		return absint( $this->_data['order_id'] );
+		return absint( $this->_data['id'] );
 	}
 
 	/**
@@ -951,8 +937,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @since 2.6.0
 	 * @param int $value
 	 */
-	public function set_order_id( $value ) {
-		$this->_data['order_id'] = absint( $value );
+	public function set_id( $value ) {
+		$this->_data['id'] = absint( $value );
 	}
 
 	/**
@@ -1407,7 +1393,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		) ), true );
 
 		if ( $order_id ) {
-			$this->set_order_id( $order_id );
+			$this->set_id( $order_id );
 
 			// Set meta data
 			$this->update_post_meta( '_customer_user', $this->get_customer_id() );
@@ -1472,7 +1458,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$order_id = absint( $post_object->ID );
 
 		// Map standard post data
-		$this->set_order_id( $order_id );
+		$this->set_id( $order_id );
 		$this->set_date_created( $post_object->post_date );
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );

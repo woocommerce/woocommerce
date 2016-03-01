@@ -18,6 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Order extends WC_Abstract_Order {
 
 	/**
+	 * Stores data about status changes so relevant hooks can be fired.
+	 * @var bool|array
+	 */
+	protected $_status_transition = false;
+
+	/**
 	 * When a payment is complete this function is called.
 	 *
 	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
