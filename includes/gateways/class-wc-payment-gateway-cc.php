@@ -21,6 +21,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		$display_tokenization = $this->supports( 'tokenization' ) && is_checkout();
 
 		if ( $display_tokenization ) {
+			$this->tokenization_script();
 			if ( is_user_logged_in() ) {
 				$this->saved_payment_methods();
 			}

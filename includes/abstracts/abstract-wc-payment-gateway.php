@@ -382,7 +382,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 2.6.0
 	 */
 	public function saved_payment_methods() {
-		$this->tokenization_script();
 		$html = '<p>';
 		foreach ( $this->get_tokens() as $token ) {
 			$html .= $this->saved_payment_method( $token );
