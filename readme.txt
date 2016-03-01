@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - API - Replace term_taxonomy_id for term_id whilst creating/editing terms.
 * Fix - API - Fix parent_id and menu_order for variations.
 * Fix - Combine update post calls when update_status is ran.
+* Fix - Total number of comments in the admin panel.
 * Tweak - Show customer details for logged in users only on thanks page to prevent customer details being revealed if someone finds out the URL.
 * Tweak - Wrap status report in backticks to stop people breaking .org forums.
 * Tweak - Error handling for screen ids.
@@ -183,6 +184,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added check for private WooCommerce pages in status report.
 * Tweak - Transactional emails for failed -> on hold.
 * Dev - Include new triggers when removing and adding the password strength meter.
+* Dev - Allow pass objects and arrays as webhook callbacks.
 
 = 2.5.2 - 01/02/2016 =
 * Fix - Compatibility with w3 total cache inline minification.
