@@ -1466,11 +1466,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @param int $id ID of object to read.
 	 */
 	public function read( $id ) {
-		if ( empty( $id ) ) {
+		if ( empty( $id ) || ! ( $post_object = get_post( $id ) ) ) {
 			return;
 		}
-		$post_object = get_post( $id );
-		$order_id    = absint( $post_object->ID );
+		$order_id = absint( $post_object->ID );
 
 		// Map standard post data
 		$this->set_order_id( $order_id );
