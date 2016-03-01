@@ -8,9 +8,8 @@ namespace WooCommerce\Tests\Payment_Tokens;
 class Payment_Tokens extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test getting tokens associated with an order
-	 *
-	 * @since 2.6
+	 * Test getting tokens associated with an order.
+	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get_order_tokens() {
 		$order = \WC_Helper_Order::create_order();
@@ -24,24 +23,51 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting tokens associated with a user
-	 *
-	 * @since 2.6
+	 * Test getting tokens associated with a user and no gateway ID.
+	 * @since 2.6.0
 	 */
-	function test_wc_payment_tokens_get_customer_token() {
+	function test_wc_payment_tokens_get_customer_tokens_no_gateway() {
 		$this->assertEmpty( \WC_Payment_Tokens::get_customer_tokens( 1 ) );
 
 		$token = \WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( 1 );
 		$token->save();
 
-		$this->assertCount( 1, \WC_Payment_Tokens::get_customer_tokens( 1 ) );
+		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token->set_user_id( 1 );
+		$token->save();
+
+		$this->assertCount( 2, \WC_Payment_Tokens::get_customer_tokens( 1 ) );
 	}
 
 	/**
-	 * Test getting a token by ID
-	 *
-	 * @since 2.6
+	 * Test getting tokens associated with a user and for a specific gateway.
+	 * @since 2.6.0
+	 */
+	function test_wc_payment_tokens_get_customer_tokens_with_gateway() {
+		$this->assertEmpty( \WC_Payment_Tokens::get_customer_tokens( 1 ) );
+
+		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token->set_user_id( 1 );
+		$token->set_gateway_id( 'simplify_commerce' );
+		$token->save();
+
+		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token->set_user_id( 1 );
+		$token->set_gateway_id( 'paypal' );
+		$token->save();
+
+		$this->assertCount( 2, \WC_Payment_Tokens::get_customer_tokens( 1 ) );
+		$this->assertCount( 1, \WC_Payment_Tokens::get_customer_tokens( 1, 'simplify_commerce' ) );
+
+		foreach ( \WC_Payment_Tokens::get_customer_tokens( 1, 'simplify_commerce' ) as $simplify_token ) {
+			$this->assertEquals( 'simplify_commerce', $simplify_token->get_gateway_id() );
+		}
+	}
+
+	/**
+	 * Test getting a token by ID.
+	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get() {
 		$token = \WC_Helper_Payment_Token::create_cc_token();
@@ -51,9 +77,8 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test deleting a token by ID
-	 *
-	 * @since 2.6
+	 * Test deleting a token by ID.
+	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_delete() {
 		$token = \WC_Helper_Payment_Token::create_cc_token();
@@ -66,9 +91,8 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a token's type by ID
-	 *
-	 * @since 2.6
+	 * Test getting a token's type by ID.
+	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get_type_by_id() {
 		$token = \WC_Helper_Payment_Token::create_cc_token();
@@ -77,9 +101,8 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a users default token
-	 *
-	 * @since 2.6
+	 * Test setting a users default token.
+	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_set_users_default() {
 		$token = \WC_Helper_Payment_Token::create_cc_token();

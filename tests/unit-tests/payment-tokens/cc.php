@@ -8,9 +8,8 @@ namespace WooCommerce\Tests\Payment_Tokens;
 class Payment_Token_CC extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test validation for empty/unset values
-	 *
-	 * @since 2.6
+	 * Test validation for empty/unset values.
+	 * @since 2.6.0
 	 */
 	function test_wc_payment_token_cc_validate_empty() {
 		$token = new \WC_Payment_Token_CC( 1 );
@@ -24,9 +23,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test validation for expiry length
-	 *
-	 * @since 2.6
+	 * Test validation for expiry length.
+	 * @since 2.6.0
 	 */
 	function test_wc_payment_token_cc_validate_expiry_length() {
 		$token = new \WC_Payment_Token_CC( 1 );
@@ -48,9 +46,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a card type
-	 *
-	 * @since 2.6
+	 * Test getting a card type.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_get_card_type() {
 		$token = new \WC_Payment_Token_CC( 1, array(), array( 'card_type' => 'mastercard' ) );
@@ -58,9 +55,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a token's card type
-	 *
-	 * @since 2.6
+	 * Test setting a token's card type.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_set_card_type() {
 		$token = new \WC_Payment_Token_CC( 1 );
@@ -69,9 +65,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting expiry year
-	 *
-	 * @since 2.6
+	 * Test getting expiry year.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_get_expiry_year() {
 		$token = new \WC_Payment_Token_CC( 1, array(), array( 'expiry_year' => '2016' ) );
@@ -79,9 +74,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a token's expiry year
-	 *
-	 * @since 2.6
+	 * Test setting a token's expiry year.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_set_expiry_year() {
 		$token = new \WC_Payment_Token_CC( 1 );
@@ -90,9 +84,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting expiry month
-	 *
-	 * @since 2.6
+	 * Test getting expiry month.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_get_expiry_month() {
 		$token = new \WC_Payment_Token_CC( 1, array(), array( 'expiry_month' => '08' ) );
@@ -100,9 +93,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a token's expiry month
-	 *
-	 * @since 2.6
+	 * Test setting a token's expiry month.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_set_expiry_month() {
 		$token = new \WC_Payment_Token_CC( 1 );
@@ -111,9 +103,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting last4
-	 *
-	 * @since 2.6
+	 * Test getting last4.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_get_last4() {
 		$token = new \WC_Payment_Token_CC( 1, array(), array( 'last4' => '1111' ) );
@@ -121,9 +112,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a token's last4
-	 *
-	 * @since 2.6
+	 * Test setting a token's last4.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_set_last4() {
 		$token = new \WC_Payment_Token_CC( 1 );
@@ -132,9 +122,8 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test reading/getting a token from DB correctly sets meta
-	 *
-	 * @since 2.6
+	 * Test reading/getting a token from DB correctly sets meta.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_read_pulls_meta() {
 		$token = \WC_Helper_Payment_Token::create_cc_token();

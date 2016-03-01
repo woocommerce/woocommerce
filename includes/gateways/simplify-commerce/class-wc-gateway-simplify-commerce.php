@@ -8,13 +8,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Simplify Commerce Gateway.
  *
  * @class 		WC_Gateway_Simplify_Commerce
- * @extends		WC_Payment_Gateway
+ * @extends		WC_Payment_Gateway_CC
  * @since       2.2.0
  * @version		1.0.0
  * @package		WooCommerce/Classes/Payment
  * @author 		WooThemes
  */
-class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
+class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 
 	/**
 	 * Constructor.
@@ -37,7 +37,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			'subscription_payment_method_change_admin',
 			'subscription_date_changes',
 			'multiple_subscriptions',
-			'credit_card_form',
+			'default_credit_card_form',
 			'tokenization',
 			'refunds',
 			'pre-orders'
@@ -276,7 +276,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 		}
 
 		if ( 'standard' == $this->mode ) {
-			new WC_Payment_Gateway_Form( $this );
+			parent::payment_fields();
 		}
 	}
 

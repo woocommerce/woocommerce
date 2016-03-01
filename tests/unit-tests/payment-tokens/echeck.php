@@ -8,9 +8,8 @@ namespace WooCommerce\Tests\Payment_Tokens;
 class Payment_Token_eCheck extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test validation for empty/unset values
-	 *
-	 * @since 2.6
+	 * Test validation for empty/unset values.
+	 * @since 2.6.0
 	 */
 	function test_wc_payment_token_echeck_validate_empty() {
 		$token = new \WC_Payment_Token_eCheck( 1 );
@@ -21,9 +20,8 @@ class Payment_Token_eCheck extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting last4
-	 *
-	 * @since 2.6
+	 * Test getting last4.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_echeck_get_last4() {
 		$token = new \WC_Payment_Token_eCheck( 1, array(), array( 'last4' => '1111' ) );
@@ -31,9 +29,8 @@ class Payment_Token_eCheck extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a token's last4
-	 *
-	 * @since 2.6
+	 * Test setting a token's last4.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_echeck_set_last4() {
 		$token = new \WC_Payment_Token_eCheck( 1 );
@@ -42,9 +39,8 @@ class Payment_Token_eCheck extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test reading/getting a token from DB correctly sets meta
-	 *
-	 * @since 2.6
+	 * Test reading/getting a token from DB correctly sets meta.
+	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_echeck_read_pulls_meta() {
 		$token = \WC_Helper_Payment_Token::create_eCheck_token();

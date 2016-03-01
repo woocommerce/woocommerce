@@ -3,7 +3,7 @@
 
 	// Form handler
 	function simplifyFormHandler() {
-		var $form = $( 'form.checkout, form#order_review, orm#add_payment_method' );
+		var $form = $( 'form.checkout, form#order_review, form#add_payment_method' );
 
 		if ( ( $( '#payment_method_simplify_commerce' ).is( ':checked' ) && $( '#wc-simplify_commerce-new' ).is( ':checked' ) ) || ( '1' === $( '#woocommerce_add_payment_method' ).val() ) ) {
 
