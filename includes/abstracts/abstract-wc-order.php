@@ -33,8 +33,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		'status'             => '',
 		'order_type'         => 'shop_order',
 		'order_key'          => '',
-		'order_currency'     => '',
-		'order_version'      => '',
+		'currency'     => '',
+		'version'      => '',
 		'prices_include_tax' => false,
 		'date_created'       => '',
 		'date_modified'      => '',
@@ -135,7 +135,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			$this->update_post_meta( '_order_shipping_tax', $this->get_shipping_tax() );
 			$this->update_post_meta( '_order_tax', $this->get_cart_tax() );
 			$this->update_post_meta( '_order_total', $this->get_order_total() );
-			$this->update_post_meta( '_order_version', $this->get_order_version() );
+			$this->update_post_meta( '_order_version', $this->get_version() );
 			$this->update_post_meta( '_prices_include_tax', $this->get_prices_include_tax() );
 
 			foreach ( $this->get_meta_data() as $key => $value ) {
@@ -249,7 +249,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @return int order ID
 	 */
 	public function save() {
-		$this->set_order_version( WC_VERSION );
+		$this->set_version( WC_VERSION );
 
 		if ( ! $this->get_id() ) {
 			$this->create();
@@ -496,15 +496,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @return string
 	 */
 	public function get_currency() {
-		return apply_filters( 'woocommerce_get_currency', $this->_data['order_currency'], $this );
+		return apply_filters( 'woocommerce_get_currency', $this->_data['currency'], $this );
 	}
 
 	/**
 	 * Get order_version
 	 * @return string
 	 */
-	public function get_order_version() {
-		return $this->_data['order_version'];
+	public function get_version() {
+		return $this->_data['version'];
 	}
 
 	/**
@@ -582,7 +582,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$discount_total = wc_format_decimal( $this->_data['discount_total'] );
 
 		// Backwards compatible total calculation - totals were not stored consistently in old versions.
-		if ( ( ! $this->get_order_version() || version_compare( $this->get_order_version(), '2.3.7', '<' ) ) && $this->get_prices_include_tax() ) {
+		if ( ( ! $this->get_version() || version_compare( $this->get_version(), '2.3.7', '<' ) ) && $this->get_prices_include_tax() ) {
 			$discount_total = $discount_total - $this->get_discount_tax();
 		}
 
@@ -812,8 +812,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * Set order_version
 	 * @param string $value
 	 */
-	public function set_order_version( $value ) {
-		$this->_data['order_version'] = $value;
+	public function set_version( $value ) {
+		$this->_data['version'] = $value;
 	}
 
 	/**
@@ -821,7 +821,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @param string $value
 	 */
 	public function set_currency( $value ) {
-		$this->_data['order_currency'] = $value;
+		$this->_data['currency'] = $value;
 	}
 
 	/**
