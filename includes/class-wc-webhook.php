@@ -133,6 +133,13 @@ class WC_Webhook {
 	 */
 	private function should_deliver( $arg ) {
 
+	    /*
+	     * Let other plugins intercept deliver for some messages queue like rabbit/zeromq
+	     */
+	    if ( ! apply_filters( 'woocommerce_webhook_should_deliver', true, $this, $arg )) {
+	        return false;
+	    }
+	    
 		// only active webhooks can be delivered
 		if ( 'active' != $this->get_status() ) {
 			return false;
