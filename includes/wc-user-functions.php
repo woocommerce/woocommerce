@@ -193,13 +193,13 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 function wc_paying_customer( $order_id ) {
 	$order = wc_get_order( $order_id );
 
-	if ( $order->get_user_id() > 0 && 'shop_order_refund' !== $order->get_order_type() ) {
+	if ( $order->get_user_id() > 0 && 'shop_order_refund' !== $order->get_type() ) {
 		update_user_meta( $order->get_user_id(), 'paying_customer', 1 );
 
 		$old_spent = absint( get_user_meta( $order->get_user_id(), '_money_spent', true ) );
 		update_user_meta( $order->get_user_id(), '_money_spent', $old_spent + $order->get_order_total() );
 	}
-	if ( $order->get_user_id() > 0 && 'shop_order' === $order->get_order_type() ) {
+	if ( $order->get_user_id() > 0 && 'shop_order' === $order->get_type() ) {
 		$old_count = absint( get_user_meta( $order->get_user_id(), '_order_count', true ) );
 		update_user_meta( $order->get_user_id(), '_order_count', $old_count + 1 );
 	}

@@ -31,10 +31,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		'id'                 => 0,
 		'parent_id'          => 0,
 		'status'             => '',
-		'order_type'         => 'shop_order',
+		'type'         => 'shop_order',
 		'order_key'          => '',
-		'currency'     => '',
-		'version'      => '',
+		'currency'           => '',
+		'version'            => '',
 		'prices_include_tax' => false,
 		'date_created'       => '',
 		'date_modified'      => '',
@@ -113,7 +113,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$order_id = wp_insert_post( apply_filters( 'woocommerce_new_order_data', array(
 			'post_date'     => date( 'Y-m-d H:i:s', $this->get_date_created() ),
 			'post_date_gmt' => get_gmt_from_date( date( 'Y-m-d H:i:s', $this->get_date_created() ) ),
-			'post_type'     => $this->get_order_type(),
+			'post_type'     => $this->get_type(),
 			'post_status'   => 'wc-' . ( $this->get_status() ? $this->get_status() : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
 			'ping_status'   => 'closed',
 			'post_author'   => 1,
@@ -520,7 +520,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @return string
 	 */
 	public function get_order_type() {
-		return $this->_data['order_type'];
+		return $this->_data['type'];
 	}
 
 	/**
@@ -797,7 +797,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @param string $value
 	 */
 	public function set_order_type( $value ) {
-		$this->_data['order_type'] = $value;
+		$this->_data['type'] = $value;
 	}
 
 	/**
