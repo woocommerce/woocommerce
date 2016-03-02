@@ -144,6 +144,22 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access delete a customer.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$id = (int) $request['id'];
+
+		if ( ! current_user_can( 'delete_user', $id ) ) {
+			return new WP_Error( 'woocommerce_rest_user_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get all customers.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -253,6 +269,57 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 
 		$customer = $this->prepare_item_for_response( $customer, $request );
 		$response = rest_ensure_response( $customer );
+
+		return $response;
+	}
+
+	/**
+	 * Delete a single customer.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function delete_item( $request ) {
+		$id       = (int) $request['id'];
+		$reassign = isset( $request['reassign'] ) ? absint( $request['reassign'] ) : null;
+		$force    = isset( $request['force'] ) ? (bool) $request['force'] : false;
+
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Customers do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		}
+
+		$customer = get_userdata( $id );
+		if ( ! $customer ) {
+			return new WP_Error( 'woocommerce_rest_user_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		if ( ! empty( $reassign ) ) {
+			if ( $reassign === $id || ! get_userdata( $reassign ) ) {
+				return new WP_Error( 'woocommerce_rest_user_invalid_reassign', __( 'Invalid resource id for reassignment.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $customer, $request );
+
+		/** Include admin customer functions to get access to wp_delete_user() */
+		require_once ABSPATH . 'wp-admin/includes/user.php';
+
+		$result = wp_delete_user( $id, $reassign );
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a customer is deleted via the REST API.
+		 *
+		 * @param WP_User          $customer The customer data.
+		 * @param WP_REST_Response $response The response returned from the API.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_customer', $customer, $response, $request );
 
 		return $response;
 	}
