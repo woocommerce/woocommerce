@@ -279,12 +279,7 @@ add_action( 'wp_upgrade', 'wc_taxonomy_metadata_migrate_data', 10, 2 );
  * @return bool
  */
 function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
-	// If term meta table is not installed (pre-wp-4.4), use WC tables
-	if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'update_term_meta' ) ) {
-		return update_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value );
-	} else {
-		return update_term_meta( $term_id, $meta_key, $meta_value, $prev_value );
-	}
+	return function_exists( 'update_term_meta' ) ? update_term_meta( $term_id, $meta_key, $meta_value, $prev_value ) : update_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value );
 }
 
 /**
@@ -294,7 +289,6 @@ function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_v
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
  * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
- *
  * @param mixed $term_id
  * @param mixed $meta_key
  * @param mixed $meta_value
@@ -302,12 +296,7 @@ function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_v
  * @return bool
  */
 function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ){
-	// If term meta table is not installed (pre-wp-4.4), use WC tables
-	if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'add_term_meta' ) ) {
-		return add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
-	} else {
-		return add_term_meta( $term_id, $meta_key, $meta_value, $unique );
-	}
+	return function_exists( 'add_term_meta' ) ? add_term_meta( $term_id, $meta_key, $meta_value, $unique ) : add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
 }
 
 /**
@@ -317,7 +306,6 @@ function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = 
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
  * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
- *
  * @param mixed $term_id
  * @param mixed $meta_key
  * @param string $meta_value (default: '')
@@ -325,12 +313,7 @@ function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = 
  * @return bool
  */
 function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $deprecated = false ) {
-	// If term meta table is not installed (pre-wp-4.4), use WC tables
-	if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'delete_term_meta' ) ) {
-		return delete_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value );
-	} else {
-		return delete_term_meta( $term_id, $meta_key, $meta_value );
-	}
+	return function_exists( 'delete_term_meta' ) ? delete_term_meta( $term_id, $meta_key, $meta_value ) : delete_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value );
 }
 
 /**
@@ -340,19 +323,13 @@ function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $d
  * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
  *
  * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
- *
  * @param mixed $term_id
  * @param string $key
  * @param bool $single (default: true)
  * @return mixed
  */
 function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
-	// If term meta table is not installed (pre-wp-4.4), use WC tables
-	if ( get_option( 'db_version' ) < 34370 || ! function_exists( 'get_term_meta' ) ) {
-		return get_metadata( 'woocommerce_term', $term_id, $key, $single );
-	} else {
-		return get_term_meta( $term_id, $key, $single );
-	}
+	return function_exists( 'get_term_meta' ) ? get_term_meta( $term_id, $key, $single ) : get_metadata( 'woocommerce_term', $term_id, $key, $single );
 }
 
 /**
@@ -366,7 +343,6 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  * @return int
  */
 function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
-
 	if ( ! $terms ) $terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
 	if ( empty( $terms ) ) return $index;
 
