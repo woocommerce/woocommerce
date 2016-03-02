@@ -65,7 +65,13 @@
 				}
 			} );
 
+			$( document.body ).on( 'click', css_class, function( e ) {
+				$( css_class ).parent().find( 'input' ).focus().select();
+				$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
+			} );
+
 			$( document.body ).on( 'copy', css_class, function( e ) {
+				$( '#copy-error' ).text( '' );
 				e.clipboardData.clearData();
 				e.clipboardData.setData( 'text/plain', $.trim( $( this ).prev( 'input' ).val() ) );
 				e.preventDefault();
