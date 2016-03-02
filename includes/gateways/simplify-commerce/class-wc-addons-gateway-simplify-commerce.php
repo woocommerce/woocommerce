@@ -81,11 +81,12 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	/**
 	 * Process the subscription.
 	 *
-	 * @param WC_Order $order
-	 * @param string   $cart_token
-	 * @uses  Simplify_ApiException
-	 * @uses  Simplify_BadRequestException
+	 * @param  WC_Order $order
+	 * @param  string   $cart_token
+	 * @uses   Simplify_ApiException
+	 * @uses   Simplify_BadRequestException
 	 * @return array
+	 * @throws Exception
 	 */
 	protected function process_subscription( $order, $cart_token = '' ) {
 		try {
@@ -275,7 +276,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * process_subscription_payment function.
 	 *
 	 * @param WC_order $order
-	 * @param integer $amount (default: 0)
+	 * @param int $amount (default: 0)
 	 * @uses  Simplify_BadRequestException
 	 * @return bool|WP_Error
 	 */
@@ -304,13 +305,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				'customer'            => $customer_id,
 				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id,
-				'card.addressCity'    => $order->billing_city,
-				'card.addressCountry' => $order->billing_country,
-				'card.addressLine1'   => $order->billing_address_1,
-				'card.addressLine2'   => $order->billing_address_2,
-				'card.addressState'   => $order->billing_state,
-				'card.addressZip'     => $order->billing_postcode
+				'reference'           => $order->id
 			) );
 
 		} catch ( Exception $e ) {
@@ -396,10 +391,11 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * Validate the payment meta data required to process automatic recurring payments so that store managers can.
 	 * manually set up automatic recurring payments for a customer via the Edit Subscription screen in Subscriptions 2.0+.
 	 *
-	 * @since 2.4
-	 * @param string $payment_method_id The ID of the payment method to validate
-	 * @param array $payment_meta associative array of meta data required for automatic payments
+	 * @since  2.4
+	 * @param  string $payment_method_id The ID of the payment method to validate
+	 * @param  array $payment_meta associative array of meta data required for automatic payments
 	 * @return array
+	 * @throws Exception
 	 */
 	public function validate_subscription_payment_meta( $payment_method_id, $payment_meta ) {
 		if ( $this->id === $payment_method_id ) {
@@ -424,7 +420,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 	 * Process a pre-order payment when the pre-order is released.
 	 *
 	 * @param WC_Order $order
-	 * @return wp_error|null
+	 * @return WP_Error|null
 	 */
 	public function process_pre_order_release_payment( $order ) {
 
@@ -445,13 +441,7 @@ class WC_Addons_Gateway_Simplify_Commerce extends WC_Gateway_Simplify_Commerce {
 				'customer'            => $customer_id,
 				'description'         => trim( substr( $pre_order_name, 0, 1024 ) ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id,
-				'card.addressCity'    => $order->billing_city,
-				'card.addressCountry' => $order->billing_country,
-				'card.addressLine1'   => $order->billing_address_1,
-				'card.addressLine2'   => $order->billing_address_2,
-				'card.addressState'   => $order->billing_state,
-				'card.addressZip'     => $order->billing_postcode
+				'reference'           => $order->id
 			) );
 
 			if ( 'APPROVED' == $payment->paymentStatus ) {

@@ -138,7 +138,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 		$args['orderby']            = $deprecated_orderby;
 	}
 
-	$current_product_cat = isset( $wp_query->query['product_cat'] ) ? $wp_query->query['product_cat'] : '';
+	$current_product_cat = isset( $wp_query->query_vars['product_cat'] ) ? $wp_query->query_vars['product_cat'] : '';
 	$defaults            = array(
 		'pad_counts'         => 1,
 		'show_count'         => 1,
@@ -499,10 +499,10 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 /**
  * Function for recounting product terms, ignoring hidden products.
  *
- * @param  array  $terms
- * @param  string  $taxonomy
- * @param  boolean $callback
- * @param  boolean $terms_are_term_taxonomy_ids
+ * @param  array $terms
+ * @param  string $taxonomy
+ * @param  bool $callback
+ * @param  bool $terms_are_term_taxonomy_ids
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
 	global $wpdb;
@@ -665,3 +665,43 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 	return $terms;
 }
 add_filter( 'get_terms', 'wc_change_term_counts', 10, 2 );
+
+/**
+ * Return products in a given term, and cache value.
+ *
+ * To keep in sync, product_count will be cleared on "set_object_terms".
+ *
+ * @param int $term_id
+ * @param string $taxonomy
+ * @return array
+ */
+function wc_get_term_product_ids( $term_id, $taxonomy ) {
+	$product_ids = get_woocommerce_term_meta( $term_id, 'product_ids', true );
+
+	if ( false === $product_ids || ! is_array( $product_ids ) ) {
+		$product_ids = get_objects_in_term( $term_id, $taxonomy );
+		update_woocommerce_term_meta( $term_id, 'product_ids', $product_ids );
+	}
+
+	return $product_ids;
+}
+
+/**
+ * When a post is updated and terms recounted (called by _update_post_term_count), clear the ids.
+ * @param int $term_id
+ * @param int    $object_id  Object ID.
+ * @param array  $terms      An array of object terms.
+ * @param array  $tt_ids     An array of term taxonomy IDs.
+ * @param string $taxonomy   Taxonomy slug.
+ * @param bool   $append     Whether to append new terms to the old terms.
+ * @param array  $old_tt_ids Old array of term taxonomy IDs.
+ */
+function wc_clear_term_product_ids( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+	foreach ( $old_tt_ids as $term_id ) {
+		delete_woocommerce_term_meta( $term_id, 'product_ids' );
+	}
+	foreach ( $tt_ids as $term_id ) {
+		delete_woocommerce_term_meta( $term_id, 'product_ids' );
+	}
+}
+add_action( 'set_object_terms', 'wc_clear_term_product_ids', 10, 6 );

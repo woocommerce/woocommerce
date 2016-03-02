@@ -30,7 +30,7 @@ class WC_Breadcrumb {
 	 */
 	public function add_crumb( $name, $link = '' ) {
 		$this->crumbs[] = array(
-			$name,
+			strip_tags( $name ),
 			$link
 		);
 	}
@@ -100,7 +100,7 @@ class WC_Breadcrumb {
 		$shop_page    = get_post( $shop_page_id );
 
 		// If permalinks contain the shop page in the URI prepend the breadcrumb with shop
-		if ( $shop_page_id && $shop_page && strstr( $permalinks['product_base'], '/' . $shop_page->post_name ) && get_option( 'page_on_front' ) != $shop_page_id ) {
+		if ( $shop_page_id && $shop_page && isset( $permalinks['product_base'] ) && strstr( $permalinks['product_base'], '/' . $shop_page->post_name ) && get_option( 'page_on_front' ) != $shop_page_id ) {
 			$this->add_crumb( get_the_title( $shop_page ), get_permalink( $shop_page ) );
 		}
 	}
@@ -278,7 +278,7 @@ class WC_Breadcrumb {
 	}
 
 	/**
-	 * Add crumbs for date based archives.
+	 * Add crumbs for taxonomies
 	 */
 	private function add_crumbs_tax() {
 		$this_term = $GLOBALS['wp_query']->get_queried_object();
@@ -287,8 +287,7 @@ class WC_Breadcrumb {
 		$this->add_crumb( $taxonomy->labels->name );
 
 		if ( 0 != $this_term->parent ) {
-			$this->term_ancestors( $this_term->parent, 'post_category' );
-			$this->add_crumb( $this_term->name, get_term_link( $this_term->term_id, $this_term->taxonomy ) );
+			$this->term_ancestors( $this_term->term_id, $this_term->taxonomy );
 		}
 
 		$this->add_crumb( single_term_title( '', false ), get_term_link( $this_term->term_id, $this_term->taxonomy ) );

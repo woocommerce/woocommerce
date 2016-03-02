@@ -285,7 +285,7 @@ jQuery( function( $ ) {
 				wc_meta_boxes_product_variations_media.variable_image_frame.on( 'select', function () {
 
 					var attachment = wc_meta_boxes_product_variations_media.variable_image_frame.state().get( 'selection' ).first().toJSON(),
-						url = attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+						url = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
 					$( '.upload_image_id', wc_meta_boxes_product_variations_media.setting_variation_image ).val( attachment.id ).change();
 					wc_meta_boxes_product_variations_media.setting_variation_image.find( '.upload_image_button' ).addClass( 'remove' );
@@ -554,7 +554,7 @@ jQuery( function( $ ) {
 			var data = {
 				action: 'woocommerce_add_variation',
 				post_id: woocommerce_admin_meta_boxes_variations.post_id,
-				loop: $( '.woocommerce_variation' ).size(),
+				loop: $( '.woocommerce_variation' ).length,
 				security: woocommerce_admin_meta_boxes_variations.add_variation_nonce
 			};
 
@@ -768,11 +768,12 @@ jQuery( function( $ ) {
 			$.ajax({
 				url: woocommerce_admin_meta_boxes_variations.ajax_url,
 				data: {
-					action:      'woocommerce_bulk_edit_variations',
-					security:    woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
-					product_id:  woocommerce_admin_meta_boxes_variations.post_id,
-					bulk_action: do_variation_action,
-					data:        data
+					action:       'woocommerce_bulk_edit_variations',
+					security:     woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
+					product_id:   woocommerce_admin_meta_boxes_variations.post_id,
+					product_type: $( '#product-type' ).val(),
+					bulk_action:  do_variation_action,
+					data:         data
 				},
 				type: 'POST',
 				success: function() {

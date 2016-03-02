@@ -20,6 +20,8 @@ class WC_Auth {
 
 	/**
 	 * Version.
+	 *
+	 * @var int
 	 */
 	const VERSION = 1;
 
@@ -44,7 +46,7 @@ class WC_Auth {
 	 *
 	 * @since  2.4.0
 	 *
-	 * @param  $vars
+	 * @param  array $vars
 	 *
 	 * @return string[]
 	 */
@@ -129,7 +131,7 @@ class WC_Auth {
 	 * @return string
 	 */
 	protected function build_url( $data, $endpoint ) {
-		$url = wc_get_endpoint_url( 'wc-auth/v' . self::VERSION, $endpoint, get_home_url( '/' ) );
+		$url = wc_get_endpoint_url( 'wc-auth/v' . self::VERSION, $endpoint, home_url( '/' ) );
 
 		return add_query_arg( array(
 			'app_name'     => wc_clean( $data['app_name'] ),
@@ -235,6 +237,7 @@ class WC_Auth {
 	 * @param  string $url
 	 *
 	 * @return bool
+	 * @throws Exception
 	 */
 	protected function post_consumer_data( $consumer_data, $url ) {
 		$params = array(

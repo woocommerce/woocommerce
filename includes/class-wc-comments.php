@@ -213,6 +213,8 @@ class WC_Comments {
 
 	/**
 	 * Modify recipient of review email.
+	 * @param array $emails
+	 * @param int $comment_id
 	 * @return array
 	 */
 	public static function comment_moderation_recipients( $emails, $comment_id ) {
@@ -226,15 +228,14 @@ class WC_Comments {
 	}
 
 	/**
-	 * Clear transients for a review.
+	 * Ensure product average rating and review count is kept up to date.
 	 * @param int $post_id
 	 */
 	public static function clear_transients( $post_id ) {
-		$post_id = absint( $post_id );
-		$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
-		delete_transient( 'wc_average_rating_' . $post_id . $transient_version );
-		delete_transient( 'wc_rating_count_' . $post_id . $transient_version );
-		delete_transient( 'wc_review_count_' . $post_id . $transient_version );
+		delete_post_meta( $post_id, '_wc_average_rating' );
+		delete_post_meta( $post_id, '_wc_rating_count' );
+		delete_post_meta( $post_id, '_wc_review_count' );
+		WC_Product::sync_average_rating( $post_id );
 	}
 
 	/**
@@ -270,6 +271,7 @@ class WC_Comments {
 			}
 
 			$stats['total_comments'] = $total;
+			$stats['all'] = $total;
 			foreach ( $approved as $key ) {
 				if ( empty( $stats[ $key ] ) ) {
 					$stats[ $key ] = 0;

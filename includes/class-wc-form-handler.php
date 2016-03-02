@@ -180,7 +180,8 @@ class WC_Form_Handler {
 		) );
 
 		foreach ( $required_fields as $field_key => $field_name ) {
-			if ( empty( $_POST[ $field_key ] ) ) {
+			$value = wc_clean( $_POST[ $field_key ] );
+			if ( empty( $value ) ) {
 				wc_add_notice( '<strong>' . esc_html( $field_name ) . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 		}
@@ -275,6 +276,8 @@ class WC_Form_Handler {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
 
+				do_action( 'woocommerce_before_pay_action', $order );
+
 				// Set customer location to order location
 				if ( $order->billing_country ) {
 					WC()->customer->set_country( $order->billing_country );
@@ -325,7 +328,7 @@ class WC_Form_Handler {
 						$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
 						// Redirect to success/confirmation/payment page
-						if ( 'success' == $result['result'] ) {
+						if ( 'success' === $result['result'] ) {
 							wp_redirect( $result['redirect'] );
 							exit;
 						}
@@ -337,6 +340,9 @@ class WC_Form_Handler {
 					wp_safe_redirect( $order->get_checkout_order_received_url() );
 					exit;
 				}
+
+				do_action( 'woocommerce_after_pay_action', $order );
+
 			}
 
 		}
@@ -346,7 +352,7 @@ class WC_Form_Handler {
 	 * Process the add payment method form.
 	 */
 	public static function add_payment_method_action() {
-		if ( isset( $_POST['woocommerce_add_payment_method'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
+		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'], $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
 
 			ob_start();
 
@@ -648,7 +654,7 @@ class WC_Form_Handler {
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) !== false ) {
-			wc_add_to_cart_message( $product_id );
+			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}
 		return false;
@@ -678,7 +684,7 @@ class WC_Form_Handler {
 
 				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
 					$was_added_to_cart = true;
-					$added_to_cart[]   = $item;
+					$added_to_cart[ $item ] = $quantity;
 				}
 			}
 
@@ -752,7 +758,7 @@ class WC_Form_Handler {
 			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
 			if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
-				wc_add_to_cart_message( $product_id );
+				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 				return true;
 			}
 		}

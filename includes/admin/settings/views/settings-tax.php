@@ -9,14 +9,6 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	array( 'title' => __( 'Tax Options', 'woocommerce' ), 'type' => 'title','desc' => '', 'id' => 'tax_options' ),
 
 	array(
-		'title'   => __( 'Enable Taxes', 'woocommerce' ),
-		'desc'    => __( 'Enable taxes and tax calculations', 'woocommerce' ),
-		'id'      => 'woocommerce_calc_taxes',
-		'default' => 'no',
-		'type'    => 'checkbox'
-	),
-
-	array(
 		'title'    => __( 'Prices Entered With Tax', 'woocommerce' ),
 		'id'       => 'woocommerce_prices_include_tax',
 		'default'  => 'no',

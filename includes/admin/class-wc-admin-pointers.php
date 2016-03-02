@@ -28,7 +28,9 @@ class WC_Admin_Pointers {
 	 * Setup pointers for screen.
 	 */
 	public function setup_pointers_for_screen() {
-		$screen = get_current_screen();
+		if ( ! $screen = get_current_screen() ) {
+			return;
+		}
 
 		switch ( $screen->id ) {
 			case 'product' :
@@ -64,12 +66,9 @@ class WC_Admin_Pointers {
 					)
 				),
 				'content' => array(
-					'target'       => "#content",
+					'target'       => "#wp-content-editor-container",
 					'next'         => 'product-type',
-					'next_trigger' => array(
-						'target' => '#content',
-						'event'  => 'click change input'
-					),
+					'next_trigger' => array(),
 					'options'      => array(
 						'content'  => 	'<h3>' . esc_html__( 'Product Description', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'This is your products main body of content. Here you should describe your product in detail.', 'woocommerce' ) . '</p>',

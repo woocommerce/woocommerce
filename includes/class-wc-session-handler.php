@@ -66,7 +66,6 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 		if ( ! is_user_logged_in() ) {
-			add_action( 'woocommerce_thankyou', array( $this, 'destroy_session' ) );
 			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
 		}
 	}
@@ -141,7 +140,7 @@ class WC_Session_Handler extends WC_Session {
 		$to_hash = $customer_id . '|' . $session_expiration;
 		$hash    = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
 
-		if ( ! hash_equals( $hash, $cookie_hash ) ) {
+		if ( empty( $cookie_hash ) || ! hash_equals( $hash, $cookie_hash ) ) {
 			return false;
 		}
 
@@ -163,14 +162,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return string
 	 */
 	private function get_cache_prefix() {
-		$prefix_num = wp_cache_get( 'wc_session_prefix', WC_SESSION_CACHE_GROUP );
-
-		if ( $prefix_num === false ) {
-			$prefix_num = 1;
-			wp_cache_set( 'wc_session_prefix', $prefix_num, WC_SESSION_CACHE_GROUP );
-		}
-
-		return 'wc_session_' . $prefix_num . '_';
+		return WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP );
 	}
 
 	/**
@@ -181,39 +173,19 @@ class WC_Session_Handler extends WC_Session {
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
 
-			$session_id = $wpdb->get_var( $wpdb->prepare( "SELECT session_id FROM $this->_table WHERE session_key = %s;", $this->_customer_id ) );
-
-			if ( $session_id ) {
-				$wpdb->update(
-					$this->_table,
-					array(
-						'session_key'    => $this->_customer_id,
-						'session_value'  => maybe_serialize( $this->_data ),
-						'session_expiry' => $this->_session_expiration
-					),
-					array( 'session_id' => $session_id ),
-					array(
-						'%s',
-						'%s',
-						'%d'
-					),
-					array( '%d' )
-				);
-			} else {
-				$wpdb->insert(
-					$this->_table,
-					array(
-						'session_key'    => $this->_customer_id,
-						'session_value'  => maybe_serialize( $this->_data ),
-						'session_expiry' => $this->_session_expiration
-					),
-					array(
-						'%s',
-						'%s',
-						'%d'
-					)
-				);
-			}
+			$wpdb->replace(
+				$this->_table,
+				array(
+					'session_key' => $this->_customer_id,
+					'session_value' => maybe_serialize( $this->_data ),
+					'session_expiry' => $this->_session_expiration
+				),
+				array(
+					'%s',
+					'%s',
+					'%d'
+				)
+			);
 
 			// Set cache
 			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
@@ -262,7 +234,7 @@ class WC_Session_Handler extends WC_Session {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) );
 
 			// Invalidate cache
-			wp_cache_incr( 'wc_session_prefix', 1, WC_SESSION_CACHE_GROUP );
+			WC_Cache_Helper::incr_cache_prefix( WC_SESSION_CACHE_GROUP );
 		}
 	}
 

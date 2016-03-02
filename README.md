@@ -5,19 +5,20 @@ Welcome to the WooCommerce repository on GitHub. Here you can browse the source,
 If you are not a developer, please use the [WooCommerce plugin page](http://wordpress.org/plugins/woocommerce/) on WordPress.org.
 
 ## Documentation
-* The [WooCommerce docs site](http://docs.woothemes.com/documentation/plugins/woocommerce/)
-* [WooCommerce API Docs](http://docs.woothemes.com/wc-apidocs/)
+* [WooCommerce Documentation](http://docs.woothemes.com/documentation/plugins/woocommerce/)
+* [WooCommerce Knowledge Base](https://support.woothemes.com/hc/en-us/categories/200146917-WooCommerce)
+* [WooCommerce Code Reference](http://docs.woothemes.com/wc-apidocs/)
 * [WooCommerce REST API Docs](http://woothemes.github.io/woocommerce-rest-api-docs/)
 
 ## Support
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place in the appropriate channels:
 
 * The [WooThemes premium support portal](http://support.woothemes.com/) for customers who have purchased themes or extensions.
-* [Our public HelpDesk](https://support.woothemes.com/hc/communities/public/topics) which is available for all WooCommerce users.
+* [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
 
 Support requests in issues on this repository will be closed on sight.
 
 ## Contributing to WooCommerce
-If you have a patch, or stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md) for more information how you can do this.
+If you have a patch, or stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woothemes/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
 
 If you have an idea for WooCommerce, see the [Roadmap Trello board](https://trello.com/b/YgRbpuze/woocommerce-roadmap).

@@ -20,11 +20,8 @@ class WC_Product_Grouped extends WC_Product {
 	/** @public array Array of child products/posts/variations. */
 	public $children;
 
-	/** @public string The product's total stock, including that of its children. */
-	public $total_stock;
-
 	/**
-	 * __construct function.
+	 * Constructor.
 	 *
 	 * @access public
 	 * @param mixed $product
@@ -43,40 +40,6 @@ class WC_Product_Grouped extends WC_Product {
 	public function add_to_cart_text() {
 		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'View products', 'woocommerce' ), $this );
 	}
-
-    /**
-     * Get total stock.
-     *
-     * This is the stock of parent and children combined.
-     *
-     * @access public
-     * @return int
-     */
-    public function get_total_stock() {
-
-        if ( empty( $this->total_stock ) ) {
-
-        	$transient_name = 'wc_product_total_stock_' . $this->id . WC_Cache_Helper::get_transient_version( 'product' );
-
-        	if ( false === ( $this->total_stock = get_transient( $transient_name ) ) ) {
-		        $this->total_stock = $this->stock;
-
-				if ( sizeof( $this->get_children() ) > 0 ) {
-					foreach ( $this->get_children() as $child_id ) {
-						$stock = get_post_meta( $child_id, '_stock', true );
-
-						if ( $stock != '' ) {
-							$this->total_stock += wc_stock_amount( $stock );
-						}
-					}
-				}
-
-				set_transient( $transient_name, $this->total_stock, DAY_IN_SECONDS * 30 );
-			}
-		}
-
-		return wc_stock_amount( $this->total_stock );
-    }
 
 	/**
 	 * Return the products children posts.
@@ -170,11 +133,12 @@ class WC_Product_Grouped extends WC_Product {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$child_prices     = array();
 
-		foreach ( $this->get_children() as $child_id )
-			$child_prices[] = get_post_meta( $child_id, '_price', true );
+		foreach ( $this->get_children() as $child_id ) {
+			$child          = wc_get_product( $child_id );
+			$child_prices[] = 'incl' === $tax_display_mode ? $child->get_price_including_tax() : $child->get_price_excluding_tax();
+		}
 
 		$child_prices     = array_unique( $child_prices );
-		$get_price_method = 'get_price_' . $tax_display_mode . 'uding_tax';
 
 		if ( ! empty( $child_prices ) ) {
 			$min_price = min( $child_prices );
@@ -185,16 +149,11 @@ class WC_Product_Grouped extends WC_Product {
 		}
 
 		if ( $min_price ) {
-			if ( $min_price == $max_price ) {
-				$display_price = wc_price( $this->$get_price_method( 1, $min_price ) );
+			if ( $min_price === $max_price ) {
+				$price = wc_price( $min_price ) . $this->get_price_suffix();
 			} else {
-				$from          = wc_price( $this->$get_price_method( 1, $min_price ) );
-				$to            = wc_price( $this->$get_price_method( 1, $max_price ) );
-				$display_price = sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), $from, $to );
+				$price = sprintf( _x( '%1$s&ndash;%2$s', 'Price range: from-to', 'woocommerce' ), wc_price( $min_price ), wc_price( $max_price ) ) . $this->get_price_suffix();
 			}
-
-			$price .= $display_price . $this->get_price_suffix();
-
 			$price = apply_filters( 'woocommerce_grouped_price_html', $price, $this );
 		} else {
 			$price = apply_filters( 'woocommerce_grouped_empty_price_html', '', $this );

@@ -17,9 +17,32 @@ if ( ! class_exists( 'WP_Importer' ) ) {
  */
 class WC_Tax_Rate_Importer extends WP_Importer {
 
+	/**
+	 * The current file id.
+	 *
+	 * @var int
+	 */
 	public $id;
+
+	/**
+	 * The current file url.
+	 *
+	 * @var string
+	 */
 	public $file_url;
+
+	/**
+	 * The current import page.
+	 *
+	 * @var string
+	 */
 	public $import_page;
+
+	/**
+	 * The current delimiter.
+	 *
+	 * @var string
+	 */
 	public $delimiter;
 
 	/**
@@ -84,7 +107,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	}
 
 	/**
-	 * format_data_from_csv function.
+	 * UTF-8 encode the data if `$enc` value isn't UTF-8.
 	 *
 	 * @param mixed $data
 	 * @param string $enc
@@ -95,7 +118,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	}
 
 	/**
-	 * import function.
+	 * Import the file if it exists and is valid.
 	 *
 	 * @param mixed $file
 	 */
@@ -143,7 +166,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		}
 
 		// Show Result
-		echo '<div class="updated settings-error below-h2"><p>
+		echo '<div class="updated settings-error"><p>
 			' . sprintf( __( 'Import complete - imported <strong>%s</strong> tax rates.', 'woocommerce' ), $loop ) . '
 		</p></div>';
 
@@ -186,22 +209,22 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	}
 
 	/**
-	 * header function.
+	 * Output header html.
 	 */
 	public function header() {
 		echo '<div class="wrap"><div class="icon32 icon32-woocommerce-importer" id="icon-woocommerce"><br></div>';
-		echo '<h2>' . __( 'Import Tax Rates', 'woocommerce' ) . '</h2>';
+		echo '<h1>' . __( 'Import Tax Rates', 'woocommerce' ) . '</h1>';
 	}
 
 	/**
-	 * footer function.
+	 * Output footer html.
 	 */
 	public function footer() {
 		echo '</div>';
 	}
 
 	/**
-	 * greet function.
+	 * Output information about the uploading process.
 	 */
 	public function greet() {
 

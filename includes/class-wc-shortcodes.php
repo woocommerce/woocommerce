@@ -84,9 +84,10 @@ class WC_Shortcodes {
 	private static function product_loop( $query_args, $atts, $loop_name ) {
 		global $woocommerce_loop;
 
-		$products                    = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts ) );
+		$products                    = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name ) );
 		$columns                     = absint( $atts['columns'] );
 		$woocommerce_loop['columns'] = $columns;
+		$woocommerce_loop['name']    = $loop_name;
 
 		ob_start();
 
@@ -446,15 +447,17 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$product = wc_setup_product_data( $product_data );
-
-		if ( ! $product ) {
+		if ( is_object( $product_data ) ) {
+			$product = wc_setup_product_data( $product_data );
+		} else {
 			return '';
 		}
 
+		$styles = empty( $atts['style'] ) ? '' : ' style="' . esc_attr( $atts['style'] ) . '"';
+
 		ob_start();
 		?>
-		<p class="product woocommerce add_to_cart_inline <?php echo esc_attr( $atts['class'] ); ?>" style="<?php echo esc_attr( $atts['style'] ); ?>">
+		<p class="product woocommerce add_to_cart_inline <?php echo esc_attr( $atts['class'] ); ?>"<?php echo $styles; ?>>
 
 			<?php if ( 'true' == $atts['show_price'] ) : ?>
 				<?php echo $product->get_price_html(); ?>
@@ -488,6 +491,12 @@ class WC_Shortcodes {
 		} elseif ( isset( $atts['sku'] ) ) {
 			$product_id   = wc_get_product_id_by_sku( $atts['sku'] );
 			$product_data = get_post( $product_id );
+		} else {
+			return '';
+		}
+
+		if ( is_object( $product_data ) ) {
+			$product = wc_setup_product_data( $product_data );
 		} else {
 			return '';
 		}
@@ -585,8 +594,6 @@ class WC_Shortcodes {
 		);
 
 		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
-
-		ob_start();
 
 		add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
 

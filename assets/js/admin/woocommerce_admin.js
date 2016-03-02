@@ -10,7 +10,7 @@ jQuery( function ( $ ) {
 		.on( 'wc_add_error_tip', function( e, element, error_type ) {
 			var offset = element.position();
 
-			if ( element.parent().find( '.wc_error_tip' ).size() === 0 ) {
+			if ( element.parent().find( '.wc_error_tip' ).length === 0 ) {
 				element.after( '<div class="wc_error_tip ' + error_type + '">' + woocommerce_admin[error_type] + '</div>' );
 				element.parent().find( '.wc_error_tip' )
 					.css( 'left', offset.left + element.width() - ( element.width() / 2 ) - ( $( '.wc_error_tip' ).width() / 2 ) )
@@ -53,7 +53,7 @@ jQuery( function ( $ ) {
 		})
 		.on( 'keyup change', '.wc_input_country_iso[type=text]', function() {
 			var value = $( this ).val();
-			var regex = new RegExp( '^([A-Z])?([A-Z])$' );
+			var regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
 
 			if ( ! regex.test( value ) ) {
 				$( this ).val( '' );
@@ -115,7 +115,7 @@ jQuery( function ( $ ) {
 
 	$( '.wc_input_table .remove_rows' ).click( function() {
 		var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
-		if ( $tbody.find( 'tr.current' ).size() > 0 ) {
+		if ( $tbody.find( 'tr.current' ).length > 0 ) {
 			var $current = $tbody.find( 'tr.current' );
 			$current.each( function() {
 				$( this ).remove();
@@ -125,15 +125,16 @@ jQuery( function ( $ ) {
 	});
 
 	var controlled = false;
-	var shifted = false;
-	var hasFocus = false;
+	var shifted    = false;
+	var hasFocus   = false;
 
 	$( document.body ).bind( 'keyup keydown', function( e ) {
-		shifted = e.shiftKey; controlled = e.ctrlKey || e.metaKey;
+		shifted    = e.shiftKey;
+		controlled = e.ctrlKey || e.metaKey;
 	});
 
 	$( '.wc_input_table' ).on( 'focus click', 'input', function( e ) {
-		var $this_table = $( this ).closest( 'table' );
+		var $this_table = $( this ).closest( 'table, tbody' );
 		var $this_row   = $( this ).closest( 'tr' );
 
 		if ( ( e.type === 'focus' && hasFocus !== $this_row.index() ) || ( e.type === 'click' && $( this ).is( ':focus' ) ) ) {
@@ -146,7 +147,7 @@ jQuery( function ( $ ) {
 				$( 'tr', $this_table ).removeClass( 'current' );
 				$this_row.addClass( 'selected_now' ).addClass( 'current' );
 
-				if ( $( 'tr.last_selected', $this_table ).size() > 0 ) {
+				if ( $( 'tr.last_selected', $this_table ).length > 0 ) {
 					if ( $this_row.index() > $( 'tr.last_selected', $this_table ).index() ) {
 						$( 'tr', $this_table ).slice( $( 'tr.last_selected', $this_table ).index(), $this_row.index() ).addClass( 'current' );
 					} else {
@@ -222,17 +223,10 @@ jQuery( function ( $ ) {
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
 
-	// Add js validation for product quick edit panel.
+	// Load videos when help button is clicked.
+	$( '#contextual-help-link' ).on( 'click', function() {
+		var frame = $( '#tab-panel-woocommerce_101_tab iframe' );
 
-	$( '#woocommerce-fields .regular_price[type=text], #woocommerce-fields .sale_price[type=text]' ).keyup( function() {
-			var value    = $( this ).val();
-			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
-			var newvalue = value.replace( regex, '' );
-			if ( value !== newvalue ) {
-				$( this ).val( newvalue );
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
-			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
-			}
+		frame.attr( 'src', frame.data( 'src' ) );
 	});
 });

@@ -38,7 +38,6 @@ class WC_Admin_Taxonomies {
 
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
-		add_action( 'product_shipping_class_pre_add_form', array( $this, 'shipping_class_description' ) );
 
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
@@ -57,7 +56,7 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param mixed $term_id
 	 * @param mixed $tt_id
-	 * @param mixed $taxonomy
+	 * @param string $taxonomy
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
 		if ( 'product_cat' != $taxonomy && ! taxonomy_is_product_attribute( $taxonomy ) ) {
@@ -89,7 +88,7 @@ class WC_Admin_Taxonomies {
 	 */
 	public function add_category_fields() {
 		?>
-		<div class="form-field">
+		<div class="form-field term-display-type-wrap">
 			<label for="display_type"><?php _e( 'Display type', 'woocommerce' ); ?></label>
 			<select id="display_type" name="display_type" class="postform">
 				<option value=""><?php _e( 'Default', 'woocommerce' ); ?></option>
@@ -98,7 +97,7 @@ class WC_Admin_Taxonomies {
 				<option value="both"><?php _e( 'Both', 'woocommerce' ); ?></option>
 			</select>
 		</div>
-		<div class="form-field">
+		<div class="form-field term-thumbnail-wrap">
 			<label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label>
 			<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_placeholder_img_src() ); ?>" width="60px" height="60px" /></div>
 			<div style="line-height: 60px;">
@@ -257,6 +256,8 @@ class WC_Admin_Taxonomies {
 	 * save_category_fields function.
 	 *
 	 * @param mixed $term_id Term ID being saved
+	 * @param mixed $tt_id
+	 * @param string $taxonomy
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
 		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) {
@@ -272,13 +273,6 @@ class WC_Admin_Taxonomies {
 	 */
 	public function product_cat_description() {
 		echo wpautop( __( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woocommerce' ) );
-	}
-
-	/**
-	 * Description for shipping class page to aid users.
-	 */
-	public function shipping_class_description() {
-		echo wpautop( __( 'Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woocommerce' ) );
 	}
 
 	/**
@@ -307,9 +301,9 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Thumbnail column value added to category admin.
 	 *
-	 * @param mixed $columns
-	 * @param mixed $column
-	 * @param mixed $id
+	 * @param string $columns
+	 * @param string $column
+	 * @param int $id
 	 * @return array
 	 */
 	public function product_cat_column( $columns, $column, $id ) {

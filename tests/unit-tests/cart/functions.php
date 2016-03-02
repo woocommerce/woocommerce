@@ -110,7 +110,7 @@ class Functions extends \WC_Unit_Test_Case {
 	public function test_wc_format_list_of_items() {
 		$items = array( 'Title 1', 'Title 2' );
 
-		$this->assertEquals( "&ldquo;Title 1&rdquo; and &ldquo;Title 2&rdquo;", wc_format_list_of_items( $items ) );
+		$this->assertEquals( 'Title 1 and Title 2', wc_format_list_of_items( $items ) );
 	}
 
 	/**

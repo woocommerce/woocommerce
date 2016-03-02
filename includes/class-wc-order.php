@@ -58,9 +58,8 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get order refunds.
-	 *
 	 * @since 2.2
-	 * @return array
+	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
 		if ( empty( $this->refunds ) && ! is_array( $this->refunds ) ) {
@@ -290,7 +289,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_remaining_refund_amount() {
-		return wc_format_decimal( $this->get_total() - $this->get_total_refunded() );
+		return wc_format_decimal( $this->get_total() - $this->get_total_refunded(), wc_get_price_decimals() );
 	}
 
 	/**

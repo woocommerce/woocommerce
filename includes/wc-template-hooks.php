@@ -73,7 +73,6 @@ add_action( 'woocommerce_archive_description', 'woocommerce_product_archive_desc
  *
  * @see woocommerce_result_count()
  * @see woocommerce_catalog_ordering()
- * @see woocommerce_reset_loop()
  */
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_result_count', 20 );
 add_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 );
@@ -86,7 +85,9 @@ add_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 )
  * @see woocommerce_template_loop_add_to_cart()
  * @see woocommerce_template_loop_product_thumbnail()
  * @see woocommerce_template_loop_product_title()
- * @see woocommerce_template_loop_subcategory_title()
+ * @see woocommerce_template_loop_category_link_open()
+ * @see woocommerce_template_loop_category_title()
+ * @see woocommerce_template_loop_category_link_close()
  * @see woocommerce_template_loop_price()
  * @see woocommerce_template_loop_rating()
  */
@@ -134,6 +135,7 @@ add_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_rela
  * Product Summary Box.
  *
  * @see woocommerce_template_single_title()
+ * @see woocommerce_template_single_rating()
  * @see woocommerce_template_single_price()
  * @see woocommerce_template_single_excerpt()
  * @see woocommerce_template_single_meta()
@@ -154,6 +156,8 @@ add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_s
  * @see woocommerce_grouped_add_to_cart()
  * @see woocommerce_variable_add_to_cart()
  * @see woocommerce_external_add_to_cart()
+ * @see woocommerce_single_variation()
+ * @see woocommerce_single_variation_add_to_cart_button()
  */
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
 add_action( 'woocommerce_simple_add_to_cart', 'woocommerce_simple_add_to_cart', 30 );
@@ -182,6 +186,7 @@ add_filter( 'woocommerce_product_tabs', 'woocommerce_sort_product_tabs', 99 );
  * @see woocommerce_checkout_login_form()
  * @see woocommerce_checkout_coupon_form()
  * @see woocommerce_order_review()
+ * @see woocommerce_checkout_payment()
  */
 add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 add_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
@@ -213,7 +218,7 @@ add_action( 'wp_footer', 'woocommerce_demo_store' );
  * Order details.
  *
  * @see woocommerce_order_details_table()
- * @see woocommerce_order_details_table()
+ * @see woocommerce_order_again_button()
  */
 add_action( 'woocommerce_view_order', 'woocommerce_order_details_table', 10 );
 add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
@@ -234,3 +239,14 @@ add_action( 'woocommerce_auth_page_footer', 'woocommerce_output_auth_footer', 10
  * Disable Jetpack comments.
  */
 add_filter( 'jetpack_comment_form_enabled_for_product', '__return_false' );
+
+/**
+ * My Account.
+ */
+add_action( 'woocommerce_account_orders_endpoint', 'woocommerce_account_orders' );
+add_action( 'woocommerce_account_view-order_endpoint', 'woocommerce_account_view_order' );
+add_action( 'woocommerce_account_downloads_endpoint', 'woocommerce_account_downloads' );
+add_action( 'woocommerce_account_edit-address_endpoint', 'woocommerce_account_edit_address' );
+add_action( 'woocommerce_account_payment-methods_endpoint', 'woocommerce_account_payment_methods' );
+add_action( 'woocommerce_account_add-payment-method_endpoint', 'woocommerce_account_add_payment_method' );
+add_action( 'woocommerce_account_edit-account_endpoint', 'woocommerce_account_edit_account' );

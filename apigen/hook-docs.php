@@ -84,7 +84,6 @@ class WC_HookFinder {
 
 		echo '<div id="content">';
 		echo '<h1>Action and Filter Hook Reference</h1>';
-		echo '<div class="description"><p>The following is a full list of actions and filters found in WooCommerce core.</p></div>';
 
 		foreach ( self::$files_to_scan as $heading => $files ) {
 			self::$custom_hooks_found = array();
@@ -123,6 +122,45 @@ class WC_HookFinder {
 								case 'filter' :
 								case 'action' :
 									$hook = trim( $token[1], "'" );
+									$loop = 0;
+
+									if ( '_' === substr( $hook, '-1', 1 ) ) {
+										$hook .= '{';
+										$open = true;
+										// Keep adding to hook until we find a comma or colon
+										while ( 1 ) {
+											$loop ++;
+											$next_hook  = trim( trim( is_string( $tokens[ $index + $loop ] ) ? $tokens[ $index + $loop ] : $tokens[ $index + $loop ][1], '"' ), "'" );
+
+											if ( in_array( $next_hook, array( '.', '{', '}', '"', "'", ' ' ) ) ) {
+												continue;
+											}
+
+											$hook_first = substr( $next_hook, 0, 1 );
+											$hook_last  = substr( $next_hook, -1, 1 );
+
+											if ( in_array( $next_hook, array( ',', ';' ) ) ) {
+												if ( $open ) {
+													$hook .= '}';
+													$open = false;
+												}
+												break;
+											}
+
+											if ( '_' === $hook_first ) {
+												$next_hook = '}' . $next_hook;
+												$open = false;
+											}
+
+											if ( '_' === $hook_last ) {
+												$next_hook .= '{';
+												$open = true;
+											}
+
+											$hook .= $next_hook;
+										}
+									}
+
 									if ( isset( self::$custom_hooks_found[ $hook ] ) ) {
 										self::$custom_hooks_found[ $hook ]['file'][] = self::$current_file;
 									} else {
@@ -151,9 +189,9 @@ class WC_HookFinder {
 			ksort( self::$custom_hooks_found );
 
 			if ( ! empty( self::$custom_hooks_found ) ) {
-				echo '<h2>' . $heading . '</h2>';
+				echo '<div class="panel panel-default"><div class="panel-heading"><h2>' . $heading . '</h2></div>';
 
-				echo '<table class="summary"><thead><tr><th>Hook</th><th>Type</th><th>File(s)</th></tr></thead><tbody>';
+				echo '<table class="summary table table-bordered table-striped"><thead><tr><th>Hook</th><th>Type</th><th>File(s)</th></tr></thead><tbody>';
 
 				foreach ( self::$custom_hooks_found as $hook => $details ) {
 					echo '<tr>
@@ -163,19 +201,20 @@ class WC_HookFinder {
 					</tr>' . "\n";
 				}
 
-				echo '</tbody></table>';
+				echo '</tbody></table></div>';
 			}
 		}
 
 		echo '</div><div id="footer">';
 
-		$html   = file_get_contents( '../wc-apidocs/todo.html' );
-		$header = current( explode( '<div id="content">', $html ) );
-		$header = str_replace( '<li class="active">', '<li>', $header );
+		$html   = file_get_contents( '../wc-apidocs/tree.html' );
+		$header = explode( '<div id="content">', $html );
+		$header = str_replace( '<li class="active">', '<li>', current( $header ) );
 		$header = str_replace( '<li class="hooks">', '<li class="active">', $header );
-		$footer = end( explode( '<div id="footer">', $html ) );
+		$header = str_replace( 'Tree | ', 'Hook Reference | ', $header );
+		$footer = explode( '<div id="footer">', $html );
 
-		file_put_contents( '../wc-apidocs/hook-docs.html', $header . ob_get_clean() . $footer );
+		file_put_contents( '../wc-apidocs/hook-docs.html', $header . ob_get_clean() . end( $footer ) );
 		echo "Hook docs generated :)\n";
 	}
 }

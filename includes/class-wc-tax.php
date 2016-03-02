@@ -15,7 +15,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Tax {
 
+	/**
+	 * Precision.
+	 *
+	 * @var int
+	 */
 	public static $precision;
+
+	/**
+	 * Round at subtotal.
+	 *
+	 * @var bool
+	 */
 	public static $round_at_subtotal;
 
 	/**
@@ -222,13 +233,14 @@ class WC_Tax {
 			return array();
 		}
 
-		$valid_postcodes     = self::_get_wildcard_postcodes( wc_clean( $postcode ) );
-		$rates_transient_key = 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, implode( ',', $valid_postcodes), $tax_class ) );
-		$matched_tax_rates   = get_transient( $rates_transient_key );
+		$postcode          = wc_clean( $postcode );
+		$valid_postcodes   = self::_get_wildcard_postcodes( $postcode );
+		$cache_key         = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, $postcode, $tax_class ) );
+		$matched_tax_rates = wp_cache_get( $cache_key, 'taxes' );
 
 		if ( false === $matched_tax_rates ) {
 			$matched_tax_rates = self::get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes );
-			set_transient( $rates_transient_key, $matched_tax_rates, WEEK_IN_SECONDS );
+			wp_cache_set( $cache_key, $matched_tax_rates, 'taxes' );
 		}
 
 		return apply_filters( 'woocommerce_find_rates', $matched_tax_rates, $args );
@@ -441,11 +453,12 @@ class WC_Tax {
 				// This will be per order shipping - loop through the order and find the highest tax class rate
 				$cart_tax_classes = WC()->cart->get_cart_item_tax_classes();
 
-				// If multiple classes are found, use highest. Don't bother with standard rate, we can get that later.
+				// If multiple classes are found, use the first one. Don't bother with standard rate, we can get that later.
 				if ( sizeof( $cart_tax_classes ) > 1 && ! in_array( '', $cart_tax_classes ) ) {
 					$tax_classes = self::get_tax_classes();
 
 					foreach ( $tax_classes as $tax_class ) {
+						$tax_class = sanitize_title( $tax_class );
 						if ( in_array( $tax_class, $cart_tax_classes ) ) {
 							$matched_tax_rates = self::find_shipping_rates( array(
 								'country' 	=> $country,
@@ -699,6 +712,8 @@ class WC_Tax {
 
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', self::prepare_tax_rate( $tax_rate ) );
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
 		do_action( 'woocommerce_tax_rate_added', $wpdb->insert_id, $tax_rate );
 
 		return $wpdb->insert_id;
@@ -750,6 +765,8 @@ class WC_Tax {
 			)
 		);
 
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
 		do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $tax_rate );
 	}
 
@@ -768,6 +785,8 @@ class WC_Tax {
 
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
+
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 
 		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
 	}
@@ -846,6 +865,8 @@ class WC_Tax {
 				INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES $sql;
 				" );
 		}
+
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 	}
 
 	/**
@@ -915,8 +936,10 @@ class WC_Tax {
 		$rates     = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rates` WHERE `tax_rate_class` = %s ORDER BY `tax_rate_order`;", sanitize_title( $tax_class ) ) );
 		$locations = $wpdb->get_results( "SELECT * FROM `{$wpdb->prefix}woocommerce_tax_rate_locations`" );
 
-		// Set the rates keys equal to their ids.
-		$rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
+		if ( ! empty( $rates ) ) {
+			// Set the rates keys equal to their ids.
+			$rates = array_combine( wp_list_pluck( $rates, 'tax_rate_id' ), $rates );
+		}
 
 		// Drop the locations into the rates array.
 		foreach ( $locations as $location ) {

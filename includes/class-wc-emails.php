@@ -72,6 +72,7 @@ class WC_Emails {
 			'woocommerce_order_status_pending_to_on-hold',
 			'woocommerce_order_status_failed_to_processing',
 			'woocommerce_order_status_failed_to_completed',
+			'woocommerce_order_status_failed_to_on-hold',
 			'woocommerce_order_status_on-hold_to_processing',
 			'woocommerce_order_status_on-hold_to_cancelled',
 			'woocommerce_order_status_on-hold_to_failed',
@@ -107,6 +108,7 @@ class WC_Emails {
 		// Email Header, Footer and content hooks
 		add_action( 'woocommerce_email_header', array( $this, 'email_header' ) );
 		add_action( 'woocommerce_email_footer', array( $this, 'email_footer' ) );
+		add_action( 'woocommerce_email_order_details', array( $this, 'order_details' ), 10, 4 );
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 20, 3 );
@@ -131,6 +133,7 @@ class WC_Emails {
 		$this->emails['WC_Email_New_Order'] 		                 = include( 'emails/class-wc-email-new-order.php' );
 		$this->emails['WC_Email_Cancelled_Order'] 		             = include( 'emails/class-wc-email-cancelled-order.php' );
 		$this->emails['WC_Email_Failed_Order'] 		                 = include( 'emails/class-wc-email-failed-order.php' );
+		$this->emails['WC_Email_Customer_On_Hold_Order'] 		     = include( 'emails/class-wc-email-customer-on-hold-order.php' );
 		$this->emails['WC_Email_Customer_Processing_Order'] 		 = include( 'emails/class-wc-email-customer-processing-order.php' );
 		$this->emails['WC_Email_Customer_Completed_Order'] 		     = include( 'emails/class-wc-email-customer-completed-order.php' );
 		$this->emails['WC_Email_Customer_Refunded_Order'] 		     = include( 'emails/class-wc-email-customer-refunded-order.php' );
@@ -255,6 +258,17 @@ class WC_Emails {
 	}
 
 	/**
+	 * Show the order details table
+	 */
+	public function order_details( $order, $sent_to_admin = false, $plain_text = false, $email = '' ) {
+		if ( $plain_text ) {
+			wc_get_template( 'emails/plain/email-order-details.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email ) );
+		} else {
+			wc_get_template( 'emails/email-order-details.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin, 'plain_text' => $plain_text, 'email' => $email ) );
+		}
+	}
+
+	/**
 	 * Add order meta to email templates.
 	 *
 	 * @param mixed $order
@@ -263,16 +277,7 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
-		$fields = array();
-
-		if ( $order->customer_note ) {
-			$fields['customer_note'] = array(
-				'label' => __( 'Note', 'woocommerce' ),
-				'value' => wptexturize( $order->customer_note )
-			);
-		}
-
-		$fields = apply_filters( 'woocommerce_email_order_meta_fields', $fields, $sent_to_admin, $order );
+		$fields = apply_filters( 'woocommerce_email_order_meta_fields', array(), $sent_to_admin, $order );
 
 		/**
 		 * Deprecated woocommerce_email_order_meta_keys filter.
@@ -334,6 +339,13 @@ class WC_Emails {
 	 */
 	public function customer_details( $order, $sent_to_admin = false, $plain_text = false ) {
 		$fields = array();
+
+		if ( $order->customer_note ) {
+			$fields['customer_note'] = array(
+				'label' => __( 'Note', 'woocommerce' ),
+				'value' => wptexturize( $order->customer_note )
+			);
+		}
 
 		if ( $order->billing_email ) {
 			$fields['billing_email'] = array(

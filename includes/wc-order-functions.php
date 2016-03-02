@@ -51,6 +51,10 @@ function wc_is_order_status( $maybe_status ) {
  * @return WC_Order
  */
 function wc_get_order( $the_order = false ) {
+	if ( ! did_action( 'woocommerce_init' ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'wc_get_order should not be called before the woocommerce_init action.', 'woocommerce' ), '2.5' );
+		return false;
+	}
 	return WC()->order_factory->get_order( $the_order );
 }
 
@@ -575,11 +579,17 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		delete_transient( $transient );
 	}
 
+	// Clear money spent for user associated with order
+	if ( $post_id && ( $user_id = get_post_meta( $post_id, '_customer_user', true ) ) ) {
+		delete_user_meta( $user_id, '_money_spent' );
+		delete_user_meta( $user_id, '_order_count' );
+	}
+
 	// Increments the transient version to invalidate cache
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 
 	// Do the same for regular cache
-	wp_cache_incr( 'wc_orders_cache_prefix', 1, 'orders' );
+	WC_Cache_Helper::incr_cache_prefix( 'orders' );
 
 	do_action( 'woocommerce_delete_shop_order_transients', $post_id );
 }
@@ -685,7 +695,7 @@ function wc_create_refund( $args = array() ) {
 									'tax_data'     => array( 'total' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) )
 								)
 							);
-							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] : 0, $line_item_args );
+							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] * -1 : 0, $line_item_args );
 							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
 						case 'shipping' :

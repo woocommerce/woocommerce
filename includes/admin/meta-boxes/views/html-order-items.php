@@ -87,6 +87,7 @@ if ( wc_tax_enabled() ) {
 
 				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item, $order );
 			}
+			do_action( 'woocommerce_admin_order_items_after_line_items', $order->id );
 		?>
 		</tbody>
 		<tbody id="order_shipping_line_items">
@@ -95,6 +96,7 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items_shipping as $item_id => $item ) {
 				include( 'html-order-shipping.php' );
 			}
+			do_action( 'woocommerce_admin_order_items_after_shipping', $order->id );
 		?>
 		</tbody>
 		<tbody id="order_fee_line_items">
@@ -102,6 +104,7 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items_fee as $item_id => $item ) {
 				include( 'html-order-fee.php' );
 			}
+			do_action( 'woocommerce_admin_order_items_after_fees', $order->id );
 		?>
 		</tbody>
 		<tbody id="order_refunds">
@@ -110,6 +113,7 @@ if ( wc_tax_enabled() ) {
 				foreach ( $refunds as $refund ) {
 					include( 'html-order-refund.php' );
 				}
+				do_action( 'woocommerce_admin_order_items_after_refunds', $order->id );
 			}
 		?>
 		</tbody>
@@ -137,7 +141,7 @@ if ( wc_tax_enabled() ) {
 	?>
 	<table class="wc-order-totals">
 		<tr>
-			<td class="label"><?php _e( 'Discount', 'woocommerce' ); ?> <span class="tips" data-tip="<?php esc_attr_e( 'This is the total discount. Discounts are defined per line item.', 'woocommerce' ); ?>">[?]</span>:</td>
+			<td class="label"><?php echo wc_help_tip( __( 'This is the total discount. Discounts are defined per line item.', 'woocommerce' ) ); ?> <?php _e( 'Discount', 'woocommerce' ); ?>:</td>
 			<td class="total">
 				<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_order_currency() ) ); ?>
 			</td>
@@ -147,7 +151,7 @@ if ( wc_tax_enabled() ) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->id ); ?>
 
 		<tr>
-			<td class="label"><?php _e( 'Shipping', 'woocommerce' ); ?> <span class="tips" data-tip="<?php esc_attr_e( 'This is the shipping and handling total costs for the order.', 'woocommerce' ); ?>">[?]</span>:</td>
+			<td class="label"><?php echo wc_help_tip( __( 'This is the shipping and handling total costs for the order.', 'woocommerce' ) ); ?> <?php _e( 'Shipping', 'woocommerce' ); ?>:</td>
 			<td class="total"><?php
 				if ( ( $refunded = $order->get_total_shipping_refunded() ) > 0 ) {
 					echo '<del>' . strip_tags( wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_order_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_total_shipping() - $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</ins>';
@@ -168,7 +172,7 @@ if ( wc_tax_enabled() ) {
 					<td class="label"><?php echo $tax->label; ?>:</td>
 					<td class="total"><?php
 						if ( ( $refunded = $order->get_total_tax_refunded_by_rate_id( $tax->rate_id ) ) > 0 ) {
-							echo '<del>' . strip_tags( $tax->formatted_amount ) . '</del> <ins>' . wc_price( $tax->amount - $refunded, array( 'currency' => $order->get_order_currency() ) ) . '</ins>';
+							echo '<del>' . strip_tags( $tax->formatted_amount ) . '</del> <ins>' . wc_price( WC_Tax::round( $tax->amount, wc_get_price_decimals() ) - WC_Tax::round( $refunded, wc_get_price_decimals() ), array( 'currency' => $order->get_order_currency() ) ) . '</ins>';
 						} else {
 							echo $tax->formatted_amount;
 						}
@@ -189,7 +193,13 @@ if ( wc_tax_enabled() ) {
 					<div class="clear"></div>
 				</div>
 			</td>
-			<td><?php if ( $order->is_editable() ) : ?><div class="wc-order-edit-line-item-actions"><a class="edit-order-item" href="#"></a></div><?php endif; ?></td>
+			<td>
+				<?php if ( $order->is_editable() ) : ?>
+					<div class="wc-order-edit-line-item-actions">
+						<a class="edit-order-item" href="#"></a>
+					</div>
+				<?php endif; ?>
+			</td>
 		</tr>
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->id ); ?>

@@ -28,27 +28,59 @@ function wc_get_text_attributes( $raw_attributes ) {
  * @return array of objects
  */
 function wc_get_attribute_taxonomies() {
-	$transient_name = 'wc_attribute_taxonomies';
-
-	if ( false === ( $attribute_taxonomies = get_transient( $transient_name ) ) ) {
+	if ( false === ( $attribute_taxonomies = get_transient( 'wc_attribute_taxonomies' ) ) ) {
 		global $wpdb;
 
-		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
+		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies order by attribute_name ASC;" );
 
-		set_transient( $transient_name, $attribute_taxonomies );
+		set_transient( 'wc_attribute_taxonomies', $attribute_taxonomies );
 	}
 
 	return (array) array_filter( apply_filters( 'woocommerce_attribute_taxonomies', $attribute_taxonomies ) );
 }
 
 /**
- * Get a product attributes name.
+ * Get a product attribute name.
  *
- * @param mixed $name
+ * @param string $attribute_name Attribute name.
  * @return string
  */
-function wc_attribute_taxonomy_name( $name ) {
-	return 'pa_' . wc_sanitize_taxonomy_name( $name );
+function wc_attribute_taxonomy_name( $attribute_name ) {
+	return 'pa_' . wc_sanitize_taxonomy_name( $attribute_name );
+}
+
+/**
+ * Get the attribute name used when storing values in post meta.
+ *
+ * @param string $attribute_name Attribute name.
+ * @since 2.6.0
+ * @return string
+ */
+function wc_variation_attribute_name( $attribute_name ) {
+	return 'attribute_' . sanitize_title( $attribute_name );
+}
+
+/**
+ * Get a product attribute name by ID.
+ *
+ * @since  2.4.0
+ * @param int $attribute_id Attribute ID.
+ * @return string Return an empty string if attribute doesn't exist.
+ */
+function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
+	global $wpdb;
+
+	$attribute_name = $wpdb->get_var( $wpdb->prepare( "
+		SELECT attribute_name
+		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+		WHERE attribute_id = %d
+	", $attribute_id ) );
+
+	if ( $attribute_name && ! is_wp_error( $attribute_name ) ) {
+		return wc_attribute_taxonomy_name( $attribute_name );
+	}
+
+	return '';
 }
 
 /**
@@ -86,11 +118,15 @@ function wc_attribute_label( $name, $product = '' ) {
  * @return string
  */
 function wc_attribute_orderby( $name ) {
-	global $wpdb;
+	global $wc_product_attributes, $wpdb;
 
 	$name = str_replace( 'pa_', '', sanitize_title( $name ) );
 
-	$orderby = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_orderby FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+	if ( isset( $wc_product_attributes[ 'pa_' . $name ] ) ) {
+		$orderby = $wc_product_attributes[ 'pa_' . $name ]->attribute_orderby;
+	} else {
+		$orderby = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_orderby FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+	}
 
 	return apply_filters( 'woocommerce_attribute_orderby', $orderby, $name );
 }

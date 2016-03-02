@@ -155,17 +155,15 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Create an order.
-	 *
-	 * Error codes:
-	 * 		400 - Cannot insert order into the database.
-	 * 		401 - Cannote update existing order.
-	 * 		402 - Cannot create line item.
-	 * 		403 - Cannot create fee item.
-	 * 		404 - Cannot create shipping item.
-	 * 		405 - Cannot create tax item.
-	 * 		406 - Cannot create coupon item.
-	 *
+	 * Create an order. Error codes:
+	 * 		520 - Cannot insert order into the database.
+	 * 		521 - Cannot get order after creation.
+	 * 		522 - Cannot update order.
+	 * 		525 - Cannot create line item.
+	 * 		526 - Cannot create fee item.
+	 * 		527 - Cannot create shipping item.
+	 * 		528 - Cannot create tax item.
+	 * 		529 - Cannot create coupon item.
 	 * @access public
 	 * @throws Exception
 	 * @return int|WP_ERROR
@@ -186,20 +184,26 @@ class WC_Checkout {
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 				'customer_id'   => $this->customer_id,
 				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
+				'cart_hash'     => md5( json_encode( WC()->cart->get_cart_for_session() ) . WC()->cart->total ),
 				'created_via'   => 'checkout'
 			);
 
 			// Insert or update the post data
 			$order_id = absint( WC()->session->order_awaiting_payment );
 
-			// Resume the unpaid order if its pending
-			if ( $order_id > 0 && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
+			/**
+			 * If there is an order pending payment, we can resume it here so
+			 * long as it has not changed. If the order has changed, i.e.
+			 * different items or cost, create a new order. We use a hash to
+			 * detect changes which is based on cart items + order total.
+			 */
+			if ( $order_id && $order_data['cart_hash'] === get_post_meta( $order_id, '_cart_hash', true ) && ( $order = wc_get_order( $order_id ) ) && $order->has_status( array( 'pending', 'failed' ) ) ) {
 
 				$order_data['order_id'] = $order_id;
 				$order                  = wc_update_order( $order_data );
 
 				if ( is_wp_error( $order ) ) {
-					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 401 ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 522 ) );
 				} else {
 					$order->remove_order_items();
 					do_action( 'woocommerce_resume_order', $order_id );
@@ -210,7 +214,9 @@ class WC_Checkout {
 				$order = wc_create_order( $order_data );
 
 				if ( is_wp_error( $order ) ) {
-					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 400 ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 520 ) );
+				} elseif ( false === $order ) {
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 521 ) );
 				} else {
 					$order_id = $order->id;
 					do_action( 'woocommerce_new_order', $order_id );
@@ -235,7 +241,7 @@ class WC_Checkout {
 				);
 
 				if ( ! $item_id ) {
-					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 402 ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 525 ) );
 				}
 
 				// Allow plugins to add order item meta
@@ -247,7 +253,7 @@ class WC_Checkout {
 				$item_id = $order->add_fee( $fee );
 
 				if ( ! $item_id ) {
-					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 403 ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 526 ) );
 				}
 
 				// Allow plugins to add order item meta to fees
@@ -260,7 +266,7 @@ class WC_Checkout {
 					$item_id = $order->add_shipping( $package['rates'][ $this->shipping_methods[ $package_key ] ] );
 
 					if ( ! $item_id ) {
-						throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 404 ) );
+						throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 527 ) );
 					}
 
 					// Allows plugins to add order item meta to shipping
@@ -271,14 +277,14 @@ class WC_Checkout {
 			// Store tax rows
 			foreach ( array_keys( WC()->cart->taxes + WC()->cart->shipping_taxes ) as $tax_rate_id ) {
 				if ( $tax_rate_id && ! $order->add_tax( $tax_rate_id, WC()->cart->get_tax_amount( $tax_rate_id ), WC()->cart->get_shipping_tax_amount( $tax_rate_id ) ) && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 405 ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 528 ) );
 				}
 			}
 
 			// Store coupons
 			foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
 				if ( ! $order->add_coupon( $code, WC()->cart->get_coupon_discount_amount( $code ), WC()->cart->get_coupon_discount_tax_amount( $code ) ) ) {
-					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 406 ) );
+					throw new Exception( sprintf( __( 'Error %d: Unable to create order. Please try again.', 'woocommerce' ), 529 ) );
 				}
 			}
 
@@ -643,7 +649,7 @@ class WC_Checkout {
 					$result = $available_gateways[ $this->posted['payment_method'] ]->process_payment( $order_id );
 
 					// Redirect to success/confirmation/payment page
-					if ( $result['result'] == 'success' ) {
+					if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
 
 						$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
@@ -759,18 +765,22 @@ class WC_Checkout {
 			}
 
 			// Get the billing_ and shipping_ address fields
-			$address_fields = array_merge( WC()->countries->get_address_fields(), WC()->countries->get_address_fields( '', 'shipping_' ) );
+			if ( isset( $this->checkout_fields['shipping'] ) && isset( $this->checkout_fields['billing'] ) ) {
 
-			if ( is_user_logged_in() && array_key_exists( $input, $address_fields ) ) {
-				$current_user = wp_get_current_user();
+				$address_fields = array_merge( $this->checkout_fields['billing'], $this->checkout_fields['shipping'] );
 
-				if ( $meta = get_user_meta( $current_user->ID, $input, true ) ) {
-					return $meta;
+				if ( is_user_logged_in() && is_array( $address_fields ) && array_key_exists( $input, $address_fields ) ) {
+					$current_user = wp_get_current_user();
+
+					if ( $meta = get_user_meta( $current_user->ID, $input, true ) ) {
+						return $meta;
+					}
+
+					if ( $input == 'billing_email' ) {
+						return $current_user->user_email;
+					}
 				}
 
-				if ( $input == 'billing_email' ) {
-					return $current_user->user_email;
-				}
 			}
 
 			switch ( $input ) {

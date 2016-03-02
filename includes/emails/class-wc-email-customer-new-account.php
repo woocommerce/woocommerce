@@ -19,9 +19,32 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account' ) ) :
  */
 class WC_Email_Customer_New_Account extends WC_Email {
 
+	/**
+	 * User login name.
+	 *
+	 * @var string
+	 */
 	public $user_login;
+
+	/**
+	 * User email.
+	 *
+	 * @var string
+	 */
 	public $user_email;
+
+	/**
+	 * User password.
+	 *
+	 * @var string
+	 */
 	public $user_pass;
+
+	/**
+	 * Is the password generated?
+	 *
+	 * @var bool
+	 */
 	public $password_generated;
 
 	/**
@@ -46,6 +69,10 @@ class WC_Email_Customer_New_Account extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param int $user_id
+	 * @param string $user_pass
+	 * @param bool $password_generated
 	 */
 	function trigger( $user_id, $user_pass = '', $password_generated = false ) {
 
@@ -67,14 +94,13 @@ class WC_Email_Customer_New_Account extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	function get_content_html() {
-		ob_start();
-		wc_get_template( $this->template_html, array(
+		return wc_get_template_html( $this->template_html, array(
 			'email_heading'      => $this->get_heading(),
 			'user_login'         => $this->user_login,
 			'user_pass'          => $this->user_pass,
@@ -84,27 +110,25 @@ class WC_Email_Customer_New_Account extends WC_Email {
 			'plain_text'         => false,
 			'email'				 => $this
 		) );
-		return ob_get_clean();
 	}
 
 	/**
-	 * get_content_plain function.
+	 * Get content plain.
 	 *
 	 * @access public
 	 * @return string
 	 */
 	function get_content_plain() {
-		ob_start();
-		wc_get_template( $this->template_plain, array(
+		return wc_get_template_html( $this->template_plain, array(
 			'email_heading'      => $this->get_heading(),
 			'user_login'         => $this->user_login,
 			'user_pass'          => $this->user_pass,
 			'blogname'           => $this->get_blogname(),
 			'password_generated' => $this->password_generated,
 			'sent_to_admin'      => false,
-			'plain_text'         => true
+			'plain_text'         => true,
+			'email'			     => $this
 		) );
-		return ob_get_clean();
 	}
 }
 

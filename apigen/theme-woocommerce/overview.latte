@@ -9,29 +9,37 @@
 
 	{var $group = false}
 
-	<table class="summary" id="namespaces" n:if="$namespaces">
-		<caption>Namespaces summary</caption>
-		{foreach $namespaces as $namespace}
-			{continueIf $config->main && 0 !== strpos($namespace, $config->main)}
-			<tr>
-				{var $group = true}
-				<td class="name"><a href="{$namespace|namespaceUrl}">{$namespace}</a></td>
-			</tr>
-		{/foreach}
-	</table>
+	{if count($namespaces)}
+		<div class="panel panel-default">
+			<div class="panel-heading"><h2>Namespaces summary</h2></div>
+			<table class="summary table table-bordered table-striped" id="namespaces">
+				{foreach $namespaces as $namespace}
+					{continueIf $config->main && 0 !== strpos($namespace, $config->main)}
+					<tr>
+						{var $group = true}
+						<td class="name"><a href="{$namespace|namespaceUrl}">{$namespace}</a></td>
+					</tr>
+				{/foreach}
+			</table>
+		</div>
+	{/if}
 
-	<table class="summary" id="packages" n:if="count($packages)">
-		<caption>Packages summary</caption>
-		{foreach $packages as $package}
-			{continueIf $config->main && 0 !== strpos($package, $config->main)}
-			<tr>
-				{var $group = true}
-				<td class="name">
-					<a href="{$package|packageUrl}">{$package}</a>
-				</td>
-			</tr>
-		{/foreach}
-	</table>
+	{if count($packages)}
+		<div class="panel panel-default">
+			<div class="panel-heading"><h2>Packages summary</h2></div>
+			<table class="summary table table-bordered table-striped" id="packages">
+				{foreach $packages as $package}
+					{continueIf $config->main && 0 !== strpos($package, $config->main)}
+					<tr>
+						{var $group = true}
+						<td class="name">
+							<a href="{$package|packageUrl}">{$package}</a>
+						</td>
+					</tr>
+				{/foreach}
+			</table>
+		</div>
+	{/if}
 
 	{if ! $group}
 		{include '@elementlist.latte'}

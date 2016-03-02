@@ -244,7 +244,7 @@ class WC_Admin_Attributes {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h2><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h2>
+			<h1><?php _e( 'Edit Attribute', 'woocommerce' ) ?></h1>
 
 			<?php
 
@@ -345,7 +345,7 @@ class WC_Admin_Attributes {
 		?>
 		<div class="wrap woocommerce">
 			<div class="icon32 icon32-attributes" id="icon-woocommerce"><br/></div>
-			<h2><?php _e( 'Attributes', 'woocommerce' ); ?></h2>
+			<h1><?php _e( 'Attributes', 'woocommerce' ); ?></h1>
 			<br class="clear" />
 			<div id="col-container">
 				<div id="col-right">
@@ -428,7 +428,7 @@ class WC_Admin_Attributes {
 				<div id="col-left">
 					<div class="col-wrap">
 						<div class="form-wrap">
-							<h3><?php _e( 'Add New Attribute', 'woocommerce' ); ?></h3>
+							<h2><?php _e( 'Add New Attribute', 'woocommerce' ); ?></h2>
 							<p><?php _e( 'Attributes let you define extra product data, such as size or colour. You can use these attributes in the shop sidebar using the "layered nav" widgets. Please note: you cannot rename an attribute later on.', 'woocommerce' ); ?></p>
 							<form action="edit.php?post_type=product&amp;page=product_attributes" method="post">
 								<div class="form-field">

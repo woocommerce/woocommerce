@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Page - Status Report
+ * Admin View: Page - Status Report.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<div class="updated woocommerce-message">
+<div class="updated woocommerce-message inline">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a>
 	<a class="button-secondary docs" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="WordPress Environment"><?php _e( 'WordPress Environment', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="WordPress Environment"><h2><?php _e( 'WordPress Environment', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -66,8 +66,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td><?php
 				$memory = wc_let_to_num( WP_MEMORY_LIMIT );
 
+				if ( function_exists( 'memory_get_usage' ) ) {
+					$system_memory = wc_let_to_num( @ini_get( 'memory_limit' ) );
+					$memory        = max( $memory, $system_memory );
+				}
+
 				if ( $memory < 67108864 ) {
-					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: <a href="%s" target="_blank">Increasing memory allocated to PHP</a>', 'woocommerce' ), size_format( $memory ), 'http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP' ) . '</mark>';
+					echo '<mark class="error">' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: %s', 'woocommerce' ), size_format( $memory ), '<a href="http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . __( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
 				}
@@ -76,19 +81,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td data-export-label="WP Debug Mode"><?php _e( 'WP Debug Mode', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) ); ?></td>
-			<td><?php if ( defined('WP_DEBUG') && WP_DEBUG ) echo '<mark class="yes">&#10004;</mark>'; else echo '<mark class="no">&ndash;</mark>'; ?></td>
+			<td>
+				<?php if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) : ?>
+					<mark class="yes">&#10004;</mark>
+				<?php else : ?>
+					<mark class="no">&ndash;</mark>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="WP Cron"><?php _e( 'WP Cron', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not WP Cron Jobs are enabled.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) : ?>
+					<mark class="no">&ndash;</mark>
+				<?php else : ?>
+					<mark class="yes">&#10004;</mark>
+				<?php endif; ?>
+			</td>
 		</tr>
 		<tr>
 			<td data-export-label="Language"><?php _e( 'Language', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'The current language used by WordPress. Default = English', 'woocommerce' ) ); ?></td>
-			<td><?php echo get_locale() ?></td>
+			<td><?php echo get_locale(); ?></td>
 		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Server Environment"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Server Environment"><h2><?php _e( 'Server Environment', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -101,12 +123,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td data-export-label="PHP Version"><?php _e( 'PHP Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); ?></td>
 			<td><?php
-				// Check if phpversion function exists
+				// Check if phpversion function exists.
 				if ( function_exists( 'phpversion' ) ) {
 					$php_version = phpversion();
 
 					if ( version_compare( $php_version, '5.4', '<' ) ) {
-						echo '<mark class="error">' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: <a href="%s" target="_blank">How to update your PHP version</a>', 'woocommerce' ), esc_html( $php_version ), 'http://docs.woothemes.com/document/how-to-update-your-php-version/' ) . '</mark>';
+						echo '<mark class="error">' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: %s', 'woocommerce' ), esc_html( $php_version ), '<a href="http://docs.woothemes.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . esc_html( $php_version ) . '</mark>';
 					}
@@ -119,17 +141,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr>
 				<td data-export-label="PHP Post Max Size"><?php _e( 'PHP Post Max Size', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The largest filesize that can be contained in one post.', 'woocommerce' ) ); ?></td>
-				<td><?php echo size_format( wc_let_to_num( ini_get('post_max_size') ) ); ?></td>
+				<td><?php echo size_format( wc_let_to_num( ini_get( 'post_max_size' ) ) ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="PHP Time Limit"><?php _e( 'PHP Time Limit', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce' ) ); ?></td>
-				<td><?php echo ini_get('max_execution_time'); ?></td>
+				<td><?php echo ini_get( 'max_execution_time' ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="PHP Max Input Vars"><?php _e( 'PHP Max Input Vars', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( __( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce' ) ); ?></td>
-				<td><?php echo ini_get('max_input_vars'); ?></td>
+				<td><?php echo ini_get( 'max_input_vars' ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="SUHOSIN Installed"><?php _e( 'SUHOSIN Installed', 'woocommerce' ); ?>:</td>
@@ -168,7 +190,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 			$posting = array();
 
-			// fsockopen/cURL
+			// fsockopen/cURL.
 			$posting['fsockopen_curl']['name'] = 'fsockopen/cURL';
 			$posting['fsockopen_curl']['help'] = wc_help_tip( __( 'Payment gateways can use cURL to communicate with remote servers to authorize payments, other plugins may also use it when communicating with remote services.', 'woocommerce' ) );
 
@@ -176,10 +198,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['fsockopen_curl']['success'] = true;
 			} else {
 				$posting['fsockopen_curl']['success'] = false;
-				$posting['fsockopen_curl']['note']    = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ). '</mark>';
+				$posting['fsockopen_curl']['note']    = __( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' );
 			}
 
-			// SOAP
+			// SOAP.
 			$posting['soap_client']['name'] = 'SoapClient';
 			$posting['soap_client']['help'] = wc_help_tip( __( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce' ) );
 
@@ -187,10 +209,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['soap_client']['success'] = true;
 			} else {
 				$posting['soap_client']['success'] = false;
-				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the <a href="%s">SOAP Client</a> class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), 'http://php.net/manual/en/class.soapclient.php' ) . '</mark>';
+				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="http://php.net/manual/en/class.soapclient.php">SoapClient</a>' );
 			}
 
-			// DOMDocument
+			// DOMDocument.
 			$posting['dom_document']['name'] = 'DOMDocument';
 			$posting['dom_document']['help'] = wc_help_tip( __( 'HTML/Multipart emails use DOMDocument to generate inline CSS in templates.', 'woocommerce' ) );
 
@@ -198,10 +220,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['dom_document']['success'] = true;
 			} else {
 				$posting['dom_document']['success'] = false;
-				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the <a href="%s">DOMDocument</a> class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), 'http://php.net/manual/en/class.domdocument.php' ) . '</mark>';
+				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="http://php.net/manual/en/class.domdocument.php">DOMDocument</a>' );
 			}
 
-			// GZIP
+			// GZIP.
 			$posting['gzip']['name'] = 'GZip';
 			$posting['gzip']['help'] = wc_help_tip( __( 'GZip (gzopen) is used to open the GEOIP database from MaxMind.', 'woocommerce' ) );
 
@@ -209,10 +231,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['gzip']['success'] = true;
 			} else {
 				$posting['gzip']['success'] = false;
-				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the <a href="%s">gzopen</a> function - this is required to use the GeoIP database from MaxMind. The API fallback will be used instead for geolocation.', 'woocommerce' ), 'http://php.net/manual/en/zlib.installation.php' ) . '</mark>';
+				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind. The API fallback will be used instead for geolocation.', 'woocommerce' ), '<a href="http://php.net/manual/en/zlib.installation.php">gzopen</a>' );
 			}
 
-			// WP Remote Post Check
+			// Multibyte String.
+			$posting['mbstring']['name'] = 'Multibyte String';
+			$posting['mbstring']['help'] = wc_help_tip( __( 'Multibyte String (mbstring) is used to convert character encoding, like for emails or converting characters to lowercase.', 'woocommerce' ) );
+
+			if ( extension_loaded( 'mbstring' ) ) {
+				$posting['mbstring']['success'] = true;
+			} else {
+				$posting['mbstring']['success'] = false;
+				$posting['mbstring']['note']    = sprintf( __( 'Your server does not support the %s functions - this is required for better character encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="http://php.net/manual/en/mbstring.installation.php">mbstring</a>' );
+			}
+
+			// WP Remote Post Check.
 			$posting['wp_remote_post']['name'] = __( 'Remote Post', 'woocommerce');
 			$posting['wp_remote_post']['help'] = wc_help_tip( __( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) );
 
@@ -236,7 +269,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['wp_remote_post']['success'] = false;
 			}
 
-			// WP Remote Get Check
+			// WP Remote Get Check.
 			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
 			$posting['wp_remote_get']['help'] = wc_help_tip( __( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) );
 
@@ -276,7 +309,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Database"><?php _e( 'Database', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Database"><h2><?php _e( 'Database', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -296,7 +329,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'woocommerce_order_items',
 				'woocommerce_order_itemmeta',
 				'woocommerce_tax_rates',
-				'woocommerce_tax_rate_locations'
+				'woocommerce_tax_rate_locations',
+				'woocommerce_shipping_zones',
+				'woocommerce_shipping_zone_locations',
+				'woocommerce_shipping_zone_methods',
 			);
 
 			foreach ( $tables as $table ) {
@@ -315,7 +351,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</th>
+			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><h2><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -336,7 +372,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			if ( ! empty( $plugin_data['Name'] ) ) {
 
-				// link the plugin name to the plugin url if available
+				// Link the plugin name to the plugin url if available.
 				$plugin_name = esc_html( $plugin_data['Name'] );
 
 				if ( ! empty( $plugin_data['PluginURI'] ) ) {
@@ -387,7 +423,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Settings"><?php _e( 'Settings', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Settings"><h2><?php _e( 'Settings', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -426,7 +462,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="API"><?php _e( 'API', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="API"><h2><?php _e( 'API', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -445,7 +481,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="WC Pages"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="WC Pages"><h2><?php _e( 'WC Pages', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -488,9 +524,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				echo '<tr><td data-export-label="' . esc_attr( $page_name ) . '">' . $page_name . ':</td>';
 				echo '<td class="help">' . wc_help_tip( $values['help']  ) . '</td><td>';
 
-				// Page ID check
+				// Page ID check.
 				if ( ! $page_id ) {
 					echo '<mark class="error">' . __( 'Page not set', 'woocommerce' ) . '</mark>';
+					$error = true;
+				} else if ( get_post_status( $page_id ) !== 'publish' ) {
+					echo '<mark class="error">' . sprintf( __( 'Page visibility should be %spublic%s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
 					$error = true;
 				} else {
 
@@ -523,7 +562,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Taxonomies"><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); ?></th>
+			<th colspan="3" data-export-label="Taxonomies"><h2><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -544,7 +583,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Theme"><?php _e( 'Theme', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Theme"><h2><?php _e( 'Theme', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 		<?php
@@ -626,7 +665,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Templates"><?php _e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></th>
+			<th colspan="3" data-export-label="Templates"><h2><?php _e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -727,16 +766,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 				jQuery( 'tr', jQuery( this ) ).each( function() {
 
 					var label       = jQuery( this ).find( 'td:eq(0)' ).data( 'export-label' ) || jQuery( this ).find( 'td:eq(0)' ).text();
-					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML
-					var image       = jQuery( this ).find( 'td:eq(2)' ).find( 'img' ); // Get WP 4.2 emojis
-					var prefix      = ( undefined === image.attr( 'alt' ) ) ? '' : image.attr( 'alt' ) + ' '; // Remove WP 4.2 emojis
+					var the_name    = jQuery.trim( label ).replace( /(<([^>]+)>)/ig, '' ); // Remove HTML.
+					var image       = jQuery( this ).find( 'td:eq(2)' ).find( 'img' ); // Get WP 4.2 emojis.
+					var prefix      = ( undefined === image.attr( 'alt' ) ) ? '' : image.attr( 'alt' ) + ' '; // Remove WP 4.2 emojis.
 					var the_value   = jQuery.trim( prefix + jQuery( this ).find( 'td:eq(2)' ).text() );
 					var value_array = the_value.split( ', ' );
 
 					if ( value_array.length > 1 ) {
 
-						// If value have a list of plugins ','
-						// Split to add new line
+						// If value have a list of plugins ','.
+						// Split to add new line.
 						var temp_line ='';
 						jQuery.each( value_array, function( key, line ) {
 							temp_line = temp_line + line + '\n';
@@ -753,7 +792,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		try {
 			jQuery( '#debug-report' ).slideDown();
-			jQuery( '#debug-report' ).find( 'textarea' ).val( report ).focus().select();
+			jQuery( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).focus().select();
 			jQuery( this ).fadeOut();
 			return false;
 		} catch ( e ) {

@@ -223,7 +223,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	}
 
 	/**
-	 * Delete a product.
+	 * Delete products.
 	 *
 	 * ## OPTIONS
 	 *
@@ -512,6 +512,15 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * [--format=<format>]
 	 * : Accepted values: table, json, csv. Default: table.
 	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * rating
+	 * * reviewer_name
+	 * * reviewer_email
+	 * * verified
+	 * * created_at
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product reviews 123
@@ -578,7 +587,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * <id>
 	 * : Product ID
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
 	 * ## AVAILABLE_FIELDS
@@ -1052,6 +1061,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @param  int $product_id
 	 * @param  array $data
 	 * @return bool
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_product_meta( $product_id, $data ) {
 		global $wpdb;
@@ -1289,7 +1299,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
 		$_product = wc_get_product( $product_id );
-		if ( $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
+		if ( $_product && $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
 
 			$clear_parent_ids = array();
 
@@ -1439,14 +1449,14 @@ class WC_CLI_Product extends WC_CLI_Command {
 		}
 
 		// Product categories
-		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
+		if ( isset( $data['categories'] ) ) {
+			$term_ids = array_unique( array_map( 'intval', (array) $data['categories'] ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_cat' );
 		}
 
 		// Product tags
-		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
+		if ( isset( $data['tags'] ) ) {
+			$term_ids = array_unique( array_map( 'intval', (array) $data['tags'] ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_tag' );
 		}
 
@@ -1513,6 +1523,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @param  int $id
 	 * @param  array $data
 	 * @return bool
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_variations( $id, $data ) {
 		global $wpdb;
@@ -1825,9 +1836,10 @@ class WC_CLI_Product extends WC_CLI_Command {
 	/**
 	 * Save product images.
 	 *
-	 * @since 2.5.0
-	 * @param array $images
-	 * @param int $id
+	 * @since  2.5.0
+	 * @param  array $images
+	 * @param  int $id
+	 * @throws WC_CLI_Exception
 	 */
 	private function save_product_images( $id, $images ) {
 		if ( is_array( $images ) ) {
@@ -1992,6 +2004,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 	 * @since  2.5.0
 	 * @param  string $image_url
 	 * @return int|WP_Error attachment id
+	 * @throws WC_CLI_Exception
 	 */
 	private function upload_product_image( $image_url ) {
 		$file_name 		= basename( current( explode( '?', $image_url ) ) );

@@ -23,6 +23,7 @@ function wc_get_screen_ids() {
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
 		$wc_screen_id . '_page_wc-reports',
+		$wc_screen_id . '_page_wc-shipping',
 		$wc_screen_id . '_page_wc-settings',
 		$wc_screen_id . '_page_wc-status',
 		$wc_screen_id . '_page_wc-addons',
@@ -34,7 +35,6 @@ function wc_get_screen_ids() {
 		'shop_coupon',
 		'edit-product_cat',
 		'edit-product_tag',
-		'edit-product_shipping_class',
 		'profile',
 		'user-edit'
 	);
@@ -159,6 +159,7 @@ function woocommerce_update_options( $options ) {
  * Get a setting from the settings API.
  *
  * @param mixed $option_name
+ * @param mixed $default
  * @return string
  */
 function woocommerce_settings_get_option( $option_name, $default = '' ) {
@@ -197,7 +198,7 @@ function wc_save_order_items( $order_id, $items ) {
 			if ( isset( $items['order_item_name'][ $item_id ] ) ) {
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_order_items',
-					array( 'order_item_name' => wc_clean( $items['order_item_name'][ $item_id ] ) ),
+					array( 'order_item_name' => wc_clean( wp_unslash( $items['order_item_name'][ $item_id ] ) ) ),
 					array( 'order_item_id' => $item_id ),
 					array( '%s' ),
 					array( '%d' )
@@ -378,13 +379,12 @@ function wc_save_order_items( $order_id, $items ) {
 }
 
 /**
- * Add help tips.
  * Display a WooCommerce help tip.
  *
  * @since  2.5.0
  *
- * @param  string $tip Help tip text
- * @param  bool $allow_html Allow sanitized HTML if true or escape
+ * @param  string $tip        Help tip text
+ * @param  bool   $allow_html Allow sanitized HTML if true or escape
  * @return string
  */
 function wc_help_tip( $tip, $allow_html = false ) {

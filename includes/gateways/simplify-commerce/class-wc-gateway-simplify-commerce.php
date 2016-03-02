@@ -62,7 +62,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 		// Hooks
 		add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
-		add_action( 'admin_notices', array( $this, 'checks' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receipt_page' ) );
 		add_action( 'woocommerce_api_wc_gateway_simplify_commerce', array( $this, 'return_handler' ) );
@@ -101,6 +100,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 			<p><?php _e( 'Simplify Commerce is your merchant account and payment gateway all rolled into one. Choose Simplify Commerce as your WooCommerce payment gateway to get access to your money quickly with a powerful, secure payment engine backed by MasterCard.', 'woocommerce' ); ?></p>
 		<?php endif; ?>
 
+		<?php $this->checks(); ?>
+
 		<table class="form-table">
 			<?php $this->generate_settings_html(); ?>
 			<script type="text/javascript">
@@ -120,7 +121,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				jQuery( '#woocommerce_simplify_commerce_mode' ).on( 'change', function() {
 					var color = jQuery( '#woocommerce_simplify_commerce_modal_color' ).closest( 'tr' );
 
-					if ( 'standard' == jQuery( this ).val() ) {
+					if ( 'standard' === jQuery( this ).val() ) {
 						color.hide();
 					} else {
 						color.show();
@@ -157,6 +158,8 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 
 	/**
 	 * Check if this gateway is enabled.
+	 *
+	 * @return bool
 	 */
 	public function is_available() {
 		if ( 'yes' !== $this->enabled ) {
@@ -276,8 +279,6 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * payment_scripts function.
-	 *
 	 * Outputs scripts used for simplify payment.
 	 */
 	public function payment_scripts() {
@@ -327,13 +328,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 				'token'               => $cart_token,
 				'description'         => sprintf( __( '%s - Order #%s', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order->get_order_number() ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id,
-				'card.addressCity'    => $order->billing_city,
-				'card.addressCountry' => $order->billing_country,
-				'card.addressLine1'   => $order->billing_address_1,
-				'card.addressLine2'   => $order->billing_address_2,
-				'card.addressState'   => $order->billing_state,
-				'card.addressZip'     => $order->billing_postcode
+				'reference'           => $order->id
 			) );
 
 			$order_complete = $this->process_order_status( $order, $payment->id, $payment->paymentStatus, $payment->authCode );
@@ -382,7 +377,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	/**
 	 * Process the payment.
 	 *
-	 * @param integer $order_id
+	 * @param int $order_id
 	 */
 	public function process_payment( $order_id ) {
 		$cart_token = isset( $_POST['simplify_token'] ) ? wc_clean( $_POST['simplify_token'] ) : '';
@@ -404,14 +399,19 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	 */
 	protected function get_hosted_payments_args( $order ) {
 		$args = apply_filters( 'woocommerce_simplify_commerce_hosted_args', array(
-			'sc-key'       => $this->public_key,
-			'amount'       => $order->order_total * 100,
-			'reference'    => $order->id,
-			'name'         => esc_html( get_bloginfo( 'name', 'display' ) ),
-			'description'  => sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ),
-			'receipt'      => 'false',
-			'color'        => $this->modal_color,
-			'redirect-url' => WC()->api_request_url( 'WC_Gateway_Simplify_Commerce' )
+			'sc-key'          => $this->public_key,
+			'amount'          => $order->order_total * 100,
+			'reference'       => $order->id,
+			'name'            => esc_html( get_bloginfo( 'name', 'display' ) ),
+			'description'     => sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ),
+			'receipt'         => 'false',
+			'color'           => $this->modal_color,
+			'redirect-url'    => WC()->api_request_url( 'WC_Gateway_Simplify_Commerce' ),
+			'address'         => $order->billing_address_1 . ' ' . $order->billing_address_2,
+			'address-city'    => $order->billing_city,
+			'address-state'   => $order->billing_state,
+			'address-zip'     => $order->billing_postcode,
+			'address-country' => $order->billing_country
 		), $order->id );
 
 		return $args;
@@ -535,7 +535,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * get_icon function.
+	 * Get gateway icon.
 	 *
 	 * @access public
 	 * @return string

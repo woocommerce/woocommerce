@@ -14,7 +14,7 @@ $settings = array(
 		'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 		'type' 			=> 'checkbox',
 		'label' 		=> __( 'Enable this shipping method', 'woocommerce' ),
-		'default' 		=> 'no',
+		'default' 		=> 'yes',
 	),
 	'title' => array(
 		'title' 		=> __( 'Method Title', 'woocommerce' ),
@@ -22,27 +22,6 @@ $settings = array(
 		'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 		'default'		=> __( 'Flat Rate', 'woocommerce' ),
 		'desc_tip'		=> true
-	),
-	'availability' => array(
-		'title' 		=> __( 'Availability', 'woocommerce' ),
-		'type' 			=> 'select',
-		'default' 		=> 'all',
-		'class'			=> 'availability wc-enhanced-select',
-		'options'		=> array(
-			'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-			'specific' 	=> __( 'Specific Countries', 'woocommerce' ),
-		),
-	),
-	'countries' => array(
-		'title' 		=> __( 'Specific Countries', 'woocommerce' ),
-		'type' 			=> 'multiselect',
-		'class'			=> 'wc-enhanced-select',
-		'css'			=> 'width: 450px;',
-		'default' 		=> '',
-		'options'		=> WC()->countries->get_shipping_countries(),
-		'custom_attributes' => array(
-			'data-placeholder' => __( 'Select some countries', 'woocommerce' )
-		)
 	),
 	'tax_status' => array(
 		'title' 		=> __( 'Tax Status', 'woocommerce' ),
@@ -68,20 +47,21 @@ $shipping_classes = WC()->shipping->get_shipping_classes();
 
 if ( ! empty( $shipping_classes ) ) {
 	$settings[ 'class_costs' ] = array(
-		'title'			=> __( 'Shipping Class Costs', 'woocommerce' ),
-		'type'			=> 'title',
-		'description'   => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' ) . '">', '</a>' )
+		'title'			 => __( 'Shipping Class Costs', 'woocommerce' ),
+		'type'			 => 'title',
+		'default'        => '',
+		'description'    => sprintf( __( 'These costs can optionally be added based on the %sproduct shipping class%s.', 'woocommerce' ), '<a href="' . admin_url( 'edit-tags.php?taxonomy=product_shipping_class&post_type=product' ) . '">', '</a>' )
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
-		if ( ! isset( $shipping_class->slug ) ) {
+		if ( ! isset( $shipping_class->term_id ) ) {
 			continue;
 		}
-		$settings[ 'class_cost_' . $shipping_class->slug ] = array(
+		$settings[ 'class_cost_' . $shipping_class->term_id ] = array(
 			'title'       => sprintf( __( '"%s" Shipping Class Cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
 			'type'        => 'text',
 			'placeholder' => __( 'N/A', 'woocommerce' ),
 			'description' => $cost_desc,
-			'default'     => '',
+			'default'     => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names
 			'desc_tip'    => true
 		);
 	}
@@ -102,22 +82,6 @@ if ( ! empty( $shipping_classes ) ) {
 			'class' 	=> __( 'Per Class: Charge shipping for each shipping class individually', 'woocommerce' ),
 			'order' 	=> __( 'Per Order: Charge shipping for the most expensive shipping class', 'woocommerce' ),
 		),
-	);
-}
-
-if ( apply_filters( 'woocommerce_enable_deprecated_additional_flat_rates', $this->get_option( 'options', false ) ) ) {
-	$settings[ 'additional_rates' ] = array(
-		'title'			=> __( 'Additional Rates', 'woocommerce' ),
-		'type'			=> 'title',
-		'description'   => __( 'These rates are extra shipping options with additional costs (based on the flat rate).', 'woocommerce' ),
-	);
-	$settings['options'] = array(
-		'title' 		=> __( 'Additional Rates', 'woocommerce' ),
-		'type' 			=> 'textarea',
-		'description'	=> __( 'One per line: Option Name | Additional Cost [+- Percents] | Per Cost Type (order, class, or item) Example: <code>Priority Mail | 6.95 [+ 0.2%] | order</code>.', 'woocommerce' ),
-		'default'		=> '',
-		'desc_tip'		=> true,
-		'placeholder'	=> __( 'Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item)', 'woocommerce' )
 	);
 }
 

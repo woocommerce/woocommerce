@@ -26,6 +26,31 @@ class WC_Cache_Helper {
 	}
 
 	/**
+	 * Get prefix for use with wp_cache_set. Allows all cache in a group to be invalidated at once.
+	 * @param  string $group
+	 * @return string
+	 */
+	public static function get_cache_prefix( $group ) {
+		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed
+		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
+
+		if ( false === $prefix ) {
+			$prefix = 1;
+			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
+		}
+
+		return 'wc_cache_' . $prefix . '_';
+	}
+
+	/**
+	 * Increment group cache prefix (invalidates cache).
+	 * @param  string $group
+	 */
+	public static function incr_cache_prefix( $group ) {
+		wp_cache_incr( 'wc_' . $group . '_cache_prefix', 1, $group );
+	}
+
+	/**
 	 * Get a hash of the customer location.
 	 * @return string
 	 */
@@ -164,15 +189,15 @@ class WC_Cache_Helper {
 	 * @access private
 	 */
 	private static function nocache() {
-		if ( ! defined( 'DONOTCACHEPAGE' ) )
-			define( "DONOTCACHEPAGE", "true" );
-
-		if ( ! defined( 'DONOTCACHEOBJECT' ) )
-			define( "DONOTCACHEOBJECT", "true" );
-
-		if ( ! defined( 'DONOTCACHEDB' ) )
-			define( "DONOTCACHEDB", "true" );
-
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( "DONOTCACHEPAGE", true );
+		}
+		if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
+			define( "DONOTCACHEOBJECT", true );
+		}
+		if ( ! defined( 'DONOTCACHEDB' ) ) {
+			define( "DONOTCACHEDB", true );
+		}
 		nocache_headers();
 	}
 

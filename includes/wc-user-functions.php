@@ -206,10 +206,8 @@ function wc_paying_customer( $order_id ) {
 }
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
-
 /**
- * Checks if a user (by email) has bought an item.
- *
+ * Checks if a user (by email or ID or both) has bought an item.
  * @param string $customer_email
  * @param int $user_id
  * @param int $product_id
@@ -252,11 +250,11 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			AND im.meta_value != 0
 			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
 		" );
-		$result = array_map( 'intval', $result );
+		$result = array_map( 'absint', $result );
 
 		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
 	}
-	return in_array( (int) $product_id, $result );
+	return in_array( absint( $product_id ), $result );
 }
 
 /**
@@ -406,8 +404,6 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		", $customer_id, date( 'Y-m-d', current_time( 'timestamp' ) ) ) ), $customer_id );
 
 	if ( $results ) {
-
-		$looped_downloads = array();
 		foreach ( $results as $result ) {
 			if ( ! $order || $order->id != $result->order_id ) {
 				// new order
@@ -439,13 +435,6 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			}
 
 			$download_file = $_product->get_file( $result->download_id );
-
-			// Check if the file has been already added to the downloads list
-			if ( in_array( $download_file, $looped_downloads ) ) {
-				continue;
-			}
-
-			array_push( $looped_downloads, $download_file );
 
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files
 			$download_name = apply_filters(
@@ -544,7 +533,7 @@ function wc_get_customer_order_count( $user_id ) {
 function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	global $wpdb;
 
-	$wpdb->update( $wpdb->postmeta, array( '_customer_user' => 0 ), array( '_customer_user' => $user_id ) );
+	$wpdb->update( $wpdb->postmeta, array( 'meta_value' => 0 ), array( 'meta_key' => '_customer_user', 'meta_value' => $user_id ) );
 }
 
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
@@ -583,3 +572,66 @@ function wc_disable_author_archives_for_customers() {
 }
 
 add_action( 'template_redirect', 'wc_disable_author_archives_for_customers' );
+
+/**
+ * Hooks into the `profile_update` hook to set the user last updated timestamp.
+ *
+ * @since 2.6.0
+ * @param int   $user_id The user that was updated.
+ * @param array $old     The profile fields pre-change.
+ */
+function wc_update_profile_last_update_time( $user_id, $old ) {
+	wc_set_user_last_update_time( $user_id );
+}
+
+add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
+
+/**
+ * Hooks into the update user meta function to set the user last updated timestamp.
+ *
+ * @since 2.6.0
+ * @param int    $meta_id     ID of the meta object that was changed.
+ * @param int    $user_id     The user that was updated.
+ * @param string $meta_key    Name of the meta key that was changed.
+ * @param string $_meta_value Value of the meta that was changed.
+ */
+function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
+	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
+	$update_time   = false;
+	if ( in_array( $meta_key, $keys_to_track ) ) {
+		$update_time = true;
+	}
+	if ( 'billing_' === substr( $meta_key, 0, 8 ) ) {
+		$update_time = true;
+	}
+	if ( 'shipping_' === substr( $meta_key, 0, 9 ) ) {
+		$update_time = true;
+	}
+
+	if ( $update_time ) {
+		wc_set_user_last_update_time( $user_id );
+	}
+}
+
+add_action( 'update_user_meta', 'wc_meta_update_last_update_time', 10, 4 );
+
+/**
+ * Sets a user's "last update" time to the current timestamp.
+ *
+ * @since 2.6.0
+ * @param int $user_id The user to set a timestamp for.
+ */
+function wc_set_user_last_update_time( $user_id ) {
+	update_user_meta( $user_id, 'last_update', time() );
+}
+
+/**
+ * Get customer saved payment methods list.
+ *
+ * @since 2.6.0
+ * @param int $customer_id
+ * @return array
+ */
+function wc_get_customer_saved_methods_list( $customer_id ) {
+	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id );
+}

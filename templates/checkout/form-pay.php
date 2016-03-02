@@ -4,10 +4,11 @@
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-pay.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
- * will need to copy the new files to your theme to maintain compatibility. We try to do this.
- * as little as possible, but it does happen. When this occurs the version of the template file will.
- * be bumped and the readme will list any important changes.
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
  *
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author   WooThemes
@@ -34,7 +35,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php if ( sizeof( $order->get_items() ) > 0 ) : ?>
 				<?php foreach ( $order->get_items() as $item ) : ?>
 					<tr>
-						<td class="product-name"><?php echo esc_html( $item['name'] ); ?></td>
+						<td class="product-name">
+							<?php echo esc_html( $item['name'] ); ?>
+							<?php $order->display_item_meta( $item ); ?>
+						</td>
 						<td class="product-quantity"><?php echo esc_html( $item['qty'] ); ?></td>
 						<td class="product-subtotal"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
 					</tr>
@@ -70,9 +74,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="form-row">
 			<input type="hidden" name="woocommerce_pay" value="1" />
 
+			<?php wc_get_template( 'checkout/terms.php' ); ?>
+
+			<?php do_action( 'woocommerce_pay_order_before_submit' ); ?>
+
 			<?php echo apply_filters( 'woocommerce_pay_order_button_html', '<input type="submit" class="button alt" id="place_order" value="' . esc_attr( $order_button_text ) . '" data-value="' . esc_attr( $order_button_text ) . '" />' ); ?>
 
-			<?php wc_get_template( 'checkout/terms.php' ); ?>
+			<?php do_action( 'woocommerce_pay_order_after_submit' ); ?>
 
 			<?php wp_nonce_field( 'woocommerce-pay' ); ?>
 		</div>
