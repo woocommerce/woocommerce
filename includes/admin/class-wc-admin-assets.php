@@ -326,7 +326,8 @@ class WC_Admin_Assets {
 				'woocommerce_admin_api_keys',
 				array(
 					'ajax_url'         => admin_url( 'admin-ajax.php' ),
-					'update_api_nonce' => wp_create_nonce( 'update-api-key' )
+					'update_api_nonce' => wp_create_nonce( 'update-api-key' ),
+					'clipboard_failed' => esc_html__( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.' ),
 				)
 			);
 		}
