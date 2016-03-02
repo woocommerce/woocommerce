@@ -368,6 +368,13 @@ class WC_Install {
 			}
 		}
 
+		/*
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 */
+		$max_index_length = 191;
+
 		return "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -399,16 +406,16 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_orderby varchar(200) NOT NULL,
   attribute_public int(1) NOT NULL DEFAULT 1,
   PRIMARY KEY  (attribute_id),
-  KEY attribute_name (attribute_name)
+  KEY attribute_name (attribute_name($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
   meta_id bigint(20) NOT NULL auto_increment,
   woocommerce_term_id bigint(20) NOT NULL,
-  meta_key varchar(255) NULL,
+  meta_key varchar(255) default NULL,
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY woocommerce_term_id (woocommerce_term_id),
-  KEY meta_key (meta_key)
+  KEY meta_key (meta_key($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   permission_id bigint(20) NOT NULL auto_increment,
@@ -423,7 +430,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   access_expires datetime NULL default null,
   download_count bigint(20) NOT NULL DEFAULT 0,
   PRIMARY KEY  (permission_id),
-  KEY download_order_key_product (product_id,order_id,order_key,download_id),
+  KEY download_order_key_product (product_id,order_id,order_key($max_index_length),download_id),
   KEY download_order_product (download_id,order_id,product_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
@@ -437,11 +444,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
 CREATE TABLE {$wpdb->prefix}woocommerce_order_itemmeta (
   meta_id bigint(20) NOT NULL auto_increment,
   order_item_id bigint(20) NOT NULL,
-  meta_key varchar(255) NULL,
+  meta_key varchar(255) default NULL,
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY order_item_id (order_item_id),
-  KEY meta_key (meta_key)
+  KEY meta_key (meta_key($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
   tax_rate_id bigint(20) NOT NULL auto_increment,
@@ -455,9 +462,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
   tax_rate_order bigint(20) NOT NULL,
   tax_rate_class varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY  (tax_rate_id),
-  KEY tax_rate_country (tax_rate_country),
-  KEY tax_rate_state (tax_rate_state),
-  KEY tax_rate_class (tax_rate_class),
+  KEY tax_rate_country (tax_rate_country($max_index_length)),
+  KEY tax_rate_state (tax_rate_state($max_index_length)),
+  KEY tax_rate_class (tax_rate_class($max_index_length)),
   KEY tax_rate_priority (tax_rate_priority)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
