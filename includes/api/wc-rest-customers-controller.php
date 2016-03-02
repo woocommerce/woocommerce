@@ -35,9 +35,10 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	public function register_routes() {
 		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base, array(
 			array(
-				'methods'  => WP_REST_Server::READABLE,
-				'callback' => array( $this, 'get_items' ),
-				'args'     => $this->get_collection_params(),
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_collection_params(),
 			),
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -98,6 +99,20 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+	}
+
+	/**
+	 * Check whether a given request has permission to read customers.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! current_user_can( 'list_users' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list customers.' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -162,6 +177,9 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 			$prepared_args['search'] = $request['slug'];
 			$prepared_args['search_columns'] = array( 'user_nicename' );
 		}
+
+		// Show only customers.
+		$prepared_args['role'] = 'customer';
 
 		/**
 		 * Filter arguments, before passing to WP_User_Query, when querying users via the REST API.
