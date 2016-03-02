@@ -370,6 +370,8 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		if ( isset( $request['customer_emails'] ) ) {
 			update_post_meta( $post->ID, 'customer_email', array_filter( array_map( 'sanitize_email', $request['customer_emails'] ) ) );
 		}
+
+		return true;
 	}
 
 	/**
