@@ -279,7 +279,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'post_excerpt' => $coupon_data['description']
 	 		);
 
-			$id = wp_insert_post( $new_coupon, $wp_error = false );
+			$id = wp_insert_post( $new_coupon, true );
 
 			if ( is_wp_error( $id ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_create_coupon', $id->get_error_message(), 400 );
