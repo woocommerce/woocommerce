@@ -785,7 +785,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	});
 
 	jQuery( document ).ready( function( $ ) {
+
+		$( document.body ).on ( 'click', '#copy-for-support', function( e ) {
+			$( '#debug-report' ).find( 'textarea' ).focus().select();
+			$( '#copy-error' ).text( '<?php esc_html_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>' );
+		} );
+
 		$( document.body ).on( 'copy', '#copy-for-support', function( e ) {
+			$( '#copy-error' ).text( '' );
 			e.clipboardData.clearData();
 			e.clipboardData.setData( 'text/plain', $( '#debug-report' ).find( 'textarea' ).val() );
 			e.preventDefault();
