@@ -326,7 +326,7 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
-		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
 
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $post, $request );
