@@ -35,15 +35,15 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	public function register_routes() {
 		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base, array(
 			array(
-				'methods'         => WP_REST_Server::READABLE,
-				'callback'        => array( $this, 'get_items' ),
-				'args'            => $this->get_collection_params(),
+				'methods'  => WP_REST_Server::READABLE,
+				'callback' => array( $this, 'get_items' ),
+				'args'     => $this->get_collection_params(),
 			),
 			array(
-				'methods'         => WP_REST_Server::CREATABLE,
-				'callback'        => array( $this, 'create_item' ),
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'            => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'email' => array(
 						'required' => true,
 					),
@@ -129,6 +129,97 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Get all customers.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		$prepared_args = array();
+		$prepared_args['exclude'] = $request['exclude'];
+		$prepared_args['include'] = $request['include'];
+		$prepared_args['order']   = $request['order'];
+		$prepared_args['number']  = $request['per_page'];
+		if ( ! empty( $request['offset'] ) ) {
+			$prepared_args['offset'] = $request['offset'];
+		} else {
+			$prepared_args['offset'] = ( $request['page'] - 1 ) * $prepared_args['number'];
+		}
+		$orderby_possibles = array(
+			'id'              => 'ID',
+			'include'         => 'include',
+			'name'            => 'display_name',
+			'registered_date' => 'registered',
+		);
+		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
+		$prepared_args['search']  = $request['search'];
+
+		if ( '' !== $prepared_args['search'] ) {
+			$prepared_args['search'] = '*' . $prepared_args['search'] . '*';
+		}
+
+		if ( ! empty( $request['slug'] ) ) {
+			$prepared_args['search'] = $request['slug'];
+			$prepared_args['search_columns'] = array( 'user_nicename' );
+		}
+
+		/**
+		 * Filter arguments, before passing to WP_User_Query, when querying users via the REST API.
+		 *
+		 * @see https://developer.wordpress.org/reference/classes/wp_user_query/
+		 *
+		 * @param array           $prepared_args Array of arguments for WP_User_Query.
+		 * @param WP_REST_Request $request       The current request.
+		 */
+		$prepared_args = apply_filters( 'woocommerce_rest_customer_query', $prepared_args, $request );
+
+		$query = new WP_User_Query( $prepared_args );
+
+		$users = array();
+		foreach ( $query->results as $user ) {
+			$data = $this->prepare_item_for_response( $user, $request );
+			$users[] = $this->prepare_response_for_collection( $data );
+		}
+
+		$response = rest_ensure_response( $users );
+
+		// Store pagation values for headers then unset for count query.
+		$per_page = (int) $prepared_args['number'];
+		$page = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
+
+		$prepared_args['fields'] = 'ID';
+
+		$total_users = $query->get_total();
+		if ( $total_users < 1 ) {
+			// Out-of-bounds, run the query again without LIMIT for total count.
+			unset( $prepared_args['number'] );
+			unset( $prepared_args['offset'] );
+			$count_query = new WP_User_Query( $prepared_args );
+			$total_users = $count_query->get_total();
+		}
+		$response->header( 'X-WP-Total', (int) $total_users );
+		$max_pages = ceil( $total_users / $per_page );
+		$response->header( 'X-WP-TotalPages', (int) $max_pages );
+
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', WC_API::REST_API_NAMESPACE, $this->rest_base ) ) );
+		if ( $page > 1 ) {
+			$prev_page = $page - 1;
+			if ( $prev_page > $max_pages ) {
+				$prev_page = $max_pages;
+			}
+			$prev_link = add_query_arg( 'page', $prev_page, $base );
+			$response->link_header( 'prev', $prev_link );
+		}
+		if ( $max_pages > $page ) {
+			$next_page = $page + 1;
+			$next_link = add_query_arg( 'page', $next_page, $base );
+			$response->link_header( 'next', $next_link );
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Get a single customer.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -182,7 +273,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		$data = array(
 			'id'               => $customer->ID,
 			'created_at'       => wc_api_prepare_date_response( $customer->user_registered ),
-			'updated_at'       => wc_api_prepare_date_response( date( 'Y-m-d H:i:s', $customer->last_update ) ),
+			'updated_at'       => $customer->last_update ? wc_api_prepare_date_response( date( 'Y-m-d H:i:s', $customer->last_update ) ) : null,
 			'email'            => $customer->user_email,
 			'first_name'       => $customer->first_name,
 			'last_name'        => $customer->last_name,
@@ -481,5 +572,62 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the query params for collections
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$query_params = parent::get_collection_params();
+
+		$query_params['context']['default'] = 'view';
+
+		$query_params['exclude'] = array(
+			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'type'               => 'array',
+			'default'            => array(),
+			'sanitize_callback'  => 'wp_parse_id_list',
+		);
+		$query_params['include'] = array(
+			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'type'               => 'array',
+			'default'            => array(),
+			'sanitize_callback'  => 'wp_parse_id_list',
+		);
+		$query_params['offset'] = array(
+			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'type'               => 'integer',
+			'sanitize_callback'  => 'absint',
+			'validate_callback'  => 'rest_validate_request_arg',
+		);
+		$query_params['order'] = array(
+			'default'            => 'asc',
+			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'enum'               => array( 'asc', 'desc' ),
+			'sanitize_callback'  => 'sanitize_key',
+			'type'               => 'string',
+			'validate_callback'  => 'rest_validate_request_arg',
+		);
+		$query_params['orderby'] = array(
+			'default'            => 'name',
+			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'enum'               => array(
+				'id',
+				'include',
+				'name',
+				'registered_date',
+			),
+			'sanitize_callback'  => 'sanitize_key',
+			'type'               => 'string',
+			'validate_callback'  => 'rest_validate_request_arg',
+		);
+		$query_params['slug']    = array(
+			'description'        => __( 'Limit result set to resources with a specific slug.', 'woocommerce' ),
+			'type'               => 'string',
+			'validate_callback'  => 'rest_validate_request_arg',
+		);
+		return $query_params;
 	}
 }
