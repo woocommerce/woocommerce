@@ -46,20 +46,21 @@ class WC_Shortcode_My_Account {
 			} else {
 				wc_get_template( 'myaccount/form-login.php' );
 			}
-		} else if (
-			isset( $wp->query_vars['page'] ) // Regular page with shortcode.
-			|| empty( $wp->query_vars ) // When My Account page is the front page.
-		) {
-			self::my_account( $atts );
-		} else {
+	 	} else {
+			// See if showing an account endpoint
 			foreach ( $wp->query_vars as $key => $value ) {
 				// Ignore pagename param.
 				if ( 'pagename' === $key ) {
 					continue;
 				}
-
-				do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+				if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
+					do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+					return;
+				}
 			}
+
+			// No endpoint? Show main account page.
+			self::my_account( $atts );
 		}
 	}
 
@@ -171,9 +172,9 @@ class WC_Shortcode_My_Account {
 			$user = self::check_password_reset_key( $_GET['key'], $_GET['login'] );
 
 			// reset key / login is correct, display reset password form with hidden key / login values
-			if( is_object( $user ) ) {
-				$args['form'] = 'reset_password';
-				$args['key'] = esc_attr( $_GET['key'] );
+			if ( is_object( $user ) ) {
+				$args['form']  = 'reset_password';
+				$args['key']   = esc_attr( $_GET['key'] );
 				$args['login'] = esc_attr( $_GET['login'] );
 			}
 		} elseif ( isset( $_GET['reset'] ) ) {

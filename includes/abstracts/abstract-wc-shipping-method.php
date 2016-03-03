@@ -74,7 +74,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public $fee = null;
 
-	/** @var float Minimum fee for the method */
 	/**
 	 * Minimum fee for the method (if applicable).
 	 * @var string

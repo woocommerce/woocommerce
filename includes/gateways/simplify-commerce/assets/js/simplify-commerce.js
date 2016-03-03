@@ -7,7 +7,7 @@
 
 		if ( $( '#payment_method_simplify_commerce' ).is( ':checked' ) ) {
 
-			if ( 0 === $( 'input.simplify-token' ).size() ) {
+			if ( 0 === $( 'input.simplify-token' ).length ) {
 
 				$form.block({
 					message: null,

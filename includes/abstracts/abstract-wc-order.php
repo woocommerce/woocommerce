@@ -632,6 +632,11 @@ abstract class WC_Abstract_Order {
 		$taxes        = array();
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
+		// If is_vat_exempt is 'yes', or wc_tax_enabled is false, return and do nothing.
+		if ( 'yes' === $this->is_vat_exempt or ! wc_tax_enabled() ) {
+			return false;
+		}
+
 		if ( 'billing' === $tax_based_on ) {
 			$country  = $this->billing_country;
 			$state    = $this->billing_state;
@@ -2282,9 +2287,21 @@ abstract class WC_Abstract_Order {
 			return false;
 		}
 
-		// Update the order.
-		wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
 		$this->post_status = 'wc-' . $new_status;
+		$update_post_data  = array(
+			'ID'          => $this->id,
+			'post_status' => $this->post_status,
+		);
+
+		if ( 'pending' === $old_status ) {
+			$update_post_data[ 'post_date' ]     = current_time( 'mysql', 0 );
+			$update_post_data[ 'post_date_gmt' ] = current_time( 'mysql', 1 );
+		}
+
+		if ( ! wp_update_post( $update_post_data ) ) {
+			$this->add_order_note( sprintf( __( 'Unable to update order from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ), 0, $manual );
+			return false;
+		}
 
 		$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
 
@@ -2390,12 +2407,6 @@ abstract class WC_Abstract_Order {
 			if ( ! empty( $transaction_id ) ) {
 				update_post_meta( $this->id, '_transaction_id', $transaction_id );
 			}
-
-			wp_update_post( array(
-				'ID'            => $this->id,
-				'post_date'     => current_time( 'mysql', 0 ),
-				'post_date_gmt' => current_time( 'mysql', 1 )
-			) );
 
 			// Payment is complete so reduce stock levels
 			if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $this->id, '_order_stock_reduced', true ), $this->id ) ) {

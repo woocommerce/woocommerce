@@ -1299,7 +1299,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
 		$_product = wc_get_product( $product_id );
-		if ( $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
+		if ( $_product && $_product->post->post_parent > 0 || $product_type == 'grouped' ) {
 
 			$clear_parent_ids = array();
 
@@ -1449,14 +1449,14 @@ class WC_CLI_Product extends WC_CLI_Command {
 		}
 
 		// Product categories
-		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['categories'] ) );
+		if ( isset( $data['categories'] ) ) {
+			$term_ids = array_unique( array_map( 'intval', (array) $data['categories'] ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_cat' );
 		}
 
 		// Product tags
-		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $data['tags'] ) );
+		if ( isset( $data['tags'] ) ) {
+			$term_ids = array_unique( array_map( 'intval', (array) $data['tags'] ) );
 			wp_set_object_terms( $product_id, $term_ids, 'product_tag' );
 		}
 
