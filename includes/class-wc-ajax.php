@@ -1987,10 +1987,15 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$term = wc_clean( stripslashes( $_GET['term'] ) );
+		$term    = wc_clean( stripslashes( $_GET['term'] ) );
+		$exclude = array();
 
 		if ( empty( $term ) ) {
 			die();
+		}
+
+		if ( ! empty( $_GET['exclude'] ) ) {
+			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
 		}
 
 		$found_customers = array();
@@ -2010,7 +2015,9 @@ class WC_AJAX {
 
 		if ( ! empty( $customers ) ) {
 			foreach ( $customers as $customer ) {
-				$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+				if ( ! in_array( $customer->ID, $exclude ) ) {
+					$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+				}
 			}
 		}
 
