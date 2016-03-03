@@ -639,10 +639,10 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_trim_string() {
-
 		$this->assertEquals( 'string', wc_trim_string( 'string' ) );
 		$this->assertEquals( 's...',   wc_trim_string( 'string', 4 ) );
 		$this->assertEquals( 'st.',    wc_trim_string( 'string', 3, '.' ) );
+		$this->assertEquals( 'string¥', wc_trim_string( 'string¥', 7, '' ) );
 	}
 
 }

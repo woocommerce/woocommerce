@@ -81,7 +81,6 @@ class WC_Admin_Post_Types {
 		// Edit post screens
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
-		add_filter( 'media_view_strings', array( $this, 'change_insert_into_post' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
@@ -101,6 +100,9 @@ class WC_Admin_Post_Types {
 
 		// Disable DFW feature pointer
 		add_action( 'admin_footer', array( $this, 'disable_dfw_feature_pointer' ) );
+
+		// Disable post type view mode options
+		add_filter( 'view_mode_post_types', array( $this, 'disable_view_mode_options' ) );
 
 		// If first time editing, disable columns by default.
 		if ( false === get_user_option( 'manageedit-shop_ordercolumnshidden' ) ) {
@@ -2103,24 +2105,6 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Change label for insert buttons.
-	 * @param  array $strings
-	 * @return array
-	 */
-	public function change_insert_into_post( $strings ) {
-		global $post_type;
-
-		if ( in_array( $post_type, array( 'product', 'shop_coupon' ) ) || in_array( $post_type, wc_get_order_types() ) ) {
-			$obj = get_post_type_object( $post_type );
-
-			$strings['insertIntoPost']     = sprintf( __( 'Insert into %s', 'woocommerce' ), $obj->labels->singular_name );
-			$strings['uploadedToThisPost'] = sprintf( __( 'Uploaded to this %s', 'woocommerce' ), $obj->labels->singular_name );
-		}
-
-		return $strings;
-	}
-
-	/**
 	 * Hidden default Meta-Boxes.
 	 * @param  array  $hidden
 	 * @param  object $screen
@@ -2290,6 +2274,20 @@ class WC_Admin_Post_Types {
 		if ( $screen && 'product' === $screen->id && 'post' === $screen->base ) {
 			remove_action( 'admin_print_footer_scripts', array( 'WP_Internal_Pointers', 'pointer_wp410_dfw' ) );
 		}
+	}
+
+	/**
+	 * Removes products, orders, and coupons from the list of post types that support "View Mode" switching.
+	 * View mode is seen on posts where you can switch between list or excerpt. Our post types don't support
+	 * it, so we want to hide the useless UI from the screen options tab.
+	 *
+	 * @since 2.6
+	 * @param  array $post_types Array of post types supporting view mode
+	 * @return array             Array of post types supporting view mode, without products, orders, and coupons
+	 */
+	public function disable_view_mode_options( $post_types ) {
+		unset( $post_types['product'], $post_types['shop_order'], $post_types['shop_coupon'] );
+		return $post_types;
 	}
 }
 

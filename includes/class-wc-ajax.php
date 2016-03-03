@@ -1451,6 +1451,7 @@ class WC_AJAX {
 		// Parse and save items
 		$items = array();
 		parse_str( $_POST['items'], $items );
+
 		wc_save_order_items( $order_id, $items );
 
 		// Get order and calc Taxes
@@ -2797,12 +2798,12 @@ class WC_AJAX {
 	 * Handle submissions from assets/js/settings-views-html-settings-tax.js Backbone model.
 	 */
 	public static function tax_rates_save_changes() {
-		if ( ! isset( $_POST['current_class'], $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
+		if ( ! isset( $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			exit;
 		}
 
-		$current_class = $_POST['current_class']; // This is sanitized seven lines later.
+		$current_class = ! empty( $_POST['current_class'] ) ? $_POST['current_class'] : ''; // This is sanitized seven lines later.
 
 		if ( ! wp_verify_nonce( $_POST['wc_tax_nonce'], 'wc_tax_nonce-class:' . $current_class ) ) {
 			wp_send_json_error( 'bad_nonce' );

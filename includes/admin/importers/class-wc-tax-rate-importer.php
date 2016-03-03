@@ -166,7 +166,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		}
 
 		// Show Result
-		echo '<div class="updated settings-error below-h2"><p>
+		echo '<div class="updated settings-error"><p>
 			' . sprintf( __( 'Import complete - imported <strong>%s</strong> tax rates.', 'woocommerce' ), $loop ) . '
 		</p></div>';
 

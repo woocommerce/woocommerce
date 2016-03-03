@@ -8,19 +8,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<div class="updated woocommerce-message">
+<div class="updated woocommerce-message inline">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a>
 	<a class="button-secondary docs" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
 		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
+		<p id="copy-error"></p>
 	</div>
 </div>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="WordPress Environment"><?php _e( 'WordPress Environment', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="WordPress Environment"><h2><?php _e( 'WordPress Environment', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -110,7 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Server Environment"><?php _e( 'Server Environment', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Server Environment"><h2><?php _e( 'Server Environment', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -309,7 +310,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Database"><?php _e( 'Database', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Database"><h2><?php _e( 'Database', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -351,7 +352,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</th>
+			<th colspan="3" data-export-label="Active Plugins (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)"><h2><?php _e( 'Active Plugins', 'woocommerce' ); ?> (<?php echo count( (array) get_option( 'active_plugins' ) ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -423,7 +424,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Settings"><?php _e( 'Settings', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Settings"><h2><?php _e( 'Settings', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -462,7 +463,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="API"><?php _e( 'API', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="API"><h2><?php _e( 'API', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -481,7 +482,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="WC Pages"><?php _e( 'WC Pages', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="WC Pages"><h2><?php _e( 'WC Pages', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -528,6 +529,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! $page_id ) {
 					echo '<mark class="error">' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 					$error = true;
+				} else if ( get_post_status( $page_id ) !== 'publish' ) {
+					echo '<mark class="error">' . sprintf( __( 'Page visibility should be %spublic%s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
+					$error = true;
 				} else {
 
 					// Shortcode check
@@ -559,7 +563,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Taxonomies"><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); ?></th>
+			<th colspan="3" data-export-label="Taxonomies"><h2><?php _e( 'Taxonomies', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -580,7 +584,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Theme"><?php _e( 'Theme', 'woocommerce' ); ?></th>
+			<th colspan="3" data-export-label="Theme"><h2><?php _e( 'Theme', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 		<?php
@@ -662,7 +666,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Templates"><?php _e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></th>
+			<th colspan="3" data-export-label="Templates"><h2><?php _e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( __( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -801,20 +805,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 	});
 
 	jQuery( document ).ready( function( $ ) {
-		$( '#copy-for-support' ).tipTip({
-			'attribute':  'data-tip',
-			'activation': 'click',
-			'fadeIn':     50,
-			'fadeOut':    50,
-			'delay':      0
-		});
+
+		$( document.body ).on ( 'click', '#copy-for-support', function( e ) {
+			$( '#debug-report' ).find( 'textarea' ).focus().select();
+			$( '#copy-error' ).text( '<?php esc_html_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>' );
+		} );
 
 		$( document.body ).on( 'copy', '#copy-for-support', function( e ) {
+			$( '#copy-error' ).text( '' );
 			e.clipboardData.clearData();
 			e.clipboardData.setData( 'text/plain', $( '#debug-report' ).find( 'textarea' ).val() );
 			e.preventDefault();
-		});
+		} );
 
-	});
+		$( document.body ).on( 'aftercopy', '#copy-for-support', function( e ) {
+			if ( true === e.success['text/plain'] ) {
+				$( '#copy-error' ).text( '' );
+				$( '#copy-for-support' ).tipTip( {
+					'attribute':  'data-tip',
+					'activation': 'focus',
+					'fadeIn':     50,
+					'fadeOut':    50,
+					'delay':      0
+				} ).focus();
+			} else {
+				$( '#debug-report' ).find( 'textarea' ).focus().select();
+				$( '#copy-error' ).text( '<?php esc_html_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>' );
+			}
+		} );
+	} );
 
 </script>

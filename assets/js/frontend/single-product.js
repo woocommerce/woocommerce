@@ -63,7 +63,7 @@ jQuery( function( $ ) {
 			var $rating = $( this ).closest( '#respond' ).find( '#rating' ),
 				rating  = $rating.val();
 
-			if ( $rating.size() > 0 && ! rating && wc_single_product_params.review_rating_required === 'yes' ) {
+			if ( $rating.length > 0 && ! rating && wc_single_product_params.review_rating_required === 'yes' ) {
 				window.alert( wc_single_product_params.i18n_required_rating_text );
 
 				return false;

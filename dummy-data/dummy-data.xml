@@ -1711,7 +1711,7 @@
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_featured</wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+			<wp:meta_value><![CDATA[yes]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_weight</wp:meta_key>
@@ -3357,7 +3357,7 @@ I'm ordering mine next week";s:7:"POST__n";s:10:"a80bd2f042";s:21:"POST__wp_http
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_featured</wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+			<wp:meta_value><![CDATA[yes]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_weight</wp:meta_key>
@@ -3807,7 +3807,7 @@ If only it came in red as well!";s:7:"POST__n";s:10:"2145d644a3";s:21:"POST__wp_
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_featured</wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+			<wp:meta_value><![CDATA[yes]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_weight</wp:meta_key>
@@ -5810,7 +5810,7 @@ If only it came in red as well!";s:7:"POST__n";s:10:"2145d644a3";s:21:"POST__wp_
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_featured</wp:meta_key>
-			<wp:meta_value><![CDATA[no]]></wp:meta_value>
+			<wp:meta_value><![CDATA[yes]]></wp:meta_value>
 		</wp:postmeta>
 		<wp:postmeta>
 			<wp:meta_key>_weight</wp:meta_key>

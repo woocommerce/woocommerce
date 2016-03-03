@@ -59,12 +59,12 @@ jQuery( function( $ ) {
 			var $payment_methods = $( '.woocommerce-checkout' ).find( 'input[name="payment_method"]' );
 
 			// If there is one method, we can hide the radio input
-			if ( 1 === $payment_methods.size() ) {
+			if ( 1 === $payment_methods.length ) {
 				$payment_methods.eq(0).hide();
 			}
 
 			// If there are none selected, select the first.
-			if ( 0 === $payment_methods.filter( ':checked' ).size() ) {
+			if ( 0 === $payment_methods.filter( ':checked' ).length ) {
 				$payment_methods.eq(0).attr( 'checked', 'checked' );
 			}
 
@@ -134,10 +134,10 @@ jQuery( function( $ ) {
 		maybe_update_checkout: function() {
 			var update_totals = true;
 
-			if ( $( wc_checkout_form.dirtyInput ).size() ) {
+			if ( $( wc_checkout_form.dirtyInput ).length ) {
 				var $required_inputs = $( wc_checkout_form.dirtyInput ).closest( 'div' ).find( '.address-field.validate-required' );
 
-				if ( $required_inputs.size() ) {
+				if ( $required_inputs.length ) {
 					$required_inputs.each( function() {
 						if ( $( this ).find( 'input.input-text' ).val() === '' ) {
 							update_totals = false;
@@ -200,7 +200,7 @@ jQuery( function( $ ) {
 				wc_checkout_form.xhr.abort();
 			}
 
-			if ( $( 'form.checkout' ).size() === 0 ) {
+			if ( $( 'form.checkout' ).length === 0 ) {
 				return;
 			}
 

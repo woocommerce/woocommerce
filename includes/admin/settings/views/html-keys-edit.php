@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div id="key-fields" class="settings-panel">
-	<h3><?php _e( 'Key Details', 'woocommerce' ); ?></h3>
+	<h2><?php _e( 'Key Details', 'woocommerce' ); ?></h2>
 
 	<input type="hidden" id="key_id" value="<?php echo esc_attr( $key_id ); ?>" />
 
@@ -102,6 +102,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 
 <script type="text/template" id="tmpl-api-keys-template">
+	<p id="copy-error"></p>
 	<table class="form-table">
 		<tbody>
 			<tr valign="top">
@@ -109,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php _e( 'Consumer Key', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
-					<code id="key_consumer_key">{{ data.consumer_key }}</code> <button type="button" class="button-secondary copy-key" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
+					<input id="key_consumer_key" value="{{ data.consumer_key }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-key" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -117,7 +118,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php _e( 'Consumer Secret', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
-					<code id="key_consumer_secret">{{ data.consumer_secret }}</code> <button type="button" class="button-secondary copy-key" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
+					<input id="key_consumer_secret" value="{{ data.consumer_secret }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-secret" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
 				</td>
 			</tr>
 			<tr valign="top">

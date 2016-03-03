@@ -208,7 +208,6 @@ class WC_Admin {
 
 		return $footer_text;
 	}
-
 }
 
 return new WC_Admin();

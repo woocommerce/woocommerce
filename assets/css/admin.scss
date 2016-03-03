@@ -65,7 +65,7 @@
 					display: none;
 				}
 
-				h3 {
+				h2, h3 {
 					margin: 0 !important;
 					padding: 20px !important;
 					background: #fff;
@@ -215,6 +215,11 @@ mark.amount {
 
 table.wc_status_table {
 	margin-bottom: 1em;
+
+	h2 {
+		font-size: 14px;
+		margin: 0;
+	}
 
 	tr {
 		&:nth-child(2n) {
@@ -499,7 +504,11 @@ ul.wc_coupon_list_block {
 		padding: 0;
 	}
 
-	h4 {
+	h3 {
+		font-size: 14px;
+	}
+
+	h3, h4 {
 		color: #333;
 		margin: 1.33em 0 0;
 	}
@@ -2418,6 +2427,7 @@ img.help_tip {
 .woocommerce {
 	.woo-nav-tab-wrapper {
 		margin-bottom: 16px !important;
+		border-bottom: 1px solid #ccc;
 	}
 
 	.subsubsub {
@@ -3903,6 +3913,7 @@ img.ui-datepicker-trigger {
 			margin: 0 !important;
 		}
 
+		div.stats_range,
 		h3.stats_range {
 			border-bottom-color: #dfdfdf;
 			margin: 0;
@@ -3928,6 +3939,7 @@ img.ui-datepicker-trigger {
 				padding: 0;
 				zoom: 1;
 				background: #f5f5f5;
+				border-bottom: 1px solid #ccc;
 
 				&:before,
 				&:after {
@@ -3944,6 +3956,8 @@ img.ui-datepicker-trigger {
 					margin: 0;
 					padding: 0;
 					line-height: 26px;
+					font-weight: bold;
+					font-size: 14px;
 
 					a {
 						border-right: 1px solid #dfdfdf;
