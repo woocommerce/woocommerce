@@ -378,12 +378,4 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function get_taxes() {
 		return $this->_data['taxes'];
 	}
-
-	/**
-	 * Get meta data.
-	 * @return array of key/value pairs
-	 */
-	public function get_meta_data() {
-		return $this->_meta_data;
-	}
 }

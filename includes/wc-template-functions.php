@@ -2077,12 +2077,12 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 			'autop'     => false,
 		) );
 
-		foreach ( $item->get_meta_data() as $meta_id => $meta ) {
+		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
 			if ( '_' === substr( $meta->key, 0, 1 ) ) {
 				continue;
 			}
-			$value = $args['autop'] ? wp_kses_post( wpautop( make_clickable( $meta->value ) ) ) : wp_kses_post( make_clickable( $meta->value ) );
-			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( wc_attribute_label( $meta->key ) ) . ':</strong> ' . $value;
+			$value = $args['autop'] ? wp_kses_post( wpautop( make_clickable( $meta->display_value ) ) ) : wp_kses_post( make_clickable( $meta->display_value ) );
+			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
 		}
 
 		if ( $strings ) {

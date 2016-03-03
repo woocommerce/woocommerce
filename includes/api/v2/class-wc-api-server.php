@@ -703,7 +703,9 @@ class WC_API_Server {
 	 * @return string RFC3339 datetime
 	 */
 	public function format_datetime( $timestamp, $convert_to_utc = false ) {
-
+		if ( ! $timestamp ) {
+			return '';
+		}
 		if ( $convert_to_utc ) {
 			$timezone = new DateTimeZone( wc_timezone_string() );
 		} else {
