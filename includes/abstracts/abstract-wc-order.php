@@ -2287,6 +2287,11 @@ abstract class WC_Abstract_Order {
 			return false;
 		}
 
+		// If the old status is unknown (e.g. draft) assume its pending for action usage.
+		if ( ! in_array( $old_status, array_keys( wc_get_order_statuses() ) ) ) {
+			$old_status = 'pending';
+		}
+
 		$this->post_status = 'wc-' . $new_status;
 		$update_post_data  = array(
 			'ID'          => $this->id,
