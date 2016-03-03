@@ -65,7 +65,7 @@
 				}
 			} );
 
-			$( document.body ).on( 'click', css_class, function( e ) {
+			$( document.body ).on( 'click', css_class, function() {
 				$( css_class ).parent().find( 'input' ).focus().select();
 				$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
 			} );
