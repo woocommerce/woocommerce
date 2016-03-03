@@ -109,6 +109,26 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to delete a term.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$term = get_term( (int) $request['id'], $this->taxonomy );
+		if ( ! $term ) {
+			return new WP_Error( "woocommerce_rest_{$this->taxonomy}_term_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$taxonomy = get_taxonomy( $this->taxonomy );
+		if ( ! current_user_can( $taxonomy->cap->delete_terms ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get terms associated with a taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request
@@ -236,6 +256,41 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		$response = $this->prepare_item_for_response( $term, $request );
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Delete a single term from a taxonomy.
+	 *
+	 * @param WP_REST_Request $request Full details about the request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		}
+
+		$term = get_term( (int) $request['id'], $this->taxonomy );
+		$request->set_param( 'context', 'view' );
+		$response = $this->prepare_item_for_response( $term, $request );
+
+		$retval = wp_delete_term( $term->term_id, $term->taxonomy );
+		if ( ! $retval ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a single term is deleted via the REST API.
+		 *
+		 * @param WP_Term          $term     The deleted term.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( "woocommerce_rest_delete_{$this->taxonomy}", $term, $response, $request );
+
+		return $response;
 	}
 
 	/**
