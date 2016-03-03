@@ -1007,7 +1007,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * @return int order item ID
 	 */
 	public function add_product( $product, $args = array(), $deprecated = array() ) {
-		if ( is_numeric( $args ) ) {
+		if ( ! is_array( $args ) ) {
 			_deprecated_argument( 'qty', '2.6', 'Pass only product and args' );
 			$qty         = $args;
 			$args        = $deprecated;
@@ -1020,8 +1020,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 			'tax_class'    => $product ? $product->get_tax_class() : '',
 			'product_id'   => $product ? $product->get_id() : '',
 			'variation_id' => $product && isset( $product->variation_id ) ? $product->variation_id : 0,
-			'subtotal'     => $product ? $product->get_price_excluding_tax( $qty ) : '',
-			'total'        => $product ? $product->get_price_excluding_tax( $qty ) : '',
+			'subtotal'     => $product ? $product->get_price_excluding_tax( $args['qty'] ) : '',
+			'total'        => $product ? $product->get_price_excluding_tax( $args['qty'] ) : '',
 			'subtotal_tax' => 0,
 			'total_tax'    => 0,
 			'variation'    => array(),
