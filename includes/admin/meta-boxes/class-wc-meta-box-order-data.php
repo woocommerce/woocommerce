@@ -412,6 +412,10 @@ class WC_Meta_Box_Order_Data {
 
 		self::init_address_fields();
 
+		// Ensure gateways are loaded in case they need to insert data into the emails
+		WC()->payment_gateways();
+		WC()->shipping();
+
 		// Add key
 		add_post_meta( $post_id, '_order_key', uniqid( 'order_' ), true );
 
