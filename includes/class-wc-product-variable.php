@@ -324,12 +324,12 @@ class WC_Product_Variable extends WC_Product {
 
 				set_transient( $transient_name, json_encode( $this->prices_array ), DAY_IN_SECONDS * 30 );
 			}
-
-			/**
-			 * Give plugins one last chance to filter the variation prices array which has been generated.
-			 */
-			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
 		}
+
+		/**
+		 * Give plugins one last chance to filter the variation prices array which has been generated.
+		 */
+		$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
 
 		/**
 		 * Return the values.
