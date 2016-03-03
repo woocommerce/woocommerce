@@ -29,6 +29,21 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Insert data into the database.
+	 * @since 2.6.0
+	 */
+	public function create() {
+		parent::create();
+
+		// Store additonal order data
+		if ( $this->get_id() ) {
+			$this->update_post_meta( '_refund_amount', $this->get_refund_amount() );
+			$this->update_post_meta( '_refunded_by', $this->get_refunded_by() );
+			$this->update_post_meta( '_refund_reason', $this->get_refund_reason() );
+		}
+	}
+
+	/**
      * Read from the database.
      * @since 2.6.0
      * @param int $id ID of object to read.
@@ -50,6 +65,27 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Update data in the database.
+	 * @since 2.6.0
+	 */
+	public function update() {
+		parent::update();
+
+		// Store additonal order data
+		$this->update_post_meta( '_refund_amount', $this->get_refund_amount() );
+		$this->update_post_meta( '_refunded_by', $this->get_refunded_by() );
+		$this->update_post_meta( '_refund_reason', $this->get_refund_reason() );
+	}
+
+	/**
+	 * Get internal type (post type.)
+	 * @return string
+	 */
+	public function get_type() {
+		return 'shop_order_refund';
+	}
+
+	/**
 	 * Get a title for the new post type.
 	 */
 	protected function get_post_title() {
@@ -61,7 +97,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @param string $value
 	 */
 	public function set_refund_amount( $value ) {
-		$this->_meta_data['refund_amount'] = wc_format_decimal( $value );
+		$this->_data['refund_amount'] = wc_format_decimal( $value );
 	}
 
 	/**
@@ -87,7 +123,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @param string $value
 	 */
 	public function set_refund_reason( $value ) {
-		$this->_meta_data['refund_reason'] = $value;
+		$this->_data['refund_reason'] = $value;
 	}
 
 	/**
@@ -104,7 +140,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @param int $value
 	 */
 	public function set_refunded_by( $value ) {
-		$this->_meta_data['refunded_by'] = absint( $value );
+		$this->_data['refunded_by'] = absint( $value );
 	}
 
 	/**

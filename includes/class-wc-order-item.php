@@ -322,7 +322,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 			}
 
 			$attribute_key = urldecode( str_replace( 'attribute_', '', $meta->key ) );
-			$display_key   = wc_attribute_label( $attribute_key, $this->product );
+			$display_key   = wc_attribute_label( $attribute_key, is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false );
 			$display_value = $meta->value;
 
 			if ( taxonomy_exists( $attribute_key ) ) {

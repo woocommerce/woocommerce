@@ -220,6 +220,7 @@ class WC_Order extends WC_Abstract_Order {
 
 		// Read additonal order data
 		if ( $order_id = $this->get_id() ) {
+			$post_object = get_post( $this->get_id() );
 			$this->set_billing_first_name( get_post_meta( $order_id, '_billing_first_name', true ) );
 			$this->set_billing_last_name( get_post_meta( $order_id, '_billing_last_name', true ) );
 			$this->set_billing_company( get_post_meta( $order_id, '_billing_company', true ) );
@@ -250,6 +251,12 @@ class WC_Order extends WC_Abstract_Order {
 			$this->set_date_completed( get_post_meta( $order_id, '_completed_date', true ) );
 			$this->set_date_paid( get_post_meta( $order_id, '_paid_date', true ) );
 			$this->set_cart_hash( get_post_meta( $order_id, '_cart_hash', true ) );
+			$this->set_customer_note( $post_object->post_excerpt );
+
+			// Map user data
+			if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
+				$this->set_billing_email( $user->user_email );
+			}
 		}
 	}
 

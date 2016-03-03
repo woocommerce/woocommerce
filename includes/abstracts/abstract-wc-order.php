@@ -11,8 +11,6 @@ include_once( 'abstract-wc-legacy-order.php' );
  * Handles generic order data and database interaction which is extended by both
  * WC_Order (regular orders) and WC_Order_Refund (refunds are negative orders).
  *
- * @todo update API and CLI to use new functions instead of legacy
- *
  * @class       WC_Abstract_Order
  * @version     2.6.0
  * @package     WooCommerce/Classes
@@ -101,6 +99,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	*/
 
 	/**
+	 * Get internal type (post type.)
+	 * @return string
+	 */
+	public function get_type() {
+		return 'shop_order';
+	}
+
+	/**
 	 * Get a title for the new post type.
 	 */
 	protected function get_post_title() {
@@ -165,7 +171,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$this->set_date_created( $post_object->post_date );
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );
-		$this->set_customer_note( $post_object->post_excerpt );
 		$this->set_order_type( $post_object->post_type );
 		$this->set_customer_id( get_post_meta( $order_id, '_customer_user', true ) );
 		$this->set_order_key( get_post_meta( $order_id, '_order_key', true ) );
@@ -176,11 +181,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$this->set_shipping_tax( get_post_meta( $order_id, '_order_shipping_tax', true ) );
 		$this->set_cart_tax( get_post_meta( $order_id, '_order_tax', true ) );
 		$this->set_total( get_post_meta( $order_id, '_order_total', true ) );
-
-		// Map user data
-		if ( ! $this->get_billing_email() && ( $user = $this->get_user() ) ) {
-			$this->set_billing_email( $user->user_email );
-		}
 
 		// Orders store the state of prices including tax when created.
 		$this->set_prices_include_tax( metadata_exists( 'post', $order_id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $order_id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ) );

@@ -327,7 +327,7 @@ class WC_Checkout {
 			$order->set_discount_tax( WC()->cart->get_cart_discount_tax_total() );
 			$order->set_shipping_total( WC()->cart->shipping_total );
 			$order->set_shipping_tax( WC()->cart->shipping_tax_total );
-			$order->set_order_total( WC()->cart->total );
+			$order->set_total( WC()->cart->total );
 			$order->save();
 
 			// Fire actions for plugins to use.

@@ -82,7 +82,7 @@ class WC_Helper_Order {
 		$order->set_discount_tax( 0 );
 		$order->set_shipping_total( 10 );
 		$order->set_shipping_tax( 0 );
-		$order->set_order_total( 40 );
+		$order->set_total( 40 );
 		$order->save();
 
 		return $order;
