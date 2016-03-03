@@ -630,9 +630,9 @@ class WC_CLI_Order extends WC_CLI_Command {
 		$order_data = array(
 			'id'                        => $order->get_id(),
 			'order_number'              => $order->get_order_number(),
-			'created_at'                => $this->format_datetime( $order_post->post_date_gmt ),
-			'updated_at'                => $this->format_datetime( $order_post->post_modified_gmt ),
-			'completed_at'              => $this->format_datetime( $order->completed_date, true ),
+			'created_at'                => $this->server->format_datetime( $order->get_date_created(), true ),
+			'updated_at'                => $this->server->format_datetime( $order->get_date_modified(), true ),
+			'completed_at'              => $this->server->format_datetime( $order->get_date_completed(), true ),
 			'status'                    => $order->get_status(),
 			'currency'                  => $order->get_currency(),
 			'total'                     => wc_format_decimal( $order->get_total(), $dp ),
@@ -647,35 +647,35 @@ class WC_CLI_Order extends WC_CLI_Command {
 			'payment_details' => array(
 				'method_id'    => $order->get_payment_method(),
 				'method_title' => $order->get_payment_method_title(),
-				'paid'         => isset( $order->paid_date ),
+				'paid'         => ! empty( $order->get_date_paid() ),
 			),
 			'billing_address' => array(
-				'first_name' => $order->billing_first_name,
-				'last_name'  => $order->billing_last_name,
-				'company'    => $order->billing_company,
-				'address_1'  => $order->billing_address_1,
-				'address_2'  => $order->billing_address_2,
-				'city'       => $order->billing_city,
-				'state'      => $order->billing_state,
-				'postcode'   => $order->billing_postcode,
-				'country'    => $order->billing_country,
+				'first_name' => $order->get_billing_first_name(),
+				'last_name'  => $order->get_billing_last_name(),
+				'company'    => $order->get_billing_company(),
+				'address_1'  => $order->get_billing_address_1(),
+				'address_2'  => $order->get_billing_address_2(),
+				'city'       => $order->get_billing_city(),
+				'state'      => $order->get_billing_state(),
+				'postcode'   => $order->get_billing_postcode(),
+				'country'    => $order->get_billing_country(),
 				'email'      => $order->get_billing_email(),
 				'phone'      => $order->get_billing_phone(),
 			),
 			'shipping_address' => array(
-				'first_name' => $order->shipping_first_name,
-				'last_name'  => $order->shipping_last_name,
-				'company'    => $order->shipping_company,
-				'address_1'  => $order->shipping_address_1,
-				'address_2'  => $order->shipping_address_2,
-				'city'       => $order->shipping_city,
-				'state'      => $order->shipping_state,
-				'postcode'   => $order->shipping_postcode,
-				'country'    => $order->shipping_country,
+				'first_name' => $order->get_shipping_first_name(),
+				'last_name'  => $order->get_shipping_last_name(),
+				'company'    => $order->get_shipping_company(),
+				'address_1'  => $order->get_shipping_address_1(),
+				'address_2'  => $order->get_shipping_address_2(),
+				'city'       => $order->get_shipping_city(),
+				'state'      => $order->get_shipping_state(),
+				'postcode'   => $order->get_shipping_postcode(),
+				'country'    => $order->get_shipping_country(),
 			),
 			'note'                      => $order->get_customer_note(),
-			'customer_ip'               => $order->customer_ip_address,
-			'customer_user_agent'       => $order->customer_user_agent,
+			'customer_ip'               => $order->get_customer_ip_address(),
+			'customer_user_agent'       => $order->get_customer_user_agent(),
 			'customer_id'               => $order->get_user_id(),
 			'view_order_url'            => $order->get_view_order_url(),
 			'line_items'                => array(),
@@ -685,9 +685,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 			'coupon_lines'              => array(),
 		);
 
-		// add line items
+		// Add line items.
 		foreach ( $order->get_items() as $item_id => $item ) {
-
 			$product     = $item->get_product();
 			$product_id  = null;
 			$product_sku = null;
@@ -698,45 +697,46 @@ class WC_CLI_Order extends WC_CLI_Command {
 				$product_sku = $product->get_sku();
 			}
 
-			$meta = new WC_Order_Item_Meta( $item, $product );
-			$item_meta = array();
-			foreach ( $meta->get_formatted( null ) as $meta_key => $formatted_meta ) {
+			$item_meta  = array();
+			$hideprefix = ( isset( $filter['all_item_meta'] ) && 'true' === $filter['all_item_meta'] ) ? null : '_';
+
+			foreach ( $item->get_formatted_meta_data( $hideprefix ) as $meta_id => $meta ) {
 				$item_meta[] = array(
-					'key' => $meta_key,
-					'label' => $formatted_meta['label'],
-					'value' => $formatted_meta['value'],
+					'key'   => $meta->key,
+					'label' => $meta->display_key,
+					'value' => $meta->display_value,
 				);
 			}
 
 			$order_data['line_items'][] = array(
 				'id'           => $item_id,
-				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
-				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
+				'subtotal'     => wc_format_decimal( $item->get_subtotal(), $dp ),
+				'subtotal_tax' => wc_format_decimal( $item->get_subtotal_tax(), $dp ),
+				'total'        => wc_format_decimal( $item->get_total(), $dp ),
+				'total_tax'    => wc_format_decimal( $item->get_total_tax(), $dp ),
 				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
-				'quantity'     => wc_stock_amount( $item['qty'] ),
-				'tax_class'    => ( ! empty( $item['tax_class'] ) ) ? $item['tax_class'] : null,
-				'name'         => $item['name'],
-				'product_id'   => $product_id,
+				'quantity'     => $item->get_qty(),
+				'tax_class'    => $item->get_tax_class(),
+				'name'         => $item->get_name(),
+				'product_id'   => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 				'sku'          => $product_sku,
 				'meta'         => $item_meta,
 			);
 		}
 
 		// Add shipping.
-		foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
+		foreach ( $order->get_shipping_methods() as $item_id => $item ) {
 			$order_data['shipping_lines'][] = array(
-				'id'           => $shipping_item_id,
-				'method_id'    => $shipping_item['method_id'],
-				'method_title' => $shipping_item['name'],
-				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
+				'id'           => $item_id,
+				'method_id'    => $item->get_method_id(),
+				'method_title' => $item->get_method_title(),
+				'total'        => wc_format_decimal( $item->get_total(), $dp ),
 			);
 		}
 
 		// Add taxes.
 		foreach ( $order->get_tax_totals() as $tax_code => $tax ) {
-			$order_data['tax_lines'][] = array(
+			$tax_line = array(
 				'id'       => $tax->id,
 				'rate_id'  => $tax->rate_id,
 				'code'     => $tax_code,
@@ -744,25 +744,35 @@ class WC_CLI_Order extends WC_CLI_Command {
 				'total'    => wc_format_decimal( $tax->amount, $dp ),
 				'compound' => (bool) $tax->is_compound,
 			);
+
+			if ( in_array( 'taxes', $expand ) ) {
+				$_rate_data = WC()->api->WC_API_Taxes->get_tax( $tax->rate_id );
+
+				if ( isset( $_rate_data['tax'] ) ) {
+					$tax_line['rate_data'] = $_rate_data['tax'];
+				}
+			}
+
+			$order_data['tax_lines'][] = $tax_line;
 		}
 
 		// Add fees.
-		foreach ( $order->get_fees() as $fee_item_id => $fee_item ) {
+		foreach ( $order->get_fees() as $item_id => $item ) {
 			$order_data['fee_lines'][] = array(
-				'id'        => $fee_item_id,
-				'title'     => $fee_item['name'],
-				'tax_class' => ( ! empty( $fee_item['tax_class'] ) ) ? $fee_item['tax_class'] : null,
-				'total'     => wc_format_decimal( $order->get_line_total( $fee_item ), $dp ),
-				'total_tax' => wc_format_decimal( $order->get_line_tax( $fee_item ), $dp ),
+				'id'        => $item_id,
+				'title'     => $item->get_name(),
+				'tax_class' => $item->get_tax_class(),
+				'total'     => wc_format_decimal( $item->get_total(), $dp ),
+				'total_tax' => wc_format_decimal( $item->get_total_tax(), $dp ),
 			);
 		}
 
 		// Add coupons.
-		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
+		foreach ( $order->get_items( 'coupon' ) as $item_id => $item ) {
 			$order_data['coupon_lines'][] = array(
-				'id'     => $coupon_item_id,
-				'code'   => $coupon_item['name'],
-				'amount' => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
+				'id'     => $item_id,
+				'code'   => $item->get_code(),
+				'amount' => wc_format_decimal( $item->get_discount(), $dp ),
 			);
 		}
 
