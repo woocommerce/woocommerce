@@ -132,29 +132,28 @@ class WC_Webhook {
 	 * @return bool true if webhook should be delivered, false otherwise
 	 */
 	private function should_deliver( $arg ) {
+		$should_deliver = true;
+		$current_action = current_action();
 
 		// only active webhooks can be delivered
 		if ( 'active' != $this->get_status() ) {
-			return false;
-		}
-
-		$current_action = current_action();
+			$should_deliver = false;
 
 		// only deliver deleted event for coupons, orders, and products
-		if ( 'delete_post' == $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
-			return false;
+		} elseif ( 'delete_post' === $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
+			$should_deliver = false;
 
 		} elseif ( 'delete_user' == $current_action ) {
 			$user = get_userdata( absint( $arg ) );
 
 			// only deliver deleted customer event for users with customer role
 			if ( ! $user || ! in_array( 'customer', (array) $user->roles ) ) {
-				return false;
+				$should_deliver = false;
 			}
 
 		// check if the custom order type has chosen to exclude order webhooks from triggering along with its own webhooks.
 		} elseif ( 'order' == $this->get_resource() && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ) ) ) {
-			return false;
+			$should_deliver = false;
 
 		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) ) {
 			// the `woocommerce_process_shop_*` hook fires for both updates
@@ -165,13 +164,16 @@ class WC_Webhook {
 			$resource_created = ( ( time() - 10 ) <= strtotime( $resource->post_date_gmt ) );
 
 			if ( 'created' == $this->get_event() && ! $resource_created ) {
-				return false;
+				$should_deliver = false;
 			} elseif ( 'updated' == $this->get_event() && $resource_created ) {
-				return false;
+				$should_deliver = false;
 			}
 		}
 
-		return true;
+		/*
+		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq
+		 */
+		return apply_filters( 'woocommerce_webhook_should_deliver', $should_deliver, $this, $arg );
 	}
 
 
