@@ -2282,14 +2282,14 @@ abstract class WC_Abstract_Order {
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 		$old_status = $this->get_status();
 
+		// If the old status is unknown (e.g. draft) assume its pending for action usage.
+		if ( ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
+			$old_status = 'pending';
+		}
+
 		// If the statuses are the same there is no need to update, unless the post status is not a valid 'wc' status.
 		if ( $new_status === $old_status && in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
 			return false;
-		}
-
-		// If the old status is unknown (e.g. draft) assume its pending for action usage.
-		if ( ! in_array( $old_status, array_keys( wc_get_order_statuses() ) ) ) {
-			$old_status = 'pending';
 		}
 
 		$this->post_status = 'wc-' . $new_status;
@@ -2308,12 +2308,17 @@ abstract class WC_Abstract_Order {
 			return false;
 		}
 
-		$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+		// Status was set.
+		do_action( 'woocommerce_order_status_' . $new_status, $this->id );
 
 		// Status was changed.
-		do_action( 'woocommerce_order_status_' . $new_status, $this->id );
-		do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
-		do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
+		if ( $new_status !== $old_status ) {
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+			do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
+			do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
+		} else {
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed to %s.', 'woocommerce' ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+		}
 
 		switch ( $new_status ) {
 
