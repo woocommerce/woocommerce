@@ -356,43 +356,43 @@ class WC_API_Customers extends WC_API_Resource {
 	 */
 	public function add_customer_data( $order_data, $order ) {
 
-		if ( 0 == $order->customer_user ) {
+		if ( ! $order->get_user_id() ) {
 
 			// add customer data from order
 			$order_data['customer'] = array(
 				'id'               => 0,
 				'email'            => $order->get_billing_email(),
-				'first_name'       => $order->billing_first_name,
-				'last_name'        => $order->billing_last_name,
+				'first_name'       => $order->get_billing_first_name(),
+				'last_name'        => $order->get_billing_last_name(),
 				'billing_address'  => array(
-					'first_name' => $order->billing_first_name,
-					'last_name'  => $order->billing_last_name,
-					'company'    => $order->billing_company,
-					'address_1'  => $order->billing_address_1,
-					'address_2'  => $order->billing_address_2,
-					'city'       => $order->billing_city,
-					'state'      => $order->billing_state,
-					'postcode'   => $order->billing_postcode,
-					'country'    => $order->billing_country,
+					'first_name' => $order->get_billing_first_name(),
+					'last_name'  => $order->get_billing_last_name(),
+					'company'    => $order->get_billing_company(),
+					'address_1'  => $order->get_billing_address_1(),
+					'address_2'  => $order->get_billing_address_2(),
+					'city'       => $order->get_billing_city(),
+					'state'      => $order->get_billing_state(),
+					'postcode'   => $order->get_billing_postcode(),
+					'country'    => $order->get_billing_country(),
 					'email'      => $order->get_billing_email(),
 					'phone'      => $order->get_billing_phone(),
 				),
 				'shipping_address' => array(
-					'first_name' => $order->shipping_first_name,
-					'last_name'  => $order->shipping_last_name,
-					'company'    => $order->shipping_company,
-					'address_1'  => $order->shipping_address_1,
-					'address_2'  => $order->shipping_address_2,
-					'city'       => $order->shipping_city,
-					'state'      => $order->shipping_state,
-					'postcode'   => $order->shipping_postcode,
-					'country'    => $order->shipping_country,
+					'first_name' => $order->get_shipping_first_name(),
+					'last_name'  => $order->get_shipping_last_name(),
+					'company'    => $order->get_shipping_company(),
+					'address_1'  => $order->get_shipping_address_1(),
+					'address_2'  => $order->get_shipping_address_2(),
+					'city'       => $order->get_shipping_city(),
+					'state'      => $order->get_shipping_state(),
+					'postcode'   => $order->get_shipping_postcode(),
+					'country'    => $order->get_shipping_country(),
 				),
 			);
 
 		} else {
 
-			$order_data['customer'] = current( $this->get_customer( $order->customer_user ) );
+			$order_data['customer'] = current( $this->get_customer( $order->get_user_id() ) );
 		}
 
 		return $order_data;
