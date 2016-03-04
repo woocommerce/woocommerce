@@ -208,3 +208,106 @@ function wc_get_account_payment_methods_columns() {
 		'actions' => '&nbsp;',
 	) );
 }
+
+/**
+ * Get My Account > Payment methods types
+ *
+ * @since 2.6.0
+ * @return array
+ */
+function wc_get_account_payment_methods_types() {
+	return apply_filters( 'woocommerce_payment_methods_types', array(
+		'cc'     => __( 'Credit Card', 'woocommerce' ),
+		'echeck' => __( 'eCheck', 'woocommerce' ),
+	) );
+}
+
+/**
+ * Returns an array of a user's saved payments list for output on the account tab.
+ *
+ * @since  2.6
+ * @param  array $list         List of payment methods passed from wc_get_customer_saved_methods_list()
+ * @param  int   $customer_id  The customer to fetch payment methods for
+ * @return array               Filtered list of customers payment methods
+ */
+function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
+	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $customer_id );
+	foreach ( $payment_tokens as $payment_token ) {
+		$delete_url      = wc_get_endpoint_url( 'delete-payment-method', $payment_token->get_id() );
+		$delete_url      = wp_nonce_url( $delete_url, 'delete-payment-method-' . $payment_token->get_id() );
+		$set_default_url = wc_get_endpoint_url( 'set-default-payment-method', $payment_token->get_id() );
+		$set_default_url = wp_nonce_url( $set_default_url, 'set-default-payment-method-' . $payment_token->get_id() );
+
+		$type            = strtolower( $payment_token->get_type() );
+		$list[ $type ][] = array(
+			'method' => array(
+				'gateway' => $payment_token->get_gateway_id(),
+			),
+			'expires'    => esc_html__( 'N/A', 'woocommerce' ),
+			'is_default' => $payment_token->is_default(),
+			'actions'    => array(
+				'delete' => array(
+					'url'  => $delete_url,
+					'name' => esc_html__( 'Delete', 'woocommerce' ),
+				),
+			),
+		);
+		$key = key( array_slice( $list[ $type ], -1, 1, true ) );
+
+		if ( ! $payment_token->is_default() ) {
+			$list[ $type ][$key]['actions']['default'] = array(
+				'url' => $set_default_url,
+				'name' => esc_html__( 'Make Default', 'woocommerce' ),
+			);
+		}
+
+		$list[ $type ][ $key ] = apply_filters( 'woocommerce_payment_methods_list_item', $list[ $type ][ $key ], $payment_token );
+	}
+	return $list;
+}
+
+add_filter( 'woocommerce_saved_payment_methods_list', 'wc_get_account_saved_payment_methods_list', 10, 2 );
+
+/**
+ * Controls the output for credit cards on the my account page.
+ *
+ * @since 2.6
+ * @param  array             $item         Individual list item from woocommerce_saved_payment_methods_list
+ * @param  WC_Payment_Token $payment_token The payment token associated with this method entry
+ * @return array                           Filtered item
+ */
+function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_token ) {
+	if ( 'cc' !== strtolower( $payment_token->get_type() ) ) {
+		return $item;
+	}
+
+	$card_type               = $payment_token->get_card_type();
+	$item['method']['last4'] = $payment_token->get_last4();
+	$item['method']['brand'] = ( ! empty( $card_type ) ? ucfirst( $card_type ) : esc_html__( 'Credit Card', 'woocommerce' ) );
+	$item['expires']         = $payment_token->get_expiry_month() . '/' . substr( $payment_token->get_expiry_year(), -2 );
+
+	return $item;
+}
+
+add_filter( 'woocommerce_payment_methods_list_item', 'wc_get_account_saved_payment_methods_list_item_cc', 10, 2 );
+
+/**
+ * Controls the output for eChecks on the my account page.
+ *
+ * @since 2.6
+ * @param  array             $item         Individual list item from woocommerce_saved_payment_methods_list
+ * @param  WC_Payment_Token $payment_token The payment token associated with this method entry
+ * @return array                           Filtered item
+ */
+function wc_get_account_saved_payment_methods_list_item_echeck( $item, $payment_token ) {
+	if ( 'echeck' !== strtolower( $payment_token->get_type() ) ) {
+		return $item;
+	}
+
+	$item['method']['last4'] = $payment_token->get_last4();
+	$item['method']['brand'] =  esc_html__( 'eCheck', 'woocommerce' );
+
+	return $item;
+}
+
+add_filter( 'woocommerce_payment_methods_list_item', 'wc_get_account_saved_payment_methods_list_item_echeck', 10, 2 );

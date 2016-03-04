@@ -65,17 +65,18 @@ class WC_Query {
 			// Checkout actions.
 			'order-pay'          => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
 			'order-received'     => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
-
 			// My account actions.
-			'orders'             => get_option( 'woocommerce_myaccount_orders_endpoint', 'orders' ),
-			'view-order'         => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
-			'downloads'          => get_option( 'woocommerce_myaccount_downloads_endpoint', 'downloads' ),
-			'edit-account'       => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
-			'edit-address'       => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
-			'payment-methods'    => get_option( 'woocommerce_myaccount_payment_methods_endpoint', 'payment-methods' ),
-			'lost-password'      => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
-			'customer-logout'    => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
-			'add-payment-method' => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
+			'orders'                     => get_option( 'woocommerce_myaccount_orders_endpoint', 'orders' ),
+			'view-order'                 => get_option( 'woocommerce_myaccount_view_order_endpoint', 'view-order' ),
+			'downloads'                  => get_option( 'woocommerce_myaccount_downloads_endpoint', 'downloads' ),
+			'edit-account'               => get_option( 'woocommerce_myaccount_edit_account_endpoint', 'edit-account' ),
+			'edit-address'               => get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ),
+			'payment-methods'            => get_option( 'woocommerce_myaccount_payment_methods_endpoint', 'payment-methods' ),
+			'lost-password'              => get_option( 'woocommerce_myaccount_lost_password_endpoint', 'lost-password' ),
+			'customer-logout'            => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
+			'add-payment-method'         => get_option( 'woocommerce_myaccount_add_payment_method_endpoint', 'add-payment-method' ),
+			'delete-payment-method'      => get_option( 'woocommerce_myaccount_delete_payment_method_endpoint', 'delete-payment-method' ),
+			'set-default-payment-method' => get_option( 'woocommerce_myaccount_set_default_payment_method_endpoint', 'set-default-payment-method' ),
 		);
 	}
 

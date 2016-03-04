@@ -937,6 +937,31 @@ function wc_get_shipping_zone( $package ) {
 }
 
 /**
+ * Get a nice name for credit card providers.
+ *
+ * @since  2.6.0
+ * @param  string $type Provider Slug/Type
+ * @return string
+ */
+function wc_get_credit_card_type_label( $type ) {
+	// Normalize
+	$type = strtolower( $type );
+	$type = str_replace( '-', ' ', $type );
+	$type = str_replace( '_', ' ', $type );
+
+	$labels = apply_filters( 'wocommerce_credit_card_type_labels', array(
+		'mastercard'       => __( 'MasterCard', 'woocommerce' ),
+		'visa'             => __( 'Visa', 'woocommerce' ),
+		'discover'         => __( 'Discover', 'woocommerce' ),
+		'american express' => __( 'American Express', 'woocommerce' ),
+		'diners'           => __( 'Diners', 'woocommerce' ),
+		'jcb'              => __( 'JCB', 'woocommerce' ),
+	) );
+
+	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucfirst( $type ) ) );
+}
+
+/**
  * Outputs a "back" link so admin screens can easily jump back a page.
  *
  * @param string $label Title of the page to return to.

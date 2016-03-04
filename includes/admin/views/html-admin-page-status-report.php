@@ -334,6 +334,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'woocommerce_shipping_zones',
 				'woocommerce_shipping_zone_locations',
 				'woocommerce_shipping_zone_methods',
+				'woocommerce_payment_tokens',
+				'woocommerce_payment_tokenmeta',
 			);
 
 			foreach ( $tables as $table ) {

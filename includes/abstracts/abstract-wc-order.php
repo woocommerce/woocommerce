@@ -145,6 +145,39 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Returns a list of all payment tokens associated with the current order
+	 *
+	 * @since 2.6
+	 * @return array An array of payment token objects
+	 */
+	public function get_payment_tokens() {
+		return WC_Payment_Tokens::get_order_tokens( $this->id );
+	}
+
+	/**
+	 * Add a payment token to an order
+	 *
+	 * @since 2.6
+	 * @param  WC_Payment_Token   $token     Payment token object
+	 * @return boolean True if the token was added, false if not
+	 */
+	public function add_payment_token( $token ) {
+		if ( empty( $token ) || ! ( $token instanceof WC_Payment_Token ) ) {
+			return false;
+		}
+
+		$token_ids = get_post_meta( $this->id, '_payment_tokens', true );
+		if ( empty ( $token_ids ) ) {
+			$token_ids = array();
+		}
+		$token_ids[] = $token->get_id();
+
+		update_post_meta( $this->id, '_payment_tokens', $token_ids );
+		do_action( 'woocommerce_payment_token_added_to_order', $this->id, $token->get_id(), $token, $token_ids );
+		return true;
+	}
+
+	/**
 	 * Set the payment method for the order.
 	 *
 	 * @param WC_Payment_Gateway $payment_method
