@@ -9,13 +9,13 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Settings' ) ) :
 
 /**
- * WC_Admin_Settings.
+ * WC_Admin_Settings Class.
  */
 class WC_Admin_Settings {
 
@@ -661,7 +661,7 @@ class WC_Admin_Settings {
 	 *
 	 * Loops though the woocommerce options array and outputs each field.
 	 *
-	 * @param array $options Opens array to output
+	 * @param array $options Options array to output
 	 * @return bool
 	 */
 	public static function save_fields( $options ) {
@@ -669,16 +669,16 @@ class WC_Admin_Settings {
 			return false;
 		}
 
-		// Options to update will be stored here and saved later
+		// Options to update will be stored here and saved later.
 		$update_options = array();
 
-		// Loop options and get values to save
+		// Loop options and get values to save.
 		foreach ( $options as $option ) {
 			if ( ! isset( $option['id'] ) || ! isset( $option['type'] ) ) {
 				continue;
 			}
 
-			// Get posted value
+			// Get posted value.
 			if ( strstr( $option['id'], '[' ) ) {
 				parse_str( $option['id'], $option_name_array );
 				$option_name  = current( array_keys( $option_name_array ) );
@@ -690,7 +690,7 @@ class WC_Admin_Settings {
 				$raw_value    = isset( $_POST[ $option['id'] ] ) ? wp_unslash( $_POST[ $option['id'] ] ) : null;
 			}
 
-			// Format the value based on option type
+			// Format the value based on option type.
 			switch ( $option['type'] ) {
 				case 'checkbox' :
 					$value = is_null( $raw_value ) ? 'no' : 'yes';
@@ -759,13 +759,13 @@ class WC_Admin_Settings {
 			}
 
 			/**
-			 * Fire an action before saved..
+			 * Fire an action before saved.
 			 * @deprecated 2.4.0 - doesn't allow manipulation of values!
 			 */
 			do_action( 'woocommerce_update_option', $option );
 		}
 
-		// Save all options in our array
+		// Save all options in our array.
 		foreach ( $update_options as $name => $value ) {
 			update_option( $name, $value );
 		}
