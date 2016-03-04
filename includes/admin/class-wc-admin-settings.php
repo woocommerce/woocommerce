@@ -620,8 +620,8 @@ class WC_Admin_Settings {
 	 * given form field. Plugins can call this when implementing their own custom
 	 * settings types.
 	 *
-	 * @param array $value The form field value array
-	 * @returns array The description and tip as a 2 element array
+	 * @param  array $value The form field value array
+	 * @return array The description and tip as a 2 element array
 	 */
 	public static function get_field_description( $value ) {
 		$description  = '';
