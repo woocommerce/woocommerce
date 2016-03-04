@@ -10,7 +10,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon create.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	function test_coupon_create() {
 		$code = 'coupon-' . time();
@@ -25,7 +25,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon deletion.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	function test_coupon_delete() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -38,7 +38,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon update.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	function test_coupon_update() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -52,7 +52,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon reading from the DB.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	function test_coupon_read() {
 		$code = 'coupon-' . time();
@@ -73,7 +73,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test coupon saving.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	function test_coupon_save() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -95,7 +95,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	/**
 	 * Test that properties can still be accessed directly for backwards
 	 * compat sake. They throw a deprecated notice.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_backwards_compat_props_use_correct_getters() {
 		// Accessing properties directly will throw some wanted deprected notices
@@ -134,7 +134,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	/**
 	 * Developers can create manual coupons (code only). This test will make sure this works correctly
 	 * and some of our backwards compat handling works correctly as well.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_read_manual_coupon() {
 		$code = 'manual_coupon_' . time();
@@ -199,7 +199,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a coupon's ID
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_id() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -208,7 +208,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a coupon's code
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_code() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -217,7 +217,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a coupon's code
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_code() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -228,7 +228,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a coupon's description
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_description() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -237,7 +237,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a coupon's description
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_description() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -247,7 +247,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a coupon's discount type
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_discount_type() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -256,7 +256,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a coupon's discount type
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_discount_type() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -266,7 +266,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a coupon's amount
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_amount() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -275,7 +275,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a coupon's amount
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_amount() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -285,7 +285,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a coupon's usage count
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_usage_count() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -294,7 +294,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a coupon's usage count
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_usage_count() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -304,7 +304,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting indvidual use status
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_individual_use() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -313,7 +313,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting individual use status
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_individual_use() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -323,7 +323,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting product ids
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_product_ids() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -332,7 +332,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting product ids
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_product_ids() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -342,7 +342,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting excluded product ids
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_excluded_product_ids() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -351,7 +351,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting excluded product ids
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_excluded_product_ids() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -361,7 +361,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting coupon usage limit
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_usage_limit() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -370,7 +370,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting coupon usage limit
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_usage_limit() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -380,7 +380,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting coupon usage limit per user
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_usage_limit_per_user() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -389,7 +389,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting coupon usage limit per user
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_usage_limit_per_user() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -399,7 +399,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting coupon usage limit to x items
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_limit_usage_to_x_items() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -408,7 +408,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting coupon usage limit to x items
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_limit_usage_to_x_items() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -418,7 +418,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting free shipping status
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_free_shipping() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -427,7 +427,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting free shipping status
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_free_shipping() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -437,7 +437,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting product categories
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_product_categories() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -446,7 +446,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting product categories
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_product_categories() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -456,7 +456,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting excluded product categories
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_excluded_product_categories() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -465,7 +465,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting excluded product categories
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_excluded_product_categories() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -475,7 +475,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting exclude sale items status
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_exclude_sale_items() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -484,7 +484,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting exclude sale items status
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_exclude_sale_items() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -494,7 +494,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a coupon's minimum amount
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_minimum_amount() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -503,7 +503,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a coupon's minimum amount
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_minimum_amount() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -513,7 +513,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting a coupon's maximum amount
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_maximum_amount() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -522,7 +522,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting a coupon's maximum amount
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_maximum_amount() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -532,7 +532,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting coupon email restrictions
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_email_restrictions() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -541,7 +541,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test setting coupon email restrictions
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_set_email_restrictions() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -552,7 +552,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting and setting coupon used by list
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_coupon_get_and_set_used_by() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
@@ -565,7 +565,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test getting custom fields
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function test_get_custom_fields() {
 		$coupon     = \WC_Helper_Coupon::create_coupon();

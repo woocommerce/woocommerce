@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce coupons class gets coupon data from storage and checks coupon validity.
  *
  * @class 		WC_Coupon
- * @version		2.6.0
+ * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author		WooThemes
@@ -21,7 +21,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Data array, with defaults.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $_data = array(
@@ -51,7 +51,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Meta data (custom coupon fields).
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $_meta_data = array();
@@ -111,7 +111,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get all class data in array format.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -120,7 +120,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
    /**
     * Get coupon ID.
-    * @since  2.6.0
+    * @since  2.7.0
     * @return integer
     */
 	public function get_id() {
@@ -129,7 +129,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get coupon code.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return string
 	 */
 	public function get_code() {
@@ -138,7 +138,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get coupon description.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return string
 	 */
 	public function get_description() {
@@ -147,7 +147,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get discount type.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return string
 	 */
 	public function get_discount_type() {
@@ -156,7 +156,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get coupon code.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return float
 	 */
 	public function get_amount() {
@@ -165,7 +165,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get coupon expiration date.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return string
 	 */
 	public function get_expiry_date() {
@@ -174,7 +174,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get coupon usage count.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return integer
 	 */
 	public function get_usage_count() {
@@ -183,7 +183,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get the "indvidual use" checkbox status.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return bool
 	 */
 	public function get_individual_use() {
@@ -192,7 +192,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get product IDs this coupon can apply to.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return array
 	 */
 	public function get_product_ids() {
@@ -201,7 +201,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get product IDs that this coupon should not apply to.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return array
 	 */
 	public function get_excluded_product_ids() {
@@ -210,7 +210,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get coupon usage limit.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return integer
 	 */
 	public function get_usage_limit() {
@@ -219,7 +219,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get coupon usage limit per customer (for a single customer)
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return integer
 	 */
 	public function get_usage_limit_per_user() {
@@ -228,7 +228,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Usage limited to certain amount of items
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return integer
 	 */
 	public function get_limit_usage_to_x_items() {
@@ -237,7 +237,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * If this coupon grants free shipping or not.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return bool
 	 */
 	public function get_free_shipping() {
@@ -246,7 +246,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get product categories this coupon can apply to.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return array
 	 */
 	public function get_product_categories() {
@@ -255,7 +255,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get product categories this coupon cannot not apply to.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return array
 	 */
 	public function get_excluded_product_categories() {
@@ -264,7 +264,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * If this coupon should exclude items on sale.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return bool
 	 */
 	public function get_exclude_sale_items() {
@@ -273,7 +273,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get minium spend amount.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return float
 	 */
 	public function get_minimum_amount() {
@@ -281,7 +281,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	}
 	/**
 	 * Get maximum spend amount.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return float
 	 */
 	public function get_maximum_amount() {
@@ -290,7 +290,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get emails to check customer usage restrictions.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @return array
 	 */
 	public function get_email_restrictions() {
@@ -327,7 +327,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Get a custom coupon field.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @return array
 	 */
 	public function get_custom_fields() {
@@ -407,7 +407,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set coupon code.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  string $code
 	 */
 	public function set_code( $code ) {
@@ -416,7 +416,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set coupon description.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  string $description
 	 */
 	public function set_description( $description ) {
@@ -425,7 +425,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set discount type.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  string $discount_type
 	 */
 	public function set_discount_type( $discount_type ) {
@@ -434,7 +434,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set amount.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  float $amount
 	 */
 	public function set_amount( $amount ) {
@@ -443,7 +443,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set expiration date.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  string $date
 	 */
 	public function set_expiry_date( $date ) {
@@ -456,7 +456,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set how many times this coupon has been used.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  int $usage_count
 	 */
 	public function set_usage_count( $usage_count ) {
@@ -465,7 +465,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set if this coupon can only be used once.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  bool $is_individual_use
 	 */
 	public function set_individual_use( $is_individual_use ) {
@@ -474,7 +474,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set the product IDs this coupon can be used with.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  array $product_ids
 	 */
 	public function set_product_ids( $product_ids ) {
@@ -483,7 +483,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set the product IDs this coupon cannot be used with.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  array $excluded_product_ids
 	 */
 	public function set_excluded_product_ids( $excluded_product_ids ) {
@@ -492,7 +492,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set the amount of times this coupon can be used.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  int $usage_limit
 	 */
 	public function set_usage_limit( $usage_limit ) {
@@ -501,7 +501,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set the amount of times this coupon can be used per user.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  int $usage_limit
 	 */
 	public function set_usage_limit_per_user( $usage_limit ) {
@@ -510,7 +510,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set usage limit to x number of items.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  int $limit_usage_to_x_items
 	 */
 	public function set_limit_usage_to_x_items( $limit_usage_to_x_items ) {
@@ -519,7 +519,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set if this coupon enables free shipping or not.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  bool $free_shipping
 	 */
 	public function set_free_shipping( $free_shipping ) {
@@ -528,7 +528,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set the product category IDs this coupon can be used with.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  array $product_categories
 	 */
 	public function set_product_categories( $product_categories ) {
@@ -537,7 +537,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set the product category IDs this coupon cannot be used with.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  array $excluded_product_categories
 	 */
 	public function set_excluded_product_categories( $excluded_product_categories ) {
@@ -546,7 +546,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set if this coupon should excluded sale items or not.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  bool $exclude_sale_items
 	 */
 	public function set_exclude_sale_items( $exclude_sale_items ) {
@@ -555,7 +555,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set the minimum spend amount.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  float $amount
 	 */
 	public function set_minimum_amount( $amount ) {
@@ -564,7 +564,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set the maximum spend amount.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  float $amount
 	 */
 	public function set_maximum_amount( $amount ) {
@@ -573,7 +573,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set email restrictions.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  array $emails
 	 */
 	public function set_email_restrictions( $emails ) {
@@ -582,7 +582,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Set which users have used this coupon.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param array $used_by
 	 */
 	public function set_used_by( $used_by ) {
@@ -603,7 +603,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Reads an coupon from the database and sets its data to the class.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param  int $id
 	 */
 	public function read( $id ) {
@@ -669,7 +669,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Create a new coupon.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function create() {
 		$coupon_id = wp_insert_post( apply_filters( 'woocommerce_new_coupon_data', array(
@@ -690,7 +690,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Updates an existing coupon.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function update() {
 		$coupon_id = $this->get_id();
@@ -708,7 +708,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Save data (either create or update depending on if we are working on an existing coupon)
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function save() {
 		if ( 0 !== $this->get_id() ) {
@@ -720,7 +720,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Delete coupon from the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function delete() {
 		wp_delete_post( $this->get_id() );
@@ -729,7 +729,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	* Helper method that updates all the post meta for a coupon based on it's settings in the WC_Coupon class.
-	* @since 2.6.0
+	* @since 2.7.0
 	* @param int $coupon_id
 	*/
 	private function update_post_meta( $coupon_id ) {
@@ -754,7 +754,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
 	/**
 	 * Developers can programically return coupons. This function will read those values into our WC_Coupon class.
-	 * @since 2.6.0
+	 * @since  2.7.0
 	 * @param  string $code  Coupon code
 	 * @param  array $coupon Array of coupon properties
 	 */
