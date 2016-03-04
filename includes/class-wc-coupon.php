@@ -83,7 +83,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		if ( $code instanceof WC_Coupon ) {
 			$this->read( absint( $code->get_id() ) );
 		} elseif ( $coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $code ) ) {
-			_doing_it_wrong( 'woocommerce_get_shop_coupon_data', 'Reading a manual coupon via woocommerce_get_shop_coupon_data has been deprecated. Please sent an instance of WC_Coupon instead.', '2.6' );
+			_doing_it_wrong( 'woocommerce_get_shop_coupon_data', 'Reading a manual coupon via woocommerce_get_shop_coupon_data has been deprecated. Please sent an instance of WC_Coupon instead.', '2.7' );
 			$this->read_manual_coupon( $code, $coupon );
 		} elseif ( ! empty( $code ) ) {
 			$this->set_code( $code );
@@ -770,7 +770,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		$convert_fields_to_array = array( 'product_ids', 'exclude_product_ids' );
 		foreach ( $convert_fields_to_array as $field ) {
 			if ( ! is_array( $coupon[ $field ] ) ) {
-				_doing_it_wrong( $field, $field . ' should be an array instead of a string.', '2.6' );
+				_doing_it_wrong( $field, $field . ' should be an array instead of a string.', '2.7' );
 				if ( empty( $coupon[ $field ] ) ) {
 					$this->_data[ $field ] = array();
 				} else {
@@ -783,7 +783,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		$yes_no_fields = array( 'individual_use', 'free_shipping', 'exclude_sale_items' );
 		foreach ( $yes_no_fields as $field ) {
 			if ( 'yes' === $coupon[ $field ] || 'no' === $coupon[ $field ] ) {
-				_doing_it_wrong( $field, $field . ' should be true or false instead of yes or no.', '2.6' );
+				_doing_it_wrong( $field, $field . ' should be true or false instead of yes or no.', '2.7' );
 				$this->_data[ $field ] = ( 'yes' === $coupon[ $field ] );
 			}
 		}
