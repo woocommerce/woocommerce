@@ -388,7 +388,7 @@ class WC_Admin_Settings {
 										<?php
 									}
 								?>
-						   </select> <?php echo $description; ?>
+							</select> <?php echo $description; ?>
 						</td>
 					</tr><?php
 					break;
@@ -477,7 +477,7 @@ class WC_Admin_Settings {
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								type="checkbox"
-							 	class="<?php echo esc_attr(isset($value['class']) ? $value['class'] : ''); ?>"
+								class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 								value="1"
 								<?php checked( $option_value, 'yes'); ?>
 								<?php echo implode( ' ', $custom_attributes ); ?>
@@ -602,7 +602,7 @@ class WC_Admin_Settings {
 										}
 									}
 								?>
-							</select> <?php echo ( $description ) ? $description : ''; ?> </br><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
+							</select> <?php echo ( $description ) ? $description : ''; ?> <br /><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
 						</td>
 					</tr><?php
 					break;
