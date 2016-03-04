@@ -951,7 +951,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function has_cart_hash( $cart_hash ) {
-		return hash_equals( $cart_hash, $this->get_cart_hash() );
+		return hash_equals( $this->get_cart_hash(), $cart_hash );
 	}
 
 	/**
