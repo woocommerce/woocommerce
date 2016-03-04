@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
+abstract class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 
 	/**
 	 * Builds our payment fields area - including tokenization fields and the actualy payment fields.
@@ -42,9 +42,8 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 	public function form() {
 		$html           = '';
 		$fields         = array();
-		$cvc_class      = '';
 
-		$cvc_field = '<p class="form-row form-row-wide">
+		$cvc_field = '<p class="form-row form-row-last">
 			<label for="' . esc_attr( $this->id ) . '-card-cvc">' . __( 'Card Code', 'woocommerce' ) . ' <span class="required">*</span></label>
 			<input id="' . esc_attr( $this->id ) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc" type="text" autocomplete="off" placeholder="' . esc_attr__( 'CVC', 'woocommerce' ) . '" name="' . esc_attr( $this->id ) . '-card-cvc" style="width:100px" />
 		</p>';

@@ -44,11 +44,6 @@ wc_print_notices(); ?>
 				</tr>
 			</thead>
 			<?php foreach ( $saved_methods as $type => $methods ) : ?>
-				<tr>
-					<th colspan='3'>
-					<?php echo esc_html( $types[ $type ] );?>
-					</th>
-				</tr>
 				<?php foreach ( $methods as $method ) : ?>
 					<tr class="method">
 						<?php foreach ( wc_get_account_payment_methods_columns() as $column_id => $column_name ) : ?>
@@ -85,6 +80,6 @@ wc_print_notices(); ?>
 
 	<?php do_action( 'woocommerce_after_account_payment_methods', $has_methods ); ?>
 
-	<a class="button" href="<?php echo esc_url( wc_get_endpoint_url( 'add-payment-method' ) ); ?>"><?php esc_html_e( 'Add New Payment Method', 'woocommerce' ); ?></a>
+	<a class="button" href="<?php echo esc_url( wc_get_endpoint_url( 'add-payment-method' ) ); ?>"><?php esc_html_e( 'Add Payment Method', 'woocommerce' ); ?></a>
 
 </div>
