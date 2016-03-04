@@ -242,7 +242,7 @@ class WC_Shipping {
 
 		// Calculate costs for passed packages
 		foreach ( $packages as $package_key => $package ) {
-			 $this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package );
+			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package );
 		}
 
 		// Allow packages to be reorganized after calculate the shipping
