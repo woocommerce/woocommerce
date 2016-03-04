@@ -808,7 +808,9 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// When a term is deleted, delete its meta.
-			$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $id ), array( '%d' ) );
+			if ( get_option( 'db_version' ) < 34370 ) {
+				$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $id ), array( '%d' ) );
+			}
 
 			do_action( 'woocommerce_api_delete_product_category', $id, $this );
 

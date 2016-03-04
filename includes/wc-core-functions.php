@@ -804,7 +804,7 @@ function wc_array_cartesian( $input ) {
 	// Generate indexes from keys and values so we have a logical sort order
 	foreach ( $input as $key => $values ) {
 		foreach ( $values as $value ) {
-			$indexes[ $key ][ $value ] = $index ++;
+			$indexes[ $key ][ $value ] = $index++;
 		}
 	}
 
