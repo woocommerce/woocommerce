@@ -605,15 +605,13 @@ class WC_Admin_Post_Types {
 	public function render_shop_order_columns( $column ) {
 		global $post, $woocommerce, $the_order;
 
-		if ( empty( $the_order ) || $the_order->id != $post->ID ) {
+		if ( empty( $the_order ) || $the_order->get_id() != $post->ID ) {
 			$the_order = wc_get_order( $post->ID );
 		}
 
 		switch ( $column ) {
 			case 'order_status' :
-
 				printf( '<mark class="%s tips" data-tip="%s">%s</mark>', sanitize_title( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ), wc_get_order_status_name( $the_order->get_status() ) );
-
 			break;
 			case 'order_date' :
 
@@ -628,8 +626,8 @@ class WC_Admin_Post_Types {
 
 			break;
 			case 'customer_message' :
-				if ( $the_order->customer_message ) {
-					echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->customer_message ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
+				if ( $the_order->get_customer_note() ) {
+					echo '<span class="note-on tips" data-tip="' . wc_sanitize_tooltip( $the_order->get_customer_note() ) . '">' . __( 'Yes', 'woocommerce' ) . '</span>';
 				} else {
 					echo '<span class="na">&ndash;</span>';
 				}
@@ -644,9 +642,14 @@ class WC_Admin_Post_Types {
 					echo '<table class="order_items" cellspacing="0">';
 
 					foreach ( $the_order->get_items() as $item ) {
-						$product        = apply_filters( 'woocommerce_order_item_product', $the_order->get_product_from_item( $item ), $item );
-						$item_meta      = new WC_Order_Item_Meta( $item, $product );
-						$item_meta_html = $item_meta->display( true, true );
+						$product        = $item->get_product();
+						$item_meta_html = wc_display_item_meta( $item, array(
+							'before'    => "",
+							'separator' => "</br>",
+							'after'     => "",
+							'echo'      => false,
+							'autop'     => false,
+						) );
 						?>
 						<tr class="<?php echo apply_filters( 'woocommerce_admin_order_item_class', '', $item ); ?>">
 							<td class="qty"><?php echo absint( $item['qty'] ); ?></td>
@@ -676,8 +679,8 @@ class WC_Admin_Post_Types {
 					echo '&ndash;';
 				}
 
-				if ( $the_order->billing_phone ) {
-					echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->billing_phone ) . '</small>';
+				if ( $the_order->get_billing_phone() ) {
+					echo '<small class="meta">' . __( 'Tel:', 'woocommerce' ) . ' ' . esc_html( $the_order->get_billing_phone() ) . '</small>';
 				}
 
 			break;
@@ -725,14 +728,14 @@ class WC_Admin_Post_Types {
 			case 'order_total' :
 				echo $the_order->get_formatted_order_total();
 
-				if ( $the_order->payment_method_title ) {
-					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->payment_method_title ) . '</small>';
+				if ( $the_order->get_payment_method_title() ) {
+					echo '<small class="meta">' . __( 'Via', 'woocommerce' ) . ' ' . esc_html( $the_order->get_payment_method_title() ) . '</small>';
 				}
 			break;
 			case 'order_title' :
 
-				if ( $the_order->user_id ) {
-					$user_info = get_userdata( $the_order->user_id );
+				if ( $the_order->get_customer_id() ) {
+					$user_info = get_userdata( $the_order->get_customer_id() );
 				}
 
 				if ( ! empty( $user_info ) ) {
@@ -748,8 +751,8 @@ class WC_Admin_Post_Types {
 					$username .= '</a>';
 
 				} else {
-					if ( $the_order->billing_first_name || $the_order->billing_last_name ) {
-						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->billing_first_name, $the_order->billing_last_name ) );
+					if ( $the_order->get_billing_first_name() || $the_order->get_billing_last_name() ) {
+						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->get_billing_first_name(), $the_order->get_billing_last_name() ) );
 					} else {
 						$username = __( 'Guest', 'woocommerce' );
 					}
@@ -757,8 +760,8 @@ class WC_Admin_Post_Types {
 
 				printf( _x( '%s by %s', 'Order number by X', 'woocommerce' ), '<a href="' . admin_url( 'post.php?post=' . absint( $post->ID ) . '&action=edit' ) . '" class="row-title"><strong>#' . esc_attr( $the_order->get_order_number() ) . '</strong></a>', $username );
 
-				if ( $the_order->billing_email ) {
-					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->billing_email ) . '">' . esc_html( $the_order->billing_email ) . '</a></small>';
+				if ( $the_order->get_billing_email() ) {
+					echo '<small class="meta email"><a href="' . esc_url( 'mailto:' . $the_order->get_billing_email() ) . '">' . esc_html( $the_order->get_billing_email() ) . '</a></small>';
 				}
 
 				echo '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details', 'woocommerce' ) . '</span></button>';
@@ -2234,12 +2237,12 @@ class WC_Admin_Post_Types {
 			foreach ( $existing_permissions as $existing_permission ) {
 				$order = wc_get_order( $existing_permission->order_id );
 
-				if ( ! empty( $order->id ) ) {
+				if ( $order->get_id() ) {
 					// Remove permissions
 					if ( ! empty( $removed_download_ids ) ) {
 						foreach ( $removed_download_ids as $download_id ) {
 							if ( apply_filters( 'woocommerce_process_product_file_download_paths_remove_access_to_old_file', true, $download_id, $product_id, $order ) ) {
-								$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) );
+								$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->get_id(), $product_id, $download_id ) );
 							}
 						}
 					}
@@ -2250,7 +2253,7 @@ class WC_Admin_Post_Types {
 
 							if ( apply_filters( 'woocommerce_process_product_file_download_paths_grant_access_to_new_file', true, $download_id, $product_id, $order ) ) {
 								// grant permission if it doesn't already exist
-								if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1=1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->id, $product_id, $download_id ) ) ) {
+								if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT 1=1 FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE order_id = %d AND product_id = %d AND download_id = %s", $order->get_id(), $product_id, $download_id ) ) ) {
 									wc_downloadable_file_permission( $download_id, $product_id, $order );
 								}
 							}

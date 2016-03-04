@@ -307,7 +307,15 @@ class WC_Product {
 	 * @return int new stock level
 	 */
 	public function reduce_stock( $amount = 1 ) {
-		return $this->set_stock( $amount, 'subtract' );
+		$new_stock = $this->set_stock( $amount, 'subtract' );
+
+        if ( 'yes' === get_option( 'woocommerce_notify_no_stock' ) && get_option( 'woocommerce_notify_no_stock_amount' ) >= $new_stock ) {
+            do_action( 'woocommerce_no_stock', $this );
+        } elseif ( 'yes' === get_option( 'woocommerce_notify_low_stock' ) && get_option( 'woocommerce_notify_low_stock_amount' ) >= $new_stock ) {
+			do_action( 'woocommerce_low_stock', $this );
+		}
+
+		return $new_stock;
 	}
 
 	/**
@@ -1468,7 +1476,6 @@ class WC_Product {
 
 	/**
 	 * Returns the product's weight.
-	 * @todo   refactor filters in this class to naming woocommerce_product_METHOD
 	 * @return string
 	 */
 	public function get_weight() {

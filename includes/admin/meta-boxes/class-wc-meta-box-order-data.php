@@ -153,8 +153,7 @@ class WC_Meta_Box_Order_Data {
 			$payment_gateways = array();
 		}
 
-		$payment_method = ! empty( $order->payment_method ) ? $order->payment_method : '';
-
+		$payment_method    = $order->get_payment_method();
 		$order_type_object = get_post_type_object( $post->post_type );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
@@ -214,10 +213,10 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide wc-customer-user">
 							<label for="customer_user"><?php _e( 'Customer:', 'woocommerce' ) ?> <?php
-								if ( ! empty( $order->customer_user ) ) {
+								if ( $order->get_customer_id() ) {
 									$args = array( 'post_status' => 'all',
 										'post_type'      => 'shop_order',
-										'_customer_user' => absint( $order->customer_user )
+										'_customer_user' => $order->get_customer_id()
 									);
 									printf( '<a href="%s">%s &rarr;</a>',
 										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
@@ -228,8 +227,8 @@ class WC_Meta_Box_Order_Data {
 							<?php
 							$user_string = '';
 							$user_id     = '';
-							if ( ! empty( $order->customer_user ) ) {
-								$user_id     = absint( $order->customer_user );
+							if ( $order->get_customer_id() ) {
+								$user_id     = $order->get_customer_id();
 								$user        = get_user_by( 'id', $user_id );
 								$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email ) . ')';
 							}
@@ -261,8 +260,8 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'billing_' . $key;
 
-									if ( $order->$field_name ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->$field_name ) ) . '</p>';
+									if ( is_callable( array( $order, "get_{$field_name}" ) ) ) {
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . make_clickable( esc_html( $order->{"get_{$field_name}"}() ) ) . '</p>';
 									}
 								}
 
@@ -415,67 +414,50 @@ class WC_Meta_Box_Order_Data {
 		// Ensure gateways are loaded in case they need to insert data into the emails
 		WC()->payment_gateways();
 		WC()->shipping();
+		
+		$order = wc_get_order( $post_id );
+		$order->set_customer_id( absint( $_POST['customer_user'] ) );
+		$order->set_transaction_id( wc_clean( $_POST['_transaction_id'] ) );
+		$order->set_status( wc_clean( $_POST['order_status'] ), false, true );
 
-		// Add key
-		add_post_meta( $post_id, '_order_key', uniqid( 'order_' ), true );
-
-		// Update meta
-		update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
-
-		if ( ! empty( self::$billing_fields ) ) {
-			foreach ( self::$billing_fields as $key => $field ) {
-				if ( ! isset( $field['id'] ) ){
-					$field['id'] = '_billing_' . $key;
-				}
-				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+		// Billing address fields
+		foreach ( self::$billing_fields as $key => $field ) {
+			if ( ! isset( $field['id'] ) ){
+				$field['id'] = '_billing_' . $key;
+			}
+			if ( is_callable( array( $order, "set{$field['id']}" ) ) ) {
+				$order->{"set{$field['id']}"}( wc_clean( $_POST[ $field['id'] ] ) );
+			} else {
+				$order->add_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
 			}
 		}
 
-		if ( ! empty( self::$shipping_fields ) ) {
-			foreach ( self::$shipping_fields as $key => $field ) {
-				if ( ! isset( $field['id'] ) ){
-					$field['id'] = '_shipping_' . $key;
-				}
-				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+		// Shipping address fields
+		foreach ( self::$shipping_fields as $key => $field ) {
+			if ( ! isset( $field['id'] ) ){
+				$field['id'] = '_shipping_' . $key;
+			}
+			if ( is_callable( array( $order, "set{$field['id']}" ) ) ) {
+				$order->{"set{$field['id']}"}( wc_clean( $_POST[ $field['id'] ] ) );
+			} else {
+				$order->add_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
 			}
 		}
 
-		if ( isset( $_POST['_transaction_id'] ) ) {
-			update_post_meta( $post_id, '_transaction_id', wc_clean( $_POST[ '_transaction_id' ] ) );
-		}
-
-		// Payment method handling
-		if ( get_post_meta( $post_id, '_payment_method', true ) !== stripslashes( $_POST['_payment_method'] ) ) {
-
+		if ( $order->get_payment_method() !== wc_clean( $_POST['_payment_method'] ) ) {
 			$methods              = WC()->payment_gateways->payment_gateways();
 			$payment_method       = wc_clean( $_POST['_payment_method'] );
-			$payment_method_title = $payment_method;
-
-			if ( isset( $methods) && isset( $methods[ $payment_method ] ) ) {
-				$payment_method_title = $methods[ $payment_method ]->get_title();
-			}
-
-			update_post_meta( $post_id, '_payment_method', $payment_method );
-			update_post_meta( $post_id, '_payment_method_title', $payment_method_title );
+			$payment_method_title = isset( $methods[ $payment_method ] ) ? $methods[ $payment_method ]->get_title() : $payment_method;
+			$order->set_payment_method( $payment_method );
+			$order->set_payment_method_title( $payment_method_title );
 		}
 
-		// Update date
 		if ( empty( $_POST['order_date'] ) ) {
-			$date = current_time('timestamp');
+			$order->set_date_created( current_time( 'timestamp' ) );
 		} else {
-			$date = strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' );
+			$order->set_date_created( strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':00' ) );
 		}
 
-		$date = date_i18n( 'Y-m-d H:i:s', $date );
-
-		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
-
-		// Order data saved, now get it so we can manipulate status
-		$order = wc_get_order( $post_id );
-
-		// Order status
-		$order->update_status( $_POST['order_status'], '', true );
-
-		wc_delete_shop_order_transients( $post_id );
+		$order->save();
 	}
 }

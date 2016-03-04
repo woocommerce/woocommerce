@@ -64,7 +64,7 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 		$order_item        = array_shift( $order_items );
 		$subscription_name = sprintf( __( '%s - Subscription for "%s"', 'woocommerce' ), esc_html( get_bloginfo( 'name', 'display' ) ), $order_item['name'] ) . ' ' . sprintf( __( '(Order #%s)', 'woocommerce' ), $order->get_order_number() );
 
-		$customer_id = get_post_meta( $order->id, '_simplify_customer_id', true );
+		$customer_id = get_post_meta( $order->get_id(), '_simplify_customer_id', true );
 
 		if ( ! $customer_id ) {
 			return new WP_Error( 'simplify_error', __( 'Customer not found', 'woocommerce' ) );
@@ -77,7 +77,7 @@ class WC_Addons_Gateway_Simplify_Commerce_Deprecated extends WC_Addons_Gateway_S
 				'customer'            => $customer_id,
 				'description'         => trim( substr( $subscription_name, 0, 1024 ) ),
 				'currency'            => strtoupper( get_woocommerce_currency() ),
-				'reference'           => $order->id,
+				'reference'           => $order->get_id(),
 				'card.addressCity'    => $order->billing_city,
 				'card.addressCountry' => $order->billing_country,
 				'card.addressLine1'   => $order->billing_address_1,

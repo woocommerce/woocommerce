@@ -12,14 +12,8 @@ class WC_Helper_Product {
 	 *
 	 * @param $product_id
 	 *
-	 * @todo check for variations, attributes, etc.
 	 */
 	public static function delete_product( $product_id ) {
-
-		/**
-		 * @todo check for variations, attributes, etc.
-		 */
-
 		// Delete the psot
 		wp_delete_post( $product_id, true );
 
@@ -229,7 +223,6 @@ class WC_Helper_Product {
 	 *
 	 * @since 2.3
 	 *
-	 * @todo clean up all term/taxonomy/etc data
 	 */
 	public static function delete_attribute( $attribute_id ) {
 		global $wpdb;

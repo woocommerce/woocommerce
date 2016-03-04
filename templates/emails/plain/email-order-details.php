@@ -23,8 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
 
 echo strtoupper( sprintf( __( 'Order number: %s', 'woocommerce' ), $order->get_order_number() ) ) . "\n";
-echo date_i18n( __( 'jS F Y', 'woocommerce' ), strtotime( $order->order_date ) ) . "\n";
-echo "\n" . $order->email_order_items_table( array(
+echo date_i18n( __( 'jS F Y', 'woocommerce' ), $order->get_date_created() ) . "\n";
+echo "\n" . wc_get_email_order_items( $order, array(
 	'show_sku'    => $sent_to_admin,
 	'show_image'  => false,
 	'image_size'  => array( 32, 32 ),
@@ -40,7 +40,7 @@ if ( $totals = $order->get_order_item_totals() ) {
 }
 
 if ( $sent_to_admin ) {
-    echo "\n" . sprintf( __( 'View order: %s', 'woocommerce'), admin_url( 'post.php?post=' . $order->id . '&action=edit' ) ) . "\n";
+    echo "\n" . sprintf( __( 'View order: %s', 'woocommerce'), admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ) ) . "\n";
 }
 
 do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );

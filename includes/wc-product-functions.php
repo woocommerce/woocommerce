@@ -580,7 +580,6 @@ function wc_get_product_id_by_sku( $sku ) {
  * This is a private function (internal use ONLY) used until a data manipulation api is built.
  *
  * @since 2.4.0
- * @todo  look into Data manipulation API
  *
  * @param int $product_id
  * @param float $regular_price

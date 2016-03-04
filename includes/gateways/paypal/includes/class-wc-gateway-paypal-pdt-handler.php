@@ -80,7 +80,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 				if ( ! empty( $_REQUEST['mc_fee'] ) ) {
 					// Log paypal transaction fee.
-					update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) );
+					update_post_meta( $order->get_id(), 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) );
 				}
 			}
 		}

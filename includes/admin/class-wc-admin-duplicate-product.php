@@ -184,7 +184,6 @@ class WC_Admin_Duplicate_Product {
 	 *
 	 * @param mixed $id
 	 * @return WP_Post|bool
-	 * @todo Returning false? Need to check for it in...
 	 * @see duplicate_product
 	 */
 	private function get_product_to_duplicate( $id ) {

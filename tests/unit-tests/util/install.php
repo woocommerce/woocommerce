@@ -6,7 +6,6 @@ namespace WooCommerce\Tests\Util;
  * Class WC_Tests_Install.
  * @package WooCommerce\Tests\Util
  *
- * @todo determine if this should be in Util or separate namespace
  */
 class WC_Tests_Install extends \WC_Unit_Test_Case {
 

@@ -54,7 +54,6 @@ class Functions extends \WC_Unit_Test_Case {
 	/**
 	 * Test wc_processing_order_count().
 	 *
-	 * @todo needs improvement when we have an orders helper
 	 * @since 2.4
 	 */
 	public function test_wc_processing_order_count() {
@@ -64,7 +63,6 @@ class Functions extends \WC_Unit_Test_Case {
 	/**
 	 * Test wc_orders_count().
 	 *
-	 * @todo needs improvement when we have an orders helper
 	 * @since 2.4
 	 */
 	public function test_wc_orders_count() {
@@ -111,7 +109,7 @@ class Functions extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order ) );
 
 		// Assert that wc_get_order() accepts a order post id.
-		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->id ) );
+		$this->assertInstanceOf( 'WC_Order', wc_get_order( $order->get_id() ) );
 
 		// Assert that a non-shop_order post returns false
 		$post = $this->factory->post->create_and_get( array( 'post_type' => 'post' ) );

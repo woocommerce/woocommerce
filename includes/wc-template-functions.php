@@ -1696,7 +1696,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 	 * @param string $key
 	 * @param mixed $args
 	 * @param string $value (default: null)
-	 * @todo This function needs to be broken up in smaller pieces
 	 */
 	function woocommerce_form_field( $key, $args, $value = null ) {
 		$defaults = array(
@@ -2117,5 +2116,125 @@ if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 	 */
 	function woocommerce_account_edit_account() {
 		WC_Shortcode_My_Account::edit_account();
+	}
+}
+
+if ( ! function_exists( 'wc_get_email_order_items' ) ) {
+	/**
+	 * Get HTML for the order items to be shown in emails.
+	 * @param WC_Order $order
+	 * @param array $args
+	 * @since 2.6.0
+	 */
+	function wc_get_email_order_items( $order, $args = array() ) {
+		ob_start();
+
+		$defaults = array(
+			'show_sku'   => false,
+			'show_image' => false,
+			'image_size' => array( 32, 32 ),
+			'plain_text' => false
+		);
+
+		$args     = wp_parse_args( $args, $defaults );
+		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
+
+		wc_get_template( $template, array(
+			'order'               => $order,
+			'items'               => $order->get_items(),
+			'show_download_links' => $order->is_download_permitted(),
+			'show_sku'            => $args['show_sku'],
+			'show_purchase_note'  => $order->is_paid(),
+			'show_image'          => $args['show_image'],
+			'image_size'          => $args['image_size'],
+		) );
+
+		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );
+	}
+}
+
+if ( ! function_exists( 'wc_display_item_meta' ) ) {
+	/**
+	 * Display item meta data.
+	 * @param  WC_Item $item
+	 * @param  array   $args
+	 * @return string|void
+	 */
+	function wc_display_item_meta( $item, $args = array() ) {
+		$strings = array();
+		$html    = '';
+		$args    = wp_parse_args( $args, array(
+			'before'    => '<ul class="wc-item-meta"><li>',
+			'after'     => '</li></ul>',
+			'separator' => '</li><li>',
+			'echo'      => true,
+			'autop'     => false,
+		) );
+
+		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
+			if ( '_' === substr( $meta->key, 0, 1 ) ) {
+				continue;
+			}
+			$value = $args['autop'] ? wp_kses_post( wpautop( make_clickable( $meta->display_value ) ) ) : wp_kses_post( make_clickable( $meta->display_value ) );
+			$strings[] = '<strong class="wc-item-meta-label">' . wp_kses_post( $meta->display_key ) . ':</strong> ' . $value;
+		}
+
+		if ( $strings ) {
+			$html = $args['before'] . implode( $args['separator'], $strings ) . $args['after'];
+		}
+
+		$html = apply_filters( 'woocommerce_display_item_meta', $html, $item, $args );
+
+		if ( $args['echo'] ) {
+			echo $html;
+		} else {
+			return $html;
+		}
+	}
+}
+
+if ( ! function_exists( 'wc_display_item_downloads' ) ) {
+	/**
+	 * Display item download links.
+	 * @param  WC_Item $item
+	 * @param  array   $args
+	 * @return string|void
+	 */
+	function wc_display_item_downloads( $item, $args = array() ) {
+		$strings = array();
+		$html    = '';
+		$args    = wp_parse_args( $args, array(
+			'before'    => '<ul class ="wc-item-downloads"><li>',
+			'after'     => '</li></ul>',
+			'separator' => '</li><li>',
+			'echo'      => true,
+			'show_url'  => false,
+		) );
+
+		if ( is_object( $item ) && $item->is_type( 'line_item' ) && ( $downloads = $item->get_item_downloads() ) ) {
+			$i = 0;
+			foreach ( $downloads as $file ) {
+				$i ++;
+
+				if ( $args['show_url'] ) {
+					$strings[] = '<strong class="wc-item-download-label">' .  esc_html( $file['name'] ) . ':</strong> ' . esc_html( $file['download_url'] );
+				} else {
+					$prefix = sizeof( $downloads ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
+					$strings[] = '<strong class="wc-item-download-label">' . $prefix . ':</strong> <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a>';
+				}
+			}
+		}
+
+		if ( $strings ) {
+			$html = $args['before'] . implode( $args['separator'], $strings ) . $args['after'];
+		}
+
+		$html = apply_filters( 'woocommerce_display_item_downloads', $html, $item, $args );
+
+		if ( $args['echo'] ) {
+			echo $html;
+		} else {
+			return $html;
+		}
 	}
 }

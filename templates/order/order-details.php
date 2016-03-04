@@ -36,7 +36,7 @@ $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_cu
 	<tbody>
 		<?php
 			foreach( $order->get_items() as $item_id => $item ) {
-				$product = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
+				$product       = $item->get_product();
 				$purchase_note = get_post_meta( $product->id, '_purchase_note', true );
 
 				wc_get_template( 'order/order-details-item.php', array(

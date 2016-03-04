@@ -245,7 +245,7 @@ function wc_register_order_type( $type, $args = array() ) {
 function wc_downloadable_file_permission( $download_id, $product_id, $order, $qty = 1 ) {
 	global $wpdb;
 
-	$user_email = sanitize_email( $order->billing_email );
+	$user_email = $order->get_billing_email();
 	$limit      = trim( get_post_meta( $product_id, '_download_limit', true ) );
 	$expiry     = trim( get_post_meta( $product_id, '_download_expiry', true ) );
 
@@ -262,10 +262,10 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
 	$data = apply_filters( 'woocommerce_downloadable_file_permission_data', array(
 		'download_id'			=> $download_id,
 		'product_id' 			=> $product_id,
-		'user_id' 				=> absint( $order->user_id ),
+		'user_id' 				=> $order->get_user_id(),
 		'user_email' 			=> $user_email,
-		'order_id' 				=> $order->id,
-		'order_key' 			=> $order->order_key,
+		'order_id' 				=> $order->get_id(),
+		'order_key' 			=> $order->get_order_key(),
 		'downloads_remaining' 	=> $limit,
 		'access_granted'		=> current_time( 'mysql' ),
 		'download_count'		=> 0
@@ -306,7 +306,7 @@ function wc_downloadable_file_permission( $download_id, $product_id, $order, $qt
  * @param int $order_id
  */
 function wc_downloadable_product_permissions( $order_id ) {
-	if ( get_post_meta( $order_id, '_download_permissions_granted', true ) == 1 ) {
+	if ( '1' === get_post_meta( $order_id, '_download_permissions_granted', true ) ) {
 		return; // Only do this once
 	}
 
@@ -318,7 +318,7 @@ function wc_downloadable_product_permissions( $order_id ) {
 
 	if ( sizeof( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
-			$_product = $order->get_product_from_item( $item );
+			$_product = $item->get_product();
 
 			if ( $_product && $_product->exists() && $_product->is_downloadable() ) {
 				$downloads = $_product->get_files();
@@ -337,98 +337,186 @@ function wc_downloadable_product_permissions( $order_id ) {
 add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
 add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_permissions' );
 
+/**
+ * Update total sales amount for each product within a paid order.
+ *
+ * @since 2.6.0
+ * @param int $order_id
+ */
+function wc_update_total_sales_counts( $order_id ) {
+	$order = wc_get_order( $order_id );
+
+	if ( ! $order || 'yes' === get_post_meta( $order_id, '_recorded_sales', true ) ) {
+		return;
+	}
+
+	if ( sizeof( $order->get_items() ) > 0 ) {
+		foreach ( $order->get_items() as $item ) {
+			if ( $item['product_id'] > 0 ) {
+				update_post_meta( $item['product_id'], 'total_sales', absint( get_post_meta( $item['product_id'], 'total_sales', true ) ) + absint( $item['qty'] ) );
+			}
+		}
+	}
+
+	update_post_meta( $order_id, '_recorded_sales', 'yes' );
+
+	/**
+	 * Called when sales for an order are recorded
+	 *
+	 * @param int $order_id order id
+	 */
+	do_action( 'woocommerce_recorded_sales', $order_id );
+}
+add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
 
 /**
- * Add a item to an order (for example a line item).
+ * Update used coupon amount for each coupon within an order.
  *
- * @access public
+ * @since 2.6.0
  * @param int $order_id
- * @return mixed
  */
-function wc_add_order_item( $order_id, $item ) {
-	global $wpdb;
+function wc_update_coupon_usage_counts( $order_id ) {
+	$order        = wc_get_order( $order_id );
+	$has_recorded = get_post_meta( $order_id, '_recorded_coupon_usage_counts', true );
 
-	$order_id = absint( $order_id );
+	if ( ! $order ) {
+		return;
+	}
 
-	if ( ! $order_id )
-		return false;
+	if ( $order->has_status( 'cancelled' ) && 'yes' === $has_recorded ) {
+		$action = 'reduce';
+		delete_post_meta( $order_id, '_recorded_coupon_usage_counts' );
+	} elseif ( ! $order->has_status( 'cancelled' ) && 'yes' !== $has_recorded ) {
+		$action = 'increase';
+		update_post_meta( $order_id, '_recorded_coupon_usage_counts', 'yes' );
+	} else {
+		return;
+	}
 
-	$defaults = array(
-		'order_item_name' 		=> '',
-		'order_item_type' 		=> 'line_item',
-	);
+	if ( sizeof( $order->get_used_coupons() ) > 0 ) {
+		foreach ( $order->get_used_coupons() as $code ) {
+			if ( ! $code ) {
+				continue;
+			}
 
-	$item = wp_parse_args( $item, $defaults );
+			$coupon = new WC_Coupon( $code );
 
-	$wpdb->insert(
-		$wpdb->prefix . "woocommerce_order_items",
-		array(
-			'order_item_name' 		=> $item['order_item_name'],
-			'order_item_type' 		=> $item['order_item_type'],
-			'order_id'				=> $order_id
-		),
-		array(
-			'%s', '%s', '%d'
-		)
-	);
+			if ( ! $used_by = $order->get_user_id() ) {
+				$used_by = $order->get_billing_email();
+			}
 
-	$item_id = absint( $wpdb->insert_id );
+			switch ( $action ) {
+				case 'reduce' :
+					$coupon->dcr_usage_count( $used_by );
+				break;
+				case 'increase' :
+					$coupon->inc_usage_count( $used_by );
+				break;
+			}
+		}
+	}
+}
+add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_cancelled', 'wc_update_total_sales_counts' );
 
-	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
+/**
+ * When a payment is complete, we can reduce stock levels for items within an order.
+ * @since 2.6.0
+ * @param int $order_id
+ */
+function wc_maybe_reduce_stock_levels( $order_id ) {
+	if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $order_id, '_order_stock_reduced', true ), $order_id ) ) {
+		wc_reduce_stock_levels( $order_id );
+		add_post_meta( $order_id, '_order_stock_reduced', '1', true );
+	}
+}
+add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
 
-	return $item_id;
+/**
+ * Reduce stock levels for items within an order.
+ * @since 2.6.0
+ * @param int $order_id
+ */
+function wc_reduce_stock_levels( $order_id ) {
+	$order = wc_get_order( $order_id );
+
+	if ( 'yes' === get_option( 'woocommerce_manage_stock' ) && $order && apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) && sizeof( $order->get_items() ) > 0 ) {
+		foreach ( $order->get_items() as $item ) {
+			if ( $item->is_type( 'line_item' ) && ( $product = $item->get_product() ) && $product->managing_stock() ) {
+				$qty       = apply_filters( 'woocommerce_order_item_quantity', $item['qty'], $order, $item );
+				$new_stock = $product->reduce_stock( $qty );
+				$item_name = $product->get_sku() ? $product->get_sku(): $item['product_id'];
+
+				if ( ! empty( $item['variation_id'] ) ) {
+					$order->add_order_note( sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock ) );
+				} else {
+					$order->add_order_note( sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock ) );
+				}
+
+				if ( $new_stock < 0 ) {
+		            do_action( 'woocommerce_product_on_backorder', array( 'product' => $product, 'order_id' => $order_id, 'quantity' => $qty_ordered ) );
+		        }
+			}
+		}
+
+		do_action( 'woocommerce_reduce_order_stock', $order );
+	}
 }
 
 /**
- * Update an item for an order.
- *
- * @since 2.2
- * @param int $item_id
- * @param array $args either `order_item_type` or `order_item_name`
- * @return bool true if successfully updated, false otherwise
+ * Add a item to an order (for example a line item).
+ * @param int $order_id
+ * @param array $args
+ * @return int New item ID, 0 on failure
  */
-function wc_update_order_item( $item_id, $args ) {
-	global $wpdb;
+function wc_add_order_item( $order_id, $args ) {
+	$order_id = absint( $order_id );
 
-	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
-
-	if ( false === $update ) {
-		return false;
+	if ( ! $order_id || ! in_array( get_post_type( $order_id ), wc_get_order_types() ) ) {
+		return 0;
 	}
 
-	do_action( 'woocommerce_update_order_item', $item_id, $args );
+	$args = wp_parse_args( $args, array(
+		'order_item_name' => '', // @deprecated
+		'order_item_type' => '', // @deprecated
+		'name'            => '',
+		'type'            => 'line_item', // Valid values line_item, coupon, fee, tax, shipping
+	) );
 
-	return true;
+	if ( $args['order_item_type'] ) {
+		$args['type'] = $args['order_item_type'];
+	}
+
+	if ( $args['order_item_name'] ) {
+		$args['name'] = $args['order_item_name'];
+	}
+
+	if ( ! in_array( $args['type'], array( 'line_item', 'coupon', 'fee', 'tax', 'shipping' ) ) ) {
+		return 0;
+	}
+
+	$item = WC_Order_Factory::get_order_item();
+	$item->set_type( $args['type'] );
+	$item->set_name( $args['name'] );
+	$item->set_order_id( $order_id );
+	return $item->save();
 }
 
 /**
  * Delete an item from the order it belongs to based on item id.
- *
- * @access public
  * @param int $item_id
- * @return bool
  */
 function wc_delete_order_item( $item_id ) {
-	global $wpdb;
-
-	$item_id = absint( $item_id );
-
-	if ( ! $item_id )
-		return false;
-
-	do_action( 'woocommerce_before_delete_order_item', $item_id );
-
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
-
-	do_action( 'woocommerce_delete_order_item', $item_id );
-
-	return true;
+	$item = WC_Order_Factory::get_order_item( absint( $item_id ) );
+	$item->delete();
 }
 
 /**
  * WooCommerce Order Item Meta API - Update term meta.
- *
  * @access public
  * @param mixed $item_id
  * @param mixed $meta_key
@@ -448,7 +536,7 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
  * @param mixed $meta_key
  * @param mixed $meta_value
  * @param bool $unique (default: false)
- * @return bool
+ * @return bool|int
  */
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
 	return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
@@ -477,7 +565,7 @@ function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $dele
  * @param bool $single (default: true)
  * @return mixed
  */
-function wc_get_order_item_meta( $item_id, $key, $single = true ) {
+function wc_get_order_item_meta( $item_id, $key = '', $single = true ) {
 	return get_metadata( 'order_item', $item_id, $key, $single );
 }
 
@@ -612,132 +700,95 @@ function wc_ship_to_billing_address_only() {
  * @return WC_Order_Refund|WP_Error
  */
 function wc_create_refund( $args = array() ) {
-	$default_args = array(
+	$args = wp_parse_args( $args, array(
 		'amount'     => '',
 		'reason'     => null,
 		'order_id'   => 0,
 		'refund_id'  => 0,
 		'line_items' => array(),
-		'date'       => current_time( 'mysql', 0 )
-	);
-
-	$args        = wp_parse_args( $args, $default_args );
-	$refund_data = array();
+		'date'       => current_time( 'mysql', 0 ),
+	) );
 
 	// prevent negative refunds
 	if ( 0 > $args['amount'] ) {
 		$args['amount'] = 0;
 	}
 
-	if ( $args['refund_id'] > 0 ) {
-		$updating          = true;
-		$refund_data['ID'] = $args['refund_id'];
-	} else {
-		$updating                     = false;
-		$refund_data['post_type']     = 'shop_order_refund';
-		$refund_data['post_status']   = 'wc-completed';
-		$refund_data['ping_status']   = 'closed';
-		$refund_data['post_author']   = get_current_user_id() ? get_current_user_id() : 1;
-		$refund_data['post_password'] = uniqid( 'refund_' );
-		$refund_data['post_parent']   = absint( $args['order_id'] );
-		$refund_data['post_title']    = sprintf( __( 'Refund &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
-		$refund_data['post_date']     = $args['date'];
-	}
+	$refund = new WC_Order_Refund( $args['refund_id'] );
+	$order  = wc_get_order( $args['order_id'] );
+	$refund->set_status( 'completed' );
+	$refund->set_parent_id( $args['order_id'] );
+	$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+	$refund->set_refund_amount( $args['amount'] );
+	$refund->set_currency( $order->get_currency() );
 
 	if ( ! is_null( $args['reason'] ) ) {
-		$refund_data['post_excerpt'] = $args['reason'];
+		$refund->set_refund_reason( wc_clean( $args['reason'] ) );
 	}
 
-	if ( $updating ) {
-		$refund_id = wp_update_post( $refund_data );
-	} else {
-		$refund_id = wp_insert_post( apply_filters( 'woocommerce_new_refund_data', $refund_data ), true );
+	if ( ! $refund->save() ) {
+		return new WP_Error( 'woocommerce_save_refund', __( 'Error: New refund could not be created.', 'woocommerce' ) );
 	}
 
-	if ( is_wp_error( $refund_id ) ) {
-		return $refund_id;
-	}
+	// Add negative line items
+	if ( sizeof( $args['line_items'] ) > 0 ) {
+		$order_items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
 
-	if ( ! $updating ) {
-		// Default refund meta data
-		update_post_meta( $refund_id, '_refund_amount', wc_format_decimal( $args['amount'] ) );
-
-		// Get refund object
-		$refund = wc_get_order( $refund_id );
-		$order  = wc_get_order( $args['order_id'] );
-
-		// Refund currency is the same used for the parent order
-		update_post_meta( $refund_id, '_order_currency', $order->get_order_currency() );
-
-		// Negative line items
-		if ( sizeof( $args['line_items'] ) > 0 ) {
-			$order_items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
-
-			foreach ( $args['line_items'] as $refund_item_id => $refund_item ) {
-				if ( isset( $order_items[ $refund_item_id ] ) ) {
-					if ( empty( $refund_item['qty'] ) && empty( $refund_item['refund_total'] ) && empty( $refund_item['refund_tax'] ) ) {
-						continue;
-					}
-
-					// Prevents errors when the order has no taxes
-					if ( ! isset( $refund_item['refund_tax'] ) ) {
-						$refund_item['refund_tax'] = array();
-					}
-
-					switch ( $order_items[ $refund_item_id ]['type'] ) {
-						case 'line_item' :
-							$line_item_args = array(
-								'totals' => array(
-									'subtotal'     => wc_format_refund_total( $refund_item['refund_total'] ),
-									'total'        => wc_format_refund_total( $refund_item['refund_total'] ),
-									'subtotal_tax' => wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ),
-									'tax'          => wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ),
-									'tax_data'     => array( 'total' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) )
-								)
-							);
-							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] * -1 : 0, $line_item_args );
-							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
-						break;
-						case 'shipping' :
-							$shipping        = new stdClass();
-							$shipping->label = $order_items[ $refund_item_id ]['name'];
-							$shipping->id    = $order_items[ $refund_item_id ]['method_id'];
-							$shipping->cost  = wc_format_refund_total( $refund_item['refund_total'] );
-							$shipping->taxes = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
-
-							$new_item_id = $refund->add_shipping( $shipping );
-							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
-						break;
-						case 'fee' :
-							$fee            = new stdClass();
-							$fee->name      = $order_items[ $refund_item_id ]['name'];
-							$fee->tax_class = $order_items[ $refund_item_id ]['tax_class'];
-							$fee->taxable   = $fee->tax_class !== '0';
-							$fee->amount    = wc_format_refund_total( $refund_item['refund_total'] );
-							$fee->tax       = wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) );
-							$fee->tax_data  = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
-
-							$new_item_id = $refund->add_fee( $fee );
-							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
-						break;
-					}
-				}
+		foreach ( $args['line_items'] as $refund_item_id => $refund_item ) {
+			if ( ! isset( $order_items[ $refund_item_id ] ) || ( empty( $refund_item['qty'] ) && empty( $refund_item['refund_total'] ) && empty( $refund_item['refund_tax'] ) ) ) {
+				continue;
 			}
-			$refund->update_taxes();
+			$item                      = $order_items[ $refund_item_id ];
+			$refund_item['refund_tax'] = isset( $refund_item['refund_tax'] ) ? $refund_item['refund_tax'] : array();
+
+			switch ( $order_items[ $refund_item_id ]->get_type() ) {
+				case 'line_item' :
+					$item = new WC_Order_Item_Product( $order_items[ $refund_item_id ] );
+					$item->set_id( 0 );
+					$item->set_order_id( $refund->get_id() );
+					$item->set_qty( isset( $refund_item['qty'] ) ? $refund_item['qty'] * -1 : 0 );
+					$item->set_subtotal( wc_format_refund_total( $refund_item['refund_total'] ) );
+					$item->set_subtotal_tax( wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ) );
+					$item->set_total( wc_format_refund_total( $refund_item['refund_total'] ) );
+					$item->set_total_tax( wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ) );
+					$item->set_taxes( array( 'total' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) ) );
+					$item->add_meta_data( '_refunded_item_id', $refund_item_id, true );
+					$item->save();
+				break;
+				case 'shipping' :
+					$item = new WC_Order_Item_Shipping( $order_items[ $refund_item_id ] );
+					$item->set_id( 0 );
+					$item->set_order_id( $refund->get_id() );
+					$item->set_total( wc_format_refund_total( $refund_item['refund_total'] ) );
+					$item->set_total_tax( wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ) );
+					$item->set_taxes( array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) );
+					$item->add_meta_data( '_refunded_item_id', $refund_item_id, true );
+					$item->save();
+				break;
+				case 'fee' :
+					$item = new WC_Order_Item_Fee( $order_items[ $refund_item_id ] );
+					$item->set_id( 0 );
+					$item->set_order_id( $refund->get_id() );
+					$item->set_total( wc_format_refund_total( $refund_item['refund_total'] ) );
+					$item->set_total_tax( wc_format_refund_total( array_sum( $refund_item['refund_tax'] ) ) );
+					$item->set_taxes( array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) );
+					$item->add_meta_data( '_refunded_item_id', $refund_item_id, true );
+					$item->save();
+				break;
+			}
 		}
-
-		$refund->calculate_totals( false );
-
-		// Set total to total refunded which may vary from order items
-		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1, 'total' );
-
-		do_action( 'woocommerce_refund_created', $refund_id, $args );
+		$refund->update_taxes();
 	}
 
-	// Clear transients
-	wc_delete_shop_order_transients( $args['order_id'] );
+	$refund->calculate_totals( false );
 
-	return new WC_Order_Refund( $refund_id );
+	// Set total to total refunded which may vary from order items
+	$refund->set_total( $args['amount'] * -1 );
+	$refund->save();
+
+	do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
+
+	return $refund;
 }
 
 /**
@@ -774,7 +825,7 @@ function wc_get_payment_gateway_by_order( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
-	return isset( $payment_gateways[ $order->payment_method ] ) ? $payment_gateways[ $order->payment_method ] : false;
+	return isset( $payment_gateways[ $order->get_payment_method() ] ) ? $payment_gateways[ $order->get_payment_method() ] : false;
 }
 
 /**

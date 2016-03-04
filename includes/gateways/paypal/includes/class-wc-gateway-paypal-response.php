@@ -40,7 +40,7 @@ abstract class WC_Gateway_Paypal_Response {
 			$order    = wc_get_order( $order_id );
 		}
 
-		if ( ! $order || $order->order_key !== $order_key ) {
+		if ( ! $order || $order->get_order_key() !== $order_key ) {
 			WC_Gateway_Paypal::log( 'Error: Order Keys do not match.' );
 			return false;
 		}
@@ -66,7 +66,7 @@ abstract class WC_Gateway_Paypal_Response {
 	 */
 	protected function payment_on_hold( $order, $reason = '' ) {
 		$order->update_status( 'on-hold', $reason );
-		$order->reduce_order_stock();
+		wc_reduce_stock_levels( $order_id );
 		WC()->cart->empty_cart();
 	}
 }

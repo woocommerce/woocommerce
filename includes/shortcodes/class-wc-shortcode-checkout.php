@@ -90,7 +90,7 @@ class WC_Shortcode_Checkout {
 				return;
 			}
 
-			if ( $order->id == $order_id && $order->order_key == $order_key ) {
+			if ( $order->get_id() == $order_id && $order->get_order_key() == $order_key ) {
 
 				if ( $order->needs_payment() ) {
 
@@ -131,7 +131,7 @@ class WC_Shortcode_Checkout {
 			$order_key            = isset( $_GET['key'] ) ? wc_clean( $_GET['key'] ) : '';
 			$order                = wc_get_order( $order_id );
 
-			if ( $order->id == $order_id && $order->order_key == $order_key ) {
+			if ( $order->get_id() == $order_id && $order->get_order_key() == $order_key ) {
 
 				if ( $order->needs_payment() ) {
 
@@ -143,23 +143,23 @@ class WC_Shortcode_Checkout {
 						</li>
 						<li class="date">
 							<?php _e( 'Date:', 'woocommerce' ); ?>
-							<strong><?php echo date_i18n(get_option('date_format'), strtotime($order->order_date)); ?></strong>
+							<strong><?php echo date_i18n( get_option('date_format'), $order->get_date_created() ); ?></strong>
 						</li>
 						<li class="total">
 							<?php _e( 'Total:', 'woocommerce' ); ?>
 							<strong><?php echo $order->get_formatted_order_total(); ?></strong>
 						</li>
-						<?php if ($order->payment_method_title) : ?>
+						<?php if ($order->get_payment_method_title()) : ?>
 						<li class="method">
 							<?php _e( 'Payment Method:', 'woocommerce' ); ?>
 							<strong><?php
-								echo $order->payment_method_title;
+								echo $order->get_payment_method_title();
 							?></strong>
 						</li>
 						<?php endif; ?>
 					</ul>
 
-					<?php do_action( 'woocommerce_receipt_' . $order->payment_method, $order_id ); ?>
+					<?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order_id ); ?>
 
 					<div class="clear"></div>
 					<?php
@@ -198,7 +198,7 @@ class WC_Shortcode_Checkout {
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
-			if ( $order->order_key != $order_key ) {
+			if ( $order->get_order_key() != $order_key ) {
 				$order = false;
 			}
 		}

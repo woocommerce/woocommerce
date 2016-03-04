@@ -392,7 +392,7 @@ if ( ! function_exists( 'woocommerce_format_hex' ) ) {
 /**
  * @deprecated
  */
-function woocommerce_get_order_id_by_order_key( $order_key ) {
+function woocommerce_get_id_by_order_key( $order_key ) {
 	return wc_get_order_id_by_order_key( $order_key );
 }
 /**
@@ -508,8 +508,9 @@ function woocommerce_list_pages( $pages ) {
 global $wc_map_deprecated_filters;
 
 $wc_map_deprecated_filters = array(
-	'woocommerce_add_to_cart_fragments' => 'add_to_cart_fragments',
-	'woocommerce_add_to_cart_redirect'  => 'add_to_cart_redirect'
+	'woocommerce_add_to_cart_fragments'       => 'add_to_cart_fragments',
+	'woocommerce_add_to_cart_redirect'        => 'add_to_cart_redirect',
+	'woocommerce_order_amount_total_shipping' => 'woocommerce_order_amount_shipping_total',
 );
 
 foreach ( $wc_map_deprecated_filters as $new => $old ) {
@@ -736,3 +737,23 @@ function woocommerce_calc_shipping_backwards_compatibility( $value ) {
 }
 
 add_filter( 'pre_option_woocommerce_calc_shipping', 'woocommerce_calc_shipping_backwards_compatibility' );
+
+/**
+ * Update an item for an order.
+ * @deprecated since 2.6.0 No need to interact with DB directly.
+ */
+function wc_update_order_item( $item_id, $args ) {
+	_deprecated_function( 'wc_update_order_item', '2.6' );
+
+	global $wpdb;
+
+	$update = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $args, array( 'order_item_id' => $item_id ) );
+
+	if ( false === $update ) {
+		return false;
+	}
+
+	do_action( 'woocommerce_update_order_item', $item_id, $args );
+
+	return true;
+}

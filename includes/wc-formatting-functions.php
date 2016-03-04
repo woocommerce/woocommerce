@@ -202,7 +202,7 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	}
 
 	if ( $dp !== false ) {
-		$dp     = intval( $dp == "" ? wc_get_price_decimals() : $dp );
+		$dp     = intval( '' === $dp ? wc_get_price_decimals() : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
 
 	// DP is false - don't use number format, just return a string in our format
