@@ -237,9 +237,19 @@ class WC_Shipping {
 			return;
 		}
 
+		// Allow packages to be reorganized before calculate the shipping
+		$packages = apply_filters( 'woocommerce_shipping_packages_before_calculate', $packages );
+
 		// Calculate costs for passed packages
 		foreach ( $packages as $package_key => $package ) {
-			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package );
+			 $this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package );
+		}
+
+		// Allow packages to be reorganized after calculate the shipping
+		$this->packages = apply_filters( 'woocommerce_shipping_packages_after_calculate', $this->packages );
+
+		if ( ! is_array( $this->packages ) || empty( $this->packages ) ) {
+			return;
 		}
 
 		// Get all chosen methods
