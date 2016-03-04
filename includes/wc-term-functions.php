@@ -358,12 +358,12 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 		}
 		// the nextid of our term to order, lets move our term here
 		if (null !== $next_id && $term->term_id == $next_id) {
-			$index ++;
+			$index++;
 			$index = wc_set_term_order($id, $index, $taxonomy, true);
 		}
 
 		// set order
-		$index ++;
+		$index++;
 		$index = wc_set_term_order($term->term_id, $index, $taxonomy);
 
 		// if that term has children we walk through them
@@ -408,7 +408,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 	$children = get_terms($taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0");
 
 	foreach ( $children as $term ) {
-		$index ++;
+		$index++;
 		$index = wc_set_term_order($term->term_id, $index, $taxonomy, true);
 	}
 
@@ -480,14 +480,14 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	}
 
 	// default to ASC
-	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper($args['menu_order']), array('ASC', 'DESC')) ) {
+	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper($args['menu_order']), array( 'ASC', 'DESC' ) ) ) {
 		$args['menu_order'] = 'ASC';
 	}
 
-	$order = "ORDER BY tm.meta_value+0 " . esc_sql( $args['menu_order'] );
+	$order = "ORDER BY tm.meta_value+0 " . $args['menu_order'];
 
 	if ( $clauses['orderby'] ) {
-		$clauses['orderby'] = str_replace( 'ORDER BY', esc_sql( $order ) . ',', $clauses['orderby'] );
+		$clauses['orderby'] = str_replace( 'ORDER BY', $order . ',', $clauses['orderby'] );
 	} else {
 		$clauses['orderby'] = $order;
 	}
