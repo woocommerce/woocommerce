@@ -28,7 +28,7 @@ module.exports = function( grunt ) {
 			]
 		},
 
-		// Minify .js files.
+		// Minify all .js files.
 		uglify: {
 			options: {
 				preserveComments: 'some'
@@ -96,11 +96,11 @@ module.exports = function( grunt ) {
 
 		// Compile all .scss files.
 		sass: {
+			options: {
+				sourcemap: 'none',
+				loadPath: require( 'node-bourbon' ).includePaths
+			},
 			compile: {
-				options: {
-					sourcemap: 'none',
-					loadPath: require( 'node-bourbon' ).includePaths
-				},
 				files: [{
 					expand: true,
 					cwd: '<%= dirs.css %>/',
