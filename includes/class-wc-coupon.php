@@ -132,9 +132,10 @@ class WC_Coupon {
 		}
 
 		// Otherwise get ID from the code
-		$this->id = $this->get_coupon_id_from_code( $this->code );
+		$this->id    = $this->get_coupon_id_from_code( $this->code );
+		$coupon_post = get_post( $this->id );
 
-		if ( $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
+		if ( $coupon_post && $this->code === apply_filters( 'woocommerce_coupon_code', $coupon_post->post_title ) ) {
 			$this->populate();
 			return true;
 		}
