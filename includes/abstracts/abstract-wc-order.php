@@ -749,6 +749,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
  		$old_status = $this->get_status();
  		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
+		// If the old status is unknown (e.g. draft) assume its pending for action usage.
+		if ( ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
+			$old_status = 'pending';
+		}
+
  		if ( in_array( 'wc-' . $new_status, array_keys( wc_get_order_statuses() ) ) && $new_status !== $old_status ) {
  			$this->_data['status'] = 'wc-' . $new_status;
  		} else {

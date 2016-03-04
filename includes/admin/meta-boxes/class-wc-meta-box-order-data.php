@@ -411,6 +411,10 @@ class WC_Meta_Box_Order_Data {
 
 		self::init_address_fields();
 
+		// Ensure gateways are loaded in case they need to insert data into the emails
+		WC()->payment_gateways();
+		WC()->shipping();
+		
 		$order = wc_get_order( $post_id );
 		$order->set_customer_id( absint( $_POST['customer_user'] ) );
 		$order->set_transaction_id( wc_clean( $_POST['_transaction_id'] ) );
