@@ -72,12 +72,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	 */
 	public function get_locations( $request ) {
 		$locations          = apply_filters( 'woocommerce_settings_locations', array() );
-		$defaults           = array(
-			'id'            => null,
-			'type'          => 'page',
-			'label'         => null,
-			'description'   => '',
-		);
+		$defaults           = $this->get_location_defaults();
 		$filtered_locations = array();
 		foreach ( $locations as $location ) {
 			$location = wp_parse_args( $location, $defaults );
@@ -119,6 +114,8 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 		}
 
 		$location  = $locations[ $index_key ];
+		$defaults = $this->get_location_defaults();
+		$location = wp_parse_args( $location, $defaults );
 		if ( is_null( $location['id'] ) || is_null( $location['label'] ) || is_null( $location['type'] ) ) {
 			return new WP_Error( 'rest_setting_location_invalid_id', __( 'Invalid location id.' ), array( 'status' => 404 ) );
 		}
@@ -213,6 +210,21 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	}
 
 	/**
+	 * Returns default settings for the various locations. null means the field is required.
+	 * @todo move this?
+	 * @since  2.7.0
+	 * @return array
+	 */
+	protected function get_location_defaults() {
+		return array(
+			'id'            => null,
+			'type'          => 'page',
+			'label'         => null,
+			'description'   => '',
+		);
+	}
+
+	/**
 	 * Returns the array key for a specific location ID so it can be pulled out of the 'locations' array.
 	 * @todo   move this?
 	 * @param  array  $locations woocommerce_settings_locations
@@ -221,7 +233,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	 */
 	protected function get_array_key_from_location_id( $locations, $id ) {
 		foreach ( $locations as $key => $location ) {
-			if ( $id === $location['id'] ) {
+			if ( ! empty( $location['id'] ) && $id === $location['id'] ) {
 				return $key;
 			}
 		}
