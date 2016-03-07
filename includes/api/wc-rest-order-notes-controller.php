@@ -27,7 +27,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	public $namepsace = 'wc/v1';
+	public $namespace = 'wc/v1';
 
 	/**
 	 * Route base.

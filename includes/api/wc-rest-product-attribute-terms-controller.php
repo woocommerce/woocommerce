@@ -27,7 +27,7 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 	 *
 	 * @var string
 	 */
-	public $namepsace = 'wc/v1';
+	public $namespace = 'wc/v1';
 
 	/**
 	 * Route base.
@@ -36,10 +36,4 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 	 */
 	protected $rest_base = 'products/attributes/(?P<attribute_id>[\d]+)/terms';
 
-	/**
-	 * Register the routes for product attribute terms.
-	 */
-	public function register_routes() {
-
-	}
 }

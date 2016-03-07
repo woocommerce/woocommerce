@@ -27,7 +27,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 	 *
 	 * @var string
 	 */
-	public $namepsace = 'wc/v1';
+	public $namespace = 'wc/v1';
 
 	/**
 	 * Route base.

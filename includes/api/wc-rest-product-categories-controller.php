@@ -27,7 +27,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 	 *
 	 * @var string
 	 */
-	public $namepsace = 'wc/v1';
+	public $namespace = 'wc/v1';
 
 	/**
 	 * Route base.
