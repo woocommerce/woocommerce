@@ -89,9 +89,13 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		$taxonomy = get_taxonomy( $this->taxonomy );
+		$taxonomy = $this->get_taxonomy( $request );
+		if ( ! $taxonomy ) {
+			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
 
-		if ( 'edit' === $request['context'] && ! current_user_can( $taxonomy->cap->edit_terms ) ) {
+		$taxonomy_obj = get_taxonomy( $taxonomy );
+		if ( 'edit' === $request['context'] && ! current_user_can( $taxonomy_obj->cap->edit_terms ) ) {
 			return new WP_Error( 'woocommerce_rest_forbidden_context', __( 'Sorry, you cannot view this resource with edit context.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -105,9 +109,13 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		$taxonomy = get_taxonomy( $this->taxonomy );
+		$taxonomy = $this->get_taxonomy( $request );
+		if ( ! $taxonomy ) {
+			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
 
-		if ( ! current_user_can( $taxonomy->cap->manage_terms ) ) {
+		$taxonomy_obj = get_taxonomy( $taxonomy );
+		if ( ! current_user_can( $taxonomy_obj->cap->manage_terms ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -131,13 +139,18 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		$term = get_term( (int) $request['id'], $this->taxonomy );
-		if ( ! $term ) {
-			return new WP_Error( "woocommerce_rest_{$this->taxonomy}_term_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		$taxonomy = $this->get_taxonomy( $request );
+		if ( ! $taxonomy ) {
+			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$taxonomy = get_taxonomy( $this->taxonomy );
-		if ( ! current_user_can( $taxonomy->cap->edit_terms ) ) {
+		$term = get_term( (int) $request['id'], $taxonomy );
+		if ( ! $term ) {
+			return new WP_Error( "woocommerce_rest_{$taxonomy}_term_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$taxonomy_obj = get_taxonomy( $taxonomy );
+		if ( ! current_user_can( $taxonomy_obj->cap->edit_terms ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -151,13 +164,18 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
-		$term = get_term( (int) $request['id'], $this->taxonomy );
-		if ( ! $term ) {
-			return new WP_Error( "woocommerce_rest_{$this->taxonomy}_term_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		$taxonomy = $this->get_taxonomy( $request );
+		if ( ! $taxonomy ) {
+			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$taxonomy = get_taxonomy( $this->taxonomy );
-		if ( ! current_user_can( $taxonomy->cap->delete_terms ) ) {
+		$term = get_term( (int) $request['id'], $taxonomy );
+		if ( ! $term ) {
+			return new WP_Error( "woocommerce_rest_{$taxonomy}_term_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$taxonomy_obj = get_taxonomy( $taxonomy );
+		if ( ! current_user_can( $taxonomy_obj->cap->delete_terms ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -167,10 +185,12 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	/**
 	 * Get terms associated with a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
+		$taxonomy = $this->get_taxonomy( $request );
+
 		$prepared_args = array(
 			'exclude'    => $request['exclude'],
 			'include'    => $request['include'],
@@ -189,9 +209,9 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			$prepared_args['offset']  = ( $request['page'] - 1 ) * $prepared_args['number'];
 		}
 
-		$taxonomy = get_taxonomy( $this->taxonomy );
+		$taxonomy_obj = get_taxonomy( $taxonomy );
 
-		if ( $taxonomy->hierarchical && isset( $request['parent'] ) ) {
+		if ( $taxonomy_obj->hierarchical && isset( $request['parent'] ) ) {
 			if ( 0 === $request['parent'] ) {
 				// Only query top-level terms.
 				$prepared_args['parent'] = 0;
@@ -214,18 +234,18 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		 *                                       passed to get_terms.
 		 * @param WP_REST_Request $request       The current request.
 		 */
-		$prepared_args = apply_filters( "woocommerce_rest_{$this->taxonomy}_query", $prepared_args, $request );
+		$prepared_args = apply_filters( "woocommerce_rest_{$taxonomy}_query", $prepared_args, $request );
 
 		if ( ! empty( $prepared_args['product'] )  ) {
 			$query_result = $this->get_terms_for_product( $prepared_args );
 			$total_terms = $this->total_terms;
 		} else {
-			$query_result = get_terms( $this->taxonomy, $prepared_args );
+			$query_result = get_terms( $taxonomy, $prepared_args );
 
 			$count_args = $prepared_args;
 			unset( $count_args['number'] );
 			unset( $count_args['offset'] );
-			$total_terms = wp_count_terms( $this->taxonomy, $count_args );
+			$total_terms = wp_count_terms( $taxonomy, $count_args );
 
 			// Ensure we don't return results when offset is out of bounds.
 			// See https://core.trac.wordpress.org/ticket/35935
@@ -275,14 +295,16 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	/**
 	 * Create a single term for a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function create_item( $request ) {
-		$name = $request['name'];
-		$args = array();
+		$taxonomy = $this->get_taxonomy( $request );
+		$name     = $request['name'];
+		$args     = array();
 
-		if ( isset( $request['description'] ) ) {
+		$schema = $this->get_item_schema();
+		if ( ! empty( $schema['properties']['description'] ) && isset( $request['description'] ) ) {
 			$args['description'] = $request['description'];
 		}
 		if ( isset( $request['slug'] ) ) {
@@ -290,11 +312,11 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		}
 
 		if ( isset( $request['parent'] ) ) {
-			if ( ! is_taxonomy_hierarchical( $this->taxonomy ) ) {
+			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$parent = get_term( (int) $request['parent'], $this->taxonomy );
+			$parent = get_term( (int) $request['parent'], $taxonomy );
 
 			if ( ! $parent ) {
 				return new WP_Error( 'woocommerce_rest_term_invalid', __( "Parent resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
@@ -303,20 +325,20 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			$args['parent'] = $parent->term_id;
 		}
 
-		$term = wp_insert_term( $name, $this->taxonomy, $args );
+		$term = wp_insert_term( $name, $taxonomy, $args );
 		if ( is_wp_error( $term ) ) {
 
 			// If we're going to inform the client that the term exists, give them the identifier
 			// they can actually use.
 			if ( ( $term_id = $term->get_error_data( 'term_exists' ) ) ) {
-				$existing_term = get_term( $term_id, $this->taxonomy );
+				$existing_term = get_term( $term_id, $taxonomy );
 				$term->add_data( $existing_term->term_id, 'term_exists' );
 			}
 
 			return $term;
 		}
 
-		$term = get_term( $term['term_id'], $this->taxonomy );
+		$term = get_term( $term['term_id'], $taxonomy );
 
 		$this->update_additional_fields_for_object( $term, $request );
 
@@ -333,7 +355,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating term, false when updating.
 		 */
-		do_action( "woocommerce_rest_insert_{$this->taxonomy}", $term, $request, true );
+		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, true );
 
 		$request->set_param( 'context', 'view' );
 		$response = $this->prepare_item_for_response( $term, $request );
@@ -351,9 +373,10 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function get_item( $request ) {
-		$term = get_term( (int) $request['id'], $this->taxonomy );
+		$taxonomy = $this->get_taxonomy( $request );
+		$term     = get_term( (int) $request['id'], $taxonomy );
 
-		if ( ! $term || $term->taxonomy !== $this->taxonomy ) {
+		if ( ! $term || $term->taxonomy !== $taxonomy ) {
 			return new WP_Error( 'woocommerce_rest_term_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -367,18 +390,20 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Update a single term from a taxonomy
+	 * Update a single term from a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function update_item( $request ) {
+		$taxonomy = $this->get_taxonomy( $request );
+		$schema  = $this->get_item_schema();
 
 		$prepared_args = array();
 		if ( isset( $request['name'] ) ) {
 			$prepared_args['name'] = $request['name'];
 		}
-		if ( isset( $request['description'] ) ) {
+		if ( ! empty( $schema['properties']['description'] ) && isset( $request['description'] ) ) {
 			$prepared_args['description'] = $request['description'];
 		}
 		if ( isset( $request['slug'] ) ) {
@@ -386,11 +411,11 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		}
 
 		if ( isset( $request['parent'] ) ) {
-			if ( ! is_taxonomy_hierarchical( $this->taxonomy ) ) {
+			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$parent = get_term( (int) $request['parent'], $this->taxonomy );
+			$parent = get_term( (int) $request['parent'], $taxonomy );
 
 			if ( ! $parent ) {
 				return new WP_Error( 'woocommerce_rest_term_invalid', __( "Parent resource doesn't exist.", 'woocommerce' ), array( 'status' => 400 ) );
@@ -399,7 +424,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			$prepared_args['parent'] = $parent->term_id;
 		}
 
-		$term = get_term( (int) $request['id'], $this->taxonomy );
+		$term = get_term( (int) $request['id'], $taxonomy );
 
 		// Only update the term if we haz something to update.
 		if ( ! empty( $prepared_args ) ) {
@@ -409,7 +434,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			}
 		}
 
-		$term = get_term( (int) $request['id'], $this->taxonomy );
+		$term = get_term( (int) $request['id'], $taxonomy );
 
 		$this->update_additional_fields_for_object( $term, $request );
 
@@ -426,7 +451,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating term, false when updating.
 		 */
-		do_action( "woocommerce_rest_insert_{$this->taxonomy}", $term, $request, false );
+		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, false );
 
 		$request->set_param( 'context', 'view' );
 		$response = $this->prepare_item_for_response( $term, $request );
@@ -436,18 +461,19 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	/**
 	 * Delete a single term from a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+		$taxonomy = $this->get_taxonomy( $request );
+		$force    = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
 			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
-		$term = get_term( (int) $request['id'], $this->taxonomy );
+		$term = get_term( (int) $request['id'], $taxonomy );
 		$request->set_param( 'context', 'view' );
 		$response = $this->prepare_item_for_response( $term, $request );
 
@@ -463,7 +489,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
 		 */
-		do_action( "woocommerce_rest_delete_{$this->taxonomy}", $term, $response, $request );
+		do_action( "woocommerce_rest_delete_{$taxonomy}", $term, $response, $request );
 
 		return $response;
 	}
@@ -472,10 +498,16 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param object $term Term object.
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Links for the given term.
 	 */
-	protected function prepare_links( $term ) {
+	protected function prepare_links( $term, $request ) {
 		$base = '/' . $this->namespace . '/' . $this->rest_base;
+
+		if ( $request['attribute_id'] ) {
+			$base = str_replace( '(?P<attribute_id>[\d]+)', (int) $request['attribute_id'], $base );
+		}
+
 		$links = array(
 			'self' => array(
 				'href' => rest_url( trailingslashit( $base ) . $term->term_id ),
@@ -520,7 +552,9 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return array List of term objects. (Total count in `$this->total_terms`).
 	 */
 	protected function get_terms_for_product( $prepared_args ) {
-		$query_result = get_the_terms( $prepared_args['product'], $this->taxonomy );
+		$taxonomy = $this->get_taxonomy( $request );
+
+		$query_result = get_the_terms( $prepared_args['product'], $taxonomy );
 		if ( empty( $query_result ) ) {
 			$this->total_terms = 0;
 			return array();
@@ -582,7 +616,13 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 */
 	public function get_collection_params() {
 		$query_params = parent::get_collection_params();
-		$taxonomy = get_taxonomy( $this->taxonomy );
+
+		if ( '' !== $this->taxonomy ) {
+			$taxonomy = get_taxonomy( $this->taxonomy );
+		} else {
+			$taxonomy = new stdClass();
+			$taxonomy->hierarchical = true;
+		}
 
 		$query_params['context']['default'] = 'view';
 
@@ -658,6 +698,29 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
+
 		return $query_params;
+	}
+
+	/**
+	 * Get taxonomy.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return int|WP_Error
+	 */
+	protected function get_taxonomy( $request ) {
+		// Check if taxonomy is defined.
+		// Prevents check for attribute taxonomy more than one time for each query.
+		if ( '' !== $this->taxonomy ) {
+			return $this->taxonomy;
+		}
+
+		if ( $request['attribute_id'] ) {
+			$taxonomy = wc_attribute_taxonomy_name_by_id( (int) $request['attribute_id'] );
+
+			$this->taxonomy = $taxonomy;
+		}
+
+		return $this->taxonomy;
 	}
 }
