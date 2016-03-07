@@ -19,6 +19,12 @@ if ( ! class_exists( 'WC_API' ) ) :
 class WC_API {
 
 	/**
+	 * WP REST API namespace/version.
+	 * @todo to be removed when the wp-api branch is merged.
+	 */
+	const REST_API_NAMESPACE = 'wc/v1';
+
+	/**
 	 * This is the major version for the REST API and takes
 	 * first-order position in endpoint URLs.
 	 *
@@ -61,6 +67,12 @@ class WC_API {
 
 		// Ensure payment gateways are initialized in time for API requests
 		add_action( 'woocommerce_api_request', array( 'WC_Payment_Gateways', 'instance' ), 0 );
+
+		/**
+		 * WP REST API.
+		 * @todo to be removed when the wp-api branch is merged.
+		 */
+		$this->rest_api_init();
 	}
 
 	/**
@@ -325,6 +337,55 @@ class WC_API {
 			die('-1');
 		}
 	}
+
+	/**
+	 * Init WP REST API.
+	 * @todo to be removed when the wp-api branch is merged.
+	 */
+	private function rest_api_init() {
+		global $wp_version;
+
+		// REST API was included starting WordPress 4.4.
+		if ( version_compare( $wp_version, 4.4, '<' ) ) {
+			return;
+		}
+
+		$this->rest_api_includes();
+
+		// Init REST API routes.
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+	}
+
+	/**
+	 * Include REST API classes.
+	 * @todo to be removed when the wp-api branch is merged.
+	 */
+	private function rest_api_includes() {
+		// WP-API classes and functions.
+		include_once( 'vendor/wp-api-functions.php' );
+		if ( ! class_exists( 'WP_REST_Controller' ) ) {
+			include_once( 'vendor/class-wp-rest-controller.php' );
+		}
+
+		// REST API controllers.
+		include_once( 'api/wc-rest-settings-controller.php' );
+	}
+
+	/**
+	 * Register REST API routes.
+	 * @todo to be removed when the wp-api branch is merged.
+	 */
+	public function register_rest_routes() {
+		$controllers = array(
+			'WC_REST_Settings_Controller',
+		);
+
+		foreach ( $controllers as $controller ) {
+			$this->$controller = new $controller();
+			$this->$controller->register_routes();
+		}
+	}
+
 }
 
 endif;
