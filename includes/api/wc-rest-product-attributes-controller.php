@@ -104,13 +104,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
-			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		$taxonomy_obj = get_taxonomy( $taxonomy );
-		if ( 'edit' === $request['context'] && ! current_user_can( $taxonomy_obj->cap->edit_terms ) ) {
+		if ( 'edit' === $request['context'] && ! current_user_can( 'manage_product_terms' ) ) {
 			return new WP_Error( 'woocommerce_rest_forbidden_context', __( 'Sorry, you cannot view this resource with edit context.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -188,7 +182,26 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get a single term from a taxonomy.
+	 * Get all attributes.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return array
+	 */
+	public function get_items( $request ) {
+		$attributes = wc_get_attribute_taxonomies();
+
+		$data = array();
+		foreach ( $attributes as $attribute_obj ) {
+			$attribute = $this->prepare_item_for_response( $attribute_obj, $request );
+			$attribute = $this->prepare_response_for_collection( $attribute );
+			$data[] = $attribute;
+		}
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Get a single attribute.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Request|WP_Error
@@ -196,14 +209,10 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	public function get_item( $request ) {
 		global $wpdb;
 
-		$attribute = $wpdb->get_row( $wpdb->prepare( "
-			SELECT *
-			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-			WHERE attribute_id = %d
-		 ", $request['id'] ) );
+		$attribute = $this->get_attribute( $request['id'] );
 
-		if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
-			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		if ( is_wp_error( $attribute ) ) {
+			return $attribute;
 		}
 
 		$response = $this->prepare_item_for_response( $attribute, $request );
@@ -329,6 +338,18 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Get the query params for collections
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$new_params = array();
+		$new_params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+
+		return $new_params;
+	}
+
+	/**
 	 * Get attribute name.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -346,5 +367,25 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 		}
 
 		return $this->attribute;
+	}
+
+	/**
+	 * Get attribute data.
+	 *
+	 * @param int $id Attribute ID.
+	 * @return stdClass|WP_Error
+	 */
+	protected function get_attribute( $id ) {
+		$attribute = $wpdb->get_row( $wpdb->prepare( "
+			SELECT *
+			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+			WHERE attribute_id = %d
+		 ", $id ) );
+
+		if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
+			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		return $attribute;
 	}
 }
