@@ -209,7 +209,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 	public function delete( $args, $assoc_args ) {
 		$exit_code = 0;
 		foreach ( $args as $id ) {
-			$order = wc_get_order( $args[0] );
+			$order = wc_get_order( $id );
 			if ( ! $order ) {
 				WP_CLI::warning( "Invalid order ID $id" );
 				continue;
