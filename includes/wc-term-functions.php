@@ -30,7 +30,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		return array();
 	}
 
-	if ( empty( $args['orderby'] ) && taxonomy_is_product_attribute( $taxonomy ) ) {
+	if ( ( ! isset( $args['orderby'] ) || empty( $args['orderby'] ) ) && taxonomy_is_product_attribute( $taxonomy ) ) {
 		$args['orderby'] = wc_attribute_orderby( $taxonomy );
 	}
 
