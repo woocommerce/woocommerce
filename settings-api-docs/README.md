@@ -1,73 +1,15 @@
 # Settings API Proposal
 
-The idea of this proposal is to handle custom settings for both WooCommerce > Settings pages and settings panels for "metaboxes" (product data, coupon data).
+The Settings API is a set of WP-API endpoints that return information about WooCommerce settings. Settings can also be updated with the API.
 
-All settings are registered with PHP filters. Not through the API. The API is only for retrieving settings and updating them.
+The API should be capable of handling settings in many different contexts including pages (WooCommerce > Settings), "metaboxes" (product data, coupon data), shipping zones, and be extendable to other contexts in the future.
 
-## GET /settings/sections
+All settings are registered with PHP filters. Not through the REST API. The REST API is only for retrieving settings and updating them.
 
-Dedicated settings sections/pages (for screens currently under WooCommerce > Settings)
-For example we might have 'General', 'Products', 'Tax', 'Shipping', 'Checkout', 'Accounts', 'Emails', and 'API'. Adding a new page to this area should automatically create a new tab in the UI.
+## Locations
+[locations.md](locations.md)
 
-Metaboxes (Coupon Data or Product Data for example) are also considered sections, and will be listed by this endpoint. They won't be automatically displayed anywhere. 
-
-Here is how they would be registered:
-
-	// Default WooCommerce Setting Sections
-	apply_filters( 'woocommerce_settings_sections', array(
-		array(
-			'id'          => 'general', // ID (required)
-			'type'        => 'page', // page or metabox
-			'label'       => __( 'General', 'woocommerce' ), // human readable label (required)
-			'description' => '', // human readable description (optional)
-		),
-		array(
-			'id'		  => 'products',
-			'type'        => 'page', // page or metabox
-			'label'       => __( 'Products', 'woocommerce' ),
-			'description' => '',
-		),
-		.....
-	) );
-
-To add a new top level tab/page to WooCommerce > Settings
-
-	add_filter( 'woocommerce_settings_sections', function( $pages ) {
-		$pages[] = array(
-			'id'      	  => 'bookings',
-			'type'        => 'page',
-			'label'       => __( 'Bookings', 'woocommerce-bookings' ),
-			'description' => __( 'Bookings settings.', 'woocommerce-bookings' ),
-		);
-		return $pages;
-	} );
-
-The actual endpoint would return a JSON object like so:
-
-	[
-	    {
-	        "id": "general",
-	        "type": "page",
-	        "label": "General",
-	        "description": ""
-	    },
-	    {
-	        "id": "products",
-	        "type": "page",
-	        "label": "Products",
-	        "description": ""
-	    },
-	    {
-	        "id": "coupon-data",
-	        "type": "metabox",
-	        "label": "Coupon Data",
-	        "description": ""
-	    }
-	]
-
-There should be a filter for this endpoint (?type=page) to get only sections of a specific type.
-
-![](https://cldup.com/HHAZ-JBOxU.thumb.png)
+# The below sections are being moved to their own doc files as the API gets fleshed out.
 
 ## GET /settings/sections/$section/
 
