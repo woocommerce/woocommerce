@@ -144,6 +144,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( 'abstracts/abstract-wc-rest-controller.php' );
 		include_once( 'abstracts/abstract-wc-rest-posts-controller.php' );
 		include_once( 'abstracts/abstract-wc-rest-terms-controller.php' );
+		include_once( 'abstracts/abstract-wc-settings-api.php' );
 
 		// REST API controllers.
 		include_once( 'api/class-wc-rest-coupons-controller.php' );
@@ -162,6 +163,7 @@ class WC_API extends WC_Legacy_API {
 		include_once( 'api/class-wc-rest-report-sales-controller.php' );
 		include_once( 'api/class-wc-rest-report-top-sellers-controller.php' );
 		include_once( 'api/class-wc-rest-reports-controller.php' );
+		include_once( 'api/wc-rest-settings-controller.php' );
 		include_once( 'api/class-wc-rest-tax-classes-controller.php' );
 		include_once( 'api/class-wc-rest-taxes-controller.php' );
 		include_once( 'api/class-wc-rest-webhook-deliveries.php' );
@@ -190,6 +192,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Report_Sales_Controller',
 			'WC_REST_Report_Top_Sellers_Controller',
 			'WC_REST_Reports_Controller',
+			'WC_Rest_Settings_Controller',
 			'WC_REST_Tax_Classes_Controller',
 			'WC_REST_Taxes_Controller',
 			'WC_REST_Webhook_Deliveries_Controller',
