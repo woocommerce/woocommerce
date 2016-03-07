@@ -23,10 +23,10 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 	}
 
 	/**
-	 * Test normal /settings/locations response.
+	 * Test getting all locations.
 	 * @since 2.7.0
 	 */
-	public function test_get_items() {
+	public function test_get_locations() {
 
 	}
 
@@ -55,12 +55,36 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 
 	}
 
-	public function test_context_param() { }
+	/**
+	 * Test /settings/locations schema.
+	 * @since 2.7.0
+	 */
+	public function test_get_item_schema() {
+
+	}
+
+	/**
+	 * Test getting a single location item.
+	 * @since 2.7.0
+	 */
+	public function test_get_location() {
+
+	}
+
+	/**
+	 * Test getting a single location item.
+	 * @since 2.7.0
+	 */
+	public function test_get_location_without_permission() {
+
+	}
+
+	public function test_get_items() { }
 	public function test_get_item() { }
+	public function test_context_param() { }
 	public function test_create_item() { }
 	public function test_update_item() { }
 	public function test_delete_item() { }
 	public function test_prepare_item() { }
-	public function test_get_item_schema() { }
 
 }
