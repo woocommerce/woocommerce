@@ -79,7 +79,7 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => $this->taxonomy,
+			'title'                => 'product_attribute_term',
 			'type'                 => 'object',
 			'properties'           => array(
 				'id' => array(
