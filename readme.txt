@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothe
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.1
 Tested up to: 4.4
-Stable tag: 2.5.3
+Stable tag: 2.5.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.5.4 - X =
+* Fix - Fix table creation when using utf8mb4 charset.
+* Fix - Have wp_insert_post return WP_Error when creating our coupon, so the is_wp_error check can catch it.
+* Fix - Clear sale price on save if sale is no longer valid.
+* Fix - Round refund values to ensure refunds can be performed.
+* Fix - When getting coupon by code used twice, latest should be queried.
+* Tweak - wc_get_page_permalink - if the page ID is not set, redirect home instead to prevent white screens.
+* Tweak - Remove log dir from system status report.
+* Tweak - Provide a fallback message if copying to the clipboard fails in system status report.
 
 = 2.5.3 - 01/03/2016 =
 * Fix - Correct the 'unavailable template' call for variations so the message is displayed correctly, fixing a JS error.
