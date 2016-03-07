@@ -53,6 +53,10 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot access settings.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
 		return true;
 	}
 

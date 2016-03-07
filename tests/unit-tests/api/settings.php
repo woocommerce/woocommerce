@@ -12,6 +12,9 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 		parent::setUp();
 		$this->endpoint = new \WC_Rest_Settings_Controller();
 		\WC_Helper_Settings::register();
+		$this->user = $this->factory->user->create( array(
+			'role' => 'administrator',
+		) );
 	}
 
 	/**
@@ -28,6 +31,8 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 	 * @since 2.7.0
 	 */
 	public function test_get_locations() {
+		wp_set_current_user( $this->user );
+
 		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' ) );
 		$data = $response->get_data();
 
@@ -54,7 +59,10 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 	 * @since 2.7.0
 	 */
 	public function test_get_locations_without_permission() {
+		wp_set_current_user( 0 );
 
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' ) );
+		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
@@ -63,6 +71,8 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 	 * @since 2.7.0
 	 */
 	public function test_get_locations_correctly_filters_values() {
+		wp_set_current_user( $this->user );
+
 		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' ) );
 		$data = $response->get_data();
 
@@ -75,6 +85,8 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 	 * @since 2.7.0
 	 */
 	public function test_get_locations_with_type() {
+		wp_set_current_user( $this->user );
+
 		$request = new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' );
 		$request->set_param( 'type', 'not-a-real-type' );
 		$response = $this->server->dispatch( $request );
@@ -118,6 +130,8 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 	 * @since 2.7.0
 	 */
 	public function test_get_location() {
+		wp_set_current_user( $this->user );
+
 		// test getting a location that does not exist
 		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/not-real' ) );
 		$data = $response->get_data();
@@ -147,7 +161,10 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 	 * @since 2.7.0
 	 */
 	public function test_get_location_without_permission() {
+		wp_set_current_user( 0 );
 
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/coupon-data' ) );
+		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	public function test_get_items() { }
