@@ -186,7 +186,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		global $wpdb;
 
 		try {
-			$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $code ) );
+			$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $code ) );
 
 			if ( is_null( $id ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_coupon_code', __( 'Invalid coupon code', 'woocommerce' ), 404 );
