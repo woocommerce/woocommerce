@@ -1168,6 +1168,51 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_review_display_gravatar' ) ) {
+	/**
+	 * Display the review authors gravatar
+	 *
+	 * @param array $comment WP_Comment.
+	 * @return void
+	 */
+	function woocommerce_review_display_gravatar( $comment ) {
+		echo get_avatar( $comment, apply_filters( 'woocommerce_review_gravatar_size', '60' ), '' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_review_display_rating' ) ) {
+	/**
+	 * Display the reviewers star rating
+	 *
+	 * @return void
+	 */
+	function woocommerce_review_display_rating() {
+		wc_get_template( 'single-product/review-rating.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_review_display_meta' ) ) {
+	/**
+	 * Display the review authors meta (name, verified owner, review date)
+	 *
+	 * @return void
+	 */
+	function woocommerce_review_display_meta() {
+		wc_get_template( 'single-product/review-meta.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_review_display_comment_text' ) ) {
+	/**
+	 * Display the review content
+	 *
+	 * @return void
+	 */
+	function woocommerce_review_display_comment_text() {
+		echo '<div itemprop="description" class="description">' . comment_text() . '</div>';
+	}
+}
+
 if ( ! function_exists( 'woocommerce_output_related_products' ) ) {
 
 	/**
