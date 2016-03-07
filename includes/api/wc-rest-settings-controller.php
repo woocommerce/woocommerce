@@ -33,14 +33,22 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => $this->get_locations_params(),
 			),
-			'schema' => array( $this, 'get_locations_schema' ),
+			'schema' => array( $this, 'get_location_schema' ),
 		) );
 
+		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/locations/(?P<location>[\w-]+)', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_location' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+			),
+			'schema' => array( $this, 'get_location_schema' ),
+		) );
 	}
 
 	/**
 	 * Makes sure the current user has access to the settings APIs.
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -58,8 +66,8 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 
 	/**
 	 * Get all settings locations.
-	 * @since 2.7.0
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @since  2.7.0
+	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_locations( $request ) {
@@ -94,8 +102,38 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	}
 
 	/**
+	 * Return a single setting location.
+	 * @since  2.7.0
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_location( $request ) {
+		$locations = apply_filters( 'woocommerce_settings_locations', array() );
+		if ( empty( $locations ) ) {
+			return new WP_Error( 'rest_setting_location_invalid_id', __( 'Invalid location id.' ), array( 'status' => 404 ) );
+		}
+
+		$index_key = $this->get_array_key_from_location_id( $locations, $request['location'] );
+		if ( is_null( $index_key ) || empty( $locations[ $index_key ] ) ) {
+			return new WP_Error( 'rest_setting_location_invalid_id', __( 'Invalid location id.' ), array( 'status' => 404 ) );
+		}
+
+		$location  = $locations[ $index_key ];
+		if ( is_null( $location['id'] ) || is_null( $location['label'] ) || is_null( $location['type'] ) ) {
+			return new WP_Error( 'rest_setting_location_invalid_id', __( 'Invalid location id.' ), array( 'status' => 404 ) );
+		}
+
+		$filtered_location = array_intersect_key(
+			$location,
+			array_flip( array_filter( array_keys( $location ), array( $this, 'filter_location_keys' ) ) )
+		);
+
+		return $filtered_location;
+	}
+
+	/**
 	 * Callback for Allowed keys for each location response.
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @param  string $key Key to check
 	 * @return boolean
 	 */
@@ -105,7 +143,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 
 	/**
 	 * Get supported query parameters for locations.
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @return array
 	 */
 	public function get_locations_params() {
@@ -121,25 +159,73 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 
 	/**
 	 * Get the locations chema, conforming to JSON Schema.
-	 * @since 2.7.0
+	 * @since  2.7.0
 	 * @return array
 	 */
-	public function get_locations_schema() {
-		/*$schema = array(
+	public function get_location_schema() {
+		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'locations',
+			'title'                => 'settings-locations',
 			'type'                 => 'object',
-			'properties'           => 
-		);*/
+			'properties'           => array(
+				'id'               => array(
+					'description'  => __( 'A unique identifier that can be used to link settings together.' ),
+					'type'         => 'string',
+					'arg_options'  => array(
+						'sanitize_callback' => 'sanitize_title',
+					),
+				),
+				'type'               => array(
+					'description'  => __( 'Context for where the settings in this location are going to be displayed.' ),
+					'type'         => 'string',
+					'arg_options'  => array(
+						'sanitize_callback' => 'sanitize_title',
+					),
+				),
+				'label'               => array(
+					'description'  => __( 'A human readable label. This is a translated string that can be used in interfaces.' ),
+					'type'         => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'description'        => array(
+					'description'  => __( 'A human readable description. This is a translated string that can be used in interfaces.' ),
+					'type'         => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**
 	 * Returns a list of allowed setting location types.
-	 * @since 2.7.0
+	 * @todo move this?
+	 * @since  2.7.0
 	 * @return array
 	 */
 	protected function get_location_types() {
 		return apply_filters( 'woocommerce_settings_location_types', array( 'page', 'metabox', 'shipping-zone' ) );
+	}
+
+	/**
+	 * Returns the array key for a specific location ID so it can be pulled out of the 'locations' array.
+	 * @todo   move this?
+	 * @param  array  $locations woocommerce_settings_locations
+	 * @param  string $id        Location ID to get an array key index for
+	 * @return integer|null
+	 */
+	protected function get_array_key_from_location_id( $locations, $id ) {
+		foreach ( $locations as $key => $location ) {
+			if ( $id === $location['id'] ) {
+				return $key;
+			}
+		}
+		return null;
 	}
 
 }
