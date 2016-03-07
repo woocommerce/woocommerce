@@ -229,7 +229,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 			array( '%s', '%s', '%s', '%s', '%d' )
 		);
 
-		// Checks for an error.
+		// Checks for errors.
 		if ( is_wp_error( $insert ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create_product_attribute', $insert->get_error_message(), array( 'status' => 400 ) );
 		}
@@ -249,7 +249,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating attribute, false when updating.
 		 */
-		do_action( "woocommerce_rest_insert_product_attribute", $attribute, $request, true );
+		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, true );
 
 		$request->set_param( 'context', 'view' );
 		$response = $this->prepare_item_for_response( $attribute, $request );
@@ -280,6 +280,85 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 		}
 
 		$response = $this->prepare_item_for_response( $attribute, $request );
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Update a single term from a taxonomy.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function update_item( $request ) {
+		global $wpdb;
+
+		$id     = (int) $request['id'];
+		$format = array( '%s', '%s', '%s', '%s', '%d' );
+		$args   = array(
+			'attribute_label'   => $request['name'],
+			'attribute_name'    => $request['slug'],
+			'attribute_type'    => $request['type'],
+			'attribute_orderby' => $request['order_by'],
+			'attribute_public'  => $request['has_archives'],
+		);
+
+		$i = 0;
+		foreach ( $args as $key => $value ) {
+			if ( empty( $value ) && ! is_bool( $value ) ) {
+				unset( $args[ $key ] );
+				unset( $format[ $i ] );
+			}
+
+			$i++;
+		}
+
+		// Set the attribute slug.
+		if ( ! empty( $args['attribute_name'] ) ) {
+			$args['attribute_name'] = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( stripslashes( $args['attribute_name'] ) ) );
+
+			$valid_slug = $this->validate_attribute_slug( $args['attribute_name'], true );
+			if ( is_wp_error( $valid_slug ) ) {
+				return $valid_slug;
+			}
+		}
+
+		$update = $wpdb->update(
+			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+			$args,
+			array( 'attribute_id' => $id ),
+			$format,
+			array( '%d' )
+		);
+
+		// Checks for errors.
+		if ( false === $update ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit_product_attribute', __( 'Could not edit the attribute', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$attribute = $this->get_attribute( $id );
+
+		if ( is_wp_error( $attribute ) ) {
+			return $attribute;
+		}
+
+		$this->update_additional_fields_for_object( $attribute, $request );
+
+		/**
+		 * Fires after a single product attribute is created or updated via the REST API.
+		 *
+		 * @param stdObject       $attribute Inserted attribute object.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating attribute, false when updating.
+		 */
+		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, false );
+
+		$request->set_param( 'context', 'view' );
+		$response = $this->prepare_item_for_response( $attribute, $request );
+
+		// Clear transients.
+		flush_rewrite_rules();
+		delete_transient( 'wc_attribute_taxonomies' );
 
 		return rest_ensure_response( $response );
 	}
