@@ -196,7 +196,9 @@ abstract class WP_REST_Controller {
 						continue;
 					}
 					if ( ! in_array( $context, $details['context'] ) ) {
-						unset( $data[ $key ][ $attribute ] );
+						if ( isset( $data[ $key ][ $attribute ] ) ) {
+							unset( $data[ $key ][ $attribute ] );
+						}
 					}
 				}
 			}
