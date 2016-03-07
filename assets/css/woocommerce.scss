@@ -1859,37 +1859,38 @@ p.demo_store {
 				font-size: 1.5em;
 				padding: 8px;
 				background-repeat: no-repeat;
-				background-position: right;
+				background-position: right .618em center;
+				background-size: 32px 20px;
 
 				&.visa {
-					background-image: url(../images/icons/credit-cards/visa.png);
+					background-image: url(../images/icons/credit-cards/visa.svg);
 				}
 
 				&.mastercard {
-					background-image: url(../images/icons/credit-cards/mastercard.png);
+					background-image: url(../images/icons/credit-cards/mastercard.svg);
 				}
 
 				&.laser {
-					background-image: url(../images/icons/credit-cards/laser.png);
+					background-image: url(../images/icons/credit-cards/laser.svg);
 				}
 
 				&.dinersclub {
-					background-image: url(../images/icons/credit-cards/diners.png);
+					background-image: url(../images/icons/credit-cards/diners.svg);
 				}
 
 				&.maestro {
-					background-image: url(../images/icons/credit-cards/maestro.png);
+					background-image: url(../images/icons/credit-cards/maestro.svg);
 				}
 
 				&.jcb {
-					background-image: url(../images/icons/credit-cards/jcb.png);
+					background-image: url(../images/icons/credit-cards/jcb.svg);
 				}
 
 				&.amex {
-					background-image: url(../images/icons/credit-cards/amex.png);
+					background-image: url(../images/icons/credit-cards/amex.svg);
 				}
 				&.discover {
-					background-image: url(../images/icons/credit-cards/discover.png);
+					background-image: url(../images/icons/credit-cards/discover.svg);
 				}
 			}
 
