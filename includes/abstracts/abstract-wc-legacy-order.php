@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Legacy and deprecated functions are here to keep the WC_Abstract_Order clean.
  * This class will be removed in future versions.
  *
- * @version	 2.6.0
+ * @version	 2.7.0
  * @package	 WooCommerce/Abstracts
  * @category	Abstract Class
  * @author	  WooThemes
@@ -28,7 +28,7 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @return int updated order item ID
 	 */
 	 public function update_product( $item, $product, $args ) {
-		_deprecated_function( 'WC_Order::update_product', '2.6', 'Interact with WC_Order_Item_Product class' );
+		_deprecated_function( 'WC_Order::update_product', '2.7', 'Interact with WC_Order_Item_Product class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -77,7 +77,7 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @return int updated order item ID
 	 */
 	public function update_coupon( $item, $args ) {
-		_deprecated_function( 'WC_Order::update_coupon', '2.6', 'Interact with WC_Order_Item_Coupon class' );
+		_deprecated_function( 'WC_Order::update_coupon', '2.7', 'Interact with WC_Order_Item_Coupon class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -116,7 +116,7 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @return int updated order item ID
 	 */
 	public function update_shipping( $item, $args ) {
-		_deprecated_function( 'WC_Order::update_shipping', '2.6', 'Interact with WC_Order_Item_Shipping class' );
+		_deprecated_function( 'WC_Order::update_shipping', '2.7', 'Interact with WC_Order_Item_Shipping class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -153,7 +153,7 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @return int updated order item ID
 	 */
 	public function update_fee( $item, $args ) {
-		_deprecated_function( 'WC_Order::update_fee', '2.6', 'Interact with WC_Order_Item_Fee class' );
+		_deprecated_function( 'WC_Order::update_fee', '2.7', 'Interact with WC_Order_Item_Fee class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -177,13 +177,13 @@ abstract class WC_Abstract_Legacy_Order {
 	 * Update tax line on order.
 	 * Note this does not update order totals.
 	 *
-	 * @since 2.6
+	 * @since 2.7
 	 * @param object|int $item
 	 * @param array $args
 	 * @return int updated order item ID
 	 */
 	public function update_tax( $item, $args ) {
-		_deprecated_function( 'WC_Order::update_tax', '2.6', 'Interact with WC_Order_Item_Tax class' );
+		_deprecated_function( 'WC_Order::update_tax', '2.7', 'Interact with WC_Order_Item_Tax class' );
 		if ( is_numeric( $item ) ) {
 			$item = $this->get_item( $item );
 		}
@@ -298,7 +298,7 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @return mixed
 	 */
 	public function __get( $key ) {
-		_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.6' );
+		_doing_it_wrong( $key, 'Order properties should not be accessed directly.', '2.7' );
 
 		if ( 'completed_date' === $key ) {
 			return $this->get_date_completed();
@@ -358,7 +358,7 @@ abstract class WC_Abstract_Legacy_Order {
 	public function has_meta( $order_item_id ) {
 		global $wpdb;
 
-		_deprecated_function( 'has_meta', '2.6', 'WC_Order_item::get_meta_data' );
+		_deprecated_function( 'has_meta', '2.7', 'WC_Order_item::get_meta_data' );
 
 		return $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value, meta_id, order_item_id
 			FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d
@@ -370,7 +370,7 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @param  array $item
 	 */
 	public function display_item_meta( $item ) {
-		_deprecated_function( 'get_item_meta', '2.6', 'wc_display_item_meta' );
+		_deprecated_function( 'get_item_meta', '2.7', 'wc_display_item_meta' );
 		$product   = $item->get_product();
 		$item_meta = new WC_Order_Item_Meta( $item, $product );
 		$item_meta->display();
@@ -456,7 +456,7 @@ abstract class WC_Abstract_Legacy_Order {
 
 	/**
 	 * Gets shipping total. Alias of WC_Order::get_shipping_total().
-	 * @deprecated 2.6.0 since this is an alias only.
+	 * @deprecated 2.7.0 since this is an alias only.
 	 * @return float
 	 */
 	public function get_total_shipping() {
@@ -465,14 +465,14 @@ abstract class WC_Abstract_Legacy_Order {
 
 	/**
 	 * Get order item meta.
-	 * @deprecated 2.6.0
+	 * @deprecated 2.7.0
 	 * @param mixed $order_item_id
 	 * @param string $key (default: '')
 	 * @param bool $single (default: false)
 	 * @return array|string
 	 */
 	public function get_item_meta( $order_item_id, $key = '', $single = false ) {
-		_deprecated_function( 'get_item_meta', '2.6', 'wc_get_order_item_meta' );
+		_deprecated_function( 'get_item_meta', '2.7', 'wc_get_order_item_meta' );
 		return get_metadata( 'order_item', $order_item_id, $key, $single );
 	}
 
@@ -483,31 +483,31 @@ abstract class WC_Abstract_Legacy_Order {
 	 * @return array of objects
 	 */
 	public function get_item_meta_array( $order_item_id ) {
-		_deprecated_function( 'get_item_meta_array', '2.6', 'WC_Order_Item::get_meta_data()' );
+		_deprecated_function( 'get_item_meta_array', '2.7', 'WC_Order_Item::get_meta_data()' );
 		$item = $this->get_item( $order_item_id );
 		return $item->get_meta_data();
 	}
 
 	/**
 	 * Expand item meta into the $item array.
-	 * @deprecated 2.6.0 Item meta no longer expanded due to new order item
+	 * @deprecated 2.7.0 Item meta no longer expanded due to new order item
 	 *		classes. This function now does nothing to avoid data breakage.
 	 * @since 2.4.0
 	 * @param array $item before expansion.
 	 * @return array
 	 */
 	public function expand_item_meta( $item ) {
-		_deprecated_function( 'expand_item_meta', '2.6', '' );
+		_deprecated_function( 'expand_item_meta', '2.7', '' );
 		return $item;
 	}
 
 	/**
 	 * Load the order object. Called from the constructor.
-	 * @deprecated 2.6.0 Logic moved to constructor
+	 * @deprecated 2.7.0 Logic moved to constructor
 	 * @param int|object|WC_Order $order Order to init.
 	 */
 	protected function init( $order ) {
-		_deprecated_function( 'init', '2.6', 'Logic moved to constructor' );
+		_deprecated_function( 'init', '2.7', 'Logic moved to constructor' );
 		if ( is_numeric( $order ) ) {
 			$this->read( $order );
 		} elseif ( $order instanceof WC_Order ) {
@@ -519,12 +519,12 @@ abstract class WC_Abstract_Legacy_Order {
 
 	/**
 	 * Gets an order from the database.
-	 * @deprecated 2.6
+	 * @deprecated 2.7
 	 * @param int $id (default: 0).
 	 * @return bool
 	 */
 	public function get_order( $id = 0 ) {
-		_deprecated_function( 'get_order', '2.6', 'read' );
+		_deprecated_function( 'get_order', '2.7', 'read' );
 		if ( ! $id ) {
 			return false;
 		}
@@ -537,72 +537,72 @@ abstract class WC_Abstract_Legacy_Order {
 
 	/**
 	 * Populates an order from the loaded post data.
-	 * @deprecated 2.6
+	 * @deprecated 2.7
 	 * @param mixed $result
 	 */
 	public function populate( $result ) {
-		_deprecated_function( 'populate', '2.6', 'read' );
+		_deprecated_function( 'populate', '2.7', 'read' );
 		$this->read( $result->ID );
 	}
 
 	/**
 	 * Cancel the order and restore the cart (before payment).
-	 * @deprecated 2.6.0 Moved to event handler.
+	 * @deprecated 2.7.0 Moved to event handler.
 	 * @param string $note (default: '') Optional note to add.
 	 */
 	public function cancel_order( $note = '' ) {
-		_deprecated_function( 'cancel_order', '2.6', 'update_status' );
+		_deprecated_function( 'cancel_order', '2.7', 'update_status' );
 		WC()->session->set( 'order_awaiting_payment', false );
 		$this->update_status( 'cancelled', $note );
 	}
 
 	/**
 	 * Record sales.
-	 * @deprecated 2.6.0
+	 * @deprecated 2.7.0
 	 */
 	public function record_product_sales() {
-		_deprecated_function( 'record_product_sales', '2.6', 'wc_update_total_sales_counts' );
+		_deprecated_function( 'record_product_sales', '2.7', 'wc_update_total_sales_counts' );
 		wc_update_total_sales_counts( $this->get_id() );
 	}
 
 	/**
 	 * Increase applied coupon counts.
-	 * @deprecated 2.6.0
+	 * @deprecated 2.7.0
 	 */
 	public function increase_coupon_usage_counts() {
-		_deprecated_function( 'increase_coupon_usage_counts', '2.6', 'wc_update_coupon_usage_counts' );
+		_deprecated_function( 'increase_coupon_usage_counts', '2.7', 'wc_update_coupon_usage_counts' );
 		wc_update_coupon_usage_counts( $this->get_id() );
 	}
 
 	/**
 	 * Decrease applied coupon counts.
-	 * @deprecated 2.6.0
+	 * @deprecated 2.7.0
 	 */
 	public function decrease_coupon_usage_counts() {
-		_deprecated_function( 'decrease_coupon_usage_counts', '2.6', 'wc_update_coupon_usage_counts' );
+		_deprecated_function( 'decrease_coupon_usage_counts', '2.7', 'wc_update_coupon_usage_counts' );
 		wc_update_coupon_usage_counts( $this->get_id() );
 	}
 
 	/**
 	 * Reduce stock levels for all line items in the order.
-	 * @deprecated 2.6.0
+	 * @deprecated 2.7.0
 	 */
 	public function reduce_order_stock() {
-		_deprecated_function( 'reduce_order_stock', '2.6', 'wc_reduce_stock_levels' );
+		_deprecated_function( 'reduce_order_stock', '2.7', 'wc_reduce_stock_levels' );
 		wc_reduce_stock_levels( $this->get_id() );
 	}
 
 	/**
 	 * Send the stock notifications.
-	 * @deprecated 2.6.0 No longer needs to be called directly.
+	 * @deprecated 2.7.0 No longer needs to be called directly.
 	 */
 	public function send_stock_notifications( $product, $new_stock, $qty_ordered ) {
-		_deprecated_function( 'send_stock_notifications', '2.6' );
+		_deprecated_function( 'send_stock_notifications', '2.7' );
 	}
 
 	/**
 	 * Output items for display in html emails.
-	 * @deprecated 2.6.0 Moved to template functions.
+	 * @deprecated 2.7.0 Moved to template functions.
 	 * @param array $args Items args.
 	 * @return string
 	 */

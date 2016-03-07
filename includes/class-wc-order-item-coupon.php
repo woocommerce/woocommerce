@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order Line Item (coupon).
  *
- * @version     2.6.0
- * @since       2.6.0
+ * @version     2.7.0
+ * @since       2.7.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
@@ -15,7 +15,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 
 	/**
 	 * Data properties of this order item object.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $_data = array(

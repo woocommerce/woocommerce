@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The WooCommerce order factory creating the right order objects.
  *
  * @class 		WC_Order_Factory
- * @version		2.6.0
+ * @version		2.7.0
  * @package		WooCommerce/Classes
  * @category	Class
  * @author 		WooThemes

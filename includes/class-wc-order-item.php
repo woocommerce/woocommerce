@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * A class which represents an item within an order and handles CRUD.
  * Uses ArrayAccess to be BW compatible with WC_Orders::get_items().
  *
- * @version     2.6.0
- * @since       2.6.0
+ * @version     2.7.0
+ * @since       2.7.0
  * @package     WooCommerce/Classes
  * @author      WooThemes
  */
@@ -18,7 +18,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
 	/**
 	 * Data array, with defaults.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $_data = array(
@@ -102,7 +102,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
 	/**
 	 * Get all class data in array format.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -207,7 +207,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
 	/**
 	 * Insert data into the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function create() {
 		global $wpdb;
@@ -224,7 +224,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
 	/**
 	 * Update data in the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function update() {
 		global $wpdb;
@@ -240,7 +240,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
 	/**
 	 * Read from the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param int|object $item ID of object to read, or already queried object.
 	 */
 	public function read( $item ) {
@@ -265,7 +265,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
 	/**
 	 * Save data to the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @return int Item ID
 	 */
 	public function save() {
@@ -281,7 +281,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
 	/**
 	 * Delete data from the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function delete() {
 		if ( $this->get_id() ) {

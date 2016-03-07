@@ -169,7 +169,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Insert data into the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function create() {
 		parent::create();
@@ -212,7 +212,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Read from the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param int $id ID of object to read.
 	 */
 	public function read( $id ) {
@@ -262,7 +262,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Update data in the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function update() {
 		parent::update();
@@ -305,7 +305,7 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Set order status.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note (default: '') Optional note to add.
 	 * @param bool $manual is this a manual order status change?
@@ -685,7 +685,7 @@ class WC_Order extends WC_Abstract_Order {
 	|
 	| Functions for setting order data. These should not update anything in the
 	| database itself and should only change what is stored in the class
-	| object. However, for backwards compatibility pre 2.6.0 some of these
+	| object. However, for backwards compatibility pre 2.7.0 some of these
 	| setters may handle both.
 	|
 	*/
@@ -854,7 +854,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set the payment method.
 	 * @since 2.2.0
-	 * @param string $value Supports WC_Payment_Gateway for bw compatibility with < 2.6
+	 * @param string $value Supports WC_Payment_Gateway for bw compatibility with < 2.7
 	 */
 	public function set_payment_method( $value ) {
 		if ( is_object( $value ) ) {

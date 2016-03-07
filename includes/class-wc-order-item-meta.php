@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * A Simple class for managing order item meta so plugins add it in the correct format.
  *
- * @deprecated  2.6.0 wc_display_item_meta function is used instead.
+ * @deprecated  2.7.0 wc_display_item_meta function is used instead.
  * @class 		order_item_meta
  * @version		2.4
  * @package		WooCommerce/Classes

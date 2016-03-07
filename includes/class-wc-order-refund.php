@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Order refund. Refunds are based on orders (essentially negative orders) and
  * contain much of the same data.
  *
- * @version  2.6.0
+ * @version  2.7.0
  * @package  WooCommerce/Classes
  * @category Class
  * @author   WooThemes
@@ -30,7 +30,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Insert data into the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function create() {
 		parent::create();
@@ -45,7 +45,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
      * Read from the database.
-     * @since 2.6.0
+     * @since 2.7.0
      * @param int $id ID of object to read.
      */
     public function read( $id ) {
@@ -66,7 +66,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Update data in the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function update() {
 		parent::update();
@@ -145,7 +145,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
 	 * Get ID of user who did the refund.
-	 * @since 2.6
+	 * @since 2.7
 	 * @return int
 	 */
 	public function get_refunded_by() {
@@ -158,7 +158,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
      * @return mixed
      */
     public function __get( $key ) {
-		_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '2.6' );
+		_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '2.7' );
 
         /**
          * Maps legacy vars to new getters.
@@ -173,12 +173,12 @@ class WC_Order_Refund extends WC_Abstract_Order {
 
 	/**
      * Gets an refund from the database.
-     * @deprecated 2.6
+     * @deprecated 2.7
      * @param int $id (default: 0).
      * @return bool
      */
     public function get_refund( $id = 0 ) {
-        _deprecated_function( 'get_refund', '2.6', 'read' );
+        _deprecated_function( 'get_refund', '2.7', 'read' );
         if ( ! $id ) {
             return false;
         }

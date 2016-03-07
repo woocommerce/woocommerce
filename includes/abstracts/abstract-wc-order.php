@@ -12,7 +12,7 @@ include_once( 'abstract-wc-legacy-order.php' );
  * WC_Order (regular orders) and WC_Order_Refund (refunds are negative orders).
  *
  * @class       WC_Abstract_Order
- * @version     2.6.0
+ * @version     2.7.0
  * @package     WooCommerce/Classes
  * @category    Class
  * @author      WooThemes
@@ -21,13 +21,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Order Data array, with defaults. This is the core order data exposed
-	 * in APIs since 2.6.0.
+	 * in APIs since 2.7.0.
 	 *
 	 * Notes:
 	 * order_tax = Sum of all taxes.
 	 * cart_tax = cart_tax is the new name for the legacy 'order_tax' which is the tax for items only, not shipping.
 	 *
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @var array
 	 */
 	protected $_data = array(
@@ -115,7 +115,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Insert data into the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function create() {
 		$this->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
@@ -157,7 +157,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Read from the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param int $id ID of object to read.
 	 */
 	public function read( $id ) {
@@ -191,7 +191,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Post meta update wrapper. Sets or deletes based on value.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	protected function update_post_meta( $key, $value ) {
 		if ( '' !== $value ) {
@@ -203,7 +203,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Update data in the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function update() {
 		global $wpdb;
@@ -242,7 +242,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Delete data from the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 */
 	public function delete() {
 		wp_delete_post( $this->get_id() );
@@ -250,7 +250,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Save data to the database.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @return int order ID
 	 */
 	public function save() {
@@ -441,7 +441,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Get all class data in array format.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @return array
 	 */
 	public function get_data() {
@@ -460,7 +460,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Get order ID.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @return integer
 	 */
 	public function get_id() {
@@ -469,7 +469,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Get parent order ID.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @return integer
 	 */
 	public function get_parent_id() {
@@ -489,7 +489,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Get order key.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @return string
 	 */
 	public function get_order_key() {
@@ -642,7 +642,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	/**
 	 * Get total tax amount. Alias for get_order_tax().
 	 *
-	 * @since 2.6.0 woocommerce_order_amount_total_tax filter has been removed to avoid
+	 * @since 2.7.0 woocommerce_order_amount_total_tax filter has been removed to avoid
 	 * these values being modified and then saved back to the DB. There are
 	 * other, later hooks available to change totals on display. e.g.
 	 * woocommerce_get_order_item_totals.
@@ -716,14 +716,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	|
 	| Functions for setting order data. These should not update anything in the
 	| database itself and should only change what is stored in the class
-	| object. However, for backwards compatibility pre 2.6.0 some of these
+	| object. However, for backwards compatibility pre 2.7.0 some of these
 	| setters may handle both.
 	|
 	*/
 
 	/**
 	 * Set order ID.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param int $value
 	 */
 	public function set_id( $value ) {
@@ -732,7 +732,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Set parent order ID.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param int $value
 	 */
 	public function set_parent_id( $value ) {
@@ -741,7 +741,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Set order status.
-	 * @since 2.6.0
+	 * @since 2.7.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @param array details of change
 	 */
@@ -887,7 +887,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 */
 	public function set_total( $value, $deprecated = '' ) {
 		if ( $deprecated ) {
-			_deprecated_argument( 'total_type', '2.6', 'Use dedicated total setter methods instead.' );
+			_deprecated_argument( 'total_type', '2.7', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
 		$this->_data['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
@@ -995,7 +995,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Get an order item object, based on it's type.
-	 * @since  2.6.0
+	 * @since  2.7.0
 	 * @param  int $item_id
 	 * @return WC_Order_Item
 	 */
@@ -1008,12 +1008,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * Order must be saved prior to adding items.
 	 * @param \WC_Product $product
 	 * @param array $args
-	 * @param array $deprecated qty was passed as arg 2 prior to 2.6.0
+	 * @param array $deprecated qty was passed as arg 2 prior to 2.7.0
 	 * @return int order item ID
 	 */
 	public function add_product( $product, $args = array(), $deprecated = array() ) {
 		if ( ! is_array( $args ) ) {
-			_deprecated_argument( 'qty', '2.6', 'Pass only product and args' );
+			_deprecated_argument( 'qty', '2.7', 'Pass only product and args' );
 			$qty         = $args;
 			$args        = $deprecated;
 			$args['qty'] = $qty;
@@ -1060,7 +1060,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$item->save();
 
 		if ( has_action( 'woocommerce_order_add_product' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_product', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			_deprecated_function( 'Action: woocommerce_order_add_product', '2.7', 'Use woocommerce_new_order_item action instead.' );
 			do_action( 'woocommerce_order_add_product', $this->get_id(), $item->get_id(), $product, $qty, $args );
 		}
 
@@ -1071,13 +1071,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * Add coupon code to the order.
 	 * Order must be saved prior to adding items.
 	 * @param array $args
-	 * @param int $deprecated1 2.6.0 code, discount, tax were passed.
-	 * @param int $deprecated2 2.6.0 code, discount, tax were passed.
+	 * @param int $deprecated1 2.7.0 code, discount, tax were passed.
+	 * @param int $deprecated2 2.7.0 code, discount, tax were passed.
 	 * @return int order item ID
 	 */
 	public function add_coupon( $args = array(), $deprecated1 = 0, $deprecated2 = 0 ) {
 		if ( ! is_array( $args ) ) {
-			_deprecated_argument( 'code', '2.6', 'Pass only an array of args' );
+			_deprecated_argument( 'code', '2.7', 'Pass only an array of args' );
 			$args = array(
 				'code'         => $args,
 				'discount'     => $deprecated1,
@@ -1096,7 +1096,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$item->save();
 
 		if ( has_action( 'woocommerce_order_add_coupon' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_coupon', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			_deprecated_function( 'Action: woocommerce_order_add_coupon', '2.7', 'Use woocommerce_new_order_item action instead.' );
 			do_action( 'woocommerce_order_add_coupon', $this->get_id(), $item->get_id(), $args['code'], $args['discount'], $args['discount_tax'] );
 		}
 
@@ -1108,13 +1108,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 	 * Order must be saved prior to adding items.
 	 * @since 2.2
 	 * @param array $args
-	 * @param int $deprecated1 2.6.0 tax_rate_id, amount, shipping amount.
-	 * @param int $deprecated2 2.6.0 tax_rate_id, amount, shipping amount.
+	 * @param int $deprecated1 2.7.0 tax_rate_id, amount, shipping amount.
+	 * @param int $deprecated2 2.7.0 tax_rate_id, amount, shipping amount.
 	 * @return int order item ID
 	 */
 	public function add_tax( $args = array(), $deprecated1 = 0, $deprecated2 = 0 ) {
 		if ( ! is_array( $args ) ) {
-			_deprecated_argument( 'tax_rate_id', '2.6', 'Pass only an array of args' );
+			_deprecated_argument( 'tax_rate_id', '2.7', 'Pass only an array of args' );
 			$args = array(
 				'rate_id'            => $args,
 				'tax_total'          => $deprecated1,
@@ -1136,7 +1136,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$item->save();
 
 		if ( has_action( 'woocommerce_order_add_tax' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_tax', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			_deprecated_function( 'Action: woocommerce_order_add_tax', '2.7', 'Use woocommerce_new_order_item action instead.' );
 			do_action( 'woocommerce_order_add_tax', $this->get_id(), $item->get_id(), $args['rate_id'], $args['tax_total'], $args['shipping_tax_total'] );
 		}
 
@@ -1161,7 +1161,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$item->save();
 
 		if ( has_action( 'woocommerce_order_add_shipping' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_shipping', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			_deprecated_function( 'Action: woocommerce_order_add_shipping', '2.7', 'Use woocommerce_new_order_item action instead.' );
 			do_action( 'woocommerce_order_add_shipping', $this->get_id(), $item->get_id(), $shipping_rate );
 		}
 
@@ -1189,7 +1189,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		$item->save();
 
 		if ( has_action( 'woocommerce_order_add_fee' ) ) {
-			_deprecated_function( 'Action: woocommerce_order_add_fee', '2.6', 'Use woocommerce_new_order_item action instead.' );
+			_deprecated_function( 'Action: woocommerce_order_add_fee', '2.7', 'Use woocommerce_new_order_item action instead.' );
 			do_action( 'woocommerce_order_add_fee', $this->get_id(), $item->get_id(), $fee );
 		}
 
