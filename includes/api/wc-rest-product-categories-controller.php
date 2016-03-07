@@ -85,6 +85,36 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 	}
 
 	/**
+	 * Update term meta fields.
+	 *
+	 * @param WP_Term $term
+	 * @param WP_REST_Request $request
+	 * @return bool|WP_Error
+	 */
+	protected function update_term_meta_fields( $term, $request ) {
+		$id = (int) $term->term_id;
+
+		update_woocommerce_term_meta( $id, 'display_type', $request['display'] );
+
+		if ( ! empty( $request['image'] ) ) {
+			$upload = wc_rest_api_upload_image_from_url( esc_url_raw( $request['image'] ) );
+
+			if ( is_wp_error( $upload ) ) {
+				return $upload;
+			}
+
+			$image_id = wc_rest_api_set_uploaded_image_as_attachment( $upload );
+
+			// Check if image_id is a valid image attachment before updating the term meta.
+			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
+				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get the Term's schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -133,6 +163,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 				'display' => array(
 					'description' => __( 'Category archive display type.', 'woocommerce' ),
 					'type'        => 'string',
+					'default'     => 'default',
 					'enum'        => array( 'default', 'products', 'subcategories', 'both' ),
 					'context'     => array( 'view', 'edit' ),
 				),

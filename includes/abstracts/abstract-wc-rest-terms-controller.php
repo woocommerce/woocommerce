@@ -99,6 +99,22 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to create a term.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function create_item_permissions_check( $request ) {
+		$taxonomy = get_taxonomy( $this->taxonomy );
+
+		if ( ! current_user_can( $taxonomy->cap->manage_terms ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if a given request has access to read a term.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
@@ -106,6 +122,26 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		return $this->get_items_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to update a term.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$term = get_term( (int) $request['id'], $this->taxonomy );
+		if ( ! $term ) {
+			return new WP_Error( "woocommerce_rest_{$this->taxonomy}_term_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$taxonomy = get_taxonomy( $this->taxonomy );
+		if ( ! current_user_can( $taxonomy->cap->edit_terms ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -237,6 +273,78 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Create a single term for a taxonomy.
+	 *
+	 * @param WP_REST_Request $request Full details about the request
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function create_item( $request ) {
+		$name = $request['name'];
+		$args = array();
+
+		if ( isset( $request['description'] ) ) {
+			$args['description'] = $request['description'];
+		}
+		if ( isset( $request['slug'] ) ) {
+			$args['slug'] = $request['slug'];
+		}
+
+		if ( isset( $request['parent'] ) ) {
+			if ( ! is_taxonomy_hierarchical( $this->taxonomy ) ) {
+				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			$parent = get_term( (int) $request['parent'], $this->taxonomy );
+
+			if ( ! $parent ) {
+				return new WP_Error( 'woocommerce_rest_term_invalid', __( "Parent resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			}
+
+			$args['parent'] = $parent->term_id;
+		}
+
+		$term = wp_insert_term( $name, $this->taxonomy, $args );
+		if ( is_wp_error( $term ) ) {
+
+			// If we're going to inform the client that the term exists, give them the identifier
+			// they can actually use.
+			if ( ( $term_id = $term->get_error_data( 'term_exists' ) ) ) {
+				$existing_term = get_term( $term_id, $this->taxonomy );
+				$term->add_data( $existing_term->term_id, 'term_exists' );
+			}
+
+			return $term;
+		}
+
+		$term = get_term( $term['term_id'], $this->taxonomy );
+
+		$this->update_additional_fields_for_object( $term, $request );
+
+		// Add term data.
+		$meta_fields = $this->update_term_meta_fields( $term, $request );
+		if ( is_wp_error( $meta_fields ) ) {
+			return $meta_fields;
+		}
+
+		/**
+		 * Fires after a single term is created or updated via the REST API.
+		 *
+		 * @param WP_Term         $term      Inserted Term object.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating term, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->taxonomy}", $term, $request, true );
+
+		$request->set_param( 'context', 'view' );
+		$response = $this->prepare_item_for_response( $term, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( '/' . WC_API::REST_API_NAMESPACE . '/' . $this->rest_base . '/' . $term->term_id ) );
+
+		return $response;
+	}
+
+	/**
 	 * Get a single term from a taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -255,6 +363,73 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 
 		$response = $this->prepare_item_for_response( $term, $request );
 
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Update a single term from a taxonomy
+	 *
+	 * @param WP_REST_Request $request Full details about the request
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function update_item( $request ) {
+
+		$prepared_args = array();
+		if ( isset( $request['name'] ) ) {
+			$prepared_args['name'] = $request['name'];
+		}
+		if ( isset( $request['description'] ) ) {
+			$prepared_args['description'] = $request['description'];
+		}
+		if ( isset( $request['slug'] ) ) {
+			$prepared_args['slug'] = $request['slug'];
+		}
+
+		if ( isset( $request['parent'] ) ) {
+			if ( ! is_taxonomy_hierarchical( $this->taxonomy ) ) {
+				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			$parent = get_term( (int) $request['parent'], $this->taxonomy );
+
+			if ( ! $parent ) {
+				return new WP_Error( 'woocommerce_rest_term_invalid', __( "Parent resource doesn't exist.", 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			$prepared_args['parent'] = $parent->term_id;
+		}
+
+		$term = get_term( (int) $request['id'], $this->taxonomy );
+
+		// Only update the term if we haz something to update.
+		if ( ! empty( $prepared_args ) ) {
+			$update = wp_update_term( $term->term_id, $term->taxonomy, $prepared_args );
+			if ( is_wp_error( $update ) ) {
+				return $update;
+			}
+		}
+
+		$term = get_term( (int) $request['id'], $this->taxonomy );
+
+		$this->update_additional_fields_for_object( $term, $request );
+
+		// Update term data.
+		$meta_fields = $this->update_term_meta_fields( $term, $request );
+		if ( is_wp_error( $meta_fields ) ) {
+			return $meta_fields;
+		}
+
+		/**
+		 * Fires after a single term is created or updated via the REST API.
+		 *
+		 * @param WP_Term         $term      Inserted Term object.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating term, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->taxonomy}", $term, $request, false );
+
+		$request->set_param( 'context', 'view' );
+		$response = $this->prepare_item_for_response( $term, $request );
 		return rest_ensure_response( $response );
 	}
 
@@ -320,6 +495,17 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		}
 
 		return $links;
+	}
+
+	/**
+	 * Update term meta fields.
+	 *
+	 * @param WP_Term $term
+	 * @param WP_REST_Request $request
+	 * @return bool|WP_Error
+	 */
+	protected function update_term_meta_fields( $term, $request ) {
+		return true;
 	}
 
 	/**
