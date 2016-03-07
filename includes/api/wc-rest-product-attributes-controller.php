@@ -364,6 +364,69 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Delete a single attribute.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		global $wpdb;
+
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		}
+
+		$attribute = $this->get_attribute( $request['id'] );
+
+		if ( is_wp_error( $attribute ) ) {
+			return $attribute;
+		}
+
+		$request->set_param( 'context', 'view' );
+		$response = $this->prepare_item_for_response( $attribute, $request );
+
+		$deleted = $wpdb->delete(
+			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+			array( 'attribute_id' => $attribute->attribute_id ),
+			array( '%d' )
+		);
+
+		if ( false === $deleted ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		$taxonomy = wc_attribute_taxonomy_name( $attribute->attribute_name );
+
+		if ( taxonomy_exists( $taxonomy ) ) {
+			$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
+			foreach ( $terms as $term ) {
+				wp_delete_term( $term->term_id, $taxonomy );
+			}
+		}
+
+		/**
+		 * Fires after a single attribute is deleted via the REST API.
+		 *
+		 * @param stdObject        $attribute     The deleted attribute.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_product_attribute', $attribute, $response, $request );
+
+		// Fires woocommerce_attribute_deleted hook.
+		do_action( 'woocommerce_attribute_deleted', $attribute->attribute_id, $attribute->attribute_name, $taxonomy );
+
+		// Clear transients.
+		flush_rewrite_rules();
+		delete_transient( 'wc_attribute_taxonomies' );
+
+		return $response;
+	}
+
+	/**
 	 * Prepare a single product attribute output for response.
 	 *
 	 * @param obj $item Term object.
