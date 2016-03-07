@@ -122,7 +122,11 @@ function wc_rest_api_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 	$title   = '';
 	$content = '';
 
-	if ( $image_meta = @wp_read_image_metadata( $upload['file'] ) ) {
+	if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
+		include_once( ABSPATH . 'wp-admin/includes/image.php' );
+	}
+
+	if ( $image_meta = wp_read_image_metadata( $upload['file'] ) ) {
 		if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
 			$title = $image_meta['title'];
 		}
