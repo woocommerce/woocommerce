@@ -91,7 +91,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $item ) );
+		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		/**
 		 * Filter a term item returned from the API.

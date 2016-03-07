@@ -37,7 +37,7 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 	protected $rest_base = 'products/attributes/(?P<attribute_id>[\d]+)/terms';
 
 	/**
-	 * Prepare a single product tag output for response.
+	 * Prepare a single product attribute term output for response.
 	 *
 	 * @param obj $item Term object.
 	 * @param WP_REST_Request $request

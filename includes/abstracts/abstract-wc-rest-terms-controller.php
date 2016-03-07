@@ -504,7 +504,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	protected function prepare_links( $term, $request ) {
 		$base = '/' . $this->namespace . '/' . $this->rest_base;
 
-		if ( $request['attribute_id'] ) {
+		if ( ! empty( $request['attribute_id'] ) ) {
 			$base = str_replace( '(?P<attribute_id>[\d]+)', (int) $request['attribute_id'], $base );
 		}
 
@@ -715,7 +715,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			return $this->taxonomy;
 		}
 
-		if ( $request['attribute_id'] ) {
+		if ( ! empty( $request['attribute_id'] ) ) {
 			$taxonomy = wc_attribute_taxonomy_name_by_id( (int) $request['attribute_id'] );
 
 			$this->taxonomy = $taxonomy;
