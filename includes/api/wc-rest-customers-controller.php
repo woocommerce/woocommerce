@@ -23,6 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_REST_Customers_Controller extends WP_REST_Controller {
 
 	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	public $namepsace = 'wc/v1';
+
+	/**
 	 * Route base.
 	 *
 	 * @var string
@@ -33,7 +40,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base, array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -59,7 +66,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -89,7 +96,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/me', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/me', array(
 			'methods'  => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'get_current_item' ),
 			'args'     => array(
@@ -263,7 +270,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		$max_pages = ceil( $total_users / $per_page );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', WC_API::REST_API_NAMESPACE, $this->rest_base ) ) );
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
 			if ( $prev_page > $max_pages ) {
@@ -324,7 +331,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		$response = $this->prepare_item_for_response( $customer, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', WC_API::REST_API_NAMESPACE, $this->rest_base, $customer_id ) ) );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $customer_id ) ) );
 
 		return $response;
 	}
@@ -467,7 +474,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		$customer = wp_get_current_user();
 		$response = $this->prepare_item_for_response( $customer, $request );
 		$response = rest_ensure_response( $response );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', WC_API::REST_API_NAMESPACE, $this->rest_base, $current_customer_id ) ) );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $current_customer_id ) ) );
 		$response->set_status( 302 );
 
 		return $response;
@@ -590,10 +597,10 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	protected function prepare_links( $customer ) {
 		$links = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', WC_API::REST_API_NAMESPACE, $this->rest_base, $customer->ID ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $customer->ID ) ),
 			),
 			'collection' => array(
-				'href' => rest_url( sprintf( '/%s/%s', WC_API::REST_API_NAMESPACE, $this->rest_base ) ),
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
 			),
 		);
 

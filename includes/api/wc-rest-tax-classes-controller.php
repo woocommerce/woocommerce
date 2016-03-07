@@ -23,6 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 
 	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	public $namepsace = 'wc/v1';
+
+	/**
 	 * Route base.
 	 *
 	 * @var string

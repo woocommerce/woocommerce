@@ -23,6 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	public $namepsace = 'wc/v1';
+
+	/**
 	 * Route base.
 	 *
 	 * @var string
@@ -40,7 +47,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * Register the routes for orders.
 	 */
 	public function register_routes() {
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			array(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_item' ),

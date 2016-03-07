@@ -23,6 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 
 	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	public $namepsace = 'wc/v1';
+
+	/**
 	 * Route base.
 	 *
 	 * @var string
@@ -40,7 +47,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * Register the routes for coupons.
 	 */
 	public function register_routes() {
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base, array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -60,7 +67,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),

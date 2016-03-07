@@ -19,11 +19,6 @@ if ( ! class_exists( 'WC_API' ) ) :
 class WC_API {
 
 	/**
-	 * WP REST API namespace/version.
-	 */
-	const REST_API_NAMESPACE = 'wc/v1';
-
-	/**
 	 * This is the major version for the REST API and takes
 	 * first-order position in endpoint URLs.
 	 *
