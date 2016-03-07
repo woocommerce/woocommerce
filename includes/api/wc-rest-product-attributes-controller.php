@@ -98,7 +98,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to read the terms.
+	 * Check if a given request has access to read the attributes.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -112,19 +112,13 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to create a term.
+	 * Check if a given request has access to create a attribute.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
-			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		$taxonomy_obj = get_taxonomy( $taxonomy );
-		if ( ! current_user_can( $taxonomy_obj->cap->manage_terms ) ) {
+		if ( ! current_user_can( 'manage_product_terms' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -132,7 +126,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to read a term.
+	 * Check if a given request has access to read a attribute.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -142,7 +136,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to update a term.
+	 * Check if a given request has access to update a attribute.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -162,7 +156,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to delete a term.
+	 * Check if a given request has access to delete a attribute.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -198,6 +192,76 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 		}
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Create a single attribute.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function create_item( $request ) {
+		global $wpdb;
+
+		$args = array(
+			'attribute_label'   => $request['name'],
+			'attribute_name'    => $request['slug'],
+			'attribute_type'    => $request['type'],
+			'attribute_orderby' => $request['order_by'],
+			'attribute_public'  => $request['has_archives'],
+		);
+
+		// Set the attribute slug.
+		if ( empty( $args['attribute_name'] ) ) {
+			$args['attribute_name'] = wc_sanitize_taxonomy_name( stripslashes( $args['attribute_label'] ) );
+		} else {
+			$args['attribute_name'] = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( stripslashes( $args['attribute_name'] ) ) );
+		}
+
+		$valid_slug = $this->validate_attribute_slug( $args['attribute_name'], true );
+		if ( is_wp_error( $valid_slug ) ) {
+			return $valid_slug;
+		}
+
+		$insert = $wpdb->insert(
+			$wpdb->prefix . 'woocommerce_attribute_taxonomies',
+			$args,
+			array( '%s', '%s', '%s', '%s', '%d' )
+		);
+
+		// Checks for an error.
+		if ( is_wp_error( $insert ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create_product_attribute', $insert->get_error_message(), array( 'status' => 400 ) );
+		}
+
+		$attribute = $this->get_attribute( $wpdb->insert_id );
+
+		if ( is_wp_error( $attribute ) ) {
+			return $attribute;
+		}
+
+		$this->update_additional_fields_for_object( $attribute, $request );
+
+		/**
+		 * Fires after a single product attribute is created or updated via the REST API.
+		 *
+		 * @param stdObject       $attribute Inserted attribute object.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating attribute, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_product_attribute", $attribute, $request, true );
+
+		$request->set_param( 'context', 'view' );
+		$response = $this->prepare_item_for_response( $attribute, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( '/' . $this->namespace . '/' . $this->rest_base . '/' . $attribute->attribute_id ) );
+
+		// Clear transients.
+		flush_rewrite_rules();
+		delete_transient( 'wc_attribute_taxonomies' );
+
+		return $response;
 	}
 
 	/**
@@ -246,12 +310,12 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 		$response->add_links( $this->prepare_links( $item ) );
 
 		/**
-		 * Filter a term item returned from the API.
+		 * Filter a attribute item returned from the API.
 		 *
 		 * Allows modification of the product attribute data right before it is returned.
 		 *
 		 * @param WP_REST_Response  $response  The response object.
-		 * @param object            $item      The original term object.
+		 * @param object            $item      The original attribute object.
 		 * @param WP_REST_Request   $request   Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_product_attribute', $response, $item, $request );
@@ -329,6 +393,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 				'has_archives' => array(
 					'description' => __( 'Enable/Disable attribute archives.', 'woocommerce' ),
 					'type'        => 'boolean',
+					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 			),
@@ -376,6 +441,8 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return stdClass|WP_Error
 	 */
 	protected function get_attribute( $id ) {
+		global $wpdb;
+
 		$attribute = $wpdb->get_row( $wpdb->prepare( "
 			SELECT *
 			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
@@ -387,5 +454,24 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 		}
 
 		return $attribute;
+	}
+
+	/**
+	 * Validate attribute slug.
+	 *
+	 * @param string $slug
+	 * @param bool $new_data
+	 * @return bool|WP_Error
+	 */
+	protected function validate_attribute_slug( $slug, $new_data = true ) {
+		if ( strlen( $slug ) >= 28 ) {
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max).', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+		} else if ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+		} else if ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+		}
+
+		return true;
 	}
 }
