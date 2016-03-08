@@ -4285,20 +4285,20 @@ img.ui-datepicker-trigger {
 			width: 2em;
 
 			&:after {
-				@include icon;
+				@include icon_dashicons;
 				line-height: 1.85;
 			}
 		}
 
 		a.edit {
 			&:after {
-				content: "\e01c";
+				content: "\f464";
 			}
 		}
 
 		a.view {
 			&:after {
-				content: "\e010";
+				content: "\f177";
 			}
 		}
 	}
