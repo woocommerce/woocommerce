@@ -549,6 +549,7 @@ class WC_Webhook {
 			'customer.updated' => array(
 				'profile_update',
 				'woocommerce_api_edit_customer',
+				'woocommerce_customer_save_address',
 			),
 			'customer.deleted' => array(
 				'delete_user',
