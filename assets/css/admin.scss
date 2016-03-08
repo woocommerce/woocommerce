@@ -455,15 +455,13 @@ ul.wc_coupon_list_block {
 .button.wc-reload {
 	@include ir();
 	padding: 0;
-	-webkit-border-radius: 100%;
-	border-radius: 100%;
-	height: 24px;
-	width: 24px !important;
+	height: 28px;
+	width: 28px !important;
 	display: inline-block;
 
 	&:after {
-		@include icon( "\e031" );
-		line-height: 22px;
+		@include icon_dashicons( "\f345" );
+		line-height: 28px;
 	}
 }
 
