@@ -1510,6 +1510,10 @@ class WC_Admin_Post_Types {
 			return;
 		}
 
+		if ( ! apply_filters( 'wc_shop_order_search_custom_fields', true, $wp ) ) {
+			return;
+		}
+
 		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
 			'_order_key',
 			'_billing_company',
