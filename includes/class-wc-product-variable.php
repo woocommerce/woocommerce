@@ -485,6 +485,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @return int Variation ID which matched, 0 is no match was found
 	 */
 	public function get_matching_variation( $match_attributes = array() ) {
+		global $wpdb;
+
 		$query_args = array(
 			'post_parent' => $this->id,
 			'post_type'   => 'product_variation',
@@ -524,6 +526,9 @@ class WC_Product_Variable extends WC_Product {
 
 		}
 
+		// Allow large queries in case user has many variations
+		$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+		
 		$matches = get_posts( $query_args );
 
 		if ( $matches && ! is_wp_error( $matches ) ) {
