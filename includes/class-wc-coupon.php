@@ -318,20 +318,30 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		$coupon_id = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 
 		if ( false === $coupon_id ) {
-			$sql       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $this->code );
-			$coupon_id = apply_filters( 'woocommerce_get_coupon_id_from_code', $wpdb->get_var( $sql ), $this->code );
+			$sql       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $this->get_code() );
+			$coupon_id = apply_filters( 'woocommerce_get_coupon_id_from_code', $wpdb->get_var( $sql ), $this->get_code() );
 			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $coupon_id, 'coupons' );
 		}
 		return absint( $coupon_id );
 	}
 
 	/**
-	 * Get a custom coupon field.
+	 * Get all custom coupon fields.
 	 * @since 2.7.0
 	 * @return array
 	 */
 	public function get_custom_fields() {
 		return $this->_meta_data;
+	}
+
+	/**
+	 * Get a single custom coupon field.
+	 * @since 2.7.0
+	 * @param string $key
+	 * @return mixed
+	 */
+	public function get_custom_field( $key ) {
+		return $this->_meta_data[ $key ];
 	}
 
 	/**
@@ -589,6 +599,17 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		$this->_data['used_by'] = array_filter( $used_by );
 	}
 
+	/**
+	 * Adds or updates a custom field (meta) (based on $key).
+	 * @since 2.7.0
+	 * @param string $key
+	 * @param mixed  $value
+	 */
+	public function set_custom_field( $key, $value ) {
+		update_post_meta( $this->get_id(), $key, $value );
+		$this->_set_meta_data();
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
@@ -656,13 +677,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		$this->set_used_by( (array) get_post_meta( $coupon_id, '_used_by' ) );
 
 		// Load custom set metadata (coupon custom fields)
-		$meta_data   = get_post_meta( $coupon_id );
-		$ignore_keys = array_merge( $this->_data, array( '_used_by' => '', 'coupon_amount' => '', '_edit_lock' => '', '_edit_last' => '' ) );
-		$ignore_keys = array_keys( $ignore_keys );
-		$meta_data   = array_diff_key( $meta_data, array_fill_keys( $ignore_keys, '' ) );
-		foreach ( $meta_data as $key => $value ) {
-			$this->_meta_data[ $key ] = $value;
-		}
+		$this->_set_meta_data();
 
 		do_action( 'woocommerce_coupon_loaded', $this );
 	}
@@ -750,6 +765,20 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		update_post_meta( $coupon_id, 'minimum_amount', $this->get_minimum_amount() );
 		update_post_meta( $coupon_id, 'maximum_amount', $this->get_maximum_amount() );
 		update_post_meta( $coupon_id, 'customer_email', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) );
+	}
+
+	/**
+	 * Sets the internal meta data from the database.
+	 * @since 2.7.0
+	 */
+	private function _set_meta_data() {
+		$meta_data   = get_post_meta( $this->get_id() );
+		$ignore_keys = array_merge( $this->_data, array( '_used_by' => '', 'coupon_amount' => '', '_edit_lock' => '', '_edit_last' => '' ) );
+		$ignore_keys = array_keys( $ignore_keys );
+		$meta_data   = array_diff_key( $meta_data, array_fill_keys( $ignore_keys, '' ) );
+		foreach ( $meta_data as $key => $value ) {
+			$this->_meta_data[ $key ] = $value[0];
+		}
 	}
 
 	/**

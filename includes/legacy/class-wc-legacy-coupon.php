@@ -51,7 +51,14 @@ class WC_Legacy_Coupon {
 				$value = ( $this->get_id() > 0 ) ? true : false;
 			break;
 			case 'coupon_custom_fields' :
-				$value = $this->get_id() ? $this->get_custom_fields() : array();
+				$legacy_custom_fields = array();
+				$custom_fields = $this->get_id() ? $this->get_custom_fields() : array();
+				if ( ! empty( $custom_fields ) ) {
+					foreach ( $custom_fields as $cf_key => $cf_value ) {
+						$legacy_custom_fields[ $cf_key ][0] = $cf_value;
+					}
+				}
+				$value = $legacy_custom_fields;
 			break;
 			case 'type' :
 			case 'discount_type' :

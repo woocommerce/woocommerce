@@ -109,9 +109,14 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 
 		$coupon = \WC_Helper_Coupon::create_coupon();
+		add_post_meta( $coupon->get_id(), 'test_coupon_field', 'testing', true );
+		$coupon->read( $coupon->get_id() );
+
 		$this->assertEquals( $coupon->get_id(), $coupon->id );
 		$this->assertEquals( ( ( $coupon->get_id() > 0 ) ? true : false ), $coupon->exists );
-		$this->assertEquals( $coupon->get_custom_fields(), $coupon->coupon_custom_fields );
+		$coupon_cf = $coupon->get_custom_fields();
+		$this->assertCount( 1, $coupon_cf  );
+		$this->assertEquals( $coupon_cf['test_coupon_field'], $coupon->coupon_custom_fields['test_coupon_field'][0] );
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->type );
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->discount_type );
 		$this->assertEquals( $coupon->get_amount(), $coupon->amount );
@@ -198,7 +203,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's ID
+	 * Test getting a coupon's ID.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_id() {
@@ -207,7 +212,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's code
+	 * Test getting a coupon's code.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_code() {
@@ -216,7 +221,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a coupon's code
+	 * Test setting a coupon's code.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_code() {
@@ -227,7 +232,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's description
+	 * Test getting a coupon's description.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_description() {
@@ -236,7 +241,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a coupon's description
+	 * Test setting a coupon's description.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_description() {
@@ -246,7 +251,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's discount type
+	 * Test getting a coupon's discount type.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_discount_type() {
@@ -255,7 +260,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a coupon's discount type
+	 * Test setting a coupon's discount type.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_discount_type() {
@@ -265,7 +270,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's amount
+	 * Test getting a coupon's amount.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_amount() {
@@ -274,7 +279,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a coupon's amount
+	 * Test setting a coupon's amount.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_amount() {
@@ -284,7 +289,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's usage count
+	 * Test getting a coupon's usage count.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_usage_count() {
@@ -293,7 +298,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a coupon's usage count
+	 * Test setting a coupon's usage count.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_usage_count() {
@@ -303,7 +308,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting indvidual use status
+	 * Test getting indvidual use status.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_individual_use() {
@@ -312,7 +317,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting individual use status
+	 * Test setting individual use status.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_individual_use() {
@@ -322,7 +327,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting product ids
+	 * Test getting product ids.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_product_ids() {
@@ -331,7 +336,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting product ids
+	 * Test setting product ids.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_product_ids() {
@@ -341,7 +346,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting excluded product ids
+	 * Test getting excluded product ids.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_excluded_product_ids() {
@@ -350,7 +355,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting excluded product ids
+	 * Test setting excluded product ids.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_excluded_product_ids() {
@@ -360,7 +365,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting coupon usage limit
+	 * Test getting coupon usage limit.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_usage_limit() {
@@ -369,7 +374,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting coupon usage limit
+	 * Test setting coupon usage limit.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_usage_limit() {
@@ -379,7 +384,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting coupon usage limit per user
+	 * Test getting coupon usage limit per user.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_usage_limit_per_user() {
@@ -388,7 +393,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting coupon usage limit per user
+	 * Test setting coupon usage limit per user.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_usage_limit_per_user() {
@@ -398,7 +403,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting coupon usage limit to x items
+	 * Test getting coupon usage limit to x items.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_limit_usage_to_x_items() {
@@ -407,7 +412,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting coupon usage limit to x items
+	 * Test setting coupon usage limit to x items.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_limit_usage_to_x_items() {
@@ -417,7 +422,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting free shipping status
+	 * Test getting free shipping status.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_free_shipping() {
@@ -426,7 +431,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting free shipping status
+	 * Test setting free shipping status.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_free_shipping() {
@@ -436,7 +441,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting product categories
+	 * Test getting product categories.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_product_categories() {
@@ -445,7 +450,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting product categories
+	 * Test setting product categories.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_product_categories() {
@@ -455,7 +460,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting excluded product categories
+	 * Test getting excluded product categories.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_excluded_product_categories() {
@@ -464,7 +469,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting excluded product categories
+	 * Test setting excluded product categories.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_excluded_product_categories() {
@@ -474,7 +479,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting exclude sale items status
+	 * Test getting exclude sale items status.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_exclude_sale_items() {
@@ -483,7 +488,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting exclude sale items status
+	 * Test setting exclude sale items status.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_exclude_sale_items() {
@@ -493,7 +498,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's minimum amount
+	 * Test getting a coupon's minimum amount.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_minimum_amount() {
@@ -502,7 +507,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a coupon's minimum amount
+	 * Test setting a coupon's minimum amount.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_minimum_amount() {
@@ -512,7 +517,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's maximum amount
+	 * Test getting a coupon's maximum amount.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_maximum_amount() {
@@ -521,7 +526,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting a coupon's maximum amount
+	 * Test setting a coupon's maximum amount.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_maximum_amount() {
@@ -531,7 +536,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting coupon email restrictions
+	 * Test getting coupon email restrictions.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_email_restrictions() {
@@ -540,7 +545,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test setting coupon email restrictions
+	 * Test setting coupon email restrictions.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_set_email_restrictions() {
@@ -551,7 +556,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 
 	/**
-	 * Test getting and setting coupon used by list
+	 * Test getting and setting coupon used by list.
 	 * @since 2.7.0
 	 */
 	public function test_coupon_get_and_set_used_by() {
@@ -564,7 +569,7 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting custom fields
+	 * Test getting custom fields.
 	 * @since 2.7.0
 	 */
 	public function test_get_custom_fields() {
@@ -575,8 +580,19 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$coupon->read( $coupon_id );
 		$custom_fields = $coupon->get_custom_fields();
 
-		$this->assertEquals( $meta_value, $custom_fields['test_coupon_field'][0] );
+		$this->assertEquals( $meta_value, $custom_fields['test_coupon_field'] );
 	}
 
+	/**
+	 * Test setting custom fields.
+	 * @since 2.7.0
+	 */
+	public function test_set_custom_fields() {
+		$coupon     = \WC_Helper_Coupon::create_coupon();
+		$coupon_id  = $coupon->get_id();
+		$meta_value = time() . '-custom-value';
+		$coupon->set_custom_field( 'my-custom-field', $meta_value );
+		$this->assertEquals( $meta_value, $coupon->get_custom_field( 'my-custom-field' ) );
+	}
 
 }
