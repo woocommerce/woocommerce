@@ -3929,7 +3929,7 @@ img.ui-datepicker-trigger {
 				text-decoration: none;
 
 				&:before {
-					@include iconbefore( "\e00a" );
+					@include iconbeforedashicons( "\f346" );
 					margin-right: 4px;
 				}
 			}
