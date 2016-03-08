@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
 		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
-		<p id="copy-error"></p>
+		<p class="copy-error hidden"><?php _e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?></p>
 	</div>
 </div>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
@@ -813,33 +813,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	jQuery( document ).ready( function( $ ) {
 
-		$( document.body ).on ( 'click', '#copy-for-support', function( e ) {
-			$( '#debug-report' ).find( 'textarea' ).focus().select();
-			$( '#copy-error' ).text( '<?php esc_html_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>' );
-		} );
-
 		$( document.body ).on( 'copy', '#copy-for-support', function( e ) {
-			$( '#copy-error' ).text( '' );
 			e.clipboardData.clearData();
 			e.clipboardData.setData( 'text/plain', $( '#debug-report' ).find( 'textarea' ).val() );
 			e.preventDefault();
-		} );
+		});
 
 		$( document.body ).on( 'aftercopy', '#copy-for-support', function( e ) {
 			if ( true === e.success['text/plain'] ) {
-				$( '#copy-error' ).text( '' );
-				$( '#copy-for-support' ).tipTip( {
+				$( '#copy-for-support' ).tipTip({
 					'attribute':  'data-tip',
 					'activation': 'focus',
 					'fadeIn':     50,
 					'fadeOut':    50,
 					'delay':      0
-				} ).focus();
+				}).focus();
 			} else {
+				$( '.copy-error' ).removeClass( 'hidden' );
 				$( '#debug-report' ).find( 'textarea' ).focus().select();
-				$( '#copy-error' ).text( '<?php esc_html_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>' );
 			}
-		} );
-	} );
+		});
+
+	});
 
 </script>
