@@ -61,8 +61,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * offsetSet for ArrayAccess/Backwards compatibility.
 	 * @deprecated Add deprecation notices in future release.
 	 * @param string $offset
+	 * @param mixed $value
 	 */
-	public function offsetSet( $offset ) {
+	public function offsetSet( $offset, $value ) {
 		if ( 'line_subtotal' === $offset ) {
 			$offset = 'subtotal';
 		} elseif ( 'line_subtotal_tax' === $offset ) {
@@ -74,7 +75,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		} elseif ( 'line_tax_data' === $offset ) {
 			$offset = 'taxes';
 		}
-		parent::offsetSet( $offset );
+		parent::offsetSet( $offset, $value );
 	}
 
 	/**

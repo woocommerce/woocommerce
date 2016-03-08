@@ -47,12 +47,13 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * offsetSet for ArrayAccess/Backwards compatibility.
 	 * @deprecated Add deprecation notices in future release.
 	 * @param string $offset
+	 * @param mixed $value
 	 */
-	public function offsetSet( $offset ) {
+	public function offsetSet( $offset, $value ) {
 		if ( 'cost' === $offset ) {
 			$offset = 'total';
 		}
-		parent::offsetSet( $offset );
+		parent::offsetSet( $offset, $value );
 	}
 
 	/**

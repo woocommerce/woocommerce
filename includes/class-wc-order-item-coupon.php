@@ -45,14 +45,15 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * offsetSet for ArrayAccess/Backwards compatibility.
 	 * @deprecated Add deprecation notices in future release.
 	 * @param string $offset
+	 * @param mixed $value
 	 */
-	public function offsetSet( $offset ) {
+	public function offsetSet( $offset, $value ) {
 		if ( 'discount_amount' === $offset ) {
 			$offset = 'discount';
 		} elseif ( 'discount_amount_tax' === $offset ) {
 			$offset = 'discount_tax';
 		}
-		parent::offsetSet( $offset );
+		parent::offsetSet( $offset, $value );
 	}
 
 	/**
