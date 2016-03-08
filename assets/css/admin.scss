@@ -1760,12 +1760,14 @@ table.wp-list-table {
 		cursor: pointer;
 
 		&:before {
-			content: "\e020";
+			font-family: "Dashicons";
+			content: "\f155";
 		}
 
 		&.not-featured {
 			&:before {
-				content: "\e021";
+				font-family: "Dashicons";
+				content: "\f154";
 			}
 		}
 	}
