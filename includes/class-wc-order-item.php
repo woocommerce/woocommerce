@@ -516,7 +516,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 			$this->_data[ $offset ] = $value;
 		}
 
-		$this->update_meta_data( $offset, $value );
+		$this->update_meta_data( '_' . $offset, $value );
 	}
 
 	/**
@@ -528,12 +528,12 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 			$this->_meta_data = array();
 			return;
 		}
-		
+
 		if ( array_key_exists( $offset, $this->_data ) ) {
 			unset( $this->_data[ $offset ] );
 		}
 
-		$this->delete_meta_data( $offset );
+		$this->delete_meta_data( '_' . $offset );
 	}
 
 	/**
@@ -545,7 +545,7 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->_data ) ) {
 			return true;
 		}
-		return array_key_exists( $offset, wp_list_pluck( $this->_meta_data, 'value', 'key' ) );
+		return array_key_exists( '_' . $offset, wp_list_pluck( $this->_meta_data, 'value', 'key' ) );
 	}
 
 	/**
@@ -564,9 +564,9 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 			return $meta_values;
 		} elseif ( array_key_exists( $offset, $this->_data ) ) {
 			return $this->_data[ $offset ];
-		} elseif ( array_key_exists( $offset, $meta_values ) ) {
-			// Item meta was expanded in previous versions. This maintains support.
-			return $meta_values[ $offset ];
+		} elseif ( array_key_exists( '_' . $offset, $meta_values ) ) {
+			// Item meta was expanded in previous versions, with prefixes removed. This maintains support.
+			return $meta_values[ '_' . $offset ];
 		}
 
 		return null;
