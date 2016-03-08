@@ -199,7 +199,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->has_status( 'pending' ) ) {
 								printf( '<a href="%s">%s &rarr;</a>',
 									esc_url( $order->get_checkout_payment_url() ),
-									__( 'Pay', 'woocommerce' )
+									__( 'Customer payment page', 'woocommerce' )
 								);
 							}
 						?></label>
