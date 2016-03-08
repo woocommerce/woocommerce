@@ -2877,67 +2877,71 @@ img.help_tip {
 				border-bottom: 1px solid #eee;
 
 				&:before {
-					@include iconbefore( "\e028" );
+					@include iconbeforedashicons( "\f107" );
 				}
 			}
 
 			&.general_options {
 				a:before {
-					content: "\e006";
+					content: "\f107";
 				}
 			}
 
 			&.inventory_options {
 				a:before {
-					content: "\e02c";
+					content: "\f239";
 				}
 			}
 
 			&.shipping_options {
 				a:before {
+					font-family: "WooCommerce";
 					content: "\e01a";
 				}
 			}
 
 			&.linked_product_options {
 				a:before {
-					content: "\e00d";
+					content: "\f103";
 				}
 			}
 
 			&.attribute_options {
 				a:before {
-					content: "\e02b";
+					content: "\f164";
 				}
 			}
 
 			&.advanced_options {
 				a:before {
-					content: "\f111";
 					font-family: 'Dashicons';
+					content: "\f111";
 				}
 			}
 
-			&.variation_options {
+			&.variations_options {
 				a:before {
-					content: "\e003";
+					content: "\f509";
 				}
 			}
 
 			&.usage_restriction_options {
 				a:before {
+					font-family: "WooCommerce";
 					content: "\e602";
 				}
 			}
 
 			&.usage_limit_options {
 				a:before {
+					font-family: "WooCommerce";
 					content: "\e601";
 				}
 			}
 
 			&.general_coupon_data {
 				a:before {
+					font-family: "WooCommerce";
 					content: "\e600";
 				}
 			}

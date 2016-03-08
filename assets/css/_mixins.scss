@@ -222,6 +222,19 @@
 	text-decoration: none;
 }
 
+@mixin iconbeforedashicons( $glyph: "\f333" ) {
+	font-family: 'Dashicons';
+	speak: none;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	margin-right: .618em;
+	content: $glyph;
+	text-decoration: none;
+}
+
 @mixin iconafter( $glyph: "\e001" ) {
 	font-family: 'WooCommerce';
 	speak: none;
