@@ -752,8 +752,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					var prefix      = ( undefined === image.attr( 'alt' ) ) ? '' : image.attr( 'alt' ) + ' '; // Remove WP 4.2 emojis.
 
 					// Find value
-					var $value_html   = jQuery( this ).find( 'td:eq(2)' );
+					var $value_html   = jQuery( this ).find( 'td:eq(2)' ).clone();
 					$value_html.find( '.private' ).remove();
+					$value_html.find('.dashicons-yes').replaceWith( "&#10004;" );
+					$value_html.find('.dashicons-no-alt, .dashicons-warning').replaceWith( "&#10060;" );
 
 					// Format value
 					var the_value   = jQuery.trim( prefix + $value_html.text() );
