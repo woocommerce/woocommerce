@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Legacy Abstract Coupon
+ * Legacy Coupon.
  *
  * Legacy and deprecated functions are here to keep the WC_Legacy_Coupon class clean.
  * This class will be removed in future versions.

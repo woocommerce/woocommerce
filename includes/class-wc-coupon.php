@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WooCommerce coupons
+ * WooCommerce coupons.
  *
  * The WooCommerce coupons class gets coupon data from storage and checks coupon validity.
  *
@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package		WooCommerce/Classes
  * @category	Class
  * @author		WooThemes
- *
  */
 class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 
