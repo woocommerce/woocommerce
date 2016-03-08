@@ -1,124 +1,121 @@
 <?php
+include_once( 'legacy/class-wc-legacy-customer.php' );
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-
 /**
- * Customer
- *
  * The WooCommerce customer class handles storage of the current customer's data, such as location.
  *
  * @class    WC_Customer
- * @version  2.3.0
+ * @version  2.7.0
  * @package  WooCommerce/Classes
  * @category Class
  * @author   WooThemes
- *
- * @property string $country
- * @property string $state
- * @property string $postcode
- * @property string $city
- * @property string $address_1
- * @property string $address_2
- * @property string $shipping_country
- * @property string $shipping_state
- * @property string $shipping_postcode
- * @property string $shipping_city
- * @property string $shipping_address_1
- * @property string $shipping_address_2
- * @property string $is_vat_exempt
- * @property string $calculated_shipping
  */
-class WC_Customer {
+class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 
 	/**
 	 * Stores customer data.
-	 *
 	 * @var array
 	 */
-	protected $_data = array();
+	protected $_data = array(
+		'id'				  => 0,
+		'postcode'            => '',
+		'city'                => '',
+		'address_1'           => '',
+		'address_2'           => '',
+		'state'               => '',
+		'country'             => '',
+		'shipping_postcode'   => '',
+		'shipping_city'       => '',
+		'shipping_address_1'  => '',
+		'shipping_address_2'  => '',
+		'shipping_state'      => '',
+		'shipping_country'    => '',
+		'is_vat_exempt'       => false,
+		'calculated_shipping' => false,
+		'is_user'             => false,
+	);
 
 	/**
-	 * Stores bool when data is changed.
-	 *
-	 * @var bool
+	 * Keys which are also stored in a session (so we can make sure they get updated...)
+	 * @var array
+	 */
+	protected $_session_keys = array(
+		'postcode', 'city', 'address_1', 'address_2', 'state', 'country',
+		'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address_2',
+		'shipping_state', 'shipping_country', 'is_vat_exempt', 'calculated_shipping',
+	);
+
+	/**
+	 * Was data changed in the database for this class?
+	 * @var boolean
 	 */
 	private $_changed = false;
 
 	/**
-	 * Constructor for the customer class loads the customer data.
-	 *
+	 * If some of the customer information is loaded by session (instead of just from the DB).
+	 * @var boolean
 	 */
-	public function __construct() {
-		$this->_data = (array) WC()->session->get( 'customer' );
+	private $_from_session = false;
 
-		// No data - set defaults
-		if ( empty( $this->_data ) ) {
-			$this->set_default_data();
+	/**
+	 * Load customer data based on how WC_Customer is called.
+	 */
+	public function __construct( $customer = '' ) {
+		if ( $customer instanceof WC_Customer ) {
+			$this->_data['is_user'] = true;
+			$this->read( absint( $customer->get_id() ) );
+		} else if ( is_numeric( $customer ) ) {
+			$this->_data['is_user'] = true;
+			$this->read( $customer );
+		} else if ( empty( $customer ) ) {
+			$this->_from_session = true;
+			if ( is_user_logged_in() ) {
+				$this->_data['is_user'] = true;
+				$this->read( get_current_user_id() );
+			} else {
+				$this->read( WC()->session->get_customer_id() );
+			}
 		}
 
-		// When leaving or ending page load, store data
-		add_action( 'shutdown', array( $this, 'save_data' ), 10 );
+		if ( $this->_from_session ) {
+			add_action( 'shutdown', array( $this, 'save_session' ), 10 );
+		}
 	}
 
 	/**
-	 * Save data function.
+	 * Saves customer information to the current session if any data changed.
+	 * @since 2.7.0
 	 */
-	public function save_data() {
+	public function save_session() {
 		if ( $this->_changed ) {
-			WC()->session->set( 'customer', $this->_data );
+			$data = array();
+			foreach ( $this->_session_keys as $session_key ) {
+				$data[ $session_key ] = $this->_data[ $session_key ];
+			}
+			WC()->session->set( 'customer', $data );
 		}
 	}
 
 	/**
-	 * __set function.
-	 *
-	 * @param mixed $property
-	 * @return bool
+	 * Return a customer's user ID.
+	 * @since 2.7.0
+	 * @return integer
 	 */
-	public function __isset( $property ) {
-		if ( 'address' === $property ) {
-			$property = 'address_1';
-		}
-		if ( 'shipping_address' === $property ) {
-			$property = 'shipping_address_1';
-		}
-		return isset( $this->_data[ $property ] );
+	public function get_id() {
+
 	}
 
 	/**
-	 * __get function.
-	 *
-	 * @param string $property
-	 * @return string
+	 * Get all class data in array format.
+	 * @since 2.7.0
+	 * @return array
 	 */
-	public function __get( $property ) {
-		if ( 'address' === $property ) {
-			$property = 'address_1';
-		}
-		if ( 'shipping_address' === $property ) {
-			$property = 'shipping_address_1';
-		}
-		return isset( $this->_data[ $property ] ) ? $this->_data[ $property ] : '';
-	}
+	public function get_data() {
 
-	/**
-	 * __set function.
-	 *
-	 * @param mixed $property
-	 * @param mixed $value
-	 */
-	public function __set( $property, $value ) {
-		if ( 'address' === $property ) {
-			$property = 'address_1';
-		}
-		if ( 'shipping_address' === $property ) {
-			$property = 'shipping_address_1';
-		}
-		$this->_data[ $property ] = $value;
-		$this->_changed = true;
 	}
 
 	/**
@@ -572,4 +569,91 @@ class WC_Customer {
 
 		return apply_filters( 'woocommerce_customer_get_downloadable_products', $downloads );
 	}
+
+	/*
+	 |--------------------------------------------------------------------------
+	 | CRUD methods
+	 |--------------------------------------------------------------------------
+	 | Methods which create, read, update and delete from the database.
+	 |
+	 | A save method is included for convenience (chooses update or create based
+	 | on if the order exists yet).
+	 */
+
+	 /**
+	  * Create a customer.
+	  * @since 2.7.0.
+	  */
+	public function create() {
+
+	}
+
+	/**
+	 * Read a customer from the database.
+	 * @since 2.7.0
+	 * @param integer $id
+	 */
+	public function read( $id ) {
+		$pull_from_db = true;
+		if ( $this->_from_session ) {
+			$data = (array) WC()->session->get( 'customer' );
+			if ( ! empty( $data ) ) {
+				$pull_from_db  = false;
+				foreach ( $this->_session_keys as $session_key ) {
+					$this->_data[ $session_key ] = $data[ $session_key ];
+				}
+			}
+		}
+
+		if ( $pull_from_db ) {
+			foreach ( array_keys( $this->_data ) as $key ) {
+				$meta_value = get_user_meta( $id, ( false === strstr( $key, 'shipping_' ) ? 'billing_' : '' ) . $key, true );
+				$this->_data[ $key ] = $meta_value ? $meta_value : $this->_data[ $key ];
+			}
+		}
+
+		$this->_data['id'] = $id;
+
+		// Set some defaults if some of our values are still not set.
+		if ( empty( $this->_data['country'] ) ) {
+			$this->_data['country'] = $this->get_default_country();
+		}
+
+		if ( empty( $this->_data['shipping_country'] ) ) {
+			$this->_data['shipping_country'] = $this->_data['country'];
+		}
+
+		if ( empty( $this->_data['state'] ) ) {
+			$this->_data['state'] = $this->get_default_state();
+		}
+
+		if ( empty( $this->_data['shipping_state'] ) ) {
+			$this->_data['shipping_state'] = $this->_data['state'];
+		}
+	}
+
+	/**
+	 * Update a customer.
+	 * @since 2.7.0
+	 */
+	public function update() {
+
+	}
+
+	/**
+	 * Delete a customer.
+	 * @since 2.7.0
+	 */
+	public function delete() {
+
+	}
+
+	/**
+	 * Save data (either create or update depending on if we are working on an existing coupon).
+	 * @since 2.7.0
+	 */
+	public function save() {
+
+	}
+
 }
