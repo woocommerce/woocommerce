@@ -367,7 +367,7 @@ class WC_CLI_Command extends WP_CLI_Command {
 				foreach ( $subarray as $sub_key => $sub_value ) {
 					$sub_key = $this->get_normalized_array_key( $sub_key );
 					if ( ! empty( $unflatten[ $first_key ][ $sub_key ] ) ) {
-						$unflatten[ $first_key ][ $sub_key ] = array_merge( $unflatten[ $first_key ][ $sub_key ], $sub_value );
+						$unflatten[ $first_key ][ $sub_key ] = array_merge_recursive( $unflatten[ $first_key ][ $sub_key ], $sub_value );
 					} else {
 						$unflatten[ $first_key ][ $sub_key ] = $sub_value;
 					}
