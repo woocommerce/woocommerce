@@ -42,6 +42,20 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	}
 
 	/**
+	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * @deprecated Add deprecation notices in future release.
+	 * @param string $offset
+	 */
+	public function offsetSet( $offset ) {
+		if ( 'discount_amount' === $offset ) {
+			$offset = 'discount';
+		} elseif ( 'discount_amount_tax' === $offset ) {
+			$offset = 'discount_tax';
+		}
+		parent::offsetSet( $offset );
+	}
+
+	/**
 	 * offsetExists for ArrayAccess
 	 * @param string $offset
 	 * @return bool

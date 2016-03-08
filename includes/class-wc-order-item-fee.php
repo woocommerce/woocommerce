@@ -49,6 +49,22 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	}
 
 	/**
+	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * @deprecated Add deprecation notices in future release.
+	 * @param string $offset
+	 */
+	public function offsetSet( $offset ) {
+		if ( 'line_total' === $offset ) {
+			$offset = 'total';
+		} elseif ( 'line_tax' === $offset ) {
+			$offset = 'total_tax';
+		} elseif ( 'line_tax_data' === $offset ) {
+			$offset = 'taxes';
+		}
+		parent::offsetSet( $offset );
+	}
+
+	/**
 	 * offsetExists for ArrayAccess
 	 * @param string $offset
 	 * @return bool
