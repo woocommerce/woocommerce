@@ -1521,23 +1521,21 @@ ul.wc_coupon_list_block {
 		padding: 0 !important;
 		height: 2em !important;
 		width: 2em;
-
-		&:after {
-			@include icon;
-			line-height: 1.85;
-		}
 	}
 
 	.processing:after {
-		content: "\e00f";
+		@include icon( "\e00f" );
+		line-height: 1.85;
 	}
 
 	.complete:after {
-		content: "\e017";
+		@include icon_dashicons( "\f147" );
+		line-height: 1.85;
 	}
 
 	.view:after {
-		content: "\e010";
+		@include icon_dashicons( "\f177" );
+		line-height: 1.85;
 	}
 }
 
