@@ -341,7 +341,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 
 	/**
 	 * Add meta data.
-	 * @param array $data Key/Value pairs
+	 * @param array $key Meta key
+	 * @param array $value Meta value
+	 * @param array $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {
@@ -369,6 +371,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order implements WC_
 		} else {
 			$this->add_meta_data( $key, $value, true );
 		}
+	}
+
+	/**
+	 * Delete meta data.
+	 * @param array $key Meta key
+	 */
+	public function delete_meta_data( $key ) {
+		$meta_ids         = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $meta_ids, '' ) );
 	}
 
 	/**

@@ -392,7 +392,9 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 
 	/**
 	 * Add meta data.
-	 * @param array $data Key/Value pairs
+	 * @param array $key Meta key
+	 * @param array $value Meta value
+	 * @param array $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {
@@ -420,6 +422,15 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 		} else {
 			$this->add_meta_data( $key, $value, true );
 		}
+	}
+
+	/**
+	 * Delete meta data.
+	 * @param array $key Meta key
+	 */
+	public function delete_meta_data( $key ) {
+		$meta_ids         = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $meta_ids, '' ) );
 	}
 
 	/**
@@ -500,7 +511,12 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 			$this->_meta_data = $value;
 			return;
 		}
-		$this->_data[ $offset ] = $value;
+
+		if ( array_key_exists( $offset, $this->_data ) ) {
+			$this->_data[ $offset ] = $value;
+		}
+
+		$this->update_meta_data( $offset, $value );
 	}
 
 	/**
@@ -512,7 +528,12 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 			$this->_meta_data = array();
 			return;
 		}
-		unset( $this->_data[ $offset ] );
+		
+		if ( array_key_exists( $offset, $this->_data ) ) {
+			unset( $this->_data[ $offset ] );
+		}
+
+		$this->delete_meta_data( $offset );
 	}
 
 	/**
@@ -521,10 +542,10 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( 'item_meta_array' === $offset || 'item_meta' === $offset ) {
+		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->_data ) ) {
 			return true;
 		}
-		return isset( $this->_data[ $offset ] );
+		return array_key_exists( $offset, wp_list_pluck( $this->_meta_data, 'value', 'key' ) );
 	}
 
 	/**
@@ -535,10 +556,19 @@ class WC_Order_Item implements ArrayAccess, WC_Data {
 	public function offsetGet( $offset ) {
 		if ( 'item_meta_array' === $offset ) {
 			return $this->_meta_data;
-		} elseif ( 'item_meta' === $offset ) {
-			$meta_values = wp_list_pluck( $this->_meta_data, 'value', 'key' );
-			return $meta_values;
 		}
-		return isset( $this->_data[ $offset ] ) ? $this->_data[ $offset ] : null;
+
+		$meta_values = wp_list_pluck( $this->_meta_data, 'value', 'key' );
+
+		if ( 'item_meta' === $offset ) {
+			return $meta_values;
+		} elseif ( array_key_exists( $offset, $this->_data ) ) {
+			return $this->_data[ $offset ];
+		} elseif ( array_key_exists( $offset, $meta_values ) ) {
+			// Item meta was expanded in previous versions. This maintains support.
+			return $meta_values[ $offset ];
+		}
+
+		return null;
 	}
 }
