@@ -1751,16 +1751,12 @@ class WC_CLI_Product extends WC_CLI_Command {
 			if ( isset( $variation['attributes'] ) ) {
 				$updated_attribute_keys = array();
 
-				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
-					if ( ! isset( $attribute['name'] ) ) {
-						continue;
-					}
-
-					$taxonomy   = sanitize_title( $attribute['name'] );
+				foreach ( $variation['attributes'] as $slug => $value ) {
+					$taxonomy   = sanitize_title( $slug );
 					$_attribute = array();
 
-					if ( isset( $attribute['slug'] ) ) {
-						$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
+					if ( $this->get_attribute_taxonomy_by_slug( $slug ) !== null ) {
+						$taxonomy = $this->get_attribute_taxonomy_by_slug( $slug );
 					}
 
 					if ( isset( $attributes[ $taxonomy ] ) ) {
@@ -1769,7 +1765,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
 						$attribute_key   = 'attribute_' . sanitize_title( $_attribute['name'] );
-						$attribute_value = isset( $attribute['option'] ) ? sanitize_title( stripslashes( $attribute['option'] ) ) : '';
+						$attribute_value = ! empty( $value ) ? sanitize_title( stripslashes( $value ) ) : '';
 						$updated_attribute_keys[] = $attribute_key;
 
 						update_post_meta( $variation_id, $attribute_key, $attribute_value );
