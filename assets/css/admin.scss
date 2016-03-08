@@ -1460,7 +1460,8 @@ ul.wc_coupon_list_block {
 		}
 
 		mark.failed:after {
-			content: "\e016";
+			font-family: "Dashicons";
+			content: "\f534";
 			color: #d0c21f;
 		}
 
