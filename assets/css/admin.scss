@@ -199,7 +199,7 @@ mark.amount {
 .woocommerce-help-tip {
 	color: #666;
 	display: inline-block;
-	font-size: 13px;
+	font-size: 1.1em;
 	font-style: normal;
 	height: 16px;
 	line-height: 16px;
@@ -208,7 +208,7 @@ mark.amount {
 	width: 16px;
 
 	&:after {
-		@include icon( "\e018" );
+		@include icon_dashicons( "\f223" );
 		cursor: help;
 	}
 }
