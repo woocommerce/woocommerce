@@ -394,4 +394,15 @@ class WC_CLI_Command extends WP_CLI_Command {
 		}
 		return $key;
 	}
+
+	/**
+	 * Check if the value is equal to 'yes', 'true' or '1'
+	 *
+	 * @since 2.5.4
+	 * @param  string $value
+	 * @return boolean
+	 */
+	protected function is_true( $value ) {
+		return ( 'yes' === $value || 'true' === $value || '1' === $value ) ? true : false;
+	}
 }
