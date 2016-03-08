@@ -562,7 +562,7 @@ class WC_Query {
 				$args['orderby']  = 'rand';
 			break;
 			case 'date' :
-				$args['orderby']  = 'date';
+				$args['orderby']  = 'date ID';
 				$args['order']    = $order == 'ASC' ? 'ASC' : 'DESC';
 			break;
 			case 'price' :
