@@ -124,7 +124,6 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			'filter_range'        => true,
 			'order_types'         => array_merge( wc_get_order_types( 'sales-reports' ), array( 'shop_order_refund' ) ),
 			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
-			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ) // Partial refunds inside refunded orders should be ignored
 		) );
 
 		// Merge
