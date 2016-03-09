@@ -831,7 +831,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get the query params for collections
+	 * Get the query params for collections.
 	 *
 	 * @return array
 	 */
