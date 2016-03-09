@@ -15,6 +15,7 @@ class WC_Shortcode_Cart {
 	 * Calculate shipping for the cart.
 	 */
 	public static function calculate_shipping() {
+		error_log( 'calculate shipping???....' );
 		try {
 			WC()->shipping->reset_shipping();
 
@@ -37,7 +38,9 @@ class WC_Shortcode_Cart {
 				WC()->customer->set_shipping_to_base();
 			}
 
-			WC()->customer->calculated_shipping( true );
+			WC()->customer->set_calculated_shipping( true );
+
+			WC()->customer->save_to_session();
 
 			wc_add_notice( __( 'Shipping costs updated.', 'woocommerce' ), 'notice' );
 

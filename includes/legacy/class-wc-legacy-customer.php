@@ -69,4 +69,87 @@ class WC_Legacy_Customer  {
 		return $key;
 	}
 
+	/**
+	 * Is customer VAT exempt?
+	 * @return bool
+	 */
+	public function is_vat_exempt() {
+		_deprecated_function( 'WC_Customer::is_vat_exempt', '2.7', 'WC_Customer::get_is_vat_exempt' );
+		return $this->get_is_vat_exempt();
+	}
+
+	/**
+	 * Has calculated shipping?
+	 * @return bool
+	 */
+	public function has_calculated_shipping() {
+		_deprecated_function( 'WC_Customer::has_calculated_shipping', '2.7', 'WC_Customer::get_calculated_shipping' );
+		return $this->get_calculated_shipping();
+	}
+
+	/**
+	 * Get default country for a customer.
+	 * @return string
+	 */
+	public function get_default_country() {
+		_deprecated_function( 'WC_Customer::get_default_country', '2.7', 'wc_get_customer_default_location' );
+		$default = wc_get_customer_default_location();
+		return $default['country'];
+	}
+
+	/**
+	 * Get default state for a customer.
+	 * @return string
+	 */
+	public function get_default_state() {
+		_deprecated_function( 'WC_Customer::get_default_state', '2.7', 'wc_get_customer_default_location' );
+		$default = wc_get_customer_default_location();
+		return $default['state'];
+	}
+
+	/**
+	 * Set customer address to match shop base address.
+	 */
+	public function set_to_base() {
+		_deprecated_function( 'WC_Customer::set_to_base', '2.7', 'WC_Customer::set_address_to_base' );
+		$this->set_address_to_base();
+	}
+
+	/**
+	 * Set customer shipping address to base address.
+	 */
+	public function set_shipping_to_base() {
+		_deprecated_function( 'WC_Customer::set_shipping_to_base', '2.7', 'WC_Customer::set_shipping_address_to_base' );
+		$this->set_shipping_address_to_base();
+	}
+
+	/**
+	 * Calculated shipping.
+	 * @param boolean $calculated
+	 */
+	public function calculated_shipping( $calculated = true ) {
+		_deprecated_function( 'WC_Customer::calculated_shipping', '2.7', 'WC_Customer::set_calculated_shipping' );
+		$this->set_calculated_shipping( $calculated );
+	}
+
+	/**
+	 * Set default data for a customer.
+	 */
+	public function set_default_data() {
+		_deprecated_function( 'WC_Customer::set_default_data', '2.7', '' );
+	}
+
+	/**
+	 * Is the user a paying customer?
+	 * @todo should this be moved to a get_ readonly?
+	 * @return bool
+	 */
+	function is_paying_customer( $user_id = '' ) {
+		_deprecated_function( 'WC_Customer::is_paying_customer', '2.7', 'WC_Customer::get_is_paying_customer' );
+		if ( ! empty( $user_id ) ) {
+			$user_id = get_current_user_id();
+		}
+		return '1' === get_user_meta( $user_id, 'paying_customer', true );
+	}
+
 }
