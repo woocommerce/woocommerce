@@ -900,7 +900,7 @@ class WC_Meta_Box_Product_Data {
 
 						// Text based attributes - Posted values are term names - don't change to slugs
 						} else {
-							$values           = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
+							$values = array_map( 'stripslashes', array_map( 'strip_tags', explode( WC_DELIMITER, $attribute_values[ $i ] ) ) );
 						}
 
 						// Remove empty items in the array
@@ -957,8 +957,7 @@ class WC_Meta_Box_Product_Data {
 						'is_taxonomy'  => $is_taxonomy
 					);
 				}
-
-			 }
+			}
 		}
 
 		if ( ! function_exists( 'attributes_cmp' ) ) {
@@ -971,6 +970,16 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 		uasort( $attributes, 'attributes_cmp' );
+
+		// Unset deleted attributes.
+		$current_attributes = get_post_meta( $post_id, '_product_attributes', true );
+		foreach ( array_keys( $current_attributes ) as $_attribute ) {
+			if ( empty( $attributes[ $_attribute ] ) ) {
+				if ( taxonomy_exists( $_attribute ) ) {
+					wp_set_object_terms( $post_id, array(), $_attribute );
+				}
+			}
+		}
 
 		update_post_meta( $post_id, '_product_attributes', $attributes );
 
