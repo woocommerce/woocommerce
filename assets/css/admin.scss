@@ -1460,8 +1460,7 @@ ul.wc_coupon_list_block {
 		}
 
 		mark.failed:after {
-			font-family: "Dashicons";
-			content: "\f534";
+			content: "\e016";
 			color: #d0c21f;
 		}
 
@@ -1775,7 +1774,7 @@ table.wp-list-table {
 
 	td.column-featured {
 		span.wc-featured {
-			font-size: 1.2em;
+			font-size: 1.6em;
 		}
 	}
 
@@ -1783,13 +1782,13 @@ table.wp-list-table {
 		margin: 0;
 
 		&:before {
-			content: "\e01d";
+			content: "\e006";
 		}
 	}
 
 	span.product-type {
 		@include ir();
-		font-size: 1.2em;
+		font-size: 1.6em;
 
 		&:before {
 			@include icon( "\e006" );
@@ -2944,7 +2943,8 @@ img.help_tip {
 
 			&.general_coupon_data {
 				a:before {
-					content: "\f524";
+					font-family: "WooCommerce";
+					content: "\e600";
 				}
 			}
 
