@@ -56,7 +56,7 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<slug>\w[\w\s\-]*)', array(
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
@@ -169,6 +169,58 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Create a single tax.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		$exists    = false;
+		$classes   = WC_Tax::get_tax_classes();
+		$tax_class = array(
+			'slug' => sanitize_title( $request['name'] ),
+			'name' => $request['name'],
+		);
+
+		// Check if class exists.
+		foreach ( $classes as $key => $class ) {
+			if ( sanitize_title( $class ) === $tax_class['slug'] ) {
+				$exists = true;
+				break;
+			}
+		}
+
+		// Return error if tax class already exists.
+		if ( $exists ) {
+			return new WP_Error( 'woocommerce_rest_tax_class_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// Add the new class.
+		$classes[] = $tax_class['name'];
+
+		update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
+
+		$this->update_additional_fields_for_object( $tax_class, $request );
+
+		/**
+		 * Fires after a tax class is created or updated via the REST API.
+		 *
+		 * @param stdClass        $tax_class Data used to create the tax class.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating tax class, false when updating tax class.
+		 */
+		do_action( 'woocommerce_rest_insert_tax_class', (object) $tax_class, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $tax_class, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $tax_class['slug'] ) ) );
+
+		return $response;
+	}
+
+	/**
 	 * Prepare a single tax class output for response.
 	 *
 	 * @param array $tax_class Tax class data.
@@ -233,6 +285,10 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 					'description' => __( 'Tax class name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 			),
 		);
