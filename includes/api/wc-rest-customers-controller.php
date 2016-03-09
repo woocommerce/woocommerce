@@ -128,7 +128,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'create_users' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_customer', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -146,7 +146,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		$types    = get_post_types( array( 'public' => true ), 'names' );
 
 		if ( empty( $id ) || empty( $customer->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_customer_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( get_current_user_id() === $id ) {
@@ -154,9 +154,9 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		}
 
 		if ( 'edit' === $request['context'] && ! current_user_can( 'list_users' ) ) {
-			return new WP_Error( 'woocommerce_rest_customer_cannot_view', __( 'Sorry, you cannot view this resource with edit context.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource with edit context.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		} else if ( ! count_user_posts( $id, $types ) && ! current_user_can( 'edit_user', $id ) && ! current_user_can( 'list_users' ) ) {
-			return new WP_Error( 'woocommerce_rest_customer_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -188,7 +188,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		$id = (int) $request['id'];
 
 		if ( ! current_user_can( 'delete_user', $id ) ) {
-			return new WP_Error( 'woocommerce_rest_user_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -347,7 +347,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		$customer = get_userdata( $id );
 
 		if ( empty( $id ) || empty( $customer->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_customer_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$customer = $this->prepare_item_for_response( $customer, $request );
@@ -367,7 +367,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 
 		$customer = get_userdata( $id );
 		if ( ! $customer ) {
-			return new WP_Error( 'woocommerce_rest_user_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		if ( ! empty( $request['email'] ) && email_exists( $request['email'] ) && $request['email'] !== $customer->user_email ) {
@@ -375,7 +375,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 		}
 
 		if ( ! empty( $request['username'] ) && $request['username'] !== $customer->user_login ) {
-			return new WP_Error( 'woocommerce_rest_user_invalid_argument', __( "Username isn't editable", 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable", 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Customer email.
@@ -426,12 +426,12 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 
 		$customer = get_userdata( $id );
 		if ( ! $customer ) {
-			return new WP_Error( 'woocommerce_rest_user_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		if ( ! empty( $reassign ) ) {
 			if ( $reassign === $id || ! get_userdata( $reassign ) ) {
-				return new WP_Error( 'woocommerce_rest_user_invalid_reassign', __( 'Invalid resource id for reassignment.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( 'woocommerce_rest_customer_invalid_reassign', __( 'Invalid resource id for reassignment.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 		}
 

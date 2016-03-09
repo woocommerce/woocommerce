@@ -231,7 +231,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 
 		// Checks for errors.
 		if ( is_wp_error( $insert ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_product_attribute', $insert->get_error_message(), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create', $insert->get_error_message(), array( 'status' => 400 ) );
 		}
 
 		$attribute = $this->get_attribute( $wpdb->insert_id );
@@ -333,7 +333,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 
 		// Checks for errors.
 		if ( false === $update ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit_product_attribute', __( 'Could not edit the attribute', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Could not edit the attribute', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$attribute = $this->get_attribute( $id );

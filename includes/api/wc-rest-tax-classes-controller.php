@@ -87,6 +87,76 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check whether a given request has permission to read tax classes.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list tax classes.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access create tax classes.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function create_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to read a tax class.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access update a tax class.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access delete a tax.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function delete_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get the User's schema, conforming to JSON Schema
 	 *
 	 * @return array

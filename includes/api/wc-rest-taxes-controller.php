@@ -108,7 +108,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_tax', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -122,7 +122,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error( 'woocommerce_rest_tax_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -150,7 +150,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error( 'woocommerce_rest_user_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -317,7 +317,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax_obj ) ) {
-			return new WP_Error( 'woocommerce_rest_tax_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$tax = $this->prepare_item_for_response( $tax_obj, $request );
@@ -337,7 +337,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		$current_tax = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $current_tax ) ) {
-			return new WP_Error( 'woocommerce_rest_tax_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data   = array();
@@ -427,7 +427,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax ) ) {
-			return new WP_Error( 'woocommerce_rest_user_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -513,7 +513,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param stdClass $tax Tax object.
-	 * @return array Links for the given user.
+	 * @return array Links for the given tax.
 	 */
 	protected function prepare_links( $tax ) {
 		$links = array(
