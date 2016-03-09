@@ -80,7 +80,6 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 						'default'     => false,
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
-					'reassign' => array(),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -130,7 +129,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access update a customer.
+	 * Check if a given request has access update a tax.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return boolean
@@ -138,6 +137,20 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	public function update_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access delete a tax.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function delete_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_user_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -362,10 +375,10 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			$data[ $field ] = $request[ $key ];
 		}
 
-		// Update tax rate
+		// Update tax rate.
 		WC_Tax::_update_tax_rate( $id, $data );
 
-		// Update locales
+		// Update locales.
 		if ( ! isset( $request['postcode'] ) ) {
 			WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $request['postcode'] ) );
 		}
@@ -390,6 +403,50 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $tax, $request );
 		$response = rest_ensure_response( $response );
+
+		return $response;
+	}
+
+	/**
+	 * Delete a single tax.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function delete_item( $request ) {
+		global $wpdb;
+
+		$id    = (int) $request['id'];
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Taxes do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		}
+
+		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
+
+		if ( empty( $id ) || empty( $tax ) ) {
+			return new WP_Error( 'woocommerce_rest_user_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $tax, $request );
+
+		WC_Tax::_delete_tax_rate( $id );
+
+		if ( 0 === $wpdb->rows_affected ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a tax is deleted via the REST API.
+		 *
+		 * @param stdClass         $tax      The tax data.
+		 * @param WP_REST_Response $response The response returned from the API.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_tax', $tax, $response, $request );
 
 		return $response;
 	}
