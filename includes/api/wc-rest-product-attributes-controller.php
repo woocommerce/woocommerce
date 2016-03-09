@@ -550,10 +550,10 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$new_params = array();
-		$new_params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+		$params = array();
+		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
 
-		return $new_params;
+		return $params;
 	}
 
 	/**

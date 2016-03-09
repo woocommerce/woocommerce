@@ -615,7 +615,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$query_params = parent::get_collection_params();
+		$params = parent::get_collection_params();
 
 		if ( '' !== $this->taxonomy ) {
 			$taxonomy = get_taxonomy( $this->taxonomy );
@@ -624,29 +624,29 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			$taxonomy->hierarchical = true;
 		}
 
-		$query_params['context']['default'] = 'view';
+		$params['context']['default'] = 'view';
 
-		$query_params['exclude'] = array(
+		$params['exclude'] = array(
 			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
 		);
-		$query_params['include'] = array(
+		$params['include'] = array(
 			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
 		);
 		if ( ! $taxonomy->hierarchical ) {
-			$query_params['offset'] = array(
+			$params['offset'] = array(
 				'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
 				'type'               => 'integer',
 				'sanitize_callback'  => 'absint',
 				'validate_callback'  => 'rest_validate_request_arg',
 			);
 		}
-		$query_params['order']      = array(
+		$params['order']      = array(
 			'description'           => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'                  => 'string',
 			'sanitize_callback'     => 'sanitize_key',
@@ -657,7 +657,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			),
 			'validate_callback'     => 'rest_validate_request_arg',
 		);
-		$query_params['orderby']    = array(
+		$params['orderby']    = array(
 			'description'           => __( 'Sort collection by resource attribute.', 'woocommerce' ),
 			'type'                  => 'string',
 			'sanitize_callback'     => 'sanitize_key',
@@ -673,33 +673,33 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 			),
 			'validate_callback'     => 'rest_validate_request_arg',
 		);
-		$query_params['hide_empty'] = array(
+		$params['hide_empty'] = array(
 			'description'           => __( 'Whether to hide resources not assigned to any products.', 'woocommerce' ),
 			'type'                  => 'boolean',
 			'default'               => false,
 			'validate_callback'     => 'rest_validate_request_arg',
 		);
 		if ( $taxonomy->hierarchical ) {
-			$query_params['parent'] = array(
+			$params['parent'] = array(
 				'description'        => __( 'Limit result set to resources assigned to a specific parent.', 'woocommerce' ),
 				'type'               => 'integer',
 				'sanitize_callback'  => 'absint',
 				'validate_callback'  => 'rest_validate_request_arg',
 			);
 		}
-		$query_params['product'] = array(
+		$params['product'] = array(
 			'description'           => __( 'Limit result set to resources assigned to a specific product.', 'woocommerce' ),
 			'type'                  => 'integer',
 			'default'               => null,
 			'validate_callback'     => 'rest_validate_request_arg',
 		);
-		$query_params['slug']    = array(
+		$params['slug']    = array(
 			'description'        => __( 'Limit result set to resources with a specific slug.', 'woocommerce' ),
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 
-		return $query_params;
+		return $params;
 	}
 
 	/**

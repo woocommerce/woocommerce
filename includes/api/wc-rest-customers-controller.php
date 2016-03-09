@@ -836,29 +836,29 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$query_params = parent::get_collection_params();
+		$params = parent::get_collection_params();
 
-		$query_params['context']['default'] = 'view';
+		$params['context']['default'] = 'view';
 
-		$query_params['exclude'] = array(
+		$params['exclude'] = array(
 			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
 		);
-		$query_params['include'] = array(
+		$params['include'] = array(
 			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
 		);
-		$query_params['offset'] = array(
+		$params['offset'] = array(
 			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
 			'type'               => 'integer',
 			'sanitize_callback'  => 'absint',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
-		$query_params['order'] = array(
+		$params['order'] = array(
 			'default'            => 'asc',
 			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'enum'               => array( 'asc', 'desc' ),
@@ -866,7 +866,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
-		$query_params['orderby'] = array(
+		$params['orderby'] = array(
 			'default'            => 'name',
 			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'enum'               => array(
@@ -879,11 +879,11 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
-		$query_params['slug']    = array(
+		$params['slug']    = array(
 			'description'        => __( 'Limit result set to resources with a specific slug.', 'woocommerce' ),
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
-		return $query_params;
+		return $params;
 	}
 }
