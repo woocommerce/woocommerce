@@ -24,7 +24,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 		status array|string List of order statuses to find
  * 		type array|string Order type, e.g. shop_order or shop_order_refund
  * 		parent int post/order parent
- * 		customer int|string User ID or billing email to limit orders to a particular user.
+ * 		customer int|string|array User ID or billing email to limit orders to a
+ * 			particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
+ * 			e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
  * 		limit int Maximum of orders to retrieve.
  * 		offset int Offset of orders to retrieve.
  * 		page int Page of orders to retrieve. Ignored when using the 'offset' arg.
@@ -43,6 +45,7 @@ function wc_get_orders( $args ) {
 		'type'     => wc_get_order_types( 'view-orders' ),
 		'parent'   => null,
 		'customer' => 0,
+		'email'    => '',
 		'limit'    => 10,
 		'offset'   => null,
 		'page'     => 1,
@@ -86,17 +89,8 @@ function wc_get_orders( $args ) {
 	}
 
 	if ( ! empty( $args['customer'] ) ) {
-		if ( is_email( $args['customer'] ) ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'   => '_billng_email',
-				'value' => sanitize_email( $args['customer'] ),
-			);
-		} else {
-			$wp_query_args['meta_query'][] = array(
-				'key'   => '_customer_user',
-				'value' => absint( $args['customer'] ),
-			);
-		}
+		$values = is_array( $args['customer'] ) ? $args['customer'] : array( $args['customer'] );
+		$wp_query_args['meta_query'][] = _wc_get_orders_generate_customer_meta_query( $values );
 	}
 
 	if ( ! empty( $args['exclude'] ) ) {
@@ -114,9 +108,53 @@ function wc_get_orders( $args ) {
 
 	return (object) array(
 		'orders'        => $return,
-		'total_orders'  => $orders->found_posts,
+		'total'         => $orders->found_posts,
 		'max_num_pages' => $orders->max_num_pages,
 	);
+}
+
+/**
+ * Generate meta query for wc_get_orders. Used internally only.
+ * @since  2.6.0
+ * @param  array $values
+ * @param  string $relation
+ * @return array
+ */
+function _wc_get_orders_generate_customer_meta_query( $values, $relation = 'or' ) {
+	$meta_query = array(
+		'relation' => strtoupper( $relation ),
+		'customer_emails' => array(
+			'key'     => '_billing_email',
+			'value'   => array(),
+			'compare' => 'IN'
+		),
+		'customer_ids' => array(
+			'key'     => '_customer_user',
+			'value'   => array(),
+			'compare' => 'IN'
+		)
+	);
+	foreach ( $values as $value ) {
+		if ( is_array( $value ) ) {
+			$meta_query[] = _wc_get_orders_generate_customer_meta_query( $value, 'and' );
+		} elseif ( is_email( $value ) ) {
+			$meta_query['customer_emails']['value'][] = sanitize_email( $value );
+		} else {
+			$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
+		}
+	}
+
+	if ( empty( $meta_query['customer_emails']['value'] ) ) {
+		unset( $meta_query['customer_emails'] );
+		unset( $meta_query['relation'] );
+	}
+
+	if ( empty( $meta_query['customer_ids']['value'] ) ) {
+		unset( $meta_query['customer_ids'] );
+		unset( $meta_query['relation'] );
+	}
+
+	return $meta_query;
 }
 
 /**
