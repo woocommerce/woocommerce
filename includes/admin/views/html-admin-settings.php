@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap woocommerce">
 	<form method="<?php echo esc_attr( apply_filters( 'woocommerce_settings_form_method_tab_' . $current_tab, 'post' ) ); ?>" id="mainform" action="" enctype="multipart/form-data">
 		<div class="icon32 icon32-woocommerce-settings" id="icon-woocommerce"><br /></div>
-		<h1 class="screen-reader-text"><?php echo esc_html( $tabs[ $current_tab ] ); ?></h1>
+		<h1><?php printf( __( '%s Settings', 'woocommerce' ), esc_html( $tabs[ $current_tab ] ) ); ?></h1>
 		<h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
 			<?php
 				foreach ( $tabs as $name => $label ) {
