@@ -2012,6 +2012,7 @@ abstract class WC_Abstract_Order {
 			'show_purchase_note'  => $this->is_paid() && ! $args['sent_to_admin'],
 			'show_image'          => $args['show_image'],
 			'image_size'          => $args['image_size'],
+			'plain_text'          => $args['plain_text'],
 			'sent_to_admin'       => $args['sent_to_admin']
 		) );
 
