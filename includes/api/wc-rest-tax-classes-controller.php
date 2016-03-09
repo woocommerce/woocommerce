@@ -58,14 +58,6 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'args'                => array(
-					'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-				),
-			),
-			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
 				'permission_callback' => array( $this, 'update_item_permissions_check' ),
@@ -115,20 +107,6 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to read a tax class.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Check if a given request has access update a tax class.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
@@ -154,6 +132,84 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get all tax classes.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return array
+	 */
+	public function get_items( $request ) {
+		$tax_classes = array();
+
+		// Add standard class.
+		$tax_classes[] = array(
+			'slug' => 'standard',
+			'name' => __( 'Standard Rate', 'woocommerce' ),
+		);
+
+		$classes = WC_Tax::get_tax_classes();
+
+		foreach ( $classes as $class ) {
+			$tax_classes[] = array(
+				'slug' => sanitize_title( $class ),
+				'name' => $class,
+			);
+		}
+
+		$data = array();
+		foreach ( $tax_classes as $tax_class ) {
+			$class  = $this->prepare_item_for_response( $tax_class, $request );
+			$class  = $this->prepare_response_for_collection( $class );
+			$data[] = $class;
+		}
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Prepare a single tax class output for response.
+	 *
+	 * @param array $tax_class Tax class data.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response Response data.
+	 */
+	public function prepare_item_for_response( $tax_class, $request ) {
+		$data = $tax_class;
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links() );
+
+		/**
+		 * Filter tax object returned from the REST API.
+		 *
+		 * @param WP_REST_Response $response  The response object.
+		 * @param stdClass         $tax_class Tax object used to create response.
+		 * @param WP_REST_Request  $request   Request object.
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_tax', $response, (object) $tax_class, $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @return array Links for the given tax class.
+	 */
+	protected function prepare_links() {
+		$links = array(
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
+			),
+		);
+
+		return $links;
 	}
 
 	/**
