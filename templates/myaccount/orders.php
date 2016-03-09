@@ -27,7 +27,7 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="my-account-content">
 
-	<?php do_action( 'woocommerce_before_account_orders', $customer_orders ); ?>
+	<?php do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
 	<?php if ( 0 < $customer_orders->total ) : ?>
 
@@ -41,7 +41,8 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 			</thead>
 
 			<tbody>
-				<?php foreach ( $customer_orders->orders as $order ) :
+				<?php foreach ( $customer_orders->orders as $customer_order ) :
+					$order      = wc_get_order( $customer_order );
 					$item_count = $order->get_item_count();
 					?>
 					<tr class="order">
@@ -126,6 +127,6 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 		</div>
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_after_account_orders', $customer_orders ); ?>
+	<?php do_action( 'woocommerce_after_account_orders', $has_orders ); ?>
 
 </div>
