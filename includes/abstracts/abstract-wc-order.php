@@ -2280,7 +2280,7 @@ abstract class WC_Abstract_Order {
 			'post_status' => $this->post_status,
 		);
 
-		if ( 'pending' === $old_status ) {
+		if ( 'pending' === $old_status && ! $manual ) {
 			$update_post_data[ 'post_date' ]     = current_time( 'mysql', 0 );
 			$update_post_data[ 'post_date_gmt' ] = current_time( 'mysql', 1 );
 		}
