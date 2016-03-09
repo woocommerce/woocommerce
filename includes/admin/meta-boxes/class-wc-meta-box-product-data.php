@@ -976,11 +976,10 @@ class WC_Meta_Box_Product_Data {
 		uasort( $attributes, 'attributes_cmp' );
 
 		// Unset deleted attributes.
-		$current_attributes = get_post_meta( $post_id, '_product_attributes', true );
-		foreach ( array_keys( $current_attributes ) as $_attribute ) {
-			if ( empty( $attributes[ $_attribute ] ) ) {
-				if ( taxonomy_exists( $_attribute ) ) {
-					wp_set_object_terms( $post_id, array(), $_attribute );
+		foreach ( get_post_meta( $post_id, '_product_attributes', true ) as $key => $value ) {
+			if ( empty( $attributes[ $key ] ) ) {
+				if ( $value['is_taxonomy'] && taxonomy_exists( $key ) ) {
+					wp_set_object_terms( $post_id, array(), $key );
 				}
 			}
 		}
