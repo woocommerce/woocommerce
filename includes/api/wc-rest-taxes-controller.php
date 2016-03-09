@@ -130,6 +130,20 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access update a customer.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get all taxes.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -235,29 +249,16 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		}
 
 		$data = array(
-			'tax_rate_country'  => '',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '',
-			'tax_rate_name'     => '',
-			'tax_rate_priority' => 1,
-			'tax_rate_compound' => 0,
-			'tax_rate_shipping' => 1,
-			'tax_rate_order'    => 0,
-			'tax_rate_class'    => '',
+			'tax_rate_country'  => $request['country'],
+			'tax_rate_state'    => $request['state'],
+			'tax_rate'          => $request['rate'],
+			'tax_rate_name'     => $request['name'],
+			'tax_rate_priority' => (int) $request['priority'],
+			'tax_rate_compound' => (int) $request['compound'],
+			'tax_rate_shipping' => (int) $request['shipping'],
+			'tax_rate_order'    => (int) $request['order'],
+			'tax_rate_class'    => 'standard' !== $request['class'] ? $request['class'] : '',
 		);
-
-		foreach ( $data as $key => $value ) {
-			$new_key = str_replace( 'tax_rate_', '', $key );
-			$new_key = 'tax_rate' === $new_key ? 'rate' : $new_key;
-
-			if ( ! empty( $request[ $new_key ] ) ) {
-				if ( in_array( $new_key, array( 'compound', 'shipping' ) ) ) {
-					$data[ $key ] = (int) $request[ $new_key ];
-				} else {
-					$data[ $key ] = $request[ $new_key ];
-				}
-			}
-		}
 
 		// Create tax rate.
 		$id = WC_Tax::_insert_tax_rate( $data );
@@ -270,7 +271,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			WC_Tax::_update_tax_rate_cities( $id, wc_clean( $request['city'] ) );
 		}
 
-		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );;
+		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		$this->update_additional_fields_for_object( $tax, $request );
 
@@ -308,6 +309,87 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 
 		$tax = $this->prepare_item_for_response( $tax_obj, $request );
 		$response = rest_ensure_response( $tax );
+
+		return $response;
+	}
+
+	/**
+	 * Update a single tax.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$id          = (int) $request['id'];
+		$current_tax = WC_Tax::_get_tax_rate( $id, OBJECT );
+
+		if ( empty( $id ) || empty( $current_tax ) ) {
+			return new WP_Error( 'woocommerce_rest_tax_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$data   = array();
+		$fields = array(
+			'tax_rate_country',
+			'tax_rate_state',
+			'tax_rate',
+			'tax_rate_name',
+			'tax_rate_priority',
+			'tax_rate_compound',
+			'tax_rate_shipping',
+			'tax_rate_order',
+			'tax_rate_class'
+		);
+
+		foreach ( $fields as $field ) {
+			$key = 'tax_rate' === $field ? 'rate' : str_replace( 'tax_rate_', '', $field );
+
+			if ( ! isset( $request[ $key ] ) ) {
+				continue;
+			}
+
+			$value = $request[ $key ];
+
+			// Fix compund and shipping values.
+			if ( in_array( $key, array( 'compound', 'shipping' ) ) ) {
+				$value = (int) $request[ $key ];
+			}
+
+			// Test new data against current data.
+			if ( $current_tax->$field === $value ) {
+				continue;
+			}
+
+			$data[ $field ] = $request[ $key ];
+		}
+
+		// Update tax rate
+		WC_Tax::_update_tax_rate( $id, $data );
+
+		// Update locales
+		if ( ! isset( $request['postcode'] ) ) {
+			WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $request['postcode'] ) );
+		}
+
+		if ( ! isset( $request['city'] ) ) {
+			WC_Tax::_update_tax_rate_cities( $id, wc_clean( $request['city'] ) );
+		}
+
+		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
+
+		$this->update_additional_fields_for_object( $tax, $request );
+
+		/**
+		 * Fires after a tax is created or updated via the REST API.
+		 *
+		 * @param stdClass        $tax       Data used to create the tax.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating tax, false when updating tax.
+		 */
+		do_action( 'woocommerce_rest_insert_tax', $tax, $request, false );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $tax, $request );
+		$response = rest_ensure_response( $response );
 
 		return $response;
 	}

@@ -357,7 +357,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Update a single user
+	 * Update a single user.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
