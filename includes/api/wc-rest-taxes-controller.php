@@ -88,6 +88,20 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check whether a given request has permission to read taxes.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list taxes.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if a given request has access to read a tax.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
@@ -99,6 +113,100 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get all customers.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		global $wpdb;
+
+		$prepared_args = array();
+		$prepared_args['exclude'] = $request['exclude'];
+		$prepared_args['include'] = $request['include'];
+		$prepared_args['order']   = $request['order'];
+		$prepared_args['number']  = $request['per_page'];
+		if ( ! empty( $request['offset'] ) ) {
+			$prepared_args['offset'] = $request['offset'];
+		} else {
+			$prepared_args['offset'] = ( $request['page'] - 1 ) * $prepared_args['number'];
+		}
+		$orderby_possibles = array(
+			'id'    => 'tax_rate_id',
+			'order' => 'tax_rate_order',
+		);
+		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
+		$prepared_args['class']   = $request['class'];
+
+		/**
+		 * Filter arguments, before passing to $wpdb->get_results(), when querying taxes via the REST API.
+		 *
+		 * @param array           $prepared_args Array of arguments for $wpdb->get_results().
+		 * @param WP_REST_Request $request       The current request.
+		 */
+		$prepared_args = apply_filters( 'woocommerce_rest_tax_query', $prepared_args, $request );
+
+		$query = "
+			SELECT *
+			FROM {$wpdb->prefix}woocommerce_tax_rates
+			WHERE 1 = 1
+		";
+
+		// Filter by tax class.
+		if ( ! empty( $prepared_args['class'] ) ) {
+			$class = 'standard' !== $prepared_args['class'] ? sanitize_title( $prepared_args['class'] ) : '';
+			$query .= " AND tax_rate_class = '$class'";
+		}
+
+		// Order tax rates.
+		$order_by = sprintf( ' ORDER BY %s', sanitize_key( $prepared_args['orderby'] ) );
+
+		// Pagination.
+		$pagination = sprintf( ' LIMIT %d, %d', $prepared_args['offset'], $prepared_args['number'] );
+
+		// Query taxes.
+		$results = $wpdb->get_results( $query . $order_by . $pagination );
+
+		$taxes = array();
+		foreach ( $results as $tax ) {
+			$data = $this->prepare_item_for_response( $tax, $request );
+			$taxes[] = $this->prepare_response_for_collection( $data );
+		}
+
+		$response = rest_ensure_response( $taxes );
+
+		// Store pagation values for headers then unset for count query.
+		$per_page = (int) $prepared_args['number'];
+		$page = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
+
+		// Query only for ids.
+		$wpdb->get_results( str_replace( 'SELECT *', 'SELECT tax_rate_id', $query ) );
+
+		// Calcule totals.
+		$total_taxes = (int) $wpdb->num_rows;
+		$response->header( 'X-WP-Total', (int) $total_taxes );
+		$max_pages = ceil( $total_taxes / $per_page );
+		$response->header( 'X-WP-TotalPages', (int) $max_pages );
+
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+		if ( $page > 1 ) {
+			$prev_page = $page - 1;
+			if ( $prev_page > $max_pages ) {
+				$prev_page = $max_pages;
+			}
+			$prev_link = add_query_arg( 'page', $prev_page, $base );
+			$response->link_header( 'prev', $prev_link );
+		}
+		if ( $max_pages > $page ) {
+			$next_page = $page + 1;
+			$next_link = add_query_arg( 'page', $next_page, $base );
+			$response->link_header( 'next', $next_link );
+		}
+
+		return $response;
 	}
 
 	/**
@@ -287,29 +395,29 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$query_params = parent::get_collection_params();
+		$params = parent::get_collection_params();
 
-		$query_params['context']['default'] = 'view';
+		$params['context']['default'] = 'view';
 
-		$query_params['exclude'] = array(
+		$params['exclude'] = array(
 			'description'        => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
 		);
-		$query_params['include'] = array(
+		$params['include'] = array(
 			'description'        => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'               => 'array',
 			'default'            => array(),
 			'sanitize_callback'  => 'wp_parse_id_list',
 		);
-		$query_params['offset'] = array(
+		$params['offset'] = array(
 			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
 			'type'               => 'integer',
 			'sanitize_callback'  => 'absint',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
-		$query_params['order'] = array(
+		$params['order'] = array(
 			'default'            => 'asc',
 			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'enum'               => array( 'asc', 'desc' ),
@@ -317,27 +425,25 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
-		$query_params['orderby'] = array(
-			'default'            => 'name',
+		$params['orderby'] = array(
+			'default'            => 'order',
 			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'enum'               => array(
 				'id',
-				'include',
-				'name',
-				'registered_date',
+				'order',
 			),
 			'sanitize_callback'  => 'sanitize_key',
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
-		$query_params['class'] = array(
+		$params['class'] = array(
 			'description'        => __( 'Sort by tax class.', 'woocommerce' ),
 			'enum'               => array_merge( array( 'standard' ), array_map( 'sanitize_title', WC_Tax::get_tax_classes() ) ),
-			'sanitize_callback'  => 'sanitize_key',
+			'sanitize_callback'  => 'sanitize_title',
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 
-		return $query_params;
+		return $params;
 	}
 }
