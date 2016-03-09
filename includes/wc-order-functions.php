@@ -31,13 +31,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 		offset int Offset of orders to retrieve.
  * 		page int Page of orders to retrieve. Ignored when using the 'offset' arg.
  * 		exclude array Order IDs to exclude from the query.
- * 		return string Type of date to return. Allowed values ids or objects.
  * 		orderby string Order by date, title, id, modified, rand etc
  * 		order string ASC or DESC
+ * 		return string Type of data to return. Allowed values:
+ * 			ids array of order ids
+ * 			objects array of order objects (default)
+ * 		paginate bool If true, the return value will be an array with values:
+ * 			'orders'        => array of data (return value above),
+ * 			'total'         => total number of orders matching the query
+ * 			'max_num_pages' => max number of pages found
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
- * @return object Number of pages and an array of order objects
+ * @return array|object Number of pages and an array of order objects if
+ *                             paginate is true, or just an array of values.
  */
 function wc_get_orders( $args ) {
 	$args = wp_parse_args( $args, array(
@@ -50,9 +57,10 @@ function wc_get_orders( $args ) {
 		'offset'   => null,
 		'page'     => 1,
 		'exclude'  => array(),
-		'return'   => 'objects',
 		'orderby'  => 'date',
 		'order'    => 'DESC',
+		'return'   => 'objects',
+		'paginate' => false,
 	) );
 
 	// Handle some BW compatibility arg names where wp_query args differ in naming.
@@ -69,7 +77,7 @@ function wc_get_orders( $args ) {
 	 * custom tables in the future.
 	 */
 	$wp_query_args = array(
-		'post_type'      => $args['type'],
+		'post_type'      => $args['type'] ? $args['type'] : 'shop_order',
 		'post_status'    => $args['status'],
 		'posts_per_page' => $args['limit'],
 		'meta_query'     => array(),
@@ -97,6 +105,10 @@ function wc_get_orders( $args ) {
 		$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
 	}
 
+	if ( ! $args['paginate' ] ) {
+		$wp_query_args['no_found_rows'] = true;
+	}
+
 	// Get results.
 	$orders = new WP_Query( $wp_query_args );
 
@@ -106,11 +118,15 @@ function wc_get_orders( $args ) {
 		$return = $orders->posts;
 	}
 
-	return (object) array(
-		'orders'        => $return,
-		'total'         => $orders->found_posts,
-		'max_num_pages' => $orders->max_num_pages,
-	);
+	if ( $args['paginate' ] ) {
+		return (object) array(
+			'orders'        => $return,
+			'total'         => $orders->found_posts,
+			'max_num_pages' => $orders->max_num_pages,
+		);
+	} else {
+		return $return;
+	}
 }
 
 /**

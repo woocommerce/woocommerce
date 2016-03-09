@@ -131,8 +131,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 					'customer' => $user->ID
 				) );
 
-				if ( ! empty( $orders->orders ) ) {
-					$order = $orders->orders[0];
+				if ( ! empty( $orders ) ) {
+					$order = $orders[0];
 					return '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) );
 				} else {
 					return '-';
@@ -172,7 +172,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 							'customer'       => array( array( 0, $user->user_email ) ),
 						) );
 
-						if ( $orders->total > 0 ) {
+						if ( $orders ) {
 							$actions['link'] = array(
 								'url'       => wp_nonce_url( add_query_arg( 'link_orders', $user->ID ), 'link_orders' ),
 								'name'      => __( 'Link previous orders', 'woocommerce' ),
