@@ -102,6 +102,20 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access create taxes.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function create_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create_tax', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if a given request has access to read a tax.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
@@ -116,7 +130,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get all customers.
+	 * Get all taxes.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
@@ -205,6 +219,75 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			$next_link = add_query_arg( 'page', $next_page, $base );
 			$response->link_header( 'next', $next_link );
 		}
+
+		return $response;
+	}
+
+	/**
+	 * Create a single tax.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			return new WP_Error( 'woocommerce_rest_tax_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$data = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '',
+			'tax_rate_name'     => '',
+			'tax_rate_priority' => 1,
+			'tax_rate_compound' => 0,
+			'tax_rate_shipping' => 1,
+			'tax_rate_order'    => 0,
+			'tax_rate_class'    => '',
+		);
+
+		foreach ( $data as $key => $value ) {
+			$new_key = str_replace( 'tax_rate_', '', $key );
+			$new_key = 'tax_rate' === $new_key ? 'rate' : $new_key;
+
+			if ( ! empty( $request[ $new_key ] ) ) {
+				if ( in_array( $new_key, array( 'compound', 'shipping' ) ) ) {
+					$data[ $key ] = (int) $request[ $new_key ];
+				} else {
+					$data[ $key ] = $request[ $new_key ];
+				}
+			}
+		}
+
+		// Create tax rate.
+		$id = WC_Tax::_insert_tax_rate( $data );
+
+		// Add locales.
+		if ( ! empty( $request['postcode'] ) ) {
+			WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $request['postcode'] ) );
+		}
+		if ( ! empty( $request['city'] ) ) {
+			WC_Tax::_update_tax_rate_cities( $id, wc_clean( $request['city'] ) );
+		}
+
+		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );;
+
+		$this->update_additional_fields_for_object( $tax, $request );
+
+		/**
+		 * Fires after a tax is created or updated via the REST API.
+		 *
+		 * @param stdClass        $tax       Data used to create the tax.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating tax, false when updating tax.
+		 */
+		do_action( 'woocommerce_rest_insert_tax', $tax, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $tax, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $id ) ) );
 
 		return $response;
 	}
