@@ -58,12 +58,6 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<slug>\w[\w\s\-]*)', array(
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			array(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_item' ),
 				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
@@ -101,20 +95,6 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	public function create_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access update a tax class.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean
-	 */
-	public function update_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -216,6 +196,73 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $tax_class['slug'] ) ) );
+
+		return $response;
+	}
+
+	/**
+	 * Delete a single tax class.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function delete_item( $request ) {
+		global $wpdb;
+
+		$id    = (int) $request['id'];
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Taxes do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		}
+
+		$tax_class = array(
+			'slug' => sanitize_title( $request['slug'] ),
+			'name' => '',
+		);
+		$classes = WC_Tax::get_tax_classes();
+		$deleted = false;
+
+		foreach ( $classes as $key => $class ) {
+			if ( sanitize_title( $class ) === $tax_class['slug'] ) {
+				$tax_class['name'] = $class;
+				unset( $classes[ $key ] );
+				$deleted = true;
+				break;
+			}
+		}
+
+		if ( ! $deleted ) {
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
+
+		// Delete tax rate locations locations from the selected class.
+		$wpdb->query( $wpdb->prepare( "
+			DELETE locations.*
+			FROM {$wpdb->prefix}woocommerce_tax_rate_locations AS locations
+			INNER JOIN
+				{$wpdb->prefix}woocommerce_tax_rates AS rates
+				ON rates.tax_rate_id = locations.tax_rate_id
+			WHERE rates.tax_rate_class = '%s'
+		", $tax_class['slug'] ) );
+
+		// Delete tax rates in the selected class.
+		$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_class' => $tax_class['slug'] ), array( '%s' ) );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $tax_class, $request );
+
+		/**
+		 * Fires after a tax class is deleted via the REST API.
+		 *
+		 * @param stdClass         $tax_class The tax data.
+		 * @param WP_REST_Response $response  The response returned from the API.
+		 * @param WP_REST_Request  $request   The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_tax', (object) $tax_class, $response, $request );
 
 		return $response;
 	}
