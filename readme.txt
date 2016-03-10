@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.5.4 - X =
+= 2.5.4 - 10/03/2016 =
 * Fix - Fix table creation when using utf8mb4 charset.
 * Fix - Have wp_insert_post return WP_Error when creating our coupon, so the is_wp_error check can catch it.
 * Fix - Clear sale price on save if sale is no longer valid.
