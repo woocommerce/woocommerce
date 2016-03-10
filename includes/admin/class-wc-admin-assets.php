@@ -329,7 +329,7 @@ class WC_Admin_Assets {
 				array(
 					'ajax_url'         => admin_url( 'admin-ajax.php' ),
 					'update_api_nonce' => wp_create_nonce( 'update-api-key' ),
-					'clipboard_failed' => esc_html__( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.' ),
+					'clipboard_failed' => esc_html__( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ),
 				)
 			);
 		}
