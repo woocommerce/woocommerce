@@ -2,7 +2,7 @@
 /**
  * REST API Reports controller
  *
- * Handles requests to the reports endpoint.
+ * Handles requests to the reports/sales endpoint.
  *
  * @author   WooThemes
  * @category API
@@ -59,14 +59,14 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check whether a given request has permission to read sales report.
+	 * Check whether a given request has permission to read report.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list sales report.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list reports.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -198,7 +198,7 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 			$period_totals[ $time ]['discount'] = wc_format_decimal( $discount->discount_amount, 2 );
 		}
 
-		$data = array(
+		$sales_data = array(
 			'total_sales'       => $report_data->total_sales,
 			'net_sales'         => $report_data->net_sales,
 			'average_sales'     => $report_data->average_sales,
@@ -214,16 +214,13 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->add_additional_fields_to_object( $sales_data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 		$response->add_links( array(
-			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
-			),
-			'collection' => array(
+			'about' => array(
 				'href' => rest_url( sprintf( '%s/reports', $this->namespace ) ),
 			),
 		) );
@@ -237,7 +234,7 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 		 * @param stdClass         $data     The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_sales', $response, (object) $data, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_sales', $response, (object) $sales_data, $request );
 	}
 
 	/**
@@ -269,6 +266,8 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 			}
 
 		} else {
+
+			$filter['period'] = empty( $filter['period'] ) ? 'week' : $filter['period'];
 
 			// Change "week" period to "7day".
 			if ( 'week' === $filter['period'] ) {

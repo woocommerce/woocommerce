@@ -386,6 +386,7 @@ class WC_API {
 		include_once( 'api/wc-rest-product-tags-controller.php' );
 		include_once( 'api/wc-rest-products-controller.php' );
 		include_once( 'api/wc-rest-report-sales-controller.php' );
+		include_once( 'api/wc-rest-report-top-sellers-controller.php' );
 		include_once( 'api/wc-rest-reports-controller.php' );
 		include_once( 'api/wc-rest-tax-classes-controller.php' );
 		include_once( 'api/wc-rest-taxes-controller.php' );
@@ -410,6 +411,7 @@ class WC_API {
 			'WC_REST_Product_Tags_Controller',
 			'WC_REST_Products_Controller',
 			'WC_REST_Report_Sales_Controller',
+			'WC_REST_Report_Top_Sellers_Controller',
 			'WC_REST_Reports_Controller',
 			'WC_REST_Tax_Classes_Controller',
 			'WC_REST_Taxes_Controller',
