@@ -312,7 +312,7 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get the User's schema, conforming to JSON Schema
+	 * Get the Tax Classes schema, conforming to JSON Schema
 	 *
 	 * @return array
 	 */

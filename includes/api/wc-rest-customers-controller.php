@@ -591,8 +591,8 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WP_User $customer User object.
-	 * @return array Links for the given user.
+	 * @param WP_User $customer Customer object.
+	 * @return array Links for the given customer.
 	 */
 	protected function prepare_links( $customer ) {
 		$links = array(
@@ -608,7 +608,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get the User's schema, conforming to JSON Schema
+	 * Get the Customer's schema, conforming to JSON Schema
 	 *
 	 * @return array
 	 */

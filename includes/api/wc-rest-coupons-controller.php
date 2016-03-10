@@ -382,7 +382,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get the Post's schema, conforming to JSON Schema.
+	 * Get the Coupon's schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */

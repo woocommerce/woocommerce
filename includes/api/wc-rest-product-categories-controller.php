@@ -122,7 +122,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 	}
 
 	/**
-	 * Get the Term's schema, conforming to JSON Schema.
+	 * Get the Category schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */

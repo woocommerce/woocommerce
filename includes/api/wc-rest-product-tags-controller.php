@@ -80,7 +80,7 @@ class WC_REST_Product_Tags_Controller extends WC_REST_Terms_Controller {
 	}
 
 	/**
-	 * Get the Term's schema, conforming to JSON Schema.
+	 * Get the Tag's schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */

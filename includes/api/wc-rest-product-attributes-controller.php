@@ -486,7 +486,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get the Term's schema, conforming to JSON Schema.
+	 * Get the Attribute's schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */

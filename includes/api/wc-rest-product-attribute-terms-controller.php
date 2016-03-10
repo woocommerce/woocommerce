@@ -72,7 +72,7 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 	}
 
 	/**
-	 * Get the Term's schema, conforming to JSON Schema.
+	 * Get the Attribute Term's schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */

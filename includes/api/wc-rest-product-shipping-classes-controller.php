@@ -106,7 +106,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 	}
 
 	/**
-	 * Get the Term's schema, conforming to JSON Schema.
+	 * Get the Shipping Class schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */
