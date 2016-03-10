@@ -169,14 +169,24 @@ class WC_Payment_Tokens {
 	 * @param int $token_id The ID of the token that should be default
 	 */
 	public static function set_users_default( $user_id, $token_id ) {
+		global $wpdb; // DB queries so we avoid an infintie loop (update & create use this function)
 		$users_tokens = self::get_customer_tokens( $user_id );
 		foreach ( $users_tokens as $token ) {
 			if ( $token_id === $token->get_id() ) {
 				$token->set_default( true );
+				$wpdb->update(
+					$wpdb->prefix . 'woocommerce_payment_tokens',
+					array( 'is_default' => 1 ),
+					array( 'token_id' => $token->get_id(),
+				) );
 			} else {
 				$token->set_default( false );
+				$wpdb->update(
+					$wpdb->prefix . 'woocommerce_payment_tokens',
+					array( 'is_default' => 0 ),
+					array( 'token_id' => $token->get_id(),
+				) );
 			}
-			$token->update();
 		}
 	}
 

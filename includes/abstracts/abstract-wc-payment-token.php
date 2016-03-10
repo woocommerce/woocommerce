@@ -202,6 +202,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			update_metadata( 'payment_token', $this->get_id(), $meta_key, $meta_value );
 		}
 
+		// Make sure all other tokens are not set to default
+		if ( $this->is_default() && $this->get_user_id() > 0 ) {
+			WC_Payment_Tokens::set_users_default( $this->get_user_id(), $this->get_id() );
+		}
+
 		do_action( 'woocommerce_payment_token_updated', $this->get_id() );
 		return true;
 	}
@@ -217,10 +222,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		global $wpdb;
-
 		// Are there any other tokens? If not, set this token as default
-		if ( ! $this->is_default() && is_user_logged_in() ) {
-			$default_token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
+		if ( ! $this->is_default() && $this->get_user_id() > 0 ) {
+			$default_token = WC_Payment_Tokens::get_customer_default_token( $this->get_user_id() );
 			if ( is_null( $default_token ) ) {
 				$this->set_default( true );
 			}
@@ -230,6 +234,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$this->id = $token_id = $wpdb->insert_id;
 		foreach ( $this->meta as $meta_key => $meta_value ) {
 			add_metadata( 'payment_token', $token_id, $meta_key, $meta_value, true );
+		}
+
+		// Make sure all other tokens are not set to default
+		if ( $this->is_default() && $this->get_user_id() > 0 ) {
+			WC_Payment_Tokens::set_users_default( $this->get_user_id(), $token_id );
 		}
 
 		do_action( 'woocommerce_payment_token_created', $token_id );
