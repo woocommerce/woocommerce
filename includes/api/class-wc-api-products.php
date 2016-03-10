@@ -1723,6 +1723,11 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $variations as $menu_order => $variation ) {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
 
+			if ( ! $variation_id && isset( $variation['sku'] ) ) {
+				$variation_sku = wc_clean( $variation['sku'] );
+				$variation_id  = wc_get_product_id_by_sku( $variation_sku );
+			}
+
 			// Generate a useful post title
 			$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
 
