@@ -66,7 +66,7 @@ class WC_REST_Reports_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get all public post types
+	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request
 	 * @return array|WP_Error
@@ -139,21 +139,21 @@ class WC_REST_Reports_Controller extends WP_REST_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'report',
-			'type'                 => 'object',
-			'properties'           => array(
-				'slug'             => array(
-					'description'  => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
-					'type'         => 'string',
-					'context'      => array( 'view' ),
-					'readonly'     => true,
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'report',
+			'type'       => 'object',
+			'properties' => array(
+				'slug' => array(
+					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
-				'description'      => array(
-					'description'  => __( 'A human-readable description of the resource.', 'woocommerce' ),
-					'type'         => 'string',
-					'context'      => array( 'view' ),
-					'readonly'     => true,
+				'description' => array(
+					'description' => __( 'A human-readable description of the resource.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
 				),
 			),
 		);

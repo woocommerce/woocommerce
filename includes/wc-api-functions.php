@@ -150,3 +150,35 @@ function wc_rest_api_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 
 	return $attachment_id;
 }
+
+/**
+ * Validate reports request arguments.
+ *
+ * @since 2.6.0
+ * @param mixed $value
+ * @param WP_REST_Request $request
+ * @param string $param
+ * @return WP_Error|boolean
+ */
+function rest_validate_reports_request_arg( $value, $request, $param ) {
+
+	$attributes = $request->get_attributes();
+	if ( ! isset( $attributes['args'][ $param ] ) || ! is_array( $attributes['args'][ $param ] ) ) {
+		return true;
+	}
+	$args = $attributes['args'][ $param ];
+
+	if ( 'string' === $args['type'] && ! is_string( $value ) ) {
+		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%s is not of type %s', 'woocommerce' ), $param, 'string' ) );
+	}
+
+	if ( 'data' === $args['format'] ) {
+		$regex = '#^\d{4}-\d{2}-\d{2}$#';
+
+		if ( ! preg_match( $regex, $value, $matches ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_date', __( 'The date you provided is invalid.', 'woocommerce' ) );
+		}
+	}
+
+	return true;
+}
