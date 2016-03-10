@@ -110,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php _e( 'Consumer Key', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
-					<input id="key_consumer_key" value="{{ data.consumer_key }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-key" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
+					<input id="key_consumer_key" type="text" value="{{ data.consumer_key }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-key" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -118,7 +118,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php _e( 'Consumer Secret', 'woocommerce' ); ?>
 				</th>
 				<td class="forminp">
-					<input id="key_consumer_secret" value="{{ data.consumer_secret }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-secret" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
+					<input id="key_consumer_secret" type="text" value="{{ data.consumer_secret }}" size="55" readonly="readonly"> <button type="button" class="button-secondary copy-secret" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy', 'woocommerce' ); ?></button>
 				</td>
 			</tr>
 			<tr valign="top">
