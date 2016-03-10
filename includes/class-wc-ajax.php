@@ -2020,6 +2020,8 @@ class WC_AJAX {
 				}
 			}
 		}
+		
+		$found_customers = apply_filters( 'woocommerce_json_search_found_customers', $found_customers );
 
 		wp_send_json( $found_customers );
 	}
