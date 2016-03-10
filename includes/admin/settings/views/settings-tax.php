@@ -21,7 +21,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'    => __( 'Calculate Tax Based On:', 'woocommerce' ),
+		'title'    => __( 'Calculate Tax Based On', 'woocommerce' ),
 		'id'       => 'woocommerce_tax_based_on',
 		'desc_tip' =>  __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
 		'default'  => 'shipping',
@@ -35,7 +35,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'    => __( 'Shipping Tax Class:', 'woocommerce' ),
+		'title'    => __( 'Shipping Tax Class', 'woocommerce' ),
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
 		'css'      => 'min-width:150px;',
@@ -64,7 +64,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'   => __( 'Display Prices in the Shop:', 'woocommerce' ),
+		'title'   => __( 'Display Prices in the Shop', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_display_shop',
 		'default' => 'excl',
 		'type'    => 'select',
@@ -76,7 +76,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'   => __( 'Display Prices During Cart and Checkout:', 'woocommerce' ),
+		'title'   => __( 'Display Prices During Cart and Checkout', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_display_cart',
 		'default' => 'excl',
 		'type'    => 'select',
@@ -89,7 +89,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'       => __( 'Price Display Suffix:', 'woocommerce' ),
+		'title'       => __( 'Price Display Suffix', 'woocommerce' ),
 		'id'          => 'woocommerce_price_display_suffix',
 		'default'     => '',
 		'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -98,7 +98,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 	),
 
 	array(
-		'title'   => __( 'Display Tax Totals:', 'woocommerce' ),
+		'title'   => __( 'Display Tax Totals', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_total_display',
 		'default' => 'itemized',
 		'type'    => 'select',
