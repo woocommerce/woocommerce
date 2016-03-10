@@ -1515,10 +1515,11 @@ class WC_Cart {
 			if ( ! wc_shipping_enabled() || ! is_array( $this->cart_contents ) )
 				return false;
 
-			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
+			if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
 				if ( ! WC()->customer->has_calculated_shipping() ) {
-					if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) )
+					if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) ) {
 						return false;
+					}
 				}
 			}
 
