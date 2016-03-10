@@ -244,7 +244,6 @@ final class WooCommerce {
 		}
 
 		if ( $this->is_request( 'frontend' ) || $this->is_request( 'cron' ) ) {
-			include_once( 'includes/abstracts/abstract-wc-session.php' );
 			include_once( 'includes/class-wc-session-handler.php' );
 		}
 

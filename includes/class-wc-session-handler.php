@@ -3,6 +3,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Session' ) ) {
+	include_once( 'abstracts/abstract-wc-session.php' );
+}
+
 /**
  * Handle data for the current customers session.
  * Implements the WC_Session abstract class.
