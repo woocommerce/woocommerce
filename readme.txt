@@ -164,8 +164,16 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Clear sale price on save if sale is no longer valid.
 * Fix - Round refund values to ensure refunds can be performed.
 * Fix - When getting coupon by code used twice, latest should be queried.
+* Fix - CLI improvements for setting up variations and deleting orders.
+* Fix - Allow big selects when getting variations to support larger queries.
+* Fix - Trigger webhook when user edits addresses on frontend.
+* Fix - Hide shipping row when calculator is disabled, and shipping costs are hidden.
+* Fix - Unset deleted attributes when updating products.
+* Tweak - Update date for paid orders during non-manual updates only.
 * Tweak - wc_get_page_permalink - if the page ID is not set, redirect home instead to prevent white screens.
 * Tweak - Remove log dir from system status report.
+* Tweak - When sorting by date, fallback to ID.
+* Tweak - Rename pay link for clarity.
 * Tweak - Provide a fallback message if copying to the clipboard fails in system status report.
 
 = 2.5.3 - 01/03/2016 =
