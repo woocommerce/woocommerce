@@ -333,7 +333,8 @@ class WC_Install {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 		/**
-		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates.
+		 * Before updating with DBDELTA, remove any primary keys which could be
+		 * modified due to schema updates.
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
@@ -341,9 +342,29 @@ class WC_Install {
 			}
 		}
 
-		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_tax_rate_locations';" ) ) {
-			if ( $wpdb->get_var( "SHOW INDEX FROM `{$wpdb->prefix}woocommerce_tax_rate_locations` WHERE Key_name LIKE 'location_type_code';" ) ) {
-				$wpdb->query( "DROP INDEX `location_type_code` ON {$wpdb->prefix}woocommerce_tax_rate_locations;" );
+		/**
+		 * Before updating with DBDELTA, drop existing indexes so they can be
+		 * re-added without duplicate key errors. Index lengths were added
+		 * in 2.5.3.
+		 */
+		$indexes_to_remove = array(
+			'woocommerce_attribute_taxonomies'             => 'attribute_name',
+			'woocommerce_termmeta'                         => 'meta_key',
+			'woocommerce_downloadable_product_permissions' => 'download_order_key_product',
+			'woocommerce_order_itemmeta'                   => 'meta_key',
+			'woocommerce_tax_rates'                        => 'tax_rate_country',
+			'woocommerce_tax_rates'                        => 'tax_rate_state',
+			'woocommerce_tax_rates'                        => 'tax_rate_class',
+			'woocommerce_tax_rate_locations'               => 'location_type_code',
+		);
+
+		foreach ( $indexes_to_remove as $table => $key ) {
+			$table = esc_sql( $wpdb->prefix . $table );
+			$key   = esc_sql( $key );
+			if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table}';" ) ) {
+				if ( $wpdb->get_var( "SHOW INDEX FROM {$table} WHERE KEY_NAME = '{$key}';" ) ) {
+					$wpdb->query(  "ALTER TABLE {$table} DROP INDEX `{$key}`;" );
+				}
 			}
 		}
 
