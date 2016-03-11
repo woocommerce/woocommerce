@@ -53,7 +53,7 @@ abstract class WC_Data {
 	 * Returns the unique ID for this object.
 	 * @return int
 	 */
-	abstract  public function get_id();
+	abstract public function get_id();
 
 	/**
 	 * Returns all data for this object.
@@ -80,7 +80,7 @@ abstract class WC_Data {
 	/**
 	 * Updates object data in the database.
 	 */
-	abstract  public function delete();
+	abstract public function delete();
 
 	/**
 	 * Save should create or update based on object existance.
@@ -127,7 +127,7 @@ abstract class WC_Data {
 			if ( $single ) {
 				$value = $this->_meta_data[ current( $meta_ids ) ]->value;
 			} else {
-				$value = array_intersect_key( $this->_meta_data, $meta_ids );
+				$value = array_intersect_key( $this->_meta_data, array_flip( $meta_ids ) );
 			}
 		}
 
@@ -286,10 +286,10 @@ abstract class WC_Data {
 		$table           = $wpdb->prefix;
 		// If we are dealing with a type of metadata that is not a core type, the table should be prefixed.
 		if ( ! in_array( $this->_meta_type, array( 'post', 'user', 'comment', 'term' ) ) ) {
-			$table = 'woocommerce_';
+			$table .= 'woocommerce_';
 		}
 
-		$table = $this->_meta_type . 'meta';
+		$table .= $this->_meta_type . 'meta';
 
 		// Figure out our field names.
 		if ( 'post' === $this->_meta_type ) {

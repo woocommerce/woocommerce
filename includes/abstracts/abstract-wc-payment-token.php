@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category	Abstract Class
  * @author		WooThemes
  */
- abstract class WC_Payment_Token implements WC_Data {
+ abstract class WC_Payment_Token {
 
  	/** @protected int Token ID. */
  	protected $id;

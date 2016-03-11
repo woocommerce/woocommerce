@@ -223,7 +223,6 @@ final class WooCommerce {
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
-		include_once( 'includes/interfaces/interface-wc-data.php' );
 		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
 		include_once( 'includes/wc-widget-functions.php' );
@@ -256,6 +255,7 @@ final class WooCommerce {
 
 		include_once( 'includes/class-wc-auth.php' );                            // Auth Class
 		include_once( 'includes/class-wc-post-types.php' );                      // Registers post types
+		include_once( 'includes/abstracts/abstract-wc-data.php' );				 // WC_Data for CRUD
 		include_once( 'includes/abstracts/abstract-wc-payment-token.php' );      // Payment Tokens
 		include_once( 'includes/abstracts/abstract-wc-product.php' );            // Products
 		include_once( 'includes/abstracts/abstract-wc-order.php' );              // Orders
