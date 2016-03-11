@@ -23,15 +23,14 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	protected $_data = array(
 		'id'				  => 0,
 		'email'               => '',
-		'avatar_url'          => '',
 		'first_name'          => '',
 		'last_name'           => '',
-		'role'				  => '',
-		'last_order_id'       => null,
-		'last_order_date'     => null,
-		'orders_count'        => 0,
-		'total_spent'         => 0,
-		'username'            => '',
+		'role'				  => 'customer',
+		'last_order_id'       => null, // read only
+		'last_order_date'     => null, // read only
+		'orders_count'        => 0, // read only
+		'total_spent'         => 0, // read only
+		'username'            => '', // read only on existing users
 		'password'            => '', // write only
 		'date_created'        => '', // read only
 		'date_modified'		  => '', // read only
@@ -85,7 +84,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	/**
 	 * Load customer data based on how WC_Customer is called.
 	 * @param mixed $customer WC_Customer object or customer ID is accepted.
-	 * if $customer is null, you can build a new WC_Customer object. If it's empty, some
+	 * if $customer is 'new', you can build a new WC_Customer object. If it's empty, some
 	 * data will be pulled from the session for the current user/customer.
 	 */
 	public function __construct( $customer = '' ) {
@@ -95,15 +94,15 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 		} else if ( is_numeric( $customer ) ) {
 			$this->_is_user = true;
 			$this->read( $customer );
-		} else if ( is_null( $customer ) ) {
-			$this->_is_user = true; // not an existing user yet, we are creating a new one
 		} else if ( empty( $customer ) ) {
-			$this->_from_session = true;
-			if ( is_user_logged_in() ) {
-				$this->_is_user = true;
-				$this->read( get_current_user_id() );
+			if ( $this->_from_session ) {
+				if ( is_user_logged_in() ) {
+					$this->read( get_current_user_id() );
+				} else {
+					$this->read( WC()->session->get_customer_id() );
+				}
 			} else {
-				$this->read( WC()->session->get_customer_id() );
+				$this->_is_user = true;
 			}
 		}
 
@@ -119,6 +118,13 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	public function save_session_if_changed() {
 		if ( $this->_changed ) {
 			$this->save_to_session();
+		}
+	}
+
+	public function load_session( $load_session = false ) {
+		$this->_from_session = true;
+		if ( is_user_logged_in() ) {
+			$this->_is_user = true;
 		}
 	}
 
@@ -161,48 +167,81 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 * @since 2.7.0
 	 * @return string
 	 */
+	public function get_first_name() {
+		return $this->_data['first_name'];
+	}
 
 	/**
 	 * Return customer's last name.
 	 * @since 2.7.0
 	 * @return string
 	 */
+	public function get_last_name() {
+		return $this->_data['last_name'];
+	}
 
 	/**
 	 * Return customer's user role.
 	 * @since 2.7.0
 	 * @return string
 	 */
+	public function get_role() {
+		return $this->_data['role'];
+	}
 
 	/**
 	 * Return customer's last order ID.
 	 * @since 2.7.0
-	 * @return integer
+	 * @return integer|null
 	 */
+	public function get_last_order_id() {
+		return ( is_null( $this->_data['last_order_id'] ) ? null : intval( $this->_data['last_order_id'] ) );
+	}
 
 	/**
 	 * Return the date of the customer's last order.
 	 * @since 2.7.0
-	 * @return string
+	 * @return integer|null
 	 */
+	public function get_last_order_date() {
+		return ( is_null( $this->_data['last_order_date'] ) ? null : intval( $this->_data['last_order_date'] ) );
+	}
 
 	/**
 	 * Return the number of orders this customer has.
 	 * @since 2.7.0
 	 * @return integer
 	 */
+	public function get_orders_count() {
+		return intval( $this->_data['orders_count'] );
+	}
 
 	/**
 	 * Return how much money this customer has spent.
 	 * @since 2.7.0
 	 * @return float
 	 */
+	public function get_total_spent() {
+		return wc_format_decimal( $this->_data['total_spent'] );
+	}
 
 	/**
-	 * Return this customer's avatar
+	 * Return this customer's avatar.
 	 * @since 2.7.0
 	 * @return string
 	 */
+	public function get_avatar_url() {
+		$avatar_html = get_avatar( $this->get_email() );
+
+		// Get the URL of the avatar from the provided HTML
+		preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
+
+		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
+			return esc_url( $matches[1] );
+		}
+
+		return '';
+	}
 
 	/**
 	 * Return the date this customer was created.
@@ -429,48 +468,63 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 * @since 2.7.0
 	 * @param string $first_name
 	 */
+	public function set_first_name( $first_name ) {
+		$this->_data['first_name'] = $first_name;
+	}
 
 	/**
 	 * Set customer's last name.
 	 * @since 2.7.0
 	 * @param string $last_name
 	 */
+	public function set_last_name( $last_name ) {
+		$this->_data['last_name'] = $last_name;
+	}
 
 	/**
 	 * Set customer's user role(s).
 	 * @since 2.7.0
-	 * @param mixed $roles
+	 * @param mixed $role
 	 */
+	public function set_role( $role ) {
+		$this->_data['role'] = $role;
+	}
 
 	/**
 	 * Set customer's last order ID.
 	 * @since 2.7.0
-	 * @param integer $last_order_id
+	 * @param integer|null $last_order_id
 	 */
+	public function set_last_order_id( $last_order_id ) {
+		$this->_data['last_order_id'] = $last_order_id;
+	}
 
 	/**
 	 * Set the date of the customer's last order.
 	 * @since 2.7.0
-	 * @param string $last_order_date
+	 * @param string|null $last_order_date
 	 */
+	public function set_last_order_date( $last_order_date ) {
+		$this->_data['last_order_date'] = $last_order_date;
+ 	}
 
 	/**
 	 * Set the number of orders this customer has.
 	 * @since 2.7.0
-	 * @param integer $number_of_orders
+	 * @param integer $order_count
 	 */
+	public function set_orders_count( $orders_count ) {
+		$this->_data['orders_count'] = $orders_count;
+	}
 
 	/**
 	 * Return how much money this customer has spent.
 	 * @since 2.7.0
 	 * @param float $total_spent
 	 */
-
-	/**
-	 * Return this customer's avatar
-	 * @since 2.7.0
-	 * @return string $avatar
-	 */
+	public function set_total_spent( $total_spent ) {
+		$this->_data['total_spent'] = $total_spent;
+	}
 
 	/**
 	 * Set customer's password.
@@ -496,7 +550,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 * @param integer $timestamp
 	 */
 	protected function set_date_created( $timestamp ) {
-		$this->_data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
+		$this->_data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
 	}
 
 	/**
@@ -713,6 +767,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	  */
 	public function create() {
 		$customer_id = wc_create_new_customer( $this->get_email(), $this->get_username(), $this->_data['password'] );
+		unset( $this->_data['password'] );
 		if ( $customer_id ) {
 			$this->_data['id'] = $customer_id;
 			update_user_meta( $this->get_id(), 'billing_postcode', $this->get_postcode() );
@@ -730,6 +785,10 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 			update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
 			$this->set_date_modified( time() );
 			update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
+			update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
+			update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
+			wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
+			$this->read( $this->get_id() );
 		}
 	}
 
@@ -739,6 +798,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 * @param integer $id
 	 */
 	public function read( $id ) {
+		global $wpdb;
 		$pull_from_db = true;
 		if ( $this->_from_session ) {
 			$data = (array) WC()->session->get( 'customer' );
@@ -766,8 +826,27 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 			$wp_user = new WP_User( $id );
 			$this->set_email( $wp_user->user_email );
 			$this->set_username( $wp_user->user_login );
-			$this->set_date_created( strtotime( $customer->user_registered ) );
+			error_log( 'hmm?' );
+			error_log( print_r ( $wp_user->user_registered, 1 ) );
+			$this->set_date_created( strtotime( $wp_user->user_registered ) );
 			$this->set_date_modified( get_user_meta( $id, 'last_update', true ) );
+			$this->set_role( $wp_user->roles[0] );
+
+			// Get info about user's last order
+			$last_order = $wpdb->get_row( "SELECT id, post_date_gmt
+				FROM $wpdb->posts AS posts
+				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
+				WHERE meta.meta_key = '_customer_user'
+				AND   meta.meta_value = {$id}
+				AND   posts.post_type = 'shop_order'
+				AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
+				ORDER BY posts.ID DESC
+			" );
+
+			$this->set_last_order_id( is_object( $last_order ) ? $last_order->id : null );
+			$this->set_last_order_date( is_object( $last_order ) ? strtotime( $last_order->post_date_gmt ) : null );
+			$this->set_orders_count( wc_get_customer_order_count( $id ) );
+			$this->set_total_spent( wc_get_customer_total_spent( $id ) );
 		}
 
 		$this->_data['id'] = $id;
@@ -776,7 +855,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 
 		// Set some defaults if some of our values are still not set.
 		if ( empty( $this->get_country() ) ) {
-			$this->set_country( $default['country'] )
+			$this->set_country( $default['country'] );
 		}
 
 		if ( empty( $this->get_shipping_country() ) ) {
@@ -809,7 +888,8 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 		wp_update_user( array( 'ID' => $customer_ID, 'user_email' => $this->get_email() ) );
 		// Only update password if a new one was set with set_password
 		if ( isset( $this->_data['password'] ) ) {
-			wp_update_user( array( 'ID' => $customer_ID, 'user_pass' => $this->_data['password'] ) ) );
+			wp_update_user( array( 'ID' => $customer_ID, 'user_pass' => $this->_data['password'] ) );
+			unset( $this->_data['password'] );
 		}
 
 		update_user_meta( $this->get_id(), 'billing_postcode', $this->get_postcode() );
@@ -827,6 +907,8 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 		update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
 		$this->set_date_modified( time() );
 		update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
+		wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
+		$this->read( $this->get_id() );
 	}
 
 	/**
