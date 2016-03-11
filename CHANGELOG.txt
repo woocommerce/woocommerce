@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 2.5.5 - 11/03/2016 =
+* Fix - Before running dbdelta, drop indexes to prevent duplicate key notices.
+* Fix - Prevent notice when unsetting terms on product edit screen.
+* Tweak - zeroclipboard fallback for firefox on system status report.
+* Tweak - Check valid product ID is provided on add_to_cart shortcode.
+
 = 2.5.4 - 10/03/2016 =
 * Fix - Fix table creation when using utf8mb4 charset.
 * Fix - Have wp_insert_post return WP_Error when creating our coupon, so the is_wp_error check can catch it.
