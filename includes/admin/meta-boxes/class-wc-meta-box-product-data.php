@@ -975,15 +975,23 @@ class WC_Meta_Box_Product_Data {
 		}
 		uasort( $attributes, 'attributes_cmp' );
 
-		// Unset deleted attributes.
-		foreach ( get_post_meta( $post_id, '_product_attributes', true ) as $key => $value ) {
-			if ( empty( $attributes[ $key ] ) ) {
-				if ( $value['is_taxonomy'] && taxonomy_exists( $key ) ) {
+		/**
+		 * Unset removed attributes by looping over previous values and
+		 * unsetting the terms.
+		 */
+		$old_attributes = array_filter( (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) ) );
+
+		if ( $old_attributes ) {
+			foreach ( $old_attributes as $key => $value ) {
+				if ( empty( $attributes[ $key ] ) && ! empty( $value['is_taxonomy'] ) && taxonomy_exists( $key ) ) {
 					wp_set_object_terms( $post_id, array(), $key );
 				}
 			}
 		}
 
+		/**
+		 * After removed attributes are unset, we can set the new attribute data.
+		 */
 		update_post_meta( $post_id, '_product_attributes', $attributes );
 
 		// Sales and prices
