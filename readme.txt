@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, royho, woothe
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.1
 Tested up to: 4.4
-Stable tag: 2.5.4
+Stable tag: 2.5.5
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,12 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 6. A product archive (grid).
 
 == Changelog ==
+
+= 2.5.5 - 11/03/2016 =
+* Fix - Before running dbdelta, drop indexes to prevent duplicate key notices.
+* Fix - Prevent notice when unsetting terms on product edit screen.
+* Tweak - zeroclipboard fallback for firefox on system status report.
+* Tweak - Check valid product ID is provided on add_to_cart shortcode.
 
 = 2.5.4 - 10/03/2016 =
 * Fix - Fix table creation when using utf8mb4 charset.

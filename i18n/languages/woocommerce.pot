@@ -2,16 +2,16 @@
 # This file is distributed under the same license as the WooCommerce package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce 2.5.4\n"
+"Project-Id-Version: WooCommerce 2.5.5\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2016-03-10 17:09:32+00:00\n"
+"POT-Creation-Date: 2016-03-11 15:08:54+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2016-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n 0.5.3\n"
+"X-Generator: grunt-wp-i18n 0.5.4\n"
 
 #: i18n/countries.php:18
 msgid "Afghanistan"
@@ -4845,7 +4845,7 @@ msgstr ""
 #: includes/admin/class-wc-admin-menus.php:80
 #: includes/admin/settings/class-wc-settings-api.php:45
 #: includes/admin/views/html-admin-page-status-report.php:407
-#: includes/class-wc-install.php:727
+#: includes/class-wc-install.php:748
 msgid "Settings"
 msgstr ""
 
@@ -8839,34 +8839,34 @@ msgstr ""
 msgid "Product SKU must be unique."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1177
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1185
 msgid ""
 "The downloadable file %s cannot be used as it does not have an allowed file "
 "type. Allowed types include: %s"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1190
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1198
 msgid "The downloadable file %s cannot be used as it does not exist on the server."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1301
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1309
 #: includes/api/class-wc-api-products.php:1747
 #: includes/api/v2/class-wc-api-products.php:1264
 #: includes/cli/class-wc-cli-product.php:1538
 msgid "Variation #%s of %s"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1354
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1362
 msgid "#%s &ndash; Variation SKU must be unique."
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1474
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1482
 msgid ""
 "#%s &ndash; The downloadable file %s cannot be used as it does not have an "
 "allowed file type. Allowed types include: %s"
 msgstr ""
 
-#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1481
+#: includes/admin/meta-boxes/class-wc-meta-box-product-data.php:1489
 msgid ""
 "#%s &ndash; The downloadable file %s cannot be used as it does not exist on "
 "the server."
@@ -9400,7 +9400,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:27
 #: includes/admin/settings/class-wc-settings-emails.php:260
-#: includes/class-wc-install.php:498
+#: includes/class-wc-install.php:519
 msgid "Customer"
 msgstr ""
 
@@ -13794,35 +13794,35 @@ msgstr ""
 msgid "Monthly"
 msgstr ""
 
-#: includes/class-wc-install.php:503
+#: includes/class-wc-install.php:524
 msgid "Shop Manager"
 msgstr ""
 
-#: includes/class-wc-install.php:727
+#: includes/class-wc-install.php:748
 msgid "View WooCommerce Settings"
 msgstr ""
 
-#: includes/class-wc-install.php:743
+#: includes/class-wc-install.php:764
 msgid "View WooCommerce Documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:743
+#: includes/class-wc-install.php:764
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:744
+#: includes/class-wc-install.php:765
 msgid "View WooCommerce API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:744
+#: includes/class-wc-install.php:765
 msgid "API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:745
+#: includes/class-wc-install.php:766
 msgid "Visit Premium Customer Support Forum"
 msgstr ""
 
-#: includes/class-wc-install.php:745
+#: includes/class-wc-install.php:766
 msgid "Premium Support"
 msgstr ""
 
