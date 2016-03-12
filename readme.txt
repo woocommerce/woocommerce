@@ -159,7 +159,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.5.5 - 11/03/2016 =
-* Fix - Before running dbdelta, drop indexes to prevent duplicate key notices.
 * Fix - Prevent notice when unsetting terms on product edit screen.
 * Tweak - zeroclipboard fallback for firefox on system status report.
 * Tweak - Check valid product ID is provided on add_to_cart shortcode.
