@@ -390,6 +390,7 @@ class WC_API {
 		include_once( 'api/wc-rest-reports-controller.php' );
 		include_once( 'api/wc-rest-tax-classes-controller.php' );
 		include_once( 'api/wc-rest-taxes-controller.php' );
+		include_once( 'api/wc-rest-webhooks-controller.php' );
 	}
 
 	/**
