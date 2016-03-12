@@ -342,32 +342,6 @@ class WC_Install {
 			}
 		}
 
-		/**
-		 * Before updating with DBDELTA, drop existing indexes so they can be
-		 * re-added without duplicate key errors. Index lengths were added
-		 * in 2.5.3.
-		 */
-		$indexes_to_remove = array(
-			'woocommerce_attribute_taxonomies'             => 'attribute_name',
-			'woocommerce_termmeta'                         => 'meta_key',
-			'woocommerce_downloadable_product_permissions' => 'download_order_key_product',
-			'woocommerce_order_itemmeta'                   => 'meta_key',
-			'woocommerce_tax_rates'                        => 'tax_rate_country',
-			'woocommerce_tax_rates'                        => 'tax_rate_state',
-			'woocommerce_tax_rates'                        => 'tax_rate_class',
-			'woocommerce_tax_rate_locations'               => 'location_type_code',
-		);
-
-		foreach ( $indexes_to_remove as $table => $key ) {
-			$table = esc_sql( $wpdb->prefix . $table );
-			$key   = esc_sql( $key );
-			if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table}';" ) ) {
-				if ( $wpdb->get_var( "SHOW INDEX FROM {$table} WHERE KEY_NAME = '{$key}';" ) ) {
-					$wpdb->query(  "ALTER TABLE {$table} DROP INDEX `{$key}`;" );
-				}
-			}
-		}
-
 		dbDelta( self::get_schema() );
 	}
 
@@ -393,6 +367,9 @@ class WC_Install {
 		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
 		 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
 		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 *
+		 * This may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
+		 * indexes first causes too much load on some servers/larger DB.
 		 */
 		$max_index_length = 191;
 
