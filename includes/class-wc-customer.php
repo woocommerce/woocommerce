@@ -827,9 +827,21 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 			}
 		}
 
-		if ( $pull_from_db ) {
+		if ( $pull_from_db && $this->_is_user) {
+
+			// Only continue reading if the customer exists.
+			$user_object = get_userdata( $id );
+			if ( empty( $user_object ) || empty ( $user_object->ID ) ) {
+				$this->_data['id'] = 0;
+				return;
+			}
+
 			foreach ( array_keys( $this->_data ) as $key ) {
-				$meta_value = get_user_meta( $id, ( false === strstr( $key, 'shipping_' ) ? 'billing_' : '' ) . $key, true );
+				if ( in_array( $key, array( 'postcode', 'city', 'address_1', 'address_2', 'state', 'country' ) ) ) {
+					$meta_value = get_user_meta( $id, 'billing_' . $key, true );
+				} else {
+					$meta_value = get_user_meta( $id, $key, true );
+				}
 				if ( $meta_value && is_callable( array( $this, "set_{$key}" ) ) ) {
 					$this->{"set_{$key}"}( $meta_value );
 				}
