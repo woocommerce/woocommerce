@@ -91,7 +91,8 @@ class WC_Shortcodes {
 
 		ob_start();
 
-		if ( $products->have_posts() ) : ?>
+		if ( $products->have_posts() ) {
+			?>
 
 			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop" ); ?>
 
@@ -107,7 +108,10 @@ class WC_Shortcodes {
 
 			<?php do_action( "woocommerce_shortcode_after_{$loop_name}_loop" ); ?>
 
-		<?php endif;
+			<?php
+		} else {
+			do_action( "woocommerce_shortcode_{$loop_name}_loop_no_results" );
+		}
 
 		woocommerce_reset_loop();
 		wp_reset_postdata();
