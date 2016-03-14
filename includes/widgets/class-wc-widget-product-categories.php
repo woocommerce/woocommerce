@@ -121,7 +121,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 		} elseif ( is_singular( 'product' ) ) {
 
-			$product_category = wc_get_product_terms( $post->ID, 'product_cat', array( 'orderby' => 'parent' ) );
+			$product_category = wc_get_product_terms( $post->ID, 'product_cat', apply_filters( 'woocommerce_product_categories_widget_product_terms_args', array( 'orderby' => 'parent' ) ) );
 
 			if ( $product_category ) {
 				$this->current_cat   = end( $product_category );
