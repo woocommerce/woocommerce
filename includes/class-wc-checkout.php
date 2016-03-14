@@ -446,7 +446,18 @@ class WC_Checkout {
 
 					// Validation: Required fields
 					if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) {
-						wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
+						switch ( $fieldset_key ) {
+							case 'shipping' :
+								$field_label = sprintf( _x( 'Shipping %s', 'Shipping FIELDNAME', 'woocommerce' ), $field['label'] );
+							break;
+							case 'billing' :
+								$field_label = sprintf( _x( 'Billing %s', 'Billing FIELDNAME', 'woocommerce' ), $field['label'] );
+							break;
+							default :
+								$field_label = $field['label'];
+							break;
+						}
+						wc_add_notice( sprintf( _x( '%s is a required field.', 'FIELDNAME is a required field.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ), 'error' );
 					}
 
 					if ( ! empty( $this->posted[ $key ] ) ) {
