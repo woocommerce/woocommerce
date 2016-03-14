@@ -345,10 +345,16 @@ class WC_Shortcodes {
 				'value'   => array_map( 'trim', explode( ',', $atts['skus'] ) ),
 				'compare' => 'IN'
 			);
+
+			// Ignore catalog visibility
+			$query_args['meta_query'] = WC()->query->stock_status_meta_query();
 		}
 
 		if ( ! empty( $atts['ids'] ) ) {
 			$query_args['post__in'] = array_map( 'trim', explode( ',', $atts['ids'] ) );
+
+			// Ignore catalog visibility
+			$query_args['meta_query'] = WC()->query->stock_status_meta_query();
 		}
 
 		return self::product_loop( $query_args, $atts, 'products' );
