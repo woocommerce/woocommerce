@@ -89,6 +89,7 @@ abstract class WC_Data {
 
 	/**
 	 * Get All Meta Data
+	 * @since 2.7.0
 	 * @return array
 	 */
 	public function get_meta_data() {
@@ -98,6 +99,7 @@ abstract class WC_Data {
 	/**
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
+	 * @since 2.7.0
 	 * @return array()
 	 */
 	protected function prefix_key( $key ) {
@@ -107,6 +109,7 @@ abstract class WC_Data {
 	/**
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
+	 * @since 2.7.0
 	 * @return array()
 	 */
 	protected function get_internal_meta_keys() {
@@ -115,6 +118,7 @@ abstract class WC_Data {
 
 	/**
 	 * Get Meta Data by Key.
+	 * @since 2.7.0
 	 * @param  string $key
 	 * @param  bool $single return first found meta with key, or all with $key
 	 * @return mixed
@@ -136,6 +140,7 @@ abstract class WC_Data {
 
 	/**
 	 * Set all meta data from array.
+	 * @since 2.7.0
 	 * @param array $data Key/Value pairs
 	 */
 	public function set_meta_data( $data ) {
@@ -155,6 +160,7 @@ abstract class WC_Data {
 
 	/**
 	 * Add meta data.
+	 * @since 2.7.0
 	 * @param array $key Meta key
 	 * @param array $value Meta value
 	 * @param array $unique Should this be a unique key?
@@ -172,6 +178,7 @@ abstract class WC_Data {
 
 	/**
 	 * Update meta data by key or ID, if provided.
+	 * @since 2.7.0
 	 * @param  string $key
 	 * @param  string $value
 	 * @param  int $meta_id
@@ -189,6 +196,7 @@ abstract class WC_Data {
 
 	/**
 	 * Delete meta data.
+	 * @since 2.7.0
 	 * @param array $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
@@ -198,6 +206,7 @@ abstract class WC_Data {
 
 	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
+	 * @since 2.7.0
 	 */
 	protected function read_meta_data() {
 		$this->_meta_data = array();
@@ -223,14 +232,15 @@ abstract class WC_Data {
 			$raw_meta_data = $wpdb->get_results( $wpdb->prepare( "
 				SELECT " . $db_info['meta_id_field'] . ", meta_key, meta_value
 				FROM " . $db_info['table'] . "
-				WHERE " . $db_info['object_id_field'] . " = %d ORDER BY meta_id
+				WHERE " . $db_info['object_id_field'] . " = %d ORDER BY " . $db_info['meta_id_field'] . "
 			", $this->get_id() ) );
 
 			foreach ( $raw_meta_data as $meta ) {
 				if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
 					continue;
 				}
-				$this->_meta_data[ $meta->meta_id ] = (object) array( 'key' => $meta->meta_key, 'value' => $meta->meta_value );
+
+				$this->_meta_data[ $meta->{$db_info['meta_id_field']} ] = (object) array( 'key' => $meta->meta_key, 'value' => $meta->meta_value );
 			}
 
 			if ( ! empty ( $this->_cache_group ) ) {
@@ -241,6 +251,7 @@ abstract class WC_Data {
 
 	/**
 	 * Update Meta Data in the database.
+	 * @since 2.7.0
 	 */
 	protected function save_meta_data() {
 		global $wpdb;
@@ -276,6 +287,7 @@ abstract class WC_Data {
 
 	/**
 	 * Table structure is slightly different between meta types, this function will return what we need to know.
+	 * @since 2.7.0
 	 * @return array Array elements: table, object_id_field, meta_id_field
 	 */
 	private function _get_db_info() {
