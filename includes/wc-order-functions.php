@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since  2.6.0
  * @param  array $args Array of args (above)
- * @return array|object Number of pages and an array of order objects if
+ * @return array|stdClass Number of pages and an array of order objects if
  *                             paginate is true, or just an array of values.
  */
 function wc_get_orders( $args ) {
@@ -51,9 +51,9 @@ function wc_get_orders( $args ) {
 		'status'   => array_keys( wc_get_order_statuses() ),
 		'type'     => wc_get_order_types( 'view-orders' ),
 		'parent'   => null,
-		'customer' => 0,
+		'customer' => null,
 		'email'    => '',
-		'limit'    => 10,
+		'limit'    => get_option( 'posts_per_page' ),
 		'offset'   => null,
 		'page'     => 1,
 		'exclude'  => array(),
@@ -64,13 +64,21 @@ function wc_get_orders( $args ) {
 	) );
 
 	// Handle some BW compatibility arg names where wp_query args differ in naming.
-	if ( isset( $args['numberposts'] ) ) $args['limit'] = $args['numberposts'];
-	if ( isset( $args['post_type'] ) ) $args['type'] = $args['post_type'];
-	if ( isset( $args['post_status'] ) ) $args['status'] = $args['post_status'];
-	if ( isset( $args['post_parent'] ) ) $args['parent'] = $args['post_parent'];
-	if ( isset( $args['author'] ) ) $args['customer'] = $args['author'];
-	if ( isset( $args['posts_per_page'] ) ) $args['limit'] = $args['posts_per_page'];
-	if ( isset( $args['paged'] ) ) $args['page'] = $args['paged'];
+	$map_legacy = array(
+		'numberposts'    => 'limit',
+		'post_type'      => 'type',
+		'post_status'    => 'status',
+		'post_parent'    => 'parent',
+		'author'         => 'customer',
+		'posts_per_page' => 'limit',
+		'paged'          => 'page',
+	);
+
+	foreach ( $map_legacy as $from => $to ) {
+		if ( isset( $args[ $from ] ) ) {
+			$args[ $to ] = $args[ $from ];
+		}
+	}
 
 	/**
 	 * Generate WP_Query args. This logic will change if orders are moved to
@@ -142,12 +150,12 @@ function _wc_get_orders_generate_customer_meta_query( $values, $relation = 'or' 
 		'customer_emails' => array(
 			'key'     => '_billing_email',
 			'value'   => array(),
-			'compare' => 'IN'
+			'compare' => 'IN',
 		),
 		'customer_ids' => array(
 			'key'     => '_customer_user',
 			'value'   => array(),
-			'compare' => 'IN'
+			'compare' => 'IN',
 		)
 	);
 	foreach ( $values as $value ) {
