@@ -328,7 +328,7 @@ final class WooCommerce {
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->cart     = new WC_Cart();                                    // Cart class, stores the cart contents
 			$this->customer = new WC_Customer();                                // Customer class, handles data such as customer location
-			$this->customer->load_session( true );
+			$this->customer->load_session();
 		}
 
 		$this->load_webhooks();

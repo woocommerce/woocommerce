@@ -95,15 +95,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 			$this->_is_user = true;
 			$this->read( $customer );
 		} else if ( empty( $customer ) ) {
-			if ( $this->_from_session ) {
-				if ( is_user_logged_in() ) {
-					$this->read( get_current_user_id() );
-				} else {
-					$this->read( WC()->session->get_customer_id() );
-				}
-			} else {
-				$this->_is_user = true;
-			}
+			$this->_is_user = true; // unless load_session gets called after.
 		}
 
 		if ( $this->_from_session ) {
@@ -121,10 +113,17 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 		}
 	}
 
-	public function load_session( $load_session = false ) {
+	/**
+	 * Loads a WC session into the customer class.
+	 */
+	public function load_session() {
 		$this->_from_session = true;
 		if ( is_user_logged_in() ) {
 			$this->_is_user = true;
+			$this->read( get_current_user_id() );
+		} else {
+			$this->_is_user = false;
+			$this->read( WC()->session->get_customer_id() );
 		}
 	}
 
@@ -646,6 +645,14 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	}
 
 	/**
+	 * Set customer address.
+	 * @param mixed $address
+	 */
+	public function set_address_1( $address ) {
+		$this->set_address( $address );
+	}
+
+	/**
 	 * Set customer's second address.
 	 * @param mixed $address
 	 */
@@ -691,6 +698,14 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 */
 	public function set_shipping_address( $address ) {
 		$this->_data['shipping_address_1'] = $address;
+	}
+
+	/**
+	 * Set customer shipping address.
+	 * @param mixed $address
+	 */
+	public function set_shipping_address_1( $address ) {
+		$this->set_shipping_address( $address );
 	}
 
 	/**
@@ -805,7 +820,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 			if ( ! empty( $data ) ) {
 				$pull_from_db  = false;
 				foreach ( $this->_session_keys as $session_key ) {
-					if ( is_callable( array( $this, "set_{$session_key}" ) ) ) {
+					if ( is_callable( array( $this, "set_billing_{$session_key}" ) ) ) {
 						$this->{"set_{$session_key}"}( $data[ $session_key ] );
 					}
 				}
@@ -826,8 +841,6 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 			$wp_user = new WP_User( $id );
 			$this->set_email( $wp_user->user_email );
 			$this->set_username( $wp_user->user_login );
-			error_log( 'hmm?' );
-			error_log( print_r ( $wp_user->user_registered, 1 ) );
 			$this->set_date_created( strtotime( $wp_user->user_registered ) );
 			$this->set_date_modified( get_user_meta( $id, 'last_update', true ) );
 			$this->set_role( $wp_user->roles[0] );
@@ -845,8 +858,35 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 
 			$this->set_last_order_id( is_object( $last_order ) ? $last_order->id : null );
 			$this->set_last_order_date( is_object( $last_order ) ? strtotime( $last_order->post_date_gmt ) : null );
-			$this->set_orders_count( wc_get_customer_order_count( $id ) );
-			$this->set_total_spent( wc_get_customer_total_spent( $id ) );
+
+			// WC_Customer can't use wc_get_customer_order_count because get_order_types might not be loaded by the time a customer/session is
+
+			$count = $wpdb->get_var( "SELECT COUNT(*)
+				FROM $wpdb->posts as posts
+
+				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+
+				WHERE   meta.meta_key       = '_customer_user'
+				AND     posts.post_type = 'shop_order'
+				AND     posts.post_status   IN ('" . implode( "','", array_keys( wc_get_order_statuses() ) )  . "')
+				AND     meta_value          = $id
+			" );
+
+			$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
+				FROM $wpdb->posts as posts
+
+				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+				LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
+
+				WHERE   meta.meta_key       = '_customer_user'
+				AND     meta.meta_value     = $id
+				AND     posts.post_type     = 'shop_order'
+				AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
+				AND     meta2.meta_key      = '_order_total'
+			" );
+
+			$this->set_orders_count( $count );
+			$this->set_total_spent( $spent );
 		}
 
 		$this->_data['id'] = $id;
@@ -872,9 +912,9 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 
 		unset( $this->_data['password'] ); // password is write only, never ever read it
 
-		error_log( 'read' );
-		error_log( print_r ( $this->get_id(), 1 ) );
-		error_log( print_r ( $this->_data, 1 ) );
+		//error_log( 'read' );
+		//error_log( print_r ( $this->get_id(), 1 ) );
+	//	error_log( print_r ( $this->_data, 1 ) );
 	}
 
 	/**

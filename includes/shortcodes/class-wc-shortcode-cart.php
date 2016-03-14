@@ -15,7 +15,6 @@ class WC_Shortcode_Cart {
 	 * Calculate shipping for the cart.
 	 */
 	public static function calculate_shipping() {
-		error_log( 'calculate shipping???....' );
 		try {
 			WC()->shipping->reset_shipping();
 
