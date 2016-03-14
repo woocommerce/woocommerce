@@ -19,7 +19,7 @@ class WC_Helper_Payment_Token {
 		$token->set_expiry_year( '2016' );
 		$token->set_card_type( 'visa' );
 		$token->set_token( time() );
-		if ( ! empty ( $user_id ) ) {
+		if ( ! empty( $user_id ) ) {
 			$token->set_user_id( $user_id );
 		}
 		$token->save();
@@ -56,4 +56,3 @@ class WC_Helper_Payment_Token {
 	}
 
 }
-
