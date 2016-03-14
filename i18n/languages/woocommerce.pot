@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce 2.6.0-dev\n"
 "Report-Msgid-Bugs-To: https://github.com/woothemes/woocommerce/issues\n"
-"POT-Creation-Date: 2016-03-11 17:39:25+00:00\n"
+"POT-Creation-Date: 2016-03-14 12:26:03+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5949,7 +5949,7 @@ msgstr ""
 #: includes/admin/settings/class-wc-settings-api.php:45
 #: includes/admin/settings/views/html-admin-page-shipping-zone-methods.php:61
 #: includes/admin/views/html-admin-page-status-report.php:429
-#: includes/class-wc-install.php:799
+#: includes/class-wc-install.php:775
 msgid "Settings"
 msgstr ""
 
@@ -9397,7 +9397,7 @@ msgstr ""
 
 #: includes/admin/reports/class-wc-report-customer-list.php:27
 #: includes/admin/settings/class-wc-settings-emails.php:260
-#: includes/class-wc-install.php:570
+#: includes/class-wc-install.php:546
 msgid "Customer"
 msgstr ""
 
@@ -13590,43 +13590,38 @@ msgid ""
 "class=\"wc-backward\">Return to homepage</a>"
 msgstr ""
 
-#: includes/class-wc-checkout.php:449 includes/class-wc-form-handler.php:85
-#: includes/class-wc-form-handler.php:185
-msgid "is a required field."
-msgstr ""
-
-#: includes/class-wc-checkout.php:462 includes/class-wc-form-handler.php:98
+#: includes/class-wc-checkout.php:473 includes/class-wc-form-handler.php:98
 #: includes/shortcodes/class-wc-shortcode-cart.php:27
 msgid "Please enter a valid postcode/ZIP."
 msgstr ""
 
-#: includes/class-wc-checkout.php:471 includes/class-wc-form-handler.php:107
+#: includes/class-wc-checkout.php:482 includes/class-wc-form-handler.php:107
 msgid "is not a valid phone number."
 msgstr ""
 
-#: includes/class-wc-checkout.php:477 includes/class-wc-form-handler.php:114
+#: includes/class-wc-checkout.php:488 includes/class-wc-form-handler.php:114
 msgid "is not a valid email address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:495
+#: includes/class-wc-checkout.php:506
 msgid "is not valid. Please enter one of the following:"
 msgstr ""
 
-#: includes/class-wc-checkout.php:551 includes/class-wc-form-handler.php:297
+#: includes/class-wc-checkout.php:562 includes/class-wc-form-handler.php:297
 msgid "You must accept our Terms &amp; Conditions."
 msgstr ""
 
-#: includes/class-wc-checkout.php:557
+#: includes/class-wc-checkout.php:568
 msgid ""
 "Unfortunately <strong>we do not ship %s</strong>. Please enter an "
 "alternative shipping address."
 msgstr ""
 
-#: includes/class-wc-checkout.php:566
+#: includes/class-wc-checkout.php:577
 msgid "Invalid shipping method."
 msgstr ""
 
-#: includes/class-wc-checkout.php:578 includes/class-wc-form-handler.php:307
+#: includes/class-wc-checkout.php:589 includes/class-wc-form-handler.php:307
 msgid "Invalid payment method."
 msgstr ""
 
@@ -13908,6 +13903,10 @@ msgstr ""
 msgid "Read More"
 msgstr ""
 
+#: includes/class-wc-form-handler.php:85 includes/class-wc-form-handler.php:185
+msgid "is a required field."
+msgstr ""
+
 #: includes/class-wc-form-handler.php:129
 msgid "Address changed successfully."
 msgstr ""
@@ -14091,40 +14090,40 @@ msgstr ""
 msgid "Monthly"
 msgstr ""
 
-#: includes/class-wc-install.php:575
+#: includes/class-wc-install.php:551
 msgid "Shop Manager"
 msgstr ""
 
-#: includes/class-wc-install.php:799
+#: includes/class-wc-install.php:775
 msgid "View WooCommerce Settings"
 msgstr ""
 
-#: includes/class-wc-install.php:815
+#: includes/class-wc-install.php:791
 msgid "View WooCommerce Documentation"
 msgstr ""
 
-#: includes/class-wc-install.php:815
+#: includes/class-wc-install.php:791
 msgid "Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:816
+#: includes/class-wc-install.php:792
 msgid "View WooCommerce API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:816
+#: includes/class-wc-install.php:792
 msgid "API Docs"
 msgstr ""
 
-#: includes/class-wc-install.php:817
+#: includes/class-wc-install.php:793
 msgid "Visit Premium Customer Support Forum"
 msgstr ""
 
-#: includes/class-wc-install.php:817
+#: includes/class-wc-install.php:793
 msgid "Premium Support"
 msgstr ""
 
-#: includes/class-wc-order.php:46
-msgid "(Includes %s)"
+#: includes/class-wc-order.php:46 includes/wc-cart-functions.php:281
+msgid "(includes %s)"
 msgstr ""
 
 #: includes/class-wc-post-types.php:66
@@ -16306,10 +16305,6 @@ msgstr ""
 msgid "estimated for %s"
 msgstr ""
 
-#: includes/wc-cart-functions.php:281
-msgid "(includes %s)"
-msgstr ""
-
 #: includes/wc-core-functions.php:83
 msgid "Order &ndash; %s"
 msgstr ""
@@ -18132,6 +18127,21 @@ msgstr ""
 #: includes/admin/views/html-admin-page-status-report.php:522
 msgctxt "WC Pages links in the System Status"
 msgid "Edit %s page"
+msgstr ""
+
+#: includes/class-wc-checkout.php:451
+msgctxt "Shipping FIELDNAME"
+msgid "Shipping %s"
+msgstr ""
+
+#: includes/class-wc-checkout.php:454
+msgctxt "Billing FIELDNAME"
+msgid "Billing %s"
+msgstr ""
+
+#: includes/class-wc-checkout.php:460
+msgctxt "FIELDNAME is a required field."
+msgid "%s is a required field."
 msgstr ""
 
 #: includes/class-wc-install.php:242
