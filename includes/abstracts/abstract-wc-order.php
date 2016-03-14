@@ -252,13 +252,15 @@ abstract class WC_Abstract_Order {
 	 * @return int|bool Item ID or false.
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
-
-		$default_args = array(
+		$args = wp_parse_args( $args, array(
 			'variation' => array(),
 			'totals'    => array()
-		);
+		) );
 
-		$args    = wp_parse_args( $args, $default_args );
+		if ( ! $product ) {
+			return false;
+		}
+
 		$item_id = wc_add_order_item( $this->id, array(
 			'order_item_name' => $product->get_title(),
 			'order_item_type' => 'line_item'
