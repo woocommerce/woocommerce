@@ -63,22 +63,11 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_refunds() {
 		if ( empty( $this->refunds ) && ! is_array( $this->refunds ) ) {
-			$refunds      = array();
-			$refund_items = get_posts(
-				array(
-					'post_type'      => 'shop_order_refund',
-					'post_parent'    => $this->id,
-					'posts_per_page' => -1,
-					'post_status'    => 'any',
-					'fields'         => 'ids'
-				)
-			);
-
-			foreach ( $refund_items as $refund_id ) {
-				$refunds[] = new WC_Order_Refund( $refund_id );
-			}
-
-			$this->refunds = $refunds;
+			$this->refunds = wc_get_orders( array(
+				'type'   => 'shop_order_refund',
+				'parent' => $this->id,
+				'limit'  => -1,
+			) );
 		}
 		return $this->refunds;
 	}

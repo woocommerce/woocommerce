@@ -137,31 +137,16 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
-
-	$customer = get_user_by( 'id', absint( $customer_id ) );
-
-	$customer_orders = get_posts( array(
-		'numberposts' => -1,
-		'post_type'   => wc_get_order_types(),
-		'post_status' => array_keys( wc_get_order_statuses() ),
-		'fields'      => 'ids',
-		'meta_query' => array(
-			array(
-				'key'     => '_customer_user',
-				'value'   => array( 0, '' ),
-				'compare' => 'IN'
-			),
-			array(
-				'key'     => '_billing_email',
-				'value'   => $customer->user_email,
-			)
-		),
+	$linked          = 0;
+	$complete        = 0;
+	$customer        = get_user_by( 'id', absint( $customer_id ) );
+	$customer_orders = wc_get_orders( array(
+		'limit'    => -1,
+		'customer' => array( array( 0, $customer->user_email ) ),
+		'return'   => 'ids',
 	) );
 
-	$linked   = 0;
-	$complete = 0;
-
-	if ( $customer_orders ) {
+	if ( ! empty( $customer_orders ) ) {
 		foreach ( $customer_orders as $order_id ) {
 			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
