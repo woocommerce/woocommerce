@@ -338,6 +338,51 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Delete a single webhook.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$id    = (int) $request['id'];
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		}
+
+		$post = get_post( $id );
+
+		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+
+		$result = wp_delete_post( $id, true );
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a single item is deleted or trashed via the REST API.
+		 *
+		 * @param object           $post     The deleted or trashed item.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( "woocommerce_rest_delete_{$this->post_type}", $post, $response, $request );
+
+		// Clear cache.
+		delete_transient( 'woocommerce_webhook_ids' );
+
+		return $response;
+	}
+
+	/**
 	 * Prepare a single webhook for create or update.
 	 *
 	 * @param WP_REST_Request $request Request object.
