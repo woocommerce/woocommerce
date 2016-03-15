@@ -249,7 +249,7 @@ class WC_Shipping {
 		 * but before Woocommerce does anything with them. A good example of usage is to merge the shipping methods for multiple
 		 * packages for marketplaces.
 		 *
-		 * @since 2.5.6
+		 * @since 2.6.0
 		 *
 		 * @param array $packages The array of packages after shipping costs are calculated.
 		 */
