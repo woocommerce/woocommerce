@@ -390,6 +390,7 @@ class WC_API {
 		include_once( 'api/wc-rest-reports-controller.php' );
 		include_once( 'api/wc-rest-tax-classes-controller.php' );
 		include_once( 'api/wc-rest-taxes-controller.php' );
+		include_once( 'api/wc-rest-webhook-deliveries.php' );
 		include_once( 'api/wc-rest-webhooks-controller.php' );
 	}
 
@@ -416,6 +417,7 @@ class WC_API {
 			'WC_REST_Reports_Controller',
 			'WC_REST_Tax_Classes_Controller',
 			'WC_REST_Taxes_Controller',
+			'WC_REST_Webhook_Deliveries_Controller',
 			'WC_REST_Webhooks_Controller',
 		);
 
