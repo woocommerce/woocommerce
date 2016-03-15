@@ -421,7 +421,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$legend[] = array(
 			'title' => sprintf( __( '%s worth of coupons used', 'woocommerce' ), '<strong>' . wc_price( $data->total_coupons ) . '</strong>' ),
 			'color' => $this->chart_colours['coupon_amount'],
-			'highlight_series' => 2
+			'highlight_series' => 4
 		);
 
 		return $legend;
