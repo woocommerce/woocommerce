@@ -248,7 +248,7 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 				),
 				'request_headers' => array(
 					'description' => __( 'Request headers.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
@@ -278,7 +278,7 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 				),
 				'response_body' => array(
 					'description' => __( 'The response body from the receiving server.', 'woocommerce' ),
-					'type'        => 'array',
+					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
