@@ -157,7 +157,6 @@ abstract class WC_Data {
 		}
 	}
 
-
 	/**
 	 * Add meta data.
 	 * @since 2.7.0
@@ -290,35 +289,27 @@ abstract class WC_Data {
 	 * @since 2.7.0
 	 * @return array Array elements: table, object_id_field, meta_id_field
 	 */
-	private function _get_db_info() {
+	protected function _get_db_info() {
 		global $wpdb;
 
-		$object_id_field = '';
 		$meta_id_field   = 'meta_id'; // for some reason users calls this umeta_id so we need to track this as well.
 		$table           = $wpdb->prefix;
+
 		// If we are dealing with a type of metadata that is not a core type, the table should be prefixed.
 		if ( ! in_array( $this->_meta_type, array( 'post', 'user', 'comment', 'term' ) ) ) {
 			$table .= 'woocommerce_';
 		}
 
 		$table .= $this->_meta_type . 'meta';
+		$object_id_field = $this->_meta_type . '_id';
 
 		// Figure out our field names.
-		if ( 'post' === $this->_meta_type ) {
-			$object_id_field = 'post_id';
-		} elseif ( 'user' === $this->_meta_type ) {
-			$object_id_field = 'user_id';
+		if ( 'user' === $this->_meta_type ) {
 			$meta_id_field   = 'umeta_id';
-		} else if ( 'comment' === $this->_meta_type ) {
-			$object_id_field = 'comment_id';
-		} else if ( 'term' === $this->_meta_data ) {
-			$object_id_field = 'term_id';
-		} else {
-			if ( ! empty ( $this->object_id_field_for_meta ) ) {
-				$object_id_field = $this->object_id_field_for_meta;
-			} else {
-				$object_id_field = 'post_id'; // default to post_id
-			}
+		}
+
+		if ( ! empty( $this->object_id_field_for_meta ) ) {
+			$object_id_field = $this->object_id_field_for_meta;
 		}
 
 		return array(
