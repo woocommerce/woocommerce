@@ -50,8 +50,8 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		if ( is_wp_error( $response ) || ! strpos( $response['body'], "SUCCESS" ) === 0 ) {
 			return false;
 		}
-
-		return true;
+		
+		return $response;
 	}
 
 	/**
@@ -71,18 +71,63 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			return false;
 		}
 
-		if ( $this->validate_transaction( $transaction ) && 'completed' === $status ) {
+		if ( 'completed' === $status && ( $response = $this->validate_transaction( $transaction ) ) !== false ) {
 			if ( $order->get_total() != $amount ) {
 				WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')' );
 				$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
 			} else {
 				$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );
 
-				if ( ! empty( $_REQUEST['mc_fee'] ) ) {
-					// Log paypal transaction fee.
-					update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) );
-				}
+				$this->save_paypal_meta_data( $order, $this->extract_paypal_data( $response ) );
 			}
 		}
 	}
+
+
+	/**
+	 * Extract data from the PDT response body.
+	 * @param array $response
+	 * @return array
+	 */
+	protected function extract_paypal_data( $response ) {
+		$posted = array();
+
+		if ( preg_match_all( '~^(\w+)=(.*)$~m', $response['body'], $matches, PREG_PATTERN_ORDER ) ) {
+			for ( $i=1; $i<count($matches[0]); $i++ ) {
+				$posted[$matches[1][$i]] = urldecode( $matches[2][$i] );
+			}
+		}
+		
+		if ( ! empty( $posted['charset'] ) && strtolower( $posted['charset'] ) !== 'utf-8' ) {
+			$posted['first_name'] = utf8_encode( $posted['first_name'] );
+			$posted['last_name'] = utf8_encode( $posted['last_name'] );
+		}
+
+		return $posted;
+	}
+
+
+	/**
+	 * Save important data from the PDT request to the order.
+	 * @param WC_Order $order
+	 * @param array $posted
+	 */
+	protected function save_paypal_meta_data( $order, $posted ) {
+		if ( ! empty( $posted['mc_fee'] ) ) {
+			update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $posted['mc_fee'] ) );
+		}
+		if ( ! empty( $posted['payer_email'] ) ) {
+			update_post_meta( $order->id, 'Payer PayPal address', wc_clean( $posted['payer_email'] ) );
+		}
+		if ( ! empty( $posted['first_name'] ) ) {
+			update_post_meta( $order->id, 'Payer first name', wc_clean( $posted['first_name'] ) );
+		}
+		if ( ! empty( $posted['last_name'] ) ) {
+			update_post_meta( $order->id, 'Payer last name', wc_clean( $posted['last_name'] ) );
+		}
+		if ( ! empty( $posted['payment_type'] ) ) {
+			update_post_meta( $order->id, 'Payment type', wc_clean( $posted['payment_type'] ) );
+		}
+	}
 }
+
