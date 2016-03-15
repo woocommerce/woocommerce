@@ -68,8 +68,6 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			$transaction_results[ $key ] = $value;
 		}
 
-		var_dump($transaction_results);
-
 		return $transaction_results;
 	}
 
