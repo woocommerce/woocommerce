@@ -9,6 +9,25 @@ namespace WooCommerce\Tests\Coupon;
 class CouponCRUD extends \WC_Unit_Test_Case {
 
 	/**
+	 * Some of our get/setters were renamed. This will return the function
+	 * name we want.
+	 * @param string $function
+	 * @return string
+	 * @since 2.7.0
+	 */
+	function get_function_name( $function ) {
+		if ( 'exclude_product_ids' === $function ) {
+			$function = 'excluded_product_ids';
+		} else if ( 'exclude_product_categories' === $function ) {
+			$function = 'excluded_product_categories';
+		} else if ( 'customer_email' === $function ) {
+			$function = 'email_restrictions';
+		}
+
+		return $function;
+	}
+
+	/**
 	 * Test coupon create.
 	 * @since 2.7.0
 	 */
@@ -203,369 +222,27 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a coupon's ID.
+	 * Test standard coupon getters & setters.
 	 * @since 2.7.0
 	 */
-	public function test_coupon_get_id() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertNotEquals( 0, $coupon->get_id() );
-	}
+	public function test_coupon_getters_and_setters() {
+		$time = time();
+		$standard_getters_and_setters = array(
+			'code' => 'test', 'description' => 'hello world', 'discount_type' => 'percent_product',
+			'amount' => 10.50, 'expiry_date' => time(), 'usage_count' => 5, 'individual_use' => true,
+			'product_ids' => array( 5, 10 ), 'exclude_product_ids' => array( 2, 1 ), 'usage_limit' => 2,
+			'usage_limit_per_user' => 10, 'limit_usage_to_x_items' => 2, 'free_shipping' => true,
+			'product_categories' => array( 6 ), 'exclude_product_categories' => array( 8 ),
+			'exclude_sale_items' => true, 'minimum_amount' => 2, 'maximum_amount' => 1000,
+			'customer_email' => array( 'test@woo.local' ), 'used_by' => array( 1 ),
+		);
 
-	/**
-	 * Test getting a coupon's code.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_code() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( 'dummycoupon', $coupon->get_code() );
-	}
-
-	/**
-	 * Test setting a coupon's code.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_code() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$code = 'coupon-' . time();
-		$coupon->set_code( $code );
-		$this->assertEquals( $code, $coupon->get_code() );
-	}
-
-	/**
-	 * Test getting a coupon's description.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_description() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( 'This is a dummy coupon', $coupon->get_description() );
-	}
-
-	/**
-	 * Test setting a coupon's description.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_description() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_description( 'This is an updated coupon' );
-		$this->assertEquals( 'This is an updated coupon', $coupon->get_description() );
-	}
-
-	/**
-	 * Test getting a coupon's discount type.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_discount_type() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( 'fixed_cart', $coupon->get_discount_type() );
-	}
-
-	/**
-	 * Test setting a coupon's discount type.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_discount_type() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_discount_type( 'percent_product' );
-		$this->assertEquals( 'percent_product', $coupon->get_discount_type() );
-	}
-
-	/**
-	 * Test getting a coupon's amount.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_amount() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( 1, $coupon->get_amount() );
-	}
-
-	/**
-	 * Test setting a coupon's amount.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_amount() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_amount( 5 );
-		$this->assertEquals( 5, $coupon->get_amount() );
-	}
-
-	/**
-	 * Test getting a coupon's usage count.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_usage_count() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( 0, $coupon->get_usage_count() );
-	}
-
-	/**
-	 * Test setting a coupon's usage count.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_usage_count() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_usage_count( 6 );
-		$this->assertEquals( 6, $coupon->get_usage_count() );
-	}
-
-	/**
-	 * Test getting indvidual use status.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_individual_use() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertFalse( $coupon->get_individual_use() );
-	}
-
-	/**
-	 * Test setting individual use status.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_individual_use() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_individual_use( true );
-		$this->assertTrue( $coupon->get_individual_use() );
-	}
-
-	/**
-	 * Test getting product ids.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_product_ids() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( array(), $coupon->get_product_ids() );
-	}
-
-	/**
-	 * Test setting product ids.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_product_ids() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_product_ids( array( 322, 333 ) );
-		$this->assertEquals( array( 322, 333 ), $coupon->get_product_ids() );
-	}
-
-	/**
-	 * Test getting excluded product ids.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_excluded_product_ids() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( array(), $coupon->get_excluded_product_ids() );
-	}
-
-	/**
-	 * Test setting excluded product ids.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_excluded_product_ids() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_excluded_product_ids( array( 322, 333 ) );
-		$this->assertEquals( array( 322, 333 ), $coupon->get_excluded_product_ids() );
-	}
-
-	/**
-	 * Test getting coupon usage limit.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_usage_limit() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEmpty( $coupon->get_usage_limit() );
-	}
-
-	/**
-	 * Test setting coupon usage limit.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_usage_limit() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_usage_limit( 100 );
-		$this->assertEquals( 100, $coupon->get_usage_limit() );
-	}
-
-	/**
-	 * Test getting coupon usage limit per user.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_usage_limit_per_user() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEmpty( $coupon->get_usage_limit_per_user() );
-	}
-
-	/**
-	 * Test setting coupon usage limit per user.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_usage_limit_per_user() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_usage_limit_per_user( 10 );
-		$this->assertEquals( 10, $coupon->get_usage_limit_per_user() );
-	}
-
-	/**
-	 * Test getting coupon usage limit to x items.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_limit_usage_to_x_items() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEmpty( $coupon->get_limit_usage_to_x_items() );
-	}
-
-	/**
-	 * Test setting coupon usage limit to x items.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_limit_usage_to_x_items() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_limit_usage_to_x_items( 10 );
-		$this->assertEquals( 10, $coupon->get_limit_usage_to_x_items() );
-	}
-
-	/**
-	 * Test getting free shipping status.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_free_shipping() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertFalse( $coupon->get_free_shipping() );
-	}
-
-	/**
-	 * Test setting free shipping status.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_free_shipping() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_free_shipping( true );
-		$this->assertTrue( $coupon->get_free_shipping() );
-	}
-
-	/**
-	 * Test getting product categories.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_product_categories() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( array(), $coupon->get_product_categories() );
-	}
-
-	/**
-	 * Test setting product categories.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_product_categories() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_product_categories( array( 322, 333 ) );
-		$this->assertEquals( array( 322, 333 ), $coupon->get_product_categories() );
-	}
-
-	/**
-	 * Test getting excluded product categories.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_excluded_product_categories() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( array(), $coupon->get_excluded_product_categories() );
-	}
-
-	/**
-	 * Test setting excluded product categories.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_excluded_product_categories() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_excluded_product_categories( array( 322, 333 ) );
-		$this->assertEquals( array( 322, 333 ), $coupon->get_excluded_product_categories() );
-	}
-
-	/**
-	 * Test getting exclude sale items status.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_exclude_sale_items() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertFalse( $coupon->get_exclude_sale_items() );
-	}
-
-	/**
-	 * Test setting exclude sale items status.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_exclude_sale_items() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_exclude_sale_items( true );
-		$this->assertTrue( $coupon->get_exclude_sale_items() );
-	}
-
-	/**
-	 * Test getting a coupon's minimum amount.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_minimum_amount() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEmpty( $coupon->get_minimum_amount() );
-	}
-
-	/**
-	 * Test setting a coupon's minimum amount.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_minimum_amount() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_minimum_amount( 5 );
-		$this->assertEquals( 5, $coupon->get_minimum_amount() );
-	}
-
-	/**
-	 * Test getting a coupon's maximum amount.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_maximum_amount() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEmpty( $coupon->get_maximum_amount() );
-	}
-
-	/**
-	 * Test setting a coupon's maximum amount.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_maximum_amount() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_maximum_amount( 5 );
-		$this->assertEquals( 5, $coupon->get_maximum_amount() );
-	}
-
-	/**
-	 * Test getting coupon email restrictions.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_email_restrictions() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( array(), $coupon->get_email_restrictions() );
-	}
-
-	/**
-	 * Test setting coupon email restrictions.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_set_email_restrictions() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$coupon->set_email_restrictions( array( 'test@test.local', 'woo@test.local' ) );
-		$this->assertEquals( array( 'test@test.local', 'woo@test.local' ), $coupon->get_email_restrictions() );
-	}
-
-
-	/**
-	 * Test getting and setting coupon used by list.
-	 * @since 2.7.0
-	 */
-	public function test_coupon_get_and_set_used_by() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
-		$this->assertEquals( array(), $coupon->get_used_by() );
-		$coupon->inc_usage_count( 1 );
-		$this->assertEquals( array( 1 ), $coupon->get_used_by() );
-		$coupon->dcr_usage_count( 1 );
-		$this->assertEquals( array(), $coupon->get_used_by() );
+		$coupon = new \WC_Coupon;
+		 foreach ( $standard_getters_and_setters as $function => $value ) {
+		 	$function = $this->get_function_name( $function );
+			$coupon->{"set_{$function}"}( $value );
+			$this->assertEquals( $value, $coupon->{"get_{$function}"}(), $function );
+		}
 	}
 
 	/**
