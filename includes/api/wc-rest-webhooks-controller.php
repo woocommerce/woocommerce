@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Webhooks controller class.
  *
  * @package WooCommerce/API
- * @extends WP_REST_Controller
+ * @extends WC_REST_Posts_Controller
  */
-class WC_REST_Webhooks_Controller extends WP_REST_Controller {
+class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -35,6 +35,13 @@ class WC_REST_Webhooks_Controller extends WP_REST_Controller {
 	 * @var string
 	 */
 	protected $rest_base = 'webhooks';
+
+	/**
+	 * Post type.
+	 *
+	 * @var string
+	 */
+	protected $post_type = 'shop_webhook';
 
 	/**
 	 * Register the routes for webhooks.
@@ -154,6 +161,49 @@ class WC_REST_Webhooks_Controller extends WP_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Prepare a single webhook output for response.
+	 *
+	 * @param WP_Post $webhook Webhook object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response Response data.
+	 */
+	public function prepare_item_for_response( $post, $request ) {
+		$id      = (int) $post->ID;
+		$webhook = new WC_Webhook( $id );
+
+		$data = array(
+			'id'           => $webhook->id,
+			'name'         => $webhook->get_name(),
+			'status'       => $webhook->get_status(),
+			'topic'        => $webhook->get_topic(),
+			'resource'     => $webhook->get_resource(),
+			'event'        => $webhook->get_event(),
+			'hooks'        => $webhook->get_hooks(),
+			'delivery_url' => $webhook->get_delivery_url(),
+			'created_at'   => wc_rest_api_prepare_date_response( $webhook->get_post_data()->post_date_gmt ),
+			'updated_at'   => wc_rest_api_prepare_date_response( $webhook->get_post_data()->post_modified_gmt ),
+		);
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $post ) );
+
+		/**
+		 * Filter webhook object returned from the REST API.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param WC_Webhook       $webhook  Webhook object used to create response.
+		 * @param WP_REST_Request  $request  Request object.
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_webhook', $response, $webhook, $request );
 	}
 
 	/**

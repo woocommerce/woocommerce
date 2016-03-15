@@ -416,6 +416,7 @@ class WC_API {
 			'WC_REST_Reports_Controller',
 			'WC_REST_Tax_Classes_Controller',
 			'WC_REST_Taxes_Controller',
+			'WC_REST_Webhooks_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
