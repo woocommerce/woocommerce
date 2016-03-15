@@ -44,6 +44,13 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	protected $post_type = 'shop_webhook';
 
 	/**
+	 * Initialize Webhooks actions.
+	 */
+	public function __construct() {
+		add_filter( "woocommerce_rest_{$this->post_type}_query", array( $this, 'query_args' ), 10, 2 );
+	}
+
+	/**
 	 * Register the routes for webhooks.
 	 */
 	public function register_routes() {
@@ -481,6 +488,53 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		 * @param WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $webhook, $request );
+	}
+
+	/**
+	 * Query args.
+	 *
+	 * @param array $args
+	 * @param WP_REST_Request $request
+	 * @return array
+	 */
+	public function query_args( $args, $request ) {
+		// Set post_status.
+		switch ( $request['status'] ) {
+			case 'active' :
+				$args['post_status'] = 'publish';
+				break;
+			case 'paused' :
+				$args['post_status'] = 'draft';
+				break;
+			case 'disabled' :
+				$args['post_status'] = 'pending';
+				break;
+			default :
+				$args['post_status'] = 'any';
+				break;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Get the query params for collections of attachments.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['status'] = array(
+			'default'           => 'all',
+			'description'       => __( 'Limit result set to webhooks assigned a specific status.', 'woocommerce' ),
+			'sanitize_callback' => 'sanitize_key',
+			'type'              => 'string',
+			'enum'               => array( 'all', 'active', 'paused', 'disabled' ),
+			'validate_callback'  => 'rest_validate_request_arg',
+		);
+
+		return $params;
 	}
 
 	/**
