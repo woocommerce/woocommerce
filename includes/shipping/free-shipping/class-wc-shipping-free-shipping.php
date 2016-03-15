@@ -33,7 +33,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			'shipping-zones',
 			'instance-settings'
 		);
-		$this->enabled		         = $this->get_option( 'enabled' );
 		$this->title 		         = $this->get_option( 'title' );
 		$this->min_amount 	         = $this->get_option( 'min_amount', 0 );
 		$this->requires		         = $this->get_option( 'requires' );
@@ -47,12 +46,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function get_instance_form_fields() {
 		return array(
-			'enabled' => array(
-				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable Free Shipping', 'woocommerce' ),
-				'default' 		=> 'yes'
-			),
 			'title' => array(
 				'title' 		=> __( 'Title', 'woocommerce' ),
 				'type' 			=> 'text',

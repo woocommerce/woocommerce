@@ -979,7 +979,7 @@ class WC_Countries {
 			$address_fields[ $type . $key ] = $value;
 
 			// Add email and phone after company or last
-			if ( $type == 'billing_' && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && $key === end( $keys ) ) ) ) {
+			if ( 'billing_' === $type && ( 'company' === $key || ( ! array_key_exists( 'company', $fields ) && $key === end( $keys ) ) ) ) {
 				$address_fields['billing_email'] = array(
 					'label'        => __( 'Email Address', 'woocommerce' ),
 					'required'     => true,

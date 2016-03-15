@@ -22,10 +22,11 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private $core_notices = array(
-		'install'        => 'install_notice',
-		'update'         => 'update_notice',
-		'template_files' => 'template_file_check_notice',
-		'theme_support'  => 'theme_check_notice'
+		'install'         => 'install_notice',
+		'update'          => 'update_notice',
+		'template_files'  => 'template_file_check_notice',
+		'theme_support'   => 'theme_check_notice',
+		'legacy_shipping' => 'legacy_shipping_notice',
 	);
 
 	/**
@@ -178,6 +179,27 @@ class WC_Admin_Notices {
 
 		if ( $outdated ) {
 			include( 'views/html-notice-template-check.php' );
+		} else {
+			self::remove_notice( 'template_files' );
+		}
+	}
+
+	/**
+	 * Show a notice asking users to convert to shipping zones.
+	 */
+	public function legacy_shipping_notice() {
+		$maybe_load_legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
+		$enabled                   = false;
+
+		foreach ( $maybe_load_legacy_methods as $method ) {
+			$options = get_option( 'woocommerce_' . $method . '_settings' );
+			if ( $options && isset( $options['enabled'] ) && 'yes' === $options['enabled'] ) {
+				$enabled = true;
+			}
+		}
+
+		if ( $enabled ) {
+			include( 'views/html-notice-legacy-shipping.php' );
 		} else {
 			self::remove_notice( 'template_files' );
 		}

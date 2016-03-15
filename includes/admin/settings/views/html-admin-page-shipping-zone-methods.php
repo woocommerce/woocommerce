@@ -51,11 +51,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 </script>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row">
-    <tr data-id="{{ data.instance_id }}">
+    <tr data-id="{{ data.instance_id }}" data-enabled="{{ data.enabled }}">
         <td width="1%" class="wc-shipping-zone-method-sort"></td>
         <td class="wc-shipping-zone-method-title"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{ data.title }}</a></td>
 		<td class="wc-shipping-zone-method-type">{{ data.method_title }}</td>
-		<td class="wc-shipping-zone-method-enabled">{{{ data.enabled_icon }}}</td>
+		<td class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
         <td class="wc-shipping-zone-method-description">{{ data.method_description }}</td>
         <td class="wc-shipping-zone-method-actions">
 			<a class="wc-shipping-zone-method-delete tips" data-tip="<?php esc_attr_e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-method-settings tips" data-tip="<?php esc_attr_e( 'Settings', 'woocommerce' ); ?>" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php _e( 'Settings', 'woocommerce' ); ?></a>

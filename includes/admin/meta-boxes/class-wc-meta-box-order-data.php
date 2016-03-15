@@ -416,18 +416,24 @@ class WC_Meta_Box_Order_Data {
 		WC()->payment_gateways();
 		WC()->shipping();
 
+		$customer_changed = false;
+
 		// Add key
 		add_post_meta( $post_id, '_order_key', uniqid( 'order_' ), true );
 
 		// Update meta
-		update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
+		if ( update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) ) ) {
+			$customer_changed = true;
+		}
 
 		if ( ! empty( self::$billing_fields ) ) {
 			foreach ( self::$billing_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ){
 					$field['id'] = '_billing_' . $key;
 				}
-				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
+					$customer_changed = true;
+				}
 			}
 		}
 
@@ -436,7 +442,9 @@ class WC_Meta_Box_Order_Data {
 				if ( ! isset( $field['id'] ) ){
 					$field['id'] = '_shipping_' . $key;
 				}
-				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
+					$customer_changed = true;
+				}
 			}
 		}
 
@@ -469,6 +477,26 @@ class WC_Meta_Box_Order_Data {
 		$date = date_i18n( 'Y-m-d H:i:s', $date );
 
 		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
+
+		// If customer changed, update any downloadable permissions
+		if ( $customer_changed ) {
+			$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
+				array(
+					'user_id'    => absint( get_post_meta( $post->ID, '_customer_user', true ) ),
+					'user_email' => wc_clean( get_post_meta( $post->ID, '_billing_email', true ) ),
+				),
+				array(
+					'order_id' 		=> $post_id,
+				),
+				array(
+					'%d',
+					'%s',
+				),
+				array(
+					'%d',
+				)
+			);
+		}
 
 		// Order data saved, now get it so we can manipulate status
 		$order = wc_get_order( $post_id );

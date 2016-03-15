@@ -475,15 +475,20 @@ function wc_print_js() {
 	global $wc_queued_js;
 
 	if ( ! empty( $wc_queued_js ) ) {
-
-		echo "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) {";
-
-		// Sanitize
+		// Sanitize.
 		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
 		$wc_queued_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $wc_queued_js );
 		$wc_queued_js = str_replace( "\r", '', $wc_queued_js );
 
-		echo $wc_queued_js . "});\n</script>\n";
+		$js = "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) { $wc_queued_js });\n</script>\n";
+
+		/**
+		 * woocommerce_queued_js filter.
+		 *
+		 * @since 2.6.0
+		 * @param string $js JavaScript code.
+		 */
+		echo apply_filters( 'woocommerce_queued_js', $js );
 
 		unset( $wc_queued_js );
 	}
