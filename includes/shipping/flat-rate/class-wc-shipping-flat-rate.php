@@ -38,7 +38,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function init() {
 		$this->instance_form_fields = include( 'includes/settings-flat-rate.php' );
-		$this->enabled		        = $this->get_option( 'enabled' );
 		$this->title                = $this->get_option( 'title' );
 		$this->availability         = $this->get_option( 'availability' );
 		$this->countries            = $this->get_option( 'countries' );

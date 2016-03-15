@@ -133,7 +133,7 @@ class WC_Shipping {
 	public function load_shipping_methods( $package = array() ) {
 		if ( $package ) {
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
-			$this->shipping_methods = $shipping_zone->get_shipping_methods();
+			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
 		} else {
 			$this->shipping_methods = array();
 		}

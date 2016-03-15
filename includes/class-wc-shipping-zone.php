@@ -213,12 +213,14 @@ class WC_Shipping_Zone implements WC_Data {
 
 	/**
 	 * Get shipping methods linked to this zone
+	 * @param bool Only return enabled methods.
 	 * @return array of objects
 	 */
-	public function get_shipping_methods() {
+	public function get_shipping_methods( $enabled_only = false ) {
 		global $wpdb;
 
-        $raw_methods     = $wpdb->get_results( $wpdb->prepare( "SELECT method_id, method_order, instance_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d order by method_order ASC;", $this->get_zone_id() ) );
+		$raw_methods_sql = $enabled_only ? "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d AND is_enabled = 1 order by method_order ASC;" : "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d order by method_order ASC;";
+        $raw_methods     = $wpdb->get_results( $wpdb->prepare( $raw_methods_sql, $this->get_zone_id() ) );
 		$wc_shipping     = WC_Shipping::instance();
 		$allowed_classes = $wc_shipping->get_shipping_method_class_names();
 		$methods         = array();
@@ -245,6 +247,7 @@ class WC_Shipping_Zone implements WC_Data {
 				// Let's make sure that we have an instance before setting its attributes
 				if ( is_object( $methods[ $raw_method->instance_id ] ) ) {
 					$methods[ $raw_method->instance_id ]->method_order = absint( $raw_method->method_order );
+					$methods[ $raw_method->instance_id ]->enabled      = $raw_method->is_enabled ? 'yes' : 'no';
 					$methods[ $raw_method->instance_id ]->has_settings = $methods[ $raw_method->instance_id ]->has_settings();
 				}
 			}

@@ -2020,7 +2020,7 @@ class WC_AJAX {
 				}
 			}
 		}
-		
+
 		$found_customers = apply_filters( 'woocommerce_json_search_found_customers', $found_customers );
 
 		wp_send_json( $found_customers );
@@ -3218,11 +3218,16 @@ class WC_AJAX {
 			}
 
 			$method_data = array_intersect_key( $data, array(
-				'method_order' => 1
+				'method_order' => 1,
+				'enabled'      => 1
 			) );
 
 			if ( isset( $method_data['method_order'] ) ) {
 				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $method_data['method_order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
+			}
+
+			if ( isset( $method_data['enabled'] ) ) {
+				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => absint( 'yes' === $method_data['enabled'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
 			}
 		}
 

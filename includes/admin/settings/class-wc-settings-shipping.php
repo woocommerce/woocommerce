@@ -215,6 +215,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
 				'add_method_failed'       => __( 'Shipping method could not be added. Please retry.', 'woocommerce' ),
 				'yes'                     => __( 'Yes', 'woocommerce' ),
+				'no'                      => __( 'No', 'woocommerce' ),
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zone-methods' );

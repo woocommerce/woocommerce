@@ -93,7 +93,7 @@
 					$( this.el ).unblock();
 				},
 				render: function() {
-					var methods       = _.indexBy( this.model.get( 'methods' ), 'instance_id' ),
+					var methods     = _.indexBy( this.model.get( 'methods' ), 'instance_id' ),
 						view        = this;
 
 					// Blank out the contents.
@@ -109,9 +109,9 @@
 						// Populate $tbody with the current methods
 						$.each( methods, function( id, rowData ) {
 							if ( 'yes' === rowData.enabled ) {
-								rowData.enabled_icon = '<span class="status-enabled tips" data-tip="' + data.strings.yes + '">' + data.strings.yes + '</span>';
+								rowData.enabled_icon = '<span class="status-enabled">' + data.strings.yes + '</span>';
 							} else {
-								rowData.enabled_icon = '&ndash;';
+								rowData.enabled_icon = '<span class="status-disabled">' + data.strings.no + '</span>';
 							}
 
 							view.$el.append( view.rowTemplate( rowData ) );
@@ -126,6 +126,7 @@
 
 						// Make the rows function
 						this.$el.find( '.wc-shipping-zone-method-delete' ).on( 'click', { view: this }, this.onDeleteRow );
+						this.$el.find( '.wc-shipping-zone-method-enabled a').on( 'click', { view: this }, this.onToggleEnabled );
 					} else {
 						view.$el.append( $blank_template );
 					}
@@ -158,6 +159,23 @@
 
 					delete methods[ instance_id ];
 					changes[ instance_id ] = _.extend( changes[ instance_id ] || {}, { deleted : 'deleted' } );
+					model.set( 'methods', methods );
+					model.logChanges( changes );
+					view.render();
+				},
+				onToggleEnabled: function( event ) {
+					var view        = event.data.view,
+						$target     = $( event.target ),
+						model       = view.model,
+						methods     = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+						instance_id = $target.closest( 'tr' ).data( 'id' ),
+						enabled     = $target.closest( 'tr' ).data( 'enabled' ) === 'yes' ? 'no' : 'yes',
+						changes     = {},
+						new_enabled = 'yes';
+
+					event.preventDefault();
+					methods[ instance_id ].enabled = enabled;
+					changes[ instance_id ] = _.extend( changes[ instance_id ] || {}, { enabled : enabled } );
 					model.set( 'methods', methods );
 					model.logChanges( changes );
 					view.render();

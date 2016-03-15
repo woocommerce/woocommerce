@@ -487,6 +487,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
   instance_id bigint(20) NOT NULL auto_increment,
   method_id varchar(255) NOT NULL,
   method_order bigint(20) NOT NULL,
+  is_enabled tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY  (instance_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (

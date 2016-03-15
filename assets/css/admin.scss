@@ -2305,6 +2305,12 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 				line-height: inherit;
 			}
 		}
+		.status-disabled {
+			display: inline-block;
+			&:before {
+				line-height: inherit;
+			}
+		}
 	}
 	.wc-shipping-zone-name,
 	.wc-shipping-zone-methods {
@@ -2449,7 +2455,8 @@ img.help_tip {
 }
 
 .status-enabled,
-.status-manual {
+.status-manual,
+.status-disabled {
 	font-size: 1.4em;
 	@include ir();
 }
@@ -2465,6 +2472,13 @@ img.help_tip {
 	&:before {
 		@include icon( "\e015" );
 		color: $woocommerce;
+	}
+}
+
+.status-disabled {
+	&:before {
+		@include icon( "\e013" );
+		color: #ccc;
 	}
 }
 
