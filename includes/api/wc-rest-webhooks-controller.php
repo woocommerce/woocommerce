@@ -58,7 +58,17 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+					'topic' => array(
+						'required' => true,
+					),
+					'delivery_url' => array(
+						'required' => true,
+					),
+					'secret' => array(
+						'required' => true,
+					),
+				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -164,6 +174,137 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Create a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+		}
+
+		// Validate topic.
+		if ( empty( $request['topic'] ) || ! wc_is_webhook_valid_topic( strtolower( $request['topic'] ) ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic is required and must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$post = $this->prepare_item_for_database( $request );
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}
+
+		$post->post_type = $this->post_type;
+		$post_id = wp_insert_post( $post, true );
+
+		if ( is_wp_error( $post_id ) ) {
+
+			if ( in_array( $post_id->get_error_code(), array( 'db_insert_error' ) ) ) {
+				$post_id->add_data( array( 'status' => 500 ) );
+			} else {
+				$post_id->add_data( array( 'status' => 400 ) );
+			}
+			return $post_id;
+		}
+		$post->ID = $post_id;
+
+		$post = get_post( $post_id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		$webhook = new WC_Webhook( $post->ID );
+
+		// Set topic.
+		$webhook->set_topic( $request['topic'] );
+
+		// Set delivery URL.
+		$webhook->set_delivery_url( $request['delivery_url'] );
+
+		// Set secret.
+		$webhook->set_secret( $request['secret'] );
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param WP_Post         $post      Inserted object.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post_id ) ) );
+
+		// Send ping.
+		$webhook->deliver_ping();
+
+		// Clear cache.
+		delete_transient( 'woocommerce_webhook_ids' );
+
+		return $response;
+	}
+
+	/**
+	 * Prepare a single webhook for create or update.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_Error|stdClass $data Post object.
+	 */
+	protected function prepare_item_for_database( $request ) {
+		global $wpdb;
+
+		$data = new stdClass;
+
+		// Post ID.
+		if ( isset( $request['id'] ) ) {
+			$data->ID = absint( $request['id'] );
+		}
+
+		$schema = $this->get_item_schema();
+
+		// Validate required POST fields.
+		if ( 'POST' === $request->get_method() && empty( $data->ID ) ) {
+			$data->post_title = ! empty( $request['name'] ) ? $request['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) );
+
+			// Post author.
+			$data->post_author = get_current_user_id();
+
+			// Post password.
+			$password = strlen( uniqid( 'webhook_' ) );
+			$data->post_password = $password > 20 ? substr( $password, 0, 20 ) : $password;
+
+			// Post status.
+			$data->post_status = 'publish';
+
+			// Comment status.
+			$data->comment_status = 'closed';
+
+			// Ping status.
+			$data->ping_status = 'closed';
+		} else {
+
+			// Allow edit post title.
+			if ( ! empty( $request['name'] ) ) {
+				$data->post_title = $request['name'];
+			}
+		}
+
+		/**
+		 * Filter the query_vars used in `get_items` for the constructed query.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
+		 * prepared for insertion.
+		 *
+		 * @param stdClass        $data An object representing a single item prepared
+		 *                                       for inserting or updating the database.
+		 * @param WP_REST_Request $request       Request object.
+		 */
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
+	}
+
+	/**
 	 * Prepare a single webhook output for response.
 	 *
 	 * @param WP_Post $webhook Webhook object.
@@ -203,7 +344,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		 * @param WC_Webhook       $webhook  Webhook object used to create response.
 		 * @param WP_REST_Request  $request  Request object.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_webhook', $response, $webhook, $request );
+		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $webhook, $request );
 	}
 
 	/**
