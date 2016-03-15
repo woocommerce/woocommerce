@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $wpdb;
 
+WC_Admin_Notices::add_notice( 'legacy_shipping' );
+
 /**
  * Migrate term meta to WordPress tables
  */
