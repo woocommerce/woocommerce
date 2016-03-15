@@ -144,6 +144,8 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
+		$response->add_links( $this->prepare_links( $post ) );
+
 		/**
 		 * Filter the data for a response.
 		 *
@@ -155,6 +157,25 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		 * @param WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_coupon', $response, $post, $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param WP_Post $post Customer object.
+	 * @return array Links for the given post.
+	 */
+	protected function prepare_links( $post ) {
+		$links = array(
+			'self' => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
+			),
+		);
+
+		return $links;
 	}
 
 	/**
