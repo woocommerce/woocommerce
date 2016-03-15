@@ -77,24 +77,71 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 				'id' => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'duration' => array(
 					'description' => __( 'The delivery duration, in seconds.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'summary' => array(
 					'description' => __( 'A friendly summary of the response including the HTTP response code, message, and body.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-
-
-
+				'request_url' => array(
+					'description' => __( 'The URL where the webhook was delivered.', 'woocommerce' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'request_headers' => array(
+					'description' => __( 'The URL where the webhook was delivered.', 'woocommerce' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'request_headers' => array(
+					'description' => __( 'Request headers.', 'woocommerce' ),
+					'type'        => 'object',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'request_body' => array(
+					'description' => __( 'Request body.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'response_code' => array(
+					'description' => __( 'The HTTP response code from the receiving server.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'response_message' => array(
+					'description' => __( 'The HTTP response message from the receiving server.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'response_headers' => array(
+					'description' => __( 'Array of the response headers from the receiving server.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'response_body' => array(
+					'description' => __( 'The response body from the receiving server.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
 				'created_at' => array(
 					'description' => __( "The date the webhook delivery was logged, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',

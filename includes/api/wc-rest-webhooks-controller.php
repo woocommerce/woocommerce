@@ -528,10 +528,10 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		$params['status'] = array(
 			'default'           => 'all',
 			'description'       => __( 'Limit result set to webhooks assigned a specific status.', 'woocommerce' ),
-			'sanitize_callback' => 'sanitize_key',
 			'type'              => 'string',
-			'enum'               => array( 'all', 'active', 'paused', 'disabled' ),
-			'validate_callback'  => 'rest_validate_request_arg',
+			'enum'              => array( 'all', 'active', 'paused', 'disabled' ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;
