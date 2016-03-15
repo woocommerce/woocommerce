@@ -349,6 +349,8 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		return array();
+		return array(
+			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+		);
 	}
 }
