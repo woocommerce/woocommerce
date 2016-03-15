@@ -107,93 +107,125 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$this->assertEquals( $username, $customer_read->get_username() );
 	}
 
-
 	/**
 	 * Tests backwards compat / legacy handling.
+	 * @expectedDeprecated WC_Customer::is_vat_exempt
+	 * @expectedDeprecated WC_Customer::has_calculated_shipping
+	 * @expectedDeprecated WC_Customer::get_default_country
+	 * @expectedDeprecated WC_Customer::get_default_state
+	 * @expectedDeprecated WC_Customer::is_paying_customer
+	 * @expectedDeprecated WC_Customer::calculated_shipping
 	 * @since 2.7.0
 	 */
 	public function test_customer_backwards_compat() {
+		// Properties.
+		// Accessing properties directly will throw some wanted deprected notices
+		// So we need to let PHPUnit know we are expecting them and it's fine to continue
+		$legacy_keys = array(
+			'id', 'country', 'state', 'postcode', 'city', 'address', 'address_1', 'address_2',
+			'shipping_country', 'shipping_state', 'shipping_postcode', 'shipping_city',
+			'shipping_address', 'shipping_address_1', 'shipping_address_2',
+			'is_vat_exempt', 'calculated_shipping',
+		);
 
+		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
+
+		$customer = \WC_Helper_Customer::create_customer();
+
+		$this->assertEquals( $customer->get_id(), $customer->id );
+		$this->assertEquals( $customer->get_country(), $customer->country );
+		$this->assertEquals( $customer->get_state(), $customer->state );
+		$this->assertEquals( $customer->get_postcode(), $customer->postcode );
+		$this->assertEquals( $customer->get_city(), $customer->city );
+		$this->assertEquals( $customer->get_address(), $customer->address );
+		$this->assertEquals( $customer->get_address(), $customer->address_1 );
+		$this->assertEquals( $customer->get_address_2(), $customer->address_2 );
+		$this->assertEquals( $customer->get_shipping_country(), $customer->shipping_country );
+		$this->assertEquals( $customer->get_shipping_state(), $customer->shipping_state );
+		$this->assertEquals( $customer->get_shipping_postcode(), $customer->shipping_postcode );
+		$this->assertEquals( $customer->get_shipping_city(), $customer->shipping_city );
+		$this->assertEquals( $customer->get_shipping_address(), $customer->shipping_address );
+		$this->assertEquals( $customer->get_shipping_address(), $customer->shipping_address_1 );
+		$this->assertEquals( $customer->get_shipping_address_2(), $customer->shipping_address_2 );
+		$this->assertEquals( $customer->get_is_vat_exempt(), $customer->is_vat_exempt );
+		$this->assertEquals( $customer->get_calculated_shipping(), $customer->calculated_shipping );
+
+		// Functions
+		$this->assertEquals( $customer->get_is_vat_exempt(), $customer->is_vat_exempt() );
+		$this->assertEquals( $customer->get_calculated_shipping(), $customer->has_calculated_shipping() );
+		$default = wc_get_customer_default_location();
+		$this->assertEquals( $default['country'], $customer->get_default_country() );
+		$this->assertEquals( $default['state'], $customer->get_default_state() );
+		$this->assertFalse( $customer->get_calculated_shipping() );
+		$customer->calculated_shipping( true );
+		$this->assertTrue( $customer->get_calculated_shipping() );
+		$this->assertEquals( $customer->get_is_paying_customer(), $customer->is_paying_customer() );
 	}
 
 	/**
-	 * Test getting a customer's ID.
+	 * Test generic getters & setters
 	 * @since 2.7.0
 	 */
-	public function test_customer_get_id() {
+	public function test_customer_setters_and_getters() {
+		$time = time();
+		$standard_getters_and_setters = array(
+			'username' => 'test', 'email' => 'test@woo.local', 'first_name' => 'Bob', 'last_name' => 'tester',
+			'role' => 'customer', 'last_order_id' => 5, 'last_order_date' => $time, 'orders_count' => 2,
+			'total_spent' => 10.57, 'date_created' => $time, 'date_modified' => $time, 'postcode' => 11010,
+			'city' => 'New York', 'address' => '123 Main St.', 'address_1' => '123 Main St.', 'address_2' => 'Apt 2', 'state' => 'NY',
+			'country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
+			'New York', 'shipping_address' => '123 Main St.', 'shipping_address_1' => '123 Main St.',
+			'shipping_address_2' => 'Apt 2', 'is_vat_exempt' => true, 'calculated_shipping' => true,
+			'is_paying_customer' => true
+		);
 
+		$customer = new \WC_Customer;
+		foreach ( $standard_getters_and_setters as $function => $value ) {
+			$customer->{"set_{$function}"}( $value );
+			$this->assertEquals( $value, $customer->{"get_{$function}"}(), $function );
+		}
 	}
 
 	/**
-	 * Test getting a customer's username.
+	 * Test getting a customer's last order ID and date
 	 * @since 2.7.0
 	 */
-	public function test_customer_get_username() {
-
+	public function test_customer_get_last_order_info() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$order = \WC_Helper_Order::create_order( $customer_id );
+		$customer->read( $customer_id );
+		$this->assertEquals( $order->id, $customer->get_last_order_id() );
+		$this->assertEquals( strtotime( $order->order_date ), $customer->get_last_order_date() );
 	}
 
 	/**
-	 * Test getting a customer's email.
+	 * Test getting a customer's order count from DB.
 	 * @since 2.7.0
 	 */
-	public function test_customer_get_email() {
-
+	public function test_customer_get_orders_count_read() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		\WC_Helper_Order::create_order( $customer_id );
+		\WC_Helper_Order::create_order( $customer_id );
+		\WC_Helper_Order::create_order( $customer_id );
+		$customer->read( $customer_id );
+		$this->assertEquals( 3, $customer->get_orders_count() );
 	}
 
 	/**
-	 * Test getting a customer's first name.
+	 * Test getting a customer's total amount spent from DB.
 	 * @since 2.7.0
 	 */
-	public function test_customer_get_first_name() {
-
-	}
-
-	/**
-	 * Test getting a customer's last name.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_last_name() {
-
-	}
-
-	/**
-	 * Test getting a customer's role.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_role() {
-
-	}
-
-	/**
-	 * Test getting a customer's last order ID.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_last_order_id() {
-
-	}
-
-	/**
-	 * Test getting a customer's last order date.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_last_order_date() {
-
-	}
-
-	/**
-	 * Test getting a customer's order count.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_orders_count() {
-
-	}
-
-	/**
-	 * Test getting a customer's total amount spent.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_total_spent() {
-
+	public function test_customer_get_total_spent_read() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$order = \WC_Helper_Order::create_order( $customer_id );
+		$customer->read( $customer_id );
+		$this->assertEquals( 0, $customer->get_total_spent() );
+		$order->update_status( 'wc-completed' );
+		$customer->read( $customer_id );
+		$this->assertEquals( 40, $customer->get_total_spent() );
 	}
 
 	/**
@@ -201,135 +233,37 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_avatar_url() {
-
+		$customer = \WC_Helper_Customer::create_customer();
+		$this->assertContains( 'gravatar.com/avatar', $customer->get_avatar_url() );
+		$this->assertContains( md5( 'test@woo.local' ), $customer->get_avatar_url() );
 	}
 
 	/**
-	 * Test getting a customer's creation date.
+	 * Test getting a customer's creation date from DB.
 	 * @since 2.7.0
 	 */
-	public function test_customer_get_date_created() {
-
+	public function test_customer_get_date_created_read() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$user = new \WP_User( $customer_id );
+		$this->assertEquals( strtotime( $user->data->user_registered ), $customer->get_date_created() );
 	}
 
 	/**
-	 * Test getting a customer's modification date.
+	 * Test getting a customer's modification date from DB.
 	 * @since 2.7.0
 	 */
-	public function test_customer_get_date_modified() {
-
-	}
-
-	/**
-	 * Test getting a customer's billing postcode.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_postcode() {
-
-	}
-
-	/**
-	 * Test getting a customer's billing city.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_city() {
-
-	}
-
-	/**
-	 * Test getting a customer's billing address.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_address() {
-
-	}
-
-	/**
-	 * Test getting a customer's billing address (2).
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_address_2() {
-
-	}
-
-	/**
-	 * Test getting a customer's billing state.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_state() {
-
-	}
-
-	/**
-	 * Test getting a customer's billing country.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_country() {
-
-	}
-
-	/**
-	 * Test getting a customer's shipping state.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_shipping_state() {
-
-	}
-
-	/**
-	 * Test getting a customer's shipping country.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_shipping_country() {
-
-	}
-
-	/**
-	 * Test getting a customer's shipping postcode/
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_shipping_postcode() {
-
-	}
-
-	/**
-	 * Test getting a customer's shipping city.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_shipping_city() {
-
-	}
-
-	/**
-	 * Test getting a customer's shipping address.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_shipping_address() {
-
-	}
-
-	/**
-	 * Test getting a customer's shipping address (2).
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_shipping_address_2() {
-
-	}
-
-	/**
-	 * Test getting a customer's vat exempt status.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_is_vat_exempt() {
-
-	}
-
-	/**
-	 * Test getting a customer's "calculated shipping" flag.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_calculated_shipping() {
-
+	public function test_customer_get_date_modified_read() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$last = get_user_meta( $customer_id, 'last_update', true );
+		sleep(1);
+		$this->assertEquals( $last, $customer->get_date_modified() );
+		$customer->set_address( '1234 Some St.' );
+		$customer->save();
+		$update = get_user_meta( $customer_id, 'last_update', true );
+		$this->assertEquals( $update, $customer->get_date_modified() );
+		$this->assertNotEquals( $update, $last );
 	}
 
 	/**
@@ -337,7 +271,33 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_taxable_address() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$customer->set_shipping_postcode( '11111' );
+		$customer->set_shipping_city( 'Test' );
+		$customer->save();
+		$customer->read( $customer_id );
 
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		$taxable = $customer->get_taxable_address();
+		$this->assertEquals( 'US', $taxable[0] );
+		$this->assertEquals( 'PA', $taxable[1] );
+		$this->assertEquals( '11111', $taxable[2] );
+		$this->assertEquals( 'Test', $taxable[3] );
+
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		$taxable = $customer->get_taxable_address();
+		$this->assertEquals( 'US', $taxable[0] );
+		$this->assertEquals( 'PA', $taxable[1] );
+		$this->assertEquals( '19123', $taxable[2] );
+		$this->assertEquals( 'Philadelphia', $taxable[3] );
+
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		$taxable = $customer->get_taxable_address();
+		$this->assertEquals( WC()->countries->get_base_country(), $taxable[0] );
+		$this->assertEquals( WC()->countries->get_base_state(), $taxable[1] );
+		$this->assertEquals( WC()->countries->get_base_postcode(), $taxable[2] );
+		$this->assertEquals( WC()->countries->get_base_city(), $taxable[3] );
 	}
 
 	/**
@@ -345,79 +305,27 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_get_downloadable_products() {
-
-	}
-
-	/**
-	 * Test getting a customer's "is paying customer" flag.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_is_paying_customer() {
-
-	}
-
-	/**
-	 * Test getting a customer's data array.
-	 * @since 2.7.0
-	 */
-	public function test_customer_get_data() {
-
-	}
-
-	/**
-	 * Test setting a customer's username.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_username() {
-
-	}
-
-	/**
-	 * Test setting a customer's email.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_email() {
-
-	}
-
-	/**
-	 * Test setting a customer's first name.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_first_name() {
-
-	}
-
-	/**
-	 * Test setting a customer's last name.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_last_name() {
-
-	}
-
-	/**
-	 * Test setting a customer's role.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_role() {
-
-	}
-
-	/**
-	 * Test setting a customer's password.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_password() {
-
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$this->assertEquals( wc_get_customer_available_downloads( $customer_id ), $customer->get_downloadable_products() );
 	}
 
 	/**
 	 * Test setting a password on update - making sure it actually changes the users password.
 	 * @since 2.7.0
 	 */
-	public function test_customer_password_updates_on_save() {
+	public function test_customer_password() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
 
+		$user = get_user_by( 'id', $customer_id );
+		$this->assertTrue( wp_check_password( 'hunter2', $user->data->user_pass, $user->ID ) );
+
+		$customer->set_password( 'hunter3' );
+		$customer->save();
+
+		$user = get_user_by( 'id', $customer_id );
+		$this->assertTrue( wp_check_password( 'hunter3', $user->data->user_pass, $user->ID ) );
 	}
 
 	/**
@@ -425,15 +333,27 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_set_address_to_base() {
-
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer->set_address_to_base();
+		$base = wc_get_customer_default_location();
+		$this->assertEquals( $base['country'], $customer->get_country() );
+		$this->assertEquals( $base['state'], $customer->get_state() );
+		$this->assertEmpty( $customer->get_postcode() );
+		$this->assertEmpty( $customer->get_city() );
 	}
 
 	/**
 	 * Test setting a customer's shipping address to the base address.
 	 * @since 2.7.0
 	 */
-	public function test_customer_set_address_shipping_to_base() {
-
+	public function test_customer_set_shipping_address_to_base() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer->set_shipping_address_to_base();
+		$base = wc_get_customer_default_location();
+		$this->assertEquals( $base['country'], $customer->get_shipping_country() );
+		$this->assertEquals( $base['state'], $customer->get_shipping_state() );
+		$this->assertEmpty( $customer->get_shipping_postcode() );
+		$this->assertEmpty( $customer->get_shipping_city() );
 	}
 
 	/**
@@ -441,7 +361,12 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_set_location() {
-
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer->set_location( 'US', 'OH', '12345', 'Cleveland' );
+		$this->assertEquals( 'US', $customer->get_country() );
+		$this->assertEquals( 'OH', $customer->get_state() );
+		$this->assertEquals( '12345', $customer->get_postcode() );
+		$this->assertEquals( 'Cleveland', $customer->get_city() );
 	}
 
 	/**
@@ -449,127 +374,12 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_set_shipping_location() {
-
-	}
-
-	/**
-	 * Test setting a customer's billing postcode.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_postcode() {
-
-	}
-
-	/**
-	 * Test setting a customer's billing city.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_city() {
-
-	}
-
-	/**
-	 * Test setting a customer's billing address.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_address() {
-
-	}
-
-	/**
-	 * Test setting a customer's billing address (2).
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_address_2() {
-
-	}
-
-	/**
-	 * Test setting a customer's billing state.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_state() {
-
-	}
-
-	/**
-	 * Test setting a customer's billing country.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_country() {
-
-	}
-
-	/**
-	 * Test setting a customer's shipping state.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_shipping_state() {
-
-	}
-
-	/**
-	 * Test setting a customer's shipping country.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_shipping_country() {
-
-	}
-
-	/**
-	 * Test setting a customer's shipping postcode.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_shipping_postcode() {
-
-	}
-
-	/**
-	 * Test setting a customer's shipping city.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_shipping_city() {
-
-	}
-
-	/**
-	 * Test setting a customer's shipping address.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_shipping_address() {
-
-	}
-
-	/**
-	 * Test setting a customer's shipping address (2).
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_shipping_address_2() {
-
-	}
-
-	/**
-	 * Test setting a customer's "vat exempt" status.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_is_vat_exempt() {
-
-	}
-
-	/**
-	 * Test setting a customer's "calculted shipping" flag.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_calculated_shipping() {
-
-	}
-
-	/**
-	 * Test setting a customer's "is a paying customer" flag.
-	 * @since 2.7.0
-	 */
-	public function test_customer_set_is_paying_customer() {
-
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer->set_shipping_location( 'US', 'OH', '12345', 'Cleveland' );
+		$this->assertEquals( 'US', $customer->get_shipping_country() );
+		$this->assertEquals( 'OH', $customer->get_shipping_state() );
+		$this->assertEquals( '12345', $customer->get_shipping_postcode() );
+		$this->assertEquals( 'Cleveland', $customer->get_shipping_city() );
 	}
 
 	/**
@@ -577,7 +387,11 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_is_customer_outside_base() {
-
+		$customer = \WC_Helper_Customer::create_customer();
+		$this->assertTrue( $customer->is_customer_outside_base() );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		$customer->set_address_to_base();
+		$this->assertFalse( $customer->is_customer_outside_base() );
 	}
 
 	/**
@@ -585,7 +399,21 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 * @since 2.7.0
 	 */
 	public function test_customer_sessions() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$session  = \WC_Helper_Customer::create_mock_customer(); // set into session....
 
+		$this->assertNotEmpty( $session->get_id() );
+		$this->assertFalse( is_numeric( $session->get_id() ) );
+		$this->assertEquals( '19123', $session->get_postcode() );
+		$this->assertEquals( '123 South Street', $session->get_address() );
+		$this->assertEquals( 'Philadelphia', $session->get_city() );
+
+		$session->set_address( '124 South Street' );
+		$session->save_to_session();
+
+		$session = new \WC_Customer();
+		$session->load_session();
+		$this->assertEquals( '124 South Street', $session->get_address() );
 	}
 
 }

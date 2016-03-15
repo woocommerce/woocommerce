@@ -20,8 +20,8 @@ class WC_Legacy_Customer  {
 	 */
 	public function __isset( $key ) {
 		$legacy_keys = array(
-			'country', 'state', 'postcode' ,'city', 'address_1', 'address_2', 'shipping_country', 'shipping_state',
-			'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address_2', 'is_vat_exempt', 'calculated_shipping',
+			'country', 'state', 'postcode' ,'city', 'address_1', 'address', 'address_2', 'shipping_country', 'shipping_state',
+			'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address', 'shipping_address_2', 'is_vat_exempt', 'calculated_shipping',
 		);
 		$key = $this->filter_legacy_key( $key );
 		return in_array( $key, $legacy_keys );

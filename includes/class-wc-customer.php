@@ -56,9 +56,9 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 * @var array
 	 */
 	protected $_session_keys = array(
-		'postcode', 'city', 'address_1', 'address_2', 'state', 'country',
-		'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address_2',
-		'shipping_state', 'shipping_country', 'is_vat_exempt', 'calculated_shipping',
+		'postcode', 'city', 'address_1', 'address', 'address_2', 'state', 'country',
+		'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address',
+		'shipping_address_2', 'shipping_state', 'shipping_country', 'is_vat_exempt', 'calculated_shipping',
 	);
 
 	/**
@@ -285,6 +285,14 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	}
 
 	/**
+	 * Get customer address.
+	 * @return string
+	 */
+	public function get_address_1() {
+		return $this->get_address();
+	}
+
+	/**
 	 * Get customer's second address.
 	 * @return string
 	 */
@@ -346,6 +354,14 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 */
 	public function get_shipping_address() {
 		return $this->_data['shipping_address_1'];
+	}
+
+	/**
+	 * Get customer address.
+	 * @return string
+	 */
+	public function get_shipping_address_1() {
+		return $this->get_shipping_address();
 	}
 
 	/**
@@ -535,20 +551,20 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	}
 
 	/**
-	 * Set the date this customer was last updated. Internal only.
+	 * Set the date this customer was last updated.
 	 * @since 2.7.0
 	 * @param integer $timestamp
 	 */
-	protected function set_date_modified( $timestamp ) {
+	public function set_date_modified( $timestamp ) {
 		$this->_data['date_modified'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
 	}
 
 	/**
-	 * Set the date this customer was last updated. Internal only.
+	 * Set the date this customer was last updated.
 	 * @since 2.7.0
 	 * @param integer $timestamp
 	 */
-	protected function set_date_created( $timestamp ) {
+	public function set_date_created( $timestamp ) {
 		$this->_data['date_created'] = is_numeric( $timestamp ) ? $timestamp : strtotime( $timestamp );
 	}
 
@@ -568,7 +584,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 * Set customer shipping address to base address.
 	 * @since 2.7.0
 	 */
-	public function set_address_shipping_to_base() {
+	public function set_shipping_address_to_base() {
 		$base = wc_get_customer_default_location();
 		$this->_data['shipping_country']  = $base['country'];
 		$this->_data['shipping_state']    = $base['state'];
@@ -820,7 +836,7 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 			if ( ! empty( $data ) ) {
 				$pull_from_db  = false;
 				foreach ( $this->_session_keys as $session_key ) {
-					if ( is_callable( array( $this, "set_billing_{$session_key}" ) ) ) {
+					if ( ! empty( $data[ $session_key ] ) && is_callable( array( $this, "set_{$session_key}" ) ) ) {
 						$this->{"set_{$session_key}"}( $data[ $session_key ] );
 					}
 				}
@@ -896,6 +912,9 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 				AND     posts.post_status   IN ( 'wc-completed', 'wc-processing' )
 				AND     meta2.meta_key      = '_order_total'
 			" );
+			if ( ! $spent ) {
+				$spent = 0;
+			}
 
 			$this->set_orders_count( $count );
 			$this->set_total_spent( $spent );
@@ -923,10 +942,6 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 		}
 
 		unset( $this->_data['password'] ); // password is write only, never ever read it
-
-		//error_log( 'read' );
-		//error_log( print_r ( $this->get_id(), 1 ) );
-	//	error_log( print_r ( $this->_data, 1 ) );
 	}
 
 	/**
@@ -936,7 +951,6 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	public function update() {
 		$customer_ID = $this->get_id();
 
-		// @todo user name change?
 		wp_update_user( array( 'ID' => $customer_ID, 'user_email' => $this->get_email() ) );
 		// Only update password if a new one was set with set_password
 		if ( isset( $this->_data['password'] ) ) {

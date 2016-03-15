@@ -34,8 +34,9 @@ class WC_Helper_Customer {
 
 		WC_Helper_Customer::set_customer_details( $customer_data );
 
-		return new WC_Customer();
-		// @todo fix this
+		$customer = new WC_Customer();
+		$customer->load_session();
+		return $customer;
 	}
 
 	/**
