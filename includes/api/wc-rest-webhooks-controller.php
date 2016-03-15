@@ -174,7 +174,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Create a single item.
+	 * Create a single webhook.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
@@ -187,6 +187,11 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		// Validate topic.
 		if ( empty( $request['topic'] ) || ! wc_is_webhook_valid_topic( strtolower( $request['topic'] ) ) ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic is required and must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// Validate delivery URL.
+		if ( empty( $request['delivery_url'] ) || ! wc_is_valid_url( $request['delivery_url'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$post = $this->prepare_item_for_database( $request );
@@ -208,10 +213,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		}
 		$post->ID = $post_id;
 
-		$post = get_post( $post_id );
-		$this->update_additional_fields_for_object( $post, $request );
-
-		$webhook = new WC_Webhook( $post->ID );
+		$webhook = new WC_Webhook( $post_id );
 
 		// Set topic.
 		$webhook->set_topic( $request['topic'] );
@@ -221,6 +223,14 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 
 		// Set secret.
 		$webhook->set_secret( $request['secret'] );
+
+		// Set status.
+		if ( ! empty( $request['status'] ) ) {
+			$webhook->update_status( $request['status'] );
+		}
+
+		$post = get_post( $post_id );
+		$this->update_additional_fields_for_object( $post, $request );
 
 		/**
 		 * Fires after a single item is created or updated via the REST API.
@@ -244,6 +254,87 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		delete_transient( 'woocommerce_webhook_ids' );
 
 		return $response;
+	}
+
+	/**
+	 * Update a single webhook.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$id   = (int) $request['id'];
+		$post = get_post( $id );
+
+		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$webhook = new WC_Webhook( $id );
+
+		// Update topic.
+		if ( ! empty( $request['topic'] ) ) {
+			if ( wc_is_webhook_valid_topic( strtolower( $request['topic'] ) ) ) {
+				$webhook->set_topic( $request['topic'] );
+			} else {
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+		}
+
+		// Update delivery URL.
+		if ( ! empty( $request['delivery_url'] ) ) {
+			if ( wc_is_valid_url( $request['delivery_url'] ) ) {
+				$webhook->set_delivery_url( $request['delivery_url'] );
+			} else {
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+		}
+
+		// Update secret.
+		if ( ! empty( $request['secret'] ) ) {
+			$webhook->set_secret( $request['secret'] );
+		}
+
+		// Update status.
+		if ( ! empty( $request['status'] ) ) {
+			$webhook->update_status( $request['status'] );
+		}
+
+		$post = $this->prepare_item_for_database( $request );
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}
+
+		// Convert the post object to an array, otherwise wp_update_post will expect non-escaped input.
+		$post_id = wp_update_post( (array) $post, true );
+		if ( is_wp_error( $post_id ) ) {
+			if ( in_array( $post_id->get_error_code(), array( 'db_update_error' ) ) ) {
+				$post_id->add_data( array( 'status' => 500 ) );
+			} else {
+				$post_id->add_data( array( 'status' => 400 ) );
+			}
+			return $post_id;
+		}
+
+		$post = get_post( $post_id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param WP_Post         $post      Inserted object.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+
+		// Clear cache.
+		delete_transient( 'woocommerce_webhook_ids' );
+
+		return rest_ensure_response( $response );
 	}
 
 	/**
@@ -277,12 +368,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 
 			// Post status.
 			$data->post_status = 'publish';
-
-			// Comment status.
-			$data->comment_status = 'closed';
-
-			// Ping status.
-			$data->ping_status = 'closed';
 		} else {
 
 			// Allow edit post title.
@@ -290,6 +375,12 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 				$data->post_title = $request['name'];
 			}
 		}
+
+		// Comment status.
+		$data->comment_status = 'closed';
+
+		// Ping status.
+		$data->ping_status = 'closed';
 
 		/**
 		 * Filter the query_vars used in `get_items` for the constructed query.
