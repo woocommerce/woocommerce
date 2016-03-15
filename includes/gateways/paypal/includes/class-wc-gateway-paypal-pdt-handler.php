@@ -37,7 +37,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			'body' 			=> array(
 				'cmd' => '_notify-synch',
 				'tx'  => $transaction,
-				'at'  => $this->identity_token
+				'at'  => $this->identity_token,
 			),
 			'timeout' 		=> 60,
 			'httpversion'   => '1.1',
@@ -56,9 +56,19 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		$transaction_results = array();
 
 		foreach ( $transaction_result as $line ) {
-			 $line                                        = explode( "=", $line );
-			 $transaction_results[ wc_clean( urldecode( $line[0] ) ) ] = wc_clean( urldecode( isset( $line[1] ) ? $line[1] : '' ) );
+			$line = explode( "=", $line );
+			$key  = wc_clean( urldecode( $line[0] ) );
+
+			if ( function_exists( 'iconv' ) ) {
+				$value = wc_clean( iconv( 'windows-1252', 'utf-8', urldecode( isset( $line[1] ) ? $line[1] : '' ) ) );
+			} else {
+				$value = wc_clean( urldecode( isset( $line[1] ) ? $line[1] : '' ) );
+			}
+
+			$transaction_results[ $key ] = $value;
 		}
+
+		var_dump($transaction_results);
 
 		return $transaction_results;
 	}
