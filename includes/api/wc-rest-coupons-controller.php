@@ -160,25 +160,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Prepare links for the request.
-	 *
-	 * @param WP_Post $post Customer object.
-	 * @return array Links for the given post.
-	 */
-	protected function prepare_links( $post ) {
-		$links = array(
-			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ),
-			),
-			'collection' => array(
-				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
-			),
-		);
-
-		return $links;
-	}
-
-	/**
 	 * Prepare a single coupon for create or update.
 	 *
 	 * @param WP_REST_Request $request Request object.
