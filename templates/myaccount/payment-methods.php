@@ -74,7 +74,7 @@ wc_print_notices(); ?>
 
 	<?php else : ?>
 
-		<p><?php esc_html_e( 'No saved methods found.', 'woocommerce' ); ?></p>
+		<p class="woocommerce-info"><?php esc_html_e( 'No saved methods found.', 'woocommerce' ); ?></p>
 
 	<?php endif; ?>
 
