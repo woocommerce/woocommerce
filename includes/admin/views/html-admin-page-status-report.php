@@ -128,8 +128,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( function_exists( 'phpversion' ) ) {
 					$php_version = phpversion();
 
-					if ( version_compare( $php_version, '5.4', '<' ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum PHP version of 5.4. See: %s', 'woocommerce' ), esc_html( $php_version ), '<a href="http://docs.woothemes.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
+					if ( version_compare( $php_version, '5.6', '<' ) ) {
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum PHP version of 5.6. See: %s', 'woocommerce' ), esc_html( $php_version ), '<a href="http://docs.woothemes.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . esc_html( $php_version ) . '</mark>';
 					}
@@ -167,7 +167,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php
 				/** @global wpdb $wpdb */
 				global $wpdb;
-				echo $wpdb->db_version();
+				$mysql_version = $wpdb->db_version();
+
+				if ( version_compare( $mysql_version, '5.6', '<' ) ) {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum MySQL version of 5.6. See: %s', 'woocommerce' ), esc_html( $mysql_version ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress Requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
+				} else {
+					echo '<mark class="yes">' . esc_html( $mysql_version ) . '</mark>';
+				}
 				?>
 			</td>
 		</tr>
