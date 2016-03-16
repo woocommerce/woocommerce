@@ -1790,14 +1790,18 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
-						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+					if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+						if ( isset( $image['src'] ) ) {
+							$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 
-						if ( is_wp_error( $upload ) ) {
-							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
+							if ( is_wp_error( $upload ) ) {
+								throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
+							}
+
+							$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
+						} else if ( isset( $image['id'] ) ) {
+							$attachment_id = $image['id'];
 						}
-
-						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
 
 						// Set the image alt if present.
 						if ( ! empty( $image['alt'] ) ) {
