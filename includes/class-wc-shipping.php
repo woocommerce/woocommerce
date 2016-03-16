@@ -242,6 +242,23 @@ class WC_Shipping {
 			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package );
 		}
 
+		/**
+		 * Allow packages to be reorganized after calculate the shipping.
+		 *
+		 * This filter can be used to apply some extra manipulation after the shipping costs are calculated for the packages
+		 * but before Woocommerce does anything with them. A good example of usage is to merge the shipping methods for multiple
+		 * packages for marketplaces.
+		 *
+		 * @since 2.6.0
+		 *
+		 * @param array $packages The array of packages after shipping costs are calculated.
+		 */
+		$this->packages = apply_filters( 'woocommerce_shipping_packages', $this->packages );
+
+		if ( ! is_array( $this->packages ) || empty( $this->packages ) ) {
+			return;
+		}
+
 		// Get all chosen methods
 		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
 		$method_counts  = WC()->session->get( 'shipping_method_counts' );
