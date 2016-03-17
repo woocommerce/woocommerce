@@ -33,16 +33,16 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$customer = \WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$this->assertEquals( 'test@woo.local', $customer->get_email() );
-		$this->assertEquals( 'Apt 1', $customer->get_address_2() );
+		$this->assertEquals( 'Apt 1', $customer->get_billing_address_2() );
 		$customer->set_email( 'test@wc.local' );
 		$customer->set_first_name( 'Justin' );
-		$customer->set_address_2( 'Apt 5' );
+		$customer->set_billing_address_2( 'Apt 5' );
 		$customer->update();
 
 		$customer = new \WC_Customer( $customer_id ); // so we can read fresh copies from the DB
 		$this->assertEquals( 'test@wc.local', $customer->get_email() );
 		$this->assertEquals( 'Justin', $customer->get_first_name() );
-		$this->assertEquals( 'Apt 5', $customer->get_address_2() );
+		$this->assertEquals( 'Apt 5', $customer->get_billing_address_2() );
 	}
 
 
@@ -135,13 +135,13 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$customer = \WC_Helper_Customer::create_customer();
 
 		$this->assertEquals( $customer->get_id(), $customer->id );
-		$this->assertEquals( $customer->get_country(), $customer->country );
-		$this->assertEquals( $customer->get_state(), $customer->state );
-		$this->assertEquals( $customer->get_postcode(), $customer->postcode );
-		$this->assertEquals( $customer->get_city(), $customer->city );
-		$this->assertEquals( $customer->get_address(), $customer->address );
-		$this->assertEquals( $customer->get_address(), $customer->address_1 );
-		$this->assertEquals( $customer->get_address_2(), $customer->address_2 );
+		$this->assertEquals( $customer->get_billing_country(), $customer->country );
+		$this->assertEquals( $customer->get_billing_state(), $customer->state );
+		$this->assertEquals( $customer->get_billing_postcode(), $customer->postcode );
+		$this->assertEquals( $customer->get_billing_city(), $customer->city );
+		$this->assertEquals( $customer->get_billing_address(), $customer->address );
+		$this->assertEquals( $customer->get_billing_address(), $customer->address_1 );
+		$this->assertEquals( $customer->get_billing_address_2(), $customer->address_2 );
 		$this->assertEquals( $customer->get_shipping_country(), $customer->shipping_country );
 		$this->assertEquals( $customer->get_shipping_state(), $customer->shipping_state );
 		$this->assertEquals( $customer->get_shipping_postcode(), $customer->shipping_postcode );
@@ -173,9 +173,9 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$standard_getters_and_setters = array(
 			'username' => 'test', 'email' => 'test@woo.local', 'first_name' => 'Bob', 'last_name' => 'tester',
 			'role' => 'customer', 'last_order_id' => 5, 'last_order_date' => $time, 'orders_count' => 2,
-			'total_spent' => 10.57, 'date_created' => $time, 'date_modified' => $time, 'postcode' => 11010,
-			'city' => 'New York', 'address' => '123 Main St.', 'address_1' => '123 Main St.', 'address_2' => 'Apt 2', 'state' => 'NY',
-			'country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
+			'total_spent' => 10.57, 'date_created' => $time, 'date_modified' => $time, 'billing_postcode' => 11010,
+			'billing_city' => 'New York', 'billing_address' => '123 Main St.', 'billing_address_1' => '123 Main St.', 'billing_address_2' => 'Apt 2', 'billing_state' => 'NY',
+			'billing_country' => 'US', 'shipping_state' => 'NY', 'shipping_postcode' => 11011, 'shipping_city' =>
 			'New York', 'shipping_address' => '123 Main St.', 'shipping_address_1' => '123 Main St.',
 			'shipping_address_2' => 'Apt 2', 'is_vat_exempt' => true, 'calculated_shipping' => true,
 			'is_paying_customer' => true
@@ -261,7 +261,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$last = get_user_meta( $customer_id, 'last_update', true );
 		sleep(1);
 		$this->assertEquals( $last, $customer->get_date_modified() );
-		$customer->set_address( '1234 Some St.' );
+		$customer->set_billing_address( '1234 Some St.' );
 		$customer->save();
 		$update = get_user_meta( $customer_id, 'last_update', true );
 		$this->assertEquals( $update, $customer->get_date_modified() );
@@ -336,12 +336,12 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 */
 	public function test_customer_set_address_to_base() {
 		$customer = \WC_Helper_Customer::create_customer();
-		$customer->set_address_to_base();
+		$customer->set_billing_address_to_base();
 		$base = wc_get_customer_default_location();
-		$this->assertEquals( $base['country'], $customer->get_country() );
-		$this->assertEquals( $base['state'], $customer->get_state() );
-		$this->assertEmpty( $customer->get_postcode() );
-		$this->assertEmpty( $customer->get_city() );
+		$this->assertEquals( $base['country'], $customer->get_billing_country() );
+		$this->assertEquals( $base['state'], $customer->get_billing_state() );
+		$this->assertEmpty( $customer->get_billing_postcode() );
+		$this->assertEmpty( $customer->get_billing_city() );
 	}
 
 	/**
@@ -364,11 +364,11 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 	 */
 	public function test_customer_set_location() {
 		$customer = \WC_Helper_Customer::create_customer();
-		$customer->set_location( 'US', 'OH', '12345', 'Cleveland' );
-		$this->assertEquals( 'US', $customer->get_country() );
-		$this->assertEquals( 'OH', $customer->get_state() );
-		$this->assertEquals( '12345', $customer->get_postcode() );
-		$this->assertEquals( 'Cleveland', $customer->get_city() );
+		$customer->set_billing_location( 'US', 'OH', '12345', 'Cleveland' );
+		$this->assertEquals( 'US', $customer->get_billing_country() );
+		$this->assertEquals( 'OH', $customer->get_billing_state() );
+		$this->assertEquals( '12345', $customer->get_billing_postcode() );
+		$this->assertEquals( 'Cleveland', $customer->get_billing_city() );
 	}
 
 	/**
@@ -392,7 +392,7 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$customer = \WC_Helper_Customer::create_customer();
 		$this->assertTrue( $customer->is_customer_outside_base() );
 		update_option( 'woocommerce_tax_based_on', 'base' );
-		$customer->set_address_to_base();
+		$customer->set_billing_address_to_base();
 		$this->assertFalse( $customer->is_customer_outside_base() );
 	}
 
@@ -406,16 +406,16 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $session->get_id() );
 		$this->assertFalse( is_numeric( $session->get_id() ) );
-		$this->assertEquals( '19123', $session->get_postcode() );
-		$this->assertEquals( '123 South Street', $session->get_address() );
-		$this->assertEquals( 'Philadelphia', $session->get_city() );
+		$this->assertEquals( '19123', $session->get_billing_postcode() );
+		$this->assertEquals( '123 South Street', $session->get_billing_address() );
+		$this->assertEquals( 'Philadelphia', $session->get_billing_city() );
 
-		$session->set_address( '124 South Street' );
+		$session->set_billing_address( '124 South Street' );
 		$session->save_to_session();
 
 		$session = new \WC_Customer();
 		$session->load_session();
-		$this->assertEquals( '124 South Street', $session->get_address() );
+		$this->assertEquals( '124 South Street', $session->get_billing_address() );
 	}
 
 	/**

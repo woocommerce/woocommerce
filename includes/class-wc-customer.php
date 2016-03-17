@@ -34,12 +34,12 @@ class WC_Customer extends WC_Legacy_Customer {
 		'password'            => '', // write only
 		'date_created'        => '', // read only
 		'date_modified'		  => '', // read only
-		'postcode'            => '',
-		'city'                => '',
-		'address_1'           => '',
-		'address_2'           => '',
-		'state'               => '',
-		'country'             => '',
+		'billing_postcode'    => '',
+		'billing_city'        => '',
+		'billing_address_1'   => '',
+		'billing_address_2'   => '',
+		'billing_state'       => '',
+		'billing_country'     => '',
 		'shipping_postcode'   => '',
 		'shipping_city'       => '',
 		'shipping_address_1'  => '',
@@ -56,8 +56,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @var array
 	 */
 	protected $_session_keys = array(
-		'postcode', 'city', 'address_1', 'address', 'address_2', 'state', 'country',
-		'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address',
+		'billing_postcode', 'billing_city', 'billing_address_1', 'billing_address', 'billing_address_2',
+		'billing_state', 'billing_country', 'shipping_postcode', 'shipping_city', 'shipping_address_1', 'shipping_address',
 		'shipping_address_2', 'shipping_state', 'shipping_country', 'is_vat_exempt', 'calculated_shipping',
 	);
 
@@ -282,56 +282,56 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Gets customer postcode.
 	 * @return string
 	 */
-	public function get_postcode() {
-		return wc_format_postcode( $this->_data['postcode'], $this->get_country() );
+	public function get_billing_postcode() {
+		return wc_format_postcode( $this->_data['billing_postcode'], $this->get_billing_country() );
 	}
 
 	/**
 	 * Get customer city.
 	 * @return string
 	 */
-	public function get_city() {
-		return $this->_data['city'];
+	public function get_billing_city() {
+		return $this->_data['billing_city'];
 	}
 
 	/**
 	 * Get customer address.
 	 * @return string
 	 */
-	public function get_address() {
-		return $this->_data['address_1'];
+	public function get_billing_address() {
+		return $this->_data['billing_address_1'];
 	}
 
 	/**
 	 * Get customer address.
 	 * @return string
 	 */
-	public function get_address_1() {
-		return $this->get_address();
+	public function get_billing_address_1() {
+		return $this->get_billing_address();
 	}
 
 	/**
 	 * Get customer's second address.
 	 * @return string
 	 */
-	public function get_address_2() {
-		return $this->_data['address_2'];
+	public function get_billing_address_2() {
+		return $this->_data['billing_address_2'];
 	}
 
 	/**
 	 * Get customer state.
 	 * @return string
 	 */
-	public function get_state() {
-		return $this->_data['state'];
+	public function get_billing_state() {
+		return $this->_data['billing_state'];
 	}
 
 	/**
 	 * Get customer country.
 	 * @return string
 	 */
-	public function get_country() {
-		return $this->_data['country'];
+	public function get_billing_country() {
+		return $this->_data['billing_country'];
 	}
 
 	/**
@@ -425,10 +425,10 @@ class WC_Customer extends WC_Legacy_Customer {
 			$postcode = WC()->countries->get_base_postcode();
 			$city     = WC()->countries->get_base_city();
 		} elseif ( 'billing' === $tax_based_on ) {
-			$country  = $this->get_country();
-			$state    = $this->get_state();
-			$postcode = $this->get_postcode();
-			$city     = $this->get_city();
+			$country  = $this->get_billing_country();
+			$state    = $this->get_billing_state();
+			$postcode = $this->get_billing_postcode();
+			$city     = $this->get_billing_city();
 		} else {
 			$country  = $this->get_shipping_country();
 			$state    = $this->get_shipping_state();
@@ -581,12 +581,12 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer address to match shop base address.
 	 * @since 2.7.0
 	 */
-	public function set_address_to_base() {
+	public function set_billing_address_to_base() {
 		$base = wc_get_customer_default_location();
-		$this->_data['country']  = $base['country'];
-		$this->_data['state']    = $base['state'];
-		$this->_data['postcode'] = '';
-		$this->_data['city']     = '';
+		$this->_data['billing_country']  = $base['country'];
+		$this->_data['billing_state']    = $base['state'];
+		$this->_data['billing_postcode'] = '';
+		$this->_data['billing_city']     = '';
 	}
 
 	/**
@@ -622,67 +622,67 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $postcode
 	 * @param string $city
 	 */
-	public function set_location( $country, $state, $postcode = '', $city = '' ) {
-		$this->_data['country']  = $country;
-		$this->_data['state']    = $state;
-		$this->_data['postcode'] = $postcode;
-		$this->_data['city']     = $city;
+	public function set_billing_location( $country, $state, $postcode = '', $city = '' ) {
+		$this->_data['billing_country']  = $country;
+		$this->_data['billing_state']    = $state;
+		$this->_data['billing_postcode'] = $postcode;
+		$this->_data['billing_city']     = $city;
 	}
 
 	/**
 	 * Set customer country.
 	 * @param mixed $country
 	 */
-	public function set_country( $country ) {
-		$this->_data['country'] = $country;
+	public function set_billing_country( $country ) {
+		$this->_data['billing_country'] = $country;
 	}
 
 	/**
 	 * Set customer state.
 	 * @param mixed $state
 	 */
-	public function set_state( $state ) {
-		$this->_data['state'] = $state;
+	public function set_billing_state( $state ) {
+		$this->_data['billing_state'] = $state;
 	}
 
 	/**
 	 * Sets customer postcode.
 	 * @param mixed $postcode
 	 */
-	public function set_postcode( $postcode ) {
-		$this->_data['postcode'] = $postcode;
+	public function set_billing_postcode( $postcode ) {
+		$this->_data['billing_postcode'] = $postcode;
 	}
 
 	/**
 	 * Sets customer city.
 	 * @param mixed $city
 	 */
-	public function set_city( $city ) {
-		$this->_data['city'] = $city;
+	public function set_billing_city( $city ) {
+		$this->_data['billing_city'] = $city;
 	}
 
 	/**
 	 * Set customer address.
 	 * @param mixed $address
 	 */
-	public function set_address( $address ) {
-		$this->_data['address_1'] = $address;
+	public function set_billing_address( $address ) {
+		$this->_data['billing_address_1'] = $address;
 	}
 
 	/**
 	 * Set customer address.
 	 * @param mixed $address
 	 */
-	public function set_address_1( $address ) {
-		$this->set_address( $address );
+	public function set_billing_address_1( $address ) {
+		$this->set_billing_address( $address );
 	}
 
 	/**
 	 * Set customer's second address.
 	 * @param mixed $address
 	 */
-	public function set_address_2( $address ) {
-		$this->_data['address_2'] = $address;
+	public function set_billing_address_2( $address ) {
+		$this->_data['billing_address_2'] = $address;
 	}
 
 	/**
@@ -810,12 +810,12 @@ class WC_Customer extends WC_Legacy_Customer {
 		unset( $this->_data['password'] );
 		if ( $customer_id ) {
 			$this->_data['id'] = $customer_id;
-			update_user_meta( $this->get_id(), 'billing_postcode', $this->get_postcode() );
-			update_user_meta( $this->get_id(), 'billing_city', $this->get_city() );
-			update_user_meta( $this->get_id(), 'billing_address_1', $this->get_address() );
-			update_user_meta( $this->get_id(), 'billing_address_2', $this->get_address_2() );
-			update_user_meta( $this->get_id(), 'billing_state', $this->get_state() );
-			update_user_meta( $this->get_id(), 'billing_country', $this->get_country() );
+			update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
+			update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
+			update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
+			update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
+			update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
+			update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
 			update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
 			update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
 			update_user_meta( $this->get_id(), 'shipping_address_1', $this->get_shipping_address() );
@@ -848,8 +848,12 @@ class WC_Customer extends WC_Legacy_Customer {
 			if ( ! empty( $data ) ) {
 				$pull_from_db  = false;
 				foreach ( $this->_session_keys as $session_key ) {
-					if ( ! empty( $data[ $session_key ] ) && is_callable( array( $this, "set_{$session_key}" ) ) ) {
-						$this->{"set_{$session_key}"}( $data[ $session_key ] );
+					$function_key = $session_key;
+					if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
+						$session_key = str_replace( 'billing_', '', $session_key );
+					}
+					if ( ! empty( $data[ $session_key ] ) && is_callable( array( $this, "set_{$function_key}" ) ) ) {
+						$this->{"set_{$function_key}"}( $data[ $session_key ] );
 					}
 				}
 			}
@@ -865,16 +869,11 @@ class WC_Customer extends WC_Legacy_Customer {
 			}
 
 			foreach ( array_keys( $this->_data ) as $key ) {
-
 				if ( ! $pull_from_db && ! empty( $data[ $key ] ) ) {
 					continue;
 				}
 
-				if ( in_array( $key, array( 'postcode', 'city', 'address_1', 'address_2', 'state', 'country' ) ) ) {
-					$meta_value = get_user_meta( $id, 'billing_' . $key, true );
-				} else {
-					$meta_value = get_user_meta( $id, $key, true );
-				}
+				$meta_value = get_user_meta( $id, $key, true );
 				if ( $meta_value && is_callable( array( $this, "set_{$key}" ) ) ) {
 					$this->{"set_{$key}"}( $meta_value );
 				}
@@ -944,23 +943,24 @@ class WC_Customer extends WC_Legacy_Customer {
 		$default = wc_get_customer_default_location();
 
 		// Set some defaults if some of our values are still not set.
-		if ( empty( $this->get_country() ) ) {
-			$this->set_country( $default['country'] );
+		if ( empty( $this->get_billing_country() ) ) {
+			$this->set_billing_country( $default['country'] );
 		}
 
 		if ( empty( $this->get_shipping_country() ) ) {
-			$this->set_shipping_country( $this->get_country() );
+			$this->set_shipping_country( $this->get_billing_country() );
 		}
 
-		if ( empty( $this->get_state() ) ) {
-			$this->set_state( $default['state'] );
+		if ( empty( $this->get_billing_state() ) ) {
+			$this->set_billing_state( $default['state'] );
 		}
 
 		if ( empty( $this->get_shipping_state() ) ) {
-			$this->set_shipping_state( $this->get_state() );
+			$this->set_shipping_state( $this->get_billing_state() );
 		}
 
 		unset( $this->_data['password'] ); // password is write only, never ever read it
+		error_log( print_r ( $this, 1 ) );
 	}
 
 	/**
@@ -977,12 +977,12 @@ class WC_Customer extends WC_Legacy_Customer {
 			unset( $this->_data['password'] );
 		}
 
-		update_user_meta( $this->get_id(), 'billing_postcode', $this->get_postcode() );
-		update_user_meta( $this->get_id(), 'billing_city', $this->get_city() );
-		update_user_meta( $this->get_id(), 'billing_address_1', $this->get_address() );
-		update_user_meta( $this->get_id(), 'billing_address_2', $this->get_address_2() );
-		update_user_meta( $this->get_id(), 'billing_state', $this->get_state() );
-		update_user_meta( $this->get_id(), 'billing_country', $this->get_country() );
+		update_user_meta( $this->get_id(), 'billing_postcode', $this->get_billing_postcode() );
+		update_user_meta( $this->get_id(), 'billing_city', $this->get_billing_city() );
+		update_user_meta( $this->get_id(), 'billing_address_1', $this->get_billing_address() );
+		update_user_meta( $this->get_id(), 'billing_address_2', $this->get_billing_address_2() );
+		update_user_meta( $this->get_id(), 'billing_state', $this->get_billing_state() );
+		update_user_meta( $this->get_id(), 'billing_country', $this->get_billing_country() );
 		update_user_meta( $this->get_id(), 'shipping_postcode', $this->get_shipping_postcode() );
 		update_user_meta( $this->get_id(), 'shipping_city', $this->get_shipping_city() );
 		update_user_meta( $this->get_id(), 'shipping_address_1', $this->get_shipping_address() );
