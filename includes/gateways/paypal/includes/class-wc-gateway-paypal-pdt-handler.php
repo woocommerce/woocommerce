@@ -52,20 +52,18 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		}
 
 		// Parse transaction result data
-		$transaction_result  = explode( "\n", $response['body'] );
+		$transaction_result  = array_map( 'wc_clean', array_map( 'urldecode', explode( "\n", $response['body'] ) ) );
 		$transaction_results = array();
 
 		foreach ( $transaction_result as $line ) {
-			$line = explode( "=", $line );
-			$key  = wc_clean( urldecode( $line[0] ) );
+			$line                            = explode( "=", $line );
+			$transaction_results[ $line[0] ] = isset( $line[1] ) ? $line[1] : '';
+		}
 
-			if ( function_exists( 'iconv' ) ) {
-				$value = wc_clean( iconv( 'windows-1252', 'utf-8', urldecode( isset( $line[1] ) ? $line[1] : '' ) ) );
-			} else {
-				$value = wc_clean( urldecode( isset( $line[1] ) ? $line[1] : '' ) );
+		if ( ! empty( $transaction_results['charset'] ) && function_exists( 'iconv' ) ) {
+			foreach ( $transaction_results as $key => $value ) {
+				$transaction_results[ $key ] = iconv( $transaction_results['charset'], 'utf-8', $value );
 			}
-
-			$transaction_results[ $key ] = $value;
 		}
 
 		return $transaction_results;
