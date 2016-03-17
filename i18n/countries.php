@@ -73,7 +73,7 @@ return array(
 	'CR' => __( 'Costa Rica', 'woocommerce' ),
 	'HR' => __( 'Croatia', 'woocommerce' ),
 	'CU' => __( 'Cuba', 'woocommerce' ),
-	'CW' => __( 'Cura&Ccedil;ao', 'woocommerce' ),
+	'CW' => __( 'Cura&ccedil;ao', 'woocommerce' ),
 	'CY' => __( 'Cyprus', 'woocommerce' ),
 	'CZ' => __( 'Czech Republic', 'woocommerce' ),
 	'DK' => __( 'Denmark', 'woocommerce' ),
