@@ -869,7 +869,10 @@ class WC_Customer extends WC_Legacy_Customer {
 			}
 
 			foreach ( array_keys( $this->_data ) as $key ) {
-				if ( ! $pull_from_db && ! empty( $data[ $key ] ) ) {
+				if ( 'billing_' === substr( $key, 0, 8 ) ) {
+					$session_key = str_replace( 'billing_', '', $key );
+				}
+				if ( ! $pull_from_db && ! empty( $data[ $session_key ] ) ) {
 					continue;
 				}
 
@@ -1035,7 +1038,11 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 		$data = array();
 		foreach ( $this->_session_keys as $session_key ) {
-			$data[ $session_key ] = $this->{"get_$session_key"}();
+			$function_key = $session_key;
+			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
+				$session_key = str_replace( 'billing_', '', $session_key );
+			}
+			$data[ $session_key ] = $this->{"get_$function_key"}();
 		}
 		WC()->session->set( 'customer', $data );
 	}

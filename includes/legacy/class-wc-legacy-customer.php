@@ -36,6 +36,9 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	public function __get( $key ) {
 		_doing_it_wrong( $key, 'Customer properties should not be accessed directly.', '2.7' );
 		$key = $this->filter_legacy_key( $key );
+		if ( in_array( $key, array( 'country', 'state', 'postcode' ,'city', 'address_1', 'address', 'address_2' ) ) ) {
+			$key = 'billing_' . $key;
+		}
 		return isset( $this->_data[ $key ] ) ? $this->_data[ $key ] : '';
 	}
 
@@ -66,6 +69,8 @@ abstract class WC_Legacy_Customer extends WC_Data {
 		if ( 'shipping_address' === $key ) {
 			$key = 'shipping_address_1';
 		}
+
+
 		return $key;
 	}
 
