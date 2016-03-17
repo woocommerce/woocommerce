@@ -1624,14 +1624,13 @@ class WC_Product {
 
 			if ( $relate_by_category ) {
 				$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) ) ";
-				$andor = 'OR';
-			} else {
-				$andor = 'AND';
+				if ( $relate_by_tag ) {
+					$query['where'] .= ' OR ';
+				}
 			}
 
 			if ( $relate_by_tag ) {
-				$query['where'] .= " {$andor} ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) ) ";
-
+				$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) ) ";
 			}
 
 			$query['where'] .= ')';
