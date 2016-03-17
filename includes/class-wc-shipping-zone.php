@@ -13,13 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category	Class
  * @author 		WooThemes
  */
-class WC_Shipping_Zone implements WC_Data {
+class WC_Shipping_Zone extends WC_Data {
 
 	/**
 	 * Zone Data
 	 * @var array
 	 */
-    private $data = array(
+    protected $_data = array(
 		'zone_id'        => 0,
 		'zone_name'      => '',
 		'zone_order'     => 0,
@@ -57,14 +57,6 @@ class WC_Shipping_Zone implements WC_Data {
     public function get_id() {
         return $this->get_zone_id();
     }
-
-	/**
-	 * Get class data array
-	 * @return array
-	 */
-	public function get_data() {
-		return $this->data;
-	}
 
 	/**
      * Insert zone into the database
@@ -141,7 +133,7 @@ class WC_Shipping_Zone implements WC_Data {
 	 * @return int
 	 */
     public function get_zone_id() {
-        return absint( $this->data['zone_id'] );
+        return absint( $this->_data['zone_id'] );
     }
 
 	/**
@@ -149,7 +141,7 @@ class WC_Shipping_Zone implements WC_Data {
 	 * @return string
 	 */
     public function get_zone_name() {
-        return $this->data['zone_name'];
+        return $this->_data['zone_name'];
     }
 
 	/**
@@ -157,7 +149,7 @@ class WC_Shipping_Zone implements WC_Data {
 	 * @return int
 	 */
 	public function get_zone_order() {
-        return absint( $this->data['zone_order'] );
+        return absint( $this->_data['zone_order'] );
     }
 
 	/**
@@ -165,7 +157,7 @@ class WC_Shipping_Zone implements WC_Data {
 	 * @return array of zone objects
 	 */
 	public function get_zone_locations() {
-        return $this->data['zone_locations'];
+        return $this->_data['zone_locations'];
     }
 
 	/**
@@ -298,7 +290,7 @@ class WC_Shipping_Zone implements WC_Data {
 	 * @param int $set
 	 */
     private function set_zone_id( $set ) {
-        $this->data['zone_id'] = absint( $set );
+        $this->_data['zone_id'] = absint( $set );
     }
 
 	/**
@@ -306,7 +298,7 @@ class WC_Shipping_Zone implements WC_Data {
 	 * @param string $set
 	 */
     public function set_zone_name( $set ) {
-		$this->data['zone_name'] = wc_clean( $set );
+		$this->_data['zone_name'] = wc_clean( $set );
     }
 
 	/**
@@ -314,7 +306,7 @@ class WC_Shipping_Zone implements WC_Data {
 	 * @param int $set
 	 */
 	public function set_zone_order( $set ) {
-        $this->data['zone_order'] = absint( $set );
+        $this->_data['zone_order'] = absint( $set );
     }
 
 	/**
@@ -337,7 +329,7 @@ class WC_Shipping_Zone implements WC_Data {
 				'code' => wc_clean( $code ),
 				'type' => wc_clean( $type )
 			);
-			$this->data['zone_locations'][] = (object) $location;
+			$this->_data['zone_locations'][] = (object) $location;
 			$this->_locations_changed = true;
 		}
 	}
@@ -350,9 +342,9 @@ class WC_Shipping_Zone implements WC_Data {
 		if ( ! is_array( $types ) ) {
 			$types = array( $types );
 		}
-		foreach ( $this->data['zone_locations'] as $key => $values ) {
+		foreach ( $this->_data['zone_locations'] as $key => $values ) {
 			if ( in_array( $values->type, $types ) ) {
-				unset( $this->data['zone_locations'][ $key ] );
+				unset( $this->_data['zone_locations'][ $key ] );
 				$this->_locations_changed = true;
 			}
 		}
