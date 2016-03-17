@@ -16,6 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Data {
 
 	/**
+	 * Core data for this object, name value pairs (name + default value).
+	 * @var array
+	 */
+	protected $_data = array();
+
+	/**
 	 * Stores meta in cache for future reads.
 	 * A group must be set to to enable caching.
 	 * @var string
@@ -56,12 +62,6 @@ abstract class WC_Data {
 	abstract public function get_id();
 
 	/**
-	 * Returns all data for this object.
-	 * @return array
-	 */
-	abstract public function get_data();
-
-	/**
 	 * Creates new object in the database.
 	 */
 	abstract public function create();
@@ -86,6 +86,22 @@ abstract class WC_Data {
 	 * Save should create or update based on object existance.
 	 */
 	abstract public function save();
+
+	/**
+	 * Change data to JSON format.
+	 * @return string Data in JSON format.
+	 */
+	public function __toString() {
+		return json_encode( $this->get_data() );
+	}
+
+	/**
+	 * Returns all data for this object.
+	 * @return array
+	 */
+	public function get_data() {
+		return array_merge( $this->_data, array( 'meta_data' => $this->get_meta_data() ) );
+	}
 
 	/**
 	 * Get All Meta Data
