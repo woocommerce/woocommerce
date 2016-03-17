@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category	Class
  * @author		WooThemes
  */
-class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
+class WC_Coupon extends WC_Legacy_Coupon {
 
 	/**
 	 * Data array, with defaults.
@@ -45,15 +45,7 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 		'minimum_amount'             => '',
 		'maximum_amount'             => '',
 		'customer_email'             => array(),
-		'custom_fields'              => array(),
 	);
-
-	/**
-	 * Meta data (custom coupon fields).
-	 * @since 2.7.0
-	 * @var array
-	 */
-	protected $_meta_data = array();
 
 	// Coupon message codes
 	const E_WC_COUPON_INVALID_FILTERED               = 100;
@@ -107,15 +99,6 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
     | Methods for getting data from the coupon object.
     |
     */
-
-	/**
-	 * Get all class data in array format.
-	 * @since  2.7.0
-	 * @return array
-	 */
-	public function get_data() {
-		return array_merge( $this->_data, array( 'meta' => $this->_meta_data ) );
-	}
 
    /**
     * Get coupon ID.
@@ -322,25 +305,6 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $coupon_id, 'coupons' );
 		}
 		return absint( $coupon_id );
-	}
-
-	/**
-	 * Get all custom coupon fields.
-	 * @since 2.7.0
-	 * @return array
-	 */
-	public function get_custom_fields() {
-		return $this->_meta_data;
-	}
-
-	/**
-	 * Get a single custom coupon field.
-	 * @since 2.7.0
-	 * @param string $key
-	 * @return mixed
-	 */
-	public function get_custom_field( $key ) {
-		return $this->_meta_data[ $key ];
 	}
 
 	/**
@@ -596,17 +560,6 @@ class WC_Coupon extends WC_Legacy_Coupon implements WC_Data {
 	 */
 	public function set_used_by( $used_by ) {
 		$this->_data['used_by'] = array_filter( $used_by );
-	}
-
-	/**
-	 * Adds or updates a custom field (meta) (based on $key).
-	 * @since 2.7.0
-	 * @param string $key
-	 * @param mixed  $value
-	 */
-	public function set_custom_field( $key, $value ) {
-		update_post_meta( $this->get_id(), $key, $value );
-		$this->_set_meta_data();
 	}
 
 	/*

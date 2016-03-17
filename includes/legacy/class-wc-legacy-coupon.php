@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category    Class
  * @author      WooThemes
  */
-class WC_Legacy_Coupon {
+abstract class WC_Legacy_Coupon extends WC_Data {
 
 	/**
 	 * Magic __isset method for backwards compatibility. Legacy properties which could be accessed directly in the past.
@@ -52,7 +52,7 @@ class WC_Legacy_Coupon {
 			break;
 			case 'coupon_custom_fields' :
 				$legacy_custom_fields = array();
-				$custom_fields = $this->get_id() ? $this->get_custom_fields() : array();
+				$custom_fields = $this->get_id() ? $this->get_meta_data() : array();
 				if ( ! empty( $custom_fields ) ) {
 					foreach ( $custom_fields as $cf_key => $cf_value ) {
 						$legacy_custom_fields[ $cf_key ][0] = $cf_value;
