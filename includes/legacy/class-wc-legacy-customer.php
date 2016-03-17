@@ -157,4 +157,68 @@ abstract class WC_Legacy_Customer extends WC_Data {
 		return '1' === get_user_meta( $user_id, 'paying_customer', true );
 	}
 
+	/**
+	 * Legacy get country.
+	 */
+	function get_country() {
+		_deprecated_function( 'WC_Customer::get_country', '2.7', 'WC_Customer::get_billing_country' );
+		return $this->get_billing_country();
+	}
+
+	/**
+	 * Legacy get state.
+	 */
+	function get_state() {
+		_deprecated_function( 'WC_Customer::get_state', '2.7', 'WC_Customer::get_billing_state' );
+		return $this->get_billing_state();
+	}
+
+	/**
+	 * Legacy get postcode.
+	 */
+	function get_postcode() {
+		_deprecated_function( 'WC_Customer::get_postcode', '2.7', 'WC_Customer::get_billing_postcode' );
+		return $this->get_billing_postcode();
+	}
+
+	/**
+	 * Legacy get city.
+	 */
+	function get_city() {
+		_deprecated_function( 'WC_Customer::get_city', '2.7', 'WC_Customer::get_billing_city' );
+		return $this->get_billing_city();
+	}
+
+	/**
+	 * Legacy set country.
+	 */
+	function set_country( $country ) {
+		_deprecated_function( 'WC_Customer::set_country', '2.7', 'WC_Customer::set_billing_country' );
+		$this->set_billing_country( $country );
+	}
+
+	/**
+	 * Legacy set state.
+	 */
+	function set_state( $state ) {
+		_deprecated_function( 'WC_Customer::set_state', '2.7', 'WC_Customer::set_billing_state' );
+		$this->set_billing_state( $state );
+	}
+
+	/**
+	 * Legacy set postcode.
+	 */
+	function set_postcode( $postcode ) {
+		_deprecated_function( 'WC_Customer::set_postcode', '2.7', 'WC_Customer::set_billing_postcode' );
+		$this->set_billing_postcode( $postcode );
+	}
+
+	/**
+	 * Legacy set city.
+	 */
+	function set_city( $city ) {
+		_deprecated_function( 'WC_Customer::set_city', '2.7', 'WC_Customer::set_billing_city' );
+		$this->set_billing_city( $city );
+	}
+
 }

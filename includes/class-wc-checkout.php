@@ -322,8 +322,8 @@ class WC_Checkout {
 			if ( $this->customer_id ) {
 				if ( apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 					foreach ( $billing_address as $key => $value ) {
-						if ( is_callable( array( $customer, "set_{$key}" ) ) ) {
-							$customer->{"set_{$key}"}( $value );
+						if ( is_callable( array( $customer, "set_billing_{$key}" ) ) ) {
+							$customer->{"set_billing_{$key}"}( $value );
 						}
 					}
 					if ( WC()->cart->needs_shipping() ) {
