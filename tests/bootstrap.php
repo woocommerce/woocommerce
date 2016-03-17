@@ -91,6 +91,7 @@ class WC_Unit_Tests_Bootstrap {
 		// framework
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-factory.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-mock-session-handler.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-mock-wc-data.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-payment-token-stub.php' );
 
 		// test cases
