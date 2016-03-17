@@ -14,7 +14,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-global $wpdb;
+global $wpdb, $wp_version;
 
 wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
@@ -39,6 +39,8 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
 	wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
 
+	$wc_attributes = array_filter( (array) $wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies;" ) );
+
 	// Tables.
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_api_keys" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_attribute_taxonomies" );
@@ -59,7 +61,40 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	// Delete posts + data.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
 	$wpdb->query( "DELETE meta FROM {$wpdb->postmeta} meta LEFT JOIN {$wpdb->posts} posts ON posts.ID = meta.post_id WHERE posts.ID IS NULL;" );
-	$wpdb->query( "DELETE tr FROM {$wpdb->term_relationships} tr LEFT JOIN {$wpdb->posts} posts ON posts.ID = tr.object_id WHERE posts.ID IS NULL;" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_items" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_itemmeta" );
+
+	// Delete terms if > WP 4.2 (term splitting was added in 4.2)
+	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
+		// Delete term taxonomies
+		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $taxonomy ) {
+			$wpdb->delete(
+				$wpdb->term_taxonomy,
+				array(
+					'taxonomy' => $taxonomy,
+				)
+			);
+		}
+
+		// Delete term attributes
+		foreach ( $wc_attributes as $taxonomy ) {
+			$wpdb->delete(
+				$wpdb->term_taxonomy,
+				array(
+					'taxonomy' => 'pa_' . $taxonomy,
+				)
+			);
+		}
+
+		// Delete orphan relationships
+		$wpdb->query( "DELETE tr FROM {$wpdb->term_relationships} tr LEFT JOIN {$wpdb->posts} posts ON posts.ID = tr.object_id WHERE posts.ID IS NULL;" );
+
+		// Delete orphan terms
+		$wpdb->query( "DELETE t FROM {$wpdb->terms} t LEFT JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
+
+		// Delete orphan term meta
+		if ( ! empty( $wpdb->termmeta ) ) {
+			$wpdb->query( "DELETE tm FROM {$wpdb->termmeta} tm LEFT JOIN {$wpdb->term_taxonomy} tt ON tm.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
+		}
+	}
 }
