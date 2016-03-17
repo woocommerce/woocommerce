@@ -963,7 +963,6 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 
 		unset( $this->_data['password'] ); // password is write only, never ever read it
-		error_log( print_r ( $this, 1 ) );
 	}
 
 	/**

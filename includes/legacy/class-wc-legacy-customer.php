@@ -116,8 +116,8 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Set customer address to match shop base address.
 	 */
 	public function set_to_base() {
-		_deprecated_function( 'WC_Customer::set_to_base', '2.7', 'WC_Customer::set_address_to_base' );
-		$this->set_address_to_base();
+		_deprecated_function( 'WC_Customer::set_to_base', '2.7', 'WC_Customer::set_billing_address_to_base' );
+		$this->set_billing_address_to_base();
 	}
 
 	/**
