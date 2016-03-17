@@ -234,6 +234,8 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-post-data.php' );
 		include_once( 'includes/class-wc-ajax.php' );
 
+		include_once( 'includes/abstracts/abstract-wc-data.php' ); // WC_Data for CRUD
+
 		if ( $this->is_request( 'admin' ) ) {
 			include_once( 'includes/admin/class-wc-admin.php' );
 		}
@@ -255,7 +257,6 @@ final class WooCommerce {
 
 		include_once( 'includes/class-wc-auth.php' );                            // Auth Class
 		include_once( 'includes/class-wc-post-types.php' );                      // Registers post types
-		include_once( 'includes/abstracts/abstract-wc-data.php' );				 // WC_Data for CRUD
 		include_once( 'includes/abstracts/abstract-wc-payment-token.php' );      // Payment Tokens
 		include_once( 'includes/abstracts/abstract-wc-product.php' );            // Products
 		include_once( 'includes/abstracts/abstract-wc-order.php' );              // Orders
