@@ -62,6 +62,24 @@ class WC_Customer extends WC_Legacy_Customer {
 	);
 
 	/**
+	 * Data stored in meta keys, but not considered "meta" for a coupon.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $_internal_meta_keys = array(
+		'billing_postcode', 'billing_city', 'billing_address_1', 'billing_address_2', 'billing_state',
+		'billing_country', 'shipping_postcode', 'shipping_city', 'shipping_address_1',
+		'shipping_address_2', 'shipping_state', 'shipping_country', 'paying_customer',
+		'last_update', 'first_name', 'last_name'
+	);
+
+	/**
+	 *  Internal meta type used to store user data.
+	 * @var string
+	 */
+	protected $_meta_type = 'user';
+
+	/**
 	 * Was data changed in the database for this class?
 	 * @var boolean
 	 */
@@ -810,7 +828,9 @@ class WC_Customer extends WC_Legacy_Customer {
 			update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
 			update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
 			wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
-			$this->read( $this->get_id() );
+			$wp_user = new WP_User( $this->get_id() );
+			$this->set_date_created( strtotime( $wp_user->user_registered ) );
+			$this->save_meta_data();
 		}
 	}
 
@@ -822,6 +842,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function read( $id ) {
 		global $wpdb;
 		$pull_from_db = true;
+		$data         = array();
 		if ( $this->_from_session ) {
 			$data = (array) WC()->session->get( 'customer' );
 			if ( ! empty( $data ) ) {
@@ -834,7 +855,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			}
 		}
 
-		if ( $pull_from_db && $this->_is_user) {
+		if ( $this->_is_user ) {
 
 			// Only continue reading if the customer exists.
 			$user_object = get_userdata( $id );
@@ -844,6 +865,11 @@ class WC_Customer extends WC_Legacy_Customer {
 			}
 
 			foreach ( array_keys( $this->_data ) as $key ) {
+
+				if ( ! $pull_from_db && ! empty( $data[ $key ] ) ) {
+					continue;
+				}
+
 				if ( in_array( $key, array( 'postcode', 'city', 'address_1', 'address_2', 'state', 'country' ) ) ) {
 					$meta_value = get_user_meta( $id, 'billing_' . $key, true );
 				} else {
@@ -862,7 +888,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			$this->set_username( $wp_user->user_login );
 			$this->set_date_created( strtotime( $wp_user->user_registered ) );
 			$this->set_date_modified( get_user_meta( $id, 'last_update', true ) );
-			$this->set_role( $wp_user->roles[0] );
+			$this->set_role( ( ! empty ( $wp_user->roles[0] ) ? $wp_user->roles[0] : 'customer' ) );
 
 			// Get info about user's last order
 			$last_order = $wpdb->get_row( "SELECT id, post_date_gmt
@@ -909,6 +935,8 @@ class WC_Customer extends WC_Legacy_Customer {
 
 			$this->set_orders_count( $count );
 			$this->set_total_spent( $spent );
+
+			$this->read_meta_data();
 		}
 
 		$this->_data['id'] = $id;
@@ -964,8 +992,10 @@ class WC_Customer extends WC_Legacy_Customer {
 		update_user_meta( $this->get_id(), 'paying_customer', $this->get_is_paying_customer() );
 		$this->set_date_modified( time() );
 		update_user_meta( $this->get_id(), 'last_update',  $this->get_date_modified() );
+		update_user_meta( $this->get_id(), 'first_name', $this->get_first_name() );
+		update_user_meta( $this->get_id(), 'last_name', $this->get_last_name() );
 		wp_update_user( array( 'ID' => $this->get_id(), 'role' => $this->get_role() ) );
-		$this->read( $this->get_id() );
+		$this->save_meta_data();
 	}
 
 	/**

@@ -35,11 +35,13 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'test@woo.local', $customer->get_email() );
 		$this->assertEquals( 'Apt 1', $customer->get_address_2() );
 		$customer->set_email( 'test@wc.local' );
+		$customer->set_first_name( 'Justin' );
 		$customer->set_address_2( 'Apt 5' );
 		$customer->update();
 
 		$customer = new \WC_Customer( $customer_id ); // so we can read fresh copies from the DB
 		$this->assertEquals( 'test@wc.local', $customer->get_email() );
+		$this->assertEquals( 'Justin', $customer->get_first_name() );
 		$this->assertEquals( 'Apt 5', $customer->get_address_2() );
 	}
 
@@ -414,6 +416,35 @@ class CustomerCRUD extends \WC_Unit_Test_Case {
 		$session = new \WC_Customer();
 		$session->load_session();
 		$this->assertEquals( '124 South Street', $session->get_address() );
+	}
+
+	/**
+	 * Test getting meta.
+	 * @since 2.7.0
+	 */
+	public function test_get_meta() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id  = $customer->get_id();
+		$meta_value = time() . '-custom-value';
+		add_user_meta( $customer_id, 'test_field', $meta_value, true );
+		$customer->read( $customer_id );
+		$fields = $customer->get_meta_data();
+		$this->assertCount( 1, $fields );
+		$this->assertEquals( $meta_value, $customer->get_meta( 'test_field') );
+	}
+
+	/**
+	 * Test setting meta.
+	 * @since 2.7.0
+	 */
+	public function test_set_meta() {
+		$customer = \WC_Helper_Customer::create_customer();
+		$customer_id  = $customer->get_id();
+		$meta_value = time() . '-custom-value';
+		$customer->add_meta_data( 'my-field', $meta_value, true );
+		$customer->save();
+		$customer->read( $customer_id );
+		$this->assertEquals( $meta_value, $customer->get_meta( 'my-field' ) );
 	}
 
 }
