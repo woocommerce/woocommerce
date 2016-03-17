@@ -105,6 +105,8 @@ class WC_Shortcode_Checkout {
 						WC()->customer->set_postcode( $order->billing_postcode );
 					}
 
+					WC()->customer->save();
+
 					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 					if ( sizeof( $available_gateways ) ) {

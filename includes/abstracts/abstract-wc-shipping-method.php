@@ -144,7 +144,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return boolean
 	 */
 	public function is_taxable() {
-		return wc_tax_enabled() && 'taxable' === $this->tax_status && ! WC()->customer->is_vat_exempt();
+		return wc_tax_enabled() && 'taxable' === $this->tax_status && ! WC()->customer->get_is_vat_exempt();
 	}
 
 	/**
