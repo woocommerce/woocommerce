@@ -133,9 +133,8 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $coupon->get_id(), $coupon->id );
 		$this->assertEquals( ( ( $coupon->get_id() > 0 ) ? true : false ), $coupon->exists );
-		$coupon_cf = $coupon->get_meta_data();
-		$this->assertCount( 1, $coupon_cf  );
-		$this->assertEquals( $coupon_cf['test_coupon_field'], $coupon->coupon_custom_fields['test_coupon_field'][0] );
+		$coupon_cf = $coupon->get_meta( 'test_coupon_field' );
+		$this->assertEquals( $coupon_cf, $coupon->coupon_custom_fields['test_coupon_field'][0] );
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->type );
 		$this->assertEquals( $coupon->get_discount_type(), $coupon->discount_type );
 		$this->assertEquals( $coupon->get_amount(), $coupon->amount );
@@ -256,8 +255,8 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		add_post_meta( $coupon_id, 'test_coupon_field', $meta_value, true );
 		$coupon->read( $coupon_id );
 		$custom_fields = $coupon->get_meta_data();
-
-		$this->assertEquals( $meta_value, $custom_fields['test_coupon_field'] );
+		$this->assertCount( 1, $custom_fields );
+		$this->assertEquals( $meta_value, $coupon->get_meta( 'test_coupon_field' ) );
 	}
 
 	/**
@@ -269,6 +268,8 @@ class CouponCRUD extends \WC_Unit_Test_Case {
 		$coupon_id  = $coupon->get_id();
 		$meta_value = time() . '-custom-value';
 		$coupon->add_meta_data( 'my-custom-field', $meta_value, true );
+		$coupon->save();
+		$coupon->read( $coupon_id );
 		$this->assertEquals( $meta_value, $coupon->get_meta( 'my-custom-field' ) );
 	}
 

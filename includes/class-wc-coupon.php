@@ -67,6 +67,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	const WC_COUPON_REMOVED                          = 201;
 
 	/**
+	 * Internal meta type used to store coupon data.
+	 * @since 2.7.0
+	 * @var string
+	 */
+	protected $_meta_type = 'post';
+
+	/**
+	 * Data stored in meta keys, but not considered "meta" for a coupon.
+	 * @since 2.7.0
+	 * @var array
+	 */
+	protected $_internal_meta_keys = array(
+		'discount_type', 'coupon_amount', 'expiry_date', 'usage_count',
+		'individual_use', 'product_ids', 'exclude_product_ids', 'usage_limit',
+		'usage_limit_per_user', 'limit_usage_to_x_items', 'free_shipping',
+		'product_categories', 'exclude_product_categories', 'exclude_sale_items',
+		'minimum_amount', 'maximum_amount', 'customer_email', '_used_by',
+	);
+
+	/**
 	 * Coupon constructor. Loads coupon data.
 	 * @param  mixed $code code of the coupon to load
 	 */
@@ -602,7 +622,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$this->set_amount( get_post_meta( $coupon_id, 'coupon_amount', true ) );
 		$this->set_expiry_date( get_post_meta( $coupon_id, 'expiry_date', true ) );
 		$this->set_usage_count( get_post_meta( $coupon_id, 'usage_count', true ) );
-
 		// Map meta data
 		$individual_use = ( 'yes' === get_post_meta( $coupon_id, 'individual_use', true ) );
 		$this->set_individual_use( $individual_use );
@@ -628,8 +647,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$this->set_email_restrictions( get_post_meta( $coupon_id, 'customer_email', true ) );
 		$this->set_used_by( (array) get_post_meta( $coupon_id, '_used_by' ) );
 
-		// Load custom set metadata (coupon custom fields)
-		$this->_set_meta_data();
+		$this->read_meta_data();
 
 		do_action( 'woocommerce_coupon_loaded', $this );
 	}
@@ -651,6 +669,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		if ( $coupon_id ) {
 			$this->_data['id'] = $coupon_id;
 			$this->update_post_meta( $coupon_id );
+			$this->save_meta_data();
 			do_action( 'woocommerce_new_coupon', $coupon_id );
 		}
 	}
@@ -670,6 +689,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		wp_update_post( $post_data );
 		$this->update_post_meta( $coupon_id );
+		$this->save_meta_data();
 		do_action( 'woocommerce_update_coupon', $coupon_id );
 	}
 
@@ -717,20 +737,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		update_post_meta( $coupon_id, 'minimum_amount', $this->get_minimum_amount() );
 		update_post_meta( $coupon_id, 'maximum_amount', $this->get_maximum_amount() );
 		update_post_meta( $coupon_id, 'customer_email', array_filter( array_map( 'sanitize_email', $this->get_email_restrictions() ) ) );
-	}
-
-	/**
-	 * Sets the internal meta data from the database.
-	 * @since 2.7.0
-	 */
-	private function _set_meta_data() {
-		$meta_data   = get_post_meta( $this->get_id() );
-		$ignore_keys = array_merge( $this->_data, array( '_used_by' => '', 'coupon_amount' => '', '_edit_lock' => '', '_edit_last' => '' ) );
-		$ignore_keys = array_keys( $ignore_keys );
-		$meta_data   = array_diff_key( $meta_data, array_fill_keys( $ignore_keys, '' ) );
-		foreach ( $meta_data as $key => $value ) {
-			$this->_meta_data[ $key ] = $value[0];
-		}
 	}
 
 	/**
