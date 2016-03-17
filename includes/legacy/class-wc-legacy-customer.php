@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Legacy_Customer  {
+abstract class WC_Legacy_Customer extends WC_Data  {
 
 	/**
 	 * __isset legacy.

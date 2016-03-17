@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   WooThemes
  */
-class WC_Customer extends WC_Legacy_Customer implements WC_Data {
+class WC_Customer extends WC_Legacy_Customer {
 
 	/**
 	 * Stores customer data.
@@ -440,15 +440,6 @@ class WC_Customer extends WC_Legacy_Customer implements WC_Data {
 	 */
 	function get_is_paying_customer() {
 		return (bool) $this->_data['is_paying_customer'];
-	}
-
-	/**
-	 * Get all class data in array format.
-	 * @since 2.7.0
-	 * @return array
-	 */
-	public function get_data() {
-		return $this->_data;
 	}
 
 	/*
