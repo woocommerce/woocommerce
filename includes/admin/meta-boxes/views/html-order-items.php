@@ -83,6 +83,8 @@ if ( wc_tax_enabled() ) {
 				$_product  = $order->get_product_from_item( $item );
 				$item_meta = $order->get_item_meta( $item_id );
 
+				do_action( 'woocommerce_before_order_item_' . $item['type'] . '_html', $item_id, $item, $order );
+
 				include( 'html-order-item.php' );
 
 				do_action( 'woocommerce_order_item_' . $item['type'] . '_html', $item_id, $item, $order );
