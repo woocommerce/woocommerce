@@ -12,11 +12,7 @@ class WC_Helper_Coupon {
 	 *
 	 * @return WC_Coupon
 	 */
-	public static function create_coupon() {
-
-		// Coupon code
-		$coupon_code = 'dummycoupon';
-
+	public static function create_coupon( $coupon_code = 'dummycoupon' ) {
 		// Insert post
 		$coupon_id = wp_insert_post( array(
 			'post_title'   => $coupon_code,

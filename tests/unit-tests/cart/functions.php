@@ -137,9 +137,9 @@ class Functions extends \WC_Unit_Test_Case {
 	public function test_wc_cart_totals_coupon_label() {
 		$coupon = \WC_Helper_Coupon::create_coupon();
 
-		$this->expectOutputString( apply_filters( 'woocommerce_cart_totals_coupon_label', 'Coupon: ' . $coupon->code ), wc_cart_totals_coupon_label( $coupon ) );
+		$this->expectOutputString( apply_filters( 'woocommerce_cart_totals_coupon_label', 'Coupon: ' . $coupon->get_code() ), wc_cart_totals_coupon_label( $coupon ) );
 
-		\WC_Helper_Coupon::delete_coupon( $coupon->id );
+		\WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 	}
 
 	/**

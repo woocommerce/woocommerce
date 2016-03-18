@@ -104,7 +104,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Get All Meta Data
+	 * Get All Meta Data.
 	 * @since 2.6.0
 	 * @return array
 	 */

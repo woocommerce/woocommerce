@@ -430,7 +430,7 @@ class Cart extends \WC_Unit_Test_Case {
 		$coupon = \WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
-		WC()->cart->add_discount( $coupon->code );
+		WC()->cart->add_discount( $coupon->get_code() );
 
 		$this->assertEquals( count( WC()->cart->get_coupons() ), 1 );
 
@@ -441,7 +441,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 
 		// Delete coupon
-		\WC_Helper_Coupon::delete_coupon( $coupon->id );
+		\WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
 	}
 

@@ -102,7 +102,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		if ( in_array( $this->requires, array( 'coupon', 'either', 'both' ) ) ) {
 			if ( $coupons = WC()->cart->get_coupons() ) {
 				foreach ( $coupons as $code => $coupon ) {
-					if ( $coupon->is_valid() && $coupon->enable_free_shipping() ) {
+					if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
 						$has_coupon = true;
 						break;
 					}
