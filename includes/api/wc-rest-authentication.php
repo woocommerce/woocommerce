@@ -91,9 +91,18 @@ class WC_REST_Authentication {
 			$user_id = $user->user_id;
 		}
 
+		// Abort if don't have an user at this point.
+		if ( empty( $user ) ) {
+			return $user_id;
+		}
+
 		// Validate user secret.
-		if ( empty( $user ) || ! hash_equals( $user->consumer_secret, $consumer_secret ) ) {
+		if ( ! hash_equals( $user->consumer_secret, $consumer_secret ) ) {
 			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Secret is invalid', 'woocommerce' ), array( 'status' => 401 ) );
+			$user_id = 0;
+		}
+
+		if ( ! $this->check_permissions( $user->permissions ) ) {
 			$user_id = 0;
 		}
 
@@ -117,6 +126,45 @@ class WC_REST_Authentication {
 		", $consumer_key ) );
 
 		return $user;
+	}
+
+	/**
+	 * Check that the API keys provided have the proper key-specific permissions to either read or write API resources.
+	 *
+	 * @param string $permissions
+	 * @return bool
+	 */
+	private function check_permissions( $permissions ) {
+		global $wc_rest_authentication_error;
+
+		$valid = true;
+
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) ) {
+			return false;
+		}
+
+		switch ( $_SERVER['REQUEST_METHOD'] ) {
+
+			case 'HEAD':
+			case 'GET':
+				if ( 'read' !== $permissions && 'read_write' !== $permissions ) {
+					$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have read permissions', 'woocommerce' ), array( 'status' => 401 ) );
+					$valid = false;
+				}
+				break;
+
+			case 'POST':
+			case 'PUT':
+			case 'PATCH':
+			case 'DELETE':
+				if ( 'write' !== $permissions && 'read_write' !== $permissions ) {
+					$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have write permissions', 'woocommerce' ), array( 'status' => 401 ) );
+					$valid = false;
+				}
+				break;
+		}
+
+		return $valid;
 	}
 }
 
