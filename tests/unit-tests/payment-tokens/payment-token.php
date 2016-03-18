@@ -8,50 +8,32 @@ namespace WooCommerce\Tests\Payment_Tokens;
 class Payment_Token extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test get_id to make sure it returns the ID passed into the class.
-	 * @since 2.6.0
-	 */
-	public function test_wc_payment_token_get_id() {
-		$token = new \WC_Payment_Token_Stub( 1 );
-		$this->assertEquals( 1, $token->get_id() );
-	}
-
-	/**
 	 * Test get type returns the class name/type.
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_get_type() {
-		$token = new \WC_Payment_Token_Stub( 1 );
+		$token = new \WC_Payment_Token_Stub();
 		$this->assertEquals( 'stub', $token->get_type() );
 	}
 
 	/**
-	 * Test get token to make sure it returns the passed token.
+	 * Test set/get token to make sure it returns the passed token.
 	 * @since 2.6.0
 	 */
-	public function test_wc_payment_token_get_token() {
+	public function test_wc_payment_token_token() {
 		$raw_token = time() . ' ' . __FUNCTION__;
-		$token = new \WC_Payment_Token_Stub( 1, array( 'token' => $raw_token ) );
-		$this->assertEquals( $raw_token, $token->get_token() );
-	}
-
-	/**
-	 * Test set token to make sure it sets the pased token.
-	 * @since 2.6.0
-	 */
-	public function test_wc_payment_token_set_token() {
-		$raw_token = time() . ' ' . __FUNCTION__;
-		$token = new \WC_Payment_Token_Stub( 1 );
+		$token = new \WC_Payment_Token_Stub();
 		$token->set_token( $raw_token );
 		$this->assertEquals( $raw_token, $token->get_token() );
 	}
 
 	/**
-	 * Test get user ID to make sure it passes the correct ID.
+	 * Test set/get user ID to make sure it passes the correct ID.
 	 * @since 2.6.0
 	 */
-	public function test_wc_payment_get_user_id() {
-		$token = new \WC_Payment_Token_Stub( 1, array( 'user_id' => 1 ) );
+	public function test_wc_payment_user_id() {
+		$token = new \WC_Payment_Token_Stub();
+		$token->set_user_id( 1 );
 		$this->assertEquals( 1, $token->get_user_id() );
 	}
 
@@ -60,44 +42,25 @@ class Payment_Token extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_get_user_id_defaults_to_0() {
-		$token = new \WC_Payment_Token_Stub( 1 );
+		$token = new \WC_Payment_Token_Stub();
 		$this->assertEquals( 0, $token->get_user_id() );
 	}
 
 	/**
-	 * Test set user ID to make sure it passes the correct ID.
+	 * Test get/set the gateway ID.
 	 * @since 2.6.0
 	 */
-	public function test_wc_payment_set_user_id() {
-		$token = new \WC_Payment_Token_Stub( 1 );
-		$token->set_user_id( 5 );
-		$this->assertEquals( 5, $token->get_user_id() );
-	}
-
-	/**
-	 * Test getting the gateway ID.
-	 * @since 2.6.0
-	 */
-	public function test_wc_payment_get_gateway_id() {
-		$token = new \WC_Payment_Token_Stub( 1, array( 'gateway_id' => 'paypal' ) );
-		$this->assertEquals( 'paypal', $token->get_gateway_id() );
-	}
-
-	/**
-	 * Test set the gateway ID.
-	 * @since 2.6.0
-	 */
-	public function test_wc_payment_set_gateway_id() {
-		$token = new \WC_Payment_Token_Stub( 1 );
+	public function test_wc_payment_gateway_id() {
+		$token = new \WC_Payment_Token_Stub();
 		$token->set_gateway_id( 'paypal' );
 		$this->assertEquals( 'paypal', $token->get_gateway_id() );
 	}
 
 	/**
-	 * Test setting a token as default.
+	 * Test set/is a token as default.
 	 * @since 2.6.0
 	 */
-	public function test_wc_payment_token_set_default() {
+	public function test_wc_payment_token_is_default() {
 		$token = new \WC_Payment_Token_Stub( 1 );
 		$token->set_default( true );
 		$this->assertTrue( $token->is_default() );
@@ -105,18 +68,6 @@ class Payment_Token extends \WC_Unit_Test_Case {
 		$this->assertFalse( $token->is_default() );
 	}
 
-	/**
-	 * Test is_default.
-	 * @since 2.6.0
-	 */
-	public function test_wc_payment_token_is_default_returns_correct_state() {
-		$token = new \WC_Payment_Token_Stub( 1, array( 'is_default' => true ) );
-		$this->assertTrue( $token->is_default() );
-		$token = new \WC_Payment_Token_Stub( 1 );
-		$this->assertFalse( $token->is_default() );
-		$token = new \WC_Payment_Token_Stub( 1, array( 'is_default' => false ) );
-		$this->assertFalse( $token->is_default() );
-	}
 
 	/**
 	 * Test that get_data returns the correct internal representation for a token.
@@ -124,10 +75,9 @@ class Payment_Token extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_payment_token_get_data() {
 		$raw_token = time() . ' ' . __FUNCTION__;
-		$token = new \WC_Payment_Token_Stub( 1, array(
-			'token'      => $raw_token,
-			'gateway_id' => 'paypal'
-		) );
+		$token = new \WC_Payment_Token_Stub();
+		$token->set_token( $raw_token );
+		$token->set_gateway_id( 'paypal' );
 		$token->set_extra( 'woocommerce' );
 
 		$data = $token->get_data();
@@ -135,7 +85,8 @@ class Payment_Token extends \WC_Unit_Test_Case {
 		$this->assertEquals( $raw_token, $data['token'] );
 		$this->assertEquals( 'paypal', $data['gateway_id'] );
 		$this->assertEquals( 'stub', $data['type'] );
-		$this->assertEquals( 'woocommerce', $data['meta']['extra'] );
+		$this->assertEquals( 'extra', $data['meta_data'][0]->key );
+		$this->assertEquals( 'woocommerce', $data['meta_data'][0]->value );
 	}
 
 	/**
@@ -143,11 +94,11 @@ class Payment_Token extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_validation() {
-		$token = new \WC_Payment_Token_Stub( 1 );
+		$token = new \WC_Payment_Token_Stub();
 		$token->set_token( time() . ' ' . __FUNCTION__ );
 		$this->assertTrue( $token->validate() );
 
-		$token = new \WC_Payment_Token_Stub( 1 );
+		$token = new \WC_Payment_Token_Stub();
 		$this->assertFalse( $token->validate() );
 	}
 

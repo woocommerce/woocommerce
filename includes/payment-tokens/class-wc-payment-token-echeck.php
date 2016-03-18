@@ -34,7 +34,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 			return false;
 		}
 
-		if ( empty( $this->meta['last4'] ) ) {
+		if ( empty( $this->get_meta( 'last4' ) ) ) {
 			return false;
 		}
 		return true;
@@ -46,7 +46,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * @return string Last 4 digits
 	 */
 	public function get_last4() {
-		return isset( $this->meta['last4'] ) ? $this->meta['last4'] : null;
+		return $this->get_meta( 'last4' );
 	}
 
 	/**
@@ -55,7 +55,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * @param string $last4
 	 */
 	public function set_last4( $last4 ) {
-		$this->meta['last4'] = $last4;
+		$this->add_meta_data( 'last4', $last4, true );
 	}
 
 }
