@@ -170,8 +170,7 @@
 						methods     = _.indexBy( model.get( 'methods' ), 'instance_id' ),
 						instance_id = $target.closest( 'tr' ).data( 'id' ),
 						enabled     = $target.closest( 'tr' ).data( 'enabled' ) === 'yes' ? 'no' : 'yes',
-						changes     = {},
-						new_enabled = 'yes';
+						changes     = {};
 
 					event.preventDefault();
 					methods[ instance_id ].enabled = enabled;
