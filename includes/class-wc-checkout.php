@@ -316,18 +316,26 @@ class WC_Checkout {
 			$order->set_total( WC()->cart->shipping_tax_total, 'shipping_tax' );
 			$order->set_total( WC()->cart->total );
 
+			$customer = new WC_Customer( $this->customer_id );
+
 			// Update user meta
 			if ( $this->customer_id ) {
 				if ( apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 					foreach ( $billing_address as $key => $value ) {
-						update_user_meta( $this->customer_id, 'billing_' . $key, $value );
+						if ( is_callable( array( $customer, "set_billing_{$key}" ) ) ) {
+							$customer->{"set_billing_{$key}"}( $value );
+						}
 					}
 					if ( WC()->cart->needs_shipping() ) {
 						foreach ( $shipping_address as $key => $value ) {
-							update_user_meta( $this->customer_id, 'shipping_' . $key, $value );
+							if ( is_callable( array( $customer, "set_shipping_{$key}" ) ) ) {
+								$customer->{"set_shipping_{$key}"}( $value );
+							}
 						}
 					}
 				}
+
+				$customer->save();
 				do_action( 'woocommerce_checkout_update_user_meta', $this->customer_id, $this->posted );
 			}
 
@@ -553,6 +561,8 @@ class WC_Checkout {
 				}
 
 			}
+
+			WC()->customer->save();
 
 			// Update cart totals now we have customer address
 			WC()->cart->calculate_totals();
@@ -796,15 +806,15 @@ class WC_Checkout {
 
 			switch ( $input ) {
 				case 'billing_country' :
-					return apply_filters( 'default_checkout_country', WC()->customer->get_country() ? WC()->customer->get_country() : WC()->countries->get_base_country(), 'billing' );
+					return apply_filters( 'default_checkout_country', WC()->customer->get_billing_country() ? WC()->customer->get_billing_country() : WC()->countries->get_base_country(), 'billing' );
 				case 'billing_state' :
-					return apply_filters( 'default_checkout_state', WC()->customer->has_calculated_shipping() ? WC()->customer->get_state() : '', 'billing' );
+					return apply_filters( 'default_checkout_state', WC()->customer->get_calculated_shipping() ? WC()->customer->get_billing_state() : '', 'billing' );
 				case 'billing_postcode' :
-					return apply_filters( 'default_checkout_postcode', WC()->customer->get_postcode() ? WC()->customer->get_postcode() : '', 'billing' );
+					return apply_filters( 'default_checkout_postcode', WC()->customer->get_billing_postcode() ? WC()->customer->get_billing_postcode() : '', 'billing' );
 				case 'shipping_country' :
 					return apply_filters( 'default_checkout_country', WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : WC()->countries->get_base_country(), 'shipping' );
 				case 'shipping_state' :
-					return apply_filters( 'default_checkout_state', WC()->customer->has_calculated_shipping() ? WC()->customer->get_shipping_state() : '', 'shipping' );
+					return apply_filters( 'default_checkout_state', WC()->customer->get_calculated_shipping() ? WC()->customer->get_shipping_state() : '', 'shipping' );
 				case 'shipping_postcode' :
 					return apply_filters( 'default_checkout_postcode', WC()->customer->get_shipping_postcode() ? WC()->customer->get_shipping_postcode() : '', 'shipping' );
 				default :

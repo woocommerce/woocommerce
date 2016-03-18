@@ -56,11 +56,12 @@ class WC_Cache_Helper {
 	 */
 	public static function geolocation_ajax_get_location_hash() {
 		$customer             = new WC_Customer();
+		$customer->load_session();
 		$location             = array();
-		$location['country']  = $customer->get_country();
-		$location['state']    = $customer->get_state();
-		$location['postcode'] = $customer->get_postcode();
-		$location['city']     = $customer->get_city();
+		$location['country']  = $customer->get_billing_country();
+		$location['state']    = $customer->get_billing_state();
+		$location['postcode'] = $customer->get_billing_postcode();
+		$location['city']     = $customer->get_billing_city();
 		return substr( md5( implode( '', $location ) ), 0, 12 );
 	}
 

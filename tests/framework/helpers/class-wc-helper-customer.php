@@ -34,7 +34,34 @@ class WC_Helper_Customer {
 
 		WC_Helper_Customer::set_customer_details( $customer_data );
 
-		return new WC_Customer();
+		$customer = new WC_Customer();
+		$customer->load_session();
+		return $customer;
+	}
+
+	/**
+	 * Creates a customer in the tests DB.
+	 */
+	public static function create_customer() {
+		$customer = new WC_Customer();
+		$customer->set_billing_country( 'US' );
+		$customer->set_first_name( 'Justin' );
+		$customer->set_billing_state( 'PA' );
+		$customer->set_billing_postcode( '19123' );
+		$customer->set_billing_city( 'Philadelphia' );
+		$customer->set_billing_address( '123 South Street' );
+		$customer->set_billing_address_2( 'Apt 1' );
+		$customer->set_shipping_country( 'US' );
+		$customer->set_shipping_state( 'PA' );
+		$customer->set_shipping_postcode( '19123' );
+		$customer->set_shipping_city( 'Philadelphia' );
+		$customer->set_shipping_address( '123 South Street' );
+		$customer->set_shipping_address_2( 'Apt 1' );
+		$customer->set_username( 'testcustomer' );
+		$customer->set_password( 'hunter2' );
+		$customer->set_email( 'test@woo.local' );
+		$customer->create();
+		return $customer;
 	}
 
 	/**

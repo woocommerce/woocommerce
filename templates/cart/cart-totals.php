@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<div class="cart_totals <?php if ( WC()->customer->has_calculated_shipping() ) echo 'calculated_shipping'; ?>">
+<div class="cart_totals <?php if ( WC()->customer->get_calculated_shipping() ) echo 'calculated_shipping'; ?>">
 
 	<?php do_action( 'woocommerce_before_cart_totals' ); ?>
 
@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) :
 			$taxable_address = WC()->customer->get_taxable_address();
-			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
+			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->get_calculated_shipping()
 					? sprintf( ' <small>(' . __( 'estimated for %s', 'woocommerce' ) . ')</small>', WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )
 					: '';
 

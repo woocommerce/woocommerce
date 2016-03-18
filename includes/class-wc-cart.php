@@ -1353,7 +1353,7 @@ class WC_Cart {
 				}
 
 				// VAT exemption done at this point - so all totals are correct before exemption
-				if ( WC()->customer->is_vat_exempt() ) {
+				if ( WC()->customer->get_is_vat_exempt() ) {
 					$this->remove_taxes();
 				}
 
@@ -1369,7 +1369,7 @@ class WC_Cart {
 				$this->tax_total = WC_Tax::get_tax_total( $this->taxes );
 
 				// VAT exemption done at this point - so all totals are correct before exemption
-				if ( WC()->customer->is_vat_exempt() ) {
+				if ( WC()->customer->get_is_vat_exempt() ) {
 					$this->remove_taxes();
 				}
 			}
@@ -1516,7 +1516,7 @@ class WC_Cart {
 				return false;
 
 			if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-				if ( ! WC()->customer->has_calculated_shipping() ) {
+				if ( ! WC()->customer->get_calculated_shipping() ) {
 					if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) ) {
 						return false;
 					}

@@ -874,7 +874,7 @@ class WC_Product {
 				$tax_rates      = WC_Tax::get_rates( $this->get_tax_class() );
 				$base_tax_rates = WC_Tax::get_base_tax_rates( $this->tax_class );
 
-				if ( ! empty( WC()->customer ) && WC()->customer->is_vat_exempt() ) {
+				if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
 
 					$base_taxes         = WC_Tax::calc_tax( $price * $qty, $base_tax_rates, true );
 					$base_tax_amount    = array_sum( $base_taxes );
