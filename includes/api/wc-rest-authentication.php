@@ -88,12 +88,13 @@ class WC_REST_Authentication {
 			$consumer_secret = $_SERVER['PHP_AUTH_PW'];
 		}
 
-		// Get user data.
-		if ( $consumer_key && $consumer_secret ) {
-			$user = $this->get_user_data_by_consumer_key( $consumer_key );
+		// Stop if don't have any key.
+		if ( ! $consumer_key || ! $consumer_secret ) {
+			return false;
 		}
 
-		// Abort if don't have an user at this point.
+		// Get user data.
+		$user = $this->get_user_data_by_consumer_key( $consumer_key );
 		if ( empty( $user ) ) {
 			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
 
