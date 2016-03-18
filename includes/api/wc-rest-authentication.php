@@ -20,6 +20,7 @@ class WC_REST_Authentication {
 	public function __construct() {
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 100 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ) );
+		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
 	}
 
 	/**
@@ -396,6 +397,25 @@ class WC_REST_Authentication {
 			array( '%s' ),
 			array( '%d' )
 		);
+	}
+
+	/**
+	 * If the consumer_key and consumer_secret $_GET parameters are NOT provided
+	 * and the Basic auth headers are either not present or the consumer secret does not match the consumer
+	 * key provided, then return the correct Basic headers and an error message.
+	 *
+	 * @param WP_REST_Response $response Current response being served.
+	 * @return WP_REST_Response
+	 */
+	public function send_unauthorized_headers( $response ) {
+		global $wc_rest_authentication_error;
+
+		if ( is_wp_error( $wc_rest_authentication_error ) && is_ssl() ) {
+			$auth_message = __( 'WooCommerce API. Use a consumer key in the username field and a consumer secret in the password field', 'woocommerce' );
+			$response->header( 'WWW-Authenticate', 'Basic realm="' . $auth_message . '"', true );
+		}
+
+		return $response;
 	}
 }
 
