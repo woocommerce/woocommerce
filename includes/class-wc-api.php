@@ -363,6 +363,9 @@ class WC_API {
 	 * @since 2.6.0
 	 */
 	private function rest_api_includes() {
+		// Authentication.
+		include_once( 'api/wc-rest-authentication.php' );
+
 		// WP-API classes and functions.
 		include_once( 'vendor/wp-api-functions.php' );
 		if ( ! class_exists( 'WP_REST_Controller' ) ) {
