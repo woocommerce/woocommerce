@@ -26,8 +26,8 @@ class WC_REST_Authentication {
 	/**
 	 * Authenticate user.
 	 *
-	 * @param int $user_id
-	 * @return int
+	 * @param int|false $user_id User ID if one has been determined, false otherwise.
+	 * @return int|false
 	 */
 	public function authenticate( $user_id ) {
 		// Do not authenticate twice!
@@ -36,16 +36,10 @@ class WC_REST_Authentication {
 		}
 
 		if ( is_ssl() ) {
-			if ( $user_id = $this->perform_basic_authentication() ) {
-				return $user_id;
-			}
+			return $this->perform_basic_authentication();
 		} else {
-			if ( $user_id = $this->perform_oauth_authentication() ) {
-				return $user_id;
-			}
+			return $this->perform_oauth_authentication();
 		}
-
-		return $user_id;
 	}
 
 	/**
@@ -73,13 +67,12 @@ class WC_REST_Authentication {
 	 * associated with the given consumer key and confirming the consumer secret
 	 * provided is valid.
 	 *
-	 * @return int
+	 * @return int|bool
 	 */
 	private function perform_basic_authentication() {
 		global $wc_rest_authentication_error;
 
 		$user            = null;
-		$user_id         = 0;
 		$consumer_key    = '';
 		$consumer_secret = '';
 
@@ -97,32 +90,32 @@ class WC_REST_Authentication {
 
 		// Get user data.
 		if ( $consumer_key && $consumer_secret ) {
-			$user    = $this->get_user_data_by_consumer_key( $consumer_key );
-			$user_id = $user->user_id;
+			$user = $this->get_user_data_by_consumer_key( $consumer_key );
 		}
 
 		// Abort if don't have an user at this point.
 		if ( empty( $user ) ) {
 			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
 
-			return $user_id;
+			return false;
 		}
 
 		// Validate user secret.
 		if ( ! hash_equals( $user->consumer_secret, $consumer_secret ) ) {
 			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Secret is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
-			$user_id = 0;
+
+			return false;
 		}
 
 		// Check API Key permissions.
 		if ( ! $this->check_permissions( $user->permissions ) ) {
-			$user_id = 0;
+			return false;
 		}
 
 		// Update last access.
 		$this->update_last_access( $user->key_id );
 
-		return $user_id;
+		return $user->user_id;
 	}
 
 	/**
@@ -138,9 +131,8 @@ class WC_REST_Authentication {
 	 *    This is because there is no cross-OS function within PHP to get the raw Authorization header.
 	 *
 	 * @link http://tools.ietf.org/html/rfc5849 for the full spec.
-	 * @since 2.1
-	 * @return array
-	 * @throws Exception
+	 *
+	 * @return int|bool
 	 */
 	private function perform_oauth_authentication() {
 		global $wc_rest_authentication_error;
@@ -150,7 +142,7 @@ class WC_REST_Authentication {
 		// Check for required OAuth parameters.
 		foreach ( $params as $param ) {
 			if ( empty( $_GET[ $param ] ) ) {
-				return 0;
+				return false;
 			}
 		}
 
@@ -160,23 +152,23 @@ class WC_REST_Authentication {
 		if ( empty( $user ) ) {
 			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
 
-			return $user_id;
+			return false;
 		}
 
 		// Perform OAuth validation.
 		$wc_rest_authentication_error = $this->check_oauth_signature( $user, $_GET );
 		if ( is_wp_error( $wc_rest_authentication_error ) ) {
-			return 0;
+			return false;
 		}
 
 		$wc_rest_authentication_error = $this->check_oauth_timestamp_and_nonce( $user, $_GET['oauth_timestamp'], $_GET['oauth_nonce'] );
 		if ( is_wp_error( $wc_rest_authentication_error ) ) {
-			return 0;
+			return false;
 		}
 
 		// Check API Key permissions.
 		if ( ! $this->check_permissions( $user->permissions ) ) {
-			$user_id = 0;
+			return false;
 		}
 
 		// Update last access.
