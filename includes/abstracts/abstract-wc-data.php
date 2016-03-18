@@ -140,14 +140,14 @@ abstract class WC_Data {
 	 * @return mixed
 	 */
 	public function get_meta( $key = '', $single = true ) {
-		$meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$array_keys = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
 		$value    = '';
 
-		if ( $meta_ids ) {
+		if ( $array_keys ) {
 			if ( $single ) {
-				$value = $this->_meta_data[ current( $meta_ids ) ]->value;
+				$value = $this->_meta_data[ current( $array_keys ) ]->value;
 			} else {
-				$value = array_intersect_key( $this->_meta_data, array_flip( $meta_ids ) );
+				$value = array_intersect_key( $this->_meta_data, array_flip( $array_keys ) );
 			}
 		}
 
@@ -161,12 +161,13 @@ abstract class WC_Data {
 	 */
 	public function set_meta_data( $data ) {
 		if ( ! empty( $data ) && is_array( $data ) ) {
-			foreach ( $data as $meta_id => $meta ) {
+			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
-				if ( isset( $meta['key'], $meta['value'] ) ) {
-					$this->_meta_data[ $meta_id ] = (object) array(
-						'key'   => $meta['key'],
-						'value' => $meta['value'],
+				if ( isset( $meta['key'], $meta['value'], $meta['meta_id'] ) ) {
+					$this->_meta_data[] = (object) array(
+						'key'     => $meta['key'],
+						'value'   => $meta['value'],
+						'meta_id' => $meta['meta_id'],
 					);
 				}
 			}
@@ -182,10 +183,10 @@ abstract class WC_Data {
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {
-			$meta_ids = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-			$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $meta_ids, '' ) );
+			$array_keys       = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+			$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
 		}
-		$this->_meta_data[ 'new-' . sizeof( $this->_meta_data ) ] = (object) array(
+		$this->_meta_data[] = (object) array(
 			'key'   => $key,
 			'value' => $value,
 		);
@@ -199,10 +200,15 @@ abstract class WC_Data {
 	 * @param  int $meta_id
 	 */
 	public function update_meta_data( $key, $value, $meta_id = '' ) {
-		if ( $meta_id && isset( $this->_meta_data[ $meta_id ] ) ) {
-			$this->_meta_data[ $meta_id ] = (object) array(
-				'key'   => $key,
-				'value' => $value,
+		$array_key = '';
+		if ( $meta_id ) {
+			$array_key = array_keys( wp_list_pluck( $this->_meta_data, 'meta_id' ), $meta_id );
+		}
+		if ( $array_key ) {
+			$this->_meta_data[ current( $array_key ) ] = (object) array(
+				'key'     => $key,
+				'value'   => $value,
+				'meta_id' => $meta_id,
 			);
 		} else {
 			$this->add_meta_data( $key, $value, true );
@@ -215,8 +221,8 @@ abstract class WC_Data {
 	 * @param array $key Meta key
 	 */
 	public function delete_meta_data( $key ) {
-		$meta_ids         = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
-		$this->_meta_data = array_diff_key( $this->_meta_data, array_fill_keys( $meta_ids, '' ) );
+		$array_keys         = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
+		$this->_meta_data   = array_diff_key( $this->_meta_data, array_fill_keys( $array_keys, '' ) );
 	}
 
 	/**
@@ -254,8 +260,11 @@ abstract class WC_Data {
 				if ( in_array( $meta->meta_key, $this->get_internal_meta_keys() ) ) {
 					continue;
 				}
-
-				$this->_meta_data[ $meta->{$db_info['meta_id_field']} ] = (object) array( 'key' => $meta->meta_key, 'value' => $meta->meta_value );
+				$this->_meta_data[] = (object) array(
+					'key'     => $meta->meta_key,
+					'value'   => $meta->meta_value,
+					'meta_id' => $meta->{ $db_info['meta_id_field'] },
+				);
 			}
 
 			if ( ! empty ( $this->_cache_group ) ) {
@@ -278,12 +287,14 @@ abstract class WC_Data {
 		" ) );
 		$set_meta_ids = array();
 
-		foreach ( $this->_meta_data as $meta_id => $meta ) {
-			if ( 'new' === substr( $meta_id, 0, 3 ) ) {
-				$set_meta_ids[] = add_metadata( $this->_meta_type, $this->get_id(), $meta->key, $meta->value, false );
+		foreach ( $this->_meta_data as $array_key => $meta ) {
+			if ( empty( $meta->meta_id ) ) {
+				$new_meta_id    = add_metadata( $this->_meta_type, $this->get_id(), $meta->key, $meta->value, false );
+				$set_meta_ids[] = $new_meta_id;
+				$this->_meta_data[ $array_key ]->meta_id = $new_meta_id;
 			} else {
-				update_metadata_by_mid( $this->_meta_type, $meta_id, $meta->value, $meta->key );
-				$set_meta_ids[] = absint( $meta_id );
+				update_metadata_by_mid( $this->_meta_type, $meta->meta_id, $meta->value, $meta->key );
+				$set_meta_ids[] = absint( $meta->meta_id );
 			}
 		}
 
