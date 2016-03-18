@@ -182,3 +182,20 @@ function rest_validate_reports_request_arg( $value, $request, $param ) {
 
 	return true;
 }
+
+/**
+ * Encodes a value according to RFC 3986.
+ * Supports multidimensional arrays.
+ *
+ * @since 2.6.0
+ * @param string|array $value The value to encode.
+ * @return string|array       Encoded values.
+ */
+function wc_rest_urlencode_rfc3986( $value ) {
+	if ( is_array( $value ) ) {
+		return array_map( 'wc_rest_urlencode_rfc3986', $value );
+	} else {
+		// Percent symbols (%) must be double-encoded.
+		return str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
+	}
+}

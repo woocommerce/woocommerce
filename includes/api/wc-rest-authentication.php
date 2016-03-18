@@ -18,7 +18,7 @@ class WC_REST_Authentication {
 	 * Initialize authentication actions.
 	 */
 	public function __construct() {
-		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 30 );
+		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 100 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ) );
 	}
 
@@ -29,9 +29,18 @@ class WC_REST_Authentication {
 	 * @return int
 	 */
 	public function authenticate( $user_id ) {
+		// Do not authenticate twice!
+		if ( ! empty( $user_id ) ) {
+			return $user_id;
+		}
+
 		if ( is_ssl() ) {
-			if ( $new_user_id = $this->perform_basic_authentication() ) {
-				$user_id = $new_user_id;
+			if ( $user_id = $this->perform_basic_authentication() ) {
+				return $user_id;
+			}
+		} else {
+			if ( $user_id = $this->perform_oauth_authentication() ) {
+				return $user_id;
 			}
 		}
 
@@ -93,20 +102,225 @@ class WC_REST_Authentication {
 
 		// Abort if don't have an user at this point.
 		if ( empty( $user ) ) {
+			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
+
 			return $user_id;
 		}
 
 		// Validate user secret.
 		if ( ! hash_equals( $user->consumer_secret, $consumer_secret ) ) {
-			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Secret is invalid', 'woocommerce' ), array( 'status' => 401 ) );
+			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Secret is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
 			$user_id = 0;
 		}
 
+		// Check API Key permissions.
 		if ( ! $this->check_permissions( $user->permissions ) ) {
 			$user_id = 0;
 		}
 
+		// Update last access.
+		$this->update_last_access( $user->key_id );
+
 		return $user_id;
+	}
+
+	/**
+	 * Perform OAuth 1.0a "one-legged" (http://oauthbible.com/#oauth-10a-one-legged) authentication for non-SSL requests.
+	 *
+	 * This is required so API credentials cannot be sniffed or intercepted when making API requests over plain HTTP.
+	 *
+	 * This follows the spec for simple OAuth 1.0a authentication (RFC 5849) as closely as possible, with two exceptions:
+	 *
+	 * 1) There is no token associated with request/responses, only consumer keys/secrets are used.
+	 *
+	 * 2) The OAuth parameters are included as part of the request query string instead of part of the Authorization header,
+	 *    This is because there is no cross-OS function within PHP to get the raw Authorization header.
+	 *
+	 * @link http://tools.ietf.org/html/rfc5849 for the full spec.
+	 * @since 2.1
+	 * @return array
+	 * @throws Exception
+	 */
+	private function perform_oauth_authentication() {
+		global $wc_rest_authentication_error;
+
+		$params = array( 'oauth_consumer_key', 'oauth_timestamp', 'oauth_nonce', 'oauth_signature', 'oauth_signature_method' );
+
+		// Check for required OAuth parameters.
+		foreach ( $params as $param ) {
+			if ( empty( $_GET[ $param ] ) ) {
+				return 0;
+			}
+		}
+
+		// Fetch WP user by consumer key
+		$user = $this->get_user_data_by_consumer_key( $_GET['oauth_consumer_key'] );
+
+		if ( empty( $user ) ) {
+			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
+
+			return $user_id;
+		}
+
+		// Perform OAuth validation.
+		$wc_rest_authentication_error = $this->check_oauth_signature( $user, $_GET );
+		if ( is_wp_error( $wc_rest_authentication_error ) ) {
+			return 0;
+		}
+
+		$wc_rest_authentication_error = $this->check_oauth_timestamp_and_nonce( $user, $_GET['oauth_timestamp'], $_GET['oauth_nonce'] );
+		if ( is_wp_error( $wc_rest_authentication_error ) ) {
+			return 0;
+		}
+
+		// Check API Key permissions.
+		if ( ! $this->check_permissions( $user->permissions ) ) {
+			$user_id = 0;
+		}
+
+		// Update last access.
+		$this->update_last_access( $user->key_id );
+
+		return $user->user_id;
+	}
+
+	/**
+	 * Verify that the consumer-provided request signature matches our generated signature,
+	 * this ensures the consumer has a valid key/secret.
+	 *
+	 * @param stdClass $user
+	 * @param array $params The request parameters.
+	 * @return null|WP_Error
+	 */
+	private function check_oauth_signature( $user, $params ) {
+		$http_method = strtoupper( $_SERVER['REQUEST_METHOD'] );
+
+		$request_path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		$wp_base      = get_home_url( null, '/', 'relative' );
+		if ( substr( $request_path, 0, strlen( $wp_base ) ) === $wp_base ) {
+			$request_path = substr( $request_path, strlen( $wp_base ) );
+		}
+		$base_request_uri = rawurlencode( get_home_url( null, $request_path ) );
+
+		// Get the signature provided by the consumer and remove it from the parameters prior to checking the signature.
+		$consumer_signature = rawurldecode( $params['oauth_signature'] );
+		unset( $params['oauth_signature'] );
+
+		// Sort parameters.
+		if ( ! uksort( $params, 'strcmp' ) ) {
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - failed to sort parameters', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		// Normalize parameter key/values.
+		$params = $this->normalize_parameters( $params );
+		$query_parameters = array();
+		foreach ( $params as $param_key => $param_value ) {
+			if ( is_array( $param_value ) ) {
+				foreach ( $param_value as $param_key_inner => $param_value_inner ) {
+					$query_parameters[] = $param_key . '%255B' . $param_key_inner . '%255D%3D' . $param_value_inner;
+				}
+			} else {
+				$query_parameters[] = $param_key . '%3D' . $param_value; // Join with equals sign.
+			}
+		}
+		$query_string = implode( '%26', $query_parameters ); // Join with ampersand.
+
+		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
+
+		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - signature method is invalid', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
+
+		$secret = $user->consumer_secret . '&';
+		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
+
+		if ( ! hash_equals( $signature, $consumer_signature ) ) {
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - provided signature does not match', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Normalize each parameter by assuming each parameter may have already been
+	 * encoded, so attempt to decode, and then re-encode according to RFC 3986.
+	 *
+	 * Note both the key and value is normalized so a filter param like:
+	 *
+	 * 'filter[period]' => 'week'
+	 *
+	 * is encoded to:
+	 *
+	 * 'filter%5Bperiod%5D' => 'week'
+	 *
+	 * This conforms to the OAuth 1.0a spec which indicates the entire query string
+	 * should be URL encoded.
+	 *
+	 * @see rawurlencode()
+	 * @param array $parameters Un-normalized pararmeters.
+	 * @return array Normalized parameters.
+	 */
+	private function normalize_parameters( $parameters ) {
+		$keys = wc_rest_urlencode_rfc3986( array_keys( $parameters ) );
+		$values = wc_rest_urlencode_rfc3986( array_values( $parameters ) );
+		$parameters = array_combine( $keys, $values );
+
+		return $parameters;
+	}
+
+	/**
+	 * Verify that the timestamp and nonce provided with the request are valid. This prevents replay attacks where
+	 * an attacker could attempt to re-send an intercepted request at a later time.
+	 *
+	 * - A timestamp is valid if it is within 15 minutes of now.
+	 * - A nonce is valid if it has not been used within the last 15 minutes.
+	 *
+	 * @param stdClass $user
+	 * @param int $timestamp the unix timestamp for when the request was made
+	 * @param string $nonce a unique (for the given user) 32 alphanumeric string, consumer-generated
+	 * @return bool|WP_Error
+	 */
+	private function check_oauth_timestamp_and_nonce( $user, $timestamp, $nonce ) {
+		global $wpdb;
+
+		$valid_window = 15 * 60; // 15 minute window.
+
+		if ( ( $timestamp < time() - $valid_window ) || ( $timestamp > time() + $valid_window ) ) {
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid timestamp', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$used_nonces = maybe_unserialize( $user->nonces );
+
+		if ( empty( $used_nonces ) ) {
+			$used_nonces = array();
+		}
+
+		if ( in_array( $nonce, $used_nonces ) ) {
+			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid nonce - nonce has already been used', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		$used_nonces[ $timestamp ] = $nonce;
+
+		// Remove expired nonces.
+		foreach ( $used_nonces as $nonce_timestamp => $nonce ) {
+			if ( $nonce_timestamp < ( time() - $valid_window ) ) {
+				unset( $used_nonces[ $nonce_timestamp ] );
+			}
+		}
+
+		$used_nonces = maybe_serialize( $used_nonces );
+
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array( 'nonces' => $used_nonces ),
+			array( 'key_id' => $user->key_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		return true;
 	}
 
 	/**
@@ -145,26 +359,43 @@ class WC_REST_Authentication {
 
 		switch ( $_SERVER['REQUEST_METHOD'] ) {
 
-			case 'HEAD':
-			case 'GET':
+			case 'HEAD' :
+			case 'GET' :
 				if ( 'read' !== $permissions && 'read_write' !== $permissions ) {
-					$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have read permissions', 'woocommerce' ), array( 'status' => 401 ) );
+					$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have read permissions.', 'woocommerce' ), array( 'status' => 401 ) );
 					$valid = false;
 				}
 				break;
 
-			case 'POST':
-			case 'PUT':
-			case 'PATCH':
-			case 'DELETE':
+			case 'POST' :
+			case 'PUT' :
+			case 'PATCH' :
+			case 'DELETE' :
 				if ( 'write' !== $permissions && 'read_write' !== $permissions ) {
-					$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have write permissions', 'woocommerce' ), array( 'status' => 401 ) );
+					$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'The API key provided does not have write permissions.', 'woocommerce' ), array( 'status' => 401 ) );
 					$valid = false;
 				}
 				break;
 		}
 
 		return $valid;
+	}
+
+	/**
+	 * Updated API Key last access datetime.
+	 *
+	 * @param int $key_id
+	 */
+	private function update_last_access( $key_id ) {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array( 'last_access' => current_time( 'mysql' ) ),
+			array( 'key_id' => $key_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
 	}
 }
 
