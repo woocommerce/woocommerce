@@ -129,7 +129,8 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 			array_flip( array_filter( array_keys( $location ), array( $this, 'filter_location_keys' ) ) )
 		);
 
-		return $filtered_location;
+		$response = rest_ensure_response( $filtered_location );
+		return $response;
 	}
 
 	/**
