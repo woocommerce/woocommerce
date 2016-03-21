@@ -971,3 +971,25 @@ function wc_order_fully_refunded( $order_id ) {
 	wc_delete_shop_order_transients( $order_id );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
+
+/**
+ * Get tooltip content for admin panel. For internal use only.
+ * @param  object $item
+ * @return string
+ */
+function _wc_get_order_item_tooltip_content( $item, $_product ) {
+	if ( ! empty( $item['product_id'] ) ) {
+		$tooltip = '<strong>' . __( 'Product ID:', 'woocommerce' ) . '</strong> ' . esc_html( $item['product_id'] );
+	} else {
+		$tooltip = __( 'This product has no ID', 'woocommerce' );
+	}
+
+	if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
+		$tooltip .= '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . esc_html( $item['variation_id'] );
+	} elseif ( ! empty( $item['variation_id'] ) ) {
+		$tooltip .=  '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . esc_html( $item['variation_id'] ) . ' (' . __( 'No longer exists', 'woocommerce' ) . ')';
+	}
+
+	$tooltip .= isset( $_product->variation_data ) ? '<br/>' . wc_get_formatted_variation( $_product->variation_data, true ) : '';
+	return $tooltip;
+}

@@ -245,14 +245,14 @@ jQuery( function ( $ ) {
 				.on( 'change', 'input.quantity', this.quantity_changed )
 
 				// Subtotal/total
-				.on( 'keyup', '.woocommerce_order_items .split-input input:eq(0)', function() {
-					var $subtotal = $( this ).next();
-					if ( $subtotal.val() === '' || $subtotal.is( '.match-total' ) ) {
+				.on( 'keyup change', '.split-input :input', function() {
+					var $subtotal = $( this ).parent().prev().find(':input');
+					if ( $subtotal && ( $subtotal.val() === '' || $subtotal.is( '.match-total' ) ) ) {
 						$subtotal.val( $( this ).val() ).addClass( 'match-total' );
 					}
 				})
 
-				.on( 'keyup', '.woocommerce_order_items .split-input input:eq(1)', function() {
+				.on( 'keyup', '.split-input :input', function() {
 					$( this ).removeClass( 'match-total' );
 				})
 
@@ -326,21 +326,23 @@ jQuery( function ( $ ) {
 			);
 
 			// Taxes
-			$( 'td.line_tax', $row ).each(function() {
-				var line_total_tax = $( 'input.line_tax', $( this ) );
-				var unit_total_tax = accounting.unformat( line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
+			$( 'input.line_tax', $row ).each( function() {
+				var $line_total_tax    = $( this );
+				var tax_id             = $line_total_tax.data( 'tax_id' );
+				var unit_total_tax     = accounting.unformat( $line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
+				var $line_subtotal_tax = $( 'input.line_subtotal_tax[data-tax_id="' + tax_id + '"]', $row );
+				var unit_subtotal_tax  = accounting.unformat( $line_subtotal_tax.attr( 'data-subtotal_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
+
 				if ( 0 < unit_total_tax ) {
-					line_total_tax.val(
+					$line_total_tax.val(
 						parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
 				}
 
-				var line_subtotal_tax = $( 'input.line_subtotal_tax', $( this ) );
-				var unit_subtotal_tax = accounting.unformat( line_subtotal_tax.attr( 'data-subtotal_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
 				if ( 0 < unit_subtotal_tax ) {
-					line_subtotal_tax.val(
+					$line_subtotal_tax.val(
 						parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
@@ -765,19 +767,20 @@ jQuery( function ( $ ) {
 				).change();
 
 				// Taxes
-				$( 'td.line_tax', $row ).each( function() {
-					var line_total_tax        = $( 'input.line_tax', $( this ) );
-					var refund_line_total_tax = $( 'input.refund_line_tax', $( this ) );
-					var unit_total_tax = accounting.unformat( line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point ) / qty;
+				$( '.refund_line_tax', $row ).each( function() {
+					var $refund_line_total_tax = $( this );
+					var tax_id                 = $refund_line_total_tax.data( 'tax_id' );
+					var line_total_tax         = $( 'input.line_tax[data-tax_id="' + tax_id + '"]', $row );
+					var unit_total_tax         = accounting.unformat( line_total_tax.data( 'total_tax' ), woocommerce_admin.mon_decimal_point ) / qty;
 
 					if ( 0 < unit_total_tax ) {
-						refund_line_total_tax.val(
+						$refund_line_total_tax.val(
 							parseFloat( accounting.formatNumber( unit_total_tax * refund_qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 								.toString()
 								.replace( '.', woocommerce_admin.mon_decimal_point )
 						).change();
 					} else {
-						refund_line_total_tax.val( 0 ).change();
+						$refund_line_total_tax.val( 0 ).change();
 					}
 				});
 

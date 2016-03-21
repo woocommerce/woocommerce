@@ -9,8 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 $who_refunded = new WP_User( $refund->post->post_author );
 ?>
 <tr class="refund <?php echo ( ! empty( $class ) ) ? $class : ''; ?>" data-order_refund_id="<?php echo $refund->id; ?>">
-	<td class="check-column"></td>
-
 	<td class="thumb"><div></div></td>
 
 	<td class="name">
@@ -37,12 +35,6 @@ $who_refunded = new WP_User( $refund->post->post_author );
 			<?php echo wc_price( '-' . $refund->get_refund_amount() ); ?>
 		</div>
 	</td>
-
-	<?php if ( ( ! isset( $legacy_order ) || ! $legacy_order ) && wc_tax_enabled() ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
-
-		<td class="line_tax" width="1%"></td>
-
-	<?php endfor; endif; ?>
 
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">
