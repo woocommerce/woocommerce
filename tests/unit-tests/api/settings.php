@@ -6,15 +6,32 @@ namespace WooCommerce\Tests\API;
  * @package WooCommerce\Tests\API
  * @since 2.7.0
  */
-class Settings extends \WP_Test_REST_Controller_Testcase {
+class Settings extends \WC_Unit_Test_Case {
 
+	protected $server;
+
+	/**
+	 * Setup our test server, endpoints, and user info.
+	 */
 	public function setUp() {
 		parent::setUp();
+		global $wp_rest_server;
+		$this->server = $wp_rest_server = new \WP_Test_Spy_REST_Server;
+		do_action( 'rest_api_init' );
 		$this->endpoint = new \WC_Rest_Settings_Controller();
 		\WC_Helper_Settings::register();
 		$this->user = $this->factory->user->create( array(
 			'role' => 'administrator',
 		) );
+	}
+
+	/**
+	 * Unset the server.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		global $wp_rest_server;
+		$wp_rest_server = null;
 	}
 
 	/**
@@ -166,15 +183,6 @@ class Settings extends \WP_Test_REST_Controller_Testcase {
 		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/coupon-data' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
-
-	public function test_get_items() { }
-	public function test_get_item() { }
-	public function test_context_param() { }
-	public function test_create_item() { }
-	public function test_update_item() { }
-	public function test_delete_item() { }
-	public function test_prepare_item() { }
-	public function test_get_item_schema() { }
 
 	/**
 	 * Ensure valid location data response.
