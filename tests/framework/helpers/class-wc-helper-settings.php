@@ -13,6 +13,7 @@ class WC_Helper_Settings {
 	 */
 	public static function register() {
 		add_filter( 'woocommerce_settings_locations', array( 'WC_Helper_Settings', 'register_locations' ) );
+		add_filter( 'woocommerce_settings_groups_test', array( 'WC_Helper_Settings', 'register_test_groups' ) );
 	}
 
 	/**
@@ -30,6 +31,12 @@ class WC_Helper_Settings {
 			'description' => __( 'My awesome test settings.', 'woocommerce' ),
 		);
 		$locations[] = array(
+			'id'          => 'test-2',
+			'type'        => 'page',
+			'label'       => __( 'Test Extension', 'woocommerce' ),
+			'description' => '',
+		);
+		$locations[] = array(
 			'id'    => 'coupon-data',
 			'type'  => 'metabox',
 			'label' => __( 'Coupon Data', 'woocommerce' ),
@@ -41,6 +48,24 @@ class WC_Helper_Settings {
 			'id' => 'invalid',
 		);
 		return $locations;
+	}
+
+	/**
+	 * Registers some example groups for the 'test' page.
+	 * @since  2.7.0
+	 * @param  array $groups
+	 * @return array
+	 */
+	public static function register_test_groups( $groups ) {
+		$groups[] = array(
+			'id'    => 'general',
+			'label' => __( 'General', 'woocommerce' ),
+		);
+		$groups[] = array(
+			'id'    => 'inventory',
+			'label' => __( 'Inventory', 'woocommerce' ),
+		);
+		return $groups;
 	}
 
 }

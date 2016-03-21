@@ -54,7 +54,7 @@ class Settings extends \WC_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $data ) );
+		$this->assertEquals( 3, count( $data ) );
 
 		$this->check_get_location_response( $data[0], array(
 			'id'          => 'test',
@@ -63,7 +63,7 @@ class Settings extends \WC_Unit_Test_Case {
 			'description' => 'My awesome test settings.',
 		) );
 
-		$this->check_get_location_response( $data[1], array(
+		$this->check_get_location_response( $data[2], array(
 			'id'          => 'coupon-data',
 			'type'        => 'metabox',
 			'label'       => 'Coupon Data',
@@ -108,7 +108,7 @@ class Settings extends \WC_Unit_Test_Case {
 		$request->set_param( 'type', 'not-a-real-type' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
-		$this->assertEquals( 2, count( $data ) ); // all results
+		$this->assertEquals( 3, count( $data ) ); // all results
 
 		$request = new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' );
 		$request->set_param( 'type', 'page' );
@@ -116,14 +116,7 @@ class Settings extends \WC_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $data ) );
-
-		$this->check_get_location_response( $data[0], array(
-			'id'          => 'test',
-			'type'        => 'page',
-			'label'       => 'Test Extension',
-			'description' => 'My awesome test settings.',
-		) );
+		$this->assertEquals( 2, count( $data ) );
 	}
 
 	/**
@@ -182,6 +175,31 @@ class Settings extends \WC_Unit_Test_Case {
 
 		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/coupon-data' ) );
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test settings groups (for pages)
+	 * @since 2.7.0
+	 */
+	public function test_settings_groups() {
+		wp_set_current_user( $this->user );
+
+		// test getting a non page location
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/coupon-data' ) );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'groups', $data );
+
+		// test getting a page with no groups
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/test-2' ) );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertEmpty( $data['groups'] );
+
+		// test getting a page with groups
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/test' ) );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertEquals( 2, count( $data['groups'] ) );
 	}
 
 	/**

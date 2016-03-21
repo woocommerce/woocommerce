@@ -54,7 +54,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	 */
 	public function permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
-		//	return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot access settings.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot access settings.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -129,7 +129,10 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 			$groups = apply_filters( 'woocommerce_settings_groups_' . $location['id'], array() );
 			if ( ! empty( $groups ) ) {
 				foreach ( $groups as $group ) {
-					$location['groups'][] = array( 'id' => $group['id'], 'label' => $group['label'], 'description' => $group['description'] );
+					$location['groups'][] = array_intersect_key(
+						$group,
+						array_flip( array_filter( array_keys( $group ), array( $this, 'filter_group_keys' ) ) )
+					);
 				}
 			}
 		}
@@ -144,13 +147,23 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	}
 
 	/**
-	 * Callback for Allowed keys for each location response.
+	 * Callback for allowed keys for each location response.
 	 * @since  2.7.0
 	 * @param  string $key Key to check
 	 * @return boolean
 	 */
 	public function filter_location_keys( $key ) {
 		return in_array( $key, array( 'id', 'type', 'label', 'description', 'groups' ) );
+	}
+
+	/**
+	 * Callback for allowed keys for each group.
+	 * @since  2.7.0
+	 * @param  string $key Key to check
+	 * @return boolean
+	 */
+	public function filter_group_keys( $key ) {
+		return in_array( $key, array( 'id', 'label', 'description' ) );
 	}
 
 	/**
