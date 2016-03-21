@@ -838,20 +838,6 @@ ul.wc_coupon_list_block {
 		}
 	}
 
-	.wc-order-bulk-actions {
-		background: #fefefe;
-		vertical-align: top;
-		border-top: 0;
-
-		select {
-			vertical-align: top;
-		}
-
-		p.bulk-actions {
-			float: left;
-		}
-	}
-
 	.wc-order-add-item {
 		background: #fff;
 		vertical-align: top;
@@ -982,11 +968,11 @@ ul.wc_coupon_list_block {
 		}
 
 		tbody th, td {
-			padding: 8px;
+			padding: 1em;
 			text-align: left;
-			line-height: 26px;
-			vertical-align: top;
-			border-bottom: 1px dotted #ececec;
+			line-height: 1.5em;
+			vertical-align: middle;
+			border-bottom: 1px solid #f8f8f8;
 
 			textarea {
 				width: 100%;
@@ -1023,9 +1009,41 @@ ul.wc_coupon_list_block {
 			border-top: none;
 		}
 
-		td.check-column {
-			padding: 8px 8px 8px 12px;
-			width: 1%;
+		td.thumb {
+			text-align: left;
+			width: 42px;
+			.wc-order-item-thumbnail {
+				width: 42px;
+				height: 42px;
+				border: 2px solid #e5e5e5;
+				background: #f8f8f8;
+				color: #ccc;
+				position: relative;
+				font-size: 21px;
+				display: block;
+				text-align: center;
+				&:after {
+					@include icon_dashicons( "\f128" );
+					width: 42px;
+					line-height: 42px;
+					display: block;
+					z-index: 1;
+				}
+				img {
+					width: 100%;
+					height: 100%;
+					margin: 0;
+					padding: 0;
+					z-index: 2;
+					position: relative;
+				}
+			}
+		}
+		td.name {
+			.wc-order-item-name {
+				display: block;
+				margin: .5em 0;
+			}
 		}
 
 		.item {
@@ -1139,8 +1157,8 @@ ul.wc_coupon_list_block {
 					padding: 0 4px .5em 0;
 					line-height: 1.5em;
 					width: 20%;
+					font-weight: normal;
 				}
-
 				td {
 					padding: 0 4px .5em 0;
 					border: 0;
@@ -1174,24 +1192,6 @@ ul.wc_coupon_list_block {
 						margin: 0;
 					}
 				}
-			}
-		}
-
-		.thumb {
-			text-align: left;
-			width: 27px;
-
-			a {
-				display: block;
-			}
-
-			img {
-				padding: 1px;
-				margin: 0;
-				border: 1px solid #dfdfdf;
-				vertical-align: middle;
-				width: 21px;
-				height: 21px;
 			}
 		}
 
@@ -1287,49 +1287,52 @@ ul.wc_coupon_list_block {
 			white-space: nowrap;
 		}
 	}
-}
-
-.wc-order-items-editable {
-	.edit-order-item {
-		@include ir();
-		display: inline-block;
-		margin: 0 .5em 0 0;
-
-		&:before {
-			@include icon;
-			content: "\e603";
-			color: #999;
-		}
-
-		&:hover {
-			&:before {
-				color: #555;
-			}
-		}
-	}
-
-	.delete-order-item,
-	.delete_refund {
-		@include ir();
-		display: inline-block;
-		margin: 0;
-
-		&:before {
-			@include icon;
-			content: "\e013";
-			color: #999;
-		}
-
-		&:hover {
-			&:before {
-				color: $red;
-			}
-		}
-	}
 
 	.wc-order-edit-line-item-actions {
-		width: 2.5em;
 		text-align: right;
+		width: 3em;
+		a {
+			color: #ccc;
+			@include ir();
+			display: inline-block;
+			cursor: pointer;
+			padding: .5em .25em;
+			font-size: 1em;
+			&:before {
+				@include icon;
+				position: static;
+			}
+			&:hover {
+				&:before {
+					color: #999;
+				}
+			}
+		}
+
+		a:first-child {
+			padding-left: 0;
+		}
+		a:last-child {
+			padding-right: 0;
+		}
+
+		.edit-order-item {
+			&:before {
+				content: "\e603";
+			}
+		}
+
+		.delete-order-item,
+		.delete_refund {
+			&:before {
+				content: "\e013";
+			}
+			&:hover {
+				&:before {
+					color: $red;
+				}
+			}
+		}
 	}
 
 	.wc-order-totals .wc-order-edit-line-item-actions {

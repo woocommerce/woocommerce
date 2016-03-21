@@ -9,45 +9,35 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
+$product_link = $_product ? admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) : '';
+$thumbnail    = $_product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $_product->get_image( 'shop_thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
+
+if ( ! empty( $item['product_id'] ) ) {
+	$tooltip = '<strong>' . __( 'Product ID:', 'woocommerce' ) . '</strong> ' . esc_html( $item['product_id'] );
+} else {
+	$tooltip = __( 'This product has no ID', 'woocommerce' );
+}
+
+if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
+	$tooltip .= '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . esc_html( $item['variation_id'] );
+} elseif ( ! empty( $item['variation_id'] ) ) {
+	$tooltip .=  '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . esc_html( $item['variation_id'] ) . ' (' . __( 'No longer exists', 'woocommerce' ) . ')';
+}
+
+$tooltip .= isset( $_product->variation_data ) ? '<br/>' . wc_get_formatted_variation( $_product->variation_data, true ) : '';
 ?>
 <tr class="item <?php echo apply_filters( 'woocommerce_admin_html_order_item_class', ( ! empty( $class ) ? $class : '' ), $item ); ?>" data-order_item_id="<?php echo $item_id; ?>">
-	<td class="check-column"><input type="checkbox" /></td>
 	<td class="thumb">
-		<?php if ( $_product ) : ?>
-			<a href="<?php echo esc_url( admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) ); ?>" class="tips" data-tip="<?php
-
-				echo '<strong>' . __( 'Product ID:', 'woocommerce' ) . '</strong> ' . absint( $item['product_id'] );
-
-				if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
-					echo '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . absint( $item['variation_id'] );
-				} elseif ( ! empty( $item['variation_id'] ) ) {
-					echo '<br/><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ' . absint( $item['variation_id'] ) . ' (' . __( 'No longer exists', 'woocommerce' ) . ')';
-				}
-
-				if ( $_product && $_product->get_sku() ) {
-					echo '<br/><strong>' . __( 'Product SKU:', 'woocommerce' ).'</strong> ' . esc_html( $_product->get_sku() );
-				}
-
-				if ( $_product && isset( $_product->variation_data ) ) {
-					echo '<br/>' . wc_get_formatted_variation( $_product->variation_data, true );
-				}
-
-			?>"><?php echo apply_filters( 'woocommerce_admin_order_item_thumbnail', $_product->get_image( 'shop_thumbnail', array( 'title' => '' ) ), $item_id, $item ); ?></a>
-		<?php else : ?>
-			<?php echo wc_placeholder_img( 'shop_thumbnail' ); ?>
-		<?php endif; ?>
+		<?php
+			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-thumbnail tips" data-tip="' . esc_attr( $tooltip ) . '">' : '<div class="wc-order-item-thumbnail tips" data-tip="' . esc_attr( $tooltip ) . '">';
+			echo wp_kses_post( $thumbnail );
+			echo $product_link ? '</a>' : '</div>';
+		?>
 	</td>
 	<td class="name" data-sort-value="<?php echo esc_attr( $item['name'] ); ?>">
-
-		<?php if ( $_product ) : ?>
-			<?php echo $_product->get_sku() ? esc_html( $_product->get_sku() ) . ' &ndash; ' : ''; ?>
-
-			<a target="_blank" href="<?php echo esc_url( admin_url( 'post.php?post=' . absint( $_product->id ) . '&action=edit' ) ); ?>">
-				<?php echo esc_html( $item['name'] ); ?>
-			</a>
-		<?php else : ?>
-			<?php echo esc_html( $item['name'] ); ?>
-		<?php endif; ?>
+		<?php
+			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' .  esc_html( $item['name'] ) . '</a>' : '<div class="class="wc-order-item-name"">' . esc_html( $item['name'] ) . '</div>';
+			echo $_product && $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . esc_html( $_product->get_sku() ) : ''; ?>
 
 		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 		<input type="hidden" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" value="<?php echo isset( $item['tax_class'] ) ? esc_attr( $item['tax_class'] ) : ''; ?>" />
@@ -75,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<td class="quantity" width="1%">
 		<div class="view">
 			<?php
-				echo ( isset( $item['qty'] ) ) ? esc_html( $item['qty'] ) : '';
+				echo '&times;' . ( isset( $item['qty'] ) ? esc_html( $item['qty'] ) : '1' );
 
 				if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
 					echo '<small class="refunded">' . $refunded_qty . '</small>';
@@ -168,10 +158,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	?>
 
 	<td class="wc-order-edit-line-item">
-		<?php if ( $order->is_editable() ) : ?>
-			<div class="wc-order-edit-line-item-actions">
-				<a class="edit-order-item" href="#"></a><a class="delete-order-item" href="#"></a>
-			</div>
-		<?php endif; ?>
+		<div class="wc-order-edit-line-item-actions">
+			<?php if ( $order->is_editable() ) : ?>
+					<a class="edit-order-item tips" href="#" data-tip="<?php esc_attr_e( 'Edit item', 'woocommerce' ); ?>"></a>
+					<a class="delete-order-item tips" href="#" data-tip="<?php esc_attr_e( 'Delete item', 'woocommerce' ); ?>"></a>
+			<?php endif; ?>
+		</div>
 	</td>
 </tr>

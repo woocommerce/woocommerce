@@ -45,7 +45,7 @@ if ( wc_tax_enabled() ) {
 ?>
 <div class="woocommerce_order_items_wrapper wc-order-items-editable">
 	<table cellpadding="0" cellspacing="0" class="woocommerce_order_items">
-		<thead>
+		<thead class="screen-reader-text">
 			<tr>
 				<th><input type="checkbox" class="check-column" /></th>
 				<th class="item sortable" colspan="2" data-sort="string-ins"><?php _e( 'Item', 'woocommerce' ); ?></th>
@@ -218,22 +218,6 @@ if ( wc_tax_enabled() ) {
 	<div class="clear"></div>
 </div>
 <div class="wc-order-data-row wc-order-bulk-actions">
-	<p class="bulk-actions">
-		<select>
-			<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-			<?php if ( $order->is_editable() ) : ?>
-				<optgroup label="<?php esc_attr_e( 'Edit', 'woocommerce' ); ?>">
-					<option value="delete"><?php _e( 'Delete selected line item(s)', 'woocommerce' ); ?></option>
-				</optgroup>
-			<?php endif; ?>
-			<optgroup label="<?php esc_attr_e( 'Stock Actions', 'woocommerce' ); ?>">
-				<option value="reduce_stock"><?php _e( 'Reduce line item stock', 'woocommerce' ); ?></option>
-				<option value="increase_stock"><?php _e( 'Increase line item stock', 'woocommerce' ); ?></option>
-			</optgroup>
-		</select>
-
-		<button type="button" class="button do_bulk_action wc-reload" title="<?php esc_attr_e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
-	</p>
 	<p class="add-items">
 		<?php if ( $order->is_editable() ) : ?>
 			<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
