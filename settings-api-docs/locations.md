@@ -20,7 +20,7 @@ The coupon data box is considered location and would be represented like so:
 	}
 
 
-There are 4 fields that make up a location:
+There are 4 fields that make up all locations:
 
 * _id_: A unique identifier that can be used to link settings together. This shoud be a unique (for the whole system) value. Prefixing with your plugin slug is recommended for non-core changes. Alphanumeric string that contains no spaces. Required.
 * _type_: Context for where the settings in this location are going to be displayed. Right now core accepts 'page' for settings pages (pages currently under WooCommerce > Settings), 'metabox' (for metabox grouped settings like Coupon Data - this name is subject to change as this API develops), and 'shipping-zone' for settings associated with shipping zone settings. Alphanumeric string that contains no spaces. Required, defaults to 'page'.
@@ -28,6 +28,9 @@ There are 4 fields that make up a location:
 * _description_: A human readable description. This is a translated string that can be used in the UI. Optional.
 
 Any other fields passed will be stripped out before the JSON response is sent back to the client.
+
+Locations with type 'page' can also have an associated set of 'groups' which are sub sections/pages. See [groups.md](groups.md).
+Pages will return an array of groups in their response.
 
 ## Registering a Location
 
@@ -53,4 +56,4 @@ There is an optional ?type parameter that allows you to return only locations fo
 
 ### GET /settings/locations/$id
 
-Returns information on a single location.
+Returns information on a single location + any associated groups.
