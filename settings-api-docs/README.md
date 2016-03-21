@@ -9,61 +9,10 @@ All settings are registered with PHP filters. Not through the REST API. The REST
 ## Locations
 [locations.md](locations.md)
 
-# The below sections are being moved to their own doc files as the API gets fleshed out.
+## Groups
+[groups.md](groups.md)
 
-## GET /settings/sections/$section/
-
-Lists all settings "groups" on a specific page. 
-
-On the 'Products' page this would be 'General', 'Display', 'Inventory', and 'Downloadable Products'.
-
-Metaboxes won't need to use this.
-
-![](https://cldup.com/qXlfpvItr6-3000x3000.png)
-
-Here is how you would register groups:
-
-	// products would be replaced with whatever page ID you want to register for. These filters automatically exist after registering a page
-	add_filter( 'woocommerce_settings_groups_products', function( $groups ) {
-		$groups[] = array(
-			'id'          => 'general',
-			'label'       => __( 'General', 'woocommerce' ), // human readable label (required)
-			'description' => '', // human readable description (optional)
-		);
-		$groups[] = array(
-			'id'		  => 'display',
-			'label'       => __( 'Display', 'woocommerce' ),
-			'description' => '',
-		);
-		$groups[] = array(
-			'id'		  => 'inventory',
-			'label'       => __( 'Inventory', 'woocommerce' ),
-			'description' => '',
-		);
-		return $groups;
-	} );
-
-To retrive the groups for the 'products' page:
-
-GET /settings/sections/products
-
-	{
-	    "label": "Products",
-	    "description": "",
-	    "groups": [
-	        {
-	            "id": "general",
-	            "label": "General",
-	            "description": ""
-	        },
-	        {
-	            "id": "display",
-	            "label": "Display",
-	            "description": ""
-	        }
-	    ]
-	}
-
+# The below sections are being moved to their own doc files (and may change) as the API gets fleshed out.
 
 ## /settings/$identifer
 
