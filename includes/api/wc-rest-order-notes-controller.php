@@ -177,7 +177,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Create a single webhook.
+	 * Create a single order note.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
@@ -206,7 +206,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 		$this->update_additional_fields_for_object( $note, $request );
 
 		/**
-		 * Fires after a single item is created or updated via the REST API.
+		 * Fires after a order note is created or updated via the REST API.
 		 *
 		 * @param WP_Comment      $note      New order note object.
 		 * @param WP_REST_Request $request   Request object.
@@ -239,12 +239,60 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 
 		$note = get_comment( $id );
 
-		if ( empty( $id ) || empty( $note ) ) {
+		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$order_note = $this->prepare_item_for_response( $note, $request );
 		$response   = rest_ensure_response( $order_note );
+
+		return $response;
+	}
+
+	/**
+	 * Delete a single webhook.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$id    = (int) $request['id'];
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		}
+
+		$order = get_post( (int) $request['order_id'] );
+
+		if ( empty( $order->post_type ) || 'shop_order' !== $order->post_type ) {
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$note = get_comment( $id );
+
+		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->ID ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $note, $request );
+
+		$result = wp_delete_comment( $note->comment_ID, true );;
+
+		if ( ! $result ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), 'order_note' ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a order note is deleted or trashed via the REST API.
+		 *
+		 * @param WP_Comment       $note     The deleted or trashed order note.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_order_note', $note, $response, $request );
 
 		return $response;
 	}
