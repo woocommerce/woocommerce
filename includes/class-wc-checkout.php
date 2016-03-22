@@ -457,6 +457,8 @@ class WC_Checkout {
 								$field_label = $field['label'];
 							break;
 						}
+						
+						$field_label = apply_filters('woocommerce_required_checkout_fields_error_label',$field_label);
 						wc_add_notice( sprintf( _x( '%s is a required field.', 'FIELDNAME is a required field.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ), 'error' );
 					}
 
