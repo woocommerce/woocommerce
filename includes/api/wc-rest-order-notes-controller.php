@@ -105,7 +105,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	 * @return boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'publish_shop_orders' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -174,6 +174,53 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 		}
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Create a single webhook.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+		}
+
+		$order = get_post( (int) $request['order_id'] );
+
+		if ( empty( $order->post_type ) || 'shop_order' !== $order->post_type ) {
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$order = wc_get_order( $order );
+
+		// Create the note.
+		$note_id = $order->add_order_note( $request['note'], $request['customer_note'] );
+
+		if ( ! $note_id ) {
+			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		$note = get_comment( $note_id );
+		$this->update_additional_fields_for_object( $note, $request );
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param WP_Comment      $note      New order note object.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( 'woocommerce_rest_insert_order_note', $note, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $note, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, str_replace( '(?P<order_id>[\d]+)', $order->id, $this->rest_base ), $note_id ) ) );
+
+		return $response;
 	}
 
 	/**
