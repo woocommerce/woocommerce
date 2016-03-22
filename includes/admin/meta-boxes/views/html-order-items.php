@@ -338,6 +338,32 @@ if ( wc_tax_enabled() ) {
 	<div class="wc-backbone-modal-backdrop modal-close"></div>
 </script>
 
+<script type="text/template" id="tmpl-wc-modal-configure-product-fields">
+	<div class="wc-backbone-modal">
+		<div class="wc-backbone-modal-content">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php _e( 'Configure product:', 'woocommerce' ); ?> {{{ data.title }}}</h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text">Close modal panel</span>
+					</button>
+				</header>
+				<article>
+					<form action="" method="post">
+						{{{ data.fields_html }}}
+					</form>
+				</article>
+				<footer>
+					<div class="inner">
+						<button id="btn-validate" class="button button-primary button-large"><?php _e( 'Done', 'woocommerce' ); ?></button>
+					</div>
+				</footer>
+			</section>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
+</script>
+
 <script type="text/template" id="tmpl-wc-modal-add-tax">
 	<div class="wc-backbone-modal">
 		<div class="wc-backbone-modal-content">

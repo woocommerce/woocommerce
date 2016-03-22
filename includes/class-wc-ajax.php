@@ -112,6 +112,7 @@ class WC_AJAX {
 			'grant_access_to_download'                         => false,
 			'get_customer_details'                             => false,
 			'add_order_item'                                   => false,
+			'get_order_items_fields'                           => false,
 			'add_order_fee'                                    => false,
 			'add_order_shipping'                               => false,
 			'add_order_tax'                                    => false,
@@ -1134,6 +1135,75 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Get order item configuration fields via ajax.
+	 */
+	public static function get_order_items_fields() {
+		check_ajax_referer( 'order-item', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+
+		$items_to_add = array_map( 'absint', $_POST['items_to_add'] );
+		$order_id     = absint( $_POST['order_id'] );
+		$fields       = array();
+
+		foreach ( $items_to_add as $item_to_add ) {
+
+			$post = get_post( $item_to_add );
+
+			if ( ! $post || ( 'product' !== $post->post_type && 'product_variation' !== $post->post_type ) ) {
+				die();
+			}
+
+			$_product         = wc_get_product( $post->ID );
+			$item_fields      = array();
+			$item_fields_html = '';
+
+			if ( $_product->is_type( 'variable' ) ) {
+				$item_fields[] = array(
+					'field_id'    => 'select_variation',
+					'field_title' => __( 'Select a variation', 'woocommerce' ),
+					'field_html'  => self::get_order_item_select_variation_fields( $_product, $order_id ),
+				);
+			}
+
+			$item_fields = apply_filters( 'woocommerce_ajax_get_order_item_fields', $item_fields, $_product, $order_id );
+
+			if ( ! empty( $item_fields ) ) {
+				ob_start();
+				include( 'admin/meta-boxes/views/html-order-item-fields.php' );
+				$item_fields_html = ob_get_clean();
+			}
+
+			$fields[] = array(
+				'id'          => $item_to_add,
+				'title'       => $_product->get_title(),
+				'has_fields'  => ! empty( $item_fields_html ),
+				'fields_html' => $item_fields_html
+			);
+		}
+
+		wp_send_json( $fields );
+	}
+
+	/**
+	 * Variable order item configuration fields.
+	 *
+	 * @param  WC_Product_Variable $product   the variable order item currently being added into the order
+	 * @param  int                 $order_id  the order id
+	 * @return string
+	 */
+	public static function get_order_item_select_variation_fields( $product, $order_id ) {
+		ob_start();
+		?>
+		<p><?php _e( '&hellip;or continue to add the parent product to this order.', 'woocommerce' ); ?></p>
+		<input type="hidden" id="add_item_id" name="add_order_item_variation" class="wc-product-search" data-allow_clear="true" data-placeholder="<?php esc_attr_e( 'Search for a variation&hellip;', 'woocommerce' ); ?>" data-multiple="false" data-include="<?php echo implode( ',', $product->get_children() ); ?>" />
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
 	 * Add order item via ajax.
 	 */
 	public static function add_order_item() {
@@ -1145,6 +1215,11 @@ class WC_AJAX {
 
 		$item_to_add = sanitize_text_field( $_POST['item_to_add'] );
 		$order_id    = absint( $_POST['order_id'] );
+		$data        = array();
+
+		if ( ! empty( $_POST['data'] ) ) {
+			parse_str( $_POST['data'], $data );
+		}
 
 		// Find the item
 		if ( ! is_numeric( $item_to_add ) ) {
@@ -1157,65 +1232,84 @@ class WC_AJAX {
 			die();
 		}
 
-		$_product    = wc_get_product( $post->ID );
-		$order       = wc_get_order( $order_id );
-		$order_taxes = $order->get_taxes();
-		$class       = 'new_row';
+		$_product = wc_get_product( $post->ID );
 
-		// Set values
-		$item = array();
-
-		$item['product_id']        = $_product->id;
-		$item['variation_id']      = isset( $_product->variation_id ) ? $_product->variation_id : '';
-		$item['variation_data']    = $item['variation_id'] ? $_product->get_variation_attributes() : '';
-		$item['name']              = $_product->get_title();
-		$item['tax_class']         = $_product->get_tax_class();
-		$item['qty']               = 1;
-		$item['line_subtotal']     = wc_format_decimal( $_product->get_price_excluding_tax() );
-		$item['line_subtotal_tax'] = '';
-		$item['line_total']        = wc_format_decimal( $_product->get_price_excluding_tax() );
-		$item['line_tax']          = '';
-		$item['type']              = 'line_item';
-
-		// Add line item
-		$item_id = wc_add_order_item( $order_id, array(
-			'order_item_name' 		=> $item['name'],
-			'order_item_type' 		=> 'line_item'
-		) );
-
-		// Add line item meta
-		if ( $item_id ) {
-			wc_add_order_item_meta( $item_id, '_qty', $item['qty'] );
-			wc_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
-			wc_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
-			wc_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
-			wc_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
-			wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
-			wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
-			wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
-
-			// Since 2.2
-			wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array(), 'subtotal' => array() ) );
-
-			// Store variation data in meta
-			if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
-				foreach ( $item['variation_data'] as $key => $value ) {
-					wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
-				}
+		if ( $_product->is_type( 'variable' ) && ! empty( $data[ 'add_order_item_variation' ] ) ) {
+			$variation_to_add = absint( $data[ 'add_order_item_variation' ] );
+			$variation        = $_product->get_child( $variation_to_add );
+			if ( $variation ) {
+				$_product = $variation;
 			}
-
-			do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item );
 		}
 
-		$item['item_meta']       = $order->get_item_meta( $item_id );
-		$item['item_meta_array'] = $order->get_item_meta_array( $item_id );
-		$item                    = $order->expand_item_meta( $item );
-		$item                    = apply_filters( 'woocommerce_ajax_order_item', $item, $item_id );
+		$order    = wc_get_order( $order_id );
+		$messages = apply_filters( 'woocommerce_ajax_add_order_item_validation_messages', array(), $_product, $order, $item_to_add, $data );
 
-		include( 'admin/meta-boxes/views/html-order-item.php' );
+		if ( empty( $messages ) ) {
 
-		// Quit out
-		die();
+			$order_taxes = $order->get_taxes();
+			$class       = 'new_row';
+
+			// Set values
+			$item = array();
+
+			$item['product_id']        = $_product->id;
+			$item['variation_id']      = isset( $_product->variation_id ) ? $_product->variation_id : '';
+			$item['variation_data']    = $item['variation_id'] ? $_product->get_variation_attributes() : '';
+			$item['name']              = $_product->get_title();
+			$item['tax_class']         = $_product->get_tax_class();
+			$item['qty']               = 1;
+			$item['line_subtotal']     = wc_format_decimal( $_product->get_price_excluding_tax() );
+			$item['line_subtotal_tax'] = '';
+			$item['line_total']        = wc_format_decimal( $_product->get_price_excluding_tax() );
+			$item['line_tax']          = '';
+			$item['type']              = 'line_item';
+
+			// Add line item
+			$item_id = wc_add_order_item( $order_id, array(
+				'order_item_name' => $item['name'],
+				'order_item_type' => 'line_item'
+			) );
+
+			// Add line item meta
+			if ( $item_id ) {
+				wc_add_order_item_meta( $item_id, '_qty', $item['qty'] );
+				wc_add_order_item_meta( $item_id, '_tax_class', $item['tax_class'] );
+				wc_add_order_item_meta( $item_id, '_product_id', $item['product_id'] );
+				wc_add_order_item_meta( $item_id, '_variation_id', $item['variation_id'] );
+				wc_add_order_item_meta( $item_id, '_line_subtotal', $item['line_subtotal'] );
+				wc_add_order_item_meta( $item_id, '_line_subtotal_tax', $item['line_subtotal_tax'] );
+				wc_add_order_item_meta( $item_id, '_line_total', $item['line_total'] );
+				wc_add_order_item_meta( $item_id, '_line_tax', $item['line_tax'] );
+
+				// Since 2.2
+				wc_add_order_item_meta( $item_id, '_line_tax_data', array( 'total' => array(), 'subtotal' => array() ) );
+
+				// Store variation data in meta
+				if ( $item['variation_data'] && is_array( $item['variation_data'] ) ) {
+					foreach ( $item['variation_data'] as $key => $value ) {
+						wc_add_order_item_meta( $item_id, str_replace( 'attribute_', '', $key ), $value );
+					}
+				}
+
+				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order, $data );
+			}
+
+			$order    = wc_get_order( $order_id );
+			$data     = get_post_meta( $order_id );
+
+			ob_start();
+			include( 'admin/meta-boxes/views/html-order-items.php' );
+			$order_items_html = ob_get_clean();
+		}
+
+		$data = array(
+			'result'   => empty( $messages ) ? 'success' : 'failure',
+			'html'     => empty( $messages ) ? $order_items_html : '',
+			'messages' => $messages,
+		);
+
+		wp_send_json( $data );
 	}
 
 	/**
