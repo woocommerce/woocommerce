@@ -361,7 +361,13 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		$response = $this->prepare_item_for_response( $term, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( '/' . $this->namespace . '/' . $this->rest_base . '/' . $term->term_id ) );
+
+		$base = '/' . $this->namespace . '/' . $this->rest_base;
+		if ( ! empty( $request['attribute_id'] ) ) {
+			$base = str_replace( '(?P<attribute_id>[\d]+)', (int) $request['attribute_id'], $base );
+		}
+
+		$response->header( 'Location', rest_url( $base . '/' . $term->term_id ) );
 
 		return $response;
 	}
