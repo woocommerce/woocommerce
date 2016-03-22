@@ -117,6 +117,8 @@ class WC_AJAX {
 			'add_order_tax'                                    => false,
 			'remove_order_item'                                => false,
 			'remove_order_tax'                                 => false,
+			'reduce_order_item_stock'                          => false,
+			'increase_order_item_stock'                        => false,
 			'add_order_item_meta'                              => false,
 			'remove_order_item_meta'                           => false,
 			'calc_line_taxes'                                  => false,
@@ -1353,7 +1355,87 @@ class WC_AJAX {
 
 		die();
 	}
-	
+
+	/**
+	 * Reduce order item stock.
+	 */
+	public static function reduce_order_item_stock() {
+		check_ajax_referer( 'order-item', 'security' );
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+		$order_id       = absint( $_POST['order_id'] );
+		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
+		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
+		$order          = wc_get_order( $order_id );
+		$order_items    = $order->get_items();
+		$return         = array();
+		if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
+			foreach ( $order_items as $item_id => $order_item ) {
+				// Only reduce checked items
+				if ( ! in_array( $item_id, $order_item_ids ) ) {
+					continue;
+				}
+				$_product = $order->get_product_from_item( $order_item );
+				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
+					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
+					$new_stock    = $_product->reduce_stock( $stock_change );
+					$item_name    = $_product->get_sku() ? $_product->get_sku() : $order_item['product_id'];
+					$note         = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
+					$return[]     = $note;
+					$order->add_order_note( $note );
+					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
+				}
+			}
+			do_action( 'woocommerce_reduce_order_stock', $order );
+			if ( empty( $return ) ) {
+				$return[] = __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' );
+			}
+			echo implode( ', ', $return );
+		}
+		die();
+	}
+
+	/**
+	 * Increase order item stock.
+	 */
+	public static function increase_order_item_stock() {
+		check_ajax_referer( 'order-item', 'security' );
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			die(-1);
+		}
+		$order_id       = absint( $_POST['order_id'] );
+		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
+		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
+		$order          = wc_get_order( $order_id );
+		$order_items    = $order->get_items();
+		$return         = array();
+		if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
+			foreach ( $order_items as $item_id => $order_item ) {
+				// Only reduce checked items
+				if ( ! in_array( $item_id, $order_item_ids ) ) {
+					continue;
+				}
+				$_product = $order->get_product_from_item( $order_item );
+				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
+					$old_stock    = $_product->get_stock_quantity();
+					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
+					$new_quantity = $_product->increase_stock( $stock_change );
+					$item_name    = $_product->get_sku() ? $_product->get_sku(): $order_item['product_id'];
+					$note         = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
+					$return[]     = $note;
+					$order->add_order_note( $note );
+				}
+			}
+			do_action( 'woocommerce_restore_order_stock', $order );
+			if ( empty( $return ) ) {
+				$return[] = __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' );
+			}
+			echo implode( ', ', $return );
+		}
+		die();
+	}
+
 	/**
 	 * Add some meta to a line item.
 	 */

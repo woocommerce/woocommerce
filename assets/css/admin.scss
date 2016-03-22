@@ -917,6 +917,13 @@ ul.wc_coupon_list_block {
 		}
 	}
 
+	.wc-order-item-bulk-edit  {
+		.cancel-action {
+			float: left;
+			margin-left: 0;
+		}
+	}
+
 	.add_meta {
 		margin-left: 0 !important;
 	}
@@ -1016,6 +1023,19 @@ ul.wc_coupon_list_block {
 				}
 			}
 
+			tbody tr {
+				td {
+					cursor: pointer;
+				}
+				&.selected {
+					background: #F5EBF3;
+					td {
+						border-color: #E6CCE1;
+						opacity: 0.8;
+					}
+				}
+			}
+
 			tbody tr:last-child td {
 				border-bottom: 1px solid #dfdfdf;
 			}
@@ -1031,6 +1051,7 @@ ul.wc_coupon_list_block {
 			td.thumb {
 				text-align: left;
 				width: 38px;
+				padding-bottom: 1.5em;
 				.wc-order-item-thumbnail {
 					width: 38px;
 					height: 38px;
@@ -1059,9 +1080,11 @@ ul.wc_coupon_list_block {
 				}
 			}
 			td.name {
-				.wc-order-item-sku {
+				.wc-order-item-sku, .wc-order-item-variation {
 					display: block;
 					margin-top: .5em;
+					font-size: 0.92em !important;
+					color: #c8c8c8;
 				}
 			}
 
@@ -1212,6 +1235,8 @@ ul.wc_coupon_list_block {
 			table.meta,
 			table.display_meta {
 				margin: .5em 0 0 0;
+				font-size: 0.92em !important;
+				color: #c8c8c8;
 
 				tr {
 					th {
@@ -1219,7 +1244,6 @@ ul.wc_coupon_list_block {
 						padding: 0 4px .5em 0;
 						line-height: 1.5em;
 						width: 20%;
-						font-weight: normal;
 					}
 					td {
 						padding: 0 4px .5em 0;
@@ -1271,7 +1295,7 @@ ul.wc_coupon_list_block {
 
 					&:before {
 						@include icon( "\e007" );
-						color: #bbbbbb;
+						color: #ccc;
 					}
 				}
 			}
@@ -1286,7 +1310,7 @@ ul.wc_coupon_list_block {
 
 					&:before {
 						@include icon( "\e014" );
-						color: #bbbbbb;
+						color: #ccc;
 					}
 				}
 			}
@@ -1301,7 +1325,7 @@ ul.wc_coupon_list_block {
 
 					&:before {
 						@include icon( "\e01a" );
-						color: #bbbbbb;
+						color: #ccc;
 					}
 				}
 				.shipping_method_name,

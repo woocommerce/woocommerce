@@ -116,6 +116,11 @@ if ( wc_tax_enabled() ) {
 		</tbody>
 	</table>
 </div>
+<div class="wc-order-data-row wc-order-item-bulk-edit" style="display:none;">
+	<button type="button" class="button bulk-delete-items"><?php _e( 'Delete selected row(s)', 'woocommerce' ); ?></button>
+	<button type="button" class="button bulk-decrease-stock"><?php _e( 'Reduce stock', 'woocommerce' ); ?></button>
+	<button type="button" class="button bulk-increase-stock"><?php _e( 'Increase stock', 'woocommerce' ); ?></button>
+</div>
 <div class="wc-order-data-row wc-order-totals-items wc-order-items-editable">
 	<?php
 		$coupons = $order->get_items( array( 'coupon' ) );
@@ -210,15 +215,15 @@ if ( wc_tax_enabled() ) {
 	</table>
 	<div class="clear"></div>
 </div>
-<div class="wc-order-data-row wc-order-bulk-actions">
+<div class="wc-order-data-row wc-order-bulk-actions wc-order-data-row-toggle">
 	<p class="add-items">
 		<?php if ( $order->is_editable() ) : ?>
-			<button type="button" class="button add-line-item"><?php _e( 'Add line item(s)', 'woocommerce' ); ?></button>
+			<button type="button" class="button add-line-item"><?php _e( 'Add item(s)', 'woocommerce' ); ?></button>
 		<?php else : ?>
 			<span class="description tips" data-tip="<?php esc_attr_e( 'To edit this order change the status back to "Pending"', 'woocommerce' ); ?>"><?php _e( 'This order has been paid for and is no longer editable', 'woocommerce' ); ?></span>
 		<?php endif; ?>
 		<?php if ( wc_tax_enabled() && $order->is_editable() ) : ?>
-			<button type="button" class="button add-order-tax"><?php _e( 'Add Tax', 'woocommerce' ); ?></button>
+			<button type="button" class="button add-order-tax"><?php _e( 'Add tax', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<?php if ( 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ) ) : ?>
 			<button type="button" class="button refund-items"><?php _e( 'Refund', 'woocommerce' ); ?></button>
@@ -233,7 +238,7 @@ if ( wc_tax_enabled() ) {
 		<?php endif; ?>
 	</p>
 </div>
-<div class="wc-order-data-row wc-order-add-item" style="display:none;">
+<div class="wc-order-data-row wc-order-add-item wc-order-data-row-toggle" style="display:none;">
 	<button type="button" class="button add-order-item"><?php _e( 'Add product(s)', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-fee"><?php _e( 'Add fee', 'woocommerce' ); ?></button>
 	<button type="button" class="button add-order-shipping"><?php _e( 'Add shipping cost', 'woocommerce' ); ?></button>
@@ -245,7 +250,7 @@ if ( wc_tax_enabled() ) {
 	?>
 </div>
 <?php if ( 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ) ) : ?>
-<div class="wc-order-data-row wc-order-refund-items" style="display: none;">
+<div class="wc-order-data-row wc-order-refund-items wc-order-data-row-toggle" style="display: none;">
 	<table class="wc-order-totals">
 		<tr style="display:none;">
 			<td class="label"><label for="restock_refunded_items"><?php _e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>

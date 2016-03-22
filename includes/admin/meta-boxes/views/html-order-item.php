@@ -10,8 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 $product_link  = $_product ? admin_url( 'post.php?post                                                                                       =' . absint( $_product->id ) . '&action =edit' ) : '';
-$thumbnail     = $_product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $_product->get_image( 'shop_thumbnail', array( 'title' => '' ), false ), $item_id, $item )              : '';
-$tooltip       = _wc_get_order_item_tooltip_content( $item, $_product );
+$thumbnail     = $_product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $_product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item )              : '';
 $tax_data      = empty( $legacy_order ) && wc_tax_enabled() ? maybe_unserialize( isset( $item['line_tax_data'] ) ? $item['line_tax_data']                                                     : '' ) : false;
 $item_total    = ( isset( $item['line_total'] ) ) ? esc_attr( wc_format_localized_price( $item['line_total'] ) )                                                                              : '';
 $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_localized_price( $item['line_subtotal'] ) )                                                                        : '';
@@ -19,16 +18,27 @@ $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_local
 <tr class="item <?php echo apply_filters( 'woocommerce_admin_html_order_item_class', ( ! empty( $class ) ? $class : '' ), $item ); ?>" data-order_item_id="<?php echo $item_id; ?>">
 	<td class="thumb">
 		<?php
-			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-thumbnail tips" data-tip="' . esc_attr( $tooltip ) . '">' : '<div class="wc-order-item-thumbnail tips" data-tip="' . esc_attr( $tooltip ) . '">';
-			echo wp_kses_post( $thumbnail );
-			echo $product_link ? '</a>' : '</div>';
+			echo '<div class="wc-order-item-thumbnail">' . wp_kses_post( $thumbnail ) . '</div>';
 		?>
 	</td>
 	<td class="name" data-sort-value="<?php echo esc_attr( $item['name'] ); ?>">
 		<?php
 			echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' .  esc_html( $item['name'] ) . '</a>' : '<div class="class="wc-order-item-name"">' . esc_html( $item['name'] ) . '</div>';
-			echo $_product && $_product->get_sku() ? '<div class="wc-order-item-sku">' . __( 'SKU:', 'woocommerce' ) . ' ' . esc_html( $_product->get_sku() ) . '</div>' : ''; ?>
 
+			if ( $_product && $_product->get_sku() ) {
+				echo '<div class="wc-order-item-sku"><strong>' . __( 'SKU:', 'woocommerce' ) . '</strong> ' . esc_html( $_product->get_sku() ) . '</div>';
+			}
+
+			if ( ! empty( $item['variation_id'] ) ) {
+				echo '<div class="wc-order-item-variation"><strong>' . __( 'Variation ID:', 'woocommerce' ) . '</strong> ';
+				if ( ! empty( $item['variation_id'] ) && 'product_variation' === get_post_type( $item['variation_id'] ) ) {
+					echo esc_html( $item['variation_id'] );
+				} elseif ( ! empty( $item['variation_id'] ) ) {
+					echo esc_html( $item['variation_id'] ) . ' (' . __( 'No longer exists', 'woocommerce' ) . ')';
+				}
+				echo '</div>';
+			}
+		?>
 		<input type="hidden" class="order_item_id" name="order_item_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 		<input type="hidden" name="order_item_tax_class[<?php echo absint( $item_id ); ?>]" value="<?php echo isset( $item['tax_class'] ) ? esc_attr( $item['tax_class'] ) : ''; ?>" />
 

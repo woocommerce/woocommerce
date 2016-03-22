@@ -209,8 +209,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
 	 * @param array $args (default: array())
+	 * @param array $package option to store information about the package in meta.
 	 */
-	public function add_rate( $args = array() ) {
+	public function add_rate( $args = array(), $package = false ) {
 		$args = wp_parse_args( $args, array(
 			'id'        => '', // ID for the rate
 			'label'     => '', // Label for the rate
@@ -244,6 +245,16 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			foreach ( $args['meta_data'] as $key => $value ) {
 				$rate->add_meta_data( $key, $value );
 			}
+		}
+
+		// Store package data
+		if ( $package ) {
+			$items_in_package = array();
+			foreach ( $package['contents'] as $item ) {
+				$product = $item['data'];
+				$items_in_package[] = $product->get_title() . ' &times; ' . $item['quantity'];
+			}
+			$rate->add_meta_data( __( 'Items', 'woocommerce' ), implode( ', ', $items_in_package ) );
 		}
 
 		$this->rates[ $args['id'] ] = $rate;

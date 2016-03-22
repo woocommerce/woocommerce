@@ -189,7 +189,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
 		// Add the rate
 		if ( $has_costs ) {
-			$this->add_rate( $rate );
+			$this->add_rate( $rate, $package );
 		}
 
 		/**
@@ -279,7 +279,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 				} else {
 					$extra_rate['cost'] += $extra_cost;
 				}
-				$this->add_rate( $extra_rate );
+				$this->add_rate( $extra_rate, $package );
 			}
 		}
 	}
