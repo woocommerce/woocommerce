@@ -141,6 +141,127 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Get order notes from an order.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return array
+	 */
+	public function get_items( $request ) {
+		$id    = (int) $request['id'];
+		$order = get_post( (int) $request['order_id'] );
+
+		if ( empty( $order->post_type ) || 'shop_order' !== $order->post_type ) {
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$args = array(
+			'post_id' => $order->ID,
+			'approve' => 'approve',
+			'type'    => 'order_note'
+		);
+
+		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
+		$notes = get_comments( $args );
+
+		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+
+		$data = array();
+		foreach ( $notes as $note ) {
+			$order_note = $this->prepare_item_for_response( $note, $request );
+			$order_note = $this->prepare_response_for_collection( $order_note );
+			$data[]     = $order_note;
+		}
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Get a single order note.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_item( $request ) {
+		$id    = (int) $request['id'];
+		$order = get_post( (int) $request['order_id'] );
+
+		if ( empty( $order->post_type ) || 'shop_order' !== $order->post_type ) {
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$note = get_comment( $id );
+
+		if ( empty( $id ) || empty( $note ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$order_note = $this->prepare_item_for_response( $note, $request );
+		$response   = rest_ensure_response( $order_note );
+
+		return $response;
+	}
+
+	/**
+	 * Prepare a single order note output for response.
+	 *
+	 * @param WP_Comment $note Order note object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response Response data.
+	 */
+	public function prepare_item_for_response( $note, $request ) {
+		$data = array(
+			'id'            => $note->comment_ID,
+			'created_at'    => wc_rest_api_prepare_date_response( $note->comment_date_gmt ),
+			'note'          => $note->comment_content,
+			'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
+		);
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $note ) );
+
+		/**
+		 * Filter order note object returned from the REST API.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param WP_Comment       $note     Order note object used to create response.
+		 * @param WP_REST_Request  $request  Request object.
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_order_note', $response, $note, $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param WP_Comment $note Delivery order_note object.
+	 * @return array Links for the given order note.
+	 */
+	protected function prepare_links( $note ) {
+		$order_id = (int) $note->comment_post_ID;
+		$base     = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
+
+		$links = array(
+			'self' => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $note->comment_ID ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
+			),
+			'up' => array(
+				'href' => rest_url( sprintf( '/wc/v1/orders/%d', $order_id ) ),
+			),
+		);
+
+		return $links;
+	}
+
+	/**
 	 * Get the Order Notes schema, conforming to JSON Schema.
 	 *
 	 * @return array
