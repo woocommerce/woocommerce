@@ -1,5 +1,4 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -37,27 +36,27 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 			return false;
 		}
 
-		if ( empty( $this->meta['last4'] ) ) {
+		if ( empty( $this->get_meta( 'last4' ) ) ) {
 			return false;
 		}
 
-		if ( empty( $this->meta['expiry_year'] ) ) {
+		if ( empty( $this->get_meta( 'expiry_year' ) ) ) {
 			return false;
 		}
 
-		if ( empty( $this->meta['expiry_month'] ) ) {
+		if ( empty( $this->get_meta( 'expiry_month' ) ) ) {
 			return false;
 		}
 
-		if ( empty ( $this->meta['card_type'] ) ) {
+		if ( empty ( $this->get_meta( 'card_type' ) ) ) {
 			return false;
 		}
 
-		if ( 4 !== strlen( $this->meta['expiry_year'] ) ) {
+		if ( 4 !== strlen( $this->get_meta( 'expiry_year' ) ) ) {
 			return false;
 		}
 
-		if ( 2 !== strlen( $this->meta['expiry_month'] ) ) {
+		if ( 2 !== strlen( $this->get_meta( 'expiry_month' ) ) ) {
 			return false;
 		}
 
@@ -70,7 +69,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @return string Card type
 	 */
 	public function get_card_type() {
-		return isset( $this->meta['card_type'] ) ? $this->meta['card_type'] : null;
+		return $this->get_meta( 'card_type' );
 	}
 
 	/**
@@ -79,7 +78,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @param string $type
 	 */
 	public function set_card_type( $type ) {
-		$this->meta['card_type'] = $type;
+		$this->add_meta_data( 'card_type', $type, true );
 	}
 
 	/**
@@ -88,7 +87,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @return string Expiration year
 	 */
 	public function get_expiry_year() {
-		return isset( $this->meta['expiry_year'] ) ? $this->meta['expiry_year'] : null;
+		return $this->get_meta( 'expiry_year' );
 	}
 
 	/**
@@ -97,7 +96,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @param string $year
 	 */
 	public function set_expiry_year( $year ) {
-		$this->meta['expiry_year'] = $year;
+		$this->add_meta_data( 'expiry_year', $year, true );
 	}
 
 	/**
@@ -106,7 +105,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @return string Expiration month
 	 */
 	public function get_expiry_month() {
-		return isset( $this->meta['expiry_month'] ) ? $this->meta['expiry_month'] : null;
+		return $this->get_meta( 'expiry_month' );
 	}
 
 	/**
@@ -115,7 +114,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @param string $month
 	 */
 	public function set_expiry_month( $month ) {
-		$this->meta['expiry_month'] = $month;
+		$this->add_meta_data( 'expiry_month', $month, true );
 	}
 
 	/**
@@ -124,7 +123,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @return string Last 4 digits
 	 */
 	public function get_last4() {
-		return isset( $this->meta['last4'] ) ? $this->meta['last4'] : null;
+		return $this->get_meta( 'last4' );
 	}
 
 	/**
@@ -133,7 +132,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @param string $last4
 	 */
 	public function set_last4( $last4 ) {
-		$this->meta['last4'] = $last4;
+		$this->add_meta_data( 'last4', $last4, true );
 	}
 
 }
