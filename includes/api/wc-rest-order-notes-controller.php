@@ -300,4 +300,15 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 
 		return $this->add_additional_fields_schema( $schema );
 	}
+
+	/**
+	 * Get the query params for collections.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		return array(
+			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+		);
+	}
 }
