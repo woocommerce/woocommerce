@@ -989,18 +989,14 @@ jQuery( function ( $ ) {
 
 		stupidtable: {
 			init: function() {
-				$( '.woocommerce_order_items' ).stupidtable().on( 'aftertablesort', this.add_arrows );
+				$( '.woocommerce_order_items' ).stupidtable();
+				$( '.woocommerce_order_items' ).on( 'aftertablesort', this.add_arrows );
 			},
 
 			add_arrows: function( event, data ) {
 				var th    = $( this ).find( 'th' );
 				var arrow = data.direction === 'asc' ? '&uarr;' : '&darr;';
 				var index = data.column;
-
-				if ( 1 < index ) {
-					index = index - 1;
-				}
-
 				th.find( '.wc-arrow' ).remove();
 				th.eq( index ).append( '<span class="wc-arrow">' + arrow + '</span>' );
 			}

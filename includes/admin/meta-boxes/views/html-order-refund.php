@@ -36,6 +36,10 @@ $who_refunded = new WP_User( $refund->post->post_author );
 		</div>
 	</td>
 
+	<?php if ( ( ! isset( $legacy_order ) || ! $legacy_order ) && wc_tax_enabled() ) : for ( $i = 0;  $i < count( $order_taxes ); $i++ ) : ?>
+		<td class="line_tax" width="1%"></td>
+	<?php endfor; endif; ?>
+
 	<td class="wc-order-edit-line-item">
 		<div class="wc-order-edit-line-item-actions">
 			<a class="delete_refund" href="#"></a>
