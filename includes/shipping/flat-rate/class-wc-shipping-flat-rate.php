@@ -171,7 +171,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		// Add the rate
 		if ( $has_costs ) {
-			$this->add_rate( $rate );
+			$this->add_rate( $rate, $package );
 		}
 
 		/**
