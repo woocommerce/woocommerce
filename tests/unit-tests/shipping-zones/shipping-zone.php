@@ -18,7 +18,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
         $data = $zone->get_data();
 
         // Assert
-        $this->assertTrue( \is_array( $data ) );
+        $this->assertTrue( is_array( $data ) );
 
         // Clean
         WC_Helper_Shipping_Zones::remove_mock_zones();
@@ -86,8 +86,8 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
         $zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
-        $this->assertTrue( \is_array( $zone->get_zone_locations() ) );
-        $this->assertTrue( 2 === \sizeof( $zone->get_zone_locations() ) );
+        $this->assertTrue( is_array( $zone->get_zone_locations() ) );
+        $this->assertTrue( 2 === sizeof( $zone->get_zone_locations() ) );
 
         // Clean
         WC_Helper_Shipping_Zones::remove_mock_zones();
@@ -141,7 +141,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$methods = $zone->get_shipping_methods();
 
         // Assert
-        $this->assertTrue( 1 === \sizeof( $methods ) );
+        $this->assertTrue( 1 === sizeof( $methods ) );
 		$this->assertInstanceOf( 'WC_Shipping_Method', current( $methods ) );
 
         // Clean
@@ -314,7 +314,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$methods = $zone->get_shipping_methods();
 
 		// Assert
-		$this->assertTrue( 2 === \sizeof( $methods ) );
+		$this->assertTrue( 2 === sizeof( $methods ) );
 		$this->assertInstanceOf( 'WC_Shipping_Method', current( $methods ) );
 
         // Clean

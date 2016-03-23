@@ -17,8 +17,8 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
         $zones = WC_Shipping_Zones::get_zones();
 
         // Assert
-        $this->assertTrue( \is_array( $zones ) );
-        $this->assertTrue( 4 === \sizeof( $zones ) );
+        $this->assertTrue( is_array( $zones ) );
+        $this->assertTrue( 4 === sizeof( $zones ) );
 
         // Clean
         WC_Helper_Shipping_Zones::remove_mock_zones();
@@ -100,7 +100,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
         $zones = WC_Shipping_Zones::get_zones();
 
         // Assert
-        $this->assertTrue( 3 === \sizeof( $zones ) );
+        $this->assertTrue( 3 === sizeof( $zones ) );
 
         // Clean
         WC_Helper_Shipping_Zones::remove_mock_zones();
