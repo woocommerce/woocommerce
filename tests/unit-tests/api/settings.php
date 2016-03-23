@@ -40,57 +40,58 @@ class Settings extends \WC_Unit_Test_Case {
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wc/v1/settings/locations', $routes );
+		$this->assertArrayHasKey( '/wc/v1/settings', $routes );
+		// @todo test others
 	}
 
 	/**
-	 * Test getting all locations.
+	 * Test getting all groups.
 	 * @since 2.7.0
 	 */
-	public function test_get_locations() {
+	public function test_get_groups() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' ) );
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings' ) );
 		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 3, count( $data ) );
 
-		$this->check_get_location_response( $data[0], array(
+		$this->check_get_group_response( $data[0], array(
 			'id'          => 'test',
-			'type'        => 'page',
 			'label'       => 'Test Extension',
+			'parent_id'   => '',
 			'description' => 'My awesome test settings.',
 		) );
 
-		$this->check_get_location_response( $data[2], array(
+		$this->check_get_group_response( $data[2], array(
 			'id'          => 'coupon-data',
-			'type'        => 'metabox',
 			'label'       => 'Coupon Data',
+			'parent_id'   => '',
 			'description' => '',
 		) );
 	}
 
 	/**
-	 * Test /settings/locations without valid permissions/creds.
+	 * Test /settings without valid permissions/creds.
 	 * @since 2.7.0
 	 */
-	public function test_get_locations_without_permission() {
+	public function test_get_groups_without_permission() {
 		wp_set_current_user( 0 );
 
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' ) );
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
-	 * Test /settings/locations correctly filters out bad values.
+	 * Test /settings/ correctly filters out bad values.
 	 * Handles required fields and bogus fields.
 	 * @since 2.7.0
 	 */
-	public function test_get_locations_correctly_filters_values() {
+	public function test_get_groups_correctly_filters_values() {
 		wp_set_current_user( $this->user );
 
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' ) );
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings' ) );
 		$data = $response->get_data();
 
 		$this->assertEquals( 'test', $data[0]['id'] );
@@ -98,108 +99,63 @@ class Settings extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test /settings/locations with type.
+	 * Test /settings schema.
 	 * @since 2.7.0
 	 */
-	public function test_get_locations_with_type() {
-		wp_set_current_user( $this->user );
-
-		$request = new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' );
-		$request->set_param( 'type', 'not-a-real-type' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
-		$this->assertEquals( 3, count( $data ) ); // all results
-
-		$request = new \WP_REST_Request( 'GET', '/wc/v1/settings/locations' );
-		$request->set_param( 'type', 'page' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $data ) );
-	}
-
-	/**
-	 * Test /settings/locations schema.
-	 * @since 2.7.0
-	 */
-	public function test_get_location_schema() {
-		$request = new \WP_REST_Request( 'OPTIONS', '/wc/v1/settings/locations' );
+	public function test_get_group_schema() {
+		$request = new \WP_REST_Request( 'OPTIONS', '/wc/v1/settings' );
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
 		$this->assertEquals( 4, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
-		$this->assertArrayHasKey( 'type', $properties );
+		$this->assertArrayHasKey( 'parent_id', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
 	}
 
 	/**
-	 * Test getting a single location item.
+	 * Test getting a single group.
 	 * @since 2.7.0
 	 */
-	public function test_get_location() {
+	public function test_get_group() {
 		wp_set_current_user( $this->user );
 
 		// test getting a location that does not exist
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/not-real' ) );
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/not-real' ) );
 		$data = $response->get_data();
 		$this->assertEquals( 404, $response->get_status() );
 
 		// test getting the 'invalid' location
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/invalid' ) );
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/invalid' ) );
 		$data = $response->get_data();
 		$this->assertEquals( 404, $response->get_status() );
 
 		// test getting a valid location
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/coupon-data' ) );
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/coupon-data' ) );
 		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$this->check_get_location_response( $data, array(
+		$this->check_get_group_response( $data, array(
 			'id'          => 'coupon-data',
-			'type'        => 'metabox',
 			'label'       => 'Coupon Data',
+			'parent_id'   => '',
 			'description' => '',
 		) );
+
+		// @todo make sure settings are set correctly
 	}
 
 	/**
-	 * Test getting a single location item.
+	 * Test getting a single group without permission.
 	 * @since 2.7.0
 	 */
-	public function test_get_location_without_permission() {
+	public function test_get_group_without_permission() {
 		wp_set_current_user( 0 );
 
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/coupon-data' ) );
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/coupon-data' ) );
 		$this->assertEquals( 401, $response->get_status() );
-	}
-
-	/**
-	 * Test settings groups (for pages)
-	 * @since 2.7.0
-	 */
-	public function test_settings_groups() {
-		wp_set_current_user( $this->user );
-
-		// test getting a non page location
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/coupon-data' ) );
-		$data = $response->get_data();
-		$this->assertArrayNotHasKey( 'groups', $data );
-
-		// test getting a page with no groups
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/test-2' ) );
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'groups', $data );
-		$this->assertEmpty( $data['groups'] );
-
-		// test getting a page with groups
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/locations/test' ) );
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'groups', $data );
-		$this->assertEquals( 2, count( $data['groups'] ) );
 	}
 
 	/**
@@ -208,9 +164,9 @@ class Settings extends \WC_Unit_Test_Case {
 	 * @param array $response
 	 * @param array $expected
 	 */
-	protected function check_get_location_response( $response, $expected ) {
+	protected function check_get_group_response( $response, $expected ) {
 		$this->assertEquals( $expected['id'], $response['id'] );
-		$this->assertEquals( $expected['type'], $response['type'] );
+		$this->assertEquals( $expected['parent_id'], $response['parent_id'] );
 		$this->assertEquals( $expected['label'], $response['label'] );
 		$this->assertEquals( $expected['description'], $response['description'] );
 	}
