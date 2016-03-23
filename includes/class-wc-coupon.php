@@ -746,7 +746,7 @@ class WC_Coupon {
 			}
 		}
 
-		$discount = round( $discount, WC_ROUNDING_PRECISION );
+		$discount = wc_cart_round_discount( $discount, wc_get_price_decimals() );
 
 		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}
