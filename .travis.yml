@@ -2,6 +2,7 @@ language: php
 
 sudo: false
 
+# Test main supported versions of PHP and HHVM against latest WP. 5.2 is min supported version.
 php:
   - 5.2
   - 5.3
@@ -13,14 +14,18 @@ php:
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
-  - WP_VERSION=4.3 WP_MULTISITE=0
-  - WP_VERSION=4.2 WP_MULTISITE=0
-  - WP_VERSION=4.1 WP_MULTISITE=0
 
+# Additonal tests against stable PHP (min recommended version is 5.6) and past supported versions of WP.
 matrix:
   include:
   - php: 5.6
     env: WP_VERSION=latest WP_MULTISITE=1
+  - php: 5.6
+    env: WP_VERSION=4.3 WP_MULTISITE=0
+  - php: 5.6
+    env: WP_VERSION=4.2 WP_MULTISITE=0
+  - php: 5.6
+    env: WP_VERSION=4.1 WP_MULTISITE=0
 
 before_script:
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
