@@ -197,35 +197,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'number' => array(
-					'description' => __( 'Order number.', 'woocommerce' ),
+				'parent_id' => array(
+					'description' => __( 'Parent order ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'order_key' => array(
-					'description' => __( 'Order key.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'created_at' => array(
-					'description' => __( "The date the order was created, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'updated_at' => array(
-					'description' => __( "The date the order was last modified, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'completed_at' => array(
-					'description' => __( "The date the order was completed, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'status' => array(
 					'description' => __( 'Order status.', 'woocommerce' ),
@@ -234,95 +209,91 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'enum'        => $order_statuses,
 					'context'     => array( 'view', 'edit' ),
 				),
+				'order_key' => array(
+					'description' => __( 'Order key.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'currency' => array(
-					'description' => __( 'Currency in ISO format.', 'woocommerce' ),
+					'description' => __( 'Currency the order was created with, in ISO format.', 'woocommerce' ),
 					'type'        => 'string',
 					'enum'        => array_keys( get_woocommerce_currencies() ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'total' => array(
-					'description' => __( 'Order total.', 'woocommerce' ),
-					'type'        => 'float',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'subtotal' => array(
-					'description' => __( 'Order subtotal.', 'woocommerce' ),
-					'type'        => 'float',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'total_line_items_quantity' => array(
-					'description' => __( 'Total of order items.', 'woocommerce' ),
+				'version' => array(
+					'description' => __( 'Version of WooCommerce when the order was made.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'total_tax' => array(
-					'description' => __( 'Order tax total.', 'woocommerce' ),
+				'prices_include_tax' => array(
+					'description' => __( 'Shows if the prices included tax during checkout.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created' => array(
+					'description' => __( "The date the order was created, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_modified' => array(
+					'description' => __( "The date the order was last modified, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'customer_id' => array(
+					'description' => __( 'User ID who owns the order. 0 for guests.', 'woocommerce' ),
+					'type'        => 'integer',
+					'default'     => 0,
+					'context'     => array( 'view', 'edit' ),
+				),
+				'discount_total' => array(
+					'description' => __( 'Total discount amount for the order.', 'woocommerce' ),
 					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'total_shipping' => array(
-					'description' => __( 'Order shipping total.', 'woocommerce' ),
+				'discount_tax' => array(
+					'description' => __( 'Total discount tax amount for the order.', 'woocommerce' ),
 					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'cart_tax' => array(
-					'description' => __( 'Order cart tax.', 'woocommerce' ),
+				'shipping_total' => array(
+					'description' => __( 'Total shipping amount for the order.', 'woocommerce' ),
 					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_tax' => array(
-					'description' => __( 'Order shipping tax.', 'woocommerce' ),
+					'description' => __( 'Total shipping tax amount for the order.', 'woocommerce' ),
 					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'total_discount' => array(
-					'description' => __( 'Order total discount.', 'woocommerce' ),
+				'cart_tax' => array(
+					'description' => __( 'Sum of line item taxes only.', 'woocommerce' ),
 					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'shipping_methods' => array(
-					'description' => __( 'Text list of the shipping methods used in the order.', 'woocommerce' ),
-					'type'        => 'string',
+				'total' => array(
+					'description' => __( 'Grand total.', 'woocommerce' ),
+					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'payment_details' => array(
-					'description' => __( 'Payment details.', 'woocommerce' ),
-					'type'        => 'object',
+				'total_tax' => array(
+					'description' => __( 'Sum of all taxes.', 'woocommerce' ),
+					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
-					'properties'  => array(
-						'method_id' => array(
-							'description' => __( 'Payment method ID.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'method_title' => array(
-							'description' => __( 'Payment method title.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'paid' => array(
-							'description' => __( 'Shows/define if the order is paid using this payment method.', 'woocommerce' ),
-							'type'        => 'boolean',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'transaction_id' => array(
-							'description' => __( 'Transaction ID, an optional field to set the transacion ID when complate one payment.', 'woocommerce' ),
-							'type'        => 'boolean',
-							'context'     => array( 'view', 'edit' ),
-						),
-					),
 				),
-				'billing_address' => array(
+				'billing' => array(
 					'description' => __( 'Billing address.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
@@ -368,7 +339,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'country' => array(
-							'description' => __( 'ISO code of the country.', 'woocommerce' ),
+							'description' => __( 'Country code in ISO 3166-1 alpha-2 format.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -385,7 +356,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 					),
 				),
-				'shipping_address' => array(
+				'shipping' => array(
 					'description' => __( 'Shipping address.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
@@ -431,34 +402,67 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'country' => array(
-							'description' => __( 'ISO code of the country.', 'woocommerce' ),
+							'description' => __( 'Country code in ISO 3166-1 alpha-2 format.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
-				'note' => array(
-					'description' => __( 'Customer order notes.', 'woocommerce' ),
+				'payment_method' => array(
+					'description' => __( 'Payment method ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'customer_ip' => array(
-					'description' => __( 'Customer IP address.', 'woocommerce' ),
+				'payment_method_title' => array(
+					'description' => __( 'Payment method title.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'transaction_id' => array(
+					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'customer_ip_address' => array(
+					'description' => __( "Customer's IP address.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'customer_user_agent' => array(
-					'description' => __( 'Customer User-Agent.', 'woocommerce' ),
+					'description' => __( 'User agent of the customer.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'customer_id' => array(
-					'description' => __( 'Customer ID (user ID).', 'woocommerce' ),
-					'type'        => 'integer',
-					'default'     => 0,
+				'created_via' => array(
+					'description' => __( 'Shows where the order was created.', 'woocommerce' ),
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'customer_note' => array(
+					'description' => __( 'Note left by customer during checkout.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'date_completed' => array(
+					'description' => __( "The date the order was completed, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_paid' => array(
+					'description' => __( "The date the order has been paid, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'cart_hash' => array(
+					'description' => __( 'MD5 hash of cart items to ensure orders are not modified.', 'woocommerce' ),
+					'type'        => 'float',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'line_items' => array(
 					'description' => __( 'Last order data.', 'woocommerce' ),
