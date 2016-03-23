@@ -39,7 +39,11 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
 	wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
 
-	$wc_attributes = array_filter( (array) $wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies;" ) );
+	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_attribute_taxonomies';" ) ) {
+		$wc_attributes = array_filter( (array) $wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies;" ) );
+	} else {
+		$wc_attributes = array();
+	}
 
 	// Tables.
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_api_keys" );
