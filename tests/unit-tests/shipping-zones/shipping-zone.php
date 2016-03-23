@@ -1,28 +1,27 @@
 <?php
-namespace WooCommerce\Tests\Shipping_Zone;
 
 /**
  * Class Shipping_Zone.
  * @package WooCommerce\Tests\Shipping_Zone
  */
-class Shipping_Zone extends \WC_Unit_Test_Case {
+class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 
 	/**
 	 * Test: WC_Shipping_Zone::get_data
 	 */
 	public function test_get_data() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
         $data = $zone->get_data();
 
         // Assert
         $this->assertTrue( \is_array( $data ) );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -30,16 +29,16 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
     public function test_get_zone_id() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
         $this->assertEquals( $zone->get_zone_id(), 1 );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
     }
 
     /**
@@ -47,16 +46,16 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
     public function test_get_zone_name() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
         $this->assertEquals( $zone->get_zone_name(), 'Local' );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
     }
 
     /**
@@ -64,16 +63,16 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
     public function test_get_zone_order() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
         $this->assertEquals( $zone->get_zone_order(), 1 );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
     }
 
     /**
@@ -81,17 +80,17 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
     public function test_get_zone_locations() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
         $this->assertTrue( \is_array( $zone->get_zone_locations() ) );
         $this->assertTrue( 2 === \sizeof( $zone->get_zone_locations() ) );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
     }
 
     /**
@@ -99,34 +98,34 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
     public function test_get_formatted_location() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
         $this->assertEquals( $zone->get_formatted_location(), 'United Kingdom (UK), CB*' );
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 2 );
+        $zone = WC_Shipping_Zones::get_zone( 2 );
 
         // Assert
         $this->assertEquals( $zone->get_formatted_location(), 'Europe' );
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 3 );
+        $zone = WC_Shipping_Zones::get_zone( 3 );
 
         // Assert
         $this->assertEquals( $zone->get_formatted_location(), 'California' );
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 4 );
+        $zone = WC_Shipping_Zones::get_zone( 4 );
 
         // Assert
         $this->assertEquals( $zone->get_formatted_location(), 'United States (US)' );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
     }
 
     /**
@@ -134,10 +133,10 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_shipping_methods() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->add_shipping_method( 'flat_rate' );
 		$methods = $zone->get_shipping_methods();
 
@@ -146,7 +145,7 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Shipping_Method', current( $methods ) );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -154,17 +153,17 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_set_zone_name() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->set_zone_name( 'I am a fish' );
 
         // Assert
         $this->assertEquals( $zone->get_zone_name(), 'I am a fish' );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -172,17 +171,17 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_set_zone_order() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->set_zone_order( 100 );
 
         // Assert
         $this->assertEquals( $zone->get_zone_order(), 100 );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -190,16 +189,16 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_valid_location_type() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
         $this->assertEquals( $zone->get_zone_order(), 1 );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -207,10 +206,10 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_location() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
         $this->assertTrue( $zone->is_valid_location_type( 'state' ) );
@@ -220,7 +219,7 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 		$this->assertFalse( $zone->is_valid_location_type( 'poop' ) );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -228,10 +227,10 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_clear_locations() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->clear_locations();
 
         // Assert
@@ -239,7 +238,7 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
         $this->assertTrue( empty( $zone_locations ) );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -247,10 +246,10 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_set_locations() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->clear_locations();
 		$zone->set_locations( array(
 			array(
@@ -276,7 +275,7 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 		) );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -284,19 +283,19 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_save() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
 		// Test
-        $zone = \WC_Shipping_Zones::get_zone( 1 );
+        $zone = WC_Shipping_Zones::get_zone( 1 );
 		$zone->set_zone_name( 'I am a fish' );
 		$zone->save();
-		$zone = \WC_Shipping_Zones::get_zone( 1 );
+		$zone = WC_Shipping_Zones::get_zone( 1 );
 
         // Assert
         $this->assertEquals( $zone->get_zone_name(), 'I am a fish' );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
     /**
@@ -304,10 +303,10 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_shipping_method() {
         // Setup
-        \WC_Helper_Shipping_Zones::create_mock_zones();
+        WC_Helper_Shipping_Zones::create_mock_zones();
 
         // Test
-        $zone        = \WC_Shipping_Zones::get_zone( 1 );
+        $zone        = WC_Shipping_Zones::get_zone( 1 );
 		$zone->add_shipping_method( 'flat_rate' );
 		$zone->add_shipping_method( 'free_shipping' );
 
@@ -319,6 +318,6 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Shipping_Method', current( $methods ) );
 
         // Clean
-        \WC_Helper_Shipping_Zones::remove_mock_zones();
+        WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 }

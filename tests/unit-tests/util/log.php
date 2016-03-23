@@ -1,12 +1,11 @@
 <?php
-namespace WooCommerce\Tests\Util;
 
 /**
  * Class Log.
  * @package WooCommerce\Tests\Util
  * @since 2.3
  */
-class Log extends \WC_Unit_Test_Case {
+class WC_Tests_Log extends WC_Unit_Test_Case {
 	public function read_content( $handle ) {
 		return file_get_contents( wc_get_log_file_path( $handle ) );
 	}
@@ -17,7 +16,7 @@ class Log extends \WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_add() {
-		$log = new \WC_Logger();
+		$log = new WC_Logger();
 
 		$log->add( 'unit-tests', 'this is a message' );
 
@@ -31,7 +30,7 @@ class Log extends \WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		$log = new \WC_Logger();
+		$log = new WC_Logger();
 
 		$log->add( 'unit-tests', 'this is a message' );
 		$log->clear( 'unit-tests' );

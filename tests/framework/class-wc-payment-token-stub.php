@@ -4,7 +4,7 @@
  *
  * @since 2.6.0
  */
-class WC_Payment_Token_Stub extends \WC_Payment_Token {
+class WC_Payment_Token_Stub extends WC_Payment_Token {
 
 	/** @protected string Token Type String */
 	protected $type = 'stub';

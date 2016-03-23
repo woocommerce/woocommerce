@@ -1,18 +1,17 @@
 <?php
-namespace WooCommerce\Tests\Payment_Tokens;
 
 /**
  * Class Payment_Token_CC.
  * @package WooCommerce\Tests\Payment_Tokens
  */
-class Payment_Token_CC extends \WC_Unit_Test_Case {
+class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 
 	/**
 	 * Test validation for empty/unset values.
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_token_cc_validate_empty() {
-		$token = new \WC_Payment_Token_CC();
+		$token = new WC_Payment_Token_CC();
 		$token->set_token( time() . ' ' . __FUNCTION__ );
 		$this->assertFalse( $token->validate() );
 		$token->set_last4( '1111' );
@@ -27,7 +26,7 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_token_cc_validate_expiry_length() {
-		$token = new \WC_Payment_Token_CC();
+		$token = new WC_Payment_Token_CC();
 		$token->set_token( time() . ' ' . __FUNCTION__ );
 		$this->assertFalse( $token->validate() );
 
@@ -51,7 +50,7 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_card_type() {
-		$token = new \WC_Payment_Token_CC();
+		$token = new WC_Payment_Token_CC();
 		$token->set_card_type( 'visa' );
 		$this->assertEquals( 'visa', $token->get_card_type() );
 	}
@@ -61,7 +60,7 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_expiry_year() {
-		$token = new \WC_Payment_Token_CC();
+		$token = new WC_Payment_Token_CC();
 		$token->set_expiry_year( '2016' );
 		$this->assertEquals( '2016', $token->get_expiry_year() );
 	}
@@ -71,7 +70,7 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_expiry_month() {
-		$token = new \WC_Payment_Token_CC();
+		$token = new WC_Payment_Token_CC();
 		$token->set_expiry_month( '08' );
 		$this->assertEquals( '08', $token->get_expiry_month() );
 	}
@@ -81,7 +80,7 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_last4() {
-		$token = new \WC_Payment_Token_CC();
+		$token = new WC_Payment_Token_CC();
 		$token->set_last4( '1111' );
 		$this->assertEquals( '1111', $token->get_last4() );
 	}
@@ -91,9 +90,9 @@ class Payment_Token_CC extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_read_pulls_meta() {
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token_id = $token->get_id();
-		$token_read = new \WC_Payment_Token_CC();
+		$token_read = new WC_Payment_Token_CC();
 		$token_read->read( $token_id );
 		$this->assertEquals( '1234', $token_read->get_last4() );
 	}

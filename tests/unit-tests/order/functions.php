@@ -1,13 +1,11 @@
 <?php
 
-namespace WooCommerce\Tests\Order;
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Order
  * @since 2.3
  */
-class Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_get_order_statuses().
@@ -102,7 +100,7 @@ class Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order() {
 
-		$order = \WC_Helper_Order::create_order();
+		$order = WC_Helper_Order::create_order();
 
 		// Assert that $order is a WC_Order object
 		$this->assertInstanceOf( 'WC_Order', $order );
@@ -130,10 +128,10 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.6
 	 */
 	public function test_wc_order_get_payment_tokens() {
-		$order = \WC_Helper_Order::create_order();
+		$order = WC_Helper_Order::create_order();
 		$this->assertEmpty( $order->get_payment_tokens() );
 
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		update_post_meta( $order->id, '_payment_tokens', array( $token->get_id() ) );
 
 		$this->assertCount( 1, $order->get_payment_tokens() );
@@ -146,10 +144,10 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.6
 	 */
 	public function test_wc_order_add_payment_token() {
-		$order = \WC_Helper_Order::create_order();
+		$order = WC_Helper_Order::create_order();
 		$this->assertEmpty( $order->get_payment_tokens() );
 
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$order->add_payment_token( $token );
 
 		$this->assertCount( 1, $order->get_payment_tokens() );

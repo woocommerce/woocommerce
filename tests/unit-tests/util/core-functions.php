@@ -1,13 +1,11 @@
 <?php
 
-namespace WooCommerce\Tests\Util;
-
 /**
  * Class Core_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.2
  */
-class Core_Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test get_woocommerce_currency().
@@ -166,4 +164,3 @@ class Core_Functions extends \WC_Unit_Test_Case {
 	}
 
 }
-

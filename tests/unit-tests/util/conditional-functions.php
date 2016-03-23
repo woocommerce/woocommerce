@@ -1,12 +1,11 @@
 <?php
-namespace WooCommerce\Tests\Util;
 
 /**
  * Class Conditional_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.3.0
  */
-class Conditional_Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test is_store_notice_showing().

@@ -1,11 +1,10 @@
 <?php
-namespace WooCommerce\Tests\Payment_Tokens;
 
 /**
  * Class Payment_Tokens
  * @package WooCommerce\Tests\Payment_Tokens
  */
-class Payment_Tokens extends \WC_Unit_Test_Case {
+class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 
 	public function setUp() {
 		parent::setUp();
@@ -18,13 +17,13 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get_order_tokens() {
-		$order = \WC_Helper_Order::create_order();
-		$this->assertEmpty( \WC_Payment_Tokens::get_order_tokens( $order->id ) );
+		$order = WC_Helper_Order::create_order();
+		$this->assertEmpty( WC_Payment_Tokens::get_order_tokens( $order->id ) );
 
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		update_post_meta( $order->id, '_payment_tokens', array( $token->get_id() ) );
 
-		$this->assertCount( 1, \WC_Payment_Tokens::get_order_tokens( $order->id ) );
+		$this->assertCount( 1, WC_Payment_Tokens::get_order_tokens( $order->id ) );
 
 	}
 
@@ -33,17 +32,17 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get_customer_tokens_no_gateway() {
-		$this->assertEmpty( \WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
+		$this->assertEmpty( WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
 
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
 		$token->save();
 
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
 		$token->save();
 
-		$this->assertCount( 2, \WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
+		$this->assertCount( 2, WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
 	}
 
 	/**
@@ -51,22 +50,22 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get_customer_tokens_with_gateway() {
-		$this->assertEmpty( \WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
+		$this->assertEmpty( WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
 
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
 		$token->set_gateway_id( 'simplify_commerce' );
 		$token->save();
 
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
 		$token->set_gateway_id( 'paypal' );
 		$token->save();
 
-		$this->assertCount( 2, \WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
-		$this->assertCount( 1, \WC_Payment_Tokens::get_customer_tokens( $this->user_id, 'simplify_commerce' ) );
+		$this->assertCount( 2, WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
+		$this->assertCount( 1, WC_Payment_Tokens::get_customer_tokens( $this->user_id, 'simplify_commerce' ) );
 
-		foreach ( \WC_Payment_Tokens::get_customer_tokens( $this->user_id, 'simplify_commerce' ) as $simplify_token ) {
+		foreach ( WC_Payment_Tokens::get_customer_tokens( $this->user_id, 'simplify_commerce' ) as $simplify_token ) {
 			$this->assertEquals( 'simplify_commerce', $simplify_token->get_gateway_id() );
 		}
 	}
@@ -76,20 +75,20 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_get_customer_default_token() {
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
 		$token->set_gateway_id( 'simplify_commerce' );
 		$token->save();
 
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
 		$token->set_default( true );
 		$token->set_gateway_id( 'paypal' );
 		$token->save();
 
-		$this->assertCount( 2, \WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
+		$this->assertCount( 2, WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
 
-		$default_token = \WC_Payment_Tokens::get_customer_default_token( $this->user_id );
+		$default_token = WC_Payment_Tokens::get_customer_default_token( $this->user_id );
 		$this->assertEquals( 'paypal', $default_token->get_gateway_id() );
 	}
 
@@ -101,17 +100,17 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_get_customer_default_token_returns_first_created_when_no_default_token_set() {
-		$token = \WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		$token = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
 		$token->set_gateway_id( 'simplify_commerce' );
 		$token->save();
 
-		$token = \WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		$token = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
 		$token->set_gateway_id( 'paypal' );
 		$token->save();
 
-		$this->assertCount( 2, \WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
+		$this->assertCount( 2, WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
 
-		$default_token = \WC_Payment_Tokens::get_customer_default_token( $this->user_id );
+		$default_token = WC_Payment_Tokens::get_customer_default_token( $this->user_id );
 		$this->assertEquals( 'simplify_commerce', $default_token->get_gateway_id() );
 	}
 
@@ -120,9 +119,9 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get() {
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token_id = $token->get_id();
-		$get_token = \WC_Payment_Tokens::get( $token_id );
+		$get_token = WC_Payment_Tokens::get( $token_id );
 		$this->assertEquals( $token->get_token(), $get_token->get_token() );
 	}
 
@@ -131,12 +130,12 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_delete() {
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token_id = $token->get_id();
 
-		\WC_Payment_Tokens::delete( $token_id );
+		WC_Payment_Tokens::delete( $token_id );
 
-		$get_token = \WC_Payment_Tokens::get( $token_id );
+		$get_token = WC_Payment_Tokens::get( $token_id );
 		$this->assertNull( $get_token );
 	}
 
@@ -145,9 +144,9 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_get_type_by_id() {
-		$token = \WC_Helper_Payment_Token::create_cc_token();
+		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token_id = $token->get_id();
-		$this->assertEquals( 'CC', \WC_Payment_Tokens::get_token_type_by_id( $token_id ) );
+		$this->assertEquals( 'CC', WC_Payment_Tokens::get_token_type_by_id( $token_id ) );
 	}
 
 	/**
@@ -155,24 +154,24 @@ class Payment_Tokens extends \WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_tokens_set_users_default() {
-		$token = \WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		$token = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
 		$token_id = $token->get_id();
 		$token->save();
 
-		$token2 = \WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		$token2 = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
 		$token_id_2 = $token2->get_id();
 		$token2->save();
 
 		$this->assertTrue( $token->is_default() ); // first created is default
 		$this->assertFalse( $token2->is_default() );
 
-		\WC_Payment_Tokens::set_users_default( $this->user_id, $token_id_2 );
+		WC_Payment_Tokens::set_users_default( $this->user_id, $token_id_2 );
 		$token->read( $token_id );
 		$token2->read( $token_id_2 );
 		$this->assertFalse( $token->is_default() );
 		$this->assertTrue( $token2->is_default() );
 
-		\WC_Payment_Tokens::set_users_default( $this->user_id, $token_id );
+		WC_Payment_Tokens::set_users_default( $this->user_id, $token_id );
 		$token->read( $token_id );
 		$token2->read( $token_id_2 );
 		$this->assertTrue( $token->is_default() );

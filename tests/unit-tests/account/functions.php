@@ -1,12 +1,10 @@
 <?php
 
-namespace WooCommerce\Tests\Account;
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Account
  */
-class Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_get_account_menu_items().

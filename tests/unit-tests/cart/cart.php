@@ -1,12 +1,10 @@
 <?php
 
-namespace WooCommerce\Tests\Cart;
-
 /**
  * Class Cart.
  * @package WooCommerce\Tests\Cart
  */
-class Cart extends \WC_Unit_Test_Case {
+class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
 	 * Test get_remove_url.
@@ -32,7 +30,7 @@ class Cart extends \WC_Unit_Test_Case {
 	public function test_add_to_cart_simple() {
 
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->id, 1 ) );
@@ -44,7 +42,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -52,7 +50,7 @@ class Cart extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_to_cart_trashed() {
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// Trash product
 		wp_trash_post( $product->id );
@@ -67,7 +65,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -76,7 +74,7 @@ class Cart extends \WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_add_to_cart_variable() {
-		$product    = \WC_Helper_Product::create_variation_product();
+		$product    = WC_Helper_Product::create_variation_product();
 		$variations = $product->get_available_variations();
 		$variation  = array_shift( $variations );
 
@@ -99,7 +97,7 @@ class Cart extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_to_cart_sold_individually() {
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// Set sold_individually to yes
 		$product->sold_individually = 'yes';
@@ -115,7 +113,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -126,7 +124,7 @@ class Cart extends \WC_Unit_Test_Case {
 	public function test_find_product_in_cart() {
 
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// Add product to cart
 		WC()->cart->add_to_cart( $product->id, 1 );
@@ -141,7 +139,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 
 	}
 
@@ -208,7 +206,7 @@ class Cart extends \WC_Unit_Test_Case {
 	 */
 	public function test_set_quantity() {
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// Add 1 product to cart
 		WC()->cart->add_to_cart( $product->id, 1 );
@@ -232,7 +230,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -243,7 +241,7 @@ class Cart extends \WC_Unit_Test_Case {
 	public function test_check_cart_item_validity() {
 
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// Add product to cart
 		WC()->cart->add_to_cart( $product->id, 1 );
@@ -255,7 +253,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 
 	}
 
@@ -267,7 +265,7 @@ class Cart extends \WC_Unit_Test_Case {
 	public function test_get_total() {
 
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// We need this to have the calculate_totals() method calculate totals
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -284,7 +282,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -298,7 +296,7 @@ class Cart extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// We need this to have the calculate_totals() method calculate totals
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -321,7 +319,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Clean up product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 
 		// Restore option
 		update_option( 'woocommerce_calc_taxes', 'no' );
@@ -347,12 +345,12 @@ class Cart extends \WC_Unit_Test_Case {
 	 */
 	public function test_shipping_total() {
 		// Create product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->id, '_price', '10' );
 		update_post_meta( $product->id, '_regular_price', '10' );
 
 		// Create a flat rate method
-		\WC_Helper_Shipping::create_simple_flat_rate();
+		WC_Helper_Shipping::create_simple_flat_rate();
 
 		// We need this to have the calculate_totals() method calculate totals
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -377,10 +375,10 @@ class Cart extends \WC_Unit_Test_Case {
 
 		// Delete the flat rate method
 		WC()->session->set( 'chosen_shipping_methods', array() );
-		\WC_Helper_Shipping::delete_simple_flat_rate();
+		WC_Helper_Shipping::delete_simple_flat_rate();
 
 		// Delete product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -390,7 +388,7 @@ class Cart extends \WC_Unit_Test_Case {
 	 */
 	public function test_cart_fee() {
 		// Create product
-		$product =\WC_Helper_Product::create_simple_product();
+		$product =WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->id, '_price', '10' );
 		update_post_meta( $product->id, '_regular_price', '10' );
 
@@ -400,7 +398,7 @@ class Cart extends \WC_Unit_Test_Case {
 		}
 
 		// Add fee
-		\WC_Helper_Fee::add_cart_fee();
+		WC_Helper_Fee::add_cart_fee();
 
 		// Add product to cart
 		WC()->cart->add_to_cart( $product->id, 1 );
@@ -415,10 +413,10 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Remove fee
-		\WC_Helper_Fee::remove_cart_fee();
+		WC_Helper_Fee::remove_cart_fee();
 
 		// Delete product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -427,7 +425,7 @@ class Cart extends \WC_Unit_Test_Case {
 	public function test_get_coupons() {
 
 		// Create coupon
-		$coupon = \WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
 		WC()->cart->add_discount( $coupon->code );
@@ -441,7 +439,7 @@ class Cart extends \WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 
 		// Delete coupon
-		\WC_Helper_Coupon::delete_coupon( $coupon->id );
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
 
 	}
 
