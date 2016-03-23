@@ -608,7 +608,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get the Customer's schema, conforming to JSON Schema
+	 * Get the Customer's schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */
