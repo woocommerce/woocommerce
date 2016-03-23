@@ -20,7 +20,6 @@ class Shipping_Zone extends \WC_Unit_Test_Case {
 
         // Assert
         $this->assertTrue( \is_array( $data ) );
-        $this->assertTrue( 4 === \sizeof( $data ) );
 
         // Clean
         \WC_Helper_Shipping_Zones::remove_mock_zones();
