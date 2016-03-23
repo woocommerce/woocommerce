@@ -34,7 +34,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 			return false;
 		}
 
-		if ( empty( $this->get_meta( 'last4' ) ) ) {
+		if ( ! $this->get_last4() ) {
 			return false;
 		}
 		return true;

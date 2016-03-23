@@ -36,27 +36,27 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 			return false;
 		}
 
-		if ( empty( $this->get_meta( 'last4' ) ) ) {
+		if ( ! $this->get_last4() ) {
 			return false;
 		}
 
-		if ( empty( $this->get_meta( 'expiry_year' ) ) ) {
+		if ( ! $this->get_expiry_year() ) {
 			return false;
 		}
 
-		if ( empty( $this->get_meta( 'expiry_month' ) ) ) {
+		if ( ! $this->get_expiry_month() ) {
 			return false;
 		}
 
-		if ( empty ( $this->get_meta( 'card_type' ) ) ) {
+		if ( ! $this->get_card_type() ) {
 			return false;
 		}
 
-		if ( 4 !== strlen( $this->get_meta( 'expiry_year' ) ) ) {
+		if ( 4 !== strlen( $this->get_expiry_year() ) ) {
 			return false;
 		}
 
-		if ( 2 !== strlen( $this->get_meta( 'expiry_month' ) ) ) {
+		if ( 2 !== strlen( $this->get_expiry_month() ) ) {
 			return false;
 		}
 
