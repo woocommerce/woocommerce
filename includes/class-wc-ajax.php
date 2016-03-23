@@ -2274,16 +2274,15 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$refund_id = absint( $_POST['refund_id'] );
-
-		if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
-			$order_id = wp_get_post_parent_id( $refund_id );
-			wc_delete_shop_order_transients( $order_id );
-			wp_delete_post( $refund_id );
-
-			do_action( 'woocommerce_refund_deleted', $refund_id, $order_id );
+		$refund_ids = array_map( 'absint', is_array( $_POST['refund_id'] ) ? $_POST['refund_id'] : array( $_POST['refund_id'] ) );
+		foreach ( $refund_ids as $refund_id ) {
+			if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
+				$order_id = wp_get_post_parent_id( $refund_id );
+				wc_delete_shop_order_transients( $order_id );
+				wp_delete_post( $refund_id );
+				do_action( 'woocommerce_refund_deleted', $refund_id, $order_id );
+			}
 		}
-
 		die();
 	}
 

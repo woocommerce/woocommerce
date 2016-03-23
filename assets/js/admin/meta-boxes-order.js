@@ -232,8 +232,8 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.calculate-tax-action', this.calculate_tax )
 				.on( 'click', 'a.edit-order-item', this.edit_item )
 				.on( 'click', 'a.delete-order-item', this.delete_item )
-				.on( 'click', 'tr.item, tr.fee, tr.shipping', this.select_row )
-				.on( 'click', 'tr.item :input, tr.fee :input, tr.shipping :input, tr.item a, tr.fee a, tr.shipping a', this.select_row_child )
+				.on( 'click', 'tr.item, tr.fee, tr.shipping, tr.refund', this.select_row )
+				.on( 'click', 'tr.item :input, tr.fee :input, tr.shipping :input, tr.refund :input, tr.item a, tr.fee a, tr.shipping a, tr.refund a', this.select_row_child )
 				.on( 'click', 'button.bulk-delete-items', this.bulk_actions.do_delete )
 				.on( 'click', 'button.bulk-increase-stock', this.bulk_actions.do_increase_stock )
 				.on( 'click', 'button.bulk-decrease-stock', this.bulk_actions.do_reduce_stock )
@@ -876,6 +876,20 @@ jQuery( function ( $ ) {
 
 			if ( $rows.length ) {
 				$( 'div.wc-order-item-bulk-edit' ).slideDown();
+
+				var selected_product = false;
+
+				$rows.each( function() {
+					if ( $( this ).is( 'tr.item' ) ) {
+						selected_product = true;
+					}
+				} );
+
+				if ( selected_product ) {
+					$( '.bulk-increase-stock, .bulk-decrease-stock' ).show();
+				} else {
+					$( '.bulk-increase-stock, .bulk-decrease-stock' ).hide();
+				}
 			} else {
 				$( 'div.wc-order-item-bulk-edit' ).slideUp();
 			}
@@ -896,27 +910,53 @@ jQuery( function ( $ ) {
 
 					wc_meta_boxes_order_items.block();
 
-					var item_ids = $.map( $rows, function( $row ) {
-						return parseInt( $( $row ).data( 'order_item_id' ), 10 );
-					});
+					var delete_items   = [];
+					var delete_refunds = [];
+					var deferred = [];
 
-					var data = {
-						order_item_ids: item_ids,
-						action:         'woocommerce_remove_order_item',
-						security:       woocommerce_admin_meta_boxes.order_item_nonce
-					};
+					$.map( $rows, function( row ) {
+						var $row = $( row );
 
-					$.ajax({
-						url: woocommerce_admin_meta_boxes.ajax_url,
-						data: data,
-						type: 'POST',
-						success: function() {
-							$rows.each( function() {
-								$( this ).remove();
-							} );
-							wc_meta_boxes_order_items.unblock();
+						if ( $row.is( '.refund' ) ) {
+							delete_refunds.push( parseInt( $( $row ).data( 'order_refund_id' ), 10 ) );
+						} else {
+							delete_items.push( parseInt( $( $row ).data( 'order_item_id' ), 10 ) );
 						}
+						return ;
 					});
+
+					if ( delete_items.length ) {
+						deferred.push( $.ajax({
+							url : woocommerce_admin_meta_boxes.ajax_url,
+							data: {
+								order_item_ids: delete_items,
+								action:         'woocommerce_remove_order_item',
+								security:       woocommerce_admin_meta_boxes.order_item_nonce
+							},
+							type: 'POST'
+						} ) );
+					}
+
+					if ( delete_refunds.length ) {
+						deferred.push( $.ajax( {
+							url : woocommerce_admin_meta_boxes.ajax_url,
+							data: {
+								action:    'woocommerce_delete_refund',
+								refund_id: delete_refunds,
+								security:  woocommerce_admin_meta_boxes.order_item_nonce
+							},
+							type: 'POST'
+						} ) );
+					}
+
+					if ( deferred ) {
+						$.when.apply( $, deferred ).done( function() {
+							wc_meta_boxes_order_items.reload_items();
+							wc_meta_boxes_order_items.unblock();
+						} );
+					} else {
+						wc_meta_boxes_order_items.unblock();
+					}
 				}
 			},
 
