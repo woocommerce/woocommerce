@@ -10,7 +10,7 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 * Create a test post we can add/test meta against.
 	 */
 	public function create_test_post() {
-		$object = new WC_Mock_WC_data();
+		$object = new WC_Mock_WC_Data();
 		$object->set_content( 'testing' );
 		$object->save();
 		return $object;
@@ -20,7 +20,7 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 * Create a test user we can add/test meta against.
 	 */
 	public function create_test_user() {
-		$object = new WC_Mock_WC_data();
+		$object = new WC_Mock_WC_Data();
 		$object->set_meta_type( 'user' );
 		$object->set_object_id_field( 'user_id' );
 		$object->set_content( 'testing@woo.dev' );
@@ -100,7 +100,7 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 			);
 		}
 
-		$object = new WC_Mock_WC_data();
+		$object = new WC_Mock_WC_Data();
 		$object->set_meta_data( $metadata );
 
 		$this->assertEquals( $metadata, $object->get_meta_data() );
@@ -205,7 +205,7 @@ class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 	 * data before a save.
 	 */
 	function test_add_meta_data_overwrite_before_save() {
-		$object = new WC_Mock_WC_data;
+		$object = new WC_Mock_WC_Data;
 		$object->add_meta_data( 'test_field_0', 'another field', true );
 		$object->add_meta_data( 'test_field_1', 'another field', true );
 		$object->add_meta_data( 'test_field_2', 'val1', true );

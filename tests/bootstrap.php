@@ -28,6 +28,11 @@ class WC_Unit_Tests_Bootstrap {
 		ini_set( 'display_errors','on' );
 		error_reporting( E_ALL );
 
+		// Ensure server variable is set for WP email functions.
+		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
+			$_SERVER['SERVER_NAME'] = 'localhost';
+		}
+
 		$this->tests_dir    = dirname( __FILE__ );
 		$this->plugin_dir   = dirname( $this->tests_dir );
 		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : '/tmp/wordpress-tests-lib';

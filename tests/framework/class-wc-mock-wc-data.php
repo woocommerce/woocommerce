@@ -2,7 +2,7 @@
 /**
  * Used for exposing and testing the various Abstract WC_Data methods.
  */
-class WC_Mock_WC_data extends WC_Data {
+class WC_Mock_WC_Data extends WC_Data {
 
 	/**
 	 * Data array
