@@ -22,7 +22,7 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=1
 
 before_install:
-  - php composer self-update
+  - composer self-update
 
 before_script:
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
