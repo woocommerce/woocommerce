@@ -1268,11 +1268,7 @@ class WC_AJAX {
 		$item             = array();
 
 		// Add new shipping
-		$shipping        = new stdClass();
-		$shipping->label = '';
-		$shipping->id    = '';
-		$shipping->cost  = '';
-		$shipping->taxes = array();
+		$shipping        = new WC_Shipping_Rate();
 		$item_id         = $order->add_shipping( $shipping );
 
 		include( 'admin/meta-boxes/views/html-order-shipping.php' );
