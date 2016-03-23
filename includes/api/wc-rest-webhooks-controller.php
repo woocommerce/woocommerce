@@ -518,26 +518,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get the query params for collections of attachments.
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		$params = parent::get_collection_params();
-
-		$params['status'] = array(
-			'default'           => 'all',
-			'description'       => __( 'Limit result set to webhooks assigned a specific status.', 'woocommerce' ),
-			'type'              => 'string',
-			'enum'              => array( 'all', 'active', 'paused', 'disabled' ),
-			'sanitize_callback' => 'sanitize_key',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
-		return $params;
-	}
-
-	/**
 	 * Get the Webhook's schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -622,5 +602,25 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the query params for collections of attachments.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['status'] = array(
+			'default'           => 'all',
+			'description'       => __( 'Limit result set to webhooks assigned a specific status.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array( 'all', 'active', 'paused', 'disabled' ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		return $params;
 	}
 }

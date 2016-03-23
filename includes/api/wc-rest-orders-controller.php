@@ -44,6 +44,13 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	protected $post_type = 'shop_order';
 
 	/**
+	 * Initialize orders actions.
+	 */
+	public function __construct() {
+		add_filter( "woocommerce_rest_{$this->post_type}_query", array( $this, 'query_args' ), 10, 2 );
+	}
+
+	/**
 	 * Register the routes for orders.
 	 */
 	public function register_routes() {
@@ -175,17 +182,330 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get the Order's schema, conforming to JSON Schema.
+	 * Prepare a single coupon output for response.
+	 *
+	 * @param WP_Post $post Post object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $data
+	 */
+	public function prepare_item_for_response( $post, $request ) {
+		global $wpdb;
+
+		$order = wc_get_order( $post );
+		$dp    = ! empty( $request['dp'] ) ? intval( $request['dp'] ) : 2;
+
+		$data = array(
+			'id'                   => $order->id,
+			'parent_id'            => $post->post_parent,
+			'status'               => $order->get_status(),
+			'order_key'            => $order->order_key,
+			'currency'             => $order->get_order_currency(),
+			'version'              => $order->order_version,
+			'prices_include_tax'   => $order->prices_include_tax,
+			'date_created'         => wc_rest_api_prepare_date_response( $post->post_date_gmt ),
+			'date_modified'        => wc_rest_api_prepare_date_response( $post->post_modified_gmt ),
+			'customer_id'          => $order->get_user_id(),
+			'discount_total'       => wc_format_decimal( $order->get_total_discount(), $dp ),
+			'discount_tax'         => wc_format_decimal( $order->cart_discount_tax, $dp ),
+			'shipping_total'       => wc_format_decimal( $order->get_total_shipping(), $dp ),
+			'shipping_tax'         => wc_format_decimal( $order->get_shipping_tax(), $dp ),
+			'cart_tax'             => wc_format_decimal( $order->get_cart_tax(), $dp ),
+			'total'                => wc_format_decimal( $order->get_total(), $dp ),
+			'total_tax'            => wc_format_decimal( $order->get_total_tax(), $dp ),
+			'billing'              => array(),
+			'shipping'             => array(),
+			'payment_method'       => $order->payment_method,
+			'payment_method_title' => $order->payment_method_title,
+			'transaction_id'       => $order->get_transaction_id(),
+			'customer_ip_address'  => $order->customer_ip_address,
+			'customer_user_agent'  => $order->customer_user_agent,
+			'created_via'          => $order->created_via,
+			'customer_note'        => $order->customer_note,
+			'date_completed'       => wc_rest_api_prepare_date_response( $order->completed_date, true ),
+			'date_paid'            => $order->paid_date,
+			'cart_hash'            => $order->cart_hash,
+			'line_items'           => array(),
+			'tax_lines'            => array(),
+			'shipping_lines'       => array(),
+			'fee_lines'            => array(),
+			'coupon_lines'         => array(),
+		);
+
+		// Add addresses.
+		$data['billing']  = $order->get_address( 'billing' );
+		$data['shipping'] = $order->get_address( 'shipping' );
+
+		// Add line items.
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$product      = $order->get_product_from_item( $item );
+			$product_id   = 0;
+			$variation_id = 0;
+			$product_sku  = null;
+
+			// Check if the product exists.
+			if ( is_object( $product ) ) {
+				$product_id   = $product->id;
+				$variation_id = $product->variation_id;
+				$product_sku  = $product->get_sku();
+			}
+
+			$meta = new WC_Order_Item_Meta( $item, $product );
+
+			$item_meta = array();
+
+			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
+
+			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
+				$item_meta[] = array(
+					'key'   => $formatted_meta['key'],
+					'label' => $formatted_meta['label'],
+					'value' => $formatted_meta['value'],
+				);
+			}
+
+			$line_item = array(
+				'id'           => $item_id,
+				'name'         => $item['name'],
+				'sku'          => $product_sku,
+				'product_id'   => (int) $product_id,
+				'variation_id' => (int) $variation_id,
+				'quantity'     => wc_stock_amount( $item['qty'] ),
+				'tax_class'    => ! empty( $item['tax_class'] ) ? $item['tax_class'] : '',
+				'price'        => wc_format_decimal( $order->get_item_total( $item, false, false ), $dp ),
+				'subtotal'     => wc_format_decimal( $order->get_line_subtotal( $item, false, false ), $dp ),
+				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
+				'total'        => wc_format_decimal( $order->get_line_total( $item, false, false ), $dp ),
+				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
+				'taxes'        => array(),
+				'meta'         => $item_meta,
+			);
+
+			$item_line_taxes = maybe_unserialize( $item['line_tax_data'] );
+			if ( isset( $item_line_taxes['total'] ) ) {
+				$line_tax = array();
+
+				foreach ( $item_line_taxes['total'] as $tax_rate_id => $tax ) {
+					$line_tax[ $tax_rate_id ] = array(
+						'id'       => $tax_rate_id,
+						'total'    => $tax,
+						'subtotal' => '',
+					);
+				}
+
+				foreach ( $item_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
+					$line_tax[ $tax_rate_id ]['subtotal'] = $tax;
+				}
+
+				$line_item['taxes'] = array_values( $line_tax );
+			}
+
+			// if ( in_array( 'products', $expand ) ) {
+			// 	$_product_data = WC()->api->WC_API_Products->get_product( $product_id );
+
+			// 	if ( isset( $_product_data['product'] ) ) {
+			// 		$line_item['product_data'] = $_product_data['product'];
+			// 	}
+			// }
+
+			$data['line_items'][] = $line_item;
+		}
+
+		// Add taxes.
+		foreach ( $order->get_items( 'tax' ) as $key => $tax ) {
+			$tax_line = array(
+				'id'                 => $key,
+				'rate_code'          => $tax['name'],
+				'rate_id'            => $tax['rate_id'],
+				'label'              => isset( $tax['label'] ) ? $tax['label'] : $tax['name'],
+				'compound'           => (bool) $tax['compound'],
+				'tax_total'          => wc_format_decimal( $tax['tax_amount'], $dp ),
+				'shipping_tax_total' => wc_format_decimal( $tax['shipping_tax_amount'], $dp ),
+			);
+
+			// if ( in_array( 'taxes', $expand ) ) {
+			// 	$_rate_data = WC()->api->WC_API_Taxes->get_tax( $tax->rate_id );
+
+			// 	if ( isset( $_rate_data['tax'] ) ) {
+			// 		$tax_line['rate_data'] = $_rate_data['tax'];
+			// 	}
+			// }
+
+			$data['tax_lines'][] = $tax_line;
+		}
+
+		// Add shipping.
+		foreach ( $order->get_shipping_methods() as $shipping_item_id => $shipping_item ) {
+			$shipping_line = array(
+				'id'           => $shipping_item_id,
+				'method_title' => $shipping_item['name'],
+				'method_id'    => $shipping_item['method_id'],
+				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
+				'total_tax'    => wc_format_decimal( '', $dp ),
+				'taxes'        => array(),
+			);
+
+			$shipping_taxes = maybe_unserialize( $shipping_item['taxes'] );
+
+			if ( ! empty( $shipping_taxes ) ) {
+				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes ), $dp );
+
+				foreach ( $shipping_taxes as $tax_rate_id => $tax ) {
+					$shipping_line['taxes'][] = array(
+						'id'       => $tax_rate_id,
+						'total'    => $tax,
+					);
+				}
+			}
+
+			$data['shipping_lines'][] = $shipping_line;
+		}
+
+		// Add fees.
+		foreach ( $order->get_fees() as $fee_item_id => $fee_item ) {
+			$fee_line = array(
+				'id'         => $fee_item_id,
+				'name'       => $fee_item['name'],
+				'tax_class'  => ! empty( $fee_item['tax_class'] ) ? $fee_item['tax_class'] : '',
+				'tax_status' => 'taxable',
+				'total'      => wc_format_decimal( $order->get_line_total( $fee_item ), $dp ),
+				'total_tax'  => wc_format_decimal( $order->get_line_tax( $fee_item ), $dp ),
+				'taxes'      => array(),
+			);
+
+			$fee_line_taxes = maybe_unserialize( $fee_item['line_tax_data'] );
+			if ( isset( $fee_line_taxes['total'] ) ) {
+				$fee_tax = array();
+
+				foreach ( $fee_line_taxes['total'] as $tax_rate_id => $tax ) {
+					$fee_tax[ $tax_rate_id ] = array(
+						'id'       => $tax_rate_id,
+						'total'    => $tax,
+						'subtotal' => '',
+					);
+				}
+
+				foreach ( $fee_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
+					$fee_tax[ $tax_rate_id ]['subtotal'] = $tax;
+				}
+
+				$fee_line['taxes'] = array_values( $fee_tax );
+			}
+
+			$data['fee_lines'][] = $fee_line;
+		}
+
+		// Add coupons.
+		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
+			$coupon_line = array(
+				'id'           => $coupon_item_id,
+				'code'         => $coupon_item['name'],
+				'discount'     => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
+				'discount_tax' => wc_format_decimal( $coupon_item['discount_amount_tax'], $dp ),
+			);
+
+			// if ( in_array( 'coupons', $expand ) ) {
+			// 	$_coupon_data = WC()->api->WC_API_Coupons->get_coupon_by_code( $coupon_item['name'] );
+
+			// 	if ( isset( $_coupon_data['coupon'] ) ) {
+			// 		$coupon_line['coupon_data'] = $_coupon_data['coupon'];
+			// 	}
+			// }
+
+			$data['coupon_lines'][] = $coupon_line;
+		}
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $order ) );
+
+		/**
+		 * Filter the data for a response.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
+		 * prepared for the response.
+		 *
+		 * @param WP_REST_Response   $response   The response object.
+		 * @param WP_Post            $post       Post object.
+		 * @param WP_REST_Request    $request    Request object.
+		 */
+		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param WC_Order $order Comment object.
+	 * @return array Links for the given order.
+	 */
+	protected function prepare_links( $order ) {
+		$links = array(
+			'self' => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->id ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
+			),
+		);
+
+		if ( 0 !== (int) $order->get_user_id() ) {
+			$links['customer'] = array(
+				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $order->get_user_id() ) ),
+			);
+		}
+
+		if ( 0 !== (int) $order->post->post_parent ) {
+			$links['up'] = array(
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order->post->post_parent ) ),
+			);
+		}
+
+		return $links;
+	}
+
+	/**
+	 * Query args.
+	 *
+	 * @param array $args
+	 * @param WP_REST_Request $request
+	 * @return array
+	 */
+	public function query_args( $args, $request ) {
+		// Set post_status.
+		if ( 'any' !== $request['status'] ) {
+			$args['post_status'] = 'wc-' . $request['status'];
+		} else {
+			$args['post_status'] = 'any';
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Get order statuses.
 	 *
 	 * @return array
 	 */
-	public function get_item_schema() {
+	protected function get_order_statuses() {
 		$order_statuses = array();
 
 		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
 			$order_statuses[] = str_replace( 'wc-', '', $status );
 		}
 
+		return $order_statuses;
+	}
+
+	/**
+	 * Get the Order's schema, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
@@ -206,7 +526,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Order status.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'pending',
-					'enum'        => $order_statuses,
+					'enum'        => $this->get_order_statuses(),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'order_key' => array(
@@ -253,49 +573,49 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'discount_total' => array(
 					'description' => __( 'Total discount amount for the order.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'discount_tax' => array(
 					'description' => __( 'Total discount tax amount for the order.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_total' => array(
 					'description' => __( 'Total shipping amount for the order.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_tax' => array(
 					'description' => __( 'Total shipping tax amount for the order.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'cart_tax' => array(
 					'description' => __( 'Sum of line item taxes only.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'total' => array(
 					'description' => __( 'Grand total.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'total_tax' => array(
 					'description' => __( 'Sum of all taxes.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'billing' => array(
 					'description' => __( 'Billing address.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'first_name' => array(
@@ -358,7 +678,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'shipping' => array(
 					'description' => __( 'Shipping address.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'first_name' => array(
@@ -469,15 +789,127 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
-
-					),
-				),
-				'shipping_lines' => array(
-					'description' => __( 'Last order data.', 'woocommerce' ),
-					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-
+						'id' => array(
+							'description' => __( 'Item ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'name' => array(
+							'description' => __( 'Product name.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'sku' => array(
+							'description' => __( 'Product SKU.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'product_id' => array(
+							'description' => __( 'Product ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'variation_id' => array(
+							'description' => __( 'Variation ID, if applicable.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'quantity' => array(
+							'description' => __( 'Quantity ordered.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'tax_class' => array(
+							'description' => __( 'Tax class of product.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'price' => array(
+							'description' => __( 'Product price.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'subtotal' => array(
+							'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'subtotal_tax' => array(
+							'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'total' => array(
+							'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'total_tax' => array(
+							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'taxes' => array(
+							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Tax rate ID.', 'woocommerce' ),
+									'type'        => 'integer',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'total' => array(
+									'description' => __( 'Tax total.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'subtotal' => array(
+									'description' => __( 'Tax subtotal.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+						'meta' => array(
+							'description' => __( 'Line item meta data.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'key' => array(
+									'description' => __( 'Meta key.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'label' => array(
+									'description' => __( 'Meta label.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'value' => array(
+									'description' => __( 'Meta value.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
 					),
 				),
 				'tax_lines' => array(
@@ -486,7 +918,104 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'properties'  => array(
-
+						'id' => array(
+							'description' => __( 'Item ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'rate_code' => array(
+							'description' => __( 'Tax rate code.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'rate_id' => array(
+							'description' => __( 'Tax rate ID.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'label' => array(
+							'description' => __( 'Tax rate label.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'compound' => array(
+							'description' => __( 'Show if is a compound tax rate.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'tax_total' => array(
+							'description' => __( 'Tax total (not including shipping taxes).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'shipping_tax_total' => array(
+							'description' => __( 'Shipping tax total.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
+				),
+				'shipping_lines' => array(
+					'description' => __( 'Last order data.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Item ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'method_title' => array(
+							'description' => __( 'Shipping method name.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'method_id' => array(
+							'description' => __( 'Shipping method ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'total' => array(
+							'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'total_tax' => array(
+							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'taxes' => array(
+							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Tax rate ID.', 'woocommerce' ),
+									'type'        => 'integer',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'total' => array(
+									'description' => __( 'Tax total.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
 					),
 				),
 				'fee_lines' => array(
@@ -494,7 +1023,67 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
-
+						'id' => array(
+							'description' => __( 'Item ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'name' => array(
+							'description' => __( 'Fee name.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'tax_class' => array(
+							'description' => __( 'Tax class of fee.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'tax_status' => array(
+							'description' => __( 'Tax status of fee.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'total' => array(
+							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'total_tax' => array(
+							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'taxes' => array(
+							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Tax rate ID.', 'woocommerce' ),
+									'type'        => 'integer',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'total' => array(
+									'description' => __( 'Tax total.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'subtotal' => array(
+									'description' => __( 'Tax subtotal.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
 					),
 				),
 				'coupon_lines' => array(
@@ -502,12 +1091,53 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
-
+						'id' => array(
+							'description' => __( 'Item ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'code' => array(
+							'description' => __( 'Coupon code.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'discount' => array(
+							'description' => __( 'Discount total.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'discount_tax' => array(
+							'description' => __( 'Discount total tax.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 					),
 				),
 			),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the query params for collections of attachments.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['status'] = array(
+			'default'           => 'any',
+			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array_merge( array( 'any' ), $this->get_order_statuses() ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		return $params;
 	}
 }
