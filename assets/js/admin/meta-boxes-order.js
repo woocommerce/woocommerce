@@ -862,17 +862,17 @@ jQuery( function ( $ ) {
 			if ( $( this ).is( 'tr' ) ) {
 				$row = $( this );
 			} else {
-				$row = $( this ).closest('tr');
+				$row = $( this ).closest( 'tr' );
 			}
-			var $table = $( this ).closest('table');
+			var $table = $( this ).closest( 'table' );
 
 			if ( $row.is( '.selected' ) ) {
-				$row.removeClass('selected');
+				$row.removeClass( 'selected' );
 			} else {
-				$row.addClass('selected');
+				$row.addClass( 'selected' );
 			}
 
-			var $rows = $table.find('tr.selected');
+			var $rows = $table.find( 'tr.selected' );
 
 			if ( $rows.length ) {
 				$( 'div.wc-order-item-bulk-edit' ).slideDown();
@@ -890,7 +890,7 @@ jQuery( function ( $ ) {
 			do_delete: function( e ) {
 				e.preventDefault();
 				var $table = $( 'table.woocommerce_order_items' );
-				var $rows = $table.find('tr.selected');
+				var $rows = $table.find( 'tr.selected' );
 
 				if ( $rows.length && window.confirm( woocommerce_admin_meta_boxes.remove_item_notice ) ) {
 
@@ -911,9 +911,9 @@ jQuery( function ( $ ) {
 						data: data,
 						type: 'POST',
 						success: function() {
-							$rows.each(function() {
+							$rows.each( function() {
 								$( this ).remove();
-							});
+							} );
 							wc_meta_boxes_order_items.unblock();
 						}
 					});
@@ -925,7 +925,7 @@ jQuery( function ( $ ) {
 				wc_meta_boxes_order_items.block();
 
 				var $table = $( 'table.woocommerce_order_items' );
-				var $rows = $table.find('tr.selected');
+				var $rows = $table.find( 'tr.selected' );
 				var quantities = {};
 				var item_ids = $.map( $rows, function( $row ) {
 					return parseInt( $( $row ).data( 'order_item_id' ), 10 );
@@ -961,7 +961,7 @@ jQuery( function ( $ ) {
 				wc_meta_boxes_order_items.block();
 
 				var $table = $( 'table.woocommerce_order_items' );
-				var $rows = $table.find('tr.selected');
+				var $rows = $table.find( 'tr.selected' );
 				var quantities = {};
 				var item_ids = $.map( $rows, function( $row ) {
 					return parseInt( $( $row ).data( 'order_item_id' ), 10 );
