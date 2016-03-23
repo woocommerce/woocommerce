@@ -51,8 +51,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	public function __construct( $token = '' ) {
 		if ( is_numeric( $token ) ) {
 			$this->read( $token );
-		} else if ( is_object( $token ) && ! empty( $token->get_id() ) ) {
-			$this->read( $token->get_id() );
+		} else if ( is_object( $token ) ) {
+			$token_id = $token->get_id();
+			if ( ! empty( $token_id ) ) {
+				$this->read( $token->get_id() );
+			}
 		}
 		// Set token type (cc, echeck)
 		if ( ! empty( $this->type ) ) {
