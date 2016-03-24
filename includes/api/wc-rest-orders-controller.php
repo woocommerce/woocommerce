@@ -518,11 +518,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				$order->payment_complete( $request['transaction_id'] );
 			}
 
-			// TODO
-			// Set order meta.
-			// if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
-			// 	$this->set_order_meta( $order->id, $data['order_meta'] );
-			// }
+			// Set meta data.
+			if ( ! empty( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
+				$this->update_meta_data( $order->id, $data['meta_data'] );
+			}
 
 			wc_transaction_query( 'commit' );
 
@@ -557,6 +556,23 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		if ( $order->get_user_id() ) {
 			foreach ( $fields as $key => $value ) {
 				update_user_meta( $order->get_user_id(), $type . '_' . $key, $value );
+			}
+		}
+	}
+
+	/**
+	 * Helper method to add/update meta data, with two restrictions:
+	 *
+	 * 1) Only non-protected meta (no leading underscore) can be set
+	 * 2) Meta values must be scalar (int, string, bool)
+	 *
+	 * @param WC_Order $order Order data.
+	 * @param array $meta_data Meta data in array( 'meta_key' => 'meta_value' ) format.
+	 */
+	protected function update_meta_data( $order_id, $meta_data ) {
+		foreach ( $meta_data as $meta_key => $meta_value ) {
+			if ( is_string( $meta_key ) && ! is_protected_meta( $meta_key ) && is_scalar( $meta_value ) ) {
+				update_post_meta( $order_id, $meta_key, $meta_value );
 			}
 		}
 	}
