@@ -504,6 +504,26 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				$this->update_address( $order, $request['shipping'], 'shipping' );
 			}
 
+			// Set currency.
+			update_post_meta( $order->id, '_order_currency', $request['currency'] );
+
+			// Set payment method.
+			if ( ! empty( $request['payment_method'] ) ) {
+				update_post_meta( $order->id, '_payment_method', $request['payment_method'] );
+			}
+			if ( ! empty( $request['payment_method_title'] ) ) {
+				update_post_meta( $order->id, '_payment_method_title', $request['payment_method'] );
+			}
+			if ( true === $request['set_paid'] ) {
+				$order->payment_complete( $request['transaction_id'] );
+			}
+
+			// TODO
+			// Set order meta.
+			// if ( isset( $data['order_meta'] ) && is_array( $data['order_meta'] ) ) {
+			// 	$this->set_order_meta( $order->id, $data['order_meta'] );
+			// }
+
 			wc_transaction_query( 'commit' );
 
 			return $order->id;
@@ -631,6 +651,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'currency' => array(
 					'description' => __( 'Currency the order was created with, in ISO format.', 'woocommerce' ),
 					'type'        => 'string',
+					'default'     => get_woocommerce_currency(),
 					'enum'        => array_keys( get_woocommerce_currencies() ),
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -830,6 +851,13 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Payment method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+				),
+				'set_paid' => array(
+					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'view', 'edit' ),
+					'writeonly'   => true,
 				),
 				'transaction_id' => array(
 					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
