@@ -22,7 +22,7 @@
 				},
 				save: function() {
 					if ( _.size( this.changes ) ) {
-						$.post( ajaxurl + '?action=woocommerce_shipping_zone_methods_save_changes', {
+						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_changes', {
 							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 							changes                 : this.changes,
 							zone_id                 : data.zone_id
@@ -32,10 +32,10 @@
 					}
 				},
 				addMethod: function() {
-					if ( _.size( this.changes ) ) {
+					if ( _.size( this.changes ) && window.confirm( data.strings.save_changes_prompt ) ) {
 						this.save();
 					}
-					$.post( ajaxurl + '?action=woocommerce_shipping_zone_add_method', {
+					$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
 						wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 						method_id               : $('select[name="add_method_id"]').val(),
 						zone_id                 : data.zone_id
@@ -266,7 +266,7 @@
 						shippingMethodView.block();
 
 						// Save method settings via ajax call
-						$.post( ajaxurl + '?action=woocommerce_shipping_zone_methods_save_settings', {
+						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_methods_save_settings', {
 							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 							instance_id             : posted_data.instance_id,
 							data                    : posted_data
@@ -285,10 +285,14 @@
 								}
 
 								// Method was saved. Re-render.
-								shippingMethodView.model.set( 'methods', response.data.methods );
-								shippingMethodView.render();
+								if ( _.size( shippingMethodView.model.changes ) ) {
+									shippingMethodView.model.save();
+								} else {
+									shippingMethodView.model.onSaveResponse( response, textStatus );
+								}
+							} else {
+								shippingMethodView.unblock();
 							}
-							shippingMethodView.unblock();
 						}, 'json' );
 					}
 				}

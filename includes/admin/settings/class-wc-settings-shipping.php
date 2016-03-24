@@ -212,6 +212,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'                 => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+				'save_changes_prompt'     => __( 'Do you wish to save your changes first? Your changed data will be discarded if you choose to cancel.', 'woocommerce' ),
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
 				'add_method_failed'       => __( 'Shipping method could not be added. Please retry.', 'woocommerce' ),
 				'yes'                     => __( 'Yes', 'woocommerce' ),

@@ -362,9 +362,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 */
 	public function get_admin_options_html() {
 		if ( $this->instance_id ) {
-			$settings_html .= $this->generate_settings_html( $this->get_instance_form_fields(), false );
+			$settings_html = $this->generate_settings_html( $this->get_instance_form_fields(), false );
 		} else {
-			$settings_html .= $this->generate_settings_html( $this->get_form_fields(), false );
+			$settings_html = $this->generate_settings_html( $this->get_form_fields(), false );
 		}
 
 		return '<table class="form-table">' . $settings_html . '</table>';

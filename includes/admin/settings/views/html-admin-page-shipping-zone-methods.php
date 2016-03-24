@@ -68,7 +68,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<h1><?php echo esc_html( sprintf( __( '%s Settings', 'Shipping Method Settings', 'woocommerce' ), '{{{ data.method.title }}}' ) ); ?></h1>
+					<h1><?php echo esc_html( sprintf( __( '%s Settings', 'Shipping Method Settings', 'woocommerce' ), '{{{ data.method.method_title }}}' ) ); ?></h1>
 					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
 						<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>

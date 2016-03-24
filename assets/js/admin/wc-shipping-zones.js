@@ -30,7 +30,7 @@
 				},
 				save: function() {
 					if ( _.size( this.changes ) ) {
-						$.post( ajaxurl + '?action=woocommerce_shipping_zones_save_changes', {
+						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zones_save_changes', {
 							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 							changes                 : this.changes
 						}, this.onSaveResponse, 'json' );
@@ -307,7 +307,7 @@
 						shippingZoneView.block();
 
 						// Add method to zone via ajax call
-						$.post( ajaxurl + '?action=woocommerce_shipping_zone_add_method', {
+						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
 							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 							method_id               : posted_data.add_method_id,
 							zone_id                 : posted_data.zone_id
