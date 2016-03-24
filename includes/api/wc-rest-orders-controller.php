@@ -485,6 +485,11 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		wc_transaction_query( 'start' );
 
 		try {
+			// Make sure customer exists.
+			if ( 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
+				throw new Exception( __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+			}
+
 			$order = wc_create_order( array(
 				'status'        => $request['status'],
 				'customer_id'   => $request['customer_id'],
@@ -497,10 +502,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// Set addresses.
-			if ( ! empty( $request['billing'] ) ) {
+			if ( is_array( $request['billing'] ) ) {
 				$this->update_address( $order, $request['billing'], 'billing' );
 			}
-			if ( ! empty( $request['shipping'] ) ) {
+			if ( is_array( $request['shipping'] ) ) {
 				$this->update_address( $order, $request['shipping'], 'shipping' );
 			}
 
@@ -519,8 +524,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// Set meta data.
-			if ( ! empty( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
-				$this->update_meta_data( $order->id, $data['meta_data'] );
+			if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
+				$this->update_meta_data( $order->id, $request['meta_data'] );
 			}
 
 			wc_transaction_query( 'commit' );
