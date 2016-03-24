@@ -986,6 +986,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
 		}
 
+		$item_args = apply_filters( 'woocommerce_cli_order_line_item_args', $item_args, $item, $order, $action );
+
 		if ( $creating ) {
 
 			$item_id = $order->add_product( $product, $item_args['qty'], $item_args );
