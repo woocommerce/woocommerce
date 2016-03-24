@@ -240,6 +240,11 @@
 						methods     = _.indexBy( model.get( 'methods' ), 'instance_id' ),
 						method      = methods[ instance_id ];
 
+					// Only load modal if supported
+					if ( ! method.settings_html ) {
+						return true;
+					}
+
 					event.preventDefault();
 
 					$( this ).WCBackboneModal({

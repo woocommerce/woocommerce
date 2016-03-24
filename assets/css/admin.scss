@@ -2590,10 +2590,12 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 				}
 				td {
 					input, select, textarea {
-						width: 100%;
+						width: 50%;
+						min-width: 250px;
 					}
 					input[type="checkbox"] {
 						width: auto;
+						min-width: 0;
 					}
 				}
 				td, th {
@@ -4905,11 +4907,19 @@ table.bar_chart {
 
 	.wc-backbone-modal-content {
 		position: fixed;
-		top: 50%;
-		left: 50%;
-		width: 500px;
 		background: #fff;
 		z-index: 100000;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 500px;
+	}
+
+	&.wc-backbone-modal-shipping-method-settings {
+		.wc-backbone-modal-content {
+			width: 75%;
+			min-width: 500px;
+		}
 	}
 }
 

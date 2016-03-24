@@ -22,6 +22,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * - shipping-zones Shipping zone functionality + instances
 	 * - instance-settings Instance settings screens.
 	 * - settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
+	 * - instance-settings-modal Allows the instance settings to be loaded within a modal in the zones UI.
 	 * @var array
 	 */
 	public $supports = array( 'settings' );
@@ -360,15 +361,13 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_admin_options_html() {
-		$settings_html = '';
-
 		if ( $this->instance_id ) {
-			$settings_html .= '<table class="form-table">' . $this->generate_settings_html( $this->get_instance_form_fields(), false ) . '</table>';
+			$settings_html .= $this->generate_settings_html( $this->get_instance_form_fields(), false );
 		} else {
-			$settings_html .= '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>';
+			$settings_html .= $this->generate_settings_html( $this->get_form_fields(), false );
 		}
 
-		return $settings_html;
+		return '<table class="form-table">' . $settings_html . '</table>';
 	}
 
 	/**

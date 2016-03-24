@@ -241,7 +241,7 @@ class WC_Shipping_Zone extends WC_Data {
 					$methods[ $raw_method->instance_id ]->method_order  = absint( $raw_method->method_order );
 					$methods[ $raw_method->instance_id ]->enabled       = $raw_method->is_enabled ? 'yes' : 'no';
 					$methods[ $raw_method->instance_id ]->has_settings  = $methods[ $raw_method->instance_id ]->has_settings();
-					$methods[ $raw_method->instance_id ]->settings_html = $methods[ $raw_method->instance_id ]->get_admin_options_html();
+					$methods[ $raw_method->instance_id ]->settings_html = $methods[ $raw_method->instance_id ]->supports( 'instance-settings-modal' ) ? $methods[ $raw_method->instance_id ]->get_admin_options_html() : false;
 				}
 			}
 		}
