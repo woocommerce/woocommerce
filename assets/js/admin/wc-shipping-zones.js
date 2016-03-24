@@ -67,6 +67,7 @@
 					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
 					$( document.body ).on( 'click', '.wc-shipping-zone-save-changes', { view: this }, this.onSubmit );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
+					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 				},
 				block: function() {
 					$( this.el ).block({
@@ -297,6 +298,8 @@
 							zone_id : zone_id
 						}
 					});
+
+					$( '.wc-shipping-zone-method-selector select' ).change();
 				},
 				onAddShippingMethodSubmitted: function( event, target, posted_data ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
@@ -315,6 +318,12 @@
 							shippingZoneView.unblock();
 						}, 'json' );
 					}
+				},
+				onChangeShippingMethodSelector: function() {
+					var description = $( this ).find( 'option:selected' ).data( 'description' );
+					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
+					$( this ).after( '<p class="wc-shipping-zone-method-description">' + description + '</p>' );
+					$( this ).closest( 'article' ).height( $( this ).parent().height() );
 				}
 			} ),
 			shippingZone = new ShippingZone({

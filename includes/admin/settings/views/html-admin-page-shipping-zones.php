@@ -4,12 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Shipping Zones let you group regions with similar Shipping Methods and rates.', 'woocommerce' ) . ' ' . __( 'WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them.', 'woocommerce' ) ); ?></h2>
+<h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'A Shipping Zone is a group of regions that can be assigned different Shipping Methods &amp rates.', 'woocommerce' ) . ' ' . __( 'WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them.', 'woocommerce' ) ); ?></h2>
 
 <table class="wc-shipping-zones widefat">
     <thead>
         <tr>
-            <th class="wc-shipping-zone-sort">&nbsp;</th>
+            <th class="wc-shipping-zone-sort"><?php echo wc_help_tip( __( 'Drag and drop to re-order your custom zones. This is the order in which they will be matched against the customer address.', 'woocommerce' ) ); ?></th>
             <th class="wc-shipping-zone-name"><?php esc_html_e( 'Zone Name', 'woocommerce' ); ?></th>
             <th class="wc-shipping-zone-region"><?php esc_html_e( 'Region(s)', 'woocommerce' ); ?></th>
             <th class="wc-shipping-zone-methods"><?php esc_html_e( 'Shipping Method(s)', 'woocommerce' ); ?></th>
@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
 	<tr>
 		<td class="wc-shipping-zones-blank-state" colspan="5">
-			<p class="main"><?php _e( 'Shipping Zones let you group regions with similar Shipping Methods and rates.', 'woocommerce' ); ?></p>
+			<p class="main"><?php _e( 'A Shipping Zone is a group of regions that can be assigned different Shipping Methods &amp rates.', 'woocommerce' ); ?></p>
 			<p><?php _e( 'You can add as many Shipping Zones as you want, for example you could have "Local", "Domestic", and "Europe" zones.', 'woocommerce' ); ?></p>
 			<p><?php _e( 'Once a Shipping Zone has been added, you can add one or more Shipping Methods to it. Customers will only see Shipping Methods that apply to their address.', 'woocommerce' ); ?></p>
 			<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add Shipping Zone', 'woocommerce' ); ?></a>
@@ -114,7 +114,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<div class="view">
                 <ul></ul>
             </div>
-            <div class="edit"><?php _e( '<a href="#" class="wc-shipping-zone-save-changes">Save changes</a> before adding methods.', 'woocommerce' ); ?></div>
+            <div class="edit"><?php _e( '<a href="#" class="wc-shipping-zone-save-changes">Save changes</a> to start adding Shipping Methods to this zone.', 'woocommerce' ); ?></div>
 		</td>
         <td class="wc-shipping-zone-actions">
 			<a class="wc-shipping-zone-delete tips" data-tip="<?php _e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a>
@@ -141,7 +141,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 						if ( ! $method->supports( 'shipping-zones' ) ) {
                 							continue;
                                         }
-                						echo '<option value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</li>';
+                						echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</li>';
                 					}
                 				?>
                 			</select>

@@ -2304,12 +2304,12 @@ table.wc_shipping {
 table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-classes {
 	td, th {
 		vertical-align: top;
-		line-height: 30px;
+		line-height: 24px;
 		padding: 1em 1em;
 		font-size: 14px;
 		background: #fff;
 		li {
-			line-height: 30px;
+			line-height: 24px;
 			font-size: 14px;
 		}
 	}
@@ -2394,7 +2394,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			width: 17px;
 			float: left;
 			height: 100%;
-			line-height: 30px;
+			line-height: 24px;
 		}
 		&:hover {
 			&:before {
@@ -2414,7 +2414,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			width: 17px;
 			float: left;
 			height: 100%;
-			line-height: 30px;
+			line-height: 24px;
 		}
 	}
 	.wc-shipping-zone-method-enabled {
@@ -2448,7 +2448,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			float: right;
 			margin: 0;
 			font-size: 0.9em;
-			color: #999;
+			text-decoration: underline;
 		}
 		.wc-shipping-zone-postcodes {
 			display:none;
@@ -2501,7 +2501,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			&:before {
 				@include icon;
 				color: #999;
-				line-height: 30px;
+				line-height: 24px;
 			}
 			&:hover {
 				&:before {
@@ -2540,7 +2540,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			vertical-align: middle !important;
 		}
 		.button-primary {
-			float:right;
+			float: right;
 		}
 	}
 	.wc-shipping-zone-method-selector {
@@ -2557,8 +2557,15 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	}
 }
 
-.wc-backbone-modal .wc-shipping-zone-method-selector select {
-	width: 100%;
+.wc-backbone-modal .wc-shipping-zone-method-selector {
+	padding: 2px;
+	.wc-shipping-zone-method-description {
+		margin: 1em 0;
+		line-height: 1.5em;
+	}
+	select {
+		width: 100%;
+	}
 }
 
 img.help_tip {
