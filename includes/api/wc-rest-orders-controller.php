@@ -65,17 +65,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
-					'email' => array(
-						'required' => true,
-					),
-					'username' => array(
-						'required' => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
-					),
-					'password' => array(
-						'required' => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
-					),
-				) ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -132,7 +122,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @return boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'publish_shop_orders' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -483,6 +473,109 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Create order.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return int|WP_Error
+	 */
+	protected function create_order( $request ) {
+		wc_transaction_query( 'start' );
+
+		try {
+			$order = wc_create_order( array(
+				'status'        => $request['status'],
+				'customer_id'   => $request['customer_id'],
+				'customer_note' => $request['customer_note'],
+				'created_via'   => 'rest-api',
+			) );
+
+			if ( is_wp_error( $order ) ) {
+				throw new Exception( sprintf( __( 'Cannot create order: %s.', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
+			}
+
+			// Set addresses.
+			if ( ! empty( $request['billing'] ) ) {
+				$this->update_address( $order, $request['billing'], 'billing' );
+			}
+			if ( ! empty( $request['shipping'] ) ) {
+				$this->update_address( $order, $request['shipping'], 'shipping' );
+			}
+
+			wc_transaction_query( 'commit' );
+
+			return $order->id;
+		} catch ( Exception $e ) {
+			wc_transaction_query( 'rollback' );
+
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_create_error", $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Update address.
+	 *
+	 * @param WC_Order $order
+	 * @param array $posted
+	 * @param string $type
+	 */
+	protected function update_address( $order, $posted, $type = 'billing' ) {
+		$fields = $order->get_address( $type );
+
+		foreach ( array_keys( $fields ) as $field ) {
+			if ( isset( $posted[ $field ] ) ) {
+				$fields[ $field ] = $posted[ $field ];
+			}
+		}
+
+		// Set address.
+		$order->set_address( $fields, $type );
+
+		// Update user meta.
+		if ( $order->get_user_id() ) {
+			foreach ( $fields as $key => $value ) {
+				update_user_meta( $order->get_user_id(), $type . '_' . $key, $value );
+			}
+		}
+	}
+
+	/**
+	 * Create a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+		}
+
+		$order_id = $this->create_order( $request );
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+
+		$post = get_post( $order_id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ) );
+
+		return $response;
 	}
 
 	/**
