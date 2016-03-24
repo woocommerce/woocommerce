@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc-shipping-zone-methods widefat">
     <thead>
         <tr>
-            <th class="wc-shipping-zone-method-sort">&nbsp;</th>
+            <th class="wc-shipping-zone-method-sort"><?php echo wc_help_tip( __( 'Drag and drop to re-order your Shipping Methods. This is the order in which they will display during checkout.', 'woocommerce' ) ); ?></th>
             <th class="wc-shipping-zone-method-title"><?php esc_html_e( 'Title', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-method-type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-method-enabled"><?php esc_html_e( 'Enabled', 'woocommerce' ); ?></th>
@@ -61,4 +61,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<a class="wc-shipping-zone-method-delete tips" data-tip="<?php esc_attr_e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a><a class="wc-shipping-zone-method-settings tips" data-tip="<?php esc_attr_e( 'Settings', 'woocommerce' ); ?>" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php _e( 'Settings', 'woocommerce' ); ?></a>
 		</td>
     </tr>
+</script>
+
+<script type="text/template" id="tmpl-wc-modal-shipping-method-settings">
+	<div class="wc-backbone-modal">
+		<div class="wc-backbone-modal-content">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php echo esc_html( sprintf( __( '%s Settings', 'Shipping Method Settings', 'woocommerce' ), '{{{ data.method.title }}}' ) ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
+					</button>
+				</header>
+				<article class="wc-modal-shipping-method-settings">
+					<form action="" method="post">
+						{{{ data.method.settings_html }}}
+						<input type="hidden" name="instance_id" value="{{{ data.instance_id }}}" />
+					</form>
+				</article>
+				<footer>
+					<div class="inner">
+						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Save changes', 'woocommerce' ); ?></button>
+					</div>
+				</footer>
+			</section>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
 </script>

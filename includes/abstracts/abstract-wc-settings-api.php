@@ -97,12 +97,16 @@ abstract class WC_Settings_API {
 
 	/**
 	 * Get a field's posted and validated value.
+	 * @param string $key
+	 * @param array $field
+	 * @param array $post_data
 	 * @return string
 	 */
-	public function get_field_value( $key, $field ) {
+	public function get_field_value( $key, $field, $post_data = array() ) {
 		$type      = $this->get_field_type( $field );
 		$field_key = $this->get_field_key( $key );
-		$value     = isset( $_POST[ $field_key ] ) ? $_POST[ $field_key ] : null;
+		$post_data = empty( $post_data ) ? $_POST : $post_data;
+		$value     = isset( $post_data[ $field_key ] ) ? $post_data[ $field_key ] : null;
 
 		// Look for a validate_FIELDID_field method for special handling
 		if ( is_callable( array( $this, 'validate_' . $key . '_field' ) ) ) {
@@ -121,15 +125,20 @@ abstract class WC_Settings_API {
 	/**
 	 * Processes and saves options.
 	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
+	 * @param  array $post_data Defaults to $_POST but can be passed in.
 	 * @return bool was anything saved?
 	 */
-	public function process_admin_options() {
+	public function process_admin_options( $post_data = array() ) {
 		$this->init_settings();
+
+		if ( empty( $post_data ) ) {
+			$post_data = $_POST;
+		}
 
 		foreach ( $this->get_form_fields() as $key => $field ) {
 			if ( 'title' !== $this->get_field_type( $field ) ) {
 				try {
-					$this->settings[ $key ] = $this->get_field_value( $key, $field );
+					$this->settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
 				} catch ( Exception $e ) {
 					$this->add_error( $e->getMessage() );
 				}
@@ -148,12 +157,19 @@ abstract class WC_Settings_API {
 	}
 
 	/**
+	 * Get admin error messages.
+	 */
+	public function get_errors() {
+		return $this->errors;
+	}
+
+	/**
 	 * Display admin error messages.
 	 */
 	public function display_errors() {
-		if ( count( $this->errors ) > 0 ) {
+		if ( $this->get_errors() ) {
 			echo '<div id="woocommerce_errors" class="error notice is-dismissible">';
-			foreach ( $this->errors as $error ) {
+			foreach ( $this->get_errors() as $error ) {
 				echo '<p>' . wp_kses_post( $error ) . '</p>';
 			}
 			echo '</div>';

@@ -79,6 +79,10 @@
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
 					$('.wc-shipping-zone-add-method').on( 'click', { view: this }, this.onAdd );
+
+					// Settings modal
+					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
+					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
 				},
 				block: function() {
 					$( this.el ).block({
@@ -228,6 +232,59 @@
 
 					if ( _.size( changes ) ) {
 						model.logChanges( changes );
+					}
+				},
+				onConfigureShippingMethod: function( event ) {
+					var instance_id = $( this ).closest( 'tr' ).data( 'id' ),
+						model       = event.data.view.model,
+						methods     = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+						method      = methods[ instance_id ];
+
+					event.preventDefault();
+
+					$( this ).WCBackboneModal({
+						template : 'wc-modal-shipping-method-settings',
+						variable : {
+							instance_id : instance_id,
+							method      : method
+						},
+						data : {
+							instance_id : instance_id,
+							method      : method
+						}
+					});
+
+					$( document.body ).trigger( 'init_tooltips' );
+				},
+				onConfigureShippingMethodSubmitted: function( event, target, posted_data ) {
+					if ( 'wc-modal-shipping-method-settings' === target ) {
+						shippingMethodView.block();
+
+						// Save method settings via ajax call
+						$.post( ajaxurl + '?action=woocommerce_shipping_zone_methods_save_settings', {
+							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
+							instance_id             : posted_data.instance_id,
+							data                    : posted_data
+						}, function( response, textStatus ) {
+							if ( 'success' === textStatus && response.success ) {
+								$( 'table.wc-shipping-zone-methods' ).parent().find( '#woocommerce_errors' ).remove();
+
+								// If there were errors, prepend the form.
+								if ( response.data.errors.length > 0 ) {
+									var error_html = '<div id="woocommerce_errors" class="error notice is-dismissible">';
+									$( response.data.errors ).each( function( index, value ) {
+										error_html = error_html + '<p>' + value + '</p>';
+									} );
+									error_html = error_html + '</div>';
+									$( 'table.wc-shipping-zone-methods' ).before( error_html );
+								}
+
+								// Method was saved. Re-render.
+								shippingMethodView.model.set( 'methods', response.data.methods );
+								shippingMethodView.render();
+							}
+							shippingMethodView.unblock();
+						}, 'json' );
 					}
 				}
 			} ),

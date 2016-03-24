@@ -2484,6 +2484,12 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			li:last-child {
 				display: block;
 			}
+			li:first-child {
+				margin: 0 !important;
+			}
+			li.wc-shipping-zone-methods-add-row {
+				margin: .5em 0 0;
+			}
 		}
 		.button {
 			display: inline-block;
@@ -2497,11 +2503,16 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			float: right;
 			padding: .5em;
 			cursor: pointer;
+			line-height: 24px;
 
 			&:before {
 				@include icon;
+				font-family: 'Dashicons';
 				color: #999;
+				vertical-align: middle;
 				line-height: 24px;
+				font-size: 16px;
+				margin: 0;
 			}
 			&:hover {
 				&:before {
@@ -2512,7 +2523,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 
 		a.wc-shipping-zone-delete, a.wc-shipping-zone-method-delete, a.wc-shipping-class-delete {
 			&:before {
-				content: "\e013";
+				content: "\f158";
+				margin-top: 1px;
 			}
 			&:hover {
 				&:before {
@@ -2529,9 +2541,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 
 		a.wc-shipping-zone-method-settings {
 			&:before {
-				@include icon("\f111");
-				font-family: 'Dashicons';
-				line-height: 2.26;
+				content: "\f111";
 			}
 		}
 	}
@@ -2553,6 +2563,50 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	.editing {
 		.wc-shipping-zone-view, .wc-shipping-zone-edit {
 			display: none;
+		}
+	}
+}
+
+.wc-modal-shipping-method-settings {
+	background: #f8f8f8;
+	padding: 1em !important;
+	form {
+		.form-table {
+			width: 100%;
+			background: #fff;
+			margin: 0 0 1.5em;
+			tr {
+				th {
+					width: 30%;
+					position: relative;
+					.woocommerce-help-tip {
+						float: right;
+						margin: -8px -.5em 0 0;
+						vertical-align: middle;
+						right: 0;
+						top: 50%;
+						position: absolute;
+					}
+				}
+				td {
+					input, select, textarea {
+						width: 100%;
+					}
+					input[type="checkbox"] {
+						width: auto;
+					}
+				}
+				td, th {
+					vertical-align: middle;
+					margin: 0;
+					line-height: 24px;
+					padding: 1em;
+					border-bottom: 1px solid #f8f8f8;
+				}
+			}
+			&:last-of-type {
+				margin-bottom: 0;
+			}
 		}
 	}
 }
