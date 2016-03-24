@@ -217,6 +217,28 @@ class WC_API_Orders extends WC_API_Resource {
 			'coupon_lines'              => array(),
 			'is_vat_exempt'             => $order->is_vat_exempt === 'yes' ? true : false,
 		);
+        
+        // Add taxes.
+		foreach ( $order->get_tax_totals() as $tax_code => $tax ) {
+			$tax_line = array(
+				'id'       => $tax->id,
+				'rate_id'  => $tax->rate_id,
+				'code'     => $tax_code,
+				'title'    => $tax->label,
+				'total'    => wc_format_decimal( $tax->amount, $dp ),
+				'compound' => (bool) $tax->is_compound,
+			);
+
+			if ( in_array( 'taxes', $expand ) ) {
+				$_rate_data = WC()->api->WC_API_Taxes->get_tax( $tax->rate_id );
+
+				if ( isset( $_rate_data['tax'] ) ) {
+					$tax_line['rate_data'] = $_rate_data['tax'];
+				}
+			}
+
+			$order_data['tax_lines'][] = $tax_line;
+		}
 
 		// Add line items.
 		foreach ( $order->get_items() as $item_id => $item ) {
@@ -257,6 +279,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'product_id'   => $product_id,
 				'sku'          => $product_sku,
 				'meta'         => $item_meta,
+   				'taxes'	       => $this->add_tax_to_line_item($item['line_tax_data'], $order_data['tax_lines'])	
 			);
 
 			if ( in_array( 'products', $expand ) ) {
@@ -278,28 +301,6 @@ class WC_API_Orders extends WC_API_Resource {
 				'method_title' => $shipping_item['name'],
 				'total'        => wc_format_decimal( $shipping_item['cost'], $dp ),
 			);
-		}
-
-		// Add taxes.
-		foreach ( $order->get_tax_totals() as $tax_code => $tax ) {
-			$tax_line = array(
-				'id'       => $tax->id,
-				'rate_id'  => $tax->rate_id,
-				'code'     => $tax_code,
-				'title'    => $tax->label,
-				'total'    => wc_format_decimal( $tax->amount, $dp ),
-				'compound' => (bool) $tax->is_compound,
-			);
-
-			if ( in_array( 'taxes', $expand ) ) {
-				$_rate_data = WC()->api->WC_API_Taxes->get_tax( $tax->rate_id );
-
-				if ( isset( $_rate_data['tax'] ) ) {
-					$tax_line['rate_data'] = $_rate_data['tax'];
-				}
-			}
-
-			$order_data['tax_lines'][] = $tax_line;
 		}
 
 		// Add fees.
@@ -333,6 +334,28 @@ class WC_API_Orders extends WC_API_Resource {
 		}
 
 		return array( 'order' => apply_filters( 'woocommerce_api_order_response', $order_data, $order, $fields, $this->server ) );
+	}
+    
+    /**
+	 * Assign the correct taxes to the line item
+	 *
+	 * @param string $line_item_tax_data (serialized tax info)
+	 * @param array $taxes (taxes associated with the Order)
+	 * @return array
+	 */
+    function add_tax_to_line_item($line_item_tax_data, $taxes)
+	{
+		$tax_data = unserialize($line_item_tax_data);
+		
+		$line_item_taxes = array();
+        	foreach($taxes as $tax)
+        	{
+            		if(preg_match('/\S/', $tax_data["total"][$tax['rate_id']]))
+            		{
+                		array_push($line_item_taxes, $tax);
+            		}
+        	}
+        	return  $line_item_taxes;
 	}
 
 	/**
