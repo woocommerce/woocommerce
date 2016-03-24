@@ -25,20 +25,18 @@ class WC_Helper_Settings {
 	public static function register_groups( $groups ) {
 		$groups[] = array(
 			'id'          => 'test',
-			'type'        => 'page',
 			'bad'         => 'value',
 			'label'       => __( 'Test Extension', 'woocommerce' ),
 			'description' => __( 'My awesome test settings.', 'woocommerce' ),
 		);
 		$groups[] = array(
-			'id'          => 'test-2',
-			'type'        => 'page',
-			'label'       => __( 'Test Extension', 'woocommerce' ),
+			'id'          => 'sub-test',
+			'parent_id'   => 'test',
+			'label'       => __( 'Sub test', 'woocommerce' ),
 			'description' => '',
 		);
 		$groups[] = array(
 			'id'    => 'coupon-data',
-			'type'  => 'metabox',
 			'label' => __( 'Coupon Data', 'woocommerce' ),
 		);
 		$groups[] = array(
@@ -53,7 +51,7 @@ class WC_Helper_Settings {
 	 * @param  array $settings
 	 * @return array
 	 */
-	public static function register_settings( $settings ) {
+	public static function register_test_settings( $settings ) {
 		$settings[] = array(
 			'id' 	=> 'catalog_options',
 			'label' => __( 'Shop & Product Pages', 'woocommerce' ),
