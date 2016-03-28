@@ -907,6 +907,202 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Wrapper method to create/update order items.
+	 * When updating, the item ID provided is checked to ensure it is associated
+	 * with the order.
+	 *
+	 * @param WC_Order $order order
+	 * @param string $item_type
+	 * @param array $item item provided in the request body
+	 * @param string $action either 'create' or 'update'
+	 * @throws WC_REST_Exception If item ID is not associated with order
+	 */
+	protected function set_item( $order, $item_type, $item, $action ) {
+		global $wpdb;
+
+		$set_method = 'set_' . $item_type;
+
+		// Verify provided line item ID is associated with order.
+		if ( 'update' === $action ) {
+			$result = $wpdb->get_row(
+				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d AND order_id = %d",
+				absint( $item['id'] ),
+				absint( $order->id )
+			) );
+
+			if ( is_null( $result ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
+			}
+		}
+
+		$this->$set_method( $order, $item, $action );
+	}
+
+	/**
+	 * Helper method to check if the resource ID associated with the provided item is null.
+	 * Items can be deleted by setting the resource ID to null.
+	 *
+	 * @param array $item Item provided in the request body.
+	 * @return bool True if the item resource ID is null, false otherwise.
+	 */
+	protected function item_is_null( $item ) {
+		$keys = array( 'product_id', 'method_id', 'title', 'code' );
+
+		foreach ( $keys as $key ) {
+			if ( array_key_exists( $key, $item ) && is_null( $item[ $key ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Update order.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @param WP_Post $post Post data.
+	 * @return int|WP_Error
+	 */
+	protected function update_order( $request, $post ) {
+		try {
+			$update_totals = false;
+			$order         = wc_get_order( $post );
+			$order_args    = array( 'order_id' => $order->id );
+
+			// Customer note.
+			if ( isset( $request['customer_note'] ) ) {
+				$order_args['customer_note'] = $request['customer_note'];
+			}
+
+			// Customer ID.
+			if ( isset( $request['customer_id'] ) && $request['customer_id'] != $order->get_user_id() ) {
+				// Make sure customer exists.
+				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+				}
+
+				update_post_meta( $order->id, '_customer_user', $request['customer_id'] );
+			}
+
+			// Update addresses.
+			if ( is_array( $request['billing'] ) ) {
+				$this->update_address( $order, $request['billing'], 'billing' );
+			}
+			if ( is_array( $request['shipping'] ) ) {
+				$this->update_address( $order, $request['shipping'], 'shipping' );
+			}
+
+			$lines = array(
+				'line_item' => 'line_items',
+				'shipping'  => 'shipping_lines',
+				'fee'       => 'fee_lines',
+				'coupon'    => 'coupon_lines',
+			);
+
+			foreach ( $lines as $line_type => $line ) {
+				if ( isset( $request[ $line ] ) && is_array( $request[ $line ] ) ) {
+					$update_totals = true;
+					foreach ( $request[ $line ] as $item ) {
+						// Item ID is always required.
+						if ( ! array_key_exists( 'id', $item ) ) {
+							throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID is required.', 'woocommerce' ), 400 );
+						}
+
+						// Create item.
+						if ( is_null( $item['id'] ) ) {
+							$this->set_item( $order, $line_type, $item, 'create' );
+						} elseif ( $this->item_is_null( $item ) ) {
+							// Delete item.
+							wc_delete_order_item( $item['id'] );
+						} else {
+							// Update item.
+							$this->set_item( $order, $line_type, $item, 'update' );
+						}
+					}
+				}
+			}
+
+			// Set payment method.
+			if ( ! empty( $request['payment_method'] ) ) {
+				update_post_meta( $order->id, '_payment_method', $request['payment_method'] );
+			}
+			if ( ! empty( $request['payment_method_title'] ) ) {
+				update_post_meta( $order->id, '_payment_method_title', $request['payment_method'] );
+			}
+			if ( $order->needs_payment() && isset( $request['set_paid'] ) && true === $request['set_paid'] ) {
+				$order->payment_complete( ! empty( $request['transaction_id'] ) ? $request['transaction_id'] : '' );
+			}
+
+			// Set order currency.
+			if ( isset( $request['currency'] ) ) {
+				update_post_meta( $order->id, '_order_currency', $request['currency'] );
+			}
+
+			// If items have changed, recalculate order totals.
+			if ( $update_totals ) {
+				$order->calculate_totals();
+			}
+
+			// Update meta data.
+			if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
+				$this->update_meta_data( $order->id, $request['meta_data'] );
+			}
+
+			// Update the order post to set customer note/modified date.
+			wc_update_order( $order_args );
+
+			// Order status.
+			if ( ! empty( $request['status'] ) ) {
+				$order->update_status( $request['status'], isset( $request['status_note'] ) ? $request['status_note'] : '' );
+			}
+
+			return $order->id;
+		} catch ( WC_REST_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Update a single order.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$id   = (int) $request['id'];
+		$post = get_post( $id );
+
+		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$order_id = $this->update_order( $request, $post );
+		if ( is_wp_error( $order_id ) ) {
+			return $order_id;
+		}
+
+		// Clear transients.
+		wc_delete_shop_order_transients( $order_id );
+
+		$post = get_post( $order_id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+		return rest_ensure_response( $response );
+	}
+
+	/**
 	 * Get order statuses.
 	 *
 	 * @return array
