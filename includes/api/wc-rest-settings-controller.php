@@ -96,6 +96,14 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 		$defaults        = $this->group_defaults();
 		$filtered_groups = array();
 		foreach ( $groups as $group ) {
+			$sub_groups = array();
+			foreach ( $groups as $_group ) {
+				if ( ! empty( $_group['parent_id'] ) && $group['id'] === $_group['parent_id'] ) {
+					$sub_groups[] = $_group['id'];
+				}
+			}
+			$group['sub_groups'] = $sub_groups;
+
 			$group = wp_parse_args( $group, $defaults );
 			if ( ! is_null( $group['id'] ) && ! is_null( $group['label'] ) ) {
 				$filtered_groups[] = $this->filter_group( $group );
@@ -194,7 +202,14 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 				$value   = ( ! empty( $value ) ? $value : $default );
 			break;
 			case 'textarea' :
-				$value = wp_kses_post( trim( $raw_value ) );
+				$value = wp_kses( trim( $raw_value ),
+					array_merge(
+						array(
+							'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
+						),
+						wp_kses_allowed_html( 'post' )
+					)
+				);
 			break;
 			case 'multiselect' :
 			case 'multi_select_countries' :
@@ -239,7 +254,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$settings  = apply_filters( 'woocommerce_settings_' . $request['group'], array() );
+		$settings  = apply_filters( 'woocommerce_settings-' . $request['group'], array() );
 		$array_key = array_keys( wp_list_pluck( $settings, 'id' ), $request['setting'] );
 
 		if ( empty( $array_key ) ) {
@@ -278,9 +293,18 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 			return new WP_Error( 'rest_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
+		// Find sub groups
+		$sub_groups = array();
+		foreach ( $groups as $_group ) {
+			if ( ! empty( $_group['parent_id'] ) && $group['id'] === $_group['parent_id'] ) {
+				$sub_groups[] = $_group['id'];
+			}
+		}
+
 		$filtered_group             = $this->filter_group( $group );
 		$filtered_group['settings'] = array();
-		$settings                   = apply_filters( 'woocommerce_settings_' . $group['id'], array() );
+		$settings                   = apply_filters( 'woocommerce_settings-' . $group['id'], array() );
+
 		if ( ! empty( $settings ) ) {
 			foreach ( $settings as $setting ) {
 				$setting           = $this->filter_setting( $setting );
@@ -290,6 +314,8 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 				}
 			}
 		}
+
+		$filtered_group['sub_groups'] = $sub_groups;
 
 		return $filtered_group;
 	}
@@ -328,6 +354,13 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 				),
 				'parent_id'        => array(
 					'description'  => __( 'ID of parent grouping.', 'woocommerce' ),
+					'type'         => 'string',
+					'arg_options'  => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'sub_groups'        => array(
+					'description'  => __( 'IDs for settings sub groups.', 'woocommerce' ),
 					'type'         => 'string',
 					'arg_options'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -415,26 +448,26 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	 */
 	public function get_value( $setting, $default = '' ) {
 		if ( strstr( $setting, '[' ) ) { // Array value
-			parse_str( $setting, $setting_array );
-			$setting = current( array_keys( $setting ) );
-			$values  = get_option( $setting, '' );
-			$key = key( $setting_array[ $setting ] );
-			if ( isset( $values[ $key ] ) ) {
-				$value = $values[ $key ];
-			} else {
-				$value = null;
-			}
-		} else { // Single value
-			$value = get_option( $setting, null );
-		}
+            parse_str( $setting, $setting_array );
+            $setting = current( array_keys( $setting ) );
+            $values  = get_option( $setting, '' );
+            $key = key( $setting_array[ $setting ] );
+            if ( isset( $values[ $key ] ) ) {
+                $value = $values[ $key ];
+            } else {
+                $value = null;
+            }
+        } else { // Single value
+            $value = get_option( $setting, null );
+        }
 
-		if ( is_array( $setting ) ) {
-			$value = array_map( 'stripslashes', $value );
-		} elseif ( ! is_null( $value ) ) {
-			$value = stripslashes( $value );
-		}
+        if ( is_array( $value ) ) {
+            $value = array_map( 'stripslashes', $value );
+        } elseif ( ! is_null( $value ) ) {
+            $value = stripslashes( $value );
+        }
 
-		return $value === null ? $default : $value;
+        return $value === null ? $default : $value;
 	}
 
 	/**
@@ -478,7 +511,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	 * @return boolean
 	 */
 	public function allowed_group_keys( $key ) {
-		return in_array( $key, array( 'id', 'label', 'description', 'parent_id' ) );
+		return in_array( $key, array( 'id', 'label', 'description', 'parent_id', 'sub_groups' ) );
 	}
 
 	/**
@@ -518,6 +551,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 			'label'         => null,
 			'description'   => '',
 			'parent_id'     => '',
+			'sub_groups'    => array(),
 		);
 	}
 

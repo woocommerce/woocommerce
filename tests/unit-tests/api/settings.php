@@ -56,28 +56,22 @@ class Settings extends \WC_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 3, count( $data ) );
 
-		$this->check_get_group_response( $data[0], array(
+		$this->assertContains( array(
 			'id'          => 'test',
 			'label'       => 'Test Extension',
 			'parent_id'   => '',
 			'description' => 'My awesome test settings.',
-		) );
+			'sub_groups' => array( 'sub-test' ),
+		), $data );
 
-		$this->check_get_group_response( $data[1], array(
+		$this->assertContains( array(
 			'id'          => 'sub-test',
 			'label'       => 'Sub test',
 			'parent_id'   => 'test',
 			'description' => '',
-		) );
-
-		$this->check_get_group_response( $data[2], array(
-			'id'          => 'coupon-data',
-			'label'       => 'Coupon Data',
-			'parent_id'   => '',
-			'description' => '',
-		) );
+			'sub_groups'  => array(),
+		), $data );
 	}
 
 	/**
@@ -92,21 +86,6 @@ class Settings extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test /settings/ correctly filters out bad values.
-	 * Handles required fields and bogus fields.
-	 * @since 2.7.0
-	 */
-	public function test_get_groups_correctly_filters_values() {
-		wp_set_current_user( $this->user );
-
-		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings' ) );
-		$data = $response->get_data();
-
-		$this->assertEquals( 'test', $data[0]['id'] );
-		$this->assertArrayNotHasKey( 'bad', $data[0] );
-	}
-
-	/**
 	 * Test groups schema.
 	 * @since 2.7.0
 	 */
@@ -115,11 +94,12 @@ class Settings extends \WC_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 4, count( $properties ) );
+		$this->assertEquals( 5, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'parent_id', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
+		$this->assertArrayHasKey( 'sub_groups', $properties );
 	}
 
 	/**
@@ -172,15 +152,17 @@ class Settings extends \WC_Unit_Test_Case {
 			'description' => '',
 		) );
 
+		$this->assertEmpty( $data['sub_groups'] );
+
 		// test getting a valid group with settings attached to it
 		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/test' ) );
 		$data = $response->get_data();
-
 		$this->assertEquals( 2, count( $data['settings'] ) );
 		$this->assertEquals( 'woocommerce_shop_page_display', $data['settings'][0]['id'] );
 		$this->assertEmpty( $data['settings'][0]['value'] );
 		$this->assertEquals( 'woocommerce_enable_lightbox', $data['settings'][1]['id'] );
 		$this->assertEquals( 'yes', $data['settings'][1]['value'] );
+		$this->assertEquals( array( 'sub-test' ), $data['sub_groups'] );
 	}
 
 	/**
@@ -426,6 +408,46 @@ class Settings extends \WC_Unit_Test_Case {
 		$this->assertEquals( array( 'width' => '100%', 'height' => '25px', 'crop' => 1 ), $value );
 		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'image_width', 'default' => array( 'width' => '50px', 'height' => '50px', 'crop' => true ) ), array() );
 		$this->assertEquals( array( 'width' => '50px', 'height' => '50px', 'crop' => 1 ), $value );
+	}
+
+	/**
+	* Tests our classic setting registeration to make sure settings added for WP-Admin are available over the API.
+	* @since  2.7.0
+	*/
+	public function test_classic_settings() {
+		wp_set_current_user( $this->user );
+
+		// Make sure the group is properly registered
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/products' ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 'products', $data['id'] );
+		$this->assertContains( array(
+			'id' => 'woocommerce_downloads_require_login',
+			'label' => 'Access Restriction',
+			'description' => 'Downloads require login',
+			'type' => 'checkbox',
+			'default' => 'no',
+			'tip' => 'This setting does not apply to guest purchases.',
+			'value' => 'no',
+		), $data['settings'] );
+
+		// test get single
+		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wc/v1/settings/products/woocommerce_dimension_unit' ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 'cm', $data['default'] );
+
+		// test update
+		$request = new \WP_REST_Request( 'PUT', sprintf( '/wc/v1/settings/%s/%s', 'products', 'woocommerce_dimension_unit' ) );
+		$request->set_body_params( array(
+			'value' => 'yd',
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 'yd', $data['value'] );
+		$this->assertEquals( 'yd', get_option(' woocommerce_dimension_unit' ) );
 	}
 
 	/**
