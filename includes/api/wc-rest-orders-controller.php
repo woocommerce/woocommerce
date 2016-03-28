@@ -487,7 +487,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		try {
 			// Make sure customer exists.
 			if ( 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
-				throw new Exception( __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 			}
 
 			$order = wc_create_order( array(
@@ -498,7 +498,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			) );
 
 			if ( is_wp_error( $order ) ) {
-				throw new Exception( sprintf( __( 'Cannot create order: %s.', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_order', sprintf( __( 'Cannot create order: %s.', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
 			}
 
 			// Set addresses.
@@ -511,6 +511,26 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 
 			// Set currency.
 			update_post_meta( $order->id, '_order_currency', $request['currency'] );
+
+			// Set lines.
+			$lines = array(
+				'line_item' => 'line_items',
+				'shipping'  => 'shipping_lines',
+				'fee'       => 'fee_lines',
+				'coupon'    => 'coupon_lines',
+			);
+
+			foreach ( $lines as $line_type => $line ) {
+				if ( is_array( $request[ $line ] ) ) {
+					foreach ( $request[ $line ] as $item ) {
+						$set_item = 'set_' . $line_type;
+						$new_item = $this->$set_item( $order, $item, 'create' );
+					}
+				}
+			}
+
+			// Calculate totals and set them.
+			$order->calculate_totals();
 
 			// Set payment method.
 			if ( ! empty( $request['payment_method'] ) ) {
@@ -531,10 +551,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			wc_transaction_query( 'commit' );
 
 			return $order->id;
-		} catch ( Exception $e ) {
+		} catch ( WC_REST_Exception $e ) {
 			wc_transaction_query( 'rollback' );
 
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_create_error", $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
@@ -561,6 +581,270 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		if ( $order->get_user_id() ) {
 			foreach ( $fields as $key => $value ) {
 				update_user_meta( $order->get_user_id(), $type . '_' . $key, $value );
+			}
+		}
+	}
+
+	/**
+	 * Create or update a line item.
+	 *
+	 * @param WC_Order $order Order data.
+	 * @param array $item Line item data.
+	 * @param string $action 'create' to add line item or 'update' to update it.
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function set_line_item( $order, $item, $action = 'create' ) {
+		$creating  = 'create' === $action;
+		$item_args = array();
+
+		// Product is always required.
+		if ( empty( $item['product_id'] ) && empty( $item['sku'] ) && empty( $item['variation_id'] ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+		}
+
+		if ( ! empty( $item['product_id'] ) ) {
+			$product_id = (int) $item['product_id'];
+		} else if ( ! empty( $item['sku'] ) ) {
+			$product_id = (int) wc_get_product_id_by_sku( $item['sku'] );
+		} else if ( ! empty( $item['variation_id'] ) ) {
+			$product_id = (int) $item['variation_id'];
+		}
+
+		// When updating, ensure product ID provided matches.
+		if ( 'update' === $action && ! empty( $item['id'] ) ) {
+			$item_product_id   = (int) wc_get_order_item_meta( $item['id'], '_product_id' );
+			$item_variation_id = (int) wc_get_order_item_meta( $item['id'], '_variation_id' );
+
+			if ( $product_id !== $item_product_id && $product_id !== $item_variation_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or variation ID provided does not match this line item.', 'woocommerce' ), 400 );
+			}
+		}
+
+		$product = wc_get_product( $product_id );
+
+		// Must be a valid WC_Product.
+		if ( ! is_object( $product ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product', __( 'Product is invalid.', 'woocommerce' ), 400 );
+		}
+
+		// Quantity must be positive float.
+		if ( isset( $item['quantity'] ) && 0 >= floatval( $item['quantity'] ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_quantity', __( 'Product quantity must be a positive float.', 'woocommerce' ), 400 );
+		}
+
+		// Quantity is required when creating.
+		if ( $creating && ! isset( $item['quantity'] ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_quantity', __( 'Product quantity is required.', 'woocommerce' ), 400 );
+		}
+
+		// Get variation attributes.
+		if ( method_exists( $product, 'get_variation_attributes' ) ) {
+			$item_args['variation'] = $product->get_variation_attributes();
+		}
+
+		// Quantity.
+		if ( isset( $item['quantity'] ) ) {
+			$item_args['qty'] = $item['quantity'];
+		}
+
+		// Total.
+		if ( isset( $item['total'] ) ) {
+			$item_args['totals']['total'] = floatval( $item['total'] );
+		}
+
+		// Total tax.
+		if ( isset( $item['total_tax'] ) ) {
+			$item_args['totals']['tax'] = floatval( $item['total_tax'] );
+		}
+
+		// Subtotal.
+		if ( isset( $item['subtotal'] ) ) {
+			$item_args['totals']['subtotal'] = floatval( $item['subtotal'] );
+		}
+
+		// Subtotal tax.
+		if ( isset( $item['subtotal_tax'] ) ) {
+			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
+		}
+
+		if ( $creating ) {
+			$item_id = $order->add_product( $product, $item_args['qty'], $item_args );
+			if ( ! $item_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
+			}
+		} else {
+			$item_id = $order->update_product( $item['id'], $product, $item_args );
+			if ( ! $item_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_update_line_item', __( 'Cannot update line item, try again.', 'woocommerce' ), 500 );
+			}
+		}
+	}
+
+	/**
+	 * Create or update an order shipping method.
+	 *
+	 * @param WC_Order $order Order data.
+	 * @param array $shipping Item data.
+	 * @param string $action 'create' to add shipping or 'update' to update it.
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function set_shipping( $order, $shipping, $action ) {
+		// Total must be a positive float.
+		if ( ! empty( $shipping['total'] ) && 0 > floatval( $shipping['total'] ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_shipping_total', __( 'Shipping total must be a positive amount.', 'woocommerce' ), 400 );
+		}
+
+		if ( 'create' === $action ) {
+			// Method ID is required.
+			if ( empty( $shipping['method_id'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
+			}
+
+			$rate = new WC_Shipping_Rate( $shipping['method_id'], isset( $shipping['method_title'] ) ? $shipping['method_title'] : '', isset( $shipping['total'] ) ? floatval( $shipping['total'] ) : 0, array(), $shipping['method_id'] );
+
+			$shipping_id = $order->add_shipping( $rate );
+
+			if ( ! $shipping_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_shipping', __( 'Cannot create shipping method, try again.', 'woocommerce' ), 500 );
+			}
+
+		} else {
+			$shipping_args = array();
+
+			if ( isset( $shipping['method_id'] ) ) {
+				$shipping_args['method_id'] = $shipping['method_id'];
+			}
+
+			if ( isset( $shipping['method_title'] ) ) {
+				$shipping_args['method_title'] = $shipping['method_title'];
+			}
+
+			if ( isset( $shipping['total'] ) ) {
+				$shipping_args['cost'] = floatval( $shipping['total'] );
+			}
+
+			$shipping_id = $order->update_shipping( $shipping['id'], $shipping_args );
+
+			if ( ! $shipping_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_update_shipping', __( 'Cannot update shipping method, try again.', 'woocommerce' ), 500 );
+			}
+		}
+	}
+
+	/**
+	 * Create or update an order fee.
+	 *
+	 * @param WC_Order $order Order data.
+	 * @param array $fee Item data.
+	 * @param string $action 'create' to add fee or 'update' to update it.
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function set_fee( $order, $fee, $action ) {
+		if ( 'create' === $action ) {
+
+			// Fee name is required.
+			if ( empty( $fee['name'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
+			}
+
+			$fee_data            = new stdClass();
+			$fee_data->id        = sanitize_title( $fee['name'] );
+			$fee_data->name      = $fee['name'];
+			$fee_data->amount    = isset( $fee['total'] ) ? floatval( $fee['total'] ) : 0;
+			$fee_data->taxable   = false;
+			$fee_data->tax       = 0;
+			$fee_data->tax_data  = array();
+			$fee_data->tax_class = '';
+
+			// If taxable, tax class and total are required.
+			if ( isset( $fee['tax_status'] ) && 'taxable' === $fee['tax_status'] ) {
+
+				if ( ! isset( $fee['tax_class'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee tax class is required when fee is taxable.', 'woocommerce' ), 400 );
+				}
+
+				$fee_data->taxable   = true;
+				$fee_data->tax_class = $fee['tax_class'];
+
+				if ( isset( $fee['total_tax'] ) ) {
+					$fee_data->tax = isset( $fee['total_tax'] ) ? wc_format_refund_total( $fee['total_tax'] ) : 0;
+				}
+			}
+
+			$fee_id = $order->add_fee( $fee_data );
+
+			if ( ! $fee_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_fee', __( 'Cannot create fee, try again.', 'woocommerce' ), 500 );
+			}
+
+		} else {
+			$fee_args = array();
+
+			if ( isset( $fee['name'] ) ) {
+				$fee_args['name'] = $fee['name'];
+			}
+
+			if ( isset( $fee['tax_class'] ) ) {
+				$fee_args['tax_class'] = $fee['tax_class'];
+			}
+
+			if ( isset( $fee['total'] ) ) {
+				$fee_args['line_total'] = floatval( $fee['total'] );
+			}
+
+			if ( isset( $fee['total_tax'] ) ) {
+				$fee_args['line_tax'] = floatval( $fee['total_tax'] );
+			}
+
+			$fee_id = $order->update_fee( $fee['id'], $fee_args );
+
+			if ( ! $fee_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_update_fee', __( 'Cannot update fee, try again.', 'woocommerce' ), 500 );
+			}
+		}
+	}
+
+	/**
+	 * Create or update an order coupon.
+	 *
+	 * @param WC_Order $order Order data.
+	 * @param array $coupon Item data.
+	 * @param string $action 'create' to add coupon or 'update' to update it.
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function set_coupon( $order, $coupon, $action ) {
+		// Coupon discount must be positive float.
+		if ( isset( $coupon['discount'] ) && 0 > floatval( $coupon['discount'] ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_total', __( 'Coupon discount must be a positive amount.', 'woocommerce' ), 400 );
+		}
+
+		if ( 'create' === $action ) {
+			// Coupon code is required.
+			if ( empty( $coupon['code'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+			}
+
+			$coupon_id = $order->add_coupon( $coupon['code'], floatval( $coupon['discount'] ) );
+
+			if ( ! $coupon_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_order_coupon', __( 'Cannot create coupon, try again.', 'woocommerce' ), 500 );
+			}
+
+		} else {
+			$coupon_args = array();
+
+			if ( isset( $coupon['code'] ) ) {
+				$coupon_args['code'] = $coupon['code'];
+			}
+
+			if ( isset( $coupon['discount'] ) ) {
+				$coupon_args['discount_amount'] = floatval( $coupon['discount'] );
+			}
+
+			$coupon_id = $order->update_coupon( $coupon['id'], $coupon_args );
+
+			if ( ! $coupon_id ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_cannot_update_order_coupon', __( 'Cannot update coupon, try again.', 'woocommerce' ), 500 );
 			}
 		}
 	}
@@ -597,6 +881,9 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		if ( is_wp_error( $order_id ) ) {
 			return $order_id;
 		}
+
+		// Clear transients.
+		wc_delete_shop_order_transients( $order_id );
 
 		$post = get_post( $order_id );
 		$this->update_additional_fields_for_object( $post, $request );
@@ -980,25 +1267,21 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'subtotal_tax' => array(
 							'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'total' => array(
 							'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'total_tax' => array(
 							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'taxes' => array(
 							'description' => __( 'Line total tax.', 'woocommerce' ),
@@ -1119,7 +1402,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Shipping method name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'method_id' => array(
 							'description' => __( 'Shipping method ID.', 'woocommerce' ),
@@ -1130,7 +1412,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'total_tax' => array(
 							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
@@ -1175,7 +1456,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Fee name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'tax_class' => array(
 							'description' => __( 'Tax class of fee.', 'woocommerce' ),
@@ -1186,19 +1466,16 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Tax status of fee.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'total' => array(
 							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'total_tax' => array(
 							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'taxes' => array(
 							'description' => __( 'Line total tax.', 'woocommerce' ),
