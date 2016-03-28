@@ -339,6 +339,82 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Create a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+		}
+
+		$order_data = get_post( (int) $request['order_id'] );
+
+		if ( empty( $order_data ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_order', __( 'Order is invalid', 'woocommerce' ), 400 );
+		}
+
+		if ( 0 > $request['amount'] ) {
+			return new WP_Error( 'woocommerce_rest_invalid_order_refund', __( 'Refund amount must be greater than zero.', 'woocommerce' ), 400 );
+		}
+
+		$api_refund = is_bool( $request['api_refund'] ) ? $request['api_refund'] : true;
+
+		$data = array(
+			'order_id'   => $order_data->ID,
+			'amount'     => $request['amount'],
+			'line_items' => $request['line_items'],
+		);
+
+		// Create the refund.
+		$refund = wc_create_refund( $data );
+
+		if ( ! $refund ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
+		}
+
+		// Refund via API.
+		if ( $api_refund ) {
+			if ( WC()->payment_gateways() ) {
+				$payment_gateways = WC()->payment_gateways->payment_gateways();
+			}
+
+			$order = wc_get_order( $order_data );
+
+			if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
+				$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				} elseif ( ! $result ) {
+					return new WP_Error( 'woocommerce_rest_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API', 'woocommerce' ), 500 );
+				}
+			}
+		}
+
+		$post = get_post( $refund->id );
+		$this->update_additional_fields_for_object( $post, $request );
+
+		/**
+		 * Fires after a single item is created or updated via the REST API.
+		 *
+		 * @param object          $post      Inserted object (not a WP_Post object).
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $post, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ) );
+
+		return $response;
+	}
+
+	/**
 	 * Get the Order's schema, conforming to JSON Schema.
 	 *
 	 * @return array
