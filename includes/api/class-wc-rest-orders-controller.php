@@ -1410,7 +1410,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'line_items' => array(
-					'description' => __( 'Last order data.', 'woocommerce' ),
+					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
@@ -1534,7 +1534,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'tax_lines' => array(
-					'description' => __( 'Last order data.', 'woocommerce' ),
+					'description' => __( 'Tax lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1584,7 +1584,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'shipping_lines' => array(
-					'description' => __( 'Last order data.', 'woocommerce' ),
+					'description' => __( 'Shipping lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
@@ -1638,7 +1638,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'fee_lines' => array(
-					'description' => __( 'Last order data.', 'woocommerce' ),
+					'description' => __( 'Fee lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
@@ -1702,7 +1702,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'coupon_lines' => array(
-					'description' => __( 'Last order data.', 'woocommerce' ),
+					'description' => __( 'Coupons line data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
