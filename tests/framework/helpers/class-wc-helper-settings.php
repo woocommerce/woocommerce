@@ -13,7 +13,7 @@ class WC_Helper_Settings {
 	 */
 	public static function register() {
 		add_filter( 'woocommerce_settings_groups', array( 'WC_Helper_Settings', 'register_groups' ) );
-		add_filter( 'woocommerce_settings_test', array( 'WC_Helper_Settings', 'register_test_settings' ) );
+		add_filter( 'woocommerce_settings-test', array( 'WC_Helper_Settings', 'register_test_settings' ) );
 	}
 
 	/**
@@ -52,11 +52,6 @@ class WC_Helper_Settings {
 	 * @return array
 	 */
 	public static function register_test_settings( $settings ) {
-		$settings[] = array(
-			'id' 	=> 'catalog_options',
-			'label' => __( 'Shop & Product Pages', 'woocommerce' ),
-			'type' 	=> 'title',
-		);
 		$settings[] = array(
 			'id'          => 'woocommerce_shop_page_display',
 			'label'       => __( 'Shop Page Display', 'woocommerce' ),
