@@ -171,6 +171,160 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Prepare a single order refund output for response.
+	 *
+	 * @param WP_Post $post Post object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $data
+	 */
+	public function prepare_item_for_response( $post, $request ) {
+		global $wpdb;
+
+		$order = wc_get_order( (int) $request['order_id'] );
+
+		if ( ! $order ) {
+			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
+		}
+
+		$refund = wc_get_order( $post );
+
+		if ( ! $refund || intval( $refund->post->post_parent ) !== intval( $order->id ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
+		}
+
+		$dp = ! empty( $request['dp'] ) ? intval( $request['dp'] ) : 2;
+
+		$data = array(
+			'id'           => $refund->id,
+			'date_created' => wc_rest_api_prepare_date_response( $refund->date ),
+			'amount'       => wc_format_decimal( $refund->get_refund_amount(), $dp ),
+			'reason'       => $refund->get_refund_reason(),
+			'line_items'   => array(),
+		);
+
+		// Add line items.
+		foreach ( $refund->get_items() as $item_id => $item ) {
+			$product      = $refund->get_product_from_item( $item );
+			$product_id   = 0;
+			$variation_id = 0;
+			$product_sku  = null;
+
+			// Check if the product exists.
+			if ( is_object( $product ) ) {
+				$product_id   = $product->id;
+				$variation_id = $product->variation_id;
+				$product_sku  = $product->get_sku();
+			}
+
+			$meta = new WC_Order_Item_Meta( $item, $product );
+
+			$item_meta = array();
+
+			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
+
+			foreach ( $meta->get_formatted( $hideprefix ) as $meta_key => $formatted_meta ) {
+				$item_meta[] = array(
+					'key'   => $formatted_meta['key'],
+					'label' => $formatted_meta['label'],
+					'value' => $formatted_meta['value'],
+				);
+			}
+
+			$line_item = array(
+				'id'           => $item_id,
+				'name'         => $item['name'],
+				'sku'          => $product_sku,
+				'product_id'   => (int) $product_id,
+				'variation_id' => (int) $variation_id,
+				'quantity'     => wc_stock_amount( $item['qty'] ),
+				'tax_class'    => ! empty( $item['tax_class'] ) ? $item['tax_class'] : '',
+				'price'        => wc_format_decimal( $refund->get_item_total( $item, false, false ), $dp ),
+				'subtotal'     => wc_format_decimal( $refund->get_line_subtotal( $item, false, false ), $dp ),
+				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
+				'total'        => wc_format_decimal( $refund->get_line_total( $item, false, false ), $dp ),
+				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
+				'taxes'        => array(),
+				'meta'         => $item_meta,
+			);
+
+			$item_line_taxes = maybe_unserialize( $item['line_tax_data'] );
+			if ( isset( $item_line_taxes['total'] ) ) {
+				$line_tax = array();
+
+				foreach ( $item_line_taxes['total'] as $tax_rate_id => $tax ) {
+					$line_tax[ $tax_rate_id ] = array(
+						'id'       => $tax_rate_id,
+						'total'    => $tax,
+						'subtotal' => '',
+					);
+				}
+
+				foreach ( $item_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
+					$line_tax[ $tax_rate_id ]['subtotal'] = $tax;
+				}
+
+				$line_item['taxes'] = array_values( $line_tax );
+			}
+
+			// if ( in_array( 'products', $expand ) ) {
+			// 	$_product_data = WC()->api->WC_API_Products->get_product( $product_id );
+
+			// 	if ( isset( $_product_data['product'] ) ) {
+			// 		$line_item['product_data'] = $_product_data['product'];
+			// 	}
+			// }
+
+			$data['line_items'][] = $line_item;
+		}
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $refund ) );
+
+		/**
+		 * Filter the data for a response.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
+		 * prepared for the response.
+		 *
+		 * @param WP_REST_Response   $response   The response object.
+		 * @param WP_Post            $post       Post object.
+		 * @param WP_REST_Request    $request    Request object.
+		 */
+		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param WC_Order_Refund $refund Comment object.
+	 * @return array Links for the given order refund.
+	 */
+	protected function prepare_links( $refund ) {
+		$order_id = $refund->post->post_parent;
+		$base = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
+
+		$links = array(
+			'self' => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $refund->id ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
+			),
+			'up' => array(
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order_id ) ),
+			),
+		);
+
+		return $links;
+	}
+
+	/**
 	 * Query args.
 	 *
 	 * @param array $args

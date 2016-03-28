@@ -172,7 +172,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Prepare a single coupon output for response.
+	 * Prepare a single order output for response.
 	 *
 	 * @param WP_Post $post Post object.
 	 * @param WP_REST_Request $request Request object.
