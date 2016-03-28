@@ -370,7 +370,7 @@ class WC_API {
 		include_once( 'api/class-wc-rest-exception.php' );
 
 		// Authentication.
-		include_once( 'api/wc-rest-authentication.php' );
+		include_once( 'api/class-wc-rest-authentication.php' );
 
 		// WP-API classes and functions.
 		include_once( 'vendor/wp-api-functions.php' );
@@ -383,24 +383,24 @@ class WC_API {
 		include_once( 'abstracts/abstract-wc-rest-terms-controller.php' );
 
 		// REST API controllers.
-		include_once( 'api/wc-rest-coupons-controller.php' );
-		include_once( 'api/wc-rest-customers-controller.php' );
-		include_once( 'api/wc-rest-order-notes-controller.php' );
-		include_once( 'api/wc-rest-order-refunds-controller.php' );
-		include_once( 'api/wc-rest-orders-controller.php' );
-		include_once( 'api/wc-rest-product-attribute-terms-controller.php' );
-		include_once( 'api/wc-rest-product-attributes-controller.php' );
-		include_once( 'api/wc-rest-product-categories-controller.php' );
-		include_once( 'api/wc-rest-product-shipping-classes-controller.php' );
-		include_once( 'api/wc-rest-product-tags-controller.php' );
-		include_once( 'api/wc-rest-products-controller.php' );
-		include_once( 'api/wc-rest-report-sales-controller.php' );
-		include_once( 'api/wc-rest-report-top-sellers-controller.php' );
-		include_once( 'api/wc-rest-reports-controller.php' );
-		include_once( 'api/wc-rest-tax-classes-controller.php' );
-		include_once( 'api/wc-rest-taxes-controller.php' );
-		include_once( 'api/wc-rest-webhook-deliveries.php' );
-		include_once( 'api/wc-rest-webhooks-controller.php' );
+		include_once( 'api/class-wc-rest-coupons-controller.php' );
+		include_once( 'api/class-wc-rest-customers-controller.php' );
+		include_once( 'api/class-wc-rest-order-notes-controller.php' );
+		include_once( 'api/class-wc-rest-order-refunds-controller.php' );
+		include_once( 'api/class-wc-rest-orders-controller.php' );
+		include_once( 'api/class-wc-rest-product-attribute-terms-controller.php' );
+		include_once( 'api/class-wc-rest-product-attributes-controller.php' );
+		include_once( 'api/class-wc-rest-product-categories-controller.php' );
+		include_once( 'api/class-wc-rest-product-shipping-classes-controller.php' );
+		include_once( 'api/class-wc-rest-product-tags-controller.php' );
+		include_once( 'api/class-wc-rest-products-controller.php' );
+		include_once( 'api/class-wc-rest-report-sales-controller.php' );
+		include_once( 'api/class-wc-rest-report-top-sellers-controller.php' );
+		include_once( 'api/class-wc-rest-reports-controller.php' );
+		include_once( 'api/class-wc-rest-tax-classes-controller.php' );
+		include_once( 'api/class-wc-rest-taxes-controller.php' );
+		include_once( 'api/class-wc-rest-webhook-deliveries.php' );
+		include_once( 'api/class-wc-rest-webhooks-controller.php' );
 	}
 
 	/**
