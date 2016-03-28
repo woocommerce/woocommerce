@@ -92,7 +92,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
-						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
 					),
 					'reassign' => array(),
 				),
