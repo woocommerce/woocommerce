@@ -537,6 +537,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 		return in_array( $type, array(
 			'text', 'email', 'number', 'color', 'password',
 			'textarea', 'select', 'multiselect', 'radio', 'checkbox',
+			'multi_select_countries', 'image_width',
 		) );
 	}
 
@@ -563,7 +564,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Controller {
 	protected function setting_defaults() {
 		return array(
 			'id'            => null,
-			'label'         => null,
+			'label'         => '',
 			'type'          => null,
 			'description'   => '',
 			'tip'           => '',

@@ -23,7 +23,22 @@ class WC_Register_Classic_Settings {
 	 */
 	public function __construct( $page ) {
 		$this->page = $page;
-		add_filter( 'woocommerce_settings-' . $this->page->get_id() . '', array( $this, 'register_classic_settings' ) );
+		add_filter( 'woocommerce_settings_groups', array( $this, 'register_classic_group' ) );
+		add_filter( 'woocommerce_settings-' . $this->page->get_id(),  array( $this, 'register_classic_settings' ) );
+	}
+
+	/**
+	* Registers a setting group.
+	* @since  2.7.0
+	* @param  array $group
+	* @return array
+	*/
+	public function register_classic_group( $groups ) {
+		$groups[] = array(
+			'id'    => $this->page->get_id(),
+			'label' => $this->page->get_label(),
+		);
+		return $groups;
 	}
 
 	/**
@@ -68,21 +83,14 @@ class WC_Register_Classic_Settings {
 }
 
 /**
- * Register full settings sections to a single group.
+ * Register full classic settings to the REST API.
  * @since  2.7.0
- * @param  array $groups Existing registered groups.
- * @return array
  */
- function wc_settings_api_register_classic_groups( $groups ) {
-	$pages = WC_Admin_Settings::get_settings_pages();
-	foreach ( $pages as $page ) {
-		$groups[] = array(
-			'id'    => $page->get_id(),
-			'label' => $page->get_label(),
-		);
-		new WC_Register_Classic_Settings( $page );
-	}
-	return $groups;
-}
+ function wc_settings_api_register_classic() {
+	 $pages = WC_Admin_Settings::get_settings_pages();
+	 foreach ( $pages as $page ) {
+		 new WC_Register_Classic_Settings( $page );
+	 }
+ }
 
-add_action( 'woocommerce_settings_groups', 'wc_settings_api_register_classic_groups' );
+add_action( 'rest_api_init', 'wc_settings_api_register_classic' );
