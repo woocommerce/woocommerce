@@ -429,7 +429,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Order $order Comment object.
+	 * @param WC_Order $order Order object.
 	 * @return array Links for the given order.
 	 */
 	protected function prepare_links( $order ) {
