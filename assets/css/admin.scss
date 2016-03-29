@@ -1920,7 +1920,7 @@ table.wp-list-table {
 		margin: 0 auto;
 
 		&:before {
-			@include icon( "\e00c" );
+			@include icon_dashicons( "\f128" );
 		}
 	}
 
@@ -1929,13 +1929,11 @@ table.wp-list-table {
 		cursor: pointer;
 
 		&:before {
-			font-family: "Dashicons";
 			content: "\f155";
 		}
 
 		&.not-featured {
 			&:before {
-				font-family: "Dashicons";
 				content: "\f154";
 			}
 		}
@@ -1951,6 +1949,7 @@ table.wp-list-table {
 		margin: 0;
 
 		&:before {
+			font-family: "WooCommerce";
 			content: "\e006";
 		}
 	}
