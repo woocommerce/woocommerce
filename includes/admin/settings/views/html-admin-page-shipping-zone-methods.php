@@ -5,11 +5,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <h2><?php _e( 'Shipping Methods', 'woocommerce' ); ?> (<?php echo esc_html( $zone->get_zone_name() ); ?>) <?php echo wc_back_link( __( 'Return to Shipping Zones', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?></h2>
-<p><?php _e( 'The following Shipping Methods apply to customers with shipping addresses within this zone.', 'woocommerce' ); ?><p>
+<p><?php _e( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ); ?><p>
 <table class="wc-shipping-zone-methods widefat">
     <thead>
         <tr>
-            <th class="wc-shipping-zone-method-sort"><?php echo wc_help_tip( __( 'Drag and drop to re-order your Shipping Methods. This is the order in which they will display during checkout.', 'woocommerce' ) ); ?></th>
+            <th class="wc-shipping-zone-method-sort"><?php echo wc_help_tip( __( 'Drag and drop to re-order your shipping methods. This is the order in which they will display during checkout.', 'woocommerce' ) ); ?></th>
             <th class="wc-shipping-zone-method-title"><?php esc_html_e( 'Title', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-method-type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-method-enabled"><?php esc_html_e( 'Enabled', 'woocommerce' ); ?></th>
@@ -31,9 +31,9 @@ if ( ! defined( 'ABSPATH' ) ) {
         					}
         				?>
         			</select>
-        			<input type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add Shipping Method', 'woocommerce' ); ?>" />
+        			<input type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" />
         		</div>
-                <input type="submit" name="save" class="button button-primary wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save Shipping Methods', 'woocommerce' ); ?>" disabled />
+                <input type="submit" name="save" class="button button-primary wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save shipping methods', 'woocommerce' ); ?>" disabled />
             </td>
         </tr>
     </tfoot>
@@ -43,9 +43,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
 	<tr>
 		<td class="wc-shipping-zone-method-blank-state" colspan="6">
-			<p class="main"><?php _e( 'Add Shipping Methods to this zone', 'woocommerce' ); ?></p>
-			<p><?php _e( 'You can add multiple Shipping Methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
-			<p><?php _e( 'Choose a method from the dropdown below and click "Add Shipping Method" to get started.', 'woocommerce' ); ?></p>
+			<p class="main"><?php _e( 'Add shipping methods to this zone', 'woocommerce' ); ?></p>
+			<p><?php _e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'Choose a method from the dropdown below and click "Add shipping method" to get started.', 'woocommerce' ); ?></p>
 		</td>
 	</tr>
 </script>
