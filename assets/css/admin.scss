@@ -743,7 +743,8 @@ ul.wc_coupon_list_block {
 		}
 		a.edit_address {
 			&:after {
-				content: "\e603";
+				font-family: "Dashicons";
+				content: "\f464";
 			}
 		}
 	}
@@ -1721,7 +1722,8 @@ ul.wc_coupon_list_block {
 	}
 
 	.edit:after {
-		content: "\e603";
+		font-family: "Dashicons";
+		content: "\f464";
 	}
 
 	.link:after {
@@ -1918,7 +1920,7 @@ table.wp-list-table {
 		margin: 0 auto;
 
 		&:before {
-			@include icon( "\e00c" );
+			@include icon_dashicons( "\f128" );
 		}
 	}
 
@@ -1927,13 +1929,11 @@ table.wp-list-table {
 		cursor: pointer;
 
 		&:before {
-			font-family: "Dashicons";
 			content: "\f155";
 		}
 
 		&.not-featured {
 			&:before {
-				font-family: "Dashicons";
 				content: "\f154";
 			}
 		}
@@ -1949,6 +1949,7 @@ table.wp-list-table {
 		margin: 0;
 
 		&:before {
+			font-family: "WooCommerce";
 			content: "\e006";
 		}
 	}
@@ -2523,7 +2524,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 
 		a.wc-shipping-class-edit {
 			&:before {
-				content: "\e603";
+				font-family: "Dashicons";
+				content: "\f464";
 			}
 		}
 
@@ -2848,7 +2850,7 @@ img.help_tip {
 					position: relative;
 
 					&:after {
-						@include icon( "\e00c" );
+						@include icon_dashicons( "\f161" );
 						font-size: 2.618em;
 						line-height: 72px;
 						color: #ddd;
@@ -2876,17 +2878,6 @@ img.help_tip {
 
 							&.tips {
 								cursor: pointer;
-							}
-						}
-
-						a.view {
-							@include ir();
-							font-size: 1.4em;
-
-							&:before {
-								@include icon( "\e00c" );
-								background-color: #000;
-								color: #fff;
 							}
 						}
 
@@ -3189,6 +3180,12 @@ img.help_tip {
 .panel {
 	padding: 9px;
 	color: #555;
+
+	.form-field {
+		.woocommerce-help-tip {
+			font-size: 1.4em;
+		}
+	}
 }
 
 .woocommerce_page_settings .woocommerce_options_panel,
