@@ -247,7 +247,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get the downloads for a product or product variation
+	 * Get the downloads for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product
 	 * @return array
@@ -287,11 +287,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$attachment_ids[] = get_post_thumbnail_id( $product->id );
 			}
 		} else {
-			// Add featured image
+			// Add featured image.
 			if ( has_post_thumbnail( $product->id ) ) {
 				$attachment_ids[] = get_post_thumbnail_id( $product->id );
 			}
-			// Add gallery images
+			// Add gallery images.
 			$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_attachment_ids() );
 		}
 
@@ -318,7 +318,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			);
 		}
 
-		// Set a placeholder image if the product has no images set
+		// Set a placeholder image if the product has no images set.
 		if ( empty( $images ) ) {
 			$images[] = array(
 				'id'            => 0,
@@ -335,7 +335,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get the attributes for a product or product variation
+	 * Get the attributes for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product
 	 * @return array
@@ -457,7 +457,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$links['up'] = array(
 				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $product->parent ) ),
 			);
-		} else if ( $product->is_type( 'simple' ) && ! empty( $product->post->post_parent ) ) {
+		} elseif ( $product->is_type( 'simple' ) && ! empty( $product->post->post_parent ) ) {
 			$links['up'] = array(
 				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $product->post->post_parent ) ),
 			);
@@ -467,7 +467,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get the Order's schema, conforming to JSON Schema.
+	 * Get the Product's schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */
