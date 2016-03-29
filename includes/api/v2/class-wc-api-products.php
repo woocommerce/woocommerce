@@ -756,6 +756,7 @@ class WC_API_Products extends WC_API_Resource {
 					'managing_stock'    => $variation->managing_stock(),
 					'stock_quantity'    => (int) $variation->get_stock_quantity(),
 					'in_stock'          => $variation->is_in_stock(),
+					'backorders_allowed' => $variation->backorders_allowed(),
 					'backordered'       => $variation->is_on_backorder(),
 					'purchaseable'      => $variation->is_purchasable(),
 					'visible'           => $variation->variation_is_visible(),
