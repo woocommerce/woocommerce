@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'A Shipping Zone is a group of regions that can be assigned different Shipping Methods &amp rates.', 'woocommerce' ) . ' ' . __( 'WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them.', 'woocommerce' ) ); ?></h2>
+<h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'A Shipping Zone is a group of regions that can be assigned different Shipping Methods.', 'woocommerce' ) . ' ' . __( 'WooCommerce will automatically choose the correct Shipping Zone based on your customer&lsquo;s shipping address and present the Shipping Methods within that zone to them.', 'woocommerce' ) ); ?></h2>
 
 <table class="wc-shipping-zones widefat">
     <thead>
@@ -59,9 +59,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
 	<tr>
 		<td class="wc-shipping-zones-blank-state" colspan="5">
-			<p class="main"><?php _e( 'A Shipping Zone is a group of regions that can be assigned different Shipping Methods &amp rates.', 'woocommerce' ); ?></p>
-			<p><?php _e( 'You can add as many Shipping Zones as you want, for example you could have "Local", "Domestic", and "Europe" zones.', 'woocommerce' ); ?></p>
-			<p><?php _e( 'Once a Shipping Zone has been added, you can add one or more Shipping Methods to it. Customers will only see Shipping Methods that apply to their address.', 'woocommerce' ); ?></p>
+			<p class="main"><?php _e( 'A Shipping Zone is a group of regions that can be assigned different Shipping Methods.', 'woocommerce' ); ?></p>
+			<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
+			<ul>
+				<li><?php _e( 'Local Zone = California ZIP 90210 = Local pickup', 'woocommerce' ); ?>
+				<li><?php _e( 'US Domestic Zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
+				<li><?php _e( 'Europe Zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
+			</ul>
+			<p><?php _e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
 			<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add Shipping Zone', 'woocommerce' ); ?></a>
 		</td>
 	</tr>

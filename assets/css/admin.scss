@@ -173,36 +173,6 @@
 	}
 }
 
-
-div.woocommerce-legacy-shipping-notice {
-	overflow: hidden;
-	padding: 1px 12px;
-	p {
-		position: relative;
-		z-index: 1;
-		max-width: 700px;
-		line-height: 1.5em;
-		margin: 12px 0;
-
-		&.main {
-			font-size: 1.1em;
-		}
-	}
-	&:before {
-		content: "\f319";
-		font-family: 'dashicons';
-		text-align: center;
-		line-height: 1;
-		color: #F7F1F6;
-		display: block;
-		width: 1em;
-		font-size: 20em;
-		top: 0;
-		right: 0;
-		position: absolute;
-	}
-}
-
 #variable_product_options #message, #variable_product_options .notice {
 	margin: 10px;
 }
@@ -2317,9 +2287,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		background: #F7F1F6 !important;
 		overflow: hidden;
 		position: relative;
-		padding: 7.5em 10%;
+		padding: 7.5em 7.5%;
 		border-bottom: 2px solid #EEE2EC;
-		p {
+		p, li {
 			color: #a46497;
 			font-size: 1.5em;
 			line-height: 1.5em;
@@ -2332,17 +2302,22 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 				font-size: 2em;
 			}
 		}
+		li {
+			margin-left: 1em;
+			list-style: circle inside;
+		}
 		&:before {
-			content: "\f319";
-			font-family: 'dashicons';
+			content: "\e01b";
+			font-family: "WooCommerce";
 			text-align: center;
 			line-height: 1;
 			color: #EEE2EC;
 			display: block;
-			width: 17px;
+			width: 1em;
 			font-size: 40em;
-			top: 0;
-			left: 0;
+			top: 50%;
+			right: -3.75%;
+			margin-top: -0.1875em;
 			position: absolute;
 		}
 		.button-primary {
