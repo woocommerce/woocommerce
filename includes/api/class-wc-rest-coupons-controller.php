@@ -177,13 +177,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 
 		$schema = $this->get_item_schema();
 
-		// Validate required POST fields.
-		if ( 'POST' === $request->get_method() && empty( $data->ID ) ) {
-			if ( empty( $request['code'] ) ) {
-				return new WP_Error( 'woocommerce_rest_missing_parameter', sprintf( __( 'Missing parameter %s.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
-			}
-		}
-
 		// Code.
 		if ( ! empty( $schema['properties']['code'] ) && ! empty( $request['code'] ) ) {
 			$coupon_code = apply_filters( 'woocommerce_coupon_code', $request['code'] );
