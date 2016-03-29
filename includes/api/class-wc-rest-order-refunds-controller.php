@@ -196,7 +196,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 
 		$data = array(
 			'id'           => $refund->id,
-			'date_created' => wc_rest_api_prepare_date_response( $refund->date ),
+			'date_created' => wc_rest_prepare_date_response( $refund->date ),
 			'amount'       => wc_format_decimal( $refund->get_refund_amount(), $dp ),
 			'reason'       => $refund->get_refund_reason(),
 			'line_items'   => array(),

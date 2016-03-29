@@ -467,8 +467,8 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 			'event'        => $webhook->get_event(),
 			'hooks'        => $webhook->get_hooks(),
 			'delivery_url' => $webhook->get_delivery_url(),
-			'created_at'   => wc_rest_api_prepare_date_response( $webhook->get_post_data()->post_date_gmt ),
-			'updated_at'   => wc_rest_api_prepare_date_response( $webhook->get_post_data()->post_modified_gmt ),
+			'created_at'   => wc_rest_prepare_date_response( $webhook->get_post_data()->post_date_gmt ),
+			'updated_at'   => wc_rest_prepare_date_response( $webhook->get_post_data()->post_modified_gmt ),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';

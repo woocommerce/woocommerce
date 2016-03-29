@@ -307,7 +307,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	public function prepare_item_for_response( $note, $request ) {
 		$data = array(
 			'id'            => $note->comment_ID,
-			'created_at'    => wc_rest_api_prepare_date_response( $note->comment_date_gmt ),
+			'created_at'    => wc_rest_prepare_date_response( $note->comment_date_gmt ),
 			'note'          => $note->comment_content,
 			'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 		);

@@ -492,15 +492,15 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 
 		$data = array(
 			'id'               => $customer->ID,
-			'created_at'       => wc_rest_api_prepare_date_response( $customer->user_registered ),
-			'updated_at'       => $customer->last_update ? wc_rest_api_prepare_date_response( date( 'Y-m-d H:i:s', $customer->last_update ) ) : null,
+			'created_at'       => wc_rest_prepare_date_response( $customer->user_registered ),
+			'updated_at'       => $customer->last_update ? wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer->last_update ) ) : null,
 			'email'            => $customer->user_email,
 			'first_name'       => $customer->first_name,
 			'last_name'        => $customer->last_name,
 			'username'         => $customer->user_login,
 			'last_order'       => array(
 				'id'   => is_object( $last_order ) ? $last_order->id : null,
-				'date' => is_object( $last_order ) ? wc_rest_api_prepare_date_response( $last_order->post->post_date_gmt ) : null
+				'date' => is_object( $last_order ) ? wc_rest_prepare_date_response( $last_order->post->post_date_gmt ) : null
 			),
 			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
 			'total_spent'      => wc_format_decimal( wc_get_customer_total_spent( $customer->ID ), 2 ),

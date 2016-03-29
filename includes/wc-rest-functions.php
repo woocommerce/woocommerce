@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string|null  $date
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
-function wc_rest_api_prepare_date_response( $date_gmt, $date = null ) {
+function wc_rest_prepare_date_response( $date_gmt, $date = null ) {
 	// Check if mysql_to_rfc3339 exists first!
 	if ( ! function_exists( 'mysql_to_rfc3339' ) ) {
 		return null;
@@ -52,7 +52,7 @@ function wc_rest_api_prepare_date_response( $date_gmt, $date = null ) {
  * @param string $image_url
  * @return array|WP_Error Attachment data or error message.
  */
-function wc_rest_api_upload_image_from_url( $image_url ) {
+function wc_rest_upload_image_from_url( $image_url ) {
 	$file_name   = basename( current( explode( '?', $image_url ) ) );
 	$wp_filetype = wp_check_filetype( $file_name, null );
 	$parsed_url  = @parse_url( $image_url );
@@ -117,7 +117,7 @@ function wc_rest_api_upload_image_from_url( $image_url ) {
  * @param int $id Post ID. Default to 0.
  * @return int Attachment ID
  */
-function wc_rest_api_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
+function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 	$info    = wp_check_filetype( $upload['file'] );
 	$title   = '';
 	$content = '';
@@ -160,7 +160,7 @@ function wc_rest_api_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
  * @param string $param
  * @return WP_Error|boolean
  */
-function rest_validate_reports_request_arg( $value, $request, $param ) {
+function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
 
 	$attributes = $request->get_attributes();
 	if ( ! isset( $attributes['args'][ $param ] ) || ! is_array( $attributes['args'][ $param ] ) ) {

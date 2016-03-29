@@ -104,13 +104,13 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 		update_woocommerce_term_meta( $id, 'display_type', $request['display'] );
 
 		if ( ! empty( $request['image'] ) ) {
-			$upload = wc_rest_api_upload_image_from_url( esc_url_raw( $request['image'] ) );
+			$upload = wc_rest_upload_image_from_url( esc_url_raw( $request['image'] ) );
 
 			if ( is_wp_error( $upload ) ) {
 				return $upload;
 			}
 
-			$image_id = wc_rest_api_set_uploaded_image_as_attachment( $upload );
+			$image_id = wc_rest_set_uploaded_image_as_attachment( $upload );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {

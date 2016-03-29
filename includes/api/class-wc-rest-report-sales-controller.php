@@ -380,14 +380,14 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 				'description'       => sprintf( __( 'Return sales for a specific start date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-AA' ),
 				'type'              => 'string',
 				'format'            => 'date',
-				'validate_callback' => 'rest_validate_reports_request_arg',
+				'validate_callback' => 'wc_rest_validate_reports_request_arg',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'date_max' => array(
 				'description'       => sprintf( __( 'Return sales for a specific end date, the date need to be in the %s format.', 'woocommerce' ), 'YYYY-MM-AA' ),
 				'type'              => 'string',
 				'format'            => 'date',
-				'validate_callback' => 'rest_validate_reports_request_arg',
+				'validate_callback' => 'wc_rest_validate_reports_request_arg',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 		);
