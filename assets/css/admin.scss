@@ -2878,17 +2878,6 @@ img.help_tip {
 							}
 						}
 
-						a.view {
-							@include ir();
-							font-size: 1.4em;
-
-							&:before {
-								@include icon( "\e00c" );
-								background-color: #000;
-								color: #fff;
-							}
-						}
-
 						a.delete {
 							@include ir();
 							font-size: 1.4em;
