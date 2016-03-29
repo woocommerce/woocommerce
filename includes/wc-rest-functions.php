@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce API Functions
+ * WooCommerce REST Functions
  *
- * Functions for API specific things.
+ * Functions for REST specific things.
  *
  * @author   WooThemes
  * @category Core
