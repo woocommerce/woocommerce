@@ -265,6 +265,7 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-countries.php' );                      // Defines countries and states
 		include_once( 'includes/class-wc-integrations.php' );                   // Loads integrations
 		include_once( 'includes/class-wc-cache-helper.php' );                   // Cache Helper
+		include_once( 'includes/class-wc-https.php' );                          // https Helper
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( 'includes/class-wc-cli.php' );
@@ -285,7 +286,6 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-tax.php' );                            // Tax class
 		include_once( 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
-		include_once( 'includes/class-wc-https.php' );                          // https Helper
 		include_once( 'includes/class-wc-embed.php' );                          // Embeds
 	}
 
