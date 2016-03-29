@@ -2847,7 +2847,7 @@ img.help_tip {
 					position: relative;
 
 					&:after {
-						@include icon( "\e00c" );
+						@include icon_dashicons( "\f161" );
 						font-size: 2.618em;
 						line-height: 72px;
 						color: #ddd;
