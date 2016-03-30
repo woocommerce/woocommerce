@@ -12,19 +12,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package	 WooCommerce/Classes
  * @category Class
  */
-class WC_Register_Classic_Settings {
+class WC_Register_Legacy_Settings {
 
 	/** @var class Current settings class. Used to pull settings. */
 	protected $page;
 
 	/**
-	 * Hooks into the settings API and starts registering our classic settings.
+	 * Hooks into the settings API and starts registering our settings registered via legacy hooks/filters.
 	 * @since 2.7.0
 	 */
 	public function __construct( $page ) {
 		$this->page = $page;
-		add_filter( 'woocommerce_settings_groups', array( $this, 'register_classic_group' ) );
-		add_filter( 'woocommerce_settings-' . $this->page->get_id(),  array( $this, 'register_classic_settings' ) );
+		add_filter( 'woocommerce_settings_groups', array( $this, 'register_legacy_group' ) );
+		add_filter( 'woocommerce_settings-' . $this->page->get_id(),  array( $this, 'register_legacy_settings' ) );
 	}
 
 	/**
@@ -33,7 +33,7 @@ class WC_Register_Classic_Settings {
 	* @param  array $group
 	* @return array
 	*/
-	public function register_classic_group( $groups ) {
+	public function register_legacy_group( $groups ) {
 		$groups[] = array(
 			'id'    => $this->page->get_id(),
 			'label' => $this->page->get_label(),
@@ -47,32 +47,32 @@ class WC_Register_Classic_Settings {
 	* @param  array $settings Existing registered settings
 	* @return array
 	*/
-	public function register_classic_settings( $settings ) {
-		$classic_sections = $this->page->get_sections();
-		if ( empty( $classic_sections ) ) {
-			$classic_sections = array( '' );
+	public function register_legacy_settings( $settings ) {
+		$legacy_sections = $this->page->get_sections();
+		if ( empty( $legacy_sections ) ) {
+			$legacy_sections = array( '' );
 		}
 
-		foreach ( $classic_sections as $classic_section => $classic_section_label ) {
-			$classic_settings = $this->page->get_settings( $classic_section );
-			foreach ( $classic_settings as $classic_setting ) {
+		foreach ( $legacy_sections as $legacy_section => $legacy_section_label ) {
+			$legacy_settings = $this->page->get_settings( $legacy_section );
+			foreach ( $legacy_settings as $legacy_setting ) {
 				$new_setting = array(
-					'id'          => $classic_setting['id'],
-					'label'       => ( ! empty( $classic_setting['title'] ) ? $classic_setting['title'] : '' ),
-					'description' => ( ! empty( $classic_setting['desc'] ) ? $classic_setting['desc'] : '' ),
-					'type'        => $classic_setting['type'],
+					'id'          => $legacy_setting['id'],
+					'label'       => ( ! empty( $legacy_setting['title'] ) ? $legacy_setting['title'] : '' ),
+					'description' => ( ! empty( $legacy_setting['desc'] ) ? $legacy_setting['desc'] : '' ),
+					'type'        => $legacy_setting['type'],
 				);
-				if ( isset( $classic_setting['default'] ) ) {
-					$new_setting['default'] = $classic_setting['default'];
+				if ( isset( $legacy_setting['default'] ) ) {
+					$new_setting['default'] = $legacy_setting['default'];
 				}
-				if ( isset( $classic_setting['options'] ) ) {
-					$new_setting['options'] = $classic_setting['options'];
+				if ( isset( $legacy_setting['options'] ) ) {
+					$new_setting['options'] = $legacy_setting['options'];
 				}
-				if ( isset( $classic_setting['desc_tip'] ) ) {
-					if ( true === $classic_setting['desc_tip'] ) {
-						$new_setting['tip'] = $classic_setting['desc'];
-					} else if ( ! empty( $classic_setting['desc_tip'] ) ) {
-						$new_setting['tip'] = $classic_setting['desc_tip'];
+				if ( isset( $legacy_setting['desc_tip'] ) ) {
+					if ( true === $legacy_setting['desc_tip'] ) {
+						$new_setting['tip'] = $legacy_setting['desc'];
+					} else if ( ! empty( $legacy_setting['desc_tip'] ) ) {
+						$new_setting['tip'] = $legacy_setting['desc_tip'];
 					}
 				}
 				$settings[] = $new_setting;
@@ -83,14 +83,14 @@ class WC_Register_Classic_Settings {
 }
 
 /**
- * Register full classic settings to the REST API.
+ * Register legacy settings to the REST API.
  * @since  2.7.0
  */
- function wc_settings_api_register_classic() {
+ function wc_settings_api_register_legacy() {
 	 $pages = WC_Admin_Settings::get_settings_pages();
 	 foreach ( $pages as $page ) {
-		 new WC_Register_Classic_Settings( $page );
+		 new WC_Register_Legacy_Settings( $page );
 	 }
  }
 
-add_action( 'rest_api_init', 'wc_settings_api_register_classic' );
+add_action( 'rest_api_init', 'wc_settings_api_register_legacy' );
