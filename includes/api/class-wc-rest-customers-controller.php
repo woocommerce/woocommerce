@@ -113,7 +113,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! current_user_can( 'list_users' ) ) {
+		if ( ! wc_rest_check_user_permissions( 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list customers.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -127,7 +127,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 * @return boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'create_users' ) ) {
+		if ( ! wc_rest_check_user_permissions( 'create' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -141,21 +141,9 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$id       = (int) $request['id'];
-		$customer = get_userdata( $id );
-		$types    = get_post_types( array( 'public' => true ), 'names' );
+		$id = (int) $request['id'];
 
-		if ( empty( $id ) || empty( $customer->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		if ( get_current_user_id() === $id ) {
-			return true;
-		}
-
-		if ( 'edit' === $request['context'] && ! current_user_can( 'list_users' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource with edit context.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		} else if ( ! count_user_posts( $id, $types ) && ! current_user_can( 'edit_user', $id ) && ! current_user_can( 'list_users' ) ) {
+		if ( $post && ! wc_rest_check_user_permissions( 'read', $id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -171,7 +159,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	public function update_item_permissions_check( $request ) {
 		$id = (int) $request['id'];
 
-		if ( ! current_user_can( 'edit_user', $id ) ) {
+		if ( ! wc_rest_check_user_permissions( 'edit', $id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -187,7 +175,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	public function delete_item_permissions_check( $request ) {
 		$id = (int) $request['id'];
 
-		if ( ! current_user_can( 'delete_user', $id ) ) {
+		if ( ! wc_rest_check_user_permissions( 'delete', $id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

@@ -227,3 +227,24 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 
 	return apply_filters( 'woocommerce_rest_check_post_permissions', $permission, $post_type, $context, $object_id );
 }
+
+/**
+ * Check permissions of users on REST API.
+ *
+ * @since 2.6.0
+ * @param string $context   Request context.
+ * @param int    $object_id Post ID.
+ * @return bool
+ */
+function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
+	$contexts = array(
+		'read'   => 'list_users',
+		'create' => 'edit_users',
+		'edit'   => 'edit_users',
+		'delete' => 'delete_users',
+	);
+
+	$permission = current_user_can( $contexts[ $context ], $object_id );
+
+	return apply_filters( 'woocommerce_rest_check_user_permissions', $permission, $context, $object_id );
+}
