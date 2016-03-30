@@ -454,15 +454,19 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_current_item( $request ) {
-		$current_customer_id = get_current_user_id();
-		if ( empty( $current_customer_id ) ) {
+		$id = get_current_user_id();
+		if ( empty( $id ) ) {
 			return new WP_Error( 'woocommerce_rest_not_logged_in', __( 'You are not currently logged in.', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		if ( ! wc_rest_check_user_permissions( 'read', $id ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		$customer = wp_get_current_user();
 		$response = $this->prepare_item_for_response( $customer, $request );
 		$response = rest_ensure_response( $response );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $current_customer_id ) ) );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $id ) ) );
 		$response->set_status( 302 );
 
 		return $response;
