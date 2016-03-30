@@ -392,6 +392,7 @@ class WC_API {
 		include_once( 'api/class-wc-rest-product-attribute-terms-controller.php' );
 		include_once( 'api/class-wc-rest-product-attributes-controller.php' );
 		include_once( 'api/class-wc-rest-product-categories-controller.php' );
+		include_once( 'api/class-wc-rest-product-reviews-controller.php' );
 		include_once( 'api/class-wc-rest-product-shipping-classes-controller.php' );
 		include_once( 'api/class-wc-rest-product-tags-controller.php' );
 		include_once( 'api/class-wc-rest-products-controller.php' );
@@ -420,6 +421,7 @@ class WC_API {
 			'WC_REST_Product_Attribute_Terms_Controller',
 			'WC_REST_Product_Attributes_Controller',
 			'WC_REST_Product_Categories_Controller',
+			'WC_REST_Product_Reviews_Controller',
 			'WC_REST_Product_Shipping_Classes_Controller',
 			'WC_REST_Product_Tags_Controller',
 			'WC_REST_Products_Controller',
