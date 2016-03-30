@@ -2121,19 +2121,18 @@ abstract class WC_Abstract_Order {
 		// Get cancel endpoint
 		$cancel_endpoint = $this->get_cancel_endpoint();
 
-		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
+		return apply_filters( 'woocommerce_get_cancel_order_url', esc_url( add_query_arg( array(
 			'cancel_order' => 'true',
 			'order'        => $this->order_key,
 			'order_id'     => $this->id,
-			'redirect'     => $redirect
-		), $cancel_endpoint ), 'woocommerce-cancel_order' ) );
+			'redirect'     => $redirect,
+		), $cancel_endpoint ) ) );
 	}
 
 	/**
 	 * Generates a raw (unescaped) cancel-order URL for use by payment gateways.
 	 *
 	 * @param string $redirect
-	 *
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
@@ -2146,7 +2145,6 @@ abstract class WC_Abstract_Order {
 			'order'        => $this->order_key,
 			'order_id'     => $this->id,
 			'redirect'     => $redirect,
-			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
 		), $cancel_endpoint ) );
 	}
 

@@ -566,7 +566,7 @@ class WC_Form_Handler {
 
 			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order->id === $order_id && $order->order_key === $order_key ) {
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
