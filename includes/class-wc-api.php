@@ -384,6 +384,7 @@ class WC_API {
 
 		// REST API controllers.
 		include_once( 'api/class-wc-rest-coupons-controller.php' );
+		include_once( 'api/class-wc-rest-customer-downloads-controller.php' );
 		include_once( 'api/class-wc-rest-customers-controller.php' );
 		include_once( 'api/class-wc-rest-order-notes-controller.php' );
 		include_once( 'api/class-wc-rest-order-refunds-controller.php' );
@@ -411,6 +412,7 @@ class WC_API {
 	public function register_rest_routes() {
 		$controllers = array(
 			'WC_REST_Coupons_Controller',
+			'WC_REST_Customer_Downloads_Controller',
 			'WC_REST_Customers_Controller',
 			'WC_REST_Order_Notes_Controller',
 			'WC_REST_Order_Refunds_Controller',
