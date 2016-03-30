@@ -139,6 +139,27 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get taxonomy terms.
+	 *
+	 * @param WC_Product $product
+	 * @param string $taxonomy
+	 * @return array
+	 */
+	protected function get_taxonomy_terms( $product, $taxonomy = 'cat' ) {
+		$terms = array();
+
+		foreach ( wp_get_post_terms( $product->id, 'product_' . $taxonomy ) as $term ) {
+			$terms[] = array(
+				'id'   => $term->term_id,
+				'name' => $term->name,
+				'slug' => $term->slug,
+			);
+		}
+
+		return $terms;
+	}
+
+	/**
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product
@@ -205,6 +226,28 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get default attributes.
+	 *
+	 * @param WC_Product $product
+	 * @return array
+	 */
+	protected function get_default_attributes( $product ) {
+		$default = array();
+
+		if ( $product->is_type( 'variable' ) ) {
+			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
+				$default[] = array(
+					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $key ) ),
+					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ),
+					'option' => $value,
+				);
+			}
+		}
+
+		return $default;
+	}
+
+	/**
 	 * Get the attributes for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product
@@ -261,28 +304,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		return $menu_order;
-	}
-
-	/**
-	 * Get default attributes.
-	 *
-	 * @param WC_Product $product
-	 * @return array
-	 */
-	protected function get_default_attributes( $product ) {
-		$default = array();
-
-		if ( $product->is_type( 'variable' ) ) {
-			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
-				$default[] = array(
-					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $key ) ),
-					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ),
-					'option' => $value,
-				);
-			}
-		}
-
-		return $default;
 	}
 
 	/**
@@ -348,8 +369,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'cross_sell_ids'        => array_map( 'absint', $product->get_cross_sells() ),
 			'parent_id'             => $product->is_type( 'variation' ) ? $product->parent->id : $product->get_post_data()->post_parent,
 			'purchase_note'         => wpautop( do_shortcode( wp_kses_post( $product->purchase_note ) ) ),
-			'categories'            => array(),
-			'tags'                  => array(),
+			'categories'            => $this->get_taxonomy_terms( $product ),
+			'tags'                  => $this->get_taxonomy_terms( $product, 'tag' ),
 			'images'                => $this->get_images( $product ),
 			'attributes'            => $this->get_attributes( $product ),
 			'default_attributes'    => $this->get_default_attributes( $product ),
