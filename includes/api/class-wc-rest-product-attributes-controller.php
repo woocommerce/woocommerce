@@ -104,8 +104,8 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( 'edit' === $request['context'] && ! current_user_can( 'manage_product_terms' ) ) {
-			return new WP_Error( 'woocommerce_rest_forbidden_context', __( 'Sorry, you cannot view this resource with edit context.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -118,7 +118,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_product_terms' ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'attributes', 'create' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -132,7 +132,15 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		return $this->get_items_permissions_check( $request );
+		if ( ! $this->get_taxonomy( $request ) ) {
+			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -142,13 +150,11 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
+		if ( ! $this->get_taxonomy( $request ) ) {
 			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$taxonomy_obj = get_taxonomy( $taxonomy );
-		if ( ! current_user_can( $taxonomy_obj->cap->edit_terms ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'attributes', 'edit' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -162,13 +168,11 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
+		if ( ! $this->get_taxonomy( $request ) ) {
 			return new WP_Error( "woocommerce_rest_taxonomy_invalid", __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$taxonomy_obj = get_taxonomy( $taxonomy );
-		if ( ! current_user_can( $taxonomy_obj->cap->delete_terms ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'attributes', 'delete' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

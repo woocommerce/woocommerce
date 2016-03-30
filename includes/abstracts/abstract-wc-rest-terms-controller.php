@@ -134,7 +134,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 
 		$term = get_term( (int) $request['id'], $taxonomy );
 		if ( $term && ! wc_rest_check_product_term_permissions( $taxonomy, 'read', $term->term_id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
