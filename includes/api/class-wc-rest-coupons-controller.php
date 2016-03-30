@@ -44,6 +44,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	protected $post_type = 'shop_coupon';
 
 	/**
+	 * Order refunds actions.
+	 */
+	public function __construct() {
+		add_filter( "woocommerce_rest_{$this->post_type}_query", array( $this, 'query_args' ), 10, 2 );
+	}
+
+	/**
 	 * Register the routes for coupons.
 	 */
 	public function register_routes() {
@@ -95,6 +102,25 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+	}
+
+	/**
+	 * Query args.
+	 *
+	 * @param array $args
+	 * @param WP_REST_Request $request
+	 * @return array
+	 */
+	public function query_args( $args, $request ) {
+		global $wpdb;
+
+		if ( ! empty( $request['code'] ) ) {
+			$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $request['code'] ) );
+
+			$args['post__in'] = array( $id );
+		}
+
+		return $args;
 	}
 
 	/**
@@ -514,5 +540,23 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );;
+	}
+
+	/**
+	 * Get the query params for collections of attachments.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['code'] = array(
+			'description'       => __( 'Limit result set to resources with a specific code.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		return $params;
 	}
 }
