@@ -116,8 +116,8 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			'id'                           => $coupon->id,
 			'code'                         => $coupon->code,
 			'type'                         => $coupon->type,
-			'created_at'                   => wc_rest_prepare_date_response( $post->post_date_gmt ),
-			'updated_at'                   => wc_rest_prepare_date_response( $post->post_modified_gmt ),
+			'date_created'                 => wc_rest_prepare_date_response( $post->post_date_gmt ),
+			'date_modified'                => wc_rest_prepare_date_response( $post->post_modified_gmt ),
 			'amount'                       => wc_format_decimal( $coupon->coupon_amount, 2 ),
 			'individual_use'               => ( 'yes' === $coupon->individual_use ),
 			'product_ids'                  => array_map( 'absint', (array) $coupon->product_ids ),
@@ -412,13 +412,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'enum'        => array_keys( wc_get_coupon_types() ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'created_at' => array(
+				'date_created' => array(
 					'description' => __( "The date the coupon was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'updated_at' => array(
+				'date_modified' => array(
 					'description' => __( "The date the coupon was last modified, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),

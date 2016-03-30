@@ -389,16 +389,16 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		$webhook = new WC_Webhook( $id );
 
 		$data = array(
-			'id'           => $webhook->id,
-			'name'         => $webhook->get_name(),
-			'status'       => $webhook->get_status(),
-			'topic'        => $webhook->get_topic(),
-			'resource'     => $webhook->get_resource(),
-			'event'        => $webhook->get_event(),
-			'hooks'        => $webhook->get_hooks(),
-			'delivery_url' => $webhook->get_delivery_url(),
-			'created_at'   => wc_rest_prepare_date_response( $webhook->get_post_data()->post_date_gmt ),
-			'updated_at'   => wc_rest_prepare_date_response( $webhook->get_post_data()->post_modified_gmt ),
+			'id'            => $webhook->id,
+			'name'          => $webhook->get_name(),
+			'status'        => $webhook->get_status(),
+			'topic'         => $webhook->get_topic(),
+			'resource'      => $webhook->get_resource(),
+			'event'         => $webhook->get_event(),
+			'hooks'         => $webhook->get_hooks(),
+			'delivery_url'  => $webhook->get_delivery_url(),
+			'date_created'  => wc_rest_prepare_date_response( $webhook->get_post_data()->post_date_gmt ),
+			'date_modified' => wc_rest_prepare_date_response( $webhook->get_post_data()->post_modified_gmt ),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -516,13 +516,13 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'edit' ),
 					'writeonly'   => true,
 				),
-				'created_at' => array(
+				'date_created' => array(
 					'description' => __( "The date the webhook was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'updated_at' => array(
+				'date_modified' => array(
 					'description' => __( "The date the webhook was last modified, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),

@@ -311,7 +311,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	public function prepare_item_for_response( $note, $request ) {
 		$data = array(
 			'id'            => $note->comment_ID,
-			'created_at'    => wc_rest_prepare_date_response( $note->comment_date_gmt ),
+			'date_created'  => wc_rest_prepare_date_response( $note->comment_date_gmt ),
 			'note'          => $note->comment_content,
 			'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 		);
@@ -377,7 +377,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'created_at' => array(
+				'date_created' => array(
 					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),

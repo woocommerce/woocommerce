@@ -156,7 +156,7 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 		$data = (array) $log;
 
 		// Add timestamp.
-		$data['created_at'] = wc_rest_prepare_date_response( $log->comment->comment_date_gmt );
+		$data['date_created'] = wc_rest_prepare_date_response( $log->comment->comment_date_gmt );
 
 		// Remove comment object.
 		unset( $data['comment'] );
@@ -284,7 +284,7 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'created_at' => array(
+				'date_created' => array(
 					'description' => __( "The date the webhook delivery was logged, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),

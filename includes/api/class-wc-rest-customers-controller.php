@@ -480,8 +480,8 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 
 		$data = array(
 			'id'               => $customer->ID,
-			'created_at'       => wc_rest_prepare_date_response( $customer->user_registered ),
-			'updated_at'       => $customer->last_update ? wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer->last_update ) ) : null,
+			'date_created'     => wc_rest_prepare_date_response( $customer->user_registered ),
+			'date_modified'    => $customer->last_update ? wc_rest_prepare_date_response( date( 'Y-m-d H:i:s', $customer->last_update ) ) : null,
 			'email'            => $customer->user_email,
 			'first_name'       => $customer->first_name,
 			'last_name'        => $customer->last_name,
@@ -612,13 +612,13 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'created_at' => array(
+				'date_created' => array(
 					'description' => __( "The date the customer was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'updated_at' => array(
+				'date_modified' => array(
 					'description' => __( "The date the customer was last modified, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
