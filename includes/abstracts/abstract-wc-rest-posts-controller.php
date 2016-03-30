@@ -556,6 +556,7 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 			'post_parent__not_in',
 			'posts_per_page',
 			'meta_query',
+			'tax_query',
 		);
 		$valid_vars = array_merge( $valid_vars, $rest_valid );
 

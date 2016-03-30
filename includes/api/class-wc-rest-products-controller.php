@@ -113,6 +113,63 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
+		// Taxonomy query to filter products by type, category,
+		// tag, shipping class, and attribute.
+		$tax_query = array();
+
+		// Map between taxonomy name and arg's key.
+		$taxonomies = array(
+			'product_type'           => 'type',
+			'product_cat'            => 'category',
+			'product_tag'            => 'tag',
+			'product_shipping_class' => 'shipping_class',
+		);
+
+		// Set tax_query for each passed arg.
+		foreach ( $taxonomies as $taxonomy => $key ) {
+			if ( ! empty( $request[ $key ] ) ) {
+				$terms = explode( ',', $request[ $key ] );
+
+				$tax_query[] = array(
+					'taxonomy' => $taxonomy,
+					'field'    => 'term_id',
+					'terms'    => $terms,
+				);
+			}
+		}
+
+		// Filter by attribute and term.
+		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
+			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names() ) ) {
+				$terms = explode( ',', $request['attribute_term'] );
+
+				$tax_query[] = array(
+					'taxonomy' => $request['attribute'],
+					'field'    => 'term_id',
+					'terms'    => $terms,
+				);
+			}
+		}
+
+		if ( ! empty( $tax_query ) ) {
+			$args['tax_query'] = $tax_query;
+		}
+
+		// Filter by sku.
+		if ( ! empty( $request['sku'] ) ) {
+			if ( ! empty( $args['meta_query'] ) ) {
+				$args['meta_query'] = array();
+			}
+
+			$args['meta_query'][] = array(
+				'key'     => '_sku',
+				'value'   => $request['sku'],
+				'compare' => '='
+			);
+
+			$args['post_type'] = array( 'product', 'product_variation' );
+		}
+
 		return $args;
 	}
 
@@ -2433,6 +2490,49 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'type'              => 'string',
 			'enum'              => array_merge( array( 'any' ), array_keys( get_post_statuses() ) ),
 			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['type'] = array(
+			'description'       => __( 'Limit result set to products assigned a specific type.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array_keys( wc_get_product_types() ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['category'] = array(
+			'description'       => __( 'Limit result set to products assigned a specific category.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['tag'] = array(
+			'description'       => __( 'Limit result set to products assigned a specific tag.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['shipping_class'] = array(
+			'description'       => __( 'Limit result set to products assigned a specific shipping class.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['attribute'] = array(
+			'description'       => __( 'Limit result set to products with a specific attribute.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['attribute_term'] = array(
+			'description'       => __( 'Limit result set to products with a specific attribute term (required an assigned attribute).', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['sku'] = array(
+			'description'       => __( 'Limit result set to products with a specific SKU.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
