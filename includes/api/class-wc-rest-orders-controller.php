@@ -371,6 +371,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
+		global $wpdb;
+
 		// Set post_status.
 		if ( 'any' !== $request['status'] ) {
 			$args['post_status'] = 'wc-' . $request['status'];
@@ -378,16 +380,30 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$args['post_status'] = 'any';
 		}
 
-		if ( ! empty( $request['customer_id'] ) ) {
+		if ( ! empty( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
 				$args['meta_query'] = array();
 			}
 
 			$args['meta_query'][] = array(
 				'key'   => '_customer_user',
-				'value' => $request['customer_id'],
+				'value' => $request['customer'],
 				'type'  => 'NUMERIC',
 			);
+		}
+
+		if ( ! empty( $request['product'] ) ) {
+			$order_ids = $wpdb->get_col( $wpdb->prepare( "
+				SELECT order_id
+				FROM {$wpdb->prefix}woocommerce_order_items
+				WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key = '_product_id' AND meta_value = %d )
+				AND order_item_type = 'line_item'
+			 ", $request['product'] ) );
+
+			// Force WP_Query return empty if don't found any order.
+			$order_ids = ! empty( $order_ids ) ? $order_ids : array( 0 );
+
+			$args['post__in'] = $order_ids;
 		}
 
 		return $args;
@@ -1670,8 +1686,14 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['customer_id'] = array(
+		$params['customer'] = array(
 			'description'       => __( 'Limit result set to orders assigned a specific customer.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['product'] = array(
+			'description'       => __( 'Limit result set to orders assigned a specific product.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
