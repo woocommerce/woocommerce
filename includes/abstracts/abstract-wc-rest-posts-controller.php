@@ -235,7 +235,7 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 		$meta_fields = $this->add_post_meta_fields( $post, $request );
 		if ( is_wp_error( $meta_fields ) ) {
 			// Remove post.
-			wp_delete_post( $post->ID, true );
+			$this->delete_post( $post );
 
 			return $meta_fields;
 		}
@@ -267,6 +267,15 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
 		return true;
+	}
+
+	/**
+	 * Delete post.
+	 *
+	 * @param WP_Post $post
+	 */
+	protected function delete_post( $post ) {
+		wp_delete_post( $post->ID, true );
 	}
 
 	/**
