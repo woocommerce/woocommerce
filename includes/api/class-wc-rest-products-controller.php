@@ -747,6 +747,23 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Save taxonomy terms.
+	 *
+	 * @param WC_Product $product
+	 * @param array $terms
+	 * @param string $taxonomy
+	 * @return array
+	 */
+	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
+		$term_ids = wp_list_pluck( $terms, 'id' );
+		$term_ids = array_unique( array_map( 'intval', $term_ids ) );
+
+		wp_set_object_terms( $product->id, $term_ids, 'product_' . $taxonomy );
+
+		return $terms;
+	}
+
+	/**
 	 * Save product meta.
 	 *
 	 * @param WC_Product $product
@@ -1117,14 +1134,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Product categories.
 		if ( isset( $request['categories'] ) && is_array( $request['categories'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $request['categories'] ) );
-			wp_set_object_terms( $product->id, $term_ids, 'product_cat' );
+			$this->save_taxonomy_terms( $product, $request['categories'] );
 		}
 
 		// Product tags.
 		if ( isset( $request['tags'] ) && is_array( $request['tags'] ) ) {
-			$term_ids = array_unique( array_map( 'intval', $request['tags'] ) );
-			wp_set_object_terms( $product->id, $term_ids, 'product_tag' );
+			$this->save_taxonomy_terms( $product, $request['tags'], 'tag' );
 		}
 
 		// Downloadable.
@@ -1181,7 +1196,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return bool
 	 * @throws WC_REST_Exception
 	 */
-	protected function save_variations( $product, $request ) {
+	protected function save_variations_data( $product, $request ) {
 		global $wpdb;
 
 		$variations = $request['variations'];
@@ -1526,7 +1541,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Save variations.
 			if ( isset( $request['type'] ) && 'variable' == $request['type'] && isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
-				$this->save_variations( $product, $request );
+				$this->save_variations_data( $product, $request );
 			}
 
 			return true;
@@ -1557,7 +1572,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			// Save variations.
 			if ( $product->is_type( 'variable' ) ) {
 				if ( isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
-					$this->save_variations( $product, $request );
+					$this->save_variations_data( $product, $request );
 				} else {
 					// Just sync variations.
 					WC_Product_Variable::sync( $product->id );
