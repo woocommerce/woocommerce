@@ -367,7 +367,9 @@ class WC_API {
 			include_once( 'vendor/class-wp-rest-controller.php' );
 		}
 
-		// REST API controllers.
+		// Settings API
+		include_once( 'api/wc-rest-settings-base.php' );
+		include_once( 'api/wc-rest-settings-groups-controller.php' );
 		include_once( 'api/wc-rest-settings-controller.php' );
 	}
 
@@ -378,6 +380,7 @@ class WC_API {
 	public function register_rest_routes() {
 		$controllers = array(
 			'WC_REST_Settings_Controller',
+			'WC_REST_Settings_Groups_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
