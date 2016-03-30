@@ -117,137 +117,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get product data.
-	 *
-	 * @param WC_Product $product
-	 * @return array
-	 */
-	protected function get_product_data( $product ) {
-		$data = array(
-			'id'                    => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
-			'name'                  => $product->get_title(),
-			'slug'                  => $product->get_post_data()->post_name,
-			'permalink'             => $product->get_permalink(),
-			'date_created'          => wc_rest_prepare_date_response( $product->get_post_data()->post_date_gmt ),
-			'date_modified'         => wc_rest_prepare_date_response( $product->get_post_data()->post_modified_gmt ),
-			'type'                  => $product->product_type,
-			'status'                => $product->get_post_data()->post_status,
-			'featured'              => $product->is_featured(),
-			'catalog_visibility'    => $product->visibility,
-			'description'           => wpautop( do_shortcode( $product->get_post_data()->post_content ) ),
-			'short_description'     => apply_filters( 'woocommerce_short_description', $product->get_post_data()->post_excerpt ),
-			'sku'                   => $product->get_sku(),
-			'price'                 => $product->get_price(),
-			'regular_price'         => $product->get_regular_price(),
-			'sale_price'            => $product->get_sale_price() ? $product->get_sale_price() : '',
-			'sale_price_dates_from' => $product->sale_price_dates_from ? date( 'Y-m-d', $product->sale_price_dates_from ) : '',
-			'sale_price_dates_to'   => $product->sale_price_dates_to ? date( 'Y-m-d', $product->sale_price_dates_to ) : '',
-			'price_html'            => $product->get_price_html(),
-			'on_sale'               => $product->is_on_sale(),
-			'purchaseable'          => $product->is_purchasable(),
-			'total_sales'           => (int) get_post_meta( $product->id, 'total_sales', true ),
-			'virtual'               => $product->is_virtual(),
-			'downloadable'          => $product->is_downloadable(),
-			'downloads'             => $this->get_downloads( $product ),
-			'download_limit'        => (int) $product->download_limit,
-			'download_expiry'       => (int) $product->download_expiry,
-			'download_type'         => $product->download_type ? $product->download_type : 'standard',
-			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
-			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
-			'tax_status'            => $product->get_tax_status(),
-			'tax_class'             => $product->get_tax_class(),
-			'managing_stock'        => $product->managing_stock(),
-			'stock_quantity'        => $product->get_stock_quantity(),
-			'in_stock'              => $product->is_in_stock(),
-			'backorders'            => $product->backorders,
-			'backorders_allowed'    => $product->backorders_allowed(),
-			'backordered'           => $product->is_on_backorder(),
-			'sold_individually'     => $product->is_sold_individually(),
-			'weight'                => $product->get_weight(),
-			'length'                => $product->get_length(),
-			'width'                 => $product->get_width(),
-			'height'                => $product->get_height(),
-			'shipping_required'     => $product->needs_shipping(),
-			'shipping_taxable'      => $product->is_shipping_taxable(),
-			'shipping_class'        => $product->get_shipping_class(),
-			'shipping_class_id'     => (int) $product->get_shipping_class_id(),
-			'reviews_allowed'       => ( 'open' === $product->get_post_data()->comment_status ),
-			'average_rating'        => wc_format_decimal( $product->get_average_rating(), 2 ),
-			'rating_count'          => (int) $product->get_rating_count(),
-			'related_ids'           => array_map( 'absint', array_values( $product->get_related() ) ),
-			'upsell_ids'            => array_map( 'absint', $product->get_upsells() ),
-			'cross_sell_ids'        => array_map( 'absint', $product->get_cross_sells() ),
-			'parent_id'             => $product->is_type( 'variation' ) ? $product->parent->id : $product->get_post_data()->post_parent,
-			'purchase_note'         => wpautop( do_shortcode( wp_kses_post( $product->purchase_note ) ) ),
-			'categories'            => array(),
-			'tags'                  => array(),
-			'images'                => $this->get_images( $product ),
-			'attributes'            => $this->get_attributes( $product ),
-			'default_attributes'    => array(),
-			'variations'            => array(),
-			'grouped_products'      => array(),
-			'menu_order'            => $this->get_product_menu_order( $product ),
-		);
-
-		return $data;
-	}
-
-	/**
-	 * Get an individual variation's data.
-	 *
-	 * @param WC_Product $product
-	 * @return array
-	 */
-	protected function get_variation_data( $product ) {
-		$variations = array();
-
-		foreach ( $product->get_children() as $child_id ) {
-			$variation = $product->get_child( $child_id );
-			if ( ! $variation->exists() ) {
-				continue;
-			}
-
-			$variations[] = array(
-				'id'                    => $variation->get_variation_id(),
-				'date_created'          => wc_rest_prepare_date_response( $variation->get_post_data()->post_date_gmt ),
-				'date_modified'         => wc_rest_prepare_date_response( $variation->get_post_data()->post_modified_gmt ),
-				'permalink'             => $variation->get_permalink(),
-				'sku'                   => $variation->get_sku(),
-				'price'                 => $variation->get_price(),
-				'regular_price'         => $variation->get_regular_price(),
-				'sale_price'            => $variation->get_sale_price(),
-				'sale_price_dates_from' => $variation->sale_price_dates_from ? date( 'Y-m-d', $variation->sale_price_dates_from ) : '',
-				'sale_price_dates_to'   => $variation->sale_price_dates_to ? date( 'Y-m-d', $variation->sale_price_dates_to ) : '',
-				'on_sale'               => $variation->is_on_sale(),
-				'purchaseable'          => $variation->is_purchasable(),
-				'virtual'               => $variation->is_virtual(),
-				'downloadable'          => $variation->is_downloadable(),
-				'downloads'             => $this->get_downloads( $variation ),
-				'download_limit'        => (int) $variation->download_limit,
-				'download_expiry'       => (int) $variation->download_expiry,
-				'tax_status'            => $variation->get_tax_status(),
-				'tax_class'             => $variation->get_tax_class(),
-				'managing_stock'        => $variation->managing_stock(),
-				'stock_quantity'        => $variation->get_stock_quantity(),
-				'in_stock'              => $variation->is_in_stock(),
-				'backorders'            => $variation->backorders,
-				'backorders_allowed'    => $variation->backorders_allowed(),
-				'backordered'           => $variation->is_on_backorder(),
-				'weight'                => $variation->get_weight(),
-				'length'                => $variation->get_length(),
-				'width'                 => $variation->get_width(),
-				'height'                => $variation->get_height(),
-				'shipping_class'        => $variation->get_shipping_class(),
-				'shipping_class_id'     => $variation->get_shipping_class_id(),
-				'image'                 => $this->get_images( $variation ),
-				'attributes'            => $this->get_attributes( $variation ),
-			);
-		}
-
-		return $variations;
-	}
-
-	/**
 	 * Get the downloads for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product
@@ -391,7 +260,160 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$menu_order = $variation->menu_order;
 		}
 
-		return apply_filters( 'woocommerce_rest_product_menu_order', $menu_order, $product );
+		return $menu_order;
+	}
+
+	/**
+	 * Get default attributes.
+	 *
+	 * @param WC_Product $product
+	 * @return array
+	 */
+	protected function get_default_attributes( $product ) {
+		$default = array();
+
+		if ( $product->is_type( 'variable' ) ) {
+			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
+				$default[] = array(
+					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $key ) ),
+					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ),
+					'option' => $value,
+				);
+			}
+		}
+
+		return $default;
+	}
+
+	/**
+	 * Get product data.
+	 *
+	 * @param WC_Product $product
+	 * @return array
+	 */
+	protected function get_product_data( $product ) {
+		$data = array(
+			'id'                    => (int) $product->is_type( 'variation' ) ? $product->get_variation_id() : $product->id,
+			'name'                  => $product->get_title(),
+			'slug'                  => $product->get_post_data()->post_name,
+			'permalink'             => $product->get_permalink(),
+			'date_created'          => wc_rest_prepare_date_response( $product->get_post_data()->post_date_gmt ),
+			'date_modified'         => wc_rest_prepare_date_response( $product->get_post_data()->post_modified_gmt ),
+			'type'                  => $product->product_type,
+			'status'                => $product->get_post_data()->post_status,
+			'featured'              => $product->is_featured(),
+			'catalog_visibility'    => $product->visibility,
+			'description'           => wpautop( do_shortcode( $product->get_post_data()->post_content ) ),
+			'short_description'     => apply_filters( 'woocommerce_short_description', $product->get_post_data()->post_excerpt ),
+			'sku'                   => $product->get_sku(),
+			'price'                 => $product->get_price(),
+			'regular_price'         => $product->get_regular_price(),
+			'sale_price'            => $product->get_sale_price() ? $product->get_sale_price() : '',
+			'sale_price_dates_from' => $product->sale_price_dates_from ? date( 'Y-m-d', $product->sale_price_dates_from ) : '',
+			'sale_price_dates_to'   => $product->sale_price_dates_to ? date( 'Y-m-d', $product->sale_price_dates_to ) : '',
+			'price_html'            => $product->get_price_html(),
+			'on_sale'               => $product->is_on_sale(),
+			'purchaseable'          => $product->is_purchasable(),
+			'total_sales'           => (int) get_post_meta( $product->id, 'total_sales', true ),
+			'virtual'               => $product->is_virtual(),
+			'downloadable'          => $product->is_downloadable(),
+			'downloads'             => $this->get_downloads( $product ),
+			'download_limit'        => (int) $product->download_limit,
+			'download_expiry'       => (int) $product->download_expiry,
+			'download_type'         => $product->download_type ? $product->download_type : 'standard',
+			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
+			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
+			'tax_status'            => $product->get_tax_status(),
+			'tax_class'             => $product->get_tax_class(),
+			'managing_stock'        => $product->managing_stock(),
+			'stock_quantity'        => $product->get_stock_quantity(),
+			'in_stock'              => $product->is_in_stock(),
+			'backorders'            => $product->backorders,
+			'backorders_allowed'    => $product->backorders_allowed(),
+			'backordered'           => $product->is_on_backorder(),
+			'sold_individually'     => $product->is_sold_individually(),
+			'weight'                => $product->get_weight(),
+			'length'                => $product->get_length(),
+			'width'                 => $product->get_width(),
+			'height'                => $product->get_height(),
+			'shipping_required'     => $product->needs_shipping(),
+			'shipping_taxable'      => $product->is_shipping_taxable(),
+			'shipping_class'        => $product->get_shipping_class(),
+			'shipping_class_id'     => (int) $product->get_shipping_class_id(),
+			'reviews_allowed'       => ( 'open' === $product->get_post_data()->comment_status ),
+			'average_rating'        => wc_format_decimal( $product->get_average_rating(), 2 ),
+			'rating_count'          => (int) $product->get_rating_count(),
+			'related_ids'           => array_map( 'absint', array_values( $product->get_related() ) ),
+			'upsell_ids'            => array_map( 'absint', $product->get_upsells() ),
+			'cross_sell_ids'        => array_map( 'absint', $product->get_cross_sells() ),
+			'parent_id'             => $product->is_type( 'variation' ) ? $product->parent->id : $product->get_post_data()->post_parent,
+			'purchase_note'         => wpautop( do_shortcode( wp_kses_post( $product->purchase_note ) ) ),
+			'categories'            => array(),
+			'tags'                  => array(),
+			'images'                => $this->get_images( $product ),
+			'attributes'            => $this->get_attributes( $product ),
+			'default_attributes'    => $this->get_default_attributes( $product ),
+			'variations'            => array(),
+			'grouped_products'      => array(),
+			'menu_order'            => $this->get_product_menu_order( $product ),
+		);
+
+		return $data;
+	}
+
+	/**
+	 * Get an individual variation's data.
+	 *
+	 * @param WC_Product $product
+	 * @return array
+	 */
+	protected function get_variation_data( $product ) {
+		$variations = array();
+
+		foreach ( $product->get_children() as $child_id ) {
+			$variation = $product->get_child( $child_id );
+			if ( ! $variation->exists() ) {
+				continue;
+			}
+
+			$variations[] = array(
+				'id'                    => $variation->get_variation_id(),
+				'date_created'          => wc_rest_prepare_date_response( $variation->get_post_data()->post_date_gmt ),
+				'date_modified'         => wc_rest_prepare_date_response( $variation->get_post_data()->post_modified_gmt ),
+				'permalink'             => $variation->get_permalink(),
+				'sku'                   => $variation->get_sku(),
+				'price'                 => $variation->get_price(),
+				'regular_price'         => $variation->get_regular_price(),
+				'sale_price'            => $variation->get_sale_price(),
+				'sale_price_dates_from' => $variation->sale_price_dates_from ? date( 'Y-m-d', $variation->sale_price_dates_from ) : '',
+				'sale_price_dates_to'   => $variation->sale_price_dates_to ? date( 'Y-m-d', $variation->sale_price_dates_to ) : '',
+				'on_sale'               => $variation->is_on_sale(),
+				'purchaseable'          => $variation->is_purchasable(),
+				'virtual'               => $variation->is_virtual(),
+				'downloadable'          => $variation->is_downloadable(),
+				'downloads'             => $this->get_downloads( $variation ),
+				'download_limit'        => (int) $variation->download_limit,
+				'download_expiry'       => (int) $variation->download_expiry,
+				'tax_status'            => $variation->get_tax_status(),
+				'tax_class'             => $variation->get_tax_class(),
+				'managing_stock'        => $variation->managing_stock(),
+				'stock_quantity'        => $variation->get_stock_quantity(),
+				'in_stock'              => $variation->is_in_stock(),
+				'backorders'            => $variation->backorders,
+				'backorders_allowed'    => $variation->backorders_allowed(),
+				'backordered'           => $variation->is_on_backorder(),
+				'weight'                => $variation->get_weight(),
+				'length'                => $variation->get_length(),
+				'width'                 => $variation->get_width(),
+				'height'                => $variation->get_height(),
+				'shipping_class'        => $variation->get_shipping_class(),
+				'shipping_class_id'     => $variation->get_shipping_class_id(),
+				'image'                 => $this->get_images( $variation ),
+				'attributes'            => $this->get_attributes( $variation ),
+			);
+		}
+
+		return $variations;
 	}
 
 	/**
