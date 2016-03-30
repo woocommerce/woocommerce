@@ -373,7 +373,7 @@ class WC_API {
 		include_once( 'api/class-wc-rest-authentication.php' );
 
 		// WP-API classes and functions.
-		include_once( 'vendor/wp-api-functions.php' );
+		include_once( 'vendor/wp-rest-functions.php' );
 		if ( ! class_exists( 'WP_REST_Controller' ) ) {
 			include_once( 'vendor/class-wp-rest-controller.php' );
 		}
