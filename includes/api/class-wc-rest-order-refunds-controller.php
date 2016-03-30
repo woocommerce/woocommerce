@@ -122,7 +122,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 
-		$dp = ! empty( $request['dp'] ) ? intval( $request['dp'] ) : 2;
+		$dp = $request['dp'];
 
 		$data = array(
 			'id'           => $refund->id,
@@ -505,5 +505,24 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the query params for collections.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['dp'] = array(
+			'default'           => 2,
+			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		return $params;
 	}
 }

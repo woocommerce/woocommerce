@@ -112,7 +112,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		global $wpdb;
 
 		$order = wc_get_order( $post );
-		$dp    = ! empty( $request['dp'] ) ? intval( $request['dp'] ) : 2;
+		$dp    = $request['dp'];
 
 		$data = array(
 			'id'                   => $order->id,
@@ -219,14 +219,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				$line_item['taxes'] = array_values( $line_tax );
 			}
 
-			// if ( in_array( 'products', $expand ) ) {
-			// 	$_product_data = WC()->api->WC_API_Products->get_product( $product_id );
-
-			// 	if ( isset( $_product_data['product'] ) ) {
-			// 		$line_item['product_data'] = $_product_data['product'];
-			// 	}
-			// }
-
 			$data['line_items'][] = $line_item;
 		}
 
@@ -241,14 +233,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'tax_total'          => wc_format_decimal( $tax['tax_amount'], $dp ),
 				'shipping_tax_total' => wc_format_decimal( $tax['shipping_tax_amount'], $dp ),
 			);
-
-			// if ( in_array( 'taxes', $expand ) ) {
-			// 	$_rate_data = WC()->api->WC_API_Taxes->get_tax( $tax->rate_id );
-
-			// 	if ( isset( $_rate_data['tax'] ) ) {
-			// 		$tax_line['rate_data'] = $_rate_data['tax'];
-			// 	}
-			// }
 
 			$data['tax_lines'][] = $tax_line;
 		}
@@ -323,14 +307,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'discount_tax' => wc_format_decimal( $coupon_item['discount_amount_tax'], $dp ),
 			);
 
-			// if ( in_array( 'coupons', $expand ) ) {
-			// 	$_coupon_data = WC()->api->WC_API_Coupons->get_coupon_by_code( $coupon_item['name'] );
-
-			// 	if ( isset( $_coupon_data['coupon'] ) ) {
-			// 		$coupon_line['coupon_data'] = $_coupon_data['coupon'];
-			// 	}
-			// }
-
 			$data['coupon_lines'][] = $coupon_line;
 		}
 
@@ -400,6 +376,18 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$args['post_status'] = 'wc-' . $request['status'];
 		} else {
 			$args['post_status'] = 'any';
+		}
+
+		if ( ! empty( $request['customer_id'] ) ) {
+			if ( ! empty( $args['meta_query'] ) ) {
+				$args['meta_query'] = array();
+			}
+
+			$args['meta_query'][] = array(
+				'key'   => '_customer_user',
+				'value' => $request['customer_id'],
+				'type'  => 'NUMERIC',
+			);
 		}
 
 		return $args;
@@ -1667,7 +1655,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get the query params for collections of attachments.
+	 * Get the query params for collections.
 	 *
 	 * @return array
 	 */
@@ -1680,6 +1668,19 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'type'              => 'string',
 			'enum'              => array_merge( array( 'any' ), $this->get_order_statuses() ),
 			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['customer_id'] = array(
+			'description'       => __( 'Limit result set to orders assigned a specific customer.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['dp'] = array(
+			'default'           => 2,
+			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
