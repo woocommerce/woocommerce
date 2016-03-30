@@ -161,7 +161,7 @@ class WC_Geolocation {
 		$version    = ( 'v4' == $version ) ? '' : 'v6';
 		$upload_dir = wp_upload_dir();
 
-		return $upload_dir['basedir'] . '/GeoIP' . $version . '.dat';
+		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoIP' . $version . '.dat' );
 	}
 
 	/**
