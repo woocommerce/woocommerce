@@ -91,8 +91,8 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list order notes.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		if ( ! wc_rest_check_post_permissions( 'shop_order', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -105,7 +105,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	 * @return boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'publish_shop_orders' ) ) {
+		if ( ! wc_rest_check_post_permissions( 'shop_order', 'create' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -119,7 +119,9 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		$post = get_post( (int) $request['order_id'] );
+
+		if ( $post && ! wc_rest_check_post_permissions( 'shop_order', 'read', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -133,7 +135,9 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	 * @return boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		$post = get_post( (int) $request['order_id'] );
+
+		if ( $post && ! wc_rest_check_post_permissions( 'shop_order', 'delete', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

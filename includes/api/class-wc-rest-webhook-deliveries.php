@@ -70,8 +70,8 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list taxes.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		if ( ! wc_rest_check_post_permissions( 'shop_webhook', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -84,7 +84,9 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		$post = get_post( (int) $request['webhook_id'] );
+
+		if ( $post && ! wc_rest_check_post_permissions( 'shop_webhook', 'read', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
