@@ -353,7 +353,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
 			'up' => array(
-				'href' => rest_url( sprintf( '/wc/v1/orders/%d', $order_id ) ),
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order_id ) ),
 			),
 		);
 

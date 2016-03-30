@@ -100,7 +100,6 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	public function get_items( $request ) {
-		$id      = (int) $request['id'];
 		$webhook = new WC_Webhook( (int) $request['webhook_id'] );
 
 		if ( empty( $webhook->post_data->post_type ) || 'shop_webhook' !== $webhook->post_data->post_type ) {
@@ -198,7 +197,7 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
 			'up' => array(
-				'href' => rest_url( sprintf( '/wc/v1/webhooks/%d', $webhook_id ) ),
+				'href' => rest_url( sprintf( '/%s/webhooks/%d', $this->namespace, $webhook_id ) ),
 			),
 		);
 
