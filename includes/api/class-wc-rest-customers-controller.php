@@ -212,13 +212,16 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 			$prepared_args['search'] = '*' . $prepared_args['search'] . '*';
 		}
 
-		if ( ! empty( $request['slug'] ) ) {
-			$prepared_args['search'] = $request['slug'];
-			$prepared_args['search_columns'] = array( 'user_nicename' );
+		// Filter by email.
+		if ( ! empty( $request['email'] ) ) {
+			$prepared_args['search'] = $request['email'];
+			$prepared_args['search_columns'] = array( 'user_email' );
 		}
 
-		// Show only customers.
-		$prepared_args['role'] = 'customer';
+		// Filter by role.
+		if ( 'all' !== $request['role'] ) {
+			$prepared_args['role'] = $request['role'];
+		}
 
 		/**
 		 * Filter arguments, before passing to WP_User_Query, when querying users via the REST API.
@@ -823,6 +826,17 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Get role names.
+	 *
+	 * @return array
+	 */
+	protected function get_role_names() {
+		global $wp_roles;
+
+		return array_keys( $wp_roles->role_names );
+	}
+
+	/**
 	 * Get the query params for collections.
 	 *
 	 * @return array
@@ -871,9 +885,17 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
-		$params['slug']    = array(
-			'description'        => __( 'Limit result set to resources with a specific slug.', 'woocommerce' ),
+		$params['email'] = array(
+			'description'        => __( 'Limit result set to resources with a specific email.', 'woocommerce' ),
 			'type'               => 'string',
+			'format'             => 'email',
+			'validate_callback'  => 'rest_validate_request_arg',
+		);
+		$params['role'] = array(
+			'description'        => __( 'Limit result set to resources with a specific role.', 'woocommerce' ),
+			'type'               => 'string',
+			'default'            => 'customer',
+			'enum'               => array_merge( array( 'all' ), $this->get_role_names() ),
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		return $params;
