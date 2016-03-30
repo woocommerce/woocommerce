@@ -114,7 +114,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_user_permissions( 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list customers.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -143,7 +143,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	public function get_item_permissions_check( $request ) {
 		$id = (int) $request['id'];
 
-		if ( $post && ! wc_rest_check_user_permissions( 'read', $id ) ) {
+		if ( ! wc_rest_check_user_permissions( 'read', $id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
