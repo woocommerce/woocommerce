@@ -43,19 +43,15 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	protected $public = false;
 
 	/**
-	 * Check if a given request has access to read an item.
+	 * Check if a given request has access to read items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_item_permissions_check( $request ) {
-		$post = get_post( (int) $request['id'] );
-
-		if ( $post ) {
-			return $this->check_read_permission( $post );
+	public function get_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
-		return true;
 	}
 
 	/**
@@ -65,26 +61,27 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-
-		$post_type = get_post_type_object( $this->post_type );
-
-		if ( ! current_user_can( $post_type->cap->create_posts ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', sprintf( __( 'Sorry, you are not allowed to create a new %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
 	}
 
 	/**
-	 * Check if a given request has access to read items.
+	 * Check if a given request has access to read an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_items_permissions_check( $request ) {
-		$post_type = get_post_type_object( $this->post_type );
+	public function get_item_permissions_check( $request ) {
+		$post = get_post( (int) $request['id'] );
 
-		return current_user_can( $post_type->cap->read_private_posts );
+		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'read', $post->ID ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -95,10 +92,9 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	 */
 	public function update_item_permissions_check( $request ) {
 		$post = get_post( $request['id'] );
-		$post_type = get_post_type_object( $this->post_type );
 
-		if ( $post && ! $this->check_update_permission( $post ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', sprintf( __( 'Sorry, you are not allowed to update this %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );;
+		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $post->ID ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -113,46 +109,11 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	public function delete_item_permissions_check( $request ) {
 		$post = get_post( $request['id'] );
 
-		if ( $post && ! $this->check_delete_permission( $post ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
-	}
-
-	/**
-	 * Check if we can read an item.
-	 *
-	 * Correctly handles posts with the inherit status.
-	 *
-	 * @param object $post Post object.
-	 * @return boolean Can we read it?
-	 */
-	public function check_read_permission( $post ) {
-		$post_type = get_post_type_object( $this->post_type );
-		return 'revision' !== $post->post_type && current_user_can( $post_type->cap->read_private_posts, $post->ID );
-	}
-
-	/**
-	 * Check if we can edit an item.
-	 *
-	 * @param object $post Post object.
-	 * @return boolean Can we edit it?
-	 */
-	protected function check_update_permission( $post ) {
-		$post_type = get_post_type_object( $this->post_type );
-		return current_user_can( $post_type->cap->edit_post, $post->ID );
-	}
-
-	/**
-	 * Check if we can delete an item.
-	 *
-	 * @param object $post Post object.
-	 * @return boolean Can we delete it?
-	 */
-	protected function check_delete_permission( $post ) {
-		$post_type = get_post_type_object( $this->post_type );
-		return current_user_can( $post_type->cap->delete_post, $post->ID );
 	}
 
 	/**
@@ -405,7 +366,7 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 
 		$posts = array();
 		foreach ( $query_result as $post ) {
-			if ( ! $this->check_read_permission( $post ) ) {
+			if ( ! wc_rest_check_post_permissions( $this->post_type, 'read', $post->ID ) ) {
 				continue;
 			}
 
@@ -483,7 +444,7 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );
 
-		if ( ! $this->check_delete_permission( $post ) ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
 			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

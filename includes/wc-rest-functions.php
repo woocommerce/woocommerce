@@ -199,3 +199,31 @@ function wc_rest_urlencode_rfc3986( $value ) {
 		return str_replace( '%', '%25', rawurlencode( rawurldecode( $value ) ) );
 	}
 }
+
+/**
+ * Check permissions of posts on REST API.
+ *
+ * @since 2.6.0
+ * @param string $post_type Post type.
+ * @param string $context   Request context.
+ * @param int    $object_id Post ID.
+ * @return bool
+ */
+function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_id = 0 ) {
+	$contexts = array(
+		'read'   => 'read_private_posts',
+		'create' => 'publish_posts',
+		'edit'   => 'edit_post',
+		'delete' => 'delete_post',
+	);
+
+	if ( 'revision' === $post_type ) {
+		$permission = false;
+	} else {
+		$cap = $contexts[ $context ];
+		$post_type_object = get_post_type_object( $post_type );
+		$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
+	}
+
+	return apply_filters( 'woocommerce_rest_check_post_permissions', $permission, $post_type, $context, $object_id );
+}
