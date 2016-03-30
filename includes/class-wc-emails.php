@@ -303,21 +303,24 @@ class WC_Emails {
 
 			if ( $is_visible ) {
 				$item_offered['url'] = get_permalink( $product->get_id() );
+			} else {
+				$item_offered['url'] = get_home_url();
 			}
 
 			if ( $image_id = $product->get_image_id() ) {
 				$item_offered['image'] = wp_get_attachment_image_url( $image_id, 'thumbnail' );
 			}
 
-			$accepted_offer = array(
-				'@type' => 'Offer',
-				'itemOffered' => $item_offered,
-				'price' => $order->get_line_subtotal( $item ),
-				'priceCurrency' => $order->get_order_currency(),
-				'eligibleQuantity' => array(
+			$accepted_offer = (object) array(
+				'@type'            => 'Offer',
+				'itemOffered'      => $item_offered,
+				'price'            => $order->get_line_subtotal( $item ),
+				'priceCurrency'    => $order->get_order_currency(),
+				'eligibleQuantity' => (object) array(
 					'@type' => 'QuantitativeValue',
 					'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item )
-				)
+				),
+				'url'   => get_home_url(),
 			);
 
 			$accepted_offers[] = $accepted_offer;
@@ -325,14 +328,16 @@ class WC_Emails {
 
 		$markup = array(
 			'@context' => 'http://schema.org',
-			'@type' => 'Order',
-			'merchant' => array(
+			'@type'    => 'Order',
+			'merchant' => (object) array(
 				'@type' => 'Organization',
-				'name' => get_bloginfo( 'name' )
+				'name'  => get_bloginfo( 'name' ),
 			),
-			'orderNumber' => strval( $order->get_order_number() ),
-			'acceptedOffer' => $accepted_offers,
-			'url' => $order->get_view_order_url()
+			'orderNumber'    => strval( $order->get_order_number() ),
+			'priceCurrency'  => $order->get_order_currency(),
+			'price'          => $order->get_total(),
+			'acceptedOffer'  => count( $accepted_offers ) > 1 ? $accepted_offers : $accepted_offers[0],
+			'url'            => $order->get_view_order_url(),
 		);
 
 		switch ( $order->get_status() ) {
@@ -360,15 +365,15 @@ class WC_Emails {
 		}
 
 		if ( $sent_to_admin ) {
-			$markup['potentialAction'] = array(
-				'@type' => 'ViewAction',
-				'target' => admin_url( 'post.php?post=' . $order->id . '&action=edit' )
+			$markup['potentialAction'] = (object) array(
+				'@type'  => 'ViewAction',
+				'target' => admin_url( 'post.php?post=' . absint( $order->id ) . '&action=edit' ),
 			);
 		}
 
 		$markup = apply_filters( 'woocommerce_email_order_schema_markup', $markup, $sent_to_admin, $order );
 
-		echo '<script type="application/ld+json">' . wp_json_encode( $markup ) . '</script>';
+		echo '<script type="application/ld+json">' . wp_json_encode( (object) $markup ) . '</script>';
 	}
 
 	/**
