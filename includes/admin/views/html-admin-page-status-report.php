@@ -250,7 +250,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['gzip']['success'] = true;
 			} else {
 				$posting['gzip']['success'] = false;
-				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind. The API fallback will be used instead for geolocation.', 'woocommerce' ), '<a href="http://php.net/manual/en/zlib.installation.php">gzopen</a>' );
+				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind.', 'woocommerce' ), '<a href="http://php.net/manual/en/zlib.installation.php">gzopen</a>' );
 			}
 
 			// Multibyte String.
@@ -366,6 +366,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 				<?php
 			}
+
+			if ( in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ) ) {
+				?>
+				<tr>
+					<td data-export-label="PHP Post Max Size"><?php _e( 'MaxMind GeoIP Database', 'woocommerce' ); ?>:</td>
+					<td class="help"><?php echo wc_help_tip( __( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); ?></td>
+					<td><?php
+						if ( file_exists( WC_Geolocation::get_local_database_path() ) ) {
+							echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( WC_Geolocation::get_local_database_path() ) . '</code></mark> ';
+						} else {
+							printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %s to the path: %s', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . WC_Geolocation::get_local_database_path() . '</code>' ) . '</mark>', WC_LOG_DIR );
+						}
+					?></td>
+				</tr>
+				<?php
+			}
+
 			?>
 		</tr>
 	</tbody>

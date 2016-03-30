@@ -160,11 +160,11 @@ class WC_Geolocation {
 	 * @param  string $version
 	 * @return string
 	 */
-	private static function get_local_database_path( $version = 'v4' ) {
+	public static function get_local_database_path( $version = 'v4' ) {
 		$version    = ( 'v4' == $version ) ? '' : 'v6';
 		$upload_dir = wp_upload_dir();
 
-		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoIP' . $version . '.dat' );
+		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoIP' . $version . '.dat', $version );
 	}
 
 	/**
