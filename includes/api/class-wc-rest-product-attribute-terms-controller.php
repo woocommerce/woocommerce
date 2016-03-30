@@ -2,7 +2,7 @@
 /**
  * REST API Product Attribute Terms controller
  *
- * Handles requests to the products/attributes/(?P<attribute_id>[\d]+)/terms endpoint.
+ * Handles requests to the products/attributes/<attribute_id>/terms endpoint.
  *
  * @author   WooThemes
  * @category API

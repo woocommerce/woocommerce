@@ -2,7 +2,7 @@
 /**
  * REST API Webhooks controller
  *
- * Handles requests to the /webhooks/(?P<webhook_id>[\d]+)/deliveries endpoint.
+ * Handles requests to the /webhooks/<webhook_id>/deliveries endpoint.
  *
  * @author   WooThemes
  * @category API
