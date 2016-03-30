@@ -118,10 +118,11 @@ class WC_Geolocation {
 	/**
 	 * Geolocate an IP address.
 	 * @param  string $ip_address
-	 * @param  bool   $fallback
+	 * @param  bool   $fallback If true, fallbacks to alternative IP detection (can be slower).
+	 * @param  bool   $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 	 * @return array
 	 */
-	public static function geolocate_ip( $ip_address = '', $fallback = true ) {
+	public static function geolocate_ip( $ip_address = '', $fallback = true, $api_fallback = true ) {
 		// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview)
 		if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
 			$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_CF_IPCOUNTRY'] ) );
@@ -136,13 +137,15 @@ class WC_Geolocation {
 
 			if ( file_exists( $database ) ) {
 				$country_code = self::geolocate_via_db( $ip_address );
-			} else {
+			} elseif ( $api_fallback ) {
 				$country_code = self::geolocate_via_api( $ip_address );
+			} else {
+				$country_code = '';
 			}
 
 			if ( ! $country_code && $fallback ) {
 				// May be a local environment - find external IP
-				return self::geolocate_ip( self::get_external_ip_address(), false );
+				return self::geolocate_ip( self::get_external_ip_address(), false, $api_fallback );
 			}
 		}
 

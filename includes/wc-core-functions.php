@@ -721,7 +721,7 @@ function wc_get_customer_default_location() {
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
 		case 'geolocation_ajax' :
 		case 'geolocation' :
-			$location = WC_Geolocation::geolocate_ip();
+			$location = WC_Geolocation::geolocate_ip( '', true, false );
 
 			// Base fallback.
 			if ( empty( $location['country'] ) ) {
