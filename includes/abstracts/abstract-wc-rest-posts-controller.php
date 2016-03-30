@@ -174,23 +174,6 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 
 		$schema = $this->get_item_schema();
 
-		// if ( ! empty( $schema['properties']['sticky'] ) ) {
-		// 	if ( ! empty( $request['sticky'] ) ) {
-		// 		stick_post( $post_id );
-		// 	} else {
-		// 		unstick_post( $post_id );
-		// 	}
-		// }
-
-		// if ( ! empty( $schema['properties']['featured_media'] ) && isset( $request['featured_media'] ) ) {
-		// 	$this->handle_featured_media( $request['featured_media'], $post->ID );
-		// }
-
-		// $terms_update = $this->handle_terms( $post->ID, $request );
-		// if ( is_wp_error( $terms_update ) ) {
-		// 	return $terms_update;
-		// }
-
 		$post = get_post( $post_id );
 		$this->update_additional_fields_for_object( $post, $request );
 
@@ -271,23 +254,6 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 		}
 
 		$schema = $this->get_item_schema();
-
-		// if ( ! empty( $schema['properties']['featured_media'] ) && isset( $request['featured_media'] ) ) {
-			// $this->handle_featured_media( $request['featured_media'], $post_id );
-		// }
-
-		// if ( ! empty( $schema['properties']['sticky'] ) && isset( $request['sticky'] ) ) {
-		// 	if ( ! empty( $request['sticky'] ) ) {
-		// 		stick_post( $post_id );
-		// 	} else {
-		// 		unstick_post( $post_id );
-		// 	}
-		// }
-
-		// $terms_update = $this->handle_terms( $post->ID, $request );
-		// if ( is_wp_error( $terms_update ) ) {
-		// 	return $terms_update;
-		// }
 
 		$post = get_post( $post_id );
 		$this->update_additional_fields_for_object( $post, $request );

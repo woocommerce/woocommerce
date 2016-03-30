@@ -79,7 +79,7 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list tax classes.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -93,7 +93,7 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	 * @return boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'create' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -107,7 +107,7 @@ class WC_REST_Tax_Classes_Controller extends WP_REST_Controller {
 	 * @return boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'delete' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

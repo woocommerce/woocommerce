@@ -272,3 +272,23 @@ function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $taxonomy );
 }
+
+/**
+ * Check manager permissions on REST API.
+ *
+ * @since 2.6.0
+ * @param string $object  Object.
+ * @param string $context Request context.
+ * @return bool
+ */
+function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
+	$objects = array(
+		'reports'  => 'view_woocommerce_reports',
+		'settings' => 'manage_woocommerce',
+	);
+
+	$permission = current_user_can( $objects[ $object ] );
+
+	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, 0, $object );
+}
+
