@@ -36,7 +36,7 @@ ob_start();
 		<?php if ( $product->has_weight() ) : $has_row = true; ?>
 			<tr class="<?php if ( ( $alt = $alt * -1 ) === 1 ) echo 'alt'; ?>">
 				<th><?php _e( 'Weight', 'woocommerce' ) ?></th>
-				<td class="product_weight"><?php echo $product->get_weight() . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ); ?></td>
+				<td class="product_weight"><?php echo wc_format_localized_decimal( $product->get_weight() ) . ' ' . esc_attr( get_option( 'woocommerce_weight_unit' ) ); ?></td>
 			</tr>
 		<?php endif; ?>
 

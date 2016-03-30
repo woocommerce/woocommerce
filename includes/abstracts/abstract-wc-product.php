@@ -1490,9 +1490,9 @@ class WC_Product {
 	 */
 	public function get_dimensions() {
 		$dimensions = implode( ' x ', array_filter( array(
-			$this->get_length(),
-			$this->get_width(),
-			$this->get_height(),
+			wc_format_localized_decimal( $this->get_length() ),
+			wc_format_localized_decimal( $this->get_width() ),
+			wc_format_localized_decimal( $this->get_height() ),
 		) ) );
 
 		if ( ! empty( $dimensions ) ) {
