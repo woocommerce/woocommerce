@@ -225,7 +225,7 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 		$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
 	}
 
-	return apply_filters( 'woocommerce_rest_check_post_permissions', $permission, $post_type, $context, $object_id );
+	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $post_type );
 }
 
 /**
@@ -246,5 +246,29 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 
 	$permission = current_user_can( $contexts[ $context ], $object_id );
 
-	return apply_filters( 'woocommerce_rest_check_user_permissions', $permission, $context, $object_id );
+	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'user' );
+}
+
+/**
+ * Check permissions of product terms on REST API.
+ *
+ * @since 2.6.0
+ * @param string $taxonomy  Taxonomy.
+ * @param string $context   Request context.
+ * @param int    $object_id Post ID.
+ * @return bool
+ */
+function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $object_id = 0 ) {
+	$contexts = array(
+		'read'   => 'manage_terms',
+		'create' => 'edit_terms',
+		'edit'   => 'edit_terms',
+		'delete' => 'delete_terms',
+	);
+
+	$cap = $contexts[ $context ];
+	$taxonomy_object = get_taxonomy( $taxonomy );
+	$permission = current_user_can( $taxonomy_object->cap->$cap, $object_id );
+
+	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $taxonomy );
 }

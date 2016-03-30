@@ -52,6 +52,8 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
+
+		return true;
 	}
 
 	/**

@@ -44,31 +44,6 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 	protected $taxonomy = 'product_shipping_class';
 
 	/**
-	 * Check if a given request has access to read the terms.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		$taxonomy = get_taxonomy( $this->taxonomy );
-
-		return current_user_can( $taxonomy->cap->edit_terms );
-	}
-
-	/**
-	 * Check if a given request has access to read a term.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_item_permissions_check( $request ) {
-		$id       = (int) $request['id'];
-		$taxonomy = get_taxonomy( $this->taxonomy );
-
-		return current_user_can( $taxonomy->cap->edit_terms, $id );
-	}
-
-	/**
 	 * Prepare a single product shipping class output for response.
 	 *
 	 * @param obj $item Term object.
