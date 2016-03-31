@@ -276,12 +276,7 @@
 
 								// If there were errors, prepend the form.
 								if ( response.data.errors.length > 0 ) {
-									var error_html = '<div id="woocommerce_errors" class="error notice is-dismissible">';
-									$( response.data.errors ).each( function( index, value ) {
-										error_html = error_html + '<p>' + value + '</p>';
-									} );
-									error_html = error_html + '</div>';
-									$( 'table.wc-shipping-zone-methods' ).before( error_html );
+									this.showErrors( response.data.errors );
 								}
 
 								// Method was saved. Re-render.
@@ -291,10 +286,21 @@
 									shippingMethodView.model.onSaveResponse( response, textStatus );
 								}
 							} else {
+								window.alert( data.strings.save_failed );
 								shippingMethodView.unblock();
 							}
 						}, 'json' );
 					}
+				},
+				showErrors: function( errors ) {
+					var error_html = '<div id="woocommerce_errors" class="error notice is-dismissible">';
+
+					$( errors ).each( function( index, value ) {
+						error_html = error_html + '<p>' + value + '</p>';
+					} );
+					error_html = error_html + '</div>';
+
+					$( 'table.wc-shipping-zone-methods' ).before( error_html );
 				}
 			} ),
 			shippingMethod = new ShippingMethod({
