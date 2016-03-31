@@ -141,26 +141,27 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		$data = array(
 			'id'                           => $coupon->id,
 			'code'                         => $coupon->code,
-			'type'                         => $coupon->type,
 			'date_created'                 => wc_rest_prepare_date_response( $post->post_date_gmt ),
 			'date_modified'                => wc_rest_prepare_date_response( $post->post_modified_gmt ),
+			'discount_type'                => $coupon->type,
+			'description'                  => $post->post_excerpt,
 			'amount'                       => wc_format_decimal( $coupon->coupon_amount, 2 ),
+			'expiry_date'                  => ( ! empty( $coupon->expiry_date ) ) ? wc_rest_prepare_date_response( $coupon->expiry_date ) : null,
+			'usage_count'                  => (int) $coupon->usage_count,
 			'individual_use'               => ( 'yes' === $coupon->individual_use ),
 			'product_ids'                  => array_map( 'absint', (array) $coupon->product_ids ),
 			'exclude_product_ids'          => array_map( 'absint', (array) $coupon->exclude_product_ids ),
 			'usage_limit'                  => ( ! empty( $coupon->usage_limit ) ) ? $coupon->usage_limit : null,
 			'usage_limit_per_user'         => ( ! empty( $coupon->usage_limit_per_user ) ) ? $coupon->usage_limit_per_user : null,
 			'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
-			'usage_count'                  => (int) $coupon->usage_count,
-			'expiry_date'                  => ( ! empty( $coupon->expiry_date ) ) ? wc_rest_prepare_date_response( $coupon->expiry_date ) : null,
-			'enable_free_shipping'         => $coupon->enable_free_shipping(),
-			'product_category_ids'         => array_map( 'absint', (array) $coupon->product_categories ),
-			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->exclude_product_categories ),
+			'free_shipping'                => $coupon->enable_free_shipping(),
+			'product_categories'           => array_map( 'absint', (array) $coupon->product_categories ),
+			'excluded_product_categories'  => array_map( 'absint', (array) $coupon->exclude_product_categories ),
 			'exclude_sale_items'           => $coupon->exclude_sale_items(),
 			'minimum_amount'               => wc_format_decimal( $coupon->minimum_amount, 2 ),
 			'maximum_amount'               => wc_format_decimal( $coupon->maximum_amount, 2 ),
-			'customer_emails'              => $coupon->customer_email,
-			'description'                  => $post->post_excerpt,
+			'email_restrictions'           => $coupon->customer_email,
+			'used_by'                      => $coupon->get_used_by(),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -290,7 +291,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		$data = $request->get_json_params();
 
 		$defaults = array(
-			'type'                         => 'fixed_cart',
+			'discount_type'                => 'fixed_cart',
 			'amount'                       => 0,
 			'individual_use'               => false,
 			'product_ids'                  => array(),
@@ -300,20 +301,20 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			'limit_usage_to_x_items'       => '',
 			'usage_count'                  => '',
 			'expiry_date'                  => '',
-			'enable_free_shipping'         => false,
-			'product_category_ids'         => array(),
-			'exclude_product_category_ids' => array(),
+			'free_shipping'                => false,
+			'product_categories'           => array(),
+			'excluded_product_categories'  => array(),
 			'exclude_sale_items'           => false,
 			'minimum_amount'               => '',
 			'maximum_amount'               => '',
-			'customer_emails'              => array(),
+			'email_restrictions'           => array(),
 			'description'                  => ''
 		);
 
 		$data = wp_parse_args( $data, $defaults );
 
 		// Set coupon meta.
-		update_post_meta( $post->ID, 'discount_type', $data['type'] );
+		update_post_meta( $post->ID, 'discount_type', $data['discount_type'] );
 		update_post_meta( $post->ID, 'coupon_amount', wc_format_decimal( $data['amount'] ) );
 		update_post_meta( $post->ID, 'individual_use', ( true === $data['individual_use'] ) ? 'yes' : 'no' );
 		update_post_meta( $post->ID, 'product_ids', implode( ',', array_filter( array_map( 'intval', $data['product_ids'] ) ) ) );
@@ -323,13 +324,13 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 		update_post_meta( $post->ID, 'limit_usage_to_x_items', absint( $data['limit_usage_to_x_items'] ) );
 		update_post_meta( $post->ID, 'usage_count', absint( $data['usage_count'] ) );
 		update_post_meta( $post->ID, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $data['expiry_date'] ) ) );
-		update_post_meta( $post->ID, 'free_shipping', ( true === $data['enable_free_shipping'] ) ? 'yes' : 'no' );
-		update_post_meta( $post->ID, 'product_categories', array_filter( array_map( 'intval', $data['product_category_ids'] ) ) );
-		update_post_meta( $post->ID, 'exclude_product_categories', array_filter( array_map( 'intval', $data['exclude_product_category_ids'] ) ) );
+		update_post_meta( $post->ID, 'free_shipping', ( true === $data['free_shipping'] ) ? 'yes' : 'no' );
+		update_post_meta( $post->ID, 'product_categories', array_filter( array_map( 'intval', $data['product_categories'] ) ) );
+		update_post_meta( $post->ID, 'exclude_product_categories', array_filter( array_map( 'intval', $data['excluded_product_categories'] ) ) );
 		update_post_meta( $post->ID, 'exclude_sale_items', ( true === $data['exclude_sale_items'] ) ? 'yes' : 'no' );
 		update_post_meta( $post->ID, 'minimum_amount', wc_format_decimal( $data['minimum_amount'] ) );
 		update_post_meta( $post->ID, 'maximum_amount', wc_format_decimal( $data['maximum_amount'] ) );
-		update_post_meta( $post->ID, 'customer_email', array_filter( array_map( 'sanitize_email', $data['customer_emails'] ) ) );
+		update_post_meta( $post->ID, 'customer_email', array_filter( array_map( 'sanitize_email', $data['email_restrictions'] ) ) );
 
 		return true;
 	}
@@ -378,16 +379,16 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			update_post_meta( $post->ID, 'expiry_date', $this->get_coupon_expiry_date( wc_clean( $request['expiry_date'] ) ) );
 		}
 
-		if ( isset( $request['enable_free_shipping'] ) ) {
-			update_post_meta( $post->ID, 'free_shipping', ( true === $request['enable_free_shipping'] ) ? 'yes' : 'no' );
+		if ( isset( $request['free_shipping'] ) ) {
+			update_post_meta( $post->ID, 'free_shipping', ( true === $request['free_shipping'] ) ? 'yes' : 'no' );
 		}
 
-		if ( isset( $request['product_category_ids'] ) ) {
-			update_post_meta( $post->ID, 'product_categories', array_filter( array_map( 'intval', $request['product_category_ids'] ) ) );
+		if ( isset( $request['product_categories'] ) ) {
+			update_post_meta( $post->ID, 'product_categories', array_filter( array_map( 'intval', $request['product_categories'] ) ) );
 		}
 
-		if ( isset( $request['exclude_product_category_ids'] ) ) {
-			update_post_meta( $post->ID, 'exclude_product_categories', array_filter( array_map( 'intval', $request['exclude_product_category_ids'] ) ) );
+		if ( isset( $request['excluded_product_categories'] ) ) {
+			update_post_meta( $post->ID, 'exclude_product_categories', array_filter( array_map( 'intval', $request['excluded_product_categories'] ) ) );
 		}
 
 		if ( isset( $request['exclude_sale_items'] ) ) {
@@ -402,8 +403,8 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			update_post_meta( $post->ID, 'maximum_amount', wc_format_decimal( $request['maximum_amount'] ) );
 		}
 
-		if ( isset( $request['customer_emails'] ) ) {
-			update_post_meta( $post->ID, 'customer_email', array_filter( array_map( 'sanitize_email', $request['customer_emails'] ) ) );
+		if ( isset( $request['email_restrictions'] ) ) {
+			update_post_meta( $post->ID, 'customer_email', array_filter( array_map( 'sanitize_email', $request['email_restrictions'] ) ) );
 		}
 
 		return true;
@@ -432,12 +433,6 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'type' => array(
-					'description' => __( 'Determines the type of discount that will be applied.', 'woocommerce' ),
-					'type'        => 'string',
-					'enum'        => array_keys( wc_get_coupon_types() ),
-					'context'     => array( 'view', 'edit' ),
-				),
 				'date_created' => array(
 					'description' => __( "The date the coupon was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
@@ -450,10 +445,32 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'description' => array(
+					'description' => __( 'Coupon description.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'discount_type' => array(
+					'description' => __( 'Determines the type of discount that will be applied.', 'woocommerce' ),
+					'type'        => 'string',
+					'enum'        => array_keys( wc_get_coupon_types() ),
+					'context'     => array( 'view', 'edit' ),
+				),
 				'amount' => array(
 					'description' => __( 'The amount of discount.', 'woocommerce' ),
 					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
+				),
+				'expiry_date' => array(
+					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'usage_count' => array(
+					'description' => __( 'Number of times the coupon has been used already.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'individual_use' => array(
 					'description' => __( 'Whether coupon can only be used individually.', 'woocommerce' ),
@@ -485,28 +502,17 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'usage_count' => array(
-					'description' => __( 'Number of times the coupon has been used already.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'expiry_date' => array(
-					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-				),
-				'enable_free_shipping' => array(
+				'free_shipping' => array(
 					'description' => __( 'Define if can be applied for free shipping.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'product_category_ids' => array(
+				'product_categories' => array(
 					'description' => __( "List of category ID's the coupon applies to.", 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'exclude_product_category_ids' => array(
+				'excluded_product_categories' => array(
 					'description' => __( "List of category ID's the coupon does not apply to.", 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
@@ -526,15 +532,16 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'customer_emails' => array(
+				'email_restrictions' => array(
 					'description' => __( 'List of email addresses that can use this coupon.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'description' => array(
-					'description' => __( 'Coupon description.', 'woocommerce' ),
-					'type'        => 'string',
+				'used_by' => array(
+					'description' => __( 'List of user IDs who have used the coupon.', 'woocommerce' ),
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 			),
 		);
