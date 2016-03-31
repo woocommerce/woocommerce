@@ -187,8 +187,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$attributes = wc_get_attribute_taxonomies();
-
-		$data = array();
+		$data       = array();
 		foreach ( $attributes as $attribute_obj ) {
 			$attribute = $this->prepare_item_for_response( $attribute_obj, $request );
 			$attribute = $this->prepare_response_for_collection( $attribute );
@@ -475,8 +474,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 	 * @return array Links for the given attribute.
 	 */
 	protected function prepare_links( $attribute ) {
-		$base = '/' . $this->namespace . '/' . $this->rest_base;
-
+		$base  = '/' . $this->namespace . '/' . $this->rest_base;
 		$links = array(
 			'self' => array(
 				'href' => rest_url( trailingslashit( $base ) . $attribute->attribute_id ),

@@ -214,7 +214,7 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 
 		// Filter by email.
 		if ( ! empty( $request['email'] ) ) {
-			$prepared_args['search'] = $request['email'];
+			$prepared_args['search']         = $request['email'];
 			$prepared_args['search_columns'] = array( 'user_email' );
 		}
 
@@ -354,9 +354,9 @@ class WC_REST_Customers_Controller extends WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$id = (int) $request['id'];
-
+		$id       = (int) $request['id'];
 		$customer = get_userdata( $id );
+
 		if ( ! $customer ) {
 			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
 		}

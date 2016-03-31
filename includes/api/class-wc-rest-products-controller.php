@@ -503,8 +503,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$product = wc_get_product( $post );
-
-		$data = $this->get_product_data( $product );
+		$data    = $this->get_product_data( $product );
 
 		// Add variations to variable products.
 		if ( $product->is_type( 'variable' ) && $product->has_child() ) {

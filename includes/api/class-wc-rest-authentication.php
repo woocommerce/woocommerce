@@ -187,8 +187,7 @@ class WC_REST_Authentication {
 	 * @return null|WP_Error
 	 */
 	private function check_oauth_signature( $user, $params ) {
-		$http_method = strtoupper( $_SERVER['REQUEST_METHOD'] );
-
+		$http_method  = strtoupper( $_SERVER['REQUEST_METHOD'] );
 		$request_path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 		$wp_base      = get_home_url( null, '/', 'relative' );
 		if ( substr( $request_path, 0, strlen( $wp_base ) ) === $wp_base ) {
@@ -206,7 +205,7 @@ class WC_REST_Authentication {
 		}
 
 		// Normalize parameter key/values.
-		$params = $this->normalize_parameters( $params );
+		$params           = $this->normalize_parameters( $params );
 		$query_parameters = array();
 		foreach ( $params as $param_key => $param_value ) {
 			if ( is_array( $param_value ) ) {
@@ -217,8 +216,7 @@ class WC_REST_Authentication {
 				$query_parameters[] = $param_key . '%3D' . $param_value; // Join with equals sign.
 			}
 		}
-		$query_string = implode( '%26', $query_parameters ); // Join with ampersand.
-
+		$query_string   = implode( '%26', $query_parameters ); // Join with ampersand.
 		$string_to_sign = $http_method . '&' . $base_request_uri . '&' . $query_string;
 
 		if ( $params['oauth_signature_method'] !== 'HMAC-SHA1' && $params['oauth_signature_method'] !== 'HMAC-SHA256' ) {
@@ -226,9 +224,8 @@ class WC_REST_Authentication {
 		}
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
-
-		$secret = $user->consumer_secret . '&';
-		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
+		$secret         = $user->consumer_secret . '&';
+		$signature      = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
 			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid Signature - provided signature does not match.', 'woocommerce' ), array( 'status' => 401 ) );
@@ -257,8 +254,8 @@ class WC_REST_Authentication {
 	 * @return array Normalized parameters.
 	 */
 	private function normalize_parameters( $parameters ) {
-		$keys = wc_rest_urlencode_rfc3986( array_keys( $parameters ) );
-		$values = wc_rest_urlencode_rfc3986( array_values( $parameters ) );
+		$keys       = wc_rest_urlencode_rfc3986( array_keys( $parameters ) );
+		$values     = wc_rest_urlencode_rfc3986( array_values( $parameters ) );
 		$parameters = array_combine( $keys, $values );
 
 		return $parameters;

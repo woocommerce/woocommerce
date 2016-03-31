@@ -196,14 +196,6 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 				$line_item['taxes'] = array_values( $line_tax );
 			}
 
-			// if ( in_array( 'products', $expand ) ) {
-			// 	$_product_data = WC()->api->WC_API_Products->get_product( $product_id );
-
-			// 	if ( isset( $_product_data['product'] ) ) {
-			// 		$line_item['product_data'] = $_product_data['product'];
-			// 	}
-			// }
-
 			$data['line_items'][] = $line_item;
 		}
 
@@ -237,9 +229,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_links( $refund ) {
 		$order_id = $refund->post->post_parent;
-		$base = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
-
-		$links = array(
+		$base     = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
+		$links    = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $refund->id ) ),
 			),

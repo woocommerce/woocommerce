@@ -99,7 +99,7 @@ class WC_REST_Customer_Downloads_Controller extends WP_REST_Controller {
 	 */
 	public function prepare_item_for_response( $download, $request ) {
 		$data = (array) $download;
-		$data['access_expires'] = $data['access_expires'] ? wc_rest_prepare_date_response( $data['access_expires'] ) : 'never';
+		$data['access_expires']      = $data['access_expires'] ? wc_rest_prepare_date_response( $data['access_expires'] ) : 'never';
 		$data['downloads_remaining'] = '' === $data['downloads_remaining'] ? 'unlimited' : $data['downloads_remaining'];
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -129,8 +129,7 @@ class WC_REST_Customer_Downloads_Controller extends WP_REST_Controller {
 	 * @return array Links for the given customer download.
 	 */
 	protected function prepare_links( $download, $request ) {
-		$base = str_replace( '(?P<customer_id>[\d]+)', $request['customer_id'], $this->rest_base );
-
+		$base  = str_replace( '(?P<customer_id>[\d]+)', $request['customer_id'], $this->rest_base );
 		$links = array(
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),

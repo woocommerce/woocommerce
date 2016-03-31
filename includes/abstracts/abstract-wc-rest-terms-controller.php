@@ -187,8 +187,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-
+		$taxonomy      = $this->get_taxonomy( $request );
 		$prepared_args = array(
 			'exclude'    => $request['exclude'],
 			'include'    => $request['include'],
@@ -300,8 +299,8 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		$taxonomy = $this->get_taxonomy( $request );
 		$name     = $request['name'];
 		$args     = array();
+		$schema   = $this->get_item_schema();
 
-		$schema = $this->get_item_schema();
 		if ( ! empty( $schema['properties']['description'] ) && isset( $request['description'] ) ) {
 			$args['description'] = $request['description'];
 		}

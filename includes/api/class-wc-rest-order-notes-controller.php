@@ -344,8 +344,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 	protected function prepare_links( $note ) {
 		$order_id = (int) $note->comment_post_ID;
 		$base     = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
-
-		$links = array(
+		$links    = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $note->comment_ID ) ),
 			),

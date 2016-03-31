@@ -188,8 +188,7 @@ class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
 	protected function prepare_links( $log ) {
 		$webhook_id = (int) $log->request_headers['X-WC-Webhook-ID'];
 		$base       = str_replace( '(?P<webhook_id>[\d]+)', $webhook_id, $this->rest_base );
-
-		$links = array(
+		$links      = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $log->id ) ),
 			),

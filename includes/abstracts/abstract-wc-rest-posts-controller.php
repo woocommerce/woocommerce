@@ -231,7 +231,7 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$id = (int) $request['id'];
+		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
@@ -391,10 +391,9 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$id = (int) $request['id'];
+		$id    = (int) $request['id'];
 		$force = (bool) $request['force'];
-
-		$post = get_post( $id );
+		$post  = get_post( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid post id.', 'woocommerce' ), array( 'status' => 404 ) );
@@ -472,7 +471,6 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 
 		return $links;
 	}
-
 
 	/**
 	 * Determine the allowed query_vars for a get_items() response and

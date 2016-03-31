@@ -387,8 +387,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	public function prepare_item_for_response( $post, $request ) {
 		$id      = (int) $post->ID;
 		$webhook = new WC_Webhook( $id );
-
-		$data = array(
+		$data    = array(
 			'id'            => $webhook->id,
 			'name'          => $webhook->get_name(),
 			'status'        => $webhook->get_status(),

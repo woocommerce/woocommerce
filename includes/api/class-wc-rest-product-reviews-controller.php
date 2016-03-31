@@ -107,8 +107,7 @@ class WC_REST_Product_Reviews_Controller extends WP_REST_Controller {
 		}
 
 		$reviews = get_approved_comments( $product->ID );
-
-		$data = array();
+		$data    = array();
 		foreach ( $reviews as $review_data ) {
 			$review = $this->prepare_item_for_response( $review_data, $request );
 			$review = $this->prepare_response_for_collection( $review );
@@ -191,8 +190,7 @@ class WC_REST_Product_Reviews_Controller extends WP_REST_Controller {
 	protected function prepare_links( $review, $request ) {
 		$product_id = (int) $request['product_id'];
 		$base       = str_replace( '(?P<product_id>[\d]+)', $product_id, $this->rest_base );
-
-		$links = array(
+		$links      = array(
 			'self' => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $review->comment_ID ) ),
 			),
