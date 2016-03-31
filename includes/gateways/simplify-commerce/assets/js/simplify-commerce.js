@@ -27,6 +27,7 @@
 					addressCity    = $form.find( '#billing_city' ).val(),
 					addressZip     = $form.find( '#billing_postcode' ).val();
 
+				addressZip = addressZip.replace( /-/g, '' );
 				card = card.replace( /\s/g, '' );
 
 				SimplifyCommerce.generateToken({
