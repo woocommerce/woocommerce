@@ -975,3 +975,22 @@ function wc_get_credit_card_type_label( $type ) {
 function wc_back_link( $label, $url ) {
 	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" title="' . esc_attr( $label ) . '">&#x2934;</a></small>';
 }
+
+/**
+ * Display a WooCommerce help tip.
+ *
+ * @since  2.5.0
+ *
+ * @param  string $tip        Help tip text
+ * @param  bool   $allow_html Allow sanitized HTML if true or escape
+ * @return string
+ */
+function wc_help_tip( $tip, $allow_html = false ) {
+	if ( $allow_html ) {
+		$tip = wc_sanitize_tooltip( $tip );
+	} else {
+		$tip = esc_attr( $tip );
+	}
+
+	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
+}
