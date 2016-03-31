@@ -3,7 +3,7 @@ jQuery(function( $ ) {
 
 	var locale_info = $.parseJSON( wc_setup_params.locale_info );
 
-	$('select[name="store_location"]').change(function(){
+	$( 'select[name="store_location"]' ).change(function(){
 		var country_option      = $(this).val();
 		var country             = country_option.split( ':' )[0];
 		var country_locale_info = locale_info[ country ];
@@ -25,17 +25,7 @@ jQuery(function( $ ) {
 		}
 	}).change();
 
-	$('input[name="woocommerce_calc_shipping"]').change(function(){
-		if ( $(this).is( ':checked' ) ) {
-			$(':input[name="shipping_cost_domestic"]').closest('tr').show();
-			$(':input[name="shipping_cost_international"]').closest('tr').show();
-		} else {
-			$(':input[name="shipping_cost_domestic"]').closest('tr').hide();
-			$(':input[name="shipping_cost_international"]').closest('tr').hide();
-		}
-	}).change();
-
-	$('input[name="woocommerce_calc_taxes"]').change(function(){
+	$( 'input[name="woocommerce_calc_taxes"]' ).change(function(){
 		if ( $(this).is( ':checked' ) ) {
 			$(':input[name="woocommerce_prices_include_tax"], :input[name="woocommerce_import_tax_rates"]').closest('tr').show();
 			$('tr.tax-rates').show();
@@ -45,7 +35,7 @@ jQuery(function( $ ) {
 		}
 	}).change();
 
-	$('.button-next').on( 'click', function() {
+	$( '.button-next' ).on( 'click', function() {
 		$('.wc-setup-content').block({
 			message: null,
 			overlayCSS: {

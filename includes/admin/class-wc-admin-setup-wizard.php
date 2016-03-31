@@ -413,35 +413,13 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php _e( 'Shipping &amp; Tax Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php printf( __( 'If you will be charging sales tax, or shipping physical goods to customers, you can configure the basic options below. This is optional and can be changed later via %1$sWooCommerce > Settings > Tax%3$s and %2$sWooCommerce > Settings > Shipping%3$s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping' ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php _e( 'If you will be charging sales tax, or shipping physical goods to customers, you can enable these below. This is optional and can be changed later.', 'woocommerce' ); ?></p>
 			<table class="form-table">
-				<tr class="section_title">
-					<td colspan="2">
-						<h2><?php _e( 'Basic Shipping Setup', 'woocommerce' ); ?></h2>
-					</td>
-				</tr>
 				<tr>
 					<th scope="row"><label for="woocommerce_calc_shipping"><?php _e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="checkbox" id="woocommerce_calc_shipping" <?php checked( get_option( 'woocommerce_ship_to_countries', '' ) !== 'disabled', true ); ?> name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
 						<label for="woocommerce_calc_shipping"><?php _e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="shipping_cost_domestic"><?php _e( '<strong>Domestic</strong> shipping cost:', 'woocommerce' ); ?></label></th>
-					<td>
-						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" />' ); ?>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="shipping_cost_worldwide"><?php _e( '<strong>Worldwide</strong> shipping cost:', 'woocommerce' ); ?></label></th>
-					<td>
-						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_worldwide" name="shipping_cost_worldwide" size="5" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_worldwide_item" name="shipping_cost_worldwide_item" size="5" />' ); ?>
-					</td>
-				</tr>
-				<tr class="section_title">
-					<td colspan="2">
-						<h2><?php _e( 'Taxes', 'woocommerce' ); ?></h2>
 					</td>
 				</tr>
 				<tr>
@@ -494,10 +472,10 @@ class WC_Admin_Setup_Wizard {
 												foreach ( $tax_rates as $rate ) {
 													?>
 													<tr>
-														<td><?php echo esc_attr( $rate['country'] ); ?></td>
-														<td><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
-														<td><?php echo esc_attr( $rate['rate'] ); ?></td>
-														<td><?php echo esc_attr( $rate['name'] ); ?></td>
+														<td class="readonly"><?php echo esc_attr( $rate['country'] ); ?></td>
+														<td class="readonly"><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
+														<td class="readonly"><?php echo esc_attr( $rate['rate'] ); ?></td>
+														<td class="readonly"><?php echo esc_attr( $rate['name'] ); ?></td>
 													</tr>
 													<?php
 												}
@@ -538,50 +516,6 @@ class WC_Admin_Setup_Wizard {
 
 		update_option( 'woocommerce_calc_taxes', $enable_taxes ? 'yes' : 'no' );
 		update_option( 'woocommerce_prices_include_tax', sanitize_text_field( $_POST['woocommerce_prices_include_tax'] ) );
-
-		if ( $enable_shipping && ! empty( $_POST['shipping_cost_domestic'] ) ) {
-			// Create a domestic shipping zone
-			$zone = new WC_Shipping_Zone( $zone_data['zone_id'] );
-			$zone->set_zone_name( __( 'Domestic', 'woocommerce' ) );
-			$zone->set_zone_order( 1 );
-			$zone->add_location( WC()->countries->get_base_country(), 'country' );
-			$zone->save();
-
-			// Add a flat rate shipping method to this domestic zone
-			$instance_id     = $zone->add_shipping_method( 'flat_rate' );
-			$shipping_method = new WC_Shipping_Flat_Rate( $instance_id );
-			$option_key      = $shipping_method->get_instance_option_key();
-
-			// Update rate settings
-			$costs           = array();
-			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_domestic'] ) );
-			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_domestic_item'] ) ) {
-				$costs[] = $item_cost . ' * [qty]';
-			}
-			$shipping_method->instance_settings['cost']    = implode( ' + ', array_filter( $costs ) );
-			$shipping_method->instance_settings['enabled'] = 'yes';
-			$shipping_method->instance_settings['type']    = 'order';
-			update_option( $option_key, $shipping_method->instance_settings );
-		}
-
-		if ( $enable_shipping && ! empty( $_POST['shipping_cost_worldwide'] ) ) {
-			// Add a flat rate shipping method to the worldwide zone
-			$zone            = WC_Shipping_Zones::get_zone( 0 );
-			$instance_id     = $zone->add_shipping_method( 'flat_rate' );
-			$shipping_method = new WC_Shipping_Flat_Rate( $instance_id );
-			$option_key      = $shipping_method->get_instance_option_key();
-
-			// Update rate settings
-			$costs           = array();
-			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_worldwide'] ) );
-			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_worldwide_item'] ) ) {
-				$costs[] = $item_cost . ' * [qty]';
-			}
-			$shipping_method->instance_settings['cost']    = implode( ' + ', array_filter( $costs ) );
-			$shipping_method->instance_settings['enabled'] = 'yes';
-			$shipping_method->instance_settings['type']    = 'order';
-			update_option( $option_key, $shipping_method->instance_settings );
-		}
 
 		if ( $enable_taxes ) {
 			$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
