@@ -173,36 +173,6 @@
 	}
 }
 
-
-div.woocommerce-legacy-shipping-notice {
-	overflow: hidden;
-	padding: 1px 12px;
-	p {
-		position: relative;
-		z-index: 1;
-		max-width: 700px;
-		line-height: 1.5em;
-		margin: 12px 0;
-
-		&.main {
-			font-size: 1.1em;
-		}
-	}
-	&:before {
-		content: "\f319";
-		font-family: 'dashicons';
-		text-align: center;
-		line-height: 1;
-		color: #F7F1F6;
-		display: block;
-		width: 1em;
-		font-size: 20em;
-		top: 0;
-		right: 0;
-		position: absolute;
-	}
-}
-
 #variable_product_options #message, #variable_product_options .notice {
 	margin: 10px;
 }
@@ -2318,9 +2288,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		background: #F7F1F6 !important;
 		overflow: hidden;
 		position: relative;
-		padding: 7.5em 10%;
+		padding: 7.5em 7.5%;
 		border-bottom: 2px solid #EEE2EC;
-		p {
+		p, li {
 			color: #a46497;
 			font-size: 1.5em;
 			line-height: 1.5em;
@@ -2333,17 +2303,22 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 				font-size: 2em;
 			}
 		}
+		li {
+			margin-left: 1em;
+			list-style: circle inside;
+		}
 		&:before {
-			content: "\f319";
-			font-family: 'dashicons';
+			content: "\e01b";
+			font-family: "WooCommerce";
 			text-align: center;
 			line-height: 1;
 			color: #EEE2EC;
 			display: block;
-			width: 17px;
+			width: 1em;
 			font-size: 40em;
-			top: 0;
-			left: 0;
+			top: 50%;
+			right: -3.75%;
+			margin-top: -0.1875em;
 			position: absolute;
 		}
 		.button-primary {
@@ -2485,6 +2460,12 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			li:last-child {
 				display: block;
 			}
+			li:first-child {
+				margin: 0 !important;
+			}
+			li.wc-shipping-zone-methods-add-row {
+				margin: .5em 0 0;
+			}
 		}
 		.button {
 			display: inline-block;
@@ -2498,11 +2479,16 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			float: right;
 			padding: .5em;
 			cursor: pointer;
+			line-height: 24px;
 
 			&:before {
 				@include icon;
+				font-family: 'Dashicons';
 				color: #999;
+				vertical-align: middle;
 				line-height: 24px;
+				font-size: 16px;
+				margin: 0;
 			}
 			&:hover {
 				&:before {
@@ -2513,7 +2499,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 
 		a.wc-shipping-zone-delete, a.wc-shipping-zone-method-delete, a.wc-shipping-class-delete {
 			&:before {
-				content: "\e013";
+				content: "\f158";
 			}
 			&:hover {
 				&:before {
@@ -2524,16 +2510,14 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 
 		a.wc-shipping-class-edit {
 			&:before {
-				font-family: "Dashicons";
 				content: "\f464";
 			}
 		}
 
 		a.wc-shipping-zone-method-settings {
 			&:before {
-				@include icon("\f111");
-				font-family: 'Dashicons';
-				line-height: 2.26;
+				content: "\f111";
+				margin-top: -1px;
 			}
 		}
 	}
@@ -2555,6 +2539,52 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	.editing {
 		.wc-shipping-zone-view, .wc-shipping-zone-edit {
 			display: none;
+		}
+	}
+}
+
+.wc-modal-shipping-method-settings {
+	background: #f8f8f8;
+	padding: 1em !important;
+	form {
+		.form-table {
+			width: 100%;
+			background: #fff;
+			margin: 0 0 1.5em;
+			tr {
+				th {
+					width: 30%;
+					position: relative;
+					.woocommerce-help-tip {
+						float: right;
+						margin: -8px -.5em 0 0;
+						vertical-align: middle;
+						right: 0;
+						top: 50%;
+						position: absolute;
+					}
+				}
+				td {
+					input, select, textarea {
+						width: 50%;
+						min-width: 250px;
+					}
+					input[type="checkbox"] {
+						width: auto;
+						min-width: 0;
+					}
+				}
+				td, th {
+					vertical-align: middle;
+					margin: 0;
+					line-height: 24px;
+					padding: 1em;
+					border-bottom: 1px solid #f8f8f8;
+				}
+			}
+			&:last-of-type {
+				margin-bottom: 0;
+			}
 		}
 	}
 }
@@ -4848,11 +4878,19 @@ table.bar_chart {
 
 	.wc-backbone-modal-content {
 		position: fixed;
-		top: 50%;
-		left: 50%;
-		width: 500px;
 		background: #fff;
 		z-index: 100000;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 500px;
+	}
+
+	&.wc-backbone-modal-shipping-method-settings {
+		.wc-backbone-modal-content {
+			width: 75%;
+			min-width: 500px;
+		}
 	}
 }
 

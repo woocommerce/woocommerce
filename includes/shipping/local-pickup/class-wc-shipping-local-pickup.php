@@ -25,7 +25,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		$this->method_description    = __( 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
-			'instance-settings'
+			'instance-settings',
+			'instance-settings-modal',
 		);
 		$this->init();
 	}

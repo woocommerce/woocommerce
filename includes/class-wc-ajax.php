@@ -145,6 +145,7 @@ class WC_AJAX {
 			'shipping_zones_save_changes'                      => false,
 			'shipping_zone_add_method'                         => false,
 			'shipping_zone_methods_save_changes'               => false,
+			'shipping_zone_methods_save_settings'              => false,
 			'shipping_classes_save_changes'                    => false,
 		);
 
@@ -3204,6 +3205,38 @@ class WC_AJAX {
 
 		wp_send_json_success( array(
 			'methods' => $zone->get_shipping_methods()
+		) );
+	}
+
+	/**
+	 * Save method settings
+	 */
+	public static function shipping_zone_methods_save_settings() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['instance_id'], $_POST['data'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$instance_id     = absint( $_POST['instance_id'] );
+		$zone            = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
+		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+		$data            = $_POST['data'];
+
+		$shipping_method->process_admin_options( $data );
+
+		wp_send_json_success( array(
+			'methods' => $zone->get_shipping_methods(),
+			'errors'  => $shipping_method->get_errors(),
 		) );
 	}
 

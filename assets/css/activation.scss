@@ -98,16 +98,16 @@ div.woocommerce-legacy-shipping-notice {
 		}
 	}
 	&:before {
-		content: "\f319";
-		font-family: 'dashicons';
+		content: "\e01b";
+		font-family: "WooCommerce";
 		text-align: center;
 		line-height: 1;
 		color: #F7F1F6;
 		display: block;
 		width: 1em;
 		font-size: 20em;
-		top: 0;
-		right: 0;
+		top: 36px;
+		right: 12px;
 		position: absolute;
 	}
 }

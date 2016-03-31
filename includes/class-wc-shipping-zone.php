@@ -238,9 +238,10 @@ class WC_Shipping_Zone extends WC_Data {
 
 				// Let's make sure that we have an instance before setting its attributes
 				if ( is_object( $methods[ $raw_method->instance_id ] ) ) {
-					$methods[ $raw_method->instance_id ]->method_order = absint( $raw_method->method_order );
-					$methods[ $raw_method->instance_id ]->enabled      = $raw_method->is_enabled ? 'yes' : 'no';
-					$methods[ $raw_method->instance_id ]->has_settings = $methods[ $raw_method->instance_id ]->has_settings();
+					$methods[ $raw_method->instance_id ]->method_order  = absint( $raw_method->method_order );
+					$methods[ $raw_method->instance_id ]->enabled       = $raw_method->is_enabled ? 'yes' : 'no';
+					$methods[ $raw_method->instance_id ]->has_settings  = $methods[ $raw_method->instance_id ]->has_settings();
+					$methods[ $raw_method->instance_id ]->settings_html = $methods[ $raw_method->instance_id ]->supports( 'instance-settings-modal' ) ? $methods[ $raw_method->instance_id ]->get_admin_options_html() : false;
 				}
 			}
 		}
@@ -411,6 +412,7 @@ class WC_Shipping_Zone extends WC_Data {
 		$instance_id     = 0;
 		$wc_shipping     = WC_Shipping::instance();
 		$allowed_classes = $wc_shipping->get_shipping_method_class_names();
+		$count           = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d", $this->get_zone_id() ) );
 
 		if ( in_array( $type, array_keys( $allowed_classes ) ) ) {
 			$wpdb->insert(
@@ -418,7 +420,7 @@ class WC_Shipping_Zone extends WC_Data {
 				array(
 					'method_id'    => $type,
 					'zone_id'      => $this->get_zone_id(),
-					'method_order' => 0
+					'method_order' => ( $count + 1 )
 				),
 				array(
 					'%s',

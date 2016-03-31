@@ -22,6 +22,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * - shipping-zones Shipping zone functionality + instances
 	 * - instance-settings Instance settings screens.
 	 * - settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
+	 * - instance-settings-modal Allows the instance settings to be loaded within a modal in the zones UI.
 	 * @var array
 	 */
 	public $supports = array( 'settings' );
@@ -356,17 +357,28 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
+	 * Return admin options as a html string.
+	 * @return string
+	 */
+	public function get_admin_options_html() {
+		if ( $this->instance_id ) {
+			$settings_html = $this->generate_settings_html( $this->get_instance_form_fields(), false );
+		} else {
+			$settings_html = $this->generate_settings_html( $this->get_form_fields(), false );
+		}
+
+		return '<table class="form-table">' . $settings_html . '</table>';
+	}
+
+	/**
 	 * Output the shipping settings screen.
 	 */
 	public function admin_options() {
-		if ( $this->instance_id ) {
-			echo wp_kses_post( wpautop( $this->get_method_description() ) );
-			echo '<table class="form-table">' . $this->generate_settings_html( $this->get_instance_form_fields(), false ) . '</table>';
-		} else {
+		if ( ! $this->instance_id ) {
 			echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
-			echo wp_kses_post( wpautop( $this->get_method_description() ) );
-			echo '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>';
 		}
+		echo wp_kses_post( wpautop( $this->get_method_description() ) );
+		echo $this->get_admin_options_html();
 	}
 
 	/**
@@ -450,16 +462,21 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Processes and saves options.
 	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
 	 * @since 2.6.0
+	 * @param  array $post_data Defaults to $_POST but can be passed in.
 	 * @return bool was anything saved?
 	 */
-	public function process_admin_options() {
+	public function process_admin_options( $post_data = array() ) {
 		if ( $this->instance_id ) {
 			$this->init_instance_settings();
+
+			if ( empty( $post_data ) ) {
+				$post_data = $_POST;
+			}
 
 			foreach ( $this->get_instance_form_fields() as $key => $field ) {
 				if ( 'title' !== $this->get_field_type( $field ) ) {
 					try {
-						$this->instance_settings[ $key ] = $this->get_field_value( $key, $field );
+						$this->instance_settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
 					} catch ( Exception $e ) {
 						$this->add_error( $e->getMessage() );
 					}

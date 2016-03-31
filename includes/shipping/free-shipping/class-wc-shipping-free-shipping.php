@@ -31,7 +31,8 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$this->method_description    = __( 'Free Shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
-			'instance-settings'
+			'instance-settings',
+			'instance-settings-modal',
 		);
 		$this->title 		         = $this->get_option( 'title' );
 		$this->min_amount 	         = $this->get_option( 'min_amount', 0 );
