@@ -510,6 +510,7 @@ class WC_Admin_Setup_Wizard {
 
 		if ( $enable_shipping ) {
 			update_option( 'woocommerce_ship_to_countries', '' );
+			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
 		} else {
 			update_option( 'woocommerce_ship_to_countries', 'disabled' );
 		}

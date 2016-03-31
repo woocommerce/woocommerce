@@ -22,11 +22,12 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private $core_notices = array(
-		'install'         => 'install_notice',
-		'update'          => 'update_notice',
-		'template_files'  => 'template_file_check_notice',
-		'theme_support'   => 'theme_check_notice',
-		'legacy_shipping' => 'legacy_shipping_notice',
+		'install'             => 'install_notice',
+		'update'              => 'update_notice',
+		'template_files'      => 'template_file_check_notice',
+		'theme_support'       => 'theme_check_notice',
+		'legacy_shipping'     => 'legacy_shipping_notice',
+		'no_shipping_methods' => 'no_shipping_methods_notice',
 	);
 
 	/**
@@ -202,6 +203,26 @@ class WC_Admin_Notices {
 			include( 'views/html-notice-legacy-shipping.php' );
 		} else {
 			self::remove_notice( 'template_files' );
+		}
+	}
+
+	/**
+	 * No shipping methods.
+	 */
+	public function no_shipping_methods_notice() {
+		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) {
+			global $wpdb;
+
+			$product_count = wp_count_posts( 'product' );
+			$method_count  = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+
+			if ( $product_count->publish > 0 && 0 === $method_count ) {
+				include( 'views/html-notice-no-shipping-methods.php' );
+			}
+
+			if ( $method_count > 0 ) {
+				self::remove_notice( 'no_shipping_methods' );
+			}
 		}
 	}
 }
