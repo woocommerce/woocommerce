@@ -441,7 +441,7 @@ class WC_Admin_Setup_Wizard {
 				</tr>
 				<tr class="section_title">
 					<td colspan="2">
-						<h2><?php _e( 'Basic Tax Setup', 'woocommerce' ); ?></h2>
+						<h2><?php _e( 'Taxes', 'woocommerce' ); ?></h2>
 					</td>
 				</tr>
 				<tr>
@@ -476,10 +476,9 @@ class WC_Admin_Setup_Wizard {
 					}
 					if ( $tax_rates ) {
 						?>
-						<tr>
-							<th scope="row"><label for="woocommerce_import_tax_rates"><?php _e( 'Import Tax Rates?', 'woocommerce' ); ?></label></th>
-							<td>
-								<label><input type="checkbox" id="woocommerce_import_tax_rates" name="woocommerce_import_tax_rates" class="input-checkbox" value="yes" /> <?php _e( 'Yes, please import some starter tax rates', 'woocommerce' ); ?></label>
+						<tr class="tax-rates">
+							<td colspan="2">
+								<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in %1$sour documentation%2$s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
 								<div class="importing-tax-rates">
 									<table class="tax-rates">
 										<thead>
@@ -488,7 +487,6 @@ class WC_Admin_Setup_Wizard {
 												<th><?php _e( 'State', 'woocommerce' ); ?></th>
 												<th><?php _e( 'Rate (%)', 'woocommerce' ); ?></th>
 												<th><?php _e( 'Name', 'woocommerce' ); ?></th>
-												<th><?php _e( 'Tax Shipping', 'woocommerce' ); ?></th>
 											</tr>
 										</thead>
 										<tbody>
@@ -500,16 +498,14 @@ class WC_Admin_Setup_Wizard {
 														<td><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
 														<td><?php echo esc_attr( $rate['rate'] ); ?></td>
 														<td><?php echo esc_attr( $rate['name'] ); ?></td>
-														<td><?php echo empty( $rate['shipping'] ) ? '-' : '&#10004;'; ?></td>
 													</tr>
 													<?php
 												}
 											?>
 										</tbody>
 									</table>
-									<p class="description"><?php _e( 'Please note: you may still need to add local and product specific tax rates depending on your business location. If in doubt, speak to an accountant.', 'woocommerce' ); ?></p>
 								</div>
-								<p class="description"><?php printf( __( 'You can edit tax rates later from the %1$stax settings%3$s screen and read more about taxes in %2$sour documentation%3$s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '<a href="http://docs.woothemes.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
+								<p class="description"><?php printf( __( 'You may you need to add/edit rates based on your products or business location which can be done from the %1$stax settings%2$s screen. If in doubt, speak to an accountant.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '</a>' ); ?></p>
 							</td>
 						</tr>
 						<?php
@@ -587,7 +583,7 @@ class WC_Admin_Setup_Wizard {
 			update_option( $option_key, $shipping_method->instance_settings );
 		}
 
-		if ( $enable_taxes && ! empty( $_POST['woocommerce_import_tax_rates'] ) ) {
+		if ( $enable_taxes ) {
 			$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
 			$tax_rates   = array();
 			$country     = WC()->countries->get_base_country();

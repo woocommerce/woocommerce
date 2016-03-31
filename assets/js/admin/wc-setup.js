@@ -45,14 +45,6 @@ jQuery(function( $ ) {
 		}
 	}).change();
 
-	$('input[name="woocommerce_import_tax_rates"]').change(function(){
-		if ( $(this).is( ':checked' ) ) {
-			$('.importing-tax-rates').show();
-		} else {
-			$('.importing-tax-rates').hide();
-		}
-	}).change();
-
 	$('.button-next').on( 'click', function() {
 		$('.wc-setup-content').block({
 			message: null,
