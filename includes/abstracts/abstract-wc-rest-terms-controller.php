@@ -89,12 +89,12 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		$permissions = $this->check_permissions( $request, 'read' );
+		if ( is_wp_error( $permissions ) ) {
+			return $permissions;
 		}
 
-		if ( ! wc_rest_check_product_term_permissions( $taxonomy, 'read' ) ) {
+		if ( ! $permissions ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -108,12 +108,12 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		$permissions = $this->check_permissions( $request, 'create' );
+		if ( is_wp_error( $permissions ) ) {
+			return $permissions;
 		}
 
-		if ( ! wc_rest_check_product_term_permissions( $taxonomy, 'create' ) ) {
+		if ( ! $permissions ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -127,13 +127,12 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		$permissions = $this->check_permissions( $request, 'read' );
+		if ( is_wp_error( $permissions ) ) {
+			return $permissions;
 		}
 
-		$term = get_term( (int) $request['id'], $taxonomy );
-		if ( $term && ! wc_rest_check_product_term_permissions( $taxonomy, 'read', $term->term_id ) ) {
+		if ( ! $permissions ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -147,13 +146,12 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		if ( ! $taxonomy ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		$permissions = $this->check_permissions( $request, 'edit' );
+		if ( is_wp_error( $permissions ) ) {
+			return $permissions;
 		}
 
-		$term = get_term( (int) $request['id'], $taxonomy );
-		if ( $term && ! wc_rest_check_product_term_permissions( $taxonomy, 'edit', $term->term_id ) ) {
+		if ( ! $permissions ) {
 			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -167,17 +165,44 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
+		$permissions = $this->check_permissions( $request, 'delete' );
+		if ( is_wp_error( $permissions ) ) {
+			return $permissions;
+		}
+
+		if ( ! $permissions ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check permissions.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @param string $context Request context.
+	 * @return bool|WP_Error
+	 */
+	protected function check_permissions( $request, $context = 'read' ) {
+		// Get taxonomy.
 		$taxonomy = $this->get_taxonomy( $request );
 		if ( ! $taxonomy ) {
 			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( "Taxonomy doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$term = get_term( (int) $request['id'], $taxonomy );
-		if ( $term && ! wc_rest_check_product_term_permissions( $taxonomy, 'delete', $term->term_id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		// Check permissions for a single term.
+		if ( $id = intval( $request['id'] ) ) {
+			$term = get_term( $id, $taxonomy );
+
+			if ( ! $term || $term->taxonomy !== $taxonomy ) {
+				return new WP_Error( 'woocommerce_rest_term_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+			}
+
+			return wc_rest_check_product_term_permissions( $taxonomy, $context, $term->term_id );
 		}
 
-		return true;
+		return wc_rest_check_product_term_permissions( $taxonomy, $context );
 	}
 
 	/**
@@ -379,10 +404,6 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		$taxonomy = $this->get_taxonomy( $request );
 		$term     = get_term( (int) $request['id'], $taxonomy );
 
-		if ( ! $term || $term->taxonomy !== $taxonomy ) {
-			return new WP_Error( 'woocommerce_rest_term_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
 		if ( is_wp_error( $term ) ) {
 			return $term;
 		}
@@ -399,15 +420,11 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function update_item( $request ) {
-		$taxonomy = $this->get_taxonomy( $request );
-		$term     = get_term( (int) $request['id'], $taxonomy );
-
-		if ( ! $term || $term->taxonomy !== $taxonomy ) {
-			return new WP_Error( 'woocommerce_rest_term_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
+		$taxonomy      = $this->get_taxonomy( $request );
+		$term          = get_term( (int) $request['id'], $taxonomy );
 		$schema        = $this->get_item_schema();
 		$prepared_args = array();
+
 		if ( isset( $request['name'] ) ) {
 			$prepared_args['name'] = $request['name'];
 		}
@@ -473,12 +490,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 	public function delete_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
 		$term     = get_term( (int) $request['id'], $taxonomy );
-
-		if ( ! $term || $term->taxonomy !== $taxonomy ) {
-			return new WP_Error( 'woocommerce_rest_term_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+		$force    = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
