@@ -122,8 +122,8 @@ class WC_HTTPS {
 	 * 		https://www.paypal-knowledge.com/infocenter/index?page=content&widgetview=true&id=FAQ1914&viewlocale=en_US
 	 */
 	public static function http_api_curl( $handle, $r, $url ) {
-		if ( strstr( $url, 'https://' ) && strstr( $url, '.paypal.com' ) && defined( 'CURL_SSLVERSION_TLSv1' ) ) {
-			curl_setopt( $handle, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1 );
+		if ( strstr( $url, 'https://' ) && ( strstr( $url, '.paypal.com/nvp' ) || strstr( $url, '.paypal.com/cgi-bin/webscr' ) ) ) {
+			curl_setopt( $handle, CURLOPT_SSLVERSION, 1 );
 		}
 	}
 }
