@@ -1103,12 +1103,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Backorders.
 			if ( isset( $request['backorders'] ) ) {
-				if ( 'notify' === $request['backorders'] ) {
-					$backorders = 'notify';
-				} else {
-					$backorders = ( true === $request['backorders'] ) ? 'yes' : 'no';
-				}
-
+				$backorders = $request['backorders'];
 				update_post_meta( $product->id, '_backorders', $backorders );
 			} else {
 				$backorders = get_post_meta( $product->id, '_backorders', true );
@@ -1126,6 +1121,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				update_post_meta( $product->id, '_stock', '' );
 
 				wc_update_product_stock_status( $product->id, 'instock' );
+			} elseif ( 'variable' === $product_type ) {
+				update_post_meta( $product->id, '_stock', '' );
 			} elseif ( 'yes' == $managing_stock ) {
 				update_post_meta( $product->id, '_backorders', $backorders );
 
@@ -1149,7 +1146,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				wc_update_product_stock_status( $product->id, $stock_status );
 			}
 
-		} else {
+		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $product->id, $stock_status );
 		}
 
@@ -1370,27 +1367,25 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			// Stock handling.
 			if ( isset( $variation['managing_stock'] ) ) {
 				$managing_stock = ( true === $variation['managing_stock'] ) ? 'yes' : 'no';
-				update_post_meta( $variation_id, '_manage_stock', $managing_stock );
 			} else {
 				$managing_stock = get_post_meta( $variation_id, '_manage_stock', true );
 			}
 
-			// Only update stock status to user setting if changed by the user,
-			// but do so before looking at stock levels at variation level.
+			update_post_meta( $variation_id, '_manage_stock', '' === $managing_stock ? 'no' : $managing_stock );
+
 			if ( isset( $variation['in_stock'] ) ) {
 				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
-				wc_update_product_stock_status( $variation_id, $stock_status );
+			} else {
+				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
 			}
+
+			wc_update_product_stock_status( $variation_id, '' === $stock_status ? 'instock' : $stock_status );
 
 			if ( 'yes' === $managing_stock ) {
 				$backorders = get_post_meta( $variation_id, '_backorders', true );
 
 				if ( isset( $variation['backorders'] ) ) {
-					if ( 'notify' == $variation['backorders'] ) {
-						$backorders = 'notify';
-					} else {
-						$backorders = ( true === $variation['backorders'] ) ? 'yes' : 'no';
-					}
+					$backorders = $variation['backorders'];
 				}
 
 				update_post_meta( $variation_id, '_backorders', '' === $backorders ? 'no' : $backorders );
@@ -1528,7 +1523,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Update parent if variable so price sorting works and stays in sync with the cheapest child.
 		WC_Product_Variable::sync( $product->id );
-		WC_Product_Variable::sync_stock_status( $product->id );
 
 		// Update default attributes options setting.
 		if ( isset( $request['default_attribute'] ) ) {
