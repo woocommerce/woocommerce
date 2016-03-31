@@ -27,7 +27,7 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 	 *
 	 * @var string
 	 */
-	public $namespace = 'wc/v1';
+	protected $namespace = 'wc/v1';
 
 	/**
 	 * Route base.

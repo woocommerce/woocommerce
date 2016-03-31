@@ -27,7 +27,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @var string
 	 */
-	public $namespace = 'wc/v1';
+	protected $namespace = 'wc/v1';
 
 	/**
 	 * Route base.
