@@ -354,7 +354,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		 */
 		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, true );
 
-		$request->set_param( 'context', 'view' );
+		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $term, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
@@ -459,7 +459,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		 */
 		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, false );
 
-		$request->set_param( 'context', 'view' );
+		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $term, $request );
 		return rest_ensure_response( $response );
 	}
@@ -486,7 +486,7 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 		}
 
 		$term = get_term( (int) $request['id'], $taxonomy );
-		$request->set_param( 'context', 'view' );
+		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $term, $request );
 
 		$retval = wp_delete_term( $term->term_id, $term->taxonomy );
