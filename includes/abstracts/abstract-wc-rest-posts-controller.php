@@ -19,7 +19,7 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	public $namespace = 'wc/v1';
+	protected $namespace = 'wc/v1';
 
 	/**
 	 * Route base.
