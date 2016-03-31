@@ -2335,11 +2335,6 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			position: relative;
 			z-index: 1;
 		}
-		&.wc-shipping-zone-method-blank-state {
-			&:before {
-				content: "\f231";
-			}
-		}
 	}
 	tbody.wc-shipping-zone-rows, .wc-shipping-zone-method-rows {
 		tr:nth-child(odd) {
