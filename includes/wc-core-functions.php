@@ -718,14 +718,16 @@ function wc_get_base_location() {
  * @return array
  */
 function wc_get_customer_default_location() {
+	$location = array();
+
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
 		case 'geolocation_ajax' :
 		case 'geolocation' :
-			$location = WC_Geolocation::geolocate_ip( '', true, false );
+			// Exclude common bots from geolocation by user agent.
+			$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
 
-			// Base fallback.
-			if ( empty( $location['country'] ) ) {
-				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
+				$location = WC_Geolocation::geolocate_ip( '', true, false );
 			}
 		break;
 		case 'base' :
@@ -734,6 +736,11 @@ function wc_get_customer_default_location() {
 		default :
 			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', '' ) );
 		break;
+	}
+
+	// Base fallback.
+	if ( empty( $location['country'] ) ) {
+		$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
 	}
 
 	return apply_filters( 'woocommerce_customer_default_location_array', $location );
