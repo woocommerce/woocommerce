@@ -54,7 +54,7 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 				<div class="form-row">
 					<?php wp_nonce_field( 'woocommerce-add-payment-method' ); ?>
 					<input type="submit" class="button alt" id="place_order" value="<?php esc_attr_e( 'Add Payment Method', 'woocommerce' ); ?>" />
-					<input type="hidden" name="woocommerce_add_payment_method" value="1" />
+					<input type="hidden" name="woocommerce_add_payment_method" id="woocommerce_add_payment_method" value="1" />
 				</div>
 			</div>
 		</form>

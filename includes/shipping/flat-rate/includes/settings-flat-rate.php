@@ -10,12 +10,6 @@ $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</cod
  * Settings for flat rate shipping.
  */
 $settings = array(
-	'enabled' => array(
-		'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-		'type' 			=> 'checkbox',
-		'label' 		=> __( 'Enable this shipping method', 'woocommerce' ),
-		'default' 		=> 'yes',
-	),
 	'title' => array(
 		'title' 		=> __( 'Method Title', 'woocommerce' ),
 		'type' 			=> 'text',

@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 echo "= " . $email_heading . " =\n\n";
 
-echo sprintf( __( "Thanks for creating an account on %s. Your username is <strong>%s</strong>.", 'woocommerce' ), $blogname, $user_login ) . "\n\n";
+echo sprintf( __( "Thanks for creating an account on %s. Your username is <strong>%s</strong>", 'woocommerce' ), $blogname, $user_login ) . "\n\n";
 
 if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $password_generated )
 	echo sprintf( __( "Your password is <strong>%s</strong>.", 'woocommerce' ), $user_pass ) . "\n\n";

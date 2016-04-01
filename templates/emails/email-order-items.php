@@ -43,7 +43,7 @@ foreach ( $items as $item_id => $item ) :
 				}
 
 				// allow other plugins to add additional product information here
-				do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+				do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 
 				// Variation
 				if ( ! empty( $item_meta->meta ) ) {
@@ -56,7 +56,7 @@ foreach ( $items as $item_id => $item ) :
 				}
 
 				// allow other plugins to add additional product information here
-				do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
+				do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 
 			?></td>
 			<td class="td" style="text-align:left; vertical-align:middle; border: 1px solid #eee; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;"><?php echo apply_filters( 'woocommerce_email_order_item_quantity', $item['qty'], $item ); ?></td>

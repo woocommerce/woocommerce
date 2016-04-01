@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-<p><?php printf( __( "Thanks for creating an account on %s. Your username is <strong>%s</strong>.", 'woocommerce' ), esc_html( $blogname ), esc_html( $user_login ) ); ?></p>
+<p><?php printf( __( "Thanks for creating an account on %s. Your username is <strong>%s</strong>", 'woocommerce' ), esc_html( $blogname ), esc_html( $user_login ) ); ?></p>
 
 <?php if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $password_generated ) : ?>
 

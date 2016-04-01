@@ -446,7 +446,18 @@ class WC_Checkout {
 
 					// Validation: Required fields
 					if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) {
-						wc_add_notice( '<strong>' . $field['label'] . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
+						switch ( $fieldset_key ) {
+							case 'shipping' :
+								$field_label = sprintf( _x( 'Shipping %s', 'Shipping FIELDNAME', 'woocommerce' ), $field['label'] );
+							break;
+							case 'billing' :
+								$field_label = sprintf( _x( 'Billing %s', 'Billing FIELDNAME', 'woocommerce' ), $field['label'] );
+							break;
+							default :
+								$field_label = $field['label'];
+							break;
+						}
+						wc_add_notice( apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( _x( '%s is a required field.', 'FIELDNAME is a required field.', 'woocommerce' ), '<strong>' . $field_label . '</strong>' ), $field_label ), 'error' );
 					}
 
 					if ( ! empty( $this->posted[ $key ] ) ) {
@@ -563,7 +574,7 @@ class WC_Checkout {
 
 				foreach ( $packages as $i => $package ) {
 					if ( ! isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
-						wc_add_notice( __( 'Invalid shipping method.', 'woocommerce' ), 'error' );
+						wc_add_notice( __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ), 'error' );
 						$this->shipping_methods[ $i ] = '';
 					}
 				}
@@ -787,13 +798,13 @@ class WC_Checkout {
 				case 'billing_country' :
 					return apply_filters( 'default_checkout_country', WC()->customer->get_country() ? WC()->customer->get_country() : WC()->countries->get_base_country(), 'billing' );
 				case 'billing_state' :
-					return apply_filters( 'default_checkout_state', WC()->customer->has_calculated_shipping() ? WC()->customer->get_state() : '', 'billing' );
+					return apply_filters( 'default_checkout_state', WC()->customer->get_state() ? WC()->customer->get_state() : '', 'billing' );
 				case 'billing_postcode' :
 					return apply_filters( 'default_checkout_postcode', WC()->customer->get_postcode() ? WC()->customer->get_postcode() : '', 'billing' );
 				case 'shipping_country' :
-					return apply_filters( 'default_checkout_country', WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : WC()->countries->get_base_country(), 'shipping' );
+					return apply_filters( 'default_checkout_country', WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : '', 'shipping' );
 				case 'shipping_state' :
-					return apply_filters( 'default_checkout_state', WC()->customer->has_calculated_shipping() ? WC()->customer->get_shipping_state() : '', 'shipping' );
+					return apply_filters( 'default_checkout_state', WC()->customer->get_shipping_state() ? WC()->customer->get_shipping_state() : '', 'shipping' );
 				case 'shipping_postcode' :
 					return apply_filters( 'default_checkout_postcode', WC()->customer->get_shipping_postcode() ? WC()->customer->get_shipping_postcode() : '', 'shipping' );
 				default :

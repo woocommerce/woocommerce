@@ -125,24 +125,14 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 			case 'last_order' :
 
-				$order_ids = get_posts( array(
-					'posts_per_page' => 1,
-					'post_type'      => 'shop_order',
-					'orderby'        => 'date',
-					'order'          => 'desc',
-					'post_status'    => array( 'wc-completed', 'wc-processing' ),
-					'meta_query' => array(
-						array(
-							'key'     => '_customer_user',
-							'value'   => $user->ID
-						)
-					),
-					'fields' => 'ids'
+				$orders = wc_get_orders( array(
+					'limit'    => 1,
+					'status'   => array( 'wc-completed', 'wc-processing' ),
+					'customer' => $user->ID
 				) );
 
-				if ( $order_ids ) {
-					$order = wc_get_order( $order_ids[0] );
-
+				if ( ! empty( $orders ) ) {
+					$order = $orders[0];
 					return '<a href="' . admin_url( 'post.php?post=' . $order->id . '&action=edit' ) . '">' . _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() . '</a> &ndash; ' . date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) );
 				} else {
 					return '-';
@@ -176,25 +166,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 							'action'    => "view"
 						);
 
-						$order_ids = get_posts( array(
-							'posts_per_page' => 1,
-							'post_type'   => wc_get_order_types(),
-							'post_status' => array_keys( wc_get_order_statuses() ),
-							'meta_query' => array(
-								array(
-									'key'     => '_customer_user',
-									'value'   => array( 0, '' ),
-									'compare' => 'IN'
-								),
-								array(
-									'key'     => '_billing_email',
-									'value'   => $user->user_email
-								)
-							),
-							'fields' => 'ids'
+						$orders = wc_get_orders( array(
+							'limit'          => 1,
+							'status'         => array( 'wc-completed', 'wc-processing' ),
+							'customer'       => array( array( 0, $user->user_email ) ),
 						) );
 
-						if ( $order_ids ) {
+						if ( $orders ) {
 							$actions['link'] = array(
 								'url'       => wp_nonce_url( add_query_arg( 'link_orders', $user->ID ), 'link_orders' ),
 								'name'      => __( 'Link previous orders', 'woocommerce' ),

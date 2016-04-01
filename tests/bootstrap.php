@@ -6,7 +6,7 @@
  */
 class WC_Unit_Tests_Bootstrap {
 
-	/** @var \WC_Unit_Tests_Bootstrap instance */
+	/** @var WC_Unit_Tests_Bootstrap instance */
 	protected static $instance = null;
 
 	/** @var string directory where wordpress-tests-lib is installed */
@@ -27,6 +27,11 @@ class WC_Unit_Tests_Bootstrap {
 
 		ini_set( 'display_errors','on' );
 		error_reporting( E_ALL );
+
+		// Ensure server variable is set for WP email functions.
+		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
+			$_SERVER['SERVER_NAME'] = 'localhost';
+		}
 
 		$this->tests_dir    = dirname( __FILE__ );
 		$this->plugin_dir   = dirname( $this->tests_dir );
@@ -91,6 +96,8 @@ class WC_Unit_Tests_Bootstrap {
 		// framework
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-factory.php' );
 		require_once( $this->tests_dir . '/framework/class-wc-mock-session-handler.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-mock-wc-data.php' );
+		require_once( $this->tests_dir . '/framework/class-wc-payment-token-stub.php' );
 
 		// test cases
 		require_once( $this->tests_dir . '/framework/class-wc-unit-test-case.php' );
@@ -104,6 +111,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-customer.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-order.php' );
 		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php' );
+		require_once( $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php' );
 	}
 
 	/**

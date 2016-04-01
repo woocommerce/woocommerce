@@ -1539,7 +1539,7 @@ class WC_Admin_Post_Types {
 				),
 				array( absint( $search_order_id ) )
 			) );
-		} else {
+		} elseif ( ! empty( $search_fields ) ) {
 			$post_ids = array_unique( array_merge(
 				$wpdb->get_col(
 					$wpdb->prepare( "
@@ -1566,16 +1566,20 @@ class WC_Admin_Post_Types {
 					)
 				)
 			) );
+		} else {
+			$post_ids = false;
 		}
 
-		// Remove s - we don't want to search order name
-		unset( $wp->query_vars['s'] );
+		if ( is_array( $post_ids ) ) {
+			// Remove s - we don't want to search order name
+			unset( $wp->query_vars['s'] );
 
-		// so we know we're doing this
-		$wp->query_vars['shop_order_search'] = true;
+			// so we know we're doing this
+			$wp->query_vars['shop_order_search'] = true;
 
-		// Search by found posts
-		$wp->query_vars['post__in'] = $post_ids;
+			// Search by found posts
+			$wp->query_vars['post__in'] = array_merge( $post_ids, array( 0 ) );
+		}
 	}
 
 	/**

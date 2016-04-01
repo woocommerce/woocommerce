@@ -146,7 +146,9 @@ class WC_Payment_Gateways {
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} elseif( $gateway->supports( 'add_payment_method' ) ) {
+				} else if( $gateway->supports( 'add_payment_method' ) ) {
+					$_available_gateways[ $gateway->id ] = $gateway;
+				} else if ( $gateway->supports( 'tokenization' ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}
@@ -166,7 +168,14 @@ class WC_Payment_Gateways {
 			return;
 		}
 
-		$current = WC()->session->get( 'chosen_payment_method' );
+		if ( is_user_logged_in() ) {
+			$default_token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
+			if ( ! is_null( $default_token ) ) {
+				$default_token_gateway = $default_token->get_gateway_id();
+			}
+		}
+
+		$current = ( isset( $default_token_gateway ) ? $default_token_gateway : WC()->session->get( 'chosen_payment_method' ) );
 
 		if ( $current && isset( $gateways[ $current ] ) ) {
 			$current_gateway = $gateways[ $current ];

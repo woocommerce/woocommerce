@@ -87,32 +87,32 @@ jQuery( function( $ ) {
 						return m;
 					},
 					ajax: {
-				        url:         wc_enhanced_select_params.ajax_url,
-				        dataType:    'json',
-				        quietMillis: 250,
-				        data: function( term ) {
-				            return {
+						url:         wc_enhanced_select_params.ajax_url,
+						dataType:    'json',
+						quietMillis: 250,
+						data: function( term ) {
+							return {
 								term:     term,
 								action:   $( this ).data( 'action' ) || 'woocommerce_json_search_products_and_variations',
 								security: wc_enhanced_select_params.search_products_nonce,
 								exclude:  $( this ).data( 'exclude' ),
 								include:  $( this ).data( 'include' ),
 								limit:    $( this ).data( 'limit' )
-				            };
-				        },
-				        results: function( data ) {
-				        	var terms = [];
-					        if ( data ) {
+							};
+						},
+						results: function( data ) {
+							var terms = [];
+							if ( data ) {
 								$.each( data, function( id, text ) {
 									terms.push( { id: id, text: text } );
 								});
 							}
-				            return {
-				            	results: terms
-			            	};
-				        },
-				        cache: true
-				    }
+							return {
+								results: terms
+							};
+						},
+						cache: true
+					}
 				};
 
 				if ( $( this ).data( 'multiple' ) === true ) {
@@ -158,19 +158,20 @@ jQuery( function( $ ) {
 						return m;
 					},
 					ajax: {
-				        url:         wc_enhanced_select_params.ajax_url,
-				        dataType:    'json',
-				        quietMillis: 250,
-				        data: function( term ) {
-				            return {
+						url:         wc_enhanced_select_params.ajax_url,
+						dataType:    'json',
+						quietMillis: 250,
+						data: function( term ) {
+							return {
 								term:     term,
 								action:   'woocommerce_json_search_customers',
-								security: wc_enhanced_select_params.search_customers_nonce
-				            };
-				        },
-				        results: function( data ) {
-				        	var terms = [];
-					        if ( data ) {
+								security: wc_enhanced_select_params.search_customers_nonce,
+								exclude:  $( this ).data( 'exclude' )
+							};
+						},
+						results: function( data ) {
+							var terms = [];
+							if ( data ) {
 								$.each( data, function( id, text ) {
 									terms.push({
 										id: id,
@@ -178,10 +179,10 @@ jQuery( function( $ ) {
 									});
 								});
 							}
-				            return { results: terms };
-				        },
-				        cache: true
-				    }
+							return { results: terms };
+						},
+						cache: true
+					}
 				};
 				if ( $( this ).data( 'multiple' ) === true ) {
 					select2_args.multiple = true;

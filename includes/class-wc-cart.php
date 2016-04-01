@@ -211,7 +211,7 @@ class WC_Cart {
 			$this->applied_coupons       = array_filter( WC()->session->get( 'applied_coupons', array() ) );
 
 			/**
-			 * Load the cart object. This defaults to the persistant cart if null.
+			 * Load the cart object. This defaults to the persistent cart if null.
 			 */
 			$cart = WC()->session->get( 'cart', null );
 
@@ -661,7 +661,7 @@ class WC_Cart {
 		/**
 		 * Gets the url to remove an item from the cart.
 		 *
-		 * @param string cart_item_key contains the id of the cart item
+		 * @param string $cart_item_key contains the id of the cart item
 		 * @return string url to page
 		 */
 		public function get_remove_url( $cart_item_key ) {
@@ -721,7 +721,8 @@ class WC_Cart {
 		/**
 		 * Returns a specific item in the cart.
 		 *
-		 * @return array item data
+		 * @param string $item_key Cart item key.
+		 * @return array Item data
 		 */
 		public function get_cart_item( $item_key ) {
 			if ( isset( $this->cart_contents[ $item_key ] ) ) {
@@ -893,7 +894,7 @@ class WC_Cart {
 				// Find the cart item key in the existing cart
 				$cart_item_key  = $this->find_product_in_cart( $cart_id );
 
-				// Force quantity to 1 if sold individually and check for exisitng item in cart
+				// Force quantity to 1 if sold individually and check for existing item in cart
 				if ( $product_data->is_sold_individually() ) {
 					$quantity         = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
 					$in_cart_quantity = $cart_item_key ? $this->cart_contents[ $cart_item_key ]['quantity'] : 0;
@@ -1028,7 +1029,7 @@ class WC_Cart {
 		 * Set the quantity for an item in the cart.
 		 *
 		 * @param string	$cart_item_key	contains the id of the cart item
-		 * @param string	$quantity		contains the quantity of the item
+		 * @param int		$quantity		contains the quantity of the item
 		 * @param bool      $refresh_totals	whether or not to calculate totals after setting the new qty
 		 *
 		 * @return bool
@@ -1515,10 +1516,11 @@ class WC_Cart {
 			if ( ! wc_shipping_enabled() || ! is_array( $this->cart_contents ) )
 				return false;
 
-			if ( get_option( 'woocommerce_shipping_cost_requires_address' ) == 'yes' ) {
+			if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
 				if ( ! WC()->customer->has_calculated_shipping() ) {
-					if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) )
+					if ( ! WC()->customer->get_shipping_country() || ( ! WC()->customer->get_shipping_state() && ! WC()->customer->get_shipping_postcode() ) ) {
 						return false;
+					}
 				}
 			}
 
@@ -1770,7 +1772,7 @@ class WC_Cart {
 		/**
 		 * Get the discount amount for a used coupon.
 		 * @param  string $code coupon code
-		 * @param  bool inc or ex tax
+		 * @param  bool $ex_tax inc or ex tax
 		 * @return float discount amount
 		 */
 		public function get_coupon_discount_amount( $code, $ex_tax = true ) {
@@ -2034,7 +2036,7 @@ class WC_Cart {
 		/**
 		 * Gets the sub total (after calculation).
 		 *
-		 * @params bool whether to include compound taxes
+		 * @param bool $compound whether to include compound taxes
 		 * @return string formatted price
 		 */
 		public function get_cart_subtotal( $compound = false ) {
@@ -2095,7 +2097,7 @@ class WC_Cart {
 		 * When on the checkout (review order), this will get the subtotal based on the customer's tax rate rather than the base rate.
 		 *
 		 * @param WC_Product $_product
-		 * @param int quantity
+		 * @param int $quantity
 		 * @return string formatted price
 		 */
 		public function get_product_subtotal( $_product, $quantity ) {

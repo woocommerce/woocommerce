@@ -143,18 +143,23 @@
 				float: none;
 				@include clearfix();
 				padding-bottom: .5em;
+
+				input,
+				.button,
+				.input-text {
+					width: 48%;
+					box-sizing: border-box;
+				}
+
+				.input-text + .button,
+				.button.alt {
+					float: right;
+				}
 			}
 
-			input,
-			.button,
-			.input-text {
-				width: 48%;
-				box-sizing: border-box;
-			}
-
-			.input-text + .button,
-			.button.alt {
-				float: right;
+			.button {
+				display: block;
+				width: 100%;
 			}
 		}
 	}

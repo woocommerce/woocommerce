@@ -472,6 +472,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @return int Variation ID which matched, 0 is no match was found
 	 */
 	public function get_matching_variation( $match_attributes = array() ) {
+		global $wpdb;
+
 		$query_args = array(
 			'post_parent' => $this->id,
 			'post_type'   => 'product_variation',
@@ -510,6 +512,9 @@ class WC_Product_Variable extends WC_Product {
 			);
 
 		}
+
+		// Allow large queries in case user has many variations
+		$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
 
 		$matches = get_posts( $query_args );
 
@@ -566,17 +571,23 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-			$attachment_id   = get_post_thumbnail_id( $variation->get_variation_id() );
-			$attachment      = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
-			$full_attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
-			$image           = $attachment ? current( $attachment ) : '';
-			$image_link      = $full_attachment ? current( $full_attachment ) : '';
-			$image_title     = get_the_title( $attachment_id );
-			$image_alt       = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
-			$image_srcset    = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
-			$image_sizes     = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+			$attachment_id     = get_post_thumbnail_id( $variation->get_variation_id() );
+			$attachment        = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+			$full_attachment   = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment_object = get_post( $attachment_id );
+			$image             = $attachment ? current( $attachment ) : '';
+			$image_link        = $full_attachment ? current( $full_attachment ) : '';
+			$image_title       = get_the_title( $attachment_id );
+			$image_alt         = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+			$image_caption     = $attachment_object->post_excerpt;
+			$image_srcset      = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+			$image_sizes       = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+
+			if ( empty( $image_alt ) ) {
+				$image_alt = $image_title;
+			}
 		} else {
-			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = '';
+			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = '';
 		}
 
 		$availability      = $variation->get_availability();
@@ -584,32 +595,33 @@ class WC_Product_Variable extends WC_Product {
 		$availability_html = apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $variation );
 
 		return apply_filters( 'woocommerce_available_variation', array(
-			'variation_id'          => $variation->variation_id,
-			'variation_is_visible'  => $variation->variation_is_visible(),
-			'variation_is_active'   => $variation->variation_is_active(),
-			'is_purchasable'        => $variation->is_purchasable(),
-			'display_price'         => $variation->get_display_price(),
-			'display_regular_price' => $variation->get_display_price( $variation->get_regular_price() ),
-			'attributes'            => $variation->get_variation_attributes(),
-			'image_src'             => $image,
-			'image_link'            => $image_link,
-			'image_title'           => $image_title,
-			'image_alt'             => $image_alt,
-			'image_srcset'			=> $image_srcset ? $image_srcset : '',
-			'image_sizes'			=> $image_sizes ? $image_sizes : '',
-			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
-			'availability_html'     => $availability_html,
-			'sku'                   => $variation->get_sku(),
-			'weight'                => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
-			'dimensions'            => $variation->get_dimensions(),
-			'min_qty'               => 1,
-			'max_qty'               => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
-			'backorders_allowed'    => $variation->backorders_allowed(),
-			'is_in_stock'           => $variation->is_in_stock(),
-			'is_downloadable'       => $variation->is_downloadable() ,
-			'is_virtual'            => $variation->is_virtual(),
-			'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
-			'variation_description' => $variation->get_variation_description(),
+			'variation_id'           => $variation->variation_id,
+			'variation_is_visible'   => $variation->variation_is_visible(),
+			'variation_is_active'    => $variation->variation_is_active(),
+			'is_purchasable'         => $variation->is_purchasable(),
+			'display_price'          => $variation->get_display_price(),
+			'display_regular_price'  => $variation->get_display_price( $variation->get_regular_price() ),
+			'attributes'             => $variation->get_variation_attributes(),
+			'image_src'              => $image,
+			'image_link'             => $image_link,
+			'image_title'            => $image_title,
+			'image_alt'              => $image_alt,
+			'image_caption'          => $image_caption,
+			'image_srcset'			 => $image_srcset ? $image_srcset : '',
+			'image_sizes'			 => $image_sizes ? $image_sizes : '',
+			'price_html'             => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+			'availability_html'      => $availability_html,
+			'sku'                    => $variation->get_sku(),
+			'weight'                 => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+			'dimensions'             => $variation->get_dimensions(),
+			'min_qty'                => 1,
+			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
+			'backorders_allowed'     => $variation->backorders_allowed(),
+			'is_in_stock'            => $variation->is_in_stock(),
+			'is_downloadable'        => $variation->is_downloadable() ,
+			'is_virtual'             => $variation->is_virtual(),
+			'is_sold_individually'   => $variation->is_sold_individually() ? 'yes' : 'no',
+			'variation_description'  => $variation->get_variation_description(),
 		), $this, $variation );
 	}
 

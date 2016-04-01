@@ -159,10 +159,32 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.0 - TBD =
+* Feature - Introduced Shipping Zone functionality, and re-usable instance based shipping methods.
+* Feature - Tabbed "My Account" area.
+* Feature - Cart operations now use ajax (item quantities/remove, coupon apply/remove, shipping options).
+* Feature - Layered nav; filter by rating.
+* Feature - On-hold order emails.
+* Dev - Added ability for shipping methods to store meta data to the order.
+* Dev - Added Payment Gateway Tokenization API for storing and retrieving tokens in a standardized manner.
+* Dev - Migrated custom term meta implementation to WP Term Meta.
+* Dev - Added new wc_get_orders() function to get order objects and ids instead of direct get_posts() calls.
 * Dev - Made coupon optional in cart has_discount() method.
+* Dev - Made the review template more editable.
+* Fix - Update download permission user and email when changed.
+* Tweak - Ignore catalog visibility on products shortcode when specifying IDs or SKUs.
+* Tweak - Added context to checkout error messages.
+* Tweak - Added SKU field to grouped products.
+* Tweak - Support qty display in cart messages.
+* Tweak - Hide min order amount field when not needed in shipping settings.
+* Tweak - If shipping < 999.99, use 'shipping' arg when passing values to PayPal.
+* Tweak - Show net sales on dashboard.
+* Tweak - Replaced credit card icons with SVG.
+* Tweak - Enqueue scripts on pages with checkout shortcodes.
+* Tweak - Color code manual, system and customer notes.
+* Tweak - Layered Nav Refactoring to improve performance.
 * Tweak - Removed tag/cat classes from loops since WP does the same.
 * Tweak - Added hash check for orders so that if the cart changes before payment, a new order is made.
-* Feature - Cart operations now use ajax (item quantities/remove, coupon apply/remove, shipping options)
+* Tweak - Removed unused 'view mode' under screen options.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 

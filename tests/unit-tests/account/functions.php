@@ -1,12 +1,10 @@
 <?php
 
-namespace WooCommerce\Tests\Account;
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Account
  */
-class Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_get_account_menu_items().
@@ -38,21 +36,6 @@ class Functions extends \WC_Unit_Test_Case {
 			'order-total'   => __( 'Total', 'woocommerce' ),
 			'order-actions' => '&nbsp;',
 		), wc_get_account_orders_columns() );
-	}
-
-	/**
-	 * Test wc_get_account_orders_query_args().
-	 *
-	 * @since 2.6.0
-	 */
-	public function test_wc_get_account_orders_query_args() {
-		$this->assertEquals( array(
-			'posts_per_page' => 15,
-			'meta_key'       => '_customer_user',
-			'meta_value'     => get_current_user_id(),
-			'post_type'      => wc_get_order_types( 'view-orders' ),
-			'post_status'    => array_keys( wc_get_order_statuses() ),
-		), wc_get_account_orders_query_args() );
 	}
 
 	/**

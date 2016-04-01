@@ -475,15 +475,20 @@ function wc_print_js() {
 	global $wc_queued_js;
 
 	if ( ! empty( $wc_queued_js ) ) {
-
-		echo "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) {";
-
-		// Sanitize
+		// Sanitize.
 		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
 		$wc_queued_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $wc_queued_js );
 		$wc_queued_js = str_replace( "\r", '', $wc_queued_js );
 
-		echo $wc_queued_js . "});\n</script>\n";
+		$js = "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) { $wc_queued_js });\n</script>\n";
+
+		/**
+		 * woocommerce_queued_js filter.
+		 *
+		 * @since 2.6.0
+		 * @param string $js JavaScript code.
+		 */
+		echo apply_filters( 'woocommerce_queued_js', $js );
 
 		unset( $wc_queued_js );
 	}
@@ -713,14 +718,16 @@ function wc_get_base_location() {
  * @return array
  */
 function wc_get_customer_default_location() {
+	$location = array();
+
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
 		case 'geolocation_ajax' :
 		case 'geolocation' :
-			$location = WC_Geolocation::geolocate_ip();
+			// Exclude common bots from geolocation by user agent.
+			$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
 
-			// Base fallback.
-			if ( empty( $location['country'] ) ) {
-				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
+				$location = WC_Geolocation::geolocate_ip( '', true, false );
 			}
 		break;
 		case 'base' :
@@ -729,6 +736,11 @@ function wc_get_customer_default_location() {
 		default :
 			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', '' ) );
 		break;
+	}
+
+	// Base fallback.
+	if ( empty( $location['country'] ) ) {
+		$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
 	}
 
 	return apply_filters( 'woocommerce_customer_default_location_array', $location );
@@ -804,7 +816,7 @@ function wc_array_cartesian( $input ) {
 	// Generate indexes from keys and values so we have a logical sort order
 	foreach ( $input as $key => $values ) {
 		foreach ( $values as $value ) {
-			$indexes[ $key ][ $value ] = $index ++;
+			$indexes[ $key ][ $value ] = $index++;
 		}
 	}
 
@@ -937,11 +949,55 @@ function wc_get_shipping_zone( $package ) {
 }
 
 /**
+ * Get a nice name for credit card providers.
+ *
+ * @since  2.6.0
+ * @param  string $type Provider Slug/Type
+ * @return string
+ */
+function wc_get_credit_card_type_label( $type ) {
+	// Normalize
+	$type = strtolower( $type );
+	$type = str_replace( '-', ' ', $type );
+	$type = str_replace( '_', ' ', $type );
+
+	$labels = apply_filters( 'wocommerce_credit_card_type_labels', array(
+		'mastercard'       => __( 'MasterCard', 'woocommerce' ),
+		'visa'             => __( 'Visa', 'woocommerce' ),
+		'discover'         => __( 'Discover', 'woocommerce' ),
+		'american express' => __( 'American Express', 'woocommerce' ),
+		'diners'           => __( 'Diners', 'woocommerce' ),
+		'jcb'              => __( 'JCB', 'woocommerce' ),
+	) );
+
+	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucfirst( $type ) ) );
+}
+
+/**
  * Outputs a "back" link so admin screens can easily jump back a page.
  *
  * @param string $label Title of the page to return to.
  * @param string $url   URL of the page to return to.
  */
 function wc_back_link( $label, $url ) {
-	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" title="' . esc_attr( $label ) . '">&#x21a9;</a></small>';
+	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" title="' . esc_attr( $label ) . '">&#x2934;</a></small>';
+}
+
+/**
+ * Display a WooCommerce help tip.
+ *
+ * @since  2.5.0
+ *
+ * @param  string $tip        Help tip text
+ * @param  bool   $allow_html Allow sanitized HTML if true or escape
+ * @return string
+ */
+function wc_help_tip( $tip, $allow_html = false ) {
+	if ( $allow_html ) {
+		$tip = wc_sanitize_tooltip( $tip );
+	} else {
+		$tip = esc_attr( $tip );
+	}
+
+	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
 }

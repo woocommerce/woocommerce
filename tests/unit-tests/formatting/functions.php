@@ -1,7 +1,5 @@
 <?php
 
-namespace WooCommerce\Tests\Formatting;
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Formatting
@@ -9,7 +7,7 @@ namespace WooCommerce\Tests\Formatting;
  *
  * @todo Split formatting class into smaller classes
  */
-class Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_sanitize_taxonomy_name().

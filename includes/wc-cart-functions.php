@@ -206,12 +206,20 @@ function wc_cart_totals_taxes_total_html() {
  *
  * @access public
  * @param string $coupon
+ * @param bool $echo or return
  */
-function wc_cart_totals_coupon_label( $coupon ) {
-	if ( is_string( $coupon ) )
+function wc_cart_totals_coupon_label( $coupon, $echo = true ) {
+	if ( is_string( $coupon ) ) {
 		$coupon = new WC_Coupon( $coupon );
+	}
 
-	echo apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->code ), $coupon );
+	$label = apply_filters( 'woocommerce_cart_totals_coupon_label', esc_html( __( 'Coupon:', 'woocommerce' ) . ' ' . $coupon->code ), $coupon );
+
+	if ( $echo ) {
+		echo $label;
+	} else {
+		return $label;
+	}
 }
 
 /**

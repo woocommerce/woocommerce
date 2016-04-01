@@ -61,6 +61,9 @@ class WC_Validation {
 			case 'DE' :
 				$valid = (bool) preg_match( '/^([0]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{3}$/', $postcode );
 				break;
+			case 'ES' :
+				$valid = (bool) preg_match( '/^([0-9]{5})$/i', $postcode );
+				break;
 			case 'GB' :
 				$valid = self::is_GB_postcode( $postcode );
 				break;

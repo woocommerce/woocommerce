@@ -33,6 +33,10 @@ class WC_Product_Factory {
 
 		$classname = $this->get_product_class( $the_product, $args );
 
+		if ( ! $classname ) {
+			return false;
+		}
+
 		if ( ! class_exists( $classname ) ) {
 			$classname = 'WC_Product_Simple';
 		}

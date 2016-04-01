@@ -338,7 +338,8 @@ class WC_Install {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 		/**
-		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates.
+		 * Before updating with DBDELTA, remove any primary keys which could be
+		 * modified due to schema updates.
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
@@ -366,10 +367,13 @@ class WC_Install {
 		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
 		 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
 		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 *
+		 * This may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
+		 * indexes first causes too much load on some servers/larger DB.
 		 */
 		$max_index_length = 191;
 
-		return "
+		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id bigint(20) NOT NULL AUTO_INCREMENT,
   session_key char(32) NOT NULL,
@@ -401,15 +405,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_public int(1) NOT NULL DEFAULT 1,
   PRIMARY KEY  (attribute_id),
   KEY attribute_name (attribute_name($max_index_length))
-) $collate;
-CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-  meta_id bigint(20) NOT NULL auto_increment,
-  woocommerce_term_id bigint(20) NOT NULL,
-  meta_key varchar(255) default NULL,
-  meta_value longtext NULL,
-  PRIMARY KEY  (meta_id),
-  KEY woocommerce_term_id (woocommerce_term_id),
-  KEY meta_key (meta_key($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   permission_id bigint(20) NOT NULL auto_increment,
@@ -492,9 +487,46 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
   instance_id bigint(20) NOT NULL auto_increment,
   method_id varchar(255) NOT NULL,
   method_order bigint(20) NOT NULL,
+  is_enabled tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY  (instance_id)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (
+  token_id bigint(20) NOT NULL auto_increment,
+  gateway_id varchar(255) NOT NULL,
+  token text NOT NULL,
+  user_id bigint(20) NOT NULL DEFAULT '0',
+  type varchar(255) NOT NULL,
+  is_default tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY  (token_id),
+  KEY user_id (user_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  payment_token_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY payment_token_id (payment_token_id),
+  KEY meta_key (meta_key)
+) $collate;
 		";
+
+		// Term meta is only needed for old installs.
+		if ( ! function_exists( 'get_term_meta' ) ) {
+			$tables .= "
+CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  woocommerce_term_id bigint(20) NOT NULL,
+  meta_key varchar(255) default NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY woocommerce_term_id (woocommerce_term_id),
+  KEY meta_key (meta_key($max_index_length))
+) $collate;
+			";
+		}
+
+		return $tables;
 	}
 
 	/**

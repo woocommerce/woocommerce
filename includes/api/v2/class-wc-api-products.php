@@ -374,6 +374,7 @@ class WC_API_Products extends WC_API_Resource {
 				} else {
 					// Just sync variations
 					WC_Product_Variable::sync( $id );
+					WC_Product_Variable::sync_stock_status( $id );
 				}
 			}
 
@@ -1091,7 +1092,8 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_stock', '' );
 
 				wc_update_product_stock_status( $product_id, 'instock' );
-
+			} elseif ( 'variable' === $product_type ) {
+				update_post_meta( $product_id, '_stock', '' );
 			} elseif ( 'yes' == $managing_stock ) {
 				update_post_meta( $product_id, '_backorders', $backorders );
 
@@ -1111,7 +1113,7 @@ class WC_API_Products extends WC_API_Resource {
 				wc_update_product_stock_status( $product_id, $stock_status );
 			}
 
-		} else {
+		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $product_id, $stock_status );
 		}
 
@@ -1332,16 +1334,19 @@ class WC_API_Products extends WC_API_Resource {
 			// Stock handling
 			if ( isset( $variation['managing_stock'] ) ) {
 				$managing_stock = ( true === $variation['managing_stock'] ) ? 'yes' : 'no';
-				update_post_meta( $variation_id, '_manage_stock', $managing_stock );
 			} else {
 				$managing_stock = get_post_meta( $variation_id, '_manage_stock', true );
 			}
 
-			// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
+			update_post_meta( $variation_id, '_manage_stock', '' === $managing_stock ? 'no' : $managing_stock );
+
 			if ( isset( $variation['in_stock'] ) ) {
 				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
-				wc_update_product_stock_status( $variation_id, $stock_status );
+			} else {
+				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
 			}
+
+			wc_update_product_stock_status( $variation_id, '' === $stock_status ? 'instock' : $stock_status );
 
 			if ( 'yes' === $managing_stock ) {
 				$backorders = get_post_meta( $variation_id, '_backorders', true );

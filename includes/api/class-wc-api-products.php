@@ -425,6 +425,7 @@ class WC_API_Products extends WC_API_Resource {
 				} else {
 					// Just sync variations
 					WC_Product_Variable::sync( $id );
+					WC_Product_Variable::sync_stock_status( $id );
 				}
 			}
 
@@ -808,7 +809,9 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			// When a term is deleted, delete its meta.
-			$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $id ), array( '%d' ) );
+			if ( get_option( 'db_version' ) < 34370 ) {
+				$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $id ), array( '%d' ) );
+			}
 
 			do_action( 'woocommerce_api_delete_product_category', $id, $this );
 
@@ -1193,28 +1196,29 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			$variations[] = array(
-					'id'                => $variation->get_variation_id(),
-					'created_at'        => $this->server->format_datetime( $variation->get_post_data()->post_date_gmt ),
-					'updated_at'        => $this->server->format_datetime( $variation->get_post_data()->post_modified_gmt ),
-					'downloadable'      => $variation->is_downloadable(),
-					'virtual'           => $variation->is_virtual(),
-					'permalink'         => $variation->get_permalink(),
-					'sku'               => $variation->get_sku(),
-					'price'             => $variation->get_price(),
-					'regular_price'     => $variation->get_regular_price(),
-					'sale_price'        => $variation->get_sale_price() ? $variation->get_sale_price() : null,
-					'taxable'           => $variation->is_taxable(),
-					'tax_status'        => $variation->get_tax_status(),
-					'tax_class'         => $variation->get_tax_class(),
-					'managing_stock'    => $variation->managing_stock(),
-					'stock_quantity'    => $variation->get_stock_quantity(),
-					'in_stock'          => $variation->is_in_stock(),
-					'backordered'       => $variation->is_on_backorder(),
-					'purchaseable'      => $variation->is_purchasable(),
-					'visible'           => $variation->variation_is_visible(),
-					'on_sale'           => $variation->is_on_sale(),
-					'weight'            => $variation->get_weight() ? $variation->get_weight() : null,
-					'dimensions'        => array(
+					'id'                 => $variation->get_variation_id(),
+					'created_at'         => $this->server->format_datetime( $variation->get_post_data()->post_date_gmt ),
+					'updated_at'         => $this->server->format_datetime( $variation->get_post_data()->post_modified_gmt ),
+					'downloadable'       => $variation->is_downloadable(),
+					'virtual'            => $variation->is_virtual(),
+					'permalink'          => $variation->get_permalink(),
+					'sku'                => $variation->get_sku(),
+					'price'              => $variation->get_price(),
+					'regular_price'      => $variation->get_regular_price(),
+					'sale_price'         => $variation->get_sale_price() ? $variation->get_sale_price() : null,
+					'taxable'            => $variation->is_taxable(),
+					'tax_status'         => $variation->get_tax_status(),
+					'tax_class'          => $variation->get_tax_class(),
+					'managing_stock'     => $variation->managing_stock(),
+					'stock_quantity'     => $variation->get_stock_quantity(),
+					'in_stock'           => $variation->is_in_stock(),
+					'backorders_allowed' => $variation->backorders_allowed(),
+					'backordered'        => $variation->is_on_backorder(),
+					'purchaseable'       => $variation->is_purchasable(),
+					'visible'            => $variation->variation_is_visible(),
+					'on_sale'            => $variation->is_on_sale(),
+					'weight'             => $variation->get_weight() ? $variation->get_weight() : null,
+					'dimensions'         => array(
 						'length' => $variation->length,
 						'width'  => $variation->width,
 						'height' => $variation->height,
@@ -1569,7 +1573,8 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_stock', '' );
 
 				wc_update_product_stock_status( $product_id, 'instock' );
-
+			} elseif ( 'variable' === $product_type ) {
+				update_post_meta( $product_id, '_stock', '' );
 			} elseif ( 'yes' == $managing_stock ) {
 				update_post_meta( $product_id, '_backorders', $backorders );
 
@@ -1594,7 +1599,7 @@ class WC_API_Products extends WC_API_Resource {
 				wc_update_product_stock_status( $product_id, $stock_status );
 			}
 
-		} else {
+		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $product_id, $stock_status );
 		}
 
@@ -1720,6 +1725,11 @@ class WC_API_Products extends WC_API_Resource {
 		foreach ( $variations as $menu_order => $variation ) {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
 
+			if ( ! $variation_id && isset( $variation['sku'] ) ) {
+				$variation_sku = wc_clean( $variation['sku'] );
+				$variation_id  = wc_get_product_id_by_sku( $variation_sku );
+			}
+
 			// Generate a useful post title
 			$variation_post_title = sprintf( __( 'Variation #%s of %s', 'woocommerce' ), $variation_id, esc_html( get_the_title( $id ) ) );
 
@@ -1782,14 +1792,18 @@ class WC_API_Products extends WC_API_Resource {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
-						$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
+					if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+						if ( isset( $image['src'] ) ) {
+							$upload = $this->upload_product_image( wc_clean( $image['src'] ) );
 
-						if ( is_wp_error( $upload ) ) {
-							throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
+							if ( is_wp_error( $upload ) ) {
+								throw new WC_API_Exception( 'woocommerce_api_cannot_upload_product_image', $upload->get_error_message(), 400 );
+							}
+
+							$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
+						} else if ( isset( $image['id'] ) ) {
+							$attachment_id = $image['id'];
 						}
-
-						$attachment_id = $this->set_product_image_as_attachment( $upload, $id );
 
 						// Set the image alt if present.
 						if ( ! empty( $image['alt'] ) ) {
@@ -1828,16 +1842,19 @@ class WC_API_Products extends WC_API_Resource {
 			// Stock handling
 			if ( isset( $variation['managing_stock'] ) ) {
 				$managing_stock = ( true === $variation['managing_stock'] ) ? 'yes' : 'no';
-				update_post_meta( $variation_id, '_manage_stock', $managing_stock );
 			} else {
 				$managing_stock = get_post_meta( $variation_id, '_manage_stock', true );
 			}
 
-			// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
+			update_post_meta( $variation_id, '_manage_stock', '' === $managing_stock ? 'no' : $managing_stock );
+
 			if ( isset( $variation['in_stock'] ) ) {
 				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
-				wc_update_product_stock_status( $variation_id, $stock_status );
+			} else {
+				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
 			}
+
+			wc_update_product_stock_status( $variation_id, '' === $stock_status ? 'instock' : $stock_status );
 
 			if ( 'yes' === $managing_stock ) {
 				$backorders = get_post_meta( $variation_id, '_backorders', true );

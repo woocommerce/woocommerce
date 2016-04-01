@@ -26,7 +26,7 @@ jQuery( function( $ ) {
 
 			wc_password_strength_meter.includeMeter( wrapper, field );
 
-			strength = wc_password_strength_meter.checkPasswordStrength( field );
+			strength = wc_password_strength_meter.checkPasswordStrength( wrapper, field );
 
 			if ( strength < wc_password_strength_meter_params.min_password_strength && ! wrapper.is( 'form.checkout' ) ) {
 				submit.attr( 'disabled', 'disabled' ).addClass( 'disabled' );
@@ -60,9 +60,9 @@ jQuery( function( $ ) {
 		 *
 		 * @return {Int}
 		 */
-		checkPasswordStrength: function( field ) {
-			var meter     = $( '.woocommerce-password-strength' );
-			var hint      = $( '.woocommerce-password-hint' );
+		checkPasswordStrength: function( wrapper, field ) {
+			var meter     = wrapper.find( '.woocommerce-password-strength' );
+			var hint      = wrapper.find( '.woocommerce-password-hint' );
 			var hint_html = '<small class="woocommerce-password-hint">' + wc_password_strength_meter_params.i18n_password_hint + '</small>';
 			var strength  = wp.passwordStrength.meter( field.val(), wp.passwordStrength.userInputBlacklist() );
 			var error     = '';

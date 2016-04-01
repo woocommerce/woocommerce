@@ -145,6 +145,7 @@ class WC_AJAX {
 			'shipping_zones_save_changes'                      => false,
 			'shipping_zone_add_method'                         => false,
 			'shipping_zone_methods_save_changes'               => false,
+			'shipping_zone_methods_save_settings'              => false,
 			'shipping_classes_save_changes'                    => false,
 		);
 
@@ -1268,11 +1269,7 @@ class WC_AJAX {
 		$item             = array();
 
 		// Add new shipping
-		$shipping        = new stdClass();
-		$shipping->label = '';
-		$shipping->id    = '';
-		$shipping->cost  = '';
-		$shipping->taxes = array();
+		$shipping        = new WC_Shipping_Rate();
 		$item_id         = $order->add_shipping( $shipping );
 
 		include( 'admin/meta-boxes/views/html-order-shipping.php' );
@@ -1361,50 +1358,38 @@ class WC_AJAX {
 	 */
 	public static function reduce_order_item_stock() {
 		check_ajax_referer( 'order-item', 'security' );
-
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
-
 		$order_id       = absint( $_POST['order_id'] );
 		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
 		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
 		$order          = wc_get_order( $order_id );
 		$order_items    = $order->get_items();
 		$return         = array();
-
 		if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
-
 			foreach ( $order_items as $item_id => $order_item ) {
-
 				// Only reduce checked items
 				if ( ! in_array( $item_id, $order_item_ids ) ) {
 					continue;
 				}
-
 				$_product = $order->get_product_from_item( $order_item );
-
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$stock_change = apply_filters( 'woocommerce_reduce_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
 					$new_stock    = $_product->reduce_stock( $stock_change );
 					$item_name    = $_product->get_sku() ? $_product->get_sku() : $order_item['product_id'];
 					$note         = sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $stock_change, $new_stock );
 					$return[]     = $note;
-
 					$order->add_order_note( $note );
 					$order->send_stock_notifications( $_product, $new_stock, $order_item_qty[ $item_id ] );
 				}
 			}
-
 			do_action( 'woocommerce_reduce_order_stock', $order );
-
 			if ( empty( $return ) ) {
 				$return[] = __( 'No products had their stock reduced - they may not have stock management enabled.', 'woocommerce' );
 			}
-
 			echo implode( ', ', $return );
 		}
-
 		die();
 	}
 
@@ -1413,29 +1398,22 @@ class WC_AJAX {
 	 */
 	public static function increase_order_item_stock() {
 		check_ajax_referer( 'order-item', 'security' );
-
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
-
 		$order_id       = absint( $_POST['order_id'] );
 		$order_item_ids = isset( $_POST['order_item_ids'] ) ? $_POST['order_item_ids'] : array();
 		$order_item_qty = isset( $_POST['order_item_qty'] ) ? $_POST['order_item_qty'] : array();
 		$order          = wc_get_order( $order_id );
 		$order_items    = $order->get_items();
 		$return         = array();
-
 		if ( $order && ! empty( $order_items ) && sizeof( $order_item_ids ) > 0 ) {
-
 			foreach ( $order_items as $item_id => $order_item ) {
-
 				// Only reduce checked items
 				if ( ! in_array( $item_id, $order_item_ids ) ) {
 					continue;
 				}
-
 				$_product = $order->get_product_from_item( $order_item );
-
 				if ( $_product->exists() && $_product->managing_stock() && isset( $order_item_qty[ $item_id ] ) && $order_item_qty[ $item_id ] > 0 ) {
 					$old_stock    = $_product->get_stock_quantity();
 					$stock_change = apply_filters( 'woocommerce_restore_order_stock_quantity', $order_item_qty[ $item_id ], $item_id );
@@ -1443,20 +1421,15 @@ class WC_AJAX {
 					$item_name    = $_product->get_sku() ? $_product->get_sku(): $order_item['product_id'];
 					$note         = sprintf( __( 'Item %s stock increased from %s to %s.', 'woocommerce' ), $item_name, $old_stock, $new_quantity );
 					$return[]     = $note;
-
 					$order->add_order_note( $note );
 				}
 			}
-
 			do_action( 'woocommerce_restore_order_stock', $order );
-
 			if ( empty( $return ) ) {
 				$return[] = __( 'No products had their stock increased - they may not have stock management enabled.', 'woocommerce' );
 			}
-
 			echo implode( ', ', $return );
 		}
-
 		die();
 	}
 
@@ -1987,10 +1960,15 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$term = wc_clean( stripslashes( $_GET['term'] ) );
+		$term    = wc_clean( stripslashes( $_GET['term'] ) );
+		$exclude = array();
 
 		if ( empty( $term ) ) {
 			die();
+		}
+
+		if ( ! empty( $_GET['exclude'] ) ) {
+			$exclude = array_map( 'intval', explode( ',', $_GET['exclude'] ) );
 		}
 
 		$found_customers = array();
@@ -2010,9 +1988,13 @@ class WC_AJAX {
 
 		if ( ! empty( $customers ) ) {
 			foreach ( $customers as $customer ) {
-				$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+				if ( ! in_array( $customer->ID, $exclude ) ) {
+					$found_customers[ $customer->ID ] = $customer->display_name . ' (#' . $customer->ID . ' &ndash; ' . sanitize_email( $customer->user_email ) . ')';
+				}
 			}
 		}
+
+		$found_customers = apply_filters( 'woocommerce_json_search_found_customers', $found_customers );
 
 		wp_send_json( $found_customers );
 	}
@@ -2168,7 +2150,7 @@ class WC_AJAX {
 		}
 
 		$order_id               = absint( $_POST['order_id'] );
-		$refund_amount          = wc_format_decimal( sanitize_text_field( $_POST['refund_amount'] ) );
+		$refund_amount          = wc_format_decimal( sanitize_text_field( $_POST['refund_amount'] ), wc_get_price_decimals() );
 		$refund_reason          = sanitize_text_field( $_POST['refund_reason'] );
 		$line_item_qtys         = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_qtys'] ) ), true );
 		$line_item_totals       = json_decode( sanitize_text_field( stripslashes( $_POST['line_item_totals'] ) ), true );
@@ -2182,7 +2164,7 @@ class WC_AJAX {
 			// Validate that the refund can occur
 			$order       = wc_get_order( $order_id );
 			$order_items = $order->get_items();
-			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
+			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ! $refund_amount || $max_refund < $refund_amount || 0 > $refund_amount ) {
 				throw new exception( __( 'Invalid refund amount', 'woocommerce' ) );
@@ -2293,16 +2275,15 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$refund_id = absint( $_POST['refund_id'] );
-
-		if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
-			$order_id = wp_get_post_parent_id( $refund_id );
-			wc_delete_shop_order_transients( $order_id );
-			wp_delete_post( $refund_id );
-
-			do_action( 'woocommerce_refund_deleted', $refund_id, $order_id );
+		$refund_ids = array_map( 'absint', is_array( $_POST['refund_id'] ) ? $_POST['refund_id'] : array( $_POST['refund_id'] ) );
+		foreach ( $refund_ids as $refund_id ) {
+			if ( $refund_id && 'shop_order_refund' === get_post_type( $refund_id ) ) {
+				$order_id = wp_get_post_parent_id( $refund_id );
+				wc_delete_shop_order_transients( $order_id );
+				wp_delete_post( $refund_id );
+				do_action( 'woocommerce_refund_deleted', $refund_id, $order_id );
+			}
 		}
-
 		die();
 	}
 
@@ -3209,16 +3190,53 @@ class WC_AJAX {
 			}
 
 			$method_data = array_intersect_key( $data, array(
-				'method_order' => 1
+				'method_order' => 1,
+				'enabled'      => 1
 			) );
 
 			if ( isset( $method_data['method_order'] ) ) {
 				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $method_data['method_order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
 			}
+
+			if ( isset( $method_data['enabled'] ) ) {
+				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => absint( 'yes' === $method_data['enabled'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
+			}
 		}
 
 		wp_send_json_success( array(
 			'methods' => $zone->get_shipping_methods()
+		) );
+	}
+
+	/**
+	 * Save method settings
+	 */
+	public static function shipping_zone_methods_save_settings() {
+		if ( ! isset( $_POST['wc_shipping_zones_nonce'], $_POST['instance_id'], $_POST['data'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wc_shipping_zones_nonce'], 'wc_shipping_zones_nonce' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			exit;
+		}
+
+		$instance_id     = absint( $_POST['instance_id'] );
+		$zone            = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
+		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+		$data            = $_POST['data'];
+
+		$shipping_method->process_admin_options( $data );
+
+		wp_send_json_success( array(
+			'methods' => $zone->get_shipping_methods(),
+			'errors'  => $shipping_method->get_errors(),
 		) );
 	}
 

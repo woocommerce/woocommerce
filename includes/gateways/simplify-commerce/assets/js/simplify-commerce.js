@@ -3,9 +3,9 @@
 
 	// Form handler
 	function simplifyFormHandler() {
-		var $form = $( 'form.checkout, form#order_review' );
+		var $form = $( 'form.checkout, form#order_review, form#add_payment_method' );
 
-		if ( $( '#payment_method_simplify_commerce' ).is( ':checked' ) ) {
+		if ( ( $( '#payment_method_simplify_commerce' ).is( ':checked' ) && $( '#wc-simplify_commerce-new' ).is( ':checked' ) ) || ( '1' === $( '#woocommerce_add_payment_method' ).val() ) ) {
 
 			if ( 0 === $( 'input.simplify-token' ).length ) {
 
@@ -27,6 +27,7 @@
 					addressCity    = $form.find( '#billing_city' ).val(),
 					addressZip     = $form.find( '#billing_postcode' ).val();
 
+				addressZip = addressZip.replace( /-/g, '' );
 				card = card.replace( /\s/g, '' );
 
 				SimplifyCommerce.generateToken({
@@ -55,8 +56,9 @@
 
 	// Handle Simplify response
 	function simplifyResponseHandler( data ) {
-		var $form  = $( 'form.checkout, form#order_review' ),
-			ccForm = $( '#simplify_commerce-cc-form' );
+
+		var $form  = $( 'form.checkout, form#order_review, form#add_payment_method' ),
+			ccForm = $( '#wc-simplify_commerce-cc-form' );
 
 		if ( data.error ) {
 
@@ -101,8 +103,13 @@
 			return simplifyFormHandler();
 		});
 
+		/* Pay Page Form */
+		$( 'form#add_payment_method' ).on( 'submit', function () {
+			return simplifyFormHandler();
+		});
+
 		/* Both Forms */
-		$( 'form.checkout, form#order_review' ).on( 'change', '#simplify_commerce-cc-form input', function() {
+		$( 'form.checkout, form#order_review, form#add_payment_method' ).on( 'change', '#wc-simplify_commerce-cc-form input', function() {
 			$( '.simplify-token' ).remove();
 		});
 

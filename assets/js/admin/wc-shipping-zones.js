@@ -30,7 +30,7 @@
 				},
 				save: function() {
 					if ( _.size( this.changes ) ) {
-						$.post( ajaxurl + '?action=woocommerce_shipping_zones_save_changes', {
+						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zones_save_changes', {
 							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 							changes                 : this.changes
 						}, this.onSaveResponse, 'json' );
@@ -67,6 +67,7 @@
 					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
 					$( document.body ).on( 'click', '.wc-shipping-zone-save-changes', { view: this }, this.onSubmit );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
+					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 				},
 				block: function() {
 					$( this.el ).block({
@@ -128,6 +129,7 @@
 						// Make the rows function
 						this.$el.find('.view').show();
 						this.$el.find('.edit').hide();
+						this.$el.find('.wc-shipping-zone-save-changes-notice').hide();
 						this.$el.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
 						this.$el.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
 						this.$el.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
@@ -149,7 +151,7 @@
 					var $tr          = $( '.wc-shipping-zones tr[data-id="' + zone_id + '"]');
 					var $method_list = $tr.find('.wc-shipping-zone-methods ul');
 
-					$method_list.empty();
+					$method_list.find( '.wc-shipping-zone-method' ).remove();
 
 					if ( _.size( shipping_methods ) ) {
 						_.each( shipping_methods, function( shipping_method, instance_id ) {
@@ -159,11 +161,9 @@
 								class_name = 'method_enabled';
 							}
 
-							$method_list.append( '<li><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
+							$method_list.prepend( '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
 						} );
-						$method_list.append( '<li>' + data.strings.add_another_method + '</li>' );
-					} else {
-						$method_list.append( '<li>' + data.strings.no_methods + '</li>' );
+
 					}
 				},
 				initTooltips: function() {
@@ -218,6 +218,8 @@
 					$( this ).closest('tr').find('.edit').show();
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).select2( select2_args );
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).addClass('enhanced');
+					$( this ).closest('tr').find('.add_shipping_method').attr( 'disabled', 'disabled' ).addClass( 'tips' );
+					event.data.view.initTooltips();
 					event.data.view.model.trigger( 'change:zones' );
 				},
 				onDeleteRow: function( event ) {
@@ -297,13 +299,15 @@
 							zone_id : zone_id
 						}
 					});
+
+					$( '.wc-shipping-zone-method-selector select' ).change();
 				},
 				onAddShippingMethodSubmitted: function( event, target, posted_data ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingZoneView.block();
 
 						// Add method to zone via ajax call
-						$.post( ajaxurl + '?action=woocommerce_shipping_zone_add_method', {
+						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
 							wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 							method_id               : posted_data.add_method_id,
 							zone_id                 : posted_data.zone_id
@@ -315,6 +319,12 @@
 							shippingZoneView.unblock();
 						}, 'json' );
 					}
+				},
+				onChangeShippingMethodSelector: function() {
+					var description = $( this ).find( 'option:selected' ).data( 'description' );
+					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
+					$( this ).after( '<p class="wc-shipping-zone-method-description">' + description + '</p>' );
+					$( this ).closest( 'article' ).height( $( this ).parent().height() );
 				}
 			} ),
 			shippingZone = new ShippingZone({

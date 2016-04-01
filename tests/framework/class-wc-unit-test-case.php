@@ -9,7 +9,7 @@
  */
 class WC_Unit_Test_Case extends WP_UnitTestCase {
 
-	/** @var \WC_Unit_Test_Factory instance */
+	/** @var WC_Unit_Test_Factory instance */
 	protected $factory;
 
 	/**
