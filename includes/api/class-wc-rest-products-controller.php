@@ -411,9 +411,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'backordered'           => $product->is_on_backorder(),
 			'sold_individually'     => $product->is_sold_individually(),
 			'weight'                => $product->get_weight(),
-			'length'                => $product->get_length(),
-			'width'                 => $product->get_width(),
-			'height'                => $product->get_height(),
+			'dimensions'            => array(
+				'length' => $product->get_length(),
+				'width'  => $product->get_width(),
+				'height' => $product->get_height(),
+			),
 			'shipping_required'     => $product->needs_shipping(),
 			'shipping_taxable'      => $product->is_shipping_taxable(),
 			'shipping_class'        => $product->get_shipping_class(),
@@ -481,9 +483,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'backorders_allowed'=> $variation->backorders_allowed(),
 				'backordered'       => $variation->is_on_backorder(),
 				'weight'            => $variation->get_weight(),
-				'length'            => $variation->get_length(),
-				'width'             => $variation->get_width(),
-				'height'            => $variation->get_height(),
+				'dimensions'        => array(
+					'length' => $variation->get_length(),
+					'width'  => $variation->get_width(),
+					'height' => $variation->get_height(),
+				),
 				'shipping_class'    => $variation->get_shipping_class(),
 				'shipping_class_id' => $variation->get_shipping_class_id(),
 				'image'             => $this->get_images( $variation ),
@@ -739,18 +743,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// Height.
-			if ( isset( $data['height'] ) ) {
-				update_post_meta( $product->id, '_height', '' === $data['height'] ? '' : wc_format_decimal( $data['height'] ) );
+			if ( isset( $data['dimensions']['height'] ) ) {
+				update_post_meta( $product->id, '_height', '' === $data['dimensions']['height'] ? '' : wc_format_decimal( $data['dimensions']['height'] ) );
 			}
 
 			// Width.
-			if ( isset( $data['width'] ) ) {
-				update_post_meta( $product->id, '_width', '' === $data['width'] ? '' : wc_format_decimal($data['width'] ) );
+			if ( isset( $data['dimensions']['width'] ) ) {
+				update_post_meta( $product->id, '_width', '' === $data['dimensions']['width'] ? '' : wc_format_decimal( $data['dimensions']['width'] ) );
 			}
 
 			// Length.
-			if ( isset( $data['length'] ) ) {
-				update_post_meta( $product->id, '_length', '' === $data['length'] ? '' : wc_format_decimal( $data['length'] ) );
+			if ( isset( $data['dimensions']['length'] ) ) {
+				update_post_meta( $product->id, '_length', '' === $data['dimensions']['length'] ? '' : wc_format_decimal( $data['dimensions']['length'] ) );
 			}
 		}
 
@@ -1928,20 +1932,27 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'length' => array(
-					'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
-					'type'        => 'string',
+				'dimensions' => array(
+					'description' => __( 'Product dimensions.', 'woocommerce' ),
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-				),
-				'width' => array(
-					'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-				),
-				'height' => array(
-					'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
+					'properties'  => array(
+						'length' => array(
+							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'width' => array(
+							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'height' => array(
+							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+					),
 				),
 				'shipping_required' => array(
 					'description' => __( 'Shows if the product need to be shipped.', 'woocommerce' ),
@@ -2339,20 +2350,27 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'length' => array(
-							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
-							'type'        => 'string',
+						'dimensions' => array(
+							'description' => __( 'Product dimensions.', 'woocommerce' ),
+							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
-						),
-						'width' => array(
-							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'height' => array(
-							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+							'properties'  => array(
+								'length' => array(
+									'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'width' => array(
+									'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'height' => array(
+									'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+							),
 						),
 						'shipping_class' => array(
 							'description' => __( 'Shipping class slug.', 'woocommerce' ),
