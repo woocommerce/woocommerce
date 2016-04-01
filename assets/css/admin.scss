@@ -2637,8 +2637,13 @@ img.help_tip {
 }
 
 .woocommerce {
+
+	h2.woo-nav-tab-wrapper {
+		margin-bottom: 1em;
+	}
+
 	nav.woo-nav-tab-wrapper {
-		margin: 1.5em 0 1em !important;
+		margin: 1.5em 0 1em;
 		border-bottom: 1px solid #ccc;
 	}
 
