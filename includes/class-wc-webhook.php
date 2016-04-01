@@ -111,7 +111,7 @@ class WC_Webhook {
 		// webhooks are processed in the background by default
 		// so as to avoid delays or failures in delivery from affecting the
 		// user who triggered it
-		if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $this ) ) {
+		if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $this, $arg ) ) {
 
 			// deliver in background
 			wp_schedule_single_event( time(), 'woocommerce_deliver_webhook_async', array( $this->id, $arg ) );
