@@ -1,9 +1,9 @@
 /*global wc_setup_params */
-jQuery(function( $ ) {
+jQuery( function( $ ) {
 
 	var locale_info = $.parseJSON( wc_setup_params.locale_info );
 
-	$( 'select[name="store_location"]' ).change(function(){
+	$( 'select[name="store_location"]' ).change( function() {
 		var country_option      = $(this).val();
 		var country             = country_option.split( ':' )[0];
 		var country_locale_info = locale_info[ country ];
@@ -23,9 +23,9 @@ jQuery(function( $ ) {
 			$(':input[name="decimal_sep"]').closest('tr').show();
 			$(':input[name="num_decimals"]').closest('tr').show();
 		}
-	}).change();
+	} ).change();
 
-	$( 'input[name="woocommerce_calc_taxes"]' ).change(function(){
+	$( 'input[name="woocommerce_calc_taxes"]' ).change( function() {
 		if ( $(this).is( ':checked' ) ) {
 			$(':input[name="woocommerce_prices_include_tax"], :input[name="woocommerce_import_tax_rates"]').closest('tr').show();
 			$('tr.tax-rates').show();
@@ -33,7 +33,7 @@ jQuery(function( $ ) {
 			$(':input[name="woocommerce_prices_include_tax"], :input[name="woocommerce_import_tax_rates"]').closest('tr').hide();
 			$('tr.tax-rates').hide();
 		}
-	}).change();
+	} ).change();
 
 	$( '.button-next' ).on( 'click', function() {
 		$('.wc-setup-content').block({
@@ -44,6 +44,6 @@ jQuery(function( $ ) {
 			}
 		});
 		return true;
-	});
+	} );
 
-});
+} );
