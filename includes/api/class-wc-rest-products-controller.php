@@ -387,11 +387,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'price'                 => $product->get_price(),
 			'regular_price'         => $product->get_regular_price(),
 			'sale_price'            => $product->get_sale_price() ? $product->get_sale_price() : '',
-			'sale_price_dates_from' => $product->sale_price_dates_from ? date( 'Y-m-d', $product->sale_price_dates_from ) : '',
-			'sale_price_dates_to'   => $product->sale_price_dates_to ? date( 'Y-m-d', $product->sale_price_dates_to ) : '',
+			'date_on_sale_from'     => $product->sale_price_dates_from ? date( 'Y-m-d', $product->sale_price_dates_from ) : '',
+			'date_on_sale_to'       => $product->sale_price_dates_to ? date( 'Y-m-d', $product->sale_price_dates_to ) : '',
 			'price_html'            => $product->get_price_html(),
 			'on_sale'               => $product->is_on_sale(),
-			'purchaseable'          => $product->is_purchasable(),
+			'purchasable'           => $product->is_purchasable(),
 			'total_sales'           => (int) get_post_meta( $product->id, 'total_sales', true ),
 			'virtual'               => $product->is_virtual(),
 			'downloadable'          => $product->is_downloadable(),
@@ -403,7 +403,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
 			'tax_status'            => $product->get_tax_status(),
 			'tax_class'             => $product->get_tax_class(),
-			'managing_stock'        => $product->managing_stock(),
+			'manage_stock'          => $product->managing_stock(),
 			'stock_quantity'        => $product->get_stock_quantity(),
 			'in_stock'              => $product->is_in_stock(),
 			'backorders'            => $product->backorders,
@@ -455,39 +455,39 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			}
 
 			$variations[] = array(
-				'id'                    => $variation->get_variation_id(),
-				'date_created'          => wc_rest_prepare_date_response( $variation->get_post_data()->post_date_gmt ),
-				'date_modified'         => wc_rest_prepare_date_response( $variation->get_post_data()->post_modified_gmt ),
-				'permalink'             => $variation->get_permalink(),
-				'sku'                   => $variation->get_sku(),
-				'price'                 => $variation->get_price(),
-				'regular_price'         => $variation->get_regular_price(),
-				'sale_price'            => $variation->get_sale_price(),
-				'sale_price_dates_from' => $variation->sale_price_dates_from ? date( 'Y-m-d', $variation->sale_price_dates_from ) : '',
-				'sale_price_dates_to'   => $variation->sale_price_dates_to ? date( 'Y-m-d', $variation->sale_price_dates_to ) : '',
-				'on_sale'               => $variation->is_on_sale(),
-				'purchaseable'          => $variation->is_purchasable(),
-				'virtual'               => $variation->is_virtual(),
-				'downloadable'          => $variation->is_downloadable(),
-				'downloads'             => $this->get_downloads( $variation ),
-				'download_limit'        => (int) $variation->download_limit,
-				'download_expiry'       => (int) $variation->download_expiry,
-				'tax_status'            => $variation->get_tax_status(),
-				'tax_class'             => $variation->get_tax_class(),
-				'managing_stock'        => $variation->managing_stock(),
-				'stock_quantity'        => $variation->get_stock_quantity(),
-				'in_stock'              => $variation->is_in_stock(),
-				'backorders'            => $variation->backorders,
-				'backorders_allowed'    => $variation->backorders_allowed(),
-				'backordered'           => $variation->is_on_backorder(),
-				'weight'                => $variation->get_weight(),
-				'length'                => $variation->get_length(),
-				'width'                 => $variation->get_width(),
-				'height'                => $variation->get_height(),
-				'shipping_class'        => $variation->get_shipping_class(),
-				'shipping_class_id'     => $variation->get_shipping_class_id(),
-				'image'                 => $this->get_images( $variation ),
-				'attributes'            => $this->get_attributes( $variation ),
+				'id'                => $variation->get_variation_id(),
+				'date_created'      => wc_rest_prepare_date_response( $variation->get_post_data()->post_date_gmt ),
+				'date_modified'     => wc_rest_prepare_date_response( $variation->get_post_data()->post_modified_gmt ),
+				'permalink'         => $variation->get_permalink(),
+				'sku'               => $variation->get_sku(),
+				'price'             => $variation->get_price(),
+				'regular_price'     => $variation->get_regular_price(),
+				'sale_price'        => $variation->get_sale_price(),
+				'date_on_sale_from' => $variation->sale_price_dates_from ? date( 'Y-m-d', $variation->sale_price_dates_from ) : '',
+				'date_on_sale_to'   => $variation->sale_price_dates_to ? date( 'Y-m-d', $variation->sale_price_dates_to ) : '',
+				'on_sale'           => $variation->is_on_sale(),
+				'purchasable'       => $variation->is_purchasable(),
+				'virtual'           => $variation->is_virtual(),
+				'downloadable'      => $variation->is_downloadable(),
+				'downloads'         => $this->get_downloads( $variation ),
+				'download_limit'    => (int) $variation->download_limit,
+				'download_expiry'   => (int) $variation->download_expiry,
+				'tax_status'        => $variation->get_tax_status(),
+				'tax_class'         => $variation->get_tax_class(),
+				'manage_stock'      => $variation->managing_stock(),
+				'stock_quantity'    => $variation->get_stock_quantity(),
+				'in_stock'          => $variation->is_in_stock(),
+				'backorders'        => $variation->backorders,
+				'backorders_allowed'=> $variation->backorders_allowed(),
+				'backordered'       => $variation->is_on_backorder(),
+				'weight'            => $variation->get_weight(),
+				'length'            => $variation->get_length(),
+				'width'             => $variation->get_width(),
+				'height'            => $variation->get_height(),
+				'shipping_class'    => $variation->get_shipping_class(),
+				'shipping_class_id' => $variation->get_shipping_class_id(),
+				'image'             => $this->get_images( $variation ),
+				'attributes'        => $this->get_attributes( $variation ),
 			);
 		}
 
@@ -1015,15 +1015,15 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$sale_price = get_post_meta( $product->id, '_sale_price', true );
 			}
 
-			if ( isset( $request['sale_price_dates_from'] ) ) {
-				$date_from = $request['sale_price_dates_from'];
+			if ( isset( $request['date_on_sale_from'] ) ) {
+				$date_from = $request['date_on_sale_from'];
 			} else {
 				$date_from = get_post_meta( $product->id, '_sale_price_dates_from', true );
 				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
 			}
 
-			if ( isset( $request['sale_price_dates_to'] ) ) {
-				$date_to = $request['sale_price_dates_to'];
+			if ( isset( $request['date_on_sale_to'] ) ) {
+				$date_to = $request['date_on_sale_to'];
 			} else {
 				$date_to = get_post_meta( $product->id, '_sale_price_dates_to', true );
 				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
@@ -1093,11 +1093,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		// Stock data.
 		if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) {
 			// Manage stock.
-			if ( isset( $request['managing_stock'] ) ) {
-				$managing_stock = ( true === $request['managing_stock'] ) ? 'yes' : 'no';
-				update_post_meta( $product->id, '_manage_stock', $managing_stock );
+			if ( isset( $request['manage_stock'] ) ) {
+				$manage_stock = ( true === $request['manage_stock'] ) ? 'yes' : 'no';
+				update_post_meta( $product->id, '_manage_stock', $manage_stock );
 			} else {
-				$managing_stock = get_post_meta( $product->id, '_manage_stock', true );
+				$manage_stock = get_post_meta( $product->id, '_manage_stock', true );
 			}
 
 			// Backorders.
@@ -1122,7 +1122,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				wc_update_product_stock_status( $product->id, 'instock' );
 			} elseif ( 'variable' === $product_type ) {
 				update_post_meta( $product->id, '_stock', '' );
-			} elseif ( 'yes' == $managing_stock ) {
+			} elseif ( 'yes' == $manage_stock ) {
 				update_post_meta( $product->id, '_backorders', $backorders );
 
 				wc_update_product_stock_status( $product->id, $stock_status );
@@ -1364,13 +1364,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$this->save_product_shipping_data( $variation_id, $variation );
 
 			// Stock handling.
-			if ( isset( $variation['managing_stock'] ) ) {
-				$managing_stock = ( true === $variation['managing_stock'] ) ? 'yes' : 'no';
+			if ( isset( $variation['manage_stock'] ) ) {
+				$manage_stock = ( true === $variation['manage_stock'] ) ? 'yes' : 'no';
 			} else {
-				$managing_stock = get_post_meta( $variation_id, '_manage_stock', true );
+				$manage_stock = get_post_meta( $variation_id, '_manage_stock', true );
 			}
 
-			update_post_meta( $variation_id, '_manage_stock', '' === $managing_stock ? 'no' : $managing_stock );
+			update_post_meta( $variation_id, '_manage_stock', '' === $manage_stock ? 'no' : $manage_stock );
 
 			if ( isset( $variation['in_stock'] ) ) {
 				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
@@ -1380,7 +1380,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			wc_update_product_stock_status( $variation_id, '' === $stock_status ? 'instock' : $stock_status );
 
-			if ( 'yes' === $managing_stock ) {
+			if ( 'yes' === $manage_stock ) {
 				$backorders = get_post_meta( $variation_id, '_backorders', true );
 
 				if ( isset( $variation['backorders'] ) ) {
@@ -1416,15 +1416,15 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$sale_price = get_post_meta( $variation_id, '_sale_price', true );
 			}
 
-			if ( isset( $variation['sale_price_dates_from'] ) ) {
-				$date_from = $variation['sale_price_dates_from'];
+			if ( isset( $variation['date_on_sale_from'] ) ) {
+				$date_from = $variation['date_on_sale_from'];
 			} else {
 				$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
 				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
 			}
 
-			if ( isset( $variation['sale_price_dates_to'] ) ) {
-				$date_to = $variation['sale_price_dates_to'];
+			if ( isset( $variation['date_on_sale_to'] ) ) {
+				$date_to = $variation['date_on_sale_to'];
 			} else {
 				$date_to = get_post_meta( $variation_id, '_sale_price_dates_to', true );
 				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
@@ -1770,12 +1770,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'sale_price_dates_from' => array(
+				'date_on_sale_from' => array(
 					'description' => __( 'Start date of sale price.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'sale_price_dates_to' => array(
+				'date_on_sale_to' => array(
 					'description' => __( 'End data of sale price.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -1792,7 +1792,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'purchaseable' => array(
+				'purchasable' => array(
 					'description' => __( 'Shows if the product can be bought.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
@@ -1881,7 +1881,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'managing_stock' => array(
+				'manage_stock' => array(
 					'description' => __( 'Stock management at product level.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
@@ -2217,12 +2217,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'sale_price_dates_from' => array(
+						'date_on_sale_from' => array(
 							'description' => __( 'Start date of sale price.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'sale_price_dates_to' => array(
+						'date_on_sale_to' => array(
 							'description' => __( 'End data of sale price.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -2233,7 +2233,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'purchaseable' => array(
+						'purchasable' => array(
 							'description' => __( 'Shows if the product can be bought.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view', 'edit' ),
@@ -2298,7 +2298,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'managing_stock' => array(
+						'manage_stock' => array(
 							'description' => __( 'Stock management at product level.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'default'     => false,
@@ -2453,10 +2453,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						),
 					),
 				),
-				'grouped_products' => array(
+				'grouped_products_ids' => array(
 					'description' => __( 'List of grouped products ID.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'menu_order' => array(
 					'description' => __( 'Menu order, used to custom sort products.', 'woocommerce' ),
