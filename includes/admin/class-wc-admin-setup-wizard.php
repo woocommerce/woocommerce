@@ -558,55 +558,131 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Simple array of gateways to show in wizard.
+	 * @return array
+	 */
+	protected function get_wizard_payment_gateways() {
+		$gateways = array(
+			'stripe' => array(
+				'name'        => __( 'Stripe', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
+				'description' => sprintf( __( 'A modern and robust way to accept credit card payments on your store. %sLearn more about Stripe%s.', 'woocommerce' ), '<a href="#" target="_blank">', '</a>' ),
+				'class'       => 'featured featured-row-first',
+				'repo-slug'   => 'woocommerce-gateway-stripe',
+			),
+			'paypal-braintree' => array(
+				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
+				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s paypal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="#" target="_blank">', '</a>' ),
+				'class'       => 'featured featured-row-last',
+				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
+			),
+			'paypal-ec' => array(
+				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/paypal-express.png',
+				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s paypal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="#" target="_blank">', '</a>' ),
+				'class'       => 'featured featured-row-last',
+				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
+			),
+			'paypal' => array(
+				'name'        => __( 'PayPal Standard', 'woocommerce' ),
+				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+				'settings'    => array(
+					'email' => array(
+						'label'       => __( 'PayPal email address', 'woocommerce' ),
+						'type'        => 'email',
+						'value'       => get_option( 'admin_email' ),
+						'placeholder' => __( 'PayPal email address', 'woocommerce' ),
+					),
+				),
+			),
+			'cheque' => array(
+				'name'        => __( 'Cheque Payments', 'woocommerce' ),
+				'description' => __( 'An simple offline gateway that lets you accept Cheque payment.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+			),
+			'bacs' => array(
+				'name'        => __( 'Bank Transfer (BACS) Payments', 'woocommerce' ),
+				'description' => __( 'An simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+			),
+			'cod' => array(
+				'name'        => __( 'Cash on Delivery', 'woocommerce' ),
+				'description' => __( 'An simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+			)
+		);
+
+		$country = WC()->countries->get_base_country();
+
+		if ( 'US' === $country ) {
+			unset( $gateways['paypal-ec'] );
+		} else {
+			unset( $gateways['paypal-braintree'] );
+		}
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			unset( $gateways['paypal-braintree'] );
+			unset( $gateways['paypal-ec'] );
+			unset( $gateways['stripe'] );
+		}
+
+		return $gateways;
+	}
+
+	/**
 	 * Payments Step.
 	 */
 	public function wc_setup_payments() {
-		$paypal_settings = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
-		$cheque_settings = array_filter( (array) get_option( 'woocommerce_cheque_settings', array() ) );
-		$cod_settings    = array_filter( (array) get_option( 'woocommerce_cod_settings', array() ) );
-		$bacs_settings   = array_filter( (array) get_option( 'woocommerce_bacs_settings', array() ) );
+		$gateways = $this->get_wizard_payment_gateways();
 		?>
 		<h1><?php _e( 'Payments', 'woocommerce' ); ?></h1>
-		<form method="post">
+		<form method="post" class="wc-wizard-payment-gateway-form">
 			<p><?php printf( __( 'WooCommerce can accept both online and offline payments. %2$sAdditional payment methods%3$s can be installed later and managed from the %1$scheckout settings%3$s screen.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout' ) . '" target="_blank">', '<a href="' . admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) . '" target="_blank">', '</a>' ); ?></p>
-			<table class="form-table">
-				<tr class="section_title">
-					<td colspan="2">
-						<h2><?php _e( 'PayPal Standard', 'woocommerce' ); ?></h2>
-						<p><?php _e( 'To accept payments via PayPal on your store, simply enter your PayPal email address below.', 'woocommerce' ); ?></p>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_paypal_email"><?php _e( 'PayPal Email Address:', 'woocommerce' ); ?></label></th>
-					<td>
-						<input type="email" id="woocommerce_paypal_email" name="woocommerce_paypal_email" class="input-text" value="<?php echo esc_attr( isset( $paypal_settings['email'] ) ? $paypal_settings['email'] : '' ); ?>" />
-					</td>
-				</tr>
-				<tr class="section_title">
-					<td colspan="2">
-						<h2><?php _e( 'Offline Payments', 'woocommerce' ); ?></h2>
-						<p><?php _e( 'Offline gateways require manual processing, but can be useful in certain circumstances or for testing payments.', 'woocommerce' ); ?></p>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_enable_cheque"><?php _e( 'Cheque Payments', 'woocommerce' ); ?></label></th>
-					<td>
-						<label><input type="checkbox" id="woocommerce_enable_cheque" name="woocommerce_enable_cheque" class="input-checkbox" value="yes" <?php checked( ( isset( $cheque_settings['enabled'] ) && 'yes' === $cheque_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable payment via Cheques', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_enable_cod"><?php _e( 'Cash on Delivery', 'woocommerce' ); ?></label></th>
-					<td>
-						<label><input type="checkbox" id="woocommerce_enable_cod" name="woocommerce_enable_cod" class="input-checkbox" value="yes" <?php checked( ( isset( $cod_settings['enabled'] ) && 'yes' === $cod_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable cash on delivery', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_enable_bacs"><?php _e( 'Bank Transfer (BACS)', 'woocommerce' ); ?></label></th>
-					<td>
-						<label><input type="checkbox" id="woocommerce_enable_bacs" name="woocommerce_enable_bacs" class="input-checkbox" value="yes" <?php checked( ( isset( $bacs_settings['enabled'] ) && 'yes' === $bacs_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable BACS payments', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-			</table>
+
+			<ul class="wc-wizard-payment-gateways">
+				<?php foreach ( $gateways as $gateway_id => $gateway ) : ?>
+					<li class="wc-wizard-gateway wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?> <?php echo esc_attr( $gateway['class'] ); ?>">
+						<div class="wc-wizard-gateway-enable">
+							<input type="checkbox" name="wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?>-enabled" class="input-checkbox" value="yes" />
+							<label>
+								<?php if ( $gateway['image'] ) : ?>
+									<img src="<?php echo esc_attr( $gateway['image'] ); ?>" alt="<?php echo esc_attr( $gateway['name'] ); ?>" />
+								<?php else : ?>
+									<?php echo esc_html( $gateway['name'] ); ?>
+								<?php endif; ?>
+							</label>
+						</div>
+						<div class="wc-wizard-gateway-description">
+							<?php echo wp_kses_post( wpautop( $gateway['description'] ) ); ?>
+						</div>
+						<?php if ( ! empty( $gateway['settings'] ) ) : ?>
+							<table class="form-table wc-wizard-gateway-settings">
+								<?php foreach ( $gateway['settings'] as $setting_id => $setting ) : ?>
+									<tr>
+										<th scope="row"><label for="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"><?php echo esc_html( $setting['label'] ); ?>:</label></th>
+										<td>
+											<input
+												type="<?php echo esc_attr( $setting['type'] ); ?>"
+												id="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+												name="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+												class="input-text"
+												value="<?php echo esc_attr( $setting['value'] ); ?>"
+												placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
+												/>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							</table>
+						<?php endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
@@ -617,29 +693,155 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Get slug from path
+	 * @param  string $key
+	 * @return string
+	 */
+	private function format_plugin_slug( $key ) {
+		$slug = explode( '/', $key );
+		$slug = explode( '.', $slug[1] );
+		return $slug[0];
+	}
+
+	/**
 	 * Payments Step save.
 	 */
 	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$paypal_settings            = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
-		$cheque_settings            = array_filter( (array) get_option( 'woocommerce_cheque_settings', array() ) );
-		$cod_settings               = array_filter( (array) get_option( 'woocommerce_cod_settings', array() ) );
-		$bacs_settings              = array_filter( (array) get_option( 'woocommerce_bacs_settings', array() ) );
+		WP_Filesystem();
+		include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
+		include_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+		$upgrader          = new WP_Upgrader();
+		$gateways          = $this->get_wizard_payment_gateways();
+		$installed_plugins = array_map( array( $this, 'format_plugin_slug' ), array_keys( get_plugins() ) );
 
-		$paypal_settings['enabled'] = ! empty( $_POST['woocommerce_paypal_email'] ) ? 'yes' : 'no';
-		$cheque_settings['enabled'] = isset( $_POST['woocommerce_enable_cheque'] ) ? 'yes' : 'no';
-		$cod_settings['enabled']    = isset( $_POST['woocommerce_enable_cod'] ) ? 'yes' : 'no';
-		$bacs_settings['enabled']   = isset( $_POST['woocommerce_enable_bacs'] ) ? 'yes' : 'no';
+		foreach ( $gateways as $gateway_id => $gateway ) {
+			// If repo-slug is defined, download and install plugin from .org.
+			if ( ! empty( $gateway['repo-slug'] ) && ! empty( $_POST[ 'wc-wizard-gateway-' . $gateway_id . '-enabled' ] ) ) {
+				$plugin_slug = $gateway['repo-slug'];
+				$plugin      = $plugin_slug . '/' . $plugin_slug . '.php';
+				$installed   = false;
+				$activate    = false;
 
-		if ( ! empty( $_POST['woocommerce_paypal_email'] ) ) {
-			$paypal_settings['email'] = wc_clean( $_POST['woocommerce_paypal_email'] );
+				// See if the plugin is installed already
+				if ( in_array( $gateway['repo-slug'], $installed_plugins ) ) {
+					$installed = true;
+					$activate  = ! is_plugin_active( $plugin );
+				}
+
+				// Install this thing!
+				if ( ! $installed ) {
+					// Suppress feedback
+					ob_start();
+
+					try {
+						$plugin = plugins_api( 'plugin_information', array(
+							'slug'   => $gateway['repo-slug'],
+							'fields' => array(
+								'short_description' => false,
+								'sections'          => false,
+								'requires'          => false,
+								'rating'            => false,
+								'ratings'           => false,
+								'downloaded'        => false,
+								'last_updated'      => false,
+								'added'             => false,
+								'tags'              => false,
+								'homepage'          => false,
+								'donate_link'       => false,
+								'author_profile'    => false,
+								'author'            => false,
+							),
+						) );
+
+						if ( is_wp_error( $plugin ) ) {
+							throw new Exception( $plugin->get_error_message() );
+						}
+
+						$package  = $plugin->download_link;
+						$download = $upgrader->download_package( $package );
+
+						if ( is_wp_error( $download ) ) {
+							throw new Exception( $download->get_error_message() );
+						}
+
+						$working_dir = $upgrader->unpack_package( $download, true );
+
+						if ( is_wp_error( $working_dir ) ) {
+							throw new Exception( $working_dir->get_error_message() );
+						}
+
+						$result = $upgrader->install_package( array(
+							'source'                      => $working_dir,
+							'destination'                 => WP_PLUGIN_DIR,
+							'clear_destination'           => false,
+							'abort_if_destination_exists' => false,
+							'clear_working'               => true,
+							'hook_extra'                  => array(
+								'type'   => 'plugin',
+								'action' => 'install',
+							),
+						) );
+
+						if ( is_wp_error( $result ) ) {
+							throw new Exception( $result->get_error_message() );
+						}
+
+						$activate = true;
+
+					} catch ( Exception $e ) {
+						WC_Admin_Notices::add_custom_notice(
+							$gateway_id . '_install_error',
+							sprintf(
+								__( '%s could not be installed (%s). %sPlease install it manually by clicking here.%s', 'woocommerce' ),
+								$gateway['name'],
+								$e->getMessage(),
+								'<a href="' . admin_url( 'plugin-install.php?tab=search&type=term&s=' . $gateway['repo-slug'] ) . '">',
+								'</a>'
+							)
+						);
+					}
+
+					// Discard feedback
+					ob_end_clean();
+				}
+
+				// Activate this thing
+				if ( $activate ) {
+					try {
+						$result = activate_plugin( $plugin );
+
+						if ( is_wp_error( $result ) ) {
+							throw new Exception( $result->get_error_message() );
+						}
+					} catch ( Exception $e ) {
+						WC_Admin_Notices::add_custom_notice(
+							$gateway_id . '_install_error',
+							sprintf(
+								__( '%s could not be activated (%s). %sPlease activate it manually via the plugins screen.%s', 'woocommerce' ),
+								$gateway['name'],
+								$e->getMessage(),
+								'<a href="' . admin_url( 'plugins.php' ) . '">',
+								'</a>'
+							)
+						);
+					}
+				}
+			}
+
+			$settings_key        = 'woocommerce_' . $gateway_id . '_settings';
+			$settings            = array_filter( (array) get_option( $settings_key, array() ) );
+			$settings['enabled'] = ! empty( $_POST[ 'wc-wizard-gateway-' . $gateway_id . '-enabled' ] ) ? 'yes' : 'no';
+
+			if ( ! empty( $gateway['settings'] ) ) {
+				foreach ( $gateway['settings'] as $setting_id => $setting ) {
+					$settings[ $setting_id ] = wc_clean( $_POST[ $gateway_id . '_' . $setting_id ] );
+				}
+			}
+
+			update_option( $settings_key, $settings );
 		}
-
-		update_option( 'woocommerce_paypal_settings', $paypal_settings );
-		update_option( 'woocommerce_cheque_settings', $cheque_settings );
-		update_option( 'woocommerce_cod_settings', $cod_settings );
-		update_option( 'woocommerce_bacs_settings', $bacs_settings );
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;

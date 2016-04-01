@@ -22,12 +22,12 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private $core_notices = array(
-		'install'             => 'install_notice',
-		'update'              => 'update_notice',
-		'template_files'      => 'template_file_check_notice',
-		'theme_support'       => 'theme_check_notice',
-		'legacy_shipping'     => 'legacy_shipping_notice',
-		'no_shipping_methods' => 'no_shipping_methods_notice',
+		'install'                         => 'install_notice',
+		'update'                          => 'update_notice',
+		'template_files'                  => 'template_file_check_notice',
+		'theme_support'                   => 'theme_check_notice',
+		'legacy_shipping'                 => 'legacy_shipping_notice',
+		'no_shipping_methods'             => 'no_shipping_methods_notice',
 	);
 
 	/**
@@ -62,7 +62,7 @@ class WC_Admin_Notices {
 
 	/**
 	 * Show a notice.
-	 * @param  string $name
+	 * @param string $name
 	 */
 	public static function add_notice( $name ) {
 		$notices = array_unique( array_merge( get_option( 'woocommerce_admin_notices', array() ), array( $name ) ) );
@@ -76,6 +76,7 @@ class WC_Admin_Notices {
 	public static function remove_notice( $name ) {
 		$notices = array_diff( get_option( 'woocommerce_admin_notices', array() ), array( $name ) );
 		update_option( 'woocommerce_admin_notices', $notices );
+		delete_option( 'woocommerce_admin_notice_' . $name );
 	}
 
 	/**
@@ -117,6 +118,36 @@ class WC_Admin_Notices {
 			foreach ( $notices as $notice ) {
 				if ( ! empty( $this->core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
 					add_action( 'admin_notices', array( $this, $this->core_notices[ $notice ] ) );
+				} else {
+					add_action( 'admin_notices', array( $this, 'output_custom_notices' ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add a custom notice.
+	 * @param string $name
+	 * @param string $notice_html
+	 */
+	public static function add_custom_notice( $name, $notice_html ) {
+		self::add_notice( $name );
+		update_option( 'woocommerce_admin_notice_' . $name, wp_kses_post( $notice_html ) );
+	}
+
+	/**
+	 * Output any stored custom notices.
+	 */
+	public function output_custom_notices() {
+		$notices = get_option( 'woocommerce_admin_notices', array() );
+		if ( $notices ) {
+			foreach ( $notices as $notice ) {
+				if ( empty( $this->core_notices[ $notice ] ) ) {
+					$notice_html = get_option( 'woocommerce_admin_notice_' . $notice );
+
+					if ( $notice_html ) {
+						include( 'views/html-notice-custom.php' );
+					}
 				}
 			}
 		}

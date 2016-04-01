@@ -11,10 +11,13 @@
 /**
  * Styling begins
  */
-.woocommerce-message {
+div.woocommerce-message {
 	overflow: hidden;
 	position: relative;
 	border-left-color: #cc99c2 !important;
+	p {
+		max-width: 700px;
+	}
 }
 
 p.woocommerce-actions,
@@ -51,8 +54,8 @@ p.woocommerce-actions,
 
 	a.woocommerce-message-close {
 		position: absolute;
-		top: 10px;
-		right: 10px;
+		top: 0;
+		right: 0;
 		padding: 10px 15px 10px 21px;
 		font-size: 13px;
 		line-height: 1.23076923;
