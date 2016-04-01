@@ -83,7 +83,8 @@ p.woocommerce-actions,
 	margin-bottom: 1em !important;
 }
 
-div.woocommerce-legacy-shipping-notice {
+div.woocommerce-legacy-shipping-notice,
+div.woocommerce-no-shipping-methods-notice {
 	overflow: hidden;
 	padding: 1px 12px;
 	p {

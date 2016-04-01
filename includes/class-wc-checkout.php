@@ -574,7 +574,7 @@ class WC_Checkout {
 
 				foreach ( $packages as $i => $package ) {
 					if ( ! isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
-						wc_add_notice( __( 'Invalid shipping method.', 'woocommerce' ), 'error' );
+						wc_add_notice( __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ), 'error' );
 						$this->shipping_methods[ $i ] = '';
 					}
 				}
