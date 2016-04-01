@@ -22,12 +22,12 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private $core_notices = array(
-		'install'                         => 'install_notice',
-		'update'                          => 'update_notice',
-		'template_files'                  => 'template_file_check_notice',
-		'theme_support'                   => 'theme_check_notice',
-		'legacy_shipping'                 => 'legacy_shipping_notice',
-		'no_shipping_methods'             => 'no_shipping_methods_notice',
+		'install'             => 'install_notice',
+		'update'              => 'update_notice',
+		'template_files'      => 'template_file_check_notice',
+		'theme_support'       => 'theme_check_notice',
+		'legacy_shipping'     => 'legacy_shipping_notice',
+		'no_shipping_methods' => 'no_shipping_methods_notice',
 	);
 
 	/**
