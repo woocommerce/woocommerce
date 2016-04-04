@@ -155,7 +155,7 @@ class WC_REST_Product_Reviews_Controller extends WP_REST_Controller {
 			'id'             => (int) $review->comment_ID,
 			'date_created'   => wc_rest_prepare_date_response( $review->comment_date_gmt ),
 			'review'         => $review->comment_content,
-			'rating'         => get_comment_meta( $review->comment_ID, 'rating', true ),
+			'rating'         => (int) get_comment_meta( $review->comment_ID, 'rating', true ),
 			'reviewer_name'  => $review->comment_author,
 			'reviewer_email' => $review->comment_author_email,
 			'verified'       => wc_review_is_from_verified_owner( $review->comment_ID ),
@@ -171,7 +171,7 @@ class WC_REST_Product_Reviews_Controller extends WP_REST_Controller {
 		$response->add_links( $this->prepare_links( $review, $request ) );
 
 		/**
-		 * Filter webhook delivery object returned from the REST API.
+		 * Filter product reviews object returned from the REST API.
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WP_Comment       $review   Product review object used to create response.
@@ -230,7 +230,7 @@ class WC_REST_Product_Reviews_Controller extends WP_REST_Controller {
 				),
 				'rating' => array(
 					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
