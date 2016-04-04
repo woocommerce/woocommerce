@@ -153,6 +153,15 @@ class WC_Admin_Taxonomies {
 					jQuery( '.remove_image_button' ).hide();
 					return false;
 				});
+				
+				jQuery( document ).ajaxComplete( function( event, request, settings ) {
+					if( 'submit' === event.target.activeElement.id ) {
+						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+						jQuery( '#product_cat_thumbnail_id' ).val( '' );
+						jQuery( '.remove_image_button' ).hide();
+					}
+					return false;
+				});
 
 			</script>
 			<div class="clear"></div>
