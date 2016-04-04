@@ -154,12 +154,12 @@ class WC_Admin_Taxonomies {
 					return false;
 				});
 				
-				jQuery( document ).ajaxComplete( function( event, xhr, options ) {
-					if (xhr && xhr.readyState === 4 && xhr.status === 200
-						&& options.data && options.data.indexOf('action=add-tag') >= 0) {
+				jQuery( document ).ajaxComplete( function( event, request, options ) {
+					if ( request && request.readyState === 4 && request.status === 200
+						&& options.data && options.data.indexOf('action=add-tag') >= 0 ) {
 					
-						var res = wpAjax.parseAjaxResponse(xhr.responseXML, 'ajax-response');
-						if (!res || res.errors) {
+						var res = wpAjax.parseAjaxResponse( request.responseXML, 'ajax-response' );
+						if ( !res || res.errors ) {
 							return;
 						}
 						// Clear Thumbnail fields on submit
