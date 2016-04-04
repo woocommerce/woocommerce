@@ -154,13 +154,22 @@ class WC_Admin_Taxonomies {
 					return false;
 				});
 				
-				jQuery( document ).ajaxComplete( function( event, request, settings ) {
-					if( 'submit' === event.target.activeElement.id ) {
+				jQuery( document ).ajaxComplete( function( event, xhr, options ) {
+					if (xhr && xhr.readyState === 4 && xhr.status === 200
+						&& options.data && options.data.indexOf('action=add-tag') >= 0) {
+					
+						var res = wpAjax.parseAjaxResponse(xhr.responseXML, 'ajax-response');
+						if (!res || res.errors) {
+							return;
+						}
+						// Clear Thumbnail fields on submit
 						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
 						jQuery( '#product_cat_thumbnail_id' ).val( '' );
 						jQuery( '.remove_image_button' ).hide();
+						// Clear Display type field on submit
+						jQuery( '#display_type' ).val( '' );
+						return;
 					}
-					return false;
 				});
 
 			</script>
