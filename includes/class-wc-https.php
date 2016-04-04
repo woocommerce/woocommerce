@@ -123,7 +123,7 @@ class WC_HTTPS {
 	 */
 	public static function http_api_curl( $handle, $r, $url ) {
 		if ( strstr( $url, 'https://' ) && ( strstr( $url, '.paypal.com/nvp' ) || strstr( $url, '.paypal.com/cgi-bin/webscr' ) ) ) {
-			curl_setopt( $handle, CURLOPT_SSLVERSION, 1 );
+			curl_setopt( $handle, CURLOPT_SSLVERSION, 6 );
 		}
 	}
 }
