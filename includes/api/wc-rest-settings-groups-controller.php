@@ -16,27 +16,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 
 	/**
+	 * WP REST API namespace/version.
+	 */
+	protected $namespace = 'wc/v1';
+
+	/**
 	 * Register routes.
 	 * @since 2.7.0
 	 */
 	public function register_routes() {
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base, array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_groups' ),
+				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
 			),
 			'schema' => array( $this, 'group_schema' ),
 		) );
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_group' ),
+				'callback'            => array( $this, 'get_item' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
 			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_settings' ),
+				'callback'            => array( $this, 'edit_item' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
@@ -45,12 +50,12 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 	}
 
 	/**
-	 * Get all settings groups.
+	 * Get all settings groups items.
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_groups( $request ) {
+	public function get_items( $request ) {
 		$groups = apply_filters( 'woocommerce_settings_groups', array() );
 		if ( empty( $groups ) ) {
 			return new WP_Error( 'rest_setting_groups_empty', __( 'No setting groups have been registered.', 'woocommerce' ), array( 'status' => 500 ) );
@@ -83,7 +88,7 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_group( $request ) {
+	public function get_item( $request ) {
 		$group = $this->_get_group_from_request( $request );
 		if ( is_wp_error( $group ) ) {
 			return $group;
@@ -97,7 +102,7 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function update_settings( $request ) {
+	public function edit_item( $request ) {
 		$group = $this->_get_group_from_request( $request );
 		if ( is_wp_error( $group ) ) {
 			return $group;

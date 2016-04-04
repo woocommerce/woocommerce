@@ -16,6 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 
 	/**
+	 * WP REST API namespace/version.
+	 */
+	protected $namespace = 'wc/v1';
+
+	/**
 	 * Route base.
 	 * @var string
 	 */
@@ -26,15 +31,15 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 	 * @since 2.7.0
 	 */
 	public function register_routes() {
-		register_rest_route( WC_API::REST_API_NAMESPACE, '/' . $this->rest_base . '/(?P<group>[\w-]+)/(?P<setting>[\w-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/(?P<setting>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_setting' ),
+				'callback'            => array( $this, 'get_item' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
 			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_setting' ),
+				'callback'            => array( $this, 'edit_item' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
@@ -48,7 +53,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_setting( $request ) {
+	public function get_item( $request ) {
 		$setting = $this->_get_setting_from_request( $request );
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
@@ -62,7 +67,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function update_setting( $request ) {
+	public function edit_item( $request ) {
 		$setting = $this->_get_setting_from_request( $request );
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
