@@ -37,7 +37,7 @@ class WC_REST_Reports_Controller extends WP_REST_Controller {
 	protected $rest_base = 'reports';
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the routes for reports.
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(

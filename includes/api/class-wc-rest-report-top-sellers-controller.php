@@ -161,7 +161,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 					'readonly'    => true,
 				),
 				'quantity' => array(
-					'description' => __( 'Total of purchases.', 'woocommerce' ),
+					'description' => __( 'Total number of purchases.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

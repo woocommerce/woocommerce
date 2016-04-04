@@ -44,7 +44,7 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 	protected $report;
 
 	/**
-	 * Register the routes for coupons.
+	 * Register the routes for sales reports.
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
@@ -123,7 +123,7 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 		$period_totals   = array();
 
 		// Setup period totals by ensuring each period in the interval has data.
-		for ( $i = 0; $i <= $this->report->chart_interval; $i ++ ) {
+		for ( $i = 0; $i <= $this->report->chart_interval; $i++ ) {
 
 			switch ( $this->report->chart_groupby ) {
 				case 'day' :
@@ -255,7 +255,7 @@ class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
 
 			if ( ! empty( $filter['date_min'] ) || ! empty( $filter['date_max'] ) ) {
 
-				// Iverwrite _GET to make use of WC_Admin_Report::calculate_current_range() for custom date ranges.
+				// Overwrite _GET to make use of WC_Admin_Report::calculate_current_range() for custom date ranges.
 				$_GET['start_date'] = $filter['date_min'];
 				$_GET['end_date'] = isset( $filter['date_max'] ) ? $filter['date_max'] : null;
 

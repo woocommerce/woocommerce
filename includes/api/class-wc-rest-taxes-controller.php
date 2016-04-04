@@ -576,7 +576,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'priority' => array(
-					'description' => __( 'Customer password.', 'woocommerce' ),
+					'description' => __( 'Tax priority.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => 1,
 					'context'     => array( 'view', 'edit' ),
