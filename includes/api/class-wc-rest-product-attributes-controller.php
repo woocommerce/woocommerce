@@ -254,7 +254,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, true );
 
-		$request->set_param( 'context', 'view' );
+		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $attribute, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
@@ -356,7 +356,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, false );
 
-		$request->set_param( 'context', 'view' );
+		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $attribute, $request );
 
 		// Clear transients.
@@ -388,7 +388,7 @@ class WC_REST_Product_Attributes_Controller extends WP_REST_Controller {
 			return $attribute;
 		}
 
-		$request->set_param( 'context', 'view' );
+		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $attribute, $request );
 
 		$deleted = $wpdb->delete(

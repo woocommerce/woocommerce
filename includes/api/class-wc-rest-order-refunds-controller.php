@@ -309,7 +309,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 				if ( is_wp_error( $result ) ) {
 					return $result;
 				} elseif ( ! $result ) {
-					return new WP_Error( 'woocommerce_rest_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API', 'woocommerce' ), 500 );
+					return new WP_Error( 'woocommerce_rest_create_order_refund_api_failed', __( 'An error occurred while attempting to create the refund using the payment gateway API.', 'woocommerce' ), 500 );
 				}
 			}
 		}
@@ -369,7 +369,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'line_items' => array(
-					'description' => __( 'Line itens data.', 'woocommerce' ),
+					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(

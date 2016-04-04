@@ -161,7 +161,7 @@ class WC_REST_Order_Notes_Controller extends WP_REST_Controller {
 		$args = array(
 			'post_id' => $order->ID,
 			'approve' => 'approve',
-			'type'    => 'order_note'
+			'type'    => 'order_note',
 		);
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
