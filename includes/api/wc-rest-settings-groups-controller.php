@@ -41,7 +41,7 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'edit_item' ),
+				'callback'            => array( $this, 'update_item' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
@@ -102,7 +102,7 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function edit_item( $request ) {
+	public function update_item( $request ) {
 		$group = $this->_get_group_from_request( $request );
 		if ( is_wp_error( $group ) ) {
 			return $group;
