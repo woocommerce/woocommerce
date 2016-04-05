@@ -327,7 +327,7 @@ class WC_REST_Authentication {
 		$user         = $wpdb->get_row( $wpdb->prepare( "
 			SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces
 			FROM {$wpdb->prefix}woocommerce_api_keys
-			WHERE consumer_key = '%s'
+			WHERE consumer_key = %s
 		", $consumer_key ) );
 
 		return $user;

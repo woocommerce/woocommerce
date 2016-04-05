@@ -59,11 +59,11 @@ function wc_rest_upload_image_from_url( $image_url ) {
 
 	// Check parsed URL.
 	if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_image_url', sprintf( __( 'Invalid URL %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
+		return new WP_Error( 'woocommerce_rest_invalid_image_url', sprintf( __( 'Invalid URL %s.', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 	}
 
 	// Ensure url is valid.
-	$image_url = str_replace( ' ', '%20', $image_url );
+	$image_url = esc_url_raw( $image_url );
 
 	// Get the file.
 	$response = wp_safe_remote_get( $image_url, array(
@@ -71,7 +71,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
 	) );
 
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
+		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 	}
 
 	// Ensure we have a file name and type.
@@ -101,7 +101,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
 		@unlink( $upload['file'] );
 		unset( $upload );
 
-		return new WP_Error( 'woocommerce_rest_image_upload_file_error', __( 'Zero size file downloaded', 'woocommerce' ), array( 'status' => 400 ) );
+		return new WP_Error( 'woocommerce_rest_image_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ), array( 'status' => 400 ) );
 	}
 
 	do_action( 'woocommerce_rest_api_uploaded_image_from_url', $upload, $image_url );
@@ -140,7 +140,7 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 		'guid'           => $upload['url'],
 		'post_parent'    => $id,
 		'post_title'     => $title,
-		'post_content'   => $content
+		'post_content'   => $content,
 	);
 
 	$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );
@@ -169,7 +169,7 @@ function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
 	$args = $attributes['args'][ $param ];
 
 	if ( 'string' === $args['type'] && ! is_string( $value ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%s is not of type %s', 'woocommerce' ), $param, 'string' ) );
+		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%s is not of type %s.', 'woocommerce' ), $param, 'string' ) );
 	}
 
 	if ( 'data' === $args['format'] ) {

@@ -652,7 +652,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$taxonomies = wc_get_attribute_taxonomies();
 
 		foreach ( $taxonomies as $key => $tax ) {
-			if ( $slug == $tax->attribute_name ) {
+			if ( $slug === $tax->attribute_name ) {
 				$taxonomy = 'pa_' . $tax->attribute_name;
 
 				break;
@@ -674,7 +674,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$gallery = array();
 
 			foreach ( $images as $image ) {
-				if ( isset( $image['position'] ) && $image['position'] == 0 ) {
+				if ( isset( $image['position'] ) && 0 === $image['position'] ) {
 					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
 					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
@@ -794,7 +794,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			$files[ md5( $file_url ) ] = array(
 				'name' => $file_name,
-				'file' => $file_url
+				'file' => $file_url,
 			);
 		}
 
@@ -885,7 +885,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$sku     = get_post_meta( $product->id, '_sku', true );
 			$new_sku = wc_clean( $request['sku'] );
 
-			if ( '' == $new_sku ) {
+			if ( '' === $new_sku ) {
 				update_post_meta( $product->id, '_sku', '' );
 			} elseif ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {
@@ -981,7 +981,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			if ( ! function_exists( 'attributes_cmp' ) ) {
 				function attributes_cmp( $a, $b ) {
-					if ( $a['position'] == $b['position'] ) {
+					if ( $a['position'] === $b['position'] ) {
 						return 0;
 					}
 
@@ -1043,7 +1043,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child.
-		if ( $parent_id > 0 || $product_type == 'grouped' ) {
+		if ( $parent_id > 0 || 'grouped' === $product_type ) {
 
 			$clear_parent_ids = array();
 
@@ -1051,7 +1051,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$clear_parent_ids[] = $parent_id;
 			}
 
-			if ( $product_type == 'grouped' ) {
+			if ( 'grouped' === $product_type ) {
 				$clear_parent_ids[] = $product->id;
 			}
 
@@ -1095,7 +1095,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Stock data.
-		if ( 'yes' == get_option( 'woocommerce_manage_stock' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			// Manage stock.
 			if ( isset( $request['manage_stock'] ) ) {
 				$manage_stock = ( true === $request['manage_stock'] ) ? 'yes' : 'no';
@@ -1112,13 +1112,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$backorders = get_post_meta( $product->id, '_backorders', true );
 			}
 
-			if ( 'grouped' == $product_type ) {
+			if ( 'grouped' === $product_type ) {
 				update_post_meta( $product->id, '_manage_stock', 'no' );
 				update_post_meta( $product->id, '_backorders', 'no' );
 				update_post_meta( $product->id, '_stock', '' );
 
 				wc_update_product_stock_status( $product->id, $stock_status );
-			} elseif ( 'external' == $product_type ) {
+			} elseif ( 'external' === $product_type ) {
 				update_post_meta( $product->id, '_manage_stock', 'no' );
 				update_post_meta( $product->id, '_backorders', 'no' );
 				update_post_meta( $product->id, '_stock', '' );
@@ -1126,7 +1126,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				wc_update_product_stock_status( $product->id, 'instock' );
 			} elseif ( 'variable' === $product_type ) {
 				update_post_meta( $product->id, '_stock', '' );
-			} elseif ( 'yes' == $manage_stock ) {
+			} elseif ( 'yes' === $manage_stock ) {
 				update_post_meta( $product->id, '_backorders', $backorders );
 
 				wc_update_product_stock_status( $product->id, $stock_status );
@@ -1208,7 +1208,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Downloadable options.
-		if ( 'yes' == $is_downloadable ) {
+		if ( 'yes' === $is_downloadable ) {
 
 			// Downloadable files.
 			if ( isset( $request['downloads'] ) && is_array( $request['downloads'] ) ) {
@@ -1232,7 +1232,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Product url and button text for external products.
-		if ( $product_type == 'external' ) {
+		if ( 'external' === $product_type ) {
 			if ( isset( $request['external_url'] ) ) {
 				update_post_meta( $product->id, '_product_url', wc_clean( $request['external_url'] ) );
 			}
@@ -1276,7 +1276,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'post_author'  => get_current_user_id(),
 					'post_parent'  => $product->id,
 					'post_type'    => 'product_variation',
-					'menu_order'   => $menu_order
+					'menu_order'   => $menu_order,
 				);
 
 				$variation_id = wp_insert_post( $new_variation );
@@ -1304,13 +1304,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$sku     = get_post_meta( $variation_id, '_sku', true );
 				$new_sku = wc_clean( $variation['sku'] );
 
-				if ( '' == $new_sku ) {
+				if ( '' === $new_sku ) {
 					update_post_meta( $variation_id, '_sku', '' );
 				} elseif ( $new_sku !== $sku ) {
 					if ( ! empty( $new_sku ) ) {
 						$unique_sku = wc_product_has_unique_sku( $variation_id, $new_sku );
 						if ( ! $unique_sku ) {
-							throw new WC_REST_Exception( 'woocommerce_rest_product_sku_already_exists', __( 'The SKU already exists on another product', 'woocommerce' ), 400 );
+							throw new WC_REST_Exception( 'woocommerce_rest_product_sku_already_exists', __( 'The SKU already exists on another product.', 'woocommerce' ), 400 );
 						} else {
 							update_post_meta( $variation_id, '_sku', $new_sku );
 						}
@@ -1324,7 +1324,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && isset( $image['src'] ) && $image['position'] == 0 ) {
+					if ( isset( $image['position'] ) && isset( $image['src'] ) && 0 === $image['position'] ) {
 						$upload = wc_rest_upload_image_from_url( wc_clean( $image['src'] ) );
 
 						if ( is_wp_error( $upload ) ) {
@@ -1446,7 +1446,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			}
 
 			// Downloads.
-			if ( 'yes' == $is_downloadable ) {
+			if ( 'yes' === $is_downloadable ) {
 				// Downloadable files.
 				if ( isset( $variation['downloads'] ) && is_array( $variation['downloads'] ) ) {
 					$this->save_downloadable_files( $product->id, $variation['downloads'], $variation_id );
@@ -1594,7 +1594,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$this->save_product_meta( $product, $request );
 
 			// Save variations.
-			if ( isset( $request['type'] ) && 'variable' == $request['type'] && isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
+			if ( isset( $request['type'] ) && 'variable' === $request['type'] && isset( $request['variations'] ) && is_array( $request['variations'] ) ) {
 				$this->save_variations_data( $product, $request );
 			}
 
