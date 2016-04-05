@@ -153,13 +153,13 @@ class WC_Admin_Taxonomies {
 					jQuery( '.remove_image_button' ).hide();
 					return false;
 				});
-				
+
 				jQuery( document ).ajaxComplete( function( event, request, options ) {
-					if ( request && request.readyState === 4 && request.status === 200
-						&& options.data && options.data.indexOf('action=add-tag') >= 0 ) {
-					
+					if ( request && 4 === request.readyState && 200 === request.status
+						&& options.data && 0 <= options.data.indexOf( 'action=add-tag' ) ) {
+
 						var res = wpAjax.parseAjaxResponse( request.responseXML, 'ajax-response' );
-						if ( !res || res.errors ) {
+						if ( ! res || res.errors ) {
 							return;
 						}
 						// Clear Thumbnail fields on submit
@@ -170,7 +170,7 @@ class WC_Admin_Taxonomies {
 						jQuery( '#display_type' ).val( '' );
 						return;
 					}
-				});
+				} );
 
 			</script>
 			<div class="clear"></div>
