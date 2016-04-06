@@ -614,6 +614,9 @@ class WC_API_Products extends WC_API_Resource {
 			// Get category display type
 			$display_type = get_woocommerce_term_meta( $term_id, 'display_type' );
 
+			// Get category order
+			$order = get_woocommerce_term_meta( $term_id, 'order' );
+
 			// Get category image
 			$image = '';
 			if ( $image_id = get_woocommerce_term_meta( $term_id, 'thumbnail_id' ) ) {
@@ -627,6 +630,7 @@ class WC_API_Products extends WC_API_Resource {
 				'parent'      => $term->parent,
 				'description' => $term->description,
 				'display'     => $display_type ? $display_type : 'default',
+				'order'       => $order ? $order : 0,
 				'image'       => $image ? esc_url( $image ) : '',
 				'count'       => intval( $term->count )
 			);
@@ -663,6 +667,7 @@ class WC_API_Products extends WC_API_Resource {
 				'slug'        => '',
 				'description' => '',
 				'parent'      => 0,
+				'order'       => 0,
 				'display'     => 'default',
 				'image'       => '',
 			);
@@ -697,6 +702,8 @@ class WC_API_Products extends WC_API_Resource {
 			$id = $insert['term_id'];
 
 			update_woocommerce_term_meta( $id, 'display_type', esc_attr( $data['display'] ) );
+
+			update_woocommerce_term_meta( $id, 'order', absint( $data['order'] ) );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
@@ -770,6 +777,10 @@ class WC_API_Products extends WC_API_Resource {
 
 			if ( ! empty( $data['display'] ) ) {
 				update_woocommerce_term_meta( $id, 'display_type', sanitize_text_field( $data['display'] ) );
+			}
+
+			if ( isset( $data['order'] ) ) {
+				update_woocommerce_term_meta( $id, 'order', absint( $data['order'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
@@ -2945,10 +2956,12 @@ class WC_API_Products extends WC_API_Resource {
 			$attribute_terms = array();
 
 			foreach ( $terms as $term ) {
+				$order = get_woocommerce_term_meta( $term->term_id, 'order_' . $taxonomy );
 				$attribute_terms[] = array(
 					'id'    => $term->term_id,
 					'slug'  => $term->slug,
 					'name'  => $term->name,
+					'order' => $order ? $order : 0,
 					'count' => $term->count,
 				);
 			}
@@ -2996,10 +3009,13 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_term_id', __( 'A product attribute term with the provided ID could not be found', 'woocommerce' ), 404 );
 			}
 
+			$order = get_woocommerce_term_meta( $id, 'order_' . $taxonomy );
+
 			$attribute_term = array(
 				'id'    => $term->term_id,
 				'name'  => $term->name,
 				'slug'  => $term->slug,
+				'order' => $order ? $order : 0,
 				'count' => $term->count,
 			);
 
@@ -3061,6 +3077,10 @@ class WC_API_Products extends WC_API_Resource {
 
 			$id = $term['term_id'];
 
+			if ( isset( $data['order'] ) ) {
+				update_woocommerce_term_meta( $id, 'order_' . $taxonomy, absint( $data['order'] ) );
+			}
+
 			do_action( 'woocommerce_api_create_product_attribute_term', $id, $data );
 
 			$this->server->send_status( 201 );
@@ -3120,6 +3140,11 @@ class WC_API_Products extends WC_API_Resource {
 
 			if ( is_wp_error( $term ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_attribute_term', $term->get_error_message(), 400 );
+			}
+
+			// Update order.
+			if ( isset( $data['order'] ) ) {
+				update_woocommerce_term_meta( $id, 'order_' . $taxonomy, absint( $data['order'] ) );
 			}
 
 			do_action( 'woocommerce_api_edit_product_attribute_term', $id, $data );
