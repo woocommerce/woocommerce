@@ -630,7 +630,7 @@ class WC_API_Products extends WC_API_Resource {
 				'parent'      => $term->parent,
 				'description' => $term->description,
 				'display'     => $display_type ? $display_type : 'default',
-				'order'       => $order ? $order : 0,
+				'order'       => $order ? absint( $order ) : 0,
 				'image'       => $image ? esc_url( $image ) : '',
 				'count'       => intval( $term->count )
 			);
@@ -2961,7 +2961,7 @@ class WC_API_Products extends WC_API_Resource {
 					'id'    => $term->term_id,
 					'slug'  => $term->slug,
 					'name'  => $term->name,
-					'order' => $order ? $order : 0,
+					'order' => $order ? absint( $order ) : 0,
 					'count' => $term->count,
 				);
 			}
@@ -3015,7 +3015,7 @@ class WC_API_Products extends WC_API_Resource {
 				'id'    => $term->term_id,
 				'name'  => $term->name,
 				'slug'  => $term->slug,
-				'order' => $order ? $order : 0,
+				'order' => $order ? absint( $order ) : 0,
 				'count' => $term->count,
 			);
 
