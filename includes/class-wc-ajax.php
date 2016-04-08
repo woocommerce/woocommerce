@@ -2510,7 +2510,7 @@ class WC_AJAX {
 					'_thumbnail_id'          => '',
 					'_sale_price_dates_from' => '',
 					'_sale_price_dates_to'   => '',
-					'_manage_stock'          => '',
+					'_manage_stock'          => apply_filters( 'woocommerce_variation_defaults_manage_stock', '' ),
 					'_stock_status'          => '',
 					'_backorders'            => null,
 					'_tax_class'             => null,
