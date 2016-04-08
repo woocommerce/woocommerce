@@ -32,7 +32,7 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
-		return esc_url_raw( add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ) );
+		return esc_url_raw( apply_filters( 'woocommerce_wc_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ) ) ), $request ) );
 	}
 
 	/**
@@ -2510,7 +2510,7 @@ class WC_AJAX {
 					'_thumbnail_id'          => '',
 					'_sale_price_dates_from' => '',
 					'_sale_price_dates_to'   => '',
-					'_manage_stock'          => '',
+					'_manage_stock'          => apply_filters( 'woocommerce_variation_defaults_manage_stock', '' ),
 					'_stock_status'          => '',
 					'_backorders'            => null,
 					'_tax_class'             => null,
