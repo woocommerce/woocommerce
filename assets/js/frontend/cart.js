@@ -63,6 +63,18 @@ jQuery( function( $ ) {
 	var update_wc_div = function( html_str ) {
 		var $html = $.parseHTML( html_str );
 		var $new_form = $( 'table.shop_table.cart', $html ).closest( 'form' );
+		var $error = $( '.woocommerce-error', $html );
+		var $message = $( '.woocommerce-message', $html );
+
+		if ( $error.length > 0 ) {
+			show_notice( $error );
+		} else if ( $message.length > 0 ) {
+			show_notice( $message );
+		} else {
+			// No new message/error, just remove existing one.
+			$( '.woocommerce-error, .woocommerce-message' ).remove();
+		}
+
 		$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
 	};
 
