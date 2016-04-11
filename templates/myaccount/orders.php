@@ -29,7 +29,7 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 
 	<?php do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
-	<?php if ( 0 < $customer_orders->total ) : ?>
+	<?php if ( $has_orders ) : ?>
 
 		<table class="shop_table shop_table_responsive my_account_orders account-orders-table">
 			<thead>
