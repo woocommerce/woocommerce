@@ -463,7 +463,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
  * @return string
  */
 function wc_get_customer_total_spent( $user_id ) {
-	if ( ! $spent = get_user_meta( $user_id, '_money_spent', true ) ) {
+	$spent = get_user_meta( $user_id, '_money_spent', true );
+	if ( '' === $spent ) {
 		global $wpdb;
 
 		$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
@@ -491,7 +492,8 @@ function wc_get_customer_total_spent( $user_id ) {
  * @return int
  */
 function wc_get_customer_order_count( $user_id ) {
-	if ( ! $count = get_user_meta( $user_id, '_order_count', true ) ) {
+	$count = get_user_meta( $user_id, '_order_count', true );
+	if ( '' === $count ) {
 		global $wpdb;
 
 		$count = $wpdb->get_var( "SELECT COUNT(*)
