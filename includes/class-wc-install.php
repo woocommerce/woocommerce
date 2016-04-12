@@ -27,13 +27,14 @@ class WC_Install {
 		'2.4.0' => 'updates/woocommerce-update-2.4.php',
 		'2.4.1' => 'updates/woocommerce-update-2.4.1.php',
 		'2.5.0' => 'updates/woocommerce-update-2.5.php',
+		'2.6.0' => 'updates/woocommerce-update-2.6.php'
 	);
 
 	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
-		add_action( 'admin_init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -43,17 +44,21 @@ class WC_Install {
 	}
 
 	/**
-	 * Check WooCommerce version.
+	 * Check WooCommerce version and run the updater is required.
+	 *
+	 * This check is done on all requests and runs if he versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && ( get_option( 'woocommerce_version' ) != WC()->version ) ) {
+		if ( ! defined( 'IFRAME_REQUEST' ) && get_option( 'woocommerce_version' ) !== WC()->version ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
 	}
 
 	/**
-	 * Install actions when a update button is clicked.
+	 * Install actions when a update button is clicked within the admin area.
+	 *
+	 * This function is hooked into admin_init to affect admin only.
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
@@ -172,6 +177,10 @@ class WC_Install {
 	 * Handle updates.
 	 */
 	private static function update() {
+		if ( ! defined( 'WC_UPDATING' ) ) {
+			define( 'WC_UPDATING', true );
+		}
+
 		$current_db_version = get_option( 'woocommerce_db_version' );
 
 		foreach ( self::$db_updates as $version => $updater ) {
@@ -329,17 +338,12 @@ class WC_Install {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 		/**
-		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates.
+		 * Before updating with DBDELTA, remove any primary keys which could be
+		 * modified due to schema updates.
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
 				$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions DROP PRIMARY KEY, ADD `permission_id` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT;" );
-			}
-		}
-
-		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_tax_rate_locations';" ) ) {
-			if ( $wpdb->get_var( "SHOW INDEX FROM `{$wpdb->prefix}woocommerce_tax_rate_locations` WHERE Key_name LIKE 'location_type_code';" ) ) {
-				$wpdb->query( "DROP INDEX `location_type_code` ON {$wpdb->prefix}woocommerce_tax_rate_locations;" );
 			}
 		}
 
@@ -356,15 +360,20 @@ class WC_Install {
 		$collate = '';
 
 		if ( $wpdb->has_cap( 'collation' ) ) {
-			if ( ! empty( $wpdb->charset ) ) {
-				$collate .= "DEFAULT CHARACTER SET $wpdb->charset";
-			}
-			if ( ! empty( $wpdb->collate ) ) {
-				$collate .= " COLLATE $wpdb->collate";
-			}
+			$collate = $wpdb->get_charset_collate();
 		}
 
-		return "
+		/*
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 *
+		 * This may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
+		 * indexes first causes too much load on some servers/larger DB.
+		 */
+		$max_index_length = 191;
+
+		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id bigint(20) NOT NULL AUTO_INCREMENT,
   session_key char(32) NOT NULL,
@@ -395,16 +404,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_orderby varchar(200) NOT NULL,
   attribute_public int(1) NOT NULL DEFAULT 1,
   PRIMARY KEY  (attribute_id),
-  KEY attribute_name (attribute_name)
-) $collate;
-CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-  meta_id bigint(20) NOT NULL auto_increment,
-  woocommerce_term_id bigint(20) NOT NULL,
-  meta_key varchar(255) NULL,
-  meta_value longtext NULL,
-  PRIMARY KEY  (meta_id),
-  KEY woocommerce_term_id (woocommerce_term_id),
-  KEY meta_key (meta_key)
+  KEY attribute_name (attribute_name($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   permission_id bigint(20) NOT NULL auto_increment,
@@ -419,7 +419,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   access_expires datetime NULL default null,
   download_count bigint(20) NOT NULL DEFAULT 0,
   PRIMARY KEY  (permission_id),
-  KEY download_order_key_product (product_id,order_id,order_key,download_id),
+  KEY download_order_key_product (product_id,order_id,order_key($max_index_length),download_id),
   KEY download_order_product (download_id,order_id,product_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
@@ -433,11 +433,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
 CREATE TABLE {$wpdb->prefix}woocommerce_order_itemmeta (
   meta_id bigint(20) NOT NULL auto_increment,
   order_item_id bigint(20) NOT NULL,
-  meta_key varchar(255) NULL,
+  meta_key varchar(255) default NULL,
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY order_item_id (order_item_id),
-  KEY meta_key (meta_key)
+  KEY meta_key (meta_key($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
   tax_rate_id bigint(20) NOT NULL auto_increment,
@@ -451,9 +451,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
   tax_rate_order bigint(20) NOT NULL,
   tax_rate_class varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY  (tax_rate_id),
-  KEY tax_rate_country (tax_rate_country),
-  KEY tax_rate_state (tax_rate_state),
-  KEY tax_rate_class (tax_rate_class),
+  KEY tax_rate_country (tax_rate_country($max_index_length)),
+  KEY tax_rate_state (tax_rate_state($max_index_length)),
+  KEY tax_rate_class (tax_rate_class($max_index_length)),
   KEY tax_rate_priority (tax_rate_priority)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
@@ -466,7 +466,67 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
   KEY location_type (location_type),
   KEY location_type_code (location_type(40),location_code(90))
 ) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zones (
+  zone_id bigint(20) NOT NULL auto_increment,
+  zone_name varchar(255) NOT NULL,
+  zone_order bigint(20) NOT NULL,
+  PRIMARY KEY  (zone_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
+  location_id bigint(20) NOT NULL auto_increment,
+  zone_id bigint(20) NOT NULL,
+  location_code varchar(255) NOT NULL,
+  location_type varchar(40) NOT NULL,
+  PRIMARY KEY  (location_id),
+  KEY location_id (location_id),
+  KEY location_type (location_type),
+  KEY location_type_code (location_type(40),location_code(90))
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
+  zone_id bigint(20) NOT NULL,
+  instance_id bigint(20) NOT NULL auto_increment,
+  method_id varchar(255) NOT NULL,
+  method_order bigint(20) NOT NULL,
+  is_enabled tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY  (instance_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (
+  token_id bigint(20) NOT NULL auto_increment,
+  gateway_id varchar(255) NOT NULL,
+  token text NOT NULL,
+  user_id bigint(20) NOT NULL DEFAULT '0',
+  type varchar(255) NOT NULL,
+  is_default tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY  (token_id),
+  KEY user_id (user_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  payment_token_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY payment_token_id (payment_token_id),
+  KEY meta_key (meta_key)
+) $collate;
 		";
+
+		// Term meta is only needed for old installs.
+		if ( ! function_exists( 'get_term_meta' ) ) {
+			$tables .= "
+CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  woocommerce_term_id bigint(20) NOT NULL,
+  meta_key varchar(255) default NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY woocommerce_term_id (woocommerce_term_id),
+  KEY meta_key (meta_key($max_index_length))
+) $collate;
+			";
+		}
+
+		return $tables;
 	}
 
 	/**

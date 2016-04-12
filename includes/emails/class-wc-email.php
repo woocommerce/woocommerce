@@ -216,7 +216,7 @@ class WC_Email extends WC_Settings_API {
 		$this->replace['site-title'] = $this->get_blogname();
 
 		// For multipart messages
-		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
+		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 	}
 
 	/**
@@ -240,7 +240,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), __( $string ) );
 	}
 
 	/**
@@ -340,7 +340,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		$value = parent::get_option( $key, $empty_value );
-		return apply_filters( 'woocommerce_email_get_option', __( $value ), $this, $value, $key, $empty_value );
+		return apply_filters( 'woocommerce_email_get_option', $value, $this, $value, $key, $empty_value );
 	}
 
 	/**
@@ -529,16 +529,20 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Admin Panel Options Processing.
 	 */
-	public function process_admin_options() {
+	public function process_admin_options( $post_data = array() ) {
+		if ( empty( $post_data ) ) {
+			$post_data = $_POST;
+		}
+
 		// Save regular options
-		parent::process_admin_options();
+		parent::process_admin_options( $post_data );
 
 		// Save templates
 		if ( isset( $_POST['template_html_code'] ) ) {
-			$this->save_template( $_POST['template_html_code'], $this->template_html );
+			$this->save_template( $post_data['template_html_code'], $this->template_html );
 		}
 		if ( isset( $_POST['template_plain_code'] ) ) {
-			$this->save_template( $_POST['template_plain_code'], $this->template_plain );
+			$this->save_template( $post_data['template_plain_code'], $this->template_plain );
 		}
 	}
 
@@ -704,7 +708,8 @@ class WC_Email extends WC_Settings_API {
 		// Do admin actions.
 		$this->admin_actions();
 		?>
-		<h3><?php echo esc_html( $this->get_title() ); ?></h3>
+		<h2><?php echo esc_html( $this->get_title() ); ?> <?php wc_back_link( __( 'Return to Emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?></h2>
+
 		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); ?>
 
 		<?php

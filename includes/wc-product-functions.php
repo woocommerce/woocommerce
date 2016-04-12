@@ -51,7 +51,9 @@ function wc_update_product_stock( $product_id, $new_stock_level ) {
  */
 function wc_update_product_stock_status( $product_id, $status ) {
 	$product = wc_get_product( $product_id );
-	$product->set_stock_status( $status );
+	if ( $product ) {
+		$product->set_stock_status( $status );
+	}
 }
 
 /**
@@ -202,23 +204,22 @@ function wc_get_featured_product_ids() {
 /**
  * Filter to allow product_cat in the permalinks for products.
  *
- * @access public
- * @param string $permalink The existing permalink URL.
- * @param WP_Post $post
+ * @param  string  $permalink The existing permalink URL.
+ * @param  WP_Post $post
  * @return string
  */
 function wc_product_post_type_link( $permalink, $post ) {
-	// Abort if post is not a product
+	// Abort if post is not a product.
 	if ( $post->post_type !== 'product' ) {
 		return $permalink;
 	}
 
-	// Abort early if the placeholder rewrite tag isn't in the generated URL
+	// Abort early if the placeholder rewrite tag isn't in the generated URL.
 	if ( false === strpos( $permalink, '%' ) ) {
 		return $permalink;
 	}
 
-	// Get the custom taxonomy terms in use by this post
+	// Get the custom taxonomy terms in use by this post.
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
 	if ( ! empty( $terms ) ) {
@@ -228,7 +229,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		$category_object = get_term( $category_object, 'product_cat' );
 		$product_cat     = $category_object->slug;
 
-		if ( $parent = $category_object->parent ) {
+		if ( $category_object->parent ) {
 			$ancestors = get_ancestors( $category_object->term_id, 'product_cat' );
 			foreach ( $ancestors as $ancestor ) {
 				$ancestor_object = get_term( $ancestor, 'product_cat' );
@@ -385,8 +386,8 @@ function wc_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force variable product prices to sync up by removing their min price meta
-				delete_post_meta( $parent, '_min_price_variation_id' );
+				// Clear prices transient for variable products.
+				delete_transient( 'wc_var_prices_' . $parent );
 
 				// Grouped products need syncing via a function
 				$this_product = wc_get_product( $product_id );
@@ -639,10 +640,12 @@ function wc_get_product_variation_attributes( $variation_id ) {
 
 	// Compare to parent variable product attributes and ensure they match
 	foreach ( $parent_attributes as $attribute_name => $options ) {
-		$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
-		$found_parent_attributes[] = $attribute;
-		if ( ! empty( $options['is_variation'] ) && ! array_key_exists( $attribute, $variation_attributes ) ) {
-			$variation_attributes[ $attribute ] = ''; // Add it - 'any' will be asumed
+		if ( ! empty( $options['is_variation'] ) ) {
+			$attribute                 = 'attribute_' . sanitize_title( $attribute_name );
+			$found_parent_attributes[] = $attribute;
+			if ( ! array_key_exists( $attribute, $variation_attributes ) ) {
+				$variation_attributes[ $attribute ] = ''; // Add it - 'any' will be asumed
+			}
 		}
 	}
 

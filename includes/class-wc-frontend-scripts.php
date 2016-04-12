@@ -157,11 +157,8 @@ class WC_Frontend_Scripts {
 		$assets_path          = str_replace( array( 'http:', 'https:' ), '', WC()->plugin_url() ) . '/assets/';
 		$frontend_script_path = $assets_path . 'js/frontend/';
 
-		// Chosen is @deprecated as of 2.3 in favour of 2.3. Here for backwards compatibility.
-		self::register_script( 'chosen', $assets_path . 'js/chosen/chosen.jquery' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
-		self::register_script( 'select2', $assets_path . 'js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.4' );
-
 		// Register any scripts for later use, or used as dependencies
+		self::register_script( 'select2', $assets_path . 'js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.4' );
 		self::register_script( 'jquery-blockui', $assets_path . 'js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70' );
 		self::register_script( 'jquery-payment', $assets_path . 'js/jquery-payment/jquery.payment' . $suffix . '.js', array( 'jquery' ), '1.2.4' );
 		self::register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.4.1' );
@@ -183,8 +180,9 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'select2' );
 			self::enqueue_style( 'select2', $assets_path . 'css/select2.css' );
 
-			// Password strength meter js called for checkout page.
-			if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) {
+			// Password strength meter.
+			// Load in checkout, account login and edit account page.
+			if ( ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) || is_edit_account_page() ) {
 				self::enqueue_script( 'wc-password-strength-meter' );
 			}
 		}
@@ -206,7 +204,12 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-single-product' );
 		}
 		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
-			self::enqueue_script( 'wc-geolocation', $frontend_script_path . 'geolocation' . $suffix . '.js', array( 'jquery' ) );
+			// Exclude common bots from geolocation by user agent.
+			$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
+
+			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
+				self::enqueue_script( 'wc-geolocation', $frontend_script_path . 'geolocation' . $suffix . '.js', array( 'jquery' ) );
+			}
 		}
 
 		// Global frontend scripts
@@ -291,6 +294,8 @@ class WC_Frontend_Scripts {
 					'ajax_url'                     => WC()->ajax_url(),
 					'wc_ajax_url'                  => WC_AJAX::get_endpoint( "%%endpoint%%" ),
 					'update_shipping_method_nonce' => wp_create_nonce( "update-shipping-method" ),
+					'apply_coupon_nonce'           => wp_create_nonce( "apply-coupon" ),
+					'remove_coupon_nonce'          => wp_create_nonce( "remove-coupon" ),
 				);
 			break;
 			case 'wc-cart-fragments' :
@@ -316,14 +321,14 @@ class WC_Frontend_Scripts {
 
 				return array(
 					'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
-					'i18n_make_a_selection_text'       => esc_attr__( 'Select product options before adding this product to your cart.', 'woocommerce' ),
+					'i18n_make_a_selection_text'       => esc_attr__( 'Please select some product options before adding this product to your cart.', 'woocommerce' ),
 					'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' )
 				);
 			break;
 			case 'wc-country-select' :
 				return array(
-					'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
-					'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
+					'countries'                 => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+					'i18n_select_state_text'    => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 					'i18n_matches_1'            => _x( 'One result is available, press enter to select it.', 'enhanced select', 'woocommerce' ),
 					'i18n_matches_n'            => _x( '%qty% results are available, use up and down arrow keys to navigate.', 'enhanced select', 'woocommerce' ),
 					'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
@@ -336,6 +341,13 @@ class WC_Frontend_Scripts {
 					'i18n_selection_too_long_n' => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
 					'i18n_load_more'            => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
 					'i18n_searching'            => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+				);
+			break;
+			case 'wc-password-strength-meter' :
+				return array(
+					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
+					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
+					'i18n_password_hint'    => esc_attr__( 'The password should be at least seven characters long. To make it stronger, use upper and lower case letters, numbers and symbols like ! " ? $ % ^ &amp; ).', 'woocommerce' )
 				);
 			break;
 		}

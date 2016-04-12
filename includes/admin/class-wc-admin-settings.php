@@ -9,13 +9,13 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 if ( ! class_exists( 'WC_Admin_Settings' ) ) :
 
 /**
- * WC_Admin_Settings.
+ * WC_Admin_Settings Class.
  */
 class WC_Admin_Settings {
 
@@ -52,8 +52,8 @@ class WC_Admin_Settings {
 			$settings[] = include( 'settings/class-wc-settings-general.php' );
 			$settings[] = include( 'settings/class-wc-settings-products.php' );
 			$settings[] = include( 'settings/class-wc-settings-tax.php' );
-			$settings[] = include( 'settings/class-wc-settings-checkout.php' );
 			$settings[] = include( 'settings/class-wc-settings-shipping.php' );
+			$settings[] = include( 'settings/class-wc-settings-checkout.php' );
 			$settings[] = include( 'settings/class-wc-settings-accounts.php' );
 			$settings[] = include( 'settings/class-wc-settings-emails.php' );
 			$settings[] = include( 'settings/class-wc-settings-integrations.php' );
@@ -80,13 +80,11 @@ class WC_Admin_Settings {
 		do_action( 'woocommerce_update_options_' . $current_tab );
 		do_action( 'woocommerce_update_options' );
 
-		// Clear any unwanted data
-		delete_transient( 'woocommerce_cache_excluded_uris' );
-
 		self::add_message( __( 'Your settings have been saved.', 'woocommerce' ) );
 		self::check_download_folder_protection();
 
-		// Re-add endpoints and flush rules
+		// Clear any unwanted data and flush rules
+		delete_transient( 'woocommerce_cache_excluded_uris' );
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
 		flush_rewrite_rules();
@@ -117,11 +115,11 @@ class WC_Admin_Settings {
 	public static function show_messages() {
 		if ( sizeof( self::$errors ) > 0 ) {
 			foreach ( self::$errors as $error ) {
-				echo '<div id="message" class="error"><p><strong>' . esc_html( $error ) . '</strong></p></div>';
+				echo '<div id="message" class="error inline"><p><strong>' . esc_html( $error ) . '</strong></p></div>';
 			}
 		} elseif ( sizeof( self::$messages ) > 0 ) {
 			foreach ( self::$messages as $message ) {
-				echo '<div id="message" class="updated"><p><strong>' . esc_html( $message ) . '</strong></p></div>';
+				echo '<div id="message" class="updated inline"><p><strong>' . esc_html( $message ) . '</strong></p></div>';
 			}
 		}
 	}
@@ -267,7 +265,7 @@ class WC_Admin_Settings {
 				// Section Titles
 				case 'title':
 					if ( ! empty( $value['title'] ) ) {
-						echo '<h3>' . esc_html( $value['title'] ) . '</h3>';
+						echo '<h2>' . esc_html( $value['title'] ) . '</h2>';
 					}
 					if ( ! empty( $value['desc'] ) ) {
 						echo wpautop( wptexturize( wp_kses_post( $value['desc'] ) ) );
@@ -390,7 +388,7 @@ class WC_Admin_Settings {
 										<?php
 									}
 								?>
-						   </select> <?php echo $description; ?>
+							</select> <?php echo $description; ?>
 						</td>
 					</tr><?php
 					break;
@@ -479,7 +477,7 @@ class WC_Admin_Settings {
 								name="<?php echo esc_attr( $value['id'] ); ?>"
 								id="<?php echo esc_attr( $value['id'] ); ?>"
 								type="checkbox"
-							 	class="<?php echo esc_attr(isset($value['class']) ? $value['class'] : ''); ?>"
+								class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 								value="1"
 								<?php checked( $option_value, 'yes'); ?>
 								<?php echo implode( ' ', $custom_attributes ); ?>
@@ -604,7 +602,7 @@ class WC_Admin_Settings {
 										}
 									}
 								?>
-							</select> <?php echo ( $description ) ? $description : ''; ?> </br><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
+							</select> <?php echo ( $description ) ? $description : ''; ?> <br /><a class="select_all button" href="#"><?php _e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php _e( 'Select none', 'woocommerce' ); ?></a>
 						</td>
 					</tr><?php
 					break;
@@ -622,8 +620,8 @@ class WC_Admin_Settings {
 	 * given form field. Plugins can call this when implementing their own custom
 	 * settings types.
 	 *
-	 * @param array $value The form field value array
-	 * @returns array The description and tip as a 2 element array
+	 * @param  array $value The form field value array
+	 * @return array The description and tip as a 2 element array
 	 */
 	public static function get_field_description( $value ) {
 		$description  = '';
@@ -663,7 +661,7 @@ class WC_Admin_Settings {
 	 *
 	 * Loops though the woocommerce options array and outputs each field.
 	 *
-	 * @param array $options Opens array to output
+	 * @param array $options Options array to output
 	 * @return bool
 	 */
 	public static function save_fields( $options ) {
@@ -671,16 +669,16 @@ class WC_Admin_Settings {
 			return false;
 		}
 
-		// Options to update will be stored here and saved later
+		// Options to update will be stored here and saved later.
 		$update_options = array();
 
-		// Loop options and get values to save
+		// Loop options and get values to save.
 		foreach ( $options as $option ) {
 			if ( ! isset( $option['id'] ) || ! isset( $option['type'] ) ) {
 				continue;
 			}
 
-			// Get posted value
+			// Get posted value.
 			if ( strstr( $option['id'], '[' ) ) {
 				parse_str( $option['id'], $option_name_array );
 				$option_name  = current( array_keys( $option_name_array ) );
@@ -692,7 +690,7 @@ class WC_Admin_Settings {
 				$raw_value    = isset( $_POST[ $option['id'] ] ) ? wp_unslash( $_POST[ $option['id'] ] ) : null;
 			}
 
-			// Format the value based on option type
+			// Format the value based on option type.
 			switch ( $option['type'] ) {
 				case 'checkbox' :
 					$value = is_null( $raw_value ) ? 'no' : 'yes';
@@ -761,13 +759,13 @@ class WC_Admin_Settings {
 			}
 
 			/**
-			 * Fire an action before saved..
+			 * Fire an action before saved.
 			 * @deprecated 2.4.0 - doesn't allow manipulation of values!
 			 */
 			do_action( 'woocommerce_update_option', $option );
 		}
 
-		// Save all options in our array
+		// Save all options in our array.
 		foreach ( $update_options as $name => $value ) {
 			update_option( $name, $value );
 		}

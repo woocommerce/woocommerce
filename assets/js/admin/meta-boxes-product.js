@@ -126,8 +126,8 @@ jQuery( function( $ ) {
 
 	function show_and_hide_panels() {
 		var product_type    = $( 'select#product-type' ).val();
-		var is_virtual      = $( 'input#_virtual:checked' ).size();
-		var is_downloadable = $( 'input#_downloadable:checked' ).size();
+		var is_virtual      = $( 'input#_virtual:checked' ).length;
+		var is_downloadable = $( 'input#_downloadable:checked' ).length;
 
 		// Hide/Show all with rules
 		var hide_classes = '.hide_if_downloadable, .hide_if_virtual';
@@ -268,9 +268,10 @@ jQuery( function( $ ) {
 
 	// Add rows
 	$( 'button.add_attribute' ).on( 'click', function() {
-		var size         = $( '.product_attributes .woocommerce_attribute' ).size();
+		var size         = $( '.product_attributes .woocommerce_attribute' ).length;
 		var attribute    = $( 'select.attribute_taxonomy' ).val();
-		var $wrapper     = $( this ).closest( '#product_attributes' ).find( '.product_attributes' );
+		var $wrapper     = $( this ).closest( '#product_attributes' );
+		var $attributes  = $wrapper.find( '.product_attributes' );
 		var product_type = $( 'select#product-type' ).val();
 		var data         = {
 			action:   'woocommerce_add_attribute',
@@ -288,10 +289,10 @@ jQuery( function( $ ) {
 		});
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-			$wrapper.append( response );
+			$attributes.append( response );
 
 			if ( product_type !== 'variable' ) {
-				$wrapper.find( '.enable_variation' ).hide();
+				$attributes.find( '.enable_variation' ).hide();
 			}
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );

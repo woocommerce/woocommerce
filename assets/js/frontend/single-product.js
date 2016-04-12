@@ -23,7 +23,8 @@ jQuery( function( $ ) {
 				$tabs.find( 'li:first a' ).click();
 			}
 		})
-		.on( 'click', '.wc-tabs li a, ul.tabs li a', function() {
+		.on( 'click', '.wc-tabs li a, ul.tabs li a', function( e ) {
+			e.preventDefault();
 			var $tab          = $( this );
 			var $tabs_wrapper = $tab.closest( '.wc-tabs-wrapper, .woocommerce-tabs' );
 			var $tabs         = $tabs_wrapper.find( '.wc-tabs, ul.tabs' );
@@ -33,8 +34,6 @@ jQuery( function( $ ) {
 
 			$tab.closest( 'li' ).addClass( 'active' );
 			$tabs_wrapper.find( $tab.attr( 'href' ) ).show();
-
-			return false;
 		})
 		.trigger( 'init' );
 
@@ -63,7 +62,7 @@ jQuery( function( $ ) {
 			var $rating = $( this ).closest( '#respond' ).find( '#rating' ),
 				rating  = $rating.val();
 
-			if ( $rating.size() > 0 && ! rating && wc_single_product_params.review_rating_required === 'yes' ) {
+			if ( $rating.length > 0 && ! rating && wc_single_product_params.review_rating_required === 'yes' ) {
 				window.alert( wc_single_product_params.i18n_required_rating_text );
 
 				return false;

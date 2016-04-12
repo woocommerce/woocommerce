@@ -215,6 +215,7 @@ class WC_API_Orders extends WC_API_Resource {
 			'tax_lines'                 => array(),
 			'fee_lines'                 => array(),
 			'coupon_lines'              => array(),
+			'is_vat_exempt'             => $order->is_vat_exempt === 'yes' ? true : false,
 		);
 
 		// Add line items.
@@ -469,6 +470,11 @@ class WC_API_Orders extends WC_API_Resource {
 						$this->$set_item( $order, $item, 'create' );
 					}
 				}
+			}
+
+			// set is vat exempt
+			if ( isset( $data['is_vat_exempt'] ) ) {
+				update_post_meta( $order->id, '_is_vat_exempt', $data['is_vat_exempt'] ? 'yes' : 'no' );
 			}
 
 			// calculate totals and set them
@@ -972,6 +978,8 @@ class WC_API_Orders extends WC_API_Resource {
 		if ( isset( $item['subtotal_tax'] ) ) {
 			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
 		}
+
+		$item_args = apply_filters( 'woocommerce_api_order_line_item_args', $item_args, $item, $order, $action );
 
 		if ( $creating ) {
 
@@ -1504,15 +1512,12 @@ class WC_API_Orders extends WC_API_Resource {
 			return $order_id;
 		}
 
-		$refund_items = get_posts(
-			array(
-				'post_type'      => 'shop_order_refund',
-				'post_parent'    => $order_id,
-				'posts_per_page' => -1,
-				'post_status'    => 'any',
-				'fields'         => 'ids'
-			)
-		);
+		$refund_items = wc_get_orders( array(
+			'type'   => 'shop_order_refund',
+			'parent' => $order_id,
+			'limit'  => -1,
+			'return' => 'ids',
+		) );
 		$order_refunds = array();
 
 		foreach ( $refund_items as $refund_id ) {
@@ -1545,7 +1550,7 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'Invalid order refund ID', 'woocommerce' ), 400 );
 			}
 
-			$order  = wc_get_order( $id );
+			$order  = wc_get_order( $order_id );
 			$refund = wc_get_order( $id );
 
 			if ( ! $refund ) {

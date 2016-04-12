@@ -189,7 +189,7 @@ class WC_Meta_Box_Order_Data {
 
 				<div class="order_data_column_container">
 					<div class="order_data_column">
-						<h4><?php _e( 'General Details', 'woocommerce' ); ?></h4>
+						<h3><?php _e( 'General Details', 'woocommerce' ); ?></h3>
 
 						<p class="form-field form-field-wide"><label for="order_date"><?php _e( 'Order date:', 'woocommerce' ) ?></label>
 							<input type="text" class="date-picker" name="order_date" id="order_date" maxlength="10" value="<?php echo date_i18n( 'Y-m-d', strtotime( $post->post_date ) ); ?>" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" />@<input type="text" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ) ?>" name="order_date_hour" id="order_date_hour" maxlength="2" size="2" value="<?php echo date_i18n( 'H', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />:<input type="text" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ) ?>" name="order_date_minute" id="order_date_minute" maxlength="2" size="2" value="<?php echo date_i18n( 'i', strtotime( $post->post_date ) ); ?>" pattern="\-?\d+(\.\d{0,})?" />
@@ -199,7 +199,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->has_status( 'pending' ) ) {
 								printf( '<a href="%s">%s &rarr;</a>',
 									esc_url( $order->get_checkout_payment_url() ),
-									__( 'Pay', 'woocommerce' )
+									__( 'Customer payment page', 'woocommerce' )
 								);
 							}
 						?></label>
@@ -239,11 +239,11 @@ class WC_Meta_Box_Order_Data {
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); ?>
 					</div>
 					<div class="order_data_column">
-						<h4>
+						<h3>
 							<?php _e( 'Billing Details', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 							<a href="#" class="tips load_customer_billing" data-tip="<?php esc_attr_e( 'Load billing address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load billing address', 'woocommerce' ); ?></a>
-						</h4>
+						</h3>
 						<?php
 							// Display values
 							echo '<div class="address">';
@@ -323,12 +323,12 @@ class WC_Meta_Box_Order_Data {
 					</div>
 					<div class="order_data_column">
 
-						<h4>
+						<h3>
 							<?php _e( 'Shipping Details', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 							<a href="#" class="tips billing-same-as-shipping" data-tip="<?php esc_attr_e( 'Copy from billing', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Copy from billing', 'woocommerce' ); ?></a>
 							<a href="#" class="tips load_customer_shipping" data-tip="<?php esc_attr_e( 'Load shipping address', 'woocommerce' ); ?>" style="display:none;"><?php _e( 'Load shipping address', 'woocommerce' ); ?></a>
-						</h4>
+						</h3>
 						<?php
 							// Display values
 							echo '<div class="address">';
@@ -412,18 +412,28 @@ class WC_Meta_Box_Order_Data {
 
 		self::init_address_fields();
 
+		// Ensure gateways are loaded in case they need to insert data into the emails
+		WC()->payment_gateways();
+		WC()->shipping();
+
+		$customer_changed = false;
+
 		// Add key
 		add_post_meta( $post_id, '_order_key', uniqid( 'order_' ), true );
 
 		// Update meta
-		update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) );
+		if ( update_post_meta( $post_id, '_customer_user', absint( $_POST['customer_user'] ) ) ) {
+			$customer_changed = true;
+		}
 
 		if ( ! empty( self::$billing_fields ) ) {
 			foreach ( self::$billing_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ){
 					$field['id'] = '_billing_' . $key;
 				}
-				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
+					$customer_changed = true;
+				}
 			}
 		}
 
@@ -432,7 +442,9 @@ class WC_Meta_Box_Order_Data {
 				if ( ! isset( $field['id'] ) ){
 					$field['id'] = '_shipping_' . $key;
 				}
-				update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+				if ( update_post_meta( $post_id, $field['id'], wc_clean( $_POST[ $field['id'] ] ) ) ) {
+					$customer_changed = true;
+				}
 			}
 		}
 
@@ -465,6 +477,26 @@ class WC_Meta_Box_Order_Data {
 		$date = date_i18n( 'Y-m-d H:i:s', $date );
 
 		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
+
+		// If customer changed, update any downloadable permissions
+		if ( $customer_changed ) {
+			$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",
+				array(
+					'user_id'    => absint( get_post_meta( $post->ID, '_customer_user', true ) ),
+					'user_email' => wc_clean( get_post_meta( $post->ID, '_billing_email', true ) ),
+				),
+				array(
+					'order_id' 		=> $post_id,
+				),
+				array(
+					'%d',
+					'%s',
+				),
+				array(
+					'%d',
+				)
+			);
+		}
 
 		// Order data saved, now get it so we can manipulate status
 		$order = wc_get_order( $post_id );

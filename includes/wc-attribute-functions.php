@@ -50,6 +50,17 @@ function wc_attribute_taxonomy_name( $attribute_name ) {
 }
 
 /**
+ * Get the attribute name used when storing values in post meta.
+ *
+ * @param string $attribute_name Attribute name.
+ * @since 2.6.0
+ * @return string
+ */
+function wc_variation_attribute_name( $attribute_name ) {
+	return 'attribute_' . sanitize_title( $attribute_name );
+}
+
+/**
  * Get a product attribute name by ID.
  *
  * @since  2.4.0
@@ -107,11 +118,15 @@ function wc_attribute_label( $name, $product = '' ) {
  * @return string
  */
 function wc_attribute_orderby( $name ) {
-	global $wpdb;
+	global $wc_product_attributes, $wpdb;
 
 	$name = str_replace( 'pa_', '', sanitize_title( $name ) );
 
-	$orderby = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_orderby FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+	if ( isset( $wc_product_attributes[ 'pa_' . $name ] ) ) {
+		$orderby = $wc_product_attributes[ 'pa_' . $name ]->attribute_orderby;
+	} else {
+		$orderby = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_orderby FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
+	}
 
 	return apply_filters( 'woocommerce_attribute_orderby', $orderby, $name );
 }

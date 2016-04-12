@@ -23,6 +23,7 @@ include( 'wc-formatting-functions.php' );
 include( 'wc-order-functions.php' );
 include( 'wc-page-functions.php' );
 include( 'wc-product-functions.php' );
+include( 'wc-account-functions.php' );
 include( 'wc-term-functions.php' );
 include( 'wc-attribute-functions.php' );
 
@@ -62,7 +63,8 @@ function wc_create_order( $args = array() ) {
 		'customer_note' => null,
 		'order_id'      => 0,
 		'created_via'   => '',
-		'parent'        => 0
+		'cart_hash'     => '',
+		'parent'        => 0,
 	);
 
 	$args       = wp_parse_args( $args, $default_args );
@@ -111,6 +113,7 @@ function wc_create_order( $args = array() ) {
 		update_post_meta( $order_id, '_customer_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '' );
 		update_post_meta( $order_id, '_customer_user', 0 );
 		update_post_meta( $order_id, '_created_via', sanitize_text_field( $args['created_via'] ) );
+		update_post_meta( $order_id, '_cart_hash', sanitize_text_field( $args['cart_hash'] ) );
 	}
 
 	if ( is_numeric( $args['customer_id'] ) ) {
@@ -297,8 +300,8 @@ function get_woocommerce_currencies() {
 				'ISK' => __( 'Icelandic krona', 'woocommerce' ),
 				'JPY' => __( 'Japanese Yen', 'woocommerce' ),
 				'KES' => __( 'Kenyan shilling', 'woocommerce' ),
-				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'KRW' => __( 'South Korean Won', 'woocommerce' ),
+				'LAK' => __( 'Lao Kip', 'woocommerce' ),
 				'MXN' => __( 'Mexican Peso', 'woocommerce' ),
 				'MYR' => __( 'Malaysian Ringgits', 'woocommerce' ),
 				'NGN' => __( 'Nigerian Naira', 'woocommerce' ),
@@ -311,12 +314,14 @@ function get_woocommerce_currencies() {
 				'PYG' => __( 'Paraguayan Guaraní', 'woocommerce' ),
 				'RON' => __( 'Romanian Leu', 'woocommerce' ),
 				'RUB' => __( 'Russian Ruble', 'woocommerce' ),
+				'SAR' => __( 'Saudi Riyal', 'woocommerce' ),
 				'SEK' => __( 'Swedish Krona', 'woocommerce' ),
 				'SGD' => __( 'Singapore Dollar', 'woocommerce' ),
 				'THB' => __( 'Thai Baht', 'woocommerce' ),
 				'TRY' => __( 'Turkish Lira', 'woocommerce' ),
 				'TWD' => __( 'Taiwan New Dollars', 'woocommerce' ),
 				'UAH' => __( 'Ukrainian Hryvnia', 'woocommerce' ),
+				'UGX' => __( 'Ugandan Shilling', 'woocommerce' ),
 				'USD' => __( 'US Dollars', 'woocommerce' ),
 				'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
 				'ZAR' => __( 'South African rand', 'woocommerce' ),
@@ -363,8 +368,8 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'ISK' => 'Kr.',
 		'JPY' => '&yen;',
 		'KES' => 'KSh',
-		'LAK' => '&#8365;',
 		'KRW' => '&#8361;',
+		'LAK' => '&#8365;',
 		'MXN' => '&#36;',
 		'MYR' => '&#82;&#77;',
 		'NGN' => '&#8358;',
@@ -377,13 +382,15 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'PYG' => '&#8370;',
 		'RMB' => '&yen;',
 		'RON' => 'lei',
-		'RUB' => '&#1088;&#1091;&#1073;.',
+		'RUB' => '&#8381;',
+		'SAR' => '&#x631;.&#x633;',
 		'SEK' => '&#107;&#114;',
 		'SGD' => '&#36;',
 		'THB' => '&#3647;',
 		'TRY' => '&#8378;',
 		'TWD' => '&#78;&#84;&#36;',
 		'UAH' => '&#8372;',
+		'UGX' => 'UGX',
 		'USD' => '&#36;',
 		'VND' => '&#8363;',
 		'ZAR' => '&#82;',
@@ -470,15 +477,20 @@ function wc_print_js() {
 	global $wc_queued_js;
 
 	if ( ! empty( $wc_queued_js ) ) {
-
-		echo "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) {";
-
-		// Sanitize
+		// Sanitize.
 		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
 		$wc_queued_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $wc_queued_js );
 		$wc_queued_js = str_replace( "\r", '', $wc_queued_js );
 
-		echo $wc_queued_js . "});\n</script>\n";
+		$js = "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) { $wc_queued_js });\n</script>\n";
+
+		/**
+		 * woocommerce_queued_js filter.
+		 *
+		 * @since 2.6.0
+		 * @param string $js JavaScript code.
+		 */
+		echo apply_filters( 'woocommerce_queued_js', $js );
 
 		unset( $wc_queued_js );
 	}
@@ -494,7 +506,7 @@ function wc_print_js() {
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
 	if ( ! headers_sent() ) {
-		setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
+		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure );
 	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE );
@@ -708,14 +720,16 @@ function wc_get_base_location() {
  * @return array
  */
 function wc_get_customer_default_location() {
+	$location = array();
+
 	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
 		case 'geolocation_ajax' :
 		case 'geolocation' :
-			$location = WC_Geolocation::geolocate_ip();
+			// Exclude common bots from geolocation by user agent.
+			$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? strtolower( $_SERVER['HTTP_USER_AGENT'] ) : '';
 
-			// Base fallback.
-			if ( empty( $location['country'] ) ) {
-				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
+				$location = WC_Geolocation::geolocate_ip( '', true, false );
 			}
 		break;
 		case 'base' :
@@ -724,6 +738,11 @@ function wc_get_customer_default_location() {
 		default :
 			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', '' ) );
 		break;
+	}
+
+	// Base fallback.
+	if ( empty( $location['country'] ) ) {
+		$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
 	}
 
 	return apply_filters( 'woocommerce_customer_default_location_array', $location );
@@ -799,7 +818,7 @@ function wc_array_cartesian( $input ) {
 	// Generate indexes from keys and values so we have a logical sort order
 	foreach ( $input as $key => $values ) {
 		foreach ( $values as $value ) {
-			$indexes[ $key ][ $value ] = $index ++;
+			$indexes[ $key ][ $value ] = $index++;
 		}
 	}
 
@@ -877,4 +896,110 @@ function wc_transaction_query( $type = 'start' ) {
 			break;
 		}
 	}
+}
+
+/**
+ * Gets the url to the cart page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to cart page
+ */
+function wc_get_cart_url() {
+	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+}
+
+/**
+ * Gets the url to the checkout page.
+ *
+ * @since  2.5.0
+ *
+ * @return string Url to checkout page
+ */
+function wc_get_checkout_url() {
+	$checkout_url = wc_get_page_permalink( 'checkout' );
+	if ( $checkout_url ) {
+		// Force SSL if needed
+		if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
+			$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
+		}
+	}
+
+	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
+}
+
+/**
+ * Register a shipping method.
+ *
+ * @since 1.5.7
+ * @param string|object $shipping_method class name (string) or a class object.
+ */
+function woocommerce_register_shipping_method( $shipping_method ) {
+	WC()->shipping->register_shipping_method( $shipping_method );
+}
+
+/**
+ * Get the shipping zone matching a given package from the cart.
+ *
+ * @since  2.6.0
+ * @uses   WC_Shipping_Zones::get_zone_matching_package
+ * @param  array $package
+ * @return WC_Shipping_Zone
+ */
+function wc_get_shipping_zone( $package ) {
+	return WC_Shipping_Zones::get_zone_matching_package( $package );
+}
+
+/**
+ * Get a nice name for credit card providers.
+ *
+ * @since  2.6.0
+ * @param  string $type Provider Slug/Type
+ * @return string
+ */
+function wc_get_credit_card_type_label( $type ) {
+	// Normalize
+	$type = strtolower( $type );
+	$type = str_replace( '-', ' ', $type );
+	$type = str_replace( '_', ' ', $type );
+
+	$labels = apply_filters( 'wocommerce_credit_card_type_labels', array(
+		'mastercard'       => __( 'MasterCard', 'woocommerce' ),
+		'visa'             => __( 'Visa', 'woocommerce' ),
+		'discover'         => __( 'Discover', 'woocommerce' ),
+		'american express' => __( 'American Express', 'woocommerce' ),
+		'diners'           => __( 'Diners', 'woocommerce' ),
+		'jcb'              => __( 'JCB', 'woocommerce' ),
+	) );
+
+	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucfirst( $type ) ) );
+}
+
+/**
+ * Outputs a "back" link so admin screens can easily jump back a page.
+ *
+ * @param string $label Title of the page to return to.
+ * @param string $url   URL of the page to return to.
+ */
+function wc_back_link( $label, $url ) {
+	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" title="' . esc_attr( $label ) . '">&#x2934;</a></small>';
+}
+
+/**
+ * Display a WooCommerce help tip.
+ *
+ * @since  2.5.0
+ *
+ * @param  string $tip        Help tip text
+ * @param  bool   $allow_html Allow sanitized HTML if true or escape
+ * @return string
+ */
+function wc_help_tip( $tip, $allow_html = false ) {
+	if ( $allow_html ) {
+		$tip = wc_sanitize_tooltip( $tip );
+	} else {
+		$tip = esc_attr( $tip );
+	}
+
+	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
 }

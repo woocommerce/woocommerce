@@ -50,7 +50,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			foreach ( $payment_gateways as $gateway ) {
 				$title = empty( $gateway->method_title ) ? ucfirst( $gateway->id ) : $gateway->method_title;
-				$sections[ strtolower( get_class( $gateway ) ) ] = esc_html( $title );
+				$sections[ strtolower( $gateway->id ) ] = esc_html( $title );
 			}
 		}
 
@@ -79,7 +79,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
 				'desc_tip'      =>  __( 'Coupons can be applied from the cart and checkout pages.', 'woocommerce' ),
-				'autoload'      => false,
 			),
 
 			array(
@@ -93,7 +92,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			),
 
 			array(
-				'title'         => _x( 'Checkout', 'Settings group label', 'woocommerce' ),
+				'title'         => _x( 'Checkout Process', 'Settings group label', 'woocommerce' ),
 				'desc'          => __( 'Enable guest checkout', 'woocommerce' ),
 				'desc_tip'      =>  __( 'Allows customers to checkout without creating an account.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_guest_checkout',
@@ -203,6 +202,25 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			),
 
 			array(
+				'title'    => __( 'Delete Payment Method', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the delete payment method page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_delete_payment_method_endpoint',
+				'type'     => 'text',
+				'default'  => 'delete-payment-method',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Set Default Payment Method', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the setting a default payment page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_set_default_payment_method_endpoint',
+				'type'     => 'text',
+				'default'  => 'set-default-payment-method',
+				'desc_tip' => true,
+			),
+
+
+			array(
 				'type' => 'sectionend',
 				'id' => 'checkout_endpoint_options',
 			),
@@ -242,10 +260,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 
 		if ( $current_section ) {
-
 			foreach ( $payment_gateways as $gateway ) {
-
-				if ( strtolower( get_class( $gateway ) ) == strtolower( $current_section ) ) {
+				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ) ) ) {
 					$gateway->admin_options();
 					break;
 				}
@@ -350,7 +366,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		} else {
 			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
-				if ( $current_section === sanitize_title( get_class( $gateway ) ) ) {
+				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ) ) ) {
 					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
 					$wc_payment_gateways->init();
 				}

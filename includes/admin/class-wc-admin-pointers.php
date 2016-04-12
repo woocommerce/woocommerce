@@ -28,7 +28,9 @@ class WC_Admin_Pointers {
 	 * Setup pointers for screen.
 	 */
 	public function setup_pointers_for_screen() {
-		$screen = get_current_screen();
+		if ( ! $screen = get_current_screen() ) {
+			return;
+		}
 
 		switch ( $screen->id ) {
 			case 'product' :

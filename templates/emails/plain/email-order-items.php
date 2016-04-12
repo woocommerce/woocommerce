@@ -4,10 +4,11 @@
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/email-order-items.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
- * will need to copy the new files to your theme to maintain compatibility. We try to do this.
- * as little as possible, but it does happen. When this occurs the version of the template file will.
- * be bumped and the readme will list any important changes.
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
  *
  * @see 	    http://docs.woothemes.com/document/template-structure/
  * @author 		WooThemes
@@ -34,7 +35,7 @@ foreach ( $items as $item_id => $item ) :
 		}
 
 		// allow other plugins to add additional product information here
-		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 
 		// Variation
 		echo ( $item_meta_content = $item_meta->display( true, true ) ) ? "\n" . $item_meta_content : '';
@@ -64,7 +65,7 @@ foreach ( $items as $item_id => $item ) :
 		}
 
 		// allow other plugins to add additional product information here
-		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
+		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 
 	}
 

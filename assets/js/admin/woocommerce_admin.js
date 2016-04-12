@@ -10,7 +10,7 @@ jQuery( function ( $ ) {
 		.on( 'wc_add_error_tip', function( e, element, error_type ) {
 			var offset = element.position();
 
-			if ( element.parent().find( '.wc_error_tip' ).size() === 0 ) {
+			if ( element.parent().find( '.wc_error_tip' ).length === 0 ) {
 				element.after( '<div class="wc_error_tip ' + error_type + '">' + woocommerce_admin[error_type] + '</div>' );
 				element.parent().find( '.wc_error_tip' )
 					.css( 'left', offset.left + element.width() - ( element.width() / 2 ) - ( $( '.wc_error_tip' ).width() / 2 ) )
@@ -53,7 +53,7 @@ jQuery( function ( $ ) {
 		})
 		.on( 'keyup change', '.wc_input_country_iso[type=text]', function() {
 			var value = $( this ).val();
-			var regex = new RegExp( '^([A-Z])?([A-Z])$' );
+			var regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
 
 			if ( ! regex.test( value ) ) {
 				$( this ).val( '' );
@@ -79,21 +79,25 @@ jQuery( function ( $ ) {
 			} else {
 				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
 			}
+		})
+		.on( 'init_tooltips', function() {
+			var tiptip_args = {
+				'attribute': 'data-tip',
+				'fadeIn': 50,
+				'fadeOut': 50,
+				'delay': 200
+			};
+
+			$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( tiptip_args );
+
+			// Add tiptip to parent element for widefat tables
+			$( '.parent-tips' ).each( function() {
+				$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( tiptip_args ).css( 'cursor', 'help' );
+			});
 		});
 
 	// Tooltips
-	var tiptip_args = {
-		'attribute': 'data-tip',
-		'fadeIn': 50,
-		'fadeOut': 50,
-		'delay': 200
-	};
-	$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( tiptip_args );
-
-	// Add tiptip to parent element for widefat tables
-	$( '.parent-tips' ).each( function() {
-		$( this ).closest( 'a, th' ).attr( 'data-tip', $( this ).data( 'tip' ) ).tipTip( tiptip_args ).css( 'cursor', 'help' );
-	});
+	$( document.body ).trigger( 'init_tooltips' );
 
 	// wc_input_table tables
 	$( '.wc_input_table.sortable tbody' ).sortable({
@@ -115,7 +119,7 @@ jQuery( function ( $ ) {
 
 	$( '.wc_input_table .remove_rows' ).click( function() {
 		var $tbody = $( this ).closest( '.wc_input_table' ).find( 'tbody' );
-		if ( $tbody.find( 'tr.current' ).size() > 0 ) {
+		if ( $tbody.find( 'tr.current' ).length > 0 ) {
 			var $current = $tbody.find( 'tr.current' );
 			$current.each( function() {
 				$( this ).remove();
@@ -147,7 +151,7 @@ jQuery( function ( $ ) {
 				$( 'tr', $this_table ).removeClass( 'current' );
 				$this_row.addClass( 'selected_now' ).addClass( 'current' );
 
-				if ( $( 'tr.last_selected', $this_table ).size() > 0 ) {
+				if ( $( 'tr.last_selected', $this_table ).length > 0 ) {
 					if ( $this_row.index() > $( 'tr.last_selected', $this_table ).index() ) {
 						$( 'tr', $this_table ).slice( $( 'tr.last_selected', $this_table ).index(), $this_row.index() ).addClass( 'current' );
 					} else {
@@ -222,4 +226,11 @@ jQuery( function ( $ ) {
 
 	// Attribute term table
 	$( 'table.attributes-table tbody tr:nth-child(odd)' ).addClass( 'alternate' );
+
+	// Load videos when help button is clicked.
+	$( '#contextual-help-link' ).on( 'click', function() {
+		var frame = $( '#tab-panel-woocommerce_101_tab iframe' );
+
+		frame.attr( 'src', frame.data( 'src' ) );
+	});
 });

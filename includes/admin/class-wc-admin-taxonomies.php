@@ -38,7 +38,6 @@ class WC_Admin_Taxonomies {
 
 		// Taxonomy page descriptions
 		add_action( 'product_cat_pre_add_form', array( $this, 'product_cat_description' ) );
-		add_action( 'product_shipping_class_pre_add_form', array( $this, 'shipping_class_description' ) );
 
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
@@ -79,7 +78,7 @@ class WC_Admin_Taxonomies {
 
 		$term_id = absint( $term_id );
 
-		if ( $term_id ) {
+		if ( $term_id && get_option( 'db_version' ) < 34370 ) {
 			$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $term_id ), array( '%d' ) );
 		}
 	}
@@ -89,7 +88,7 @@ class WC_Admin_Taxonomies {
 	 */
 	public function add_category_fields() {
 		?>
-		<div class="form-field">
+		<div class="form-field term-display-type-wrap">
 			<label for="display_type"><?php _e( 'Display type', 'woocommerce' ); ?></label>
 			<select id="display_type" name="display_type" class="postform">
 				<option value=""><?php _e( 'Default', 'woocommerce' ); ?></option>
@@ -98,7 +97,7 @@ class WC_Admin_Taxonomies {
 				<option value="both"><?php _e( 'Both', 'woocommerce' ); ?></option>
 			</select>
 		</div>
-		<div class="form-field">
+		<div class="form-field term-thumbnail-wrap">
 			<label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label>
 			<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_placeholder_img_src() ); ?>" width="60px" height="60px" /></div>
 			<div style="line-height: 60px;">
@@ -154,6 +153,24 @@ class WC_Admin_Taxonomies {
 					jQuery( '.remove_image_button' ).hide();
 					return false;
 				});
+
+				jQuery( document ).ajaxComplete( function( event, request, options ) {
+					if ( request && 4 === request.readyState && 200 === request.status
+						&& options.data && 0 <= options.data.indexOf( 'action=add-tag' ) ) {
+
+						var res = wpAjax.parseAjaxResponse( request.responseXML, 'ajax-response' );
+						if ( ! res || res.errors ) {
+							return;
+						}
+						// Clear Thumbnail fields on submit
+						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+						jQuery( '#product_cat_thumbnail_id' ).val( '' );
+						jQuery( '.remove_image_button' ).hide();
+						// Clear Display type field on submit
+						jQuery( '#display_type' ).val( '' );
+						return;
+					}
+				} );
 
 			</script>
 			<div class="clear"></div>
@@ -274,13 +291,6 @@ class WC_Admin_Taxonomies {
 	 */
 	public function product_cat_description() {
 		echo wpautop( __( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. To see more categories listed click the "screen options" link at the top of the page.', 'woocommerce' ) );
-	}
-
-	/**
-	 * Description for shipping class page to aid users.
-	 */
-	public function shipping_class_description() {
-		echo wpautop( __( 'Shipping classes can be used to group products of similar type. These groups can then be used by certain shipping methods to provide different rates to different products.', 'woocommerce' ) );
 	}
 
 	/**

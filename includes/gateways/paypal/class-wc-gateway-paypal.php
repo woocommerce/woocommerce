@@ -106,6 +106,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	protected function get_icon_url( $country ) {
+<<<<<<< HEAD
 		$home_counties = array( 'BE', 'CZ', 'DK', 'HU', 'IT', 'JP', 'NL', 'NO', 'ES', 'SE', 'TR');
 		$countries = array( 'DZ', 'AU', 'BH', 'BQ', 'BW', 'CA', 'CN', 'CW', 'FI', 'FR', 'DE', 'GR', 'HK', 'IN', 'ID', 'JO', 'KE', 'KW', 'LU', 'MY', 'MA', 'OM', 'PH', 'PL', 'PT', 'QA', 'IE', 'RU', 'BL', 'SX', 'MF', 'SA', 'SG', 'SK', 'KR', 'SS', 'TW', 'TH', 'AE', 'GB', 'US', 'VN' );
 
@@ -113,9 +114,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return 'https://www.paypal.com/' . strtolower( $country ) . '/webapps/mpp/home';
 		}elseif ( in_array( $country, $countries ) ) {
 			return 'https://www.paypal.com/' . strtolower( $country ) . '/webapps/mpp/paypal-popup';
-		}
+=======
+		$url           = 'https://www.paypal.com/' . strtolower( $country );
+		$home_counties = array( 'BE', 'CZ', 'DK', 'HU', 'IT', 'JP', 'NL', 'NO', 'ES', 'SE', 'TR');
+		$countries     = array( 'DZ', 'AU', 'BH', 'BQ', 'BW', 'CA', 'CN', 'CW', 'FI', 'FR', 'DE', 'GR', 'HK', 'IN', 'ID', 'JO', 'KE', 'KW', 'LU', 'MY', 'MA', 'OM', 'PH', 'PL', 'PT', 'QA', 'IE', 'RU', 'BL', 'SX', 'MF', 'SA', 'SG', 'SK', 'KR', 'SS', 'TW', 'TH', 'AE', 'GB', 'US', 'VN' );
 
-		return 'https://www.paypal.com/' . strtolower( $country ) . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
+		if ( in_array( $country, $home_counties ) ) {
+			return  $url . '/webapps/mpp/home';
+		} else if ( in_array( $country, $countries ) ) {
+			return $url . '/webapps/mpp/paypal-popup';
+		} else {
+			return $url . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
+>>>>>>> woothemes/master
+		}
 	}
 
 	/**

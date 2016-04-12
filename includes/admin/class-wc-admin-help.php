@@ -32,7 +32,7 @@ class WC_Admin_Help {
 	public function add_tabs() {
 		$screen = get_current_screen();
 
-		if ( ! in_array( $screen->id, wc_get_screen_ids() ) ) {
+		if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids() ) ) {
 			return;
 		}
 
@@ -101,10 +101,6 @@ class WC_Admin_Help {
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
 			),
-			'edit-product_shipping_class' => array(
-				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
-			),
 			'product_attributes' => array(
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
@@ -160,7 +156,7 @@ class WC_Admin_Help {
 				'title'     => __( 'WooCommerce 101', 'woocommerce' ),
 				'content'   =>
 					'<h2><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Videos&utm_campaign=Onboarding">' . __( 'WooCommerce 101', 'woocommerce' ) . '</a> &ndash; ' . esc_html( $video_map[ $video_key ]['title'] ) . '</h2>' .
-					'<iframe src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="480" height="298"></iframe>'
+					'<iframe data-src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" src="" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="480" height="298"></iframe>'
 			) );
 		}
 
@@ -198,7 +194,7 @@ class WC_Admin_Help {
 			'title'     => __( 'Found a bug?', 'woocommerce' ),
 			'content'   =>
 				'<h2>' . __( 'Found a bug?', 'woocommerce' ) . '</h2>' .
-				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. To help us solve your issue, please be as descriptive as possible and include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
+				'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%s">Github issues</a>. Ensure you read the <a href="%s">contribution guide</a> prior to submitting your report. To help us solve your issue, please be as descriptive as possible and include your <a href="%s">system status report</a>.', 'woocommerce' ), 'https://github.com/woothemes/woocommerce/issues?state=open', 'https://github.com/woothemes/woocommerce/blob/master/.github/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
 				'<p><a href="' . 'https://github.com/woothemes/woocommerce/issues?state=open' . '" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button">' . __( 'System Status', 'woocommerce' ) . '</a></p>'
 
 		) );

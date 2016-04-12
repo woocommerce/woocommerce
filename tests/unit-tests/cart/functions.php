@@ -1,12 +1,10 @@
 <?php
 
-namespace WooCommerce\Tests\Cart;
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Cart
  */
-class Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Helper method to get the checkout URL.
@@ -87,7 +85,7 @@ class Functions extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_empty_cart() {
 		// Create dummy product
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		// Add the product to the cart
 		WC()->cart->add_to_cart( $product->id, 1 );
@@ -99,7 +97,7 @@ class Functions extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
 
 		// Delete the previously created product
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -110,7 +108,7 @@ class Functions extends \WC_Unit_Test_Case {
 	public function test_wc_format_list_of_items() {
 		$items = array( 'Title 1', 'Title 2' );
 
-		$this->assertEquals( "&ldquo;Title 1&rdquo; and &ldquo;Title 2&rdquo;", wc_format_list_of_items( $items ) );
+		$this->assertEquals( 'Title 1 and Title 2', wc_format_list_of_items( $items ) );
 	}
 
 	/**
@@ -120,13 +118,13 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_cart_totals_subtotal_html() {
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		WC()->cart->add_to_cart( $product->id, 1 );
 
 		$this->expectOutputString( wc_price( $product->price ), wc_cart_totals_subtotal_html() );
 
-		\WC_Helper_Product::delete_product( $product->id );
+		WC_Helper_Product::delete_product( $product->id );
 	}
 
 	/**
@@ -135,11 +133,11 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_cart_totals_coupon_label() {
-		$coupon = \WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 
 		$this->expectOutputString( apply_filters( 'woocommerce_cart_totals_coupon_label', 'Coupon: ' . $coupon->code ), wc_cart_totals_coupon_label( $coupon ) );
 
-		\WC_Helper_Coupon::delete_coupon( $coupon->id );
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
 	}
 
 	/**

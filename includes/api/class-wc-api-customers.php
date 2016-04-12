@@ -162,6 +162,7 @@ class WC_API_Customers extends WC_API_Resource {
 		$customer_data = array(
 			'id'               => $customer->ID,
 			'created_at'       => $this->server->format_datetime( $customer->user_registered ),
+			'last_update'      => $this->server->format_datetime( get_user_meta( $customer->ID, 'last_update', true ) ),
 			'email'            => $customer->user_email,
 			'first_name'       => $customer->first_name,
 			'last_name'        => $customer->last_name,

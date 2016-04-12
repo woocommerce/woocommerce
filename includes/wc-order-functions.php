@@ -15,6 +15,173 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Wrapper for get_posts specific to orders.
+ *
+ * This function should be used for order retrieval so that when we move to
+ * custom tables, functions still work.
+ *
+ * Args:
+ * 		status array|string List of order statuses to find
+ * 		type array|string Order type, e.g. shop_order or shop_order_refund
+ * 		parent int post/order parent
+ * 		customer int|string|array User ID or billing email to limit orders to a
+ * 			particular user. Accepts array of values. Array of values is OR'ed. If array of array is passed, each array will be AND'ed.
+ * 			e.g. test@test.com, 1, array( 1, 2, 3 ), array( array( 1, 'test@test.com' ), 2, 3 )
+ * 		limit int Maximum of orders to retrieve.
+ * 		offset int Offset of orders to retrieve.
+ * 		page int Page of orders to retrieve. Ignored when using the 'offset' arg.
+ * 		exclude array Order IDs to exclude from the query.
+ * 		orderby string Order by date, title, id, modified, rand etc
+ * 		order string ASC or DESC
+ * 		return string Type of data to return. Allowed values:
+ * 			ids array of order ids
+ * 			objects array of order objects (default)
+ * 		paginate bool If true, the return value will be an array with values:
+ * 			'orders'        => array of data (return value above),
+ * 			'total'         => total number of orders matching the query
+ * 			'max_num_pages' => max number of pages found
+ *
+ * @since  2.6.0
+ * @param  array $args Array of args (above)
+ * @return array|stdClass Number of pages and an array of order objects if
+ *                             paginate is true, or just an array of values.
+ */
+function wc_get_orders( $args ) {
+	$args = wp_parse_args( $args, array(
+		'status'   => array_keys( wc_get_order_statuses() ),
+		'type'     => wc_get_order_types( 'view-orders' ),
+		'parent'   => null,
+		'customer' => null,
+		'email'    => '',
+		'limit'    => get_option( 'posts_per_page' ),
+		'offset'   => null,
+		'page'     => 1,
+		'exclude'  => array(),
+		'orderby'  => 'date',
+		'order'    => 'DESC',
+		'return'   => 'objects',
+		'paginate' => false,
+	) );
+
+	// Handle some BW compatibility arg names where wp_query args differ in naming.
+	$map_legacy = array(
+		'numberposts'    => 'limit',
+		'post_type'      => 'type',
+		'post_status'    => 'status',
+		'post_parent'    => 'parent',
+		'author'         => 'customer',
+		'posts_per_page' => 'limit',
+		'paged'          => 'page',
+	);
+
+	foreach ( $map_legacy as $from => $to ) {
+		if ( isset( $args[ $from ] ) ) {
+			$args[ $to ] = $args[ $from ];
+		}
+	}
+
+	/**
+	 * Generate WP_Query args. This logic will change if orders are moved to
+	 * custom tables in the future.
+	 */
+	$wp_query_args = array(
+		'post_type'      => $args['type'] ? $args['type'] : 'shop_order',
+		'post_status'    => $args['status'],
+		'posts_per_page' => $args['limit'],
+		'meta_query'     => array(),
+		'fields'         => 'ids',
+		'orderby'        => $args['orderby'],
+		'order'          => $args['order'],
+	);
+
+	if ( ! is_null( $args['parent'] ) ) {
+		$wp_query_args['post_parent'] = absint( $args['parent'] );
+	}
+
+	if ( ! is_null( $args['offset'] ) ) {
+		$wp_query_args['offset'] = absint( $args['offset'] );
+	} else {
+		$wp_query_args['paged'] = absint( $args['page'] );
+	}
+
+	if ( ! empty( $args['customer'] ) ) {
+		$values = is_array( $args['customer'] ) ? $args['customer'] : array( $args['customer'] );
+		$wp_query_args['meta_query'][] = _wc_get_orders_generate_customer_meta_query( $values );
+	}
+
+	if ( ! empty( $args['exclude'] ) ) {
+		$wp_query_args['post__not_in'] = array_map( 'absint', $args['exclude'] );
+	}
+
+	if ( ! $args['paginate' ] ) {
+		$wp_query_args['no_found_rows'] = true;
+	}
+
+	// Get results.
+	$orders = new WP_Query( $wp_query_args );
+
+	if ( 'objects' === $args['return'] ) {
+		$return = array_map( 'wc_get_order', $orders->posts );
+	} else {
+		$return = $orders->posts;
+	}
+
+	if ( $args['paginate' ] ) {
+		return (object) array(
+			'orders'        => $return,
+			'total'         => $orders->found_posts,
+			'max_num_pages' => $orders->max_num_pages,
+		);
+	} else {
+		return $return;
+	}
+}
+
+/**
+ * Generate meta query for wc_get_orders. Used internally only.
+ * @since  2.6.0
+ * @param  array $values
+ * @param  string $relation
+ * @return array
+ */
+function _wc_get_orders_generate_customer_meta_query( $values, $relation = 'or' ) {
+	$meta_query = array(
+		'relation' => strtoupper( $relation ),
+		'customer_emails' => array(
+			'key'     => '_billing_email',
+			'value'   => array(),
+			'compare' => 'IN',
+		),
+		'customer_ids' => array(
+			'key'     => '_customer_user',
+			'value'   => array(),
+			'compare' => 'IN',
+		)
+	);
+	foreach ( $values as $value ) {
+		if ( is_array( $value ) ) {
+			$meta_query[] = _wc_get_orders_generate_customer_meta_query( $value, 'and' );
+		} elseif ( is_email( $value ) ) {
+			$meta_query['customer_emails']['value'][] = sanitize_email( $value );
+		} else {
+			$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
+		}
+	}
+
+	if ( empty( $meta_query['customer_emails']['value'] ) ) {
+		unset( $meta_query['customer_emails'] );
+		unset( $meta_query['relation'] );
+	}
+
+	if ( empty( $meta_query['customer_ids']['value'] ) ) {
+		unset( $meta_query['customer_ids'] );
+		unset( $meta_query['relation'] );
+	}
+
+	return $meta_query;
+}
+
+/**
  * Get all order statuses.
  *
  * @since 2.2
@@ -579,6 +746,12 @@ function wc_delete_shop_order_transients( $post_id = 0 ) {
 		delete_transient( $transient );
 	}
 
+	// Clear money spent for user associated with order
+	if ( $post_id && ( $user_id = get_post_meta( $post_id, '_customer_user', true ) ) ) {
+		delete_user_meta( $user_id, '_money_spent' );
+		delete_user_meta( $user_id, '_order_count' );
+	}
+
 	// Increments the transient version to invalidate cache
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 
@@ -689,7 +862,7 @@ function wc_create_refund( $args = array() ) {
 									'tax_data'     => array( 'total' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), 'subtotal' => array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ) )
 								)
 							);
-							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] : 0, $line_item_args );
+							$new_item_id = $refund->add_product( $order->get_product_from_item( $order_items[ $refund_item_id ] ), isset( $refund_item['qty'] ) ? $refund_item['qty'] * -1 : 0, $line_item_args );
 							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
 						case 'shipping' :

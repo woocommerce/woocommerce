@@ -47,7 +47,7 @@ class WC_Admin_Status {
 					wc_delete_shop_order_transients();
 					WC_Cache_Helper::get_transient_version( 'shipping', true );
 
-					echo '<div class="updated"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated inline"><p>' . __( 'Product Transients Cleared', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'clear_expired_transients' :
 
@@ -72,15 +72,14 @@ class WC_Admin_Status {
 						AND b.option_value < %d";
 					$rows2 = $wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like( '_site_transient_timeout_' ) . '%', time() ) );
 
-					echo '<div class="updated"><p>' . sprintf( __( '%d Transients Rows Cleared', 'woocommerce' ), $rows + $rows2 ) . '</p></div>';
-
+					echo '<div class="updated inline"><p>' . sprintf( __( '%d Transients Rows Cleared', 'woocommerce' ), $rows + $rows2 ) . '</p></div>';
 				break;
 				case 'reset_roles' :
 					// Remove then re-add caps and roles
 					WC_Install::remove_roles();
 					WC_Install::create_roles();
 
-					echo '<div class="updated"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated inline"><p>' . __( 'Roles successfully reset', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'recount_terms' :
 
@@ -92,33 +91,33 @@ class WC_Admin_Status {
 
 					_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
 
-					echo '<div class="updated"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated inline"><p>' . __( 'Terms successfully recounted', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'clear_sessions' :
 
-					$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_sessions" );
+					$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
 
 					wp_cache_flush();
 
-					echo '<div class="updated"><p>' . __( 'Sessions successfully cleared', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated inline"><p>' . __( 'Sessions successfully cleared', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'install_pages' :
 					WC_Install::create_pages();
-					echo '<div class="updated"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated inline"><p>' . __( 'All missing WooCommerce pages was installed successfully.', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'delete_taxes' :
 
-					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rates" );
-					$wpdb->query( "TRUNCATE " . $wpdb->prefix . "woocommerce_tax_rate_locations" );
+					$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
+					$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
 					WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 
-					echo '<div class="updated"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated inline"><p>' . __( 'Tax rates successfully deleted', 'woocommerce' ) . '</p></div>';
 				break;
 				case 'reset_tracking' :
 					delete_option( 'woocommerce_allow_tracking' );
 					WC_Admin_Notices::add_notice( 'tracking' );
 
-					echo '<div class="updated"><p>' . __( 'Usage tracking settings successfully reset.', 'woocommerce' ) . '</p></div>';
+					echo '<div class="updated inline"><p>' . __( 'Usage tracking settings successfully reset.', 'woocommerce' ) . '</p></div>';
 				break;
 				default :
 					$action = esc_attr( $_GET['action'] );
@@ -127,10 +126,9 @@ class WC_Admin_Status {
 						$return = call_user_func( $callback );
 						if ( $return === false ) {
 							if ( is_array( $callback ) ) {
-								echo '<div class="error"><p>' . sprintf( __( 'There was an error calling %s::%s', 'woocommerce' ), get_class( $callback[0] ), $callback[1] ) . '</p></div>';
-
+								echo '<div class="error inline"><p>' . sprintf( __( 'There was an error calling %s::%s', 'woocommerce' ), get_class( $callback[0] ), $callback[1] ) . '</p></div>';
 							} else {
-								echo '<div class="error"><p>' . sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback ) . '</p></div>';
+								echo '<div class="error inline"><p>' . sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback ) . '</p></div>';
 							}
 						}
 					}
@@ -140,7 +138,7 @@ class WC_Admin_Status {
 
 		// Display message if settings settings have been saved
 		if ( isset( $_REQUEST['settings-updated'] ) ) {
-			echo '<div class="updated"><p>' . __( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
+			echo '<div class="updated inline"><p>' . __( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
 		}
 
 		include_once( 'views/html-admin-page-status-tools.php' );
@@ -301,24 +299,25 @@ class WC_Admin_Status {
 
 	/**
 	 * Get latest version of a theme by slug.
-	 * @param  object $theme WP_Theme object
-	 * @return string Version number if found
+	 * @param  object $theme WP_Theme object.
+	 * @return string Version number if found.
 	 */
 	public static function get_latest_theme_version( $theme ) {
 		$api = themes_api( 'theme_information', array(
 			'slug'     => $theme->get_stylesheet(),
 			'fields'   => array(
-			'sections' => false,
-			'tags'     => false
-		) ) );
+				'sections' => false,
+				'tags'     => false,
+			)
+		) );
 
 		$update_theme_version = 0;
 
-		// Check .org for updates
-		if ( $api && ! is_wp_error( $api ) ) {
+		// Check .org for updates.
+		if ( is_object( $api ) && ! is_wp_error( $api ) ) {
 			$update_theme_version = $api->version;
 
-		// Check WooThemes Theme Version
+		// Check WooThemes Theme Version.
 		} elseif ( strstr( $theme->{'Author URI'}, 'woothemes' ) ) {
 			$theme_dir = substr( strtolower( str_replace( ' ','', $theme->Name ) ), 0, 45 );
 

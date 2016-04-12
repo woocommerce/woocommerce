@@ -400,7 +400,7 @@ class WC_Admin_Webhooks {
 	 * Table list output.
 	 */
 	private static function table_list_output() {
-		echo '<h3>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h3>';
+		echo '<h2>' . __( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( wp_nonce_url( admin_url( 'admin.php?page=wc-settings&tab=api&section=webhooks&create-webhook=1' ), 'create-webhook' ) ) . '" class="add-new-h2">' . __( 'Add Webhook', 'woocommerce' ) . '</a></h2>';
 
 		$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 		$webhooks_table_list->prepare_items();

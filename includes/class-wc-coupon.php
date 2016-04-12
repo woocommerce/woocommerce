@@ -132,9 +132,10 @@ class WC_Coupon {
 		}
 
 		// Otherwise get ID from the code
-		$this->id = $this->get_coupon_id_from_code( $this->code );
+		$this->id    = $this->get_coupon_id_from_code( $this->code );
+		$coupon_post = get_post( $this->id );
 
-		if ( $this->code === apply_filters( 'woocommerce_coupon_code', get_the_title( $this->id ) ) ) {
+		if ( $coupon_post && $this->code === apply_filters( 'woocommerce_coupon_code', $coupon_post->post_title ) ) {
 			$this->populate();
 			return true;
 		}
@@ -154,7 +155,7 @@ class WC_Coupon {
 		$coupon_id = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 
 		if ( false === $coupon_id ) {
-			$sql       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $this->code );
+			$sql       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $this->code );
 			$coupon_id = apply_filters( 'woocommerce_get_coupon_id_from_code', $wpdb->get_var( $sql ), $this->code );
 			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $coupon_id, 'coupons' );
 		}
@@ -366,11 +367,7 @@ class WC_Coupon {
 		}
 		if ( $this->usage_limit_per_user > 0 && is_user_logged_in() && $this->id ) {
 			global $wpdb;
-			$wpdb->get_var( $wpdb->prepare( "SELECT COUNT( `meta_id` )
-											 FROM   {$wpdb->postmeta}
-											 WHERE  `post_id`    = %d
-											   AND  `meta_key`   = '_used_by'
-											   AND  `meta_value` = %d", $this->id, $user_id ) );
+			$usage_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %d;", $this->id, $user_id ) );
 
 			if ( $usage_count >= $this->usage_limit_per_user ) {
 				throw new Exception( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
@@ -749,7 +746,7 @@ class WC_Coupon {
 			}
 		}
 
-		$discount = round( $discount, WC_ROUNDING_PRECISION );
+		$discount = wc_cart_round_discount( $discount, wc_get_price_decimals() );
 
 		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}

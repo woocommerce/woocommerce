@@ -87,10 +87,12 @@ class WC_Shortcodes {
 		$products                    = new WP_Query( apply_filters( 'woocommerce_shortcode_products_query', $query_args, $atts, $loop_name ) );
 		$columns                     = absint( $atts['columns'] );
 		$woocommerce_loop['columns'] = $columns;
+		$woocommerce_loop['name']    = $loop_name;
 
 		ob_start();
 
-		if ( $products->have_posts() ) : ?>
+		if ( $products->have_posts() ) {
+			?>
 
 			<?php do_action( "woocommerce_shortcode_before_{$loop_name}_loop" ); ?>
 
@@ -106,7 +108,10 @@ class WC_Shortcodes {
 
 			<?php do_action( "woocommerce_shortcode_after_{$loop_name}_loop" ); ?>
 
-		<?php endif;
+			<?php
+		} else {
+			do_action( "woocommerce_shortcode_{$loop_name}_loop_no_results" );
+		}
 
 		woocommerce_reset_loop();
 		wp_reset_postdata();
@@ -344,10 +349,16 @@ class WC_Shortcodes {
 				'value'   => array_map( 'trim', explode( ',', $atts['skus'] ) ),
 				'compare' => 'IN'
 			);
+
+			// Ignore catalog visibility
+			$query_args['meta_query'] = WC()->query->stock_status_meta_query();
 		}
 
 		if ( ! empty( $atts['ids'] ) ) {
 			$query_args['post__in'] = array_map( 'trim', explode( ',', $atts['ids'] ) );
+
+			// Ignore catalog visibility
+			$query_args['meta_query'] = WC()->query->stock_status_meta_query();
 		}
 
 		return self::product_loop( $query_args, $atts, 'products' );
@@ -446,9 +457,9 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		if ( is_object( $product_data ) ) {
-			$product = wc_setup_product_data( $product_data );
-		} else {
+		$product = is_object( $product_data ) && in_array( $product_data->post_type, array( 'product', 'product_variation' ) ) ? wc_setup_product_data( $product_data ) : false;
+
+		if ( ! $product ) {
 			return '';
 		}
 
@@ -494,13 +505,9 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		if ( is_object( $product_data ) ) {
-			$product = wc_setup_product_data( $product_data );
-		} else {
-			return '';
-		}
+		$product = is_object( $product_data ) && in_array( $product_data->post_type, array( 'product', 'product_variation' ) ) ? wc_setup_product_data( $product_data ) : false;
 
-		if ( 'product' !== $product_data->post_type ) {
+		if ( ! $product ) {
 			return '';
 		}
 
@@ -593,8 +600,6 @@ class WC_Shortcodes {
 		);
 
 		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
-
-		ob_start();
 
 		add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
 

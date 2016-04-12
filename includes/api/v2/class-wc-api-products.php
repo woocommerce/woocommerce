@@ -374,6 +374,7 @@ class WC_API_Products extends WC_API_Resource {
 				} else {
 					// Just sync variations
 					WC_Product_Variable::sync( $id );
+					WC_Product_Variable::sync_stock_status( $id );
 				}
 			}
 
@@ -965,57 +966,34 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Regular Price
 			if ( isset( $data['regular_price'] ) ) {
-				$regular_price = ( '' === $data['regular_price'] ) ? '' : wc_format_decimal( $data['regular_price'] );
-				update_post_meta( $product_id, '_regular_price', $regular_price );
+				$regular_price = ( '' === $data['regular_price'] ) ? '' : $data['regular_price'];
 			} else {
 				$regular_price = get_post_meta( $product_id, '_regular_price', true );
 			}
 
 			// Sale Price
 			if ( isset( $data['sale_price'] ) ) {
-				$sale_price = ( '' === $data['sale_price'] ) ? '' : wc_format_decimal( $data['sale_price'] );
-				update_post_meta( $product_id, '_sale_price', $sale_price );
+				$sale_price = ( '' === $data['sale_price'] ) ? '' : $data['sale_price'];
 			} else {
 				$sale_price = get_post_meta( $product_id, '_sale_price', true );
 			}
 
-			$date_from = isset( $data['sale_price_dates_from'] ) ? strtotime( $data['sale_price_dates_from'] ) : get_post_meta( $product_id, '_sale_price_dates_from', true );
-			$date_to   = isset( $data['sale_price_dates_to'] ) ? strtotime( $data['sale_price_dates_to'] ) : get_post_meta( $product_id, '_sale_price_dates_to', true );
-
-			// Dates
-			if ( $date_from ) {
-				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
+			if ( isset( $data['sale_price_dates_from'] ) ) {
+				$date_from = $data['sale_price_dates_from'];
 			} else {
-				update_post_meta( $product_id, '_sale_price_dates_from', '' );
+				$date_from = get_post_meta( $product_id, '_sale_price_dates_from', true );
+				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
 			}
 
-			if ( $date_to ) {
-				update_post_meta( $product_id, '_sale_price_dates_to', $date_to );
+			if ( isset( $data['sale_price_dates_to'] ) ) {
+				$date_to = $data['sale_price_dates_to'];
 			} else {
-				update_post_meta( $product_id, '_sale_price_dates_to', '' );
+				$date_to = get_post_meta( $product_id, '_sale_price_dates_to', true );
+				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
 			}
 
-			if ( $date_to && ! $date_from ) {
-				$date_from = strtotime( 'NOW', current_time( 'timestamp' ) );
-				update_post_meta( $product_id, '_sale_price_dates_from', $date_from );
-			}
+			_wc_save_product_price( $product_id, $regular_price, $sale_price, $date_from, $date_to );
 
-			// Update price if on sale
-			if ( '' !== $sale_price && '' == $date_to && '' == $date_from ) {
-				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
-			} else {
-				update_post_meta( $product_id, '_price', $regular_price );
-			}
-
-			if ( '' !== $sale_price && $date_from && $date_from <= strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $product_id, '_price', wc_format_decimal( $sale_price ) );
-			}
-
-			if ( $date_to && $date_to < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $product_id, '_price', $regular_price );
-				update_post_meta( $product_id, '_sale_price_dates_from', '' );
-				update_post_meta( $product_id, '_sale_price_dates_to', '' );
-			}
 		}
 
 		// Product parent ID for groups
@@ -1114,7 +1092,8 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_stock', '' );
 
 				wc_update_product_stock_status( $product_id, 'instock' );
-
+			} elseif ( 'variable' === $product_type ) {
+				update_post_meta( $product_id, '_stock', '' );
 			} elseif ( 'yes' == $managing_stock ) {
 				update_post_meta( $product_id, '_backorders', $backorders );
 
@@ -1134,7 +1113,7 @@ class WC_API_Products extends WC_API_Resource {
 				wc_update_product_stock_status( $product_id, $stock_status );
 			}
 
-		} else {
+		} elseif ( 'variable' !== $product_type ) {
 			wc_update_product_stock_status( $product_id, $stock_status );
 		}
 
@@ -1355,16 +1334,19 @@ class WC_API_Products extends WC_API_Resource {
 			// Stock handling
 			if ( isset( $variation['managing_stock'] ) ) {
 				$managing_stock = ( true === $variation['managing_stock'] ) ? 'yes' : 'no';
-				update_post_meta( $variation_id, '_manage_stock', $managing_stock );
 			} else {
 				$managing_stock = get_post_meta( $variation_id, '_manage_stock', true );
 			}
 
-			// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
+			update_post_meta( $variation_id, '_manage_stock', '' === $managing_stock ? 'no' : $managing_stock );
+
 			if ( isset( $variation['in_stock'] ) ) {
 				$stock_status = ( true === $variation['in_stock'] ) ? 'instock' : 'outofstock';
-				wc_update_product_stock_status( $variation_id, $stock_status );
+			} else {
+				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
 			}
+
+			wc_update_product_stock_status( $variation_id, '' === $stock_status ? 'instock' : $stock_status );
 
 			if ( 'yes' === $managing_stock ) {
 				$backorders = get_post_meta( $variation_id, '_backorders', true );
@@ -1389,56 +1371,33 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Regular Price
 			if ( isset( $variation['regular_price'] ) ) {
-				$regular_price = ( '' === $variation['regular_price'] ) ? '' : wc_format_decimal( $variation['regular_price'] );
-				update_post_meta( $variation_id, '_regular_price', $regular_price );
+				$regular_price = ( '' === $variation['regular_price'] ) ? '' : $variation['regular_price'];
 			} else {
 				$regular_price = get_post_meta( $variation_id, '_regular_price', true );
 			}
 
 			// Sale Price
 			if ( isset( $variation['sale_price'] ) ) {
-				$sale_price = ( '' === $variation['sale_price'] ) ? '' : wc_format_decimal( $variation['sale_price'] );
-				update_post_meta( $variation_id, '_sale_price', $sale_price );
+				$sale_price = ( '' === $variation['sale_price'] ) ? '' : $variation['sale_price'];
 			} else {
 				$sale_price = get_post_meta( $variation_id, '_sale_price', true );
 			}
 
-			$date_from = isset( $variation['sale_price_dates_from'] ) ? strtotime( $variation['sale_price_dates_from'] ) : get_post_meta( $variation_id, '_sale_price_dates_from', true );
-			$date_to   = isset( $variation['sale_price_dates_to'] ) ? strtotime( $variation['sale_price_dates_to'] ) : get_post_meta( $variation_id, '_sale_price_dates_to', true );
-
-			// Save Dates
-			if ( $date_from ) {
-				update_post_meta( $variation_id, '_sale_price_dates_from', $date_from );
+			if ( isset( $variation['sale_price_dates_from'] ) ) {
+				$date_from = $variation['sale_price_dates_from'];
 			} else {
-				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
+				$date_from = get_post_meta( $variation_id, '_sale_price_dates_from', true );
+				$date_from = ( '' === $date_from ) ? '' : date( 'Y-m-d', $date_from );
 			}
 
-			if ( $date_to ) {
-				update_post_meta( $variation_id, '_sale_price_dates_to', $date_to );
+			if ( isset( $variation['sale_price_dates_to'] ) ) {
+				$date_to = $variation['sale_price_dates_to'];
 			} else {
-				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
+				$date_to = get_post_meta( $variation_id, '_sale_price_dates_to', true );
+				$date_to = ( '' === $date_to ) ? '' : date( 'Y-m-d', $date_to );
 			}
 
-			if ( $date_to && ! $date_from ) {
-				update_post_meta( $variation_id, '_sale_price_dates_from', strtotime( 'NOW', current_time( 'timestamp' ) ) );
-			}
-
-			// Update price if on sale
-			if ( '' != $sale_price && '' == $date_to && '' == $date_from ) {
-				update_post_meta( $variation_id, '_price', $sale_price );
-			} else {
-				update_post_meta( $variation_id, '_price', $regular_price );
-			}
-
-			if ( '' != $sale_price && $date_from && $date_from < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $variation_id, '_price', $sale_price );
-			}
-
-			if ( $date_to && $date_to < strtotime( 'NOW', current_time( 'timestamp' ) ) ) {
-				update_post_meta( $variation_id, '_price', $regular_price );
-				update_post_meta( $variation_id, '_sale_price_dates_from', '' );
-				update_post_meta( $variation_id, '_sale_price_dates_to', '' );
-			}
+			_wc_save_product_price( $variation_id, $regular_price, $sale_price, $date_from, $date_to );
 
 			// Tax class
 			if ( isset( $variation['tax_class'] ) ) {

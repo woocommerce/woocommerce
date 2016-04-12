@@ -319,7 +319,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				$chart_data[ $category->term_id ]['category'] = $category->name;
 				$chart_data[ $category->term_id ]['data'] = $category_chart_data;
 
-				$index ++;
+				$index++;
 			}
 			?>
 			<div class="chart-container">

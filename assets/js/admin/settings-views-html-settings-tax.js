@@ -1,8 +1,8 @@
 /* global htmlSettingsTaxLocalizeScript, ajaxurl */
+
 /**
  * Used by woocommerce/includes/admin/settings/views/html-settings-tax.php
  */
-
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
 
@@ -39,7 +39,9 @@
 					var changes = this.changes || {};
 
 					_.each( changedRows, function( row, id ) {
-						changes[ id ] = _.extend( changes[ id ] || { tax_rate_id : id }, row );
+						changes[ id ] = _.extend( changes[ id ] || {
+							tax_rate_id : id
+						}, row );
 					} );
 
 					this.changes = changes;
@@ -82,7 +84,7 @@
 					Backbone.ajax({
 						method: 'POST',
 						dataType: 'json',
-						url: ajaxurl + '?action=woocommerce_tax_rates_save_changes',
+						url: ajaxurl + ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_tax_rates_save_changes',
 						data: {
 							current_class: data.current_class,
 							wc_tax_nonce: data.wc_tax_nonce,
@@ -95,6 +97,9 @@
 
 								WCTaxTableModelInstance.changes = {};
 								WCTaxTableModelInstance.trigger( 'saved:rates' );
+
+								// Reload view.
+								WCTaxTableInstance.render();
 							}
 
 							self.unblock();
@@ -114,7 +119,7 @@
 
 					this.listenTo( this.model, 'change:rates', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
-					$tbody.on( 'change', ':input', { view: this }, this.updateModelOnChange );
+					$tbody.on( 'change autocompletechange', ':input', { view: this }, this.updateModelOnChange );
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$search_field.on( 'keyup search', { view: this }, this.onSearchField );
 					$pagination.on( 'click', 'a', { view: this }, this.onPageChange );
@@ -369,7 +374,7 @@
 						var new_position = 0;
 						var old_position = parseInt( rate.tax_rate_order, 10 );
 
-						if ( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').size() ) {
+						if ( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').length ) {
 							new_position = parseInt( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').index(), 10 ) + parseInt( ( view.page - 1 ) * view.per_page, 10 );
 						} else {
 							new_position = old_position;
