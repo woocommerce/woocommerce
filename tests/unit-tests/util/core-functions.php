@@ -72,6 +72,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'TRY' => __( 'Turkish Lira', 'woocommerce' ),
 			'TWD' => __( 'Taiwan New Dollars', 'woocommerce' ),
 			'UAH' => __( 'Ukrainian Hryvnia', 'woocommerce' ),
+			'UGX' => __( 'Ugandan Shilling', 'woocommerce' ),
 			'USD' => __( 'US Dollars', 'woocommerce' ),
 			'VND' => __( 'Vietnamese Dong', 'woocommerce' ),
 			'ZAR' => __( 'South African rand', 'woocommerce' ),

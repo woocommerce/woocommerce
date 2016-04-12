@@ -817,7 +817,7 @@ class WC_Admin_Post_Types {
 	public function product_sortable_columns( $columns ) {
 		$custom = array(
 			'price'    => 'price',
-			'featured' => 'featured',
+			'featured' => array( 'featured', 1 ),
 			'sku'      => 'sku',
 			'name'     => 'title'
 		);
