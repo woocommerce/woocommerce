@@ -214,7 +214,7 @@ class WC_AJAX {
 		$coupon = wc_clean( $_POST['coupon'] );
 
 		if ( ! isset( $coupon ) || empty( $coupon ) ) {
-			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ) );
+			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 
 		} else {
 
