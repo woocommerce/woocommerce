@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!DOCTYPE html>
 <html dir="<?php echo is_rtl() ? 'rtl' : 'ltr'?>">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=<?php echo apply_filters( 'woocommerce_email_charset', 'UTF-8'); ?>" />
         <title><?php echo get_bloginfo( 'name', 'display' ); ?></title>
 	</head>
     <body <?php echo is_rtl() ? 'rightmargin' : 'leftmargin'; ?>="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
