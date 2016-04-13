@@ -804,8 +804,12 @@ class WC_Countries {
 					)
 				),
 				'NZ' => array(
+					'postcode' => array(
+						'label' => __( 'Postcode', 'woocommerce' )
+					),
 					'state' => array(
-						'required' => false
+						'required' => false,
+						'label'    => __( 'Region', 'woocommerce' )
 					)
 				),
 				'NO' => array(
