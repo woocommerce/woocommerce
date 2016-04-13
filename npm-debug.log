@@ -1,0 +1,23 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node', '/usr/local/bin/npm', 'start' ]
+2 info using npm@3.8.6
+3 info using node@v4.3.0
+4 verbose stack Error: missing script: start
+4 verbose stack     at run (/usr/local/lib/node_modules/npm/lib/run-script.js:147:19)
+4 verbose stack     at /usr/local/lib/node_modules/npm/lib/run-script.js:57:5
+4 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:345:5
+4 verbose stack     at checkBinReferences_ (/usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:309:45)
+4 verbose stack     at final (/usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:343:3)
+4 verbose stack     at then (/usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:113:5)
+4 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:300:12
+4 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/graceful-fs/graceful-fs.js:78:16
+4 verbose stack     at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
+5 verbose cwd /Users/kellychoffman/Documents/wp-core.dev/wp-content/plugins/woocommerce
+6 error Darwin 15.4.0
+7 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "start"
+8 error node v4.3.0
+9 error npm  v3.8.6
+10 error missing script: start
+11 error If you need help, you may report this error at:
+11 error     <https://github.com/npm/npm/issues>
+12 verbose exit [ 1, true ]
