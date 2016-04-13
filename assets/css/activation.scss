@@ -40,6 +40,15 @@ p.woocommerce-actions,
 		}
 	}
 
+	a.skip,
+	a.docs {
+		opacity: 0.5;
+
+		&:hover, &:focus {
+			opacity: 1;
+		}
+	}
+
 	a.woocommerce-message-close {
 		position: absolute;
 		top: 10px;
