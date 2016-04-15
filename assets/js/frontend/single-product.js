@@ -15,7 +15,7 @@ jQuery( function( $ ) {
 			var url   = window.location.href;
 			var $tabs = $( this ).find( '.wc-tabs, ul.tabs' ).first();
 
-			if ( hash.toLowerCase().indexOf( 'comment-' ) >= 0 || hash === '#reviews' ) {
+			if ( hash.toLowerCase().indexOf( 'comment-' ) >= 0 || hash === '#reviews' || hash === '#tab-reviews' ) {
 				$tabs.find( 'li.reviews_tab a' ).click();
 			} else if ( url.indexOf( 'comment-page-' ) > 0 || url.indexOf( 'cpage=' ) > 0 ) {
 				$tabs.find( 'li.reviews_tab a' ).click();
