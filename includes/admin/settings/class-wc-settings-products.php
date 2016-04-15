@@ -109,8 +109,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'     => 'select',
 					'options'  => array(
 						''              => __( 'Show products', 'woocommerce' ),
-						'subcategories' => __( 'Show categories &amp; subcategories', 'woocommerce' ),
-						'both'          => __( 'Show both', 'woocommerce' ),
+						'subcategories' => __( 'Show categories', 'woocommerce' ),
+						'both'          => __( 'Show categories &amp; products', 'woocommerce' ),
 					),
 					'desc_tip' =>  true,
 				),
@@ -126,7 +126,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'options'  => array(
 						''              => __( 'Show products', 'woocommerce' ),
 						'subcategories' => __( 'Show subcategories', 'woocommerce' ),
-						'both'          => __( 'Show both', 'woocommerce' ),
+						'both'          => __( 'Show subcategories &amp; products', 'woocommerce' ),
 					),
 					'desc_tip' =>  true,
 				),
