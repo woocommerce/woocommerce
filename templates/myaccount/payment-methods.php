@@ -29,25 +29,25 @@ wc_print_notices(); ?>
 
 <?php wc_get_template( 'myaccount/navigation.php' ); ?>
 
-<div class="my-account-content">
+<div class="woocommerce-MyAccount-content">
 
 	<?php do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 
 	<?php if ( $has_methods ) : ?>
 
-		<table class="shop_table shop_table_responsive account-payment-methods-table">
+		<table class="woocommerce-MyAccount-paymentMethods shop_table shop_table_responsive account-payment-methods-table">
 			<thead>
 				<tr>
 					<?php foreach ( wc_get_account_payment_methods_columns() as $column_id => $column_name ) : ?>
-						<th class="payment-method-<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo esc_html( $column_name ); ?></span></th>
+						<th class="woocommerce-PaymentMethod woocommerce-PaymentMethod--<?php echo esc_attr( $column_id ); ?> payment-method-<?php echo esc_attr( $column_id ); ?>"><span class="nobr"><?php echo esc_html( $column_name ); ?></span></th>
 					<?php endforeach; ?>
 				</tr>
 			</thead>
 			<?php foreach ( $saved_methods as $type => $methods ) : ?>
 				<?php foreach ( $methods as $method ) : ?>
-					<tr class="method">
+					<tr>
 						<?php foreach ( wc_get_account_payment_methods_columns() as $column_id => $column_name ) : ?>
-							<td class="payment-method-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
+							<td class="woocommerce-PaymentMethod woocommerce-PaymentMethod--<?php echo esc_attr( $column_id ); ?> payment-method-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
 								<?php
 								if ( has_action( 'woocommerce_account_payment_methods_column_' . $column_id ) ) {
 									do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
@@ -74,7 +74,7 @@ wc_print_notices(); ?>
 
 	<?php else : ?>
 
-		<p class="woocommerce-info"><?php esc_html_e( 'No saved methods found.', 'woocommerce' ); ?></p>
+		<p class="woocommerce-Message woocommerce-Message--info woocommerce-info"><?php esc_html_e( 'No saved methods found.', 'woocommerce' ); ?></p>
 
 	<?php endif; ?>
 

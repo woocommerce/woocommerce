@@ -26,7 +26,7 @@ wc_print_notices();
 
 wc_get_template( 'myaccount/navigation.php' ); ?>
 
-<div class="my-account-content">
+<div class="woocommerce-MyAccount-content">
 	<?php if ( ! $load_address ) : ?>
 		<?php wc_get_template( 'myaccount/my-address.php' ); ?>
 	<?php else : ?>

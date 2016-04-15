@@ -98,7 +98,8 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 	global $wp;
 
 	$classes = array(
-		'my-account-menu-item-' . $endpoint,
+		'woocommerce-MyAccount-navigation-link',
+		'woocommerce-MyAccount-navigation-link--' . $endpoint,
 	);
 
 	// Set current item class.
@@ -108,7 +109,7 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 	}
 
 	if ( $current ) {
-		$classes[] = 'current-item';
+		$classes[] = 'is-active';
 	}
 
 	$classes = apply_filters( 'woocommerce_account_menu_item_classes', $classes, $endpoint );

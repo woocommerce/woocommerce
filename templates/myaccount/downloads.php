@@ -29,7 +29,7 @@ wc_print_notices(); ?>
 
 <?php wc_get_template( 'myaccount/navigation.php' ); ?>
 
-<div class="my-account-content">
+<div class="woocommerce-MyAccount-content">
 
 	<?php do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
 
@@ -37,7 +37,7 @@ wc_print_notices(); ?>
 
 		<?php do_action( 'woocommerce_before_available_downloads' ); ?>
 
-		<table class="shop_table shop_table_responsive account-downloads-table">
+		<table class="woocommerce-MyAccount-downloads shop_table shop_table_responsive">
 			<thead>
 				<tr>
 					<?php foreach ( wc_get_account_downloads_columns() as $column_id => $column_name ) : ?>
@@ -46,7 +46,7 @@ wc_print_notices(); ?>
 				</tr>
 			</thead>
 			<?php foreach ( $downloads as $download ) : ?>
-				<tr class="download">
+				<tr>
 					<?php foreach ( wc_get_account_downloads_columns() as $column_id => $column_name ) : ?>
 						<td class="<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
 							<?php if ( has_action( 'woocommerce_account_downloads_column_' . $column_id ) ) : ?>
@@ -84,7 +84,7 @@ wc_print_notices(); ?>
 
 									if ( $actions = apply_filters( 'woocommerce_account_download_actions', $actions, $download ) ) {
 										foreach ( $actions as $key => $action ) {
-											echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';
+											echo '<a href="' . esc_url( $action['url'] ) . '" class="button woocommerce-Button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';
 										}
 									}
 								?>

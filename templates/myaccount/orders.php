@@ -25,13 +25,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 wc_print_notices();
 wc_get_template( 'myaccount/navigation.php' ); ?>
 
-<div class="my-account-content">
+<div class="woocommerce-MyAccount-content">
 
 	<?php do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
 	<?php if ( $has_orders ) : ?>
 
-		<table class="shop_table shop_table_responsive my_account_orders account-orders-table">
+		<table class="woocommerce-MyAccount-orders shop_table shop_table_responsive my_account_orders account-orders-table">
 			<thead>
 				<tr>
 					<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) : ?>
@@ -107,20 +107,20 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 		<?php do_action( 'woocommerce_before_account_orders_pagination' ); ?>
 
 		<?php if ( 1 < $customer_orders->max_num_pages ) : ?>
-			<div class="wc-account-orders-pagination">
+			<div class="woocommerce-Pagination">
 				<?php if ( 1 !== $current_page ) : ?>
-					<a class="button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php _e( 'Previous', 'woocommerce' ); ?></a>
+					<a class="woocommerce-Button button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php _e( 'Previous', 'woocommerce' ); ?></a>
 				<?php endif; ?>
 
 				<?php if ( $current_page !== intval( $customer_orders->max_num_pages ) ) : ?>
-					<a class="button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page + 1 ) ); ?>"><?php _e( 'Next', 'woocommerce' ); ?></a>
+					<a class="woocommerce-Button button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page + 1 ) ); ?>"><?php _e( 'Next', 'woocommerce' ); ?></a>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>
 
 	<?php else : ?>
-		<div class="woocommerce-info">
-			<a class="button" href="<?php echo esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ); ?>">
+		<div class="woocommerce-Message woocommerce-Message--info woocommerce-info">
+			<a class="woocommerce-Button button" href="<?php echo esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ); ?>">
 				<?php _e( 'Go Shop', 'woocommerce' ) ?>
 			</a>
 			<?php _e( 'No order has been made yet.', 'woocommerce' ); ?>
