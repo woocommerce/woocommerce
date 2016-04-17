@@ -263,7 +263,21 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * @subcommand delete
 	 * @since      2.5.0
 	 */
-	protected function delete( $__, $assoc_args ) {
+	public function delete( $args, $assoc_args ) {
+
+		try {
+			foreach ( $args as $cat_id ) {
+
+				if ( wp_delete_category( $cat_id ) ) {
+				  WP_CLI::success( "Category #$cat_id was successfully deleted");
+				} else {
+				  WP_CLI::warning( "Not able to delete category #$cat_id! Make sure it exists and that it's not the default category");
+				}
+			}
+		} catch ( WC_CLI_Exception $e ) {
+			WP_CLI::error( $e->getMessage() );
+		}
+
 
 	}
 
