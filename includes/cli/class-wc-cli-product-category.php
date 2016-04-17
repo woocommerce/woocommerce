@@ -8,6 +8,7 @@
  * @category CLI
  * @author   WooThemes
  */
+//@formatter:off
 class WC_CLI_Product_Category extends WC_CLI_Command {
 
 	/**
@@ -147,6 +148,18 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		);
 	}
 
+	protected function get_product_category_by_name( $term_name ) {
+
+		$term_meta = get_term_by( 'slug', $term_name, 'product_cat', OBJECT, 'woocommerce_cli_get_product_term_by_slug' );
+		return $this->get_product_category( $term_meta->term_id );
+	}
+
+	protected function get_product_category_by_slug( $term_slug ) {
+
+		$term_meta = get_term_by( 'name', $term_slug, 'product_cat', OBJECT, 'woocommerce_cli_get_product_term_by_name' );
+		return $this->get_product_category( $term_meta->term_id );
+	}
+
 	/**
 	 * Get default format fields that will be used in `list` and `get` subcommands.
 	 *
@@ -156,4 +169,84 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	protected function get_default_format_fields() {
 		return 'id,name,slug,parent,description,display,image,count';
 	}
+
+	/**
+	 * Create a new product category
+	 *
+	 * // display type = (products, subcategories, both)
+	 *
+	 * @param string $term
+	 *
+	 * @since 2.6.0
+	 * @return array
+	 */
+	public function create( $__, $assoc_args ) {
+
+		try {
+
+			// Create and validate the term creation
+			$product_category_meta = ( empty( $assoc_args ) ) ? wp_insert_term( $assoc_args[ 'name' ], 'product_cat' ) :
+				wp_insert_term( $assoc_args[ 'name' ], 'product_cat', $assoc_args );
+
+			if( is_object( $product_category_meta ) && ( 'WP_Error' == get_class( $product_category_meta ) ) ) {
+
+				$error = array_pop( $product_category_meta->errors );
+				throw new WC_CLI_Exception( $error[0], key( $error ) );
+			}
+
+			// Log successful creation
+			WP_CLI::log( 'Product Category ' . $assoc_args[ 'name' ] . ' was created successfully.' );
+
+			if ( array_key_exists( 'parent', $assoc_args ) ) {
+
+				$term = $this->get_product_category_by_mixed( $assoc_args[ 'parent' ] );
+				WP_CLI::log( "parent term: " . var_dump( $term ) );
+				$assoc_args[ 'parent' ] = $term[ 'id' ];
+			}
+
+			// Read for default values
+			$default_meta_values = $this->get_default_product_category_meta();
+
+			$assignable_meta_values = array_merge( $default_meta_values, $assoc_args );
+
+            foreach( $assignable_meta_values as $meta_key => $meta_value ) {
+
+                add_term_meta( $product_category_meta[ 'term_id' ], $meta_key, $assignable_meta_values[ $meta_key ] );
+            }
+
+			return true;
+		}
+		catch ( WC_CLI_Exception $ex ) {
+
+			WP_CLI::error( $ex->getErrorCode() );
+		}
+	}
+
+	protected function get_default_product_category_meta() {
+
+		return array (
+			'display_type' => 'both',
+			'thumbnail_id' => 0,
+		);
+	}
+
+	protected function get_product_category_by_mixed( $term_identifier ) {
+
+		$term = false;
+
+		if ( is_int( $term_identifier ) ) {
+			$term = $this->get_product_category( $term_identifier );
+		}
+
+		if ( ! $term ) {
+			$term = $this->get_product_category_by_slug( $term_identifier );
+		}
+
+		if ( ! $term ) {
+			$term = $this->get_product_category_by_name( $term_identifier );
+		}
+
+		return $term;
+	}
+
 }
