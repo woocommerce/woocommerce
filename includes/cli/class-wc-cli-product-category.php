@@ -222,12 +222,49 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		}
 	}
 
+	/**
+	 * Delete a product category
+	 *
+	 * // display type = (products, subcategories, both)
+	 *
+	 * @param string $term
+	 *
+	 * @since 2.6.0
+	 * @return array
+	 */
 	protected function get_default_product_category_meta() {
 
 		return array (
 			'display_type' => 'both',
 			'thumbnail_id' => 0,
 		);
+	}
+
+
+	/**
+	 * Delete Product Categories
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--<field>=<value>]
+	 * : Filter categories based on product property.
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * name
+	 * * slug
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wc product category delete
+	 *
+	 *     wp wc product category delete --fields=id,name,slug --format=json
+	 *
+	 * @subcommand delete
+	 * @since      2.5.0
+	 */
+	protected function delete( $__, $assoc_args ) {
+
 	}
 
 	protected function get_product_category_by_mixed( $term_identifier ) {
