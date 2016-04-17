@@ -199,9 +199,10 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 
 			if ( array_key_exists( 'parent', $assoc_args ) ) {
 
-				$term = $this->get_product_category_by_mixed( $assoc_args[ 'parent' ] );
+				$term = $this->get_product_category( $assoc_args[ 'parent' ] );
 				WP_CLI::log( "parent term: " . var_dump( $term ) );
 				$assoc_args[ 'parent' ] = $term[ 'id' ];
+
 			}
 
 			// Read for default values
