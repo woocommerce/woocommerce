@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         						if ( ! $method->supports( 'shipping-zones' ) ) {
         							continue;
                                 }
-        						echo '<option value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</li>';
+        						echo '<option value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</option>';
         					}
         				?>
         			</select>
