@@ -1849,11 +1849,21 @@ class WC_Admin_Post_Types {
 			}
 
 			// Categories
-			if ( isset( $_GET['product_cat'] ) && '0' == $_GET['product_cat'] ) {
+			if ( isset( $_GET['product_cat'] ) && '0' === $_GET['product_cat'] ) {
 				$query->query_vars['tax_query'][] = array(
 					'taxonomy' => 'product_cat',
 					'field'    => 'id',
 					'terms'    => get_terms( 'product_cat', array( 'fields' => 'ids' ) ),
+					'operator' => 'NOT IN'
+				);
+			}
+
+			// Shipping classes
+			if ( isset( $_GET['product_shipping_class'] ) && '0' === $_GET['product_shipping_class'] ) {
+				$query->query_vars['tax_query'][] = array(
+					'taxonomy' => 'product_shipping_class',
+					'field'    => 'id',
+					'terms'    => get_terms( 'product_shipping_class', array( 'fields' => 'ids' ) ),
 					'operator' => 'NOT IN'
 				);
 			}
