@@ -307,11 +307,14 @@ class WC_Admin_Taxonomies {
 	 * @return array
 	 */
 	public function product_cat_columns( $columns ) {
-		$new_columns          = array();
-		$new_columns['cb']    = $columns['cb'];
-		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
+		$new_columns = array();
 
-		unset( $columns['cb'] );
+		if ( isset( $columns['cb'] ) ) {
+			$new_columns['cb'] = $columns['cb'];
+			unset( $columns['cb'] );
+		}
+
+		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
 
 		return array_merge( $new_columns, $columns );
 	}
