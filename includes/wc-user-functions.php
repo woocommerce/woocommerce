@@ -43,6 +43,9 @@ add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
  */
 function wc_create_new_customer( $email, $username = '', $password = '' ) {
 
+    $function = apply_filters( 'woocommerce_registration_new_customer', array() );
+    if ( ! empty($function) && function_exists($function) ) return call_user_func_array($function, array($email, $username, $password));
+
 	// Check the e-mail address
 	if ( empty( $email ) || ! is_email( $email ) ) {
 		return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'woocommerce' ) );
