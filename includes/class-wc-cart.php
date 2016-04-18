@@ -790,6 +790,28 @@ class WC_Cart {
 			return array_unique( $found_tax_classes );
 		}
 
+		/**
+		 * Determines the value that the customer spent and the subtotal
+		 * displayed, used for things like coupon validation.
+		 *
+		 * Since the coupon lines are displayed based on the TAX DISPLAY value
+		 * of cart, this is used to determine the spend.
+		 *
+		 * If cart totals are shown including tax, use the subtotal.
+		 * If cart totals are shown excluding tax, use the subtotal ex tax
+		 * (tax is shown after coupons).
+		 *
+		 * @since 2.6.0
+		 * @return string
+		 */
+		public function get_displayed_subtotal() {
+			if ( 'incl' === $this->tax_display_cart ) {
+				return wc_format_decimal( $this->subtotal );
+			} elseif ( 'excl' === $this->tax_display_cart ) {
+				return wc_format_decimal( $this->subtotal_ex_tax );
+			}
+		}
+
 	/*-----------------------------------------------------------------------------------*/
 	/* Add to cart handling */
 	/*-----------------------------------------------------------------------------------*/
