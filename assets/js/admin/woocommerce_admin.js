@@ -7,6 +7,7 @@ jQuery( function ( $ ) {
 
 	// Field validation error tips
 	$( document.body )
+
 		.on( 'wc_add_error_tip', function( e, element, error_type ) {
 			var offset = element.position();
 
@@ -18,51 +19,57 @@ jQuery( function ( $ ) {
 					.fadeIn( '100' );
 			}
 		})
+
 		.on( 'wc_remove_error_tip', function( e, element, error_type ) {
-			element.parent().find( '.wc_error_tip.' + error_type ).remove();
+			element.parent().find( '.wc_error_tip.' + error_type ).fadeOut( '100', function() { $( this ).remove(); } );
 		})
+
 		.on( 'click', function() {
 			$( '.wc_error_tip' ).fadeOut( '100', function() { $( this ).remove(); } );
 		})
+
 		.on( 'blur', '.wc_input_decimal[type=text], .wc_input_price[type=text], .wc_input_country_iso[type=text]', function() {
 			$( '.wc_error_tip' ).fadeOut( '100', function() { $( this ).remove(); } );
 		})
-		.on( 'keyup change', '.wc_input_price[type=text]', function() {
+
+		.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text]', function() {
+			if ( $( this ).is( '.wc_input_price' ) ) {
+				var regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+			} else {
+				var regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+			}
+
 			var value    = $( this ).val();
-			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 			var newvalue = value.replace( regex, '' );
 
 			if ( value !== newvalue ) {
 				$( this ).val( newvalue );
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
-			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_mon_decimal_error' ] );
 			}
 		})
-		.on( 'keyup change', '.wc_input_decimal[type=text]', function() {
+
+		.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text]', function() {
+			if ( $( this ).is( '.wc_input_price' ) ) {
+				var regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+				var error = 'i18n_mon_decimal_error';
+			} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
+				var regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
+				var error = 'i18n_country_iso_error';
+			} else {
+				var regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+				var error = 'i18n_decimal_error';
+			}
+
 			var value    = $( this ).val();
-			var regex    = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
 			var newvalue = value.replace( regex, '' );
 
 			if ( value !== newvalue ) {
-				$( this ).val( newvalue );
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_decimal_error' ] );
+				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), error ] );
 			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_decimal_error' ] );
+				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), error ] );
 			}
 		})
-		.on( 'keyup change', '.wc_input_country_iso[type=text]', function() {
-			var value = $( this ).val();
-			var regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
 
-			if ( ! regex.test( value ) ) {
-				$( this ).val( '' );
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), 'i18n_country_iso_error' ] );
-			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), 'i18n_country_iso_error' ] );
-			}
-		})
-		.on( 'keyup change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
+		.on( 'keyup', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
 			var sale_price_field = $( this ), regular_price_field;
 
 			if( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
@@ -80,6 +87,24 @@ jQuery( function ( $ ) {
 				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
 			}
 		})
+
+		.on( 'change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
+			var sale_price_field = $( this ), regular_price_field;
+
+			if( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
+				regular_price_field = sale_price_field.parents( '.variable_pricing' ).find( '.wc_input_price[name^=variable_regular_price]' );
+			} else {
+				regular_price_field = $( '#_regular_price' );
+			}
+
+			var sale_price    = parseFloat( window.accounting.unformat( sale_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+			var regular_price = parseFloat( window.accounting.unformat( regular_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+
+			if ( sale_price >= regular_price ) {
+				$( this ).val( '' );
+			}
+		})
+
 		.on( 'init_tooltips', function() {
 			var tiptip_args = {
 				'attribute': 'data-tip',
