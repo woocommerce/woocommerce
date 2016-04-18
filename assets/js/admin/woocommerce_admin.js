@@ -33,10 +33,12 @@ jQuery( function ( $ ) {
 		})
 
 		.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text]', function() {
+			var regex;
+
 			if ( $( this ).is( '.wc_input_price' ) ) {
-				var regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 			} else {
-				var regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
 			}
 
 			var value    = $( this ).val();
@@ -48,15 +50,17 @@ jQuery( function ( $ ) {
 		})
 
 		.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text]', function() {
+			var regex, error;
+
 			if ( $( this ).is( '.wc_input_price' ) ) {
-				var regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
-				var error = 'i18n_mon_decimal_error';
+				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+				error = 'i18n_mon_decimal_error';
 			} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
-				var regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
-				var error = 'i18n_country_iso_error';
+				regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
+				error = 'i18n_country_iso_error';
 			} else {
-				var regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
-				var error = 'i18n_decimal_error';
+				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+				error = 'i18n_decimal_error';
 			}
 
 			var value    = $( this ).val();
