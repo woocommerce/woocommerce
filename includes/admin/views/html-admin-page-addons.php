@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="icon32 icon32-posts-product" id="icon-woocommerce"><br /></div>
 	<h1>
 		<?php _e( 'WooCommerce Add-ons/Extensions', 'woocommerce' ); ?>
-		<a href="http://www.woothemes.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
+		<a href="https://www.woothemes.com/product-category/woocommerce-extensions/" class="add-new-h2"><?php _e( 'Browse all extensions', 'woocommerce' ); ?></a>
 		<?php WC_Admin_Addons::output_storefront_button(); ?>
 	</h1>
 	<?php if ( $sections ) : ?>

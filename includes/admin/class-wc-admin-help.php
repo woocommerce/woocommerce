@@ -155,7 +155,7 @@ class WC_Admin_Help {
 				'id'        => 'woocommerce_101_tab',
 				'title'     => __( 'WooCommerce 101', 'woocommerce' ),
 				'content'   =>
-					'<h2><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Videos&utm_campaign=Onboarding">' . __( 'WooCommerce 101', 'woocommerce' ) . '</a> &ndash; ' . esc_html( $video_map[ $video_key ]['title'] ) . '</h2>' .
+					'<h2><a href="https://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Videos&utm_campaign=Onboarding">' . __( 'WooCommerce 101', 'woocommerce' ) . '</a> &ndash; ' . esc_html( $video_map[ $video_key ]['title'] ) . '</h2>' .
 					'<iframe data-src="' . esc_url( $video_map[ $video_key ]['url'] ) . '" src="" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen msallowfullscreen width="480" height="298"></iframe>'
 			) );
 		}
@@ -175,7 +175,7 @@ class WC_Admin_Help {
 			'title'     => __( 'Support', 'woocommerce' ),
 			'content'   =>
 				'<h2>' . __( 'Support', 'woocommerce' ) . '</h2>' .
-				'<p>' . sprintf( __( 'After %sreading the documentation%s, for further assistance you can use the %scommunity forums%s on WordPress.org to talk with other users. If however you are a WooThemes customer, or need help with premium add-ons sold by WooThemes, please %suse our helpdesk%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/documentation/plugins/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Docs&utm_campaign=Onboarding">', '</a>', '<a href="https://wordpress.org/support/plugin/woocommerce">', '</a>', '<a href="http://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding">', '</a>' ) . '</p>' .
+				'<p>' . sprintf( __( 'After %sreading the documentation%s, for further assistance you can use the %scommunity forums%s on WordPress.org to talk with other users. If however you are a WooThemes customer, or need help with premium add-ons sold by WooThemes, please %suse our helpdesk%s.', 'woocommerce' ), '<a href="https://docs.woothemes.com/documentation/plugins/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Docs&utm_campaign=Onboarding">', '</a>', '<a href="https://wordpress.org/support/plugin/woocommerce">', '</a>', '<a href="https://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding">', '</a>' ) . '</p>' .
 				'<p>' . __( 'Before asking for help we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
 				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'WordPress.org Forums', 'woocommerce' ) . '</a> <a href="' . 'http://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding' . '" class="button">' . __( 'WooThemes Customer Support', 'woocommerce' ) . '</a></p>'
 		) );
