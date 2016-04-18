@@ -318,7 +318,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
 				$attributes[] = array(
-					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $attribute_name ) ),
+					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $attribute_name ), $product ),
 					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ),
 					'option' => $attribute,
 				);
@@ -333,7 +333,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				}
 
 				$attributes[] = array(
-					'name'      => wc_attribute_label( $attribute['name'] ),
+					'name'      => wc_attribute_label( $attribute['name'], $product ),
 					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
 					'position'  => (int) $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
