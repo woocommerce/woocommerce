@@ -46,6 +46,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'BOB' => __( 'Bolivian boliviano', 'woocommerce' ),
 			'BRL' => __( 'Brazilian real', 'woocommerce' ),
 			'BSD' => __( 'Bahamian dollar', 'woocommerce' ),
+			'BTC' => __( 'Bitcoin', 'woocommerce' ),
 			'BTN' => __( 'Bhutanese ngultrum', 'woocommerce' ),
 			'BWP' => __( 'Botswana pula', 'woocommerce' ),
 			'BYR' => __( 'Belarusian ruble', 'woocommerce' ),
