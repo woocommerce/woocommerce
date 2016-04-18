@@ -693,141 +693,17 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Get slug from path
-	 * @param  string $key
-	 * @return string
-	 */
-	private function format_plugin_slug( $key ) {
-		$slug = explode( '/', $key );
-		$slug = explode( '.', $slug[1] );
-		return $slug[0];
-	}
-
-	/**
 	 * Payments Step save.
 	 */
 	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
 
-		WP_Filesystem();
-		include_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-		include_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
-		$upgrader          = new WP_Upgrader();
-		$gateways          = $this->get_wizard_payment_gateways();
-		$installed_plugins = array_map( array( $this, 'format_plugin_slug' ), array_keys( get_plugins() ) );
+		$gateways = $this->get_wizard_payment_gateways();
 
 		foreach ( $gateways as $gateway_id => $gateway ) {
 			// If repo-slug is defined, download and install plugin from .org.
 			if ( ! empty( $gateway['repo-slug'] ) && ! empty( $_POST[ 'wc-wizard-gateway-' . $gateway_id . '-enabled' ] ) ) {
-				$plugin_slug = $gateway['repo-slug'];
-				$plugin      = $plugin_slug . '/' . $plugin_slug . '.php';
-				$installed   = false;
-				$activate    = false;
-
-				// See if the plugin is installed already
-				if ( in_array( $gateway['repo-slug'], $installed_plugins ) ) {
-					$installed = true;
-					$activate  = ! is_plugin_active( $plugin );
-				}
-
-				// Install this thing!
-				if ( ! $installed ) {
-					// Suppress feedback
-					ob_start();
-
-					try {
-						$plugin = plugins_api( 'plugin_information', array(
-							'slug'   => $gateway['repo-slug'],
-							'fields' => array(
-								'short_description' => false,
-								'sections'          => false,
-								'requires'          => false,
-								'rating'            => false,
-								'ratings'           => false,
-								'downloaded'        => false,
-								'last_updated'      => false,
-								'added'             => false,
-								'tags'              => false,
-								'homepage'          => false,
-								'donate_link'       => false,
-								'author_profile'    => false,
-								'author'            => false,
-							),
-						) );
-
-						if ( is_wp_error( $plugin ) ) {
-							throw new Exception( $plugin->get_error_message() );
-						}
-
-						$package  = $plugin->download_link;
-						$download = $upgrader->download_package( $package );
-
-						if ( is_wp_error( $download ) ) {
-							throw new Exception( $download->get_error_message() );
-						}
-
-						$working_dir = $upgrader->unpack_package( $download, true );
-
-						if ( is_wp_error( $working_dir ) ) {
-							throw new Exception( $working_dir->get_error_message() );
-						}
-
-						$result = $upgrader->install_package( array(
-							'source'                      => $working_dir,
-							'destination'                 => WP_PLUGIN_DIR,
-							'clear_destination'           => false,
-							'abort_if_destination_exists' => false,
-							'clear_working'               => true,
-							'hook_extra'                  => array(
-								'type'   => 'plugin',
-								'action' => 'install',
-							),
-						) );
-
-						if ( is_wp_error( $result ) ) {
-							throw new Exception( $result->get_error_message() );
-						}
-
-						$activate = true;
-
-					} catch ( Exception $e ) {
-						WC_Admin_Notices::add_custom_notice(
-							$gateway_id . '_install_error',
-							sprintf(
-								__( '%s could not be installed (%s). %sPlease install it manually by clicking here.%s', 'woocommerce' ),
-								$gateway['name'],
-								$e->getMessage(),
-								'<a href="' . admin_url( 'plugin-install.php?tab=search&type=term&s=' . $gateway['repo-slug'] ) . '">',
-								'</a>'
-							)
-						);
-					}
-
-					// Discard feedback
-					ob_end_clean();
-				}
-
-				// Activate this thing
-				if ( $activate ) {
-					try {
-						$result = activate_plugin( $plugin );
-
-						if ( is_wp_error( $result ) ) {
-							throw new Exception( $result->get_error_message() );
-						}
-					} catch ( Exception $e ) {
-						WC_Admin_Notices::add_custom_notice(
-							$gateway_id . '_install_error',
-							sprintf(
-								__( '%s could not be activated (%s). %sPlease activate it manually via the plugins screen.%s', 'woocommerce' ),
-								$gateway['name'],
-								$e->getMessage(),
-								'<a href="' . admin_url( 'plugins.php' ) . '">',
-								'</a>'
-							)
-						);
-					}
-				}
+				wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $gateway_id, $gateway ) );
 			}
 
 			$settings_key        = 'woocommerce_' . $gateway_id . '_settings';
