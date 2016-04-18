@@ -308,10 +308,12 @@ class WC_Admin_Taxonomies {
 	 */
 	public function product_cat_columns( $columns ) {
 		$new_columns          = array();
-		$new_columns['cb']    = $columns['cb'];
 		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
-
-		unset( $columns['cb'] );
+		
+		if ( isset( $columns['cb'] ) ) {
+			$new_columns['cb'] = $columns['cb'];
+			unset( $columns['cb'] );
+		}
 
 		return array_merge( $new_columns, $columns );
 	}
