@@ -563,13 +563,6 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function get_wizard_payment_gateways() {
 		$gateways = array(
-			'stripe' => array(
-				'name'        => __( 'Stripe', 'woocommerce' ),
-				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
-				'description' => sprintf( __( 'A modern and robust way to accept credit card payments on your store. %sLearn more about Stripe%s.', 'woocommerce' ), '<a href="#" target="_blank">', '</a>' ),
-				'class'       => 'featured featured-row-first',
-				'repo-slug'   => 'woocommerce-gateway-stripe',
-			),
 			'paypal-braintree' => array(
 				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
@@ -580,9 +573,16 @@ class WC_Admin_Setup_Wizard {
 			'paypal-ec' => array(
 				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal-express.png',
-				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s paypal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="#" target="_blank">', '</a>' ),
+				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="#" target="_blank">', '</a>' ),
 				'class'       => 'featured featured-row-last',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
+			),
+			'stripe' => array(
+				'name'        => __( 'Stripe', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
+				'description' => sprintf( __( 'A modern and robust way to accept credit card payments on your store. %sLearn more about Stripe%s.', 'woocommerce' ), '<a href="#" target="_blank">', '</a>' ),
+				'class'       => 'featured featured-row-first',
+				'repo-slug'   => 'woocommerce-gateway-stripe',
 			),
 			'paypal' => array(
 				'name'        => __( 'PayPal Standard', 'woocommerce' ),
