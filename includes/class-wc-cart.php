@@ -1546,10 +1546,7 @@ class WC_Cart {
 				}
 			}
 
-			$show_shipping = true;
-
-			return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', $show_shipping );
-
+			return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 		}
 
 		/**

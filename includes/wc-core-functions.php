@@ -731,6 +731,11 @@ function wc_get_customer_default_location() {
 			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
 				$location = WC_Geolocation::geolocate_ip( '', true, false );
 			}
+
+			// Base fallback.
+			if ( empty( $location['country'] ) ) {
+				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
+			}
 		break;
 		case 'base' :
 			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
@@ -738,11 +743,6 @@ function wc_get_customer_default_location() {
 		default :
 			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', '' ) );
 		break;
-	}
-
-	// Base fallback.
-	if ( empty( $location['country'] ) ) {
-		$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
 	}
 
 	return apply_filters( 'woocommerce_customer_default_location_array', $location );

@@ -335,7 +335,7 @@ class WC_AJAX {
 
 		if ( wc_ship_to_billing_address_only() ) {
 
-			if ( isset( $_POST['country'] ) ) {
+			if ( ! empty( $_POST['country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['country'] );
 				WC()->customer->calculated_shipping( true );
 			}
@@ -361,7 +361,7 @@ class WC_AJAX {
 			}
 		} else {
 
-			if ( isset( $_POST['s_country'] ) ) {
+			if ( ! empty( $_POST['s_country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['s_country'] );
 				WC()->customer->calculated_shipping( true );
 			}
