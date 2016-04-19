@@ -7482,10 +7482,6 @@ msgstr ""
 msgid "Get eCommerce advice in your inbox"
 msgstr ""
 
-#: includes/admin/class-wc-admin-setup-wizard.php:766
-msgid "Follow Sidekick interactive walkthroughs"
-msgstr ""
-
 #: includes/admin/class-wc-admin-setup-wizard.php:767
 msgid "Read more about getting started"
 msgstr ""
