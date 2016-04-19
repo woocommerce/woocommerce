@@ -28,6 +28,7 @@ class WC_Admin_Notices {
 		'theme_support'       => 'theme_check_notice',
 		'legacy_shipping'     => 'legacy_shipping_notice',
 		'no_shipping_methods' => 'no_shipping_methods_notice',
+		'simplify_commerce'   => 'simplify_commerce_notice',
 	);
 
 	/**
@@ -57,6 +58,13 @@ class WC_Admin_Notices {
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
 			self::add_notice( 'theme_support' );
 		}
+
+		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
+
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] ) {
+			WC_Admin_Notices::add_notice( 'simplify_commerce' );
+		}
+
 		self::add_notice( 'template_files' );
 	}
 
@@ -254,6 +262,19 @@ class WC_Admin_Notices {
 			if ( $method_count > 0 ) {
 				self::remove_notice( 'no_shipping_methods' );
 			}
+		}
+	}
+
+	/**
+	 * Simplify Commerce is being removed from core.
+	 */
+	public function simplify_commerce_notice() {
+		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) ) {
+			self::remove_notice( 'simplify_commerce' );
+			return;
+		}
+		if ( empty( $_GET['action'] ) ) {
+			include( 'views/html-notice-simplify-commerce.php' );
 		}
 	}
 }
