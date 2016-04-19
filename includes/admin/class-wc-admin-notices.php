@@ -28,6 +28,7 @@ class WC_Admin_Notices {
 		'theme_support'       => 'theme_check_notice',
 		'legacy_shipping'     => 'legacy_shipping_notice',
 		'no_shipping_methods' => 'no_shipping_methods_notice',
+		'simplify_commerce'   => 'simplify_commerce_notice',
 	);
 
 	/**
@@ -57,12 +58,19 @@ class WC_Admin_Notices {
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
 			self::add_notice( 'theme_support' );
 		}
+
+		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
+
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] ) {
+			WC_Admin_Notices::add_notice( 'simplify_commerce' );
+		}
+
 		self::add_notice( 'template_files' );
 	}
 
 	/**
 	 * Show a notice.
-	 * @param  string $name
+	 * @param string $name
 	 */
 	public static function add_notice( $name ) {
 		$notices = array_unique( array_merge( get_option( 'woocommerce_admin_notices', array() ), array( $name ) ) );
@@ -76,6 +84,7 @@ class WC_Admin_Notices {
 	public static function remove_notice( $name ) {
 		$notices = array_diff( get_option( 'woocommerce_admin_notices', array() ), array( $name ) );
 		update_option( 'woocommerce_admin_notices', $notices );
+		delete_option( 'woocommerce_admin_notice_' . $name );
 	}
 
 	/**
@@ -117,6 +126,36 @@ class WC_Admin_Notices {
 			foreach ( $notices as $notice ) {
 				if ( ! empty( $this->core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
 					add_action( 'admin_notices', array( $this, $this->core_notices[ $notice ] ) );
+				} else {
+					add_action( 'admin_notices', array( $this, 'output_custom_notices' ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add a custom notice.
+	 * @param string $name
+	 * @param string $notice_html
+	 */
+	public static function add_custom_notice( $name, $notice_html ) {
+		self::add_notice( $name );
+		update_option( 'woocommerce_admin_notice_' . $name, wp_kses_post( $notice_html ) );
+	}
+
+	/**
+	 * Output any stored custom notices.
+	 */
+	public function output_custom_notices() {
+		$notices = get_option( 'woocommerce_admin_notices', array() );
+		if ( $notices ) {
+			foreach ( $notices as $notice ) {
+				if ( empty( $this->core_notices[ $notice ] ) ) {
+					$notice_html = get_option( 'woocommerce_admin_notice_' . $notice );
+
+					if ( $notice_html ) {
+						include( 'views/html-notice-custom.php' );
+					}
 				}
 			}
 		}
@@ -223,6 +262,19 @@ class WC_Admin_Notices {
 			if ( $method_count > 0 ) {
 				self::remove_notice( 'no_shipping_methods' );
 			}
+		}
+	}
+
+	/**
+	 * Simplify Commerce is being removed from core.
+	 */
+	public function simplify_commerce_notice() {
+		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) ) {
+			self::remove_notice( 'simplify_commerce' );
+			return;
+		}
+		if ( empty( $_GET['action'] ) ) {
+			include( 'views/html-notice-simplify-commerce.php' );
 		}
 	}
 }
