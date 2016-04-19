@@ -324,7 +324,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( in_array( 'coupons', $expand ) ) {
 				$_coupon_data = WC()->api->WC_API_Coupons->get_coupon_by_code( $coupon_item['name'] );
 
-				if ( isset( $_coupon_data['coupon'] ) ) {
+				if ( ! is_wp_error( $_coupon_data ) && isset( $_coupon_data['coupon'] ) ) {
 					$coupon_line['coupon_data'] = $_coupon_data['coupon'];
 				}
 			}

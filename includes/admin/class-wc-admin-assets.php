@@ -226,6 +226,14 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'wc-admin-coupon-meta-boxes' );
 		}
 		if ( in_array( str_replace( 'edit-', '', $screen_id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
+			$post_id  = isset( $post->ID ) ? $post->ID : '';
+			$currency = '';
+
+			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
+				$order    = wc_get_order( $post_id );
+				$currency = $order->get_order_currency();
+			}
+
 			$params = array(
 				'remove_item_notice'            => __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
 				'i18n_select_items'             => __( 'Please select some items.', 'woocommerce' ),
@@ -268,7 +276,7 @@ class WC_Admin_Assets {
 				'post_id'                       => isset( $post->ID ) ? $post->ID : '',
 				'base_country'                  => WC()->countries->get_base_country(),
 				'currency_format_num_decimals'  => wc_get_price_decimals(),
-				'currency_format_symbol'        => get_woocommerce_currency_symbol(),
+				'currency_format_symbol'        => get_woocommerce_currency_symbol( $currency ),
 				'currency_format_decimal_sep'   => esc_attr( wc_get_price_decimal_separator() ),
 				'currency_format_thousand_sep'  => esc_attr( wc_get_price_thousand_separator() ),
 				'currency_format'               => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS

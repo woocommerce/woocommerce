@@ -214,7 +214,7 @@ class WC_AJAX {
 		$coupon = wc_clean( $_POST['coupon'] );
 
 		if ( ! isset( $coupon ) || empty( $coupon ) ) {
-			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ) );
+			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 
 		} else {
 
@@ -335,7 +335,7 @@ class WC_AJAX {
 
 		if ( wc_ship_to_billing_address_only() ) {
 
-			if ( isset( $_POST['country'] ) ) {
+			if ( ! empty( $_POST['country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['country'] );
 				WC()->customer->calculated_shipping( true );
 			}
@@ -361,7 +361,7 @@ class WC_AJAX {
 			}
 		} else {
 
-			if ( isset( $_POST['s_country'] ) ) {
+			if ( ! empty( $_POST['s_country'] ) ) {
 				WC()->customer->set_shipping_country( $_POST['s_country'] );
 				WC()->customer->calculated_shipping( true );
 			}
@@ -511,7 +511,7 @@ class WC_AJAX {
 			}
 		}
 
-		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=shop_order' ) );
+		wp_safe_redirect( wp_get_referer() ? remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids' ), wp_get_referer() ) : admin_url( 'edit.php?post_type=product' ) );
 		die();
 	}
 
@@ -1483,17 +1483,18 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		$tax            = new WC_Tax();
-		$tax_based_on   = get_option( 'woocommerce_tax_based_on' );
-		$order_id       = absint( $_POST['order_id'] );
-		$items          = array();
-		$country        = strtoupper( esc_attr( $_POST['country'] ) );
-		$state          = strtoupper( esc_attr( $_POST['state'] ) );
-		$postcode       = strtoupper( esc_attr( $_POST['postcode'] ) );
-		$city           = wc_clean( esc_attr( $_POST['city'] ) );
-		$order          = wc_get_order( $order_id );
-		$taxes          = array();
-		$shipping_taxes = array();
+		$tax                    = new WC_Tax();
+		$tax_based_on           = get_option( 'woocommerce_tax_based_on' );
+		$order_id               = absint( $_POST['order_id'] );
+		$items                  = array();
+		$country                = strtoupper( esc_attr( $_POST['country'] ) );
+		$state                  = strtoupper( esc_attr( $_POST['state'] ) );
+		$postcode               = strtoupper( esc_attr( $_POST['postcode'] ) );
+		$city                   = wc_clean( esc_attr( $_POST['city'] ) );
+		$order                  = wc_get_order( $order_id );
+		$taxes                  = array();
+		$shipping_taxes         = array();
+		$order_item_tax_classes = array();
 
 		// Default to base
 		if ( 'base' === $tax_based_on || empty( $country ) ) {
@@ -1526,14 +1527,14 @@ class WC_AJAX {
 
 			// Get items and fees taxes
 			if ( isset( $items['order_item_id'] ) ) {
-				$line_total = $line_subtotal = $order_item_tax_class = array();
+				$line_total = $line_subtotal = array();
 
 				foreach ( $items['order_item_id'] as $item_id ) {
-					$item_id                          = absint( $item_id );
-					$line_total[ $item_id ]           = isset( $items['line_total'][ $item_id ] ) ? wc_format_decimal( $items['line_total'][ $item_id ] ) : 0;
-					$line_subtotal[ $item_id ]        = isset( $items['line_subtotal'][ $item_id ] ) ? wc_format_decimal( $items['line_subtotal'][ $item_id ] ) : $line_total[ $item_id ];
-					$order_item_tax_class[ $item_id ] = isset( $items['order_item_tax_class'][ $item_id ] ) ? sanitize_text_field( $items['order_item_tax_class'][ $item_id ] ) : '';
-					$product_id                       = $order->get_item_meta( $item_id, '_product_id', true );
+					$item_id                            = absint( $item_id );
+					$line_total[ $item_id ]             = isset( $items['line_total'][ $item_id ] ) ? wc_format_decimal( $items['line_total'][ $item_id ] ) : 0;
+					$line_subtotal[ $item_id ]          = isset( $items['line_subtotal'][ $item_id ] ) ? wc_format_decimal( $items['line_subtotal'][ $item_id ] ) : $line_total[ $item_id ];
+					$order_item_tax_classes[ $item_id ] = isset( $items['order_item_tax_class'][ $item_id ] ) ? sanitize_text_field( $items['order_item_tax_class'][ $item_id ] ) : '';
+					$product_id                         = $order->get_item_meta( $item_id, '_product_id', true );
 
 					// Get product details
 					if ( get_post_type( $product_id ) == 'product' ) {
@@ -1543,13 +1544,13 @@ class WC_AJAX {
 						$item_tax_status = 'taxable';
 					}
 
-					if ( '0' !== $order_item_tax_class[ $item_id ] && 'taxable' === $item_tax_status ) {
+					if ( '0' !== $order_item_tax_classes[ $item_id ] && 'taxable' === $item_tax_status ) {
 						$tax_rates = WC_Tax::find_rates( array(
 							'country'   => $country,
 							'state'     => $state,
 							'postcode'  => $postcode,
 							'city'      => $city,
-							'tax_class' => $order_item_tax_class[ $item_id ]
+							'tax_class' => $order_item_tax_classes[ $item_id ]
 						) );
 
 						$line_taxes          = WC_Tax::calc_tax( $line_total[ $item_id ], $tax_rates, false );
@@ -1575,22 +1576,45 @@ class WC_AJAX {
 
 			// Get shipping taxes
 			if ( isset( $items['shipping_method_id'] ) ) {
-				$matched_tax_rates = array();
+				$matched_tax_rates      = array();
+				$order_item_tax_classes = array_unique( array_values( $order_item_tax_classes ) );
 
-				$tax_rates = WC_Tax::find_rates( array(
-					'country'   => $country,
-					'state'     => $state,
-					'postcode'  => $postcode,
-					'city'      => $city,
-					'tax_class' => ''
-				) );
+				// If multiple classes are found, use the first one. Don't bother with standard rate, we can get that later.
+				if ( sizeof( $order_item_tax_classes ) > 1 && ! in_array( '', $order_item_tax_classes ) ) {
+					$tax_classes = WC_Tax::get_tax_classes();
 
-				if ( $tax_rates ) {
-					foreach ( $tax_rates as $key => $rate ) {
-						if ( isset( $rate['shipping'] ) && 'yes' == $rate['shipping'] ) {
-							$matched_tax_rates[ $key ] = $rate;
+					foreach ( $tax_classes as $tax_class ) {
+						$tax_class = sanitize_title( $tax_class );
+						if ( in_array( $tax_class, $order_item_tax_classes ) ) {
+							$matched_tax_rates = WC_Tax::find_shipping_rates( array(
+								'country' 	=> $country,
+								'state' 	=> $state,
+								'postcode' 	=> $postcode,
+								'city' 		=> $city,
+								'tax_class' => $tax_class,
+							) );
+							break;
 						}
 					}
+				// If a single tax class is found, use it
+				} elseif ( sizeof( $order_item_tax_classes ) === 1 ) {
+					$matched_tax_rates = WC_Tax::find_shipping_rates( array(
+						'country' 	=> $country,
+						'state' 	=> $state,
+						'postcode' 	=> $postcode,
+						'city' 		=> $city,
+						'tax_class' => $order_item_tax_classes[0]
+					) );
+				}
+
+				// Get standard rate if no taxes were found
+				if ( ! sizeof( $matched_tax_rates ) ) {
+					$matched_tax_rates = WC_Tax::find_shipping_rates( array(
+						'country' 	=> $country,
+						'state' 	=> $state,
+						'postcode' 	=> $postcode,
+						'city' 		=> $city
+					) );
 				}
 
 				$shipping_cost = $shipping_taxes = array();

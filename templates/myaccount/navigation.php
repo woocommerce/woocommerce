@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 
-<nav class="my-account-navigation">
+<nav class="woocommerce-MyAccount-navigation">
 	<ul>
 		<?php foreach ( wc_get_account_menu_items() as $endpoint => $label ) : ?>
 			<li class="<?php echo wc_get_account_menu_item_classes( $endpoint ); ?>">

@@ -82,9 +82,9 @@ class WC_Meta_Box_Product_Data {
 		?>
 		<div class="panel-wrap product_data">
 
-			<span class="type_box"> &mdash; <?php echo $type_box; ?></span>
+			<span class="type_box hidden"> &mdash; <?php echo $type_box; ?></span>
 
-			<ul class="product_data_tabs wc-tabs" style="display:none;">
+			<ul class="product_data_tabs wc-tabs">
 				<?php
 					$product_data_tabs = apply_filters( 'woocommerce_product_data_tabs', array(
 						'general' => array(
@@ -145,7 +145,7 @@ class WC_Meta_Box_Product_Data {
 
 				echo '</div>';
 
-				echo '<div class="options_group pricing show_if_simple show_if_external">';
+				echo '<div class="options_group pricing show_if_simple show_if_external hidden">';
 
 					// Price
 					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'label' => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')', 'data_type' => 'price' ) );
@@ -168,7 +168,7 @@ class WC_Meta_Box_Product_Data {
 
 				echo '</div>';
 
-				echo '<div class="options_group show_if_downloadable">';
+				echo '<div class="options_group show_if_downloadable hidden">';
 
 					?>
 					<div class="form-field downloadable_files">
@@ -280,7 +280,7 @@ class WC_Meta_Box_Product_Data {
 				?>
 			</div>
 
-			<div id="inventory_product_data" class="panel woocommerce_options_panel">
+			<div id="inventory_product_data" class="panel woocommerce_options_panel hidden">
 
 				<?php
 
@@ -354,7 +354,7 @@ class WC_Meta_Box_Product_Data {
 
 			</div>
 
-			<div id="shipping_product_data" class="panel woocommerce_options_panel">
+			<div id="shipping_product_data" class="panel woocommerce_options_panel hidden">
 
 				<?php
 
@@ -410,7 +410,7 @@ class WC_Meta_Box_Product_Data {
 
 			</div>
 
-			<div id="product_attributes" class="panel wc-metaboxes-wrapper">
+			<div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
 				<div class="toolbar toolbar-top">
 					<span class="expand-close">
 						<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>
@@ -478,7 +478,7 @@ class WC_Meta_Box_Product_Data {
 				</div>
 				<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 			</div>
-			<div id="linked_product_data" class="panel woocommerce_options_panel">
+			<div id="linked_product_data" class="panel woocommerce_options_panel hidden">
 
 				<div class="options_group">
 
@@ -545,7 +545,7 @@ class WC_Meta_Box_Product_Data {
 				<?php do_action( 'woocommerce_product_options_related' ); ?>
 			</div>
 
-			<div id="advanced_product_data" class="panel woocommerce_options_panel">
+			<div id="advanced_product_data" class="panel woocommerce_options_panel hidden">
 
 				<div class="options_group hide_if_external">
 					<?php
@@ -613,7 +613,7 @@ class WC_Meta_Box_Product_Data {
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 		?>
-		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
+		<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden"><div id="variable_product_options_inner">
 
 			<?php if ( ! $variation_attribute_found ) : ?>
 

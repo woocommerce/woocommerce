@@ -330,6 +330,27 @@
 }
 
 /**
+ * Twenty Eleven specific styles
+ */
+.woocommerce-page {
+	&.left-sidebar {
+		#content.twentyeleven {
+			width: 58.4%;
+			margin: 0 7.6%;
+			float: right;
+		}
+	}
+
+	&.right-sidebar {
+		#content.twentyeleven {
+			margin: 0 7.6%;
+			width: 58.4%;
+			float: left;
+		}
+	}
+}
+
+/**
  * Twenty Fourteen specific styles
  */
 .twentyfourteen {

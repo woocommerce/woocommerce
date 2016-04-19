@@ -564,7 +564,9 @@ class WC_Checkout {
 
 			if ( WC()->cart->needs_shipping() ) {
 
-				if ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) ) {
+				if ( empty( WC()->customer->get_shipping_country() ) ) {
+					wc_add_notice( __( 'Please enter an address to continue.', 'woocommerce' ), 'error' );
+				} elseif ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ) ) ) {
 					wc_add_notice( sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ), 'error' );
 				}
 
@@ -796,7 +798,7 @@ class WC_Checkout {
 
 			switch ( $input ) {
 				case 'billing_country' :
-					return apply_filters( 'default_checkout_country', WC()->customer->get_country() ? WC()->customer->get_country() : WC()->countries->get_base_country(), 'billing' );
+					return apply_filters( 'default_checkout_country', WC()->customer->get_country() ? WC()->customer->get_country() : '', 'billing' );
 				case 'billing_state' :
 					return apply_filters( 'default_checkout_state', WC()->customer->get_state() ? WC()->customer->get_state() : '', 'billing' );
 				case 'billing_postcode' :

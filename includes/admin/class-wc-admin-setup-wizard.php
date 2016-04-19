@@ -150,7 +150,7 @@ class WC_Admin_Setup_Wizard {
 			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wc-setup wp-core-ui">
-			<h1 id="wc-logo"><a href="http://woothemes.com/woocommerce"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
+			<h1 id="wc-logo"><a href="https://woothemes.com/woocommerce"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
 		<?php
 	}
 
@@ -313,7 +313,7 @@ class WC_Admin_Setup_Wizard {
 							}
 							?>
 						</select>
-						<span class="description"><?php printf( __( 'If your currency is not listed you can %sadd it later%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
+						<span class="description"><?php printf( __( 'If your currency is not listed you can %sadd it later%s.', 'woocommerce' ), '<a href="https://docs.woothemes.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -456,7 +456,7 @@ class WC_Admin_Setup_Wizard {
 						?>
 						<tr class="tax-rates">
 							<td colspan="2">
-								<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in %1$sour documentation%2$s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
+								<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in %1$sour documentation%2$s.', 'woocommerce' ), '<a href="https://docs.woothemes.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
 								<div class="importing-tax-rates">
 									<table class="tax-rates">
 										<thead>
@@ -752,7 +752,7 @@ class WC_Admin_Setup_Wizard {
 
 		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 			<div class="woocommerce-message woocommerce-tracker">
-				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information. %sFind out more%s.', 'woocommerce' ), '<a href="http://www.woothemes.com/woocommerce/usage-tracking/" target="_blank">', '</a>' ); ?></p>
+				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information. %sFind out more%s.', 'woocommerce' ), '<a href="https://www.woothemes.com/woocommerce/usage-tracking/" target="_blank">', '</a>' ); ?></p>
 				<p class="submit">
 					<a class="button-primary button button-large" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optin', 'true' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'Allow', 'woocommerce' ); ?></a>
 					<a class="button-secondary button button-large skip"  href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optout', 'true' ), 'wc_tracker_optout', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'No thanks', 'woocommerce' ); ?></a>
@@ -770,10 +770,9 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-setup-next-steps-last">
 				<h2><?php _e( 'Learn More', 'woocommerce' ); ?></h2>
 				<ul>
-					<li class="video-walkthrough"><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Videos&amp;utm_campaign=Onboarding"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="newsletter"><a href="http://www.woothemes.com/woocommerce-onboarding-email/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Newsletter&amp;utm_campaign=Onboarding"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
-					<li class="sidekick"><a href="http://www.woothemes.com/sidekick/"><?php _e( 'Follow Sidekick interactive walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Docs&amp;utm_campaign=Onboarding"><?php _e( 'Read more about getting started', 'woocommerce' ); ?></a></li>
+					<li class="video-walkthrough"><a href="https://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Videos&amp;utm_campaign=Onboarding"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
+					<li class="newsletter"><a href="https://www.woothemes.com/woocommerce-onboarding-email/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Newsletter&amp;utm_campaign=Onboarding"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
+					<li class="learn-more"><a href="https://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Docs&amp;utm_campaign=Onboarding"><?php _e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 		</div>

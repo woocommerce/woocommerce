@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="updated woocommerce-message inline">
 	<p><?php _e( 'Please copy and paste this information in your ticket when contacting support:', 'woocommerce' ); ?> </p>
 	<p class="submit"><a href="#" class="button-primary debug-report"><?php _e( 'Get System Report', 'woocommerce' ); ?></a>
-	<a class="button-secondary docs" href="http://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
+	<a class="button-secondary docs" href="https://docs.woothemes.com/document/understanding-the-woocommerce-system-status-report/" target="_blank"><?php _e( 'Understanding the Status Report', 'woocommerce' ); ?></a></p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
 		<p class="submit"><button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>"><?php _e( 'Copy for Support', 'woocommerce' ); ?></button></p>
@@ -73,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 
 				if ( $memory < 67108864 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: %s', 'woocommerce' ), size_format( $memory ), '<a href="http://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . __( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend setting memory to at least 64MB. See: %s', 'woocommerce' ), size_format( $memory ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . __( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . size_format( $memory ) . '</mark>';
 				}
@@ -129,7 +129,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$php_version = phpversion();
 
 					if ( version_compare( $php_version, '5.6', '<' ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum PHP version of 5.6. See: %s', 'woocommerce' ), esc_html( $php_version ), '<a href="http://docs.woothemes.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum PHP version of 5.6. See: %s', 'woocommerce' ), esc_html( $php_version ), '<a href="https://docs.woothemes.com/document/how-to-update-your-php-version/" target="_blank">' . __( 'How to update your PHP version', 'woocommerce' ) . '</a>' ) . '</mark>';
 					} else {
 						echo '<mark class="yes">' . esc_html( $php_version ) . '</mark>';
 					}
@@ -228,7 +228,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['soap_client']['success'] = true;
 			} else {
 				$posting['soap_client']['success'] = false;
-				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="http://php.net/manual/en/class.soapclient.php">SoapClient</a>' );
+				$posting['soap_client']['note']    = sprintf( __( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.soapclient.php">SoapClient</a>' );
 			}
 
 			// DOMDocument.
@@ -239,7 +239,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['dom_document']['success'] = true;
 			} else {
 				$posting['dom_document']['success'] = false;
-				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="http://php.net/manual/en/class.domdocument.php">DOMDocument</a>' );
+				$posting['dom_document']['note']    = sprintf( __( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.domdocument.php">DOMDocument</a>' );
 			}
 
 			// GZIP.
@@ -250,7 +250,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['gzip']['success'] = true;
 			} else {
 				$posting['gzip']['success'] = false;
-				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind.', 'woocommerce' ), '<a href="http://php.net/manual/en/zlib.installation.php">gzopen</a>' );
+				$posting['gzip']['note']    = sprintf( __( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind.', 'woocommerce' ), '<a href="https://php.net/manual/en/zlib.installation.php">gzopen</a>' );
 			}
 
 			// Multibyte String.
@@ -261,7 +261,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$posting['mbstring']['success'] = true;
 			} else {
 				$posting['mbstring']['success'] = false;
-				$posting['mbstring']['note']    = sprintf( __( 'Your server does not support the %s functions - this is required for better character encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="http://php.net/manual/en/mbstring.installation.php">mbstring</a>' );
+				$posting['mbstring']['note']    = sprintf( __( 'Your server does not support the %s functions - this is required for better character encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="https://php.net/manual/en/mbstring.installation.php">mbstring</a>' );
 			}
 
 			// WP Remote Post Check.
@@ -773,7 +773,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<tr>
 					<td>&nbsp;</td>
 					<td class="help">&nbsp;</td>
-					<td><a href="http://docs.woothemes.com/document/fix-outdated-templates-woocommerce/" target="_blank"><?php _e( 'Learn how to update outdated templates', 'woocommerce' ) ?></a></td>
+					<td><a href="https://docs.woothemes.com/document/fix-outdated-templates-woocommerce/" target="_blank"><?php _e( 'Learn how to update outdated templates', 'woocommerce' ) ?></a></td>
 				</tr>
 				<?php
 			}

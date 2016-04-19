@@ -127,25 +127,21 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		// Load shipping methods so we can show any global options they may have
 		$shipping_methods = WC()->shipping->load_shipping_methods();
 
-		if ( 'options' === $current_section ) {
+		if ( '' == $current_section ) {
+			$this->output_zones_screen();
+		} elseif ( 'options' === $current_section ) {
 			$settings = $this->get_settings();
 			WC_Admin_Settings::output_fields( $settings );
-			return;
 		} elseif ( 'classes' === $current_section ) {
 			$hide_save_button = true;
 			$this->output_shipping_class_screen();
-			return;
 		} else {
 			foreach ( $shipping_methods as $method ) {
 				if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ) ) && $method->has_settings() ) {
 					$method->admin_options();
-					return;
 				}
 			}
 		}
-
-		// Default to zones screen
-		$this->output_zones_screen();
 	}
 
 	/**
