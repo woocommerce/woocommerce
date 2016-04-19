@@ -82,11 +82,11 @@
 					$( this.el ).unblock();
 				},
 				render: function() {
-					var zones       = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
-						view        = this;
+					var zones = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
+						view  = this;
 
-					this.$el.empty();
-					this.unblock();
+					view.$el.empty();
+					view.unblock();
 
 					if ( _.size( zones ) ) {
 						// Sort zones
@@ -96,56 +96,86 @@
 
 						// Populate $tbody with the current zones
 						$.each( zones, function( id, rowData ) {
-							view.$el.append( view.rowTemplate( rowData ) );
-
-							var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
-
-							// Editing?
-							if ( rowData.editing ) {
-								$tr.addClass( 'editing' );
-							}
-
-							// Select values in region select
-							_.each( rowData.zone_locations, function( location ) {
-								if ( 'postcode' === location.type ) {
-									var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
-
-									if ( postcode_field.val() ) {
-										postcode_field.val( postcode_field.val() + '\n' + location.code );
-									} else {
-										postcode_field.val( location.code );
-									}
-									$tr.find( '.wc-shipping-zone-postcodes' ).show();
-									$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
-								} else {
-									$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
-								}
-							} );
-
-							// List shipping methods
-							view.renderShippingMethods( rowData.zone_id, rowData.shipping_methods );
+							view.renderRow( rowData );
 						} );
 
-						// Make the rows function
-						this.$el.find('.view').show();
-						this.$el.find('.edit').hide();
-						this.$el.find('.wc-shipping-zone-save-changes-notice').hide();
-						this.$el.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
-						this.$el.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
-						this.$el.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
-						this.$el.find('.editing .wc-shipping-zone-edit').trigger('click');
-
-						// Stripe
-						if ( 0 === _.size( zones ) % 2) {
-							$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).addClass( 'odd' );
-						} else {
-							$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
-						}
 					} else {
 						view.$el.append( $blank_template );
 					}
 
-					this.initTooltips();
+					view.initRows( zones );
+				},
+				renderRow: function( rowData ) {
+					var view = this;
+
+					view.$el.append( view.rowTemplate( rowData ) );
+
+					var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
+
+					// Editing?
+					if ( rowData.editing ) {
+						$tr.addClass( 'editing' );
+					}
+
+					// Select values in region select
+					_.each( rowData.zone_locations, function( location ) {
+						if ( 'string' === jQuery.type( location ) ) {
+							$tr.find( 'option[value="' + location + '"]' ).prop( 'selected', true );
+						} else {
+							if ( 'postcode' === location.type ) {
+								var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
+
+								if ( postcode_field.val() ) {
+									postcode_field.val( postcode_field.val() + '\n' + location.code );
+								} else {
+									postcode_field.val( location.code );
+								}
+								$tr.find( '.wc-shipping-zone-postcodes' ).show();
+								$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
+							} else {
+								$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
+							}
+						}
+					} );
+
+					if ( rowData.zone_postcodes ) {
+						_.each( rowData.zone_postcodes, function( location ) {
+							var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
+
+							if ( postcode_field.val() ) {
+								postcode_field.val( postcode_field.val() + '\n' + location.code );
+							} else {
+								postcode_field.val( location.code );
+							}
+							$tr.find( '.wc-shipping-zone-postcodes' ).show();
+							$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
+						} );
+					}
+
+					// List shipping methods
+					view.renderShippingMethods( rowData.zone_id, rowData.shipping_methods );
+				},
+				initRows: function( zones ) {
+					// Make the rows function
+					$table.find( '.view' ).show();
+					$table.find( '.edit' ).hide();
+					$table.find( '.wc-shipping-zone-save-changes-notice' ).hide();
+					$table.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
+					$table.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
+					$table.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
+					$table.find( '.editing .wc-shipping-zone-edit' ).trigger( 'click' );
+
+					// Stripe
+					if ( 0 === _.size( zones ) % 2 ) {
+						$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).addClass( 'odd' );
+					} else {
+						$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
+					}
+
+					// Tooltips
+					$( '#tiptip_holder' ).removeAttr( 'style' );
+					$( '#tiptip_arrow' ).removeAttr( 'style' );
+					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				renderShippingMethods: function( zone_id, shipping_methods ) {
 					var $tr          = $( '.wc-shipping-zones tr[data-id="' + zone_id + '"]');
@@ -165,11 +195,6 @@
 						} );
 
 					}
-				},
-				initTooltips: function() {
-					$( '#tiptip_holder' ).removeAttr( 'style' );
-					$( '#tiptip_arrow' ).removeAttr( 'style' );
-					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				onSubmit: function( event ) {
 					event.data.view.block();
@@ -202,8 +227,8 @@
 
 					model.set( 'zones', zones );
 					model.logChanges( changes );
-
-					view.render();
+					view.renderRow( newRow );
+					view.initRows( zones );
 				},
 				onTogglePostcodes: function( event ) {
 					event.preventDefault();
@@ -213,14 +238,13 @@
 				},
 				onEditRow: function( event ) {
 					event.preventDefault();
-					$( this ).closest('tr').addClass('editing');
+					event.data.view.model.trigger( 'change:zones' );
+					$( this ).closest('tr').addClass( 'editing' );
 					$( this ).closest('tr').find('.view').hide();
 					$( this ).closest('tr').find('.edit').show();
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).select2( select2_args );
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).addClass('enhanced');
 					$( this ).closest('tr').find('.add_shipping_method').attr( 'disabled', 'disabled' ).addClass( 'tips' );
-					event.data.view.initTooltips();
-					event.data.view.model.trigger( 'change:zones' );
 				},
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
