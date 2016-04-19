@@ -99,7 +99,8 @@ jQuery( function( $ ) {
 		/**
 		 * Initialize event handlers and UI state.
 		 */
-		init: function() {
+		init: function( cart ) {
+			this.cart = cart;
 			this.toggle_shipping = this.toggle_shipping.bind( this );
 			this.shipping_method_selected = this.shipping_method_selected.bind( this );
 			this.shipping_calculator_submit = this.shipping_calculator_submit.bind( this );
@@ -166,6 +167,7 @@ jQuery( function( $ ) {
 		shipping_calculator_submit: function( evt ) {
 			evt.preventDefault();
 
+			var cart = this.cart;
 			var $form = $( evt.target );
 
 			block( $form );
@@ -187,6 +189,7 @@ jQuery( function( $ ) {
 				},
 				complete: function() {
 					unblock( $form );
+					cart.update_cart_totals();
 				}
 			} );
 		}
@@ -336,6 +339,8 @@ jQuery( function( $ ) {
 		 */
 		quantity_update: function( $form ) {
 
+			var cart = this;
+
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
 											.attr( 'name', 'update_cart' )
@@ -353,6 +358,7 @@ jQuery( function( $ ) {
 				success:  update_wc_div,
 				complete: function() {
 					unblock( $form );
+					cart.update_cart_totals();
 				}
 			} );
 		},
@@ -365,6 +371,7 @@ jQuery( function( $ ) {
 		item_remove_clicked: function( evt ) {
 			evt.preventDefault();
 
+			var cart = this;
 			var $a = $( evt.target );
 			var $form = $a.parents( 'form' );
 
@@ -377,11 +384,12 @@ jQuery( function( $ ) {
 				success: update_wc_div,
 				complete: function() {
 					unblock( $form );
+					cart.update_cart_totals();
 				}
 			} );
 		}
 	};
 
-	cart_shipping.init();
+	cart_shipping.init( cart );
 	cart.init();
 } );
