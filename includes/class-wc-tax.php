@@ -727,18 +727,19 @@ class WC_Tax {
 	 * @since 2.5.0
 	 * @access private
 	 *
-	 * @param  int $tax_rate_id
+	 * @param int $tax_rate_id
+	 * @param string $output_type
 	 *
 	 * @return array
 	 */
-	public static function _get_tax_rate( $tax_rate_id ) {
+	public static function _get_tax_rate( $tax_rate_id, $output_type = ARRAY_A ) {
 		global $wpdb;
 
 		return $wpdb->get_row( $wpdb->prepare( "
 			SELECT *
 			FROM {$wpdb->prefix}woocommerce_tax_rates
 			WHERE tax_rate_id = %d
-		", $tax_rate_id ), ARRAY_A );
+		", $tax_rate_id ), $output_type );
 	}
 
 	/**
