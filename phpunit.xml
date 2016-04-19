@@ -18,8 +18,7 @@
 		<blacklist>
 			<directory suffix=".php">./apigen/</directory>
 			<directory suffix=".php">./i18n/</directory>
-			<directory suffix=".php">./includes/api/v1/</directory>
-			<directory suffix=".php">./includes/api/v2/</directory>
+			<directory suffix=".php">./includes/api/legacy/</directory>
 			<directory suffix=".php">./includes/gateways/simplify-commerce-deprecated/</directory>
 			<directory suffix=".php">./includes/gateways/simplify-commerce/includes/</directory>
 			<directory suffix=".php">./includes/libraries/</directory>
