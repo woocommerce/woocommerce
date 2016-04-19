@@ -35,21 +35,20 @@ class WC_Logger {
 	 */
 	public function __destruct() {
 		foreach ( $this->_handles as $handle ) {
-			@fclose( $handle );
+			if ( is_resource( $handle ) ) {
+				fclose( $handle );
+			}
 		}
 	}
 
 	/**
 	 * Open log file for writing.
 	 *
-	 * @access private
-	 *
 	 * @param string $handle
 	 * @param string $mode
-	 *
 	 * @return bool success
 	 */
-	private function open( $handle, $mode = 'a' ) {
+	protected function open( $handle, $mode = 'a' ) {
 		if ( isset( $this->_handles[ $handle ] ) ) {
 			return true;
 		}
@@ -59,6 +58,23 @@ class WC_Logger {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Close a handle.
+	 *
+	 * @param string $handle
+	 * @return bool success
+	 */
+	protected function close( $handle ) {
+		$result = false;
+
+		if ( is_resource( $this->_handles[ $handle ] ) ) {
+			$result = fclose( $this->_handles[ $handle ] );
+			unset( $this->_handles[ $handle ] );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -74,7 +90,7 @@ class WC_Logger {
 
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
 			$time   = date_i18n( 'm-d-Y @ H:i:s -' ); // Grab Time
-			$result = @fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
+			$result = fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
 		}
 
 		do_action( 'woocommerce_log_add', $handle, $message );
@@ -93,9 +109,7 @@ class WC_Logger {
 		$result = false;
 
 		// Close the file if it's already open.
-		if ( is_resource( $this->_handles[ $handle ] ) ) {
-			@fclose( $handle );
-		}
+		$this->close( $handle );
 
 		/**
 		 * $this->open( $handle, 'w' ) == Open the file for writing only. Place the file pointer at the beginning of the file,
