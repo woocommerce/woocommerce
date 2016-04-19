@@ -74,7 +74,7 @@ class WC_Logger {
 
 		if ( $this->open( $handle ) && is_resource( $this->_handles[ $handle ] ) ) {
 			$time   = date_i18n( 'm-d-Y @ H:i:s -' ); // Grab Time
-			$result = fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
+			$result = @fwrite( $this->_handles[ $handle ], $time . " " . $message . "\n" );
 		}
 
 		do_action( 'woocommerce_log_add', $handle, $message );
@@ -91,6 +91,11 @@ class WC_Logger {
 	 */
 	public function clear( $handle ) {
 		$result = false;
+
+		// Close the file if it's already open.
+		if ( is_resource( $this->_handles[ $handle ] ) ) {
+			@fclose( $handle );
+		}
 
 		/**
 		 * $this->open( $handle, 'w' ) == Open the file for writing only. Place the file pointer at the beginning of the file,
