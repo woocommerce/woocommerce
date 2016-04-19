@@ -41,6 +41,7 @@ class WC_Install {
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
+		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
 	}
 
 	/**
@@ -338,7 +339,8 @@ class WC_Install {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 		/**
-		 * Before updating with DBDELTA, remove any primary keys which could be modified due to schema updates.
+		 * Before updating with DBDELTA, remove any primary keys which could be
+		 * modified due to schema updates.
 		 */
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_downloadable_product_permissions';" ) ) {
 			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}woocommerce_downloadable_product_permissions` LIKE 'permission_id';" ) ) {
@@ -362,7 +364,17 @@ class WC_Install {
 			$collate = $wpdb->get_charset_collate();
 		}
 
-		return "
+		/*
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WordPress 4.2, however, we moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 *
+		 * This may cause duplicate index notices in logs due to https://core.trac.wordpress.org/ticket/34870 but dropping
+		 * indexes first causes too much load on some servers/larger DB.
+		 */
+		$max_index_length = 191;
+
+		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id bigint(20) NOT NULL AUTO_INCREMENT,
   session_key char(32) NOT NULL,
@@ -393,16 +405,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_attribute_taxonomies (
   attribute_orderby varchar(200) NOT NULL,
   attribute_public int(1) NOT NULL DEFAULT 1,
   PRIMARY KEY  (attribute_id),
-  KEY attribute_name (attribute_name)
-) $collate;
-CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-  meta_id bigint(20) NOT NULL auto_increment,
-  woocommerce_term_id bigint(20) NOT NULL,
-  meta_key varchar(255) NULL,
-  meta_value longtext NULL,
-  PRIMARY KEY  (meta_id),
-  KEY woocommerce_term_id (woocommerce_term_id),
-  KEY meta_key (meta_key)
+  KEY attribute_name (attribute_name($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   permission_id bigint(20) NOT NULL auto_increment,
@@ -417,7 +420,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   access_expires datetime NULL default null,
   download_count bigint(20) NOT NULL DEFAULT 0,
   PRIMARY KEY  (permission_id),
-  KEY download_order_key_product (product_id,order_id,order_key,download_id),
+  KEY download_order_key_product (product_id,order_id,order_key($max_index_length),download_id),
   KEY download_order_product (download_id,order_id,product_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
@@ -431,11 +434,11 @@ CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
 CREATE TABLE {$wpdb->prefix}woocommerce_order_itemmeta (
   meta_id bigint(20) NOT NULL auto_increment,
   order_item_id bigint(20) NOT NULL,
-  meta_key varchar(255) NULL,
+  meta_key varchar(255) default NULL,
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY order_item_id (order_item_id),
-  KEY meta_key (meta_key)
+  KEY meta_key (meta_key($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
   tax_rate_id bigint(20) NOT NULL auto_increment,
@@ -449,9 +452,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_tax_rates (
   tax_rate_order bigint(20) NOT NULL,
   tax_rate_class varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY  (tax_rate_id),
-  KEY tax_rate_country (tax_rate_country),
-  KEY tax_rate_state (tax_rate_state),
-  KEY tax_rate_class (tax_rate_class),
+  KEY tax_rate_country (tax_rate_country($max_index_length)),
+  KEY tax_rate_state (tax_rate_state($max_index_length)),
+  KEY tax_rate_class (tax_rate_class($max_index_length)),
   KEY tax_rate_priority (tax_rate_priority)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations (
@@ -485,9 +488,46 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
   instance_id bigint(20) NOT NULL auto_increment,
   method_id varchar(255) NOT NULL,
   method_order bigint(20) NOT NULL,
+  is_enabled tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY  (instance_id)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (
+  token_id bigint(20) NOT NULL auto_increment,
+  gateway_id varchar(255) NOT NULL,
+  token text NOT NULL,
+  user_id bigint(20) NOT NULL DEFAULT '0',
+  type varchar(255) NOT NULL,
+  is_default tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY  (token_id),
+  KEY user_id (user_id)
+) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  payment_token_id bigint(20) NOT NULL,
+  meta_key varchar(255) NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY payment_token_id (payment_token_id),
+  KEY meta_key (meta_key)
+) $collate;
 		";
+
+		// Term meta is only needed for old installs.
+		if ( ! function_exists( 'get_term_meta' ) ) {
+			$tables .= "
+CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
+  meta_id bigint(20) NOT NULL auto_increment,
+  woocommerce_term_id bigint(20) NOT NULL,
+  meta_key varchar(255) default NULL,
+  meta_value longtext NULL,
+  PRIMARY KEY  (meta_id),
+  KEY woocommerce_term_id (woocommerce_term_id),
+  KEY meta_key (meta_key($max_index_length))
+) $collate;
+			";
+		}
+
+		return $tables;
 	}
 
 	/**
@@ -780,6 +820,151 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
 		$tables[] = $wpdb->prefix . 'woocommerce_order_itemmeta';
 
 		return $tables;
+	}
+
+	/**
+	 * Get slug from path
+	 * @param  string $key
+	 * @return string
+	 */
+	private static function format_plugin_slug( $key ) {
+		$slug = explode( '/', $key );
+		$slug = explode( '.', end( $slug ) );
+		return $slug[0];
+	}
+
+	/**
+	 * Install a plugin from .org in the background via a cron job (used by
+	 * installer - opt in).
+	 * @param string $plugin_to_install_id
+	 * @param array $plugin_to_install
+	 * @since 2.6.0
+	 */
+	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+			require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
+			require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+			require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+
+			WP_Filesystem();
+
+			$skin              = new Automatic_Upgrader_Skin;
+			$upgrader          = new WP_Upgrader( $skin );
+			$installed_plugins = array_map( array( __CLASS__, 'format_plugin_slug' ), array_keys( get_plugins() ) );
+			$plugin_slug       = $plugin_to_install['repo-slug'];
+			$plugin            = $plugin_slug . '/' . $plugin_slug . '.php';
+			$installed         = false;
+			$activate          = false;
+
+			// See if the plugin is installed already
+			if ( in_array( $plugin_to_install['repo-slug'], $installed_plugins ) ) {
+				$installed = true;
+				$activate  = ! is_plugin_active( $plugin );
+			}
+
+			// Install this thing!
+			if ( ! $installed ) {
+				// Suppress feedback
+				ob_start();
+
+				try {
+					$plugin_information = plugins_api( 'plugin_information', array(
+						'slug'   => $plugin_to_install['repo-slug'],
+						'fields' => array(
+							'short_description' => false,
+							'sections'          => false,
+							'requires'          => false,
+							'rating'            => false,
+							'ratings'           => false,
+							'downloaded'        => false,
+							'last_updated'      => false,
+							'added'             => false,
+							'tags'              => false,
+							'homepage'          => false,
+							'donate_link'       => false,
+							'author_profile'    => false,
+							'author'            => false,
+						),
+					) );
+
+					if ( is_wp_error( $plugin_information ) ) {
+						throw new Exception( $plugin_information->get_error_message() );
+					}
+
+					$package  = $plugin_information->download_link;
+					$download = $upgrader->download_package( $package );
+
+					if ( is_wp_error( $download ) ) {
+						throw new Exception( $download->get_error_message() );
+					}
+
+					$working_dir = $upgrader->unpack_package( $download, true );
+
+					if ( is_wp_error( $working_dir ) ) {
+						throw new Exception( $working_dir->get_error_message() );
+					}
+
+					$result = $upgrader->install_package( array(
+						'source'                      => $working_dir,
+						'destination'                 => WP_PLUGIN_DIR,
+						'clear_destination'           => false,
+						'abort_if_destination_exists' => false,
+						'clear_working'               => true,
+						'hook_extra'                  => array(
+							'type'   => 'plugin',
+							'action' => 'install',
+						),
+					) );
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					}
+
+					$activate = true;
+
+				} catch ( Exception $e ) {
+					WC_Admin_Notices::add_custom_notice(
+						$plugin_to_install_id . '_install_error',
+						sprintf(
+							__( '%s could not be installed (%s). %sPlease install it manually by clicking here.%s', 'woocommerce' ),
+							$plugin_to_install['name'],
+							$e->getMessage(),
+							'<a href="' . admin_url( 'plugin-install.php?tab=search&type=term&s=' . $plugin_to_install['repo-slug'] ) . '">',
+							'</a>'
+						)
+					);
+				}
+
+				// Discard feedback
+				ob_end_clean();
+			}
+
+			wp_clean_plugins_cache();
+
+			// Activate this thing
+			if ( $activate ) {
+				try {
+					$result = activate_plugin( $plugin );
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					}
+
+				} catch ( Exception $e ) {
+					WC_Admin_Notices::add_custom_notice(
+						$plugin_to_install_id . '_install_error',
+						sprintf(
+							__( '%s could not be activated (%s). %sPlease activate it manually via the plugins screen.%s', 'woocommerce' ),
+							$plugin_to_install['name'],
+							$e->getMessage() . '"' . $plugin . '"',
+							'<a href="' . admin_url( 'plugins.php' ) . '">',
+							'</a>'
+						)
+					);
+				}
+			}
+		}
 	}
 }
 

@@ -48,7 +48,7 @@ class WC_Shipping_Rate {
 	 * @param array $taxes
 	 * @param string $method_id
 	 */
-	public function __construct( $id, $label, $cost, $taxes, $method_id ) {
+	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '' ) {
 		$this->id        = $id;
 		$this->label     = $label;
 		$this->cost      = $cost;

@@ -13,7 +13,7 @@
  * @see 	http://docs.woothemes.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
- * @version 2.5.0
+ * @version 2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,7 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $order = wc_get_order( $order_id );
 
-$show_purchase_note = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
+$show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
+$show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
 ?>
 <h2><?php _e( 'Order Details', 'woocommerce' ); ?></h2>
 <table class="shop_table order_details">
@@ -36,15 +37,14 @@ $show_purchase_note = $order->has_status( apply_filters( 'woocommerce_purchase_n
 		<?php
 			foreach( $order->get_items() as $item_id => $item ) {
 				$product = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item ), $item );
-				$purchase_note = get_post_meta( $product->id, '_purchase_note', true );
 
 				wc_get_template( 'order/order-details-item.php', array(
-					'order'					=> $order,
-					'item_id'				=> $item_id,
-					'item'					=> $item,
-					'show_purchase_note'	=> $show_purchase_note,
-					'purchase_note'			=> $purchase_note,
-					'product'				=> $product,
+					'order'			     => $order,
+					'item_id'		     => $item_id,
+					'item'			     => $item,
+					'show_purchase_note' => $show_purchase_note,
+					'purchase_note'	     => $product ? get_post_meta( $product->id, '_purchase_note', true ) : '',
+					'product'	         => $product,
 				) );
 			}
 		?>
@@ -66,4 +66,6 @@ $show_purchase_note = $order->has_status( apply_filters( 'woocommerce_purchase_n
 
 <?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
 
-<?php wc_get_template( 'order/order-details-customer.php', array( 'order' =>  $order ) ); ?>
+<?php if ( $show_customer_details ) : ?>
+	<?php wc_get_template( 'order/order-details-customer.php', array( 'order' =>  $order ) ); ?>
+<?php endif; ?>

@@ -32,89 +32,89 @@ function wc_disable_admin_bar( $show_admin_bar ) {
 }
 add_filter( 'show_admin_bar', 'wc_disable_admin_bar', 10, 1 );
 
+if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
-/**
- * Create a new customer.
- *
- * @param  string $email
- * @param  string $username
- * @param  string $password
- * @return int|WP_Error on failure, Int (user ID) on success
- */
-function wc_create_new_customer( $email, $username = '', $password = '' ) {
+	/**
+	 * Create a new customer.
+	 *
+	 * @param  string $email Customer email.
+	 * @param  string $username Customer username.
+	 * @param  string $password Customer password.
+	 * @return int|WP_Error Returns WP_Error on failure, Int (user ID) on success.
+	 */
+	function wc_create_new_customer( $email, $username = '', $password = '' ) {
 
-	// Check the e-mail address
-	if ( empty( $email ) || ! is_email( $email ) ) {
-		return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'woocommerce' ) );
-	}
-
-	if ( email_exists( $email ) ) {
-		return new WP_Error( 'registration-error-email-exists', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
-	}
-
-	// Handle username creation
-	if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
-
-		$username = sanitize_user( $username );
-
-		if ( empty( $username ) || ! validate_username( $username ) ) {
-			return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
+		// Check the email address.
+		if ( empty( $email ) || ! is_email( $email ) ) {
+			return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'woocommerce' ) );
 		}
 
-		if ( username_exists( $username ) )
-			return new WP_Error( 'registration-error-username-exists', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
-	} else {
-
-		$username = sanitize_user( current( explode( '@', $email ) ), true );
-
-		// Ensure username is unique
-		$append     = 1;
-		$o_username = $username;
-
-		while ( username_exists( $username ) ) {
-			$username = $o_username . $append;
-			$append ++;
+		if ( email_exists( $email ) ) {
+			return new WP_Error( 'registration-error-email-exists', __( 'An account is already registered with your email address. Please login.', 'woocommerce' ) );
 		}
+
+		// Handle username creation.
+		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
+			$username = sanitize_user( $username );
+
+			if ( empty( $username ) || ! validate_username( $username ) ) {
+				return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
+			}
+
+			if ( username_exists( $username ) ) {
+				return new WP_Error( 'registration-error-username-exists', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
+			}
+		} else {
+			$username = sanitize_user( current( explode( '@', $email ) ), true );
+
+			// Ensure username is unique.
+			$append     = 1;
+			$o_username = $username;
+
+			while ( username_exists( $username ) ) {
+				$username = $o_username . $append;
+				$append++;
+			}
+		}
+
+		// Handle password creation.
+		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
+			$password           = wp_generate_password();
+			$password_generated = true;
+		} elseif ( empty( $password ) ) {
+			return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'woocommerce' ) );
+		} else {
+			$password_generated = false;
+		}
+
+		// Use WP_Error to handle registration errors.
+		$errors = new WP_Error();
+
+		do_action( 'woocommerce_register_post', $username, $email, $errors );
+
+		$errors = apply_filters( 'woocommerce_registration_errors', $errors, $username, $email );
+
+		if ( $errors->get_error_code() ) {
+			return $errors;
+		}
+
+		$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
+			'user_login' => $username,
+			'user_pass'  => $password,
+			'user_email' => $email,
+			'role'       => 'customer',
+		) );
+
+		$customer_id = wp_insert_user( $new_customer_data );
+
+		if ( is_wp_error( $customer_id ) ) {
+			return new WP_Error( 'registration-error', '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+		}
+
+		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
+
+		return $customer_id;
 	}
-
-	// Handle password creation
-	if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
-		$password = wp_generate_password();
-		$password_generated = true;
-
-	} elseif ( empty( $password ) ) {
-		return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'woocommerce' ) );
-
-	} else {
-		$password_generated = false;
-	}
-
-	// WP Validation
-	$validation_errors = new WP_Error();
-
-	do_action( 'woocommerce_register_post', $username, $email, $validation_errors );
-
-	$validation_errors = apply_filters( 'woocommerce_registration_errors', $validation_errors, $username, $email );
-
-	if ( $validation_errors->get_error_code() )
-		return $validation_errors;
-
-	$new_customer_data = apply_filters( 'woocommerce_new_customer_data', array(
-		'user_login' => $username,
-		'user_pass'  => $password,
-		'user_email' => $email,
-		'role'       => 'customer'
-	) );
-
-	$customer_id = wp_insert_user( $new_customer_data );
-
-	if ( is_wp_error( $customer_id ) ) {
-		return new WP_Error( 'registration-error', '<strong>' . __( 'ERROR', 'woocommerce' ) . '</strong>: ' . __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
-	}
-
-	do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
-
-	return $customer_id;
 }
 
 /**
@@ -137,31 +137,16 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
-
-	$customer = get_user_by( 'id', absint( $customer_id ) );
-
-	$customer_orders = get_posts( array(
-		'numberposts' => -1,
-		'post_type'   => wc_get_order_types(),
-		'post_status' => array_keys( wc_get_order_statuses() ),
-		'fields'      => 'ids',
-		'meta_query' => array(
-			array(
-				'key'     => '_customer_user',
-				'value'   => array( 0, '' ),
-				'compare' => 'IN'
-			),
-			array(
-				'key'     => '_billing_email',
-				'value'   => $customer->user_email,
-			)
-		),
+	$linked          = 0;
+	$complete        = 0;
+	$customer        = get_user_by( 'id', absint( $customer_id ) );
+	$customer_orders = wc_get_orders( array(
+		'limit'    => -1,
+		'customer' => array( array( 0, $customer->user_email ) ),
+		'return'   => 'ids',
 	) );
 
-	$linked   = 0;
-	$complete = 0;
-
-	if ( $customer_orders ) {
+	if ( ! empty( $customer_orders ) ) {
 		foreach ( $customer_orders as $order_id ) {
 			update_post_meta( $order_id, '_customer_user', $customer->ID );
 
@@ -478,7 +463,8 @@ function wc_get_customer_available_downloads( $customer_id ) {
  * @return string
  */
 function wc_get_customer_total_spent( $user_id ) {
-	if ( ! $spent = get_user_meta( $user_id, '_money_spent', true ) ) {
+	$spent = get_user_meta( $user_id, '_money_spent', true );
+	if ( '' === $spent ) {
 		global $wpdb;
 
 		$spent = $wpdb->get_var( "SELECT SUM(meta2.meta_value)
@@ -506,7 +492,8 @@ function wc_get_customer_total_spent( $user_id ) {
  * @return int
  */
 function wc_get_customer_order_count( $user_id ) {
-	if ( ! $count = get_user_meta( $user_id, '_order_count', true ) ) {
+	$count = get_user_meta( $user_id, '_order_count', true );
+	if ( '' === $count ) {
 		global $wpdb;
 
 		$count = $wpdb->get_var( "SELECT COUNT(*)
@@ -634,4 +621,52 @@ function wc_set_user_last_update_time( $user_id ) {
  */
 function wc_get_customer_saved_methods_list( $customer_id ) {
 	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id );
+}
+
+/**
+ * Get info about customer's last order.
+ *
+ * @since 2.6.0
+ * @param int $customer_id Customer ID.
+ * @return WC_Order|bool Order object if successful or false.
+ */
+function wc_get_customer_last_order( $customer_id ) {
+	global $wpdb;
+
+	$customer_id = absint( $customer_id );
+
+	$id = $wpdb->get_var( "SELECT id
+		FROM $wpdb->posts AS posts
+		LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
+		WHERE meta.meta_key = '_customer_user'
+		AND   meta.meta_value = {$customer_id}
+		AND   posts.post_type = 'shop_order'
+		AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
+		ORDER BY posts.ID DESC
+	" );
+
+	return wc_get_order( $id );
+}
+
+/**
+ * Wrapper for @see get_avatar() which doesn't simply return
+ * the URL so we need to pluck it from the HTML img tag.
+ *
+ * Kudos to https://github.com/WP-API/WP-API for offering a better solution.
+ *
+ * @since 2.6.0
+ * @param string $email the customer's email.
+ * @return string the URL to the customer's avatar.
+ */
+function wc_get_customer_avatar_url( $email ) {
+	$avatar_html = get_avatar( $email );
+
+	// Get the URL of the avatar from the provided HTML.
+	preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
+
+	if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
+		return esc_url_raw( $matches[1] );
+	}
+
+	return null;
 }

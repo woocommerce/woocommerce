@@ -85,7 +85,7 @@ jQuery( function( $ ) {
 		// Grab wrapping element to target only stateboxes in same 'group'
 		var $wrapper    = $( this ).closest('.woocommerce-billing-fields, .woocommerce-shipping-fields, .woocommerce-shipping-calculator');
 
-		if ( ! $wrapper.size() ) {
+		if ( ! $wrapper.length ) {
 			$wrapper = $( this ).closest('.form-row').parent();
 		}
 

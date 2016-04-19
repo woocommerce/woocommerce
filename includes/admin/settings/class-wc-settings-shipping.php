@@ -127,26 +127,21 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		// Load shipping methods so we can show any global options they may have
 		$shipping_methods = WC()->shipping->load_shipping_methods();
 
-		if ( 'options' === $current_section ) {
+		if ( '' == $current_section ) {
+			$this->output_zones_screen();
+		} elseif ( 'options' === $current_section ) {
 			$settings = $this->get_settings();
 			WC_Admin_Settings::output_fields( $settings );
-			return;
 		} elseif ( 'classes' === $current_section ) {
 			$hide_save_button = true;
 			$this->output_shipping_class_screen();
-			return;
 		} else {
 			foreach ( $shipping_methods as $method ) {
 				if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ) ) && $method->has_settings() ) {
 					$method->admin_options();
-					return;
 				}
 			}
 		}
-
-		// Default to zones screen
-		$hide_save_button = true;
-		$this->output_zones_screen();
 	}
 
 	/**
@@ -181,11 +176,15 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Handles output of the shipping zones page in admin.
 	 */
 	protected function output_zones_screen() {
+		global $hide_save_button;
+
 		if ( isset( $_REQUEST['zone_id'] ) ) {
+			$hide_save_button = true;
 			$this->zone_methods_screen( absint( $_REQUEST['zone_id'] ) );
 		} elseif ( isset( $_REQUEST['instance_id'] ) ) {
 			$this->instance_settings_screen( absint( $_REQUEST['instance_id'] ) );
 		} else {
+			$hide_save_button = true;
 			$this->zones_screen();
 		}
 	}
@@ -209,9 +208,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
 			'strings'                 => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+				'save_changes_prompt'     => __( 'Do you wish to save your changes first? Your changed data will be discarded if you choose to cancel.', 'woocommerce' ),
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
 				'add_method_failed'       => __( 'Shipping method could not be added. Please retry.', 'woocommerce' ),
 				'yes'                     => __( 'Yes', 'woocommerce' ),
+				'no'                      => __( 'No', 'woocommerce' ),
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zone-methods' );
@@ -237,8 +238,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'strings'       => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
-				'no_methods'              => '<a href="#" class="add_shipping_method button">' . __( 'Add Shipping Method', 'woocommerce' ) . '</a>',
-				'add_another_method'      => '<a href="#" class="add_shipping_method button">' . __( 'Add Shipping Method', 'woocommerce' ) . '</a>'
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zones' );
@@ -264,9 +263,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			wp_die( __( 'This shipping method does not have any settings to configure.', 'woocommerce' ) );
 		}
 
-		if ( ! empty( $_POST['save_method'] ) ) {
+		if ( ! empty( $_POST['save'] ) ) {
 
-			if ( empty( $_POST['woocommerce_save_method_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_save_method_nonce'], 'woocommerce_save_method' )) {
+			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-settings' ) ) {
 				echo '<div class="updated error"><p>' . __( 'Edit failed. Please try again.', 'woocommerce' ) . '</p></div>';
 			}
 

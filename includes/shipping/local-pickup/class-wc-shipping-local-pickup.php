@@ -25,7 +25,8 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		$this->method_description    = __( 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
-			'instance-settings'
+			'instance-settings',
+			'instance-settings-modal',
 		);
 		$this->init();
 	}
@@ -40,7 +41,6 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		$this->init_settings();
 
 		// Define user set variables
-		$this->enabled		= $this->get_option( 'enabled' );
 		$this->title		= $this->get_option( 'title' );
 		$this->codes		= $this->get_option( 'codes' );
 		$this->availability	= $this->get_option( 'availability' );
@@ -66,12 +66,6 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
-			'enabled' => array(
-				'title'   => __( 'Enable', 'woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Enable local pickup', 'woocommerce' ),
-				'default' => 'yes'
-			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
@@ -142,7 +136,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-		$is_available = "yes" === $this->enabled;
+		$is_available = true;
 
 		if ( $is_available && $this->get_valid_postcodes() ) {
 			$is_available = $this->is_valid_postcode( $package['destination']['postcode'], $package['destination']['country'] );

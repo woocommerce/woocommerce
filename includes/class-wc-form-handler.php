@@ -31,23 +31,23 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
 
-		// May need $wp global to access query vars
+		// May need $wp global to access query vars.
 		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
 		add_action( 'wp', array( __CLASS__, 'add_payment_method_action' ), 20 );
 	}
 
 	/**
-	 * Save and and update a billing or shipping address if the.
+	 * Save and and update a billing or shipping address if the
 	 * form was submitted through the user account page.
 	 */
 	public static function save_address() {
 		global $wp;
 
-		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || 'edit_address' !== $_POST[ 'action' ] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' ) ) {
+		if ( empty( $_POST['action'] ) || 'edit_address' !== $_POST['action'] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' ) ) {
 			return;
 		}
 
@@ -67,9 +67,9 @@ class WC_Form_Handler {
 				$field['type'] = 'text';
 			}
 
-			// Get Value
+			// Get Value.
 			switch ( $field['type'] ) {
-				case "checkbox" :
+				case 'checkbox' :
 					$_POST[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
 				break;
 				default :
@@ -77,10 +77,10 @@ class WC_Form_Handler {
 				break;
 			}
 
-			// Hook to allow modification of value
+			// Hook to allow modification of value.
 			$_POST[ $key ] = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $_POST[ $key ] );
 
-			// Validation: Required fields
+			// Validation: Required fields.
 			if ( ! empty( $field['required'] ) && empty( $_POST[ $key ] ) ) {
 				wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
@@ -130,7 +130,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount') );
+			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
 		}
 	}
@@ -359,17 +359,15 @@ class WC_Form_Handler {
 			$payment_method = wc_clean( $_POST['payment_method'] );
 
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
 			// Validate
 			$available_gateways[ $payment_method ]->validate_fields();
 
 			// Process
 			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
 				$result = $available_gateways[ $payment_method ]->add_payment_method();
-
 				// Redirect to success/confirmation/payment page
 				if ( $result['result'] == 'success' ) {
-					wc_add_message( __( 'Payment method added.', 'woocommerce' ) );
+					wc_add_notice( __( 'Payment method added.', 'woocommerce' ) );
 					wp_redirect( $result['redirect'] );
 					exit();
 				}
@@ -568,7 +566,7 @@ class WC_Form_Handler {
 
 			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order->id === $order_id && $order->order_key === $order_key ) {
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );

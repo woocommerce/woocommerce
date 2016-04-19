@@ -103,6 +103,36 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $view_transaction_url = '';
 
 	/**
+	 * Optional label to show for "new payment method" in the payment
+	 * method/token selection radio selection.
+	 * @var string
+	 */
+	public $new_method_label = '';
+
+	/**
+	 * Contains a users saved tokens for this gateway.
+	 * @var array
+	 */
+	protected $tokens = array();
+
+	/**
+	 * Returns a users saved tokens for this gateway.
+	 * @since 2.6.0
+	 * @return array
+	 */
+	public function get_tokens() {
+		if ( sizeof( $this->tokens ) > 0 ) {
+			return $this->tokens;
+		}
+
+		if ( is_user_logged_in() && $this->supports( 'tokenization' ) && is_checkout() ) {
+			$this->tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id(), $this->id );
+		}
+
+		return $this->tokens;
+	}
+
+	/**
 	 * Return the title for admin screens.
 	 * @return string
 	 */
@@ -306,13 +336,12 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Override this in your gateway if you have some.
 	 */
 	public function payment_fields() {
-
 		if ( $description = $this->get_description() ) {
 			echo wpautop( wptexturize( $description ) );
 		}
 
 		if ( $this->supports( 'default_credit_card_form' ) ) {
-			$this->credit_card_form();
+			$this->credit_card_form(); // Deprecated, will be removed in a future version.
 		}
 	}
 
@@ -331,48 +360,136 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Core credit card form which gateways can used if needed.
-	 *
+	 * Enqueues our tokenization script to handle some of the new form options.
+	 * @since 2.6.0
+	 */
+	public function tokenization_script() {
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		wp_enqueue_script(
+			'woocommerce-tokenization-form',
+			plugins_url(  '/assets/js/frontend/tokenization-form' . $suffix . '.js', WC_PLUGIN_FILE ),
+			array( 'jquery' ),
+			WC()->version
+		);
+		wp_localize_script( 'woocommerce-tokenization-form', 'woocommerceTokenizationParams', array(
+			'gatewayID'    => $this->id,
+			'userLoggedIn' => (bool) is_user_logged_in(),
+		) );
+	}
+
+	/**
+	 * Grab and display our saved payment methods.
+	 * @since 2.6.0
+	 */
+	public function saved_payment_methods() {
+		$html = '<p>';
+		foreach ( $this->get_tokens() as $token ) {
+			$html .= $this->saved_payment_method( $token );
+		}
+		$html .= '</p><span id="wc-' . esc_attr( $this->id ) . '-method-count" data-count="' . esc_attr( count( $this->get_tokens() ) ) . '"></span>';
+		$html .= '<div class="clear"></div>';
+		echo apply_filters( 'wc_payment_gateway_form_saved_payment_methods_html', $html, $this );
+	}
+
+	/**
+	 * Outputs a saved payment method from a token.
+	 * @since 2.6.0
+	 * @param  WC_Payment_Token $token Payment Token
+	 * @return string                  Generated payment method HTML
+	 */
+	public function saved_payment_method( $token ) {
+		$html = sprintf(
+			'<input type="radio" id="wc-%1$s-payment-token-%2$s" name="wc-%1$s-payment-token" style="width:auto;" class="wc-gateway-payment-token wc-%1$s-payment-token" value="%2$s" %3$s/>',
+			esc_attr( $this->id ),
+			esc_attr( $token->get_id() ),
+			checked( $token->is_default(), true, false )
+		);
+
+		$html .= sprintf( '<label class="wc-gateway-payment-form-saved-payment-method wc-gateway-payment-token-label" for="wc-%s-payment-token-%s">',
+			esc_attr( $this->id ),
+			esc_attr( $token->get_id() )
+		);
+
+		$html .= $this->saved_payment_method_title( $token );
+		$html .= '</label><br />';
+
+		return apply_filters( 'wc_payment_gateway_form_saved_payment_method_html', $html, $token, $this );
+	}
+
+	/**
+	 * Outputs a saved payment method's title based on the passed token.
+	 * @since 2.6.0
+	 * @param  WC_Payment_Token $token Payment Token
+	 * @return string                  Generated payment method title HTML
+	 */
+	public function saved_payment_method_title( $token ) {
+		if ( 'CC' == $token->get_type() && is_callable( array( $token, 'get_card_type' ) ) ) {
+			$type = esc_html__( wc_get_credit_card_type_label( $token->get_card_type() ), 'woocommerce' );
+		} else if ( 'eCheck' === $token->get_type() ) {
+			$type = esc_html__( 'eCheck', 'woocommerce' );
+		}
+
+		$type  = apply_filters( 'wc_payment_gateway_form_saved_payment_method_title_type_html', $type, $token, $this );
+		$title = $type;
+
+		if ( is_callable( array( $token, 'get_last4' ) ) ) {
+			$title .= '&nbsp;' . sprintf( esc_html__( 'ending in %s', 'woocommerce' ), $token->get_last4() );
+		}
+
+		if ( is_callable( array( $token, 'get_expiry_month' ) ) && is_callable( array( $token, 'get_expiry_year' ) ) ) {
+			$title .= ' ' . sprintf( esc_html__( '(expires %s)', 'woocommerce' ), $token->get_expiry_month() . '/' . substr( $token->get_expiry_year(), 2 ) );
+		}
+
+		return apply_filters( 'wc_payment_gateway_form_saved_payment_method_title_html', $title, $token, $this );
+	}
+
+	/**
+	 * Outputs a checkbox for saving a new payment method to the database.
+	 * @since 2.6.0
+	 */
+	public function save_payment_method_checkbox() {
+		$html = sprintf(
+			'<p class="form-row" id="wc-%s-new-payment-method-wrap">',
+			esc_attr( $this->id )
+		);
+		$html .= sprintf(
+			'<input name="wc-%1$s-new-payment-method" id="wc-%1$s-new-payment-method" type="checkbox" value="true" style="width:auto;"/>',
+			esc_attr( $this->id )
+		);
+		$html .= sprintf(
+			'<label for="wc-%s-new-payment-method" style="display:inline;">%s</label>',
+			esc_attr( $this->id ),
+			esc_html__( 'Save to Account', 'woocommerce' )
+		);
+		$html .= '</p><div class="clear"></div>';
+		echo $html;
+	}
+
+	/**
+	 * Displays a radio button for entering a new payment method (new CC details) instead of using a saved method.
+	 * Only displayed when a gateway supports tokenization.
+	 * @since 2.6.0
+	 */
+	public function use_new_payment_method_checkbox() {
+		$label = ( ! empty( $this->new_method_label ) ? esc_html( $this->new_method_label ) : esc_html__( 'Use a new payment method', 'woocommerce' ) );
+		$html = '<input type="radio" id="wc-' . esc_attr( $this->id ). '-new" name="wc-' . esc_attr( $this->id ) . '-payment-token" value="new" style="width:auto;">';
+		$html .= '<label class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox wc-gateway-payment-token-label" for="wc-' . esc_attr( $this->id ) . '-new">';
+		$html .=  apply_filters( 'woocommerce_payment_gateway_form_new_method_label', $label, $this );
+		$html .= '</label>';
+		echo '<div class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox-wrap">' . $html . '</div>';
+	}
+
+	/**
+	 * Core credit card form which gateways can used if needed. Deprecated - inheirt WC_Payment_Gateway_CC instead.
 	 * @param  array $args
 	 * @param  array $fields
 	 */
 	public function credit_card_form( $args = array(), $fields = array() ) {
-
-		wp_enqueue_script( 'wc-credit-card-form' );
-
-		$default_args = array(
-			'fields_have_names' => true, // Some gateways like stripe don't need names as the form is tokenized.
-		);
-
-		$args = wp_parse_args( $args, apply_filters( 'woocommerce_credit_card_form_args', $default_args, $this->id ) );
-
-		$default_fields = array(
-			'card-number-field' => '<p class="form-row form-row-wide">
-				<label for="' . esc_attr( $this->id ) . '-card-number">' . __( 'Card Number', 'woocommerce' ) . ' <span class="required">*</span></label>
-				<input id="' . esc_attr( $this->id ) . '-card-number" class="input-text wc-credit-card-form-card-number" type="text" maxlength="20" autocomplete="off" placeholder="•••• •••• •••• ••••" name="' . ( $args['fields_have_names'] ? $this->id . '-card-number' : '' ) . '" />
-			</p>',
-			'card-expiry-field' => '<p class="form-row form-row-first">
-				<label for="' . esc_attr( $this->id ) . '-card-expiry">' . __( 'Expiry (MM/YY)', 'woocommerce' ) . ' <span class="required">*</span></label>
-				<input id="' . esc_attr( $this->id ) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" type="text" autocomplete="off" placeholder="' . esc_attr__( 'MM / YY', 'woocommerce' ) . '" name="' . ( $args['fields_have_names'] ? $this->id . '-card-expiry' : '' ) . '" />
-			</p>',
-			'card-cvc-field' => '<p class="form-row form-row-last">
-				<label for="' . esc_attr( $this->id ) . '-card-cvc">' . __( 'Card Code', 'woocommerce' ) . ' <span class="required">*</span></label>
-				<input id="' . esc_attr( $this->id ) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc" type="text" autocomplete="off" placeholder="' . esc_attr__( 'CVC', 'woocommerce' ) . '" name="' . ( $args['fields_have_names'] ? $this->id . '-card-cvc' : '' ) . '" />
-			</p>'
-		);
-
-		$fields = wp_parse_args( $fields, apply_filters( 'woocommerce_credit_card_form_fields', $default_fields, $this->id ) );
-		?>
-		<fieldset id="<?php echo $this->id; ?>-cc-form">
-			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
-			<?php
-				foreach ( $fields as $field ) {
-					echo $field;
-				}
-			?>
-			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>
-			<div class="clear"></div>
-		</fieldset>
-		<?php
+		_deprecated_function( 'credit_card_form', '2.6', 'WC_Payment_Gateway_CC->form' );
+		$cc_form = new WC_Payment_Gateway_CC;
+		$cc_form->id       = $this->id;
+		$cc_form->supports = $this->supports;
+		$cc_form->form();
 	}
+
 }

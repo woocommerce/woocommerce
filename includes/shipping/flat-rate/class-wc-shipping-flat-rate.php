@@ -26,7 +26,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$this->method_description    = __( 'Lets you charge a fixed rate for shipping.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
-			'instance-settings'
+			'instance-settings',
+			'instance-settings-modal',
 		);
 		$this->init();
 
@@ -38,7 +39,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function init() {
 		$this->instance_form_fields = include( 'includes/settings-flat-rate.php' );
-		$this->enabled		        = $this->get_option( 'enabled' );
 		$this->title                = $this->get_option( 'title' );
 		$this->availability         = $this->get_option( 'availability' );
 		$this->countries            = $this->get_option( 'countries' );
@@ -172,7 +172,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		// Add the rate
 		if ( $has_costs ) {
-			$this->add_rate( $rate );
+			$this->add_rate( $rate, $package );
 		}
 
 		/**

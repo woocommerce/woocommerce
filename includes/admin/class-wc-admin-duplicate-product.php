@@ -237,7 +237,7 @@ class WC_Admin_Duplicate_Product {
 		global $wpdb;
 
 		$sql     = $wpdb->prepare( "SELECT meta_key, meta_value FROM $wpdb->postmeta WHERE post_id = %d", absint( $id ) );
-		$exclude = array_map( 'esc_sql', array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array( 'total_sales' ) ) ) );
+		$exclude = array_map( 'esc_sql', array_filter( apply_filters( 'woocommerce_duplicate_product_exclude_meta', array( 'total_sales', '_wc_average_rating', '_wc_rating_count', '_wc_review_count' ) ) ) );
 
 		if ( sizeof( $exclude ) ) {
 			$sql .= " AND meta_key NOT IN ( '" . implode( "','", $exclude ) . "' )";

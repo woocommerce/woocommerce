@@ -750,6 +750,8 @@ class WC_Admin_Post_Types {
 				} else {
 					if ( $the_order->billing_first_name || $the_order->billing_last_name ) {
 						$username = trim( sprintf( _x( '%1$s %2$s', 'full name', 'woocommerce' ), $the_order->billing_first_name, $the_order->billing_last_name ) );
+					} else if ( $the_order->billing_company ) {
+						$username = trim( $the_order->billing_company );
 					} else {
 						$username = __( 'Guest', 'woocommerce' );
 					}
@@ -817,7 +819,7 @@ class WC_Admin_Post_Types {
 	public function product_sortable_columns( $columns ) {
 		$custom = array(
 			'price'    => 'price',
-			'featured' => 'featured',
+			'featured' => array( 'featured', 1 ),
 			'sku'      => 'sku',
 			'name'     => 'title'
 		);
@@ -1539,7 +1541,7 @@ class WC_Admin_Post_Types {
 				),
 				array( absint( $search_order_id ) )
 			) );
-		} else {
+		} elseif ( ! empty( $search_fields ) ) {
 			$post_ids = array_unique( array_merge(
 				$wpdb->get_col(
 					$wpdb->prepare( "
@@ -1566,16 +1568,20 @@ class WC_Admin_Post_Types {
 					)
 				)
 			) );
+		} else {
+			$post_ids = false;
 		}
 
-		// Remove s - we don't want to search order name
-		unset( $wp->query_vars['s'] );
+		if ( is_array( $post_ids ) ) {
+			// Remove s - we don't want to search order name
+			unset( $wp->query_vars['s'] );
 
-		// so we know we're doing this
-		$wp->query_vars['shop_order_search'] = true;
+			// so we know we're doing this
+			$wp->query_vars['shop_order_search'] = true;
 
-		// Search by found posts
-		$wp->query_vars['post__in'] = $post_ids;
+			// Search by found posts
+			$wp->query_vars['post__in'] = array_merge( $post_ids, array( 0 ) );
+		}
 	}
 
 	/**
@@ -1843,11 +1849,21 @@ class WC_Admin_Post_Types {
 			}
 
 			// Categories
-			if ( isset( $_GET['product_cat'] ) && '0' == $_GET['product_cat'] ) {
+			if ( isset( $_GET['product_cat'] ) && '0' === $_GET['product_cat'] ) {
 				$query->query_vars['tax_query'][] = array(
 					'taxonomy' => 'product_cat',
 					'field'    => 'id',
 					'terms'    => get_terms( 'product_cat', array( 'fields' => 'ids' ) ),
+					'operator' => 'NOT IN'
+				);
+			}
+
+			// Shipping classes
+			if ( isset( $_GET['product_shipping_class'] ) && '0' === $_GET['product_shipping_class'] ) {
+				$query->query_vars['tax_query'][] = array(
+					'taxonomy' => 'product_shipping_class',
+					'field'    => 'id',
+					'terms'    => get_terms( 'product_shipping_class', array( 'fields' => 'ids' ) ),
 					'operator' => 'NOT IN'
 				);
 			}

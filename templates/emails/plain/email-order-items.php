@@ -35,7 +35,7 @@ foreach ( $items as $item_id => $item ) :
 		}
 
 		// allow other plugins to add additional product information here
-		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 
 		// Variation
 		echo ( $item_meta_content = $item_meta->display( true, true ) ) ? "\n" . $item_meta_content : '';
@@ -65,7 +65,7 @@ foreach ( $items as $item_id => $item ) :
 		}
 
 		// allow other plugins to add additional product information here
-		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
+		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 
 	}
 

@@ -28,6 +28,7 @@ function wc_template_redirect() {
 
 	// When on the checkout with an empty cart, redirect to cart page
 	elseif ( is_page( wc_get_page_id( 'checkout' ) ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ) );
 		wp_redirect( wc_get_page_permalink( 'cart' ) );
 		exit;
 	}
@@ -80,6 +81,19 @@ function wc_send_frame_options_header() {
 	}
 }
 add_action( 'template_redirect', 'wc_send_frame_options_header' );
+
+/**
+ * No index our endpoints.
+ * Prevent indexing pages like order-received.
+ *
+ * @since 2.5.3
+ */
+function wc_prevent_endpoint_indexing() {
+	if ( is_wc_endpoint_url() || isset( $_GET['download_file'] ) ) {
+		@header( 'X-Robots-Tag: noindex' );
+	}
+}
+add_action( 'template_redirect', 'wc_prevent_endpoint_indexing' );
 
 /**
  * When the_post is called, put product data into a global.
@@ -543,7 +557,7 @@ if (  ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
  * Insert the opening anchor tag for products in the loop.
  */
 function woocommerce_template_loop_product_link_open() {
-	echo '<a href="' . get_the_permalink() . '">';
+	echo '<a href="' . get_the_permalink() . '" class="woocommerce-LoopProduct-link">';
 }
 /**
  * Insert the opening anchor tag for products in the loop.
@@ -1151,6 +1165,51 @@ if ( ! function_exists( 'woocommerce_comments' ) ) {
 	function woocommerce_comments( $comment, $args, $depth ) {
 		$GLOBALS['comment'] = $comment;
 		wc_get_template( 'single-product/review.php', array( 'comment' => $comment, 'args' => $args, 'depth' => $depth ) );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_review_display_gravatar' ) ) {
+	/**
+	 * Display the review authors gravatar
+	 *
+	 * @param array $comment WP_Comment.
+	 * @return void
+	 */
+	function woocommerce_review_display_gravatar( $comment ) {
+		echo get_avatar( $comment, apply_filters( 'woocommerce_review_gravatar_size', '60' ), '' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_review_display_rating' ) ) {
+	/**
+	 * Display the reviewers star rating
+	 *
+	 * @return void
+	 */
+	function woocommerce_review_display_rating() {
+		wc_get_template( 'single-product/review-rating.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_review_display_meta' ) ) {
+	/**
+	 * Display the review authors meta (name, verified owner, review date)
+	 *
+	 * @return void
+	 */
+	function woocommerce_review_display_meta() {
+		wc_get_template( 'single-product/review-meta.php' );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_review_display_comment_text' ) ) {
+	/**
+	 * Display the review content
+	 *
+	 * @return void
+	 */
+	function woocommerce_review_display_comment_text() {
+		echo '<div itemprop="description" class="description">' . comment_text() . '</div>';
 	}
 }
 
@@ -2035,9 +2094,17 @@ if ( ! function_exists( 'woocommerce_account_orders' ) ) {
 	 * @param int $current_page Current page number.
 	 */
 	function woocommerce_account_orders( $current_page ) {
-		$current_page = empty( $current_page ) ? 1 : $current_page;
+		$current_page    = empty( $current_page ) ? 1 : absint( $current_page );
+		$customer_orders = wc_get_orders( apply_filters( 'woocommerce_my_account_my_orders_query', array( 'customer' => get_current_user_id(), 'page' => $current_page, 'paginate' => true ) ) );
 
-		wc_get_template( 'myaccount/orders.php', array( 'current_page' => absint( $current_page ) ) );
+		wc_get_template(
+			'myaccount/orders.php',
+			array(
+				'current_page' => absint( $current_page ),
+				'customer_orders' => $customer_orders,
+				'has_orders' => 0 < $customer_orders->total,
+			)
+		);
 	}
 }
 

@@ -367,7 +367,7 @@ class WC_CLI_Command extends WP_CLI_Command {
 				foreach ( $subarray as $sub_key => $sub_value ) {
 					$sub_key = $this->get_normalized_array_key( $sub_key );
 					if ( ! empty( $unflatten[ $first_key ][ $sub_key ] ) ) {
-						$unflatten[ $first_key ][ $sub_key ] = array_merge( $unflatten[ $first_key ][ $sub_key ], $sub_value );
+						$unflatten[ $first_key ][ $sub_key ] = array_merge_recursive( $unflatten[ $first_key ][ $sub_key ], $sub_value );
 					} else {
 						$unflatten[ $first_key ][ $sub_key ] = $sub_value;
 					}
@@ -393,5 +393,16 @@ class WC_CLI_Command extends WP_CLI_Command {
 			$key = absint( $key );
 		}
 		return $key;
+	}
+
+	/**
+	 * Check if the value is equal to 'yes', 'true' or '1'
+	 *
+	 * @since 2.5.4
+	 * @param  string $value
+	 * @return boolean
+	 */
+	protected function is_true( $value ) {
+		return ( 'yes' === $value || 'true' === $value || '1' === $value ) ? true : false;
 	}
 }

@@ -554,7 +554,7 @@ jQuery( function( $ ) {
 			var data = {
 				action: 'woocommerce_add_variation',
 				post_id: woocommerce_admin_meta_boxes_variations.post_id,
-				loop: $( '.woocommerce_variation' ).size(),
+				loop: $( '.woocommerce_variation' ).length,
 				security: woocommerce_admin_meta_boxes_variations.add_variation_nonce
 			};
 

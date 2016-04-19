@@ -131,7 +131,7 @@ class WC_Post_types {
 		register_taxonomy( 'product_shipping_class',
 			apply_filters( 'woocommerce_taxonomy_objects_product_shipping_class', array( 'product', 'product_variation' ) ),
 			apply_filters( 'woocommerce_taxonomy_args_product_shipping_class', array(
-				'hierarchical'          => true,
+				'hierarchical'          => false,
 				'update_count_callback' => '_update_post_term_count',
 				'label'                 => __( 'Shipping Classes', 'woocommerce' ),
 				'labels' => array(

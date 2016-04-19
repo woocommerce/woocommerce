@@ -22,7 +22,7 @@
 				},
 				save: function() {
 					if ( _.size( this.changes ) ) {
-						$.post( ajaxurl + '?action=woocommerce_shipping_classes_save_changes', {
+						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_classes_save_changes', {
 							wc_shipping_classes_nonce : data.wc_shipping_classes_nonce,
 							changes                 : this.changes
 						}, this.onSaveResponse, 'json' );

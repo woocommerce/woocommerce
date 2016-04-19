@@ -1490,9 +1490,9 @@ class WC_Product {
 	 */
 	public function get_dimensions() {
 		$dimensions = implode( ' x ', array_filter( array(
-			$this->get_length(),
-			$this->get_width(),
-			$this->get_height(),
+			wc_format_localized_decimal( $this->get_length() ),
+			wc_format_localized_decimal( $this->get_width() ),
+			wc_format_localized_decimal( $this->get_height() ),
 		) ) );
 
 		if ( ! empty( $dimensions ) ) {
@@ -1534,15 +1534,18 @@ class WC_Product {
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
 	 * @param array $attr
+	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
-	public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
+	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
 		if ( has_post_thumbnail( $this->id ) ) {
 			$image = get_the_post_thumbnail( $this->id, $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
 			$image = get_the_post_thumbnail( $parent_id, $size, $attr );
-		} else {
+		} elseif ( $placeholder ) {
 			$image = wc_placeholder_img( $size );
+		} else {
+			$image = '';
 		}
 
 		return $image;
@@ -1616,17 +1619,24 @@ class WC_Product {
 			$query['where'] .= " AND pm2.meta_value = 'instock'";
 		}
 
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $this->id ) ) {
-			$query['where'] .= " AND ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) )";
-			$andor = 'OR';
-		} else {
-			$andor = 'AND';
-		}
+		$relate_by_category = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $this->id );
+		$relate_by_tag      = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $this->id );
 
-		// when query is OR - need to check against excluded ids again
-		if ( apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $this->id ) ) {
-			$query['where'] .= " {$andor} ( ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) )";
-			$query['where'] .= " AND p.ID NOT IN ( " . implode( ',', $exclude_ids ) . " ) )";
+		if ( $relate_by_category || $relate_by_tag ) {
+			$query['where'] .= ' AND (';
+
+			if ( $relate_by_category ) {
+				$query['where'] .= " ( tt.taxonomy = 'product_cat' AND t.term_id IN ( " . implode( ',', $cats_array ) . " ) ) ";
+				if ( $relate_by_tag ) {
+					$query['where'] .= ' OR ';
+				}
+			}
+
+			if ( $relate_by_tag ) {
+				$query['where'] .= " ( tt.taxonomy = 'product_tag' AND t.term_id IN ( " . implode( ',', $tags_array ) . " ) ) ";
+			}
+
+			$query['where'] .= ')';
 		}
 
 		$query['limits'] = " LIMIT {$limit} ";

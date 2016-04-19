@@ -386,8 +386,8 @@ function wc_scheduled_sales() {
 
 			// Sync parent
 			if ( $parent ) {
-				// We can force variable product prices to sync up by removing their min price meta
-				delete_post_meta( $parent, '_min_price_variation_id' );
+				// Clear prices transient for variable products.
+				delete_transient( 'wc_var_prices_' . $parent );
 
 				// Grouped products need syncing via a function
 				$this_product = wc_get_product( $product_id );

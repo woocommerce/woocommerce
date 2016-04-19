@@ -84,7 +84,7 @@
 					Backbone.ajax({
 						method: 'POST',
 						dataType: 'json',
-						url: ajaxurl + '?action=woocommerce_tax_rates_save_changes',
+						url: ajaxurl + ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_tax_rates_save_changes',
 						data: {
 							current_class: data.current_class,
 							wc_tax_nonce: data.wc_tax_nonce,
@@ -374,7 +374,7 @@
 						var new_position = 0;
 						var old_position = parseInt( rate.tax_rate_order, 10 );
 
-						if ( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').size() ) {
+						if ( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').length ) {
 							new_position = parseInt( $table.find( 'tr[data-id="' + rate.tax_rate_id + '"]').index(), 10 ) + parseInt( ( view.page - 1 ) * view.per_page, 10 );
 						} else {
 							new_position = old_position;

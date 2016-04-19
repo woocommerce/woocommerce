@@ -30,14 +30,14 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Validate a PDT transaction to ensure its authentic.
 	 * @param  string $transaction
-	 * @return bool
+	 * @return bool|array False or result array
 	 */
 	protected function validate_transaction( $transaction ) {
 		$pdt = array(
 			'body' 			=> array(
 				'cmd' => '_notify-synch',
 				'tx'  => $transaction,
-				'at'  => $this->identity_token
+				'at'  => $this->identity_token,
 			),
 			'timeout' 		=> 60,
 			'httpversion'   => '1.1',
@@ -51,7 +51,22 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			return false;
 		}
 
-		return true;
+		// Parse transaction result data
+		$transaction_result  = array_map( 'wc_clean', array_map( 'urldecode', explode( "\n", $response['body'] ) ) );
+		$transaction_results = array();
+
+		foreach ( $transaction_result as $line ) {
+			$line                            = explode( "=", $line );
+			$transaction_results[ $line[0] ] = isset( $line[1] ) ? $line[1] : '';
+		}
+
+		if ( ! empty( $transaction_results['charset'] ) && function_exists( 'iconv' ) ) {
+			foreach ( $transaction_results as $key => $value ) {
+				$transaction_results[ $key ] = iconv( $transaction_results['charset'], 'utf-8', $value );
+			}
+		}
+
+		return $transaction_results;
 	}
 
 	/**
@@ -71,16 +86,30 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			return false;
 		}
 
-		if ( $this->validate_transaction( $transaction ) && 'completed' === $status ) {
+		$transaction_result = $this->validate_transaction( $transaction );
+
+		if ( $transaction_result && 'completed' === $status ) {
 			if ( $order->get_total() != $amount ) {
 				WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')' );
 				$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
 			} else {
 				$this->payment_complete( $order, $transaction,  __( 'PDT payment completed', 'woocommerce' ) );
 
-				if ( ! empty( $_REQUEST['mc_fee'] ) ) {
-					// Log paypal transaction fee.
-					update_post_meta( $order->id, 'PayPal Transaction Fee', wc_clean( $_REQUEST['mc_fee'] ) );
+				// Log paypal transaction fee and other meta data.
+				if ( ! empty( $transaction_result['mc_fee'] ) ) {
+					update_post_meta( $order->id, 'PayPal Transaction Fee', $transaction_result['mc_fee'] );
+				}
+				if ( ! empty( $transaction_result['payer_email'] ) ) {
+					update_post_meta( $order->id, 'Payer PayPal address', $transaction_result['payer_email'] );
+				}
+				if ( ! empty( $transaction_result['first_name'] ) ) {
+					update_post_meta( $order->id, 'Payer first name', $transaction_result['first_name'] );
+				}
+				if ( ! empty( $transaction_result['last_name'] ) ) {
+					update_post_meta( $order->id, 'Payer last name', $transaction_result['last_name'] );
+				}
+				if ( ! empty( $transaction_result['payment_type'] ) ) {
+					update_post_meta( $order->id, 'Payment type', $transaction_result['payment_type'] );
 				}
 			}
 		}

@@ -104,7 +104,7 @@ class WC_Admin_Assets {
 		wp_register_script( 'wc-settings-tax', WC()->plugin_url() . '/assets/js/admin/settings-views-html-settings-tax' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-blockui' ), WC_VERSION );
 		wp_register_script( 'wc-backbone-modal', WC()->plugin_url() . '/assets/js/admin/backbone-modal' . $suffix . '.js', array( 'underscore', 'backbone', 'wp-util' ), WC_VERSION );
 		wp_register_script( 'wc-shipping-zones', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zones' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-enhanced-select', 'wc-backbone-modal' ), WC_VERSION );
-		wp_register_script( 'wc-shipping-zone-methods', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zone-methods' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable' ), WC_VERSION );
+		wp_register_script( 'wc-shipping-zone-methods', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zone-methods' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal' ), WC_VERSION );
 		wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), WC_VERSION );
 		wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2' . $suffix . '.js', array( 'jquery' ), '3.5.4' );
 		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'select2' ), WC_VERSION );
@@ -226,6 +226,14 @@ class WC_Admin_Assets {
 			wp_enqueue_script( 'wc-admin-coupon-meta-boxes' );
 		}
 		if ( in_array( str_replace( 'edit-', '', $screen_id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
+			$post_id  = isset( $post->ID ) ? $post->ID : '';
+			$currency = '';
+
+			if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
+				$order    = wc_get_order( $post_id );
+				$currency = $order->get_order_currency();
+			}
+
 			$params = array(
 				'remove_item_notice'            => __( 'Are you sure you want to remove the selected items? If you have previously reduced this item\'s stock, or this order was submitted by a customer, you will need to manually restore the item\'s stock.', 'woocommerce' ),
 				'i18n_select_items'             => __( 'Please select some items.', 'woocommerce' ),
@@ -268,7 +276,7 @@ class WC_Admin_Assets {
 				'post_id'                       => isset( $post->ID ) ? $post->ID : '',
 				'base_country'                  => WC()->countries->get_base_country(),
 				'currency_format_num_decimals'  => wc_get_price_decimals(),
-				'currency_format_symbol'        => get_woocommerce_currency_symbol(),
+				'currency_format_symbol'        => get_woocommerce_currency_symbol( $currency ),
 				'currency_format_decimal_sep'   => esc_attr( wc_get_price_decimal_separator() ),
 				'currency_format_thousand_sep'  => esc_attr( wc_get_price_thousand_separator() ),
 				'currency_format'               => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS
@@ -326,7 +334,8 @@ class WC_Admin_Assets {
 				'woocommerce_admin_api_keys',
 				array(
 					'ajax_url'         => admin_url( 'admin-ajax.php' ),
-					'update_api_nonce' => wp_create_nonce( 'update-api-key' )
+					'update_api_nonce' => wp_create_nonce( 'update-api-key' ),
+					'clipboard_failed' => esc_html__( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ),
 				)
 			);
 		}

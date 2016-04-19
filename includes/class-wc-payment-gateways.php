@@ -78,17 +78,18 @@ class WC_Payment_Gateways {
 			'WC_Gateway_Paypal',
 		);
 
-		$simplify_countries = (array) apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) );
+		/**
+		 * Simplify Commerce is @deprecated in 2.6.0. Only load when enabled.
+		 */
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && in_array( WC()->countries->get_base_country(), apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
+			$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
 
-		if ( in_array( WC()->countries->get_base_country(), $simplify_countries ) ) {
-			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
-				if ( ! function_exists( 'wcs_create_renewal_order' ) ) { // Subscriptions < 2.0
-					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce_Deprecated';
-				} else {
+			if ( ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] ) {
+				if ( function_exists( 'wcs_create_renewal_order' ) ) {
 					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';
+				} else {
+					$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 				}
-			} else {
-				$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 			}
 		}
 
@@ -146,7 +147,9 @@ class WC_Payment_Gateways {
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} elseif( $gateway->supports( 'add_payment_method' ) ) {
+				} else if( $gateway->supports( 'add_payment_method' ) ) {
+					$_available_gateways[ $gateway->id ] = $gateway;
+				} else if ( $gateway->supports( 'tokenization' ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}
@@ -166,7 +169,14 @@ class WC_Payment_Gateways {
 			return;
 		}
 
-		$current = WC()->session->get( 'chosen_payment_method' );
+		if ( is_user_logged_in() ) {
+			$default_token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
+			if ( ! is_null( $default_token ) ) {
+				$default_token_gateway = $default_token->get_gateway_id();
+			}
+		}
+
+		$current = ( isset( $default_token_gateway ) ? $default_token_gateway : WC()->session->get( 'chosen_payment_method' ) );
 
 		if ( $current && isset( $gateways[ $current ] ) ) {
 			$current_gateway = $gateways[ $current ];

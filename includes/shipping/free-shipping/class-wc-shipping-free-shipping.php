@@ -31,9 +31,9 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		$this->method_description    = __( 'Free Shipping is a special method which can be triggered with coupons and minimum spends.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
-			'instance-settings'
+			'instance-settings',
+			'instance-settings-modal',
 		);
-		$this->enabled		         = $this->get_option( 'enabled' );
 		$this->title 		         = $this->get_option( 'title' );
 		$this->min_amount 	         = $this->get_option( 'min_amount', 0 );
 		$this->requires		         = $this->get_option( 'requires' );
@@ -47,12 +47,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function get_instance_form_fields() {
 		return array(
-			'enabled' => array(
-				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
-				'type' 			=> 'checkbox',
-				'label' 		=> __( 'Enable Free Shipping', 'woocommerce' ),
-				'default' 		=> 'yes'
-			),
 			'title' => array(
 				'title' 		=> __( 'Title', 'woocommerce' ),
 				'type' 			=> 'text',
@@ -118,11 +112,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 		}
 
 		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( WC()->cart->cart_contents_total ) ) {
-			if ( WC()->cart->prices_include_tax ) {
-				$total = WC()->cart->cart_contents_total + array_sum( WC()->cart->taxes );
-			} else {
-				$total = WC()->cart->cart_contents_total;
-			}
+			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( $total >= $this->min_amount ) {
 				$has_met_min_amount = true;

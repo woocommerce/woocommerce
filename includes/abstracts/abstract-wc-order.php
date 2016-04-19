@@ -145,6 +145,39 @@ abstract class WC_Abstract_Order {
 	}
 
 	/**
+	 * Returns a list of all payment tokens associated with the current order
+	 *
+	 * @since 2.6
+	 * @return array An array of payment token objects
+	 */
+	public function get_payment_tokens() {
+		return WC_Payment_Tokens::get_order_tokens( $this->id );
+	}
+
+	/**
+	 * Add a payment token to an order
+	 *
+	 * @since 2.6
+	 * @param  WC_Payment_Token   $token     Payment token object
+	 * @return boolean True if the token was added, false if not
+	 */
+	public function add_payment_token( $token ) {
+		if ( empty( $token ) || ! ( $token instanceof WC_Payment_Token ) ) {
+			return false;
+		}
+
+		$token_ids = get_post_meta( $this->id, '_payment_tokens', true );
+		if ( empty ( $token_ids ) ) {
+			$token_ids = array();
+		}
+		$token_ids[] = $token->get_id();
+
+		update_post_meta( $this->id, '_payment_tokens', $token_ids );
+		do_action( 'woocommerce_payment_token_added_to_order', $this->id, $token->get_id(), $token, $token_ids );
+		return true;
+	}
+
+	/**
 	 * Set the payment method for the order.
 	 *
 	 * @param WC_Payment_Gateway $payment_method
@@ -219,13 +252,15 @@ abstract class WC_Abstract_Order {
 	 * @return int|bool Item ID or false.
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
-
-		$default_args = array(
+		$args = wp_parse_args( $args, array(
 			'variation' => array(),
 			'totals'    => array()
-		);
+		) );
 
-		$args    = wp_parse_args( $args, $default_args );
+		if ( ! $product ) {
+			return false;
+		}
+
 		$item_id = wc_add_order_item( $this->id, array(
 			'order_item_name' => $product->get_title(),
 			'order_item_type' => 'line_item'
@@ -1979,6 +2014,7 @@ abstract class WC_Abstract_Order {
 			'show_purchase_note'  => $this->is_paid() && ! $args['sent_to_admin'],
 			'show_image'          => $args['show_image'],
 			'image_size'          => $args['image_size'],
+			'plain_text'          => $args['plain_text'],
 			'sent_to_admin'       => $args['sent_to_admin']
 		) );
 
@@ -2085,19 +2121,18 @@ abstract class WC_Abstract_Order {
 		// Get cancel endpoint
 		$cancel_endpoint = $this->get_cancel_endpoint();
 
-		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
+		return apply_filters( 'woocommerce_get_cancel_order_url', esc_url( add_query_arg( array(
 			'cancel_order' => 'true',
 			'order'        => $this->order_key,
 			'order_id'     => $this->id,
-			'redirect'     => $redirect
-		), $cancel_endpoint ), 'woocommerce-cancel_order' ) );
+			'redirect'     => $redirect,
+		), $cancel_endpoint ) ) );
 	}
 
 	/**
 	 * Generates a raw (unescaped) cancel-order URL for use by payment gateways.
 	 *
 	 * @param string $redirect
-	 *
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
@@ -2110,7 +2145,6 @@ abstract class WC_Abstract_Order {
 			'order'        => $this->order_key,
 			'order_id'     => $this->id,
 			'redirect'     => $redirect,
-			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
 		), $cancel_endpoint ) );
 	}
 
@@ -2282,21 +2316,43 @@ abstract class WC_Abstract_Order {
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 		$old_status = $this->get_status();
 
+		// If the old status is unknown (e.g. draft) assume its pending for action usage.
+		if ( ! in_array( 'wc-' . $old_status, array_keys( wc_get_order_statuses() ) ) ) {
+			$old_status = 'pending';
+		}
+
 		// If the statuses are the same there is no need to update, unless the post status is not a valid 'wc' status.
 		if ( $new_status === $old_status && in_array( $this->post_status, array_keys( wc_get_order_statuses() ) ) ) {
 			return false;
 		}
 
-		// Update the order.
-		wp_update_post( array( 'ID' => $this->id, 'post_status' => 'wc-' . $new_status ) );
 		$this->post_status = 'wc-' . $new_status;
+		$update_post_data  = array(
+			'ID'          => $this->id,
+			'post_status' => $this->post_status,
+		);
 
-		$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+		if ( 'pending' === $old_status && ! $manual ) {
+			$update_post_data[ 'post_date' ]     = current_time( 'mysql', 0 );
+			$update_post_data[ 'post_date_gmt' ] = current_time( 'mysql', 1 );
+		}
+
+		if ( ! wp_update_post( $update_post_data ) ) {
+			$this->add_order_note( sprintf( __( 'Unable to update order from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ), 0, $manual );
+			return false;
+		}
+
+		// Status was set.
+		do_action( 'woocommerce_order_status_' . $new_status, $this->id );
 
 		// Status was changed.
-		do_action( 'woocommerce_order_status_' . $new_status, $this->id );
-		do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
-		do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
+		if ( $new_status !== $old_status ) {
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+			do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
+			do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
+		} else {
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed to %s.', 'woocommerce' ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+		}
 
 		switch ( $new_status ) {
 
@@ -2395,12 +2451,6 @@ abstract class WC_Abstract_Order {
 			if ( ! empty( $transaction_id ) ) {
 				update_post_meta( $this->id, '_transaction_id', $transaction_id );
 			}
-
-			wp_update_post( array(
-				'ID'            => $this->id,
-				'post_date'     => current_time( 'mysql', 0 ),
-				'post_date_gmt' => current_time( 'mysql', 1 )
-			) );
 
 			// Payment is complete so reduce stock levels
 			if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $this->id, '_order_stock_reduced', true ), $this->id ) ) {
