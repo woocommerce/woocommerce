@@ -79,7 +79,7 @@ class WC_Logger {
 
 		do_action( 'woocommerce_log_add', $handle, $message );
 
-		return $result === false ? false : true;
+		return false !== $result;
 	}
 
 	/**
@@ -102,7 +102,7 @@ class WC_Logger {
 
 		do_action( 'woocommerce_log_clear', $handle );
 
-		return $result === true;
+		return $result;
 	}
 
 }
