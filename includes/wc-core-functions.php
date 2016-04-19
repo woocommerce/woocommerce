@@ -26,6 +26,7 @@ include( 'wc-product-functions.php' );
 include( 'wc-account-functions.php' );
 include( 'wc-term-functions.php' );
 include( 'wc-attribute-functions.php' );
+include( 'wc-rest-functions.php' );
 
 /**
  * Filters on data used in admin and frontend.

@@ -622,3 +622,51 @@ function wc_set_user_last_update_time( $user_id ) {
 function wc_get_customer_saved_methods_list( $customer_id ) {
 	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id );
 }
+
+/**
+ * Get info about customer's last order.
+ *
+ * @since 2.6.0
+ * @param int $customer_id Customer ID.
+ * @return WC_Order|bool Order object if successful or false.
+ */
+function wc_get_customer_last_order( $customer_id ) {
+	global $wpdb;
+
+	$customer_id = absint( $customer_id );
+
+	$id = $wpdb->get_var( "SELECT id
+		FROM $wpdb->posts AS posts
+		LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
+		WHERE meta.meta_key = '_customer_user'
+		AND   meta.meta_value = {$customer_id}
+		AND   posts.post_type = 'shop_order'
+		AND   posts.post_status IN ( '" . implode( "','", array_keys( wc_get_order_statuses() ) ) . "' )
+		ORDER BY posts.ID DESC
+	" );
+
+	return wc_get_order( $id );
+}
+
+/**
+ * Wrapper for @see get_avatar() which doesn't simply return
+ * the URL so we need to pluck it from the HTML img tag.
+ *
+ * Kudos to https://github.com/WP-API/WP-API for offering a better solution.
+ *
+ * @since 2.6.0
+ * @param string $email the customer's email.
+ * @return string the URL to the customer's avatar.
+ */
+function wc_get_customer_avatar_url( $email ) {
+	$avatar_html = get_avatar( $email );
+
+	// Get the URL of the avatar from the provided HTML.
+	preg_match( '/src=["|\'](.+)[\&|"|\']/U', $avatar_html, $matches );
+
+	if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
+		return esc_url_raw( $matches[1] );
+	}
+
+	return null;
+}

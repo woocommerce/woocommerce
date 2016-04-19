@@ -7,8 +7,8 @@ jQuery( function( $ ) {
 	}
 
 	// Tabs
-	$( '.wc-tabs-wrapper, .woocommerce-tabs' )
-		.on( 'init', function() {
+	$( 'body' )
+		.on( 'init', '.wc-tabs-wrapper, .woocommerce-tabs', function() {
 			$( '.wc-tab, .woocommerce-tabs .panel:not(.panel .panel)' ).hide();
 
 			var hash  = window.location.hash;
@@ -35,17 +35,15 @@ jQuery( function( $ ) {
 			$tab.closest( 'li' ).addClass( 'active' );
 			$tabs_wrapper.find( $tab.attr( 'href' ) ).show();
 		})
-		.trigger( 'init' );
-
-	$( 'a.woocommerce-review-link' ).click( function() {
-		$( '.reviews_tab a' ).click();
-		return true;
-	});
-
-	// Star ratings for comments
-	$( '#rating' ).hide().before( '<p class="stars"><span><a class="star-1" href="#">1</a><a class="star-2" href="#">2</a><a class="star-3" href="#">3</a><a class="star-4" href="#">4</a><a class="star-5" href="#">5</a></span></p>' );
-
-	$( 'body' )
+		// Review link
+		.on( 'click', 'a.woocommerce-review-link', function() {
+			$( '.reviews_tab a' ).click();
+			return true;
+		})
+		// Star ratings for comments
+		.on( 'init', '#rating', function() {
+			$( '#rating' ).hide().before( '<p class="stars"><span><a class="star-1" href="#">1</a><a class="star-2" href="#">2</a><a class="star-3" href="#">3</a><a class="star-4" href="#">4</a><a class="star-5" href="#">5</a></span></p>' );
+		})
 		.on( 'click', '#respond p.stars a', function() {
 			var $star   	= $( this ),
 				$rating 	= $( this ).closest( '#respond' ).find( '#rating' ),
@@ -68,4 +66,7 @@ jQuery( function( $ ) {
 				return false;
 			}
 		});
+	
+	//Init Tabs and Star Ratings	
+	$( '.wc-tabs-wrapper, .woocommerce-tabs, #rating' ).trigger( 'init' );
 });

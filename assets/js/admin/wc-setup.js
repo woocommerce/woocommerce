@@ -46,4 +46,21 @@ jQuery( function( $ ) {
 		return true;
 	} );
 
+	$( '.wc-wizard-payment-gateways' ).on( 'change', '.wc-wizard-gateway-enable input', function() {
+		if ( $( this ).is( ':checked' ) ) {
+			$( this ).closest( 'li' ).addClass( 'checked' );
+		} else {
+			$( this ).closest( 'li' ).removeClass( 'checked' );
+		}
+	} );
+
+	$( '.wc-wizard-payment-gateways' ).on( 'click', 'li.wc-wizard-gateway', function() {
+		var $enabled = $( this ).find( '.wc-wizard-gateway-enable input' );
+
+		$enabled.prop( 'checked', ! $enabled.prop( 'checked' ) ).change();
+	} );
+
+	$( '.wc-wizard-payment-gateways' ).on( 'click', 'li.wc-wizard-gateway table, li.wc-wizard-gateway a', function( e ) {
+		e.stopPropagation();
+	} );
 } );
