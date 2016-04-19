@@ -225,6 +225,7 @@ final class WooCommerce {
 	public function includes() {
 		include_once( 'includes/class-wc-autoloader.php' );
 		include_once( 'includes/wc-core-functions.php' );
+		include_once( 'includes/class-wc-register-legacy-settings.php' );
 		include_once( 'includes/wc-widget-functions.php' );
 		include_once( 'includes/wc-webhook-functions.php' );
 		include_once( 'includes/class-wc-install.php' );
