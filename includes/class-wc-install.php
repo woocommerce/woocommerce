@@ -41,6 +41,7 @@ class WC_Install {
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
+		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
 	}
 
 	/**
@@ -819,6 +820,151 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$tables[] = $wpdb->prefix . 'woocommerce_order_itemmeta';
 
 		return $tables;
+	}
+
+	/**
+	 * Get slug from path
+	 * @param  string $key
+	 * @return string
+	 */
+	private static function format_plugin_slug( $key ) {
+		$slug = explode( '/', $key );
+		$slug = explode( '.', end( $slug ) );
+		return $slug[0];
+	}
+
+	/**
+	 * Install a plugin from .org in the background via a cron job (used by
+	 * installer - opt in).
+	 * @param string $plugin_to_install_id
+	 * @param array $plugin_to_install
+	 * @since 2.6.0
+	 */
+	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+			require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
+			require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+			require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+
+			WP_Filesystem();
+
+			$skin              = new Automatic_Upgrader_Skin;
+			$upgrader          = new WP_Upgrader( $skin );
+			$installed_plugins = array_map( array( __CLASS__, 'format_plugin_slug' ), array_keys( get_plugins() ) );
+			$plugin_slug       = $plugin_to_install['repo-slug'];
+			$plugin            = $plugin_slug . '/' . $plugin_slug . '.php';
+			$installed         = false;
+			$activate          = false;
+
+			// See if the plugin is installed already
+			if ( in_array( $plugin_to_install['repo-slug'], $installed_plugins ) ) {
+				$installed = true;
+				$activate  = ! is_plugin_active( $plugin );
+			}
+
+			// Install this thing!
+			if ( ! $installed ) {
+				// Suppress feedback
+				ob_start();
+
+				try {
+					$plugin_information = plugins_api( 'plugin_information', array(
+						'slug'   => $plugin_to_install['repo-slug'],
+						'fields' => array(
+							'short_description' => false,
+							'sections'          => false,
+							'requires'          => false,
+							'rating'            => false,
+							'ratings'           => false,
+							'downloaded'        => false,
+							'last_updated'      => false,
+							'added'             => false,
+							'tags'              => false,
+							'homepage'          => false,
+							'donate_link'       => false,
+							'author_profile'    => false,
+							'author'            => false,
+						),
+					) );
+
+					if ( is_wp_error( $plugin_information ) ) {
+						throw new Exception( $plugin_information->get_error_message() );
+					}
+
+					$package  = $plugin_information->download_link;
+					$download = $upgrader->download_package( $package );
+
+					if ( is_wp_error( $download ) ) {
+						throw new Exception( $download->get_error_message() );
+					}
+
+					$working_dir = $upgrader->unpack_package( $download, true );
+
+					if ( is_wp_error( $working_dir ) ) {
+						throw new Exception( $working_dir->get_error_message() );
+					}
+
+					$result = $upgrader->install_package( array(
+						'source'                      => $working_dir,
+						'destination'                 => WP_PLUGIN_DIR,
+						'clear_destination'           => false,
+						'abort_if_destination_exists' => false,
+						'clear_working'               => true,
+						'hook_extra'                  => array(
+							'type'   => 'plugin',
+							'action' => 'install',
+						),
+					) );
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					}
+
+					$activate = true;
+
+				} catch ( Exception $e ) {
+					WC_Admin_Notices::add_custom_notice(
+						$plugin_to_install_id . '_install_error',
+						sprintf(
+							__( '%s could not be installed (%s). %sPlease install it manually by clicking here.%s', 'woocommerce' ),
+							$plugin_to_install['name'],
+							$e->getMessage(),
+							'<a href="' . admin_url( 'plugin-install.php?tab=search&type=term&s=' . $plugin_to_install['repo-slug'] ) . '">',
+							'</a>'
+						)
+					);
+				}
+
+				// Discard feedback
+				ob_end_clean();
+			}
+
+			wp_clean_plugins_cache();
+
+			// Activate this thing
+			if ( $activate ) {
+				try {
+					$result = activate_plugin( $plugin );
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					}
+
+				} catch ( Exception $e ) {
+					WC_Admin_Notices::add_custom_notice(
+						$plugin_to_install_id . '_install_error',
+						sprintf(
+							__( '%s could not be activated (%s). %sPlease activate it manually via the plugins screen.%s', 'woocommerce' ),
+							$plugin_to_install['name'],
+							$e->getMessage() . '"' . $plugin . '"',
+							'<a href="' . admin_url( 'plugins.php' ) . '">',
+							'</a>'
+						)
+					);
+				}
+			}
+		}
 	}
 }
 
