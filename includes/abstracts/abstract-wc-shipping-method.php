@@ -218,7 +218,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			'cost'      => '0', // Amount or array of costs (per item shipping)
 			'taxes'     => '', // Pass taxes, or leave empty to have it calculated for you, or 'false' to disable calculations
 			'calc_tax'  => 'per_order', // Calc tax per_order or per_item. Per item needs an array of costs
-			'meta_data' => array() // Array of misc meta data to store along with this rate - key value pairs.
+			'meta_data' => array(), // Array of misc meta data to store along with this rate - key value pairs.
+			'package'   => false, // Package array this rate was generated for @since 2.6.0
 		) );
 
 		// ID and label are required
@@ -247,14 +248,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			}
 		}
 
-		// Retieve the package
-		// @since WC 2.6
-		$package = isset( $args['package'] ) ? $args['package'] : false;
-
 		// Store package data
-		if ( $package ) {
+		if ( $args['package'] ) {
 			$items_in_package = array();
-			foreach ( $package['contents'] as $item ) {
+			foreach ( $args['package']['contents'] as $item ) {
 				$product = $item['data'];
 				$items_in_package[] = $product->get_title() . ' &times; ' . $item['quantity'];
 			}
@@ -465,7 +462,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Processes and saves options.
 	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
 	 * @since 2.6.0
-	 * @param  array $post_data Defaults to $_POST but can be passed in.
 	 * @return bool was anything saved?
 	 */
 	public function process_admin_options() {
