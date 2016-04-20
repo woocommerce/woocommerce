@@ -43,7 +43,7 @@ abstract class WC_Settings_API {
 	public $form_fields = array();
 
 	/**
-	 * The settings data. When empty, the $_POST data will be taken.
+	 * The posted settings data. When empty, $_POST data will be used.
 	 * @var array
 	 */
 	protected $data = array();
@@ -131,20 +131,18 @@ abstract class WC_Settings_API {
 	/**
 	 * Sets the POSTed data. This method can be used to set specific data, instead
 	 * of taking it from the $_POST array.
-	 *
 	 * @param array data
 	 */
-	protected function set_post_data( array $data ) {
+	public function set_post_data( $data = array() ) {
 		$this->data = $data;
 	}
 
 	/**
 	 * Returns the POSTed data, to be used to save the settings.
-	 *
 	 * @return array
 	 */
-	protected function get_post_data() {
-		if( !empty( $this->data ) || !is_array( $this->data ) ) {
+	public function get_post_data() {
+		if ( ! empty( $this->data ) && is_array( $this->data ) ) {
 			return $this->data;
 		}
 		return $_POST;
@@ -153,7 +151,6 @@ abstract class WC_Settings_API {
 	/**
 	 * Processes and saves options.
 	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
-	 * @param  array $post_data Defaults to $_POST but can be passed in.
 	 * @return bool was anything saved?
 	 */
 	public function process_admin_options() {
