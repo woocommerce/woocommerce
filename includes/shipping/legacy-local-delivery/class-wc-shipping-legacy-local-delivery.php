@@ -81,9 +81,10 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 		}
 
 		$rate = array(
-			'id'    => $this->id,
-			'label' => $this->title,
-			'cost'  => $shipping_total
+			'id'      => $this->id,
+			'label'   => $this->title,
+			'cost'    => $shipping_total,
+			'package' => $package,
 		);
 
 		$this->add_rate( $rate );

@@ -123,9 +123,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$rate = array(
-			'id'    => $this->id . $this->instance_id,
-			'label' => $this->title,
-			'cost'  => 0,
+			'id'      => $this->id . $this->instance_id,
+			'label'   => $this->title,
+			'cost'    => 0,
+			'package' => $package,
 		);
 
 		// Calculate the costs
@@ -136,7 +137,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost( $cost, array(
 				'qty'  => $this->get_package_item_qty( $package ),
-				'cost' => $package['contents_cost']
+				'cost' => $package['contents_cost'],
 			) );
 		}
 
@@ -169,8 +170,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		if ( $this->type === 'order' && $highest_class_cost ) {
 			$rate['cost'] += $highest_class_cost;
 		}
-
-		$rate['package'] = $package;
 
 		// Add the rate
 		if ( $has_costs ) {

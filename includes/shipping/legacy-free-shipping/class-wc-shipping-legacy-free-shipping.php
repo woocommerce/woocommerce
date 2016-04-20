@@ -208,10 +208,11 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$args = array(
-			'id' 	=> $this->id,
-			'label' => $this->title,
-			'cost' 	=> 0,
-			'taxes' => false
+			'id' 	  => $this->id,
+			'label'   => $this->title,
+			'cost' 	  => 0,
+			'taxes'   => false,
+			'package' => $package,
 		);
 		$this->add_rate( $args );
 	}
