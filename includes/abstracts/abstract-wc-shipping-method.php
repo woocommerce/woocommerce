@@ -465,13 +465,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param  array $post_data Defaults to $_POST but can be passed in.
 	 * @return bool was anything saved?
 	 */
-	public function process_admin_options( $post_data = array() ) {
+	public function process_admin_options() {
 		if ( $this->instance_id ) {
 			$this->init_instance_settings();
 
-			if ( empty( $post_data ) ) {
-				$post_data = $_POST;
-			}
+			$post_data = !empty( $_POST['data'] ) ? $_POST['data'] : $this->get_post_data();
 
 			foreach ( $this->get_instance_form_fields() as $key => $field ) {
 				if ( 'title' !== $this->get_field_type( $field ) ) {
