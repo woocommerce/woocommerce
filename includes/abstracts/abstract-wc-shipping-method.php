@@ -210,9 +210,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
 	 * @param array $args (default: array())
-	 * @param array $package option to store information about the package in meta.
 	 */
-	public function add_rate( $args = array(), $package = false ) {
+	public function add_rate( $args = array() ) {
 		$args = wp_parse_args( $args, array(
 			'id'        => '', // ID for the rate
 			'label'     => '', // Label for the rate
@@ -247,6 +246,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 				$rate->add_meta_data( $key, $value );
 			}
 		}
+
+		// Retieve the package
+		// @since WC 2.6
+		$package = isset( $args['package'] ) ? $args['package'] : false;
 
 		// Store package data
 		if ( $package ) {

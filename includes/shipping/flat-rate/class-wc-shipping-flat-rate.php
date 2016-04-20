@@ -170,9 +170,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$rate['cost'] += $highest_class_cost;
 		}
 
+		$rate['package'] = $package;
+
 		// Add the rate
 		if ( $has_costs ) {
-			$this->add_rate( $rate, $package );
+			$this->add_rate( $rate );
 		}
 
 		/**
@@ -195,7 +197,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		 * 			$method->add_rate( $new_rate );
 		 * 		}.
 		 */
-		do_action( 'woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate, $package );
+		do_action( 'woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate );
 	}
 
 	/**
