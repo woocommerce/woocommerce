@@ -3256,6 +3256,7 @@ class WC_AJAX {
 		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		//$data            = $_POST['data'];
 
+		$shipping_method->set_post_data( $_POST['data'] );
 		$shipping_method->process_admin_options();
 
 		wp_send_json_success( array(

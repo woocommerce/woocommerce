@@ -469,7 +469,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		if ( $this->instance_id ) {
 			$this->init_instance_settings();
 
-			$post_data = !empty( $_POST['data'] ) ? $_POST['data'] : $this->get_post_data();
+			$post_data = $this->get_post_data();
 
 			foreach ( $this->get_instance_form_fields() as $key => $field ) {
 				if ( 'title' !== $this->get_field_type( $field ) ) {
