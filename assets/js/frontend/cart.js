@@ -75,7 +75,13 @@ jQuery( function( $ ) {
 			$( '.woocommerce-error, .woocommerce-message' ).remove();
 		}
 
-		$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
+		if ( $new_form.length === 0 ) {
+			// No items to display now! Reload page from server, so we can
+			// display the "empty cart" page instead.
+			location.reload();
+		} else {
+			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
+		}
 	};
 
 	/**
