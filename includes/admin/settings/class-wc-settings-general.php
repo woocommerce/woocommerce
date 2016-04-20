@@ -75,6 +75,15 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
+				'title'   => __( 'Sell to all Countries except', 'woocommerce' ),
+				'desc'    => '',
+				'id'      => 'woocommerce_all_except_countries',
+				'css'     => 'min-width: 350px;',
+				'default' => '',
+				'type'    => 'multi_select_countries'
+			),
+
+			array(
 				'title'   => __( 'Sell to Specific Countries', 'woocommerce' ),
 				'desc'    => '',
 				'id'      => 'woocommerce_specific_allowed_countries',
@@ -97,6 +106,15 @@ class WC_Settings_General extends WC_Settings_Page {
 					'specific' => __( 'Ship to specific countries only', 'woocommerce' ),
 					'disabled' => __( 'Disable shipping &amp; shipping calculations', 'woocommerce' ),
 				)
+			),
+
+			array(
+				'title'   => __( 'Ship to all Countries except', 'woocommerce' ),
+				'desc'    => '',
+				'id'      => 'woocommerce_all_except_ship_to_countries',
+				'css'     => 'min-width: 350px;',
+				'default' => '',
+				'type'    => 'multi_select_countries'
 			),
 
 			array(

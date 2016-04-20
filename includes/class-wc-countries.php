@@ -183,8 +183,18 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_allowed_countries() {
-		if ( get_option( 'woocommerce_allowed_countries' ) !== 'specific' ) {
-			return $this->countries;
+		if ( 'specific' !== get_option( 'woocommerce_allowed_countries' ) ) {
+			$except_countries = get_option( 'woocommerce_all_except_countries', array() );
+
+			if ( ! $except_countries ) {
+				return $this->countries;
+			} else {
+				$all_except_countries = $this->countries;
+				foreach( $except_countries as $country ) {
+					unset( $all_except_countries[ $country ] );
+				}
+				return apply_filters( 'woocommerce_countries_allowed_countries', $all_except_countries );
+			}
 		}
 
 		$countries = array();
@@ -205,12 +215,32 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_shipping_countries() {
-		if ( get_option( 'woocommerce_ship_to_countries' ) == '' ) {
-			return $this->get_allowed_countries();
+		if ( '' === get_option( 'woocommerce_ship_to_countries' ) ) {
+			$except_countries = get_option( 'woocommerce_all_except_ship_to_countries', array() );
+
+			if ( ! $except_countries ) {
+				return $this->get_allowed_countries();
+			} else {
+				$all_except_countries = $this->get_allowed_countries();
+				foreach( $except_countries as $country ) {
+					unset( $all_except_countries[ $country ] );
+				}
+				return apply_filters( 'woocommerce_countries_allowed_countries', $all_except_countries );
+			}
 		}
 
-		if ( get_option( 'woocommerce_ship_to_countries' ) !== 'specific' ) {
-			return $this->countries;
+		if ( 'specific' !== get_option( 'woocommerce_ship_to_countries' ) ) {
+			$except_countries = get_option( 'woocommerce_all_except_ship_to_countries', array() );
+
+			if ( ! $except_countries ) {
+				return $this->countries;
+			} else {
+				$all_except_countries = $this->countries;
+				foreach( $except_countries as $country ) {
+					unset( $all_except_countries[ $country ] );
+				}
+				return apply_filters( 'woocommerce_countries_allowed_countries', $all_except_countries );
+			}
 		}
 
 		$countries = array();

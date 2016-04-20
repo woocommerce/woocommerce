@@ -3,10 +3,15 @@
 
 	// Countries
 	$( 'select#woocommerce_allowed_countries, select#woocommerce_ship_to_countries' ).change( function() {
-		if ( $( this ).val() === 'specific' ) {
-			$( this ).parent().parent().next( 'tr' ).show();
-		} else {
+		if ( 'disabled' === $( this ).val() ) {
 			$( this ).parent().parent().next( 'tr' ).hide();
+			jQuery( this ).parent().parent().next().next( 'tr' ).hide();
+		} else if ( 'specific' === $( this ).val() ) {
+			$( this ).parent().parent().next( 'tr' ).hide();
+			$( this ).parent().parent().next().next( 'tr' ).show();
+		} else {
+			$( this ).parent().parent().next( 'tr' ).show();
+			$( this ).parent().parent().next().next( 'tr' ).hide();
 		}
 	}).change();
 
