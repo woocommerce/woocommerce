@@ -81,6 +81,7 @@ jQuery( function( $ ) {
 			location.reload();
 		} else {
 			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
+			$( 'table.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
 		}
 	};
 
@@ -228,6 +229,19 @@ jQuery( function( $ ) {
 				'click',
 				'td.product-remove > a',
 				this.item_remove_clicked );
+			$( document ).on(
+				'change input',
+				'div.woocommerce > form .cart_item :input',
+				this.input_changed );
+
+			$( 'div.woocommerce > form input[name="update_cart"]' ).prop( 'disabled', true );
+		},
+
+		/**
+		 * After and input is changed, enabled the update cart button.
+		 */
+		input_changed: function() {
+			$( 'div.woocommerce > form input[name="update_cart"]' ).prop( 'disabled', false );
 		},
 
 		/**
