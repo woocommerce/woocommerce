@@ -140,9 +140,10 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$rate = array(
-			'id'    => $this->id,
-			'label' => $this->title,
-			'cost'  => 0,
+			'id'      => $this->id,
+			'label'   => $this->title,
+			'cost'    => 0,
+			'package' => $package,
 		);
 
 		// Calculate the costs
@@ -187,9 +188,11 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$rate['cost'] += $highest_class_cost;
 		}
 
+		$rate['package'] = $package;
+
 		// Add the rate
 		if ( $has_costs ) {
-			$this->add_rate( $rate, $package );
+			$this->add_rate( $rate );
 		}
 
 		/**
@@ -212,7 +215,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		 * 			$method->add_rate( $new_rate );
 		 * 		}.
 		 */
-		do_action( 'woocommerce_flat_rate_shipping_add_rate', $this, $rate, $package );
+		do_action( 'woocommerce_flat_rate_shipping_add_rate', $this, $rate );
 	}
 
 	/**
@@ -279,7 +282,10 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 				} else {
 					$extra_rate['cost'] += $extra_cost;
 				}
-				$this->add_rate( $extra_rate, $package );
+
+				$rate['package'] = $package;
+
+				$this->add_rate( $extra_rate );
 			}
 		}
 	}

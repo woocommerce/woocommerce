@@ -529,19 +529,17 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Admin Panel Options Processing.
 	 */
-	public function process_admin_options( $post_data = array() ) {
-		if ( empty( $post_data ) ) {
-			$post_data = $_POST;
-		}
-
+	public function process_admin_options() {
 		// Save regular options
-		parent::process_admin_options( $post_data );
+		parent::process_admin_options();
+
+		$post_data = $this->get_post_data();
 
 		// Save templates
-		if ( isset( $_POST['template_html_code'] ) ) {
+		if ( isset( $post_data['template_html_code'] ) ) {
 			$this->save_template( $post_data['template_html_code'], $this->template_html );
 		}
-		if ( isset( $_POST['template_plain_code'] ) ) {
+		if ( isset( $post_data['template_plain_code'] ) ) {
 			$this->save_template( $post_data['template_plain_code'], $this->template_plain );
 		}
 	}

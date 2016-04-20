@@ -210,16 +210,16 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
 	 * @param array $args (default: array())
-	 * @param array $package option to store information about the package in meta.
 	 */
-	public function add_rate( $args = array(), $package = false ) {
+	public function add_rate( $args = array() ) {
 		$args = wp_parse_args( $args, array(
 			'id'        => '', // ID for the rate
 			'label'     => '', // Label for the rate
 			'cost'      => '0', // Amount or array of costs (per item shipping)
 			'taxes'     => '', // Pass taxes, or leave empty to have it calculated for you, or 'false' to disable calculations
 			'calc_tax'  => 'per_order', // Calc tax per_order or per_item. Per item needs an array of costs
-			'meta_data' => array() // Array of misc meta data to store along with this rate - key value pairs.
+			'meta_data' => array(), // Array of misc meta data to store along with this rate - key value pairs.
+			'package'   => false, // Package array this rate was generated for @since 2.6.0
 		) );
 
 		// ID and label are required
@@ -249,9 +249,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		// Store package data
-		if ( $package ) {
+		if ( $args['package'] ) {
 			$items_in_package = array();
-			foreach ( $package['contents'] as $item ) {
+			foreach ( $args['package']['contents'] as $item ) {
 				$product = $item['data'];
 				$items_in_package[] = $product->get_title() . ' &times; ' . $item['quantity'];
 			}
@@ -462,16 +462,13 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Processes and saves options.
 	 * If there is an error thrown, will continue to save and validate fields, but will leave the erroring field out.
 	 * @since 2.6.0
-	 * @param  array $post_data Defaults to $_POST but can be passed in.
 	 * @return bool was anything saved?
 	 */
-	public function process_admin_options( $post_data = array() ) {
+	public function process_admin_options() {
 		if ( $this->instance_id ) {
 			$this->init_instance_settings();
 
-			if ( empty( $post_data ) ) {
-				$post_data = $_POST;
-			}
+			$post_data = $this->get_post_data();
 
 			foreach ( $this->get_instance_form_fields() as $key => $field ) {
 				if ( 'title' !== $this->get_field_type( $field ) ) {
