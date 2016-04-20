@@ -1518,7 +1518,7 @@ class WC_Cart {
 		 *
 		 * @return bool
 		 */
-		function needs_shipping_address() {
+		public function needs_shipping_address() {
 
 			$needs_shipping_address = false;
 
