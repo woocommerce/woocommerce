@@ -708,8 +708,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</thead>
 	<tbody>
+		<?php if ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ) : ?>
+		<tr>
+			<td data-export-label="Overrides"><?php _e( 'Archive Template', 'woocommerce' ); ?>:</td>
+			<td class="help">&nbsp;</td>
+			<td><?php _e( 'Your theme has a woocommerce.php file, you will not be able to override the woocommerce/archive-product.php custom template since woocommerce.php has priority over archive-product.php. This is intended to prevent display issues.', 'woocommerce' ); ?></td>
+		</tr>
+		<?php endif ?>
 		<?php
-
 			$template_paths     = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 			$scanned_files      = array();
 			$found_files        = array();
