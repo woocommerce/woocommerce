@@ -713,7 +713,13 @@ class WC_Form_Handler {
 		$missing_attributes = array();
 		$variations         = array();
 		$attributes         = $adding_to_cart->get_attributes();
-		$variation          = wc_get_product( $variation_id );
+
+		// If no variation ID is set, attempt to get a variation ID from posted attributes.
+		if ( empty( $variation_id ) ) {
+			$variation_id = $adding_to_cart->get_matching_variation( wp_unslash( $_POST ) );
+		}
+
+		$variation = wc_get_product( $variation_id );
 
 		// Verify all attributes
 		foreach ( $attributes as $attribute ) {
