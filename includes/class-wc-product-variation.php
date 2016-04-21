@@ -154,7 +154,6 @@ class WC_Product_Variation extends WC_Product {
 	 * @return int variation (post) ID
 	 */
 	public function get_id() {
-
 		return $this->variation_id;
 	}
 
@@ -170,11 +169,21 @@ class WC_Product_Variation extends WC_Product {
 	/**
 	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
 	 *
-	 * @param  $cart item array If the cart item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
+	 * @param  $item_object item array If a cart or order item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
 	 * @return string
 	 */
-	public function get_permalink( $cart_item = null ) {
-		return add_query_arg( array_map( 'urlencode', array_filter( isset( $cart_item['variation'] ) ? $cart_item['variation'] : $this->variation_data ) ), get_permalink( $this->id ) );
+	public function get_permalink( $item_object = null ) {
+		if ( ! empty( $item_object['variation'] ) ) {
+			$data = $item_object['variation'];
+		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
+			$allowed_data = array_keys( $this->variation_data );
+			$data_keys    = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
+			$data_values  = wp_list_pluck( $item_object['item_meta_array'], 'value' );
+			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->variation_data );
+		} else {
+			$data = $this->variation_data;
+		}
+		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), get_permalink( $this->id ) );
 	}
 
 	/**
