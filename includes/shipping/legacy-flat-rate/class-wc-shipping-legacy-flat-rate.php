@@ -28,7 +28,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$this->init();
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_flat_rate_shipping_add_rate', array( $this, 'calculate_extra_shipping' ), 10, 3 );
+		add_action( 'woocommerce_flat_rate_shipping_add_rate', array( $this, 'calculate_extra_shipping' ), 10, 2 );
 	}
 
 	/**
@@ -264,7 +264,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * Additonal rates defined like this:
 	 * 	Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item).
 	 */
-	public function calculate_extra_shipping( $method, $rate, $package ) {
+	public function calculate_extra_shipping( $method, $rate ) {
 		if ( $this->options ) {
 			$options = array_filter( (array) explode( "\n", $this->options ) );
 
