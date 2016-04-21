@@ -2414,6 +2414,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		input, select, textarea {
 			width: 100%;
 		}
+		a.wc-shipping-zone-delete {
+			color: red;
+		}
 		.wc-shipping-zone-postcodes-toggle {
 			float: right;
 			margin: 0;
@@ -2441,6 +2444,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		}
 		ul {
 			color: #999;
+			position: relative;
+			padding-right: 32px;
 			li {
 				display: inline;
 				margin: 0 0 0 0;
@@ -2458,14 +2463,39 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 				margin: 0 !important;
 			}
 			li.wc-shipping-zone-methods-add-row {
-				margin: .5em 0 0;
+				position: absolute;
+				right: 0;
+				top: 0;
 			}
 		}
-		.button {
-			display: inline-block;
+		.add_shipping_method {
+			display: block;
+			width: 24px;
+			padding: 24px 0 0 0;
+			height: 0;
+			overflow: hidden;
+			cursor: pointer;
+
+			&:before {
+				@include icon;
+				font-family: 'Dashicons';
+				content: "\f502";
+				color: #999;
+				vertical-align: middle;
+				line-height: 24px;
+				font-size: 16px;
+				margin: 0;
+			}
+
+			&.disabled {
+				cursor: not-allowed;
+				&:before {
+					color: #ccc;
+				}
+			}
 		}
 	}
-	.wc-shipping-zone-actions, .wc-shipping-zone-method-actions, .wc-shipping-class-actions {
+	.wc-shipping-zone-method-actions, .wc-shipping-class-actions {
 		width: 4em;
 
 		a {

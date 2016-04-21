@@ -13,12 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
             <th class="wc-shipping-zone-name"><?php esc_html_e( 'Zone Name', 'woocommerce' ); ?></th>
             <th class="wc-shipping-zone-region"><?php esc_html_e( 'Region(s)', 'woocommerce' ); ?></th>
             <th class="wc-shipping-zone-methods"><?php esc_html_e( 'Shipping Method(s)', 'woocommerce' ); ?></th>
-            <th class="wc-shipping-zone-actions">&nbsp;</th>
         </tr>
     </thead>
     <tfoot>
         <tr>
-            <td colspan="5">
+            <td colspan="4">
                 <a class="button button-secondary wc-shipping-zone-add" href="#"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
                 <input type="submit" name="save" class="button button-primary wc-shipping-zone-save" value="<?php esc_attr_e( 'Save shipping zones', 'woocommerce' ); ?>" disabled />
             </td>
@@ -46,19 +45,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	                            $class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
 								echo '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
 							}
+						} else {
+							echo '<li class="wc-shipping-zone-method">&ndash;</li>';
 						}
 					?>
-					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method button" data-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone.', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
+					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method tips" data-tip="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" data-disabled-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
 				</ul>
 			</td>
-            <td class="wc-shipping-zone-actions"></td>
         </tr>
     </tbody>
 </table>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
 	<tr>
-		<td class="wc-shipping-zones-blank-state" colspan="5">
+		<td class="wc-shipping-zones-blank-state" colspan="4">
 			<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
 			<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
 			<ul>
@@ -79,10 +79,15 @@ if ( ! defined( 'ABSPATH' ) ) {
             <div class="view">
                 <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
                 <div class="row-actions">
-                    <a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit Zone', 'woocommerce' ); ?></a> | <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit shipping methods', 'woocommerce' ); ?></a>
+                    <a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'View shipping methods', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
                 </div>
             </div>
-            <div class="edit"><input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
+            <div class="edit">
+				<input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" />
+				<div class="row-actions">
+                    <a class="wc-shipping-zone-cancel-edit" href="#"><?php _e( 'Cancel changes', 'woocommerce' ); ?></a>
+                </div>
+			</div>
         </td>
 		<td class="wc-shipping-zone-region">
 			<div class="view">{{ data.formatted_zone_location }}</div>
@@ -116,12 +121,9 @@ if ( ! defined( 'ABSPATH' ) ) {
         <td class="wc-shipping-zone-methods">
 			<div>
                 <ul>
-					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method button" data-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone.', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
+					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method tips" data-tip="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" data-disabled-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
 				</ul>
             </div>
-		</td>
-        <td class="wc-shipping-zone-actions">
-			<a class="wc-shipping-zone-delete tips" data-tip="<?php _e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a>
 		</td>
     </tr>
 </script>

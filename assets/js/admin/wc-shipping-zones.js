@@ -28,6 +28,23 @@
 					this.changes = changes;
 					this.trigger( 'change:zones' );
 				},
+				discardChanges: function( id ) {
+					var changes  = this.changes || {},
+						position = null;
+
+					if ( changes[ id ] && changes[ id ].zone_order !== undefined ) {
+						position = changes[ id ].zone_order;
+					}
+
+					delete changes[ id ];
+
+					if ( position !== null ) {
+						changes[ id ] = _.extend( changes[ id ] || {}, { zone_id : id, zone_order : position } );
+					}
+
+					this.changes = changes;
+					this.trigger( 'change:zones' );
+				},
 				save: function() {
 					if ( _.size( this.changes ) ) {
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zones_save_changes', {
@@ -63,7 +80,7 @@
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
-					$( document.body ).on( 'click', '.add_shipping_method', { view: this }, this.onAddShippingMethod );
+					$( document.body ).on( 'click', '.add_shipping_method:not(.disabled)', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
 					$( document.body ).on( 'click', '.wc-shipping-zone-save-changes', { view: this }, this.onSubmit );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
@@ -107,9 +124,11 @@
 				},
 				renderRow: function( rowData ) {
 					var view = this;
-
 					view.$el.append( view.rowTemplate( rowData ) );
-
+					view.initRow( rowData );
+				},
+				initRow: function( rowData ) {
+					var view = this;
 					var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
 
 					// Editing?
@@ -161,6 +180,7 @@
 					$table.find( '.edit' ).hide();
 					$table.find( '.wc-shipping-zone-save-changes-notice' ).hide();
 					$table.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
+					$table.find( '.wc-shipping-zone-cancel-edit' ).on( 'click', { view: this }, this.onCancelEditRow );
 					$table.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
 					$table.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
 					$table.find( '.editing .wc-shipping-zone-edit' ).trigger( 'click' );
@@ -193,7 +213,8 @@
 
 							$method_list.prepend( '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
 						} );
-
+					} else {
+						$method_list.prepend( '<li class="wc-shipping-zone-method">&ndash;</li>' );
 					}
 				},
 				onSubmit: function( event ) {
@@ -244,7 +265,27 @@
 					$( this ).closest('tr').find('.edit').show();
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).select2( select2_args );
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).addClass('enhanced');
-					$( this ).closest('tr').find('.add_shipping_method').attr( 'disabled', 'disabled' ).addClass( 'tips' );
+
+					var addShippingMethod = $( this ).closest('tr').find('.add_shipping_method');
+					addShippingMethod.addClass( 'disabled' );
+					addShippingMethod.tipTip({ 'attribute': 'data-disabled-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
+				},
+				onCancelEditRow: function( event ) {
+					var view    = event.data.view,
+						model   = view.model,
+						row     = $( this ).closest('tr'),
+						zone_id = row.data('id'),
+						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' );
+
+					event.preventDefault();
+					model.discardChanges( zone_id );
+
+					// Remove row and re-render
+					row.after( view.rowTemplate( zones[ zone_id ] ) );
+					row.remove();
+
+					view.initRow( zones[ zone_id ] );
+					view.initRows( zones );
 				},
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
@@ -288,7 +329,6 @@
 					if ( zones[ zone_id ][ attribute ] !== value ) {
 						changes[ zone_id ] = {};
 						changes[ zone_id ][ attribute ] = value;
-						zones[ zone_id ][ attribute ]   = value;
 					}
 
 					model.logChanges( changes );
