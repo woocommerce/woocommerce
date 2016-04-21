@@ -567,6 +567,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! $page_id ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 					$error = true;
+				} else if ( ! get_post( $page_id ) ) {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
+					$error = true;
 				} else if ( get_post_status( $page_id ) !== 'publish' ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be %spublic%s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
 					$error = true;
