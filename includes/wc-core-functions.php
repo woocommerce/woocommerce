@@ -1223,3 +1223,69 @@ function wc_help_tip( $tip, $allow_html = false ) {
 
 	return '<span class="woocommerce-help-tip" data-tip="' . $tip . '"></span>';
 }
+
+/**
+ * Return a list of potential postcodes for wildcard searching.
+ * @since 2.6.0
+ * @param  string $postcode
+ * @return array
+ */
+function wc_get_wildcard_postcodes( $postcode ) {
+	$postcodes         = array( '*', strtoupper( $postcode ), strtoupper( $postcode ) . '*' );
+	$postcode_length   = strlen( $postcode );
+	$wildcard_postcode = strtoupper( $postcode );
+
+	for ( $i = 0; $i < $postcode_length; $i ++ ) {
+		$wildcard_postcode = substr( $wildcard_postcode, 0, -1 );
+		$postcodes[] = $wildcard_postcode . '*';
+	}
+	return $postcodes;
+}
+
+/**
+ * Used by shipping zones and taxes to compare a given $postcode to stored
+ * postcodes to find matches for numerical ranges, and wildcards.
+ * @since 2.6.0
+ * @param string $postcode Postcode you want to match against stored postcodes
+ * @param array $objects Array of postcode objects from Database
+ * @param string $object_compare_key DB column name for the ID.
+ * @param string $object_compare_key DB column name for the value.
+ * @return array Array of matching object ID and values.
+ */
+function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key ) {
+	$matches            = array();
+	$wildcard_postcodes = array_map( 'wc_clean', wc_get_wildcard_postcodes( $postcode ) );
+	$postcodes          = wp_list_pluck( $objects, $object_compare_key, $object_id_key );
+
+	foreach ( $postcodes as $object_id => $compare_against ) {
+		$compare = $postcode;
+
+		// Handle postcodes containing ranges
+		if ( strstr( $compare_against, '-' ) ) {
+			$range = array_map( 'trim', explode( '-', $compare_against ) );
+
+			if ( 2 !== sizeof( $range ) ) {
+				continue;
+			}
+
+			list( $min, $max ) = $range;
+
+			// If the postcode is non-numeric, make it numeric
+			if ( ! is_numeric( $min ) || ! is_numeric( $max ) ) {
+				$compare = wc_make_numeric_postcode( $compare );
+				$min     = str_pad( wc_make_numeric_postcode( $min ), strlen( $encoded_postcode ), '0' );
+				$max     = str_pad( wc_make_numeric_postcode( $max ), strlen( $encoded_postcode ), '0' );
+			}
+
+			if ( $compare >= $min && $compare <= $max ) {
+				$matches[ $object_id ] = $compare_against;
+			}
+
+		// Wildcard and standard comparison
+		} elseif ( in_array( $compare_against, $wildcard_postcodes ) ) {
+			$matches[ $object_id ] = $compare_against;
+		}
+	}
+
+	return $matches;
+}

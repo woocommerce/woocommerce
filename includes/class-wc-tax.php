@@ -234,12 +234,11 @@ class WC_Tax {
 		}
 
 		$postcode          = wc_clean( $postcode );
-		$valid_postcodes   = self::_get_wildcard_postcodes( $postcode );
 		$cache_key         = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, $postcode, $tax_class ) );
 		$matched_tax_rates = wp_cache_get( $cache_key, 'taxes' );
 
 		if ( false === $matched_tax_rates ) {
-			$matched_tax_rates = self::get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes );
+			$matched_tax_rates = self::get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class );
 			wp_cache_set( $cache_key, $matched_tax_rates, 'taxes' );
 		}
 
@@ -275,49 +274,63 @@ class WC_Tax {
 	 * @param  string $postcode
 	 * @param  string $city
 	 * @param  string $tax_class
-	 * @param  string[] $valid_postcodes
 	 * @return array
 	 */
-	private static function get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class, $valid_postcodes ) {
+	private static function get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class ) {
 		global $wpdb;
 
-		$valid_postcodes = array_map( 'esc_sql', array_map( 'wc_clean', $valid_postcodes ) );
-		$match_country   = esc_sql( strtoupper( wc_clean( $country ) ) );
-		$match_state     = esc_sql( strtoupper( wc_clean( $state ) ) );
-		$match_tax_class = esc_sql( sanitize_title( $tax_class ) );
-		$match_city      = esc_sql( strtoupper( wc_clean( $city ) ) );
-		$found_rates     = $wpdb->get_results( "
+		// Query criteria - these will be ANDed
+		$criteria   = array();
+		$criteria[] = $wpdb->prepare( "tax_rate_country IN ( %s, '' )", strtoupper( $country ) );
+		$criteria[] = $wpdb->prepare( "tax_rate_state IN ( %s, '' )", strtoupper( $state ) );
+		$criteria[] = $wpdb->prepare( "tax_rate_class = %s", sanitize_title( $tax_class ) );
+
+		// Pre-query postcode ranges for PHP based matching.
+		$postcode_search = wc_get_wildcard_postcodes( $postcode );
+		$postcode_ranges = $wpdb->get_results( "SELECT tax_rate_id, location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type = 'postcode' AND location_code LIKE '%-%';" );
+
+		if ( $postcode_ranges ) {
+			$matches         = wc_postcode_location_matcher( $postcode, $postcode_ranges, 'tax_rate_id', 'location_code' );
+			$postcode_search = array_unique( array_merge( $postcode_search, array_values( $matches ) ) );
+		}
+
+		/**
+		 * Location matching criteria - ORed
+		 * Needs to match:
+		 * 	- rates with no postcodes and cities
+		 * 	- rates with a matching postcode and city
+		 * 	- rates with matching postcode, no city
+		 * 	- rates with matching city, no postcode
+		 */
+		$locations_criteria   = array();
+		$locations_criteria[] = "locations.location_type IS NULL";
+		$locations_criteria[] = "
+			locations.location_type = 'postcode' AND locations.location_code IN ('" . implode( "','", array_map( 'esc_sql', $postcode_search ) ) . "')
+			AND (
+				( locations2.location_type = 'city' AND locations2.location_code = '" . esc_sql( strtoupper( $city ) ) . "' )
+				OR NOT EXISTS (
+					SELECT sub.tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sub
+					WHERE sub.location_type = 'city'
+					AND sub.tax_rate_id = tax_rates.tax_rate_id
+				)
+			)
+		";
+		$locations_criteria[] = "
+			locations.location_type = 'city' AND locations.location_code = '" . esc_sql( strtoupper( $city ) ) . "'
+			AND NOT EXISTS (
+				SELECT sub.tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sub
+				WHERE sub.location_type = 'postcode'
+				AND sub.tax_rate_id = tax_rates.tax_rate_id
+			)
+		";
+		$criteria[] = '( ( ' . implode( ' ) OR ( ', $locations_criteria ) . ' ) )';
+
+		$found_rates = $wpdb->get_results( "
 			SELECT tax_rates.*
 			FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
-			WHERE tax_rate_country IN ( '{$match_country}', '' )
-			AND tax_rate_state IN ( '{$match_state}', '' )
-			AND tax_rate_class = '{$match_tax_class}'
-			AND (
-				locations.location_type IS NULL
-				OR (
-					locations.location_type = 'postcode'
-					AND locations.location_code IN ('" . implode( "','", $valid_postcodes ) . "')
-					AND (
-						locations2.location_type = 'city' AND locations2.location_code = '{$match_city}'
-						OR 0 = (
-							SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
-							WHERE sublocations.location_type = 'city'
-							AND sublocations.tax_rate_id = tax_rates.tax_rate_id
-						)
-					)
-				)
-				OR (
-					locations.location_type = 'city'
-					AND locations.location_code = '{$match_city}'
-					AND 0 = (
-							SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
-							WHERE sublocations.location_type = 'postcode'
-							AND sublocations.tax_rate_id = tax_rates.tax_rate_id
-						)
-				)
-			)
+			WHERE 1=1 AND " . implode( ' AND ', $criteria ) . "
 			GROUP BY tax_rate_id
 			ORDER BY tax_rate_priority, tax_rate_order
 		" );
@@ -809,7 +822,6 @@ class WC_Tax {
 			$postcodes = explode( ';', $postcodes );
 		}
 		$postcodes = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_postcode' ), $postcodes ), array( '*' ) ) );
-		$postcodes = self::_get_expanded_numeric_ranges_from_array( $postcodes );
 
 		self::_update_tax_rate_locations( $tax_rate_id, $postcodes, 'postcode' );
 	}
@@ -868,59 +880,6 @@ class WC_Tax {
 		}
 
 		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
-	}
-
-	/**
-	 * Expands ranges in an array (used for zipcodes). e.g. 101-105 would expand to 101, 102, 103, 104, 105.
-	 *
-	 * Internal use only.
-	 *
-	 * @since 2.3.0
-	 * @access private
-	 *
-	 * @param  array  $values array of values
-	 * @return array expanded values
-	 */
-	private static function _get_expanded_numeric_ranges_from_array( $values = array() ) {
-		$expanded = array();
-		foreach ( $values as $value ) {
-			if ( strstr( $value, '-' ) ) {
-				$parts = array_map( 'absint', array_map( 'trim', explode( '-', $value ) ) );
-
-				for ( $expanded_value = $parts[0]; $expanded_value <= $parts[1]; $expanded_value ++ ) {
-					if ( strlen( $expanded_value ) < strlen( $parts[0] ) ) {
-						$expanded_value = str_pad( $expanded_value, strlen( $parts[0] ), "0", STR_PAD_LEFT );
-					}
-					$expanded[] = $expanded_value;
-				}
-			} else {
-				$expanded[] = trim( $value );
-			}
-		}
-		return array_filter( $expanded );
-	}
-
-	/**
-	 * Get postcode wildcards in array format.
-	 *
-	 * Internal use only.
-	 *
-	 * @since 2.3.0
-	 * @access private
-	 *
-	 * @param  string  $postcode array of values
-	 * @return string[] Array of postcodes with wildcards
-	 */
-	private static function _get_wildcard_postcodes( $postcode ) {
-		$postcodes         = array( '*', strtoupper( $postcode ), strtoupper( $postcode ) . '*' );
-		$postcode_length   = strlen( $postcode );
-		$wildcard_postcode = strtoupper( $postcode );
-
-		for ( $i = 0; $i < $postcode_length; $i ++ ) {
-			$wildcard_postcode = substr( $wildcard_postcode, 0, -1 );
-			$postcodes[] = $wildcard_postcode . '*';
-		}
-		return $postcodes;
 	}
 
 	/**

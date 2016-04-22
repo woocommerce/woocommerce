@@ -21,10 +21,10 @@ class WC_Shipping_Zones {
 	 * @since 2.6.0
 	 * @return array of arrays
 	 */
-    public static function get_zones() {
+	public static function get_zones() {
 		global $wpdb;
 
-        $raw_zones = $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones order by zone_order ASC;" );
+		$raw_zones = $wpdb->get_results( "SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones order by zone_order ASC;" );
 		$zones     = array();
 
 		foreach ( $raw_zones as $raw_zone ) {
@@ -35,7 +35,7 @@ class WC_Shipping_Zones {
 		}
 
 		return $zones;
-    }
+	}
 
 	/**
 	 * Get shipping zone using it's ID
@@ -106,32 +106,9 @@ class WC_Shipping_Zones {
 	 * @param int $zone_id
 	 * @since 2.6.0
 	 */
-    public static function delete_zone( $zone_id ) {
+	public static function delete_zone( $zone_id ) {
 		$zone = new WC_Shipping_Zone( $zone_id );
 		$zone->delete();
-    }
-
-	/**
-	 * Get postcode wildcards in array format.
-	 *
-	 * Internal use only.
-	 *
-	 * @since 2.6.0
-	 * @access private
-	 *
-	 * @param  string  $postcode array of values
-	 * @return string[] Array of postcodes with wildcards
-	 */
-	private static function _get_wildcard_postcodes( $postcode ) {
-		$postcodes         = array( '*', strtoupper( $postcode ), strtoupper( $postcode ) . '*' );
-		$postcode_length   = strlen( $postcode );
-		$wildcard_postcode = strtoupper( $postcode );
-
-		for ( $i = 0; $i < $postcode_length; $i ++ ) {
-			$wildcard_postcode = substr( $wildcard_postcode, 0, -1 );
-			$postcodes[] = $wildcard_postcode . '*';
-		}
-		return $postcodes;
 	}
 
 	/**
@@ -148,7 +125,6 @@ class WC_Shipping_Zones {
 		$state            = strtoupper( wc_clean( $package['destination']['state'] ) );
 		$continent        = strtoupper( wc_clean( WC()->countries->get_continent_code_for_country( $country ) ) );
 		$postcode         = strtoupper( wc_clean( $package['destination']['postcode'] ) );
-		$valid_postcodes  = array_map( 'wc_clean', self::_get_wildcard_postcodes( $postcode ) );
 		$cache_key        = WC_Cache_Helper::get_cache_prefix( 'shipping_zones' ) . 'wc_shipping_zone_' . md5( sprintf( '%s+%s+%s', $country, $state, $postcode ) );
 		$matching_zone_id = wp_cache_get( $cache_key, 'shipping_zones' );
 
@@ -165,41 +141,8 @@ class WC_Shipping_Zones {
 
 			if ( $postcode_locations ) {
 				$zone_ids_with_postcode_rules = array_map( 'absint', wp_list_pluck( $postcode_locations, 'zone_id' ) );
-				$zone_id_matches              = array();
-
-				foreach ( $postcode_locations as $postcode_location ) {
-					$postcode_to_match = trim( strtoupper( $postcode_location->location_code ) );
-
-					// Ranges
-					if ( strstr( '-', $postcode_to_match ) ) {
-						$range = array_map( 'trim', explode( '-', $postcode_to_match ) );
-
-						if ( sizeof( $range ) != 2 ) {
-							continue;
-						}
-
-						if ( is_numeric( $range[0] ) && is_numeric( $range[1] ) ) {
-							$encoded_postcode = $postcode;
-							$min              = $range[0];
-							$max              = $range[1];
-						} else {
-							$min = wc_make_numeric_postcode( $range[0] );
-							$max = wc_make_numeric_postcode( $range[1] );
-							$min = str_pad( $min, $encoded_postcode_len, '0' );
-							$max = str_pad( $max, $encoded_postcode_len, '9' );
-						}
-
-						if ( $encoded_postcode >= $min && $encoded_postcode <= $max ) {
-							$zone_id_matches[] = absint( $postcode_location->zone_id );
-						}
-
-					// Wildcard/standard
-					} elseif ( in_array( $postcode_to_match, $valid_postcodes ) ) {
-						$zone_id_matches[] = absint( $postcode_location->zone_id );
-					}
-				}
-
-				$do_not_match = array_unique( array_diff( $zone_ids_with_postcode_rules, $zone_id_matches ) );
+				$matches                      = wc_postcode_location_matcher( $postcode, $postcode_locations, 'zone_id', 'location_code' );
+				$do_not_match                 = array_unique( array_diff( $zone_ids_with_postcode_rules, array_keys( $zone_id_matches ) ) );
 
 				if ( $do_not_match ) {
 					$criteria[] = "AND zones.zone_id NOT IN (" . implode( ',', $do_not_match ) . ")";
