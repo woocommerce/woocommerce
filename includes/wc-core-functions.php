@@ -1226,6 +1226,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
 
 /**
  * Return a list of potential postcodes for wildcard searching.
+ * @since 2.6.0
  * @param  string $postcode
  * @return array
  */
@@ -1244,6 +1245,7 @@ function wc_get_wildcard_postcodes( $postcode ) {
 /**
  * Used by shipping zones and taxes to compare a given $postcode to stored
  * postcodes to find matches for numerical ranges, and wildcards.
+ * @since 2.6.0
  * @param string $postcode Postcode you want to match against stored postcodes
  * @param array $objects Array of postcode objects from Database
  * @param string $object_compare_key DB column name for the ID.
