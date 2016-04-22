@@ -57,19 +57,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 </table>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
-	<tr>
-		<td class="wc-shipping-zones-blank-state" colspan="4">
-			<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
-			<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
-			<ul>
-				<li><?php _e( 'Local Zone = California ZIP 90210 = Local pickup', 'woocommerce' ); ?>
-				<li><?php _e( 'US Domestic Zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
-				<li><?php _e( 'Europe Zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
-			</ul>
-			<p><?php _e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
-			<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
-		</td>
-	</tr>
+	<?php if ( 0 === $method_count ) : ?>
+		<tr>
+			<td class="wc-shipping-zones-blank-state" colspan="4">
+				<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
+				<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
+				<ul>
+					<li><?php _e( 'Local Zone = California ZIP 90210 = Local pickup', 'woocommerce' ); ?>
+					<li><?php _e( 'US Domestic Zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
+					<li><?php _e( 'Europe Zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
+				</ul>
+				<p><?php _e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
+				<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
+			</td>
+		</tr>
+	<?php endif; ?>
 </script>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row">

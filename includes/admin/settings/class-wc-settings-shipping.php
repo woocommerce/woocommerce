@@ -224,12 +224,15 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Show zones
 	 */
 	protected function zones_screen() {
+		global $wpdb;
+
 		$allowed_countries = WC()->countries->get_allowed_countries();
-        $continents        = WC()->countries->get_continents();
+		$continents        = WC()->countries->get_continents();
+		$method_count      = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
 
 		wp_localize_script( 'wc-shipping-zones', 'shippingZonesLocalizeScript', array(
-            'zones'         => WC_Shipping_Zones::get_zones(),
-            'default_zone'  => array(
+			'zones'         => WC_Shipping_Zones::get_zones(),
+			'default_zone'  => array(
 				'zone_id'    => 0,
 				'zone_name'  => '',
 				'zone_order' => null,
@@ -282,8 +285,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function output_shipping_class_screen() {
 		$wc_shipping = WC_Shipping::instance();
 		wp_localize_script( 'wc-shipping-classes', 'shippingClassesLocalizeScript', array(
-            'classes'         => $wc_shipping->get_shipping_classes(),
-            'default_shipping_class'  => array(
+			'classes'         => $wc_shipping->get_shipping_classes(),
+			'default_shipping_class'  => array(
 				'term_id'     => 0,
 				'name'        => '',
 				'description' => '',
