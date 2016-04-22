@@ -167,11 +167,19 @@ class WC_Admin_Attributes {
 			);
 
 			// Update taxonomy ordering term meta
-			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_termmeta',
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $attribute['attribute_name'] ) ),
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name ) )
-			);
+			if ( get_option( 'db_version' ) < 34370 ) {
+				$wpdb->update(
+					$wpdb->prefix . 'woocommerce_termmeta',
+					array( 'meta_key' => 'order_pa_' . sanitize_title( $attribute['attribute_name'] ) ),
+					array( 'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name ) )
+				);
+			} else {
+				$wpdb->update(
+					$wpdb->termmeta,
+					array( 'meta_key' => 'order_pa_' . sanitize_title( $attribute['attribute_name'] ) ),
+					array( 'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name ) )
+				);
+			}
 
 			// Update product attributes which use this taxonomy
 			$old_attribute_name_length = strlen( $old_attribute_name ) + 3;

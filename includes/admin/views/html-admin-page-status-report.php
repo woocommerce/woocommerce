@@ -344,7 +344,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'woocommerce_sessions',
 				'woocommerce_api_keys',
 				'woocommerce_attribute_taxonomies',
-				'woocommerce_termmeta',
 				'woocommerce_downloadable_product_permissions',
 				'woocommerce_order_items',
 				'woocommerce_order_itemmeta',
@@ -356,6 +355,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'woocommerce_payment_tokens',
 				'woocommerce_payment_tokenmeta',
 			);
+
+			if ( get_option( 'db_version' ) < 34370 ) {
+				$tables[] = 'woocommerce_termmeta';
+			}
 
 			foreach ( $tables as $table ) {
 				?>
