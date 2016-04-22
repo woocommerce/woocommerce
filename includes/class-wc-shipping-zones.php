@@ -142,7 +142,7 @@ class WC_Shipping_Zones {
 			if ( $postcode_locations ) {
 				$zone_ids_with_postcode_rules = array_map( 'absint', wp_list_pluck( $postcode_locations, 'zone_id' ) );
 				$matches                      = wc_postcode_location_matcher( $postcode, $postcode_locations, 'zone_id', 'location_code' );
-				$do_not_match                 = array_unique( array_diff( $zone_ids_with_postcode_rules, array_keys( $zone_id_matches ) ) );
+				$do_not_match                 = array_unique( array_diff( $zone_ids_with_postcode_rules, array_keys( $matches ) ) );
 
 				if ( $do_not_match ) {
 					$criteria[] = "AND zones.zone_id NOT IN (" . implode( ',', $do_not_match ) . ")";
