@@ -164,6 +164,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Feature - Cart operations now use ajax (item quantities/remove, coupon apply/remove, shipping options).
 * Feature - Layered nav; filter by rating.
 * Feature - On-hold order emails.
+* Dev - All new REST API based on the WP REST API. The old WC REST API is still available, but the new one is preferred.
 * Dev - Added ability for shipping methods to store meta data to the order.
 * Dev - Added Payment Gateway Tokenization API for storing and retrieving tokens in a standardized manner.
 * Dev - Migrated custom term meta implementation to WP Term Meta.
@@ -185,10 +186,11 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Removed tag/cat classes from loops since WP does the same.
 * Tweak - Added hash check for orders so that if the cart changes before payment, a new order is made.
 * Tweak - Removed unused 'view mode' under screen options.
+* Tweak - Added 110 new currencies.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 
 == Upgrade Notice ==
 
-= 2.5.0 =
-2.5.0 is a major update so it is important that you make backups, and ensure themes and extensions are 2.5 compatible. Developers should catch up with [the development blog](https://woocommerce.wordpress.com/) to see what has been happening in core.
+= 2.6.0 =
+2.6.0 is a major update so it is important that you make backups, and ensure themes and extensions are 2.6 compatible before upgrading. Developers should catch up with [the development blog](https://woocommerce.wordpress.com/) to see what has been happening in core.
