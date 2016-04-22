@@ -241,6 +241,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'strings'       => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+				'default_zone_name'       => __( 'Zone', 'woocommerce' ),
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zones' );

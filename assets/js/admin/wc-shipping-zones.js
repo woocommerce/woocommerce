@@ -29,21 +29,29 @@
 					this.trigger( 'change:zones' );
 				},
 				discardChanges: function( id ) {
-					var changes  = this.changes || {},
-						position = null;
+					var changes      = this.changes || {},
+						set_position = null,
+						zones        = _.indexBy( this.get( 'zones' ), 'zone_id' );
 
+					// Find current set position if it has moved since last save
 					if ( changes[ id ] && changes[ id ].zone_order !== undefined ) {
-						position = changes[ id ].zone_order;
+						set_position = changes[ id ].zone_order;
 					}
 
+					// Delete all changes
 					delete changes[ id ];
 
-					if ( position !== null ) {
-						changes[ id ] = _.extend( changes[ id ] || {}, { zone_id : id, zone_order : position } );
+					// If the position was set, and this zone does exist in DB, set the position again so the changes are not lost.
+					if ( set_position !== null && zones[ id ] && zones[ id ].zone_order !== set_position ) {
+						changes[ id ] = _.extend( changes[ id ] || {}, { zone_id : id, zone_order : set_position } );
 					}
 
 					this.changes = changes;
-					this.trigger( 'change:zones' );
+
+					// No changes? Disable save button.
+					if ( 0 === _.size( this.changes ) ) {
+						shippingZoneView.clearUnloadConfirmation();
+					}
 				},
 				save: function() {
 					if ( _.size( this.changes ) ) {
@@ -120,7 +128,7 @@
 						view.$el.append( $blank_template );
 					}
 
-					view.initRows( zones );
+					view.initRows();
 				},
 				renderRow: function( rowData ) {
 					var view = this;
@@ -130,11 +138,6 @@
 				initRow: function( rowData ) {
 					var view = this;
 					var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
-
-					// Editing?
-					if ( rowData.editing ) {
-						$tr.addClass( 'editing' );
-					}
 
 					// Select values in region select
 					_.each( rowData.zone_locations, function( location ) {
@@ -173,20 +176,24 @@
 
 					// List shipping methods
 					view.renderShippingMethods( rowData.zone_id, rowData.shipping_methods );
-				},
-				initRows: function( zones ) {
-					// Make the rows function
-					$table.find( '.view' ).show();
-					$table.find( '.edit' ).hide();
-					$table.find( '.wc-shipping-zone-save-changes-notice' ).hide();
-					$table.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
-					$table.find( '.wc-shipping-zone-cancel-edit' ).on( 'click', { view: this }, this.onCancelEditRow );
-					$table.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
-					$table.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
-					$table.find( '.editing .wc-shipping-zone-edit' ).trigger( 'click' );
 
+					// Make the row function
+					$tr.find( '.view' ).show();
+					$tr.find( '.edit' ).hide();
+					$tr.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
+					$tr.find( '.wc-shipping-zone-cancel-edit' ).on( 'click', { view: this }, this.onCancelEditRow );
+					$tr.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
+					$tr.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
+
+					// Editing?
+					if ( true === rowData.editing ) {
+						$tr.addClass( 'editing' );
+						$tr.find( '.wc-shipping-zone-edit' ).trigger( 'click' );
+					}
+				},
+				initRows: function() {
 					// Stripe
-					if ( 0 === _.size( zones ) % 2 ) {
+					if ( 0 === ( $( 'tbody.wc-shipping-zone-rows tr' ).length % 2 ) ) {
 						$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).addClass( 'odd' );
 					} else {
 						$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
@@ -231,8 +238,9 @@
 						changes = {},
 						size    = _.size( zones ),
 						newRow  = _.extend( {}, data.default_zone, {
-							zone_id: 'new-' + size + '-' + Date.now(),
-							editing:  true
+							zone_id  : 'new-' + size + '-' + Date.now(),
+							zone_name: data.strings.default_zone_name,
+							editing  : true
 						} );
 
 					newRow.zone_order = 1 + _.max(
@@ -243,13 +251,11 @@
 						}
 					);
 
-					zones[ newRow.zone_id ]   = newRow;
 					changes[ newRow.zone_id ] = newRow;
 
-					model.set( 'zones', zones );
 					model.logChanges( changes );
 					view.renderRow( newRow );
-					view.initRows( zones );
+					view.initRows();
 				},
 				onTogglePostcodes: function( event ) {
 					event.preventDefault();
@@ -280,35 +286,42 @@
 					event.preventDefault();
 					model.discardChanges( zone_id );
 
-					// Remove row and re-render
-					row.after( view.rowTemplate( zones[ zone_id ] ) );
-					row.remove();
+					if ( zones[ zone_id ] ) {
+						zones[ zone_id ].editing = false;
+						row.after( view.rowTemplate( zones[ zone_id ] ) );
+						view.initRow( zones[ zone_id ] );
+					}
 
-					view.initRow( zones[ zone_id ] );
-					view.initRows( zones );
+					row.remove();
+					view.initRows();
 				},
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
 						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {},
+						row     = $( this ).closest('tr'),
 						zone_id = $( this ).closest('tr').data('id');
 
 					event.preventDefault();
 
-					delete zones[ zone_id ];
-					changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { deleted : 'deleted' } );
-					model.set( 'zones', zones );
-					model.logChanges( changes );
-					view.render();
+					if ( zones[ zone_id ] ) {
+						delete zones[ zone_id ];
+						changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { deleted : 'deleted' } );
+						model.set( 'zones', zones );
+						model.logChanges( changes );
+					}
+
+					row.remove();
+					view.initRows();
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
-					$save_button.removeAttr( 'disabled' );
+					$save_button.prop( 'disabled', false );
 				},
 				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
-					$save_button.attr( 'disabled', 'disabled' );
+					$save_button.prop( 'disabled', true );
 				},
 				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
@@ -326,7 +339,7 @@
 						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {};
 
-					if ( zones[ zone_id ][ attribute ] !== value ) {
+					if ( ! zones[ zone_id ] || zones[ zone_id ][ attribute ] !== value ) {
 						changes[ zone_id ] = {};
 						changes[ zone_id ][ attribute ] = value;
 					}
@@ -334,17 +347,24 @@
 					model.logChanges( changes );
 				},
 				updateModelOnSort: function( event ) {
-					var view         = event.data.view,
-						model        = view.model,
-						zones        = _.indexBy( model.get( 'zones' ), 'zone_id' ),
-						changes      = {};
+					var view    = event.data.view,
+						model   = view.model,
+						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
+						rows    = $( 'tbody.wc-shipping-zone-rows tr' ),
+						changes = {};
 
-					_.each( zones, function( zone ) {
-						var old_position = parseInt( zone.zone_order, 10 );
-						var new_position = parseInt( $table.find( 'tr[data-id="' + zone.zone_id + '"]').index(), 10 );
+					// Update sorted row position
+					_.each( rows, function( row ) {
+						var zone_id = $( row ).data( 'id' ),
+							old_position = null,
+							new_position = parseInt( $( row ).index(), 10 );
+
+						if ( zones[ zone_id ] ) {
+							old_position = parseInt( zones[ zone_id ].zone_order, 10 );
+						}
 
 						if ( old_position !== new_position ) {
-							changes[ zone.zone_id ] = _.extend( changes[ zone.zone_id ] || {}, { zone_order : new_position } );
+							changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { zone_order : new_position } );
 						}
 					} );
 
