@@ -281,42 +281,56 @@ class WC_Tax {
 
 		// Query criteria - these will be ANDed
 		$criteria   = array();
-		$criteria[] = $wpdb->prepare( "tax_rate_country IN ( %s, '' )", strtoupper( wc_clean( $country ) ) );
-		$criteria[] = $wpdb->prepare( "tax_rate_state IN ( %s, '' )", strtoupper( wc_clean( $state ) ) );
+		$criteria[] = $wpdb->prepare( "tax_rate_country IN ( %s, '' )", strtoupper( $country ) );
+		$criteria[] = $wpdb->prepare( "tax_rate_state IN ( %s, '' )", strtoupper( $state ) );
 		$criteria[] = $wpdb->prepare( "tax_rate_class = %s", sanitize_title( $tax_class ) );
 
-		// Location matching criteria - ORed
-		$locations_criteria   = array();
-		$locations_criteria[] = "locations.location_type IS NULL"; // No locations matches all
-		$locations_criteria[] = $wpdb->prepare( "locations.location_type = 'city' AND locations.location_code = %s", strtoupper( wc_clean( $city ) ) ); // City match
-		$locations_criteria[] = "0 = (
-			SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sublocations
-			WHERE sublocations.location_type = 'city'
-			AND sublocations.tax_rate_id = tax_rates.tax_rate_id
-		)"; // No cities
+		// Pre-query postcode ranges for PHP based matching.
+		$postcode_search = wc_get_wildcard_postcodes( $postcode );
+		$postcode_ranges = $wpdb->get_results( "SELECT tax_rate_id, location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type = 'postcode' AND location_code LIKE '%-%';" );
 
-		$criteria[] = ' ( ' . implode( ' ) OR ( ', $locations_criteria ) . ' ) ';
-
-		// Pre-query for postcode range and wildcard matching
-		$rates_with_postcodes = $wpdb->get_results( "SELECT tax_rate_id, location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type = 'postcode';" );
-
-		if ( $rates_with_postcodes ) {
-			$rates_with_postcodes_ids = array_unique( wp_list_pluck( $rates_with_postcodes, 'tax_rate_id' ) );
-			$matches                  = wc_postcode_location_matcher( $postcode, $rates_with_postcodes, 'tax_rate_id', 'location_code' );
-			$do_not_match             = array_unique( array_diff( $rates_with_postcodes_ids, $matches ) );
-
-			// Do not match any rate with a postcode which didn't match the customer postcode
-			if ( $do_not_match ) {
-				$criteria[] = "tax_rates.tax_rate_id NOT IN (" . implode( ',', array_map( 'esc_sql', $do_not_match ) ) . ")";
-			}
+		if ( $postcode_ranges ) {
+			$matches         = wc_postcode_location_matcher( $postcode, $postcode_ranges, 'tax_rate_id', 'location_code' );
+			$postcode_search = array_unique( array_merge( $postcode_search, array_values( $matches ) ) );
 		}
+
+		/**
+		 * Location matching criteria - ORed
+		 * Needs to match:
+		 * 	- rates with no postcodes and cities
+		 * 	- rates with a matching postcode and city
+		 * 	- rates with matching postcode, no city
+		 * 	- rates with matching city, no postcode
+		 */
+		$locations_criteria   = array();
+		$locations_criteria[] = "locations.location_type IS NULL";
+		$locations_criteria[] = "
+			locations.location_type = 'postcode' AND locations.location_code IN ('" . implode( "','", array_map( 'esc_sql', $postcode_search ) ) . "')
+			AND (
+				( locations2.location_type = 'city' AND locations2.location_code = '" . esc_sql( strtoupper( $city ) ) . "' )
+				OR NOT EXISTS (
+					SELECT sub.tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sub
+					WHERE sub.location_type = 'city'
+					AND sub.tax_rate_id = tax_rates.tax_rate_id
+				)
+			)
+		";
+		$locations_criteria[] = "
+			locations.location_type = 'city' AND locations.location_code = '" . esc_sql( strtoupper( $city ) ) . "'
+			AND NOT EXISTS (
+				SELECT sub.tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rate_locations as sub
+				WHERE sub.location_type = 'postcode'
+				AND sub.tax_rate_id = tax_rates.tax_rate_id
+			)
+		";
+		$criteria[] = '( ( ' . implode( ' ) OR ( ', $locations_criteria ) . ' ) )';
 
 		$found_rates = $wpdb->get_results( "
 			SELECT tax_rates.*
 			FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations ON tax_rates.tax_rate_id = locations.tax_rate_id
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_tax_rate_locations as locations2 ON tax_rates.tax_rate_id = locations2.tax_rate_id
-			WHERE 1=1 AND ( " . implode( ' ) AND ( ', $criteria ) . " )
+			WHERE 1=1 AND " . implode( ' AND ', $criteria ) . "
 			GROUP BY tax_rate_id
 			ORDER BY tax_rate_priority, tax_rate_order
 		" );
