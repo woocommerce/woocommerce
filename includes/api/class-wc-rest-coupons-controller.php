@@ -493,7 +493,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'usage_limit_per_user' => array(
-					'description' => __( 'How many times the coupon can be user per customer.', 'woocommerce' ),
+					'description' => __( 'How many times the coupon can be used per customer.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
