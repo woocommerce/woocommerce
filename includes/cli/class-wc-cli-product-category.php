@@ -244,10 +244,6 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	/**
 	 * Delete Product Categories
 	 *
-	 * ## OPTIONS
-	 *
-	 * [--<field>=<value>]
-	 * : Filter categories based on product property.
 	 * ## AVAILABLE FIELDS
 	 *
 	 * * id
@@ -258,13 +254,12 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 *     wp wc product category delete
 	 *
-	 *     wp wc product category delete --fields=id,name,slug --format=json
+	 *     wp wc product category delete id
 	 *
 	 * @subcommand delete
 	 * @since      2.5.0
 	 */
-	public function delete( $args, $assoc_args ) {
-
+	public function delete( $args ) {
 		try {
 			foreach ( $args as $cat_id ) {
 
