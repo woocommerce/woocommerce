@@ -8,7 +8,6 @@
  * @category CLI
  * @author   WooThemes
  */
-//@formatter:off
 class WC_CLI_Product_Category extends WC_CLI_Command {
 
 	/**
@@ -71,7 +70,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * : Limit the output to specific product fields.
 	 *
 	 * [--format=<format>]
-	 * : Acceptec values: table, csv, json, count, ids. Default: table.
+	 * : Accepted values: table, csv, json, count, ids. Default: table.
 	 *
 	 * ## AVAILABLE FIELDS
 	 *
@@ -109,6 +108,104 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		}
 	}
 
+
+	/**
+	 * Create a new product category.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--name=<value>]
+	 * : Assign a name to the new slug (required)
+	 * 
+	 * [--parent=<id>]
+	 * : Assign a parent tag using the parent category using the parent category's ID
+	 *
+	 * [--alias_of=<id>]
+	 * : Assign an alias to this tag using the target tag's ID
+	 *
+	 * [--description=<string>]
+	 * : Assign a description to the new tag
+	 *
+	 * [--slug=<string>]
+	 * : Assign a slug for the new tag
+	 * 
+	 * [--<field>=<value>]
+	 * : Assign a meta key and meta value
+	 * 
+	 * ## EXAMPLES
+	 *
+	 *     wp wc product category create
+	 *
+	 *     wp wc product category create --name=newcat --parent=50 --description="New Category Field" --order=2 --slug=new-cat
+	 *
+	 * @subcommand create
+	 * @since      2.6.0
+	 */
+	public function create( $__, $assoc_args ) {
+
+		try {
+
+			// Create the Product Category (term)
+			$product_category_meta = ( empty( $assoc_args ) ) ? wp_insert_term( $assoc_args[ 'name' ], 'product_cat' ) :
+				wp_insert_term( $assoc_args[ 'name' ], 'product_cat', $assoc_args );
+
+			// Validate the Product Category (term)
+			if( is_object( $product_category_meta ) && ( 'WP_Error' == get_class( $product_category_meta ) ) ) {
+				$error = array_pop( $product_category_meta->errors );
+				throw new WC_CLI_Exception( $error[0], key( $error ) );
+			}
+			
+			// Read meta values from assoc args and assign back to term.
+			$default_meta_values = $this->get_default_product_category_meta_field_values();
+			$assignable_meta_values = array_merge( $default_meta_values, $assoc_args );
+			$this->filter_insert_keys_from_assoc_args( $assignable_meta_values );
+
+			// Apply meta key->value pairs to new term.
+            foreach( $assignable_meta_values as $meta_key => $meta_value ) {
+                add_term_meta( $product_category_meta[ 'term_id' ], $meta_key, $assignable_meta_values[ $meta_key ] );
+            }
+
+			// Log successful creation
+			WP_CLI::success( 'Product Category ' . $assoc_args[ 'name' ] . ' was created successfully.' );
+
+			return true;
+		}
+		catch ( WC_CLI_Exception $ex ) {
+
+			WP_CLI::error( $ex->getErrorCode() );
+		}
+	}
+	
+	/**
+	 *  Get an array of default term meta key->value pairs that need to be assigned to the new term.
+	 * 
+	 *  @return array
+	 */
+	protected function get_default_product_category_meta_field_values() {
+
+		return array (
+			'display_type' => 'both',
+			'thumbnail_id' => 0,
+			'order' => 0,
+		);
+	}
+	
+	/**
+	 * Pass in the assoc_args array to filter out the key->value pairs which are applied directly to the new term.
+	 * 
+	 * @mutator
+	 * 
+	 * @param $assoc_args  The array of associated args to filter
+	 */
+	protected function filter_insert_keys_from_assoc_args( &$assoc_args ) { 
+		
+		unset( $assoc_args[ 'name' ] );
+		unset( $assoc_args[ 'slug' ] );
+		unset( $assoc_args[ 'parent' ] );
+		unset( $assoc_args[ 'description' ] );
+		unset( $assoc_args[ 'alias_of' ] );
+	}
+	
 	/**
 	 * Get product category properties from given term ID.
 	 *
@@ -148,18 +245,6 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		);
 	}
 
-	protected function get_product_category_by_name( $term_name ) {
-
-		$term_meta = get_term_by( 'slug', $term_name, 'product_cat', OBJECT, 'woocommerce_cli_get_product_term_by_slug' );
-		return $this->get_product_category( $term_meta->term_id );
-	}
-
-	protected function get_product_category_by_slug( $term_slug ) {
-
-		$term_meta = get_term_by( 'name', $term_slug, 'product_cat', OBJECT, 'woocommerce_cli_get_product_term_by_name' );
-		return $this->get_product_category( $term_meta->term_id );
-	}
-
 	/**
 	 * Get default format fields that will be used in `list` and `get` subcommands.
 	 *
@@ -169,85 +254,4 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	protected function get_default_format_fields() {
 		return 'id,name,slug,parent,description,display,image,count';
 	}
-
-	/**
-	 * Create a new product category
-	 *
-	 * // display type = (products, subcategories, both)
-	 *
-	 * @param string $term
-	 *
-	 * @since 2.6.0
-	 * @return array
-	 */
-	public function create( $__, $assoc_args ) {
-
-		try {
-
-			// Create and validate the term creation
-			$product_category_meta = ( empty( $assoc_args ) ) ? wp_insert_term( $assoc_args[ 'name' ], 'product_cat' ) :
-				wp_insert_term( $assoc_args[ 'name' ], 'product_cat', $assoc_args );
-
-			if( is_object( $product_category_meta ) && ( 'WP_Error' == get_class( $product_category_meta ) ) ) {
-
-				$error = array_pop( $product_category_meta->errors );
-				throw new WC_CLI_Exception( $error[0], key( $error ) );
-			}
-
-			// Log successful creation
-			WP_CLI::log( 'Product Category ' . $assoc_args[ 'name' ] . ' was created successfully.' );
-
-			if ( array_key_exists( 'parent', $assoc_args ) ) {
-
-				$term = $this->get_product_category( $assoc_args[ 'parent' ] );
-				WP_CLI::log( "parent term: " . var_dump( $term ) );
-				$assoc_args[ 'parent' ] = $term[ 'id' ];
-
-			}
-
-			// Read for default values
-			$default_meta_values = $this->get_default_product_category_meta();
-
-			$assignable_meta_values = array_merge( $default_meta_values, $assoc_args );
-
-            foreach( $assignable_meta_values as $meta_key => $meta_value ) {
-
-                add_term_meta( $product_category_meta[ 'term_id' ], $meta_key, $assignable_meta_values[ $meta_key ] );
-            }
-
-			return true;
-		}
-		catch ( WC_CLI_Exception $ex ) {
-
-			WP_CLI::error( $ex->getErrorCode() );
-		}
-	}
-
-	protected function get_default_product_category_meta() {
-
-		return array (
-			'display_type' => 'both',
-			'thumbnail_id' => 0,
-		);
-	}
-
-	protected function get_product_category_by_mixed( $term_identifier ) {
-
-		$term = false;
-
-		if ( is_int( $term_identifier ) ) {
-			$term = $this->get_product_category( $term_identifier );
-		}
-
-		if ( ! $term ) {
-			$term = $this->get_product_category_by_slug( $term_identifier );
-		}
-
-		if ( ! $term ) {
-			$term = $this->get_product_category_by_name( $term_identifier );
-		}
-
-		return $term;
-	}
-
 }
