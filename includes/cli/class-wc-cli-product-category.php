@@ -257,12 +257,28 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 * @subcommand delete
 	 * @since      2.5.0
+	 * @return array
+	 * @throws WC_CLI_Exception
 	 */
 	public function delete( $args ) {
+
 		try {
 			foreach ( $args as $cat_id ) {
 
-				if ( wp_delete_category( $cat_id ) ) {
+				$term_id = absint( $cat_id );
+				$term    = get_term( $term_id, 'product_cat' );
+
+				if ( is_wp_error( $term ) || is_null( $term ) ) {
+					throw new WC_CLI_Exception( 'woocommerce_cli_invalid_product_category_id', sprintf( __( 'Invalid product category ID "%s"', 'woocommerce' ), $term_id ) );
+				}
+
+				$term_id = intval( $term->term_id );
+
+
+				WP_CLI::confirm(sprintf( __( 'Are you sure you want to delete Product Category "%s"', 'woocommerce' ), $term_id ) );
+
+
+				if ( wp_delete_term( $cat_id ) ) {
 				  WP_CLI::success( "Category #$cat_id was successfully deleted");
 				} else {
 				  WP_CLI::warning( "Not able to delete category #$cat_id! Make sure it exists and that it's not the default category");
@@ -271,7 +287,6 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		} catch ( WC_CLI_Exception $e ) {
 			WP_CLI::error( $e->getMessage() );
 		}
-
 
 	}
 
