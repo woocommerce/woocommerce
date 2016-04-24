@@ -253,7 +253,6 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product category delete
-	 *
 	 *     wp wc product category delete id
 	 *
 	 * @subcommand delete
