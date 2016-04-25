@@ -164,9 +164,9 @@ class WC_Frontend_Scripts {
 		self::register_script( 'jquery-cookie', $assets_path . 'js/jquery-cookie/jquery.cookie' . $suffix . '.js', array( 'jquery' ), '1.4.1' );
 		self::register_script( 'wc-credit-card-form', $frontend_script_path . 'credit-card-form' . $suffix . '.js', array( 'jquery', 'jquery-payment' ) );
 		self::register_script( 'wc-add-to-cart-variation', $frontend_script_path . 'add-to-cart-variation' . $suffix . '.js', array( 'jquery', 'wp-util' ) );
-		self::register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js' );
-		self::register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js' );
-		self::register_script( 'wc-address-i18n', $frontend_script_path . 'address-i18n' . $suffix . '.js' );
+		self::register_script( 'wc-single-product', $frontend_script_path . 'single-product' . $suffix . '.js', array( 'jquery' ) );
+		self::register_script( 'wc-country-select', $frontend_script_path . 'country-select' . $suffix . '.js', array( 'jquery' ) );
+		self::register_script( 'wc-address-i18n', $frontend_script_path . 'address-i18n' . $suffix . '.js', array( 'jquery' ) );
 		self::register_script( 'wc-password-strength-meter', $frontend_script_path . 'password-strength-meter' . $suffix . '.js', array( 'jquery', 'password-strength-meter' ) );
 
 		// Register frontend scripts conditionally
