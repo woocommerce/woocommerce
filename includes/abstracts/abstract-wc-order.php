@@ -1661,7 +1661,7 @@ abstract class WC_Abstract_Order {
 			$shipping_methods = $this->get_shipping_methods();
 
 			foreach ( $shipping_methods as $shipping ) {
-				$labels[] = $shipping['name'];
+				$labels[] = $shipping['name'] ? $shipping['name'] : __( 'Shipping', 'woocommerce' );
 			}
 		}
 
