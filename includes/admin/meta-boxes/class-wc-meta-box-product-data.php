@@ -462,7 +462,7 @@ class WC_Meta_Box_Product_Data {
 									$metabox_class[]    = $taxonomy;
 									$attribute_label    = wc_attribute_label( $taxonomy );
 								} else {
-									$attribute_label    = apply_filters( 'woocommerce_attribute_label', $attribute['name'], $attribute['name'] );
+									$attribute_label    = apply_filters( 'woocommerce_attribute_label', $attribute['name'], $attribute['name'], false );
 								}
 
 								include( 'views/html-product-attribute.php' );
