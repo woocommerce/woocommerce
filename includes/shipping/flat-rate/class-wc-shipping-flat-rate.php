@@ -123,7 +123,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$rate = array(
-			'id'      => $this->id . $this->instance_id,
+			'id'      => $this->get_rate_id(),
 			'label'   => $this->title,
 			'cost'    => 0,
 			'package' => $package,

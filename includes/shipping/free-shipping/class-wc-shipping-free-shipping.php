@@ -146,7 +146,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$this->add_rate( array(
-			'id' 	  => $this->id . $this->instance_id,
 			'label'   => $this->title,
 			'cost' 	  => 0,
 			'taxes'   => false,

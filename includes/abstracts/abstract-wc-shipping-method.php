@@ -208,12 +208,33 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
+	 * Returns a rate ID based on this methods ID and instance, with an optional
+	 * suffix if distinguishing between multiple rates.
+	 * @since 2.6.0
+	 * @param string $suffix
+	 * @return string
+	 */
+	public function get_rate_id( $suffix = '' ) {
+		$rate_id = array( $this->id );
+
+		if ( $this->instance_id ) {
+			$rate_id[] = $this->instance_id;
+		}
+
+		if ( $suffix ) {
+			$rate_id[] = $suffix;
+		}
+
+		return implode( ':', $rate_id );
+	}
+
+	/**
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
 	 * @param array $args (default: array())
 	 */
 	public function add_rate( $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'id'        => '', // ID for the rate
+			'id'        => $this->get_rate_id(), // ID for the rate. If not passed, this id:instance default will be used.
 			'label'     => '', // Label for the rate
 			'cost'      => '0', // Amount or array of costs (per item shipping)
 			'taxes'     => '', // Pass taxes, or leave empty to have it calculated for you, or 'false' to disable calculations
