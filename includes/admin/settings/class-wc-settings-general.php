@@ -75,7 +75,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title'   => __( 'Sell to all Countries except', 'woocommerce' ),
+				'title'   => __( 'Exclude specific countries', 'woocommerce' ),
 				'desc'    => '',
 				'id'      => 'woocommerce_all_except_countries',
 				'css'     => 'min-width: 350px;',
@@ -109,7 +109,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title'   => __( 'Ship to all Countries except', 'woocommerce' ),
+				'title'   => __( 'Exclude specific countries', 'woocommerce' ),
 				'desc'    => '',
 				'id'      => 'woocommerce_all_except_ship_to_countries',
 				'css'     => 'min-width: 350px;',
