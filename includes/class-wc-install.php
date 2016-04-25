@@ -927,7 +927,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
-							__( '%s could not be installed (%s). %sPlease install it manually by clicking here.%s', 'woocommerce' ),
+							__( '%1$s could not be installed (%2$s). %3$sPlease install it manually by clicking here.%4$s', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
 							'<a href="' . admin_url( 'plugin-install.php?tab=search&type=term&s=' . $plugin_to_install['repo-slug'] ) . '">',
@@ -955,9 +955,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
-							__( '%s could not be activated (%s). %sPlease activate it manually via the plugins screen.%s', 'woocommerce' ),
+							__( '%1$s was installed but could not be activated. %2$sPlease activate it manually by clicking here.%3$s', 'woocommerce' ),
 							$plugin_to_install['name'],
-							$e->getMessage() . '"' . $plugin . '"',
 							'<a href="' . admin_url( 'plugins.php' ) . '">',
 							'</a>'
 						)

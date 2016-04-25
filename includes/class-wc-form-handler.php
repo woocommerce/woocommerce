@@ -406,11 +406,13 @@ class WC_Form_Handler {
 
 				// Don't show undo link if removed item is out of stock.
 				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
-					$undo = WC()->cart->get_undo_url( $cart_item_key );
-					wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $item_removed_title, '<a href="' . esc_url( $undo ) . '">', '</a>' ) );
+					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
+					$removed_notice .= ' <a href="' . esc_url( WC()->cart->get_undo_url( $cart_item_key ) ) . '">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
-					wc_add_notice( sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title ) );
+					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
+
+				wc_add_notice( $removed_notice );
 			}
 
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();

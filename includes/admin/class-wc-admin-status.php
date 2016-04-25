@@ -125,11 +125,8 @@ class WC_Admin_Status {
 						$callback = $tools[ $action ]['callback'];
 						$return = call_user_func( $callback );
 						if ( $return === false ) {
-							if ( is_array( $callback ) ) {
-								echo '<div class="error inline"><p>' . sprintf( __( 'There was an error calling %s::%s', 'woocommerce' ), get_class( $callback[0] ), $callback[1] ) . '</p></div>';
-							} else {
-								echo '<div class="error inline"><p>' . sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback ) . '</p></div>';
-							}
+							$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
+							echo '<div class="error inline"><p>' . sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string ) . '</p></div>';
 						}
 					}
 				break;

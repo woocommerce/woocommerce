@@ -169,7 +169,7 @@ function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
 	$args = $attributes['args'][ $param ];
 
 	if ( 'string' === $args['type'] && ! is_string( $value ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%s is not of type %s.', 'woocommerce' ), $param, 'string' ) );
+		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'string' ) );
 	}
 
 	if ( 'data' === $args['format'] ) {
@@ -292,4 +292,3 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, 0, $object );
 }
-

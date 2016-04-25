@@ -161,32 +161,24 @@ class WC_Admin_Help {
 		}
 
 		$screen->add_help_tab( array(
-			'id'        => 'woocommerce_docs_tab',
-			'title'     => __( 'Documentation', 'woocommerce' ),
-			'content'   =>
-				'<h2>' . __( 'Documentation', 'woocommerce' ) . '</h2>' .
-				'<p>' . __( 'Should you need help understanding, using, or extending WooCommerce, please read our documentation. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ) . '</p>' .
-				'<p><a href="' . 'http://docs.woothemes.com/documentation/plugins/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Docs&utm_campaign=Onboarding' . '" class="button button-primary">' . __( 'WooCommerce Documentation', 'woocommerce' ) . '</a> <a href="' . 'http://docs.woothemes.com/wc-apidocs/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=APIDocs&utm_campaign=Onboarding' . '" class="button">' . __( 'Developer API Docs', 'woocommerce' ) . '</a></p>'
-
-		) );
-
-		$screen->add_help_tab( array(
 			'id'        => 'woocommerce_support_tab',
-			'title'     => __( 'Support', 'woocommerce' ),
+			'title'     => __( 'Help &amp; Support', 'woocommerce' ),
 			'content'   =>
-				'<h2>' . __( 'Support', 'woocommerce' ) . '</h2>' .
-				'<p>' . sprintf( __( 'After %sreading the documentation%s, for further assistance you can use the %scommunity forums%s on WordPress.org to talk with other users. If however you are a WooThemes customer, or need help with premium add-ons sold by WooThemes, please %suse our helpdesk%s.', 'woocommerce' ), '<a href="https://docs.woothemes.com/documentation/plugins/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Docs&utm_campaign=Onboarding">', '</a>', '<a href="https://wordpress.org/support/plugin/woocommerce">', '</a>', '<a href="https://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding">', '</a>' ) . '</p>' .
+				'<h2>' . __( 'Help &amp; Support', 'woocommerce' ) . '</h2>' .
+				'<p>' . sprintf(
+					__( 'Should you need help understanding, using, or extending WooCommerce, %splease read our documentation%s. You will find all kinds of resources including snippets, tutorials and much more.' , 'woocommerce' ),
+					'<a href="http://docs.woothemes.com/documentation/plugins/woocommerce/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Docs&utm_campaign=Onboarding">',
+					'</a>'
+				) . '</p>' .
+				'<p>' . sprintf(
+					__( 'For further assistance with WooCommerce core you can use the %scommunity forum%s. If you need help with premium add-ons sold by WooThemes, please %suse our helpdesk%s.', 'woocommerce' ),
+					'<a href="https://wordpress.org/support/plugin/woocommerce">',
+					'</a>',
+					'<a href="https://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding">',
+					'</a>'
+				) . '</p>' .
 				'<p>' . __( 'Before asking for help we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'WordPress.org Forums', 'woocommerce' ) . '</a> <a href="' . 'http://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding' . '" class="button">' . __( 'WooThemes Customer Support', 'woocommerce' ) . '</a></p>'
-		) );
-
-		$screen->add_help_tab( array(
-			'id'        => 'woocommerce_education_tab',
-			'title'     => __( 'Education', 'woocommerce' ),
-			'content'   =>
-				'<h2>' . __( 'Education', 'woocommerce' ) . '</h2>' .
-				'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider following a WooCommerce course ran by one of our educational partners.', 'woocommerce' ) . '</p>' .
-				'<p><a href="' . 'http://www.woothemes.com/educational-partners/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=EduPartners&utm_campaign=Onboarding' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>'
+				'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System Status', 'woocommerce' ) . '</a> <a href="' . 'https://wordpress.org/support/plugin/woocommerce' . '" class="button">' . __( 'Community Forum', 'woocommerce' ) . '</a> <a href="' . 'http://www.woothemes.com/my-account/tickets/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=Tickets&utm_campaign=Onboarding' . '" class="button">' . __( 'WooThemes Helpdesk', 'woocommerce' ) . '</a></p>'
 		) );
 
 		$screen->add_help_tab( array(
@@ -199,6 +191,15 @@ class WC_Admin_Help {
 
 		) );
 
+		$screen->add_help_tab( array(
+			'id'        => 'woocommerce_education_tab',
+			'title'     => __( 'Education', 'woocommerce' ),
+			'content'   =>
+				'<h2>' . __( 'Education', 'woocommerce' ) . '</h2>' .
+				'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider following a WooCommerce course ran by one of our educational partners.', 'woocommerce' ) . '</p>' .
+				'<p><a href="' . 'http://www.woothemes.com/educational-partners/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=EduPartners&utm_campaign=Onboarding' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>'
+		) );
+		
 		$screen->add_help_tab( array(
 			'id'        => 'woocommerce_onboard_tab',
 			'title'     => __( 'Setup Wizard', 'woocommerce' ),

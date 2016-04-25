@@ -2338,7 +2338,7 @@ abstract class WC_Abstract_Order {
 		}
 
 		if ( ! wp_update_post( $update_post_data ) ) {
-			$this->add_order_note( sprintf( __( 'Unable to update order from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ), 0, $manual );
+			$this->add_order_note( sprintf( __( 'Unable to update order from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ), 0, $manual );
 			return false;
 		}
 
@@ -2347,7 +2347,7 @@ abstract class WC_Abstract_Order {
 
 		// Status was changed.
 		if ( $new_status !== $old_status ) {
-			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
 			do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
 			do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
 		} else {
@@ -2594,9 +2594,9 @@ abstract class WC_Abstract_Order {
 						$item_name = $_product->get_sku() ? $_product->get_sku(): $item['product_id'];
 
 						if ( isset( $item['variation_id'] ) && $item['variation_id'] ) {
-							$this->add_order_note( sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock) );
+							$this->add_order_note( sprintf( __( 'Item %1$s variation #%2$s stock reduced from %3$s to %4$s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock) );
 						} else {
-							$this->add_order_note( sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock) );
+							$this->add_order_note( sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock) );
 						}
 						$this->send_stock_notifications( $_product, $new_stock, $item['qty'] );
 					}

@@ -526,11 +526,7 @@ class WC_Admin_Post_Types {
 				$usage_limit = esc_html( get_post_meta( $post->ID, 'usage_limit', true ) );
 				$usage_url   = sprintf( '<a href="%s">%s</a>', admin_url( sprintf( 'edit.php?s=%s&post_status=all&post_type=shop_order', esc_html( $post->post_title ) ) ), $usage_count );
 
-				if ( $usage_limit ) {
-					printf( __( '%s / %s', 'woocommerce' ), $usage_url, $usage_limit );
-				} else {
-					printf( __( '%s / &infin;', 'woocommerce' ), $usage_url );
-				}
+				printf( _x( '%1$s / %2$s', 'Count / Limit', 'woocommerce' ), $usage_url, $usage_limit ? $usage_limit : '&infin;' );
 			break;
 			case 'expiry_date' :
 				$expiry_date = get_post_meta( $post->ID, 'expiry_date', true );

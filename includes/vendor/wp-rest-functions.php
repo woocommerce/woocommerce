@@ -89,16 +89,16 @@ if ( ! function_exists( 'rest_validate_request_arg' ) ) {
 
 		if ( ! empty( $args['enum'] ) ) {
 			if ( ! in_array( $value, $args['enum'] ) ) {
-				return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not one of %s', 'woocommerce' ), $param, implode( ', ', $args['enum'] ) ) );
+				return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not one of %2$s', 'woocommerce' ), $param, implode( ', ', $args['enum'] ) ) );
 			}
 		}
 
 		if ( 'integer' === $args['type'] && ! is_numeric( $value ) ) {
-			return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not of type %s', 'woocommerce' ), $param, 'integer' ) );
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'integer' ) );
 		}
 
 		if ( 'string' === $args['type'] && ! is_string( $value ) ) {
-			return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not of type %s', 'woocommerce' ), $param, 'string' ) );
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'string' ) );
 		}
 
 		if ( isset( $args['format'] ) ) {
@@ -120,32 +120,32 @@ if ( ! function_exists( 'rest_validate_request_arg' ) ) {
 		if ( in_array( $args['type'], array( 'numeric', 'integer' ) ) && ( isset( $args['minimum'] ) || isset( $args['maximum'] ) ) ) {
 			if ( isset( $args['minimum'] ) && ! isset( $args['maximum'] ) ) {
 				if ( ! empty( $args['exclusiveMinimum'] ) && $value <= $args['minimum'] ) {
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be greater than %d (exclusive)', 'woocommerce' ), $param, $args['minimum'] ) );
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than %2$s (exclusive)', 'woocommerce' ), $param, $args['minimum'] ) );
 				} else if ( empty( $args['exclusiveMinimum'] ) && $value < $args['minimum'] ) {
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be greater than %d (inclusive)', 'woocommerce' ), $param, $args['minimum'] ) );
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be greater than %2$s (inclusive)', 'woocommerce' ), $param, $args['minimum'] ) );
 				}
 			} else if ( isset( $args['maximum'] ) && ! isset( $args['minimum'] ) ) {
 				if ( ! empty( $args['exclusiveMaximum'] ) && $value >= $args['maximum'] ) {
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be less than %d (exclusive)', 'woocommerce' ), $param, $args['maximum'] ) );
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than %2$s (exclusive)', 'woocommerce' ), $param, $args['maximum'] ) );
 				} else if ( empty( $args['exclusiveMaximum'] ) && $value > $args['maximum'] ) {
-					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be less than %d (inclusive)', 'woocommerce' ), $param, $args['maximum'] ) );
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be less than %2$s (inclusive)', 'woocommerce' ), $param, $args['maximum'] ) );
 				}
 			} else if ( isset( $args['maximum'] ) && isset( $args['minimum'] ) ) {
 				if ( ! empty( $args['exclusiveMinimum'] ) && ! empty( $args['exclusiveMaximum'] ) ) {
 					if ( $value >= $args['maximum'] || $value <= $args['minimum'] ) {
-						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be between %d (exclusive) and %d (exclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$s (exclusive) and %3$s (exclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
 					}
 				} else if ( empty( $args['exclusiveMinimum'] ) && ! empty( $args['exclusiveMaximum'] ) ) {
 					if ( $value >= $args['maximum'] || $value < $args['minimum'] ) {
-						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be between %d (inclusive) and %d (exclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$s (inclusive) and %3$s (exclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
 					}
 				} else if ( ! empty( $args['exclusiveMinimum'] ) && empty( $args['exclusiveMaximum'] ) ) {
 					if ( $value > $args['maximum'] || $value <= $args['minimum'] ) {
-						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be between %d (exclusive) and %d (inclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$s (exclusive) and %3$s (inclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
 					}
 				} else if ( empty( $args['exclusiveMinimum'] ) && empty( $args['exclusiveMaximum'] ) ) {
 					if ( $value > $args['maximum'] || $value < $args['minimum'] ) {
-						return new WP_Error( 'rest_invalid_param', sprintf( __( '%s must be between %d (inclusive) and %d (inclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
+						return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s must be between %2$s (inclusive) and %3$s (inclusive)', 'woocommerce' ), $param, $args['minimum'], $args['maximum'] ) );
 					}
 				}
 			}

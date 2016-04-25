@@ -1557,14 +1557,13 @@ class WC_Product {
 	 * @return string Formatted product name
 	 */
 	public function get_formatted_name() {
-
 		if ( $this->get_sku() ) {
 			$identifier = $this->get_sku();
 		} else {
 			$identifier = '#' . $this->id;
 		}
 
-		return sprintf( __( '%s &ndash; %s', 'woocommerce' ), $identifier, $this->get_title() );
+		return sprintf( '%s &ndash; %s', $identifier, $this->get_title() );
 	}
 
 	/**
