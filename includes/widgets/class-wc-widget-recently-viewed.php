@@ -50,7 +50,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 	 * @param array $args
 	 * @param array $instance
 	 */
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 
 		$viewed_products = ! empty( $_COOKIE['woocommerce_recently_viewed'] ) ? (array) explode( '|', $_COOKIE['woocommerce_recently_viewed'] ) : array();
 		$viewed_products = array_filter( array_map( 'absint', $viewed_products ) );

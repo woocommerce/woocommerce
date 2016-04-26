@@ -42,7 +42,7 @@ class WC_Widget_Product_Search extends WC_Widget {
 	 * @param array $args
 	 * @param array $instance
 	 */
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 		$this->widget_start( $args, $instance );
 
 		get_product_search_form();
