@@ -276,14 +276,12 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 				$extra_rate          = $rate;
 				$extra_rate['id']    = $this->id . ':' . urldecode( sanitize_title( $this_option[0] ) );
 				$extra_rate['label'] = $this_option[0];
-				$extra_cost          = $this->get_extra_cost( $this_option[1], $this_option[2], $package );
+				$extra_cost          = $this->get_extra_cost( $this_option[1], $this_option[2], $rate['package'] );
 				if ( is_array( $extra_rate['cost'] ) ) {
 					$extra_rate['cost']['order'] = $extra_rate['cost']['order'] + $extra_cost;
 				} else {
 					$extra_rate['cost'] += $extra_cost;
 				}
-
-				$rate['package'] = $package;
 
 				$this->add_rate( $extra_rate );
 			}
