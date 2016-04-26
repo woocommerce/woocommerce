@@ -22,7 +22,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	/**
 	 * Constructor.
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->id               = 'customer_processing_order';
 		$this->customer_email   = true;
 		$this->title            = __( 'Processing order', 'woocommerce' );
@@ -44,7 +44,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	 *
 	 * @param int $order_id
 	 */
-	function trigger( $order_id ) {
+	public function trigger( $order_id ) {
 
 		if ( $order_id ) {
 			$this->object       = wc_get_order( $order_id );
@@ -70,7 +70,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_content_html() {
+	public function get_content_html() {
 		return wc_get_template_html( $this->template_html, array(
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
@@ -86,7 +86,7 @@ class WC_Email_Customer_Processing_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_content_plain() {
+	public function get_content_plain() {
 		return wc_get_template_html( $this->template_plain, array(
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
