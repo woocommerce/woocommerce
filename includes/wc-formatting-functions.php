@@ -622,19 +622,33 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
 /**
  * Format the postcode according to the country and length of the postcode.
  *
- * @param string postcode
- * @param string country
- * @return string formatted postcode
+ * @param string $postcode
+ * @param string $country
+ * @return string Formatted postcode.
  */
 function wc_format_postcode( $postcode, $country ) {
-	$postcode = strtoupper( trim( $postcode ) );
-	$postcode = trim( preg_replace( '/[\s]/', '', $postcode ) );
+	$postcode = wc_sanitize_postcode( $postcode );
 
 	if ( in_array( $country, array( 'GB', 'CA' ) ) ) {
 		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 	}
 
 	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
+}
+
+/**
+ * Sanitize postcodes.
+ *
+ * Remove spaces and convert characters to uppercase.
+ *
+ * @since 2.6.0
+ * @param string $postcode
+ * @return string Sanitized postcode.
+ */
+function wc_sanitize_postcode( $postcode ) {
+	$postcode = trim( preg_replace( '/[\s]/', '', strtoupper( $postcode ) ) );
+
+	return apply_filters( 'woocommerce_sanitize_postcode', $postcode );
 }
 
 /**

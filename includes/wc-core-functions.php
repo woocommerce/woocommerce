@@ -1253,14 +1253,15 @@ function wc_get_wildcard_postcodes( $postcode ) {
  * @return array Array of matching object ID and values.
  */
 function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key ) {
-	$matches            = array();
+	$postcode           = wc_sanitize_postcode( $postcode );
 	$wildcard_postcodes = array_map( 'wc_clean', wc_get_wildcard_postcodes( $postcode ) );
-	$postcodes          = wp_list_pluck( $objects, $object_compare_key, $object_id_key );
+	$postcodes          = array_map( 'wc_sanitize_postcode', wp_list_pluck( $objects, $object_compare_key, $object_id_key ) );
+	$matches            = array();
 
 	foreach ( $postcodes as $object_id => $compare_against ) {
 		$compare = $postcode;
 
-		// Handle postcodes containing ranges
+		// Handle postcodes containing ranges.
 		if ( strstr( $compare_against, '-' ) ) {
 			$range = array_map( 'trim', explode( '-', $compare_against ) );
 
@@ -1270,7 +1271,7 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 
 			list( $min, $max ) = $range;
 
-			// If the postcode is non-numeric, make it numeric
+			// If the postcode is non-numeric, make it numeric.
 			if ( ! is_numeric( $min ) || ! is_numeric( $max ) ) {
 				$compare = wc_make_numeric_postcode( $compare );
 				$min     = str_pad( wc_make_numeric_postcode( $min ), strlen( $encoded_postcode ), '0' );
@@ -1281,7 +1282,7 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 				$matches[ $object_id ] = $compare_against;
 			}
 
-		// Wildcard and standard comparison
+		// Wildcard and standard comparison.
 		} elseif ( in_array( $compare_against, $wildcard_postcodes ) ) {
 			$matches[ $object_id ] = $compare_against;
 		}
