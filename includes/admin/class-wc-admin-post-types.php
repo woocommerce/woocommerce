@@ -2040,6 +2040,15 @@ class WC_Admin_Post_Types {
 
 				delete_transient( 'woocommerce_processing_order_count' );
 				wc_delete_shop_order_transients( $id );
+			} else if ( 'product' === $post_type ) {
+				// Check if SKU is valid before untrash the product.
+				$sku = get_post_meta( $id, '_sku', true );
+
+				if ( ! empty( $sku ) ) {
+					if ( ! wc_product_has_unique_sku( $id, $sku ) ) {
+						update_post_meta( $id, '_sku', '' );
+					}
+				}
 			}
 		}
 	}
