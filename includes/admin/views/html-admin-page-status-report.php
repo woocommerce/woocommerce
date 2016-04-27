@@ -122,6 +122,11 @@ global $wpdb;
 			<td><?php echo esc_html( $_SERVER['SERVER_SOFTWARE'] ); ?></td>
 		</tr>
 		<tr>
+			<td data-export-label="Server Host"><?php _e( 'Server Host', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Information about the host that is currently hosting your site.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( gethostname() ); ?></td>
+		</tr>
+		<tr>
 			<td data-export-label="PHP Version"><?php _e( 'PHP Version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); ?></td>
 			<td><?php
@@ -390,6 +395,70 @@ global $wpdb;
 
 			?>
 		</tr>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
+			<th colspan="3" data-export-label="'SSL Certificate"><h2><?php _e( 'SSL Certificate', 'woocommerce' ); ?></h2></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="SSL Active"><?php _e( 'SSL Active', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Is your website using a SSL certificate?', 'woocommerce' ) ); ?></td>
+			<td>
+			<?php
+			$is_ssl = is_ssl();
+
+			if ( ! $is_ssl ) : ?>
+				<mark class="no">&ndash;</mark>
+			<?php else : ?>
+				<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
+			<?php endif; ?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="Force SSL"><?php _e( 'Force SSL', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) ); ?></td>
+			<td><?php echo 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<?php
+		if ( $is_ssl ) :
+			$get  = stream_context_create( array( 'ssl' => array( 'capture_peer_cert' => true ) ) );
+			$read = stream_socket_client( rtrim( str_replace( 'https', 'ssl', site_url() ), '/' ) . ':443', $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $get );
+
+			if ( empty( $errno ) ) :
+				$cert     = stream_context_get_params( $read );
+				$certinfo = openssl_x509_parse( $cert["options"]["ssl"]["peer_certificate"] );
+			?>
+			<tr>
+				<td data-export-label="Subject Name"><?php _e( 'Subject Name', 'woocommerce' ); ?></td>
+				<td class="help"><?php echo wc_help_tip( __( 'The domain on which your SSL certificate is valid.', 'woocommerce' ) ); ?></td>
+				<td><?php echo esc_attr( $certinfo['subject']['CN'] ); ?>
+			</tr>
+			<tr>
+				<td data-export-label="Issuer Name"><?php _e( 'Issuer Name', 'woocommerce' ); ?></td>
+				<td class="help"><?php echo wc_help_tip( __( 'Who released your SSL certificate.', 'woocommerce' ) ); ?></td>
+				<td><?php echo ( isset( $certinfo['issuer']['O'] ) ? esc_attr( $certinfo['issuer']['O'] ) : esc_attr( $certinfo['issuer']['CN'] ) ); ?>
+			</tr>
+			<tr>
+				<td data-export-label="Version"><?php _e( 'Version', 'woocommerce' ); ?></td>
+				<td class="help"><?php echo wc_help_tip( __( 'The version of your SSL certificate.', 'woocommerce' ) ); ?></td>
+				<td><?php echo esc_attr( $certinfo['version'] ); ?>
+			</tr>
+			<tr>
+				<td data-export-label="Valid From"><?php _e( 'Valid From', 'woocommerce' ); ?></td>
+				<td class="help"><?php echo wc_help_tip( __( 'The date from which your SSL certificate is valid.', 'woocommerce' ) ); ?></td>
+				<td><?php echo esc_attr( date( wc_date_format(), $certinfo['validFrom_time_t'] ) ); ?>
+			</tr>
+			<tr>
+				<td data-export-label="Valid To"><?php _e( 'Valid To', 'woocommerce' ); ?></td>
+				<td class="help"><?php echo wc_help_tip( __( 'The date to which your SSL certificate is valid.', 'woocommerce' ) ); ?></td>
+				<td><?php echo esc_attr( date( wc_date_format(), $certinfo['validTo_time_t'] ) ); ?>
+			</tr>
+			<?php endif; ?>
+		<?php endif; ?>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
