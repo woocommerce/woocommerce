@@ -6,6 +6,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+global $wpdb;
 
 ?>
 <div class="updated woocommerce-message inline">
@@ -172,23 +173,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td><?php echo extension_loaded( 'suhosin' ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 			</tr>
 		<?php endif; ?>
-		<tr>
-			<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
-			<td>
-				<?php
-				/** @global wpdb $wpdb */
-				global $wpdb;
-				$mysql_version = $wpdb->db_version();
+		<?php
+		if ( ! empty( $wpdb->is_mysql ) ) : ?>
+			<tr>
+				<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
+				<td class="help"><?php echo wc_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
+				<td>
+					<?php
+					$mysql_version = $wpdb->db_version();
 
-				if ( version_compare( $mysql_version, '5.6', '<' ) ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum MySQL version of 5.6. See: %s', 'woocommerce' ), esc_html( $mysql_version ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress Requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
-				} else {
-					echo '<mark class="yes">' . esc_html( $mysql_version ) . '</mark>';
-				}
-				?>
-			</td>
-		</tr>
+					if ( version_compare( $mysql_version, '5.6', '<' ) ) {
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum MySQL version of 5.6. See: %s', 'woocommerce' ), esc_html( $mysql_version ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress Requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
+					} else {
+						echo '<mark class="yes">' . esc_html( $mysql_version ) . '</mark>';
+					}
+					?>
+				</td>
+			</tr>
+		<?php endif; ?>
 		<tr>
 			<td data-export-label="Max Upload Size"><?php _e( 'Max Upload Size', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce' ) ); ?></td>
