@@ -61,9 +61,12 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$link = add_query_arg( 'orderby', wc_clean( $_GET['orderby'] ), $link );
 		}
 
-		// Search Arg
+		/**
+		 * Search Arg.
+		 * To support quote characters, first they are decoded from &quot; entities, then URL encoded.
+		 */
 		if ( get_search_query() ) {
-			$link = add_query_arg( 's', get_search_query(), $link );
+			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query() ) ), $link );
 		}
 
 		// Post Type Arg
