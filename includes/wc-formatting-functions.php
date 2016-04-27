@@ -634,7 +634,7 @@ function wc_format_postcode( $postcode, $country ) {
 		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 	}
 
-	return $postcode;
+	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
 }
 
 /**
@@ -644,8 +644,7 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string
  */
 function wc_format_phone_number( $tel ) {
-	$tel = str_replace( '.', '-', $tel );
-	return $tel;
+	return str_replace( '.', '-', $tel );
 }
 
 /**
