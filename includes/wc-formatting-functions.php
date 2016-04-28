@@ -627,7 +627,7 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
  * @return string Formatted postcode.
  */
 function wc_format_postcode( $postcode, $country ) {
-	$postcode = wc_sanitize_postcode( $postcode );
+	$postcode = wc_normalize_postcode( $postcode );
 
 	if ( in_array( $country, array( 'GB', 'CA' ) ) ) {
 		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
@@ -637,7 +637,7 @@ function wc_format_postcode( $postcode, $country ) {
 }
 
 /**
- * Sanitize postcodes.
+ * Normalize postcodes.
  *
  * Remove spaces and convert characters to uppercase.
  *
@@ -645,7 +645,7 @@ function wc_format_postcode( $postcode, $country ) {
  * @param string $postcode
  * @return string Sanitized postcode.
  */
-function wc_sanitize_postcode( $postcode ) {
+function wc_normalize_postcode( $postcode ) {
 	return trim( preg_replace( '/[\s]/', '', strtoupper( $postcode ) ) );
 }
 

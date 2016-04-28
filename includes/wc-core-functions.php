@@ -1253,9 +1253,9 @@ function wc_get_wildcard_postcodes( $postcode ) {
  * @return array Array of matching object ID and values.
  */
 function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key ) {
-	$postcode           = wc_sanitize_postcode( $postcode );
+	$postcode           = wc_normalize_postcode( $postcode );
 	$wildcard_postcodes = array_map( 'wc_clean', wc_get_wildcard_postcodes( $postcode ) );
-	$postcodes          = array_map( 'wc_sanitize_postcode', wp_list_pluck( $objects, $object_compare_key, $object_id_key ) );
+	$postcodes          = array_map( 'wc_normalize_postcode', wp_list_pluck( $objects, $object_compare_key, $object_id_key ) );
 	$matches            = array();
 
 	foreach ( $postcodes as $object_id => $compare_against ) {
