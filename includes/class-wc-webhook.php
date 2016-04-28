@@ -181,13 +181,13 @@ class WC_Webhook {
 	 * Deliver the webhook payload using wp_safe_remote_request().
 	 *
 	 * @since 2.2
-	 * @param mixed $arg first hook argument
+	 * @param mixed $arg First hook argument.
 	 */
 	public function deliver( $arg ) {
 
 		$payload = $this->build_payload( $arg );
 
-		// setup request args
+		// Setup request args.
 		$http_args = array(
 			'method'      => 'POST',
 			'timeout'     => MINUTE_IN_SECONDS,
@@ -202,7 +202,8 @@ class WC_Webhook {
 
 		$http_args = apply_filters( 'woocommerce_webhook_http_args', $http_args, $arg, $this->id );
 
-		// add custom headers
+		// Add custom headers.
+		$http_args['headers']['X-WC-Webhook-Source']      = home_url( '/' ); // Since 2.6.0.
 		$http_args['headers']['X-WC-Webhook-Topic']       = $this->get_topic();
 		$http_args['headers']['X-WC-Webhook-Resource']    = $this->get_resource();
 		$http_args['headers']['X-WC-Webhook-Event']       = $this->get_event();
@@ -212,7 +213,7 @@ class WC_Webhook {
 
 		$start_time = microtime( true );
 
-		// webhook away!
+		// Webhook away!
 		$response = wp_safe_remote_request( $this->get_delivery_url(), $http_args );
 
 		$duration = round( microtime( true ) - $start_time, 5 );
