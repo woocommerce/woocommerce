@@ -453,6 +453,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'discount_type' => array(
 					'description' => __( 'Determines the type of discount that will be applied.', 'woocommerce' ),
 					'type'        => 'string',
+					'default'     => 'fixed_cart',
 					'enum'        => array_keys( wc_get_coupon_types() ),
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -475,6 +476,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'individual_use' => array(
 					'description' => __( 'Whether coupon can only be used individually.', 'woocommerce' ),
 					'type'        => 'boolean',
+					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'product_ids' => array(
@@ -505,6 +507,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'free_shipping' => array(
 					'description' => __( 'Define if can be applied for free shipping.', 'woocommerce' ),
 					'type'        => 'boolean',
+					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'product_categories' => array(
@@ -520,6 +523,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'exclude_sale_items' => array(
 					'description' => __( 'Define if should not apply when have sale items.', 'woocommerce' ),
 					'type'        => 'boolean',
+					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'minimum_amount' => array(
