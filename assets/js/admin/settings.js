@@ -4,23 +4,23 @@
 	// Sell Countries
 	$( 'select#woocommerce_allowed_countries' ).change( function() {
 		if ( 'specific' === $( this ).val() ) {
-			$( this ).parent().parent().next( 'tr' ).hide();
-			$( this ).parent().parent().next().next( 'tr' ).show();
+			$( this ).closest('tr').next( 'tr' ).hide();
+			$( this ).closest('tr').next().next( 'tr' ).show();
 		} else if ( 'all_except' === $( this ).val() ) {
-			$( this ).parent().parent().next( 'tr' ).show();
-			$( this ).parent().parent().next().next( 'tr' ).hide();
+			$( this ).closest('tr').next( 'tr' ).show();
+			$( this ).closest('tr').next().next( 'tr' ).hide();
 		} else {
-			$( this ).parent().parent().next( 'tr' ).hide();
-			$( this ).parent().parent().next().next( 'tr' ).hide();
+			$( this ).closest('tr').next( 'tr' ).hide();
+			$( this ).closest('tr').next().next( 'tr' ).hide();
 		}
 	}).change();
 
 	// Ship Countries
 	$( 'select#woocommerce_ship_to_countries' ).change( function() {
 		if ( 'specific' === $( this ).val() ) {
-			$( this ).parent().parent().next( 'tr' ).show();
+			$( this ).closest('tr').next( 'tr' ).show();
 		} else {
-			$( this ).parent().parent().next( 'tr' ).hide();
+			$( this ).closest('tr').next( 'tr' ).hide();
 		}
 	}).change();
 
