@@ -127,7 +127,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		// Load shipping methods so we can show any global options they may have
 		$shipping_methods = WC()->shipping->load_shipping_methods();
 
-		if ( '' == $current_section ) {
+		if ( '' === $current_section ) {
 			$this->output_zones_screen();
 		} elseif ( 'options' === $current_section ) {
 			$settings = $this->get_settings();
