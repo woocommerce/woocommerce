@@ -1352,7 +1352,7 @@ class WC_API_Products extends WC_API_Resource {
 				$backorders = get_post_meta( $variation_id, '_backorders', true );
 
 				if ( isset( $variation['backorders'] ) ) {
-					if ( 'notify' == $variation['backorders'] ) {
+					if ( 'notify' === $variation['backorders'] ) {
 						$backorders = 'notify';
 					} else {
 						$backorders = ( true === $variation['backorders'] ) ? 'yes' : 'no';
