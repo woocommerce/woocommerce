@@ -491,5 +491,4 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		$cc_form->supports = $this->supports;
 		$cc_form->form();
 	}
-
 }
