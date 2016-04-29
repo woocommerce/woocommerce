@@ -866,12 +866,7 @@ function wc_create_refund( $args = array() ) {
 							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
 						case 'shipping' :
-							$shipping        = new stdClass();
-							$shipping->label = $order_items[ $refund_item_id ]['name'];
-							$shipping->id    = $order_items[ $refund_item_id ]['method_id'];
-							$shipping->cost  = wc_format_refund_total( $refund_item['refund_total'] );
-							$shipping->taxes = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
-
+							$shipping    = new WC_Shipping_Rate( $order_items[ $refund_item_id ]['method_id'], $order_items[ $refund_item_id ]['name'], wc_format_refund_total( $refund_item['refund_total'] ), array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), $order_items[ $refund_item_id ]['method_id'] );
 							$new_item_id = $refund->add_shipping( $shipping );
 							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;

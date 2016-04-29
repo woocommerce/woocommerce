@@ -103,7 +103,7 @@ class WC_Tax {
 	 *
 	 * Filter example: to return rounding to .5 cents you'd use:
 	 *
-	 * public function euro_5cent_rounding( $in ) {
+	 * function euro_5cent_rounding( $in ) {
 	 *      return round( $in / 5, 2 ) * 5;
 	 * }
 	 * add_filter( 'woocommerce_tax_round', 'euro_5cent_rounding' );
