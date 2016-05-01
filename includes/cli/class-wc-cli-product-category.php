@@ -116,7 +116,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 * <name>
 	 * : Assign a name to the new slug (required)
-	 * 
+	 *
 	 * [--parent=<id>]
 	 * : Assign a parent tag using the parent category using the parent category's ID
 	 *
@@ -128,10 +128,10 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 * [--slug=<string>]
 	 * : Assign a slug for the new tag
-	 * 
+	 *
 	 * [--<field>=<value>]
 	 * : Assign a meta key and meta value
-	 * 
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product category create
@@ -156,7 +156,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 				$error = array_pop( $product_category_meta->errors );
 				throw new WC_CLI_Exception( $error[0], key( $error ) );
 			}
-			
+
 			// Read meta values from assoc args and assign back to term.
 			$default_meta_values = $this->get_default_product_category_meta_field_values();
 			$assignable_meta_values = array_merge( $default_meta_values, $assoc_args );
@@ -177,10 +177,10 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 			WP_CLI::error( $ex->getErrorCode() );
 		}
 	}
-	
+
 	/**
 	 *  Get an array of default term meta key->value pairs that need to be assigned to the new term.
-	 * 
+	 *
 	 *  @return array
 	 */
 	protected function get_default_product_category_meta_field_values() {
@@ -191,23 +191,23 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 			'order' => 0,
 		);
 	}
-	
+
 	/**
 	 * Pass in the assoc_args array to filter out the key->value pairs which are applied directly to the new term.
-	 * 
+	 *
 	 * @mutator
-	 * 
+	 *
 	 * @param $assoc_args  The array of associated args to filter
 	 */
-	protected function filter_insert_keys_from_assoc_args( &$assoc_args ) { 
-		
+	protected function filter_insert_keys_from_assoc_args( &$assoc_args ) {
+
 		unset( $assoc_args[ 'name' ] );
 		unset( $assoc_args[ 'slug' ] );
 		unset( $assoc_args[ 'parent' ] );
 		unset( $assoc_args[ 'description' ] );
 		unset( $assoc_args[ 'alias_of' ] );
 	}
-	
+
 	/**
 	 * Get product category properties from given term ID.
 	 *
@@ -278,18 +278,20 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 
 
 	/**
-	 * Delete Product Categories
+	 * Delete Product Categories by ID
+	 *
+	 * ## OPTIONS
+	 *
+	 * <product_category_id>
+	 * : The ID of the product category you wish to delete.
 	 *
 	 * ## AVAILABLE FIELDS
 	 *
-	 * * id
-	 * * name
-	 * * slug
+   	 * * id
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc product category delete
-	 *     wp wc product category delete id
+	 *     wp wc product category delete id 123
 	 *
 	 * @subcommand delete
 	 * @since      2.5.0
