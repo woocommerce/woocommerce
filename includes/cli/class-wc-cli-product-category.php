@@ -393,6 +393,4 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 
 		return $term;
 	}
-
->>>>>>> feature/wp-cli--bryan
 }
