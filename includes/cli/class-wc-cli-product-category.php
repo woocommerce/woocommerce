@@ -114,7 +114,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * [--name=<value>]
+	 * <name>
 	 * : Assign a name to the new slug (required)
 	 * 
 	 * [--parent=<id>]
@@ -141,13 +141,15 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * @subcommand create
 	 * @since      2.6.0
 	 */
-	public function create( $__, $assoc_args ) {
+	public function create( $args, $assoc_args ) {
 
 		try {
+			
+			$category_name = $args[0];
 
 			// Create the Product Category (term)
-			$product_category_meta = ( empty( $assoc_args ) ) ? wp_insert_term( $assoc_args[ 'name' ], 'product_cat' ) :
-				wp_insert_term( $assoc_args[ 'name' ], 'product_cat', $assoc_args );
+			$product_category_meta = ( empty( $assoc_args ) ) ? wp_insert_term( $category_name, 'product_cat' ) :
+				wp_insert_term( $category_name, 'product_cat', $assoc_args );
 
 			// Validate the Product Category (term)
 			if( is_object( $product_category_meta ) && ( 'WP_Error' == get_class( $product_category_meta ) ) ) {
@@ -166,7 +168,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
             }
 
 			// Log successful creation
-			WP_CLI::success( 'Product Category ' . $assoc_args[ 'name' ] . ' was created successfully.' );
+			WP_CLI::success( 'Product Category ' . $category_name . ' was created successfully.' );
 
 			return true;
 		}
