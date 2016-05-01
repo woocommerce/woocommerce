@@ -291,7 +291,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 * @subcommand delete
 	 * @since      2.5.0
-	 * @return array
+	 * @return string
 	 * @throws WC_CLI_Exception
 	 */
 	public function delete( $args ) {
