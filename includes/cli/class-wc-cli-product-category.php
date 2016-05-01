@@ -285,13 +285,9 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * <product_category_id>
 	 * : The ID of the product category you wish to delete.
 	 *
-	 * ## AVAILABLE FIELDS
-	 *
-   	 * * id
-	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc product category delete id 123
+	 *     wp wc product category delete 123
 	 *
 	 * @subcommand delete
 	 * @since      2.5.0
