@@ -128,15 +128,23 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 * [--slug=<string>]
 	 * : Assign a slug for the new tag
+	 * 
+	 * [--order=<sortorder>]
+	 * : Assign the sort order of this category, relative to a parent
 	 *
-	 * [--<field>=<value>]
+	 * [--metafield=<value>]
 	 * : Assign a meta key and meta value
+	 * 
+	 * ## ABOUT METAFIELD
 	 *
+	 * Available fields are arbitrary key=>value pairs, assigned as metadata 
+	 * to the new category.  You may list as many unique pairs as you like.
+	 * 
 	 * ## EXAMPLES
 	 *
-	 *     wp wc product category create
+	 *     wp wc product category create newcat
 	 *
-	 *     wp wc product category create --name=newcat --parent=50 --description="New Category Field" --order=2 --slug=new-cat
+	 *     wp wc product category create newcat --parent=50 --description="New Category Field" --order=2 --slug=new-cat
 	 *
 	 * @subcommand create
 	 * @since      2.6.0
@@ -321,25 +329,5 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 		} catch ( WC_CLI_Exception $e ) {
 			WP_CLI::error( $e->getMessage() );
 		}
-
-	}
-
-	protected function get_product_category_by_mixed( $term_identifier ) {
-
-		$term = false;
-
-		if ( is_int( $term_identifier ) ) {
-			$term = $this->get_product_category( $term_identifier );
-		}
-
-		if ( ! $term ) {
-			$term = $this->get_product_category_by_slug( $term_identifier );
-		}
-
-		if ( ! $term ) {
-			$term = $this->get_product_category_by_name( $term_identifier );
-		}
-
-		return $term;
 	}
 }
