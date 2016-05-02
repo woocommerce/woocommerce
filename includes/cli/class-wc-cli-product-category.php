@@ -128,18 +128,18 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 * [--slug=<string>]
 	 * : Assign a slug for the new tag
-	 * 
+	 *
 	 * [--order=<sortorder>]
 	 * : Assign the sort order of this category, relative to a parent
 	 *
 	 * [--metafield=<value>]
 	 * : Assign a meta key and meta value
-	 * 
+	 *
 	 * ## ABOUT METAFIELD
 	 *
-	 * Available fields are arbitrary key=>value pairs, assigned as metadata 
+	 * Available fields are arbitrary key=>value pairs, assigned as metadata
 	 * to the new category.  You may list as many unique pairs as you like.
-	 * 
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product category create newcat
@@ -152,7 +152,7 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	public function create( $args, $assoc_args ) {
 
 		try {
-			
+
 			$category_name = $args[0];
 
 			// Create the Product Category (term)
