@@ -27,10 +27,13 @@ jQuery(function( $ ) {
 			tax_status     = $wc_inline_data.find( '.tax_status' ).text(),
 			tax_class      = $wc_inline_data.find( '.tax_class' ).text(),
 			backorders     = $wc_inline_data.find( '.backorders' ).text();
+			
+		var formatted_regular_price = regular_price.replace('.', woocommerce_admin.mon_decimal_point),
+			formatted_sale_price	= sale_price.replace('.', woocommerce_admin.mon_decimal_point);
 
 		$( 'input[name="_sku"]', '.inline-edit-row' ).val( sku );
-		$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( regular_price );
-		$( 'input[name="_sale_price"]', '.inline-edit-row' ).val( sale_price );
+		$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( formatted_regular_price );
+		$( 'input[name="_sale_price"]', '.inline-edit-row' ).val( formatted_sale_price );
 		$( 'input[name="_weight"]', '.inline-edit-row' ).val( weight );
 		$( 'input[name="_length"]', '.inline-edit-row' ).val( length );
 		$( 'input[name="_width"]', '.inline-edit-row' ).val( width );
