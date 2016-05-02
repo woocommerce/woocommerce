@@ -152,7 +152,6 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	public function create( $args, $assoc_args ) {
 
 		try {
-
 			$category_name = $args[0];
 
 			// Create the Product Category (term)
