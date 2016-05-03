@@ -2006,7 +2006,7 @@ abstract class WC_Abstract_Order {
 		$args     = wp_parse_args( $args, $defaults );
 		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
-		wc_get_template( $template, array(
+		wc_get_template( $template, apply_filters( 'woocommerce_email_order_items_args', array(
 			'order'               => $this,
 			'items'               => $this->get_items(),
 			'show_download_links' => $this->is_download_permitted() && ! $args['sent_to_admin'],
@@ -2016,7 +2016,7 @@ abstract class WC_Abstract_Order {
 			'image_size'          => $args['image_size'],
 			'plain_text'          => $args['plain_text'],
 			'sent_to_admin'       => $args['sent_to_admin']
-		) );
+		) ) );
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
 	}
