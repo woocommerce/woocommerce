@@ -183,8 +183,22 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_allowed_countries() {
-		if ( get_option( 'woocommerce_allowed_countries' ) !== 'specific' ) {
+		if ( 'all' === get_option( 'woocommerce_allowed_countries' ) ) {
 			return $this->countries;
+		}
+
+		if( 'all_except' === get_option( 'woocommerce_allowed_countries' ) ) {
+			$except_countries = get_option( 'woocommerce_all_except_countries', array() );
+
+			if ( ! $except_countries ) {
+				return $this->countries;
+			} else {
+				$all_except_countries = $this->countries;
+				foreach( $except_countries as $country ) {
+					unset( $all_except_countries[ $country ] );
+				}
+				return apply_filters( 'woocommerce_countries_allowed_countries', $all_except_countries );
+			}
 		}
 
 		$countries = array();
@@ -205,11 +219,11 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_shipping_countries() {
-		if ( get_option( 'woocommerce_ship_to_countries' ) == '' ) {
+		if ( '' === get_option( 'woocommerce_ship_to_countries' ) ) {
 			return $this->get_allowed_countries();
 		}
 
-		if ( get_option( 'woocommerce_ship_to_countries' ) !== 'specific' ) {
+		if ( 'all' === get_option( 'woocommerce_ship_to_countries' ) ) {
 			return $this->countries;
 		}
 

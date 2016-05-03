@@ -1,12 +1,26 @@
 /* global woocommerce_settings_params */
 ( function( $ ) {
 
-	// Countries
-	$( 'select#woocommerce_allowed_countries, select#woocommerce_ship_to_countries' ).change( function() {
-		if ( $( this ).val() === 'specific' ) {
-			$( this ).parent().parent().next( 'tr' ).show();
+	// Sell Countries
+	$( 'select#woocommerce_allowed_countries' ).change( function() {
+		if ( 'specific' === $( this ).val() ) {
+			$( this ).closest('tr').next( 'tr' ).hide();
+			$( this ).closest('tr').next().next( 'tr' ).show();
+		} else if ( 'all_except' === $( this ).val() ) {
+			$( this ).closest('tr').next( 'tr' ).show();
+			$( this ).closest('tr').next().next( 'tr' ).hide();
 		} else {
-			$( this ).parent().parent().next( 'tr' ).hide();
+			$( this ).closest('tr').next( 'tr' ).hide();
+			$( this ).closest('tr').next().next( 'tr' ).hide();
+		}
+	}).change();
+
+	// Ship Countries
+	$( 'select#woocommerce_ship_to_countries' ).change( function() {
+		if ( 'specific' === $( this ).val() ) {
+			$( this ).closest('tr').next( 'tr' ).show();
+		} else {
+			$( this ).closest('tr').next( 'tr' ).hide();
 		}
 	}).change();
 
