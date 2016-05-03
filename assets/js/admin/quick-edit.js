@@ -1,4 +1,4 @@
-/*global ajaxurl, inlineEditPost, inlineEditL10n */
+/*global ajaxurl, inlineEditPost, inlineEditL10n, woocommerce_admin */
 jQuery(function( $ ) {
 	$( '#the-list' ).on( 'click', '.editinline', function() {
 
@@ -27,9 +27,9 @@ jQuery(function( $ ) {
 			tax_status     = $wc_inline_data.find( '.tax_status' ).text(),
 			tax_class      = $wc_inline_data.find( '.tax_class' ).text(),
 			backorders     = $wc_inline_data.find( '.backorders' ).text();
-			
-		var formatted_regular_price = regular_price.replace('.', woocommerce_admin.mon_decimal_point),
-			formatted_sale_price	= sale_price.replace('.', woocommerce_admin.mon_decimal_point);
+
+		var formatted_regular_price = regular_price.replace('.', woocommerce_admin.mon_decimal_point ),
+			formatted_sale_price	= sale_price.replace('.', woocommerce_admin.mon_decimal_point );
 
 		$( 'input[name="_sku"]', '.inline-edit-row' ).val( sku );
 		$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( formatted_regular_price );

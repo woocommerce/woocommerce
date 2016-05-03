@@ -161,7 +161,7 @@ class WC_Admin_Assets {
 
 		// Products
 		if ( in_array( $screen_id, array( 'edit-product' ) ) ) {
-			wp_register_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
+			wp_register_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), WC_VERSION );
 			wp_enqueue_script( 'woocommerce_quick-edit' );
 		}
 

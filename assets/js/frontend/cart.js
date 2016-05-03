@@ -64,25 +64,32 @@ jQuery( function( $ ) {
 		var $html = $.parseHTML( html_str );
 		var $new_form = $( 'table.shop_table.cart', $html ).closest( 'form' );
 
+		// Error message collection
+		var $error = $( '.woocommerce-error', $html );
+		var $message = $( '.woocommerce-message', $html );
+
+		// Remove errors
+		$( '.woocommerce-error, .woocommerce-message' ).remove();
+
 		if ( $new_form.length === 0 ) {
 			// No items to display now! Replace all cart content.
 			var $cart_html = $( '.cart-empty', $html ).closest( '.woocommerce' );
 			$( 'table.shop_table.cart' ).closest( '.woocommerce' ).replaceWith( $cart_html );
+
+			if ( $error.length > 0 ) {
+				show_notice( $error, $( '.cart-empty' ).closest( '.woocommerce' ) );
+			} else if ( $message.length > 0 ) {
+				show_notice( $message, $( '.cart-empty' ).closest( '.woocommerce' ) );
+			}
 		} else {
-			var $error = $( '.woocommerce-error', $html );
-			var $message = $( '.woocommerce-message', $html );
+			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
+			$( 'table.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
 
 			if ( $error.length > 0 ) {
 				show_notice( $error );
 			} else if ( $message.length > 0 ) {
 				show_notice( $message );
-			} else {
-				// No new message/error, just remove existing one.
-				$( '.woocommerce-error, .woocommerce-message' ).remove();
 			}
-
-			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
-			$( 'table.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
 		}
 	};
 
@@ -91,11 +98,12 @@ jQuery( function( $ ) {
 	 *
 	 * @param {Object} The Notice HTML Element in string or object form.
 	 */
-	var show_notice = function( html_element ) {
-		var $form = $( 'table.shop_table.cart' ).closest( 'form' );
-
+	var show_notice = function( html_element, $target ) {
+		if ( ! $target ) {
+			$target = $( 'table.shop_table.cart' ).closest( 'form' );
+		}
 		$( '.woocommerce-error, .woocommerce-message' ).remove();
-		$form.before( html_element );
+		$target.before( html_element );
 	};
 
 
