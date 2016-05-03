@@ -69,14 +69,14 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'min-width: 350px;',
 				'desc_tip' =>  true,
 				'options'  => array(
-					'all'        => __( 'Sell to all countries', 'woocommerce' ),
-					'all_except' => __( 'Sell to all countries except', 'woocommerce' ),
-					'specific'   => __( 'Sell to specific countries only', 'woocommerce' )
+					'all'        => __( 'Sell to All Countries', 'woocommerce' ),
+					'all_except' => __( 'Sell to All Countries, Except For&hellip;', 'woocommerce' ),
+					'specific'   => __( 'Sell to Specific Countries', 'woocommerce' )
 				)
 			),
 
 			array(
-				'title'   => __( 'Exclude specific countries', 'woocommerce' ),
+				'title'   => __( 'Sell to All Countries, Except For&hellip;', 'woocommerce' ),
 				'desc'    => '',
 				'id'      => 'woocommerce_all_except_countries',
 				'css'     => 'min-width: 350px;',
