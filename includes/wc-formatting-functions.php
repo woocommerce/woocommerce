@@ -166,12 +166,12 @@ function wc_round_tax_total( $tax ) {
 
 	// @codeCoverageIgnoreStart
 	if ( version_compare( phpversion(), '5.3', '<' ) ) {
-		$tax = round( $tax, $dp );
+		$rounded_tax = round( $tax, $dp );
 	} else {
 		// @codeCoverageIgnoreEnd
-		$tax = round( $tax, $dp, WC_TAX_ROUNDING_MODE );
+		$rounded_tax = round( $tax, $dp, WC_TAX_ROUNDING_MODE );
 	}
-	return $tax;
+	return apply_filters( 'wc_round_tax_total', $rounded_tax, $tax, $dp, WC_TAX_ROUNDING_MODE );
 }
 
 /**
