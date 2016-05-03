@@ -415,18 +415,20 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		// If we're managing stock at variation level, check stock levels
-		if ( true === $this->managing_stock() ) {
-			if ( $this->backorders_allowed() ) {
-				return true;
-			} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				return false;
-			} else {
-				return $this->stock_status === 'instock';
-			}
-		} else {
-			return $this->stock_status === 'instock';
+		$status = $this->stock_status === 'instock';
+
+		/**
+		 * Sanity check to ensure stock qty is not lower than 0 but still listed
+		 * instock.
+		 *
+		 * Check is not required for products on backorder since they can be
+		 * instock regardless of actual stock quantity.
+		 */
+		if ( true === $this->managing_stock() && ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$status = false;
 		}
+
+		return apply_filters( 'woocommerce_variation_is_in_stock', $status );
 	}
 
 	/**
@@ -542,47 +544,46 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string
 	 */
 	public function get_availability() {
-		$availability = $class = '';
+		// Default to in-stock
+		$availability = __( 'In stock', 'woocommerce' );
+		$class        = 'in-stock';
 
-		if ( $this->managing_stock() ) {
-			if ( $this->is_in_stock() && $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				switch ( get_option( 'woocommerce_stock_format' ) ) {
-					case 'no_amount' :
-						$availability = __( 'In stock', 'woocommerce' );
-					break;
-					case 'low_amount' :
-						if ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-							$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_stock_quantity() );
-
-							if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-								$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
-							}
-						} else {
-							$availability = __( 'In stock', 'woocommerce' );
-						}
-					break;
-					default :
-						$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_stock_quantity() );
-
-						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-							$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
-						}
-					break;
-				}
-				$class        = 'in-stock';
-			} elseif ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-				$availability = __( 'Available on backorder', 'woocommerce' );
-				$class        = 'available-on-backorder';
-			} elseif ( $this->backorders_allowed() ) {
-				$availability = __( 'In stock', 'woocommerce' );
-				$class        = 'in-stock';
-			} else {
-				$availability = __( 'Out of stock', 'woocommerce' );
-				$class        = 'out-of-stock';
-			}
-		} elseif ( ! $this->is_in_stock() ) {
+		// If out of stock, this takes priority over all other settings.
+		if ( ! $this->is_in_stock() ) {
 			$availability = __( 'Out of stock', 'woocommerce' );
 			$class        = 'out-of-stock';
+
+		// Any further we can assume status is set to in stock.
+		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
+			$availability = __( 'Available on backorder', 'woocommerce' );
+			$class        = 'available-on-backorder';
+
+		} elseif ( true === $this->managing_stock() ) {
+			switch ( get_option( 'woocommerce_stock_format' ) ) {
+				case 'no_amount' :
+					$availability = __( 'In stock', 'woocommerce' );
+				break;
+				case 'low_amount' :
+					if ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+						$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_stock_quantity() );
+
+						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+							$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
+						}
+					} else {
+						$availability = __( 'In stock', 'woocommerce' );
+					}
+				break;
+				default :
+					$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_stock_quantity() );
+
+					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+						$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
+					}
+				break;
+			}
+		} elseif ( 'parent' === $this->managing_stock() ) {
+			return parent::get_availability();
 		}
 
 		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );
