@@ -193,4 +193,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Upgrade Notice ==
 
 = 2.6.0 =
-2.6.0 is a major update so it is important that you make backups, and ensure themes and extensions are 2.6 compatible before upgrading. Developers should catch up with [the development blog](https://woocommerce.wordpress.com/) to see what has been happening in core.
+2.6 is a major update so it is important that you make backups, and ensure themes and extensions are 2.6 compatible before upgrading. Developers should catch up with [the development blog](https://woocommerce.wordpress.com/) to see what has been happening in core.
+
+Note: 2.6 includes Shipping Zone functionality. Please ensure shipping method extensions in particular (e.g. Table Rate Shipping) support 2.6 **before** updating.
