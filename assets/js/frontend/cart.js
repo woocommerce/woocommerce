@@ -213,11 +213,16 @@ jQuery( function( $ ) {
 		init: function() {
 			this.update_cart_totals = this.update_cart_totals.bind( this );
 			this.cart_submit = this.cart_submit.bind( this );
+			this.submit_click = this.submit_click.bind( this );
 			this.apply_coupon = this.apply_coupon.bind( this );
 			this.remove_coupon_clicked = this.remove_coupon_clicked.bind( this );
 			this.quantity_update = this.quantity_update.bind( this );
 			this.item_remove_clicked = this.item_remove_clicked.bind( this );
 
+			$( document ).on(
+				'click',
+				'div.woocommerce > form input[type=submit]',
+				this.submit_click );
 			$( document ).on(
 				'submit',
 				'div.woocommerce > form',
@@ -239,7 +244,7 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * After and input is changed, enabled the update cart button.
+		 * After an input is changed, enable the update cart button.
 		 */
 		input_changed: function() {
 			$( 'div.woocommerce > form input[name="update_cart"]' ).prop( 'disabled', false );
@@ -270,6 +275,7 @@ jQuery( function( $ ) {
 
 			var $form = $( evt.target );
 			var $submit = $( document.activeElement );
+			var $clicked = $( 'input[type=submit][clicked=true]' );
 
 			if ( 0 === $form.find( 'table.shop_table.cart' ).length ) {
 				return false;
@@ -278,12 +284,22 @@ jQuery( function( $ ) {
 				return false;
 			}
 
-			if ( $submit.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+			if ( $clicked.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
 				this.quantity_update( $form );
 
-			} else if ( $submit.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+			} else if ( $clicked.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
 				this.apply_coupon( $form );
 			}
+		},
+
+		/**
+		 * Special handling to identify which submit button was clicked.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		submit_click: function( evt ) {
+			$( 'input[type=submit]', $( evt.target ).parents( 'form' ) ).removeAttr( 'clicked' );
+			$( evt.target ).attr( 'clicked', 'true' );
 		},
 
 		/**
