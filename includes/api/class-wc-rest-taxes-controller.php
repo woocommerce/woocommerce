@@ -564,32 +564,22 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			if ( ! empty( $item['id'] ) ) {
 				$_item = new WP_REST_Request( 'PUT' );
 				$_item->set_body_params( $item );
-				$edit  = $this->update_item( $_item );
-
-				if ( is_wp_error( $edit ) ) {
-					$response[] = array(
-						'id'    => $item['id'],
-						'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message(), 'data' => $edit->get_error_data() ),
-					);
-				} else {
-					$response[] = $wp_rest_server->response_to_data( $edit, '' );
-				}
-			}
+				$_response = $this->update_item( $_item );
 
 			// Item don't exists.
-			else {
+			} else {
 				$_item  = new WP_REST_Request( 'POST' );
 				$_item->set_body_params( $item );
-				$create = $this->create_item( $_item );
+				$_response = $this->create_item( $_item );
+			}
 
-				if ( is_wp_error( $create ) ) {
-					$response[] = array(
-						'id'    => 0,
-						'error' => array( 'code' => $create->get_error_code(), 'message' => $create->get_error_message(), 'data' => $create->get_error_data( 'status' ) ),
-					);
-				} else {
-					$response[] = $wp_rest_server->response_to_data( $create, '' );
-				}
+			if ( is_wp_error( $_response ) ) {
+				$response[] = array(
+					'id'    => $item['id'],
+					'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $_response->get_error_data() ),
+				);
+			} else {
+				$response[] = $wp_rest_server->response_to_data( $_response, '' );
 			}
 		}
 
