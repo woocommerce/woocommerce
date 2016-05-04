@@ -84,6 +84,16 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/bulk', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'bulk_items' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
 	}
 
 	/**
@@ -526,6 +536,64 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		);
 
 		return $links;
+	}
+
+	/**
+	 * Bulk update or create items.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return array Of WP_Error or WP_REST_Response.
+	 */
+	public function bulk_items( $request ) {
+		/** @var WP_REST_Server $wp_rest_server */
+		global $wp_rest_server;
+
+		// Get the request params.
+		$items = $request->get_params();
+
+		// Limit bulk operation.
+		$limit = apply_filters( 'woocommerce_rest_bulk_items_limit', 100, 'taxes' );
+		if ( count( $items ) > $limit ) {
+			return new WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
+		}
+
+		$response = array();
+
+		foreach ( $items as $item ) {
+			// Item exists.
+			if ( ! empty( $item['id'] ) ) {
+				$_item = new WP_REST_Request( 'PUT' );
+				$_item->set_body_params( $item );
+				$edit  = $this->update_item( $_item );
+
+				if ( is_wp_error( $edit ) ) {
+					$response[] = array(
+						'id'    => $item['id'],
+						'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message(), 'data' => $edit->get_error_data() ),
+					);
+				} else {
+					$response[] = $wp_rest_server->response_to_data( $edit, '' );
+				}
+			}
+
+			// Item don't exists.
+			else {
+				$_item  = new WP_REST_Request( 'POST' );
+				$_item->set_body_params( $item );
+				$create = $this->create_item( $_item );
+
+				if ( is_wp_error( $create ) ) {
+					$response[] = array(
+						'id'    => 0,
+						'error' => array( 'code' => $create->get_error_code(), 'message' => $create->get_error_message(), 'data' => $create->get_error_data( 'status' ) ),
+					);
+				} else {
+					$response[] = $wp_rest_server->response_to_data( $create, '' );
+				}
+			}
+		}
+
+		return $response;
 	}
 
 	/**
