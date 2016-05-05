@@ -265,11 +265,11 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 *
 	 * @todo Replace with CRUD in 2.7.0
 	 * @param WP_REST_Request $request Full details about the request.
+	 * @param stdClass|null $current Existing tax object.
 	 * @return stdClass
 	 */
-	protected function create_or_update_tax( $request ) {
+	protected function create_or_update_tax( $request, $current = null ) {
 		$id          = absint( isset( $request['id'] ) ? $request['id'] : 0 );
-		$current_tax = $id ? WC_Tax::_get_tax_rate( $id, OBJECT ) : false;
 		$data        = array();
 		$fields      = array(
 			'tax_rate_country',
@@ -293,7 +293,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			}
 
 			// Test new data against current data.
-			if ( $current_tax && $current_tax->$field === $request[ $key ] ) {
+			if ( $current && $current->$field === $request[ $key ] ) {
 				continue;
 			}
 
@@ -391,7 +391,13 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$tax = $this->create_or_update_tax( $request );
+		$id      = (int) $request['id'];
+		$current = WC_Tax::_get_tax_rate( $id, OBJECT );
+		if ( empty( $id ) || empty( $current ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$tax = $this->create_or_update_tax( $request, $current );
 
 		$this->update_additional_fields_for_object( $tax, $request );
 
