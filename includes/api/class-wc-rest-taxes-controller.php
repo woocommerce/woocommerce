@@ -282,14 +282,17 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			'tax_rate_class',
 		);
 
-		foreach ( $fields as $key ) {
+		foreach ( $fields as $field ) {
+			// Keys via API differ from the stored names returned by _get_tax_rate
+			$key = 'tax_rate' === $field ? 'rate' : str_replace( 'tax_rate_', '', $field );
+
 			// Remove data that was not posted.
 			if ( ! isset( $request[ $key ] ) ) {
 				continue;
 			}
 
 			// Test new data against current data.
-			if ( $current_tax && $current_tax->$key === $request[ $key ] ) {
+			if ( $current_tax && $current_tax->$field === $request[ $key ] ) {
 				continue;
 			}
 
@@ -299,13 +302,13 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 				case 'tax_rate_compound' :
 				case 'tax_rate_shipping' :
 				case 'tax_rate_order' :
-					$data[ $key ] = absint( $request[ $key ] );
+					$data[ $field ] = absint( $request[ $key ] );
 					break;
 				case 'tax_rate_class' :
-					$data[ $key ] = 'standard' !== $request['tax_rate_class'] ? $request['tax_rate_class'] : '';
+					$data[ $field ] = 'standard' !== $request['tax_rate_class'] ? $request['tax_rate_class'] : '';
 					break;
 				default :
-					$data[ $key ] = wc_clean( $request[ $key ] );
+					$data[ $field ] = wc_clean( $request[ $key ] );
 					break;
 			}
 		}
