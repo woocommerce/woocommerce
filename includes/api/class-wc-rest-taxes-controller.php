@@ -85,11 +85,11 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/bulk', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/update_items', array(
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'bulk_items' ),
-				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'callback'            => array( $this, 'update_items' ),
+				'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -261,6 +261,73 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Take tax data from the request and return the updated or newly created rate.
+	 * @todo Replace with CRUD in 2.7.0
+	 * @param  array $request
+	 * @return object
+	 */
+	protected function create_or_update_tax( $request ) {
+		$id          = absint( isset( $request['id'] ) ? $request['id'] : 0 );
+		$current_tax = $id ? WC_Tax::_get_tax_rate( $id, OBJECT ) : false;
+		$data        = array();
+		$fields        = array(
+			'tax_rate_country',
+			'tax_rate_state',
+			'tax_rate',
+			'tax_rate_name',
+			'tax_rate_priority',
+			'tax_rate_compound',
+			'tax_rate_shipping',
+			'tax_rate_order',
+			'tax_rate_class',
+		);
+
+		foreach ( $fields as $key ) {
+			// Remove data that was not posted.
+			if ( ! isset( $request[ $key ] ) ) {
+				continue;
+			}
+
+			// Test new data against current data.
+			if ( $current_tax && $current_tax->$key === $request[ $key ] ) {
+				continue;
+			}
+
+			// Add to data array
+			switch ( $key ) {
+				case 'tax_rate_priority' :
+				case 'tax_rate_compound' :
+				case 'tax_rate_shipping' :
+				case 'tax_rate_order' :
+					$data[ $key ] = absint( $request[ $key ] );
+					break;
+				case 'tax_rate_class' :
+					$data[ $key ] = 'standard' !== $request['tax_rate_class'] ? $request['tax_rate_class'] : '';
+					break;
+				default :
+					$data[ $key ] = wc_clean( $request[ $key ] );
+					break;
+			}
+		}
+
+		if ( $id ) {
+			WC_Tax::_update_tax_rate( $id, $data );
+		} else {
+			$id = WC_Tax::_insert_tax_rate( $data );
+		}
+
+		// Add locales.
+		if ( ! empty( $request['postcode'] ) ) {
+			WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $request['postcode'] ) );
+		}
+		if ( ! empty( $request['city'] ) ) {
+			WC_Tax::_update_tax_rate_cities( $id, wc_clean( $request['city'] ) );
+		}
+
+		return WC_Tax::_get_tax_rate( $id, OBJECT );
+	}
+
+	/**
 	 * Create a single tax.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -271,30 +338,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_tax_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$data = array(
-			'tax_rate_country'  => $request['country'],
-			'tax_rate_state'    => $request['state'],
-			'tax_rate'          => $request['rate'],
-			'tax_rate_name'     => $request['name'],
-			'tax_rate_priority' => (int) $request['priority'],
-			'tax_rate_compound' => (int) $request['compound'],
-			'tax_rate_shipping' => (int) $request['shipping'],
-			'tax_rate_order'    => (int) $request['order'],
-			'tax_rate_class'    => 'standard' !== $request['class'] ? $request['class'] : '',
-		);
-
-		// Create tax rate.
-		$id = WC_Tax::_insert_tax_rate( $data );
-
-		// Add locales.
-		if ( ! empty( $request['postcode'] ) ) {
-			WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $request['postcode'] ) );
-		}
-		if ( ! empty( $request['city'] ) ) {
-			WC_Tax::_update_tax_rate_cities( $id, wc_clean( $request['city'] ) );
-		}
-
-		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
+		$tax = $this->create_or_update_tax( $request );
 
 		$this->update_additional_fields_for_object( $tax, $request );
 
@@ -343,61 +387,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$id          = (int) $request['id'];
-		$current_tax = WC_Tax::_get_tax_rate( $id, OBJECT );
-
-		if ( empty( $id ) || empty( $current_tax ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		$data   = array();
-		$fields = array(
-			'tax_rate_country',
-			'tax_rate_state',
-			'tax_rate',
-			'tax_rate_name',
-			'tax_rate_priority',
-			'tax_rate_compound',
-			'tax_rate_shipping',
-			'tax_rate_order',
-			'tax_rate_class'
-		);
-
-		foreach ( $fields as $field ) {
-			$key = 'tax_rate' === $field ? 'rate' : str_replace( 'tax_rate_', '', $field );
-
-			if ( ! isset( $request[ $key ] ) ) {
-				continue;
-			}
-
-			$value = $request[ $key ];
-
-			// Fix compund and shipping values.
-			if ( in_array( $key, array( 'compound', 'shipping' ) ) ) {
-				$value = (int) $request[ $key ];
-			}
-
-			// Test new data against current data.
-			if ( $current_tax->$field === $value ) {
-				continue;
-			}
-
-			$data[ $field ] = $request[ $key ];
-		}
-
-		// Update tax rate.
-		WC_Tax::_update_tax_rate( $id, $data );
-
-		// Update locales.
-		if ( ! isset( $request['postcode'] ) ) {
-			WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $request['postcode'] ) );
-		}
-
-		if ( ! isset( $request['city'] ) ) {
-			WC_Tax::_update_tax_rate_cities( $id, wc_clean( $request['city'] ) );
-		}
-
-		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
+		$tax = $this->create_or_update_tax( $request );
 
 		$this->update_additional_fields_for_object( $tax, $request );
 
@@ -544,7 +534,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
-	public function bulk_items( $request ) {
+	public function update_items( $request ) {
 		/** @var WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 
@@ -566,7 +556,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 				$_item->set_body_params( $item );
 				$_response = $this->update_item( $_item );
 
-			// Item don't exists.
+			// Item does not exist.
 			} else {
 				$_item  = new WP_REST_Request( 'POST' );
 				$_item->set_body_params( $item );
