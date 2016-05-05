@@ -539,7 +539,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		global $wp_rest_server;
 
 		// Get the request params.
-		$items = $request->get_params();
+		$items = array_filter( $request->get_params() );
 
 		// Limit bulk operation.
 		$limit = apply_filters( 'woocommerce_rest_bulk_items_limit', 100, 'taxes' );
