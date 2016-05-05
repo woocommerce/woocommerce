@@ -359,7 +359,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		$response = $this->prepare_item_for_response( $tax, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $id ) ) );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $tax->tax_rate_id ) ) );
 
 		return $response;
 	}
