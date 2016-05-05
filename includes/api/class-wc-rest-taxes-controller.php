@@ -262,15 +262,16 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 
 	/**
 	 * Take tax data from the request and return the updated or newly created rate.
+	 *
 	 * @todo Replace with CRUD in 2.7.0
-	 * @param  array $request
-	 * @return object
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return stdClass
 	 */
 	protected function create_or_update_tax( $request ) {
 		$id          = absint( isset( $request['id'] ) ? $request['id'] : 0 );
 		$current_tax = $id ? WC_Tax::_get_tax_rate( $id, OBJECT ) : false;
 		$data        = array();
-		$fields        = array(
+		$fields      = array(
 			'tax_rate_country',
 			'tax_rate_state',
 			'tax_rate',
@@ -283,7 +284,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 		);
 
 		foreach ( $fields as $field ) {
-			// Keys via API differ from the stored names returned by _get_tax_rate
+			// Keys via API differ from the stored names returned by _get_tax_rate.
 			$key = 'tax_rate' === $field ? 'rate' : str_replace( 'tax_rate_', '', $field );
 
 			// Remove data that was not posted.
@@ -296,7 +297,7 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 				continue;
 			}
 
-			// Add to data array
+			// Add to data array.
 			switch ( $key ) {
 				case 'tax_rate_priority' :
 				case 'tax_rate_compound' :
@@ -370,14 +371,14 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$id       = (int) $request['id'];
+		$id      = (int) $request['id'];
 		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax_obj ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$tax = $this->prepare_item_for_response( $tax_obj, $request );
+		$tax      = $this->prepare_item_for_response( $tax_obj, $request );
 		$response = rest_ensure_response( $tax );
 
 		return $response;
