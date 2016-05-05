@@ -190,7 +190,7 @@
 	content: $glyph;
 }
 
-@mixin icon_dashicons( $glyph: "\e001" ) {
+@mixin icon_dashicons( $glyph: "\f333" ) {
 	font-family: 'Dashicons';
 	speak: none;
 	font-weight: normal;

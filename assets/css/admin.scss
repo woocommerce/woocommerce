@@ -1313,24 +1313,20 @@ ul.wc_coupon_list_block {
 			td.line_tax {
 				.delete-order-tax {
 					@include ir();
-					font-size: 12px;
-					visibility: hidden;
 					float: right;
-					margin: 2px -16px 0 0;
+					font-size: 14px;
+					visibility: hidden;
+					margin: 3px -18px 0 0;
 
 					&:before {
-						@include icon( "\e013" );
-						color: white;
-						background-color: #000;
-						-webkit-border-radius: 100%;
-						border-radius: 100%;
-						border: 1px solid #000;
-						box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+						@include icon_dashicons( "\f153" );
+						color: #999;
 					}
 
-					&:hover:before {
-						border-color: $red;
-						background-color: $red;
+					&:hover {
+						&:before {
+							color: $red;
+						}
 					}
 				}
 
@@ -2942,18 +2938,17 @@ img.help_tip {
 
 						a.delete {
 							@include ir();
-							font-size: 1.4em;
+							font-size: 1.2em;
 
 							&:before {
-								@include icon( "\e013" );
-								color: white;
-								background-color: #000;
-								@include border-radius(100%);
-								box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+								@include icon_dashicons( "\f153" );
+								color: #999;
 							}
 
-							&:hover before {
-								background-color: $red;
+							&:hover {
+								&:before {
+									color: $red;
+								}
 							}
 						}
 					}
@@ -3317,10 +3312,10 @@ img.help_tip {
 
 				.delete {
 					@include ir();
+					font-size: 1.2em;
 
 					&:before {
-						@include icon;
-						content: "\e013";
+						@include icon_dashicons( "\f153" );
 						color: #999;
 					}
 
