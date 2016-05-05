@@ -4683,9 +4683,10 @@ table.bar_chart {
 		}
 
 		.short,
-		input[type=email].short,
-		input[type=number].short,
-		input[type=text].short,
+		input[type="text"].short,
+		input[type="email"].short,
+		input[type="number"].short,
+		input[type="password"].short,
 		.dimensions_field .wrap {
 			width: 80%;
 		}
