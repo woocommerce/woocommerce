@@ -392,12 +392,13 @@ class WC_REST_Taxes_Controller extends WP_REST_Controller {
 	 */
 	public function update_item( $request ) {
 		$id      = (int) $request['id'];
-		$current = WC_Tax::_get_tax_rate( $id, OBJECT );
-		if ( empty( $id ) || empty( $current ) ) {
+		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
+
+		if ( empty( $id ) || empty( $tax_obj ) ) {
 			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$tax = $this->create_or_update_tax( $request, $current );
+		$tax = $this->create_or_update_tax( $request, $tax_obj );
 
 		$this->update_additional_fields_for_object( $tax, $request );
 
