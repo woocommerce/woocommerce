@@ -557,7 +557,7 @@ class WC_AJAX {
 			'name'         => $taxonomy,
 			'value'        => '',
 			'is_visible'   => apply_filters( 'woocommerce_attribute_default_visibility', 1 ),
-			'is_variation' => 0,
+			'is_variation' => apply_filters( 'woocommerce_attribute_default_is_variation', 0 ),
 			'is_taxonomy'  => $taxonomy ? 1 : 0
 		);
 
