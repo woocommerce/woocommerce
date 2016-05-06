@@ -3291,6 +3291,11 @@ img.help_tip {
 
 			th {
 				padding: 7px 0 7px 7px !important;
+
+				.woocommerce-help-tip {
+					font-size: 1.1em;
+					margin-left: 0;
+				}
 			}
 
 			td {
@@ -3332,17 +3337,14 @@ img.help_tip {
 				}
 			}
 
-			th.sort {
-				width: 17px;
-				padding: 0;
-			}
-
 			td.sort {
 				padding: 0 8px;
 				cursor: move;
+				width: 17px;
 				background: #f9f9f9;
 				text-align: center;
 				vertical-align: middle;
+				padding-right: 7px !important;
 
 				&:before {
 					content: "\f333";
