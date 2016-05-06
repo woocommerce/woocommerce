@@ -2938,7 +2938,7 @@ img.help_tip {
 
 						a.delete {
 							@include ir();
-							font-size: 1.2em;
+							font-size: 1.4em;
 
 							&:before {
 								@include icon_dashicons( "\f153" );
