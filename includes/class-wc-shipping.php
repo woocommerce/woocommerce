@@ -239,7 +239,7 @@ class WC_Shipping {
 
 		// Calculate costs for passed packages
 		foreach ( $packages as $package_key => $package ) {
-			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package );
+			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package, $package_key );
 		}
 
 		/**
@@ -313,9 +313,10 @@ class WC_Shipping {
 	 * Calculates each shipping methods cost. Rates are stored in the session based on the package hash to avoid re-calculation every page load.
 	 *
 	 * @param array $package cart items
+	 * @param int   $package_key Index of the package being calculated. Used to cache multiple package rates.
 	 * @return array
 	 */
-	public function calculate_shipping_for_package( $package = array() ) {
+	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
 		if ( ! $this->enabled || ! $package ) {
 			return false;
 		}
@@ -323,7 +324,8 @@ class WC_Shipping {
 		// Check if we need to recalculate shipping for this package
 		$package_hash   = 'wc_ship_' . md5( json_encode( $package ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
 		$status_options = get_option( 'woocommerce_status_options', array() );
-		$stored_rates   = WC()->session->get( 'shipping_for_package' );
+		$session_key    = 'shipping_for_package_' . $package_key;
+		$stored_rates   = WC()->session->get( $session_key );
 
 		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || ! empty( $status_options['shipping_debug_mode'] ) ) {
 			// Calculate shipping method rates
@@ -340,7 +342,7 @@ class WC_Shipping {
 			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
 
 			// Store in session to avoid recalculation
-			WC()->session->set( 'shipping_for_package', array(
+			WC()->session->set( $session_key, array(
 				'package_hash' => $package_hash,
 				'rates'        => $package['rates']
 			) );
