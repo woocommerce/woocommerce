@@ -334,6 +334,7 @@ jQuery( function( $ ) {
 				dataType: 'html',
 				success: function( response ) {
 					show_notice( response );
+					$( document.body ).trigger( 'applied_coupon' );
 				},
 				complete: function() {
 					unblock( $form );
