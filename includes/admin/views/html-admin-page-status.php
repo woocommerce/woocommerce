@@ -35,8 +35,8 @@ $tabs        = apply_filters( 'woocommerce_admin_status_tabs', $tabs );
 				WC_Admin_Status::status_logs();
 			break;
 			default :
-				if ( array_key_exists( $current_tab, $tabs ) && has_action( 'woocommerce_admin_status_' . $current_tab ) ) {
-					do_action( 'woocommerce_admin_status_' . $current_tab );
+				if ( array_key_exists( $current_tab, $tabs ) && has_action( 'woocommerce_admin_status_content_' . $current_tab ) ) {
+					do_action( 'woocommerce_admin_status_content_' . $current_tab );
 				} else {
 					WC_Admin_Status::status_report();
 				}
