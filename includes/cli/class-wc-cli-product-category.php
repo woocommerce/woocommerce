@@ -436,4 +436,5 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 				sprintf( __( 'Invalid product category ID "%s"', 'woocommerce' ), $term_id ) );
 		}
 	}
+	
 }
