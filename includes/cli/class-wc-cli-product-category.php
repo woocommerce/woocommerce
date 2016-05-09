@@ -400,7 +400,16 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 			'thumbnail_id' => 0,
 		);
 	}
-	
+
+	/**
+	 * Ensure that a given term did not error our during loading our processing.  Throws exception if error
+	 * is found.
+	 * 
+	 * @pre  The $term must be an associative array to utilize this method.
+	 *
+	 * @param array $term
+	 * @throws WC_CLI_Exception
+	 */
 	protected function assert_no_wp_error( $term ) {
 
 		// Validate the Product Category (term)
@@ -409,7 +418,13 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 			throw new WC_CLI_Exception( $error[0], key( $error ) );
 		}
 	}
-	
+
+	/**
+	 * Ensure that a the given term_id is associated with an existing term.  Throws an error if not found.
+	 * 
+	 * @param int $term_id
+	 * @throws WC_CLI_Exception
+	 */
 	protected function assert_term_exists( $term_id ) {
 		
 		// Load the category (taxonomy term)
