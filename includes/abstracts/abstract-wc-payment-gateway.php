@@ -125,7 +125,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			return $this->tokens;
 		}
 
-		if ( is_user_logged_in() && $this->supports( 'tokenization' ) && is_checkout() ) {
+		if ( is_user_logged_in() && $this->supports( 'tokenization' ) ) {
 			$this->tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id(), $this->id );
 		}
 
