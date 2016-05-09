@@ -370,6 +370,7 @@ jQuery( function( $ ) {
 				dataType: 'html',
 				success: function( response ) {
 					show_notice( response );
+					$( document.body ).trigger( 'removed_coupon' );
 					unblock( $tr.parents( 'table' ) );
 				},
 				complete: function() {
