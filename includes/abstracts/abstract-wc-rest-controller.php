@@ -94,7 +94,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				$_response = $this->create_item( $_item );
 
 				if ( is_wp_error( $_response ) ) {
-					$response[] = array(
+					$response['create'][] = array(
 						'id'    => 0,
 						'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $_response->get_error_data() ),
 					);
@@ -111,7 +111,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				$_response = $this->update_item( $_item );
 
 				if ( is_wp_error( $_response ) ) {
-					$response[] = array(
+					$response['update'][] = array(
 						'id'    => $item['id'],
 						'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $_response->get_error_data() ),
 					);
@@ -128,7 +128,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				$_response = $this->delete_item( $_item );
 
 				if ( is_wp_error( $_response ) ) {
-					$response[] = array(
+					$response['delete'][] = array(
 						'id'    => $id,
 						'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $_response->get_error_data() ),
 					);
