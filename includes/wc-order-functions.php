@@ -604,7 +604,12 @@ function wc_delete_order_item( $item_id ) {
  * @return bool
  */
 function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
-	return update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value );
+	if ( update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value ) ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
+		wp_cache_delete( $cache_key, 'orders' );
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -618,7 +623,12 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
  * @return bool
  */
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
-	return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
+	if ( add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique ) ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
+		wp_cache_delete( $cache_key, 'orders' );
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -632,7 +642,12 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
  * @return bool
  */
 function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
-	return delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all );
+	if ( delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all ) ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
+		wp_cache_delete( $cache_key, 'orders' );
+		return true;
+	}
+	return false;
 }
 
 /**
