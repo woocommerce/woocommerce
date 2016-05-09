@@ -379,6 +379,7 @@ class WC_API {
 		}
 
 		// Abstract controllers.
+		include_once( 'abstracts/abstract-wc-rest-controller.php' );
 		include_once( 'abstracts/abstract-wc-rest-posts-controller.php' );
 		include_once( 'abstracts/abstract-wc-rest-terms-controller.php' );
 
