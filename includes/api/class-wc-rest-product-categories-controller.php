@@ -46,7 +46,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 	/**
 	 * Prepare a single product category output for response.
 	 *
-	 * @param obj $item Term object.
+	 * @param WP_Term $item Term object.
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response $response
 	 */
@@ -60,6 +60,9 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 			$image = wp_get_attachment_url( $image_id );
 		}
 
+		// Get category order
+		$menu_order = get_woocommerce_term_meta( $item->term_id, 'order' );
+
 		$data = array(
 			'id'          => (int) $item->term_id,
 			'name'        => $item->name,
@@ -68,6 +71,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 			'description' => $item->description,
 			'display'     => $display_type ? $display_type : 'default',
 			'image'       => $image ? esc_url( $image ) : '',
+			'menu_order'  => (int) $menu_order,
 			'count'       => (int) $item->count,
 		);
 
@@ -102,6 +106,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 		$id = (int) $term->term_id;
 
 		update_woocommerce_term_meta( $id, 'display_type', $request['display'] );
+		update_woocommerce_term_meta( $id, 'order', $request['menu_order'] );
 
 		if ( ! empty( $request['image'] ) ) {
 			$upload = wc_rest_upload_image_from_url( esc_url_raw( $request['image'] ) );
@@ -178,6 +183,11 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 					'description' => __( 'Image URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'menu_order' => array(
+					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
+					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'count' => array(

@@ -39,16 +39,21 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 	/**
 	 * Prepare a single product attribute term output for response.
 	 *
-	 * @param obj $item Term object.
+	 * @param WP_Term $item Term object.
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
+
+		// Get term order
+		$menu_order = get_woocommerce_term_meta( $item->term_id, 'order_' . $this->taxonomy );
+
 		$data = array(
-			'id'    => (int) $item->term_id,
-			'name'  => $item->name,
-			'slug'  => $item->slug,
-			'count' => (int) $item->count,
+			'id'         => (int) $item->term_id,
+			'name'       => $item->name,
+			'slug'       => $item->slug,
+			'menu_order' => (int) $menu_order,
+			'count'      => (int) $item->count,
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -69,6 +74,21 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 		 * @param WP_REST_Request   $request   Request used to generate the response.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
+	}
+
+	/**
+	 * Update term meta fields.
+	 *
+	 * @param WP_Term $term
+	 * @param WP_REST_Request $request
+	 * @return bool|WP_Error
+	 */
+	protected function update_term_meta_fields( $term, $request ) {
+		$id = (int) $term->term_id;
+
+		update_woocommerce_term_meta( $id, 'order_' . $this->taxonomy, $request['menu_order'] );
+
+		return true;
 	}
 
 	/**
@@ -103,6 +123,11 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
+				),
+				'menu_order' => array(
+					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit', 'woocommerce' ),
 				),
 				'count' => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
