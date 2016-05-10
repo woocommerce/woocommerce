@@ -217,7 +217,7 @@ class WC_Admin_Attributes {
 
 		$attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
 		
-		do_action( 'woocommerce_before_attribute_delete', $attribute_id, $attribute_name );
+		do_action( 'woocommerce_before_attribute_delete', $attribute_name );
 		
 		if ( $attribute_name && $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" ) ) {
 
