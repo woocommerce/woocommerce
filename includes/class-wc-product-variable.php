@@ -119,20 +119,6 @@ class WC_Product_Variable extends WC_Product {
 			);
 
 			if ( $visible_only ) {
-				// Hide variations with no prices if this is true.
-				if ( apply_filters( 'woocommerce_hide_invisible_variations', false, $this->id, $variation ) ) {
-					$args['meta_query'] = array(
-						'relation' => 'AND',
-						// Price is required
-						array(
-							'key'     => '_price',
-							'value'   => '',
-							'compare' => '!=',
-						)
-					);
-				}
-
-				// Must be in stock?
 				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 					$args['meta_query'][] = array(
 						'key'     => '_stock_status',
