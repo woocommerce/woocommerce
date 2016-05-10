@@ -44,8 +44,7 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-
-		// Get term order
+		// Get term order.
 		$menu_order = get_woocommerce_term_meta( $item->term_id, 'order_' . $this->taxonomy );
 
 		$data = array(
@@ -127,12 +126,12 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 				'menu_order' => array(
 					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'count' => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 			),

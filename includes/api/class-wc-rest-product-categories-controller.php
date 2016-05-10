@@ -60,7 +60,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 			$image = wp_get_attachment_url( $image_id );
 		}
 
-		// Get category order
+		// Get category order.
 		$menu_order = get_woocommerce_term_meta( $item->term_id, 'order' );
 
 		$data = array(
@@ -193,7 +193,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 				'count' => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 			),
