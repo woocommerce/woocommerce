@@ -307,6 +307,10 @@ class WC_API_Products extends WC_API_Resource {
 				'menu_order'   => isset( $data['menu_order'] ) ? intval( $data['menu_order'] ) : 0,
 			);
 
+			if ( ! empty( $data['name'] ) ) {
+				array_merge( $new_product, array( 'post_name' => sanitize_title( $data['name'] ) ) );
+			}
+
 			// Attempts to create the new product.
 			$id = wp_insert_post( $new_product, true );
 
