@@ -30,8 +30,8 @@ class WC_REST_Authentication {
 	 * @return int|false
 	 */
 	public function authenticate( $user_id ) {
-		// Do not authenticate twice!
-		if ( ! empty( $user_id ) ) {
+		// Do not authenticate twice and check if is a request to our endpoint in the WP REST API.
+		if ( ! empty( $user_id ) || isset( $_SERVER['REQUEST_URI'] ) && false === strpos( $_SERVER['REQUEST_URI'], 'wp-json/wc' ) ) {
 			return $user_id;
 		}
 
