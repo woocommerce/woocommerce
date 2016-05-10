@@ -3208,8 +3208,12 @@ class WC_AJAX {
 		$changes = $_POST['changes'];
 
 		foreach ( $changes as $instance_id => $data ) {
+			$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );
+
 			if ( isset( $data['deleted'] ) ) {
-				$wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) );
+				if ( $wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) ) ) {
+					do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method_id, $zone_id );
+				}
 				continue;
 			}
 
@@ -3223,7 +3227,10 @@ class WC_AJAX {
 			}
 
 			if ( isset( $method_data['enabled'] ) ) {
-				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => absint( 'yes' === $method_data['enabled'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
+				$is_enabled = absint( 'yes' === $method_data['enabled'] );
+				if ( $wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => $is_enabled ), array( 'instance_id' => absint( $instance_id ) ) ) ) {
+					do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method_id, $zone_id, $is_enabled );
+				}
 			}
 		}
 
