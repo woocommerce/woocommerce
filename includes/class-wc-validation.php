@@ -68,7 +68,7 @@ class WC_Validation {
 				$valid = self::is_GB_postcode( $postcode );
 				break;
 			case 'JP' :
-				$valid = (bool) preg_match( '/^([0-9]3)([-])([0-9]{4})$/', $postcode );
+				$valid = (bool) preg_match( '/^([0-9]{3})([-])([0-9]{4})$/', $postcode );
 				break;
 			case 'PT' :
 				$valid = (bool) preg_match( '/^([0-9]{4})([-])([0-9]{3})$/', $postcode );
