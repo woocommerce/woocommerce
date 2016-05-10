@@ -364,9 +364,6 @@ class WC_API {
 	 */
 	private function rest_api_includes() {
 		// Exception handler.
-		if ( ! class_exists( 'WC_API_Exception' ) ) {
-			include_once( 'api/legacy/v3/class-wc-api-exception.php' );
-		}
 		include_once( 'api/class-wc-rest-exception.php' );
 
 		// Authentication.
