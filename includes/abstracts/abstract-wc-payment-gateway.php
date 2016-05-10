@@ -382,12 +382,12 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 2.6.0
 	 */
 	public function saved_payment_methods() {
-		$html = '<p>';
+		$html = '<ul id="wc-' . esc_attr( $this->id ) . '-methods" class="wc-saved-payment-methods" data-count="' . esc_attr( count( $this->get_tokens() ) ) . '">';
 		foreach ( $this->get_tokens() as $token ) {
-			$html .= $this->saved_payment_method( $token );
+			$html .= '<li>' . $this->saved_payment_method( $token ) . '</li>';
 		}
-		$html .= '</p><span id="wc-' . esc_attr( $this->id ) . '-method-count" data-count="' . esc_attr( count( $this->get_tokens() ) ) . '"></span>';
-		$html .= '<div class="clear"></div>';
+		$html .= '<li class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox-wrap">' . $this->use_new_payment_method_checkbox() . '</li>';
+		$html .= '</ul>';
 		echo apply_filters( 'wc_payment_gateway_form_saved_payment_methods_html', $html, $this );
 	}
 
@@ -411,7 +411,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		);
 
 		$html .= $this->saved_payment_method_title( $token );
-		$html .= '</label><br />';
+		$html .= '</label>';
 
 		return apply_filters( 'wc_payment_gateway_form_saved_payment_method_html', $html, $token, $this );
 	}
@@ -474,9 +474,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		$label = ( ! empty( $this->new_method_label ) ? esc_html( $this->new_method_label ) : esc_html__( 'Use a new payment method', 'woocommerce' ) );
 		$html = '<input type="radio" id="wc-' . esc_attr( $this->id ). '-new" name="wc-' . esc_attr( $this->id ) . '-payment-token" value="new" style="width:auto;">';
 		$html .= '<label class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox wc-gateway-payment-token-label" for="wc-' . esc_attr( $this->id ) . '-new">';
-		$html .=  apply_filters( 'woocommerce_payment_gateway_form_new_method_label', $label, $this );
+		$html .= apply_filters( 'woocommerce_payment_gateway_form_new_method_label', $label, $this );
 		$html .= '</label>';
-		echo '<div class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox-wrap">' . $html . '</div>';
+		return $html;
 	}
 
 	/**

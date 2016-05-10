@@ -22,10 +22,7 @@ class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 
 		if ( $display_tokenization ) {
 			$this->tokenization_script();
-			if ( is_user_logged_in() ) {
-				$this->saved_payment_methods();
-			}
-			$this->use_new_payment_method_checkbox();
+			$this->saved_payment_methods();
 		}
 
 		$this->form();

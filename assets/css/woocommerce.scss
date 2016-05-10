@@ -1854,6 +1854,15 @@ p.demo_store {
 				color: darken( $secondary, 20% );
 			}
 
+			.wc-saved-payment-methods {
+				list-style: none outside;
+				margin: 0;
+			}
+			.wc-credit-card-form {
+				border: 0;
+				padding: 0;
+				margin: 1em 0 0;
+			}
 			.wc-credit-card-form-card-number,
 			.wc-credit-card-form-card-expiry,
 			.wc-credit-card-form-card-cvc {
