@@ -200,7 +200,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		// Mark as processing (payment won't be taken until delivery)
-		$order->update_status( 'processing', __( 'Payment to be made upon delivery.', 'woocommerce' ) );
+		$order->update_status( apply_filters( 'woocommerce_cod_process_payment_order_status', 'processing' ), __( 'Payment to be made upon delivery.', 'woocommerce' ) );
 
 		// Reduce stock levels
 		$order->reduce_order_stock();

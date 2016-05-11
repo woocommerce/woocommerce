@@ -118,7 +118,7 @@ class WC_Admin_Menus {
 			break;
 			case 'product' :
 				$screen = get_current_screen();
-				if ( taxonomy_is_product_attribute( $screen->taxonomy ) ) {
+				if ( $screen && taxonomy_is_product_attribute( $screen->taxonomy ) ) {
 					$submenu_file = 'product_attributes';
 					$parent_file  = 'edit.php?post_type=product';
 				}
@@ -137,7 +137,7 @@ class WC_Admin_Menus {
 			unset( $submenu['woocommerce'][0] );
 
 			// Add count if user has access
-			if ( current_user_can( 'manage_woocommerce' ) && ( $order_count = wc_processing_order_count() ) ) {
+			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) && ( $order_count = wc_processing_order_count() ) ) {
 				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
 						$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . $order_count . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
@@ -173,7 +173,7 @@ class WC_Admin_Menus {
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
 				unset( $menu_order[ $woocommerce_separator ] );
 				unset( $menu_order[ $woocommerce_product ] );
-			} elseif ( !in_array( $item, array( 'separator-woocommerce' ) ) ) {
+			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 
@@ -236,6 +236,9 @@ class WC_Admin_Menus {
 		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce Endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
 	}
 
+	/**
+	 * Output menu links.
+	 */
 	public function nav_menu_links() {
 		$exclude = array( 'view-order', 'add-payment-method', 'order-pay', 'order-received' );
 		?>

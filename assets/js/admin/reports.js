@@ -175,7 +175,7 @@ jQuery(function( $ ) {
 
 			var the_series = window.main_chart.getData();
 			var series     = [];
-			csv_data      += xaxes_label + ',';
+			csv_data      += '"' + xaxes_label + '",';
 
 			$.each( the_series, function( index, value ) {
 				if ( ! exclude_series || $.inArray( index.toString(), exclude_series ) === -1 ) {
@@ -185,7 +185,7 @@ jQuery(function( $ ) {
 
 			// CSV Headers
 			for ( s = 0; s < series.length; ++s ) {
-				csv_data += series[s].label + ',';
+				csv_data += '"' + series[s].label + '",';
 			}
 
 			csv_data = csv_data.substring( 0, csv_data.length - 1 );
@@ -218,9 +218,9 @@ jQuery(function( $ ) {
 				var date = new Date( parseInt( index, 10 ) );
 
 				if ( groupby === 'day' ) {
-					csv_data += date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + '-' + date.getUTCDate() + ',';
+					csv_data += '"' + date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + '-' + date.getUTCDate() + '",';
 				} else {
-					csv_data += date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + ',';
+					csv_data += '"' + date.getUTCFullYear() + '-' + parseInt( date.getUTCMonth() + 1, 10 ) + '",';
 				}
 
 				for ( var d = 0; d < value.length; ++d ) {
@@ -231,7 +231,7 @@ jQuery(function( $ ) {
 						val = val.toFixed( 2 );
 					}
 
-					csv_data += val + ',';
+					csv_data += '"' + val + '",';
 				}
 				csv_data = csv_data.substring( 0, csv_data.length - 1 );
 				csv_data += '\n';

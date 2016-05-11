@@ -198,8 +198,9 @@ class WC_Shortcode_Checkout {
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
-			if ( $order->order_key != $order_key )
-				unset( $order );
+			if ( $order->order_key != $order_key ) {
+				$order = false;
+			}
 		}
 
 		// Empty awaiting payment session

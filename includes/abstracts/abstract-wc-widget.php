@@ -49,7 +49,6 @@ abstract class WC_Widget extends WP_Widget {
 	 * Constructor.
 	 */
 	public function __construct() {
-
 		$widget_ops = array(
 			'classname'   => $this->widget_cssclass,
 			'description' => $this->widget_description
@@ -63,7 +62,10 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * get_cached_widget function.
+	 * Get cached widget.
+	 *
+	 * @param  array $args
+	 * @return bool true if the widget is cached otherwise false
 	 */
 	public function get_cached_widget( $args ) {
 
@@ -126,7 +128,7 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * update function.
+	 * Updates a particular instance of a widget.
 	 *
 	 * @see    WP_Widget->update
 	 * @param  array $new_instance
@@ -170,6 +172,11 @@ abstract class WC_Widget extends WP_Widget {
 					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
 				break;
 			}
+
+			/**
+			 * Sanitize the value of a setting.
+			 */
+			$instance[ $key ] = apply_filters( 'woocommerce_widget_settings_sanitize_option', $instance[ $key ], $new_instance, $key, $setting );
 		}
 
 		$this->flush_widget_cache();
@@ -178,7 +185,7 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
-	 * form function.
+	 * Outputs the settings update form.
 	 *
 	 * @see   WP_Widget->form
 	 * @param array $instance
@@ -246,6 +253,11 @@ abstract class WC_Widget extends WP_Widget {
 						<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
 					</p>
 					<?php
+				break;
+
+				// Default: run an action
+				default :
+					do_action( 'woocommerce_widget_field_' . $setting['type'], $key, $value, $setting, $instance );
 				break;
 			}
 		}

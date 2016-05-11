@@ -21,6 +21,8 @@ class WC_Meta_Box_Product_Short_Description {
 
 	/**
 	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 

@@ -29,7 +29,7 @@ main: WC
 title: WooCommerce 2.5.x Code Reference
 
 # base url used for sitemap (useful for public doc)
-baseUrl: http://docs.woothemes.com/wc-apidocs/
+baseUrl: https://docs.woothemes.com/wc-apidocs/
 
 # choose ApiGen template theme
 templateTheme: default

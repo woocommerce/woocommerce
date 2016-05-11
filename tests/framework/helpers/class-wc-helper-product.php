@@ -133,9 +133,6 @@ class WC_Helper_Product {
 		// Attribute meta
 		update_post_meta( $variation_id, 'attribute_pa_size', 'small' );
 
-		// Add the variation meta to the main product
-		update_post_meta( $product_id, '_min_price_variation_id', $variation_id );
-
 		// Create the variation
 		$variation_id = wp_insert_post( array(
 			'post_title'  => 'Variation #' . ( $product_id + 2 ) . ' of Dummy Product',

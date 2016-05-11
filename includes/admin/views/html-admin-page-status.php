@@ -8,22 +8,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $current_tab = ! empty( $_REQUEST['tab'] ) ? sanitize_title( $_REQUEST['tab'] ) : 'status';
+$tabs        = array(
+	'status' => __( 'System Status', 'woocommerce' ),
+	'tools'  => __( 'Tools', 'woocommerce' ),
+	'logs'   => __( 'Logs', 'woocommerce' ),
+);
+$tabs        = apply_filters( 'woocommerce_admin_status_tabs', $tabs );
 ?>
 <div class="wrap woocommerce">
-	<div class="icon32 icon32-woocommerce-status" id="icon-woocommerce"><br /></div><h2 class="nav-tab-wrapper woo-nav-tab-wrapper">
+	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
-			$tabs = array(
-				'status' => __( 'System Status', 'woocommerce' ),
-				'tools'  => __( 'Tools', 'woocommerce' ),
-				'logs'   => __( 'Logs', 'woocommerce' ),
-			);
 			foreach ( $tabs as $name => $label ) {
 				echo '<a href="' . admin_url( 'admin.php?page=wc-status&tab=' . $name ) . '" class="nav-tab ';
 				if ( $current_tab == $name ) echo 'nav-tab-active';
 				echo '">' . $label . '</a>';
 			}
 		?>
-	</h2>
+	</nav>
+	<h1 class="screen-reader-text"><?php echo esc_html( $tabs[ $current_tab ] ); ?></h1>
 	<?php
 		switch ( $current_tab ) {
 			case "tools" :
@@ -33,7 +35,11 @@ $current_tab = ! empty( $_REQUEST['tab'] ) ? sanitize_title( $_REQUEST['tab'] ) 
 				WC_Admin_Status::status_logs();
 			break;
 			default :
-				WC_Admin_Status::status_report();
+				if ( array_key_exists( $current_tab, $tabs ) && has_action( 'woocommerce_admin_status_content_' . $current_tab ) ) {
+					do_action( 'woocommerce_admin_status_content_' . $current_tab );
+				} else {
+					WC_Admin_Status::status_report();
+				}
 			break;
 		}
 	?>

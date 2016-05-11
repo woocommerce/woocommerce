@@ -122,6 +122,45 @@ class WC_HookFinder {
 								case 'filter' :
 								case 'action' :
 									$hook = trim( $token[1], "'" );
+									$loop = 0;
+
+									if ( '_' === substr( $hook, '-1', 1 ) ) {
+										$hook .= '{';
+										$open = true;
+										// Keep adding to hook until we find a comma or colon
+										while ( 1 ) {
+											$loop ++;
+											$next_hook  = trim( trim( is_string( $tokens[ $index + $loop ] ) ? $tokens[ $index + $loop ] : $tokens[ $index + $loop ][1], '"' ), "'" );
+
+											if ( in_array( $next_hook, array( '.', '{', '}', '"', "'", ' ' ) ) ) {
+												continue;
+											}
+
+											$hook_first = substr( $next_hook, 0, 1 );
+											$hook_last  = substr( $next_hook, -1, 1 );
+
+											if ( in_array( $next_hook, array( ',', ';' ) ) ) {
+												if ( $open ) {
+													$hook .= '}';
+													$open = false;
+												}
+												break;
+											}
+
+											if ( '_' === $hook_first ) {
+												$next_hook = '}' . $next_hook;
+												$open = false;
+											}
+
+											if ( '_' === $hook_last ) {
+												$next_hook .= '{';
+												$open = true;
+											}
+
+											$hook .= $next_hook;
+										}
+									}
+
 									if ( isset( self::$custom_hooks_found[ $hook ] ) ) {
 										self::$custom_hooks_found[ $hook ]['file'][] = self::$current_file;
 									} else {
@@ -169,13 +208,13 @@ class WC_HookFinder {
 		echo '</div><div id="footer">';
 
 		$html   = file_get_contents( '../wc-apidocs/tree.html' );
-		$header = current( explode( '<div id="content">', $html ) );
-		$header = str_replace( '<li class="active">', '<li>', $header );
+		$header = explode( '<div id="content">', $html );
+		$header = str_replace( '<li class="active">', '<li>', current( $header ) );
 		$header = str_replace( '<li class="hooks">', '<li class="active">', $header );
 		$header = str_replace( 'Tree | ', 'Hook Reference | ', $header );
-		$footer = end( explode( '<div id="footer">', $html ) );
+		$footer = explode( '<div id="footer">', $html );
 
-		file_put_contents( '../wc-apidocs/hook-docs.html', $header . ob_get_clean() . $footer );
+		file_put_contents( '../wc-apidocs/hook-docs.html', $header . ob_get_clean() . end( $footer ) );
 		echo "Hook docs generated :)\n";
 	}
 }

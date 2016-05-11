@@ -154,7 +154,7 @@ class WC_Widget_Products extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *

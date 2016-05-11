@@ -17,7 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Integrations {
 
-	/** Array of integration classes */
+	/**
+	 * Array of integrations.
+	 *
+	 * @var array
+	 */
 	public $integrations = array();
 
     /**

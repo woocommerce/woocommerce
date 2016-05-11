@@ -21,6 +21,8 @@ class WC_Meta_Box_Coupon_Data {
 
 	/**
 	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -209,6 +211,9 @@ class WC_Meta_Box_Coupon_Data {
 
 	/**
 	 * Save meta box data.
+	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
 		global $wpdb;

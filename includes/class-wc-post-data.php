@@ -17,6 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Post_Data {
 
+	/**
+	 * Editing term.
+	 *
+	 * @var object
+	 */
 	private static $editing_term = null;
 
 	/**
