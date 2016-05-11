@@ -215,6 +215,7 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 		'create' => 'publish_posts',
 		'edit'   => 'edit_post',
 		'delete' => 'delete_post',
+		'batch'  => 'edit_post',
 	);
 
 	if ( 'revision' === $post_type ) {
@@ -242,6 +243,7 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 		'create' => 'edit_users',
 		'edit'   => 'edit_users',
 		'delete' => 'delete_users',
+		'batch'  => 'edit_users',
 	);
 
 	$permission = current_user_can( $contexts[ $context ], $object_id );
@@ -264,6 +266,7 @@ function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $
 		'create' => 'edit_terms',
 		'edit'   => 'edit_terms',
 		'delete' => 'delete_terms',
+		'batch'  => 'edit_terms',
 	);
 
 	$cap = $contexts[ $context ];
