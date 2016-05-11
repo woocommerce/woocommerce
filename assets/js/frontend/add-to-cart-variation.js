@@ -59,7 +59,7 @@
 
 		// Reset product data
 		.on( 'reset_data', function() {
-			$('.sku').wc_reset_content();
+			$product.find( '.product_meta' ).find( '.sku' ).wc_reset_content();
 			$('.product_weight').wc_reset_content();
 			$('.product_dimensions').wc_reset_content();
 			$form.trigger( 'reset_image' );
