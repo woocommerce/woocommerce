@@ -101,23 +101,37 @@ class WC_Admin {
 	/**
 	 * Handle redirects to setup/welcome page after install and updates.
 	 *
-	 * Transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
+	 * For setup wizard, transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
-		if ( ! get_transient( '_wc_activation_redirect' ) ) {
-			return;
-		}
+		// Nonced plugin install redirects (whitelisted)
+		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {
+			$plugin_slug = wc_clean( $_GET['wc-install-plugin-redirect'] );
 
-		delete_transient( '_wc_activation_redirect' );
+			if ( current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ) ) ) {
+				$nonce = wp_create_nonce( 'install-plugin_' . $plugin_slug );
+				$url   = self_admin_url( 'update.php?action=install-plugin&plugin=' . $plugin_slug . '&_wpnonce=' . $nonce );
+			} else {
+				$url = admin_url( 'plugin-install.php?tab=search&type=term&s=' . $plugin_slug );
+			}
 
-		if ( ( ! empty( $_GET['page'] ) && in_array( $_GET['page'], array( 'wc-setup' ) ) ) || is_network_admin() || isset( $_GET['activate-multi'] ) || ! current_user_can( 'manage_woocommerce' ) || apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) ) {
-			return;
-		}
-
-		// If the user needs to install, send them to the setup wizard
-		if ( WC_Admin_Notices::has_notice( 'install' ) ) {
-			wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
+			wp_safe_redirect( $url );
 			exit;
+		}
+
+		// Setup wizard redirect
+		if ( get_transient( '_wc_activation_redirect' ) ) {
+			delete_transient( '_wc_activation_redirect' );
+
+			if ( ( ! empty( $_GET['page'] ) && in_array( $_GET['page'], array( 'wc-setup' ) ) ) || is_network_admin() || isset( $_GET['activate-multi'] ) || ! current_user_can( 'manage_woocommerce' ) || apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) ) {
+				return;
+			}
+
+			// If the user needs to install, send them to the setup wizard
+			if ( WC_Admin_Notices::has_notice( 'install' ) ) {
+				wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
+				exit;
+			}
 		}
 	}
 

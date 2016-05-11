@@ -933,7 +933,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 							__( '%1$s could not be installed (%2$s). %3$sPlease install it manually by clicking here.%4$s', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							'<a href="' . admin_url( 'plugin-install.php?tab=search&type=term&s=' . $plugin_to_install['repo-slug'] ) . '">',
+							'<a href="' . esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_to_install['repo-slug'] ) ) . '">',
 							'</a>'
 						)
 					);
