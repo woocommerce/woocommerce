@@ -17,18 +17,65 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Install {
 
-	/** @var array DB updates that need to be run */
+	/** @var array DB updates and callbacks that need to be run per version */
 	private static $db_updates = array(
-		'2.0.0' => 'updates/woocommerce-update-2.0.php',
-		'2.0.9' => 'updates/woocommerce-update-2.0.9.php',
-		'2.1.0' => 'updates/woocommerce-update-2.1.php',
-		'2.2.0' => 'updates/woocommerce-update-2.2.php',
-		'2.3.0' => 'updates/woocommerce-update-2.3.php',
-		'2.4.0' => 'updates/woocommerce-update-2.4.php',
-		'2.4.1' => 'updates/woocommerce-update-2.4.1.php',
-		'2.5.0' => 'updates/woocommerce-update-2.5.php',
-		'2.6.0' => 'updates/woocommerce-update-2.6.php'
+		'2.0.0' => array(
+			'wc_update_200_file_paths',
+			'wc_update_200_permalinks',
+			'wc_update_200_subcat_display',
+			'wc_update_200_taxrates',
+			'wc_update_200_line_items',
+			'wc_update_200_images',
+			'wc_update_200_db_version',
+		),
+		'2.0.9' => array(
+			'wc_update_209_brazillian_state',
+			'wc_update_209_db_version',
+		),
+		'2.1.0' => array(
+			'wc_update_210_remove_pages',
+			'wc_update_210_file_paths',
+			'wc_update_210_db_version',
+		),
+		'2.2.0' => array(
+			'wc_update_220_shipping',
+			'wc_update_220_order_status',
+			'wc_update_220_variations',
+			'wc_update_220_attributes',
+			'wc_update_220_db_version',
+		),
+		'2.3.0' => array(
+			'wc_update_230_options',
+			'wc_update_230_db_version',
+		),
+		'2.4.0' => array(
+			'wc_update_240_options',
+			'wc_update_240_shipping_methods',
+			'wc_update_240_api_keys',
+			'wc_update_240_webhooks',
+			'wc_update_240_refunds',
+			'wc_update_240_db_version',
+		),
+		'2.4.1' => array(
+			'wc_update_241_variations',
+			'wc_update_241_db_version',
+		),
+		'2.5.0' => array(
+			'wc_update_250_currency',
+			'wc_update_250_db_version',
+		),
+		'2.6.0' => array(
+			'wc_update_260_options',
+			'wc_update_260_termmeta',
+			'wc_update_260_zones',
+			'wc_update_260_zone_methods',
+			'wc_update_260_refunds',
+			'wc_update_260_db_version',
+		),
 	);
+
+	/** @var object Background update class */
+	private static $background_updater;
 
 	/**
 	 * Hook in tabs.
@@ -42,6 +89,9 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
+
+		// Init background updates
+		self::$background_updater = new WC_Background_Updater();
 	}
 
 	/**
@@ -65,7 +115,6 @@ class WC_Install {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
 			self::update();
 			WC_Admin_Notices::remove_notice( 'update' );
-			add_action( 'admin_notices', array( __CLASS__, 'updated_notice' ) );
 		}
 	}
 
@@ -167,31 +216,30 @@ class WC_Install {
 	}
 
 	/**
-	 * Update DB version to current.
-	 */
-	private static function update_db_version( $version = null ) {
-		delete_option( 'woocommerce_db_version' );
-		add_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
-	}
-
-	/**
-	 * Handle updates.
+	 * Push all needed DB updates to the queue for processing.
 	 */
 	private static function update() {
-		if ( ! defined( 'WC_UPDATING' ) ) {
-			define( 'WC_UPDATING', true );
-		}
+		WC_Admin_Notices::add_notice( 'updating' );
 
 		$current_db_version = get_option( 'woocommerce_db_version' );
 
-		foreach ( self::$db_updates as $version => $updater ) {
+		foreach ( self::$db_updates as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
-				include( $updater );
-				self::update_db_version( $version );
+				foreach ( $update_callbacks as $update_callback ) {
+					self::$background_updater->push_to_queue( $update_callback );
+				}
 			}
 		}
 
-		self::update_db_version();
+		self::$background_updater->save()->dispatch();
+	}
+
+	/**
+	 * Update DB version to current.
+	 */
+	public static function update_db_version( $version = null ) {
+		delete_option( 'woocommerce_db_version' );
+		add_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
 	}
 
 	/**
