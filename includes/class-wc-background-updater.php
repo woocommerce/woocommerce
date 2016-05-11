@@ -29,6 +29,14 @@ class WC_Background_Updater extends WP_Background_Process {
 	protected $action = 'wc_updater';
 
 	/**
+	 * Dispatch
+	 */
+	public function dispatch() {
+		WC_Admin_Notices::add_notice( 'updating' );
+		parent::dispatch();
+	}
+
+	/**
 	 * Task
 	 *
 	 * Override this method to perform any actions required on each
@@ -45,15 +53,16 @@ class WC_Background_Updater extends WP_Background_Process {
 		}
 
 		$logger = new WC_Logger();
-		$logger->add( 'wc_db_updates', sprintf( 'Starting %s update', $callback ) );
 
 		include_once( 'wc-update-functions.php' );
 
 		if ( is_callable( $callback ) ) {
+			$logger->add( 'wc_db_updates', sprintf( 'Running %s callback', $callback ) );
 			call_user_func( $callback );
+			$logger->add( 'wc_db_updates', sprintf( 'Finished %s callback', $callback ) );
+		} else {
+			$logger->add( 'wc_db_updates', sprintf( 'Could not find %s callback', $callback ) );
 		}
-
-		$logger->add( 'wc_db_updates', sprintf( 'Finished %s update', $callback ) );
 
 		return false;
 	}
@@ -65,9 +74,10 @@ class WC_Background_Updater extends WP_Background_Process {
 	 * performed, or, call parent::complete().
 	 */
 	protected function complete() {
+		$logger = new WC_Logger();
+
+		$logger->add( 'wc_db_updates', 'Data update complete' );
 		WC_Install::update_db_version();
-		WC_Admin_Notices::remove_notice( 'updating' );
-		WC_Admin_Notices::add_notice( 'updated' );
 		parent::complete();
 	}
 }
