@@ -1456,17 +1456,17 @@ class WC_AJAX {
 	 * Remove meta from a line item.
 	 */
 	public static function remove_order_item_meta() {
-		global $wpdb;
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
 
-		$meta_id = absint( $_POST['meta_id'] );
+		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $meta_id ) );
+		$wpdb->delete( "{$wpdb->prefix}woocommerce_order_itemmeta", array(
+			'meta_id' => absint( $_POST['meta_id'] ),
+		) );
 
 		die();
 	}

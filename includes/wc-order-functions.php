@@ -620,15 +620,15 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
  * @param mixed $meta_key
  * @param mixed $meta_value
  * @param bool $unique (default: false)
- * @return bool
+ * @return int New row ID or 0
  */
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
-	if ( add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique ) ) {
+	if ( $meta_id = add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique ) ) {
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
 		wp_cache_delete( $cache_key, 'orders' );
-		return true;
+		return $meta_id;
 	}
-	return false;
+	return 0;
 }
 
 /**

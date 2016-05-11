@@ -848,7 +848,7 @@ jQuery( function ( $ ) {
 						data: data,
 						type: 'POST',
 						success: function() {
-							$row.hide();
+							$row.remove();
 							wc_meta_boxes_order_items.unblock();
 						}
 					});
