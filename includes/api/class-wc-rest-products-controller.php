@@ -847,6 +847,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			}
 		}
 
+		// Default total sales.
+		add_post_meta( $product_id, 'total_sales', '0', true );
+
 		// Virtual.
 		if ( isset( $request['virtual'] ) ) {
 			update_post_meta( $product->id, '_virtual', true === $request['virtual'] ? 'yes' : 'no' );

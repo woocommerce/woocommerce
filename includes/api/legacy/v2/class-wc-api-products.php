@@ -806,6 +806,9 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
+		// Default total sales.
+		add_post_meta( $product_id, 'total_sales', '0', true );
+
 		// Virtual
 		if ( isset( $data['virtual'] ) ) {
 			update_post_meta( $product_id, '_virtual', ( true === $data['virtual'] ) ? 'yes' : 'no' );
