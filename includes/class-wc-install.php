@@ -219,19 +219,23 @@ class WC_Install {
 	 * Push all needed DB updates to the queue for processing.
 	 */
 	private static function update() {
-		WC_Admin_Notices::add_notice( 'updating' );
-
 		$current_db_version = get_option( 'woocommerce_db_version' );
+		$logger             = new WC_Logger();
+		$update_queued      = false;
 
 		foreach ( self::$db_updates as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
+					$logger->add( 'wc_db_updates', sprintf( 'Queuing %s - %s', $version, $update_callback ) );
 					self::$background_updater->push_to_queue( $update_callback );
+					$update_queued = true;
 				}
 			}
 		}
 
-		self::$background_updater->save()->dispatch();
+		if ( $update_queued ) {
+			self::$background_updater->save()->dispatch();
+		}
 	}
 
 	/**
