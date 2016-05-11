@@ -47,6 +47,9 @@ if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone
 		// Avoid ID conflicts
 		$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods AUTO_INCREMENT = %d;", max( $max_new_id, $max_old_id ) + 1 ) );
 
+		// Store changes
+		$changes = array();
+
 		// Move data
 		foreach ( $old_methods as $old_method ) {
 			$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array(
@@ -62,6 +65,7 @@ if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone
 			$old_settings_key   = 'woocommerce_' . $old_method->shipping_method_type . '_' . $old_method->shipping_method_id . '_settings';
 			add_option( 'woocommerce_' . $old_method->shipping_method_type . '_' . $new_instance_id . '_settings', get_option( $old_settings_key, get_option( $older_settings_key ) ) );
 
+			// Handling for table rate and flat rate box shipping.
 			if ( 'table_rate' === $old_method->shipping_method_type ) {
 				// Move priority settings
 				add_option( 'woocommerce_table_rate_default_priority_' . $new_instance_id, get_option( 'woocommerce_table_rate_default_priority_' . $old_method->shipping_method_id ) );
@@ -77,9 +81,7 @@ if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone
 						'shipping_method_id' => $old_method->shipping_method_id
 					)
 				);
-			}
-
-			if ( 'flat_rate_boxes' === $old_method->shipping_method_type ) {
+			} elseif ( 'flat_rate_boxes' === $old_method->shipping_method_type ) {
 				$wpdb->update(
 					$wpdb->prefix . 'woocommerce_shipping_flat_rate_boxes',
 					array(
@@ -90,7 +92,14 @@ if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone
 					)
 				);
 			}
+
+			$changes[ $old_method->shipping_method_id ] = $new_instance_id;
 		}
+
+		// $changes contains keys (old method ids) and values (new instance ids) if extra processing is needed in plugins.
+		// Store this to an option so extensions can pick it up later, then fire an action.
+		update_option( 'woocommerce_updated_instance_ids', $changes );
+		do_action( 'woocommerce_updated_instance_ids', $changes );
 	}
 }
 
