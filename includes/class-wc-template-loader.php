@@ -42,6 +42,10 @@ class WC_Template_Loader {
 		$find = array( 'woocommerce.php' );
 		$file = '';
 
+		if ( is_embed() ) {
+			return $template;
+		}
+
 		if ( is_single() && get_post_type() == 'product' ) {
 
 			$file 	= 'single-product.php';
@@ -84,7 +88,7 @@ class WC_Template_Loader {
 	}
 
 	/**
-	 * comments_template_loader function.
+	 * Load comments template.
 	 *
 	 * @param mixed $template
 	 * @return string

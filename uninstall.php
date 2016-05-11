@@ -14,12 +14,17 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+global $wpdb, $wp_version;
+
+wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
+wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
+wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
+wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
+
 $status_options = get_option( 'woocommerce_status_options', array() );
 
 if ( ! empty( $status_options['uninstall_data'] ) ) {
-
-	global $wpdb;
-
 	// Roles + caps.
 	include_once( 'includes/class-wc-install.php' );
 	WC_Install::remove_roles();
@@ -34,6 +39,12 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
 	wp_trash_post( get_option( 'woocommerce_logout_page_id' ) );
 
+	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_attribute_taxonomies';" ) ) {
+		$wc_attributes = array_filter( (array) $wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies;" ) );
+	} else {
+		$wc_attributes = array();
+	}
+
 	// Tables.
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_api_keys" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_attribute_taxonomies" );
@@ -41,6 +52,12 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_termmeta" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rates" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_tax_rate_locations" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zone_methods" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zone_locations" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_shipping_zones" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_sessions" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_payment_tokens" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_payment_tokenmeta" );
 
 	// Delete options.
 	$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';");
@@ -50,4 +67,41 @@ if ( ! empty( $status_options['uninstall_data'] ) ) {
 	$wpdb->query( "DELETE meta FROM {$wpdb->postmeta} meta LEFT JOIN {$wpdb->posts} posts ON posts.ID = meta.post_id WHERE posts.ID IS NULL;" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_items" );
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_itemmeta" );
+
+	// Delete terms if > WP 4.2 (term splitting was added in 4.2)
+	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
+		// Delete term taxonomies
+		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $taxonomy ) {
+			$wpdb->delete(
+				$wpdb->term_taxonomy,
+				array(
+					'taxonomy' => $taxonomy,
+				)
+			);
+		}
+
+		// Delete term attributes
+		foreach ( $wc_attributes as $taxonomy ) {
+			$wpdb->delete(
+				$wpdb->term_taxonomy,
+				array(
+					'taxonomy' => 'pa_' . $taxonomy,
+				)
+			);
+		}
+
+		// Delete orphan relationships
+		$wpdb->query( "DELETE tr FROM {$wpdb->term_relationships} tr LEFT JOIN {$wpdb->posts} posts ON posts.ID = tr.object_id WHERE posts.ID IS NULL;" );
+
+		// Delete orphan terms
+		$wpdb->query( "DELETE t FROM {$wpdb->terms} t LEFT JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
+
+		// Delete orphan term meta
+		if ( ! empty( $wpdb->termmeta ) ) {
+			$wpdb->query( "DELETE tm FROM {$wpdb->termmeta} tm LEFT JOIN {$wpdb->term_taxonomy} tt ON tm.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
+		}
+	}
+
+	// Clear any cached data that has been removed
+	wp_cache_flush();
 }

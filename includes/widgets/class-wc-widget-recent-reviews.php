@@ -43,7 +43,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Output widget.
 	 *
 	 * @see WP_Widget
 	 *

@@ -16,11 +16,46 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Report {
 
+	/**
+	 * The chart interval.
+	 *
+	 * @var int
+	 */
 	public $chart_interval;
+
+	/**
+	 * Group by SQL query.
+	 *
+	 * @var string
+	 */
 	public $group_by_query;
+
+	/**
+	 * The bar width.
+	 *
+	 * @var int
+	 */
 	public $barwidth;
+
+	/**
+	 * Group chart item by day or month.
+	 *
+	 * @var string
+	 */
 	public $chart_groupby;
+
+	/**
+	 * The start date of the report.
+	 *
+	 * @var string
+	 */
 	public $start_date;
+
+	/**
+	 * The end date of the report.
+	 *
+	 * @var string
+	 */
 	public $end_date;
 
 	/**
@@ -316,7 +351,7 @@ class WC_Admin_Report {
 	 * @param  int $interval
 	 * @param  string $start_date
 	 * @param  string $group_by
-	 * @return string
+	 * @return array
 	 */
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
 		$prepared_data = array();
@@ -470,7 +505,7 @@ class WC_Admin_Report {
 				$this->end_date   = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
 
 				if ( ! $this->end_date ) {
-					$this->end_date = current_time('timestamp');
+					$this->end_date = current_time( 'timestamp' );
 				}
 
 				$interval = 0;
@@ -575,7 +610,7 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * [get_chart_widgets description].
+	 * Get chart widgets.
 	 *
 	 * @return array
 	 */

@@ -4,12 +4,13 @@
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-pay.php.
  *
- * HOWEVER, on occasion WooCommerce will need to update template files and you (the theme developer).
- * will need to copy the new files to your theme to maintain compatibility. We try to do this.
- * as little as possible, but it does happen. When this occurs the version of the template file will.
- * be bumped and the readme will list any important changes.
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
+ * @see      http://docs.woothemes.com/document/template-structure/
  * @author   WooThemes
  * @package  WooCommerce/Templates
  * @version  2.5.0
@@ -32,13 +33,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</thead>
 		<tbody>
 			<?php if ( sizeof( $order->get_items() ) > 0 ) : ?>
-				<?php foreach ( $order->get_items() as $item ) : ?>
-					<tr>
+				<?php foreach ( $order->get_items() as $item_id => $item ) : ?>
+					<?php
+						if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
+							continue;
+						}
+					?>
+					<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
 						<td class="product-name">
-							<?php echo esc_html( $item['name'] ); ?>
-							<?php $order->display_item_meta( $item ); ?>
+							<?php
+								echo apply_filters( 'woocommerce_order_item_name', esc_html( $item['name'] ), $item, false );
+
+								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+								$order->display_item_meta( $item );
+								do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
+							?>
 						</td>
-						<td class="product-quantity"><?php echo esc_html( $item['qty'] ); ?></td>
+						<td class="product-quantity"><?php echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', esc_html( $item['qty'] ) ) . '</strong>', $item ); ?></td>
 						<td class="product-subtotal"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td>
 					</tr>
 				<?php endforeach; ?>
@@ -73,13 +84,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="form-row">
 			<input type="hidden" name="woocommerce_pay" value="1" />
 
+			<?php wc_get_template( 'checkout/terms.php' ); ?>
+
 			<?php do_action( 'woocommerce_pay_order_before_submit' ); ?>
 
 			<?php echo apply_filters( 'woocommerce_pay_order_button_html', '<input type="submit" class="button alt" id="place_order" value="' . esc_attr( $order_button_text ) . '" data-value="' . esc_attr( $order_button_text ) . '" />' ); ?>
 
 			<?php do_action( 'woocommerce_pay_order_after_submit' ); ?>
-
-			<?php wc_get_template( 'checkout/terms.php' ); ?>
 
 			<?php wp_nonce_field( 'woocommerce-pay' ); ?>
 		</div>

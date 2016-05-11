@@ -320,10 +320,32 @@
 		.wc-terms-and-conditions, .terms {
 			text-align: left;
 			padding: 0 1em 0 0;
+			float:left;
 		}
 
 		#place_order {
 			float: right;
+		}
+	}
+}
+
+/**
+ * Twenty Eleven specific styles
+ */
+.woocommerce-page {
+	&.left-sidebar {
+		#content.twentyeleven {
+			width: 58.4%;
+			margin: 0 7.6%;
+			float: right;
+		}
+	}
+
+	&.right-sidebar {
+		#content.twentyeleven {
+			margin: 0 7.6%;
+			width: 58.4%;
+			float: left;
 		}
 	}
 }
@@ -496,6 +518,31 @@
 			.entry-summary {
 				margin-right: 0;
 				margin-left: 0;
+			}
+		}
+	}
+}
+
+/**
+ * RTL styles.
+ */
+.rtl {
+	.woocommerce, .woocommerce-page {
+		.col2-set {
+			.col-1 {
+				float: right;
+			}
+			.col-2 {
+				float: left;
+			}
+		}
+		form {
+			.form-row-first,
+			.form-row-last {
+				float: right;
+			}
+			.form-row-last {
+				float: left;
 			}
 		}
 	}

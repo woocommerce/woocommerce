@@ -19,6 +19,8 @@ class WC_Meta_Box_Order_Downloads {
 
 	/**
 	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
 		global $post, $wpdb;
@@ -77,6 +79,9 @@ class WC_Meta_Box_Order_Downloads {
 
 	/**
 	 * Save meta box data.
+	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
 		global $wpdb;
@@ -90,9 +95,6 @@ class WC_Meta_Box_Order_Downloads {
 			$access_expires         = $_POST['access_expires'];
 
 			// Order data
-			$order_key       = get_post_meta( $post->ID, '_order_key', true );
-			$customer_email  = get_post_meta( $post->ID, '_billing_email', true );
-			$customer_user   = get_post_meta( $post->ID, '_customer_user', true );
 			$product_ids_max = max( array_keys( $product_ids ) );
 
 			for ( $i = 0; $i <= $product_ids_max; $i ++ ) {
@@ -102,12 +104,12 @@ class WC_Meta_Box_Order_Downloads {
 				}
 
 				$data = array(
-					'user_id'				=> absint( $customer_user ),
-					'user_email' 			=> wc_clean( $customer_email ),
-					'downloads_remaining'	=> wc_clean( $downloads_remaining[ $i ] )
+					'downloads_remaining' => wc_clean( $downloads_remaining[ $i ] ),
 				);
 
-				$format = array( '%d', '%s', '%s' );
+				$format = array(
+					'%s',
+				);
 
 				$expiry  = ( array_key_exists( $i, $access_expires ) && '' != $access_expires[ $i ] ) ? date_i18n( 'Y-m-d', strtotime( $access_expires[ $i ] ) ) : null;
 

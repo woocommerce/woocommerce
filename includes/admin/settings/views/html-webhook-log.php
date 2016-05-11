@@ -8,10 +8,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <tr>
 	<td><?php echo date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $log['comment']->comment_date_gmt ), true ); ?></td>
-	<td><?php echo esc_attr( $log['duration'] ); ?></td>
+	<td><?php echo esc_attr( $log['request_url'] ); ?></td>
 	<td>
 		<p><strong><?php _e( 'Method', 'woocommerce' ); ?>: </strong><?php echo esc_html( $log['request_method'] ); ?></p>
-		<p><strong><?php _e( 'Duration', 'woocommerce' ); ?>: </strong><?php echo esc_html( $log['request_url'] ); ?></p>
+		<p><strong><?php _e( 'Duration', 'woocommerce' ); ?>: </strong><?php echo esc_html( $log['duration'] ); ?></p>
 		<p><strong><?php _e( 'Headers', 'woocommerce' ); ?>:</strong></p>
 		<ul>
 			<?php foreach ( ( array ) $log['request_headers'] as $key => $value ) : ?>

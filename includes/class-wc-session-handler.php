@@ -3,6 +3,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Session' ) ) {
+	include_once( 'abstracts/abstract-wc-session.php' );
+}
+
 /**
  * Handle data for the current customers session.
  * Implements the WC_Session abstract class.
@@ -66,7 +70,6 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 		if ( ! is_user_logged_in() ) {
-			add_action( 'woocommerce_thankyou', array( $this, 'destroy_session' ) );
 			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
 		}
 	}
@@ -131,7 +134,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool|array
 	 */
 	public function get_session_cookie() {
-		if ( empty( $_COOKIE[ $this->_cookie ] ) ) {
+		if ( empty( $_COOKIE[ $this->_cookie ] ) || ! is_string( $_COOKIE[ $this->_cookie ] ) ) {
 			return false;
 		}
 
@@ -141,7 +144,7 @@ class WC_Session_Handler extends WC_Session {
 		$to_hash = $customer_id . '|' . $session_expiration;
 		$hash    = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
 
-		if ( ! hash_equals( $hash, $cookie_hash ) ) {
+		if ( empty( $cookie_hash ) || ! hash_equals( $hash, $cookie_hash ) ) {
 			return false;
 		}
 
@@ -174,39 +177,19 @@ class WC_Session_Handler extends WC_Session {
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
 
-			$session_id = $wpdb->get_var( $wpdb->prepare( "SELECT session_id FROM $this->_table WHERE session_key = %s;", $this->_customer_id ) );
-
-			if ( $session_id ) {
-				$wpdb->update(
-					$this->_table,
-					array(
-						'session_key'    => $this->_customer_id,
-						'session_value'  => maybe_serialize( $this->_data ),
-						'session_expiry' => $this->_session_expiration
-					),
-					array( 'session_id' => $session_id ),
-					array(
-						'%s',
-						'%s',
-						'%d'
-					),
-					array( '%d' )
-				);
-			} else {
-				$wpdb->insert(
-					$this->_table,
-					array(
-						'session_key'    => $this->_customer_id,
-						'session_value'  => maybe_serialize( $this->_data ),
-						'session_expiry' => $this->_session_expiration
-					),
-					array(
-						'%s',
-						'%s',
-						'%d'
-					)
-				);
-			}
+			$wpdb->replace(
+				$this->_table,
+				array(
+					'session_key' => $this->_customer_id,
+					'session_value' => maybe_serialize( $this->_data ),
+					'session_expiry' => $this->_session_expiration
+				),
+				array(
+					'%s',
+					'%s',
+					'%d'
+				)
+			);
 
 			// Set cache
 			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );

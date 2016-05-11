@@ -31,23 +31,23 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
 
-		// May need $wp global to access query vars
+		// May need $wp global to access query vars.
 		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
 		add_action( 'wp', array( __CLASS__, 'add_payment_method_action' ), 20 );
 	}
 
 	/**
-	 * Save and and update a billing or shipping address if the.
+	 * Save and and update a billing or shipping address if the
 	 * form was submitted through the user account page.
 	 */
 	public static function save_address() {
 		global $wp;
 
-		if ( 'POST' !== strtoupper( $_SERVER[ 'REQUEST_METHOD' ] ) ) {
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
 
-		if ( empty( $_POST[ 'action' ] ) || 'edit_address' !== $_POST[ 'action' ] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' ) ) {
+		if ( empty( $_POST['action'] ) || 'edit_address' !== $_POST['action'] || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-edit_address' ) ) {
 			return;
 		}
 
@@ -67,9 +67,9 @@ class WC_Form_Handler {
 				$field['type'] = 'text';
 			}
 
-			// Get Value
+			// Get Value.
 			switch ( $field['type'] ) {
-				case "checkbox" :
+				case 'checkbox' :
 					$_POST[ $key ] = isset( $_POST[ $key ] ) ? 1 : 0;
 				break;
 				default :
@@ -77,10 +77,10 @@ class WC_Form_Handler {
 				break;
 			}
 
-			// Hook to allow modification of value
+			// Hook to allow modification of value.
 			$_POST[ $key ] = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $_POST[ $key ] );
 
-			// Validation: Required fields
+			// Validation: Required fields.
 			if ( ! empty( $field['required'] ) && empty( $_POST[ $key ] ) ) {
 				wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
@@ -130,7 +130,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount') );
+			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
 		}
 	}
@@ -180,7 +180,8 @@ class WC_Form_Handler {
 		) );
 
 		foreach ( $required_fields as $field_key => $field_name ) {
-			if ( empty( $_POST[ $field_key ] ) ) {
+			$value = wc_clean( $_POST[ $field_key ] );
+			if ( empty( $value ) ) {
 				wc_add_notice( '<strong>' . esc_html( $field_name ) . '</strong> ' . __( 'is a required field.', 'woocommerce' ), 'error' );
 			}
 		}
@@ -275,6 +276,8 @@ class WC_Form_Handler {
 
 			if ( $order->id == $order_id && $order->order_key == $order_key && $order->needs_payment() ) {
 
+				do_action( 'woocommerce_before_pay_action', $order );
+
 				// Set customer location to order location
 				if ( $order->billing_country ) {
 					WC()->customer->set_country( $order->billing_country );
@@ -337,6 +340,9 @@ class WC_Form_Handler {
 					wp_safe_redirect( $order->get_checkout_order_received_url() );
 					exit;
 				}
+
+				do_action( 'woocommerce_after_pay_action', $order );
+
 			}
 
 		}
@@ -346,24 +352,22 @@ class WC_Form_Handler {
 	 * Process the add payment method form.
 	 */
 	public static function add_payment_method_action() {
-		if ( isset( $_POST['woocommerce_add_payment_method'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
+		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'], $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-add-payment-method' ) ) {
 
 			ob_start();
 
 			$payment_method = wc_clean( $_POST['payment_method'] );
 
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
 			// Validate
 			$available_gateways[ $payment_method ]->validate_fields();
 
 			// Process
 			if ( wc_notice_count( 'wc_errors' ) == 0 ) {
 				$result = $available_gateways[ $payment_method ]->add_payment_method();
-
 				// Redirect to success/confirmation/payment page
 				if ( $result['result'] == 'success' ) {
-					wc_add_message( __( 'Payment method added.', 'woocommerce' ) );
+					wc_add_notice( __( 'Payment method added.', 'woocommerce' ) );
 					wp_redirect( $result['redirect'] );
 					exit();
 				}
@@ -402,11 +406,13 @@ class WC_Form_Handler {
 
 				// Don't show undo link if removed item is out of stock.
 				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
-					$undo = WC()->cart->get_undo_url( $cart_item_key );
-					wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $item_removed_title, '<a href="' . esc_url( $undo ) . '">', '</a>' ) );
+					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
+					$removed_notice .= ' <a href="' . esc_url( WC()->cart->get_undo_url( $cart_item_key ) ) . '">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
-					wc_add_notice( sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title ) );
+					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
+
+				wc_add_notice( $removed_notice );
 			}
 
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
@@ -562,7 +568,7 @@ class WC_Form_Handler {
 
 			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->id == $order_id && $order->order_key == $order_key && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'woocommerce-cancel_order' ) ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order->id === $order_id && $order->order_key === $order_key ) {
 
 				// Cancel the order + restore stock
 				$order->cancel_order( __('Order cancelled by customer.', 'woocommerce' ) );
@@ -648,7 +654,7 @@ class WC_Form_Handler {
 		$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) !== false ) {
-			wc_add_to_cart_message( $product_id );
+			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}
 		return false;
@@ -678,7 +684,7 @@ class WC_Form_Handler {
 
 				if ( $passed_validation && WC()->cart->add_to_cart( $item, $quantity ) !== false ) {
 					$was_added_to_cart = true;
-					$added_to_cart[]   = $item;
+					$added_to_cart[ $item ] = $quantity;
 				}
 			}
 
@@ -709,7 +715,13 @@ class WC_Form_Handler {
 		$missing_attributes = array();
 		$variations         = array();
 		$attributes         = $adding_to_cart->get_attributes();
-		$variation          = wc_get_product( $variation_id );
+
+		// If no variation ID is set, attempt to get a variation ID from posted attributes.
+		if ( empty( $variation_id ) ) {
+			$variation_id = $adding_to_cart->get_matching_variation( wp_unslash( $_POST ) );
+		}
+
+		$variation = wc_get_product( $variation_id );
 
 		// Verify all attributes
 		foreach ( $attributes as $attribute ) {
@@ -752,7 +764,7 @@ class WC_Form_Handler {
 			$passed_validation 	= apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
 			if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) !== false ) {
-				wc_add_to_cart_message( $product_id );
+				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 				return true;
 			}
 		}
@@ -823,7 +835,7 @@ class WC_Form_Handler {
 					exit;
 				}
 
-			} catch (Exception $e) {
+			} catch ( Exception $e ) {
 
 				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
 
@@ -836,7 +848,13 @@ class WC_Form_Handler {
 	 */
 	public static function process_lost_password() {
 		if ( isset( $_POST['wc_reset_password'] ) && isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
-			WC_Shortcode_My_Account::retrieve_password();
+			$success = WC_Shortcode_My_Account::retrieve_password();
+
+			// If successful, redirect to my account with query arg set
+			if ( $success ) {
+				wp_redirect( add_query_arg( 'reset-link-sent', 'true', remove_query_arg( array( 'key', 'login', 'reset' ) ) ) );
+				exit;
+			}
 		}
 	}
 
@@ -879,7 +897,7 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_customer_reset_password', $user );
 
-				wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login' ) ) ) );
+				wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login', 'reset-link-sent' ) ) ) );
 				exit;
 			}
 		}

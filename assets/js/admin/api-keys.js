@@ -48,20 +48,35 @@
 		/**
 		 * Init TipTip
 		 */
-		initTipTip: function() {
-			$( '.copy-key', this.el ).tipTip({
-				'attribute':  'data-tip',
-				'activation': 'click',
-				'fadeIn':     50,
-				'fadeOut':    50,
-				'delay':      0
-			});
-
-			$( document.body ).on( 'copy', '.copy-key', function( e ) {
-				e.clipboardData.clearData();
-				e.clipboardData.setData( 'text/plain', $.trim( $( this ).prev( 'code' ).html() ) );
-				e.preventDefault();
-			});
+		initTipTip: function( css_class ) {
+			$( document.body )
+				.on( 'aftercopy', css_class, function( e ) {
+					if ( true === e.success['text/plain'] ) {
+						$( '#copy-error' ).text( '' );
+						$( css_class ).tipTip( {
+							'attribute':  'data-tip',
+							'activation': 'focus',
+							'fadeIn':     50,
+							'fadeOut':    50,
+							'delay':      0
+						} ).focus();
+					} else {
+						$( css_class ).parent().find( 'input' ).focus().select();
+						$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
+					}
+				} )
+				.on( 'click', css_class, function() {
+					if ( ! document.queryCommandSupported( 'copy' ) ) {
+						$( css_class ).parent().find( 'input' ).focus().select();
+						$( '#copy-error' ).text( woocommerce_admin_api_keys.clipboard_failed );
+					}
+				} )
+				.on( 'copy', css_class, function( e ) {
+					$( '#copy-error' ).text( '' );
+					e.clipboardData.clearData();
+					e.clipboardData.setData( 'text/plain', $.trim( $( this ).prev( 'input' ).val() ) );
+					e.preventDefault();
+				} );
 		},
 
 		/**
@@ -121,7 +136,8 @@
 								consumer_secret: data.consumer_secret
 							}) );
 							self.createQRCode( data.consumer_key, data.consumer_secret );
-							self.initTipTip();
+							self.initTipTip( '.copy-key' );
+							self.initTipTip( '.copy-secret' );
 						} else {
 							$( '#key_description', self.el ).val( data.description );
 							$( '#key_user', self.el ).val( data.user_id );

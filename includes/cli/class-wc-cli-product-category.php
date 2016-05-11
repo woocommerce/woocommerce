@@ -27,6 +27,17 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 * [--format=<format>]
 	 * : Accepted values: table, json, csv. Default: table.
 	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * name
+	 * * slug
+	 * * parent
+	 * * description
+	 * * display
+	 * * image
+	 * * count
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc product category get 123
@@ -60,6 +71,17 @@ class WC_CLI_Product_Category extends WC_CLI_Command {
 	 *
 	 * [--format=<format>]
 	 * : Acceptec values: table, csv, json, count, ids. Default: table.
+	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * * id
+	 * * name
+	 * * slug
+	 * * parent
+	 * * description
+	 * * display
+	 * * image
+	 * * count
 	 *
 	 * ## EXAMPLES
 	 *

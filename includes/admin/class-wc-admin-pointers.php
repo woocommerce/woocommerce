@@ -28,7 +28,9 @@ class WC_Admin_Pointers {
 	 * Setup pointers for screen.
 	 */
 	public function setup_pointers_for_screen() {
-		$screen = get_current_screen();
+		if ( ! $screen = get_current_screen() ) {
+			return;
+		}
 
 		switch ( $screen->id ) {
 			case 'product' :
@@ -218,7 +220,7 @@ class WC_Admin_Pointers {
 	 * @param array $pointers
 	 */
 	public function enqueue_pointers( $pointers ) {
-		$pointers = json_encode( $pointers );
+		$pointers = wp_json_encode( $pointers );
 		wp_enqueue_style( 'wp-pointer' );
 		wp_enqueue_script( 'wp-pointer' );
 		wc_enqueue_js( "

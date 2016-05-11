@@ -213,6 +213,8 @@ class WC_Comments {
 
 	/**
 	 * Modify recipient of review email.
+	 * @param array $emails
+	 * @param int $comment_id
 	 * @return array
 	 */
 	public static function comment_moderation_recipients( $emails, $comment_id ) {
@@ -233,6 +235,7 @@ class WC_Comments {
 		delete_post_meta( $post_id, '_wc_average_rating' );
 		delete_post_meta( $post_id, '_wc_rating_count' );
 		delete_post_meta( $post_id, '_wc_review_count' );
+		WC_Product::sync_average_rating( $post_id );
 	}
 
 	/**
@@ -268,6 +271,7 @@ class WC_Comments {
 			}
 
 			$stats['total_comments'] = $total;
+			$stats['all'] = $total;
 			foreach ( $approved as $key ) {
 				if ( empty( $stats[ $key ] ) ) {
 					$stats[ $key ] = 0;
