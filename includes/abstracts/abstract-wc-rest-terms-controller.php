@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package  WooCommerce/Abstracts
  * @version  2.6.0
  */
-abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
+abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 	/**
 	 * Route base.
@@ -79,6 +79,16 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'batch_items' ),
+				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_batch_schema' ),
 		) );
 	}
 
@@ -172,6 +182,25 @@ abstract class WC_REST_Terms_Controller extends WP_REST_Controller {
 
 		if ( ! $permissions ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access batch create, update and delete items.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function batch_items_permissions_check( $request ) {
+		$permissions = $this->check_permissions( $request, 'batch' );
+		if ( is_wp_error( $permissions ) ) {
+			return $permissions;
+		}
+
+		if ( ! $permissions ) {
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;

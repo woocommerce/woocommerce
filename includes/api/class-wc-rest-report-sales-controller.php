@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Report Sales controller class.
  *
  * @package WooCommerce/API
- * @extends WP_REST_Controller
+ * @extends WC_REST_Controller
  */
-class WC_REST_Report_Sales_Controller extends WP_REST_Controller {
+class WC_REST_Report_Sales_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package  WooCommerce/Abstracts
  * @version  2.6.0
  */
-abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
+abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -113,6 +113,20 @@ abstract class WC_REST_Posts_Controller extends WP_REST_Controller {
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access batch create, update and delete items.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return boolean
+	 */
+	public function batch_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'batch' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to manipule this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;

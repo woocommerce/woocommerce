@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Webhook Deliveries controller class.
  *
  * @package WooCommerce/API
- * @extends WP_REST_Controller
+ * @extends WC_REST_Controller
  */
-class WC_REST_Webhook_Deliveries_Controller extends WP_REST_Controller {
+class WC_REST_Webhook_Deliveries_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
