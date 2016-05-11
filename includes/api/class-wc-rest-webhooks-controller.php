@@ -72,9 +72,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 					'delivery_url' => array(
 						'required' => true,
 					),
-					'secret' => array(
-						'required' => true,
-					),
 				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -159,7 +156,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		$webhook->set_delivery_url( $request['delivery_url'] );
 
 		// Set secret.
-		$webhook->set_secret( $request['secret'] );
+		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : wc_webhook_generate_secret() );
 
 		// Set status.
 		if ( ! empty( $request['status'] ) ) {
@@ -509,7 +506,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'secret' => array(
-					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default to the current API user's consumer secret if not provided.", 'woocommerce' ),
+					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default is a MD5 hash from the current user's ID|username if not provided.", 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'edit' ),

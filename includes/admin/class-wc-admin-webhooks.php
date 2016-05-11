@@ -80,7 +80,7 @@ class WC_Admin_Webhooks {
 	 * @param WC_Webhook $webhook
 	 */
 	private function update_secret( $webhook ) {
-		$secret = ! empty( $_POST['webhook_secret'] ) ? $_POST['webhook_secret'] : get_user_meta( get_current_user_id(), 'woocommerce_api_consumer_secret', true );
+		$secret = ! empty( $_POST['webhook_secret'] ) ? $_POST['webhook_secret'] : wc_webhook_generate_secret();
 
 		$webhook->set_secret( $secret );
 	}
