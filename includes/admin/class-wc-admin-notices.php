@@ -24,6 +24,8 @@ class WC_Admin_Notices {
 	private $core_notices = array(
 		'install'             => 'install_notice',
 		'update'              => 'update_notice',
+		'updating'            => 'updating_notice',
+		'updated'             => 'updated_notice',
 		'template_files'      => 'template_file_check_notice',
 		'theme_support'       => 'theme_check_notice',
 		'legacy_shipping'     => 'legacy_shipping_notice',
@@ -166,6 +168,20 @@ class WC_Admin_Notices {
 	 */
 	public function update_notice() {
 		include( 'views/html-notice-update.php' );
+	}
+
+	/**
+	 * If we are updating, show progress.
+	 */
+	public function updating_notice() {
+		include( 'views/html-notice-updating.php' );
+	}
+
+	/**
+	 * If we are done updating, tell user.
+	 */
+	public function updated_notice() {
+		include( 'views/html-notice-updated.php' );
 	}
 
 	/**
