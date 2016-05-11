@@ -25,7 +25,7 @@ update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
  * Update legacy options to new math based options.
  */
 $shipping_methods = array(
-	'woocommerce_flat_rates'                        => new WC_Shipping_Flat_Rate(),
+	'woocommerce_flat_rates'                        => new WC_Shipping_Legacy_Flat_Rate(),
 	'woocommerce_international_delivery_flat_rates' => new WC_Shipping_Legacy_International_Delivery()
 );
 foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
