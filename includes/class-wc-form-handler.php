@@ -828,17 +828,12 @@ class WC_Form_Handler {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
-					// Feedback
-					wc_add_notice( sprintf( __( 'You are now logged in as <strong>%s</strong>', 'woocommerce' ), $user->display_name ) );
-
 					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 					exit;
 				}
 
 			} catch ( Exception $e ) {
-
 				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
-
 			}
 		}
 	}
