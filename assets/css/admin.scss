@@ -2383,21 +2383,6 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			line-height: 24px;
 		}
 	}
-	.wc-shipping-zone-method-enabled {
-		text-align: center;
-		.status-enabled {
-			display: inline-block;
-			&:before {
-				line-height: inherit;
-			}
-		}
-		.status-disabled {
-			display: inline-block;
-			&:before {
-				line-height: inherit;
-			}
-		}
-	}
 	.wc-shipping-zone-name,
 	.wc-shipping-zone-methods {
 		width: 25%;
@@ -2491,53 +2476,26 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			}
 		}
 	}
-	.wc-shipping-zone-method-actions, .wc-shipping-class-actions {
-		width: 4em;
-
-		a {
-			@include ir();
-			float: right;
-			padding: .5em;
-			cursor: pointer;
-			line-height: 24px;
-
+	.wc-shipping-zone-method-title {
+		width: 33%;
+		.wc-shipping-zone-method-delete {
+			color: red;
+		}
+	}
+	.wc-shipping-zone-method-enabled {
+		text-align: center;
+		.status-enabled {
+			margin-top: 1px;
+			display: inline-block;
 			&:before {
-				@include icon;
-				font-family: 'Dashicons';
-				color: #999;
-				vertical-align: middle;
-				line-height: 24px;
-				font-size: 16px;
-				margin: 0;
-			}
-			&:hover {
-				&:before {
-					color: #0073aa;
-				}
+				line-height: inherit;
 			}
 		}
-
-		a.wc-shipping-zone-delete, a.wc-shipping-zone-method-delete, a.wc-shipping-class-delete {
+		.status-disabled {
+			margin-top: 1px;
+			display: inline-block;
 			&:before {
-				content: "\f158";
-			}
-			&:hover {
-				&:before {
-					color: $red;
-				}
-			}
-		}
-
-		a.wc-shipping-class-edit {
-			&:before {
-				content: "\f464";
-			}
-		}
-
-		a.wc-shipping-zone-method-settings {
-			&:before {
-				content: "\f111";
-				margin-top: -1px;
+				line-height: inherit;
 			}
 		}
 	}
@@ -2545,12 +2503,12 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		input, select {
 			vertical-align: middle !important;
 		}
-		.button-primary {
+		.button-secondary {
 			float: right;
 		}
 	}
 	.wc-shipping-zone-method-selector {
-		float: left;
+		float: right;
 		select {
 			margin:0;
 			height: 29px;
