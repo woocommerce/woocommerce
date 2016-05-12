@@ -1191,7 +1191,7 @@ jQuery( function ( $ ) {
 		delete_order_note: function() {
 			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_delete_note ) ) {
 				var note = $( this ).closest( 'li.note' );
-	
+
 				$( note ).block({
 					message: null,
 					overlayCSS: {
@@ -1199,19 +1199,19 @@ jQuery( function ( $ ) {
 						opacity: 0.6
 					}
 				});
-	
+
 				var data = {
 					action:   'woocommerce_delete_order_note',
 					note_id:  $( note ).attr( 'rel' ),
 					security: woocommerce_admin_meta_boxes.delete_order_note_nonce
 				};
-	
+
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
 					$( note ).remove();
 				});
-	
-				return false;
 			}
+
+			return false;
 		}
 	};
 
