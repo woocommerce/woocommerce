@@ -20,19 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<td colspan="5">
 				<input type="submit" name="save" class="button button-primary wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled />
-				<div class="wc-shipping-zone-method-selector">
-					<select name="add_method_id">
-						<?php
-							foreach ( $shipping_methods as $method ) {
-								if ( ! $method->supports( 'shipping-zones' ) ) {
-									continue;
-								}
-								echo '<option value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</option>';
-							}
-						?>
-					</select>
-					<input type="submit" class="button wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" />
-				</div>
+				<input type="submit" class="button button-secondary wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" />
 			</td>
 		</tr>
 	</tfoot>
@@ -83,6 +71,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<footer>
 					<div class="inner">
 						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Save changes', 'woocommerce' ); ?></button>
+					</div>
+				</footer>
+			</section>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
+</script>
+
+<script type="text/template" id="tmpl-wc-modal-add-shipping-method">
+	<div class="wc-backbone-modal">
+		<div class="wc-backbone-modal-content">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php _e( 'Add shipping method', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
+					</button>
+				</header>
+				<article>
+					<form action="" method="post">
+						<div class="wc-shipping-zone-method-selector">
+							<select name="add_method_id">
+								<?php
+									foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+										if ( ! $method->supports( 'shipping-zones' ) ) {
+											continue;
+										}
+										echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</li>';
+									}
+								?>
+							</select>
+						</div>
+					</form>
+				</article>
+				<footer>
+					<div class="inner">
+						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Add shipping method', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
