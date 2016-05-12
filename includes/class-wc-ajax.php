@@ -3321,17 +3321,11 @@ class WC_AJAX {
 			if ( isset( $data['newRow'] ) ) {
 				$update_args = array_filter( $update_args );
 				if ( empty( $update_args['name'] ) ) {
-					wp_send_json_error( __( 'Shipping Class name is required', 'woocommerce' ) );
-					exit;
+					continue;
 				}
-				$result      = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+				$result = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
 			} else {
 				$result = wp_update_term( $term_id, 'product_shipping_class', $update_args );
-			}
-
-			if ( is_wp_error( $result ) ) {
-				wp_send_json_error( $result->get_error_message() );
-				exit;
 			}
 		}
 

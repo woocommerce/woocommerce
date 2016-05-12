@@ -42,7 +42,7 @@
 							window.alert( data.strings.save_failed );
 						}
 					}
-				},
+				}
 			} ),
 
 			// Backbone view

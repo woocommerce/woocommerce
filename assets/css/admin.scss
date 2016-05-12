@@ -2338,7 +2338,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			}
 		}
 	}
-	tr.odd {
+	tr.odd, .wc-shipping-class-rows tr:nth-child(odd) {
 		td {
 			background: #f9f9f9;
 		}
@@ -2395,7 +2395,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		input, select, textarea {
 			width: 100%;
 		}
-		a.wc-shipping-zone-delete {
+		a.wc-shipping-zone-delete, a.wc-shipping-class-delete {
 			color: red;
 		}
 		.wc-shipping-zone-postcodes-toggle {
