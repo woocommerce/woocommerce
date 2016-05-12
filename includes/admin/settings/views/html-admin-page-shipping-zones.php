@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td class="wc-shipping-zone-name">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Rest of the World', 'woocommerce' ); ?></a>
 				<div class="row-actions">
-					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit shipping methods', 'woocommerce' ); ?></a>
+					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'View', 'woocommerce' ); ?></a>
 				</div>
 			</td>
 			<td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping Methods added here will apply to shipping addresses that aren&lsquo;t included in any other shipping zone.', 'woocommerce' ); ?></td>
@@ -81,7 +81,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<div class="view">
 				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
 				<div class="row-actions">
-					<a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit shipping methods', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Remove', 'woocommerce' ); ?></a>
+					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'View', 'woocommerce' ); ?></a> | <a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Remove', 'woocommerce' ); ?></a>
 				</div>
 			</div>
 			<div class="edit">

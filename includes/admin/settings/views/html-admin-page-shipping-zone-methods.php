@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h2><?php _e( 'Shipping Methods', 'woocommerce' ); ?> (<?php echo esc_html( $zone->get_zone_name() ); ?>) <?php echo wc_back_link( __( 'Return to Shipping Zones', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?></h2>
+<h2><?php printf( __( '&ldquo;%s&rdquo; Shipping Methods', 'woocommerce' ), esc_html( $zone->get_zone_name() ) ); ?> <?php echo wc_back_link( __( 'Return to Shipping Zones', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?></h2>
 <p><?php _e( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ); ?><p>
 <table class="wc-shipping-zone-methods widefat">
 	<thead>
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tr data-id="{{ data.instance_id }}" data-enabled="{{ data.enabled }}">
 		<td width="1%" class="wc-shipping-zone-method-sort"></td>
 		<td class="wc-shipping-zone-method-title">
-			<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{ data.title }}</a>
+			<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}">{{ data.title }}</a>
 			<div class="row-actions">
 				<a class="wc-shipping-zone-method-settings" href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id={{ data.instance_id }}"><?php _e( 'Settings', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-method-delete"><?php _e( 'Remove', 'woocommerce' ); ?></a>
 			</div>
