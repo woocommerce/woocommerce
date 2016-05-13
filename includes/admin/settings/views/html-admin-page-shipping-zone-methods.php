@@ -4,8 +4,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h2><?php printf( __( '&ldquo;%s&rdquo; Shipping Methods', 'woocommerce' ), esc_html( $zone->get_zone_name() ) ); ?> <?php echo wc_back_link( __( 'Return to Shipping Zones', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?></h2>
-<p><?php _e( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ); ?><p>
+<h2>
+	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping' ); ?>"><?php _e( 'Shipping Zones', 'woocommerce' ); ?></a> &gt;
+	<?php echo esc_html( $zone->get_zone_name() ); ?>
+	<?php echo wc_help_tip( __( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ) ); ?>
+</h2>
+
 <table class="wc-shipping-zone-methods widefat">
 	<thead>
 		<tr>
