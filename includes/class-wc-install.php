@@ -405,6 +405,7 @@ class WC_Install {
 
 	/**
 	 * Get Table schema.
+	 * https://github.com/woothemes/woocommerce/wiki/Database-Description/
 	 * @return string
 	 */
 	private static function get_schema() {
