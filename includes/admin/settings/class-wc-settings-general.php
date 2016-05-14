@@ -69,13 +69,23 @@ class WC_Settings_General extends WC_Settings_Page {
 				'css'      => 'min-width: 350px;',
 				'desc_tip' =>  true,
 				'options'  => array(
-					'all'      => __( 'Sell to all countries', 'woocommerce' ),
-					'specific' => __( 'Sell to specific countries only', 'woocommerce' )
+					'all'        => __( 'Sell to All Countries', 'woocommerce' ),
+					'all_except' => __( 'Sell to All Countries, Except For&hellip;', 'woocommerce' ),
+					'specific'   => __( 'Sell to Specific Countries', 'woocommerce' )
 				)
 			),
 
 			array(
-				'title'   => __( 'Specific Countries', 'woocommerce' ),
+				'title'   => __( 'Sell to All Countries, Except For&hellip;', 'woocommerce' ),
+				'desc'    => '',
+				'id'      => 'woocommerce_all_except_countries',
+				'css'     => 'min-width: 350px;',
+				'default' => '',
+				'type'    => 'multi_select_countries'
+			),
+
+			array(
+				'title'   => __( 'Sell to Specific Countries', 'woocommerce' ),
 				'desc'    => '',
 				'id'      => 'woocommerce_specific_allowed_countries',
 				'css'     => 'min-width: 350px;',
@@ -84,19 +94,51 @@ class WC_Settings_General extends WC_Settings_Page {
 			),
 
 			array(
-				'title'    => __( 'Default Customer Address', 'woocommerce' ),
+				'title'    => __( 'Shipping Location(s)', 'woocommerce' ),
+				'desc'     => __( 'Choose which countries you want to ship to, or choose to ship to all locations you sell to.', 'woocommerce' ),
+				'id'       => 'woocommerce_ship_to_countries',
+				'default'  => '',
+				'type'     => 'select',
+				'class'    => 'wc-enhanced-select',
+				'desc_tip' => true,
+				'options'  => array(
+					''         => __( 'Ship to all countries you sell to', 'woocommerce' ),
+					'all'      => __( 'Ship to all countries', 'woocommerce' ),
+					'specific' => __( 'Ship to specific countries only', 'woocommerce' ),
+					'disabled' => __( 'Disable shipping &amp; shipping calculations', 'woocommerce' ),
+				)
+			),
+
+			array(
+				'title'   => __( 'Ship to Specific Countries', 'woocommerce' ),
+				'desc'    => '',
+				'id'      => 'woocommerce_specific_ship_to_countries',
+				'css'     => '',
+				'default' => '',
+				'type'    => 'multi_select_countries'
+			),
+
+			array(
+				'title'    => __( 'Default Customer Location', 'woocommerce' ),
 				'id'       => 'woocommerce_default_customer_address',
-				'desc_tip' =>  __( 'This option determines the customers default address (before they input their details).', 'woocommerce' ),
-				'desc'     =>  sprintf( __( 'The %sMaxMind GeoLite Database%s will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ), '<a href="http://dev.maxmind.com/geoip/legacy/geolite/">', '</a>' ),
+				'desc_tip' =>  __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
 				'default'  => 'geolocation',
 				'type'     => 'select',
 				'class'    => 'wc-enhanced-select',
 				'options'  => array(
-					''                 => __( 'No address', 'woocommerce' ),
+					''                 => __( 'No location by default', 'woocommerce' ),
 					'base'             => __( 'Shop base address', 'woocommerce' ),
 					'geolocation'      => __( 'Geolocate', 'woocommerce' ),
 					'geolocation_ajax' => __( 'Geolocate (with page caching support)', 'woocommerce' ),
 				),
+			),
+
+			array(
+				'title'   => __( 'Enable Taxes', 'woocommerce' ),
+				'desc'    => __( 'Enable taxes and tax calculations', 'woocommerce' ),
+				'id'      => 'woocommerce_calc_taxes',
+				'default' => 'no',
+				'type'    => 'checkbox'
 			),
 
 			array(

@@ -8,10 +8,13 @@ jQuery( function( $ ) {
 
 	/* Storage Handling */
 	var $supports_html5_storage;
+
 	try {
 		$supports_html5_storage = ( 'sessionStorage' in window && window.sessionStorage !== null );
 		window.sessionStorage.setItem( 'wc', 'test' );
 		window.sessionStorage.removeItem( 'wc' );
+		window.localStorage.setItem( 'wc', 'test' );
+		window.localStorage.removeItem( 'wc' );
 	} catch( err ) {
 		$supports_html5_storage = false;
 	}

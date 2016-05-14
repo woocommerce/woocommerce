@@ -44,6 +44,8 @@ class WC_Email_Failed_Order extends WC_Email {
 
 	/**
 	 * Trigger.
+	 *
+	 * @param int $order_id
 	 */
 	public function trigger( $order_id ) {
 		if ( $order_id ) {
@@ -62,7 +64,7 @@ class WC_Email_Failed_Order extends WC_Email {
 	}
 
 	/**
-	 * get_content_html function.
+	 * Get content html.
 	 *
 	 * @access public
 	 * @return string

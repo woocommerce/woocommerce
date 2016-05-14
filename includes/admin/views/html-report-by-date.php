@@ -11,7 +11,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div id="poststuff" class="woocommerce-reports-wide">
 	<div class="postbox">
-		<h3 class="stats_range">
+
+	<h3 class="screen-reader-text"><?php echo esc_html( $ranges[ $current_range ] ); ?></h3>
+
+		<div class="stats_range">
 			<?php $this->get_export_button(); ?>
 			<ul>
 				<?php
@@ -43,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</form>
 				</li>
 			</ul>
-		</h3>
+		</div>
 		<?php if ( empty( $hide_sidebar ) ) : ?>
 			<div class="inside chart-with-sidebar">
 				<div class="chart-sidebar">

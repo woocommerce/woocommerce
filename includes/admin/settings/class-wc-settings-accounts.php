@@ -55,56 +55,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'account_page_options' ),
 
-			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
-
-			array(
-				'title'    => __( 'View Order', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; View Order page', 'woocommerce' ),
-				'id'       => 'woocommerce_myaccount_view_order_endpoint',
-				'type'     => 'text',
-				'default'  => 'view-order',
-				'desc_tip' => true,
-			),
-
-			array(
-				'title'    => __( 'Edit Account', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Edit Account page', 'woocommerce' ),
-				'id'       => 'woocommerce_myaccount_edit_account_endpoint',
-				'type'     => 'text',
-				'default'  => 'edit-account',
-				'desc_tip' => true,
-			),
-
-			array(
-				'title'    => __( 'Edit Address', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Edit Address page', 'woocommerce' ),
-				'id'       => 'woocommerce_myaccount_edit_address_endpoint',
-				'type'     => 'text',
-				'default'  => 'edit-address',
-				'desc_tip' => true,
-			),
-
-			array(
-				'title'    => __( 'Lost Password', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the My Account &rarr; Lost Password page', 'woocommerce' ),
-				'id'       => 'woocommerce_myaccount_lost_password_endpoint',
-				'type'     => 'text',
-				'default'  => 'lost-password',
-				'desc_tip' => true,
-			),
-
-			array(
-				'title' => __( 'Logout', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true', 'woocommerce' ),
-				'id'       => 'woocommerce_logout_endpoint',
-				'type'     => 'text',
-				'default'  => 'customer-logout',
-				'desc_tip' => true,
-			),
-
-			array( 'type' => 'sectionend', 'id' => 'account_endpoint_options' ),
-
-			array(	'title' => __( 'Registration Options', 'woocommerce' ), 'type' => 'title', 'id' => 'account_registration_options' ),
+			array(	'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
 
 			array(
 				'title'         => __( 'Enable Registration', 'woocommerce' ),
@@ -126,6 +77,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array(
+				'title'         => __( 'Login', 'woocommerce' ),
 				'desc'          => __( 'Display returning customer login reminder on the "Checkout" page', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_checkout_login_reminder',
 				'default'       => 'yes',
@@ -154,6 +106,82 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'account_registration_options'),
+
+			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
+
+			array(
+				'title'    => __( 'Orders', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Orders page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_orders_endpoint',
+				'type'     => 'text',
+				'default'  => 'orders',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'View Order', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; View Order page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_view_order_endpoint',
+				'type'     => 'text',
+				'default'  => 'view-order',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Downloads', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Downloads page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_downloads_endpoint',
+				'type'     => 'text',
+				'default'  => 'downloads',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Edit Account', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Edit Account page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_edit_account_endpoint',
+				'type'     => 'text',
+				'default'  => 'edit-account',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Edit Address', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Edit Address page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_edit_address_endpoint',
+				'type'     => 'text',
+				'default'  => 'edit-address',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Payment Methods', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Payment Methods page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_payment_methods_endpoint',
+				'type'     => 'text',
+				'default'  => 'payment-methods',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title'    => __( 'Lost Password', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the My Account &rarr; Lost Password page', 'woocommerce' ),
+				'id'       => 'woocommerce_myaccount_lost_password_endpoint',
+				'type'     => 'text',
+				'default'  => 'lost-password',
+				'desc_tip' => true,
+			),
+
+			array(
+				'title' => __( 'Logout', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true', 'woocommerce' ),
+				'id'       => 'woocommerce_logout_endpoint',
+				'type'     => 'text',
+				'default'  => 'customer-logout',
+				'desc_tip' => true,
+			),
+
+			array( 'type' => 'sectionend', 'id' => 'account_endpoint_options' ),
 
 		) );
 

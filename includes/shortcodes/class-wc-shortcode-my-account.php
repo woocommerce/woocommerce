@@ -35,7 +35,6 @@ class WC_Shortcode_My_Account {
 		}
 
 		if ( ! is_user_logged_in() ) {
-
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) ) {
@@ -43,66 +42,53 @@ class WC_Shortcode_My_Account {
 			}
 
 			if ( isset( $wp->query_vars['lost-password'] ) ) {
-
 				self::lost_password();
-
 			} else {
-
 				wc_get_template( 'myaccount/form-login.php' );
-
+			}
+	 	} else {
+			// See if showing an account endpoint
+			foreach ( $wp->query_vars as $key => $value ) {
+				// Ignore pagename param.
+				if ( 'pagename' === $key ) {
+					continue;
+				}
+				if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
+					do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+					return;
+				}
 			}
 
-		} else {
-
-			if ( ! empty( $wp->query_vars['view-order'] ) ) {
-
-				self::view_order( absint( $wp->query_vars['view-order'] ) );
-
-			} elseif ( isset( $wp->query_vars['edit-account'] ) ) {
-
-				self::edit_account();
-
-			} elseif ( isset( $wp->query_vars['edit-address'] ) ) {
-
-				self::edit_address( wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) );
-
-			} elseif ( isset( $wp->query_vars['add-payment-method'] ) ) {
-
-				self::add_payment_method();
-
-			} else {
-
-				self::my_account( $atts );
-
-			}
+			// No endpoint? Show main account page.
+			self::my_account( $atts );
 		}
 	}
 
 	/**
 	 * My account page.
 	 *
-	 * @param  array $atts
+	 * @param array $atts
 	 */
 	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
-	    	'order_count' => 15
+	    	'order_count' => 15 // @deprecated 2.6.0. Keep for backward compatibility.
 		), $atts ) );
 
 		wc_get_template( 'myaccount/my-account.php', array(
-			'current_user' 	=> get_user_by( 'id', get_current_user_id() ),
-			'order_count' 	=> 'all' == $order_count ? -1 : $order_count
+			'current_user' => get_user_by( 'id', get_current_user_id() ),
+			'order_count'  => 'all' == $order_count ? -1 : $order_count
 		) );
 	}
 
 	/**
 	 * View order page.
 	 *
-	 * @param  int $order_id
+	 * @param int $order_id
 	 */
-	private static function view_order( $order_id ) {
+	public static function view_order( $order_id ) {
 
-		$user_id      	= get_current_user_id();
-		$order 			= wc_get_order( $order_id );
+		$user_id = get_current_user_id();
+		$order   = wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . __( 'Invalid order.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ).'" class="wc-forward">'. __( 'My Account', 'woocommerce' ) .'</a>' . '</div>';
@@ -123,22 +109,17 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Edit account details page.
 	 */
-	private static function edit_account() {
+	public static function edit_account() {
 		wc_get_template( 'myaccount/form-edit-account.php', array( 'user' => get_user_by( 'id', get_current_user_id() ) ) );
 	}
 
 	/**
 	 * Edit address page.
 	 *
-	 * @access public
 	 * @param string $load_address
 	 */
-	private static function edit_address( $load_address = 'billing' ) {
-
-		// Current user
-		global $current_user;
-		get_currentuserinfo();
-
+	public static function edit_address( $load_address = 'billing' ) {
+		$current_user = wp_get_current_user();
 		$load_address = sanitize_key( $load_address );
 
 		$address = WC()->countries->get_address_fields( get_user_meta( get_current_user_id(), $load_address . '_country', true ), $load_address . '_' );
@@ -179,28 +160,41 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
-	 * Lost password page.
+	 * Lost password page handling.
 	 */
 	public static function lost_password() {
-		// arguments to pass to template
-		$args = array( 'form' => 'lost_password' );
-
-		// process reset key / login from email confirmation link
-		if ( isset( $_GET['key'] ) && isset( $_GET['login'] ) ) {
+		/**
+		 * Process reset key / login from email confirmation link
+		 */
+		if ( ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
 
 			$user = self::check_password_reset_key( $_GET['key'], $_GET['login'] );
 
 			// reset key / login is correct, display reset password form with hidden key / login values
-			if( is_object( $user ) ) {
-				$args['form'] = 'reset_password';
-				$args['key'] = esc_attr( $_GET['key'] );
-				$args['login'] = esc_attr( $_GET['login'] );
+			if ( is_object( $user ) ) {
+				return wc_get_template( 'myaccount/form-reset-password.php', array(
+					'key'   => wc_clean( $_GET['key'] ),
+					'login' => wc_clean( $_GET['login'] ),
+				) );
 			}
-		} elseif ( isset( $_GET['reset'] ) ) {
-			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
+
+		/**
+		 * After sending the reset link, don't show the form again.
+		 */
+	 	} elseif ( ! empty( $_GET['reset-link-sent'] ) ) {
+			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
+
+		/**
+		 * After reset, show confirmation message.
+		 */
+	 	} elseif ( ! empty( $_GET['reset'] ) ) {
+			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a class="button" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 		}
 
-		wc_get_template( 'myaccount/form-lost-password.php', $args );
+		// Show lost password form by default
+		wc_get_template( 'myaccount/form-lost-password.php', array(
+			'form'  => 'lost_password',
+		) );
 	}
 
 	/**
@@ -208,7 +202,6 @@ class WC_Shortcode_My_Account {
 	 *
 	 * Based on retrieve_password() in core wp-login.php.
 	 *
-	 * @access public
 	 * @uses $wpdb WordPress Database object
 	 * @return bool True: when finish. False: on error
 	 */
@@ -280,7 +273,6 @@ class WC_Shortcode_My_Account {
 		WC()->mailer(); // load email classes
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
-		wc_add_notice( __( 'Check your e-mail for the confirmation link.', 'woocommerce' ) );
 		return true;
 	}
 
@@ -344,7 +336,7 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Show the add payment method page.
 	 */
-	private static function add_payment_method() {
+	public static function add_payment_method() {
 
 		if ( ! is_user_logged_in() ) {
 
@@ -355,18 +347,78 @@ class WC_Shortcode_My_Account {
 
 			do_action( 'before_woocommerce_add_payment_method' );
 
-			wc_add_notice( __( 'Add a new payment method.', 'woocommerce' ), 'notice'  );
-
 			wc_print_notices();
 
-			// Add payment method form
 			wc_get_template( 'myaccount/form-add-payment-method.php' );
-
-			wc_print_notices();
 
 			do_action( 'after_woocommerce_add_payment_method' );
 
 		}
 
 	}
+
+	/**
+	 * Deletes a payment method from a users list and displays a message to the user
+	 *
+	 * @since  2.6
+	 * @param  int $id  Payment Token ID
+	 */
+	public static function delete_payment_method( $id ) {
+		$token = WC_Payment_Tokens::get( $id );
+
+		if ( is_null( $token ) ) {
+			wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+			woocommerce_account_payment_methods();
+			return false;
+		}
+
+		if ( get_current_user_id() !== $token->get_user_id() ) {
+			wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+			woocommerce_account_payment_methods();
+			return false;
+		}
+
+		if ( false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'delete-payment-method-' . $id ) ) {
+			wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+			woocommerce_account_payment_methods();
+			return false;
+		}
+
+		WC_Payment_Tokens::delete( $id );
+		wc_add_notice( __( 'Payment method deleted.', 'woocommerce' ) );
+		woocommerce_account_payment_methods();
+	}
+
+	/**
+	 * Sets a payment method as default and displays a message to the user
+	 *
+	 * @since  2.6
+	 * @param  int $id  Payment Token ID
+	 */
+	public static function set_default_payment_method( $id ) {
+		$token = WC_Payment_Tokens::get( $id );
+
+		if ( is_null( $token ) ) {
+			wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+			woocommerce_account_payment_methods();
+			return false;
+		}
+
+		if ( get_current_user_id() !== $token->get_user_id() ) {
+			wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+			woocommerce_account_payment_methods();
+			return false;
+		}
+
+		if ( false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'set-default-payment-method-' . $id ) ) {
+			wc_add_notice( __( 'Invalid payment method', 'woocommerce' ), 'error' );
+			woocommerce_account_payment_methods();
+			return false;
+		}
+
+		WC_Payment_Tokens::set_users_default( $token->get_user_id(), intval( $id ) );
+		wc_add_notice( __( 'This payment method was successfully set as your default.', 'woocommerce' ) );
+		woocommerce_account_payment_methods();
+	}
+
 }

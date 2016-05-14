@@ -47,21 +47,15 @@ class WC_Admin_Dashboard {
 		global $wpdb;
 
 		include_once( 'reports/class-wc-admin-report.php' );
+		include_once( 'reports/class-wc-report-sales-by-date.php' );
 
-		$reports = new WC_Admin_Report();
-
-		// Sales
-		$query            = array();
-		$query['fields']  = "SELECT SUM( postmeta.meta_value ) FROM {$wpdb->posts} as posts";
-		$query['join']    = "INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id LEFT JOIN {$wpdb->posts} AS parent ON posts.post_parent = parent.ID";
-		$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", array_merge( wc_get_order_types( 'sales-reports' ), array( 'shop_order_refund' ) ) ) . "' ) ";
-		$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
-		$query['where']  .= "AND ( parent.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) OR parent.ID IS NULL ) ";
-		$query['where']  .= "AND postmeta.meta_key   = '_order_total' ";
-		$query['where']  .= "AND posts.post_date >= '" . date( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
-		$query['where']  .= "AND posts.post_date <= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
-
-		$sales = $wpdb->get_var( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_sales_query', $query ) ) );
+		$reports                       = new WC_Admin_Report();
+		$sales_by_date                 = new WC_Report_Sales_By_Date();
+		$sales_by_date->start_date     = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
+		$sales_by_date->end_date       = current_time( 'timestamp' );
+		$sales_by_date->chart_groupby  = 'day';
+		$sales_by_date->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
+		$report_data                   = $sales_by_date->get_report_data();
 
 		// Get top seller
 		$query            = array();
@@ -132,7 +126,7 @@ class WC_Admin_Dashboard {
 			<li class="sales-this-month">
 				<a href="<?php echo admin_url( 'admin.php?page=wc-reports&tab=orders&range=month' ); ?>">
 					<?php echo $reports->sales_sparkline( '', max( 7, date( 'd', current_time( 'timestamp' ) ) ) ); ?>
-					<?php printf( __( "<strong>%s</strong> sales this month", 'woocommerce' ), wc_price( $sales ) ); ?>
+					<?php printf( __( "<strong>%s</strong> net sales this month", 'woocommerce' ), wc_price( $report_data->net_sales ) ); ?>
 				</a>
 			</li>
 			<?php if ( $top_seller && $top_seller->qty ) : ?>

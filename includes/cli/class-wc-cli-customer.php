@@ -147,7 +147,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * <customer>
-	 * : The customer ID, email, or username to delete.
+	 * : The customer ID, email or username.
 	 *
 	 * [--field=<field>]
 	 * : Instead of returning the whole customer fields, returns the value of a single fields.
@@ -160,7 +160,9 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 *
 	 * ## AVAILABLE FIELDS
 	 *
-	 * See
+	 * * download_id
+	 * * download_name
+	 * * access_expires
 	 *
 	 * ## EXAMPLES
 	 *
@@ -386,7 +388,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * <customer>
-	 * : The customer ID, email, or username to delete.
+	 * : The customer ID, email or username.
 	 *
 	 * [--field=<field>]
 	 * : Instead of returning the whole customer fields, returns the value of a single fields.
@@ -423,7 +425,7 @@ class WC_CLI_Customer extends WC_CLI_Command {
 	 * <customer>
 	 * : Customer ID, email, or username.
 	 *
-	 * --<field>=<value>
+	 * [--<field>=<value>]
 	 * : One or more fields to update.
 	 *
 	 * ## AVAILABLE FIELDS

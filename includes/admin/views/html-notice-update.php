@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div id="message" class="updated woocommerce-message wc-connect">
-	<p><?php _e( '<strong>WooCommerce Data Update Required</strong> &#8211; We just need to update your install to the latest version', 'woocommerce' ); ?></p>
+	<p><?php _e( '<strong>WooCommerce Data Update Required</strong> &#8211; We need to update your store\'s database to the latest version.', 'woocommerce' ); ?></p>
 	<p class="submit"><a href="<?php echo esc_url( add_query_arg( 'do_update_woocommerce', 'true', admin_url( 'admin.php?page=wc-settings' ) ) ); ?>" class="wc-update-now button-primary"><?php _e( 'Run the updater', 'woocommerce' ); ?></a></p>
 </div>
 <script type="text/javascript">

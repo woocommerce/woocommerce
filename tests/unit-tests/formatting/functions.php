@@ -1,7 +1,5 @@
 <?php
 
-namespace WooCommerce\Tests\Formatting;
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Formatting
@@ -9,7 +7,7 @@ namespace WooCommerce\Tests\Formatting;
  *
  * @todo Split formatting class into smaller classes
  */
-class Functions extends \WC_Unit_Test_Case {
+class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_sanitize_taxonomy_name().
@@ -95,10 +93,17 @@ class Functions extends \WC_Unit_Test_Case {
 			array( 0, wc_get_dimension( -10, 'mm' ) ),
 		);
 
+		$custom = array(
+			array( 25.4, wc_get_dimension( 10, 'cm', 'in' ) ),
+			array( 914.4, wc_get_dimension( 10, 'cm', 'yd' ) ),
+			array( 393.7, wc_get_dimension( 10, 'in', 'm' ) ),
+			array( 0.010936133, wc_get_dimension( 10, 'yd', 'mm' ) )
+		);
+
 		// restore default
 		update_option( 'woocommerce_dimension_unit', $default_unit );
 
-		return array_merge( $cm, $in, $m, $mm, $yd, $n );
+		return array_merge( $cm, $in, $m, $mm, $yd, $n, $custom );
 
 	}
 
@@ -151,6 +156,12 @@ class Functions extends \WC_Unit_Test_Case {
 		$this->assertEquals( 283.495, wc_get_weight( 10, 'g' ) );
 		$this->assertEquals( 0.6249987469, wc_get_weight( 10, 'lbs' ) );
 		$this->assertEquals( 10, wc_get_weight( 10, 'oz' ) );
+
+		// custom from unit
+		$this->assertEquals( 0.283495, wc_get_weight( 10, 'kg', 'oz' ) );
+		$this->assertEquals( 0.01, wc_get_weight( 10, 'kg', 'g' ) );
+		$this->assertEquals( 4.53592, wc_get_weight( 10, 'kg', 'lbs' ) );
+		$this->assertEquals( 10, wc_get_weight( 10, 'kg', 'kg' ) );
 
 		// negative
 		$this->assertEquals( 0, wc_get_weight( -10, 'g' ) );
@@ -627,10 +638,10 @@ class Functions extends \WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_trim_string() {
-
 		$this->assertEquals( 'string', wc_trim_string( 'string' ) );
 		$this->assertEquals( 's...',   wc_trim_string( 'string', 4 ) );
 		$this->assertEquals( 'st.',    wc_trim_string( 'string', 3, '.' ) );
+		$this->assertEquals( 'string¥', wc_trim_string( 'string¥', 7, '' ) );
 	}
 
 }

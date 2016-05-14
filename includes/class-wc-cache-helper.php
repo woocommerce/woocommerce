@@ -189,15 +189,15 @@ class WC_Cache_Helper {
 	 * @access private
 	 */
 	private static function nocache() {
-		if ( ! defined( 'DONOTCACHEPAGE' ) )
-			define( "DONOTCACHEPAGE", "true" );
-
-		if ( ! defined( 'DONOTCACHEOBJECT' ) )
-			define( "DONOTCACHEOBJECT", "true" );
-
-		if ( ! defined( 'DONOTCACHEDB' ) )
-			define( "DONOTCACHEDB", "true" );
-
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( "DONOTCACHEPAGE", true );
+		}
+		if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
+			define( "DONOTCACHEOBJECT", true );
+		}
+		if ( ! defined( 'DONOTCACHEDB' ) ) {
+			define( "DONOTCACHEDB", true );
+		}
 		nocache_headers();
 	}
 

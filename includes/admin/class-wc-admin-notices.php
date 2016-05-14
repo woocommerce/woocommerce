@@ -21,50 +21,84 @@ class WC_Admin_Notices {
 	 * Array of notices - name => callback.
 	 * @var array
 	 */
-	private $core_notices = array(
-		'install'        => 'install_notice',
-		'update'         => 'update_notice',
-		'template_files' => 'template_file_check_notice',
-		'theme_support'  => 'theme_check_notice'
+	private static $core_notices = array(
+		'install'             => 'install_notice',
+		'update'              => 'update_notice',
+		'updating'            => 'updating_notice',
+		'template_files'      => 'template_file_check_notice',
+		'theme_support'       => 'theme_check_notice',
+		'legacy_shipping'     => 'legacy_shipping_notice',
+		'no_shipping_methods' => 'no_shipping_methods_notice',
+		'simplify_commerce'   => 'simplify_commerce_notice',
 	);
+
+	/**
+	 * Stores notices.
+	 * @var array
+	 */
+	private static $notices = array();
 
 	/**
 	 * Constructor.
 	 */
-	public function __construct() {
-		add_action( 'switch_theme', array( $this, 'reset_admin_notices' ) );
-		add_action( 'woocommerce_installed', array( $this, 'reset_admin_notices' ) );
-		add_action( 'wp_loaded', array( $this, 'hide_notices' ) );
+	public static function init() {
+		self::$notices = get_option( 'woocommerce_admin_notices', array() );
+
+		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
+		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
+		add_action( 'wp_loaded', array( __CLASS__, 'hide_notices' ) );
+		add_action( 'shutdown', array( __CLASS__, 'store_notices' ) );
 
 		if ( current_user_can( 'manage_woocommerce' ) ) {
-			add_action( 'admin_print_styles', array( $this, 'add_notices' ) );
+			add_action( 'admin_print_styles', array( __CLASS__, 'add_notices' ) );
 		}
+	}
+
+	/**
+	 * Store notices to DB
+	 */
+	public static function store_notices() {
+		update_option( 'woocommerce_admin_notices', self::get_notices() );
+	}
+
+	/**
+	 * Get notices
+	 * @return array
+	 */
+	public static function get_notices() {
+		return self::$notices;
 	}
 
 	/**
 	 * Remove all notices.
 	 */
 	public static function remove_all_notices() {
-		delete_option( 'woocommerce_admin_notices' );
+		self::$notices = array();
 	}
 
 	/**
 	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
-	public function reset_admin_notices() {
+	public static function reset_admin_notices() {
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
 			self::add_notice( 'theme_support' );
 		}
+
+		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
+
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] ) {
+			WC_Admin_Notices::add_notice( 'simplify_commerce' );
+		}
+
 		self::add_notice( 'template_files' );
 	}
 
 	/**
 	 * Show a notice.
-	 * @param  string $name
+	 * @param string $name
 	 */
 	public static function add_notice( $name ) {
-		$notices = array_unique( array_merge( get_option( 'woocommerce_admin_notices', array() ), array( $name ) ) );
-		update_option( 'woocommerce_admin_notices', $notices );
+		self::$notices = array_unique( array_merge( self::get_notices(), array( $name ) ) );
 	}
 
 	/**
@@ -72,8 +106,8 @@ class WC_Admin_Notices {
 	 * @param  string $name
 	 */
 	public static function remove_notice( $name ) {
-		$notices = array_diff( get_option( 'woocommerce_admin_notices', array() ), array( $name ) );
-		update_option( 'woocommerce_admin_notices', $notices );
+		self::$notices = array_diff( self::get_notices(), array( $name ) );
+		delete_option( 'woocommerce_admin_notice_' . $name );
 	}
 
 	/**
@@ -82,13 +116,13 @@ class WC_Admin_Notices {
 	 * @return boolean
 	 */
 	public static function has_notice( $name ) {
-		return in_array( $name, get_option( 'woocommerce_admin_notices', array() ) );
+		return in_array( $name, self::get_notices() );
 	}
 
 	/**
 	 * Hide a notice if the GET variable is set.
 	 */
-	public function hide_notices() {
+	public static function hide_notices() {
 		if ( isset( $_GET['wc-hide-notice'] ) && isset( $_GET['_wc_notice_nonce'] ) ) {
 			if ( ! wp_verify_nonce( $_GET['_wc_notice_nonce'], 'woocommerce_hide_notices_nonce' ) ) {
 				wp_die( __( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
@@ -107,14 +141,45 @@ class WC_Admin_Notices {
 	/**
 	 * Add notices + styles if needed.
 	 */
-	public function add_notices() {
-		$notices = get_option( 'woocommerce_admin_notices', array() );
+	public static function add_notices() {
+		$notices = self::get_notices();
 
 		if ( $notices ) {
 			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			foreach ( $notices as $notice ) {
-				if ( ! empty( $this->core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
-					add_action( 'admin_notices', array( $this, $this->core_notices[ $notice ] ) );
+				if ( ! empty( self::$core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
+					add_action( 'admin_notices', array( __CLASS__, self::$core_notices[ $notice ] ) );
+				} else {
+					add_action( 'admin_notices', array( __CLASS__, 'output_custom_notices' ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add a custom notice.
+	 * @param string $name
+	 * @param string $notice_html
+	 */
+	public static function add_custom_notice( $name, $notice_html ) {
+		self::add_notice( $name );
+		update_option( 'woocommerce_admin_notice_' . $name, wp_kses_post( $notice_html ) );
+	}
+
+	/**
+	 * Output any stored custom notices.
+	 */
+	public static function output_custom_notices() {
+		$notices = self::get_notices();
+
+		if ( $notices ) {
+			foreach ( $notices as $notice ) {
+				if ( empty( self::$core_notices[ $notice ] ) ) {
+					$notice_html = get_option( 'woocommerce_admin_notice_' . $notice );
+
+					if ( $notice_html ) {
+						include( 'views/html-notice-custom.php' );
+					}
 				}
 			}
 		}
@@ -123,21 +188,32 @@ class WC_Admin_Notices {
 	/**
 	 * If we need to update, include a message with the update button.
 	 */
-	public function update_notice() {
+	public static function update_notice() {
 		include( 'views/html-notice-update.php' );
+	}
+
+	/**
+	 * If we are updating, show progress.
+	 */
+	public static function updating_notice() {
+		if ( version_compare( get_option( 'woocommerce_db_version' ), WC_VERSION, '<' ) ) {
+			include( 'views/html-notice-updating.php' );
+		} else {
+			include( 'views/html-notice-updated.php' );
+		}
 	}
 
 	/**
 	 * If we have just installed, show a message with the install pages button.
 	 */
-	public function install_notice() {
+	public static function install_notice() {
 		include( 'views/html-notice-install.php' );
 	}
 
 	/**
 	 * Show the Theme Check notice.
 	 */
-	public function theme_check_notice() {
+	public static function theme_check_notice() {
 		if ( ! current_theme_supports( 'woocommerce' ) && ! in_array( get_option( 'template' ), wc_get_core_supported_themes() ) ) {
 			include( 'views/html-notice-theme-support.php' );
 		} else {
@@ -148,7 +224,7 @@ class WC_Admin_Notices {
 	/**
 	 * Show a notice highlighting bad template files.
 	 */
-	public function template_file_check_notice() {
+	public static function template_file_check_notice() {
 		$core_templates = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates' );
 		$outdated       = false;
 
@@ -182,6 +258,60 @@ class WC_Admin_Notices {
 			self::remove_notice( 'template_files' );
 		}
 	}
+
+	/**
+	 * Show a notice asking users to convert to shipping zones.
+	 */
+	public static function legacy_shipping_notice() {
+		$maybe_load_legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
+		$enabled                   = false;
+
+		foreach ( $maybe_load_legacy_methods as $method ) {
+			$options = get_option( 'woocommerce_' . $method . '_settings' );
+			if ( $options && isset( $options['enabled'] ) && 'yes' === $options['enabled'] ) {
+				$enabled = true;
+			}
+		}
+
+		if ( $enabled ) {
+			include( 'views/html-notice-legacy-shipping.php' );
+		} else {
+			self::remove_notice( 'template_files' );
+		}
+	}
+
+	/**
+	 * No shipping methods.
+	 */
+	public static function no_shipping_methods_notice() {
+		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) {
+			global $wpdb;
+
+			$product_count = wp_count_posts( 'product' );
+			$method_count  = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+
+			if ( $product_count->publish > 0 && 0 === $method_count ) {
+				include( 'views/html-notice-no-shipping-methods.php' );
+			}
+
+			if ( $method_count > 0 ) {
+				self::remove_notice( 'no_shipping_methods' );
+			}
+		}
+	}
+
+	/**
+	 * Simplify Commerce is being removed from core.
+	 */
+	public static function simplify_commerce_notice() {
+		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) ) {
+			self::remove_notice( 'simplify_commerce' );
+			return;
+		}
+		if ( empty( $_GET['action'] ) ) {
+			include( 'views/html-notice-simplify-commerce.php' );
+		}
+	}
 }
 
-new WC_Admin_Notices();
+WC_Admin_Notices::init();

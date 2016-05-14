@@ -20,7 +20,7 @@ jQuery( function ( $ ) {
 		var code = event.keyCode || event.which;
 
 		// Tab key
-		if ( code === '9' && $( '#woocommerce-coupon-description' ).size() > 0 ) {
+		if ( code === '9' && $( '#woocommerce-coupon-description' ).length > 0 ) {
 			event.stopPropagation();
 			$( '#woocommerce-coupon-description' ).focus();
 			return false;

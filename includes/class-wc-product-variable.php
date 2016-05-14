@@ -119,16 +119,6 @@ class WC_Product_Variable extends WC_Product {
 			);
 
 			if ( $visible_only ) {
-				$args['meta_query'] = array(
-					'relation' => 'AND',
-					// Price is required
-					array(
-						'key'     => '_price',
-						'value'   => '',
-						'compare' => '!=',
-					)
-				);
-				// Must be in stock?
 				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 					$args['meta_query'][] = array(
 						'key'     => '_stock_status',
@@ -148,7 +138,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * get_child function.
+	 * Get child product.
 	 *
 	 * @access public
 	 * @param mixed $child_id
@@ -178,6 +168,7 @@ class WC_Product_Variable extends WC_Product {
 	public function is_on_sale() {
 		$is_on_sale = false;
 		$prices     = $this->get_variation_prices();
+
 		if ( $prices['regular_price'] !== $prices['sale_price'] && $prices['sale_price'] === $prices['price'] ) {
 			$is_on_sale = true;
 		}
@@ -244,7 +235,7 @@ class WC_Product_Variable extends WC_Product {
 		 * @var string
 		 */
 		if ( $display ) {
-			$price_hash = array( true, WC_Tax::get_rates(), get_option( 'woocommerce_tax_display_shop' ) );
+			$price_hash = array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() );
 		} else {
 			$price_hash = array( false );
 		}
@@ -253,74 +244,92 @@ class WC_Product_Variable extends WC_Product {
 
 		foreach ( $filter_names as $filter_name ) {
 			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
-				$price_hash[ $filter_name ] = $wp_filter[ $filter_name ];
+				$price_hash[ $filter_name ] = array();
+
+				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
+					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
+				}
 			}
 		}
 
 		$price_hash = md5( json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $this, $display ) ) );
 
-		// If the value has already been generated, return it now
-		if ( ! empty( $this->prices_array[ $price_hash ] ) ) {
-			return $this->prices_array[ $price_hash ];
-		}
-
-		// Get value of transient
-		$this->prices_array = array_filter( (array) get_transient( $transient_name ) );
-
-		// If the prices are not stored for this hash, generate them
+		// If the value has already been generated, we don't need to grab the values again.
 		if ( empty( $this->prices_array[ $price_hash ] ) ) {
-			$prices         = array();
-			$regular_prices = array();
-			$sale_prices    = array();
-			$variation_ids  = $this->get_children( true );
 
-			foreach ( $variation_ids as $variation_id ) {
-				if ( $variation = $this->get_child( $variation_id ) ) {
-					$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
-					$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
-					$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->sale_price, $variation, $this );
+			// Get value of transient
+			$this->prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
-					// If sale price does not equal price, the product is not yet on sale
-					if ( $sale_price === $regular_price || $sale_price !== $price ) {
-						$sale_price = $regular_price;
-					}
-
-					// If we are getting prices for display, we need to account for taxes
-					if ( $display ) {
-						if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
-							$price         = '' === $price ? ''         : $variation->get_price_including_tax( 1, $price );
-							$regular_price = '' === $regular_price ? '' : $variation->get_price_including_tax( 1, $regular_price );
-							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_including_tax( 1, $sale_price );
-						} else {
-							$price         = '' === $price ? ''         : $variation->get_price_excluding_tax( 1, $price );
-							$regular_price = '' === $regular_price ? '' : $variation->get_price_excluding_tax( 1, $regular_price );
-							$sale_price    = '' === $sale_price ? ''    : $variation->get_price_excluding_tax( 1, $sale_price );
-						}
-					}
-
-					$prices[ $variation_id ]         = $price;
-					$regular_prices[ $variation_id ] = $regular_price;
-					$sale_prices[ $variation_id ]    = $sale_price;
-				}
+			// If the product version has changed, reset cache
+			if ( empty( $this->prices_array['version'] ) || $this->prices_array['version'] !== WC_Cache_Helper::get_transient_version( 'product' ) ) {
+				$this->prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
 			}
 
-			asort( $prices );
-			asort( $regular_prices );
-			asort( $sale_prices );
+			// If the prices are not stored for this hash, generate them
+			if ( empty( $this->prices_array[ $price_hash ] ) ) {
+				$prices         = array();
+				$regular_prices = array();
+				$sale_prices    = array();
+				$variation_ids  = $this->get_children( true );
 
-			$this->prices_array[ $price_hash ] = array(
-				'price'         => $prices,
-				'regular_price' => $regular_prices,
-				'sale_price'    => $sale_prices
-			);
+				foreach ( $variation_ids as $variation_id ) {
+					if ( $variation = $this->get_child( $variation_id ) ) {
+						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
+						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
+						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->sale_price, $variation, $this );
 
-			set_transient( $transient_name, $this->prices_array, DAY_IN_SECONDS * 30 );
+						// Skip empty prices
+						if ( '' === $price ) {
+							continue;
+						}
+
+						// If sale price does not equal price, the product is not yet on sale
+						if ( $sale_price === $regular_price || $sale_price !== $price ) {
+							$sale_price = $regular_price;
+						}
+
+						// If we are getting prices for display, we need to account for taxes
+						if ( $display ) {
+							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
+								$price         = '' === $price ? ''         : $variation->get_price_including_tax( 1, $price );
+								$regular_price = '' === $regular_price ? '' : $variation->get_price_including_tax( 1, $regular_price );
+								$sale_price    = '' === $sale_price ? ''    : $variation->get_price_including_tax( 1, $sale_price );
+							} else {
+								$price         = '' === $price ? ''         : $variation->get_price_excluding_tax( 1, $price );
+								$regular_price = '' === $regular_price ? '' : $variation->get_price_excluding_tax( 1, $regular_price );
+								$sale_price    = '' === $sale_price ? ''    : $variation->get_price_excluding_tax( 1, $sale_price );
+							}
+						}
+
+						$prices[ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
+						$regular_prices[ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
+						$sale_prices[ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
+					}
+				}
+
+				asort( $prices );
+				asort( $regular_prices );
+				asort( $sale_prices );
+
+				$this->prices_array[ $price_hash ] = array(
+					'price'         => $prices,
+					'regular_price' => $regular_prices,
+					'sale_price'    => $sale_prices,
+				);
+
+				set_transient( $transient_name, json_encode( $this->prices_array ), DAY_IN_SECONDS * 30 );
+			}
+
+			/**
+			 * Give plugins one last chance to filter the variation prices array which has been generated.
+			 */
+			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
 		}
 
 		/**
-		 * Give plugins one last chance to filter the variation prices array which is being returned.
+		 * Return the values.
 		 */
-		return $this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $this->prices_array[ $price_hash ], $this, $display );
+		return $this->prices_array[ $price_hash ];
 	}
 
 	/**
@@ -362,68 +371,54 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array of attributes and their available values
 	 */
 	public function get_variation_attributes() {
+		global $wpdb;
+
 		$variation_attributes = array();
+		$attributes           = $this->get_attributes();
+		$child_ids            = $this->get_children( true );
 
-		if ( ! $this->has_child() ) {
-			return $variation_attributes;
-		}
-
-		$attributes = $this->get_attributes();
-
-		foreach ( $attributes as $attribute ) {
-			if ( ! $attribute['is_variation'] ) {
-				continue;
-			}
-
-			$values               = array();
-			$attribute_field_name = 'attribute_' . sanitize_title( $attribute['name'] );
-
-			// Get used values from children variations
-			foreach ( $this->get_children() as $child_id ) {
-				$variation = $this->get_child( $child_id );
-
-				if ( ! empty( $variation->variation_id ) ) {
-					if ( ! $variation->variation_is_visible() ) {
-						continue; // Disabled or hidden
-					}
-
-					$child_variation_attributes = $variation->get_variation_attributes();
-
-					if ( isset( $child_variation_attributes[ $attribute_field_name ] ) ) {
-						$values[] = $child_variation_attributes[ $attribute_field_name ];
-					}
+		if ( ! empty( $child_ids ) ) {
+			foreach ( $attributes as $attribute ) {
+				if ( empty( $attribute['is_variation'] ) ) {
+					continue;
 				}
-			}
 
-			// empty value indicates that all options for given attribute are available
-			if ( in_array( '', $values ) ) {
-				$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
+				// Get possible values for this attribute, for only visible variations.
+				$values = array_unique( $wpdb->get_col( $wpdb->prepare(
+					"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'esc_sql', $child_ids ) ) . ")",
+					wc_variation_attribute_name( $attribute['name'] )
+				) ) );
 
-			// Get custom attributes (non taxonomy) as defined
-			} elseif ( ! $attribute['is_taxonomy'] ) {
-				$text_attributes          = wc_get_text_attributes( $attribute['value'] );
-				$assigned_text_attributes = $values;
-				$values                   = array();
+				// empty value indicates that all options for given attribute are available
+				if ( in_array( '', $values ) ) {
+					$values = $attribute['is_taxonomy'] ? wp_get_post_terms( $this->id, $attribute['name'], array( 'fields' => 'slugs' ) ) : wc_get_text_attributes( $attribute['value'] );
 
-				// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
-				if ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
-					$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
+				// Get custom attributes (non taxonomy) as defined
+				} elseif ( ! $attribute['is_taxonomy'] ) {
+					$text_attributes          = wc_get_text_attributes( $attribute['value'] );
+					$assigned_text_attributes = $values;
+					$values                   = array();
 
-					foreach ( $text_attributes as $text_attribute ) {
-						if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
-							$values[] = $text_attribute;
+					// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute
+					if ( version_compare( get_post_meta( $this->id, '_product_version', true ), '2.4.0', '<' ) ) {
+						$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
+
+						foreach ( $text_attributes as $text_attribute ) {
+							if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes ) ) {
+								$values[] = $text_attribute;
+							}
 						}
-					}
-				} else {
-					foreach ( $text_attributes as $text_attribute ) {
-						if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
-							$values[] = $text_attribute;
+					} else {
+						foreach ( $text_attributes as $text_attribute ) {
+							if ( in_array( $text_attribute, $assigned_text_attributes ) ) {
+								$values[] = $text_attribute;
+							}
 						}
 					}
 				}
-			}
 
-			$variation_attributes[ $attribute['name'] ] = array_unique( $values );
+				$variation_attributes[ $attribute['name'] ] = array_unique( $values );
+			}
 		}
 
 		return $variation_attributes;
@@ -472,6 +467,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @return int Variation ID which matched, 0 is no match was found
 	 */
 	public function get_matching_variation( $match_attributes = array() ) {
+		global $wpdb;
+
 		$query_args = array(
 			'post_parent' => $this->id,
 			'post_type'   => 'product_variation',
@@ -497,11 +494,22 @@ class WC_Product_Variable extends WC_Product {
 			$value = wc_clean( $match_attributes[ $attribute_field_name ] );
 
 			$query_args['meta_query'][] = array(
-				'key'     => $attribute_field_name,
-				'value'   => array( '', $value ),
-				'compare' => 'IN'
+				'relation' => 'OR',
+				array(
+					'key'     => $attribute_field_name,
+					'value'   => array( '', $value ),
+					'compare' => 'IN'
+				),
+				array(
+					'key'     => $attribute_field_name,
+					'compare' => 'NOT EXISTS'
+				)
 			);
+
 		}
+
+		// Allow large queries in case user has many variations
+		$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
 
 		$matches = get_posts( $query_args );
 
@@ -547,7 +555,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Returns an array of date for a variation. Used in the add to cart form.
+	 * Returns an array of data for a variation. Used in the add to cart form.
 	 * @since  2.4.0
 	 * @param  WC_Product $variation Variation product object or ID
 	 * @return array
@@ -558,17 +566,23 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		if ( has_post_thumbnail( $variation->get_variation_id() ) ) {
-			$attachment_id   = get_post_thumbnail_id( $variation->get_variation_id() );
-			$attachment      = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
-			$full_attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
-			$image           = $attachment ? current( $attachment ) : '';
-			$image_link      = $full_attachment ? current( $full_attachment ) : '';
-			$image_title     = get_the_title( $attachment_id );
-			$image_alt       = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
-			$image_srcset    = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
-			$image_sizes     = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+			$attachment_id     = get_post_thumbnail_id( $variation->get_variation_id() );
+			$attachment        = wp_get_attachment_image_src( $attachment_id, 'shop_single' );
+			$full_attachment   = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment_object = get_post( $attachment_id );
+			$image             = $attachment ? current( $attachment ) : '';
+			$image_link        = $full_attachment ? current( $full_attachment ) : '';
+			$image_title       = get_the_title( $attachment_id );
+			$image_alt         = trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+			$image_caption     = $attachment_object->post_excerpt;
+			$image_srcset      = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, 'shop_single' ) : false;
+			$image_sizes       = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, 'shop_single' ) : false;
+
+			if ( empty( $image_alt ) ) {
+				$image_alt = $image_title;
+			}
 		} else {
-			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = '';
+			$image = $image_link = $image_title = $image_alt = $image_srcset = $image_sizes = $image_caption = '';
 		}
 
 		$availability      = $variation->get_availability();
@@ -576,32 +590,33 @@ class WC_Product_Variable extends WC_Product {
 		$availability_html = apply_filters( 'woocommerce_stock_html', $availability_html, $availability['availability'], $variation );
 
 		return apply_filters( 'woocommerce_available_variation', array(
-			'variation_id'          => $variation->variation_id,
-			'variation_is_visible'  => $variation->variation_is_visible(),
-			'variation_is_active'   => $variation->variation_is_active(),
-			'is_purchasable'        => $variation->is_purchasable(),
-			'display_price'         => $variation->get_display_price(),
-			'display_regular_price' => $variation->get_display_price( $variation->get_regular_price() ),
-			'attributes'            => $variation->get_variation_attributes(),
-			'image_src'             => $image,
-			'image_link'            => $image_link,
-			'image_title'           => $image_title,
-			'image_alt'             => $image_alt,
-			'image_srcset'			=> $image_srcset ? $image_srcset : '',
-			'image_sizes'			=> $image_sizes ? $image_sizes : '',
-			'price_html'            => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
-			'availability_html'     => $availability_html,
-			'sku'                   => $variation->get_sku(),
-			'weight'                => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
-			'dimensions'            => $variation->get_dimensions(),
-			'min_qty'               => 1,
-			'max_qty'               => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
-			'backorders_allowed'    => $variation->backorders_allowed(),
-			'is_in_stock'           => $variation->is_in_stock(),
-			'is_downloadable'       => $variation->is_downloadable() ,
-			'is_virtual'            => $variation->is_virtual(),
-			'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
-			'variation_description' => $variation->get_variation_description(),
+			'variation_id'           => $variation->variation_id,
+			'variation_is_visible'   => $variation->variation_is_visible(),
+			'variation_is_active'    => $variation->variation_is_active(),
+			'is_purchasable'         => $variation->is_purchasable(),
+			'display_price'          => $variation->get_display_price(),
+			'display_regular_price'  => $variation->get_display_price( $variation->get_regular_price() ),
+			'attributes'             => $variation->get_variation_attributes(),
+			'image_src'              => $image,
+			'image_link'             => $image_link,
+			'image_title'            => $image_title,
+			'image_alt'              => $image_alt,
+			'image_caption'          => $image_caption,
+			'image_srcset'			 => $image_srcset ? $image_srcset : '',
+			'image_sizes'			 => $image_sizes ? $image_sizes : '',
+			'price_html'             => apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === "" || $this->get_variation_price( 'min' ) !== $this->get_variation_price( 'max' ), $this, $variation ) ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+			'availability_html'      => $availability_html,
+			'sku'                    => $variation->get_sku(),
+			'weight'                 => $variation->get_weight() . ' ' . esc_attr( get_option('woocommerce_weight_unit' ) ),
+			'dimensions'             => $variation->get_dimensions(),
+			'min_qty'                => 1,
+			'max_qty'                => $variation->backorders_allowed() ? '' : $variation->get_stock_quantity(),
+			'backorders_allowed'     => $variation->backorders_allowed(),
+			'is_in_stock'            => $variation->is_in_stock(),
+			'is_downloadable'        => $variation->is_downloadable() ,
+			'is_virtual'             => $variation->is_virtual(),
+			'is_sold_individually'   => $variation->is_sold_individually() ? 'yes' : 'no',
+			'variation_description'  => $variation->get_variation_description(),
 		), $this, $variation );
 	}
 
@@ -720,8 +735,11 @@ class WC_Product_Variable extends WC_Product {
 		) );
 
 		// No published variations - product won't be purchasable.
-		if ( ! $children && 'publish' === get_post_status( $product_id ) ) {
-			if ( is_admin() ) {
+		if ( ! $children ) {
+			update_post_meta( $product_id, '_price', '' );
+			delete_transient( 'wc_products_onsale' );
+
+			if ( is_admin() && 'publish' === get_post_status( $product_id ) ) {
 				WC_Admin_Meta_Boxes::add_error( __( 'This variable product has no active variations. Add or enable variations to allow this product to be purchased.', 'woocommerce' ) );
 			}
 
@@ -799,8 +817,10 @@ class WC_Product_Variable extends WC_Product {
 				update_post_meta( $product_id, '_max_' . $price_type . '_variation_id', ${"max_{$price_type}_id"} );
 			}
 
-			// The VARIABLE PRODUCT price should equal the min price of any type
-			update_post_meta( $product_id, '_price', $min_price );
+			// Sync _price meta
+			delete_post_meta( $product_id, '_price' );
+			add_post_meta( $product_id, '_price', $min_price, false );
+			add_post_meta( $product_id, '_price', $max_price, false );
 			delete_transient( 'wc_products_onsale' );
 
 			// Sync attributes

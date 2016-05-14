@@ -226,14 +226,17 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.add-order-fee', this.add_fee )
 				.on( 'click', 'button.add-order-shipping', this.add_shipping )
 				.on( 'click', 'button.add-order-tax', this.add_tax )
-				.on( 'click', 'input.check-column', this.bulk_actions.check_column )
-				.on( 'click', '.do_bulk_action', this.bulk_actions.do_bulk_action )
 				.on( 'click', 'button.calculate-action', this.calculate_totals )
 				.on( 'click', 'button.save-action', this.save_line_items )
 				.on( 'click', 'a.delete-order-tax', this.delete_tax )
 				.on( 'click', 'button.calculate-tax-action', this.calculate_tax )
 				.on( 'click', 'a.edit-order-item', this.edit_item )
 				.on( 'click', 'a.delete-order-item', this.delete_item )
+				.on( 'click', 'tr.item, tr.fee, tr.shipping, tr.refund', this.select_row )
+				.on( 'click', 'tr.item :input, tr.fee :input, tr.shipping :input, tr.refund :input, tr.item a, tr.fee a, tr.shipping a, tr.refund a', this.select_row_child )
+				.on( 'click', 'button.bulk-delete-items', this.bulk_actions.do_delete )
+				.on( 'click', 'button.bulk-increase-stock', this.bulk_actions.do_increase_stock )
+				.on( 'click', 'button.bulk-decrease-stock', this.bulk_actions.do_reduce_stock )
 
 				// Refunds
 				.on( 'click', '.delete_refund', this.refunds.delete_refund )
@@ -246,14 +249,14 @@ jQuery( function ( $ ) {
 				.on( 'change', 'input.quantity', this.quantity_changed )
 
 				// Subtotal/total
-				.on( 'keyup', '.woocommerce_order_items .split-input input:eq(0)', function() {
-					var $subtotal = $( this ).next();
-					if ( $subtotal.val() === '' || $subtotal.is( '.match-total' ) ) {
+				.on( 'keyup change', '.split-input :input', function() {
+					var $subtotal = $( this ).parent().prev().find(':input');
+					if ( $subtotal && ( $subtotal.val() === '' || $subtotal.is( '.match-total' ) ) ) {
 						$subtotal.val( $( this ).val() ).addClass( 'match-total' );
 					}
 				})
 
-				.on( 'keyup', '.woocommerce_order_items .split-input input:eq(1)', function() {
+				.on( 'keyup', '.split-input :input', function() {
 					$( this ).removeClass( 'match-total' );
 				})
 
@@ -327,21 +330,23 @@ jQuery( function ( $ ) {
 			);
 
 			// Taxes
-			$( 'td.line_tax', $row ).each(function() {
-				var line_total_tax = $( 'input.line_tax', $( this ) );
-				var unit_total_tax = accounting.unformat( line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
+			$( 'input.line_tax', $row ).each( function() {
+				var $line_total_tax    = $( this );
+				var tax_id             = $line_total_tax.data( 'tax_id' );
+				var unit_total_tax     = accounting.unformat( $line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
+				var $line_subtotal_tax = $( 'input.line_subtotal_tax[data-tax_id="' + tax_id + '"]', $row );
+				var unit_subtotal_tax  = accounting.unformat( $line_subtotal_tax.attr( 'data-subtotal_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
+
 				if ( 0 < unit_total_tax ) {
-					line_total_tax.val(
+					$line_total_tax.val(
 						parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
 				}
 
-				var line_subtotal_tax = $( 'input.line_subtotal_tax', $( this ) );
-				var unit_subtotal_tax = accounting.unformat( line_subtotal_tax.attr( 'data-subtotal_tax' ), woocommerce_admin.mon_decimal_point ) / o_qty;
 				if ( 0 < unit_subtotal_tax ) {
-					line_subtotal_tax.val(
+					$line_subtotal_tax.val(
 						parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
@@ -354,13 +359,13 @@ jQuery( function ( $ ) {
 
 		add_line_item: function() {
 			$( 'div.wc-order-add-item' ).slideDown();
-			$( 'div.wc-order-bulk-actions' ).slideUp();
+			$( 'div.wc-order-data-row-toggle' ).not( 'div.wc-order-add-item' ).slideUp();
 			return false;
 		},
 
 		refund_items: function() {
 			$( 'div.wc-order-refund-items' ).slideDown();
-			$( 'div.wc-order-bulk-actions' ).slideUp();
+			$( 'div.wc-order-data-row-toggle' ).not( 'div.wc-order-refund-items' ).slideUp();
 			$( 'div.wc-order-totals-items' ).slideUp();
 			$( '#woocommerce-order-items' ).find( 'div.refund' ).show();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).hide();
@@ -368,7 +373,7 @@ jQuery( function ( $ ) {
 		},
 
 		cancel: function() {
-			$( this ).closest( 'div.wc-order-data-row' ).slideUp();
+			$( 'div.wc-order-data-row-toggle' ).not( 'div.wc-order-bulk-actions' ).slideUp();
 			$( 'div.wc-order-bulk-actions' ).slideDown();
 			$( 'div.wc-order-totals-items' ).slideDown();
 			$( '#woocommerce-order-items' ).find( 'div.refund' ).hide();
@@ -666,7 +671,7 @@ jQuery( function ( $ ) {
 						line_item_totals:       JSON.stringify( line_item_totals, null, '' ),
 						line_item_tax_totals:   JSON.stringify( line_item_tax_totals, null, '' ),
 						api_refund:             $( this ).is( '.do-api-refund' ),
-						restock_refunded_items: $( '#restock_refunded_items:checked' ).size() ? 'true' : 'false',
+						restock_refunded_items: $( '#restock_refunded_items:checked' ).length ? 'true' : 'false',
 						security:               woocommerce_admin_meta_boxes.order_item_nonce
 					};
 
@@ -766,19 +771,20 @@ jQuery( function ( $ ) {
 				).change();
 
 				// Taxes
-				$( 'td.line_tax', $row ).each( function() {
-					var line_total_tax        = $( 'input.line_tax', $( this ) );
-					var refund_line_total_tax = $( 'input.refund_line_tax', $( this ) );
-					var unit_total_tax = accounting.unformat( line_total_tax.attr( 'data-total_tax' ), woocommerce_admin.mon_decimal_point ) / qty;
+				$( '.refund_line_tax', $row ).each( function() {
+					var $refund_line_total_tax = $( this );
+					var tax_id                 = $refund_line_total_tax.data( 'tax_id' );
+					var line_total_tax         = $( 'input.line_tax[data-tax_id="' + tax_id + '"]', $row );
+					var unit_total_tax         = accounting.unformat( line_total_tax.data( 'total_tax' ), woocommerce_admin.mon_decimal_point ) / qty;
 
 					if ( 0 < unit_total_tax ) {
-						refund_line_total_tax.val(
+						$refund_line_total_tax.val(
 							parseFloat( accounting.formatNumber( unit_total_tax * refund_qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 								.toString()
 								.replace( '.', woocommerce_admin.mon_decimal_point )
 						).change();
 					} else {
-						refund_line_total_tax.val( 0 ).change();
+						$refund_line_total_tax.val( 0 ).change();
 					}
 				});
 
@@ -802,7 +808,7 @@ jQuery( function ( $ ) {
 
 			add: function() {
 				var $button = $( this );
-				var $item = $button.closest( 'tr.item' );
+				var $item = $button.closest( 'tr.item, tr.shipping' );
 
 				var data = {
 					order_item_id: $item.attr( 'data-order_item_id' ),
@@ -842,7 +848,7 @@ jQuery( function ( $ ) {
 						data: data,
 						type: 'POST',
 						success: function() {
-							$row.hide();
+							$row.remove();
 							wc_meta_boxes_order_items.unblock();
 						}
 					});
@@ -851,77 +857,124 @@ jQuery( function ( $ ) {
 			}
 		},
 
-		bulk_actions: {
+		select_row: function() {
+			var $row = false;
+			if ( $( this ).is( 'tr' ) ) {
+				$row = $( this );
+			} else {
+				$row = $( this ).closest( 'tr' );
+			}
+			var $table = $( this ).closest( 'table' );
 
-			check_column: function() {
-				if ( $( this ).is( ':checked' ) ) {
-					$( '#woocommerce-order-items' ).find( '.check-column input' ).attr( 'checked', 'checked' );
-				} else {
-					$( '#woocommerce-order-items' ).find( '.check-column input' ).removeAttr( 'checked' );
-				}
-			},
+			if ( $row.is( '.selected' ) ) {
+				$row.removeClass( 'selected' );
+			} else {
+				$row.addClass( 'selected' );
+			}
 
-			do_bulk_action: function() {
-				var action        = $( this ).closest( '.bulk-actions' ).find( 'select' ).val();
-				var selected_rows = $( '#woocommerce-order-items' ).find( '.check-column input:checked' );
-				var item_ids      = [];
+			var $rows = $table.find( 'tr.selected' );
 
-				$( selected_rows ).each( function() {
-					var $item = $( this ).closest( 'tr' );
+			if ( $rows.length ) {
+				$( 'div.wc-order-item-bulk-edit' ).slideDown();
 
-					if ( $item.attr( 'data-order_item_id' ) ) {
-						item_ids.push( $item.attr( 'data-order_item_id' ) );
+				var selected_product = false;
+
+				$rows.each( function() {
+					if ( $( this ).is( 'tr.item' ) ) {
+						selected_product = true;
 					}
 				} );
 
-				if ( item_ids.length === 0 ) {
-					window.alert( woocommerce_admin_meta_boxes.i18n_select_items );
-					return;
+				if ( selected_product ) {
+					$( '.bulk-increase-stock, .bulk-decrease-stock' ).show();
+				} else {
+					$( '.bulk-increase-stock, .bulk-decrease-stock' ).hide();
 				}
+			} else {
+				$( 'div.wc-order-item-bulk-edit' ).slideUp();
+			}
+		},
 
-				if ( wc_meta_boxes_order_items.bulk_actions[ 'do_' + action ] ) {
-					wc_meta_boxes_order_items.bulk_actions[ 'do_' + action ]( selected_rows, item_ids );
-				}
+		select_row_child: function( e ) {
+			e.stopPropagation();
+		},
 
-				return false;
-			},
+		bulk_actions: {
 
-			do_delete: function( selected_rows, item_ids ) {
-				if ( window.confirm( woocommerce_admin_meta_boxes.remove_item_notice ) ) {
+			do_delete: function( e ) {
+				e.preventDefault();
+				var $table = $( 'table.woocommerce_order_items' );
+				var $rows = $table.find( 'tr.selected' );
+
+				if ( $rows.length && window.confirm( woocommerce_admin_meta_boxes.remove_item_notice ) ) {
 
 					wc_meta_boxes_order_items.block();
 
-					var data = {
-						order_item_ids: item_ids,
-						action:         'woocommerce_remove_order_item',
-						security:       woocommerce_admin_meta_boxes.order_item_nonce
-					};
+					var delete_items   = [];
+					var delete_refunds = [];
+					var deferred = [];
 
-					$.ajax({
-						url: woocommerce_admin_meta_boxes.ajax_url,
-						data: data,
-						type: 'POST',
-						success: function() {
-							$( selected_rows ).each(function() {
-								$( this ).closest( 'tr' ).remove();
-							});
-							wc_meta_boxes_order_items.unblock();
+					$.map( $rows, function( row ) {
+						var $row = $( row );
+
+						if ( $row.is( '.refund' ) ) {
+							delete_refunds.push( parseInt( $( $row ).data( 'order_refund_id' ), 10 ) );
+						} else {
+							delete_items.push( parseInt( $( $row ).data( 'order_item_id' ), 10 ) );
 						}
+						return ;
 					});
+
+					if ( delete_items.length ) {
+						deferred.push( $.ajax({
+							url : woocommerce_admin_meta_boxes.ajax_url,
+							data: {
+								order_item_ids: delete_items,
+								action:         'woocommerce_remove_order_item',
+								security:       woocommerce_admin_meta_boxes.order_item_nonce
+							},
+							type: 'POST'
+						} ) );
+					}
+
+					if ( delete_refunds.length ) {
+						deferred.push( $.ajax( {
+							url : woocommerce_admin_meta_boxes.ajax_url,
+							data: {
+								action:    'woocommerce_delete_refund',
+								refund_id: delete_refunds,
+								security:  woocommerce_admin_meta_boxes.order_item_nonce
+							},
+							type: 'POST'
+						} ) );
+					}
+
+					if ( deferred ) {
+						$.when.apply( $, deferred ).done( function() {
+							wc_meta_boxes_order_items.reload_items();
+							wc_meta_boxes_order_items.unblock();
+						} );
+					} else {
+						wc_meta_boxes_order_items.unblock();
+					}
 				}
 			},
 
-			do_increase_stock: function( selected_rows, item_ids ) {
+			do_increase_stock: function( e ) {
+				e.preventDefault();
 				wc_meta_boxes_order_items.block();
 
+				var $table = $( 'table.woocommerce_order_items' );
+				var $rows = $table.find( 'tr.selected' );
 				var quantities = {};
+				var item_ids = $.map( $rows, function( $row ) {
+					return parseInt( $( $row ).data( 'order_item_id' ), 10 );
+				});
 
-				$( selected_rows ).each(function() {
-
-					var $item = $( this ).closest( 'tr.item, tr.fee' );
-					var $qty  = $item.find( 'input.quantity' );
-
-					quantities[ $item.attr( 'data-order_item_id' ) ] = $qty.val();
+				$rows.each(function() {
+					if ( $( this ).find( 'input.quantity' ).length ) {
+						quantities[ $( this ).attr( 'data-order_item_id' ) ] = $( this ).find( 'input.quantity' ).val();
+					}
 				});
 
 				var data = {
@@ -943,17 +996,21 @@ jQuery( function ( $ ) {
 				});
 			},
 
-			do_reduce_stock: function( selected_rows, item_ids ) {
+			do_reduce_stock: function( e ) {
+				e.preventDefault();
 				wc_meta_boxes_order_items.block();
 
+				var $table = $( 'table.woocommerce_order_items' );
+				var $rows = $table.find( 'tr.selected' );
 				var quantities = {};
+				var item_ids = $.map( $rows, function( $row ) {
+					return parseInt( $( $row ).data( 'order_item_id' ), 10 );
+				});
 
-				$( selected_rows ).each(function() {
-
-					var $item = $( this ).closest( 'tr.item, tr.fee' );
-					var $qty  = $item.find( 'input.quantity' );
-
-					quantities[ $item.attr( 'data-order_item_id' ) ] = $qty.val();
+				$rows.each(function() {
+					if ( $( this ).find( 'input.quantity' ).length ) {
+						quantities[ $( this ).attr( 'data-order_item_id' ) ] = $( this ).find( 'input.quantity' ).val();
+					}
 				});
 
 				var data = {
@@ -1076,18 +1133,14 @@ jQuery( function ( $ ) {
 
 		stupidtable: {
 			init: function() {
-				$( '.woocommerce_order_items' ).stupidtable().on( 'aftertablesort', this.add_arrows );
+				$( '.woocommerce_order_items' ).stupidtable();
+				$( '.woocommerce_order_items' ).on( 'aftertablesort', this.add_arrows );
 			},
 
 			add_arrows: function( event, data ) {
 				var th    = $( this ).find( 'th' );
 				var arrow = data.direction === 'asc' ? '&uarr;' : '&darr;';
 				var index = data.column;
-
-				if ( 1 < index ) {
-					index = index - 1;
-				}
-
 				th.find( '.wc-arrow' ).remove();
 				th.eq( index ).append( '<span class="wc-arrow">' + arrow + '</span>' );
 			}
@@ -1136,25 +1189,27 @@ jQuery( function ( $ ) {
 		},
 
 		delete_order_note: function() {
-			var note = $( this ).closest( 'li.note' );
+			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_delete_note ) ) {
+				var note = $( this ).closest( 'li.note' );
 
-			$( note ).block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
+				$( note ).block({
+					message: null,
+					overlayCSS: {
+						background: '#fff',
+						opacity: 0.6
+					}
+				});
 
-			var data = {
-				action:   'woocommerce_delete_order_note',
-				note_id:  $( note ).attr( 'rel' ),
-				security: woocommerce_admin_meta_boxes.delete_order_note_nonce
-			};
+				var data = {
+					action:   'woocommerce_delete_order_note',
+					note_id:  $( note ).attr( 'rel' ),
+					security: woocommerce_admin_meta_boxes.delete_order_note_nonce
+				};
 
-			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
-				$( note ).remove();
-			});
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
+					$( note ).remove();
+				});
+			}
 
 			return false;
 		}
@@ -1188,7 +1243,7 @@ jQuery( function ( $ ) {
 			var data = {
 				action:      'woocommerce_grant_access_to_download',
 				product_ids: products,
-				loop:        $('.order_download_permissions .wc-metabox').size(),
+				loop:        $('.order_download_permissions .wc-metabox').length,
 				order_id:    woocommerce_admin_meta_boxes.post_id,
 				security:    woocommerce_admin_meta_boxes.grant_access_nonce
 			};

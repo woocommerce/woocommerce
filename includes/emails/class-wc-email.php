@@ -216,11 +216,11 @@ class WC_Email extends WC_Settings_API {
 		$this->replace['site-title'] = $this->get_blogname();
 
 		// For multipart messages
-		add_filter( 'phpmailer_init', array( $this, 'handle_multipart' ) );
+		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 	}
 
 	/**
-	 * handle_multipart function.
+	 * Handle multipart mail.
 	 *
 	 * @param PHPMailer $mailer
 	 * @return PHPMailer
@@ -234,17 +234,17 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * format_string function.
+	 * Format email string.
 	 *
 	 * @param mixed $string
 	 * @return string
 	 */
 	public function format_string( $string ) {
-		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), $string );
+		return str_replace( apply_filters( 'woocommerce_email_format_string_find', $this->find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $this->replace, $this ), __( $string ) );
 	}
 
 	/**
-	 * get_subject function.
+	 * Get email subject.
 	 *
 	 * @return string
 	 */
@@ -253,7 +253,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * get_heading function.
+	 * Get email heading.
 	 *
 	 * @return string
 	 */
@@ -273,7 +273,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * get_headers function.
+	 * Get email headers.
 	 *
 	 * @return string
 	 */
@@ -282,7 +282,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * get_attachments function.
+	 * Get email attachments.
 	 *
 	 * @return string|array
 	 */
@@ -300,7 +300,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * get_content_type function.
+	 * Get email content type.
 	 *
 	 * @return string
 	 */
@@ -340,7 +340,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		$value = parent::get_option( $key, $empty_value );
-		return apply_filters( 'woocommerce_email_get_option', __( $value ), $this, $value, $key, $empty_value );
+		return apply_filters( 'woocommerce_email_get_option', $value, $this, $value, $key, $empty_value );
 	}
 
 	/**
@@ -368,7 +368,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * get_blogname function.
+	 * Get WordPress blog name.
 	 *
 	 * @return string
 	 */
@@ -377,7 +377,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * get_content function.
+	 * Get email content.
 	 *
 	 * @return string
 	 */
@@ -533,12 +533,14 @@ class WC_Email extends WC_Settings_API {
 		// Save regular options
 		parent::process_admin_options();
 
+		$post_data = $this->get_post_data();
+
 		// Save templates
-		if ( isset( $_POST['template_html_code'] ) ) {
-			$this->save_template( $_POST['template_html_code'], $this->template_html );
+		if ( isset( $post_data['template_html_code'] ) ) {
+			$this->save_template( $post_data['template_html_code'], $this->template_html );
 		}
-		if ( isset( $_POST['template_plain_code'] ) ) {
-			$this->save_template( $_POST['template_plain_code'], $this->template_plain );
+		if ( isset( $post_data['template_plain_code'] ) ) {
+			$this->save_template( $post_data['template_plain_code'], $this->template_plain );
 		}
 	}
 
@@ -704,7 +706,8 @@ class WC_Email extends WC_Settings_API {
 		// Do admin actions.
 		$this->admin_actions();
 		?>
-		<h3><?php echo esc_html( $this->get_title() ); ?></h3>
+		<h2><?php echo esc_html( $this->get_title() ); ?> <?php wc_back_link( __( 'Return to Emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?></h2>
+
 		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); ?>
 
 		<?php

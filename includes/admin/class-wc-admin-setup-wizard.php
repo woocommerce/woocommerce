@@ -150,7 +150,7 @@ class WC_Admin_Setup_Wizard {
 			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wc-setup wp-core-ui">
-			<h1 id="wc-logo"><a href="http://woothemes.com/woocommerce"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
+			<h1 id="wc-logo"><a href="https://woothemes.com/woocommerce"><img src="<?php echo WC()->plugin_url(); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
 		<?php
 	}
 
@@ -286,6 +286,7 @@ class WC_Admin_Setup_Wizard {
 		$currency       = get_option( 'woocommerce_currency', 'GBP' );
 		$currency_pos   = get_option( 'woocommerce_currency_pos', 'left' );
 		$decimal_sep    = get_option( 'woocommerce_price_decimal_sep', '.' );
+		$num_decimals   = get_option( 'woocommerce_price_num_decimals', '2' );
 		$thousand_sep   = get_option( 'woocommerce_price_thousand_sep', ',' );
 		$dimension_unit = get_option( 'woocommerce_dimension_unit', 'cm' );
 		$weight_unit    = get_option( 'woocommerce_weight_unit', 'kg' );
@@ -308,11 +309,11 @@ class WC_Admin_Setup_Wizard {
 							<option value=""><?php _e( 'Choose a currency&hellip;', 'woocommerce' ); ?></option>
 							<?php
 							foreach ( get_woocommerce_currencies() as $code => $name ) {
-								echo '<option value="' . esc_attr( $code ) . '" ' . checked( $currency, $code, false ) . '>' . esc_html( $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')' ) . '</option>';
+								echo '<option value="' . esc_attr( $code ) . '" ' . selected( $currency, $code, false ) . '>' . esc_html( $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')' ) . '</option>';
 							}
 							?>
 						</select>
-						<span class="description"><?php printf( __( 'If your currency is not listed you can %sadd it later%s.', 'woocommerce' ), '<a href="http://docs.woothemes.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
+						<span class="description"><?php printf( __( 'If your currency is not listed you can %sadd it later%s.', 'woocommerce' ), '<a href="https://docs.woothemes.com/document/add-a-custom-currency-symbol/" target="_blank">', '</a>' ); ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -336,6 +337,12 @@ class WC_Admin_Setup_Wizard {
 					<th scope="row"><label for="decimal_sep"><?php _e( 'Decimal Separator', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="text" id="decimal_sep" name="decimal_sep" size="2" value="<?php echo esc_attr( $decimal_sep ) ; ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="num_decimals"><?php _e( 'Number of Decimals', 'woocommerce' ); ?></label></th>
+					<td>
+						<input type="text" id="num_decimals" name="num_decimals" size="2" value="<?php echo esc_attr( $num_decimals ) ; ?>" />
 					</td>
 				</tr>
 				<tr>
@@ -381,6 +388,7 @@ class WC_Admin_Setup_Wizard {
 		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
 		$currency_pos   = sanitize_text_field( $_POST['currency_pos'] );
 		$decimal_sep    = sanitize_text_field( $_POST['decimal_sep'] );
+		$num_decimals   = sanitize_text_field( $_POST['num_decimals'] );
 		$thousand_sep   = sanitize_text_field( $_POST['thousand_sep'] );
 		$weight_unit    = sanitize_text_field( $_POST['weight_unit'] );
 		$dimension_unit = sanitize_text_field( $_POST['dimension_unit'] );
@@ -389,6 +397,7 @@ class WC_Admin_Setup_Wizard {
 		update_option( 'woocommerce_currency', $currency_code );
 		update_option( 'woocommerce_currency_pos', $currency_pos );
 		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_num_decimals', $num_decimals );
 		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
 		update_option( 'woocommerce_weight_unit', $weight_unit );
 		update_option( 'woocommerce_dimension_unit', $dimension_unit );
@@ -401,50 +410,16 @@ class WC_Admin_Setup_Wizard {
 	 * Shipping and taxes.
 	 */
 	public function wc_setup_shipping_taxes() {
-		$domestic                         = new WC_Shipping_Flat_Rate();
-		$international                    = new WC_Shipping_International_Delivery();
-		$shipping_cost_domestic           = '';
-		$shipping_cost_international      = '';
-
-		if ( 'yes' === $domestic->get_option( 'enabled' ) ) {
-			$shipping_cost_domestic      = $domestic->get_option( 'cost' );
-		}
-
-		if ( 'yes' === $international->get_option( 'enabled' ) ) {
-			$shipping_cost_international      = $international->get_option( 'cost' );
-		}
 		?>
 		<h1><?php _e( 'Shipping &amp; Tax Setup', 'woocommerce' ); ?></h1>
 		<form method="post">
-			<p><?php printf( __( 'If you will be charging sales tax, or shipping physical goods to customers, you can configure the basic options below. This is optional and can be changed later via %1$sWooCommerce > Settings > Tax%3$s and %2$sWooCommerce > Settings > Shipping%3$s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping' ) . '" target="_blank">', '</a>' ); ?></p>
+			<p><?php _e( 'If you will be charging sales tax, or shipping physical goods to customers, you can enable these below. This is optional and can be changed later.', 'woocommerce' ); ?></p>
 			<table class="form-table">
-				<tr class="section_title">
-					<td colspan="2">
-						<h2><?php _e( 'Basic Shipping Setup', 'woocommerce' ); ?></h2>
-					</td>
-				</tr>
 				<tr>
 					<th scope="row"><label for="woocommerce_calc_shipping"><?php _e( 'Will you be shipping products?', 'woocommerce' ); ?></label></th>
 					<td>
-						<input type="checkbox" id="woocommerce_calc_shipping" <?php checked( get_option( 'woocommerce_calc_shipping', 'no' ), 'yes' ); ?> name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
+						<input type="checkbox" id="woocommerce_calc_shipping" <?php checked( get_option( 'woocommerce_ship_to_countries', '' ) !== 'disabled', true ); ?> name="woocommerce_calc_shipping" class="input-checkbox" value="1" />
 						<label for="woocommerce_calc_shipping"><?php _e( 'Yes, I will be shipping physical goods to customers', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="shipping_cost_domestic"><?php _e( '<strong>Domestic</strong> shipping costs:', 'woocommerce' ); ?></label></th>
-					<td>
-						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic" name="shipping_cost_domestic" size="5" value="' . esc_attr( $shipping_cost_domestic ) . '" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_domestic_item" name="shipping_cost_domestic_item" size="5" />' ); ?>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="shipping_cost_international"><?php _e( '<strong>International</strong> shipping costs:', 'woocommerce' ); ?></label></th>
-					<td>
-						<?php printf( __( 'A total of %s per order and/or %s per item', 'woocommerce' ), get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_international" name="shipping_cost_international" size="5" value="' . esc_attr( $shipping_cost_international ) . '" />', get_woocommerce_currency_symbol() . ' <input type="text" id="shipping_cost_international_item" name="shipping_cost_international_item" size="5" />' ); ?>
-					</td>
-				</tr>
-				<tr class="section_title">
-					<td colspan="2">
-						<h2><?php _e( 'Basic Tax Setup', 'woocommerce' ); ?></h2>
 					</td>
 				</tr>
 				<tr>
@@ -479,10 +454,9 @@ class WC_Admin_Setup_Wizard {
 					}
 					if ( $tax_rates ) {
 						?>
-						<tr>
-							<th scope="row"><label for="woocommerce_import_tax_rates"><?php _e( 'Import Tax Rates?', 'woocommerce' ); ?></label></th>
-							<td>
-								<label><input type="checkbox" id="woocommerce_import_tax_rates" name="woocommerce_import_tax_rates" class="input-checkbox" value="yes" /> <?php _e( 'Yes, please import some starter tax rates', 'woocommerce' ); ?></label>
+						<tr class="tax-rates">
+							<td colspan="2">
+								<p><?php printf( __( 'The following tax rates will be imported automatically for you. You can read more about taxes in %1$sour documentation%2$s.', 'woocommerce' ), '<a href="https://docs.woothemes.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
 								<div class="importing-tax-rates">
 									<table class="tax-rates">
 										<thead>
@@ -491,7 +465,6 @@ class WC_Admin_Setup_Wizard {
 												<th><?php _e( 'State', 'woocommerce' ); ?></th>
 												<th><?php _e( 'Rate (%)', 'woocommerce' ); ?></th>
 												<th><?php _e( 'Name', 'woocommerce' ); ?></th>
-												<th><?php _e( 'Tax Shipping', 'woocommerce' ); ?></th>
 											</tr>
 										</thead>
 										<tbody>
@@ -499,20 +472,18 @@ class WC_Admin_Setup_Wizard {
 												foreach ( $tax_rates as $rate ) {
 													?>
 													<tr>
-														<td><?php echo esc_attr( $rate['country'] ); ?></td>
-														<td><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
-														<td><?php echo esc_attr( $rate['rate'] ); ?></td>
-														<td><?php echo esc_attr( $rate['name'] ); ?></td>
-														<td><?php echo empty( $rate['shipping'] ) ? '-' : '&#10004;'; ?></td>
+														<td class="readonly"><?php echo esc_attr( $rate['country'] ); ?></td>
+														<td class="readonly"><?php echo esc_attr( $rate['state'] ? $rate['state'] : '*' ); ?></td>
+														<td class="readonly"><?php echo esc_attr( $rate['rate'] ); ?></td>
+														<td class="readonly"><?php echo esc_attr( $rate['name'] ); ?></td>
 													</tr>
 													<?php
 												}
 											?>
 										</tbody>
 									</table>
-									<p class="description"><?php _e( 'Please note: you may still need to add local and product specific tax rates depending on your business location. If in doubt, speak to an accountant.', 'woocommerce' ); ?></p>
 								</div>
-								<p class="description"><?php printf( __( 'You can edit tax rates later from the %1$stax settings%3$s screen and read more about taxes in %2$sour documentation%3$s.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '<a href="http://docs.woothemes.com/document/setting-up-taxes-in-woocommerce/" target="_blank">', '</a>' ); ?></p>
+								<p class="description"><?php printf( __( 'You may you need to add/edit rates based on your products or business location which can be done from the %1$stax settings%2$s screen. If in doubt, speak to an accountant.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=tax' ) . '" target="_blank">', '</a>' ); ?></p>
 							</td>
 						</tr>
 						<?php
@@ -534,56 +505,20 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_shipping_taxes_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$woocommerce_calc_shipping = isset( $_POST['woocommerce_calc_shipping'] ) ? 'yes' : 'no';
-		$woocommerce_calc_taxes    = isset( $_POST['woocommerce_calc_taxes'] ) ? 'yes' : 'no';
+		$enable_shipping = isset( $_POST['woocommerce_calc_shipping'] );
+		$enable_taxes    = isset( $_POST['woocommerce_calc_taxes'] );
 
-		update_option( 'woocommerce_calc_shipping', $woocommerce_calc_shipping );
-		update_option( 'woocommerce_calc_taxes', $woocommerce_calc_taxes );
+		if ( $enable_shipping ) {
+			update_option( 'woocommerce_ship_to_countries', '' );
+			WC_Admin_Notices::add_notice( 'no_shipping_methods' );
+		} else {
+			update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		}
+
+		update_option( 'woocommerce_calc_taxes', $enable_taxes ? 'yes' : 'no' );
 		update_option( 'woocommerce_prices_include_tax', sanitize_text_field( $_POST['woocommerce_prices_include_tax'] ) );
 
-		if ( 'yes' === $woocommerce_calc_shipping && ! empty( $_POST['shipping_cost_domestic'] ) ) {
-			// Delete existing settings if they exist
-			delete_option( 'woocommerce_flat_rate_settings' );
-
-			// Init rate and settings
-			$shipping_method = new WC_Shipping_Flat_Rate();
-			$costs           = array();
-			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_domestic'] ) );
-			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_domestic_item'] ) ) {
-				$costs[] = $item_cost . ' * [qty]';
-			}
-			$shipping_method->settings['cost']         = implode( ' + ', array_filter( $costs ) );
-			$shipping_method->settings['enabled']      = 'yes';
-			$shipping_method->settings['type']         = 'order';
-			$shipping_method->settings['availability'] = 'specific';
-			$shipping_method->settings['countries']    = array( WC()->countries->get_base_country() );
-
-			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
-		}
-
-		if ( 'yes' === $woocommerce_calc_shipping && ! empty( $_POST['shipping_cost_international'] ) ) {
-			// Delete existing settings if they exist
-			delete_option( 'woocommerce_international_delivery_settings' );
-
-			// Init rate and settings
-			$shipping_method = new WC_Shipping_International_Delivery();
-			$costs           = array();
-			$costs[]         = wc_format_decimal( sanitize_text_field( $_POST['shipping_cost_international'] ) );
-			if ( $item_cost = sanitize_text_field( $_POST['shipping_cost_international_item'] ) ) {
-				$costs[] = $item_cost . ' * [qty]';
-			}
-			$shipping_method->settings['cost']         = implode( ' + ', array_filter( $costs ) );
-			$shipping_method->settings['enabled']      = 'yes';
-			$shipping_method->settings['type']         = 'order';
-			if ( ! empty( $_POST['shipping_cost_domestic'] ) ) {
-				$shipping_method->settings['availability'] = 'excluding';
-				$shipping_method->settings['countries']    = array( WC()->countries->get_base_country() );
-			}
-
-			update_option( $shipping_method->plugin_id . $shipping_method->id . '_settings', $shipping_method->settings );
-		}
-
-		if ( 'yes' === $woocommerce_calc_taxes && ! empty( $_POST['woocommerce_import_tax_rates'] ) ) {
+		if ( $enable_taxes ) {
 			$locale_info = include( WC()->plugin_path() . '/i18n/locale-info.php' );
 			$tax_rates   = array();
 			$country     = WC()->countries->get_base_country();
@@ -623,55 +558,131 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Simple array of gateways to show in wizard.
+	 * @return array
+	 */
+	protected function get_wizard_payment_gateways() {
+		$gateways = array(
+			'paypal-braintree' => array(
+				'name'        => __( 'PayPal by Braintree', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/paypal-braintree.png',
+				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-powered-by-braintree/" target="_blank">', '</a>' ),
+				'class'       => 'featured featured-row-last',
+				'repo-slug'   => 'woocommerce-gateway-paypal-powered-by-braintree',
+			),
+			'paypal-ec' => array(
+				'name'        => __( 'PayPal Express Checkout', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
+				'description' => sprintf( __( 'Safe and secure payments using credit cards or your customer\'s PayPal account. %sLearn more about PayPal%s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-paypal-express-checkout/" target="_blank">', '</a>' ),
+				'class'       => 'featured featured-row-last',
+				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
+			),
+			'stripe' => array(
+				'name'        => __( 'Stripe', 'woocommerce' ),
+				'image'       => WC()->plugin_url() . '/assets/images/stripe.png',
+				'description' => sprintf( __( 'A modern and robust way to accept credit card payments on your store. %sLearn more about Stripe%s.', 'woocommerce' ), '<a href="https://wordpress.org/plugins/woocommerce-gateway-stripe/" target="_blank">', '</a>' ),
+				'class'       => 'featured featured-row-first',
+				'repo-slug'   => 'woocommerce-gateway-stripe',
+			),
+			'paypal' => array(
+				'name'        => __( 'PayPal Standard', 'woocommerce' ),
+				'description' => __( 'Accept payments via PayPal using account balance or credit card.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+				'settings'    => array(
+					'email' => array(
+						'label'       => __( 'PayPal email address', 'woocommerce' ),
+						'type'        => 'email',
+						'value'       => get_option( 'admin_email' ),
+						'placeholder' => __( 'PayPal email address', 'woocommerce' ),
+					),
+				),
+			),
+			'cheque' => array(
+				'name'        => _x( 'Check Payments', 'Check payment method', 'woocommerce' ),
+				'description' => __( 'An simple offline gateway that lets you accept a check as method of payment.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+			),
+			'bacs' => array(
+				'name'        => __( 'Bank Transfer (BACS) Payments', 'woocommerce' ),
+				'description' => __( 'An simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+			),
+			'cod' => array(
+				'name'        => __( 'Cash on Delivery', 'woocommerce' ),
+				'description' => __( 'An simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+			)
+		);
+
+		$country = WC()->countries->get_base_country();
+
+		if ( 'US' === $country ) {
+			unset( $gateways['paypal-ec'] );
+		} else {
+			unset( $gateways['paypal-braintree'] );
+		}
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			unset( $gateways['paypal-braintree'] );
+			unset( $gateways['paypal-ec'] );
+			unset( $gateways['stripe'] );
+		}
+
+		return $gateways;
+	}
+
+	/**
 	 * Payments Step.
 	 */
 	public function wc_setup_payments() {
-		$paypal_settings = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
-		$cheque_settings = array_filter( (array) get_option( 'woocommerce_cheque_settings', array() ) );
-		$cod_settings    = array_filter( (array) get_option( 'woocommerce_cod_settings', array() ) );
-		$bacs_settings   = array_filter( (array) get_option( 'woocommerce_bacs_settings', array() ) );
+		$gateways = $this->get_wizard_payment_gateways();
 		?>
 		<h1><?php _e( 'Payments', 'woocommerce' ); ?></h1>
-		<form method="post">
+		<form method="post" class="wc-wizard-payment-gateway-form">
 			<p><?php printf( __( 'WooCommerce can accept both online and offline payments. %2$sAdditional payment methods%3$s can be installed later and managed from the %1$scheckout settings%3$s screen.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout' ) . '" target="_blank">', '<a href="' . admin_url( 'admin.php?page=wc-addons&view=payment-gateways' ) . '" target="_blank">', '</a>' ); ?></p>
-			<table class="form-table">
-				<tr class="section_title">
-					<td colspan="2">
-						<h2><?php _e( 'PayPal Standard', 'woocommerce' ); ?></h2>
-						<p><?php _e( 'To accept payments via PayPal on your store, simply enter your PayPal email address below.', 'woocommerce' ); ?></p>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_paypal_email"><?php _e( 'PayPal Email Address:', 'woocommerce' ); ?></label></th>
-					<td>
-						<input type="email" id="woocommerce_paypal_email" name="woocommerce_paypal_email" class="input-text" value="<?php echo esc_attr( isset( $paypal_settings['email'] ) ? $paypal_settings['email'] : '' ); ?>" />
-					</td>
-				</tr>
-				<tr class="section_title">
-					<td colspan="2">
-						<h2><?php _e( 'Offline Payments', 'woocommerce' ); ?></h2>
-						<p><?php _e( 'Offline gateways require manual processing, but can be useful in certain circumstances or for testing payments.', 'woocommerce' ); ?></p>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_enable_cheque"><?php _e( 'Cheque Payments', 'woocommerce' ); ?></label></th>
-					<td>
-						<label><input type="checkbox" id="woocommerce_enable_cheque" name="woocommerce_enable_cheque" class="input-checkbox" value="yes" <?php checked( ( isset( $cheque_settings['enabled'] ) && 'yes' === $cheque_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable payment via Cheques', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_enable_cod"><?php _e( 'Cash on Delivery', 'woocommerce' ); ?></label></th>
-					<td>
-						<label><input type="checkbox" id="woocommerce_enable_cod" name="woocommerce_enable_cod" class="input-checkbox" value="yes" <?php checked( ( isset( $cod_settings['enabled'] ) && 'yes' === $cod_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable cash on delivery', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="woocommerce_enable_bacs"><?php _e( 'Bank Transfer (BACS)', 'woocommerce' ); ?></label></th>
-					<td>
-						<label><input type="checkbox" id="woocommerce_enable_bacs" name="woocommerce_enable_bacs" class="input-checkbox" value="yes" <?php checked( ( isset( $bacs_settings['enabled'] ) && 'yes' === $bacs_settings['enabled'] ), true ); ?> /> <?php _e( 'Enable BACS payments', 'woocommerce' ); ?></label>
-					</td>
-				</tr>
-			</table>
+
+			<ul class="wc-wizard-payment-gateways">
+				<?php foreach ( $gateways as $gateway_id => $gateway ) : ?>
+					<li class="wc-wizard-gateway wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?> <?php echo esc_attr( $gateway['class'] ); ?>">
+						<div class="wc-wizard-gateway-enable">
+							<input type="checkbox" name="wc-wizard-gateway-<?php echo esc_attr( $gateway_id ); ?>-enabled" class="input-checkbox" value="yes" />
+							<label>
+								<?php if ( $gateway['image'] ) : ?>
+									<img src="<?php echo esc_attr( $gateway['image'] ); ?>" alt="<?php echo esc_attr( $gateway['name'] ); ?>" />
+								<?php else : ?>
+									<?php echo esc_html( $gateway['name'] ); ?>
+								<?php endif; ?>
+							</label>
+						</div>
+						<div class="wc-wizard-gateway-description">
+							<?php echo wp_kses_post( wpautop( $gateway['description'] ) ); ?>
+						</div>
+						<?php if ( ! empty( $gateway['settings'] ) ) : ?>
+							<table class="form-table wc-wizard-gateway-settings">
+								<?php foreach ( $gateway['settings'] as $setting_id => $setting ) : ?>
+									<tr>
+										<th scope="row"><label for="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"><?php echo esc_html( $setting['label'] ); ?>:</label></th>
+										<td>
+											<input
+												type="<?php echo esc_attr( $setting['type'] ); ?>"
+												id="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+												name="<?php echo esc_attr( $gateway_id ); ?>_<?php echo esc_attr( $setting_id ); ?>"
+												class="input-text"
+												value="<?php echo esc_attr( $setting['value'] ); ?>"
+												placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
+												/>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							</table>
+						<?php endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 			<p class="wc-setup-actions step">
 				<input type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" />
 				<a href="<?php echo esc_url( $this->get_next_step_link() ); ?>" class="button button-large button-next"><?php _e( 'Skip this step', 'woocommerce' ); ?></a>
@@ -687,24 +698,26 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_payments_save() {
 		check_admin_referer( 'wc-setup' );
 
-		$paypal_settings            = array_filter( (array) get_option( 'woocommerce_paypal_settings', array() ) );
-		$cheque_settings            = array_filter( (array) get_option( 'woocommerce_cheque_settings', array() ) );
-		$cod_settings               = array_filter( (array) get_option( 'woocommerce_cod_settings', array() ) );
-		$bacs_settings              = array_filter( (array) get_option( 'woocommerce_bacs_settings', array() ) );
+		$gateways = $this->get_wizard_payment_gateways();
 
-		$paypal_settings['enabled'] = ! empty( $_POST['woocommerce_paypal_email'] ) ? 'yes' : 'no';
-		$cheque_settings['enabled'] = isset( $_POST['woocommerce_enable_cheque'] ) ? 'yes' : 'no';
-		$cod_settings['enabled']    = isset( $_POST['woocommerce_enable_cod'] ) ? 'yes' : 'no';
-		$bacs_settings['enabled']   = isset( $_POST['woocommerce_enable_bacs'] ) ? 'yes' : 'no';
+		foreach ( $gateways as $gateway_id => $gateway ) {
+			// If repo-slug is defined, download and install plugin from .org.
+			if ( ! empty( $gateway['repo-slug'] ) && ! empty( $_POST[ 'wc-wizard-gateway-' . $gateway_id . '-enabled' ] ) ) {
+				wp_schedule_single_event( time() + 10, 'woocommerce_plugin_background_installer', array( $gateway_id, $gateway ) );
+			}
 
-		if ( ! empty( $_POST['woocommerce_paypal_email'] ) ) {
-			$paypal_settings['email'] = wc_clean( $_POST['woocommerce_paypal_email'] );
+			$settings_key        = 'woocommerce_' . $gateway_id . '_settings';
+			$settings            = array_filter( (array) get_option( $settings_key, array() ) );
+			$settings['enabled'] = ! empty( $_POST[ 'wc-wizard-gateway-' . $gateway_id . '-enabled' ] ) ? 'yes' : 'no';
+
+			if ( ! empty( $gateway['settings'] ) ) {
+				foreach ( $gateway['settings'] as $setting_id => $setting ) {
+					$settings[ $setting_id ] = wc_clean( $_POST[ $gateway_id . '_' . $setting_id ] );
+				}
+			}
+
+			update_option( $settings_key, $settings );
 		}
-
-		update_option( 'woocommerce_paypal_settings', $paypal_settings );
-		update_option( 'woocommerce_cheque_settings', $cheque_settings );
-		update_option( 'woocommerce_cod_settings', $cod_settings );
-		update_option( 'woocommerce_bacs_settings', $bacs_settings );
 
 		wp_redirect( esc_url_raw( $this->get_next_step_link() ) );
 		exit;
@@ -739,7 +752,7 @@ class WC_Admin_Setup_Wizard {
 
 		<?php if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) : ?>
 			<div class="woocommerce-message woocommerce-tracker">
-				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information, and get %s discount on your next WooThemes purchase. %sFind out more%s.', 'woocommerce' ), '20%', '<a href="http://www.woothemes.com/woocommerce/usage-tracking/" target="_blank">', '</a>' ); ?></p>
+				<p><?php printf( __( 'Want to help make WooCommerce even more awesome? Allow WooThemes to collect non-sensitive diagnostic data and usage information. %sFind out more%s.', 'woocommerce' ), '<a href="https://www.woothemes.com/woocommerce/usage-tracking/" target="_blank">', '</a>' ); ?></p>
 				<p class="submit">
 					<a class="button-primary button button-large" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optin', 'true' ), 'wc_tracker_optin', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'Allow', 'woocommerce' ); ?></a>
 					<a class="button-secondary button button-large skip"  href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc_tracker_optout', 'true' ), 'wc_tracker_optout', 'wc_tracker_nonce' ) ); ?>"><?php _e( 'No thanks', 'woocommerce' ); ?></a>
@@ -757,10 +770,9 @@ class WC_Admin_Setup_Wizard {
 			<div class="wc-setup-next-steps-last">
 				<h2><?php _e( 'Learn More', 'woocommerce' ); ?></h2>
 				<ul>
-					<li class="video-walkthrough"><a href="http://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Videos&amp;utm_campaign=Onboarding"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="newsletter"><a href="http://www.woothemes.com/woocommerce-onboarding-email/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Newsletter&amp;utm_campaign=Onboarding"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
-					<li class="sidekick"><a href="http://www.woothemes.com/sidekick/"><?php _e( 'Follow Sidekick interactive walkthroughs', 'woocommerce' ); ?></a></li>
-					<li class="learn-more"><a href="http://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Docs&amp;utm_campaign=Onboarding"><?php _e( 'Read more about getting started', 'woocommerce' ); ?></a></li>
+					<li class="video-walkthrough"><a href="https://docs.woothemes.com/document/woocommerce-101-video-series/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Videos&amp;utm_campaign=Onboarding"><?php _e( 'Watch the WC 101 video walkthroughs', 'woocommerce' ); ?></a></li>
+					<li class="newsletter"><a href="https://www.woothemes.com/woocommerce-onboarding-email/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Newsletter&amp;utm_campaign=Onboarding"><?php _e( 'Get eCommerce advice in your inbox', 'woocommerce' ); ?></a></li>
+					<li class="learn-more"><a href="https://docs.woothemes.com/documentation/plugins/woocommerce/getting-started/?utm_source=WooCommercePlugin&amp;utm_medium=Wizard&amp;utm_content=Docs&amp;utm_campaign=Onboarding"><?php _e( 'Learn more about getting started', 'woocommerce' ); ?></a></li>
 				</ul>
 			</div>
 		</div>
