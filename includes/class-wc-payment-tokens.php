@@ -35,16 +35,15 @@ class WC_Payment_Tokens {
 			$customer_id
 		) );
 
-		if ( empty( $token_results ) ) {
-			return array();
-		}
-
 		$tokens = array();
-		foreach ( $token_results as $token_result ) {
-			if ( empty( $gateway_id ) || $gateway_id === $token_result->gateway_id ) {
-				$_token = self::get( $token_result->token_id, $token_result );
-				if ( ! empty( $_token ) ) {
-					$tokens[ $token_result->token_id ] = $_token;
+
+		if ( ! empty( $token_results ) ) {
+			foreach ( $token_results as $token_result ) {
+				if ( empty( $gateway_id ) || $gateway_id === $token_result->gateway_id ) {
+					$_token = self::get( $token_result->token_id, $token_result );
+					if ( ! empty( $_token ) ) {
+						$tokens[ $token_result->token_id ] = $_token;
+					}
 				}
 			}
 		}
