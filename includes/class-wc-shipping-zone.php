@@ -47,6 +47,8 @@ class WC_Shipping_Zone extends WC_Data {
 		} elseif ( 0 === $zone ) {
 			$this->set_zone_name( __( 'Rest of the World', 'woocommerce' ) );
 			$this->read_zone_locations( 0 );
+		} else {
+			$this->set_zone_name( __( 'Zone', 'woocommerce' ) );
 		}
     }
 
@@ -429,6 +431,10 @@ class WC_Shipping_Zone extends WC_Data {
 				)
 			);
 			$instance_id = $wpdb->insert_id;
+		}
+
+		if ( $instance_id ) {
+			do_action( 'woocommerce_shipping_zone_method_added', $instance_id, $type, $this->get_zone_id() );
 		}
 
 		return $instance_id;

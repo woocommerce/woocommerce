@@ -119,16 +119,6 @@ class WC_Product_Variable extends WC_Product {
 			);
 
 			if ( $visible_only ) {
-				$args['meta_query'] = array(
-					'relation' => 'AND',
-					// Price is required
-					array(
-						'key'     => '_price',
-						'value'   => '',
-						'compare' => '!=',
-					)
-				);
-				// Must be in stock?
 				if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 					$args['meta_query'][] = array(
 						'key'     => '_stock_status',
@@ -287,6 +277,11 @@ class WC_Product_Variable extends WC_Product {
 						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->price, $variation, $this );
 						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->regular_price, $variation, $this );
 						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->sale_price, $variation, $this );
+
+						// Skip empty prices
+						if ( '' === $price ) {
+							continue;
+						}
 
 						// If sale price does not equal price, the product is not yet on sale
 						if ( $sale_price === $regular_price || $sale_price !== $price ) {
@@ -560,7 +555,7 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Returns an array of date for a variation. Used in the add to cart form.
+	 * Returns an array of data for a variation. Used in the add to cart form.
 	 * @since  2.4.0
 	 * @param  WC_Product $variation Variation product object or ID
 	 * @return array

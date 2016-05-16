@@ -68,7 +68,7 @@ jQuery( function( $ ) {
 		} );
 
 		// Don't show the "use new" radio button if we are a guest or only have one method..
-		if ( 0 === $( '#wc-' +  woocommerceTokenizationParams.gatewayID + '-method-count' ).data( 'count' ) || !  woocommerceTokenizationParams.userLoggedIn ) {
+		if ( 0 === $( '#wc-' +  woocommerceTokenizationParams.gatewayID + '-methods' ).data( 'count' ) || !  woocommerceTokenizationParams.userLoggedIn ) {
 			$( '.wc-' +  woocommerceTokenizationParams.gatewayID + '-payment-form-new-checkbox-wrap' ).hide();
 		}
 

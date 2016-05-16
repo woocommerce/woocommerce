@@ -27,6 +27,18 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 	}
 
 	/**
+	 * Process and redirect if disabled.
+	 */
+	public function process_admin_options() {
+		parent::process_admin_options();
+
+		if ( 'no' === $this->settings[ 'enabled' ] ) {
+			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
+			exit;
+		}
+	}
+	
+	/**
 	 * Return the name of the option in the WP DB.
 	 * @since 2.6.0
 	 * @return string
@@ -81,9 +93,10 @@ class WC_Shipping_Legacy_Local_Delivery extends WC_Shipping_Local_Pickup {
 		}
 
 		$rate = array(
-			'id'    => $this->id,
-			'label' => $this->title,
-			'cost'  => $shipping_total
+			'id'      => $this->id,
+			'label'   => $this->title,
+			'cost'    => $shipping_total,
+			'package' => $package,
 		);
 
 		$this->add_rate( $rate );

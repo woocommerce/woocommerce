@@ -28,6 +28,31 @@
 					this.changes = changes;
 					this.trigger( 'change:zones' );
 				},
+				discardChanges: function( id ) {
+					var changes      = this.changes || {},
+						set_position = null,
+						zones        = _.indexBy( this.get( 'zones' ), 'zone_id' );
+
+					// Find current set position if it has moved since last save
+					if ( changes[ id ] && changes[ id ].zone_order !== undefined ) {
+						set_position = changes[ id ].zone_order;
+					}
+
+					// Delete all changes
+					delete changes[ id ];
+
+					// If the position was set, and this zone does exist in DB, set the position again so the changes are not lost.
+					if ( set_position !== null && zones[ id ] && zones[ id ].zone_order !== set_position ) {
+						changes[ id ] = _.extend( changes[ id ] || {}, { zone_id : id, zone_order : set_position } );
+					}
+
+					this.changes = changes;
+
+					// No changes? Disable save button.
+					if ( 0 === _.size( this.changes ) ) {
+						shippingZoneView.clearUnloadConfirmation();
+					}
+				},
 				save: function() {
 					if ( _.size( this.changes ) ) {
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zones_save_changes', {
@@ -63,7 +88,7 @@
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$save_button.on( 'click', { view: this }, this.onSubmit );
-					$( document.body ).on( 'click', '.add_shipping_method', { view: this }, this.onAddShippingMethod );
+					$( document.body ).on( 'click', '.add_shipping_method:not(.disabled)', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
 					$( document.body ).on( 'click', '.wc-shipping-zone-save-changes', { view: this }, this.onSubmit );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
@@ -82,11 +107,11 @@
 					$( this.el ).unblock();
 				},
 				render: function() {
-					var zones       = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
-						view        = this;
+					var zones = _.indexBy( this.model.get( 'zones' ), 'zone_id' ),
+						view  = this;
 
-					this.$el.empty();
-					this.unblock();
+					view.$el.empty();
+					view.unblock();
 
 					if ( _.size( zones ) ) {
 						// Sort zones
@@ -96,56 +121,88 @@
 
 						// Populate $tbody with the current zones
 						$.each( zones, function( id, rowData ) {
-							view.$el.append( view.rowTemplate( rowData ) );
-
-							var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
-
-							// Editing?
-							if ( rowData.editing ) {
-								$tr.addClass( 'editing' );
-							}
-
-							// Select values in region select
-							_.each( rowData.zone_locations, function( location ) {
-								if ( 'postcode' === location.type ) {
-									var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
-
-									if ( postcode_field.val() ) {
-										postcode_field.val( postcode_field.val() + '\n' + location.code );
-									} else {
-										postcode_field.val( location.code );
-									}
-									$tr.find( '.wc-shipping-zone-postcodes' ).show();
-									$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
-								} else {
-									$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
-								}
-							} );
-
-							// List shipping methods
-							view.renderShippingMethods( rowData.zone_id, rowData.shipping_methods );
+							view.renderRow( rowData );
 						} );
 
-						// Make the rows function
-						this.$el.find('.view').show();
-						this.$el.find('.edit').hide();
-						this.$el.find('.wc-shipping-zone-save-changes-notice').hide();
-						this.$el.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
-						this.$el.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
-						this.$el.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
-						this.$el.find('.editing .wc-shipping-zone-edit').trigger('click');
-
-						// Stripe
-						if ( 0 === _.size( zones ) % 2) {
-							$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).addClass( 'odd' );
-						} else {
-							$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
-						}
 					} else {
 						view.$el.append( $blank_template );
 					}
 
-					this.initTooltips();
+					view.initRows();
+				},
+				renderRow: function( rowData ) {
+					var view = this;
+					view.$el.append( view.rowTemplate( rowData ) );
+					view.initRow( rowData );
+				},
+				initRow: function( rowData ) {
+					var view = this;
+					var $tr = view.$el.find( 'tr[data-id="' + rowData.zone_id + '"]');
+
+					// Select values in region select
+					_.each( rowData.zone_locations, function( location ) {
+						if ( 'string' === jQuery.type( location ) ) {
+							$tr.find( 'option[value="' + location + '"]' ).prop( 'selected', true );
+						} else {
+							if ( 'postcode' === location.type ) {
+								var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
+
+								if ( postcode_field.val() ) {
+									postcode_field.val( postcode_field.val() + '\n' + location.code );
+								} else {
+									postcode_field.val( location.code );
+								}
+								$tr.find( '.wc-shipping-zone-postcodes' ).show();
+								$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
+							} else {
+								$tr.find( 'option[value="' + location.type + ':' + location.code + '"]' ).prop( 'selected', true );
+							}
+						}
+					} );
+
+					if ( rowData.zone_postcodes ) {
+						_.each( rowData.zone_postcodes, function( location ) {
+							var postcode_field = $tr.find( '.wc-shipping-zone-postcodes :input' );
+
+							if ( postcode_field.val() ) {
+								postcode_field.val( postcode_field.val() + '\n' + location.code );
+							} else {
+								postcode_field.val( location.code );
+							}
+							$tr.find( '.wc-shipping-zone-postcodes' ).show();
+							$tr.find( '.wc-shipping-zone-postcodes-toggle' ).hide();
+						} );
+					}
+
+					// List shipping methods
+					view.renderShippingMethods( rowData.zone_id, rowData.shipping_methods );
+
+					// Make the row function
+					$tr.find( '.view' ).show();
+					$tr.find( '.edit' ).hide();
+					$tr.find( '.wc-shipping-zone-edit' ).on( 'click', { view: this }, this.onEditRow );
+					$tr.find( '.wc-shipping-zone-cancel-edit' ).on( 'click', { view: this }, this.onCancelEditRow );
+					$tr.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
+					$tr.find( '.wc-shipping-zone-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
+
+					// Editing?
+					if ( true === rowData.editing ) {
+						$tr.addClass( 'editing' );
+						$tr.find( '.wc-shipping-zone-edit' ).trigger( 'click' );
+					}
+				},
+				initRows: function() {
+					// Stripe
+					if ( 0 === ( $( 'tbody.wc-shipping-zone-rows tr' ).length % 2 ) ) {
+						$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).addClass( 'odd' );
+					} else {
+						$table.find( 'tbody.wc-shipping-zone-rows' ).next( 'tbody' ).find( 'tr' ).removeClass( 'odd' );
+					}
+
+					// Tooltips
+					$( '#tiptip_holder' ).removeAttr( 'style' );
+					$( '#tiptip_arrow' ).removeAttr( 'style' );
+					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				renderShippingMethods: function( zone_id, shipping_methods ) {
 					var $tr          = $( '.wc-shipping-zones tr[data-id="' + zone_id + '"]');
@@ -163,13 +220,9 @@
 
 							$method_list.prepend( '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
 						} );
-
+					} else {
+						$method_list.prepend( '<li class="wc-shipping-zone-method">&ndash;</li>' );
 					}
-				},
-				initTooltips: function() {
-					$( '#tiptip_holder' ).removeAttr( 'style' );
-					$( '#tiptip_arrow' ).removeAttr( 'style' );
-					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				onSubmit: function( event ) {
 					event.data.view.block();
@@ -185,8 +238,9 @@
 						changes = {},
 						size    = _.size( zones ),
 						newRow  = _.extend( {}, data.default_zone, {
-							zone_id: 'new-' + size + '-' + Date.now(),
-							editing:  true
+							zone_id  : 'new-' + size + '-' + Date.now(),
+							zone_name: data.strings.default_zone_name,
+							editing  : true
 						} );
 
 					newRow.zone_order = 1 + _.max(
@@ -197,13 +251,11 @@
 						}
 					);
 
-					zones[ newRow.zone_id ]   = newRow;
 					changes[ newRow.zone_id ] = newRow;
 
-					model.set( 'zones', zones );
 					model.logChanges( changes );
-
-					view.render();
+					view.renderRow( newRow );
+					view.initRows();
 				},
 				onTogglePostcodes: function( event ) {
 					event.preventDefault();
@@ -213,37 +265,63 @@
 				},
 				onEditRow: function( event ) {
 					event.preventDefault();
-					$( this ).closest('tr').addClass('editing');
+					event.data.view.model.trigger( 'change:zones' );
+					$( this ).closest('tr').addClass( 'editing' );
 					$( this ).closest('tr').find('.view').hide();
 					$( this ).closest('tr').find('.edit').show();
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).select2( select2_args );
 					$( '.wc-shipping-zone-region-select:not(.enhanced)' ).addClass('enhanced');
-					$( this ).closest('tr').find('.add_shipping_method').attr( 'disabled', 'disabled' ).addClass( 'tips' );
-					event.data.view.initTooltips();
-					event.data.view.model.trigger( 'change:zones' );
+
+					var addShippingMethod = $( this ).closest('tr').find('.add_shipping_method');
+					addShippingMethod.addClass( 'disabled' );
+					addShippingMethod.tipTip({ 'attribute': 'data-disabled-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
+				},
+				onCancelEditRow: function( event ) {
+					var view    = event.data.view,
+						model   = view.model,
+						row     = $( this ).closest('tr'),
+						zone_id = row.data('id'),
+						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' );
+
+					event.preventDefault();
+					model.discardChanges( zone_id );
+
+					if ( zones[ zone_id ] ) {
+						zones[ zone_id ].editing = false;
+						row.after( view.rowTemplate( zones[ zone_id ] ) );
+						view.initRow( zones[ zone_id ] );
+					}
+
+					row.remove();
+					view.initRows();
 				},
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
 						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {},
+						row     = $( this ).closest('tr'),
 						zone_id = $( this ).closest('tr').data('id');
 
 					event.preventDefault();
 
-					delete zones[ zone_id ];
-					changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { deleted : 'deleted' } );
-					model.set( 'zones', zones );
-					model.logChanges( changes );
-					view.render();
+					if ( zones[ zone_id ] ) {
+						delete zones[ zone_id ];
+						changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { deleted : 'deleted' } );
+						model.set( 'zones', zones );
+						model.logChanges( changes );
+					}
+
+					row.remove();
+					view.initRows();
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
-					$save_button.removeAttr( 'disabled' );
+					$save_button.prop( 'disabled', false );
 				},
 				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
-					$save_button.attr( 'disabled', 'disabled' );
+					$save_button.prop( 'disabled', true );
 				},
 				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
@@ -261,26 +339,32 @@
 						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
 						changes = {};
 
-					if ( zones[ zone_id ][ attribute ] !== value ) {
+					if ( ! zones[ zone_id ] || zones[ zone_id ][ attribute ] !== value ) {
 						changes[ zone_id ] = {};
 						changes[ zone_id ][ attribute ] = value;
-						zones[ zone_id ][ attribute ]   = value;
 					}
 
 					model.logChanges( changes );
 				},
 				updateModelOnSort: function( event ) {
-					var view         = event.data.view,
-						model        = view.model,
-						zones        = _.indexBy( model.get( 'zones' ), 'zone_id' ),
-						changes      = {};
+					var view    = event.data.view,
+						model   = view.model,
+						zones   = _.indexBy( model.get( 'zones' ), 'zone_id' ),
+						rows    = $( 'tbody.wc-shipping-zone-rows tr' ),
+						changes = {};
 
-					_.each( zones, function( zone ) {
-						var old_position = parseInt( zone.zone_order, 10 );
-						var new_position = parseInt( $table.find( 'tr[data-id="' + zone.zone_id + '"]').index(), 10 );
+					// Update sorted row position
+					_.each( rows, function( row ) {
+						var zone_id = $( row ).data( 'id' ),
+							old_position = null,
+							new_position = parseInt( $( row ).index(), 10 );
+
+						if ( zones[ zone_id ] ) {
+							old_position = parseInt( zones[ zone_id ].zone_order, 10 );
+						}
 
 						if ( old_position !== new_position ) {
-							changes[ zone.zone_id ] = _.extend( changes[ zone.zone_id ] || {}, { zone_order : new_position } );
+							changes[ zone_id ] = _.extend( changes[ zone_id ] || {}, { zone_order : new_position } );
 						}
 					} );
 

@@ -433,22 +433,22 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb;
 
-	// No sorting when menu_order is false
+	// No sorting when menu_order is false.
 	if ( isset( $args['menu_order'] ) && $args['menu_order'] == false ) {
 		return $clauses;
 	}
 
-	// No sorting when orderby is non default
+	// No sorting when orderby is non default.
 	if ( isset( $args['orderby'] ) && $args['orderby'] != 'name' ) {
 		return $clauses;
 	}
 
-	// No sorting in admin when sorting by a column
+	// No sorting in admin when sorting by a column.
 	if ( is_admin() && isset( $_GET['orderby'] ) ) {
 		return $clauses;
 	}
 
-	// wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes
+	// Wordpress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes.
 	$found = false;
 	foreach ( (array) $taxonomies as $taxonomy ) {
 		if ( taxonomy_is_product_attribute( $taxonomy ) || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) {
@@ -460,27 +460,27 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 		return $clauses;
 	}
 
-	// Meta name
+	// Meta name.
 	if ( ! empty( $taxonomies[0] ) && taxonomy_is_product_attribute( $taxonomies[0] ) ) {
 		$meta_name = 'order_' . esc_attr( $taxonomies[0] );
 	} else {
 		$meta_name = 'order';
 	}
 
-	// query fields
+	// Query fields.
 	if ( strpos( 'COUNT(*)', $clauses['fields'] ) === false )  {
-		$clauses['fields']  .= ', tm.* ';
+		$clauses['fields'] = 'tm.*, ' . $clauses['fields'];
 	}
 
-	// query join
+	// Query join.
 	if ( get_option( 'db_version' ) < 34370 ) {
 		$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
 	} else {
 		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
 	}
 
-	// default to ASC
-	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper($args['menu_order']), array( 'ASC', 'DESC' ) ) ) {
+	// Default to ASC.
+	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper( $args['menu_order'] ), array( 'ASC', 'DESC' ) ) ) {
 		$args['menu_order'] = 'ASC';
 	}
 
@@ -494,6 +494,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 
 	return $clauses;
 }
+
 add_filter( 'terms_clauses', 'wc_terms_clauses', 10, 3 );
 
 /**

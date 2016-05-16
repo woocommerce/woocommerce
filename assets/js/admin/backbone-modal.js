@@ -53,15 +53,28 @@
 		_string: undefined,
 		events: {
 			'click .modal-close': 'closeButton',
-			'click #btn-ok':      'addButton',
+			'click #btn-ok'     : 'addButton',
 			'touchstart #btn-ok': 'addButton',
-			'keydown':            'keyboardActions'
+			'keydown'           : 'keyboardActions'
+		},
+		resizeContent: function() {
+			var $content  = $( '.wc-backbone-modal-content' ).find( 'article' );
+			var max_h     = $( window ).height() * 0.75;
+
+			$content.css({
+				'max-height': max_h + 'px'
+			});
 		},
 		initialize: function( data ) {
+			var view     = this;
 			this._target = data.target;
 			this._string = data.string;
 			_.bindAll( this, 'render' );
 			this.render();
+
+			$( window ).resize(function() {
+				view.resizeContent();
+			});
 		},
 		render: function() {
 			var template = wp.template( this._target );
@@ -74,26 +87,7 @@
 				'overflow': 'hidden'
 			}).append( this.$el );
 
-			var $content  = $( '.wc-backbone-modal-content' ).find( 'article' );
-			var content_h = ( $content.height() < 90 ) ? 90 : $content.height();
-			var max_h     = $( window ).height() * 0.75;
-
-			if ( content_h > max_h ) {
-				$content.css({
-					'overflow': 'auto',
-					height: max_h + 'px'
-				});
-			} else {
-				$content.css({
-					'overflow': 'visible',
-					height: ( content_h > 90 ) ? 'auto' : content_h + 'px'
-				});
-			}
-
-			/*$( '.wc-backbone-modal-content' ).css({
-				'margin-top': '-' + ( $( '.wc-backbone-modal-content' ).height() / 2 ) + 'px',
-				'margin-left': '-' + ( $( '.wc-backbone-modal-content' ).width() / 2 ) + 'px'
-			});*/
+			this.resizeContent();
 
 			$( document.body ).trigger( 'wc_backbone_modal_loaded', this._target );
 		},

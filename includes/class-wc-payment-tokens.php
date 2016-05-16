@@ -188,6 +188,7 @@ class WC_Payment_Tokens {
 				) );
 			}
 		}
+		do_action( 'woocommerce_payment_token_set_default', $token_id );
 	}
 
 	/**

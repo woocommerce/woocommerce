@@ -167,11 +167,19 @@ class WC_Admin_Attributes {
 			);
 
 			// Update taxonomy ordering term meta
-			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_termmeta',
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $attribute['attribute_name'] ) ),
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name ) )
-			);
+			if ( get_option( 'db_version' ) < 34370 ) {
+				$wpdb->update(
+					$wpdb->prefix . 'woocommerce_termmeta',
+					array( 'meta_key' => 'order_pa_' . sanitize_title( $attribute['attribute_name'] ) ),
+					array( 'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name ) )
+				);
+			} else {
+				$wpdb->update(
+					$wpdb->termmeta,
+					array( 'meta_key' => 'order_pa_' . sanitize_title( $attribute['attribute_name'] ) ),
+					array( 'meta_key' => 'order_pa_' . sanitize_title( $old_attribute_name ) )
+				);
+			}
 
 			// Update product attributes which use this taxonomy
 			$old_attribute_name_length = strlen( $old_attribute_name ) + 3;
@@ -204,15 +212,17 @@ class WC_Admin_Attributes {
 	 */
 	private static function process_delete_attribute() {
 		global $wpdb;
+
 		$attribute_id = absint( $_GET['delete'] );
+
 		check_admin_referer( 'woocommerce-delete-attribute_' . $attribute_id );
 
 		$attribute_name = $wpdb->get_var( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
+		$taxonomy       = wc_attribute_taxonomy_name( $attribute_name );
+
+		do_action( 'woocommerce_before_attribute_delete', $attribute_id, $attribute_name, $taxonomy );
 
 		if ( $attribute_name && $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" ) ) {
-
-			$taxonomy = wc_attribute_taxonomy_name( $attribute_name );
-
 			if ( taxonomy_exists( $taxonomy ) ) {
 				$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
 				foreach ( $terms as $term ) {
@@ -222,7 +232,6 @@ class WC_Admin_Attributes {
 
 			do_action( 'woocommerce_attribute_deleted', $attribute_id, $attribute_name, $taxonomy );
 			delete_transient( 'wc_attribute_taxonomies' );
-
 			return true;
 		}
 

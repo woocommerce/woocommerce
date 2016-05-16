@@ -84,7 +84,7 @@
 					Backbone.ajax({
 						method: 'POST',
 						dataType: 'json',
-						url: ajaxurl + ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_tax_rates_save_changes',
+						url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_tax_rates_save_changes',
 						data: {
 							current_class: data.current_class,
 							wc_tax_nonce: data.wc_tax_nonce,

@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Products controller class.
  *
  * @package WooCommerce/API
- * @extends WP_REST_Controller
+ * @extends WC_REST_Controller
  */
-class WC_REST_Product_Reviews_Controller extends WP_REST_Controller {
+class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.

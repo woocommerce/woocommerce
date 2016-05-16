@@ -806,6 +806,9 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
+		// Default total sales.
+		add_post_meta( $product_id, 'total_sales', '0', true );
+
 		// Virtual
 		if ( isset( $data['virtual'] ) ) {
 			update_post_meta( $product_id, '_virtual', ( true === $data['virtual'] ) ? 'yes' : 'no' );
@@ -1352,7 +1355,7 @@ class WC_API_Products extends WC_API_Resource {
 				$backorders = get_post_meta( $variation_id, '_backorders', true );
 
 				if ( isset( $variation['backorders'] ) ) {
-					if ( 'notify' == $variation['backorders'] ) {
+					if ( 'notify' === $variation['backorders'] ) {
 						$backorders = 'notify';
 					} else {
 						$backorders = ( true === $variation['backorders'] ) ? 'yes' : 'no';

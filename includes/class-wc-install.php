@@ -17,18 +17,65 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Install {
 
-	/** @var array DB updates that need to be run */
+	/** @var array DB updates and callbacks that need to be run per version */
 	private static $db_updates = array(
-		'2.0.0' => 'updates/woocommerce-update-2.0.php',
-		'2.0.9' => 'updates/woocommerce-update-2.0.9.php',
-		'2.1.0' => 'updates/woocommerce-update-2.1.php',
-		'2.2.0' => 'updates/woocommerce-update-2.2.php',
-		'2.3.0' => 'updates/woocommerce-update-2.3.php',
-		'2.4.0' => 'updates/woocommerce-update-2.4.php',
-		'2.4.1' => 'updates/woocommerce-update-2.4.1.php',
-		'2.5.0' => 'updates/woocommerce-update-2.5.php',
-		'2.6.0' => 'updates/woocommerce-update-2.6.php'
+		'2.0.0' => array(
+			'wc_update_200_file_paths',
+			'wc_update_200_permalinks',
+			'wc_update_200_subcat_display',
+			'wc_update_200_taxrates',
+			'wc_update_200_line_items',
+			'wc_update_200_images',
+			'wc_update_200_db_version',
+		),
+		'2.0.9' => array(
+			'wc_update_209_brazillian_state',
+			'wc_update_209_db_version',
+		),
+		'2.1.0' => array(
+			'wc_update_210_remove_pages',
+			'wc_update_210_file_paths',
+			'wc_update_210_db_version',
+		),
+		'2.2.0' => array(
+			'wc_update_220_shipping',
+			'wc_update_220_order_status',
+			'wc_update_220_variations',
+			'wc_update_220_attributes',
+			'wc_update_220_db_version',
+		),
+		'2.3.0' => array(
+			'wc_update_230_options',
+			'wc_update_230_db_version',
+		),
+		'2.4.0' => array(
+			'wc_update_240_options',
+			'wc_update_240_shipping_methods',
+			'wc_update_240_api_keys',
+			'wc_update_240_webhooks',
+			'wc_update_240_refunds',
+			'wc_update_240_db_version',
+		),
+		'2.4.1' => array(
+			'wc_update_241_variations',
+			'wc_update_241_db_version',
+		),
+		'2.5.0' => array(
+			'wc_update_250_currency',
+			'wc_update_250_db_version',
+		),
+		'2.6.0' => array(
+			'wc_update_260_options',
+			'wc_update_260_termmeta',
+			'wc_update_260_zones',
+			'wc_update_260_zone_methods',
+			'wc_update_260_refunds',
+			'wc_update_260_db_version',
+		),
 	);
+
+	/** @var object Background update class */
+	private static $background_updater;
 
 	/**
 	 * Hook in tabs.
@@ -42,6 +89,9 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
+
+		// Init background updates
+		self::$background_updater = new WC_Background_Updater();
 	}
 
 	/**
@@ -65,7 +115,6 @@ class WC_Install {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
 			self::update();
 			WC_Admin_Notices::remove_notice( 'update' );
-			add_action( 'admin_notices', array( __CLASS__, 'updated_notice' ) );
 		}
 	}
 
@@ -167,31 +216,34 @@ class WC_Install {
 	}
 
 	/**
-	 * Update DB version to current.
-	 */
-	private static function update_db_version( $version = null ) {
-		delete_option( 'woocommerce_db_version' );
-		add_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
-	}
-
-	/**
-	 * Handle updates.
+	 * Push all needed DB updates to the queue for processing.
 	 */
 	private static function update() {
-		if ( ! defined( 'WC_UPDATING' ) ) {
-			define( 'WC_UPDATING', true );
-		}
-
 		$current_db_version = get_option( 'woocommerce_db_version' );
+		$logger             = new WC_Logger();
+		$update_queued      = false;
 
-		foreach ( self::$db_updates as $version => $updater ) {
+		foreach ( self::$db_updates as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
-				include( $updater );
-				self::update_db_version( $version );
+				foreach ( $update_callbacks as $update_callback ) {
+					$logger->add( 'wc_db_updates', sprintf( 'Queuing %s - %s', $version, $update_callback ) );
+					self::$background_updater->push_to_queue( $update_callback );
+					$update_queued = true;
+				}
 			}
 		}
 
-		self::update_db_version();
+		if ( $update_queued ) {
+			self::$background_updater->save()->dispatch();
+		}
+	}
+
+	/**
+	 * Update DB version to current.
+	 */
+	public static function update_db_version( $version = null ) {
+		delete_option( 'woocommerce_db_version' );
+		add_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
 	}
 
 	/**
@@ -353,6 +405,7 @@ class WC_Install {
 
 	/**
 	 * Get Table schema.
+	 * https://github.com/woothemes/woocommerce/wiki/Database-Description/
 	 * @return string
 	 */
 	private static function get_schema() {
@@ -728,7 +781,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$response = wp_safe_remote_get( 'https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt' );
 
 			if ( ! is_wp_error( $response ) && ! empty( $response['body'] ) ) {
-				$upgrade_notice = self::parse_update_notice( $response['body'] );
+				$upgrade_notice = self::parse_update_notice( $response['body'], $args['new_version'] );
 				set_transient( $transient_name, $upgrade_notice, DAY_IN_SECONDS );
 			}
 		}
@@ -738,11 +791,13 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 	/**
 	 * Parse update notice from readme file.
+	 *
 	 * @param  string $content
+	 * @param  string $new_version
 	 * @return string
 	 */
-	private static function parse_update_notice( $content ) {
-		// Output Upgrade Notice
+	private static function parse_update_notice( $content, $new_version ) {
+		// Output Upgrade Notice.
 		$matches        = null;
 		$regexp         = '~==\s*Upgrade Notice\s*==\s*=\s*(.*)\s*=(.*)(=\s*' . preg_quote( WC_VERSION ) . '\s*=|$)~Uis';
 		$upgrade_notice = '';
@@ -751,7 +806,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			$version = trim( $matches[1] );
 			$notices = (array) preg_split('~[\r\n]+~', trim( $matches[2] ) );
 
-			if ( version_compare( WC_VERSION, $version, '<' ) ) {
+			// Check the latest stable version and ignore trunk.
+			if ( $version === $new_version && version_compare( WC_VERSION, $version, '<' ) ) {
 
 				$upgrade_notice .= '<div class="wc_plugin_upgrade_notice">';
 
@@ -927,10 +983,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
-							__( '%s could not be installed (%s). %sPlease install it manually by clicking here.%s', 'woocommerce' ),
+							__( '%1$s could not be installed (%2$s). %3$sPlease install it manually by clicking here.%4$s', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							'<a href="' . admin_url( 'plugin-install.php?tab=search&type=term&s=' . $plugin_to_install['repo-slug'] ) . '">',
+							'<a href="' . esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_to_install['repo-slug'] ) ) . '">',
 							'</a>'
 						)
 					);
@@ -955,9 +1011,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					WC_Admin_Notices::add_custom_notice(
 						$plugin_to_install_id . '_install_error',
 						sprintf(
-							__( '%s could not be activated (%s). %sPlease activate it manually via the plugins screen.%s', 'woocommerce' ),
+							__( '%1$s was installed but could not be activated. %2$sPlease activate it manually by clicking here.%3$s', 'woocommerce' ),
 							$plugin_to_install['name'],
-							$e->getMessage() . '"' . $plugin . '"',
 							'<a href="' . admin_url( 'plugins.php' ) . '">',
 							'</a>'
 						)

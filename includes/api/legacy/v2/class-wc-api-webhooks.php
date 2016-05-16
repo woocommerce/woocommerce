@@ -210,7 +210,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 			$webhook->set_delivery_url( $data['delivery_url'] );
 
 			// set secret if provided, defaults to API users consumer secret
-			$webhook->set_secret( ! empty( $data['secret'] ) ? $data['secret'] : get_user_meta( get_current_user_id(), 'woocommerce_api_consumer_secret', true ) );
+			$webhook->set_secret( ! empty( $data['secret'] ) ? $data['secret'] : wc_webhook_generate_secret() );
 
 			// send ping
 			$webhook->deliver_ping();

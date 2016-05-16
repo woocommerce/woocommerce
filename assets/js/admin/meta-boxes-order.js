@@ -848,7 +848,7 @@ jQuery( function ( $ ) {
 						data: data,
 						type: 'POST',
 						success: function() {
-							$row.hide();
+							$row.remove();
 							wc_meta_boxes_order_items.unblock();
 						}
 					});
@@ -1189,25 +1189,27 @@ jQuery( function ( $ ) {
 		},
 
 		delete_order_note: function() {
-			var note = $( this ).closest( 'li.note' );
+			if ( window.confirm( woocommerce_admin_meta_boxes.i18n_delete_note ) ) {
+				var note = $( this ).closest( 'li.note' );
 
-			$( note ).block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
+				$( note ).block({
+					message: null,
+					overlayCSS: {
+						background: '#fff',
+						opacity: 0.6
+					}
+				});
 
-			var data = {
-				action:   'woocommerce_delete_order_note',
-				note_id:  $( note ).attr( 'rel' ),
-				security: woocommerce_admin_meta_boxes.delete_order_note_nonce
-			};
+				var data = {
+					action:   'woocommerce_delete_order_note',
+					note_id:  $( note ).attr( 'rel' ),
+					security: woocommerce_admin_meta_boxes.delete_order_note_nonce
+				};
 
-			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
-				$( note ).remove();
-			});
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
+					$( note ).remove();
+				});
+			}
 
 			return false;
 		}

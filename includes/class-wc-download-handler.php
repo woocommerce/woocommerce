@@ -73,6 +73,8 @@ class WC_Download_Handler {
 			$query .= "AND download_id = %s ";
 		}
 
+		$query .= "ORDER BY downloads_remaining DESC";
+
 		return $wpdb->get_row( $wpdb->prepare( $query, array( $args['email'], $args['order_key'], $args['product_id'], $args['download_id'] ) ) );
 	}
 

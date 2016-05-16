@@ -447,32 +447,32 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	public function test_wc_price() {
 
 		// common prices
-		$this->assertEquals( '<span class="amount">&pound;1.00</span>', wc_price( 1 ) );
-		$this->assertEquals( '<span class="amount">&pound;1.10</span>', wc_price( 1.1 ) );
-		$this->assertEquals( '<span class="amount">&pound;1.17</span>', wc_price( 1.17 ) );
-		$this->assertEquals( '<span class="amount">&pound;1,111.17</span>', wc_price( 1111.17 ) );
-		$this->assertEquals( '<span class="amount">&pound;0.00</span>', wc_price( 0 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1.00</span>', wc_price( 1 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1.10</span>', wc_price( 1.1 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1.17</span>', wc_price( 1.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1,111.17</span>', wc_price( 1111.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( 0 ) );
 
 		// different currency
-		$this->assertEquals( '<span class="amount">&#36;1,111.17</span>', wc_price( 1111.17, array( 'currency' => 'USD' ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>1,111.17</span>', wc_price( 1111.17, array( 'currency' => 'USD' ) ) );
 
 		// negative price
-		$this->assertEquals( '<span class="amount">-&pound;1.17</span>', wc_price( -1.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount">-<span class="woocommerce-Price-currencySymbol">&pound;</span>1.17</span>', wc_price( -1.17 ) );
 
 		// bogus prices
-		$this->assertEquals( '<span class="amount">&pound;0.00</span>', wc_price( null ) );
-		$this->assertEquals( '<span class="amount">&pound;0.00</span>', wc_price( 'Q' ) );
-		$this->assertEquals( '<span class="amount">&pound;0.00</span>', wc_price( 'ಠ_ಠ' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( null ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( 'Q' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( 'ಠ_ಠ' ) );
 
 		// trim zeros
 		add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
-		$this->assertEquals( '<span class="amount">&pound;1</span>', wc_price( 1.00 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1</span>', wc_price( 1.00 ) );
 		remove_filter( 'woocommerce_price_trim_zeros', '__return_true' );
 
 		// ex tax label
 		$calc_taxes = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->assertEquals( '<span class="amount">&pound;1,111.17</span> <small class="tax_label">(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>1,111.17</span> <small class="woocommerce-Price-taxLabel tax_label">(ex. VAT)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
 		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 	}
 

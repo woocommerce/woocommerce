@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * @version 2.0-beta12
+ * @version 2.0-beta13
  */
 abstract class WP_REST_Controller {
 
@@ -27,7 +27,7 @@ abstract class WP_REST_Controller {
 	 * Register the routes for the objects of the controller.
 	 */
 	public function register_routes() {
-		_doing_it_wrong( 'WP_REST_Controller::register_routes', 'The register_routes() method must be overriden', 'WPAPI-2.0' );
+		_doing_it_wrong( 'WP_REST_Controller::register_routes', __( 'The register_routes() method must be overriden', 'woocommerce' ), 'WPAPI-2.0' );
 	}
 
 	/**
@@ -37,7 +37,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -47,7 +47,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -57,7 +57,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -67,7 +67,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -77,7 +77,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -87,7 +87,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -97,7 +97,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -107,7 +107,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -117,7 +117,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -127,7 +127,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -137,7 +137,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_Error|object $prepared_item
 	 */
 	protected function prepare_item_for_database( $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -148,7 +148,7 @@ abstract class WP_REST_Controller {
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		return new WP_Error( 'invalid-method', sprintf( "Method '%s' not implemented. Must be over-ridden in subclass.", __METHOD__ ), array( 'status' => 405 ) );
+		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be over-ridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -163,7 +163,14 @@ abstract class WP_REST_Controller {
 		}
 
 		$data = (array) $response->get_data();
-		$links = WP_REST_Server::get_response_links( $response );
+		$server = rest_get_server();
+
+		if ( method_exists( $server, 'get_compact_response_links' ) ) {
+			$links = call_user_func( array( $server, 'get_compact_response_links' ), $response );
+		} else {
+			$links = call_user_func( array( $server, 'get_response_links' ), $response );
+		}
+
 		if ( ! empty( $links ) ) {
 			$data['_links'] = $links;
 		}
@@ -243,7 +250,7 @@ abstract class WP_REST_Controller {
 		return array(
 			'context'                => $this->get_context_param(),
 			'page'                   => array(
-				'description'        => 'Current page of the collection.',
+				'description'        => __( 'Current page of the collection.', 'woocommerce' ),
 				'type'               => 'integer',
 				'default'            => 1,
 				'sanitize_callback'  => 'absint',
@@ -251,7 +258,7 @@ abstract class WP_REST_Controller {
 				'minimum'            => 1,
 			),
 			'per_page'               => array(
-				'description'        => 'Maximum number of items to be returned in result set.',
+				'description'        => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 				'type'               => 'integer',
 				'default'            => 10,
 				'minimum'            => 1,
@@ -260,7 +267,7 @@ abstract class WP_REST_Controller {
 				'validate_callback'  => 'rest_validate_request_arg',
 			),
 			'search'                 => array(
-				'description'        => 'Limit results to those matching a string.',
+				'description'        => __( 'Limit results to those matching a string.', 'woocommerce' ),
 				'type'               => 'string',
 				'sanitize_callback'  => 'sanitize_text_field',
 				'validate_callback'  => 'rest_validate_request_arg',
@@ -278,7 +285,7 @@ abstract class WP_REST_Controller {
 	 */
 	public function get_context_param( $args = array() ) {
 		$param_details = array(
-			'description'        => 'Scope under which the request is made; determines fields present in response.',
+			'description'        => __( 'Scope under which the request is made; determines fields present in response.', 'woocommerce' ),
 			'type'               => 'string',
 			'sanitize_callback'  => 'sanitize_key',
 			'validate_callback'  => 'rest_validate_request_arg',
@@ -445,6 +452,10 @@ abstract class WP_REST_Controller {
 				'validate_callback' => 'rest_validate_request_arg',
 				'sanitize_callback' => 'rest_sanitize_request_arg',
 			);
+
+			if ( isset( $params['description'] ) ) {
+				$endpoint_args[ $field_id ]['description'] = $params['description'];
+			}
 
 			if ( WP_REST_Server::CREATABLE === $method && isset( $params['default'] ) ) {
 				$endpoint_args[ $field_id ]['default'] = $params['default'];

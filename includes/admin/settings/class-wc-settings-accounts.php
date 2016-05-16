@@ -55,6 +55,58 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 			array( 'type' => 'sectionend', 'id' => 'account_page_options' ),
 
+			array(	'title' => '', 'type' => 'title', 'id' => 'account_registration_options' ),
+
+			array(
+				'title'         => __( 'Enable Registration', 'woocommerce' ),
+				'desc'          => __( 'Enable registration on the "Checkout" page', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'autoload'      => false
+			),
+
+			array(
+				'desc'          => __( 'Enable registration on the "My Account" page', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_myaccount_registration',
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'end',
+				'autoload'      => false
+			),
+
+			array(
+				'title'         => __( 'Login', 'woocommerce' ),
+				'desc'          => __( 'Display returning customer login reminder on the "Checkout" page', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_checkout_login_reminder',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'autoload'      => false
+			),
+
+			array(
+				'title'         => __( 'Account Creation', 'woocommerce' ),
+				'desc'          => __( 'Automatically generate username from customer email', 'woocommerce' ),
+				'id'            => 'woocommerce_registration_generate_username',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'autoload'      => false
+			),
+
+			array(
+				'desc'          => __( 'Automatically generate customer password', 'woocommerce' ),
+				'id'            => 'woocommerce_registration_generate_password',
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'end',
+				'autoload'      => false
+			),
+
+			array( 'type' => 'sectionend', 'id' => 'account_registration_options'),
+
 			array( 'title' => __( 'My Account Endpoints', 'woocommerce' ), 'type' => 'title', 'desc' => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique.', 'woocommerce' ), 'id' => 'account_endpoint_options' ),
 
 			array(
@@ -130,57 +182,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 
 			array( 'type' => 'sectionend', 'id' => 'account_endpoint_options' ),
-
-			array(	'title' => __( 'Registration Options', 'woocommerce' ), 'type' => 'title', 'id' => 'account_registration_options' ),
-
-			array(
-				'title'         => __( 'Enable Registration', 'woocommerce' ),
-				'desc'          => __( 'Enable registration on the "Checkout" page', 'woocommerce' ),
-				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
-				'default'       => 'yes',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'autoload'      => false
-			),
-
-			array(
-				'desc'          => __( 'Enable registration on the "My Account" page', 'woocommerce' ),
-				'id'            => 'woocommerce_enable_myaccount_registration',
-				'default'       => 'no',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'end',
-				'autoload'      => false
-			),
-
-			array(
-				'desc'          => __( 'Display returning customer login reminder on the "Checkout" page', 'woocommerce' ),
-				'id'            => 'woocommerce_enable_checkout_login_reminder',
-				'default'       => 'yes',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'autoload'      => false
-			),
-
-			array(
-				'title'         => __( 'Account Creation', 'woocommerce' ),
-				'desc'          => __( 'Automatically generate username from customer email', 'woocommerce' ),
-				'id'            => 'woocommerce_registration_generate_username',
-				'default'       => 'yes',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'autoload'      => false
-			),
-
-			array(
-				'desc'          => __( 'Automatically generate customer password', 'woocommerce' ),
-				'id'            => 'woocommerce_registration_generate_password',
-				'default'       => 'no',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'end',
-				'autoload'      => false
-			),
-
-			array( 'type' => 'sectionend', 'id' => 'account_registration_options'),
 
 		) );
 

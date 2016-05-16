@@ -22,7 +22,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	/**
 	 * Constructor.
 	 */
-	function __construct() {
+	public function __construct() {
 
 		$this->id             = 'customer_completed_order';
 		$this->customer_email = true;
@@ -51,7 +51,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 *
 	 * @param int $order_id
 	 */
-	function trigger( $order_id ) {
+	public function trigger( $order_id ) {
 
 		if ( $order_id ) {
 			$this->object                  = wc_get_order( $order_id );
@@ -77,7 +77,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_subject() {
+	public function get_subject() {
 		if ( ! empty( $this->object ) && $this->object->has_downloadable_item() ) {
 			return apply_filters( 'woocommerce_email_subject_customer_completed_order', $this->format_string( $this->subject_downloadable ), $this->object );
 		} else {
@@ -91,7 +91,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_heading() {
+	public function get_heading() {
 		if ( ! empty( $this->object ) && $this->object->has_downloadable_item() ) {
 			return apply_filters( 'woocommerce_email_heading_customer_completed_order', $this->format_string( $this->heading_downloadable ), $this->object );
 		} else {
@@ -105,7 +105,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 * @access public
 	 * @return string
 	 */
-	function get_content_html() {
+	public function get_content_html() {
 		return wc_get_template_html( $this->template_html, array(
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
@@ -120,7 +120,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	 *
 	 * @return string
 	 */
-	function get_content_plain() {
+	public function get_content_plain() {
 		return wc_get_template_html( $this->template_plain, array(
 			'order'         => $this->object,
 			'email_heading' => $this->get_heading(),
@@ -133,7 +133,7 @@ class WC_Email_Customer_Completed_Order extends WC_Email {
 	/**
 	 * Initialise settings form fields.
 	 */
-	function init_form_fields() {
+	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'         => __( 'Enable/Disable', 'woocommerce' ),

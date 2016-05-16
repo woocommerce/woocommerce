@@ -169,7 +169,7 @@ function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
 	$args = $attributes['args'][ $param ];
 
 	if ( 'string' === $args['type'] && ! is_string( $value ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%s is not of type %s.', 'woocommerce' ), $param, 'string' ) );
+		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'string' ) );
 	}
 
 	if ( 'data' === $args['format'] ) {
@@ -215,6 +215,7 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 		'create' => 'publish_posts',
 		'edit'   => 'edit_post',
 		'delete' => 'delete_post',
+		'batch'  => 'edit_post',
 	);
 
 	if ( 'revision' === $post_type ) {
@@ -242,6 +243,7 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 		'create' => 'edit_users',
 		'edit'   => 'edit_users',
 		'delete' => 'delete_users',
+		'batch'  => 'edit_users',
 	);
 
 	$permission = current_user_can( $contexts[ $context ], $object_id );
@@ -264,6 +266,7 @@ function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $
 		'create' => 'edit_terms',
 		'edit'   => 'edit_terms',
 		'delete' => 'delete_terms',
+		'batch'  => 'edit_terms',
 	);
 
 	$cap = $contexts[ $context ];
@@ -292,4 +295,3 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, 0, $object );
 }
-

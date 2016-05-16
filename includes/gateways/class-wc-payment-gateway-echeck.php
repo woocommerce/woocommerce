@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package		WooCommerce/Classes
  * @author 		WooThemes
  */
-abstract class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
+class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 
 	/**
 	 * Builds our payment fields area - including tokenization fields and the actualy payment fields.
@@ -22,10 +22,7 @@ abstract class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 
 		if ( $display_tokenization ) {
 			$this->tokenization_script();
-			if ( is_user_logged_in() ) {
-				$this->saved_payment_methods();
-			}
-			$this->use_new_payment_method_checkbox();
+			$this->saved_payment_methods();
 		}
 
 		$this->form();

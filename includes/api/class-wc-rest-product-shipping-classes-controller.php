@@ -129,7 +129,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Terms_Controll
 				'count' => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 			),

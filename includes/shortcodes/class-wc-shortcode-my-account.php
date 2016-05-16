@@ -160,28 +160,41 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
-	 * Lost password page.
+	 * Lost password page handling.
 	 */
 	public static function lost_password() {
-		// arguments to pass to template
-		$args = array( 'form' => 'lost_password' );
-
-		// process reset key / login from email confirmation link
-		if ( isset( $_GET['key'] ) && isset( $_GET['login'] ) ) {
+		/**
+		 * Process reset key / login from email confirmation link
+		 */
+		if ( ! empty( $_GET['key'] ) && ! empty( $_GET['login'] ) ) {
 
 			$user = self::check_password_reset_key( $_GET['key'], $_GET['login'] );
 
 			// reset key / login is correct, display reset password form with hidden key / login values
 			if ( is_object( $user ) ) {
-				$args['form']  = 'reset_password';
-				$args['key']   = esc_attr( $_GET['key'] );
-				$args['login'] = esc_attr( $_GET['login'] );
+				return wc_get_template( 'myaccount/form-reset-password.php', array(
+					'key'   => wc_clean( $_GET['key'] ),
+					'login' => wc_clean( $_GET['login'] ),
+				) );
 			}
-		} elseif ( isset( $_GET['reset'] ) ) {
-			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a href="' . wc_get_page_permalink( 'myaccount' ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
+
+		/**
+		 * After sending the reset link, don't show the form again.
+		 */
+	 	} elseif ( ! empty( $_GET['reset-link-sent'] ) ) {
+			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
+
+		/**
+		 * After reset, show confirmation message.
+		 */
+	 	} elseif ( ! empty( $_GET['reset'] ) ) {
+			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a class="button" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 		}
 
-		wc_get_template( 'myaccount/form-lost-password.php', $args );
+		// Show lost password form by default
+		wc_get_template( 'myaccount/form-lost-password.php', array(
+			'form'  => 'lost_password',
+		) );
 	}
 
 	/**
@@ -260,7 +273,6 @@ class WC_Shortcode_My_Account {
 		WC()->mailer(); // load email classes
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
-		wc_add_notice( __( 'Check your e-mail for the confirmation link.', 'woocommerce' ) );
 		return true;
 	}
 

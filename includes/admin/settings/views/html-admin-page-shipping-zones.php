@@ -4,38 +4,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<h2><?php _e( 'Shipping Zones', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ) . ' ' . __( 'WooCommerce will automatically choose the correct shipping zone based on your customer&lsquo;s shipping address and present the shipping methods within that zone to them.', 'woocommerce' ) ); ?></h2>
+<h2>
+	<?php _e( 'Shipping Zones', 'woocommerce' ); ?>
+	<?php echo wc_help_tip( __( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ) . ' ' . __( 'WooCommerce will automatically choose the correct shipping zone based on your customer&lsquo;s shipping address and present the shipping methods within that zone to them.', 'woocommerce' ) ); ?>
+</h2>
 
 <table class="wc-shipping-zones widefat">
-    <thead>
-        <tr>
-            <th class="wc-shipping-zone-sort"><?php echo wc_help_tip( __( 'Drag and drop to re-order your custom zones. This is the order in which they will be matched against the customer address.', 'woocommerce' ) ); ?></th>
-            <th class="wc-shipping-zone-name"><?php esc_html_e( 'Zone Name', 'woocommerce' ); ?></th>
-            <th class="wc-shipping-zone-region"><?php esc_html_e( 'Region(s)', 'woocommerce' ); ?></th>
-            <th class="wc-shipping-zone-methods"><?php esc_html_e( 'Shipping Method(s)', 'woocommerce' ); ?></th>
-            <th class="wc-shipping-zone-actions">&nbsp;</th>
-        </tr>
-    </thead>
-    <tfoot>
-        <tr>
-            <td colspan="5">
-                <a class="button button-secondary wc-shipping-zone-add" href="#"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
-                <input type="submit" name="save" class="button button-primary wc-shipping-zone-save" value="<?php esc_attr_e( 'Save shipping zones', 'woocommerce' ); ?>" disabled />
-            </td>
-        </tr>
-    </tfoot>
-    <tbody class="wc-shipping-zone-rows"></tbody>
-    <tbody>
-        <tr data-id="0">
-            <td width="1%" class="wc-shipping-zone-worldwide"></td>
-            <td class="wc-shipping-zone-name">
-                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Rest of the World', 'woocommerce' ); ?></a>
-                <div class="row-actions">
-                    <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit shipping methods', 'woocommerce' ); ?></a>
-                </div>
-            </td>
-            <td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping Methods added here will apply to shipping addresses that aren&lsquo;t included in any other shipping zone.', 'woocommerce' ); ?></td>
-            <td class="wc-shipping-zone-methods">
+	<thead>
+		<tr>
+			<th class="wc-shipping-zone-sort"><?php echo wc_help_tip( __( 'Drag and drop to re-order your custom zones. This is the order in which they will be matched against the customer address.', 'woocommerce' ) ); ?></th>
+			<th class="wc-shipping-zone-name"><?php esc_html_e( 'Zone Name', 'woocommerce' ); ?></th>
+			<th class="wc-shipping-zone-region"><?php esc_html_e( 'Region(s)', 'woocommerce' ); ?></th>
+			<th class="wc-shipping-zone-methods"><?php esc_html_e( 'Shipping Method(s)', 'woocommerce' ); ?></th>
+		</tr>
+	</thead>
+	<tfoot>
+		<tr>
+			<td colspan="4">
+				<input type="submit" name="save" class="button button-primary wc-shipping-zone-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled />
+				<a class="button button-secondary wc-shipping-zone-add" href="#"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
+			</td>
+		</tr>
+	</tfoot>
+	<tbody class="wc-shipping-zone-rows"></tbody>
+	<tbody>
+		<tr data-id="0">
+			<td width="1%" class="wc-shipping-zone-worldwide"></td>
+			<td class="wc-shipping-zone-name">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Rest of the World', 'woocommerce' ); ?></a>
+				<div class="row-actions">
+					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'View', 'woocommerce' ); ?></a>
+				</div>
+			</td>
+			<td class="wc-shipping-zone-region"><?php esc_html_e( 'Shipping Methods added here will apply to shipping addresses that aren&lsquo;t included in any other shipping zone.', 'woocommerce' ); ?></td>
+			<td class="wc-shipping-zone-methods">
 				<ul>
 					<?php
 						$worldwide = new WC_Shipping_Zone( 0 );
@@ -43,47 +45,55 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						if ( $methods ) {
 							foreach ( $methods as $method ) {
-	                            $class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
+								$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
 								echo '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';
 							}
+						} else {
+							echo '<li class="wc-shipping-zone-method">&ndash;</li>';
 						}
 					?>
-					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method button" data-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone.', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
+					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method tips" data-tip="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" data-disabled-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
 				</ul>
 			</td>
-            <td class="wc-shipping-zone-actions"></td>
-        </tr>
-    </tbody>
+		</tr>
+	</tbody>
 </table>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
-	<tr>
-		<td class="wc-shipping-zones-blank-state" colspan="5">
-			<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
-			<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
-			<ul>
-				<li><?php _e( 'Local Zone = California ZIP 90210 = Local pickup', 'woocommerce' ); ?>
-				<li><?php _e( 'US Domestic Zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
-				<li><?php _e( 'Europe Zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
-			</ul>
-			<p><?php _e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
-			<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
-		</td>
-	</tr>
+	<?php if ( 0 === $method_count ) : ?>
+		<tr>
+			<td class="wc-shipping-zones-blank-state" colspan="4">
+				<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
+				<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
+				<ul>
+					<li><?php _e( 'Local Zone = California ZIP 90210 = Local pickup', 'woocommerce' ); ?>
+					<li><?php _e( 'US Domestic Zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
+					<li><?php _e( 'Europe Zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
+				</ul>
+				<p><?php _e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
+				<a class="button button-primary wc-shipping-zone-add"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
+			</td>
+		</tr>
+	<?php endif; ?>
 </script>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row">
-    <tr data-id="{{ data.zone_id }}">
-        <td width="1%" class="wc-shipping-zone-sort"></td>
-        <td class="wc-shipping-zone-name">
-            <div class="view">
-                <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
-                <div class="row-actions">
-                    <a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit Zone', 'woocommerce' ); ?></a> | <a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit shipping methods', 'woocommerce' ); ?></a>
-                </div>
-            </div>
-            <div class="edit"><input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" /></div>
-        </td>
+	<tr data-id="{{ data.zone_id }}">
+		<td width="1%" class="wc-shipping-zone-sort"></td>
+		<td class="wc-shipping-zone-name">
+			<div class="view">
+				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
+				<div class="row-actions">
+					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'View', 'woocommerce' ); ?></a> | <a class="wc-shipping-zone-edit" href="#"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Remove', 'woocommerce' ); ?></a>
+				</div>
+			</div>
+			<div class="edit">
+				<input type="text" name="zone_name[{{ data.zone_id }}]" data-attribute="zone_name" value="{{ data.zone_name }}" placeholder="<?php esc_attr_e( 'Zone Name', 'woocommerce' ); ?>" />
+				<div class="row-actions">
+					<a class="wc-shipping-zone-cancel-edit" href="#"><?php _e( 'Cancel changes', 'woocommerce' ); ?></a>
+				</div>
+			</div>
+		</td>
 		<td class="wc-shipping-zone-region">
 			<div class="view">{{ data.formatted_zone_location }}</div>
 			<div class="edit">
@@ -109,21 +119,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<a class="wc-shipping-zone-postcodes-toggle" href="#"><?php _e( 'Limit to specific ZIP/postcodes', 'woocommerce' ); ?></a>
 				<div class="wc-shipping-zone-postcodes">
 					<textarea name="zone_postcodes[{{ data.zone_id }}]" data-attribute="zone_postcodes" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>" class="input-text large-text" cols="25" rows="5"></textarea>
-					<span class="description"><?php _e( 'Wildcards and numerical ranges are supported too, for example, 90210-99000 and CB23*', 'woocommerce' ) ?></span>
+					<span class="description"><?php _e( 'Postcodes containing wildcards (e.g. CB23*) and fully numeric ranges (e.g. 90210-99000) are also supported.', 'woocommerce' ) ?></span>
 				</div>
 			</div>
 		</td>
-        <td class="wc-shipping-zone-methods">
+		<td class="wc-shipping-zone-methods">
 			<div>
-                <ul>
-					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method button" data-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone.', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
+				<ul>
+					<li class="wc-shipping-zone-methods-add-row"><a href="#" class="add_shipping_method tips" data-tip="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>" data-disabled-tip="<?php esc_attr_e( 'Save changes to continue adding shipping methods to this zone', 'woocommerce' ); ?>"><?php _e( 'Add shipping method', 'woocommerce' ); ?></a></li>
 				</ul>
-            </div>
+			</div>
 		</td>
-        <td class="wc-shipping-zone-actions">
-			<a class="wc-shipping-zone-delete tips" data-tip="<?php _e( 'Delete', 'woocommerce' ); ?>" href="#"><?php _e( 'Delete', 'woocommerce' ); ?></a>
-		</td>
-    </tr>
+	</tr>
 </script>
 
 <script type="text/template" id="tmpl-wc-modal-add-shipping-method">
@@ -138,19 +145,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</header>
 				<article>
 					<form action="" method="post">
-                        <div class="wc-shipping-zone-method-selector">
-                			<select name="add_method_id">
-                				<?php
-                					foreach ( WC()->shipping->load_shipping_methods() as $method ) {
-                						if ( ! $method->supports( 'shipping-zones' ) ) {
-                							continue;
-                                        }
-                						echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</li>';
-                					}
-                				?>
-                			</select>
-                            <input type="hidden" name="zone_id" value="{{{ data.zone_id }}}" />
-                		</div>
+						<div class="wc-shipping-zone-method-selector">
+							<select name="add_method_id">
+								<?php
+									foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+										if ( ! $method->supports( 'shipping-zones' ) ) {
+											continue;
+										}
+										echo '<option data-description="' . esc_attr( $method->method_description ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->title ) . '</li>';
+									}
+								?>
+							</select>
+							<input type="hidden" name="zone_id" value="{{{ data.zone_id }}}" />
+						</div>
 					</form>
 				</article>
 				<footer>

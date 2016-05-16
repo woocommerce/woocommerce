@@ -24,14 +24,33 @@ class WC_REST_Authentication {
 	}
 
 	/**
+	 * Check if is request to our REST API.
+	 *
+	 * @return bool
+	 */
+	protected function is_request_to_rest_api() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		// Check if our endpoint.
+		$woocommerce = false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wc/' );
+
+		// Allow third party plugins use our authentication methods.
+		$third_party = false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wc-' );
+
+		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
+	}
+
+	/**
 	 * Authenticate user.
 	 *
 	 * @param int|false $user_id User ID if one has been determined, false otherwise.
 	 * @return int|false
 	 */
 	public function authenticate( $user_id ) {
-		// Do not authenticate twice!
-		if ( ! empty( $user_id ) ) {
+		// Do not authenticate twice and check if is a request to our endpoint in the WP REST API.
+		if ( ! empty( $user_id ) || ! $this->is_request_to_rest_api() ) {
 			return $user_id;
 		}
 

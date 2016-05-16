@@ -6,6 +6,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+global $wpdb;
 
 ?>
 <div class="updated woocommerce-message inline">
@@ -172,23 +173,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td><?php echo extension_loaded( 'suhosin' ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 			</tr>
 		<?php endif; ?>
-		<tr>
-			<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
-			<td>
-				<?php
-				/** @global wpdb $wpdb */
-				global $wpdb;
-				$mysql_version = $wpdb->db_version();
+		<?php
+		if ( ! empty( $wpdb->is_mysql ) ) : ?>
+			<tr>
+				<td data-export-label="MySQL Version"><?php _e( 'MySQL Version', 'woocommerce' ); ?>:</td>
+				<td class="help"><?php echo wc_help_tip( __( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
+				<td>
+					<?php
+					$mysql_version = $wpdb->db_version();
 
-				if ( version_compare( $mysql_version, '5.6', '<' ) ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum MySQL version of 5.6. See: %s', 'woocommerce' ), esc_html( $mysql_version ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress Requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
-				} else {
-					echo '<mark class="yes">' . esc_html( $mysql_version ) . '</mark>';
-				}
-				?>
-			</td>
-		</tr>
+					if ( version_compare( $mysql_version, '5.6', '<' ) ) {
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( '%s - We recommend a minimum MySQL version of 5.6. See: %s', 'woocommerce' ), esc_html( $mysql_version ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . __( 'WordPress Requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
+					} else {
+						echo '<mark class="yes">' . esc_html( $mysql_version ) . '</mark>';
+					}
+					?>
+				</td>
+			</tr>
+		<?php endif; ?>
 		<tr>
 			<td data-export-label="Max Upload Size"><?php _e( 'Max Upload Size', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce' ) ); ?></td>
@@ -344,7 +346,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'woocommerce_sessions',
 				'woocommerce_api_keys',
 				'woocommerce_attribute_taxonomies',
-				'woocommerce_termmeta',
 				'woocommerce_downloadable_product_permissions',
 				'woocommerce_order_items',
 				'woocommerce_order_itemmeta',
@@ -356,6 +357,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'woocommerce_payment_tokens',
 				'woocommerce_payment_tokenmeta',
 			);
+
+			if ( get_option( 'db_version' ) < 34370 ) {
+				$tables[] = 'woocommerce_termmeta';
+			}
 
 			foreach ( $tables as $table ) {
 				?>
@@ -376,7 +381,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						if ( file_exists( WC_Geolocation::get_local_database_path() ) ) {
 							echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( WC_Geolocation::get_local_database_path() ) . '</code></mark> ';
 						} else {
-							printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %s to the path: %s', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . WC_Geolocation::get_local_database_path() . '</code>' ) . '</mark>', WC_LOG_DIR );
+							printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s', 'woocommerce' ), make_clickable( 'http://dev.maxmind.com/geoip/legacy/geolite/' ), '<code class="private">' . WC_Geolocation::get_local_database_path() . '</code>' ) . '</mark>', WC_LOG_DIR );
 						}
 					?></td>
 				</tr>
@@ -567,6 +572,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! $page_id ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page not set', 'woocommerce' ) . '</mark>';
 					$error = true;
+				} else if ( ! get_post( $page_id ) ) {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . __( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
+					$error = true;
 				} else if ( get_post_status( $page_id ) !== 'publish' ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( __( 'Page visibility should be %spublic%s', 'woocommerce' ), '<a href="https://codex.wordpress.org/Content_Visibility" target="_blank">', '</a>' ) . '</mark>';
 					$error = true;
@@ -658,7 +666,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<td data-export-label="Child Theme"><?php _e( 'Child Theme', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); ?></td>
 			<td><?php
-				echo is_child_theme() ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you\'re modifying WooCommerce on a parent theme you didn\'t build personally, then we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'http://codex.wordpress.org/Child_Themes' );
+				echo is_child_theme() ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . sprintf( __( 'If you\'re modifying WooCommerce on a parent theme you didn\'t build personally, then we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' );
 			?></td>
 		</tr>
 		<?php
@@ -708,8 +716,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 	</thead>
 	<tbody>
+		<?php if ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ) : ?>
+		<tr>
+			<td data-export-label="Overrides"><?php _e( 'Archive Template', 'woocommerce' ); ?>:</td>
+			<td class="help">&nbsp;</td>
+			<td><?php _e( 'Your theme has a woocommerce.php file, you will not be able to override the woocommerce/archive-product.php custom template since woocommerce.php has priority over archive-product.php. This is intended to prevent display issues.', 'woocommerce' ); ?></td>
+		</tr>
+		<?php endif ?>
 		<?php
-
 			$template_paths     = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 			$scanned_files      = array();
 			$found_files        = array();

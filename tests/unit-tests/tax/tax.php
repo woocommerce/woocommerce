@@ -576,7 +576,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
 
-		$this->assertEquals( array( '12345', '90210', '90211', '90212', '90213', '90214', '90215' ), $results );
+		$this->assertEquals( array( '12345', '90210-90215' ), $results );
 
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}

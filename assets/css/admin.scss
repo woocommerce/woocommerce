@@ -229,6 +229,11 @@ mark.amount {
 	}
 }
 
+h2 .woocommerce-help-tip {
+	margin-top: -5px;
+	margin-left: .25em;
+}
+
 table.wc_status_table {
 	margin-bottom: 1em;
 
@@ -1313,24 +1318,20 @@ ul.wc_coupon_list_block {
 			td.line_tax {
 				.delete-order-tax {
 					@include ir();
-					font-size: 12px;
-					visibility: hidden;
 					float: right;
-					margin: 2px -16px 0 0;
+					font-size: 14px;
+					visibility: hidden;
+					margin: 3px -18px 0 0;
 
 					&:before {
-						@include icon( "\e013" );
-						color: white;
-						background-color: #000;
-						-webkit-border-radius: 100%;
-						border-radius: 100%;
-						border: 1px solid #000;
-						box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+						@include icon_dashicons( "\f153" );
+						color: #999;
 					}
 
-					&:hover:before {
-						border-color: $red;
-						background-color: $red;
+					&:hover {
+						&:before {
+							color: $red;
+						}
 					}
 				}
 
@@ -2342,7 +2343,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			}
 		}
 	}
-	tr.odd {
+	tr.odd, .wc-shipping-class-rows tr:nth-child(odd) {
 		td {
 			background: #f9f9f9;
 		}
@@ -2387,21 +2388,6 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			line-height: 24px;
 		}
 	}
-	.wc-shipping-zone-method-enabled {
-		text-align: center;
-		.status-enabled {
-			display: inline-block;
-			&:before {
-				line-height: inherit;
-			}
-		}
-		.status-disabled {
-			display: inline-block;
-			&:before {
-				line-height: inherit;
-			}
-		}
-	}
 	.wc-shipping-zone-name,
 	.wc-shipping-zone-methods {
 		width: 25%;
@@ -2413,6 +2399,9 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	.wc-shipping-zone-region {
 		input, select, textarea {
 			width: 100%;
+		}
+		a.wc-shipping-zone-delete, a.wc-shipping-class-delete {
+			color: red;
 		}
 		.wc-shipping-zone-postcodes-toggle {
 			float: right;
@@ -2441,6 +2430,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		}
 		ul {
 			color: #999;
+			position: relative;
+			padding-right: 32px;
 			li {
 				display: inline;
 				margin: 0 0 0 0;
@@ -2458,60 +2449,58 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 				margin: 0 !important;
 			}
 			li.wc-shipping-zone-methods-add-row {
-				margin: .5em 0 0;
+				position: absolute;
+				right: 0;
+				top: 0;
 			}
 		}
-		.button {
-			display: inline-block;
-		}
-	}
-	.wc-shipping-zone-actions, .wc-shipping-zone-method-actions, .wc-shipping-class-actions {
-		width: 4em;
-
-		a {
-			@include ir();
-			float: right;
-			padding: .5em;
+		.add_shipping_method {
+			display: block;
+			width: 24px;
+			padding: 24px 0 0 0;
+			height: 0;
+			overflow: hidden;
 			cursor: pointer;
-			line-height: 24px;
 
 			&:before {
 				@include icon;
 				font-family: 'Dashicons';
+				content: "\f502";
 				color: #999;
 				vertical-align: middle;
 				line-height: 24px;
 				font-size: 16px;
 				margin: 0;
 			}
-			&:hover {
+
+			&.disabled {
+				cursor: not-allowed;
 				&:before {
-					color: #0073aa;
+					color: #ccc;
 				}
 			}
 		}
-
-		a.wc-shipping-zone-delete, a.wc-shipping-zone-method-delete, a.wc-shipping-class-delete {
+	}
+	.wc-shipping-zone-method-title {
+		width: 33%;
+		.wc-shipping-zone-method-delete {
+			color: red;
+		}
+	}
+	.wc-shipping-zone-method-enabled {
+		text-align: center;
+		.status-enabled {
+			margin-top: 1px;
+			display: inline-block;
 			&:before {
-				content: "\f158";
-			}
-			&:hover {
-				&:before {
-					color: $red;
-				}
+				line-height: inherit;
 			}
 		}
-
-		a.wc-shipping-class-edit {
+		.status-disabled {
+			margin-top: 1px;
+			display: inline-block;
 			&:before {
-				content: "\f464";
-			}
-		}
-
-		a.wc-shipping-zone-method-settings {
-			&:before {
-				content: "\f111";
-				margin-top: -1px;
+				line-height: inherit;
 			}
 		}
 	}
@@ -2519,15 +2508,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 		input, select {
 			vertical-align: middle !important;
 		}
-		.button-primary {
+		.button-secondary {
 			float: right;
-		}
-	}
-	.wc-shipping-zone-method-selector {
-		float: left;
-		select {
-			margin:0;
-			height: 29px;
 		}
 	}
 	.editing {
@@ -2915,15 +2897,14 @@ img.help_tip {
 							font-size: 1.4em;
 
 							&:before {
-								@include icon( "\e013" );
-								color: white;
-								background-color: #000;
-								@include border-radius(100%);
-								box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+								@include icon_dashicons( "\f153" );
+								color: #999;
 							}
 
-							&:hover before {
-								background-color: $red;
+							&:hover {
+								&:before {
+									color: $red;
+								}
 							}
 						}
 					}
@@ -3261,6 +3242,11 @@ img.help_tip {
 
 			th {
 				padding: 7px 0 7px 7px !important;
+
+				.woocommerce-help-tip {
+					font-size: 1.1em;
+					margin-left: 0;
+				}
 			}
 
 			td {
@@ -3287,10 +3273,10 @@ img.help_tip {
 
 				.delete {
 					@include ir();
+					font-size: 1.2em;
 
 					&:before {
-						@include icon;
-						content: "\e013";
+						@include icon_dashicons( "\f153" );
 						color: #999;
 					}
 
@@ -3302,17 +3288,14 @@ img.help_tip {
 				}
 			}
 
-			th.sort {
-				width: 17px;
-				padding: 0;
-			}
-
 			td.sort {
 				padding: 0 8px;
 				cursor: move;
+				width: 17px;
 				background: #f9f9f9;
 				text-align: center;
 				vertical-align: middle;
+				padding-right: 7px !important;
 
 				&:before {
 					content: "\f333";
@@ -4653,9 +4636,10 @@ table.bar_chart {
 		}
 
 		.short,
-		input[type=email].short,
-		input[type=number].short,
-		input[type=text].short,
+		input[type="text"].short,
+		input[type="email"].short,
+		input[type="number"].short,
+		input[type="password"].short,
 		.dimensions_field .wrap {
 			width: 80%;
 		}
@@ -4883,6 +4867,9 @@ table.bar_chart {
 		top: 50%;
 		transform: translate(-50%, -50%);
 		width: 500px;
+		article {
+			overflow: auto;
+		}
 	}
 
 	&.wc-backbone-modal-shipping-method-settings {
@@ -5006,6 +4993,7 @@ table.bar_chart {
 	font-size: inherit;
 	font-weight: inherit;
 	padding: 3px 5px;
+	width: 100% !important;
 }
 .select2-container {
 	line-height: 1.85em;

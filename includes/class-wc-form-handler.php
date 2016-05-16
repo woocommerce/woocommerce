@@ -406,11 +406,13 @@ class WC_Form_Handler {
 
 				// Don't show undo link if removed item is out of stock.
 				if ( $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
-					$undo = WC()->cart->get_undo_url( $cart_item_key );
-					wc_add_notice( sprintf( __( '%s removed. %sUndo?%s', 'woocommerce' ), $item_removed_title, '<a href="' . esc_url( $undo ) . '">', '</a>' ) );
+					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
+					$removed_notice .= ' <a href="' . esc_url( WC()->cart->get_undo_url( $cart_item_key ) ) . '">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
-					wc_add_notice( sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title ) );
+					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
+
+				wc_add_notice( $removed_notice );
 			}
 
 			$referer  = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
@@ -713,7 +715,13 @@ class WC_Form_Handler {
 		$missing_attributes = array();
 		$variations         = array();
 		$attributes         = $adding_to_cart->get_attributes();
-		$variation          = wc_get_product( $variation_id );
+
+		// If no variation ID is set, attempt to get a variation ID from posted attributes.
+		if ( empty( $variation_id ) ) {
+			$variation_id = $adding_to_cart->get_matching_variation( wp_unslash( $_POST ) );
+		}
+
+		$variation = wc_get_product( $variation_id );
 
 		// Verify all attributes
 		foreach ( $attributes as $attribute ) {
@@ -820,17 +828,12 @@ class WC_Form_Handler {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
-					// Feedback
-					wc_add_notice( sprintf( __( 'You are now logged in as <strong>%s</strong>', 'woocommerce' ), $user->display_name ) );
-
 					wp_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ) );
 					exit;
 				}
 
-			} catch (Exception $e) {
-
+			} catch ( Exception $e ) {
 				wc_add_notice( apply_filters('login_errors', $e->getMessage() ), 'error' );
-
 			}
 		}
 	}
@@ -840,7 +843,13 @@ class WC_Form_Handler {
 	 */
 	public static function process_lost_password() {
 		if ( isset( $_POST['wc_reset_password'] ) && isset( $_POST['user_login'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'lost_password' ) ) {
-			WC_Shortcode_My_Account::retrieve_password();
+			$success = WC_Shortcode_My_Account::retrieve_password();
+
+			// If successful, redirect to my account with query arg set
+			if ( $success ) {
+				wp_redirect( add_query_arg( 'reset-link-sent', 'true', remove_query_arg( array( 'key', 'login', 'reset' ) ) ) );
+				exit;
+			}
 		}
 	}
 
@@ -883,7 +892,7 @@ class WC_Form_Handler {
 
 				do_action( 'woocommerce_customer_reset_password', $user );
 
-				wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login' ) ) ) );
+				wp_redirect( add_query_arg( 'reset', 'true', remove_query_arg( array( 'key', 'login', 'reset-link-sent' ) ) ) );
 				exit;
 			}
 		}

@@ -63,19 +63,34 @@ jQuery( function( $ ) {
 	var update_wc_div = function( html_str ) {
 		var $html = $.parseHTML( html_str );
 		var $new_form = $( 'table.shop_table.cart', $html ).closest( 'form' );
+
+		// Error message collection
 		var $error = $( '.woocommerce-error', $html );
 		var $message = $( '.woocommerce-message', $html );
 
-		if ( $error.length > 0 ) {
-			show_notice( $error );
-		} else if ( $message.length > 0 ) {
-			show_notice( $message );
-		} else {
-			// No new message/error, just remove existing one.
-			$( '.woocommerce-error, .woocommerce-message' ).remove();
-		}
+		// Remove errors
+		$( '.woocommerce-error, .woocommerce-message' ).remove();
 
-		$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
+		if ( $new_form.length === 0 ) {
+			// No items to display now! Replace all cart content.
+			var $cart_html = $( '.cart-empty', $html ).closest( '.woocommerce' );
+			$( 'table.shop_table.cart' ).closest( '.woocommerce' ).replaceWith( $cart_html );
+
+			if ( $error.length > 0 ) {
+				show_notice( $error, $( '.cart-empty' ).closest( '.woocommerce' ) );
+			} else if ( $message.length > 0 ) {
+				show_notice( $message, $( '.cart-empty' ).closest( '.woocommerce' ) );
+			}
+		} else {
+			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
+			$( 'table.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
+
+			if ( $error.length > 0 ) {
+				show_notice( $error );
+			} else if ( $message.length > 0 ) {
+				show_notice( $message );
+			}
+		}
 	};
 
 	/**
@@ -83,11 +98,12 @@ jQuery( function( $ ) {
 	 *
 	 * @param {Object} The Notice HTML Element in string or object form.
 	 */
-	var show_notice = function( html_element ) {
-		var $form = $( 'table.shop_table.cart' ).closest( 'form' );
-
+	var show_notice = function( html_element, $target ) {
+		if ( ! $target ) {
+			$target = $( 'table.shop_table.cart' ).closest( 'form' );
+		}
 		$( '.woocommerce-error, .woocommerce-message' ).remove();
-		$form.before( html_element );
+		$target.before( html_element );
 	};
 
 
@@ -99,7 +115,8 @@ jQuery( function( $ ) {
 		/**
 		 * Initialize event handlers and UI state.
 		 */
-		init: function() {
+		init: function( cart ) {
+			this.cart = cart;
 			this.toggle_shipping = this.toggle_shipping.bind( this );
 			this.shipping_method_selected = this.shipping_method_selected.bind( this );
 			this.shipping_calculator_submit = this.shipping_calculator_submit.bind( this );
@@ -166,6 +183,7 @@ jQuery( function( $ ) {
 		shipping_calculator_submit: function( evt ) {
 			evt.preventDefault();
 
+			var cart = this.cart;
 			var $form = $( evt.target );
 
 			block( $form );
@@ -187,6 +205,7 @@ jQuery( function( $ ) {
 				},
 				complete: function() {
 					unblock( $form );
+					cart.update_cart_totals();
 				}
 			} );
 		}
@@ -202,11 +221,16 @@ jQuery( function( $ ) {
 		init: function() {
 			this.update_cart_totals = this.update_cart_totals.bind( this );
 			this.cart_submit = this.cart_submit.bind( this );
+			this.submit_click = this.submit_click.bind( this );
 			this.apply_coupon = this.apply_coupon.bind( this );
 			this.remove_coupon_clicked = this.remove_coupon_clicked.bind( this );
 			this.quantity_update = this.quantity_update.bind( this );
 			this.item_remove_clicked = this.item_remove_clicked.bind( this );
 
+			$( document ).on(
+				'click',
+				'div.woocommerce > form input[type=submit]',
+				this.submit_click );
 			$( document ).on(
 				'submit',
 				'div.woocommerce > form',
@@ -219,6 +243,19 @@ jQuery( function( $ ) {
 				'click',
 				'td.product-remove > a',
 				this.item_remove_clicked );
+			$( document ).on(
+				'change input',
+				'div.woocommerce > form .cart_item :input',
+				this.input_changed );
+
+			$( 'div.woocommerce > form input[name="update_cart"]' ).prop( 'disabled', true );
+		},
+
+		/**
+		 * After an input is changed, enable the update cart button.
+		 */
+		input_changed: function() {
+			$( 'div.woocommerce > form input[name="update_cart"]' ).prop( 'disabled', false );
 		},
 
 		/**
@@ -246,6 +283,7 @@ jQuery( function( $ ) {
 
 			var $form = $( evt.target );
 			var $submit = $( document.activeElement );
+			var $clicked = $( 'input[type=submit][clicked=true]' );
 
 			if ( 0 === $form.find( 'table.shop_table.cart' ).length ) {
 				return false;
@@ -254,12 +292,22 @@ jQuery( function( $ ) {
 				return false;
 			}
 
-			if ( $submit.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+			if ( $clicked.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
 				this.quantity_update( $form );
 
-			} else if ( $submit.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+			} else if ( $clicked.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
 				this.apply_coupon( $form );
 			}
+		},
+
+		/**
+		 * Special handling to identify which submit button was clicked.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		submit_click: function( evt ) {
+			$( 'input[type=submit]', $( evt.target ).parents( 'form' ) ).removeAttr( 'clicked' );
+			$( evt.target ).attr( 'clicked', 'true' );
 		},
 
 		/**
@@ -286,6 +334,7 @@ jQuery( function( $ ) {
 				dataType: 'html',
 				success: function( response ) {
 					show_notice( response );
+					$( document.body ).trigger( 'applied_coupon' );
 				},
 				complete: function() {
 					unblock( $form );
@@ -321,6 +370,7 @@ jQuery( function( $ ) {
 				dataType: 'html',
 				success: function( response ) {
 					show_notice( response );
+					$( document.body ).trigger( 'removed_coupon' );
 					unblock( $tr.parents( 'table' ) );
 				},
 				complete: function() {
@@ -335,6 +385,8 @@ jQuery( function( $ ) {
 		 * @param {JQuery Object} $form The cart form.
 		 */
 		quantity_update: function( $form ) {
+
+			var cart = this;
 
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
@@ -353,6 +405,7 @@ jQuery( function( $ ) {
 				success:  update_wc_div,
 				complete: function() {
 					unblock( $form );
+					cart.update_cart_totals();
 				}
 			} );
 		},
@@ -365,6 +418,7 @@ jQuery( function( $ ) {
 		item_remove_clicked: function( evt ) {
 			evt.preventDefault();
 
+			var cart = this;
 			var $a = $( evt.target );
 			var $form = $a.parents( 'form' );
 
@@ -377,11 +431,12 @@ jQuery( function( $ ) {
 				success: update_wc_div,
 				complete: function() {
 					unblock( $form );
+					cart.update_cart_totals();
 				}
 			} );
 		}
 	};
 
-	cart_shipping.init();
+	cart_shipping.init( cart );
 	cart.init();
 } );

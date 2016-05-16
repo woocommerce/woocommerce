@@ -527,7 +527,9 @@ class WC_Shortcodes {
 			'per_page' => '12',
 			'columns'  => '4',
 			'orderby'  => 'title',
-			'order'    => 'asc'
+			'order'    => 'asc',
+			'category' => '', // Slugs
+			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 		), $atts );
 
 		$query_args = array(
@@ -540,6 +542,8 @@ class WC_Shortcodes {
 			'meta_query'     => WC()->query->get_meta_query(),
 			'post__in'       => array_merge( array( 0 ), wc_get_product_ids_on_sale() )
 		);
+
+		$query_args = self::_maybe_add_category_args( $query_args, $atts['category'], $atts['operator'] );
 
 		return self::product_loop( $query_args, $atts, 'sale_products' );
 	}

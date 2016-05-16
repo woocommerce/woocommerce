@@ -902,7 +902,7 @@ class WC_Cart {
 				// Get the product
 				$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
 
-				// Sanitity check
+				// Sanity check
 				if ( $quantity <= 0 || ! $product_data || 'trash' === $product_data->post->post_status  ) {
 					throw new Exception();
 				}
@@ -1518,7 +1518,7 @@ class WC_Cart {
 		 *
 		 * @return bool
 		 */
-		function needs_shipping_address() {
+		public function needs_shipping_address() {
 
 			$needs_shipping_address = false;
 

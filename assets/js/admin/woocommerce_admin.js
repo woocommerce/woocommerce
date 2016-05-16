@@ -56,7 +56,7 @@ jQuery( function ( $ ) {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 				error = 'i18n_mon_decimal_error';
 			} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
-				regex = new RegExp( '^([a-zA-Z])?([a-zA-Z])$' );
+				regex = new RegExp( '([^A-Z])+|(.){3,}', 'im' );
 				error = 'i18n_country_iso_error';
 			} else {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );

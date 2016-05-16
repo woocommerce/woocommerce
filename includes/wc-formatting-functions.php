@@ -166,12 +166,12 @@ function wc_round_tax_total( $tax ) {
 
 	// @codeCoverageIgnoreStart
 	if ( version_compare( phpversion(), '5.3', '<' ) ) {
-		$tax = round( $tax, $dp );
+		$rounded_tax = round( $tax, $dp );
 	} else {
 		// @codeCoverageIgnoreEnd
-		$tax = round( $tax, $dp, WC_TAX_ROUNDING_MODE );
+		$rounded_tax = round( $tax, $dp, WC_TAX_ROUNDING_MODE );
 	}
-	return $tax;
+	return apply_filters( 'wc_round_tax_total', $rounded_tax, $tax, $dp, WC_TAX_ROUNDING_MODE );
 }
 
 /**
@@ -394,11 +394,11 @@ function wc_price( $price, $args = array() ) {
 		$price = wc_trim_zeros( $price );
 	}
 
-	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $price_format, get_woocommerce_currency_symbol( $currency ), $price );
-	$return          = '<span class="amount">' . $formatted_price . '</span>';
+	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $price_format, '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $currency ) . '</span>', $price );
+	$return          = '<span class="woocommerce-Price-amount amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && wc_tax_enabled() ) {
-		$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+		$return .= ' <small class="woocommerce-Price-taxLabel tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
 	return apply_filters( 'wc_price', $return, $price, $args );
@@ -622,19 +622,31 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
 /**
  * Format the postcode according to the country and length of the postcode.
  *
- * @param string postcode
- * @param string country
- * @return string formatted postcode
+ * @param string $postcode
+ * @param string $country
+ * @return string Formatted postcode.
  */
 function wc_format_postcode( $postcode, $country ) {
-	$postcode = strtoupper( trim( $postcode ) );
-	$postcode = trim( preg_replace( '/[\s]/', '', $postcode ) );
+	$postcode = wc_normalize_postcode( $postcode );
 
 	if ( in_array( $country, array( 'GB', 'CA' ) ) ) {
 		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
 	}
 
-	return $postcode;
+	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
+}
+
+/**
+ * Normalize postcodes.
+ *
+ * Remove spaces and convert characters to uppercase.
+ *
+ * @since 2.6.0
+ * @param string $postcode
+ * @return string Sanitized postcode.
+ */
+function wc_normalize_postcode( $postcode ) {
+	return trim( preg_replace( '/[\s]/', '', strtoupper( $postcode ) ) );
 }
 
 /**
@@ -644,8 +656,7 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string
  */
 function wc_format_phone_number( $tel ) {
-	$tel = str_replace( '.', '-', $tel );
-	return $tel;
+	return str_replace( '.', '-', $tel );
 }
 
 /**

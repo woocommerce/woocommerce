@@ -27,7 +27,14 @@ wc_print_notices(); ?>
 <?php wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="woocommerce-MyAccount-content">
-	<p><?php printf( __( 'Order #<mark class="order-number">%s</mark> was placed on <mark class="order-date">%s</mark> and is currently <mark class="order-status">%s</mark>.', 'woocommerce' ), $order->get_order_number(), date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ), wc_get_order_status_name( $order->get_status() ) ); ?></p>
+	<p><?php
+		printf(
+			__( 'Order #%1$s was placed on %2$s and is currently %3$s.', 'woocommerce' ),
+			'<mark class="order-number">' . $order->get_order_number() . '</mark>', 
+			'<mark class="order-date">' . date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ) . '</mark>',
+			'<mark class="order-status">' . wc_get_order_status_name( $order->get_status() ) . '</mark>'
+		);
+	?></p>
 
 	<?php if ( $notes = $order->get_customer_order_notes() ) : ?>
 		<h2><?php _e( 'Order Updates', 'woocommerce' ); ?></h2>

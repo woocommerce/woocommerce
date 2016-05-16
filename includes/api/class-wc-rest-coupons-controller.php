@@ -102,6 +102,16 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'batch_items' ),
+				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_batch_schema' ),
+		) );
 	}
 
 	/**
@@ -453,6 +463,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'discount_type' => array(
 					'description' => __( 'Determines the type of discount that will be applied.', 'woocommerce' ),
 					'type'        => 'string',
+					'default'     => 'fixed_cart',
 					'enum'        => array_keys( wc_get_coupon_types() ),
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -475,6 +486,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'individual_use' => array(
 					'description' => __( 'Whether coupon can only be used individually.', 'woocommerce' ),
 					'type'        => 'boolean',
+					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'product_ids' => array(
@@ -493,7 +505,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'usage_limit_per_user' => array(
-					'description' => __( 'How many times the coupon can be user per customer.', 'woocommerce' ),
+					'description' => __( 'How many times the coupon can be used per customer.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -505,6 +517,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'free_shipping' => array(
 					'description' => __( 'Define if can be applied for free shipping.', 'woocommerce' ),
 					'type'        => 'boolean',
+					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'product_categories' => array(
@@ -520,6 +533,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 				'exclude_sale_items' => array(
 					'description' => __( 'Define if should not apply when have sale items.', 'woocommerce' ),
 					'type'        => 'boolean',
+					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'minimum_amount' => array(

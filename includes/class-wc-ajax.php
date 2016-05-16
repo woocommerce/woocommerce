@@ -557,7 +557,7 @@ class WC_AJAX {
 			'name'         => $taxonomy,
 			'value'        => '',
 			'is_visible'   => apply_filters( 'woocommerce_attribute_default_visibility', 1 ),
-			'is_variation' => 0,
+			'is_variation' => apply_filters( 'woocommerce_attribute_default_is_variation', 0 ),
 			'is_taxonomy'  => $taxonomy ? 1 : 0
 		);
 
@@ -1456,17 +1456,17 @@ class WC_AJAX {
 	 * Remove meta from a line item.
 	 */
 	public static function remove_order_item_meta() {
-		global $wpdb;
-
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			die(-1);
 		}
 
-		$meta_id = absint( $_POST['meta_id'] );
+		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_id = %d", $meta_id ) );
+		$wpdb->delete( "{$wpdb->prefix}woocommerce_order_itemmeta", array(
+			'meta_id' => absint( $_POST['meta_id'] ),
+		) );
 
 		die();
 	}
@@ -3208,8 +3208,12 @@ class WC_AJAX {
 		$changes = $_POST['changes'];
 
 		foreach ( $changes as $instance_id => $data ) {
+			$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );
+
 			if ( isset( $data['deleted'] ) ) {
-				$wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) );
+				if ( $wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) ) ) {
+					do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method_id, $zone_id );
+				}
 				continue;
 			}
 
@@ -3223,7 +3227,10 @@ class WC_AJAX {
 			}
 
 			if ( isset( $method_data['enabled'] ) ) {
-				$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => absint( 'yes' === $method_data['enabled'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
+				$is_enabled = absint( 'yes' === $method_data['enabled'] );
+				if ( $wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => $is_enabled ), array( 'instance_id' => absint( $instance_id ) ) ) ) {
+					do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method_id, $zone_id, $is_enabled );
+				}
 			}
 		}
 
@@ -3254,9 +3261,8 @@ class WC_AJAX {
 		$instance_id     = absint( $_POST['instance_id'] );
 		$zone            = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
 		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$data            = $_POST['data'];
-
-		$shipping_method->process_admin_options( $data );
+		$shipping_method->set_post_data( $_POST['data'] );
+		$shipping_method->process_admin_options();
 
 		wp_send_json_success( array(
 			'methods' => $zone->get_shipping_methods(),
@@ -3315,17 +3321,11 @@ class WC_AJAX {
 			if ( isset( $data['newRow'] ) ) {
 				$update_args = array_filter( $update_args );
 				if ( empty( $update_args['name'] ) ) {
-					wp_send_json_error( __( 'Shipping Class name is required', 'woocommerce' ) );
-					exit;
+					continue;
 				}
-				$result      = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+				$result = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
 			} else {
 				$result = wp_update_term( $term_id, 'product_shipping_class', $update_args );
-			}
-
-			if ( is_wp_error( $result ) ) {
-				wp_send_json_error( $result->get_error_message() );
-				exit;
 			}
 		}
 

@@ -1642,7 +1642,7 @@ class WC_CLI_Product extends WC_CLI_Command {
 
 			if ( 'yes' === $managing_stock ) {
 				if ( isset( $variation['backorders'] ) ) {
-					if ( 'notify' == $variation['backorders'] ) {
+					if ( 'notify' === $variation['backorders'] ) {
 						$backorders = 'notify';
 					} else {
 						$backorders = ( $this->is_true( $variation['backorders'] ) ) ? 'yes' : 'no';

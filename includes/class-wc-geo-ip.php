@@ -1506,7 +1506,7 @@ class WC_Geo_IP {
 	 * @param  int $ipnum
 	 * @return string
 	 */
-	function _geoip_seek_country_v6( $ipnum ) {
+	public function _geoip_seek_country_v6( $ipnum ) {
 		// arrays from unpack start with offset 1
 		// yet another php mystery. array_merge work around
 		// this broken behaviour
