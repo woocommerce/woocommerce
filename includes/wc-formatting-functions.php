@@ -394,11 +394,11 @@ function wc_price( $price, $args = array() ) {
 		$price = wc_trim_zeros( $price );
 	}
 
-	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $price_format, get_woocommerce_currency_symbol( $currency ), $price );
-	$return          = '<span class="amount">' . $formatted_price . '</span>';
+	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $price_format, '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $currency ) . '</span>', $price );
+	$return          = '<span class="woocommerce-Price-amount amount">' . $formatted_price . '</span>';
 
 	if ( $ex_tax_label && wc_tax_enabled() ) {
-		$return .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+		$return .= ' <small class="woocommerce-Price-taxLabel tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 	}
 
 	return apply_filters( 'wc_price', $return, $price, $args );
