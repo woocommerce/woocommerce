@@ -25,7 +25,6 @@ class WC_Admin_Duplicate_Product {
 	public function __construct() {
 		add_action( 'admin_action_duplicate_product', array( $this, 'duplicate_product_action' ) );
 		add_filter( 'post_row_actions', array( $this, 'dupe_link' ), 10, 2 );
-		add_filter( 'page_row_actions', array( $this, 'dupe_link' ), 10, 2 );
 		add_action( 'post_submitbox_start', array( $this, 'dupe_button' ) );
 	}
 
@@ -69,9 +68,9 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		if ( isset( $_GET['post'] ) ) {
-			$notifyUrl = wp_nonce_url( admin_url( "edit.php?post_type=product&action=duplicate_product&post=" . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
+			$notify_url = wp_nonce_url( admin_url( "edit.php?post_type=product&action=duplicate_product&post=" . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 			?>
-			<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notifyUrl ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
+			<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notify_url ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
 			<?php
 		}
 	}
