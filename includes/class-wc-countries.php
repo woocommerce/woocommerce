@@ -231,8 +231,10 @@ class WC_Countries {
 
 		$raw_countries = get_option( 'woocommerce_specific_ship_to_countries' );
 
-		foreach ( $raw_countries as $country ) {
-			$countries[ $country ] = $this->countries[ $country ];
+		if ( $raw_countries ) {
+			foreach ( $raw_countries as $country ) {
+				$countries[ $country ] = $this->countries[ $country ];
+			}
 		}
 
 		return apply_filters( 'woocommerce_countries_shipping_countries', $countries );
@@ -251,9 +253,11 @@ class WC_Countries {
 
 		$raw_countries = get_option( 'woocommerce_specific_allowed_countries' );
 
-		foreach ( $raw_countries as $country ) {
-			if ( isset( $this->states[ $country ] ) ) {
-				$states[ $country ] = $this->states[ $country ];
+		if ( $raw_countries ) {
+			foreach ( $raw_countries as $country ) {
+				if ( isset( $this->states[ $country ] ) ) {
+					$states[ $country ] = $this->states[ $country ];
+				}
 			}
 		}
 
@@ -277,9 +281,11 @@ class WC_Countries {
 
 		$raw_countries = get_option( 'woocommerce_specific_ship_to_countries' );
 
-		foreach ( $raw_countries as $country ) {
-			if ( ! empty( $this->states[ $country ] ) ) {
-				$states[ $country ] = $this->states[ $country ];
+		if ( $raw_countries ) {
+			foreach ( $raw_countries as $country ) {
+				if ( ! empty( $this->states[ $country ] ) ) {
+					$states[ $country ] = $this->states[ $country ];
+				}
 			}
 		}
 
