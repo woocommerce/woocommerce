@@ -272,7 +272,7 @@ if ( wc_tax_enabled() ) {
 			</td>
 		</tr>
 		<tr>
-			<td class="label"><label for="refund_reason"><?php echo wc_help_tip( __( 'Note: the refund reason will be visible by the customer.', 'woocommerce' ) ); ?>"><?php _e( 'Reason for refund (optional)', 'woocommerce' ); ?>:</label></td>
+			<td class="label"><label for="refund_reason"><?php echo wc_help_tip( __( 'Note: the refund reason will be visible by the customer.', 'woocommerce' ) ); ?> <?php _e( 'Reason for refund (optional)', 'woocommerce' ); ?>:</label></td>
 			<td class="total">
 				<input type="text" class="text" id="refund_reason" name="refund_reason" />
 				<div class="clear"></div>
