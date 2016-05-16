@@ -454,7 +454,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>0.00</span>', wc_price( 0 ) );
 
 		// different currency
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount">&#36;1,111.17</span>', wc_price( 1111.17, array( 'currency' => 'USD' ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>1,111.17</span>', wc_price( 1111.17, array( 'currency' => 'USD' ) ) );
 
 		// negative price
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount">-<span class="woocommerce-Price-currencySymbol">&pound;</span>1.17</span>', wc_price( -1.17 ) );
