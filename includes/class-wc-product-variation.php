@@ -80,9 +80,9 @@ class WC_Product_Variation extends WC_Product {
 		/* Get main product data from parent (args) */
 		$this->id = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
 
-		// The post doesn't have a parent id, therefore its invalid.
+		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
 		if ( empty( $this->id ) ) {
-			return;
+			throw new Exception( sprintf( 'No parent product set for variation #%d', $this->variation_id ), 422 );
 		}
 
 		$this->product_type = 'variation';

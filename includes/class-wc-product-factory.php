@@ -18,30 +18,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_Factory {
 
 	/**
-	 * Get product.
+	 * Get a product.
 	 *
 	 * @param bool $the_product (default: false)
 	 * @param array $args (default: array())
 	 * @return WC_Product|bool false if the product cannot be loaded
 	 */
 	public function get_product( $the_product = false, $args = array() ) {
-		$the_product = $this->get_product_object( $the_product );
+		try {
+			$the_product = $this->get_product_object( $the_product );
 
-		if ( ! $the_product ) {
+			if ( ! $the_product ) {
+				throw new Exception( 'Product object does not exist', 422 );
+			}
+
+			$classname = $this->get_product_class( $the_product, $args );
+
+			if ( ! $classname ) {
+				throw new Exception( 'Missing classname', 422 );
+			}
+
+			if ( ! class_exists( $classname ) ) {
+				$classname = 'WC_Product_Simple';
+			}
+
+			return new $classname( $the_product, $args );
+
+		} catch ( Exception $e ) {
 			return false;
 		}
-
-		$classname = $this->get_product_class( $the_product, $args );
-
-		if ( ! $classname ) {
-			return false;
-		}
-
-		if ( ! class_exists( $classname ) ) {
-			$classname = 'WC_Product_Simple';
-		}
-
-		return new $classname( $the_product, $args );
 	}
 
 	/**
