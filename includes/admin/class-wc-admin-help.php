@@ -73,23 +73,19 @@ class WC_Admin_Help {
 				'title' => __( 'PayPal Standard', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/rbl7e7l4k2?videoFoam=true'
 			),
-			'wc-settings-checkout-wc_gateway_simplify_commerce' => array(
-				'title' => __( 'Simplify Commerce', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/jdfzjiiw61?videoFoam=true'
-			),
 			'wc-settings-shipping' => array(
 				'title' => __( 'Shipping Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/9c9008dxnr?videoFoam=true'
 			),
-			'wc-settings-shipping-wc_shipping_free_shipping' => array(
+			'wc-settings-shipping_flat_rate' => array(
+				'title' => __( 'Flat Rate', 'woocommerce' ),
+				'url'   => '//fast.wistia.net/embed/iframe/9wjbfa8kte?videoFoam=true'
+			),
+			'wc-settings-shipping_free_shipping' => array(
 				'title' => __( 'Free Shipping', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/po191fmvy9?videoFoam=true'
 			),
-			'wc-settings-shipping-wc_shipping_local_delivery' => array(
-				'title' => __( 'Local Delivery', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/5qjepx9ozj?videoFoam=true'
-			),
-			'wc-settings-shipping-wc_shipping_local_pickup' => array(
+			'wc-settings-shipping_local_pickup' => array(
 				'title' => __( 'Local Pickup', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/pe95ph0apb?videoFoam=true'
 			),
@@ -148,6 +144,17 @@ class WC_Admin_Help {
 		// Fallback for tabs
 		if ( ! isset( $video_map[ $video_key ] ) ) {
 			$video_key = $page ? $page : $screen->id;
+		}
+
+		// Support for core shipping methods
+		if ( $video_key === 'wc-settings-shipping' && isset( $_REQUEST['instance_id'] ) ) {
+			$instance_id           = absint( $_REQUEST['instance_id'] );
+			$shipping_method       = WC_Shipping_Zones::get_shipping_method( $instance_id );
+			$core_shipping_methods = array( 'flat_rate', 'free_shipping', 'local_pickup' );
+
+			if ( in_array( $shipping_method->id, $core_shipping_methods ) ) {
+				$video_key = 'wc-settings-shipping_' . $shipping_method->id;
+			}
 		}
 
 		if ( isset( $video_map[ $video_key ] ) ) {

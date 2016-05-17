@@ -80,7 +80,7 @@ class WC_Shipping_Zones {
 	}
 
 	/**
-	 * Get shipping zone using it's ID
+	 * Get shipping method using it's instance ID
 	 * @since 2.6.0
 	 * @param int $zone_id
 	 * @return WC_Shipping_Meethod|bool
