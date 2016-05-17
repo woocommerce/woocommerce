@@ -1568,7 +1568,7 @@ class WC_Admin_Post_Types {
 			$post_ids = false;
 		}
 
-		if ( is_array( $post_ids ) ) {
+		if ( ! empty( $post_ids ) ) {
 			// Remove s - we don't want to search order name
 			unset( $wp->query_vars['s'] );
 
@@ -1576,7 +1576,7 @@ class WC_Admin_Post_Types {
 			$wp->query_vars['shop_order_search'] = true;
 
 			// Search by found posts
-			$wp->query_vars['post__in'] = array_merge( $post_ids, array( 0 ) );
+			$wp->query_vars['post__in'] = $post_ids;
 		}
 	}
 
