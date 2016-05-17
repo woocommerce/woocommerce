@@ -184,7 +184,7 @@ class WC_Checkout {
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 				'customer_id'   => $this->customer_id,
 				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
-				'cart_hash'     => md5( json_encode( WC()->cart->get_cart_for_session() ) . WC()->cart->total ),
+				'cart_hash'     => md5( print_r( WC()->cart->get_cart_for_session(), true ) . WC()->cart->total ),
 				'created_via'   => 'checkout'
 			);
 
