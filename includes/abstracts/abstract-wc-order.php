@@ -762,7 +762,7 @@ abstract class WC_Abstract_Order {
 				) );
 			}
 
-			$line_taxes          = WC_Tax::calc_tax( $item->get_total(), $tax_rates, false );
+			$line_taxes          = WC_Tax::calc_tax( $item['cost'], $tax_rates, false );
 			$line_tax            = max( 0, array_sum( $line_taxes ) );
 			$shipping_tax_total += $line_tax;
 
