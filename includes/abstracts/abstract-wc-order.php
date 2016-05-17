@@ -731,9 +731,6 @@ abstract class WC_Abstract_Order {
 			}
 		}
 
-
-
-
 		// Calc taxes for shipping
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
