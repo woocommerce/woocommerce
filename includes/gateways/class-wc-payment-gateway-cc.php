@@ -52,7 +52,6 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 	public function form() {
 		wp_enqueue_script( 'wc-credit-card-form' );
 
-		$html   = '';
 		$fields = array();
 
 		$cvc_field = '<p class="form-row form-row-last">
