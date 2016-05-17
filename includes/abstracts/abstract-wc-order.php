@@ -731,9 +731,6 @@ abstract class WC_Abstract_Order {
 			}
 		}
 
-
-
-
 		// Calc taxes for shipping
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
@@ -746,10 +743,10 @@ abstract class WC_Abstract_Order {
 					$tax_class = sanitize_title( $tax_class );
 					if ( in_array( $tax_class, $found_tax_classes ) ) {
 						$tax_rates = WC_Tax::find_shipping_rates( array(
-							'country'   => $args['country'],
-							'state'     => $args['state'],
-							'postcode'  => $args['postcode'],
-							'city'      => $args['city'],
+							'country'   => $country,
+							'state'     => $state,
+							'postcode'  => $postcode,
+							'city'      => $city,
 							'tax_class' => $tax_class,
 						) );
 						break;
@@ -757,15 +754,15 @@ abstract class WC_Abstract_Order {
 				}
 			} else {
 				$tax_rates = WC_Tax::find_shipping_rates( array(
-					'country'   => $args['country'],
-					'state'     => $args['state'],
-					'postcode'  => $args['postcode'],
-					'city'      => $args['city'],
+					'country'   => $country,
+					'state'     => $state,
+					'postcode'  => $postcode,
+					'city'      => $city,
 					'tax_class' => 'standard' === $shipping_tax_class ? '' : $shipping_tax_class,
 				) );
 			}
 
-			$line_taxes          = WC_Tax::calc_tax( $item->get_total(), $tax_rates, false );
+			$line_taxes          = WC_Tax::calc_tax( $item['cost'], $tax_rates, false );
 			$line_tax            = max( 0, array_sum( $line_taxes ) );
 			$shipping_tax_total += $line_tax;
 
