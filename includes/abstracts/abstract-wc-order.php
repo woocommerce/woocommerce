@@ -743,10 +743,10 @@ abstract class WC_Abstract_Order {
 					$tax_class = sanitize_title( $tax_class );
 					if ( in_array( $tax_class, $found_tax_classes ) ) {
 						$tax_rates = WC_Tax::find_shipping_rates( array(
-							'country'   => $args['country'],
-							'state'     => $args['state'],
-							'postcode'  => $args['postcode'],
-							'city'      => $args['city'],
+							'country'   => $country,
+							'state'     => $state,
+							'postcode'  => $postcode,
+							'city'      => $city,
 							'tax_class' => $tax_class,
 						) );
 						break;
@@ -754,10 +754,10 @@ abstract class WC_Abstract_Order {
 				}
 			} else {
 				$tax_rates = WC_Tax::find_shipping_rates( array(
-					'country'   => $args['country'],
-					'state'     => $args['state'],
-					'postcode'  => $args['postcode'],
-					'city'      => $args['city'],
+					'country'   => $country,
+					'state'     => $state,
+					'postcode'  => $postcode,
+					'city'      => $city,
 					'tax_class' => 'standard' === $shipping_tax_class ? '' : $shipping_tax_class,
 				) );
 			}
