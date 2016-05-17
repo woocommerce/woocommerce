@@ -32,10 +32,10 @@ jQuery( function ( $ ) {
 			$( '.wc_error_tip' ).fadeOut( '100', function() { $( this ).remove(); } );
 		})
 
-		.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text]', function() {
+		.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc-order-totals #refund_amount[type=text]', function() {
 			var regex;
 
-			if ( $( this ).is( '.wc_input_price' ) ) {
+			if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 			} else {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
@@ -49,10 +49,10 @@ jQuery( function ( $ ) {
 			}
 		})
 
-		.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text]', function() {
+		.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text], .wc-order-totals #refund_amount[type=text]', function() {
 			var regex, error;
 
-			if ( $( this ).is( '.wc_input_price' ) ) {
+			if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 				error = 'i18n_mon_decimal_error';
 			} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
@@ -106,47 +106,6 @@ jQuery( function ( $ ) {
 				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
 			} else {
 				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
-			}
-		})
-
-		.on( 'change', '.wc-order-totals #refund_amount[type=text]', function() {
-			var regex;
-
-			if ( $( this ).is( '#refund_amount' ) ) {
-				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
-			} else {
-				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
-			}
-
-			var value    = $( this ).val();
-			var newvalue = value.replace( regex, '' );
-
-			if ( value !== newvalue ) {
-				$( this ).val( newvalue );
-			}
-		})
-
-		.on( 'keyup', '.wc-order-totals #refund_amount[type=text]', function() {
-			var regex, error;
-
-			if ( $( this ).is( '#refund_amount' ) ) {
-				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
-				error = 'i18n_mon_decimal_error';
-			} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
-				regex = new RegExp( '([^A-Z])+|(.){3,}', 'im' );
-				error = 'i18n_country_iso_error';
-			} else {
-				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
-				error = 'i18n_decimal_error';
-			}
-
-			var value    = $( this ).val();
-			var newvalue = value.replace( regex, '' );
-
-			if ( value !== newvalue ) {
-				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), error ] );
-			} else {
-				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $( this ), error ] );
 			}
 		})
 
