@@ -202,8 +202,8 @@ final class WooCommerce {
 
 	/**
 	 * What type of request is this?
-	 * string $type ajax, frontend or admin.
 	 *
+	 * @param  string $type admin, ajax, cron or frontend.
 	 * @return bool
 	 */
 	private function is_request( $type ) {
