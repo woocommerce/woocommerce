@@ -280,7 +280,7 @@ class WC_Shipping {
 
 				// If not set, not available, or available methods have changed, set to the DEFAULT option
 				if ( empty( $chosen_method ) || ! isset( $package['rates'][ $chosen_method ] ) || $method_count !== sizeof( $package['rates'] ) ) {
-					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], $chosen_method ), $package['rates'] );
+					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], $chosen_method ), $package['rates'], $chosen_method );
 					$chosen_methods[ $i ] = $chosen_method;
 					$method_counts[ $i ]  = sizeof( $package['rates'] );
 					do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
