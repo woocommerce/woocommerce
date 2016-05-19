@@ -166,7 +166,7 @@ abstract class WC_Widget extends WP_Widget {
 					$instance[ $key ] = wp_kses( trim( wp_unslash( $new_instance[ $key ] ) ), wp_kses_allowed_html( 'post' ) );
 				break;
 				case 'checkbox' :
-					$instance[ $key ] = is_null( $new_instance[ $key ] ) ? 0 : 1;
+					$instance[ $key ] = isset( $new_instance[ $key ] ) ? (bool) $new_instance[ $key ] : false;
 				break;
 				default:
 					$instance[ $key ] = sanitize_text_field( $new_instance[ $key ] );
