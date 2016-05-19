@@ -292,13 +292,21 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'name'        => '',
 				'description' => '',
 			),
-			'wc_shipping_classes_nonce'  => wp_create_nonce( 'wc_shipping_classes_nonce' ),
+			'wc_shipping_classes_nonce' => wp_create_nonce( 'wc_shipping_classes_nonce' ),
 			'strings'       => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' )
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-classes' );
+
+		// Extendable columns to show on the shipping classes screen.
+		$shipping_class_columns = apply_filters( 'woocommerce_shipping_classes_columns', array(
+			'wc-shipping-class-name'        => __( 'Shipping Class', 'woocommerce' ),
+			'wc-shipping-class-slug'        => __( 'Slug', 'woocommerce' ),
+			'wc-shipping-class-description' => __( 'Description', 'woocommerce' ),
+			'wc-shipping-class-count'       => __( 'Product Count', 'woocommerce' ),
+		) );
 
 		include_once( 'views/html-admin-page-shipping-classes.php' );
 	}

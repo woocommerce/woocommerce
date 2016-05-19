@@ -3323,10 +3323,12 @@ class WC_AJAX {
 				if ( empty( $update_args['name'] ) ) {
 					continue;
 				}
-				$result = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
+				$term_id = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
 			} else {
-				$result = wp_update_term( $term_id, 'product_shipping_class', $update_args );
+				wp_update_term( $term_id, 'product_shipping_class', $update_args );
 			}
+
+			do_action( 'woocommerce_shipping_classes_save_class', $term_id, $data );
 		}
 
 		$wc_shipping = WC_Shipping::instance();

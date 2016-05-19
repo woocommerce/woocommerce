@@ -196,7 +196,7 @@ class WC_Shipping {
 			$classes                = get_terms( 'product_shipping_class', array( 'hide_empty' => '0', 'orderby' => 'name' ) );
 			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
-		return $this->shipping_classes;
+		return apply_filters( 'woocommerce_get_shipping_classes', $this->shipping_classes );
 	}
 
 	/**
