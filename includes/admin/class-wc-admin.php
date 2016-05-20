@@ -2,11 +2,11 @@
 /**
  * WooCommerce Admin
  *
- * @class       WC_Admin
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.3.1
+ * @class    WC_Admin
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
