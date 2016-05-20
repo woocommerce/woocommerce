@@ -74,6 +74,13 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 		return 'product_tag';
 	}
 
+	/**
+	 * Retuns topic count text.
+	 *
+	 * @since 2.6.0
+	 * @param int $count
+	 * @return string
+	 */
 	public function _topic_count_text( $count ) {
 		/* translators: %s for product quantity, e.g. 1 product and 2 products */
 		return sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) );
