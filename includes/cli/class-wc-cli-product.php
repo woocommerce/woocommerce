@@ -144,6 +144,9 @@ class WC_CLI_Product extends WC_CLI_Command {
 		$id = 0;
 
 		try {
+			$porcelain = isset( $assoc_args['porcelain'] );
+			unset( $assoc_args['porcelain'] );
+
 			$data = apply_filters( 'woocommerce_cli_create_product_data', $this->unflatten_array( $assoc_args ) );
 
 			// Check if product title is specified
@@ -213,7 +216,11 @@ class WC_CLI_Product extends WC_CLI_Command {
 			// Clear cache/transients
 			wc_delete_product_transients( $id );
 
-			WP_CLI::success( "Created product $id." );
+			if ( $porcelain ) {
+				WP_CLI::line( $id );
+			} else {
+				WP_CLI::success( "Created product $id." );
+			}
 		} catch ( WC_CLI_Exception $e ) {
 			// Remove the product when fails
 			$this->clear_product( $id );
