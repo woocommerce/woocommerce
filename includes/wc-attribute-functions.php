@@ -183,3 +183,13 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 
 	return in_array( $attribute_name, $reserved_terms );
 }
+
+/**
+ * Return the title attribute for the tagcloud callback
+ *
+ * @param  int $count
+ * @return string
+ */
+function wc_product_tag_cloud_title_callback( $count ) {
+	return sprintf( _n( '%s Product', '%s Products', $count, 'woocommerce' ), number_format_i18n( $count ) );
+}

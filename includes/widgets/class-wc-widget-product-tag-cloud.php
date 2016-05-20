@@ -54,7 +54,7 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 
 		echo '<div class="tagcloud">';
 
-		wp_tag_cloud( apply_filters( 'woocommerce_product_tag_cloud_widget_args', array( 'taxonomy' => $current_taxonomy ) ) );
+		wp_tag_cloud( apply_filters( 'woocommerce_product_tag_cloud_widget_args', array( 'taxonomy' => $current_taxonomy, 'topic_count_text_callback' => 'wc_product_tag_cloud_title_callback' ) ) );
 
 		echo '</div>';
 
