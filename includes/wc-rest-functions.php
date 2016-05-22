@@ -215,7 +215,7 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 		'create' => 'publish_posts',
 		'edit'   => 'edit_post',
 		'delete' => 'delete_post',
-		'batch'  => 'edit_post',
+		'batch'  => 'edit_others_posts',
 	);
 
 	if ( 'revision' === $post_type ) {
