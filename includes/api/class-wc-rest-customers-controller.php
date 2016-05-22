@@ -96,15 +96,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/me', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'get_current_item' ),
-			'args'     => array(
-				'context' => array(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
@@ -470,31 +461,6 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_customer', $customer, $response, $request );
-
-		return $response;
-	}
-
-	/**
-	 * Get the current customer.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
-	 */
-	public function get_current_item( $request ) {
-		$id = get_current_user_id();
-		if ( empty( $id ) ) {
-			return new WP_Error( 'woocommerce_rest_not_logged_in', __( 'You are not currently logged in.', 'woocommerce' ), array( 'status' => 401 ) );
-		}
-
-		if ( ! wc_rest_check_user_permissions( 'read', $id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		$customer = wp_get_current_user();
-		$response = $this->prepare_item_for_response( $customer, $request );
-		$response = rest_ensure_response( $response );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $id ) ) );
-		$response->set_status( 302 );
 
 		return $response;
 	}
