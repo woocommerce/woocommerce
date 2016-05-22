@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-do_action( 'woocommerce_before_myaccount_navigation' ); 
+do_action( 'woocommerce_before_account_navigation' ); 
 ?>
 
 <nav class="woocommerce-MyAccount-navigation">
@@ -33,4 +33,4 @@ do_action( 'woocommerce_before_myaccount_navigation' );
 	</ul>
 </nav>
 
-<?php do_action( 'woocommerce_after_myaccount_navigation' ); ?>
+<?php do_action( 'woocommerce_after_account_navigation' ); ?>
