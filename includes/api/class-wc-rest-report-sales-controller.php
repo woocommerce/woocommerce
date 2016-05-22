@@ -351,7 +351,7 @@ class WC_REST_Report_Sales_Controller extends WC_REST_Controller {
 				),
 				'totals' => array(
 					'description' => __( 'Totals.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),

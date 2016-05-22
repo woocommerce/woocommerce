@@ -692,7 +692,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				),
 				'last_order' => array(
 					'description' => __( 'Last order data.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'properties'  => array(
@@ -730,7 +730,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				),
 				'billing_address' => array(
 					'description' => __( 'List of billing address data.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties' => array(
 						'first_name' => array(
@@ -793,7 +793,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				),
 				'shipping_address' => array(
 					'description' => __( 'List of shipping address data.', 'woocommerce' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties' => array(
 						'first_name' => array(
