@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php echo wc_help_tip( __( 'The following shipping methods apply to customers with shipping addresses within this zone.', 'woocommerce' ) ); ?>
 </h2>
 
-<?php do_action('wc_shipping_zone_before_methods_table'); ?>
+<?php do_action( 'woocommerce_shipping_zone_before_methods_table' ); ?>
 
 <table class="wc-shipping-zone-methods widefat">
 	<thead>
