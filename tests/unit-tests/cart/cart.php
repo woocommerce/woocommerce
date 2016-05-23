@@ -15,10 +15,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * Due to discounts being split amongst products in cart.
 	 */
 	public function test_cart_get_discounted_price() {
+		global $wpdb;
+		
 		// We need this to have the calculate_totals() method calculate totals
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
 		}
+
+		# Test case 1 #10963
 
 		// Create dummy coupon - fixed cart, 1 value
 		$coupon  = WC_Helper_Coupon::create_coupon();
@@ -50,6 +54,42 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Clean up the cart
 		WC()->cart->empty_cart();
 		WC()->cart->remove_coupons();
+
+		# Test case 2 #10573
+		update_post_meta( $product->id, '_regular_price', '29.95' );
+		update_post_meta( $product->id, '_price', '29.95' );
+		update_post_meta( $coupon->id, 'discount_type', 'percent' );
+		update_post_meta( $coupon->id, 'coupon_amount', '10' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+		$product = wc_get_product( $product->id );
+
+		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->add_discount( $coupon->code );
+
+		WC()->cart->calculate_totals();
+		$cart_item = current( WC()->cart->get_cart() );
+		$this->assertEquals( '24.51', number_format( $cart_item['line_total'], 2, '.', '' ) );
+
+		// Cleanup
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
 
 		// Delete coupon
 		WC_Helper_Coupon::delete_coupon( $coupon->id );

@@ -1255,7 +1255,7 @@ class WC_Cart {
 					$line_subtotal_tax     = 0;
 					$line_subtotal         = $line_price;
 					$line_tax              = 0;
-					$line_total            = WC_Tax::round( $discounted_price * $values['quantity'] );
+					$line_total            = round( $discounted_price * $values['quantity'], WC_ROUNDING_PRECISION );
 
 				/**
 				 * Prices include tax.
@@ -1285,11 +1285,16 @@ class WC_Cart {
 						// Adjusted price (this is the price including the new tax rate)
 						$adjusted_price    = ( $line_subtotal + $line_subtotal_tax ) / $values['quantity'];
 
-						// Apply discounts
+						// Apply discounts and get the discounted price FOR A SINGLE ITEM
 						$discounted_price  = $this->get_discounted_price( $values, $adjusted_price, true );
-						$discounted_taxes  = WC_Tax::calc_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
+
+						// Convert back to line price and round nicely
+						$discounted_line_price = round( $discounted_price * $values['quantity'], $this->dp );
+
+						// Now use rounded line price to get taxes.
+						$discounted_taxes  = WC_Tax::calc_tax( $discounted_line_price, $item_tax_rates, true );
 						$line_tax          = array_sum( $discounted_taxes );
-						$line_total        = ( $discounted_price * $values['quantity'] ) - $line_tax;
+						$line_total        = $discounted_line_price - $line_tax;
 
 					/**
 					 * Regular tax calculation (customer inside base and the tax class is unmodified.
@@ -1305,9 +1310,14 @@ class WC_Cart {
 
 						// Calc prices and tax (discounted)
 						$discounted_price = $this->get_discounted_price( $values, $base_price, true );
-						$discounted_taxes = WC_Tax::calc_tax( $discounted_price * $values['quantity'], $item_tax_rates, true );
-						$line_tax         = array_sum( $discounted_taxes );
-						$line_total       = ( $discounted_price * $values['quantity'] ) - $line_tax;
+
+						// Convert back to line price and round nicely
+						$discounted_line_price = round( $discounted_price * $values['quantity'], $this->dp );
+
+						// Now use rounded line price to get taxes.
+						$discounted_taxes  = WC_Tax::calc_tax( $discounted_line_price, $item_tax_rates, true );
+						$line_tax          = array_sum( $discounted_taxes );
+						$line_total        = $discounted_line_price - $line_tax;
 					}
 
 					// Tax rows - merge the totals we just got
