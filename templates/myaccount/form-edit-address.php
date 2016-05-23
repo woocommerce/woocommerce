@@ -27,6 +27,9 @@ wc_print_notices();
 wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="woocommerce-MyAccount-content">
+
+	<?php do_action( 'woocommerce_before_edit_account_address_form' ); ?>
+
 	<?php if ( ! $load_address ) : ?>
 		<?php wc_get_template( 'myaccount/my-address.php' ); ?>
 	<?php else : ?>
@@ -54,4 +57,6 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 		</form>
 
 	<?php endif; ?>
+
+	<?php do_action( 'woocommerce_after_edit_account_address_form' ); ?>
 </div>

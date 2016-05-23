@@ -25,6 +25,9 @@ wc_print_notices();
 wc_get_template( 'myaccount/navigation.php' ); ?>
 
 <div class="woocommerce-MyAccount-content">
+
+	<?php do_action( 'woocommerce_before_edit_account_form' ); ?>
+
 	<form class="woocommerce-EditAccountForm" action="" method="post">
 
 		<?php do_action( 'woocommerce_edit_account_form_start' ); ?>
@@ -72,4 +75,6 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 
 		<?php do_action( 'woocommerce_edit_account_form_end' ); ?>
 	</form>
+
+	<?php do_action( 'woocommerce_after_edit_account_form' ); ?>
 </div>
