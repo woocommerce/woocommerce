@@ -2108,6 +2108,7 @@ table.wc_input_table {
 	.ui-sortable:not(.ui-sortable-disabled) {
 		td.sort {
 			cursor: move;
+			font-size: 15px;
 			background: #f9f9f9;
 			text-align: center;
 			vertical-align: middle;
@@ -2228,14 +2229,16 @@ table.wc_shipping {
 	td.sort {
 		padding: 0 7px;
 		cursor: move;
+		font-size: 15px;
 		text-align: center;
 		vertical-align: middle;
+
 		&:before {
 			content: "\f333";
 			font-family: 'Dashicons';
 			text-align: center;
 			line-height: 1;
-			color: #ccc;
+			color: #999;
 			display: block;
 			width: 17px;
 			float: left;
@@ -2353,6 +2356,7 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 	}
 	td.wc-shipping-zone-sort, td.wc-shipping-zone-method-sort {
 		cursor: move;
+		font-size: 15px;
 		text-align: center;
 
 		&:before {
@@ -3243,6 +3247,11 @@ img.help_tip {
 			th {
 				padding: 7px 0 7px 7px !important;
 
+				&.sort {
+					width: 17px;
+					padding: 7px !important;
+				}
+
 				.woocommerce-help-tip {
 					font-size: 1.1em;
 					margin-left: 0;
@@ -3261,13 +3270,13 @@ img.help_tip {
 				input.input_text {
 					width: 100%;
 					float: none;
-					margin: 1px 0;
 					min-width: 0;
+					margin: 1px 0;
 				}
 
 				.upload_file_button {
-					float: right;
 					width: auto;
+					float: right;
 					cursor: pointer;
 				}
 
@@ -3289,12 +3298,11 @@ img.help_tip {
 			}
 
 			td.sort {
-				padding: 0 8px;
-				cursor: move;
 				width: 17px;
-				background: #f9f9f9;
+				cursor: move;
+				font-size: 15px;
 				text-align: center;
-				vertical-align: middle;
+				background: #f9f9f9;
 				padding-right: 7px !important;
 
 				&:before {
@@ -3321,28 +3329,33 @@ img.help_tip {
 .woocommerce_variation {
 	h3 {
 		.sort {
+			width: 17px;
+			height: 26px;
 			cursor: move;
+			float: right;
+			font-size: 15px;
+			font-weight: 400;
+			margin-right: .5em;
+			visibility: hidden;
 			text-align: center;
 			vertical-align: middle;
-			float: right;
-			height: 26px;
-			width: 17px;
-			visibility: hidden;
-			vertical-align: middle;
-			margin-right: .5em;
-			color: #a0a5aa;
+
 			&:before {
 				content: "\f333";
 				font-family: 'Dashicons';
 				text-align: center;
-				cursor: move;
-				line-height: 1;
+				line-height: 28px;
+				color: #999;
 				display: block;
 				width: 17px;
-				line-height: 28px;
+				float: left;
+				height: 100%;
 			}
+
 			&:hover {
-				color: #777;
+				&:before {
+					color: #777;
+				}
 			}
 		}
 	}
