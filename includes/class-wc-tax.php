@@ -287,7 +287,7 @@ class WC_Tax {
 
 		// Pre-query postcode ranges for PHP based matching.
 		$postcode_search = wc_get_wildcard_postcodes( $postcode );
-		$postcode_ranges = $wpdb->get_results( "SELECT tax_rate_id, location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type = 'postcode' AND location_code LIKE '%-%';" );
+		$postcode_ranges = $wpdb->get_results( "SELECT tax_rate_id, location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type = 'postcode' AND location_code LIKE '%...%';" );
 
 		if ( $postcode_ranges ) {
 			$matches         = wc_postcode_location_matcher( $postcode, $postcode_ranges, 'tax_rate_id', 'location_code' );
