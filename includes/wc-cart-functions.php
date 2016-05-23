@@ -73,7 +73,7 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 		$show_qty = false;
 	}
 
-	if ( ! $show_qty ) {
+	if ( ! $show_qty && ! is_array( $products ) ) {
 		$products = array_fill_keys( array_values( $products ), 1 );
 	}
 
