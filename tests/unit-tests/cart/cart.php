@@ -7,6 +7,58 @@
 class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
+	 * Test some discount logic which has caused issues in the past.
+	 * Tickets:
+	 * 	https://github.com/woothemes/woocommerce/issues/10573
+	 *  https://github.com/woothemes/woocommerce/issues/10963
+	 *
+	 * Due to discounts being split amongst products in cart.
+	 */
+	public function test_cart_get_discounted_price() {
+		// We need this to have the calculate_totals() method calculate totals
+		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			define( 'WOOCOMMERCE_CHECKOUT', true );
+		}
+
+		// Create dummy coupon - fixed cart, 1 value
+		$coupon  = WC_Helper_Coupon::create_coupon();
+
+		// Add coupon
+		WC()->cart->add_discount( $coupon->code );
+
+		// Create dummy product - price will be 10
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Add product to cart x1, calc and test
+		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '9.00', number_format( WC()->cart->total, 2, '.', '' ) );
+		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
+
+		// Add product to cart x2, calc and test
+		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '19.00', number_format( WC()->cart->total, 2, '.', '' ) );
+		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
+
+		// Add product to cart x3, calc and test
+		WC()->cart->add_to_cart( $product->id, 1 );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '29.00', number_format( WC()->cart->total, 2, '.', '' ) );
+		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
+
+		// Clean up the cart
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+
+		// Delete coupon
+		WC_Helper_Coupon::delete_coupon( $coupon->id );
+
+		// Clean up product
+		WC_Helper_Product::delete_product( $product->id );
+	}
+
+	/**
 	 * Test get_remove_url.
 	 *
 	 * @since 2.3
