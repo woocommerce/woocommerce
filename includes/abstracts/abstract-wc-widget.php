@@ -51,7 +51,8 @@ abstract class WC_Widget extends WP_Widget {
 	public function __construct() {
 		$widget_ops = array(
 			'classname'   => $this->widget_cssclass,
-			'description' => $this->widget_description
+			'description' => $this->widget_description,
+			'customize_selective_refresh' => true
 		);
 
 		parent::__construct( $this->widget_id, $this->widget_name, $widget_ops );
