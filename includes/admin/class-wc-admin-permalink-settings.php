@@ -168,9 +168,9 @@ class WC_Admin_Permalink_Settings {
 			return;
 		}
 
-		// We need to save the options ourselves; settings api does not trigger save for the permalinks page
-		if ( isset( $_POST['permalink_structure'] ) || isset( $_POST['category_base'] ) && isset( $_POST['product_permalink'] ) ) {
-			// Cat and tag bases
+		// We need to save the options ourselves; settings api does not trigger save for the permalinks page.
+		if ( isset( $_POST['permalink_structure'] ) ) {
+			// Cat and tag bases.
 			$woocommerce_product_category_slug  = wc_clean( $_POST['woocommerce_product_category_slug'] );
 			$woocommerce_product_tag_slug       = wc_clean( $_POST['woocommerce_product_tag_slug'] );
 			$woocommerce_product_attribute_slug = wc_clean( $_POST['woocommerce_product_attribute_slug'] );
@@ -184,19 +184,19 @@ class WC_Admin_Permalink_Settings {
 			$permalinks['tag_base']         = untrailingslashit( $woocommerce_product_tag_slug );
 			$permalinks['attribute_base']   = untrailingslashit( $woocommerce_product_attribute_slug );
 
-			// Product base
-			$product_permalink = wc_clean( $_POST['product_permalink'] );
+			// Product base.
+			$product_permalink = isset( $_POST['product_permalink'] ) ? wc_clean( $_POST['product_permalink'] ) : '';
 
 			if ( 'custom' === $product_permalink ) {
-				// Get permalink without slashes
-				$product_permalink = trim( wc_clean( $_POST['product_permalink_structure'] ), '/' );
+				// Get permalink without slashes.
+				$product_permalink = isset( $_POST['product_permalink_structure'] ) ? trim( wc_clean( $_POST['product_permalink_structure'] ), '/' ) : '';
 
-				// This is an invalid base structure and breaks pages
+				// This is an invalid base structure and breaks pages.
 				if ( '%product_cat%' == $product_permalink ) {
 					$product_permalink = _x( 'product', 'slug', 'woocommerce' ) . '/' . $product_permalink;
 				}
 
-				// Prepending slash
+				// Prepending slash.
 				$product_permalink = '/' . $product_permalink;
 			} elseif ( empty( $product_permalink ) ) {
 				$product_permalink = false;
@@ -204,7 +204,7 @@ class WC_Admin_Permalink_Settings {
 
 			$permalinks['product_base'] = untrailingslashit( $product_permalink );
 
-			// Shop base may require verbose page rules if nesting pages
+			// Shop base may require verbose page rules if nesting pages.
 			$shop_page_id   = wc_get_page_id( 'shop' );
 			$shop_permalink = ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : _x( 'shop', 'default-slug', 'woocommerce' );
 
