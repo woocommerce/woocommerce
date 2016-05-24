@@ -48,7 +48,7 @@ class WC_Payment_Tokens {
 			}
 		}
 
-		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id );
+		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id, $gateway_id );
 	}
 
 	/**

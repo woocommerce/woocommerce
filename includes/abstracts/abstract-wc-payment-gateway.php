@@ -372,7 +372,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			WC()->version
 		);
 		wp_localize_script( 'woocommerce-tokenization-form', 'woocommerceTokenizationParams', array(
-			'gatewayID'    => $this->id,
 			'userLoggedIn' => (bool) is_user_logged_in(),
 		) );
 	}
@@ -386,7 +385,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		foreach ( $this->get_tokens() as $token ) {
 			$html .= '<li>' . $this->saved_payment_method( $token ) . '</li>';
 		}
-		$html .= '<li class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox-wrap">' . $this->use_new_payment_method_checkbox() . '</li>';
+		$html .= '<li class="wc-payment-form-new-checkbox-wrap">' . $this->use_new_payment_method_checkbox() . '</li>';
 		$html .= '</ul>';
 		echo apply_filters( 'wc_payment_gateway_form_saved_payment_methods_html', $html, $this );
 	}
@@ -449,7 +448,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public function save_payment_method_checkbox() {
 		$html = sprintf(
-			'<p class="form-row" id="wc-%s-new-payment-method-wrap">',
+			'<p class="form-row wc-new-payment-method-wrap" id="wc-%s-new-payment-method-wrap">',
 			esc_attr( $this->id )
 		);
 		$html .= sprintf(
@@ -472,7 +471,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public function use_new_payment_method_checkbox() {
 		$label = ( ! empty( $this->new_method_label ) ? esc_html( $this->new_method_label ) : esc_html__( 'Use a new payment method', 'woocommerce' ) );
-		$html = '<input type="radio" id="wc-' . esc_attr( $this->id ). '-new" name="wc-' . esc_attr( $this->id ) . '-payment-token" value="new" style="width:auto;">';
+		$html = '<input type="radio" id="wc-' . esc_attr( $this->id ). '-new" name="wc-' . esc_attr( $this->id ) . '-payment-token" class="wc-gateway-payment-token" value="new" style="width:auto;">';
 		$html .= '<label class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox wc-gateway-payment-token-label" for="wc-' . esc_attr( $this->id ) . '-new">';
 		$html .= apply_filters( 'woocommerce_payment_gateway_form_new_method_label', $label, $this );
 		$html .= '</label>';

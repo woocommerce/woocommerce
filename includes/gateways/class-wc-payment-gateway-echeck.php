@@ -53,7 +53,7 @@ class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 		$fields = wp_parse_args( $fields, apply_filters( 'woocommerce_echeck_form_fields', $default_fields, $this->id ) );
 		?>
 
-		<fieldset id="<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-echeck-form'>
+		<fieldset id="<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-echeck-form wc-payment-form'>
 			<?php do_action( 'woocommerce_echeck_form_start', $this->id ); ?>
 			<?php
 				foreach ( $fields as $field ) {
