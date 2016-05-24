@@ -434,7 +434,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 			}
 
-			$order = wc_create_order( array(
+			$order = $this->create_base_order( array(
 				'status'        => $request['status'],
 				'customer_id'   => $request['customer_id'],
 				'customer_note' => $request['customer_note'],
@@ -1717,5 +1717,16 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Create base WC Order object.
+	 *
+	 * @since 2.6
+	 * @param array $args
+	 * @return WC_Order
+	 */
+	protected function create_base_order( $args ) {
+		return wc_create_order( $args );
 	}
 }
