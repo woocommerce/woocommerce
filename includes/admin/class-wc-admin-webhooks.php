@@ -151,6 +151,9 @@ class WC_Admin_Webhooks {
 		// Topic
 		$this->update_topic( $webhook );
 
+		// Update date.
+		wp_update_post( array( 'ID' => $webhook->id, 'post_modified' => current_time( 'mysql' ) ) );
+
 		// Run actions
 		do_action( 'woocommerce_webhook_options_save', $webhook->id );
 
