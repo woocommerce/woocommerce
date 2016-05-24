@@ -1388,17 +1388,17 @@ class WC_Meta_Box_Product_Data {
 				// Stock handling
 				update_post_meta( $variation_id, '_manage_stock', $manage_stock );
 
-				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
-				if ( ! empty( $variable_stock_status[ $i ] ) ) {
-					wc_update_product_stock_status( $variation_id, $variable_stock_status[ $i ] );
-				}
-
 				if ( 'yes' === $manage_stock ) {
 					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
 					delete_post_meta( $variation_id, '_stock' );
+				}
+
+				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
+				if ( ! empty( $variable_stock_status[ $i ] ) ) {
+					wc_update_product_stock_status( $variation_id, $variable_stock_status[ $i ] );
 				}
 
 				// Price handling
