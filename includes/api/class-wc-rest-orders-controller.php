@@ -439,7 +439,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'customer_id'   => $request['customer_id'],
 				'customer_note' => $request['customer_note'],
 				'created_via'   => 'rest-api',
-			) );
+			), $request );
 
 			if ( is_wp_error( $order ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_order', sprintf( __( 'Cannot create order: %s.', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
@@ -1724,9 +1724,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @since 2.6
 	 * @param array $args
+	 * @param array $data
 	 * @return WC_Order
 	 */
-	protected function create_base_order( $args ) {
+	protected function create_base_order( $args, $data ) {
 		return wc_create_order( $args );
 	}
 }
