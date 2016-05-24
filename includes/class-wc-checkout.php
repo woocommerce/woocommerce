@@ -184,7 +184,7 @@ class WC_Checkout {
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 				'customer_id'   => $this->customer_id,
 				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
-				'cart_hash'     => md5( json_encode( WC()->cart->get_cart_for_session() ) . WC()->cart->total ),
+				'cart_hash'     => md5( print_r( WC()->cart->get_cart_for_session(), true ) . WC()->cart->total ),
 				'created_via'   => 'checkout'
 			);
 
@@ -366,7 +366,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_before_checkout_process' );
 
 			if ( WC()->cart->is_empty() ) {
-				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to homepage</a>', 'woocommerce' ), home_url() ) );
+				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ), esc_url( wc_get_page_permalink( 'shop' ) ) ) );
 			}
 
 			do_action( 'woocommerce_checkout_process' );

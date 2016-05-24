@@ -20,6 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+do_action( 'woocommerce_before_account_navigation' ); 
 ?>
 
 <nav class="woocommerce-MyAccount-navigation">
@@ -31,3 +32,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endforeach; ?>
 	</ul>
 </nav>
+
+<?php do_action( 'woocommerce_after_account_navigation' ); ?>

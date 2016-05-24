@@ -50,7 +50,8 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 	 * @since 2.6.0
 	 */
 	public function form() {
-		$html   = '';
+		wp_enqueue_script( 'wc-credit-card-form' );
+
 		$fields = array();
 
 		$cvc_field = '<p class="form-row form-row-last">
@@ -61,7 +62,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 		$default_fields = array(
 			'card-number-field' => '<p class="form-row form-row-wide">
 				<label for="' . esc_attr( $this->id ) . '-card-number">' . __( 'Card Number', 'woocommerce' ) . ' <span class="required">*</span></label>
-				<input id="' . esc_attr( $this->id ) . '-card-number" class="input-text wc-credit-card-form-card-number" type="text" maxlength="20" autocomplete="off" placeholder="•••• •••• •••• ••••" ' . $this->field_name( 'card-number' ) . ' />
+				<input id="' . esc_attr( $this->id ) . '-card-number" class="input-text wc-credit-card-form-card-number" type="text" maxlength="20" autocomplete="off" placeholder="&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;" ' . $this->field_name( 'card-number' ) . ' />
 			</p>',
 			'card-expiry-field' => '<p class="form-row form-row-first">
 				<label for="' . esc_attr( $this->id ) . '-card-expiry">' . __( 'Expiry (MM/YY)', 'woocommerce' ) . ' <span class="required">*</span></label>

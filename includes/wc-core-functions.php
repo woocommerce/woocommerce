@@ -1264,8 +1264,8 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 		$compare = $postcode;
 
 		// Handle postcodes containing ranges.
-		if ( strstr( $compare_against, '-' ) ) {
-			$range = array_map( 'trim', explode( '-', $compare_against ) );
+		if ( strstr( $compare_against, '...' ) ) {
+			$range = array_map( 'trim', explode( '...', $compare_against ) );
 
 			if ( 2 !== sizeof( $range ) ) {
 				continue;

@@ -483,6 +483,8 @@ class WC_Meta_Box_Order_Data {
 
 		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
 
+		clean_post_cache( $post_id );
+
 		// If customer changed, update any downloadable permissions
 		if ( $customer_changed ) {
 			$wpdb->update( $wpdb->prefix . "woocommerce_downloadable_product_permissions",

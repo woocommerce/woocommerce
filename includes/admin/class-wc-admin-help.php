@@ -73,25 +73,13 @@ class WC_Admin_Help {
 				'title' => __( 'PayPal Standard', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/rbl7e7l4k2?videoFoam=true'
 			),
-			'wc-settings-checkout-wc_gateway_simplify_commerce' => array(
-				'title' => __( 'Simplify Commerce', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/jdfzjiiw61?videoFoam=true'
-			),
 			'wc-settings-shipping' => array(
 				'title' => __( 'Shipping Settings', 'woocommerce' ),
 				'url'   => '//fast.wistia.net/embed/iframe/9c9008dxnr?videoFoam=true'
 			),
-			'wc-settings-shipping-wc_shipping_free_shipping' => array(
-				'title' => __( 'Free Shipping', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/po191fmvy9?videoFoam=true'
-			),
-			'wc-settings-shipping-wc_shipping_local_delivery' => array(
-				'title' => __( 'Local Delivery', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/5qjepx9ozj?videoFoam=true'
-			),
-			'wc-settings-shipping-wc_shipping_local_pickup' => array(
-				'title' => __( 'Local Pickup', 'woocommerce' ),
-				'url'   => '//fast.wistia.net/embed/iframe/pe95ph0apb?videoFoam=true'
+			'wc-settings-shipping-classes' => array(
+				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
+				'url'   => '//fast.wistia.net/embed/iframe/f0j5gzqigg?videoFoam=true'
 			),
 			'edit-product_cat' => array(
 				'title' => __( 'Product Categories, Tags, Shipping Classes, &amp; Attributes', 'woocommerce' ),
@@ -199,7 +187,7 @@ class WC_Admin_Help {
 				'<p>' . __( 'If you would like to learn about using WooCommerce from an expert, consider following a WooCommerce course ran by one of our educational partners.', 'woocommerce' ) . '</p>' .
 				'<p><a href="' . 'http://www.woothemes.com/educational-partners/?utm_source=WooCommercePlugin&utm_medium=Help&utm_content=EduPartners&utm_campaign=Onboarding' . '" class="button button-primary">' . __( 'View Education Partners', 'woocommerce' ) . '</a></p>'
 		) );
-		
+
 		$screen->add_help_tab( array(
 			'id'        => 'woocommerce_onboard_tab',
 			'title'     => __( 'Setup Wizard', 'woocommerce' ),

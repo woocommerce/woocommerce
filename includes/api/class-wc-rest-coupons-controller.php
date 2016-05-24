@@ -298,7 +298,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Posts_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
-		$data = $request->get_json_params();
+		$data = array_filter( $request->get_params() );
 
 		$defaults = array(
 			'discount_type'                => 'fixed_cart',

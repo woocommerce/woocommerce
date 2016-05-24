@@ -112,12 +112,17 @@
 					var view = this;
 					var $tr = view.$el.find( 'tr[data-id="' + rowData.term_id + '"]');
 
+					// Support select boxes
+					$tr.find( 'select' ).each( function() {
+						var attribute = $( this ).data( 'attribute' );
+						$( this ).find( 'option[value="' + rowData[ attribute ] + '"]' ).prop( 'selected', true );
+					} );
+
 					// Make the rows function
-					$tr.find('.view').show();
-					$tr.find('.edit').hide();
+					$tr.find( '.view' ).show();
+					$tr.find( '.edit' ).hide();
 					$tr.find( '.wc-shipping-class-edit' ).on( 'click', { view: this }, this.onEditRow );
 					$tr.find( '.wc-shipping-class-delete' ).on( 'click', { view: this }, this.onDeleteRow );
-					$tr.find( '.wc-shipping-class-postcodes-toggle' ).on( 'click', { view: this }, this.onTogglePostcodes );
 					$tr.find( '.editing .wc-shipping-class-edit' ).trigger('click');
 					$tr.find( '.wc-shipping-class-cancel-edit' ).on( 'click', { view: this }, this.onCancelEditRow );
 

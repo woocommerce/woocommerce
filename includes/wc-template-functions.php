@@ -728,6 +728,7 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $deprecated1 = 0, $deprecated2 = 0 ) {
 		global $post;
+		$size = apply_filters( 'single_product_archive_thumbnail_size', 'shop_catalog' );
 
 		if ( has_post_thumbnail() ) {
 			$props = wc_get_product_attachment_props( get_post_thumbnail_id(), $post );
@@ -1677,7 +1678,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	 * @subpackage	Loop
 	 */
 	function woocommerce_subcategory_thumbnail( $category ) {
-		$small_thumbnail_size  	= apply_filters( 'single_product_small_thumbnail_size', 'shop_catalog' );
+		$small_thumbnail_size  	= apply_filters( 'subcategory_archive_thumbnail_size', 'shop_catalog' );
 		$dimensions    			= wc_get_image_size( $small_thumbnail_size );
 		$thumbnail_id  			= get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true  );
 

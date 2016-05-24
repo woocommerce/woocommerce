@@ -32,10 +32,10 @@ jQuery( function ( $ ) {
 			$( '.wc_error_tip' ).fadeOut( '100', function() { $( this ).remove(); } );
 		})
 
-		.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text]', function() {
+		.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc-order-totals #refund_amount[type=text]', function() {
 			var regex;
 
-			if ( $( this ).is( '.wc_input_price' ) ) {
+			if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 			} else {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
@@ -49,10 +49,10 @@ jQuery( function ( $ ) {
 			}
 		})
 
-		.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text]', function() {
+		.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text], .wc-order-totals #refund_amount[type=text]', function() {
 			var regex, error;
 
-			if ( $( this ).is( '.wc_input_price' ) ) {
+			if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
 				regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 				error = 'i18n_mon_decimal_error';
 			} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
@@ -73,6 +73,23 @@ jQuery( function ( $ ) {
 			}
 		})
 
+		.on( 'change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
+			var sale_price_field = $( this ), regular_price_field;
+
+			if( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
+				regular_price_field = sale_price_field.parents( '.variable_pricing' ).find( '.wc_input_price[name^=variable_regular_price]' );
+			} else {
+				regular_price_field = $( '#_regular_price' );
+			}
+
+			var sale_price    = parseFloat( window.accounting.unformat( sale_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+			var regular_price = parseFloat( window.accounting.unformat( regular_price_field.val(), woocommerce_admin.mon_decimal_point ) );
+
+			if ( sale_price >= regular_price ) {
+				$( this ).val( '' );
+			}
+		})
+
 		.on( 'keyup', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
 			var sale_price_field = $( this ), regular_price_field;
 
@@ -89,23 +106,6 @@ jQuery( function ( $ ) {
 				$( document.body ).triggerHandler( 'wc_add_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
 			} else {
 				$( document.body ).triggerHandler( 'wc_remove_error_tip', [ $(this), 'i18_sale_less_than_regular_error' ] );
-			}
-		})
-
-		.on( 'change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
-			var sale_price_field = $( this ), regular_price_field;
-
-			if( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
-				regular_price_field = sale_price_field.parents( '.variable_pricing' ).find( '.wc_input_price[name^=variable_regular_price]' );
-			} else {
-				regular_price_field = $( '#_regular_price' );
-			}
-
-			var sale_price    = parseFloat( window.accounting.unformat( sale_price_field.val(), woocommerce_admin.mon_decimal_point ) );
-			var regular_price = parseFloat( window.accounting.unformat( regular_price_field.val(), woocommerce_admin.mon_decimal_point ) );
-
-			if ( sale_price >= regular_price ) {
-				$( this ).val( '' );
 			}
 		})
 

@@ -56,7 +56,7 @@ $item_subtotal = ( isset( $item['line_subtotal'] ) ) ? esc_attr( wc_format_local
 					echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_order_currency() ) );
 
 					if ( isset( $item['line_subtotal'] ) && $item['line_subtotal'] != $item['line_total'] ) {
-						echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $order->get_item_subtotal( $item, false ) - $order->get_item_total( $item, false ), '' ), array( 'currency' => $order->get_order_currency() ) ) . '</span>';
+						echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $order->get_item_subtotal( $item, false, false ) - $order->get_item_total( $item, false, false ), '' ), array( 'currency' => $order->get_order_currency() ) ) . '</span>';
 					}
 				}
 			?>

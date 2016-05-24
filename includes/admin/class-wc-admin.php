@@ -2,11 +2,11 @@
 /**
  * WooCommerce Admin
  *
- * @class       WC_Admin
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.3
+ * @class    WC_Admin
+ * @author   WooThemes
+ * @category Admin
+ * @package  WooCommerce/Admin
+ * @version  2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -180,7 +180,7 @@ class WC_Admin {
 			$email         = new WC_Email();
 
 			// wrap the content with the email template and then add styles
-			$message       = $email->style_inline( $mailer->wrap_message( $email_heading, $message ) );
+			$message       = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
 
 			// print the preview email
 			echo $message;
