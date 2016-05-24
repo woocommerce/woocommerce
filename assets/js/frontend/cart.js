@@ -156,7 +156,7 @@ jQuery( function( $ ) {
 		shipping_method_selected: function( evt ) {
 			var target = evt.target;
 
-			var shipping_methods = [];
+			var shipping_methods = {};
 
 			$( 'select.shipping_method, input[name^=shipping_method][type=radio]:checked, input[name^=shipping_method][type=hidden]' ).each( function() {
 				shipping_methods[ $( target ).data( 'index' ) ] = $( target ).val();
