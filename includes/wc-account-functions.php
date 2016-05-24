@@ -86,7 +86,7 @@ function wc_get_account_menu_items() {
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	);
 
-	// Remove empty items
+	// Remove empty items.
 	$downloads = WC()->customer->get_downloadable_products();
 
 	if ( ! sizeof( $downloads ) ) {
