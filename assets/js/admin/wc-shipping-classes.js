@@ -155,6 +155,7 @@
 
 					model.logChanges( changes );
 					view.renderRow( newRow );
+					$( '.wc-shipping-classes-blank-state' ).remove();
 				},
 				onEditRow: function( event ) {
 					event.preventDefault();
@@ -180,7 +181,7 @@
 						model.logChanges( changes );
 					}
 
-					row.remove();
+					view.render();
 				},
 				onCancelEditRow: function( event ) {
 					var view    = event.data.view,
