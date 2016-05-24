@@ -249,7 +249,7 @@ jQuery( function( $ ) {
 			};
 
 			if ( false !== args.update_shipping_method ) {
-				var shipping_methods = [];
+				var shipping_methods = {};
 
 				$( 'select.shipping_method, input[name^="shipping_method"][type="radio"]:checked, input[name^="shipping_method"][type="hidden"]' ).each( function() {
 					shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
