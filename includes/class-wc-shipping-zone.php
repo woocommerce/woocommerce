@@ -117,7 +117,9 @@ class WC_Shipping_Zone extends WC_Data {
 	 * Save zone data to the database.
 	 */
 	public function save() {
-		if ( empty( $this->get_zone_name() ) ) {
+		$name = $this->get_zone_name();
+
+		if ( empty( $name ) ) {
 			$this->set_zone_name( $this->generate_zone_name() );
 		}
 
