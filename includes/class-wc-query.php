@@ -110,10 +110,10 @@ class WC_Query {
 				$title = __( 'Downloads', 'woocommerce' );
 			break;
 			case 'edit-account' :
-				$title = __( 'Edit Account Details', 'woocommerce' );
+				$title = __( 'Account Details', 'woocommerce' );
 			break;
 			case 'edit-address' :
-				$title = __( 'Edit Address', 'woocommerce' );
+				$title = __( 'Addresses', 'woocommerce' );
 			break;
 			case 'payment-methods' :
 				$title = __( 'Payment Methods', 'woocommerce' );
