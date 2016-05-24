@@ -76,7 +76,7 @@ function wc_edit_address_i18n( $id, $flip = false ) {
  * @return array
  */
 function wc_get_account_menu_items() {
-	return apply_filters( 'woocommerce_account_menu_items', array(
+	$items = array(
 		'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
@@ -84,7 +84,16 @@ function wc_get_account_menu_items() {
 		'payment-methods' => __( 'Payment Methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account Details', 'woocommerce' ),
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
-	) );
+	);
+
+	// Remove empty items
+	$downloads = WC()->customer->get_downloadable_products();
+
+	if ( ! sizeof( $downloads ) ) {
+		unset( $items['downloads'] );
+	}
+
+	return apply_filters( 'woocommerce_account_menu_items', $items );
 }
 
 /**
