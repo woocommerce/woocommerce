@@ -1311,8 +1311,6 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
 
 		if ( $include_legacy ) {
-			$methods = WC()->shipping->get_shipping_methods();
-
 			// WooCommerce legacy methods.
 			$legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
 			foreach ( $legacy_methods as $method ) {
@@ -1323,6 +1321,7 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 			}
 
 			// Include only activated methods that don't support shipping zones.
+			$methods = WC()->shipping->get_shipping_methods();
 			foreach ( $methods as $method ) {
 				if ( ! $method->supports( 'shipping-zones' ) && isset( $method->enabled ) && 'yes' === $method->enabled ) {
 					$method_count++;
