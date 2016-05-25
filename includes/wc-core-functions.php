@@ -1313,8 +1313,17 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 		if ( $include_legacy ) {
 			$methods = WC()->shipping->get_shipping_methods();
 
+			// WooCommerce legacy methods.
+			$legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
+			foreach ( $legacy_methods as $method ) {
+				$options = get_option( 'woocommerce_' . $method . '_settings' );
+				if ( $options && isset( $options['enabled'] ) && 'yes' === $options['enabled'] ) {
+					$method_count++;
+				}
+			}
+
+			// Include only activated methods that don't support shipping zones.
 			foreach ( $methods as $method ) {
-				// Include only activated methods that don't support shipping zones.
 				if ( ! $method->supports( 'shipping-zones' ) && isset( $method->enabled ) && 'yes' === $method->enabled ) {
 					$method_count++;
 				}
