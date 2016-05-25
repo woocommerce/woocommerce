@@ -457,6 +457,8 @@ class WC_Shipping_Zone extends WC_Data {
 			do_action( 'woocommerce_shipping_zone_method_added', $instance_id, $type, $this->get_zone_id() );
 		}
 
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
 		return $instance_id;
 	}
 }
