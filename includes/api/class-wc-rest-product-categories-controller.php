@@ -105,7 +105,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 	protected function update_term_meta_fields( $term, $request ) {
 		$id = (int) $term->term_id;
 
-		update_woocommerce_term_meta( $id, 'display_type', $request['display'] );
+		update_woocommerce_term_meta( $id, 'display_type', 'default' === $request['display'] ? '' : $request['display'] );
 		update_woocommerce_term_meta( $id, 'order', $request['menu_order'] );
 
 		if ( ! empty( $request['image'] ) ) {

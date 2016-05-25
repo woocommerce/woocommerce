@@ -701,7 +701,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			$id = $insert['term_id'];
 
-			update_woocommerce_term_meta( $id, 'display_type', esc_attr( $data['display'] ) );
+			update_woocommerce_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
@@ -774,7 +774,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( ! empty( $data['display'] ) ) {
-				update_woocommerce_term_meta( $id, 'display_type', sanitize_text_field( $data['display'] ) );
+				update_woocommerce_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
