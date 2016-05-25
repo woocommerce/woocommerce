@@ -1296,6 +1296,7 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 /**
  * Gets number of shipping methods currently enabled. Used to identify if
  * shipping is configured.
+ *
  * @since  2.6.0
  * @param  bool $include_legacy Count legacy shipping methods too.
  * @return int
@@ -1310,12 +1311,12 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
 
 		if ( $include_legacy ) {
-			$legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
+			$methods = WC()->shipping->get_shipping_methods();
 
-			foreach ( $legacy_methods as $method ) {
-				$options = get_option( 'woocommerce_' . $method . '_settings' );
-				if ( $options && isset( $options['enabled'] ) && 'yes' === $options['enabled'] ) {
-					$method_count ++;
+			foreach ( $methods as $method ) {
+				// Include only activated methods that don't support shipping zones.
+				if ( ! $method->supports( 'shipping-zones' ) && isset( $method->enabled ) && 'yes' === $method->enabled ) {
+					$method_count++;
 				}
 			}
 		}
