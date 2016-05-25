@@ -288,7 +288,7 @@ class WC_Admin_Notices {
 			global $wpdb;
 
 			$product_count = wp_count_posts( 'product' );
-			$method_count  = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+			$method_count  = wc_get_shipping_method_count();
 
 			if ( $product_count->publish > 0 && 0 === $method_count ) {
 				include( 'views/html-notice-no-shipping-methods.php' );
