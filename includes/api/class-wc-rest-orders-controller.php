@@ -1062,6 +1062,18 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Create base WC Order object.
+	 *
+	 * @since 2.6.0
+	 * @param array $args Order args.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WC_Order
+	 */
+	protected function create_base_order( $args, $data ) {
+		return wc_create_order( $args );
+	}
+
+	/**
 	 * Get the Order's schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -1717,17 +1729,5 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		);
 
 		return $params;
-	}
-
-	/**
-	 * Create base WC Order object.
-	 *
-	 * @since 2.6
-	 * @param array $args
-	 * @param array $data
-	 * @return WC_Order
-	 */
-	protected function create_base_order( $args, $data ) {
-		return wc_create_order( $args );
 	}
 }
