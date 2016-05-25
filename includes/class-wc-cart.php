@@ -1505,7 +1505,8 @@ class WC_Cart {
 		 * @return bool whether or not the cart needs shipping
 		 */
 		public function needs_shipping() {
-			if ( ! wc_shipping_enabled() ) {
+			// If shipping is disabled or not yet configured, we can skip this.
+			if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) {
 				return false;
 			}
 
