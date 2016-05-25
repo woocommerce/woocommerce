@@ -375,7 +375,7 @@ global $wpdb;
 			if ( in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ) ) {
 				?>
 				<tr>
-					<td data-export-label="PHP Post Max Size"><?php _e( 'MaxMind GeoIP Database', 'woocommerce' ); ?>:</td>
+					<td data-export-label="MaxMind GeoIP Database"><?php _e( 'MaxMind GeoIP Database', 'woocommerce' ); ?>:</td>
 					<td class="help"><?php echo wc_help_tip( __( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); ?></td>
 					<td><?php
 						if ( file_exists( WC_Geolocation::get_local_database_path() ) ) {
