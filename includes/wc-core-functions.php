@@ -1292,3 +1292,36 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 
 	return $matches;
 }
+
+/**
+ * Gets number of shipping methods currently enabled. Used to identify if
+ * shipping is configured.
+ * @since  2.6.0
+ * @param  bool $include_legacy Count legacy shipping methods too.
+ * @return int
+ */
+function wc_get_shipping_method_count( $include_legacy = false ) {
+	global $wpdb;
+
+	$transient_name = 'wc_shipping_method_count_' . ( $include_legacy ? 1 : 0 ) . '_' . WC_Cache_Helper::get_transient_version( 'shipping' );
+	$method_count   = absint( get_transient( $transient_name ) );
+
+	if ( false === $method_count ) {
+		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+
+		if ( $include_legacy ) {
+			$legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
+
+			foreach ( $legacy_methods as $method ) {
+				$options = get_option( 'woocommerce_' . $method . '_settings' );
+				if ( $options && isset( $options['enabled'] ) && 'yes' === $options['enabled'] ) {
+					$method_count ++;
+				}
+			}
+		}
+
+		set_transient( $transient_name, $method_count, DAY_IN_SECONDS * 30 );
+	}
+
+	return $method_count;
+}
