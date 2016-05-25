@@ -1304,7 +1304,7 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 	global $wpdb;
 
 	$transient_name = 'wc_shipping_method_count_' . ( $include_legacy ? 1 : 0 ) . '_' . WC_Cache_Helper::get_transient_version( 'shipping' );
-	$method_count   = absint( get_transient( $transient_name ) );
+	$method_count   = get_transient( $transient_name );
 
 	if ( false === $method_count ) {
 		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
@@ -1323,5 +1323,5 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 		set_transient( $transient_name, $method_count, DAY_IN_SECONDS * 30 );
 	}
 
-	return $method_count;
+	return absint( $method_count );
 }
