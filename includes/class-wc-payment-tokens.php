@@ -204,6 +204,8 @@ class WC_Payment_Tokens {
 					array( 'is_default' => 1 ),
 					array( 'token_id' => $token->get_id(),
 				) );
+
+				do_action( 'woocommerce_payment_token_set_default', $token_id, $token );
 			} else {
 				$token->set_default( false );
 				$wpdb->update(
@@ -213,7 +215,6 @@ class WC_Payment_Tokens {
 				) );
 			}
 		}
-		do_action( 'woocommerce_payment_token_set_default', $token_id );
 	}
 
 	/**
