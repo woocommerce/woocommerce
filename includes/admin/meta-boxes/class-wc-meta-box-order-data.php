@@ -188,7 +188,7 @@ class WC_Meta_Box_Order_Data {
 					}
 
 					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
-						echo __( 'Customer IP', 'woocommerce' ) . ': ' . esc_html( $ip_address );
+						echo __( 'Customer IP', 'woocommerce' ) . ': <span class="customer_ip">' . esc_html( $ip_address ) . '</span>';
 					}
 				?></p>
 
