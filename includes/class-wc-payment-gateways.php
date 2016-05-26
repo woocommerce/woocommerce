@@ -119,8 +119,6 @@ class WC_Payment_Gateways {
 
 	/**
 	 * Get gateways.
-	 *
-	 * @access public
 	 * @return array
 	 */
 	public function payment_gateways() {
@@ -133,6 +131,15 @@ class WC_Payment_Gateways {
 		}
 
 		return $_available_gateways;
+	}
+
+	/**
+	 * Get array of registered gateway ids
+	 * @since 2.6.0
+	 * @return array of strings
+	 */
+	public function get_payment_gateway_ids() {
+		return wp_list_pluck( $this->payment_gateways, 'id' );
 	}
 
 	/**
