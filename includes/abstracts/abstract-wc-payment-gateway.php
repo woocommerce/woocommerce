@@ -371,7 +371,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		$cc_form->supports = $this->supports;
 		$cc_form->form();
 	}
-	
+
 	/**
 	 * Enqueues our tokenization script to handle some of the new form options.
 	 * @since 2.6.0
@@ -391,21 +391,24 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public function saved_payment_methods() {
 		$html = '<ul id="wc-' . esc_attr( $this->id ) . '-methods" class="wc-saved-payment-methods" data-count="' . esc_attr( count( $this->get_tokens() ) ) . '">';
+
 		foreach ( $this->get_tokens() as $token ) {
-			$html .= '<li>' . $this->saved_payment_method( $token ) . '</li>';
+			$html .= '<li>' . $this->get_saved_payment_method_html( $token ) . '</li>';
 		}
+
 		$html .= '<li class="wc-payment-form-new-checkbox-wrap">' . $this->use_new_payment_method_checkbox() . '</li>';
 		$html .= '</ul>';
+
 		echo apply_filters( 'wc_payment_gateway_form_saved_payment_methods_html', $html, $this );
 	}
 
 	/**
-	 * Outputs a saved payment method from a token.
+	 * Gets saved payment method HTML from a token.
 	 * @since 2.6.0
 	 * @param  WC_Payment_Token $token Payment Token
 	 * @return string                  Generated payment method HTML
 	 */
-	public function saved_payment_method( $token ) {
+	public function get_saved_payment_method_html( $token ) {
 		$html = sprintf(
 			'<input type="radio" id="wc-%1$s-payment-token-%2$s" name="wc-%1$s-payment-token" style="width:auto;" class="wc-gateway-payment-token wc-%1$s-payment-token" value="%2$s" %3$s/>',
 			esc_attr( $this->id ),
@@ -418,10 +421,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			esc_attr( $token->get_id() )
 		);
 
-		$html .= $this->saved_payment_method_title( $token );
+		$html .= $this->get_saved_payment_method_title( $token );
 		$html .= '</label>';
 
-		return apply_filters( 'wc_payment_gateway_form_saved_payment_method_html', $html, $token, $this );
+		return apply_filters( 'woocommerce_payment_gateway_get_saved_payment_method_html', $html, $token, $this );
 	}
 
 	/**
@@ -430,15 +433,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @param  WC_Payment_Token $token Payment Token
 	 * @return string                  Generated payment method title HTML
 	 */
-	public function saved_payment_method_title( $token ) {
-		if ( 'CC' == $token->get_type() && is_callable( array( $token, 'get_card_type' ) ) ) {
-			$type = esc_html__( wc_get_credit_card_type_label( $token->get_card_type() ), 'woocommerce' );
-		} else if ( 'eCheck' === $token->get_type() ) {
-			$type = esc_html__( 'eCheck', 'woocommerce' );
-		}
-
-		$type  = apply_filters( 'wc_payment_gateway_form_saved_payment_method_title_type_html', $type, $token, $this );
-		$title = $type;
+	public function get_saved_payment_method_title( $token ) {
+		$title = $token->get_type_to_display();
 
 		if ( is_callable( array( $token, 'get_last4' ) ) ) {
 			$title .= '&nbsp;' . sprintf( esc_html__( 'ending in %s', 'woocommerce' ), $token->get_last4() );
@@ -448,7 +444,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$title .= ' ' . sprintf( esc_html__( '(expires %s)', 'woocommerce' ), $token->get_expiry_month() . '/' . substr( $token->get_expiry_year(), 2 ) );
 		}
 
-		return apply_filters( 'wc_payment_gateway_form_saved_payment_method_title_html', $title, $token, $this );
+		return apply_filters( 'woocommerce_payment_gateway_get_saved_payment_method_title', $title, $token, $this );
 	}
 
 	/**

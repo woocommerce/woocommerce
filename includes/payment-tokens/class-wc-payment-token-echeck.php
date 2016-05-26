@@ -41,6 +41,14 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	}
 
 	/**
+	 * Get type to display to user.
+	 * @return string
+	 */
+	public function get_type_to_display() {
+		return __( 'eCheck', 'woocommerce' );
+	}
+
+	/**
 	 * Returns the last four digits.
 	 * @since 2.6.0
 	 * @return string Last 4 digits

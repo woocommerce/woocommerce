@@ -64,6 +64,14 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
+	 * Get type to display to user.
+	 * @return string
+	 */
+	public function get_type_to_display() {
+		return wc_get_credit_card_type_label( $this->get_card_type() );
+	}
+
+	/**
 	 * Returns the card type (mastercard, visa, ...).
 	 * @since 2.6.0
 	 * @return string Card type
