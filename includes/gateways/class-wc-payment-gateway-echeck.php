@@ -13,22 +13,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 
 	/**
-	 * Builds our payment fields area - including tokenization fields and the actualy payment fields.
-	 * If tokenization is displayed, just the fields will be displayed.
+	 * Builds our payment fields area - including tokenization fields for logged
+	 * in users, and the actual payment fields.
 	 * @since 2.6.0
 	 */
 	public function payment_fields() {
-		$display_tokenization = $this->supports( 'tokenization' ) && is_checkout();
-
-		if ( $display_tokenization ) {
+		if ( $this->supports( 'tokenization' ) && is_checkout() && is_user_logged_in() ) {
 			$this->tokenization_script();
 			$this->saved_payment_methods();
-		}
-
-		$this->form();
-
-		if ( $display_tokenization ) {
+			$this->form();
 			$this->save_payment_method_checkbox();
+		} else {
+			$this->form();
 		}
 	}
 
