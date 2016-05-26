@@ -273,4 +273,16 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( array( 'country' => 'US-CA', 'state' => '' ), wc_format_country_state_string( 'US-CA' ) );
 	}
 
+	/**
+	 * Test wc_get_shipping_method_count()
+	 *
+	 * @since 2.6.0
+	 */
+	public function test_wc_get_shipping_method_count() {
+		// Without legacy methods.
+		$this->assertEquals( 0, wc_get_shipping_method_count( false ) );
+
+		// With legacy methods.
+		$this->assertEquals( 0, wc_get_shipping_method_count( true ) );
+	}
 }
