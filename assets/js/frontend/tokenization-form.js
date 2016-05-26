@@ -1,4 +1,3 @@
-/* global woocommerceTokenizationParams */
 ( function( $, data ) {
 	$( function() {
 		var wcTokenizationForm = (function() {
@@ -10,7 +9,7 @@
 				this.onTokenChange = function() {
 					if ( 'new' === $( this ).val() ) {
 						 $wcTokenizationForm.showForm();
-						 $wcTokenizationForm.showSaveNewCheckboxForLoggedInOnly();
+						 $wcTokenizationForm.showSaveNewCheckbox();
 					} else {
 						 $wcTokenizationForm.hideForm();
 						 $wcTokenizationForm.hideSaveNewCheckbox();
@@ -31,8 +30,8 @@
 						$( ':input.wc-gateway-payment-token:last', $target ).prop( 'checked', true );
 					}
 
-					// Don't show the "use new" radio button if we are a guest or only have one method..
-					if ( 0 === $target.data( 'count' ) || ! data.userLoggedIn ) {
+					// Don't show the "use new" radio button if we only have one method..
+					if ( 0 === $target.data( 'count' ) ) {
 						$( '.wc-payment-form-new-checkbox-wrap', $target ).hide();
 					}
 
@@ -56,14 +55,6 @@
 					$( '.wc-new-payment-method-wrap', $formWrap ).hide();
 				};
 
-				this.showSaveNewCheckboxForLoggedInOnly = function() {
-					if ( data.userLoggedIn ) {
-						$wcTokenizationForm.showSaveNewCheckbox();
-					} else {
-						$wcTokenizationForm.hideSaveNewCheckbox();
-					}
-				};
-
 				// When a radio button is changed, make sure to show/hide our new CC info area
 				$( ':input.wc-gateway-payment-token', $target ).change( this.onTokenChange );
 
@@ -85,4 +76,4 @@
 			} );
 		} );
 	});
-})( jQuery, woocommerceTokenizationParams );
+})( jQuery );

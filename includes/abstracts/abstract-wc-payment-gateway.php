@@ -360,20 +360,29 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
+	 * Core credit card form which gateways can used if needed. Deprecated - inheirt WC_Payment_Gateway_CC instead.
+	 * @param  array $args
+	 * @param  array $fields
+	 */
+	public function credit_card_form( $args = array(), $fields = array() ) {
+		_deprecated_function( 'credit_card_form', '2.6', 'WC_Payment_Gateway_CC->form' );
+		$cc_form = new WC_Payment_Gateway_CC;
+		$cc_form->id       = $this->id;
+		$cc_form->supports = $this->supports;
+		$cc_form->form();
+	}
+	
+	/**
 	 * Enqueues our tokenization script to handle some of the new form options.
 	 * @since 2.6.0
 	 */
 	public function tokenization_script() {
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		wp_enqueue_script(
 			'woocommerce-tokenization-form',
-			plugins_url(  '/assets/js/frontend/tokenization-form' . $suffix . '.js', WC_PLUGIN_FILE ),
+			plugins_url(  '/assets/js/frontend/tokenization-form' . ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min' ) . '.js', WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			WC()->version
 		);
-		wp_localize_script( 'woocommerce-tokenization-form', 'woocommerceTokenizationParams', array(
-			'userLoggedIn' => (bool) is_user_logged_in(),
-		) );
 	}
 
 	/**
@@ -476,18 +485,5 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		$html .= apply_filters( 'woocommerce_payment_gateway_form_new_method_label', $label, $this );
 		$html .= '</label>';
 		return $html;
-	}
-
-	/**
-	 * Core credit card form which gateways can used if needed. Deprecated - inheirt WC_Payment_Gateway_CC instead.
-	 * @param  array $args
-	 * @param  array $fields
-	 */
-	public function credit_card_form( $args = array(), $fields = array() ) {
-		_deprecated_function( 'credit_card_form', '2.6', 'WC_Payment_Gateway_CC->form' );
-		$cc_form = new WC_Payment_Gateway_CC;
-		$cc_form->id       = $this->id;
-		$cc_form->supports = $this->supports;
-		$cc_form->form();
 	}
 }
