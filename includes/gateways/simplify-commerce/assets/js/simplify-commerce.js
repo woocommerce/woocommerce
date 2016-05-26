@@ -5,7 +5,7 @@
 	function simplifyFormHandler() {
 		var $form = $( 'form.checkout, form#order_review, form#add_payment_method' );
 
-		if ( ( $( '#payment_method_simplify_commerce' ).is( ':checked' ) && $( '#wc-simplify_commerce-new' ).is( ':checked' ) ) || ( '1' === $( '#woocommerce_add_payment_method' ).val() ) ) {
+		if ( ( $( '#payment_method_simplify_commerce' ).is( ':checked' ) && 'new' === $( 'input[name="wc-simplify_commerce-payment-token"]:checked' ).val() ) || ( '1' === $( '#woocommerce_add_payment_method' ).val() ) ) {
 
 			if ( 0 === $( 'input.simplify-token' ).length ) {
 
@@ -20,12 +20,12 @@
 				var card           = $( '#simplify_commerce-card-number' ).val(),
 					cvc            = $( '#simplify_commerce-card-cvc' ).val(),
 					expiry         = $.payment.cardExpiryVal( $( '#simplify_commerce-card-expiry' ).val() ),
-					address1       = $form.find( '#billing_address_1' ).val(),
-					address2       = $form.find( '#billing_address_2' ).val(),
-					addressCountry = $form.find( '#billing_country' ).val(),
-					addressState   = $form.find( '#billing_state' ).val(),
-					addressCity    = $form.find( '#billing_city' ).val(),
-					addressZip     = $form.find( '#billing_postcode' ).val();
+					address1       = $form.find( '#billing_address_1' ).val() || '',
+					address2       = $form.find( '#billing_address_2' ).val() || '',
+					addressCountry = $form.find( '#billing_country' ).val() || '',
+					addressState   = $form.find( '#billing_state' ).val() || '',
+					addressCity    = $form.find( '#billing_city' ).val() || '',
+					addressZip     = $form.find( '#billing_postcode' ).val() || '';
 
 				addressZip = addressZip.replace( /-/g, '' );
 				card = card.replace( /\s/g, '' );
