@@ -390,13 +390,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 2.6.0
 	 */
 	public function saved_payment_methods() {
-		$html = '<ul id="wc-' . esc_attr( $this->id ) . '-methods" class="wc-saved-payment-methods" data-count="' . esc_attr( count( $this->get_tokens() ) ) . '">';
+		$html = '<ul class="woocommerce-SavedPaymentMethods wc-saved-payment-methods" data-count="' . esc_attr( count( $this->get_tokens() ) ) . '">';
 
 		foreach ( $this->get_tokens() as $token ) {
-			$html .= '<li>' . $this->get_saved_payment_method_html( $token ) . '</li>';
+			$html .= $this->get_saved_payment_method_option_html( $token );
 		}
 
-		$html .= '<li class="wc-payment-form-new-checkbox-wrap">' . $this->use_new_payment_method_checkbox() . '</li>';
+		$html .= $this->get_new_payment_method_option_html();
 		$html .= '</ul>';
 
 		echo apply_filters( 'wc_payment_gateway_form_saved_payment_methods_html', $html, $this );
@@ -408,65 +408,19 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @param  WC_Payment_Token $token Payment Token
 	 * @return string                  Generated payment method HTML
 	 */
-	public function get_saved_payment_method_html( $token ) {
+	public function get_saved_payment_method_option_html( $token ) {
 		$html = sprintf(
-			'<input type="radio" id="wc-%1$s-payment-token-%2$s" name="wc-%1$s-payment-token" style="width:auto;" class="wc-gateway-payment-token wc-%1$s-payment-token" value="%2$s" %3$s/>',
+			'<li class="woocommerce-SavedPaymentMethods-token">
+				<input id="wc-%1$s-payment-token-%2$s" type="radio" name="wc-%1$s-payment-token" value="%2$s" style="width:auto;" class="woocommerce-SavedPaymentMethods-tokenInput" %4$s />
+				<label for="wc-%1$s-payment-token-%2$s">%3$s</label>
+			</li>',
 			esc_attr( $this->id ),
 			esc_attr( $token->get_id() ),
+			esc_html( $token->get_display_name() ),
 			checked( $token->is_default(), true, false )
 		);
 
-		$html .= sprintf( '<label class="wc-gateway-payment-form-saved-payment-method wc-gateway-payment-token-label" for="wc-%s-payment-token-%s">',
-			esc_attr( $this->id ),
-			esc_attr( $token->get_id() )
-		);
-
-		$html .= $this->get_saved_payment_method_title( $token );
-		$html .= '</label>';
-
-		return apply_filters( 'woocommerce_payment_gateway_get_saved_payment_method_html', $html, $token, $this );
-	}
-
-	/**
-	 * Outputs a saved payment method's title based on the passed token.
-	 * @since 2.6.0
-	 * @param  WC_Payment_Token $token Payment Token
-	 * @return string                  Generated payment method title HTML
-	 */
-	public function get_saved_payment_method_title( $token ) {
-		$title = $token->get_type_to_display();
-
-		if ( is_callable( array( $token, 'get_last4' ) ) ) {
-			$title .= '&nbsp;' . sprintf( esc_html__( 'ending in %s', 'woocommerce' ), $token->get_last4() );
-		}
-
-		if ( is_callable( array( $token, 'get_expiry_month' ) ) && is_callable( array( $token, 'get_expiry_year' ) ) ) {
-			$title .= ' ' . sprintf( esc_html__( '(expires %s)', 'woocommerce' ), $token->get_expiry_month() . '/' . substr( $token->get_expiry_year(), 2 ) );
-		}
-
-		return apply_filters( 'woocommerce_payment_gateway_get_saved_payment_method_title', $title, $token, $this );
-	}
-
-	/**
-	 * Outputs a checkbox for saving a new payment method to the database.
-	 * @since 2.6.0
-	 */
-	public function save_payment_method_checkbox() {
-		$html = sprintf(
-			'<p class="form-row wc-new-payment-method-wrap" id="wc-%s-new-payment-method-wrap">',
-			esc_attr( $this->id )
-		);
-		$html .= sprintf(
-			'<input name="wc-%1$s-new-payment-method" id="wc-%1$s-new-payment-method" type="checkbox" value="true" style="width:auto;"/>',
-			esc_attr( $this->id )
-		);
-		$html .= sprintf(
-			'<label for="wc-%s-new-payment-method" style="display:inline;">%s</label>',
-			esc_attr( $this->id ),
-			esc_html__( 'Save to Account', 'woocommerce' )
-		);
-		$html .= '</p><div class="clear"></div>';
-		echo $html;
+		return apply_filters( 'woocommerce_payment_gateway_get_saved_payment_method_option_html', $html, $token, $this );
 	}
 
 	/**
@@ -474,12 +428,32 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Only displayed when a gateway supports tokenization.
 	 * @since 2.6.0
 	 */
-	public function use_new_payment_method_checkbox() {
-		$label = ( ! empty( $this->new_method_label ) ? esc_html( $this->new_method_label ) : esc_html__( 'Use a new payment method', 'woocommerce' ) );
-		$html = '<input type="radio" id="wc-' . esc_attr( $this->id ). '-new" name="wc-' . esc_attr( $this->id ) . '-payment-token" class="wc-gateway-payment-token" value="new" style="width:auto;">';
-		$html .= '<label class="wc-' . esc_attr( $this->id ) . '-payment-form-new-checkbox wc-gateway-payment-token-label" for="wc-' . esc_attr( $this->id ) . '-new">';
-		$html .= apply_filters( 'woocommerce_payment_gateway_form_new_method_label', $label, $this );
-		$html .= '</label>';
-		return $html;
+	public function get_new_payment_method_option_html() {
+		$label = apply_filters( 'woocommerce_payment_gateway_get_new_payment_method_option_html_label', $this->new_method_label ? $this->new_method_label : __( 'Use a new payment method', 'woocommerce' ), $this );
+		$html  = sprintf(
+			'<li class="woocommerce-SavedPaymentMethods-new">
+				<input id="wc-%1$s-payment-token-new" type="radio" name="wc-%1$s-payment-token" value="new" style="width:auto;" class="woocommerce-SavedPaymentMethods-tokenInput" />
+				<label for="wc-%1$s-payment-token-new">%2$s</label>
+			</li>',
+			esc_attr( $this->id ),
+			esc_html( $label )
+		);
+
+		return apply_filters( 'woocommerce_payment_gateway_get_new_payment_method_option_html', $html, $this );
+	}
+
+	/**
+	 * Outputs a checkbox for saving a new payment method to the database.
+	 * @since 2.6.0
+	 */
+	public function save_payment_method_checkbox() {
+		echo sprintf(
+			'<p class="form-row woocommerce-SavedPaymentMethods-saveNew">
+				<input id="wc-%1$s-new-payment-method" name="wc-%1$s-new-payment-method" type="checkbox" value="true" style="width:auto;" />
+				<label for="wc-%1$s-new-payment-method" style="display:inline;">%2$s</label>
+			</p>',
+			esc_attr( $this->id ),
+			esc_html__( 'Save to Account', 'woocommerce' )
+		);
 	}
 }

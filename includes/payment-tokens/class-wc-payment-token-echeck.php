@@ -44,7 +44,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * Get type to display to user.
 	 * @return string
 	 */
-	public function get_type_to_display() {
+	public function get_display_name() {
 		return __( 'eCheck', 'woocommerce' );
 	}
 

@@ -1,4 +1,4 @@
-( function( $, data ) {
+( function( $ ) {
 	$( function() {
 		var wcTokenizationForm = (function() {
 			function wcTokenizationForm( target ) {
@@ -26,17 +26,17 @@
 
 				this.onDisplay = function() {
 					// Make sure a radio button is selected if there is no is_default for this payment method..
-					if ( 0 === $( ':input.wc-gateway-payment-token:checked', $target ).length ) {
-						$( ':input.wc-gateway-payment-token:last', $target ).prop( 'checked', true );
+					if ( 0 === $( ':input.woocommerce-SavedPaymentMethods-tokenInput:checked', $target ).length ) {
+						$( ':input.woocommerce-SavedPaymentMethods-tokenInput:last', $target ).prop( 'checked', true );
 					}
 
 					// Don't show the "use new" radio button if we only have one method..
 					if ( 0 === $target.data( 'count' ) ) {
-						$( '.wc-payment-form-new-checkbox-wrap', $target ).hide();
+						$( '.woocommerce-SavedPaymentMethods-new', $target ).hide();
 					}
 
 					// Trigger change event
-					$( ':input.wc-gateway-payment-token:checked', $target ).trigger( 'change' );
+					$( ':input.woocommerce-SavedPaymentMethods-tokenInput:checked', $target ).trigger( 'change' );
 				};
 
 				this.hideForm = function() {
@@ -48,15 +48,15 @@
 				};
 
 				this.showSaveNewCheckbox = function() {
-					$( '.wc-new-payment-method-wrap', $formWrap ).show();
+					$( '.woocommerce-SavedPaymentMethods-saveNew', $formWrap ).show();
 				};
 
 				this.hideSaveNewCheckbox = function() {
-					$( '.wc-new-payment-method-wrap', $formWrap ).hide();
+					$( '.woocommerce-SavedPaymentMethods-saveNew', $formWrap ).hide();
 				};
 
 				// When a radio button is changed, make sure to show/hide our new CC info area
-				$( ':input.wc-gateway-payment-token', $target ).change( this.onTokenChange );
+				$( ':input.woocommerce-SavedPaymentMethods-tokenInput', $target ).change( this.onTokenChange );
 
 				// OR if create account is checked
 				$ ( 'input#createaccount' ).change( this.onCreateAccountChange );
@@ -69,7 +69,7 @@
 
 		$( document.body ).on( 'updated_checkout', function() {
 			// Loop over gateways with saved payment methods
-			var $saved_payment_methods = $( 'ul.wc-saved-payment-methods' );
+			var $saved_payment_methods = $( 'ul.woocommerce-SavedPaymentMethods' );
 
 			$saved_payment_methods.each( function() {
 				new wcTokenizationForm( this );
