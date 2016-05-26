@@ -1276,8 +1276,8 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 			// If the postcode is non-numeric, make it numeric.
 			if ( ! is_numeric( $min ) || ! is_numeric( $max ) ) {
 				$compare = wc_make_numeric_postcode( $compare );
-				$min     = str_pad( wc_make_numeric_postcode( $min ), strlen( $encoded_postcode ), '0' );
-				$max     = str_pad( wc_make_numeric_postcode( $max ), strlen( $encoded_postcode ), '0' );
+				$min     = str_pad( wc_make_numeric_postcode( $min ), strlen( $compare ), '0' );
+				$max     = str_pad( wc_make_numeric_postcode( $max ), strlen( $compare ), '0' );
 			}
 
 			if ( $compare >= $min && $compare <= $max ) {
