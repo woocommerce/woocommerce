@@ -106,6 +106,11 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		foreach( $post_transient_names as $transient ) {
 			$transients_to_clear[] = $transient . $post_id;
 		}
+
+		// Does this product have a parent?
+		if ( $parent_id = wp_get_post_parent_id( $post_id ) ) {
+			wc_delete_product_transients( $parent_id );
+		}
 	}
 
 	// Delete transients

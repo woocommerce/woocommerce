@@ -1035,7 +1035,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		if ( $post->post_parent > 0 || 'grouped' == $product_type || $_POST['previous_parent_id'] > 0 ) {
+		if ( $post->post_parent > 0 || 'grouped' === $product_type || $_POST['previous_parent_id'] > 0 ) {
 
 			$clear_parent_ids = array();
 
@@ -1043,7 +1043,7 @@ class WC_Meta_Box_Product_Data {
 				$clear_parent_ids[] = $post->post_parent;
 			}
 
-			if ( 'grouped' == $product_type ) {
+			if ( 'grouped' === $product_type ) {
 				$clear_parent_ids[] = $post_id;
 			}
 
