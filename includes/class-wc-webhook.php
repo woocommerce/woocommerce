@@ -155,9 +155,10 @@ class WC_Webhook {
 		} elseif ( 'order' == $this->get_resource() && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ) ) ) {
 			$should_deliver = false;
 
-		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) ) {
-			// the `woocommerce_process_shop_*` hook fires for both updates
-			// and creation so check the post creation date to determine the actual event
+		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
+			// the `woocommerce_process_shop_*` and `woocommerce_process_product_*` hooks
+			// fire for create and update of products and orders, so check the post
+			// creation date to determine the actual event
 			$resource = get_post( absint( $arg ) );
 
 			// a resource is considered created when the hook is executed within 10 seconds of the post creation date
