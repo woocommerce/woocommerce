@@ -175,7 +175,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'title' => __( 'Product Images', 'woocommerce' ),
 					'type' 	=> 'title',
-					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/' ),
+					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'https://wordpress.org/extend/plugins/regenerate-thumbnails/' ),
 					'id' 	=> 'image_options'
 				),
 

@@ -259,7 +259,7 @@ class WC_Query {
 			define( 'SHOP_IS_ON_FRONT', true );
 
 			// Get the actual WP page to avoid errors and let us use is_front_page()
-			// This is hacky but works. Awaiting http://core.trac.wordpress.org/ticket/21096
+			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096
 			global $wp_post_types;
 
 			$shop_page 	= get_post( wc_get_page_id( 'shop' ) );
@@ -454,7 +454,7 @@ class WC_Query {
 	}
 
 	/**
-	 * WP Core doens't let us change the sort direction for invidual orderby params - http://core.trac.wordpress.org/ticket/17065.
+	 * WP Core doens't let us change the sort direction for invidual orderby params - https://core.trac.wordpress.org/ticket/17065.
 	 *
 	 * This lets us sort by meta value desc, and have a second orderby param.
 	 *

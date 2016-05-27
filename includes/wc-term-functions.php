@@ -120,7 +120,7 @@ function _wc_get_product_terms_parent_usort_callback( $a, $b ) {
 /**
  * WooCommerce Dropdown categories.
  *
- * Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258.
+ * Stuck with this until a fix for https://core.trac.wordpress.org/ticket/13258.
  * We use a custom walker, just like WordPress does.
  *
  * @param int $deprecated_show_uncategorized (default: 1)

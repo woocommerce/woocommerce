@@ -2,7 +2,7 @@
   "name": "woocommerce",
   "title": "WooCommerce",
   "version": "2.6.0",
-  "homepage": "http://www.woothemes.com/woocommerce/",
+  "homepage": "https://www.woothemes.com/woocommerce/",
   "repository": {
     "type": "git",
     "url": "https://github.com/woothemes/woocommerce.git"

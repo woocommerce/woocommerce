@@ -1616,7 +1616,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			}
 		}
 
-		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( http://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
+		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
 		$product_categories = get_categories( apply_filters( 'woocommerce_product_subcategories_args', array(
 			'parent'       => $parent_id,
 			'menu_order'   => 'ASC',
@@ -1691,7 +1691,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 
 		if ( $image ) {
 			// Prevent esc_url from breaking spaces in urls for image embeds
-			// Ref: http://core.trac.wordpress.org/ticket/23605
+			// Ref: https://core.trac.wordpress.org/ticket/23605
 			$image = str_replace( ' ', '%20', $image );
 
 			echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';

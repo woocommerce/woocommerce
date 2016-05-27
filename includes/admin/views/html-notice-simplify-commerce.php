@@ -12,7 +12,7 @@ $plugin_slug = 'woocommerce-gateway-simplify-commerce';
 if ( current_user_can( 'install_plugins' ) ) {
 	$url = wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=' . $plugin_slug ), 'install-plugin_' . $plugin_slug );
 } else {
-	$url = 'http://wordpress.org/plugins/' . $plugin_slug;
+	$url = 'https://wordpress.org/plugins/' . $plugin_slug;
 }
 ?>
 <div id="message" class="updated woocommerce-message">

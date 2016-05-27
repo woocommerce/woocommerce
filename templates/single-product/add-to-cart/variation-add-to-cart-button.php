@@ -2,7 +2,7 @@
 /**
  * Single variation cart button
  *
- * @see 	http://docs.woothemes.com/document/template-structure/
+ * @see 	https://docs.woothemes.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.5.0

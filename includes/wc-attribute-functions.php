@@ -162,7 +162,7 @@ function wc_get_attribute_types() {
 
 /**
  * Check if attribute name is reserved.
- * http://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms.
+ * https://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms.
  *
  * @since  2.4.0
  * @param  string $attribute_name

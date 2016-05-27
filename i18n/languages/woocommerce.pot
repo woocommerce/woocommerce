@@ -20234,7 +20234,7 @@ msgid "Only logged in customers who have purchased this product may leave a revi
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "http://www.woothemes.com/woocommerce/"
+msgid "https://www.woothemes.com/woocommerce/"
 msgstr ""
 
 #. Description of the plugin/theme

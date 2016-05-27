@@ -102,7 +102,7 @@ class WC_Validation {
 	public static function is_GB_postcode( $to_check ) {
 
 		// Permitted letters depend upon their position in the postcode.
-		// http://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
+		// https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
 		$alpha1 = "[abcdefghijklmnoprstuwyz]"; // Character 1
 		$alpha2 = "[abcdefghklmnopqrstuvwxy]"; // Character 2
 		$alpha3 = "[abcdefghjkpstuw]";         // Character 3 == ABCDEFGHJKPSTUW

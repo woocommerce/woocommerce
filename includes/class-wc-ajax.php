@@ -2074,7 +2074,7 @@ class WC_AJAX {
 	/**
 	 * Ajax request handling for product ordering.
 	 *
-	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/).
+	 * Based on Simple Page Ordering by 10up (https://wordpress.org/extend/plugins/simple-page-ordering/).
 	 */
 	public static function product_ordering() {
 		global $wpdb;

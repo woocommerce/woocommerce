@@ -18,11 +18,11 @@
 
 <!-- generator="WordPress/3.5.1" created="2013-06-14 12:35" -->
 <rss version="2.0"
-	xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
+	xmlns:excerpt="https://wordpress.org/export/1.2/excerpt/"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
 	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
 	xmlns:dc="http://purl.org/dc/elements/1.1/"
-	xmlns:wp="http://wordpress.org/export/1.2/"
+	xmlns:wp="https://wordpress.org/export/1.2/"
 >
 
 <channel>
@@ -50,7 +50,7 @@
 	<wp:term><wp:term_id>15</wp:term_id><wp:term_taxonomy>product_cat</wp:term_taxonomy><wp:term_slug>t-shirts</wp:term_slug><wp:term_parent>clothing</wp:term_parent><wp:term_name><![CDATA[T-shirts]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>22</wp:term_id><wp:term_taxonomy>product_cat</wp:term_taxonomy><wp:term_slug>albums</wp:term_slug><wp:term_parent>music</wp:term_parent><wp:term_name><![CDATA[Albums]]></wp:term_name></wp:term>
 
-	<generator>http://wordpress.org/?v=3.5.1</generator>
+	<generator>https://wordpress.org/?v=3.5.1</generator>
 
 	<item>
 		<title>T_1_front</title>
