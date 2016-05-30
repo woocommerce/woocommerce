@@ -360,7 +360,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'reason' => array(
-					'description' => __( 'Reason for refund', 'woocommerce' ),
+					'description' => __( 'Reason for refund.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -404,7 +404,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 						),
 						'tax_class' => array(
 							'description' => __( 'Tax class of product.', 'woocommerce' ),
-							'type'        => 'integer',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
