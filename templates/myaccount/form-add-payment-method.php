@@ -20,7 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-wc_get_template( 'myaccount/navigation.php' ); ?>
+/**
+ * My Account navigation.
+ *
+ * @since 2.6.0
+ */
+do_action( 'woocommerce_account_navigation' ); ?>
 
 <div class="woocommerce-MyAccount-content">
 	<?php if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateways() ) : ?>

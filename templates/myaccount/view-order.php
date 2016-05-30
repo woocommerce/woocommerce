@@ -22,9 +22,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-wc_print_notices(); ?>
+wc_print_notices();
 
-<?php wc_get_template( 'myaccount/navigation.php' ); ?>
+/**
+ * My Account navigation.
+ *
+ * @since 2.6.0
+ */
+do_action( 'woocommerce_account_navigation' ); ?>
 
 <div class="woocommerce-MyAccount-content">
 	<p><?php

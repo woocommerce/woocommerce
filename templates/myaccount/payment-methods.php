@@ -25,9 +25,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 $saved_methods = wc_get_customer_saved_methods_list( get_current_user_id() );
 $has_methods   = (bool) $saved_methods;
 $types         = wc_get_account_payment_methods_types();
-wc_print_notices(); ?>
 
-<?php wc_get_template( 'myaccount/navigation.php' ); ?>
+wc_print_notices();
+
+/**
+ * My Account navigation.
+ *
+ * @since 2.6.0
+ */
+do_action( 'woocommerce_account_navigation' ); ?>
 
 <div class="woocommerce-MyAccount-content">
 
