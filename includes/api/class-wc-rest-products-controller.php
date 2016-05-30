@@ -2509,6 +2509,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
+		$params['slug'] = array(
+			'description'       => __( 'Limit result set to posts with a specific slug.', 'woocommerce', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		$params['status'] = array(
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),
