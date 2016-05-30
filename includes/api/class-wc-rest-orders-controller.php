@@ -151,7 +151,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'customer_user_agent'  => $order->customer_user_agent,
 			'created_via'          => $order->created_via,
 			'customer_note'        => $order->customer_note,
-			'date_completed'       => wc_rest_prepare_date_response( $order->completed_date, true ),
+			'date_completed'       => wc_rest_prepare_date_response( $order->completed_date ),
 			'date_paid'            => $order->paid_date,
 			'cart_hash'            => $order->cart_hash,
 			'line_items'           => array(),
