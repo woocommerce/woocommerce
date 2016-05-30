@@ -2091,6 +2091,16 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_account_navigation' ) ) {
+
+	/**
+	 * My Account navigation template.
+	 */
+	function woocommerce_account_navigation() {
+		wc_get_template( 'myaccount/navigation.php' );
+	}
+}
+
 if ( ! function_exists( 'woocommerce_account_orders' ) ) {
 
 	/**
