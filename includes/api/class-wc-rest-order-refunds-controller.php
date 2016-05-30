@@ -435,7 +435,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'taxes' => array(
-							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
