@@ -1316,8 +1316,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
-					'context'     => array( 'view', 'edit' ),
-					'writeonly'   => true,
+					'context'     => array( 'edit' ),
 				),
 				'transaction_id' => array(
 					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
