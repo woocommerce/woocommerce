@@ -546,11 +546,11 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
 		}
 
-		if ( ! empty( $item['product_id'] ) ) {
-			$product_id = (int) $item['product_id'];
-		} else if ( ! empty( $item['sku'] ) ) {
+		if ( ! empty( $item['sku'] ) ) {
 			$product_id = (int) wc_get_product_id_by_sku( $item['sku'] );
-		} else if ( ! empty( $item['variation_id'] ) ) {
+		} elseif ( ! empty( $item['product_id'] ) && empty( $item['variation_id'] ) ) {
+			$product_id = (int) $item['product_id'];
+		} elseif ( ! empty( $item['variation_id'] ) ) {
 			$product_id = (int) $item['variation_id'];
 		}
 
