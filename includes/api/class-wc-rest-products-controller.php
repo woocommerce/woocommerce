@@ -406,8 +406,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'virtual'               => $product->is_virtual(),
 			'downloadable'          => $product->is_downloadable(),
 			'downloads'             => $this->get_downloads( $product ),
-			'download_limit'        => (int) $product->download_limit,
-			'download_expiry'       => (int) $product->download_expiry,
+			'download_limit'        => '' !== $product->download_limit ? (int) $product->download_limit : -1,
+			'download_expiry'       => '' !== $product->download_expiry ? (int) $product->download_expiry : -1,
 			'download_type'         => $product->download_type ? $product->download_type : 'standard',
 			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
@@ -482,8 +482,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'virtual'            => $variation->is_virtual(),
 				'downloadable'       => $variation->is_downloadable(),
 				'downloads'          => $this->get_downloads( $variation ),
-				'download_limit'     => (int) $variation->download_limit,
-				'download_expiry'    => (int) $variation->download_expiry,
+				'download_limit'     => '' !== $variation->download_limit ? (int) $variation->download_limit : -1,
+				'download_expiry'    => '' !== $variation->download_expiry ? (int) $variation->download_expiry : -1,
 				'tax_status'         => $variation->get_tax_status(),
 				'tax_class'          => $variation->get_tax_class(),
 				'manage_stock'       => $variation->managing_stock(),
@@ -858,7 +858,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Default total sales.
-		add_post_meta( $product_id, 'total_sales', '0', true );
+		add_post_meta( $product->id, 'total_sales', '0', true );
 
 		// Virtual.
 		if ( isset( $request['virtual'] ) ) {
@@ -1230,12 +1230,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Download limit.
 			if ( isset( $request['download_limit'] ) ) {
-				update_post_meta( $product->id, '_download_limit', ( '' === $request['download_limit'] ) ? '' : absint( $request['download_limit'] ) );
+				update_post_meta( $product->id, '_download_limit', -1 === $request['download_limit'] ? '' : absint( $request['download_limit'] ) );
 			}
 
 			// Download expiry.
 			if ( isset( $request['download_expiry'] ) ) {
-				update_post_meta( $product->id, '_download_expiry', ( '' === $request['download_expiry'] ) ? '' : absint( $request['download_expiry'] ) );
+				update_post_meta( $product->id, '_download_expiry', -1 === $request['download_expiry'] ? '' : absint( $request['download_expiry'] ) );
 			}
 
 			// Download type.
@@ -1467,14 +1467,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 				// Download limit.
 				if ( isset( $variation['download_limit'] ) ) {
-					$download_limit = absint( $variation['download_limit'] );
-					update_post_meta( $variation_id, '_download_limit', ( ! $download_limit ) ? '' : $download_limit );
+					update_post_meta( $variation_id, '_download_limit', -1 === $variation['download_limit'] ? '' : absint( $variation['download_limit'] ) );
 				}
 
 				// Download expiry.
 				if ( isset( $variation['download_expiry'] ) ) {
-					$download_expiry = absint( $variation['download_expiry'] );
-					update_post_meta( $variation_id, '_download_expiry', ( ! $download_expiry ) ? '' : $download_expiry );
+					update_post_meta( $variation_id, '_download_expiry', -1 === $variation['download_expiry'] ? '' : absint( $variation['download_expiry'] ) );
 				}
 			} else {
 				update_post_meta( $variation_id, '_download_limit', '' );
