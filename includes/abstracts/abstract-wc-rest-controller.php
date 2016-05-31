@@ -90,6 +90,18 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		if ( ! empty( $items['create'] ) ) {
 			foreach ( $items['create'] as $item ) {
 				$_item = new WP_REST_Request( 'POST' );
+
+				// Default parameters.
+				$defaults = array();
+				$schema   = $this->get_public_item_schema();
+				foreach ( $schema['properties'] as $arg => $options ) {
+					if ( isset( $options['default'] ) ) {
+						$defaults[ $arg ] = $options['default'];
+					}
+				}
+				$_item->set_default_params( $defaults );
+
+				// Set request parameters.
 				$_item->set_body_params( $item );
 				$_response = $this->create_item( $_item );
 

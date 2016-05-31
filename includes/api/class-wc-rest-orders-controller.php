@@ -151,7 +151,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'customer_user_agent'  => $order->customer_user_agent,
 			'created_via'          => $order->created_via,
 			'customer_note'        => $order->customer_note,
-			'date_completed'       => wc_rest_prepare_date_response( $order->completed_date, true ),
+			'date_completed'       => wc_rest_prepare_date_response( $order->completed_date ),
 			'date_paid'            => $order->paid_date,
 			'cart_hash'            => $order->cart_hash,
 			'line_items'           => array(),
@@ -546,11 +546,11 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
 		}
 
-		if ( ! empty( $item['product_id'] ) ) {
-			$product_id = (int) $item['product_id'];
-		} else if ( ! empty( $item['sku'] ) ) {
+		if ( ! empty( $item['sku'] ) ) {
 			$product_id = (int) wc_get_product_id_by_sku( $item['sku'] );
-		} else if ( ! empty( $item['variation_id'] ) ) {
+		} elseif ( ! empty( $item['product_id'] ) && empty( $item['variation_id'] ) ) {
+			$product_id = (int) $item['product_id'];
+		} elseif ( ! empty( $item['variation_id'] ) ) {
 			$product_id = (int) $item['variation_id'];
 		}
 
@@ -1316,12 +1316,11 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
-					'context'     => array( 'view', 'edit' ),
-					'writeonly'   => true,
+					'context'     => array( 'edit' ),
 				),
 				'transaction_id' => array(
 					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
-					'type'        => 'boolean',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'customer_ip_address' => array(
@@ -1361,7 +1360,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'cart_hash' => array(
 					'description' => __( 'MD5 hash of cart items to ensure orders are not modified.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -1378,7 +1377,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'name' => array(
 							'description' => __( 'Product name.', 'woocommerce' ),
-							'type'        => 'integer',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
@@ -1436,7 +1435,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'taxes' => array(
-							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1557,7 +1556,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'method_id' => array(
 							'description' => __( 'Shipping method ID.', 'woocommerce' ),
-							'type'        => 'integer',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'total' => array(
@@ -1572,7 +1571,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'readonly'    => true,
 						),
 						'taxes' => array(
-							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1620,7 +1619,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'total' => array(
-							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+							'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1630,7 +1629,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'taxes' => array(
-							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,

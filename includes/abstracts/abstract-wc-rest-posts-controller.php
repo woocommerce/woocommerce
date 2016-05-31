@@ -666,12 +666,6 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			);
 		}
 
-		$params['slug'] = array(
-			'description'       => __( 'Limit result set to posts with a specific slug.', 'woocommerce', 'woocommerce' ),
-			'type'              => 'string',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
 		$params['filter'] = array(
 			'description' => __( 'Use WP Query arguments to modify the response; private query vars require appropriate authorization.', 'woocommerce' ),
 		);

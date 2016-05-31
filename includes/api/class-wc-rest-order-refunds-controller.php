@@ -66,11 +66,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
-					'email' => array(
-						'required' => true,
-					),
-				) ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -364,7 +360,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'reason' => array(
-					'description' => __( 'Reason for refund', 'woocommerce' ),
+					'description' => __( 'Reason for refund.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -408,7 +404,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 						),
 						'tax_class' => array(
 							'description' => __( 'Tax class of product.', 'woocommerce' ),
-							'type'        => 'integer',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
@@ -439,7 +435,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'taxes' => array(
-							'description' => __( 'Line total tax.', 'woocommerce' ),
+							'description' => __( 'Line taxes.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
