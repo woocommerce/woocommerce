@@ -1240,7 +1240,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Download type.
 			if ( isset( $request['download_type'] ) ) {
-				update_post_meta( $product->id, '_download_type', wc_clean( $request['download_type'] ) );
+				update_post_meta( $product->id, '_download_type', 'standard' === $request['download_type'] ? '' : wc_clean( $request['download_type'] ) );
 			}
 		}
 
