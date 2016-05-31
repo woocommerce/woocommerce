@@ -1857,13 +1857,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'download_limit' => array(
 					'description' => __( 'Amount of times the product can be downloaded.', 'woocommerce' ),
 					'type'        => 'integer',
-					'default'     => null,
+					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
 					'description' => __( 'Number of days that the customer has up to be able to download the product.', 'woocommerce' ),
 					'type'        => 'integer',
-					'default'     => null,
+					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_type' => array(
