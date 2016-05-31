@@ -445,7 +445,7 @@ class WC_Checkout {
 					$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[ $key ] );
 
 					// Validation: Required fields
-					if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) {
+					if ( isset( $field['required'] ) && $field['required'] && ( ! isset( $this->posted[ $key ] ) || "" === $this->posted[ $key ] ) ) {
 						switch ( $fieldset_key ) {
 							case 'shipping' :
 								$field_label = sprintf( _x( 'Shipping %s', 'Shipping FIELDNAME', 'woocommerce' ), $field['label'] );
