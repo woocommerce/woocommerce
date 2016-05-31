@@ -16,7 +16,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 */
 	public function test_cart_get_discounted_price() {
 		global $wpdb;
-		
+
 		// We need this to have the calculate_totals() method calculate totals
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
 			define( 'WOOCOMMERCE_CHECKOUT', true );
@@ -480,7 +480,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 */
 	public function test_cart_fee() {
 		// Create product
-		$product =WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 		update_post_meta( $product->id, '_price', '10' );
 		update_post_meta( $product->id, '_regular_price', '10' );
 

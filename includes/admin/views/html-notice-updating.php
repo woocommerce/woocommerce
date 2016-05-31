@@ -9,5 +9,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div id="message" class="updated woocommerce-message wc-connect">
-	<p><?php _e( '<strong>WooCommerce Data Updating</strong> &#8211; Your database is being updated in the background.', 'woocommerce' ); ?></p>
+	<p><strong><?php _e( 'WooCommerce Data Update', 'woocommerce' ); ?></strong> &#8211; <?php _e( 'Your database is being updated in the background.', 'woocommerce' ); ?></p>
 </div>

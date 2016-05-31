@@ -620,7 +620,7 @@ class WC_Meta_Box_Product_Data {
 				<div id="message" class="inline notice woocommerce-message">
 					<p><?php _e( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
 					<p>
-						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
+						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
 					</p>
 				</div>
 
@@ -1035,7 +1035,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		if ( $post->post_parent > 0 || 'grouped' == $product_type || $_POST['previous_parent_id'] > 0 ) {
+		if ( $post->post_parent > 0 || 'grouped' === $product_type || $_POST['previous_parent_id'] > 0 ) {
 
 			$clear_parent_ids = array();
 
@@ -1043,7 +1043,7 @@ class WC_Meta_Box_Product_Data {
 				$clear_parent_ids[] = $post->post_parent;
 			}
 
-			if ( 'grouped' == $product_type ) {
+			if ( 'grouped' === $product_type ) {
 				$clear_parent_ids[] = $post_id;
 			}
 
@@ -1388,17 +1388,17 @@ class WC_Meta_Box_Product_Data {
 				// Stock handling
 				update_post_meta( $variation_id, '_manage_stock', $manage_stock );
 
-				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
-				if ( ! empty( $variable_stock_status[ $i ] ) ) {
-					wc_update_product_stock_status( $variation_id, $variable_stock_status[ $i ] );
-				}
-
 				if ( 'yes' === $manage_stock ) {
 					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
 					delete_post_meta( $variation_id, '_stock' );
+				}
+
+				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
+				if ( ! empty( $variable_stock_status[ $i ] ) ) {
+					wc_update_product_stock_status( $variation_id, $variable_stock_status[ $i ] );
 				}
 
 				// Price handling

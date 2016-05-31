@@ -147,20 +147,21 @@ function wc_products_rss_feed() {
 
 	} elseif ( is_tax( 'product_cat' ) ) {
 
-		$term = get_term_by('slug', esc_attr( get_query_var('product_cat') ), 'product_cat');
+		$term = get_term_by( 'slug', esc_attr( get_query_var('product_cat') ), 'product_cat' );
 
-		$feed = add_query_arg('product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ));
-
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . esc_attr( sprintf( __( 'New products added to %s', 'woocommerce' ), $term->name ) ) . '" href="' . esc_url( $feed ) . '" />';
+		if ( $term ) {
+			$feed = add_query_arg( 'product_cat', $term->slug, get_post_type_archive_feed_link( 'product' ) );
+			echo '<link rel="alternate" type="application/rss+xml"  title="' . esc_attr( sprintf( __( 'New products added to %s', 'woocommerce' ), $term->name ) ) . '" href="' . esc_url( $feed ) . '" />';
+		}
 
 	} elseif ( is_tax( 'product_tag' ) ) {
 
 		$term = get_term_by('slug', esc_attr( get_query_var('product_tag') ), 'product_tag');
 
-		$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ));
-
-		echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_url( $feed ) . '" />';
-
+		if ( $term ) {
+			$feed = add_query_arg('product_tag', $term->slug, get_post_type_archive_feed_link( 'product' ));
+			echo '<link rel="alternate" type="application/rss+xml"  title="' . sprintf(__( 'New products tagged %s', 'woocommerce' ), urlencode($term->name)) . '" href="' . esc_url( $feed ) . '" />';
+		}
 	}
 }
 
@@ -728,16 +729,16 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'shop_catalog', $deprecated1 = 0, $deprecated2 = 0 ) {
 		global $post;
-		$size = apply_filters( 'single_product_archive_thumbnail_size', 'shop_catalog' );
+		$image_size = apply_filters( 'single_product_archive_thumbnail_size', $size );
 
 		if ( has_post_thumbnail() ) {
 			$props = wc_get_product_attachment_props( get_post_thumbnail_id(), $post );
-			return get_the_post_thumbnail( $post->ID, $size, array(
+			return get_the_post_thumbnail( $post->ID, $image_size, array(
 				'title'	 => $props['title'],
 				'alt'    => $props['alt'],
 			) );
 		} elseif ( wc_placeholder_img_src() ) {
-			return wc_placeholder_img( $size );
+			return wc_placeholder_img( $image_size );
 		}
 	}
 }
@@ -1616,7 +1617,7 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			}
 		}
 
-		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( http://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
+		// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work
 		$product_categories = get_categories( apply_filters( 'woocommerce_product_subcategories_args', array(
 			'parent'       => $parent_id,
 			'menu_order'   => 'ASC',
@@ -1691,7 +1692,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 
 		if ( $image ) {
 			// Prevent esc_url from breaking spaces in urls for image embeds
-			// Ref: http://core.trac.wordpress.org/ticket/23605
+			// Ref: https://core.trac.wordpress.org/ticket/23605
 			$image = str_replace( ' ', '%20', $image );
 
 			echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
@@ -2088,6 +2089,16 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$html .= '</select>';
 
 		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html, $args );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_navigation' ) ) {
+
+	/**
+	 * My Account navigation template.
+	 */
+	function woocommerce_account_navigation() {
+		wc_get_template( 'myaccount/navigation.php' );
 	}
 }
 

@@ -100,6 +100,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	/**
+	 * Get type to display to user.
+	 * @return string
+	 */
+	public function get_display_name() {
+		return $this->get_type();
+	}
+
+	/**
 	 * Returns the user ID associated with the token or false if this token is not associated.
 	 * @since 2.6.0
 	 * @return int User ID if this token is associated with a user or 0 if no user is associated

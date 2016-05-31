@@ -13,22 +13,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 
 	/**
-	 * Builds our payment fields area - including tokenization fields and the actualy payment fields.
-	 * If tokenization is displayed, just the fields will be displayed.
+	 * Builds our payment fields area - including tokenization fields for logged
+	 * in users, and the actual payment fields.
 	 * @since 2.6.0
 	 */
 	public function payment_fields() {
-		$display_tokenization = $this->supports( 'tokenization' ) && is_checkout();
-
-		if ( $display_tokenization ) {
+		if ( $this->supports( 'tokenization' ) && is_checkout() && is_user_logged_in() ) {
 			$this->tokenization_script();
 			$this->saved_payment_methods();
-		}
-
-		$this->form();
-
-		if ( $display_tokenization ) {
+			$this->form();
 			$this->save_payment_method_checkbox();
+		} else {
+			$this->form();
 		}
 	}
 
@@ -53,7 +49,7 @@ class WC_Payment_Gateway_eCheck extends WC_Payment_Gateway {
 		$fields = wp_parse_args( $fields, apply_filters( 'woocommerce_echeck_form_fields', $default_fields, $this->id ) );
 		?>
 
-		<fieldset id="<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-echeck-form'>
+		<fieldset id="<?php echo esc_attr( $this->id ); ?>-cc-form" class='wc-echeck-form wc-payment-form'>
 			<?php do_action( 'woocommerce_echeck_form_start', $this->id ); ?>
 			<?php
 				foreach ( $fields as $field ) {

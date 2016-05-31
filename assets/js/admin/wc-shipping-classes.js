@@ -155,6 +155,7 @@
 
 					model.logChanges( changes );
 					view.renderRow( newRow );
+					$( '.wc-shipping-classes-blank-state' ).remove();
 				},
 				onEditRow: function( event ) {
 					event.preventDefault();
@@ -166,7 +167,6 @@
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						row     = $( this ).closest('tr'),
 						classes = _.indexBy( model.get( 'classes' ), 'term_id' ),
 						changes = {},
 						term_id = $( this ).closest('tr').data('id');
@@ -180,7 +180,7 @@
 						model.logChanges( changes );
 					}
 
-					row.remove();
+					view.render();
 				},
 				onCancelEditRow: function( event ) {
 					var view    = event.data.view,

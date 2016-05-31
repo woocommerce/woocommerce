@@ -196,7 +196,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function zone_methods_screen( $zone_id ) {
 		$wc_shipping      = WC_Shipping      ::instance();
 		$zone             = WC_Shipping_Zones::get_zone( $zone_id );
-		$shipping_methods = $wc_shipping ->get_shipping_methods();
+		$shipping_methods = $wc_shipping->get_shipping_methods();
 
 		if ( ! $zone ) {
 			wp_die( __( 'Zone does not exist!', 'woocommerce' ) );
@@ -228,7 +228,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		$allowed_countries = WC()->countries->get_allowed_countries();
 		$continents        = WC()->countries->get_continents();
-		$method_count      = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+		$method_count      = wc_get_shipping_method_count();
 
 		wp_localize_script( 'wc-shipping-zones', 'shippingZonesLocalizeScript', array(
 			'zones'         => WC_Shipping_Zones::get_zones(),
@@ -241,7 +241,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'strings'       => array(
 				'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 				'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
-				'default_zone_name'       => __( 'Zone', 'woocommerce' ),
 			),
 		) );
 		wp_enqueue_script( 'wc-shipping-zones' );

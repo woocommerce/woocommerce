@@ -42,8 +42,8 @@ class WC_Admin_Taxonomies {
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
 		if ( $attribute_taxonomies ) {
-			foreach ( array_keys( $attribute_taxonomies ) as $attribute ) {
-				add_action( $attribute . '_pre_add_form', array( $this, 'product_attribute_description' ) );
+			foreach ( $attribute_taxonomies as $attribute ) {
+				add_action( 'pa_' . $attribute->attribute_name . '_pre_add_form', array( $this, 'product_attribute_description' ) );
 			}
 		}
 
@@ -340,7 +340,7 @@ class WC_Admin_Taxonomies {
 			}
 
 			// Prevent esc_url from breaking spaces in urls for image embeds
-			// Ref: http://core.trac.wordpress.org/ticket/23605
+			// Ref: https://core.trac.wordpress.org/ticket/23605
 			$image = str_replace( ' ', '%20', $image );
 
 			$columns .= '<img src="' . esc_url( $image ) . '" alt="' . esc_attr__( 'Thumbnail', 'woocommerce' ) . '" class="wp-post-image" height="48" width="48" />';

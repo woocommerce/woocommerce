@@ -295,7 +295,7 @@ global $wpdb;
 			$posting['wp_remote_get']['name'] = __( 'Remote Get', 'woocommerce');
 			$posting['wp_remote_get']['help'] = wc_help_tip( __( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) );
 
-			$response = wp_safe_remote_get( 'http://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+			$response = wp_safe_remote_get( 'https://www.woothemes.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
 
 			if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 ) {
 				$posting['wp_remote_get']['success'] = true;
@@ -375,7 +375,7 @@ global $wpdb;
 			if ( in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ) ) {
 				?>
 				<tr>
-					<td data-export-label="PHP Post Max Size"><?php _e( 'MaxMind GeoIP Database', 'woocommerce' ); ?>:</td>
+					<td data-export-label="MaxMind GeoIP Database"><?php _e( 'MaxMind GeoIP Database', 'woocommerce' ); ?>:</td>
 					<td class="help"><?php echo wc_help_tip( __( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); ?></td>
 					<td><?php
 						if ( file_exists( WC_Geolocation::get_local_database_path() ) ) {

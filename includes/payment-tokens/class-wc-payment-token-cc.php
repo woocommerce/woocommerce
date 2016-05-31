@@ -64,6 +64,17 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
+	 * Get type to display to user.
+	 * @return string
+	 */
+	public function get_display_name() {
+		$display = wc_get_credit_card_type_label( $this->get_card_type() );
+		$display .= '&nbsp;' . sprintf( __( 'ending in %s', 'woocommerce' ), $this->get_last4() );
+		$display .= ' ' . sprintf( __( '(expires %s)', 'woocommerce' ), $this->get_expiry_month() . '/' . substr( $this->get_expiry_year(), 2 ) );
+		return $display;
+	}
+
+	/**
 	 * Returns the card type (mastercard, visa, ...).
 	 * @since 2.6.0
 	 * @return string Card type

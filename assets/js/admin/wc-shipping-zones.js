@@ -239,7 +239,6 @@
 						size    = _.size( zones ),
 						newRow  = _.extend( {}, data.default_zone, {
 							zone_id  : 'new-' + size + '-' + Date.now(),
-							zone_name: data.strings.default_zone_name,
 							editing  : true
 						} );
 

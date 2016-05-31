@@ -915,7 +915,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Product sorting link.
 	 *
-	 * Based on Simple Page Ordering by 10up (http://wordpress.org/extend/plugins/simple-page-ordering/).
+	 * Based on Simple Page Ordering by 10up (https://wordpress.org/extend/plugins/simple-page-ordering/).
 	 *
 	 * @param  array $views
 	 * @return array
@@ -1403,7 +1403,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Add extra bulk action options to mark orders as complete or processing.
 	 *
-	 * Using Javascript until WordPress core fixes: http://core.trac.wordpress.org/ticket/16031.
+	 * Using Javascript until WordPress core fixes: https://core.trac.wordpress.org/ticket/16031.
 	 */
 	public function bulk_admin_footer() {
 		global $post_type;

@@ -24,6 +24,8 @@ class WC_Helper_Shipping {
 
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
 		update_option( 'woocommerce_flat_rate', array() );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping->unregister_shipping_methods();
 	}
 
 	/**
@@ -34,5 +36,7 @@ class WC_Helper_Shipping {
 	public static function delete_simple_flat_rate() {
 		delete_option( 'woocommerce_flat_rate_settings' );
 		delete_option( 'woocommerce_flat_rate' );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping->unregister_shipping_methods();
 	}
 }

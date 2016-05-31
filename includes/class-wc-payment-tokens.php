@@ -17,6 +17,62 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Payment_Tokens {
 
 	/**
+	 * Gets valid tokens from the database based on user defined criteria.
+	 * @param  array $args
+	 * @return array
+	 */
+	public static function get_tokens( $args ) {
+		global $wpdb;
+
+		$args = wp_parse_args( $args, array(
+			'token_id'   => '',
+			'user_id'    => '',
+			'gateway_id' => '',
+			'type'       => '',
+		) );
+
+		$sql   = "SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens";
+		$where = array( '1=1' );
+
+		if ( $args['token_id'] ) {
+			$token_ids = array_map( 'absint', is_array( $args['token_id'] ) ? $args['token_id'] : array( $args['token_id'] ) );
+			$where[]   = "token_id IN ('" . implode( "','", array_map( 'esc_sql', $token_ids ) ) . "')";
+		}
+
+		if ( $args['user_id'] ) {
+			$where[] = 'user_id = ' . absint( $args['user_id'] );
+		}
+
+		if ( $args['gateway_id'] ) {
+			$gateway_ids = array( $args['gateway_id'] );
+		} else {
+			$gateways    = WC_Payment_Gateways::instance();
+			$gateway_ids = $gateways->get_payment_gateway_ids();
+		}
+
+		$gateway_ids[] = '';
+		$where[]       = "gateway_id IN ('" . implode( "','", array_map( 'esc_sql', $gateway_ids ) ) . "')";
+
+		if ( $args['type'] ) {
+			$where[] = 'type = ' . esc_sql( $args['type'] );
+		}
+
+		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) );
+		$tokens        = array();
+
+		if ( ! empty( $token_results ) ) {
+			foreach ( $token_results as $token_result ) {
+				$_token = self::get( $token_result->token_id, $token_result );
+				if ( ! empty( $_token ) ) {
+					$tokens[ $token_result->token_id ] = $_token;
+				}
+			}
+		}
+
+		return $tokens;
+	}
+
+	/**
 	 * Returns an array of payment token objects associated with the passed customer ID.
 	 * @since 2.6.0
 	 * @param  int    $customer_id  Customer ID
@@ -28,27 +84,12 @@ class WC_Payment_Tokens {
 			return array();
 		}
 
-		global $wpdb;
-
-		$token_results = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE user_id = %d",
-			$customer_id
+		$tokens = self::get_tokens( array(
+			'user_id'    => $customer_id,
+			'gateway_id' => $gateway_id
 		) );
 
-		$tokens = array();
-
-		if ( ! empty( $token_results ) ) {
-			foreach ( $token_results as $token_result ) {
-				if ( empty( $gateway_id ) || $gateway_id === $token_result->gateway_id ) {
-					$_token = self::get( $token_result->token_id, $token_result );
-					if ( ! empty( $_token ) ) {
-						$tokens[ $token_result->token_id ] = $_token;
-					}
-				}
-			}
-		}
-
-		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id );
+		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id, $gateway_id );
 	}
 
 	/**
@@ -90,28 +131,13 @@ class WC_Payment_Tokens {
 		}
 
 		$token_ids = get_post_meta( $order_id, '_payment_tokens', true );
-		if ( empty ( $token_ids ) ) {
+		if ( empty( $token_ids ) ) {
 			return array();
 		}
 
-		global $wpdb;
-
-		$token_ids_as_string = implode( ',', array_map( 'intval', $token_ids ) );
-		$token_results = $wpdb->get_results(
-			"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id IN ( {$token_ids_as_string} )"
-		);
-
-		if ( empty( $token_results ) ) {
-			return array();
-		}
-
-		$tokens = array();
-		foreach ( $token_results as $token_result ) {
-			$_token = self::get( $token_result->token_id, $token_result );
-			if ( ! empty( $_token ) ) {
-				$tokens[ $token_result->token_id ] = $_token;
-			}
-		}
+		$tokens = self::get_tokens( array(
+			'token_id' => $token_ids
+		) );
 
 		return apply_filters( 'woocommerce_get_order_payment_tokens', $tokens, $order_id );
 	}
@@ -178,6 +204,8 @@ class WC_Payment_Tokens {
 					array( 'is_default' => 1 ),
 					array( 'token_id' => $token->get_id(),
 				) );
+
+				do_action( 'woocommerce_payment_token_set_default', $token_id, $token );
 			} else {
 				$token->set_default( false );
 				$wpdb->update(
@@ -187,7 +215,6 @@ class WC_Payment_Tokens {
 				) );
 			}
 		}
-		do_action( 'woocommerce_payment_token_set_default', $token_id );
 	}
 
 	/**

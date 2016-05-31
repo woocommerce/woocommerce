@@ -1147,7 +1147,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				// Stock quantity.
 				if ( isset( $request['stock_quantity'] ) ) {
 					wc_update_product_stock( $product->id, wc_stock_amount( $request['stock_quantity'] ) );
-				} else if ( isset( $request['inventory_delta'] ) ) {
+				} elseif ( isset( $request['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( get_post_meta( $product->id, '_stock', true ) );
 					$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
 
@@ -1408,7 +1408,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 				if ( isset( $variation['stock_quantity'] ) ) {
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variation['stock_quantity'] ) );
-				}  else if ( isset( $request['inventory_delta'] ) ) {
+				}  elseif ( isset( $request['inventory_delta'] ) ) {
 					$stock_quantity  = wc_stock_amount( get_post_meta( $variation_id, '_stock', true ) );
 					$stock_quantity += wc_stock_amount( $request['inventory_delta'] );
 
@@ -2509,6 +2509,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
+		$params['slug'] = array(
+			'description'       => __( 'Limit result set to posts with a specific slug.', 'woocommerce', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		$params['status'] = array(
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),

@@ -1276,8 +1276,8 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 			// If the postcode is non-numeric, make it numeric.
 			if ( ! is_numeric( $min ) || ! is_numeric( $max ) ) {
 				$compare = wc_make_numeric_postcode( $compare );
-				$min     = str_pad( wc_make_numeric_postcode( $min ), strlen( $encoded_postcode ), '0' );
-				$max     = str_pad( wc_make_numeric_postcode( $max ), strlen( $encoded_postcode ), '0' );
+				$min     = str_pad( wc_make_numeric_postcode( $min ), strlen( $compare ), '0' );
+				$max     = str_pad( wc_make_numeric_postcode( $max ), strlen( $compare ), '0' );
 			}
 
 			if ( $compare >= $min && $compare <= $max ) {
@@ -1291,4 +1291,38 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 	}
 
 	return $matches;
+}
+
+/**
+ * Gets number of shipping methods currently enabled. Used to identify if
+ * shipping is configured.
+ *
+ * @since  2.6.0
+ * @param  bool $include_legacy Count legacy shipping methods too.
+ * @return int
+ */
+function wc_get_shipping_method_count( $include_legacy = false ) {
+	global $wpdb;
+
+	$transient_name = 'wc_shipping_method_count_' . ( $include_legacy ? 1 : 0 ) . '_' . WC_Cache_Helper::get_transient_version( 'shipping' );
+	$method_count   = get_transient( $transient_name );
+
+	if ( false === $method_count ) {
+		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+
+		if ( $include_legacy ) {
+			// Count activated methods that don't support shipping zones.
+			$methods = WC()->shipping->get_shipping_methods();
+
+			foreach ( $methods as $method ) {
+				if ( isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) ) {
+					$method_count++;
+				}
+			}
+		}
+
+		set_transient( $transient_name, $method_count, DAY_IN_SECONDS * 30 );
+	}
+
+	return absint( $method_count );
 }

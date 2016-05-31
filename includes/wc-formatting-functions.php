@@ -450,9 +450,9 @@ function wc_time_format() {
 
 /**
  * WooCommerce Timezone - helper to retrieve the timezone string for a site until.
- * a WP core method exists (see http://core.trac.wordpress.org/ticket/24730).
+ * a WP core method exists (see https://core.trac.wordpress.org/ticket/24730).
  *
- * Adapted from http://www.php.net/manual/en/function.timezone-name-from-abbr.php#89155.
+ * Adapted from https://secure.php.net/manual/en/function.timezone-name-from-abbr.php#89155.
  *
  * @since 2.1
  * @return string a valid PHP timezone string for the site

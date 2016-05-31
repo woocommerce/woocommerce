@@ -140,7 +140,7 @@ class WC_Admin_Setup_Wizard {
 	public function setup_wizard_header() {
 		?>
 		<!DOCTYPE html>
-		<html xmlns="http://www.w3.org/1999/xhtml" <?php language_attributes(); ?>>
+		<html <?php language_attributes(); ?>>
 		<head>
 			<meta name="viewport" content="width=device-width" />
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -745,7 +745,7 @@ class WC_Admin_Setup_Wizard {
 		$this->wc_setup_ready_actions();
 		shuffle( $this->tweets );
 		?>
-		<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
+		<a href="https://twitter.com/share" class="twitter-share-button" data-url="https://www.woothemes.com/woocommerce/" data-text="<?php echo esc_attr( $this->tweets[0] ); ?>" data-via="WooThemes" data-size="large">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
 		<h1><?php _e( 'Your Store is Ready!', 'woocommerce' ); ?></h1>

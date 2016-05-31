@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     http://docs.woothemes.com/document/template-structure/
+ * @see     https://docs.woothemes.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.6.0
@@ -24,9 +24,17 @@ $page_title = ( $load_address === 'billing' ) ? __( 'Billing Address', 'woocomme
 
 wc_print_notices();
 
-wc_get_template( 'myaccount/navigation.php' ); ?>
+/**
+ * My Account navigation.
+ *
+ * @since 2.6.0
+ */
+do_action( 'woocommerce_account_navigation' ); ?>
 
 <div class="woocommerce-MyAccount-content">
+
+	<?php do_action( 'woocommerce_before_edit_account_address_form' ); ?>
+
 	<?php if ( ! $load_address ) : ?>
 		<?php wc_get_template( 'myaccount/my-address.php' ); ?>
 	<?php else : ?>
@@ -54,4 +62,6 @@ wc_get_template( 'myaccount/navigation.php' ); ?>
 		</form>
 
 	<?php endif; ?>
+
+	<?php do_action( 'woocommerce_after_edit_account_address_form' ); ?>
 </div>

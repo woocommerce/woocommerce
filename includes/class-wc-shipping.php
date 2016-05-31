@@ -169,7 +169,7 @@ class WC_Shipping {
 	 * Unregister shipping methods.
 	 */
 	public function unregister_shipping_methods() {
-		$this->shipping_methods = array();
+		$this->shipping_methods = null;
 	}
 
 	/**

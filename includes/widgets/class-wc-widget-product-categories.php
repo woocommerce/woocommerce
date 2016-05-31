@@ -207,7 +207,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			);
 			$dropdown_args = wp_parse_args( $dropdown_args, $dropdown_defaults );
 
-			// Stuck with this until a fix for http://core.trac.wordpress.org/ticket/13258
+			// Stuck with this until a fix for https://core.trac.wordpress.org/ticket/13258
 			wc_product_dropdown_categories( apply_filters( 'woocommerce_product_categories_widget_dropdown_args', $dropdown_args ) );
 
 			wc_enqueue_js( "

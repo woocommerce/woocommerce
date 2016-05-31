@@ -520,7 +520,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'edit' ),
-					'writeonly'   => true,
 				),
 				'date_created' => array(
 					'description' => __( "The date the webhook was created, in the site's timezone.", 'woocommerce' ),
