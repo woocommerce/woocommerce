@@ -120,12 +120,12 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	}
 
 	/**
-	 * Set the expiration month for the card (MM format).
+	 * Set the expiration month for the card (formats into MM format).
 	 * @since 2.6.0
 	 * @param string $month
 	 */
 	public function set_expiry_month( $month ) {
-		$this->add_meta_data( 'expiry_month', $month, true );
+		$this->add_meta_data( 'expiry_month', str_pad( $month, 2, '0', STR_PAD_LEFT ), true );
 	}
 
 	/**
