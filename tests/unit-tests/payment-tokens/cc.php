@@ -41,7 +41,7 @@ class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $token->validate() );
 
-		$token->set_expiry_month( '8' );
+		$token->set_expiry_month( '888' );
 		$this->assertFalse( $token->validate() );
 	}
 
