@@ -1215,7 +1215,7 @@ if ( ! function_exists( 'woocommerce_review_display_comment_text' ) ) {
 	 * @return void
 	 */
 	function woocommerce_review_display_comment_text() {
-		echo '<div itemprop="description" class="description">' . comment_text() . '</div>';
+		echo '<div itemprop="description" class="description">' . get_comment_text() . '</div>';
 	}
 }
 
