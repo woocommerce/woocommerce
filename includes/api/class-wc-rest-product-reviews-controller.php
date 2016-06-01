@@ -152,13 +152,13 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 */
 	public function prepare_item_for_response( $review, $request ) {
 		$data = array(
-			'id'             => (int) $review->comment_ID,
-			'date_created'   => wc_rest_prepare_date_response( $review->comment_date_gmt ),
-			'review'         => $review->comment_content,
-			'rating'         => (int) get_comment_meta( $review->comment_ID, 'rating', true ),
-			'reviewer_name'  => $review->comment_author,
-			'reviewer_email' => $review->comment_author_email,
-			'verified'       => wc_review_is_from_verified_owner( $review->comment_ID ),
+			'id'           => (int) $review->comment_ID,
+			'date_created' => wc_rest_prepare_date_response( $review->comment_date_gmt ),
+			'review'       => $review->comment_content,
+			'rating'       => (int) get_comment_meta( $review->comment_ID, 'rating', true ),
+			'name'         => $review->comment_author,
+			'email'        => $review->comment_author_email,
+			'verified'     => wc_review_is_from_verified_owner( $review->comment_ID ),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -234,13 +234,13 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'reviewer_name' => array(
+				'name' => array(
 					'description' => __( 'Reviewer name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'reviewer_email' => array(
+				'email' => array(
 					'description' => __( 'Reviewer email.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
