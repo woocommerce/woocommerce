@@ -37,6 +37,13 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	protected $rest_base = 'orders/(?P<order_id>[\d]+)/notes';
 
 	/**
+	 * Post type.
+	 *
+	 * @var string
+	 */
+	protected $post_type = 'shop_order';
+
+	/**
 	 * Register the routes for order notes.
 	 */
 	public function register_routes() {
@@ -91,7 +98,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( 'shop_order', 'read' ) ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -105,7 +112,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	 * @return boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( 'shop_order', 'create' ) ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -121,7 +128,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	public function get_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['order_id'] );
 
-		if ( $post && ! wc_rest_check_post_permissions( 'shop_order', 'read', $post->ID ) ) {
+		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'read', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -137,7 +144,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	public function delete_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['order_id'] );
 
-		if ( $post && ! wc_rest_check_post_permissions( 'shop_order', 'delete', $post->ID ) ) {
+		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -154,8 +161,8 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$id    = (int) $request['id'];
 		$order = get_post( (int) $request['order_id'] );
 
-		if ( empty( $order->post_type ) || 'shop_order' !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
+			return new WP_Error( 'woocommerce_rest_{$this->post_type}_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$args = array(
@@ -193,7 +200,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 
 		$order = get_post( (int) $request['order_id'] );
 
-		if ( empty( $order->post_type ) || 'shop_order' !== $order->post_type ) {
+		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
 			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -237,7 +244,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$id    = (int) $request['id'];
 		$order = get_post( (int) $request['order_id'] );
 
-		if ( empty( $order->post_type ) || 'shop_order' !== $order->post_type ) {
+		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
 			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
@@ -270,7 +277,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 
 		$order = get_post( (int) $request['order_id'] );
 
-		if ( empty( $order->post_type ) || 'shop_order' !== $order->post_type ) {
+		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
 			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
