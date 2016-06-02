@@ -303,9 +303,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		if ( $product->is_type( 'variable' ) ) {
 			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
+				$is_taxonomy = 0 === strpos( $key, 'pa_' );
+
 				$default[] = array(
-					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $key ) ),
-					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ),
+					'id'     => $is_taxonomy ? wc_attribute_taxonomy_id_by_name( $key ) : 0,
+					'name'   => str_replace( 'pa_', '', $key ),
 					'option' => $value,
 				);
 			}
@@ -327,9 +329,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			// Variation attributes.
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
-				$attributes[] = array(
-					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $attribute_name ), $product ),
-					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ),
+				$is_taxonomy     = 0 === strpos( $attribute_name, 'attribute_pa_' );
+				$_attribute_name = str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) );
+				$attributes[]    = array(
+					'id'     => $is_taxonomy ? wc_attribute_taxonomy_id_by_name( $_attribute_name ) : 0,
+					'name'   => $_attribute_name,
 					'option' => $attribute,
 				);
 			}
@@ -343,8 +347,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				}
 
 				$attributes[] = array(
-					'name'      => wc_attribute_label( $attribute['name'], $product ),
-					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
+					'id'        => $attribute['is_taxonomy'] ? wc_attribute_taxonomy_id_by_name( $attribute['name'] ) : 0,
+					'name'      => str_replace( 'pa_', '', $attribute['name'] ),
 					'position'  => (int) $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
@@ -652,27 +656,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Get attribute taxonomy by slug.
-	 *
-	 * @param string $slug
-	 * @return string|null
-	 */
-	private function get_attribute_taxonomy_by_slug( $slug ) {
-		$taxonomy   = null;
-		$taxonomies = wc_get_attribute_taxonomies();
-
-		foreach ( $taxonomies as $key => $tax ) {
-			if ( $slug === $tax->attribute_name ) {
-				$taxonomy = 'pa_' . $tax->attribute_name;
-
-				break;
-			}
-		}
-
-		return $taxonomy;
-	}
-
-	/**
 	 * Save product images.
 	 *
 	 * @param WC_Product $product
@@ -919,25 +902,22 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$attributes = array();
 
 			foreach ( $request['attributes'] as $attribute ) {
-				$is_taxonomy = 0;
-				$taxonomy    = 0;
+				$attribute_id   = 0;
+				$attribute_name = '';
 
-				if ( ! isset( $attribute['name'] ) ) {
+				// Check ID for global attributes or name for product attributes.
+				if ( ! empty( $attribute['id'] ) ) {
+					$attribute_id   = absint( $attribute['id'] );
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				} elseif ( ! empty( $attribute['name'] ) ) {
+					$attribute_name = wc_clean( $attribute['name'] );
+				}
+
+				if ( ! $attribute_id && ! $attribute_name ) {
 					continue;
 				}
 
-				$attribute_slug = sanitize_title( $attribute['name'] );
-
-				if ( isset( $attribute['slug'] ) ) {
-					$taxonomy       = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
-					$attribute_slug = sanitize_title( $attribute['slug'] );
-				}
-
-				if ( $taxonomy ) {
-					$is_taxonomy = 1;
-				}
-
-				if ( $is_taxonomy ) {
+				if ( $attribute_id ) {
 
 					if ( isset( $attribute['options'] ) ) {
 						$options = $attribute['options'];
@@ -954,19 +934,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					}
 
 					// Update post terms.
-					if ( taxonomy_exists( $taxonomy ) ) {
-						wp_set_object_terms( $product->id, $values, $taxonomy );
+					if ( taxonomy_exists( $attribute_name ) ) {
+						wp_set_object_terms( $product->id, $values, $attribute_name );
 					}
 
 					if ( $values ) {
 						// Add attribute to array, but don't set values.
-						$attributes[ $taxonomy ] = array(
-							'name'         => $taxonomy,
+						$attributes[ $attribute_name ] = array(
+							'name'         => $attribute_name,
 							'value'        => '',
 							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-							'is_taxonomy'  => $is_taxonomy
+							'is_taxonomy'  => true,
 						);
 					}
 
@@ -981,13 +961,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					}
 
 					// Custom attribute - Add attribute to array and set the values.
-					$attributes[ $attribute_slug ] = array(
-						'name'         => wc_clean( $attribute['name'] ),
+					$attributes[ sanitize_title( $attribute_name ) ] = array(
+						'name'         => $attribute_name,
 						'value'        => $values,
 						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-						'is_taxonomy'  => $is_taxonomy
+						'is_taxonomy'  => false,
 					);
 				}
 			}
@@ -1270,7 +1250,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		global $wpdb;
 
 		$variations = $request['variations'];
-		$attributes = (array) maybe_unserialize( get_post_meta( $product->id, '_product_attributes', true ) );
+		$attributes = $product->get_attributes();
 
 		foreach ( $variations as $menu_order => $variation ) {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
@@ -1489,24 +1469,24 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( isset( $variation['attributes'] ) ) {
 				$updated_attribute_keys = array();
 
-				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
-					if ( ! isset( $attribute['name'] ) ) {
+				foreach ( $variation['attributes'] as $attribute ) {
+					$attribute_id   = 0;
+					$attribute_name = '';
+
+					// Check ID for global attributes or name for product attributes.
+					if ( ! empty( $attribute['id'] ) ) {
+						$attribute_id   = absint( $attribute['id'] );
+						$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					} elseif ( ! empty( $attribute['name'] ) ) {
+						$attribute_name = sanitize_title( $attribute['name'] );
+					}
+
+					if ( ! $attribute_id && ! $attribute_name ) {
 						continue;
 					}
 
-					$taxonomy   = 0;
-					$_attribute = array();
-
-					if ( isset( $attribute['slug'] ) ) {
-						$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
-					}
-
-					if ( ! $taxonomy ) {
-						$taxonomy = sanitize_title( $attribute['name'] );
-					}
-
-					if ( isset( $attributes[ $taxonomy ] ) ) {
-						$_attribute = $attributes[ $taxonomy ];
+					if ( isset( $attributes[ $attribute_name ] ) ) {
+						$_attribute = $attributes[ $attribute_name ];
 					}
 
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
@@ -1546,34 +1526,39 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
 			$default_attributes = array();
 
-			foreach ( $request['default_attributes'] as $default_attr_key => $default_attr ) {
-				if ( ! isset( $default_attr['name'] ) ) {
+			foreach ( $request['default_attributes'] as $attribute ) {
+				$attribute_id   = 0;
+				$attribute_name = '';
+
+				// Check ID for global attributes or name for product attributes.
+				if ( ! empty( $attribute['id'] ) ) {
+					$attribute_id   = absint( $attribute['id'] );
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				} elseif ( ! empty( $attribute['name'] ) ) {
+					$attribute_name = sanitize_title( $attribute['name'] );
+				}
+
+				if ( ! $attribute_id && ! $attribute_name ) {
 					continue;
 				}
 
-				$taxonomy = sanitize_title( $default_attr['name'] );
-
-				if ( isset( $default_attr['slug'] ) ) {
-					$taxonomy = $this->get_attribute_taxonomy_by_slug( $default_attr['slug'] );
-				}
-
-				if ( isset( $attributes[ $taxonomy ] ) ) {
-					$_attribute = $attributes[ $taxonomy ];
+				if ( isset( $attributes[ $attribute_name ] ) ) {
+					$_attribute = $attributes[ $attribute_name ];
 
 					if ( $_attribute['is_variation'] ) {
 						$value = '';
 
-						if ( isset( $default_attr['option'] ) ) {
+						if ( isset( $attribute['option'] ) ) {
 							if ( $_attribute['is_taxonomy'] ) {
 								// Don't use wc_clean as it destroys sanitized characters.
-								$value = sanitize_title( trim( stripslashes( $default_attr['option'] ) ) );
+								$value = sanitize_title( trim( stripslashes( $attribute['option'] ) ) );
 							} else {
-								$value = wc_clean( trim( stripslashes( $default_attr['option'] ) ) );
+								$value = wc_clean( trim( stripslashes( $attribute['option'] ) ) );
 							}
 						}
 
 						if ( $value ) {
-							$default_attributes[ $taxonomy ] = $value;
+							$default_attributes[ $attribute_name ] = $value;
 						}
 					}
 				}
@@ -2132,14 +2117,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Attribute ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
 						'name' => array(
 							'description' => __( 'Attribute name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'required'    => true,
-						),
-						'slug' => array(
-							'description' => __( 'Attribute slug.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2172,13 +2156,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
-						'name' => array(
-							'description' => __( 'Attribute name.', 'woocommerce' ),
-							'type'        => 'string',
+						'id' => array(
+							'description' => __( 'Attribute ID.', 'woocommerce' ),
+							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'slug' => array(
-							'description' => __( 'Attribute slug.', 'woocommerce' ),
+						'name' => array(
+							'description' => __( 'Attribute name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2446,14 +2430,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Attribute ID.', 'woocommerce' ),
+									'type'        => 'integer',
+									'context'     => array( 'view', 'edit' ),
+								),
 								'name' => array(
 									'description' => __( 'Attribute name.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-									'required'    => true,
-								),
-								'slug' => array(
-									'description' => __( 'Attribute slug.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),

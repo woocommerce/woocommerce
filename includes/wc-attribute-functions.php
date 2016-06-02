@@ -84,6 +84,20 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
 }
 
 /**
+ * Get a product attribute ID by name.
+ *
+ * @since  2.6.0
+ * @param string $name Attribute name.
+ * @return int
+ */
+function wc_attribute_taxonomy_id_by_name( $name ) {
+	$name       = str_replace( 'pa_', '', $name );
+	$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id', 'attribute_name' );
+
+	return isset( $taxonomies[ $name ] ) ? (int) $taxonomies[ $name ] : 0;
+}
+
+/**
  * Get a product attributes label.
  *
  * @param string $name
