@@ -303,9 +303,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		if ( $product->is_type( 'variable' ) ) {
 			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
+				$is_taxonomy = 0 === strpos( $key, 'pa_' );
+
 				$default[] = array(
-					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $key ) ),
-					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ),
+					'id'     => $is_taxonomy ? wc_attribute_taxonomy_id_by_name( $key ) : 0,
+					'name'   => str_replace( 'pa_', '', $key ),
 					'option' => $value,
 				);
 			}
@@ -327,9 +329,11 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			// Variation attributes.
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
-				$attributes[] = array(
-					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $attribute_name ), $product ),
-					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ),
+				$is_taxonomy     = 0 === strpos( $attribute_name, 'attribute_pa_' );
+				$_attribute_name = str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) );
+				$attributes[]    = array(
+					'id'     => $is_taxonomy ? wc_attribute_taxonomy_id_by_name( $_attribute_name ) : 0,
+					'name'   => $_attribute_name,
 					'option' => $attribute,
 				);
 			}
@@ -343,8 +347,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				}
 
 				$attributes[] = array(
-					'name'      => wc_attribute_label( $attribute['name'], $product ),
-					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
+					'id'        => $attribute['is_taxonomy'] ? wc_attribute_taxonomy_id_by_name( $attribute['name'] ) : 0,
+					'name'      => str_replace( 'pa_', '', $attribute['name'] ),
 					'position'  => (int) $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
@@ -2132,14 +2136,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Attribute ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
 						'name' => array(
 							'description' => __( 'Attribute name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'required'    => true,
-						),
-						'slug' => array(
-							'description' => __( 'Attribute slug.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2172,13 +2175,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
-						'name' => array(
-							'description' => __( 'Attribute name.', 'woocommerce' ),
-							'type'        => 'string',
+						'id' => array(
+							'description' => __( 'Attribute ID.', 'woocommerce' ),
+							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'slug' => array(
-							'description' => __( 'Attribute slug.', 'woocommerce' ),
+						'name' => array(
+							'description' => __( 'Attribute name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2446,14 +2449,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Attribute ID.', 'woocommerce' ),
+									'type'        => 'integer',
+									'context'     => array( 'view', 'edit' ),
+								),
 								'name' => array(
 									'description' => __( 'Attribute name.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-									'required'    => true,
-								),
-								'slug' => array(
-									'description' => __( 'Attribute slug.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
