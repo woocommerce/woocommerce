@@ -210,7 +210,6 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 							'description' => __( 'Image ID.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'date_created' => array(
 							'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
