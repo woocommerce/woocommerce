@@ -40,15 +40,15 @@ class WC_Embed {
 		// Add some basic styles.
 		add_action( 'embed_head', array( __CLASS__, 'print_embed_styles' ) );
 	}
-	
+
 	/**
 	 * Remove comments button on product embeds.
-	 * 
+	 *
 	 * @since 2.5.6
 	 */
 	public static function remove_comments_button() {
-		if (is_product()) {
-			remove_action('embed_content_meta', 'print_embed_comments_button');
+		if ( self::is_embedded_product() ) {
+			remove_action( 'embed_content_meta', 'print_embed_comments_button' );
 		}
 	}
 
