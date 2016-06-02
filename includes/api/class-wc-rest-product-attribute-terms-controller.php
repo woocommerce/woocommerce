@@ -48,11 +48,12 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 		$menu_order = get_woocommerce_term_meta( $item->term_id, 'order_' . $this->taxonomy );
 
 		$data = array(
-			'id'         => (int) $item->term_id,
-			'name'       => $item->name,
-			'slug'       => $item->slug,
-			'menu_order' => (int) $menu_order,
-			'count'      => (int) $item->count,
+			'id'          => (int) $item->term_id,
+			'name'        => $item->name,
+			'slug'        => $item->slug,
+			'menu_order'  => (int) $menu_order,
+			'count'       => (int) $item->count,
+			'description' => $item->description
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -121,6 +122,14 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
+					),
+				),
+				'description' => array(
+					'description' => __( 'HTML description of the resource.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'wp_filter_post_kses',
 					),
 				),
 				'menu_order' => array(
