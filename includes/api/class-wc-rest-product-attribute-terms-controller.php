@@ -51,9 +51,9 @@ class WC_REST_Product_Attribute_Terms_Controller extends WC_REST_Terms_Controlle
 			'id'          => (int) $item->term_id,
 			'name'        => $item->name,
 			'slug'        => $item->slug,
+			'description' => $item->description,
 			'menu_order'  => (int) $menu_order,
 			'count'       => (int) $item->count,
-			'description' => $item->description
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
