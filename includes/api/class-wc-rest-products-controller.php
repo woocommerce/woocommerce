@@ -293,6 +293,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get attribute taxonomy label.
+	 *
+	 * @param  string $name
+	 * @return string
+	 */
+	protected function get_attribute_taxonomy_label( $name ) {
+		$tax    = get_taxonomy( $name );
+		$labels = get_taxonomy_labels( $tax );
+
+		return $labels->singular_name;
+	}
+
+	/**
 	 * Get default attributes.
 	 *
 	 * @param WC_Product $product
@@ -303,13 +316,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		if ( $product->is_type( 'variable' ) ) {
 			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
-				$is_taxonomy = 0 === strpos( $key, 'pa_' );
-
-				$default[] = array(
-					'id'     => $is_taxonomy ? wc_attribute_taxonomy_id_by_name( $key ) : 0,
-					'name'   => str_replace( 'pa_', '', $key ),
-					'option' => $value,
-				);
+				if ( 0 === strpos( $key, 'pa_' ) ) {
+					$default[] = array(
+						'id'     => wc_attribute_taxonomy_id_by_name( $key ),
+						'name'   => $this->get_attribute_taxonomy_label( $key ),
+						'option' => $value,
+					);
+				} else {
+					$default[] = array(
+						'id'     => 0,
+						'name'   => str_replace( 'pa_', '', $key ),
+						'option' => $value,
+					);
+				}
 			}
 		}
 
@@ -328,32 +347,45 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		if ( $product->is_type( 'variation' ) ) {
 			// Variation attributes.
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
+				$name = str_replace( 'attribute_', '', $attribute_name );
+
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
-				$is_taxonomy     = 0 === strpos( $attribute_name, 'attribute_pa_' );
-				$_attribute_name = str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) );
-				$attributes[]    = array(
-					'id'     => $is_taxonomy ? wc_attribute_taxonomy_id_by_name( $_attribute_name ) : 0,
-					'name'   => $_attribute_name,
-					'option' => $attribute,
-				);
+				if ( 0 === strpos( $attribute_name, 'attribute_pa_' ) ) {
+					$attributes[] = array(
+						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
+						'name'   => $this->get_attribute_taxonomy_label( $name ),
+						'option' => $attribute,
+					);
+				} else {
+					$attributes[] = array(
+						'id'     => 0,
+						'name'   => str_replace( 'pa_', '', $name ),
+						'option' => $attribute,
+					);
+				}
 			}
 		} else {
 			foreach ( $product->get_attributes() as $attribute ) {
 				// Taxonomy-based attributes are comma-separated, others are pipe (|) separated.
 				if ( $attribute['is_taxonomy'] ) {
-					$options = explode( ',', $product->get_attribute( $attribute['name'] ) );
+					$attributes[] = array(
+						'id'        => $attribute['is_taxonomy'] ? wc_attribute_taxonomy_id_by_name( $attribute['name'] ) : 0,
+						'name'      => $this->get_attribute_taxonomy_label( $attribute['name'] ),
+						'position'  => (int) $attribute['position'],
+						'visible'   => (bool) $attribute['is_visible'],
+						'variation' => (bool) $attribute['is_variation'],
+						'options'   => array_map( 'trim', explode( ',', $product->get_attribute( $attribute['name'] ) ) ),
+					);
 				} else {
-					$options = explode( '|', $product->get_attribute( $attribute['name'] ) );
+					$attributes[] = array(
+						'id'        => 0,
+						'name'      => str_replace( 'pa_', '', $attribute['name'] ),
+						'position'  => (int) $attribute['position'],
+						'visible'   => (bool) $attribute['is_visible'],
+						'variation' => (bool) $attribute['is_variation'],
+						'options'   => array_map( 'trim', explode( '|', $product->get_attribute( $attribute['name'] ) ) ),
+					);
 				}
-
-				$attributes[] = array(
-					'id'        => $attribute['is_taxonomy'] ? wc_attribute_taxonomy_id_by_name( $attribute['name'] ) : 0,
-					'name'      => str_replace( 'pa_', '', $attribute['name'] ),
-					'position'  => (int) $attribute['position'],
-					'visible'   => (bool) $attribute['is_visible'],
-					'variation' => (bool) $attribute['is_variation'],
-					'options'   => array_map( 'trim', $options ),
-				);
 			}
 		}
 
