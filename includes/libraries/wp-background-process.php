@@ -48,7 +48,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 			$this->schedule_event();
 
 			// Perform remote post
-			parent::dispatch();
+			return parent::dispatch();
 		}
 
 		/**
