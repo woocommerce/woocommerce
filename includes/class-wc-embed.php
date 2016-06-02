@@ -44,7 +44,7 @@ class WC_Embed {
 	/**
 	 * Remove comments button on product embeds.
 	 *
-	 * @since 2.5.6
+	 * @since 2.6.0
 	 */
 	public static function remove_comments_button() {
 		if ( self::is_embedded_product() ) {
