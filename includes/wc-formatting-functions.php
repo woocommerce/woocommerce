@@ -254,12 +254,17 @@ function wc_format_localized_decimal( $value ) {
 }
 
 /**
- * Clean variables using sanitize_text_field.
+ * Clean variables using sanitize_text_field. Arrays are cleaned recursively.
+ * Non-scalar values are ignored.
  * @param string|array $var
  * @return string|array
  */
 function wc_clean( $var ) {
-	return is_array( $var ) ? array_map( 'wc_clean', $var ) : sanitize_text_field( $var );
+	if ( is_array( $var ) ) {
+		return array_map( 'wc_clean', $var );
+	} else {
+		return is_scalar( $var ) ? sanitize_text_field( $var ) : $var;
+	}
 }
 
 /**
