@@ -2189,3 +2189,12 @@ if ( ! function_exists( 'woocommerce_account_edit_account' ) ) {
 		WC_Shortcode_My_Account::edit_account();
 	}
 }
+
+if ( ! function_exists( 'woocommerce_account_introduction' ) ) {
+	/**
+	 * My Account navigation template.
+	 */
+	function woocommerce_account_introduction() {
+		wc_get_template( 'myaccount/introduction.php' );
+	}
+}
