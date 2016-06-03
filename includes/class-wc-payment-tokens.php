@@ -150,17 +150,21 @@ class WC_Payment_Tokens {
 	 */
 	public static function get( $token_id, $token_result = null ) {
 		global $wpdb;
+
 		if ( is_null( $token_result ) ) {
 			$token_result = $wpdb->get_row( $wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE token_id = %d",
 				$token_id
 			) );
+
 			// Still empty? Token doesn't exist? Don't continue
 			if ( empty( $token_result ) ) {
 				return null;
 			}
 		}
+
 		$token_class = 'WC_Payment_Token_' . $token_result->type;
+
 		if ( class_exists( $token_class ) ) {
 			$meta =  get_metadata( 'payment_token', $token_id );
 			$passed_meta = array();
@@ -171,6 +175,8 @@ class WC_Payment_Tokens {
 			}
 			return new $token_class( $token_id, (array) $token_result, $passed_meta );
 		}
+
+		return null;
 	}
 
 	/**

@@ -61,8 +61,9 @@ jQuery( function( $ ) {
 	 * @param {String} html_str The HTML string with which to replace the div.
 	 */
 	var update_wc_div = function( html_str ) {
-		var $html = $.parseHTML( html_str );
-		var $new_form = $( 'table.shop_table.cart', $html ).closest( 'form' );
+		var $html       = $.parseHTML( html_str );
+		var $new_form   = $( 'table.shop_table.cart', $html ).closest( 'form' );
+		var $new_totals = $( '.cart_totals', $html );
 
 		// Error message collection
 		var $error = $( '.woocommerce-error', $html );
@@ -84,6 +85,7 @@ jQuery( function( $ ) {
 		} else {
 			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
 			$( 'table.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
+			$( '.cart_totals' ).replaceWith( $new_totals );
 
 			if ( $error.length > 0 ) {
 				show_notice( $error );
@@ -91,6 +93,8 @@ jQuery( function( $ ) {
 				show_notice( $message );
 			}
 		}
+
+		$( document.body ).trigger( 'updated_wc_div' );
 	};
 
 	/**
@@ -183,10 +187,10 @@ jQuery( function( $ ) {
 		shipping_calculator_submit: function( evt ) {
 			evt.preventDefault();
 
-			var cart = this.cart;
 			var $form = $( evt.target );
 
 			block( $form );
+			block( $( 'div.cart_totals' ) );
 
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
@@ -201,11 +205,11 @@ jQuery( function( $ ) {
 				data:     $form.serialize(),
 				dataType: 'html',
 				success:  function( response ) {
-					update_wc_div(response );
+					update_wc_div( response );
 				},
 				complete: function() {
 					unblock( $form );
-					cart.update_cart_totals();
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
 		}
@@ -219,14 +223,18 @@ jQuery( function( $ ) {
 		 * Initialize cart UI events.
 		 */
 		init: function() {
-			this.update_cart_totals = this.update_cart_totals.bind( this );
-			this.cart_submit = this.cart_submit.bind( this );
-			this.submit_click = this.submit_click.bind( this );
-			this.apply_coupon = this.apply_coupon.bind( this );
+			this.update_cart_totals    = this.update_cart_totals.bind( this );
+			this.cart_submit           = this.cart_submit.bind( this );
+			this.submit_click          = this.submit_click.bind( this );
+			this.apply_coupon          = this.apply_coupon.bind( this );
 			this.remove_coupon_clicked = this.remove_coupon_clicked.bind( this );
-			this.quantity_update = this.quantity_update.bind( this );
-			this.item_remove_clicked = this.item_remove_clicked.bind( this );
+			this.quantity_update       = this.quantity_update.bind( this );
+			this.item_remove_clicked   = this.item_remove_clicked.bind( this );
+			this.update_cart           = this.update_cart.bind( this );
 
+			$( document ).on(
+				'wc_update_cart',
+				this.update_cart );
 			$( document ).on(
 				'click',
 				'div.woocommerce > form input[type=submit]',
@@ -259,6 +267,31 @@ jQuery( function( $ ) {
 		},
 
 		/**
+		 * Update entire cart via ajax.
+		 */
+		update_cart: function() {
+			var $form = $( 'table.shop_table.cart' ).closest( 'form' );
+
+			block( $form );
+			block( $( 'div.cart_totals' ) );
+
+			// Make call to actual form post URL.
+			$.ajax( {
+				type:     $form.attr( 'method' ),
+				url:      $form.attr( 'action' ),
+				data:     $form.serialize(),
+				dataType: 'html',
+				success:  function( response ) {
+					update_wc_div( response );
+				},
+				complete: function() {
+					unblock( $form );
+					unblock( $( 'div.cart_totals' ) );
+				}
+			} );
+		},
+
+		/**
 		 * Update the cart after something has changed.
 		 */
 		update_cart_totals: function() {
@@ -269,6 +302,7 @@ jQuery( function( $ ) {
 				dataType: 'html',
 				success: function( response ) {
 					$( 'div.cart_totals' ).replaceWith( response );
+					$( document.body ).trigger( 'updated_cart_totals' );
 				}
 			} );
 		},
@@ -385,9 +419,6 @@ jQuery( function( $ ) {
 		 * @param {JQuery Object} $form The cart form.
 		 */
 		quantity_update: function( $form ) {
-
-			var cart = this;
-
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
 											.attr( 'name', 'update_cart' )
@@ -395,6 +426,7 @@ jQuery( function( $ ) {
 											.appendTo( $form );
 
 			block( $form );
+			block( $( 'div.cart_totals' ) );
 
 			// Make call to actual form post URL.
 			$.ajax( {
@@ -405,7 +437,7 @@ jQuery( function( $ ) {
 				success:  update_wc_div,
 				complete: function() {
 					unblock( $form );
-					cart.update_cart_totals();
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
 		},
@@ -418,11 +450,11 @@ jQuery( function( $ ) {
 		item_remove_clicked: function( evt ) {
 			evt.preventDefault();
 
-			var cart = this;
 			var $a = $( evt.target );
 			var $form = $a.parents( 'form' );
 
 			block( $form );
+			block( $( 'div.cart_totals' ) );
 
 			$.ajax( {
 				type:     'GET',
@@ -431,7 +463,7 @@ jQuery( function( $ ) {
 				success: update_wc_div,
 				complete: function() {
 					unblock( $form );
-					cart.update_cart_totals();
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
 		}

@@ -29,11 +29,31 @@ class WC_Background_Updater extends WP_Background_Process {
 	protected $action = 'wc_updater';
 
 	/**
-	 * Dispatch
+	 * @var string
+	 */
+	protected $error = '';
+
+	/**
+	 * Dispatch updater.
+	 *
+	 * Updater will still run via cron job if this fails for any reason.
 	 */
 	public function dispatch() {
 		WC_Admin_Notices::add_notice( 'updating' );
-		parent::dispatch();
+
+		$dispatched = parent::dispatch();
+
+		if ( is_wp_error( $dispatched ) ) {
+			$this->error = $dispatched->get_error_message();
+			add_action( 'admin_notices', array( $this, 'dispatch_error' ) );
+		}
+	}
+
+	/**
+	 * Error shown when the updater cannot dispatch.
+	 */
+	public function dispatch_error() {
+		echo '<div class="error"><p>' . __( 'Unable to dispatch WooCommerce updater:', 'woocommerce' ) . ' ' . esc_html( $this->error ) . '</p></div>';
 	}
 
 	/**

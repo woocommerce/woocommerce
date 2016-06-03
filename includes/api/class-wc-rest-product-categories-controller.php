@@ -54,12 +54,6 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 		// Get category display type.
 		$display_type = get_woocommerce_term_meta( $item->term_id, 'display_type' );
 
-		// Get category image.
-		$image = '';
-		if ( $image_id = get_woocommerce_term_meta( $item->term_id, 'thumbnail_id' ) ) {
-			$image = wp_get_attachment_url( $image_id );
-		}
-
 		// Get category order.
 		$menu_order = get_woocommerce_term_meta( $item->term_id, 'order' );
 
@@ -70,10 +64,24 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 			'parent'      => (int) $item->parent,
 			'description' => $item->description,
 			'display'     => $display_type ? $display_type : 'default',
-			'image'       => $image ? esc_url( $image ) : '',
+			'image'       => array(),
 			'menu_order'  => (int) $menu_order,
 			'count'       => (int) $item->count,
 		);
+
+		// Get category image.
+		if ( $image_id = get_woocommerce_term_meta( $item->term_id, 'thumbnail_id' ) ) {
+			$attachment = get_post( $image_id );
+
+			$data['image'] = array(
+				'id'            => (int) $image_id,
+				'date_created'  => wc_rest_prepare_date_response( $attachment->post_date_gmt ),
+				'date_modified' => wc_rest_prepare_date_response( $attachment->post_modified_gmt ),
+				'src'           => wp_get_attachment_url( $image_id ),
+				'title'         => get_the_title( $attachment ),
+				'alt'           => get_post_meta( $image_id, '_wp_attachment_image_alt', true ),
+			);
+		}
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -109,17 +117,31 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 		update_woocommerce_term_meta( $id, 'order', $request['menu_order'] );
 
 		if ( ! empty( $request['image'] ) ) {
-			$upload = wc_rest_upload_image_from_url( esc_url_raw( $request['image'] ) );
+			if ( empty( $request['image']['id'] ) && ! empty( $request['image']['src'] ) ) {
+				$upload = wc_rest_upload_image_from_url( esc_url_raw( $request['image']['src'] ) );
 
-			if ( is_wp_error( $upload ) ) {
-				return $upload;
+				if ( is_wp_error( $upload ) ) {
+					return $upload;
+				}
+
+				$image_id = wc_rest_set_uploaded_image_as_attachment( $upload );
+			} else {
+				$image_id = absint( $request['image']['id'] );
 			}
-
-			$image_id = wc_rest_set_uploaded_image_as_attachment( $upload );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
 				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
+
+				// Set the image alt.
+				if ( ! empty( $request['image']['alt'] ) ) {
+					update_post_meta( $image_id, '_wp_attachment_image_alt', wc_clean( $request['image']['alt'] ) );
+				}
+
+				// Set the image title.
+				if ( ! empty( $request['image']['title'] ) ) {
+					wp_update_post( array( 'ID' => $image_id, 'post_title' => wc_clean( $request['image']['title'] ) ) );
+				}
 			}
 		}
 
@@ -180,10 +202,44 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Terms_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'image' => array(
-					'description' => __( 'Image URL.', 'woocommerce' ),
-					'type'        => 'string',
-					'format'      => 'uri',
+					'description' => __( 'Image data.', 'woocommerce' ),
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Image ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'date_created' => array(
+							'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'date_modified' => array(
+							'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'src' => array(
+							'description' => __( 'Image URL.', 'woocommerce' ),
+							'type'        => 'string',
+							'format'      => 'uri',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'name' => array(
+							'description' => __( 'Image name.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+						'alt' => array(
+							'description' => __( 'Image alternative text.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
+					),
 				),
 				'menu_order' => array(
 					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),

@@ -293,6 +293,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get attribute taxonomy label.
+	 *
+	 * @param  string $name
+	 * @return string
+	 */
+	protected function get_attribute_taxonomy_label( $name ) {
+		$tax    = get_taxonomy( $name );
+		$labels = get_taxonomy_labels( $tax );
+
+		return $labels->singular_name;
+	}
+
+	/**
 	 * Get default attributes.
 	 *
 	 * @param WC_Product $product
@@ -303,11 +316,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		if ( $product->is_type( 'variable' ) ) {
 			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
-				$default[] = array(
-					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $key ) ),
-					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ),
-					'option' => $value,
-				);
+				if ( 0 === strpos( $key, 'pa_' ) ) {
+					$default[] = array(
+						'id'     => wc_attribute_taxonomy_id_by_name( $key ),
+						'name'   => $this->get_attribute_taxonomy_label( $key ),
+						'option' => $value,
+					);
+				} else {
+					$default[] = array(
+						'id'     => 0,
+						'name'   => str_replace( 'pa_', '', $key ),
+						'option' => $value,
+					);
+				}
 			}
 		}
 
@@ -326,30 +347,45 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		if ( $product->is_type( 'variation' ) ) {
 			// Variation attributes.
 			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
+				$name = str_replace( 'attribute_', '', $attribute_name );
+
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
-				$attributes[] = array(
-					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $attribute_name ), $product ),
-					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ),
-					'option' => $attribute,
-				);
+				if ( 0 === strpos( $attribute_name, 'attribute_pa_' ) ) {
+					$attributes[] = array(
+						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
+						'name'   => $this->get_attribute_taxonomy_label( $name ),
+						'option' => $attribute,
+					);
+				} else {
+					$attributes[] = array(
+						'id'     => 0,
+						'name'   => str_replace( 'pa_', '', $name ),
+						'option' => $attribute,
+					);
+				}
 			}
 		} else {
 			foreach ( $product->get_attributes() as $attribute ) {
 				// Taxonomy-based attributes are comma-separated, others are pipe (|) separated.
 				if ( $attribute['is_taxonomy'] ) {
-					$options = explode( ',', $product->get_attribute( $attribute['name'] ) );
+					$attributes[] = array(
+						'id'        => $attribute['is_taxonomy'] ? wc_attribute_taxonomy_id_by_name( $attribute['name'] ) : 0,
+						'name'      => $this->get_attribute_taxonomy_label( $attribute['name'] ),
+						'position'  => (int) $attribute['position'],
+						'visible'   => (bool) $attribute['is_visible'],
+						'variation' => (bool) $attribute['is_variation'],
+						'options'   => array_map( 'trim', explode( ',', $product->get_attribute( $attribute['name'] ) ) ),
+					);
 				} else {
-					$options = explode( '|', $product->get_attribute( $attribute['name'] ) );
+					$attributes[] = array(
+						'id'        => 0,
+						'name'      => str_replace( 'pa_', '', $attribute['name'] ),
+						'position'  => (int) $attribute['position'],
+						'visible'   => (bool) $attribute['is_visible'],
+						'variation' => (bool) $attribute['is_variation'],
+						'options'   => array_map( 'trim', explode( '|', $product->get_attribute( $attribute['name'] ) ) ),
+					);
 				}
-
-				$attributes[] = array(
-					'name'      => wc_attribute_label( $attribute['name'], $product ),
-					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
-					'position'  => (int) $attribute['position'],
-					'visible'   => (bool) $attribute['is_visible'],
-					'variation' => (bool) $attribute['is_variation'],
-					'options'   => array_map( 'trim', $options ),
-				);
 			}
 		}
 
@@ -406,8 +442,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'virtual'               => $product->is_virtual(),
 			'downloadable'          => $product->is_downloadable(),
 			'downloads'             => $this->get_downloads( $product ),
-			'download_limit'        => (int) $product->download_limit,
-			'download_expiry'       => (int) $product->download_expiry,
+			'download_limit'        => '' !== $product->download_limit ? (int) $product->download_limit : -1,
+			'download_expiry'       => '' !== $product->download_expiry ? (int) $product->download_expiry : -1,
 			'download_type'         => $product->download_type ? $product->download_type : 'standard',
 			'external_url'          => $product->is_type( 'external' ) ? $product->get_product_url() : '',
 			'button_text'           => $product->is_type( 'external' ) ? $product->get_button_text() : '',
@@ -482,8 +518,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'virtual'            => $variation->is_virtual(),
 				'downloadable'       => $variation->is_downloadable(),
 				'downloads'          => $this->get_downloads( $variation ),
-				'download_limit'     => (int) $variation->download_limit,
-				'download_expiry'    => (int) $variation->download_expiry,
+				'download_limit'     => '' !== $variation->download_limit ? (int) $variation->download_limit : -1,
+				'download_expiry'    => '' !== $variation->download_expiry ? (int) $variation->download_expiry : -1,
 				'tax_status'         => $variation->get_tax_status(),
 				'tax_class'          => $variation->get_tax_class(),
 				'manage_stock'       => $variation->managing_stock(),
@@ -649,27 +685,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		 * @param WP_REST_Request $request       Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
-	}
-
-	/**
-	 * Get attribute taxonomy by slug.
-	 *
-	 * @param string $slug
-	 * @return string|null
-	 */
-	private function get_attribute_taxonomy_by_slug( $slug ) {
-		$taxonomy   = null;
-		$taxonomies = wc_get_attribute_taxonomies();
-
-		foreach ( $taxonomies as $key => $tax ) {
-			if ( $slug === $tax->attribute_name ) {
-				$taxonomy = 'pa_' . $tax->attribute_name;
-
-				break;
-			}
-		}
-
-		return $taxonomy;
 	}
 
 	/**
@@ -858,7 +873,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		}
 
 		// Default total sales.
-		add_post_meta( $product_id, 'total_sales', '0', true );
+		add_post_meta( $product->id, 'total_sales', '0', true );
 
 		// Virtual.
 		if ( isset( $request['virtual'] ) ) {
@@ -919,25 +934,22 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$attributes = array();
 
 			foreach ( $request['attributes'] as $attribute ) {
-				$is_taxonomy = 0;
-				$taxonomy    = 0;
+				$attribute_id   = 0;
+				$attribute_name = '';
 
-				if ( ! isset( $attribute['name'] ) ) {
+				// Check ID for global attributes or name for product attributes.
+				if ( ! empty( $attribute['id'] ) ) {
+					$attribute_id   = absint( $attribute['id'] );
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				} elseif ( ! empty( $attribute['name'] ) ) {
+					$attribute_name = wc_clean( $attribute['name'] );
+				}
+
+				if ( ! $attribute_id && ! $attribute_name ) {
 					continue;
 				}
 
-				$attribute_slug = sanitize_title( $attribute['name'] );
-
-				if ( isset( $attribute['slug'] ) ) {
-					$taxonomy       = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
-					$attribute_slug = sanitize_title( $attribute['slug'] );
-				}
-
-				if ( $taxonomy ) {
-					$is_taxonomy = 1;
-				}
-
-				if ( $is_taxonomy ) {
+				if ( $attribute_id ) {
 
 					if ( isset( $attribute['options'] ) ) {
 						$options = $attribute['options'];
@@ -954,19 +966,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					}
 
 					// Update post terms.
-					if ( taxonomy_exists( $taxonomy ) ) {
-						wp_set_object_terms( $product->id, $values, $taxonomy );
+					if ( taxonomy_exists( $attribute_name ) ) {
+						wp_set_object_terms( $product->id, $values, $attribute_name );
 					}
 
 					if ( $values ) {
 						// Add attribute to array, but don't set values.
-						$attributes[ $taxonomy ] = array(
-							'name'         => $taxonomy,
+						$attributes[ $attribute_name ] = array(
+							'name'         => $attribute_name,
 							'value'        => '',
 							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-							'is_taxonomy'  => $is_taxonomy
+							'is_taxonomy'  => true,
 						);
 					}
 
@@ -981,13 +993,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					}
 
 					// Custom attribute - Add attribute to array and set the values.
-					$attributes[ $attribute_slug ] = array(
-						'name'         => wc_clean( $attribute['name'] ),
+					$attributes[ sanitize_title( $attribute_name ) ] = array(
+						'name'         => $attribute_name,
 						'value'        => $values,
 						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-						'is_taxonomy'  => $is_taxonomy
+						'is_taxonomy'  => false,
 					);
 				}
 			}
@@ -1230,17 +1242,17 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 			// Download limit.
 			if ( isset( $request['download_limit'] ) ) {
-				update_post_meta( $product->id, '_download_limit', ( '' === $request['download_limit'] ) ? '' : absint( $request['download_limit'] ) );
+				update_post_meta( $product->id, '_download_limit', -1 === $request['download_limit'] ? '' : absint( $request['download_limit'] ) );
 			}
 
 			// Download expiry.
 			if ( isset( $request['download_expiry'] ) ) {
-				update_post_meta( $product->id, '_download_expiry', ( '' === $request['download_expiry'] ) ? '' : absint( $request['download_expiry'] ) );
+				update_post_meta( $product->id, '_download_expiry', -1 === $request['download_expiry'] ? '' : absint( $request['download_expiry'] ) );
 			}
 
 			// Download type.
 			if ( isset( $request['download_type'] ) ) {
-				update_post_meta( $product->id, '_download_type', wc_clean( $request['download_type'] ) );
+				update_post_meta( $product->id, '_download_type', 'standard' === $request['download_type'] ? '' : wc_clean( $request['download_type'] ) );
 			}
 		}
 
@@ -1270,7 +1282,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		global $wpdb;
 
 		$variations = $request['variations'];
-		$attributes = (array) maybe_unserialize( get_post_meta( $product->id, '_product_attributes', true ) );
+		$attributes = $product->get_attributes();
 
 		foreach ( $variations as $menu_order => $variation ) {
 			$variation_id = isset( $variation['id'] ) ? absint( $variation['id'] ) : 0;
@@ -1467,14 +1479,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 				// Download limit.
 				if ( isset( $variation['download_limit'] ) ) {
-					$download_limit = absint( $variation['download_limit'] );
-					update_post_meta( $variation_id, '_download_limit', ( ! $download_limit ) ? '' : $download_limit );
+					update_post_meta( $variation_id, '_download_limit', -1 === $variation['download_limit'] ? '' : absint( $variation['download_limit'] ) );
 				}
 
 				// Download expiry.
 				if ( isset( $variation['download_expiry'] ) ) {
-					$download_expiry = absint( $variation['download_expiry'] );
-					update_post_meta( $variation_id, '_download_expiry', ( ! $download_expiry ) ? '' : $download_expiry );
+					update_post_meta( $variation_id, '_download_expiry', -1 === $variation['download_expiry'] ? '' : absint( $variation['download_expiry'] ) );
 				}
 			} else {
 				update_post_meta( $variation_id, '_download_limit', '' );
@@ -1491,24 +1501,24 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( isset( $variation['attributes'] ) ) {
 				$updated_attribute_keys = array();
 
-				foreach ( $variation['attributes'] as $attribute_key => $attribute ) {
-					if ( ! isset( $attribute['name'] ) ) {
+				foreach ( $variation['attributes'] as $attribute ) {
+					$attribute_id   = 0;
+					$attribute_name = '';
+
+					// Check ID for global attributes or name for product attributes.
+					if ( ! empty( $attribute['id'] ) ) {
+						$attribute_id   = absint( $attribute['id'] );
+						$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					} elseif ( ! empty( $attribute['name'] ) ) {
+						$attribute_name = sanitize_title( $attribute['name'] );
+					}
+
+					if ( ! $attribute_id && ! $attribute_name ) {
 						continue;
 					}
 
-					$taxonomy   = 0;
-					$_attribute = array();
-
-					if ( isset( $attribute['slug'] ) ) {
-						$taxonomy = $this->get_attribute_taxonomy_by_slug( $attribute['slug'] );
-					}
-
-					if ( ! $taxonomy ) {
-						$taxonomy = sanitize_title( $attribute['name'] );
-					}
-
-					if ( isset( $attributes[ $taxonomy ] ) ) {
-						$_attribute = $attributes[ $taxonomy ];
+					if ( isset( $attributes[ $attribute_name ] ) ) {
+						$_attribute = $attributes[ $attribute_name ];
 					}
 
 					if ( isset( $_attribute['is_variation'] ) && $_attribute['is_variation'] ) {
@@ -1548,34 +1558,39 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
 			$default_attributes = array();
 
-			foreach ( $request['default_attributes'] as $default_attr_key => $default_attr ) {
-				if ( ! isset( $default_attr['name'] ) ) {
+			foreach ( $request['default_attributes'] as $attribute ) {
+				$attribute_id   = 0;
+				$attribute_name = '';
+
+				// Check ID for global attributes or name for product attributes.
+				if ( ! empty( $attribute['id'] ) ) {
+					$attribute_id   = absint( $attribute['id'] );
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				} elseif ( ! empty( $attribute['name'] ) ) {
+					$attribute_name = sanitize_title( $attribute['name'] );
+				}
+
+				if ( ! $attribute_id && ! $attribute_name ) {
 					continue;
 				}
 
-				$taxonomy = sanitize_title( $default_attr['name'] );
-
-				if ( isset( $default_attr['slug'] ) ) {
-					$taxonomy = $this->get_attribute_taxonomy_by_slug( $default_attr['slug'] );
-				}
-
-				if ( isset( $attributes[ $taxonomy ] ) ) {
-					$_attribute = $attributes[ $taxonomy ];
+				if ( isset( $attributes[ $attribute_name ] ) ) {
+					$_attribute = $attributes[ $attribute_name ];
 
 					if ( $_attribute['is_variation'] ) {
 						$value = '';
 
-						if ( isset( $default_attr['option'] ) ) {
+						if ( isset( $attribute['option'] ) ) {
 							if ( $_attribute['is_taxonomy'] ) {
 								// Don't use wc_clean as it destroys sanitized characters.
-								$value = sanitize_title( trim( stripslashes( $default_attr['option'] ) ) );
+								$value = sanitize_title( trim( stripslashes( $attribute['option'] ) ) );
 							} else {
-								$value = wc_clean( trim( stripslashes( $default_attr['option'] ) ) );
+								$value = wc_clean( trim( stripslashes( $attribute['option'] ) ) );
 							}
 						}
 
 						if ( $value ) {
-							$default_attributes[ $taxonomy ] = $value;
+							$default_attributes[ $attribute_name ] = $value;
 						}
 					}
 				}
@@ -1689,7 +1704,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$schema = array(
+		$weight_unit    = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		$schema         = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
 			'type'       => 'object',
@@ -1859,13 +1876,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				'download_limit' => array(
 					'description' => __( 'Amount of times the product can be downloaded.', 'woocommerce' ),
 					'type'        => 'integer',
-					'default'     => null,
+					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry' => array(
 					'description' => __( 'Number of days that the customer has up to be able to download the product.', 'woocommerce' ),
 					'type'        => 'integer',
-					'default'     => null,
+					'default'     => -1,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'download_type' => array(
@@ -1941,7 +1958,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'weight' => array(
-					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), get_option( 'woocommerce_weight_unit' ) ),
+					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1951,17 +1968,17 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'length' => array(
-							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width' => array(
-							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
-							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2091,7 +2108,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'description' => __( 'Image ID.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
 						),
 						'date_created' => array(
 							'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
@@ -2133,14 +2149,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Attribute ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
 						'name' => array(
 							'description' => __( 'Attribute name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'required'    => true,
-						),
-						'slug' => array(
-							'description' => __( 'Attribute slug.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2173,18 +2188,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Attribute ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+						),
 						'name' => array(
 							'description' => __( 'Attribute name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'slug' => array(
-							'description' => __( 'Attribute slug.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
 						'option' => array(
-							'description' => __( 'Selected term name of the attribute.', 'woocommerce' ),
+							'description' => __( 'Selected attribute term name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2214,7 +2229,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'readonly'    => true,
 						),
 						'permalink' => array(
-							'description' => __( 'Product URL.', 'woocommerce' ),
+							'description' => __( 'Variation URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
@@ -2226,18 +2241,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'price' => array(
-							'description' => __( 'Current product price.', 'woocommerce' ),
+							'description' => __( 'Current variation price.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'regular_price' => array(
-							'description' => __( 'Product regular price.', 'woocommerce' ),
+							'description' => __( 'Variation regular price.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'sale_price' => array(
-							'description' => __( 'Product sale price.', 'woocommerce' ),
+							'description' => __( 'Variation sale price.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2252,25 +2267,25 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'on_sale' => array(
-							'description' => __( 'Shows if the product is on sale.', 'woocommerce' ),
+							'description' => __( 'Shows if the variation is on sale.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'purchasable' => array(
-							'description' => __( 'Shows if the product can be bought.', 'woocommerce' ),
+							'description' => __( 'Shows if the variation can be bought.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'virtual' => array(
-							'description' => __( 'If the product is virtual.', 'woocommerce' ),
+							'description' => __( 'If the variation is virtual.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'default'     => false,
 							'context'     => array( 'view', 'edit' ),
 						),
 						'downloadable' => array(
-							'description' => __( 'If the product is downloadable.', 'woocommerce' ),
+							'description' => __( 'If the variation is downloadable.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'default'     => false,
 							'context'     => array( 'view', 'edit' ),
@@ -2299,13 +2314,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							),
 						),
 						'download_limit' => array(
-							'description' => __( 'Amount of times the product can be downloaded.', 'woocommerce' ),
+							'description' => __( 'Amount of times the variation can be downloaded.', 'woocommerce' ),
 							'type'        => 'integer',
 							'default'     => null,
 							'context'     => array( 'view', 'edit' ),
 						),
 						'download_expiry' => array(
-							'description' => __( 'Number of days that the customer has up to be able to download the product.', 'woocommerce' ),
+							'description' => __( 'Number of days that the customer has up to be able to download the variation.', 'woocommerce' ),
 							'type'        => 'integer',
 							'default'     => null,
 							'context'     => array( 'view', 'edit' ),
@@ -2323,7 +2338,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'manage_stock' => array(
-							'description' => __( 'Stock management at product level.', 'woocommerce' ),
+							'description' => __( 'Stock management at variation level.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'default'     => false,
 							'context'     => array( 'view', 'edit' ),
@@ -2334,7 +2349,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'in_stock' => array(
-							'description' => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
+							'description' => __( 'Controls whether or not the variation is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'default'     => true,
 							'context'     => array( 'view', 'edit' ),
@@ -2353,33 +2368,33 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'readonly'    => true,
 						),
 						'backordered' => array(
-							'description' => __( 'Shows if a product is on backorder.', 'woocommerce' ),
+							'description' => __( 'Shows if a variation is on backorder.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'weight' => array(
-							'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), get_option( 'woocommerce_weight_unit' ) ),
+							'description' => sprintf( __( 'Variation weight (%s).', 'woocommerce' ), $weight_unit ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'dimensions' => array(
-							'description' => __( 'Product dimensions.', 'woocommerce' ),
+							'description' => __( 'Variation dimensions.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
 								'length' => array(
-									'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+									'description' => sprintf( __( 'Variation length (%s).', 'woocommerce' ), $dimension_unit ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
 								'width' => array(
-									'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+									'description' => sprintf( __( 'Variation width (%s).', 'woocommerce' ), $dimension_unit ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
 								'height' => array(
-									'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+									'description' => sprintf( __( 'Variation height (%s).', 'woocommerce' ), $dimension_unit ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
 								),
@@ -2405,7 +2420,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 									'description' => __( 'Image ID.', 'woocommerce' ),
 									'type'        => 'integer',
 									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
 								),
 								'date_created' => array(
 									'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
@@ -2447,37 +2461,19 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
+								'id' => array(
+									'description' => __( 'Attribute ID.', 'woocommerce' ),
+									'type'        => 'integer',
+									'context'     => array( 'view', 'edit' ),
+								),
 								'name' => array(
 									'description' => __( 'Attribute name.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => array( 'view', 'edit' ),
-									'required'    => true,
 								),
-								'slug' => array(
-									'description' => __( 'Attribute slug.', 'woocommerce' ),
+								'option' => array(
+									'description' => __( 'Selected attribute term name.', 'woocommerce' ),
 									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'position' => array(
-									'description' => __( 'Attribute position.', 'woocommerce' ),
-									'type'        => 'integer',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'visible' => array(
-									'description' => __( "Define if the attribute is visible on the \"Additional Information\" tab in the product's page.", 'woocommerce' ),
-									'type'        => 'boolean',
-									'default'     => false,
-									'context'     => array( 'view', 'edit' ),
-								),
-								'variation' => array(
-									'description' => __( 'Define if the attribute can be used as variation.', 'woocommerce' ),
-									'type'        => 'boolean',
-									'default'     => false,
-									'context'     => array( 'view', 'edit' ),
-								),
-								'options' => array(
-									'description' => __( 'List of available term names of the attribute.', 'woocommerce' ),
-									'type'        => 'array',
 									'context'     => array( 'view', 'edit' ),
 								),
 							),
@@ -2510,7 +2506,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$params = parent::get_collection_params();
 
 		$params['slug'] = array(
-			'description'       => __( 'Limit result set to posts with a specific slug.', 'woocommerce', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products with a specific slug.', 'woocommerce', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

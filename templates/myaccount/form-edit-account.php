@@ -33,7 +33,7 @@ do_action( 'woocommerce_account_navigation' ); ?>
 
 	<?php do_action( 'woocommerce_before_edit_account_form' ); ?>
 
-	<form class="woocommerce-EditAccountForm" action="" method="post">
+	<form class="woocommerce-EditAccountForm edit-account" action="" method="post">
 
 		<?php do_action( 'woocommerce_edit_account_form_start' ); ?>
 

@@ -159,6 +159,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'shipping_lines'       => array(),
 			'fee_lines'            => array(),
 			'coupon_lines'         => array(),
+			'refunds'              => array(),
 		);
 
 		// Add addresses.
@@ -318,6 +319,15 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			);
 
 			$data['coupon_lines'][] = $coupon_line;
+		}
+
+		// Add refunds.
+		foreach ( $order->get_refunds() as $refund ) {
+			$data['refunds'][] = array(
+				'id'     => $refund->id,
+				'refund' => $refund->get_refund_reason() ? $refund->get_refund_reason() : '',
+				'total'  => '-' . wc_format_decimal( $refund->get_refund_amount(), $dp ),
+			);
 		}
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -1679,6 +1689,32 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 						),
 						'discount_tax' => array(
 							'description' => __( 'Discount total tax.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
+				),
+				'refunds' => array(
+					'description' => __( 'List of refunds.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+					'properties'  => array(
+						'id' => array(
+							'description' => __( 'Refund ID.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'reason' => array(
+							'description' => __( 'Refund reason.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'total' => array(
+							'description' => __( 'Refund total.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,

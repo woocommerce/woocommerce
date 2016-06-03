@@ -397,16 +397,19 @@ class WC_Admin_Post_Types {
 				echo '</a>';
 				break;
 			case 'is_in_stock' :
+
 				if ( $the_product->is_in_stock() ) {
-					echo '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
+					$stock_html = '<mark class="instock">' . __( 'In stock', 'woocommerce' ) . '</mark>';
 				} else {
-					echo '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
+					$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
 
 				// If the product has children, a single stock level would be misleading as some could be -ve and some +ve, some managed/some unmanaged etc so hide stock level in this case.
 				if ( $the_product->managing_stock() && ! sizeof( $the_product->get_children() ) ) {
-					echo ' (' . $the_product->get_total_stock() . ')';
+					$stock_html .= ' (' . $the_product->get_total_stock() . ')';
 				}
+
+				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $the_product );
 
 				break;
 			default :

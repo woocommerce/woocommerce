@@ -184,8 +184,8 @@ class WC_Checkout {
 				'status'        => apply_filters( 'woocommerce_default_order_status', 'pending' ),
 				'customer_id'   => $this->customer_id,
 				'customer_note' => isset( $this->posted['order_comments'] ) ? $this->posted['order_comments'] : '',
-				'cart_hash'     => md5( print_r( WC()->cart->get_cart_for_session(), true ) . WC()->cart->total ),
-				'created_via'   => 'checkout'
+				'cart_hash'     => md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total ),
+				'created_via'   => 'checkout',
 			);
 
 			// Insert or update the post data
@@ -445,7 +445,7 @@ class WC_Checkout {
 					$this->posted[ $key ] = apply_filters( 'woocommerce_process_checkout_field_' . $key, $this->posted[ $key ] );
 
 					// Validation: Required fields
-					if ( isset( $field['required'] ) && $field['required'] && empty( $this->posted[ $key ] ) ) {
+					if ( isset( $field['required'] ) && $field['required'] && ( ! isset( $this->posted[ $key ] ) || "" === $this->posted[ $key ] ) ) {
 						switch ( $fieldset_key ) {
 							case 'shipping' :
 								$field_label = sprintf( _x( 'Shipping %s', 'Shipping FIELDNAME', 'woocommerce' ), $field['label'] );
