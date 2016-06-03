@@ -255,6 +255,8 @@ add_filter( 'jetpack_comment_form_enabled_for_product', '__return_false' );
 
 /**
  * My Account.
+ *
+ * @see woocommerce_account_introduction()
  */
 add_action( 'woocommerce_account_navigation', 'woocommerce_account_navigation' );
 add_action( 'woocommerce_account_orders_endpoint', 'woocommerce_account_orders' );
