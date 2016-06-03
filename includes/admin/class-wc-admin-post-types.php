@@ -109,6 +109,9 @@ class WC_Admin_Post_Types {
 			$user = wp_get_current_user();
 			update_user_option( $user->ID, 'manageedit-shop_ordercolumnshidden', array( 0 => 'billing_address' ), true );
 		}
+
+		// Show blank state
+		add_action( 'manage_posts_extra_tablenav', array( $this, 'maybe_render_blank_state' ) );
 	}
 
 	/**
@@ -2285,7 +2288,6 @@ class WC_Admin_Post_Types {
 		}
 	}
 
-
 	/**
 	 * Disable DFW feature pointer.
 	 */
@@ -2309,6 +2311,33 @@ class WC_Admin_Post_Types {
 	public function disable_view_mode_options( $post_types ) {
 		unset( $post_types['product'], $post_types['shop_order'], $post_types['shop_coupon'] );
 		return $post_types;
+	}
+
+	public function maybe_render_blank_state( $which ) {
+		global $post_type;
+
+		if ( 'shop_order' === $post_type && 'bottom' === $which ) {
+			$counts = (array) wp_count_posts( 'shop_order' );
+			unset( $counts['auto-draft'] );
+			$count  = array_sum( $counts );
+
+			if ( 0 === $count ) {
+				?>
+				<div class="woocommerce-BlankState">
+					<h2 class="woocommerce-BlankState-message"><?php _e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?></h2>
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woothemes.com/document/managing-orders/"><?php _e( 'Learn more about orders', 'woocommerce' ); ?></a>
+					<style type="text/css">
+						#posts-filter .wp-list-table,
+						#posts-filter .tablenav.top,
+						.wrap .subsubsub  {
+							display: none;
+						}
+					</style>
+				</div>
+				<?php
+			}
+		}
+
 	}
 }
 

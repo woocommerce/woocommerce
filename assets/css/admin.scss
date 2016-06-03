@@ -106,11 +106,8 @@
 	}
 }
 
-.woocommerce-message {
-	position: relative;
-	border-left-color: #cc99c2 !important;
-	overflow: hidden;
-
+.woocommerce-message,
+.woocommerce-BlankState {
 	a.button-primary,
 	button.button-primary {
 		background: #bb77ae;
@@ -127,6 +124,12 @@
 			box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
 		}
 	}
+}
+
+.woocommerce-message {
+	position: relative;
+	border-left-color: #cc99c2 !important;
+	overflow: hidden;
 
 	a.skip,
 	a.docs {
@@ -4609,6 +4612,37 @@ table.bar_chart {
 					background: transparent;
 				}
 			}
+		}
+	}
+}
+
+.post-type-shop_order {
+	.woocommerce-BlankState {
+		text-align: center;
+		padding: 5em 0 0;
+
+		.woocommerce-BlankState-message {
+			color: #aaa;
+			margin: 0 0 1.5em 0;
+
+			&:before {
+				@include icon_dashicons( "\f174" );
+				color: #ddd;
+				text-shadow: 0 -1px 0 #aaa, 0 1px 0 white;
+				font-size: 10em;
+				display: block;
+				position: relative !important;
+				top: auto;
+				left: auto;
+				line-height: 1em;
+				margin: 0 0 0.1em 0;
+			}
+		}
+
+		.woocommerce-BlankState-cta {
+			font-size: 1.2em;
+			padding: .75em 1.5em;
+			height: auto;
 		}
 	}
 }
