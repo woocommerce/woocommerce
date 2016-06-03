@@ -2316,28 +2316,40 @@ class WC_Admin_Post_Types {
 	public function maybe_render_blank_state( $which ) {
 		global $post_type;
 
-		if ( 'shop_order' === $post_type && 'bottom' === $which ) {
-			$counts = (array) wp_count_posts( 'shop_order' );
+		if ( in_array( $post_type, array( 'shop_order', 'product', 'shop_coupon' ) ) && 'bottom' === $which ) {
+			$counts = (array) wp_count_posts( $post_type );
 			unset( $counts['auto-draft'] );
 			$count  = array_sum( $counts );
 
-			if ( 0 === $count ) {
-				?>
-				<div class="woocommerce-BlankState">
+			if ( 0 < $count ) {
+				//return;
+			}
+
+			echo '<div class="woocommerce-BlankState">';
+
+			switch ( $post_type ) {
+				case 'shop_order' :
+					?>
 					<h2 class="woocommerce-BlankState-message"><?php _e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?></h2>
 					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woothemes.com/document/managing-orders/"><?php _e( 'Learn more about orders', 'woocommerce' ); ?></a>
-					<style type="text/css">
-						#posts-filter .wp-list-table,
-						#posts-filter .tablenav.top,
-						.wrap .subsubsub  {
-							display: none;
-						}
-					</style>
-				</div>
-				<?php
+					<?php
+				break;
+				case 'shop_coupon' :
+					?>
+					<h2 class="woocommerce-BlankState-message"><?php _e( 'Coupons are a great way to offer discounts and rewards to your customers. They will appear here once created.', 'woocommerce' ); ?></h2>
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woothemes.com/document/coupon-management/"><?php _e( 'Learn more about coupons', 'woocommerce' ); ?></a>
+					<?php
+				break;
+				case 'product' :
+					?>
+					<h2 class="woocommerce-BlankState-message"><?php _e( 'Ready to start selling something awesome?', 'woocommerce' ); ?></h2>
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ); ?>"><?php _e( 'Create your first product!', 'woocommerce' ); ?></a>
+					<?php
+				break;
 			}
-		}
 
+			echo '<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .wrap .subsubsub  { display: none; } </style></div>';
+		}
 	}
 }
 
