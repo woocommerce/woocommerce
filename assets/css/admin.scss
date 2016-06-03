@@ -114,32 +114,17 @@
 	a.button-primary,
 	button.button-primary {
 		background: #bb77ae;
-		border-color: #aa559a;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
+		border-color: #A36597;
+		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+		box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
 		color: #fff;
-		text-decoration: none !important;
-		text-shadow: 0px -1px 1px #8a4f7f, 1px 0px 1px #8a4f7f, 0px 1px 1px #8a4f7f, -1px 0px 1px #8a4f7f;
+		text-shadow: 0px -1px 1px #A36597, 1px 0px 1px #A36597, 0px 1px 1px #A36597, -1px 0px 1px #A36597;
 
-		&:hover {
-			background: #c480b7;
-			border-color: #aa559a;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-			box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-		}
-
-		&:active {
-			background: #aa559a;
-			border-color: #873A79;
-			-webkit-box-shadow: inset 0px 2px 0px #873A79;
-			box-shadow: inset 0px 2px 0px #873A79;
-		}
-
-		&:focus {
-			background: #bb77ae;
-			border-color: #aa559a;
-			-webkit-box-shadow: 0px 1px 0px #bb77ae, 0px 0px 2px 1px #aa559a;
-			box-shadow: 0px 1px 0px #bb77ae, 0px 0px 2px 1px #aa559a;
+		&:hover, &:focus, &:active {
+			background: #A36597;
+			border-color: #A36597;
+			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
+			box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 #A36597;
 		}
 	}
 
@@ -2325,8 +2310,8 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 			position: absolute;
 		}
 		.button-primary {
-			background-color: #a16696;
-			border-color: #a16696;
+			background-color: #804877;
+			border-color: #804877;
 			-webkit-box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 			box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
 			margin: 0;
