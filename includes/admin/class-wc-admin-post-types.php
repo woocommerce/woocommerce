@@ -2322,7 +2322,7 @@ class WC_Admin_Post_Types {
 			$count  = array_sum( $counts );
 
 			if ( 0 < $count ) {
-				//return;
+				return;
 			}
 
 			echo '<div class="woocommerce-BlankState">';
