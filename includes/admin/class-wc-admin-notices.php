@@ -85,8 +85,9 @@ class WC_Admin_Notices {
 		}
 
 		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
+		$location         = wc_get_base_location();
 
-		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] && in_array( WC()->countries->get_base_country(), apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] && in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
 			WC_Admin_Notices::add_notice( 'simplify_commerce' );
 		}
 
@@ -304,7 +305,9 @@ class WC_Admin_Notices {
 	 * Simplify Commerce is being removed from core.
 	 */
 	public static function simplify_commerce_notice() {
-		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) || ! in_array( WC()->countries->get_base_country(), apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
+		$location = wc_get_base_location();
+		
+		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) || ! in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
 			self::remove_notice( 'simplify_commerce' );
 			return;
 		}
