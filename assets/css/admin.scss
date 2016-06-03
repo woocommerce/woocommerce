@@ -4617,33 +4617,51 @@ table.bar_chart {
 }
 
 .post-type-shop_order {
-	.woocommerce-BlankState {
-		text-align: center;
-		padding: 5em 0 0;
+	.woocommerce-BlankState-message:before {
+		@include icon( "\e01d" );
+	}
+}
 
-		.woocommerce-BlankState-message {
-			color: #aaa;
-			margin: 0 0 1.5em 0;
+.post-type-shop_coupon {
+	.woocommerce-BlankState-message:before {
+		@include icon( "\e600" );
+	}
+}
 
-			&:before {
-				@include icon_dashicons( "\f174" );
-				color: #ddd;
-				text-shadow: 0 -1px 0 #aaa, 0 1px 0 white;
-				font-size: 10em;
-				display: block;
-				position: relative !important;
-				top: auto;
-				left: auto;
-				line-height: 1em;
-				margin: 0 0 0.1em 0;
-			}
+.post-type-product {
+	.woocommerce-BlankState-message:before {
+		@include icon( "\e006" );
+	}
+}
+
+.woocommerce-BlankState {
+	text-align: center;
+	padding: 5em 0 0;
+
+	.woocommerce-BlankState-message {
+		color: #aaa;
+		margin: 0 auto 1.5em;
+		line-height: 1.5em;
+		font-size: 1.2em;
+		max-width: 500px;
+
+		&:before {
+			color: #ddd;
+			text-shadow: 0 -1px 1px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.8);
+			font-size: 8em;
+			display: block;
+			position: relative !important;
+			top: auto;
+			left: auto;
+			line-height: 1em;
+			margin: 0 0 0.1875em 0;
 		}
+	}
 
-		.woocommerce-BlankState-cta {
-			font-size: 1.2em;
-			padding: .75em 1.5em;
-			height: auto;
-		}
+	.woocommerce-BlankState-cta {
+		font-size: 1.2em;
+		padding: .75em 1.5em;
+		height: auto;
 	}
 }
 
