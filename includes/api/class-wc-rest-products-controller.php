@@ -1946,7 +1946,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'backordered' => array(
-					'description' => __( 'Shows if a product is on backorder.', 'woocommerce' ),
+					'description' => __( 'Shows if the product is on backordered.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -2368,7 +2368,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'readonly'    => true,
 						),
 						'backordered' => array(
-							'description' => __( 'Shows if a variation is on backorder.', 'woocommerce' ),
+							'description' => __( 'Shows if the variation is on backordered.', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
