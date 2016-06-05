@@ -2412,7 +2412,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							'readonly'    => true,
 						),
 						'image' => array(
-							'description' => __( 'Varition image data.', 'woocommerce' ),
+							'description' => __( 'Variation image data.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
 							'properties'  => array(
