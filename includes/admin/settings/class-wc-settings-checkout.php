@@ -212,7 +212,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			array(
 				'title'    => __( 'Set Default Payment Method', 'woocommerce' ),
-				'desc'     => __( 'Endpoint for the setting a default payment page', 'woocommerce' ),
+				'desc'     => __( 'Endpoint for the setting a default payment method page', 'woocommerce' ),
 				'id'       => 'woocommerce_myaccount_set_default_payment_method_endpoint',
 				'type'     => 'text',
 				'default'  => 'set-default-payment-method',
