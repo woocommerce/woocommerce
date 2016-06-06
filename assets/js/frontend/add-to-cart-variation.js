@@ -118,6 +118,14 @@
 					// Get a matchihng variation via ajax
 					data.product_id = $product_id;
 
+					$( '.variations_form' ).block({
+						message: null,
+						overlayCSS: {
+							background: '#fff',
+							opacity: 0.6
+						}
+					});
+
 					$xhr = $.ajax( {
 						url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
 						type: 'POST',
@@ -130,6 +138,9 @@
 								$form.find( '.single_variation' ).after( '<p class="wc-no-matching-variations woocommerce-info">' + wc_add_to_cart_variation_params.i18n_no_matching_variations_text + '</p>' );
 								$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
 							}
+						},
+						complete: function() {
+							$( '.variations_form' ).unblock();
 						}
 					} );
 				} else {
