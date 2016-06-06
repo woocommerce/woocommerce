@@ -922,9 +922,7 @@ class WC_AJAX {
 			die(-1);
 		}
 
-		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
-			@set_time_limit( 0 );
-		}
+		wc_set_time_limit( 0 );
 
 		$post_id = intval( $_POST['post_id'] );
 

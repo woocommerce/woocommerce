@@ -1326,3 +1326,12 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 
 	return absint( $method_count );
 }
+
+/**
+ * Wrapper for set_time_limit to see if it is enabled.
+ */
+function wc_set_time_limit( $limit = 0 ) {
+	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
+		@set_time_limit( $limit );
+	}
+}
