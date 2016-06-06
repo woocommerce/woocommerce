@@ -91,7 +91,6 @@ class WC_REST_Authentication {
 	private function perform_basic_authentication() {
 		global $wc_rest_authentication_error;
 
-		$user            = null;
 		$consumer_key    = '';
 		$consumer_secret = '';
 
