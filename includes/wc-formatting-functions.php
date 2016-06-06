@@ -651,7 +651,7 @@ function wc_format_postcode( $postcode, $country ) {
  * @return string Sanitized postcode.
  */
 function wc_normalize_postcode( $postcode ) {
-	return trim( preg_replace( '/[\s]/', '', strtoupper( $postcode ) ) );
+	return trim( preg_replace( '/[\s\-]/', '', strtoupper( $postcode ) ) );
 }
 
 /**
