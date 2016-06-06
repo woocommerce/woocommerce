@@ -44,7 +44,7 @@ class WC_Shipping_Rate {
 	 *
 	 * @param string $id
 	 * @param string $label
-	 * @param float $cost
+	 * @param integer $cost
 	 * @param array $taxes
 	 * @param string $method_id
 	 */
@@ -87,8 +87,6 @@ class WC_Shipping_Rate {
 	/**
 	 * Get all meta data for this rate.
 	 * @since 2.6.0
-	 * @param string $key
-	 * @param string $value
 	 */
 	public function get_meta_data() {
 		return $this->meta_data;

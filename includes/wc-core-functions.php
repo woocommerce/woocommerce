@@ -209,6 +209,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
  * Like wc_get_template, but returns the HTML instead of outputting.
  * @see wc_get_template
  * @since 2.5.0
+ * @param string $template_name
  */
 function wc_get_template_html( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	ob_start();
@@ -1230,7 +1231,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
  * Return a list of potential postcodes for wildcard searching.
  * @since 2.6.0
  * @param  string $postcode
- * @return array
+ * @return string[]
  */
 function wc_get_wildcard_postcodes( $postcode ) {
 	$postcodes         = array( '*', strtoupper( $postcode ), strtoupper( $postcode ) . '*' );
@@ -1252,6 +1253,7 @@ function wc_get_wildcard_postcodes( $postcode ) {
  * @param array $objects Array of postcode objects from Database
  * @param string $object_compare_key DB column name for the ID.
  * @param string $object_compare_key DB column name for the value.
+ * @param string $object_id_key
  * @return array Array of matching object ID and values.
  */
 function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key ) {

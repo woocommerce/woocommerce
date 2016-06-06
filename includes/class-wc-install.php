@@ -240,6 +240,7 @@ class WC_Install {
 
 	/**
 	 * Update DB version to current.
+	 * @param string $version
 	 */
 	public static function update_db_version( $version = null ) {
 		delete_option( 'woocommerce_db_version' );

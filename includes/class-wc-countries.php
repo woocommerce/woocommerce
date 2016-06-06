@@ -64,7 +64,7 @@ class WC_Countries {
 	/**
 	 * Get continent code for a country code.
 	 * @since 2.6.0
-	 * @param $cc string
+	 * @param string $cc string
 	 * @return string
 	 */
 	public function get_continent_code_for_country( $cc ) {

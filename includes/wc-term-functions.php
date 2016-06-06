@@ -307,7 +307,7 @@ function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = 
  *
  * @todo These functions should be deprecated with notices in a future WC version, allowing users a chance to upgrade WordPress.
  * @param mixed $term_id
- * @param mixed $meta_key
+ * @param string $meta_key
  * @param string $meta_value (default: '')
  * @param bool $deprecated (default: false)
  * @return bool
@@ -689,7 +689,6 @@ function wc_get_term_product_ids( $term_id, $taxonomy ) {
 
 /**
  * When a post is updated and terms recounted (called by _update_post_term_count), clear the ids.
- * @param int $term_id
  * @param int    $object_id  Object ID.
  * @param array  $terms      An array of object terms.
  * @param array  $tt_ids     An array of term taxonomy IDs.

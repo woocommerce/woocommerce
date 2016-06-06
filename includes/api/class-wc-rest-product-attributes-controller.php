@@ -494,7 +494,6 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 * Prepare links for the request.
 	 *
 	 * @param object $attribute Attribute object.
-	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Links for the given attribute.
 	 */
 	protected function prepare_links( $attribute ) {
@@ -586,7 +585,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Controller {
 	 * Get attribute name.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return int|WP_Error
+	 * @return string
 	 */
 	protected function get_taxonomy( $request ) {
 		if ( '' !== $this->attribute ) {

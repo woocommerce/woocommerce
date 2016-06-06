@@ -387,7 +387,6 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
-	 * @param WP_Post $webhook Webhook object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
