@@ -2092,6 +2092,33 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_account_content' ) ) {
+
+	/**
+	 * My Account content output.
+	 */
+	function woocommerce_account_content() {
+		global $wp;
+
+		foreach ( $wp->query_vars as $key => $value ) {
+			// Ignore pagename param.
+			if ( 'pagename' === $key ) {
+				continue;
+			}
+
+			if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
+				do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+				return;
+			}
+		}
+
+		// No endpoint found? Default to dashboard.
+		wc_get_template( 'myaccount/dashboard.php', array(
+			'current_user' => get_user_by( 'id', get_current_user_id() ),
+		) );
+	}
+}
+
 if ( ! function_exists( 'woocommerce_account_navigation' ) ) {
 
 	/**
