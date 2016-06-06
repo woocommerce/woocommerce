@@ -773,6 +773,11 @@ class WC_Cart {
 				}
 			}
 
+			if ( apply_filters( 'woocommerce_cart_hide_zero_taxes', true ) ) {
+				$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
+				$tax_totals = array_intersect_key( $tax_totals, $amounts );
+			}
+
 			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
 		}
 

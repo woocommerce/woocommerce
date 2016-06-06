@@ -1363,6 +1363,11 @@ abstract class WC_Abstract_Order {
 			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array('currency' => $this->get_order_currency()) );
 		}
 
+		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
+			$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
+			$tax_totals = array_intersect_key( $tax_totals, $amounts );
+		}
+
 		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
 	}
 
