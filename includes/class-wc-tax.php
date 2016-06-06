@@ -617,7 +617,9 @@ class WC_Tax {
 
 	/**
 	 * format the postcodes.
+	 *
 	 * @param  string $postcode
+	 * @param  string $country
 	 * @return string
 	 */
 	private static function format_tax_rate_postcode( $postcode, $country = '' ) {
