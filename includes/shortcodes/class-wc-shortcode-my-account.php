@@ -47,7 +47,31 @@ class WC_Shortcode_My_Account {
 				wc_get_template( 'myaccount/form-login.php' );
 			}
 		 } else {
-			self::my_account( $atts );
+			 wc_print_notices();
+			 ob_start();
+			 self::my_account( $atts );
+
+			/**
+			 * @deprecated my-account.php template handling. This code should be
+			 * removed in a future release.
+			 *
+			 * If woocommerce_account_content did not run, this is an old template
+			 * so we need to render the endpoint content again.
+			 */
+			if ( ! did_action( 'woocommerce_account_content' ) ) {
+				foreach ( $wp->query_vars as $key => $value ) {
+					if ( 'pagename' === $key ) {
+						continue;
+					}
+					if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
+						ob_clean();
+						do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+						break;
+					}
+	 			}
+			}
+
+			ob_end_flush();
 		}
 	}
 
