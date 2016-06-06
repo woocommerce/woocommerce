@@ -423,7 +423,7 @@ class WC_Meta_Box_Product_Data {
 							// Array of defined attribute taxonomies
 							$attribute_taxonomies = wc_get_attribute_taxonomies();
 
-							if ( $attribute_taxonomies ) {
+							if ( ! empty( $attribute_taxonomies ) ) {
 								foreach ( $attribute_taxonomies as $tax ) {
 									$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
 									$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
@@ -960,16 +960,7 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		if ( ! function_exists( 'attributes_cmp' ) ) {
-			function attributes_cmp( $a, $b ) {
-				if ( $a['position'] == $b['position'] ) {
-					return 0;
-				}
-
-				return ( $a['position'] < $b['position'] ) ? -1 : 1;
-			}
-		}
-		uasort( $attributes, 'attributes_cmp' );
+		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
 
 		/**
 		 * Unset removed attributes by looping over previous values and

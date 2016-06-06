@@ -72,7 +72,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 */
 	public function get_chart_legend() {
 
-		if ( ! $this->show_categories ) {
+		if ( empty( $this->show_categories ) ) {
 			return array();
 		}
 
@@ -127,7 +127,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		$this->calculate_current_range( $current_range );
 
 		// Get item sales data
-		if ( $this->show_categories ) {
+		if ( ! empty( $this->show_categories ) ) {
 			$order_items = $this->get_order_report_data( array(
 				'data' => array(
 					'_product_id' => array(
@@ -276,7 +276,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	public function get_main_chart() {
 		global $wp_locale;
 
-		if ( ! $this->show_categories ) {
+		if ( empty( $this->show_categories ) ) {
 			?>
 			<div class="chart-container">
 				<p class="chart-prompt"><?php _e( '&larr; Choose a category to view stats', 'woocommerce' ); ?></p>

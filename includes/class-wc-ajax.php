@@ -748,16 +748,7 @@ class WC_AJAX {
 			 }
 		}
 
-		if ( ! function_exists( 'attributes_cmp' ) ) {
-			function attributes_cmp( $a, $b ) {
-				if ( $a['position'] == $b['position'] ) {
-					return 0;
-				}
-
-				return ( $a['position'] < $b['position'] ) ? -1 : 1;
-			}
-		}
-		uasort( $attributes, 'attributes_cmp' );
+		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
 
 		update_post_meta( $post_id, '_product_attributes', $attributes );
 
