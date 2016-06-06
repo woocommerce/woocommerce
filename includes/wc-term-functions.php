@@ -197,23 +197,6 @@ function wc_walk_category_dropdown_tree() {
 }
 
 /**
- * WooCommerce Term/Order item Meta API - set table name.
- */
-function wc_taxonomy_metadata_wpdbfix() {
-	global $wpdb;
-	$termmeta_name = 'woocommerce_termmeta';
-	$itemmeta_name = 'woocommerce_order_itemmeta';
-
-	$wpdb->woocommerce_termmeta = $wpdb->prefix . $termmeta_name;
-	$wpdb->order_itemmeta = $wpdb->prefix . $itemmeta_name;
-
-	$wpdb->tables[] = 'woocommerce_termmeta';
-	$wpdb->tables[] = 'woocommerce_order_itemmeta';
-}
-add_action( 'init', 'wc_taxonomy_metadata_wpdbfix', 0 );
-add_action( 'switch_blog', 'wc_taxonomy_metadata_wpdbfix', 0 );
-
-/**
  * When a term is split, ensure meta data maintained.
  * @param  int $old_term_id
  * @param  int $new_term_id
