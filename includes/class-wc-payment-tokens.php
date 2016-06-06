@@ -76,7 +76,7 @@ class WC_Payment_Tokens {
 	 * Returns an array of payment token objects associated with the passed customer ID.
 	 * @since 2.6.0
 	 * @param  int    $customer_id  Customer ID
-	 * @param  string $gateway      Optional Gateway ID for getting tokens for a specific gateway
+	 * @param  string $gateway_id      Optional Gateway ID for getting tokens for a specific gateway
 	 * @return array                Array of token objects
 	 */
 	public static function get_customer_tokens( $customer_id, $gateway_id = '' ) {

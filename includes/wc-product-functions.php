@@ -706,7 +706,6 @@ function wc_get_product_cat_ids( $product_id ) {
 /**
  * Gets data about an attachment, such as alt text and captions.
  * @since 2.6.0
- * @param int $thumbnail_id
  * @param object|bool $product
  * @return array
  */

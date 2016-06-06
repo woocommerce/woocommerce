@@ -628,7 +628,7 @@ function wc_get_customer_saved_methods_list( $customer_id ) {
  *
  * @since 2.6.0
  * @param int $customer_id Customer ID.
- * @return WC_Order|bool Order object if successful or false.
+ * @return WC_Order Order object if successful or false.
  */
 function wc_get_customer_last_order( $customer_id ) {
 	global $wpdb;

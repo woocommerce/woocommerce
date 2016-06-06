@@ -82,7 +82,6 @@ class WC_Shipping_Zones {
 	/**
 	 * Get shipping zone using it's ID
 	 * @since 2.6.0
-	 * @param int $zone_id
 	 * @return WC_Shipping_Meethod|bool
 	 */
 	public static function get_shipping_method( $instance_id ) {
