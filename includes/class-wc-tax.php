@@ -233,7 +233,7 @@ class WC_Tax {
 			return array();
 		}
 
-		$postcode          = wc_clean( $postcode );
+		$postcode          = wc_normalize_postcode( wc_clean( $postcode ) );
 		$cache_key         = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, $postcode, $tax_class ) );
 		$matched_tax_rates = wp_cache_get( $cache_key, 'taxes' );
 
@@ -812,14 +812,7 @@ class WC_Tax {
 		if ( ! is_array( $postcodes ) ) {
 			$postcodes = explode( ';', $postcodes );
 		}
-		$tax_rate  = self::_get_tax_rate( $tax_rate_id );
-		$postcodes = array_diff( array_filter( $postcodes ), array( '*' ) );
-
-		foreach ( $postcodes as $key => $postcode ) {
-			$postcodes[ $key ] = wc_format_postcode( $postcode, $tax_rate['tax_rate_country'] );
-		}
-
-		self::_update_tax_rate_locations( $tax_rate_id, $postcodes, 'postcode' );
+		self::_update_tax_rate_locations( $tax_rate_id, array_diff( array_map( 'wc_normalize_postcode', array_filter( $postcodes ) ), array( '*' ) ), 'postcode' );
 	}
 
 	/**
