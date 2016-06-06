@@ -620,8 +620,8 @@ class WC_Tax {
 	 * @param  string $postcode
 	 * @return string
 	 */
-	private static function format_tax_rate_postcode( $postcode ) {
-		return strtoupper( trim( $postcode ) );
+	private static function format_tax_rate_postcode( $postcode, $country = '' ) {
+		return wc_format_postcode( $postcode, $country );
 	}
 
 	/**
@@ -821,7 +821,12 @@ class WC_Tax {
 		if ( ! is_array( $postcodes ) ) {
 			$postcodes = explode( ';', $postcodes );
 		}
-		$postcodes = array_filter( array_diff( array_map( array( __CLASS__, 'format_tax_rate_postcode' ), $postcodes ), array( '*' ) ) );
+		$tax_rate  = self::_get_tax_rate( $tax_rate_id );
+		$postcodes = array_diff( array_filter( $postcodes ), array( '*' ) );
+
+		foreach ( $postcodes as $key => $postcode ) {
+			$postcodes[ $key ] = self::format_tax_rate_postcode( $postcode, $tax_rate['tax_rate_country'] );
+		}
 
 		self::_update_tax_rate_locations( $tax_rate_id, $postcodes, 'postcode' );
 	}
