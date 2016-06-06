@@ -52,7 +52,7 @@ class WC_Shortcode_My_Account {
 			 self::my_account( $atts );
 
 			/**
-			 * @deprecated my-account.php template handling. This code should be
+			 * Deprecated my-account.php template handling. This code should be
 			 * removed in a future release.
 			 *
 			 * If woocommerce_account_content did not run, this is an old template
@@ -69,6 +69,8 @@ class WC_Shortcode_My_Account {
 						break;
 					}
 	 			}
+
+				_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
 			}
 
 			ob_end_flush();
