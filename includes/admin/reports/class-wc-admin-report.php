@@ -47,14 +47,14 @@ class WC_Admin_Report {
 	/**
 	 * The start date of the report.
 	 *
-	 * @var string
+	 * @var int timestamp
 	 */
 	public $start_date;
 
 	/**
 	 * The end date of the report.
 	 *
-	 * @var string
+	 * @var int timestamp
 	 */
 	public $end_date;
 

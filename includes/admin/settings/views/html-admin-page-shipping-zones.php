@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						$worldwide = new WC_Shipping_Zone( 0 );
 						$methods   = $worldwide->get_shipping_methods();
 
-						if ( $methods ) {
+						if ( ! empty( $methods ) ) {
 							foreach ( $methods as $method ) {
 								$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
 								echo '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' . absint( $method->instance_id ) . '" class="' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</a></li>';

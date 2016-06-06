@@ -968,7 +968,7 @@ class WC_Meta_Box_Product_Data {
 		 */
 		$old_attributes = array_filter( (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) ) );
 
-		if ( $old_attributes ) {
+		if ( ! empty( $old_attributes ) ) {
 			foreach ( $old_attributes as $key => $value ) {
 				if ( empty( $attributes[ $key ] ) && ! empty( $value['is_taxonomy'] ) && taxonomy_exists( $key ) ) {
 					wp_set_object_terms( $post_id, array(), $key );
