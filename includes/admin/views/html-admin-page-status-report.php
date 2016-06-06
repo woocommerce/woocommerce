@@ -156,8 +156,8 @@ global $wpdb;
 				<td><?php echo ini_get( 'max_input_vars' ); ?></td>
 			</tr>
 			<tr>
-				<td data-export-label="CURL Version"><?php _e( 'CURL Version', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( __( 'The version of CURL installed on your server.', 'woocommerce' ) ); ?></td>
+				<td data-export-label="cURL Version"><?php _e( 'cURL Version', 'woocommerce' ); ?>:</td>
+				<td class="help"><?php echo wc_help_tip( __( 'The version of cURL installed on your server.', 'woocommerce' ) ); ?></td>
 				<td><?php
 					if ( function_exists( 'curl_version' ) ) {
 						$curl_version = curl_version();

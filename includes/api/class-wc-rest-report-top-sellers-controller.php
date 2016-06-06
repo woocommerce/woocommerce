@@ -80,7 +80,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 
 			if ( $product ) {
 				$top_sellers[] = array(
-					'title'      => $product->get_title(),
+					'name'      => $product->get_title(),
 					'product_id' => (int) $item->product_id,
 					'quantity'   => wc_stock_amount( $item->order_item_qty ),
 				);
@@ -105,7 +105,7 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 	 */
 	public function prepare_item_for_response( $top_seller, $request ) {
 		$data = array(
-			'title'      => $top_seller->title,
+			'name'       => $top_seller->name,
 			'product_id' => $top_seller->product_id,
 			'quantity'   => $top_seller->quantity,
 		);
@@ -148,8 +148,8 @@ class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Sales_Control
 			'title'      => 'top_sellers_report',
 			'type'       => 'object',
 			'properties' => array(
-				'title' => array(
-					'description' => __( 'Product title.', 'woocommerce' ),
+				'name' => array(
+					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

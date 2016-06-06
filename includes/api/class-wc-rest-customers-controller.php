@@ -381,7 +381,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 		}
 
 		if ( ! empty( $request['username'] ) && $request['username'] !== $customer->user_login ) {
-			return new WP_Error( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable", 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable.", 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Customer email.

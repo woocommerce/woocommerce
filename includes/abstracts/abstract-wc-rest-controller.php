@@ -30,6 +30,38 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	protected $rest_base = '';
 
 	/**
+	 * Add the schema from additional fields to an schema array.
+	 *
+	 * The type of object is inferred from the passed schema.
+	 *
+	 * @param array $schema Schema array.
+	 */
+	protected function add_additional_fields_schema( $schema ) {
+		if ( empty( $schema['title'] ) ) {
+			return $schema;
+		}
+
+		/**
+		 * Can't use $this->get_object_type otherwise we cause an inf loop.
+		 */
+		$object_type = $schema['title'];
+
+		$additional_fields = $this->get_additional_fields( $object_type );
+
+		foreach ( $additional_fields as $field_name => $field_options ) {
+			if ( ! $field_options['schema'] ) {
+				continue;
+			}
+
+			$schema['properties'][ $field_name ] = $field_options['schema'];
+		}
+
+		$schema['properties'] = apply_filters( 'woocommerce_rest_' . $object_type . '_schema', $schema['properties'] );
+
+		return $schema;
+	}
+
+	/**
 	 * Get normalized rest base.
 	 *
 	 * @return string
