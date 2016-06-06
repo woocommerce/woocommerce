@@ -104,7 +104,6 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			$index = 0;
 			$stack = new WC_Eval_Math_Stack;
 			$output = array(); // postfix form of expression, to be passed to pfx()
-			// $expr = trim(strtolower($expr));
 			$expr = trim( $expr );
 
 			$ops   = array( '+', '-', '*', '/', '^', '_' );

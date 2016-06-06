@@ -14,7 +14,7 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 		public static $last_error = null;
 
 		/** @var array */
-		public static $v = array( 'e' => 2.71, 'pi' => 3.14 ); // variables (and constants)
+		public static $v = array( 'e' => 2.71, 'pi' => 3.14 );
 
 		/** @var array */
 		public static $f = array(); // user-defined functions
@@ -83,7 +83,6 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			$index = 0;
 			$stack = new WC_Eval_Math_Stack;
 			$output = array(); // postfix form of expression, to be passed to pfx()
-			// $expr = trim(strtolower($expr));
 			$expr = trim( $expr );
 
 			$ops   = array( '+', '-', '*', '/', '^', '_' );
