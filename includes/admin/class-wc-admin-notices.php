@@ -18,6 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Notices {
 
 	/**
+	 * Stores notices.
+	 * @var array
+	 */
+	private static $notices = array();
+
+	/**
 	 * Array of notices - name => callback.
 	 * @var array
 	 */
@@ -31,12 +37,6 @@ class WC_Admin_Notices {
 		'no_shipping_methods' => 'no_shipping_methods_notice',
 		'simplify_commerce'   => 'simplify_commerce_notice',
 	);
-
-	/**
-	 * Stores notices.
-	 * @var array
-	 */
-	private static $notices = array();
 
 	/**
 	 * Constructor.

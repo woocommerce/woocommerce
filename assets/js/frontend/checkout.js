@@ -316,7 +316,7 @@ jQuery( function( $ ) {
 
 					}
 
-					// re-init methods
+					// Re-init methods
 					wc_checkout_form.init_payment_methods();
 
 					// Fire updated_checkout e
@@ -359,7 +359,7 @@ jQuery( function( $ ) {
 						}
 
 						try {
-							// check for valid JSON
+							// Check for valid JSON
 							var data = $.parseJSON( raw_response );
 
 							if ( data && 'object' === typeof data ) {
@@ -370,7 +370,7 @@ jQuery( function( $ ) {
 
 						} catch ( e ) {
 
-							// attempt to fix the malformed JSON
+							// Attempt to fix the malformed JSON
 							var valid_json = raw_response.match( /{"result.*"}/ );
 
 							if ( null === valid_json ) {
@@ -528,13 +528,13 @@ jQuery( function( $ ) {
 
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 
-						// remove coupon code from coupon field
+						// Remove coupon code from coupon field
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
 					}
 				},
 				error: function ( jqXHR ) {
 					if ( wc_checkout_params.debug_mode ) {
-						/*jshint devel: true */
+						/* jshint devel: true */
 						console.log( jqXHR.responseText );
 					}
 				},
