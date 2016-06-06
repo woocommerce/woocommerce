@@ -18,25 +18,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
  abstract class WC_Payment_Token extends WC_Data {
 
- 	/**
- 	 * Token Data (stored in the payment_tokens table).
- 	 * @var array
- 	 */
- 	protected $_data = array(
- 		'id'         => 0,
- 		'gateway_id' => '',
- 		'token'      => '',
- 		'is_default' => 0,
- 		'user_id'    => 0,
- 	);
+	/**
+	 * Token Data (stored in the payment_tokens table).
+	 * @var array
+	 */
+	protected $_data = array(
+		 'id'         => 0,
+		 'gateway_id' => '',
+		 'token'      => '',
+		 'is_default' => 0,
+		 'user_id'    => 0,
+	);
 
- 	/**
- 	 * Meta type. Payment tokens are a new object type.
- 	 * @var string
- 	 */
- 	protected $_meta_type = 'payment_token';
+	/**
+	 * Meta type. Payment tokens are a new object type.
+	 * @var string
+	 */
+	protected $_meta_type = 'payment_token';
 
- 	/**
+	 /**
 	 * Initialize a payment token.
 	 *
 	 * These fields are accepted by all payment tokens:

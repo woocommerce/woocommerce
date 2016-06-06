@@ -20,7 +20,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	/** @protected string Token Type String */
 	protected $type = 'eCheck';
 
- 	/**
+	/**
 	 * Validate eCheck payment tokens.
 	 *
 	 * These fields are required by all eCheck payment tokens:
