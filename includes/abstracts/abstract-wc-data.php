@@ -143,7 +143,7 @@ abstract class WC_Data {
 		$array_keys = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
 		$value    = '';
 
-		if ( $array_keys ) {
+		if ( ! empty( $array_keys ) ) {
 			if ( $single ) {
 				$value = $this->_meta_data[ current( $array_keys ) ]->value;
 			} else {

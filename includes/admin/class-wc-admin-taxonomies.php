@@ -41,7 +41,7 @@ class WC_Admin_Taxonomies {
 
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
-		if ( $attribute_taxonomies ) {
+		if ( ! empty( $attribute_taxonomies ) ) {
 			foreach ( $attribute_taxonomies as $attribute ) {
 				add_action( 'pa_' . $attribute->attribute_name . '_pre_add_form', array( $this, 'product_attribute_description' ) );
 			}

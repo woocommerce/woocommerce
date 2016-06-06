@@ -52,7 +52,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	 */
 	public function get_chart_legend() {
 
-		if ( ! $this->product_ids ) {
+		if ( empty( $this->product_ids ) ) {
 			return array();
 		}
 
@@ -388,7 +388,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	public function get_main_chart() {
 		global $wp_locale;
 
-		if ( ! $this->product_ids ) {
+		if ( empty( $this->product_ids ) ) {
 			?>
 			<div class="chart-container">
 				<p class="chart-prompt"><?php _e( '&larr; Choose a product to view stats', 'woocommerce' ); ?></p>

@@ -154,7 +154,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 					<th class="total_row"><?php _e( 'Total Tax', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'This is the total tax for the rate (shipping tax + product tax).', 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>
-			<?php if ( $tax_rows ) : ?>
+			<?php if ( ! empty( $tax_rows ) ) : ?>
 				<tbody>
 					<?php
 					foreach ( $tax_rows as $rate_id => $tax_row ) {

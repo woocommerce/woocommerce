@@ -1329,9 +1329,21 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 
 /**
  * Wrapper for set_time_limit to see if it is enabled.
+ * @since 2.6.0
  */
 function wc_set_time_limit( $limit = 0 ) {
 	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
 		@set_time_limit( $limit );
 	}
+}
+
+/**
+ * Used to sort products attributes with uasort.
+ * @since 2.6.0
+ */
+function wc_product_attribute_uasort_comparison( $a, $b ) {
+	if ( $a['position'] == $b['position'] ) {
+		return 0;
+	}
+	return ( $a['position'] < $b['position'] ) ? -1 : 1;
 }
