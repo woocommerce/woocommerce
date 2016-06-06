@@ -1,14 +1,15 @@
 <?php
 /**
- * background updater.
+ * Background Updater
  *
  * Uses https://github.com/A5hleyRich/wp-background-processing to handle DB
  * updates in the background.
  *
- * @author   WooThemes
- * @category Admin
- * @package  WooCommerce/Classes
+ * @class    WC_Background_Updater
  * @version  2.6.0
+ * @package  WooCommerce/Classes
+ * @category Class
+ * @author   WooThemes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

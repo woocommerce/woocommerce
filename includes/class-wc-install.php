@@ -1,6 +1,6 @@
 <?php
 /**
- * Installation related functions and actions
+ * Installation related functions and actions.
  *
  * @author   WooThemes
  * @category Admin
@@ -119,17 +119,6 @@ class WC_Install {
 	}
 
 	/**
-	 * Show notice stating update was successful.
-	 */
-	public static function updated_notice() {
-		?>
-		<div id="message" class="updated woocommerce-message wc-connect">
-			<p><?php _e( 'WooCommerce data update complete. Thank you for updating to the latest version!', 'woocommerce' ); ?></p>
-		</div>
-		<?php
-	}
-
-	/**
 	 * Install WC.
 	 */
 	public static function install() {
@@ -190,8 +179,8 @@ class WC_Install {
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		/*
-		 * Deletes all expired transients. The multi-table delete syntax is used.
-		 * to delete the transient record from table a, and the corresponding.
+		 * Deletes all expired transients. The multi-table delete syntax is used
+		 * to delete the transient record from table a, and the corresponding
 		 * transient_timeout record from table b.
 		 *
 		 * Based on code inside core's upgrade_network() function.
