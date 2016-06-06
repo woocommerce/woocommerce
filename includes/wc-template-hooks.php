@@ -255,6 +255,8 @@ add_filter( 'jetpack_comment_form_enabled_for_product', '__return_false' );
 
 /**
  * My Account.
+ *
+ * @see woocommerce_account_introduction()
  */
 add_action( 'woocommerce_account_navigation', 'woocommerce_account_navigation' );
 add_action( 'woocommerce_account_content', 'woocommerce_account_content' );
@@ -265,3 +267,4 @@ add_action( 'woocommerce_account_edit-address_endpoint', 'woocommerce_account_ed
 add_action( 'woocommerce_account_payment-methods_endpoint', 'woocommerce_account_payment_methods' );
 add_action( 'woocommerce_account_add-payment-method_endpoint', 'woocommerce_account_add_payment_method' );
 add_action( 'woocommerce_account_edit-account_endpoint', 'woocommerce_account_edit_account' );
+add_action( 'woocommerce_account_dashboard', 'woocommerce_account_introduction' );
