@@ -1392,7 +1392,7 @@ class WC_API_Products extends WC_API_Resource {
 						wp_set_object_terms( $product_id, $values, $taxonomy );
 					}
 
-					if ( $values ) {
+					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values.
 						$attributes[ $taxonomy ] = array(
 							'name'         => $taxonomy,
@@ -1494,7 +1494,7 @@ class WC_API_Products extends WC_API_Resource {
 				$clear_parent_ids[] = $product_id;
 			}
 
-			if ( $clear_parent_ids ) {
+			if ( ! empty( $clear_parent_ids ) ) {
 				foreach ( $clear_parent_ids as $clear_id ) {
 
 					$children_by_price = get_posts( array(

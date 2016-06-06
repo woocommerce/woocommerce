@@ -159,7 +159,7 @@ function wc_product_dropdown_categories( $args = array(), $deprecated_hierarchic
 
 	$terms = get_terms( 'product_cat', apply_filters( 'wc_product_dropdown_categories_get_terms_args', $args ) );
 
-	if ( ! $terms ) {
+	if ( empty( $terms ) ) {
 		return;
 	}
 
@@ -538,7 +538,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	}
 
 	// Exit if we have no terms to count
-	if ( ! $terms ) {
+	if ( empty( $terms ) ) {
 		return;
 	}
 

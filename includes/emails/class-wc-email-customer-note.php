@@ -56,7 +56,7 @@ class WC_Email_Customer_Note extends WC_Email {
 	 */
 	public function trigger( $args ) {
 
-		if ( $args ) {
+		if ( ! empty( $args ) ) {
 
 			$defaults = array(
 				'order_id'      => '',

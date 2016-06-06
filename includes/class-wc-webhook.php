@@ -28,7 +28,6 @@ class WC_Webhook {
 	 *
 	 * @since 2.2
 	 * @param string|int $id
-	 * @return \WC_Webhook
 	 */
 	public function __construct( $id ) {
 

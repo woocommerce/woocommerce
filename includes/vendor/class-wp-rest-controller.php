@@ -418,7 +418,7 @@ abstract class WP_REST_Controller {
 	protected function get_object_type() {
 		$schema = $this->get_item_schema();
 
-		if ( ! $schema || ! isset( $schema['title'] ) ) {
+		if ( empty( $schema ) || ! isset( $schema['title'] ) ) {
 			return null;
 		}
 

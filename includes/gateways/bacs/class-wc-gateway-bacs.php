@@ -357,7 +357,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 */
 	public function get_country_locale() {
 
-		if ( ! $this->locale ) {
+		if ( empty( $this->locale ) ) {
 
 			// Locale information to be used - only those that are not 'Sort Code'
 			$this->locale = apply_filters( 'woocommerce_get_bacs_locale', array(

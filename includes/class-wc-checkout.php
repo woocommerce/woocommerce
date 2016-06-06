@@ -414,7 +414,7 @@ class WC_Checkout {
 				}
 
 				// Skip account if not needed
-				if ( $fieldset_key == 'account' && ( is_user_logged_in() || ( $this->must_create_account == false && empty( $this->posted['createaccount'] ) ) ) ) {
+				if ( 'account' === $fieldset_key && ( is_user_logged_in() || ( false === $this->must_create_account && empty( $this->posted['createaccount'] ) ) ) ) {
 					continue;
 				}
 

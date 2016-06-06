@@ -278,7 +278,7 @@ class WC_Admin_Status {
 		$files  = @scandir( WC_LOG_DIR );
 		$result = array();
 
-		if ( $files ) {
+		if ( ! empty( $files ) ) {
 
 			foreach ( $files as $key => $value ) {
 

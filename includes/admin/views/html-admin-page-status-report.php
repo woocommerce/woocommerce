@@ -762,7 +762,7 @@ global $wpdb;
 				}
 			}
 
-			if ( $found_files ) {
+			if ( ! empty( $found_files ) ) {
 				foreach ( $found_files as $plugin_name => $found_plugin_files ) {
 					?>
 					<tr>

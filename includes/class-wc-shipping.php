@@ -131,7 +131,7 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function load_shipping_methods( $package = array() ) {
-		if ( $package ) {
+		if ( ! empty( $package ) ) {
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
 		} else {
@@ -317,7 +317,7 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
-		if ( ! $this->enabled || ! $package ) {
+		if ( ! $this->enabled || empty( $package ) ) {
 			return false;
 		}
 

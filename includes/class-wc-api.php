@@ -45,9 +45,7 @@ class WC_API {
 
 	/**
 	 * Setup class.
-	 *
 	 * @since 2.0
-	 * @return WC_API
 	 */
 	public function __construct() {
 		// Add query vars.

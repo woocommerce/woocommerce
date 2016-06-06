@@ -970,7 +970,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						wp_set_object_terms( $product->id, $values, $attribute_name );
 					}
 
-					if ( $values ) {
+					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values.
 						$attributes[ $attribute_name ] = array(
 							'name'         => $attribute_name,
@@ -1071,7 +1071,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				$clear_parent_ids[] = $product->id;
 			}
 
-			if ( $clear_parent_ids ) {
+			if ( ! empty( $clear_parent_ids ) ) {
 				foreach ( $clear_parent_ids as $clear_id ) {
 
 					$children_by_price = get_posts( array(

@@ -1517,7 +1517,7 @@ class WC_Cart {
 
 			$needs_shipping = false;
 
-			if ( $this->cart_contents ) {
+			if ( ! empty( $this->cart_contents ) ) {
 				foreach ( $this->cart_contents as $cart_item_key => $values ) {
 					$_product = $values['data'];
 					if ( $_product->needs_shipping() ) {

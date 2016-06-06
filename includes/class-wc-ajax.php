@@ -716,7 +716,7 @@ class WC_AJAX {
 						wp_set_object_terms( $post_id, $values, $attribute_names[ $i ] );
 					}
 
-					if ( $values ) {
+					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values
 						$attributes[ sanitize_title( $attribute_names[ $i ] ) ] = array(
 							'name' 			=> wc_clean( $attribute_names[ $i ] ),
@@ -1065,7 +1065,7 @@ class WC_AJAX {
 				die();
 			}
 
-			if ( $files ) {
+			if ( ! empty( $files ) ) {
 				foreach ( $files as $download_id => $file ) {
 					if ( $inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order ) ) {
 

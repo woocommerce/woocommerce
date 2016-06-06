@@ -33,7 +33,6 @@ class WC_Order_Item_Meta {
 	 *
 	 * @param array $item defaults to array()
 	 * @param \WC_Product $product defaults to null
-	 * @return \WC_Order_Item_Meta instance
 	 */
 	public function __construct( $item = array(), $product = null ) {
 		// Backwards (pre 2.4) compat

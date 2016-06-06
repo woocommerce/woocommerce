@@ -184,7 +184,7 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path (default: '')
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	if ( $args && is_array( $args ) ) {
+	if ( ! empty( $args ) && is_array( $args ) ) {
 		extract( $args );
 	}
 

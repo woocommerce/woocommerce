@@ -167,7 +167,7 @@ class WC_Tax {
 	public static function calc_exclusive_tax( $price, $rates ) {
 		$taxes = array();
 
-		if ( $rates ) {
+		if ( ! empty( $rates ) ) {
 			// Multiple taxes
 			foreach ( $rates as $key => $rate ) {
 

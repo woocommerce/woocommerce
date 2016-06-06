@@ -274,7 +274,7 @@ function wc_update_200_line_items() {
 
 		$order_taxes = (array) maybe_unserialize( $order_tax_row->meta_value );
 
-		if ( $order_taxes ) {
+		if ( ! empty( $order_taxes ) ) {
 			foreach( $order_taxes as $order_tax ) {
 
 				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
