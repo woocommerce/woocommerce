@@ -342,7 +342,7 @@ class WC_Webhook {
 	 * @since 2.2
 	 * @param int $delivery_id previously created comment ID
 	 * @param array $request request data
-	 * @param array $response response data
+	 * @param array|WP_Error $response response data
 	 * @param float $duration request duration
 	 */
 	public function log_delivery( $delivery_id, $request, $response, $duration ) {

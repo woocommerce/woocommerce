@@ -1077,7 +1077,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @since 2.6.0
 	 * @param array $args Order args.
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WC_Order
+	 * @return WC_Order|WP_Error
 	 */
 	protected function create_base_order( $args, $data ) {
 		return wc_create_order( $args );

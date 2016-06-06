@@ -215,7 +215,7 @@ function wc_is_order_status( $maybe_status ) {
  *
  * @since  2.2
  * @param  mixed $the_order Post object or post ID of the order.
- * @return WC_Order
+ * @return WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
@@ -971,7 +971,7 @@ function wc_order_fully_refunded( $order_id ) {
 	}
 
 	// Create the refund object
-	$refund = wc_create_refund( array(
+	wc_create_refund( array(
 		'amount'     => $max_refund,
 		'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
 		'order_id'   => $order_id,

@@ -435,7 +435,7 @@ class WC_AJAX {
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 		$product_status    = get_post_status( $product_id );
 
-		if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
+		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) && 'publish' === $product_status ) {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
@@ -2365,7 +2365,6 @@ class WC_AJAX {
 				$data['consumer_secret'] = '';
 				$data['message']         = __( 'API Key updated successfully.', 'woocommerce' );
 			} else {
-				$status          = 2;
 				$consumer_key    = 'ck_' . wc_rand_hash();
 				$consumer_secret = 'cs_' . wc_rand_hash();
 

@@ -99,8 +99,6 @@ class WC_Shortcode_My_Account {
 	 * @param int $order_id
 	 */
 	public static function view_order( $order_id ) {
-
-		$user_id = get_current_user_id();
 		$order   = wc_get_order( $order_id );
 
 		if ( ! current_user_can( 'view_order', $order_id ) ) {

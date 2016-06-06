@@ -23,7 +23,7 @@ class WC_Shipping {
 	/** @var bool True if shipping is enabled. */
 	public $enabled					 = false;
 
-	/** @var array Stores methods loaded into woocommerce. */
+	/** @var array|null Stores methods loaded into woocommerce. */
 	public $shipping_methods         = null;
 
 	/** @var float Stores the cost of shipping */

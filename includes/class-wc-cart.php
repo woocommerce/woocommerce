@@ -890,7 +890,7 @@ class WC_Cart {
 		 * @param int $variation_id
 		 * @param array $variation attribute values
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
-		 * @return string $cart_item_key
+		 * @return string|bool $cart_item_key
 		 */
 		public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 			// Wrap in try catch so plugins can throw an exception to prevent adding to cart

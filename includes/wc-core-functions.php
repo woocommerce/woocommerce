@@ -55,7 +55,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  *
  * @param  array $args
  *
- * @return WC_Order on success, WP_Error on failure.
+ * @return WC_Order|WP_Error WC_Order on success, WP_Error on failure.
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
