@@ -13,18 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version  2.7.0
  * @since    2.7.0
  */
-class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
+class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 
 	/**
 	 * WP REST API namespace/version.
 	 */
 	protected $namespace = 'wc/v1';
-
-	/**
-	 * Route base.
-	 * @var string
-	 */
-	protected $rest_base = 'settings';
 
 	/**
 	 * Register routes.
@@ -43,7 +37,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
-			'schema' => array( $this, 'setting_schema' ),
+			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 	}
 
@@ -54,7 +48,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$setting = $this->_get_setting_from_request( $request );
+		$setting = $this->prepare_item_for_response( $request );
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
 		}
@@ -68,7 +62,7 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$setting = $this->_get_setting_from_request( $request );
+		$setting = $this->prepare_item_for_response( $request );
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
 		}
@@ -80,12 +74,13 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 	}
 
 	/**
-	 * Takes a valid request and returns back the corresponding setting array.
-	 * @since 2.7.0
-	 * @param  WP_REST_Request $request
-	 * @return WP_Error|array
+	 * Prepare a report sales object for serialization.
+	 *
+	 * @param null $_
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response Response data.
 	 */
-	private function _get_setting_from_request( $request ) {
+	public function prepare_item_for_response( $_, $request ) {
 		if ( empty( $request['group'] ) || empty( $request['setting'] ) ) {
 			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
@@ -109,10 +104,11 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 
 	/**
 	 * Get the settings schema, conforming to JSON Schema.
-	 * @since  2.7.0
+	 *
+	 * @since 2.7.0
 	 * @return array
 	 */
-	public function setting_schema() {
+	public function get_item_schema() {
 		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'settings',
@@ -173,5 +169,4 @@ class WC_Rest_Settings_Controller extends WP_Rest_Settings_Base {
 
 		return $this->add_additional_fields_schema( $schema );
 	}
-
 }

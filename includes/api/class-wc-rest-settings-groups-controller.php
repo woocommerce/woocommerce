@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version  2.7.0
  * @since    2.7.0
  */
-class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
+class WC_Rest_Settings_Groups_Controller extends WC_REST_Settings_API_Controller {
 
 	/**
 	 * WP REST API namespace/version.
@@ -31,8 +31,9 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
 			),
-			'schema' => array( $this, 'group_schema' ),
+			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -45,12 +46,13 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
-			'schema' => array( $this, 'group_schema' ),
+			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 	}
 
 	/**
 	 * Get all settings groups items.
+	 *
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
@@ -84,12 +86,13 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 
 	/**
 	 * Return a single setting group and its settings.
+	 *
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$group = $this->_get_group_from_request( $request );
+		$group = $this->prepare_item_for_response( $request );
 		if ( is_wp_error( $group ) ) {
 			return $group;
 		}
@@ -98,12 +101,13 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 
 	/**
 	 * Update a multiple settings at once.
+	 *
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$group = $this->_get_group_from_request( $request );
+		$group = $this->prepare_item_for_response( $request );
 		if ( is_wp_error( $group ) ) {
 			return $group;
 		}
@@ -120,12 +124,13 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 	}
 
 	/**
-	 * Takes a valid request and returns back the corresponding group array.
-	 * @since 2.7.0
-	 * @param  WP_REST_Request $request
-	 * @return WP_Error|array
+	 * Prepare a report sales object for serialization.
+	 *
+	 * @param null $_
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response Response data.
 	 */
-	private function _get_group_from_request( $request ) {
+	public function prepare_item_for_response( $_, $request ) {
 		$groups = apply_filters( 'woocommerce_settings_groups', array() );
 		if ( empty( $groups ) ) {
 			return new WP_Error( 'rest_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
@@ -141,7 +146,7 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 			return new WP_Error( 'rest_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		// Find sub groups
+		// Find sub groups.
 		$sub_groups = array();
 		foreach ( $groups as $_group ) {
 			if ( ! empty( $_group['parent_id'] ) && $group['id'] === $_group['parent_id'] ) {
@@ -169,11 +174,54 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 	}
 
 	/**
-	 * Get the groups schema, conforming to JSON Schema.
+	 * Filters out bad values from the groups array/filter so we
+	 * only return known values via the API.
+	 *
+	 * @since 2.7.0
+	 * @param  array $group
+	 * @return array
+	 */
+	public function filter_group( $group ) {
+		return array_intersect_key(
+			$group,
+			array_flip( array_filter( array_keys( $group ), array( $this, 'allowed_group_keys' ) ) )
+		);
+	}
+
+	/**
+	 * Callback for allowed keys for each group response.
+	 *
+	 * @since  2.7.0
+	 * @param  string $key Key to check
+	 * @return boolean
+	 */
+	public function allowed_group_keys( $key ) {
+		return in_array( $key, array( 'id', 'label', 'description', 'parent_id', 'sub_groups' ) );
+	}
+
+	/**
+	 * Returns default settings for groups. null means the field is required.
+	 *
 	 * @since  2.7.0
 	 * @return array
 	 */
-	public function group_schema() {
+	protected function group_defaults() {
+		return array(
+			'id'          => null,
+			'label'       => null,
+			'description' => '',
+			'parent_id'   => '',
+			'sub_groups'  => array(),
+		);
+	}
+
+	/**
+	 * Get the groups schema, conforming to JSON Schema.
+	 *
+	 * @since  2.7.0
+	 * @return array
+	 */
+	public function get_item_schema() {
 		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'settings-group',
@@ -219,44 +267,4 @@ class WC_Rest_Settings_Groups_Controller extends WP_Rest_Settings_Base {
 
 		return $this->add_additional_fields_schema( $schema );
 	}
-
-	/**
-	 * Filters out bad values from the groups array/filter so we
-	 * only return known values via the API.
-	 * @since 2.7.0
-	 * @param  array $group
-	 * @return array
-	 */
-	public function filter_group( $group ) {
-		return array_intersect_key(
-			$group,
-			array_flip( array_filter( array_keys( $group ), array( $this, 'allowed_group_keys' ) ) )
-		);
-	}
-
-	/**
-	 * Callback for allowed keys for each group response.
-	 * @since  2.7.0
-	 * @param  string $key Key to check
-	 * @return boolean
-	 */
-	public function allowed_group_keys( $key ) {
-		return in_array( $key, array( 'id', 'label', 'description', 'parent_id', 'sub_groups' ) );
-	}
-
-	/**
-	 * Returns default settings for groups. null means the field is required.
-	 * @since  2.7.0
-	 * @return array
-	 */
-	protected function group_defaults() {
-		return array(
-			'id'            => null,
-			'label'         => null,
-			'description'   => '',
-			'parent_id'     => '',
-			'sub_groups'    => array(),
-		);
-	}
-
 }
