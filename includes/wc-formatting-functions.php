@@ -634,8 +634,14 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
 function wc_format_postcode( $postcode, $country ) {
 	$postcode = wc_normalize_postcode( $postcode );
 
-	if ( in_array( $country, array( 'GB', 'CA' ) ) ) {
-		$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+	switch ( $country ) {
+		case 'CA' :
+		case 'GB' :
+			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+			break;
+		case 'BR' :
+			$postcode = trim( substr_replace( $postcode, '-', -3, 0 ) );
+			break;
 	}
 
 	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
