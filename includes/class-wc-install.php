@@ -163,7 +163,6 @@ class WC_Install {
 		// Queue upgrades/setup wizard
 		$current_wc_version    = get_option( 'woocommerce_version', null );
 		$current_db_version    = get_option( 'woocommerce_db_version', null );
-		$major_wc_version      = substr( WC()->version, 0, strrpos( WC()->version, '.' ) );
 
 		WC_Admin_Notices::remove_all_notices();
 

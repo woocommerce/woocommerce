@@ -57,7 +57,7 @@ class WC_Geo_IP {
 	/**
 	 * Flags.
 	 *
-	 * @var array
+	 * @var int
 	 */
 	public $flags;
 
@@ -71,7 +71,7 @@ class WC_Geo_IP {
 	/**
 	 * Memory buffer.
 	 *
-	 * @var array
+	 * @var string
 	 */
 	public $memory_buffer;
 

@@ -363,8 +363,8 @@ class WC_Coupon {
 	 * @param  int  $user_id
 	 * @throws Exception
 	 */
-	private function validate_user_usage_limit( $user_id = null ) {
-		if ( ! $user_id ) {
+	private function validate_user_usage_limit( $user_id = 0 ) {
+		if ( empty( $user_id ) ) {
 			$user_id = get_current_user_id();
 		}
 		if ( $this->usage_limit_per_user > 0 && is_user_logged_in() && $this->id ) {
