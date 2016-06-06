@@ -53,7 +53,8 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				}
 				$args = explode( ",", preg_replace( "/\s+/", "", $matches[2] ) ); // get the arguments
 				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) return false; // see if it can be converted to postfix
-				for ( $i = 0; $i<count( $stack ); $i++ ) { // freeze the state of the non-argument variables
+				$stack_size = count( $stack );
+				for ( $i = 0; $i<$stack_size; $i++ ) { // freeze the state of the non-argument variables
 					$token = $stack[$i];
 					if ( preg_match( '/^[a-z]\w*$/', $token ) and !in_array( $token, $args ) ) {
 						if ( array_key_exists( $token, self::$v ) ) {
