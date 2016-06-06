@@ -478,7 +478,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				if ( is_array( $request[ $line ] ) ) {
 					foreach ( $request[ $line ] as $item ) {
 						$set_item = 'set_' . $line_type;
-						$new_item = $this->$set_item( $order, $item, 'create' );
+						$this->$set_item( $order, $item, 'create' );
 					}
 				}
 			}
