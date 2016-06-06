@@ -116,7 +116,7 @@ abstract class WC_Data {
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
 	 * @since 2.6.0
-	 * @return array()
+	 * @return array
 	 */
 	protected function prefix_key( $key ) {
 		return '_' === substr( $key, 0, 1 ) ? $key : '_' . $key;
@@ -126,7 +126,7 @@ abstract class WC_Data {
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
 	 * @since 2.6.0
-	 * @return array()
+	 * @return array
 	 */
 	protected function get_internal_meta_keys() {
 		return array_merge( array_map( array( $this, 'prefix_key' ), array_keys( $this->_data ) ), $this->_internal_meta_keys );
