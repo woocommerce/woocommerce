@@ -52,7 +52,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
-		include_once( 'includes/class-wc-eval-math.php' );
+		include_once( WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php' );
 
 		// Allow 3rd parties to process shipping cost arguments
 		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
