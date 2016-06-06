@@ -46,20 +46,7 @@ class WC_Shortcode_My_Account {
 			} else {
 				wc_get_template( 'myaccount/form-login.php' );
 			}
-	 	} else {
-			// See if showing an account endpoint
-			foreach ( $wp->query_vars as $key => $value ) {
-				// Ignore pagename param.
-				if ( 'pagename' === $key ) {
-					continue;
-				}
-				if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
-					do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
-					return;
-				}
-			}
-
-			// No endpoint? Show main account page.
+		 } else {
 			self::my_account( $atts );
 		}
 	}
@@ -71,12 +58,12 @@ class WC_Shortcode_My_Account {
 	 */
 	private static function my_account( $atts ) {
 		extract( shortcode_atts( array(
-	    	'order_count' => 15 // @deprecated 2.6.0. Keep for backward compatibility.
+			'order_count' => 15 // @deprecated 2.6.0. Keep for backward compatibility.
 		), $atts ) );
 
 		wc_get_template( 'myaccount/my-account.php', array(
 			'current_user' => get_user_by( 'id', get_current_user_id() ),
-			'order_count'  => 'all' == $order_count ? -1 : $order_count
+			'order_count'  => 'all' == $order_count ? -1 : $order_count,
 		) );
 	}
 
@@ -100,10 +87,10 @@ class WC_Shortcode_My_Account {
 		$status->name = wc_get_order_status_name( $order->get_status() );
 
 		wc_get_template( 'myaccount/view-order.php', array(
-	        'status'    => $status, // @deprecated 2.2
-	        'order'     => wc_get_order( $order_id ),
-	        'order_id'  => $order_id
-	    ) );
+			'status'    => $status, // @deprecated 2.2
+			'order'     => wc_get_order( $order_id ),
+			'order_id'  => $order_id
+		) );
 	}
 
 	/**
@@ -181,13 +168,13 @@ class WC_Shortcode_My_Account {
 		/**
 		 * After sending the reset link, don't show the form again.
 		 */
-	 	} elseif ( ! empty( $_GET['reset-link-sent'] ) ) {
+		 } elseif ( ! empty( $_GET['reset-link-sent'] ) ) {
 			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
 
 		/**
 		 * After reset, show confirmation message.
 		 */
-	 	} elseif ( ! empty( $_GET['reset'] ) ) {
+		 } elseif ( ! empty( $_GET['reset'] ) ) {
 			wc_add_notice( __( 'Your password has been reset.', 'woocommerce' ) . ' <a class="button" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . __( 'Log in', 'woocommerce' ) . '</a>' );
 		}
 
