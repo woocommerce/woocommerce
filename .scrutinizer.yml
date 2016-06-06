@@ -7,7 +7,8 @@ filter:
   - includes/api/legacy/*
   - includes/libraries/*
   - includes/updates/*
-  - includes/gateways/simplify-commerce/includes/*
+  - includes/gateways/simplify-commerce/*
+  - includes/shipping/legacy-*
 
 checks:
   php:
