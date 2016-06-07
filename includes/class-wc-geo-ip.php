@@ -78,7 +78,7 @@ class WC_Geo_IP {
 	/**
 	 * Database type.
 	 *
-	 * @var string
+	 * @var int
 	 */
 	public $databaseType;
 
@@ -1768,21 +1768,21 @@ class WC_Geo_IP_Record {
 	/**
 	 * Latitude
 	 *
-	 * @var float
+	 * @var int
 	 */
 	public $latitude;
 
 	/**
 	 * Longitude.
 	 *
-	 * @var float
+	 * @var int
 	 */
 	public $longitude;
 
 	/**
 	 * Area code.
 	 *
-	 * @var string
+	 * @var int
 	 */
 	public $area_code;
 
@@ -1792,14 +1792,14 @@ class WC_Geo_IP_Record {
 	 * Metro and DMA code are the same.
 	 * Use metro code instead.
 	 *
-	 * @var int
+	 * @var float
 	 */
 	public $dma_code;
 
 	/**
 	 * Metro code.
 	 *
-	 * @var int
+	 * @var float
 	 */
 	public $metro_code;
 
