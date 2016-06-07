@@ -9,6 +9,8 @@ filter:
   - includes/updates/*
   - includes/gateways/simplify-commerce/*
   - includes/shipping/legacy-*
+  - includes/wc-deprecated-functions.php
+  - includes/class-wc-legacy-api.php
 
 checks:
   php:

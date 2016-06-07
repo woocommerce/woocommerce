@@ -251,31 +251,33 @@ final class WooCommerce {
 			include_once( 'includes/class-wc-tracker.php' );
 		}
 
-		$this->query = include( 'includes/class-wc-query.php' );                 // The main query class
-		$this->api   = include( 'includes/class-wc-api.php' );                   // API Class
-
-		include_once( 'includes/class-wc-auth.php' );                            // Auth Class
-		include_once( 'includes/class-wc-post-types.php' );                      // Registers post types
+		include_once( 'includes/class-wc-query.php' ); // The main query class
+		include_once( 'includes/class-wc-api.php' ); // API Class
+		include_once( 'includes/class-wc-auth.php' ); // Auth Class
+		include_once( 'includes/class-wc-post-types.php' ); // Registers post types
 		include_once( 'includes/abstracts/abstract-wc-data.php' );				 // WC_Data for CRUD
-		include_once( 'includes/abstracts/abstract-wc-payment-token.php' );      // Payment Tokens
-		include_once( 'includes/abstracts/abstract-wc-product.php' );            // Products
-		include_once( 'includes/abstracts/abstract-wc-order.php' );              // Orders
-		include_once( 'includes/abstracts/abstract-wc-settings-api.php' );       // Settings API (for gateways, shipping, and integrations)
-		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' );    // A Shipping method
-		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' );    // A Payment gateway
-		include_once( 'includes/abstracts/abstract-wc-integration.php' );        // An integration with a service
-		include_once( 'includes/class-wc-product-factory.php' );                 // Product factory
-		include_once( 'includes/class-wc-payment-tokens.php' );                  // Payment tokens controller
-		include_once( 'includes/gateways/class-wc-payment-gateway-cc.php' );     // CC Payment Gateway
+		include_once( 'includes/abstracts/abstract-wc-payment-token.php' ); // Payment Tokens
+		include_once( 'includes/abstracts/abstract-wc-product.php' ); // Products
+		include_once( 'includes/abstracts/abstract-wc-order.php' ); // Orders
+		include_once( 'includes/abstracts/abstract-wc-settings-api.php' ); // Settings API (for gateways, shipping, and integrations)
+		include_once( 'includes/abstracts/abstract-wc-shipping-method.php' ); // A Shipping method
+		include_once( 'includes/abstracts/abstract-wc-payment-gateway.php' ); // A Payment gateway
+		include_once( 'includes/abstracts/abstract-wc-integration.php' ); // An integration with a service
+		include_once( 'includes/class-wc-product-factory.php' ); // Product factory
+		include_once( 'includes/class-wc-payment-tokens.php' ); // Payment tokens controller
+		include_once( 'includes/gateways/class-wc-payment-gateway-cc.php' ); // CC Payment Gateway
 		include_once( 'includes/gateways/class-wc-payment-gateway-echeck.php' ); // eCheck Payment Gateway
-		include_once( 'includes/class-wc-countries.php' );                       // Defines countries and states
-		include_once( 'includes/class-wc-integrations.php' );                    // Loads integrations
-		include_once( 'includes/class-wc-cache-helper.php' );                    // Cache Helper
-		include_once( 'includes/class-wc-https.php' );                          // https Helper
+		include_once( 'includes/class-wc-countries.php' ); // Defines countries and states
+		include_once( 'includes/class-wc-integrations.php' ); // Loads integrations
+		include_once( 'includes/class-wc-cache-helper.php' ); // Cache Helper
+		include_once( 'includes/class-wc-https.php' ); // https Helper
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once( 'includes/class-wc-cli.php' );
 		}
+
+		$this->query = new WC_Query();
+		$this->api   = new WC_API();
 	}
 
 	/**
