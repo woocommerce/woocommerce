@@ -180,13 +180,15 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Set the payment method for the order.
 	 *
-	 * @param WC_Payment_Gateway $payment_method
+	 * @param WC_Payment_Gateway|string $payment_method
 	 */
-	public function set_payment_method( $payment_method ) {
-
+	public function set_payment_method( $payment_method = '' ) {
 		if ( is_object( $payment_method ) ) {
 			update_post_meta( $this->id, '_payment_method', $payment_method->id );
 			update_post_meta( $this->id, '_payment_method_title', $payment_method->get_title() );
+		} else {
+			update_post_meta( $this->id, '_payment_method', '' );
+			update_post_meta( $this->id, '_payment_method_title', '' );
 		}
 	}
 
