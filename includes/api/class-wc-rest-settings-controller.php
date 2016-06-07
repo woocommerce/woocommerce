@@ -60,19 +60,55 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 	}
 
 	/**
+	 * Get all settings in a group.
+	 *
+	 * @param string $group_id Group ID.
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_group_settings( $group_id ) {
+		if ( empty( $group_id ) ) {
+			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() );
+
+		if ( empty( $settings ) ) {
+			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$filtered_settings = array();
+
+		foreach ( $settings as $setting ) {
+			$setting = $this->filter_setting( $setting );
+			if ( $this->is_setting_type_valid( $setting['type'] ) ) {
+				$setting['value']    = $this->get_value( $setting['id'] );
+				$filtered_settings[] = $setting;
+			}
+		}
+
+		return $filtered_settings;
+	}
+
+	/**
 	 * Get setting data.
 	 *
-	 * @param string $group Group ID.
+	 * @param string $group_id Group ID.
 	 * @param string $setting_id Setting ID.
 	 *
 	 * @return stdClass|WP_Error
 	 */
-	public function get_setting( $group, $setting_id ) {
-		if ( empty( $group ) || empty( $setting_id ) ) {
+	public function get_setting( $group_id, $setting_id ) {
+		if ( empty( $setting_id ) ) {
 			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$settings  = apply_filters( 'woocommerce_settings-' . $group, array() );
+		$settings = $this->get_group_settings( $group_id );
+
+		if ( is_wp_error( $settings ) ) {
+			return $settings;
+		}
+
 		$array_key = array_keys( wp_list_pluck( $settings, 'id' ), $setting_id );
 
 		if ( empty( $array_key ) ) {
