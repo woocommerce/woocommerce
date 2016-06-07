@@ -123,7 +123,6 @@
 						$.each( zones, function( id, rowData ) {
 							view.renderRow( rowData );
 						} );
-
 					} else {
 						view.$el.append( $blank_template );
 					}
@@ -241,6 +240,8 @@
 							zone_id  : 'new-' + size + '-' + Date.now(),
 							editing  : true
 						} );
+
+					$( '.wc-shipping-zones-blank-state' ).closest( 'tr' ).remove();
 
 					newRow.zone_order = 1 + _.max(
 						_.pluck( zones, 'zone_order' ),
