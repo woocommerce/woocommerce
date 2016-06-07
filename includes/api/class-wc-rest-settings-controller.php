@@ -25,6 +25,15 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 	 * @since 2.7.0
 	 */
 	public function register_routes() {
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/(?P<setting>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -57,6 +66,22 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 		$response = $this->prepare_item_for_response( $setting, $request );
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Return all settings in a group.
+	 * @since  2.7.0
+	 * @param  WP_REST_Request $request
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		$settings = $this->get_group_settings( $request['group'] );
+
+		if ( is_wp_error( $settings ) ) {
+			return $settings;
+		}
+
+		return rest_ensure_response( $settings );
 	}
 
 	/**

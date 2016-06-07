@@ -36,11 +36,6 @@ class WC_Rest_Settings_Groups_Controller extends WC_REST_Settings_API_Controller
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'permissions_check' ),
-			),
-			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
