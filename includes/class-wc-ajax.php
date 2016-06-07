@@ -1756,17 +1756,21 @@ class WC_AJAX {
 	/**
 	 * Search for products and echo json.
 	 *
-	 * @param string $x (default: '')
+	 * @param string $term (default: '')
 	 * @param string $post_types (default: array('product'))
 	 */
-	public static function json_search_products( $x = '', $post_types = array( 'product' ) ) {
+	public static function json_search_products( $term = '', $post_types = array( 'product' ) ) {
 		global $wpdb;
 
 		ob_start();
 
 		check_ajax_referer( 'search-products', 'security' );
 
-		$term = (string) wc_clean( stripslashes( $_GET['term'] ) );
+		if ( empty( $term ) ) {
+			$term = wc_clean( stripslashes( $_GET['term'] ) );
+		} else {
+			$term = wc_clean( $term );
+		}
 
 		if ( empty( $term ) ) {
 			die();
