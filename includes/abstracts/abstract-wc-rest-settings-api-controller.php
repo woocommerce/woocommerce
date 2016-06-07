@@ -87,6 +87,11 @@ class WC_REST_Settings_API_Controller extends WC_REST_Controller {
 					$value['crop']   = $setting['default']['crop'];
 				}
 				break;
+			case 'select':
+				$options = array_keys( $setting['options'] );
+				$default = ( empty( $setting['default'] ) ? $options[0] : $setting['default'] );
+				$value   = in_array( $raw_value, $options ) ? $raw_value : $default;
+				break;
 			default :
 				$value = wc_clean( $raw_value );
 				break;
