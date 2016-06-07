@@ -462,8 +462,8 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * @param array $data
 	 * @return WC_Order
 	 */
-	protected function create_base_order( $args, $data ) {
-		return wc_create_order( $args );
+	protected function create_base_order( $data ) {
+		return wc_create_order( $data );
 	}
 
 	/**
