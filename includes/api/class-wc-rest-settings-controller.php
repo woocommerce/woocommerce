@@ -34,7 +34,17 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/(?P<setting>[\w-]+)', array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/batch', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'batch_items' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
+			'schema' => array( $this, 'get_public_batch_schema' ),
+		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)/(?P<id>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -57,7 +67,7 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$setting = $this->get_setting( $request['group'], $request['setting'] );
+		$setting = $this->get_setting( $request['group'], $request['id'] );
 
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
@@ -158,21 +168,48 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 	}
 
 	/**
+	 * Bulk create, update and delete items.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return array Of WP_Error or WP_REST_Response.
+	 */
+	public function batch_items( $request ) {
+		// Get the request params.
+		$items = array_filter( $request->get_params() );
+
+		/*
+		 * Since our batch settings update is group-specific and matches based on the route,
+		 * we inject the URL parameters (containing group) into the batch items
+		 */
+		if ( ! empty( $items['update'] ) ) {
+			$to_update = array();
+			foreach ( $items['update'] as $item ) {
+				$to_update[] = array_merge( $request->get_url_params(), $item );
+			}
+			$request = new WP_REST_Request( $request->get_method() );
+			$request->set_body_params( array( 'update' => $to_update ) );
+		}
+
+		return parent::batch_items( $request );
+	}
+
+	/**
 	 * Update a single setting in a group.
 	 * @since  2.7.0
 	 * @param  WP_REST_Request $request
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$setting = $this->get_setting( $request['group'], $request['setting'] );
+		$setting = $this->get_setting( $request['group'], $request['id'] );
 
 		if ( is_wp_error( $setting ) ) {
 			return $setting;
 		}
 
-		$response          = $this->prepare_item_for_response( $setting, $request );
-		$value             = $this->sanitize_setting_value( $setting, $request['value'] );
-		$response['value'] = $value;
+		$response = $this->prepare_item_for_response( $setting, $request );
+		$value    = $this->sanitize_setting_value( $setting, $request['value'] );
+
+		$response->set_data( array_merge( $response->get_data(), compact( 'value' ) ) );
 
 		update_option( $setting['id'], $value );
 
