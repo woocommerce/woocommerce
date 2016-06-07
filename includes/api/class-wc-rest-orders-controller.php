@@ -430,6 +430,33 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Prepare a single order for create.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_Error|stdClass $data Object.
+	 */
+	protected function prepare_item_for_database( $request ) {
+		$data = new stdClass;
+
+		// Set default order args.
+		$data->status        = $request['status'];
+		$data->customer_id   = $request['customer_id'];
+		$data->customer_note = $request['customer_note'];
+
+		/**
+		 * Filter the query_vars used in `get_items` for the constructed query.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
+		 * prepared for insertion.
+		 *
+		 * @param stdClass        $data    An object representing a single item prepared
+		 *                                 for inserting the database.
+		 * @param WP_REST_Request $request Request object.
+		 */
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
+	}
+
+	/**
 	 * Create order.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -444,12 +471,14 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 			}
 
-			$order = $this->create_base_order( array(
-				'status'        => $request['status'],
-				'customer_id'   => $request['customer_id'],
-				'customer_note' => $request['customer_note'],
-				'created_via'   => 'rest-api',
-			) );
+			$data = $this->prepare_item_for_database( $request );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+
+			$data->created_via = 'rest-api';
+
+			$order = wc_create_order( (array) $data );
 
 			if ( is_wp_error( $order ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_order', sprintf( __( 'Cannot create order: %s.', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
@@ -1069,17 +1098,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		return $order_statuses;
-	}
-
-	/**
-	 * Create base WC Order object.
-	 *
-	 * @since 2.6.0
-	 * @param array $args Order args.
-	 * @return WC_Order|WP_Error
-	 */
-	protected function create_base_order( $args ) {
-		return wc_create_order( $args );
 	}
 
 	/**
