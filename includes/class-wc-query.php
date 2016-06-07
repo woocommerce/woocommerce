@@ -13,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Query' ) ) :
-
 /**
  * WC_Query Class.
  */
@@ -698,7 +696,3 @@ class WC_Query {
 		_deprecated_function( 'layered_nav_query', '2.6', '' );
 	}
 }
-
-endif;
-
-return new WC_Query();

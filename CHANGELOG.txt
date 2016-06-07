@@ -1,5 +1,51 @@
 == Changelog ==
 
+= 2.6.0 - 14/06/16 =
+* Feature - Introduced Shipping Zone functionality, and re-usable instance based shipping methods.
+* Feature - Tabbed "My Account" area.
+* Feature - Cart operations now use ajax (item quantities/remove, coupon apply/remove, shipping options).
+* Feature - Layered nav; filter by rating.
+* Feature - On-hold order emails.
+* Dev - All new REST API based on the WP REST API. The old WC REST API is still available, but the new one is preferred.
+* Dev - Added ability for shipping methods to store meta data to the order.
+* Dev - Added Payment Gateway Tokenization API for storing and retrieving tokens in a standardized manner.
+* Dev - Migrated custom term meta implementation to WP Term Meta.
+* Dev - Added new wc_get_orders() function to get order objects and ids instead of direct get_posts() calls.
+* Dev - Made coupon optional in cart has_discount() method.
+* Dev - Made the review template more editable.
+* Dev - Allowed product constructors to throw exceptions if invalid.
+* Dev - Wrapped currency symbols in a span to allow styling or replacement.
+* Fix - Update download permission user and email when changed.
+* Fix - Fixed shipping method unregistration.
+* Fix - Stopped create and update webhooks firing at the same time for products.
+* Fix - Allow COD to set on-hold status if the order contains downloads.
+* Fix - Force CURL to use TLS 1.2 for PayPal connections.
+* Tweak - Improved lost password flow.
+* Tweak - Show payment dates on order screen.
+* Tweak - Ignore catalog visibility on products shortcode when specifying IDs or SKUs.
+* Tweak - Added context to checkout error messages.
+* Tweak - Added SKU field to grouped products.
+* Tweak - Support qty display in cart messages.
+* Tweak - Hide min order amount field when not needed in shipping settings.
+* Tweak - If shipping < 999.99, use 'shipping' arg when passing values to PayPal.
+* Tweak - Show net sales on dashboard.
+* Tweak - Replaced credit card icons with SVG.
+* Tweak - Enqueue scripts on pages with checkout shortcodes.
+* Tweak - Color code the manual, system and customer notes.
+* Tweak - Layered Nav Refactoring to improve performance.
+* Tweak - Removed tag/cat classes from loops since WP does the same.
+* Tweak - Added hash check for orders so that if the cart changes before payment, a new order is made.
+* Tweak - Removed unused 'view mode' under screen options.
+* Tweak - Added 110 new currencies (including Bitcoin).
+* Tweak - New background updater for data upgrades.
+* Tweak - Blank slates in admin post screens.
+* Tweak - Added blockui when variations are being retrieved via ajax.
+* Tweak - Hide empty taxes by default (filterable).
+* Tweak - Allow failed orders to be edited.
+* Tweak - If there are no shipping methods setup, don’t prompt for shipping at checkout.
+* Tweak - Allowed country exclusion, rather than just inclusion, in ‘sell to’ setting.
+* Lots, lots more - [see the comparison here: https://github.com/woothemes/woocommerce/compare/2.5.5...2.6.0
+
 = 2.5.5 - 11/03/2016 =
 * Fix - Before running dbdelta, drop indexes to prevent duplicate key notices.
 * Fix - Prevent notice when unsetting terms on product edit screen.

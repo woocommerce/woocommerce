@@ -907,7 +907,7 @@ class WC_API_Products extends WC_API_Resource {
 						wp_set_object_terms( $product_id, $values, $taxonomy );
 					}
 
-					if ( $values ) {
+					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values
 						$attributes[ $taxonomy ] = array(
 							'name'         => $taxonomy,
@@ -941,16 +941,7 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
-			if ( ! function_exists( 'attributes_cmp' ) ) {
-				function attributes_cmp( $a, $b ) {
-					if ( $a['position'] == $b['position'] ) {
-						return 0;
-					}
-
-					return ( $a['position'] < $b['position'] ) ? -1 : 1;
-				}
-			}
-			uasort( $attributes, 'attributes_cmp' );
+			uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
 
 			update_post_meta( $product_id, '_product_attributes', $attributes );
 		}
@@ -1018,7 +1009,7 @@ class WC_API_Products extends WC_API_Resource {
 				$clear_parent_ids[] = $product_id;
 			}
 
-			if ( $clear_parent_ids ) {
+			if ( ! empty( $clear_parent_ids ) ) {
 				foreach ( $clear_parent_ids as $clear_id ) {
 
 					$children_by_price = get_posts( array(

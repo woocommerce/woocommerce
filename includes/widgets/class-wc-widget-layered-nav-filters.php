@@ -59,7 +59,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			echo '<ul>';
 
 			// Attributes
-			if ( $_chosen_attributes ) {
+			if ( ! empty( $_chosen_attributes ) ) {
 				foreach ( $_chosen_attributes as $taxonomy => $data ) {
 					foreach ( $data['terms'] as $term_slug ) {
 						if ( ! $term = get_term_by( 'slug', $term_slug, $taxonomy ) ) {

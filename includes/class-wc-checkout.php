@@ -414,7 +414,7 @@ class WC_Checkout {
 				}
 
 				// Skip account if not needed
-				if ( $fieldset_key == 'account' && ( is_user_logged_in() || ( $this->must_create_account == false && empty( $this->posted['createaccount'] ) ) ) ) {
+				if ( 'account' === $fieldset_key && ( is_user_logged_in() || ( false === $this->must_create_account && empty( $this->posted['createaccount'] ) ) ) ) {
 					continue;
 				}
 
@@ -573,7 +573,7 @@ class WC_Checkout {
 
 				// Validate Shipping Methods
 				$packages               = WC()->shipping->get_packages();
-				$this->shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+				$this->shipping_methods = (array) WC()->session->get( 'chosen_shipping_methods' );
 
 				foreach ( $packages as $i => $package ) {
 					if ( ! isset( $package['rates'][ $this->shipping_methods[ $i ] ] ) ) {
@@ -614,9 +614,9 @@ class WC_Checkout {
 
 					if ( is_wp_error( $new_customer ) ) {
 						throw new Exception( $new_customer->get_error_message() );
+					} else {
+						$this->customer_id = absint( $new_customer );
 					}
-
-					$this->customer_id = $new_customer;
 
 					wc_set_customer_auth_cookie( $this->customer_id );
 

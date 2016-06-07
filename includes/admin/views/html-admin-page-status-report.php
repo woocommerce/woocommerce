@@ -515,11 +515,6 @@ global $wpdb;
 			<td class="help"><?php echo wc_help_tip( __( 'Does your site have REST API enabled?', 'woocommerce' ) ); ?></td>
 			<td><?php echo 'yes' === get_option( 'woocommerce_api_enabled' ) ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
-		<tr>
-			<td data-export-label="API Version"><?php _e( 'API Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( __( 'What version of the REST API does your site use?', 'woocommerce' ) ); ?></td>
-			<td><?php echo esc_html( WC_API::VERSION ); ?></td>
-		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -762,7 +757,7 @@ global $wpdb;
 				}
 			}
 
-			if ( $found_files ) {
+			if ( ! empty( $found_files ) ) {
 				foreach ( $found_files as $plugin_name => $found_plugin_files ) {
 					?>
 					<tr>

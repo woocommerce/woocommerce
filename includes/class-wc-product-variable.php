@@ -40,7 +40,9 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_add_to_cart_text', __( 'Select options', 'woocommerce' ), $this );
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Select options', 'woocommerce' ) : __( 'Read More', 'woocommerce' );
+
+		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
 	}
 
 	/**
@@ -142,7 +144,7 @@ class WC_Product_Variable extends WC_Product {
 	 *
 	 * @access public
 	 * @param mixed $child_id
-	 * @return WC_Product WC_Product or WC_Product_variation
+	 * @return WC_Product_Variation
 	 */
 	public function get_child( $child_id ) {
 		return wc_get_product( $child_id, array(

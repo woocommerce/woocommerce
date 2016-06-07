@@ -4,10 +4,10 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     2.6.0
+ * @author   WooThemes
+ * @category Core
+ * @package  WooCommerce/Functions
+ * @version  2.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -274,7 +274,7 @@ function wc_update_200_line_items() {
 
 		$order_taxes = (array) maybe_unserialize( $order_tax_row->meta_value );
 
-		if ( $order_taxes ) {
+		if ( ! empty( $order_taxes ) ) {
 			foreach( $order_taxes as $order_tax ) {
 
 				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
@@ -766,7 +766,7 @@ function wc_update_240_refunds() {
 		", $refunded_order->ID ) );
 
 		if ( $order_total > $refunded_total ) {
-			$refund = wc_create_refund( array(
+			wc_create_refund( array(
 				'amount'     => $order_total - $refunded_total,
 				'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
 				'order_id'   => $refunded_order->ID,

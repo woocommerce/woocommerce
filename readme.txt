@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.0 - TBD =
+= 2.6.0 - 14/06/16 =
 * Feature - Introduced Shipping Zone functionality, and re-usable instance based shipping methods.
 * Feature - Tabbed "My Account" area.
 * Feature - Cart operations now use ajax (item quantities/remove, coupon apply/remove, shipping options).
@@ -171,7 +171,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Added new wc_get_orders() function to get order objects and ids instead of direct get_posts() calls.
 * Dev - Made coupon optional in cart has_discount() method.
 * Dev - Made the review template more editable.
+* Dev - Allowed product constructors to throw exceptions if invalid.
+* Dev - Wrapped currency symbols in a span to allow styling or replacement.
 * Fix - Update download permission user and email when changed.
+* Fix - Fixed shipping method unregistration.
+* Fix - Stopped create and update webhooks firing at the same time for products.
+* Fix - Allow COD to set on-hold status if the order contains downloads.
+* Fix - Force CURL to use TLS 1.2 for PayPal connections.
+* Tweak - Improved lost password flow.
+* Tweak - Show payment dates on order screen.
 * Tweak - Ignore catalog visibility on products shortcode when specifying IDs or SKUs.
 * Tweak - Added context to checkout error messages.
 * Tweak - Added SKU field to grouped products.
@@ -181,12 +189,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Show net sales on dashboard.
 * Tweak - Replaced credit card icons with SVG.
 * Tweak - Enqueue scripts on pages with checkout shortcodes.
-* Tweak - Color code manual, system and customer notes.
+* Tweak - Color code the manual, system and customer notes.
 * Tweak - Layered Nav Refactoring to improve performance.
 * Tweak - Removed tag/cat classes from loops since WP does the same.
 * Tweak - Added hash check for orders so that if the cart changes before payment, a new order is made.
 * Tweak - Removed unused 'view mode' under screen options.
 * Tweak - Added 110 new currencies (including Bitcoin).
+* Tweak - New background updater for data upgrades.
+* Tweak - Blank slates in admin post screens.
+* Tweak - Added blockui when variations are being retrieved via ajax.
+* Tweak - Hide empty taxes by default (filterable).
+* Tweak - Allow failed orders to be edited.
+* Tweak - If there are no shipping methods setup, don’t prompt for shipping at checkout.
+* Tweak - Allowed country exclusion, rather than just inclusion, in ‘sell to’ setting.
+* Lots, lots more - [see the comparison here](https://github.com/woothemes/woocommerce/compare/2.5.5...2.6.0).
 
 [See changelog for all versions](https://raw.githubusercontent.com/woothemes/woocommerce/master/CHANGELOG.txt).
 

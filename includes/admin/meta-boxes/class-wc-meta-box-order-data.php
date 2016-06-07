@@ -180,7 +180,7 @@ class WC_Meta_Box_Order_Data {
 							}
 						}
 
-						if ( $paid_date = $order->paid_date ) {
+						if ( $order->paid_date ) {
 							printf( ' ' . _x( 'on %s @ %s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), strtotime( $order->paid_date ) ), date_i18n( get_option( 'time_format' ), strtotime( $order->paid_date ) ) );
 						}
 

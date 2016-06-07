@@ -96,7 +96,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * @return bool
 	 */
 	public function is_available( $package ) {
-		$is_available       = false;
 		$has_coupon         = false;
 		$has_met_min_amount = false;
 

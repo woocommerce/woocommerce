@@ -555,9 +555,11 @@ function woocommerce_walk_category_dropdown_tree( $a1 = '', $a2 = '', $a3 = '' )
 /**
  * @deprecated
  */
-function woocommerce_taxonomy_metadata_wpdbfix() {
-	return wc_taxonomy_metadata_wpdbfix();
-}
+function woocommerce_taxonomy_metadata_wpdbfix() {}
+/**
+ * @deprecated
+ */
+function wc_taxonomy_metadata_wpdbfix() {}
 /**
  * @deprecated
  */

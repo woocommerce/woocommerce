@@ -47,14 +47,14 @@ class WC_Admin_Report {
 	/**
 	 * The start date of the report.
 	 *
-	 * @var string
+	 * @var int timestamp
 	 */
 	public $start_date;
 
 	/**
 	 * The end date of the report.
 	 *
-	 * @var string
+	 * @var int timestamp
 	 */
 	public $end_date;
 
@@ -554,7 +554,7 @@ class WC_Admin_Report {
 
 			case 'day' :
 				$this->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
-				$this->chart_interval = ceil( max( 0, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) ) );
+				$this->chart_interval = absint( ceil( max( 0, ( $this->end_date - $this->start_date ) / ( 60 * 60 * 24 ) ) ) );
 				$this->barwidth       = 60 * 60 * 24 * 1000;
 			break;
 

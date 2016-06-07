@@ -55,7 +55,7 @@ add_filter( 'woocommerce_short_description', 'do_shortcode', 11 ); // AFTER wpau
  *
  * @param  array $args
  *
- * @return WC_Order on success, WP_Error on failure.
+ * @return WC_Order|WP_Error WC_Order on success, WP_Error on failure.
  */
 function wc_create_order( $args = array() ) {
 	$default_args = array(
@@ -184,7 +184,7 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path (default: '')
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	if ( $args && is_array( $args ) ) {
+	if ( ! empty( $args ) && is_array( $args ) ) {
 		extract( $args );
 	}
 
@@ -209,6 +209,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
  * Like wc_get_template, but returns the HTML instead of outputting.
  * @see wc_get_template
  * @since 2.5.0
+ * @param string $template_name
  */
 function wc_get_template_html( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	ob_start();
@@ -741,9 +742,7 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false ) {
  * @return string the URL.
  */
 function get_woocommerce_api_url( $path ) {
-
-	$_version = substr( WC_API::VERSION, 0, 1 );
-	$version  = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : $_version;
+	$version  = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : substr( WC_API::VERSION, 0, 1 );
 
 	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
 
@@ -1230,7 +1229,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
  * Return a list of potential postcodes for wildcard searching.
  * @since 2.6.0
  * @param  string $postcode
- * @return array
+ * @return string[]
  */
 function wc_get_wildcard_postcodes( $postcode ) {
 	$postcodes         = array( '*', strtoupper( $postcode ), strtoupper( $postcode ) . '*' );
@@ -1252,6 +1251,7 @@ function wc_get_wildcard_postcodes( $postcode ) {
  * @param array $objects Array of postcode objects from Database
  * @param string $object_compare_key DB column name for the ID.
  * @param string $object_compare_key DB column name for the value.
+ * @param string $object_id_key
  * @return array Array of matching object ID and values.
  */
 function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key ) {
@@ -1325,4 +1325,25 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 	}
 
 	return absint( $method_count );
+}
+
+/**
+ * Wrapper for set_time_limit to see if it is enabled.
+ * @since 2.6.0
+ */
+function wc_set_time_limit( $limit = 0 ) {
+	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
+		@set_time_limit( $limit );
+	}
+}
+
+/**
+ * Used to sort products attributes with uasort.
+ * @since 2.6.0
+ */
+function wc_product_attribute_uasort_comparison( $a, $b ) {
+	if ( $a['position'] == $b['position'] ) {
+		return 0;
+	}
+	return ( $a['position'] < $b['position'] ) ? -1 : 1;
 }

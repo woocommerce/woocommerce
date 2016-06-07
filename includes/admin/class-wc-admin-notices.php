@@ -18,6 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Notices {
 
 	/**
+	 * Stores notices.
+	 * @var array
+	 */
+	private static $notices = array();
+
+	/**
 	 * Array of notices - name => callback.
 	 * @var array
 	 */
@@ -31,12 +37,6 @@ class WC_Admin_Notices {
 		'no_shipping_methods' => 'no_shipping_methods_notice',
 		'simplify_commerce'   => 'simplify_commerce_notice',
 	);
-
-	/**
-	 * Stores notices.
-	 * @var array
-	 */
-	private static $notices = array();
 
 	/**
 	 * Constructor.
@@ -145,7 +145,7 @@ class WC_Admin_Notices {
 	public static function add_notices() {
 		$notices = self::get_notices();
 
-		if ( $notices ) {
+		if ( ! empty( $notices ) ) {
 			wp_enqueue_style( 'woocommerce-activation', plugins_url(  '/assets/css/activation.css', WC_PLUGIN_FILE ) );
 			foreach ( $notices as $notice ) {
 				if ( ! empty( self::$core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
@@ -173,7 +173,7 @@ class WC_Admin_Notices {
 	public static function output_custom_notices() {
 		$notices = self::get_notices();
 
-		if ( $notices ) {
+		if ( ! empty( $notices ) ) {
 			foreach ( $notices as $notice ) {
 				if ( empty( self::$core_notices[ $notice ] ) ) {
 					$notice_html = get_option( 'woocommerce_admin_notice_' . $notice );
@@ -306,7 +306,7 @@ class WC_Admin_Notices {
 	 */
 	public static function simplify_commerce_notice() {
 		$location = wc_get_base_location();
-		
+
 		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) || ! in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
 			self::remove_notice( 'simplify_commerce' );
 			return;

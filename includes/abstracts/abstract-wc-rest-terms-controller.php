@@ -518,7 +518,6 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 */
 	public function delete_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
-		$term     = get_term( (int) $request['id'], $taxonomy );
 		$force    = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
 		// We don't support trashing for this type, error out.

@@ -430,6 +430,43 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Prepare a single order for create.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_Error|stdClass $data Object.
+	 */
+	protected function prepare_item_for_database( $request ) {
+		$data = new stdClass;
+
+		// Set default order args.
+		$data->status        = $request['status'];
+		$data->customer_id   = $request['customer_id'];
+		$data->customer_note = $request['customer_note'];
+
+		/**
+		 * Filter the query_vars used in `get_items` for the constructed query.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
+		 * prepared for insertion.
+		 *
+		 * @param stdClass        $data    An object representing a single item prepared
+		 *                                 for inserting the database.
+		 * @param WP_REST_Request $request Request object.
+		 */
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
+	}
+
+	/**
+	 * Create base WC Order object.
+	 *
+	 * @param array $data
+	 * @return WC_Order
+	 */
+	protected function create_base_order( $data ) {
+		return wc_create_order( $data );
+	}
+
+	/**
 	 * Create order.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -444,12 +481,14 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 			}
 
-			$order = $this->create_base_order( array(
-				'status'        => $request['status'],
-				'customer_id'   => $request['customer_id'],
-				'customer_note' => $request['customer_note'],
-				'created_via'   => 'rest-api',
-			), $request );
+			$data = $this->prepare_item_for_database( $request );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+
+			$data->created_via = 'rest-api';
+
+			$order = $this->create_base_order( (array) $data );
 
 			if ( is_wp_error( $order ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_order', sprintf( __( 'Cannot create order: %s.', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
@@ -478,7 +517,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				if ( is_array( $request[ $line ] ) ) {
 					foreach ( $request[ $line ] as $item ) {
 						$set_item = 'set_' . $line_type;
-						$new_item = $this->$set_item( $order, $item, 'create' );
+						$this->$set_item( $order, $item, 'create' );
 					}
 				}
 			}
@@ -809,7 +848,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * 1) Only non-protected meta (no leading underscore) can be set
 	 * 2) Meta values must be scalar (int, string, bool)
 	 *
-	 * @param WC_Order $order Order data.
+	 * @param int $order_id Order ID.
 	 * @param array $meta_data Meta data in array( 'meta_key' => 'meta_value' ) format.
 	 */
 	protected function update_meta_data( $order_id, $meta_data ) {
@@ -1069,18 +1108,6 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		}
 
 		return $order_statuses;
-	}
-
-	/**
-	 * Create base WC Order object.
-	 *
-	 * @since 2.6.0
-	 * @param array $args Order args.
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WC_Order
-	 */
-	protected function create_base_order( $args, $data ) {
-		return wc_create_order( $args );
 	}
 
 	/**

@@ -10,20 +10,41 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 	 * Based on EvalMath by Miles Kaufman Copyright (C) 2005 Miles Kaufmann http://www.twmagic.com/.
 	 */
 	class WC_Eval_Math {
-		/** @var string */
+
+		/**
+		 * Last error.
+		 *
+		 * @var string
+		 */
 		public static $last_error = null;
 
-		/** @var array */
-		public static $v = array( 'e' => 2.71, 'pi' => 3.14 ); // variables (and constants)
+		/**
+		 * Variables (and constants).
+		 *
+		 * @var array
+		 */
+		public static $v = array( 'e' => 2.71, 'pi' => 3.14 );
 
-		/** @var array */
-		public static $f = array(); // user-defined functions
+		/**
+		 * User-defined functions.
+		 *
+		 * @var array
+		 */
+		public static $f = array();
 
-		/** @var array */
-		public static $vb = array( 'e', 'pi' ); // constants
+		/**
+		 * Constants.
+		 *
+		 * @var array
+		 */
+		public static $vb = array( 'e', 'pi' );
 
-		/** @var array */
-		public static $fb = array(); // built-in functions
+		/**
+		 * Built-in functions.
+		 *
+		 * @var array
+		 */
+		public static $fb = array();
 
 		/**
 		 * Evaluate maths string.
@@ -53,7 +74,8 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 				}
 				$args = explode( ",", preg_replace( "/\s+/", "", $matches[2] ) ); // get the arguments
 				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) return false; // see if it can be converted to postfix
-				for ( $i = 0; $i<count( $stack ); $i++ ) { // freeze the state of the non-argument variables
+				$stack_size = count( $stack );
+				for ( $i = 0; $i<$stack_size; $i++ ) { // freeze the state of the non-argument variables
 					$token = $stack[$i];
 					if ( preg_match( '/^[a-z]\w*$/', $token ) and !in_array( $token, $args ) ) {
 						if ( array_key_exists( $token, self::$v ) ) {
@@ -82,7 +104,6 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			$index = 0;
 			$stack = new WC_Eval_Math_Stack;
 			$output = array(); // postfix form of expression, to be passed to pfx()
-			// $expr = trim(strtolower($expr));
 			$expr = trim( $expr );
 
 			$ops   = array( '+', '-', '*', '/', '^', '_' );
@@ -202,10 +223,16 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			return $output;
 		}
 
-		// evaluate postfix notation
+		/**
+		 * Evaluate postfix notation.
+		 *
+		 * @param  mixed $tokens
+		 * @param  array $vars
+		 *
+		 * @return mixed
+		 */
 		private static function pfx( $tokens, $vars = array() ) {
 			if ( $tokens == false ) return false;
-
 			$stack = new WC_Eval_Math_Stack;
 
 			foreach ( $tokens as $token ) { // nice and easy
@@ -247,7 +274,13 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			return $stack->pop();
 		}
 
-		// trigger an error, but nicely, if need be
+		/**
+		 * Trigger an error, but nicely, if need be.
+		 *
+		 * @param  string $msg
+		 *
+		 * @return bool
+		 */
 		private static function trigger( $msg ) {
 			self::$last_error = $msg;
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -258,10 +291,12 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			return false;
 		}
 
-		// Prints the file name, function name, and
-		// line number which called your function
-		// (not this function, then one that  called
-		// it to begin with)
+		/**
+		 * Prints the file name, function name, and
+		 * line number which called your function
+		 * (not this function, then one that  called
+		 * it to begin with)
+		 */
 		private static function debugPrintCallingFunction() {
 			$file = 'n/a';
 			$func = 'n/a';
@@ -281,17 +316,35 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 	 */
 	class WC_Eval_Math_Stack {
 
-		/** @var array */
+		/**
+		 * Stack array.
+		 *
+		 * @var array
+		 */
 		public $stack = array();
 
-		/** @var integer */
+		/**
+		 * Stack counter.
+		 *
+		 * @var integer
+		 */
 		public $count = 0;
 
+		/**
+		 * Push value into stack.
+		 *
+		 * @param  mixed $val
+		 */
 		public function push( $val ) {
 			$this->stack[ $this->count ] = $val;
 			$this->count++;
 		}
 
+		/**
+		 * Pop value from stack.
+		 *
+		 * @return mixed
+		 */
 		public function pop() {
 			if ( $this->count > 0 ) {
 				$this->count--;
@@ -300,6 +353,13 @@ if ( ! class_exists( 'WC_Eval_Math' ) ) {
 			return null;
 		}
 
+		/**
+		 * Get last value from stack.
+		 *
+		 * @param  int $n
+		 *
+		 * @return mixed
+		 */
 		public function last( $n=1 ) {
 			$key = $this->count - $n;
 			return array_key_exists( $key, $this->stack ) ? $this->stack[ $key ] : null;

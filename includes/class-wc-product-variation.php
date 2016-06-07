@@ -24,10 +24,10 @@ class WC_Product_Variation extends WC_Product {
 	public $parent;
 
 	/** @public string Stores the shipping class of the variation. */
-	public $variation_shipping_class         = false;
+	public $variation_shipping_class         = '';
 
 	/** @public int Stores the shipping class ID of the variation. */
-	public $variation_shipping_class_id      = false;
+	public $variation_shipping_class_id      = 0;
 
 	/** @public unused vars @deprecated in 2.2 */
 	public $variation_has_sku                = true;
@@ -176,7 +176,6 @@ class WC_Product_Variation extends WC_Product {
 		if ( ! empty( $item_object['variation'] ) ) {
 			$data = $item_object['variation'];
 		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
-			$allowed_data = array_keys( $this->variation_data );
 			$data_keys    = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
 			$data_values  = wp_list_pluck( $item_object['item_meta_array'], 'value' );
 			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->variation_data );

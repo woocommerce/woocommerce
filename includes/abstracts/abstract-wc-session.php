@@ -66,7 +66,7 @@ abstract class WC_Session {
 	 *
 	 * @param string $key
 	 * @param  mixed $default used if the session variable isn't set
-	 * @return mixed value of session variable
+	 * @return array|string value of session variable
 	 */
 	public function get( $key, $default = null ) {
 		$key = sanitize_key( $key );

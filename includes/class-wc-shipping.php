@@ -23,7 +23,7 @@ class WC_Shipping {
 	/** @var bool True if shipping is enabled. */
 	public $enabled					 = false;
 
-	/** @var array Stores methods loaded into woocommerce. */
+	/** @var array|null Stores methods loaded into woocommerce. */
 	public $shipping_methods         = null;
 
 	/** @var float Stores the cost of shipping */
@@ -131,7 +131,7 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function load_shipping_methods( $package = array() ) {
-		if ( $package ) {
+		if ( ! empty( $package ) ) {
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
 		} else {
@@ -161,6 +161,9 @@ class WC_Shipping {
 				return false;
 			}
 			$method = new $method();
+		}
+		if ( is_null( $this->shipping_methods ) ) {
+			$this->shipping_methods = array();
 		}
 		$this->shipping_methods[ $method->id ] = $method;
 	}
@@ -317,7 +320,7 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
-		if ( ! $this->enabled || ! $package ) {
+		if ( ! $this->enabled || empty( $package ) ) {
 			return false;
 		}
 

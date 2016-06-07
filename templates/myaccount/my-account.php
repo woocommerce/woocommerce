@@ -24,44 +24,16 @@ wc_print_notices();
 
 /**
  * My Account navigation.
- *
  * @since 2.6.0
  */
 do_action( 'woocommerce_account_navigation' ); ?>
 
 <div class="woocommerce-MyAccount-content">
-	<p>
-		<?php
-			echo sprintf( esc_attr__( 'Hello %s%s%s (not %2$s? %sSign out%s)', 'woocommerce' ), '<strong>', esc_html( $current_user->display_name ), '</strong>', '<a href="' . esc_url( wc_get_endpoint_url( 'customer-logout', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">', '</a>' );
-		?>
-	</p>
-
-	<p>
-		<?php
-			echo sprintf( esc_attr__( 'From your account dashboard you can view your %1$srecent orders%2$s, manage your %3$sshipping and billing addresses%2$s and %4$sedit your password and account details%2$s.', 'woocommerce' ), '<a href="' . esc_url( wc_get_endpoint_url( 'orders' ) ) . '">', '</a>', '<a href="' . esc_url( wc_get_endpoint_url( 'edit-address' ) ) . '">', '<a href="' . esc_url( wc_get_endpoint_url( 'edit-account' ) ) . '">' );
-		?>
-	</p>
-
 	<?php
 		/**
-		 * My Account dashboard.
-		 *
+		 * My Account content.
 		 * @since 2.6.0
 		 */
-		do_action( 'woocommerce_account_dashboard' );
-
-		/**
-		 * Deprecated woocommerce_before_my_account action.
-		 *
-		 * @deprecated 2.6.0
-		 */
-		do_action( 'woocommerce_before_my_account' );
-
-		/**
-		 * Deprecated woocommerce_after_my_account action.
-		 *
-		 * @deprecated 2.6.0
-		 */
-		do_action( 'woocommerce_after_my_account' );
+		do_action( 'woocommerce_account_content' );
 	?>
 </div>

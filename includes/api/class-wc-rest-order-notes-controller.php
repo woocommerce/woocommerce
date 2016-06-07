@@ -158,7 +158,6 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_items( $request ) {
-		$id    = (int) $request['id'];
 		$order = get_post( (int) $request['order_id'] );
 
 		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {

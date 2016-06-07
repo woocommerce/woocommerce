@@ -773,6 +773,11 @@ class WC_Cart {
 				}
 			}
 
+			if ( apply_filters( 'woocommerce_cart_hide_zero_taxes', true ) ) {
+				$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
+				$tax_totals = array_intersect_key( $tax_totals, $amounts );
+			}
+
 			return apply_filters( 'woocommerce_cart_tax_totals', $tax_totals, $this );
 		}
 
@@ -885,7 +890,7 @@ class WC_Cart {
 		 * @param int $variation_id
 		 * @param array $variation attribute values
 		 * @param array $cart_item_data extra cart item data we want to pass into the item
-		 * @return string $cart_item_key
+		 * @return string|bool $cart_item_key
 		 */
 		public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 			// Wrap in try catch so plugins can throw an exception to prevent adding to cart
@@ -1512,7 +1517,7 @@ class WC_Cart {
 
 			$needs_shipping = false;
 
-			if ( $this->cart_contents ) {
+			if ( ! empty( $this->cart_contents ) ) {
 				foreach ( $this->cart_contents as $cart_item_key => $values ) {
 					$_product = $values['data'];
 					if ( $_product->needs_shipping() ) {

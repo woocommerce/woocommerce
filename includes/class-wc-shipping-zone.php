@@ -348,6 +348,9 @@ class WC_Shipping_Zone extends WC_Data {
 	 */
 	public function add_location( $code, $type ) {
 		if ( $this->is_valid_location_type( $type ) ) {
+			if ( 'postcode' === $type ) {
+				$code = wc_normalize_postcode( $code );
+			}
 			$location = array(
 				'code' => wc_clean( $code ),
 				'type' => wc_clean( $type )

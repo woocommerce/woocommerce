@@ -82,7 +82,6 @@ class WC_Shipping_Zones {
 	/**
 	 * Get shipping zone using it's ID
 	 * @since 2.6.0
-	 * @param int $zone_id
 	 * @return WC_Shipping_Meethod|bool
 	 */
 	public static function get_shipping_method( $instance_id ) {
@@ -124,7 +123,7 @@ class WC_Shipping_Zones {
 		$country          = strtoupper( wc_clean( $package['destination']['country'] ) );
 		$state            = strtoupper( wc_clean( $package['destination']['state'] ) );
 		$continent        = strtoupper( wc_clean( WC()->countries->get_continent_code_for_country( $country ) ) );
-		$postcode         = strtoupper( wc_clean( $package['destination']['postcode'] ) );
+		$postcode         = wc_normalize_postcode( wc_clean( $package['destination']['postcode'] ) );
 		$cache_key        = WC_Cache_Helper::get_cache_prefix( 'shipping_zones' ) . 'wc_shipping_zone_' . md5( sprintf( '%s+%s+%s', $country, $state, $postcode ) );
 		$matching_zone_id = wp_cache_get( $cache_key, 'shipping_zones' );
 
@@ -144,7 +143,7 @@ class WC_Shipping_Zones {
 				$matches                      = wc_postcode_location_matcher( $postcode, $postcode_locations, 'zone_id', 'location_code' );
 				$do_not_match                 = array_unique( array_diff( $zone_ids_with_postcode_rules, array_keys( $matches ) ) );
 
-				if ( $do_not_match ) {
+				if ( ! empty( $do_not_match ) ) {
 					$criteria[] = "AND zones.zone_id NOT IN (" . implode( ',', $do_not_match ) . ")";
 				}
 			}

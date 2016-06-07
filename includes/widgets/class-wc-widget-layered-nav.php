@@ -60,7 +60,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$attribute_array      = array();
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
-		if ( $attribute_taxonomies ) {
+		if ( ! empty( $attribute_taxonomies ) ) {
 			foreach ( $attribute_taxonomies as $tax ) {
 				if ( taxonomy_exists( wc_attribute_taxonomy_name( $tax->attribute_name ) ) ) {
 					$attribute_array[ $tax->attribute_name ] = $tax->attribute_name;

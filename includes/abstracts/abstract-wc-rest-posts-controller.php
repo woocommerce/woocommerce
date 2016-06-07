@@ -185,7 +185,6 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			return $post_id;
 		}
 		$post->ID = $post_id;
-		$schema   = $this->get_item_schema();
 		$post     = get_post( $post_id );
 
 		$this->update_additional_fields_for_object( $post, $request );
@@ -265,8 +264,6 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			}
 			return $post_id;
 		}
-
-		$schema = $this->get_item_schema();
 
 		$post = get_post( $post_id );
 		$this->update_additional_fields_for_object( $post, $request );

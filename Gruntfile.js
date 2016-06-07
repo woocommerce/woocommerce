@@ -31,7 +31,7 @@ module.exports = function( grunt ) {
 		// Minify .js files.
 		uglify: {
 			options: {
-				// Preserve comments that start with a bang. 
+				// Preserve comments that start with a bang.
 				preserveComments: /^!/
 			},
 			admin: {
@@ -203,7 +203,7 @@ module.exports = function( grunt ) {
 			},
 			apigen: {
 				command: [
-					'apigen generate',
+					'apigen generate -q',
 					'cd apigen',
 					'php hook-docs.php'
 				].join( '&&' )

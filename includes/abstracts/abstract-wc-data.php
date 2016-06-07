@@ -116,7 +116,7 @@ abstract class WC_Data {
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
 	 * @since 2.6.0
-	 * @return array()
+	 * @return array
 	 */
 	protected function prefix_key( $key ) {
 		return '_' === substr( $key, 0, 1 ) ? $key : '_' . $key;
@@ -126,7 +126,7 @@ abstract class WC_Data {
 	 * Internal meta keys we don't want exposed as part of meta_data. This is in
 	 * addition to all data props with _ prefix.
 	 * @since 2.6.0
-	 * @return array()
+	 * @return array
 	 */
 	protected function get_internal_meta_keys() {
 		return array_merge( array_map( array( $this, 'prefix_key' ), array_keys( $this->_data ) ), $this->_internal_meta_keys );
@@ -143,7 +143,7 @@ abstract class WC_Data {
 		$array_keys = array_keys( wp_list_pluck( $this->_meta_data, 'key' ), $key );
 		$value    = '';
 
-		if ( $array_keys ) {
+		if ( ! empty( $array_keys ) ) {
 			if ( $single ) {
 				$value = $this->_meta_data[ current( $array_keys ) ]->value;
 			} else {
@@ -177,9 +177,9 @@ abstract class WC_Data {
 	/**
 	 * Add meta data.
 	 * @since 2.6.0
-	 * @param array $key Meta key
-	 * @param array $value Meta value
-	 * @param array $unique Should this be a unique key?
+	 * @param string $key Meta key
+	 * @param string $value Meta value
+	 * @param bool $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {

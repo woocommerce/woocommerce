@@ -833,7 +833,7 @@ class WC_Form_Handler {
 			}
 		}
 
-		if ( $missing_attributes ) {
+		if ( ! empty( $missing_attributes ) ) {
 			wc_add_notice( sprintf( _n( '%s is a required field', '%s are required fields', sizeof( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ), 'error' );
 		} elseif ( empty( $variation_id ) ) {
 			wc_add_notice( __( 'Please choose product options&hellip;', 'woocommerce' ), 'error' );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Installation related functions and actions
+ * Installation related functions and actions.
  *
  * @author   WooThemes
  * @category Admin
@@ -119,17 +119,6 @@ class WC_Install {
 	}
 
 	/**
-	 * Show notice stating update was successful.
-	 */
-	public static function updated_notice() {
-		?>
-		<div id="message" class="updated woocommerce-message wc-connect">
-			<p><?php _e( 'WooCommerce data update complete. Thank you for updating to the latest version!', 'woocommerce' ); ?></p>
-		</div>
-		<?php
-	}
-
-	/**
 	 * Install WC.
 	 */
 	public static function install() {
@@ -163,7 +152,6 @@ class WC_Install {
 		// Queue upgrades/setup wizard
 		$current_wc_version    = get_option( 'woocommerce_version', null );
 		$current_db_version    = get_option( 'woocommerce_db_version', null );
-		$major_wc_version      = substr( WC()->version, 0, strrpos( WC()->version, '.' ) );
 
 		WC_Admin_Notices::remove_all_notices();
 
@@ -190,8 +178,8 @@ class WC_Install {
 		delete_transient( 'wc_attribute_taxonomies' );
 
 		/*
-		 * Deletes all expired transients. The multi-table delete syntax is used.
-		 * to delete the transient record from table a, and the corresponding.
+		 * Deletes all expired transients. The multi-table delete syntax is used
+		 * to delete the transient record from table a, and the corresponding
 		 * transient_timeout record from table b.
 		 *
 		 * Based on code inside core's upgrade_network() function.
@@ -240,6 +228,7 @@ class WC_Install {
 
 	/**
 	 * Update DB version to current.
+	 * @param string $version
 	 */
 	public static function update_db_version( $version = null ) {
 		delete_option( 'woocommerce_db_version' );

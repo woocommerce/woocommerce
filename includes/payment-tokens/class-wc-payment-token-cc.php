@@ -19,7 +19,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	/** @protected string Token Type String. */
 	protected $type = 'CC';
 
- 	/**
+	/**
 	 * Validate credit card payment tokens.
 	 *
 	 * These fields are required by all credit card payment tokens:

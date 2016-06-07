@@ -388,7 +388,7 @@ function wc_is_valid_url( $url ) {
  * @return bool
  */
 function wc_site_is_https() {
-	return strstr( get_option( 'home' ), 'https:' );
+	return false !== strstr( get_option( 'home' ), 'https:' );
 }
 
 /**

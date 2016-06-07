@@ -1465,7 +1465,7 @@ if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 
 		wc_get_template( 'checkout/payment.php', array(
 			'checkout'           => WC()->checkout(),
-			'available_gateways' => WC()->payment_gateways()->get_available_payment_gateways(),
+			'available_gateways' => $available_gateways,
 			'order_button_text'  => apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) )
 		) );
 	}
@@ -2089,6 +2089,33 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$html .= '</select>';
 
 		echo apply_filters( 'woocommerce_dropdown_variation_attribute_options_html', $html, $args );
+	}
+}
+
+if ( ! function_exists( 'woocommerce_account_content' ) ) {
+
+	/**
+	 * My Account content output.
+	 */
+	function woocommerce_account_content() {
+		global $wp;
+
+		foreach ( $wp->query_vars as $key => $value ) {
+			// Ignore pagename param.
+			if ( 'pagename' === $key ) {
+				continue;
+			}
+
+			if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
+				do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
+				return;
+			}
+		}
+
+		// No endpoint found? Default to dashboard.
+		wc_get_template( 'myaccount/dashboard.php', array(
+			'current_user' => get_user_by( 'id', get_current_user_id() ),
+		) );
 	}
 }
 
