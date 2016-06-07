@@ -24,10 +24,10 @@ class WC_Product_Variation extends WC_Product {
 	public $parent;
 
 	/** @public string Stores the shipping class of the variation. */
-	public $variation_shipping_class         = false;
+	public $variation_shipping_class         = '';
 
 	/** @public int Stores the shipping class ID of the variation. */
-	public $variation_shipping_class_id      = false;
+	public $variation_shipping_class_id      = 0;
 
 	/** @public unused vars @deprecated in 2.2 */
 	public $variation_has_sku                = true;
