@@ -50,7 +50,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 */
 	public function __construct() {
 		$this->import_page = 'woocommerce_tax_rate_csv';
-		$this->delimiter   = empty( $_POST['delimiter'] ) ? ',' : wc_clean( $_POST['delimiter'] );
+		$this->delimiter   = empty( $_POST['delimiter'] ) ? ',' : (string) wc_clean( $_POST['delimiter'] );
 	}
 
 	/**

@@ -83,7 +83,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Object this email is for, for example a customer, product, or email.
-	 * @var object
+	 * @var object|bool
 	 */
 	public $object;
 

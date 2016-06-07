@@ -1050,7 +1050,7 @@ class WC_Admin_Post_Types {
 		// Save fields
 		if ( isset( $_REQUEST['_sku'] ) ) {
 			$sku     = get_post_meta( $post_id, '_sku', true );
-			$new_sku = wc_clean( $_REQUEST['_sku'] );
+			$new_sku = (string) wc_clean( $_REQUEST['_sku'] );
 
 			if ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {

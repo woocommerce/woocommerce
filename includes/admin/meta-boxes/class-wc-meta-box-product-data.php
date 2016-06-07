@@ -840,7 +840,7 @@ class WC_Meta_Box_Product_Data {
 
 		// Unique SKU
 		$sku     = get_post_meta( $post_id, '_sku', true );
-		$new_sku = wc_clean( $_POST['_sku'] );
+		$new_sku = (string) wc_clean( $_POST['_sku'] );
 
 		if ( '' == $new_sku ) {
 			update_post_meta( $post_id, '_sku', '' );
@@ -991,10 +991,10 @@ class WC_Meta_Box_Product_Data {
 			update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
 		} else {
-			$date_from     = isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';
-			$date_to       = isset( $_POST['_sale_price_dates_to'] ) ? wc_clean( $_POST['_sale_price_dates_to'] )     : '';
-			$regular_price = isset( $_POST['_regular_price'] ) ? wc_clean( $_POST['_regular_price'] )                 : '';
-			$sale_price    = isset( $_POST['_sale_price'] ) ? wc_clean( $_POST['_sale_price'] )                       : '';
+			$date_from     = (string) isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';
+			$date_to       = (string) isset( $_POST['_sale_price_dates_to'] ) ? wc_clean( $_POST['_sale_price_dates_to'] )     : '';
+			$regular_price = (string) isset( $_POST['_regular_price'] ) ? wc_clean( $_POST['_regular_price'] )                 : '';
+			$sale_price    = (string) isset( $_POST['_sale_price'] ) ? wc_clean( $_POST['_sale_price'] )                       : '';
 
 			update_post_meta( $post_id, '_regular_price', '' === $regular_price ? '' : wc_format_decimal( $regular_price ) );
 			update_post_meta( $post_id, '_sale_price', '' === $sale_price ? '' : wc_format_decimal( $sale_price ) );
