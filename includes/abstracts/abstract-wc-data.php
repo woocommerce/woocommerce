@@ -177,9 +177,9 @@ abstract class WC_Data {
 	/**
 	 * Add meta data.
 	 * @since 2.6.0
-	 * @param array $key Meta key
-	 * @param array $value Meta value
-	 * @param array $unique Should this be a unique key?
+	 * @param string $key Meta key
+	 * @param string $value Meta value
+	 * @param bool $unique Should this be a unique key?
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $unique ) {
