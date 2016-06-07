@@ -33,16 +33,6 @@ class WC_Rest_Settings_Groups_Controller extends WC_REST_Settings_API_Controller
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
-
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<group>[\w-]+)', array(
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
 	}
 
 	/**
@@ -91,30 +81,6 @@ class WC_Rest_Settings_Groups_Controller extends WC_REST_Settings_API_Controller
 		if ( is_wp_error( $group ) ) {
 			return $group;
 		}
-		return rest_ensure_response( $group );
-	}
-
-	/**
-	 * Update a multiple settings at once.
-	 *
-	 * @since  2.7.0
-	 * @param  WP_REST_Request $request
-	 * @return WP_Error|WP_REST_Response
-	 */
-	public function update_item( $request ) {
-		$group = $this->prepare_item_for_response( $request );
-		if ( is_wp_error( $group ) ) {
-			return $group;
-		}
-
-		foreach ( $group['settings'] as $array_key => $setting ) {
-			if ( isset( $request['values'][ $setting['id'] ] ) ) {
-				$value = $this->sanitize_setting_value( $setting, $request['values'][ $setting['id'] ] );
-				$group['settings'][ $array_key ]['value'] = $value;
-				update_option( $setting['id'], $value );
-			}
-		}
-
 		return rest_ensure_response( $group );
 	}
 
