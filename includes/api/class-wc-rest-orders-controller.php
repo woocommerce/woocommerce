@@ -449,7 +449,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				'customer_id'   => $request['customer_id'],
 				'customer_note' => $request['customer_note'],
 				'created_via'   => 'rest-api',
-			), $request );
+			) );
 
 			if ( is_wp_error( $order ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create_order', sprintf( __( 'Cannot create order: %s.', 'woocommerce' ), implode( ', ', $order->get_error_messages() ) ), 400 );
@@ -809,7 +809,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 * 1) Only non-protected meta (no leading underscore) can be set
 	 * 2) Meta values must be scalar (int, string, bool)
 	 *
-	 * @param WC_Order $order Order data.
+	 * @param int $order_id Order ID.
 	 * @param array $meta_data Meta data in array( 'meta_key' => 'meta_value' ) format.
 	 */
 	protected function update_meta_data( $order_id, $meta_data ) {
@@ -1076,10 +1076,9 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @since 2.6.0
 	 * @param array $args Order args.
-	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WC_Order|WP_Error
 	 */
-	protected function create_base_order( $args, $data ) {
+	protected function create_base_order( $args ) {
 		return wc_create_order( $args );
 	}
 
