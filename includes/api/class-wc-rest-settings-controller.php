@@ -81,7 +81,15 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 			return $settings;
 		}
 
-		return rest_ensure_response( $settings );
+		$data = array();
+
+		foreach ( $settings as $setting_obj ) {
+			$setting = $this->prepare_item_for_response( $setting_obj, $request );
+			$setting = $this->prepare_response_for_collection( $setting );
+			$data[]  = $setting;
+		}
+
+		return rest_ensure_response( $data );
 	}
 
 	/**
@@ -179,10 +187,39 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$setting          = $this->filter_setting( $item );
-		$setting['value'] = $this->get_value( $setting['id'] );
+		$data          = $this->filter_setting( $item );
+		$data['value'] = $this->get_value( $data['id'] );
 
-		return $setting;
+		$context = empty( $request['context'] ) ? 'view' : $request['context'];
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $data['id'], $request['group'] ) );
+
+		return $response;
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param string $setting_id Setting ID.
+	 * @param string $group_id Group ID.
+	 * @return array Links for the given setting.
+	 */
+	protected function prepare_links( $setting_id, $group_id ) {
+		$base  = '/' . $this->namespace . '/' . $this->rest_base . '/' . $group_id;
+		$links = array(
+			'self' => array(
+				'href' => rest_url( trailingslashit( $base ) . $setting_id ),
+			),
+			'collection' => array(
+				'href' => rest_url( $base ),
+			),
+		);
+
+		return $links;
 	}
 
 	/**
