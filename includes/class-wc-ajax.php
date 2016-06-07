@@ -2622,6 +2622,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Toggle Enabled.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2638,6 +2639,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Toggle Downloadable Checkbox.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2652,6 +2654,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Toggle Virtual Checkbox.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2666,6 +2669,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Toggle Manage Stock Checkbox.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2680,6 +2684,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Regular Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2706,6 +2711,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Sale Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2732,6 +2738,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Stock.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2754,6 +2761,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Weight.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2764,6 +2772,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Length.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2774,6 +2783,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Width.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2784,6 +2794,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Height.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2794,6 +2805,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Download Limit.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2804,6 +2816,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Download Expiry.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2814,6 +2827,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Delete all.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2828,6 +2842,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Sale Schedule.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2864,6 +2879,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Increase Regular Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2874,6 +2890,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Decrease Regular Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2884,6 +2901,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Increase Sale Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2894,6 +2912,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Decrease Sale Prices.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param  array $data
 	 */
@@ -2904,6 +2923,7 @@ class WC_AJAX {
 	/**
 	 * Bulk action - Set Price.
 	 * @access private
+	 * @used-by bulk_edit_variations
 	 * @param  array $variations
 	 * @param string $operator + or -
 	 * @param string $field price being adjusted
@@ -2942,9 +2962,29 @@ class WC_AJAX {
 		}
 	}
 
-
 	/**
 	 * Bulk edit variations via AJAX.
+	 * @uses WC_AJAX::variation_bulk_set_meta()
+	 * @uses WC_AJAX::variation_bulk_adjust_price()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_decrease()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_increase()
+	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price_decrease()
+	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price_increase()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_schedule()
+	 * @uses WC_AJAX::variation_bulk_action_delete_all()
+	 * @uses WC_AJAX::variation_bulk_action_variable_download_expiry()
+	 * @uses WC_AJAX::variation_bulk_action_variable_download_limit()
+	 * @uses WC_AJAX::variation_bulk_action_variable_height()
+	 * @uses WC_AJAX::variation_bulk_action_variable_width()
+	 * @uses WC_AJAX::variation_bulk_action_variable_length()
+	 * @uses WC_AJAX::variation_bulk_action_variable_weight()
+	 * @uses WC_AJAX::variation_bulk_action_variable_stock()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price()
+	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price()
+	 * @uses WC_AJAX::variation_bulk_action_toggle_manage_stock()
+	 * @uses WC_AJAX::variation_bulk_action_toggle_virtual()
+	 * @uses WC_AJAX::variation_bulk_action_toggle_downloadable()
+	 * @uses WC_AJAX::variation_bulk_action_toggle_enabled
 	 */
 	public static function bulk_edit_variations() {
 		ob_start();
