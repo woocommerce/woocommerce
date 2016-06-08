@@ -70,6 +70,10 @@ jQuery( function( $ ) {
 		var cart_timeout = null,
 			day_in_ms    = ( 24 * 60 * 60 * 1000 );
 
+		$( document.body ).bind( 'wc_fragment_refresh updated_wc_div', function() {
+			refresh_cart_fragment();
+		});
+
 		$( document.body ).bind( 'added_to_cart', function( event, fragments, cart_hash ) {
 			var prev_cart_hash = sessionStorage.getItem( cart_hash_key );
 
