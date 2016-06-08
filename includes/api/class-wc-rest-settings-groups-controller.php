@@ -61,7 +61,11 @@ class WC_Rest_Settings_Groups_Controller extends WC_REST_Settings_API_Controller
 
 			$group = wp_parse_args( $group, $defaults );
 			if ( ! is_null( $group['id'] ) && ! is_null( $group['label'] ) ) {
-				$filtered_groups[] = $this->filter_group( $group );
+				$group_obj  = $this->filter_group( $group );
+				$group_data = $this->prepare_item_for_response( $group_obj, $request );
+				$group_data = $this->prepare_response_for_collection( $group_data );
+
+				$filtered_groups[] = $group_data;
 			}
 		}
 
@@ -70,68 +74,40 @@ class WC_Rest_Settings_Groups_Controller extends WC_REST_Settings_API_Controller
 	}
 
 	/**
-	 * Return a single setting group and its settings.
+	 * Prepare links for the request.
 	 *
-	 * @since  2.7.0
-	 * @param  WP_REST_Request $request
-	 * @return WP_Error|WP_REST_Response
+	 * @param string $group_id Group ID.
+	 * @return array Links for the given group.
 	 */
-	public function get_item( $request ) {
-		$group = $this->prepare_item_for_response( $request );
-		if ( is_wp_error( $group ) ) {
-			return $group;
-		}
-		return rest_ensure_response( $group );
+	protected function prepare_links( $group_id ) {
+		$base  = '/' . $this->namespace . '/' . $this->rest_base;
+		$links = array(
+			'item' => array(
+				'href'       => rest_url( trailingslashit( $base ) . $group_id ),
+				'embeddable' => true,
+			),
+		);
+
+		return $links;
 	}
 
 	/**
 	 * Prepare a report sales object for serialization.
 	 *
-	 * @param null $_
+	 * @param array $item Group object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
-	public function prepare_item_for_response( $_, $request ) {
-		$groups = apply_filters( 'woocommerce_settings_groups', array() );
-		if ( empty( $groups ) ) {
-			return new WP_Error( 'rest_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
+	public function prepare_item_for_response( $item, $request ) {
+		$context = empty( $request['context'] ) ? 'view' : $request['context'];
+		$data    = $this->add_additional_fields_to_object( $item, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
 
-		$index_key = array_keys( wp_list_pluck( $groups, 'id' ), $request['group'] );
-		if ( empty( $index_key ) || empty( $groups[ $index_key[0] ] ) ) {
-			return new WP_Error( 'rest_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
+		$response = rest_ensure_response( $data );
 
-		$group = wp_parse_args( $groups[ $index_key[0] ], $this->group_defaults() );
-		if ( is_null( $group['id'] ) || is_null( $group['label'] ) ) {
-			return new WP_Error( 'rest_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
+		$response->add_links( $this->prepare_links( $item['id'] ) );
 
-		// Find sub groups.
-		$sub_groups = array();
-		foreach ( $groups as $_group ) {
-			if ( ! empty( $_group['parent_id'] ) && $group['id'] === $_group['parent_id'] ) {
-				$sub_groups[] = $_group['id'];
-			}
-		}
-
-		$filtered_group             = $this->filter_group( $group );
-		$filtered_group['settings'] = array();
-		$settings                   = apply_filters( 'woocommerce_settings-' . $group['id'], array() );
-
-		if ( ! empty( $settings ) ) {
-			foreach ( $settings as $setting ) {
-				$setting           = $this->filter_setting( $setting );
-				$setting['value']  = $this->get_value( $setting['id'] );
-				if ( $this->is_setting_type_valid( $setting['type'] ) ) {
-					$filtered_group['settings'][] = $setting;
-				}
-			}
-		}
-
-		$filtered_group['sub_groups'] = $sub_groups;
-
-		return $filtered_group;
+		return $response;
 	}
 
 	/**
