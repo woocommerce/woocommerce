@@ -123,29 +123,34 @@ class WC_Geolocation {
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = true, $api_fallback = true ) {
-		// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview)
-		if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
-			$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_CF_IPCOUNTRY'] ) );
-		} else {
-			$ip_address = $ip_address ? $ip_address : self::get_ip_address();
+		// Filter to allow custom geolocation of the IP address.
+		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
-			if ( self::is_IPv6( $ip_address ) ) {
-				$database = self::get_local_database_path( 'v6' );
+		if ( false === $country_code ) {
+			// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview)
+			if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
+				$country_code = sanitize_text_field( strtoupper( $_SERVER['HTTP_CF_IPCOUNTRY'] ) );
 			} else {
-				$database = self::get_local_database_path();
-			}
+				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
 
-			if ( file_exists( $database ) ) {
-				$country_code = self::geolocate_via_db( $ip_address );
-			} elseif ( $api_fallback ) {
-				$country_code = self::geolocate_via_api( $ip_address );
-			} else {
-				$country_code = '';
-			}
+				if ( self::is_IPv6( $ip_address ) ) {
+					$database = self::get_local_database_path( 'v6' );
+				} else {
+					$database = self::get_local_database_path();
+				}
 
-			if ( ! $country_code && $fallback ) {
-				// May be a local environment - find external IP
-				return self::geolocate_ip( self::get_external_ip_address(), false, $api_fallback );
+				if ( file_exists( $database ) ) {
+					$country_code = self::geolocate_via_db( $ip_address );
+				} elseif ( $api_fallback ) {
+					$country_code = self::geolocate_via_api( $ip_address );
+				} else {
+					$country_code = '';
+				}
+
+				if ( ! $country_code && $fallback ) {
+					// May be a local environment - find external IP
+					return self::geolocate_ip( self::get_external_ip_address(), false, $api_fallback );
+				}
 			}
 		}
 
