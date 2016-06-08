@@ -56,6 +56,9 @@ class WC_Register_Legacy_Settings {
 		foreach ( $legacy_sections as $legacy_section => $legacy_section_label ) {
 			$legacy_settings = $this->page->get_settings( $legacy_section );
 			foreach ( $legacy_settings as $legacy_setting ) {
+				if ( ! isset( $legacy_setting['id'] ) ) {
+					continue;
+				}
 				$new_setting = array(
 					'id'          => $legacy_setting['id'],
 					'label'       => ( ! empty( $legacy_setting['title'] ) ? $legacy_setting['title'] : '' ),
