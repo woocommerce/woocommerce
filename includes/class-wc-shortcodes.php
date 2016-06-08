@@ -821,6 +821,9 @@ class WC_Shortcodes {
 
 		ob_start();
 
+		// Rename arg
+		$atts['posts_per_page'] = absint( $atts['per_page'] );
+
 		woocommerce_related_products( $atts );
 
 		return ob_get_clean();
