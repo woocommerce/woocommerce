@@ -435,7 +435,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 			echo ( $count > 0 || $option_is_set ) ? '</a> ' : '</span> ';
 
-			echo apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>' );
+			echo apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term );
 
 			echo '</li>';
 		}
