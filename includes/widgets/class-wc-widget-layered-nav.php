@@ -148,6 +148,15 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			return;
 		}
 
+		switch ( $orderby ) {
+			case 'name_num' :
+				usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
+			break;
+			case 'parent' :
+				usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+			break;
+		}
+
 		ob_start();
 
 		$this->widget_start( $args, $instance );
