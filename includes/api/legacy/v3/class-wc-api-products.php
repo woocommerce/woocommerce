@@ -2395,7 +2395,7 @@ class WC_API_Products extends WC_API_Resource {
 	 * Sets product image as attachment and returns the attachment ID.
 	 *
 	 * @since 2.2
-	 * @param integer $upload
+	 * @param array $upload
 	 * @param int $id
 	 * @return int
 	 */
