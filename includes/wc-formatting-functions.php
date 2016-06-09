@@ -27,6 +27,29 @@ function wc_sanitize_taxonomy_name( $taxonomy ) {
 }
 
 /**
+ * Sanitize permalink values before insertion into DB.
+ *
+ * Cannot use wc_clean because it sometimes strips % chars and breaks the user's setting.
+ *
+ * @since 2.6.0
+ * @param string $taxonomy
+ * @return string
+ */
+function wc_sanitize_permalink( $value ) {
+	global $wpdb;
+
+	$value = $wpdb->strip_invalid_text_for_column( $wpdb->options, 'option_value', $value );
+
+	if ( is_wp_error( $value ) ) {
+		$value = '';
+	}
+
+	$value = esc_url_raw( $value );
+	$value = str_replace( 'http://', '', $value );
+	return untrailingslashit( $value );
+}
+
+/**
  * Gets the filename part of a download URL.
  *
  * @param string $file_url

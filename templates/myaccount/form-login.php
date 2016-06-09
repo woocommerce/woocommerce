@@ -52,7 +52,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php do_action( 'woocommerce_login_form' ); ?>
 
 			<p class="form-row">
-				<?php wp_nonce_field( 'woocommerce-login' ); ?>
+				<?php wp_nonce_field( 'woocommerce-login', 'woocommerce-login-nonce' ); ?>
 				<input type="submit" class="woocommerce-Button button" name="login" value="<?php esc_attr_e( 'Login', 'woocommerce' ); ?>" />
 				<label for="rememberme" class="inline">
 					<input class="woocommerce-Input woocommerce-Input--checkbox" name="rememberme" type="checkbox" id="rememberme" value="forever" /> <?php _e( 'Remember me', 'woocommerce' ); ?>
@@ -108,7 +108,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php do_action( 'register_form' ); ?>
 
 			<p class="woocomerce-FormRow form-row">
-				<?php wp_nonce_field( 'woocommerce-register' ); ?>
+				<?php wp_nonce_field( 'woocommerce-register', 'woocommerce-register-nonce' ); ?>
 				<input type="submit" class="woocommerce-Button button" name="register" value="<?php esc_attr_e( 'Register', 'woocommerce' ); ?>" />
 			</p>
 
