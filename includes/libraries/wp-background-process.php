@@ -1,27 +1,53 @@
 <?php
+/**
+ * WP Background Process
+ *
+ * @package WP-Background-Processing
+ */
 
 if ( ! class_exists( 'WP_Background_Process' ) ) {
+
+	/**
+	 * Abstract WP_Background_Process class.
+	 *
+	 * @abstract
+	 * @extends WP_Async_Request
+	 */
 	abstract class WP_Background_Process extends WP_Async_Request {
 
 		/**
-		 * @var
+		 * Action
+		 *
+		 * (default value: 'background_process')
+		 *
+		 * @var string
+		 * @access protected
 		 */
 		protected $action = 'background_process';
 
 		/**
-		 * Start time of current process
+		 * Start time of current process.
+		 *
+		 * (default value: 0)
 		 *
 		 * @var int
+		 * @access protected
 		 */
 		protected $start_time = 0;
 
 		/**
-		 * @var string
+		 * Cron_hook_identifier
+		 *
+		 * @var mixed
+		 * @access protected
 		 */
 		protected $cron_hook_identifier;
 
 		/**
-		 * @var string
+		 * Cron_interval_identifier
+		 *
+		 * @var mixed
+		 * @access protected
 		 */
 		protected $cron_interval_identifier;
 
@@ -41,20 +67,21 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		/**
 		 * Dispatch
 		 *
-		 * @return array|WP_Error
+		 * @access public
+		 * @return void
 		 */
 		public function dispatch() {
-			// Schedule the cron healthcheck
+			// Schedule the cron healthcheck.
 			$this->schedule_event();
 
-			// Perform remote post
+			// Perform remote post.
 			return parent::dispatch();
 		}
 
 		/**
 		 * Push to queue
 		 *
-		 * @param mixed $data
+		 * @param mixed $data Data.
 		 *
 		 * @return $this
 		 */
@@ -82,8 +109,8 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		/**
 		 * Update queue
 		 *
-		 * @param string $key
-		 * @param array  $data
+		 * @param string $key Key.
+		 * @param array  $data Data.
 		 *
 		 * @return $this
 		 */
@@ -98,7 +125,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		/**
 		 * Delete queue
 		 *
-		 * @param string $key
+		 * @param string $key Key.
 		 *
 		 * @return $this
 		 */
@@ -114,7 +141,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * Generates a unique key based on microtime. Queue items are
 		 * given a unique key so that they can be merged upon save.
 		 *
-		 * @param int $length
+		 * @param int $length Length.
 		 *
 		 * @return string
 		 */
@@ -133,12 +160,12 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 */
 		public function maybe_handle() {
 			if ( $this->is_process_running() ) {
-				// Background process already running
+				// Background process already running.
 				wp_die();
 			}
 
 			if ( $this->is_queue_empty() ) {
-				// No data to process
+				// No data to process.
 				wp_die();
 			}
 
@@ -184,7 +211,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 */
 		protected function is_process_running() {
 			if ( get_site_transient( $this->identifier . '_process_lock' ) ) {
-				// Process already running
+				// Process already running.
 				return true;
 			}
 
@@ -199,7 +226,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * defined in the time_exceeded() method.
 		 */
 		protected function lock_process() {
-			$this->start_time = time(); // Set start time of current process
+			$this->start_time = time(); // Set start time of current process.
 
 			$lock_duration = ( property_exists( $this, 'queue_lock_time' ) ) ? $this->queue_lock_time : 60; // 1 minute
 			$lock_duration = apply_filters( $this->identifier . '_queue_lock_time', $lock_duration );
@@ -279,12 +306,12 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 					}
 
 					if ( $this->time_exceeded() || $this->memory_exceeded() ) {
-						// Batch limits reached
+						// Batch limits reached.
 						break;
 					}
 				}
 
-				// Update or delete current batch
+				// Update or delete current batch.
 				if ( ! empty( $batch->data ) ) {
 					$this->update( $batch->key, $batch->data );
 				} else {
@@ -294,7 +321,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 
 			$this->unlock_process();
 
-			// Start next batch or complete process
+			// Start next batch or complete process.
 			if ( ! $this->is_queue_empty() ) {
 				$this->dispatch();
 			} else {
@@ -313,7 +340,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * @return bool
 		 */
 		protected function memory_exceeded() {
-			$memory_limit   =  $this->get_memory_limit() * 0.9; // 90% of max memory
+			$memory_limit   = $this->get_memory_limit() * 0.9; // 90% of max memory
 			$current_memory = memory_get_usage( true );
 			$return         = false;
 
@@ -333,12 +360,12 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 			if ( function_exists( 'ini_get' ) ) {
 				$memory_limit = ini_get( 'memory_limit' );
 			} else {
-				// Sensible default
+				// Sensible default.
 				$memory_limit = '128M';
 			}
 
-			if ( ! $memory_limit || -1 == $memory_limit ) {
-				// Unlimited, set to 32GB
+			if ( ! $memory_limit || -1 === $memory_limit ) {
+				// Unlimited, set to 32GB.
 				$memory_limit = '32000M';
 			}
 
@@ -346,7 +373,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		}
 
 		/**
-		 * Time exceeded
+		 * Time exceeded.
 		 *
 		 * Ensures the batch never exceeds a sensible time limit.
 		 * A timeout limit of 30s is common on shared hosting.
@@ -365,21 +392,21 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		}
 
 		/**
-		 * Complete
+		 * Complete.
 		 *
 		 * Override if applicable, but ensure that the below actions are
 		 * performed, or, call parent::complete().
 		 */
 		protected function complete() {
-			// Unschedule the cron healthcheck
+			// Unschedule the cron healthcheck.
 			$this->clear_scheduled_event();
 		}
 
 		/**
 		 * Schedule cron healthcheck
 		 *
-		 * @param $schedules
-		 *
+		 * @access public
+		 * @param mixed $schedules Schedules.
 		 * @return mixed
 		 */
 		public function schedule_cron_healthcheck( $schedules ) {
@@ -406,12 +433,12 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 */
 		public function handle_cron_healthcheck() {
 			if ( $this->is_process_running() ) {
-				// Background process already running
+				// Background process already running.
 				exit;
 			}
 
 			if ( $this->is_queue_empty() ) {
-				// No data to process
+				// No data to process.
 				$this->clear_scheduled_event();
 				exit;
 			}
@@ -442,6 +469,23 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		}
 
 		/**
+		 * Cancel Process
+		 *
+		 * Stop processing queue items, clear cronjob and delete batch.
+		 *
+		 */
+		public function cancel_process() {
+			if ( ! $this->is_queue_empty() ) {
+				$batch = $this->get_batch();
+
+				$this->delete( $batch->key );
+
+				wp_clear_scheduled_hook( $this->cron_hook_identifier );
+			}
+
+		}
+
+		/**
 		 * Task
 		 *
 		 * Override this method to perform any actions required on each
@@ -449,7 +493,7 @@ if ( ! class_exists( 'WP_Background_Process' ) ) {
 		 * in the next pass through. Or, return false to remove the
 		 * item from the queue.
 		 *
-		 * @param mixed $item Queue item to iterate over
+		 * @param mixed $item Queue item to iterate over.
 		 *
 		 * @return mixed
 		 */
