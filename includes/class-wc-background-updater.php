@@ -51,6 +51,15 @@ class WC_Background_Updater extends WP_Background_Process {
 	}
 
 	/**
+	 * Schedule event
+	 */
+	protected function schedule_event() {
+		if ( ! wp_next_scheduled( $this->cron_hook_identifier ) ) {
+			wp_schedule_event( time() + 10, $this->cron_interval_identifier, $this->cron_hook_identifier );
+		}
+	}
+
+	/**
 	 * Error shown when the updater cannot dispatch.
 	 */
 	public function dispatch_error() {
