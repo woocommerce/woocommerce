@@ -291,8 +291,14 @@ class WC_Tax {
 
 		if ( $postcode_ranges ) {
 			$matches         = wc_postcode_location_matcher( $postcode, $postcode_ranges, 'tax_rate_id', 'location_code' );
-			$postcode_search = array_unique( array_merge( $postcode_search, array_values( $matches ) ) );
+			if ( ! empty( $matches ) ) {
+				foreach ( $matches as $matched_postcodes ) {
+					$postcode_search = array_merge( $postcode_search, $matched_postcodes );
+				}
+			}
 		}
+
+		$postcode_search = array_unique( $postcode_search );
 
 		/**
 		 * Location matching criteria - ORed
