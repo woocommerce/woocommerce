@@ -159,6 +159,8 @@ class WC_API_Customers extends WC_API_Resource {
 						ORDER BY posts.ID DESC
 					" );
 
+		$roles = array_values( $customer->roles );
+
 		$customer_data = array(
 			'id'               => $customer->ID,
 			'created_at'       => $this->server->format_datetime( $customer->user_registered ),
@@ -166,7 +168,7 @@ class WC_API_Customers extends WC_API_Resource {
 			'first_name'       => $customer->first_name,
 			'last_name'        => $customer->last_name,
 			'username'         => $customer->user_login,
-			'role'             => $customer->roles[0],
+			'role'             => $roles[0],
 			'last_order_id'    => is_object( $last_order ) ? $last_order->id : null,
 			'last_order_date'  => is_object( $last_order ) ? $this->server->format_datetime( $last_order->post_date_gmt ) : null,
 			'orders_count'     => wc_get_customer_order_count( $customer->ID ),
