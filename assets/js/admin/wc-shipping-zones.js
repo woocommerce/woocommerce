@@ -90,7 +90,6 @@
 					$save_button.on( 'click', { view: this }, this.onSubmit );
 					$( document.body ).on( 'click', '.add_shipping_method:not(.disabled)', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
-					$( document.body ).on( 'click', '.wc-shipping-zone-save-changes', { view: this }, this.onSubmit );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 				},
