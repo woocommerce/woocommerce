@@ -167,8 +167,6 @@ class WC_Admin_Permalink_Settings {
 			return;
 		}
 
-		global $wpdb;
-
 		// We need to save the options ourselves; settings api does not trigger save for the permalinks page.
 		if ( isset( $_POST['permalink_structure'] ) ) {
 			$permalinks = get_option( 'woocommerce_permalinks' );

@@ -31,8 +31,8 @@ function wc_sanitize_taxonomy_name( $taxonomy ) {
  *
  * Cannot use wc_clean because it sometimes strips % chars and breaks the user's setting.
  *
- * @since 2.6.0
- * @param string $taxonomy
+ * @since  2.6.0
+ * @param  string $value
  * @return string
  */
 function wc_sanitize_permalink( $value ) {
