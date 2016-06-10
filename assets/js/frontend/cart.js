@@ -269,6 +269,7 @@ jQuery( function( $ ) {
 				dataType: 'html',
 				success: function( response ) {
 					$( 'div.cart_totals' ).replaceWith( response );
+					$( document.body ).trigger( 'updated_cart_totals' );
 				}
 			} );
 		},
