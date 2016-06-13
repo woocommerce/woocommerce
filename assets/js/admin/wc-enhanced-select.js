@@ -147,7 +147,7 @@ jQuery( function( $ ) {
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 
-				if( select2_args.multiple == true ){
+				if( $( this ).data( 'sortable' ) == true ){
 					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
 					    containment: 'parent',
 					    start: function() { $( this ).select2( 'onSortStart' ); },
@@ -227,14 +227,14 @@ jQuery( function( $ ) {
 
 				$( this ).select2( select2_args ).addClass( 'enhanced' );
 
-				if( select2_args.multiple == true ){
+				if( $( this ).data( 'sortable' ) == true ){
 					$( this ).select2( 'container' ).find( 'ul.select2-choices' ).sortable({
 					    containment: 'parent',
 					    start: function() { $( this ).select2( 'onSortStart' ); },
 					    update: function() { $( this ).select2( 'onSortEnd' ); }
 					});
 				}
-				
+
 			});
 		})
 
