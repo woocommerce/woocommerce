@@ -114,7 +114,7 @@ class WC_Install {
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
 			self::update();
-			WC_Admin_Notices::remove_notice( 'update' );
+			WC_Admin_Notices::add_notice( 'update' );
 		}
 	}
 

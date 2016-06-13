@@ -40,8 +40,6 @@ class WC_Background_Updater extends WP_Background_Process {
 	 * Updater will still run via cron job if this fails for any reason.
 	 */
 	public function dispatch() {
-		WC_Admin_Notices::add_notice( 'updating' );
-
 		$dispatched = parent::dispatch();
 
 		if ( is_wp_error( $dispatched ) ) {
@@ -64,6 +62,14 @@ class WC_Background_Updater extends WP_Background_Process {
 	 */
 	public function dispatch_error() {
 		echo '<div class="error"><p>' . __( 'Unable to dispatch WooCommerce updater:', 'woocommerce' ) . ' ' . esc_html( $this->error ) . '</p></div>';
+	}
+
+	/**
+	 * Is the updater running?
+	 * @return boolean
+	 */
+	public function is_updating() {
+		return false === $this->is_queue_empty();
 	}
 
 	/**
@@ -105,7 +111,6 @@ class WC_Background_Updater extends WP_Background_Process {
 	 */
 	protected function complete() {
 		$logger = new WC_Logger();
-
 		$logger->add( 'wc_db_updates', 'Data update complete' );
 		WC_Install::update_db_version();
 		parent::complete();
