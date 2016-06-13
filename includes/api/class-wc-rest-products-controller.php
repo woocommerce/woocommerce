@@ -290,8 +290,8 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		if ( empty( $images ) ) {
 			$images[] = array(
 				'id'            => 0,
-				'date_created'  => wc_rest_prepare_date_response( time() ), // Default to now.
-				'date_modified' => wc_rest_prepare_date_response( time() ),
+				'date_created'  => wc_rest_prepare_date_response( current_time( 'mysql' ) ), // Default to now.
+				'date_modified' => wc_rest_prepare_date_response( current_time( 'mysql' ) ),
 				'src'           => wc_placeholder_img_src(),
 				'title'         => __( 'Placeholder', 'woocommerce' ),
 				'alt'           => __( 'Placeholder', 'woocommerce' ),

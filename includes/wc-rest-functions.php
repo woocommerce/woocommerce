@@ -21,28 +21,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
  * @since 2.6.0
- * @param string       $date_gmt
- * @param string|null  $date
+ * @param string       $date
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
-function wc_rest_prepare_date_response( $date_gmt, $date = null ) {
+function wc_rest_prepare_date_response( $date ) {
 	// Check if mysql_to_rfc3339 exists first!
 	if ( ! function_exists( 'mysql_to_rfc3339' ) ) {
 		return null;
 	}
 
-	// Use the date if passed.
-	if ( isset( $date ) ) {
-		return mysql_to_rfc3339( $date );
-	}
-
-	// Return null if $date_gmt is empty/zeros.
-	if ( '0000-00-00 00:00:00' === $date_gmt ) {
+	// Return null if $date is empty/zeros.
+	if ( '0000-00-00 00:00:00' === $date ) {
 		return null;
 	}
 
 	// Return the formatted datetime.
-	return mysql_to_rfc3339( $date_gmt );
+	return mysql_to_rfc3339( $date );
 }
 
 /**
