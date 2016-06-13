@@ -10,7 +10,7 @@ extensions: [php]
 # directories and files matching this file mask will not be parsed
 exclude:
     - includes/libraries/
-    - api/
+    - includes/api/
     - i18n/
     - node_modules/
     - wc-apidocs/
@@ -26,10 +26,10 @@ charset: [UTF-8]
 main: WC
 
 # title of generated documentation
-title: WooCommerce 2.5.x Code Reference
+title: WooCommerce 2.6.x Code Reference
 
 # base url used for sitemap (useful for public doc)
-baseUrl: http://docs.woothemes.com/wc-apidocs/
+baseUrl: https://docs.woothemes.com/wc-apidocs/
 
 # choose ApiGen template theme
 templateTheme: default

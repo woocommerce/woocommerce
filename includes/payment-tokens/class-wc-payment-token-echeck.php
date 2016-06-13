@@ -20,7 +20,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	/** @protected string Token Type String */
 	protected $type = 'eCheck';
 
- 	/**
+	/**
 	 * Validate eCheck payment tokens.
 	 *
 	 * These fields are required by all eCheck payment tokens:
@@ -34,10 +34,18 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 			return false;
 		}
 
-		if ( empty( $this->meta['last4'] ) ) {
+		if ( ! $this->get_last4() ) {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Get type to display to user.
+	 * @return string
+	 */
+	public function get_display_name() {
+		return __( 'eCheck', 'woocommerce' );
 	}
 
 	/**
@@ -46,7 +54,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * @return string Last 4 digits
 	 */
 	public function get_last4() {
-		return isset( $this->meta['last4'] ) ? $this->meta['last4'] : null;
+		return $this->get_meta( 'last4' );
 	}
 
 	/**
@@ -55,7 +63,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 	 * @param string $last4
 	 */
 	public function set_last4( $last4 ) {
-		$this->meta['last4'] = $last4;
+		$this->add_meta_data( 'last4', $last4, true );
 	}
 
 }

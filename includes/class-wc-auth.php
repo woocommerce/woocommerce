@@ -134,12 +134,27 @@ class WC_Auth {
 		$url = wc_get_endpoint_url( 'wc-auth/v' . self::VERSION, $endpoint, home_url( '/' ) );
 
 		return add_query_arg( array(
-			'app_name'     => wc_clean( $data['app_name'] ),
-			'user_id'      => wc_clean( $data['user_id'] ),
-			'return_url'   => urlencode( $data['return_url'] ),
-			'callback_url' => urlencode( $data['callback_url'] ),
-			'scope'        => wc_clean( $data['scope'] ),
+			'app_name'            => wc_clean( $data['app_name'] ),
+			'user_id'             => wc_clean( $data['user_id'] ),
+			'return_url'          => urlencode( $this->get_formatted_url( $data['return_url'] ) ),
+			'callback_url'        => urlencode( $this->get_formatted_url( $data['callback_url'] ) ),
+			'scope'               => wc_clean( $data['scope'] ),
 		), $url );
+	}
+
+	/**
+	 * Decode and format a URL.
+	 * @param  string $url
+	 * @return array
+	 */
+	protected function get_formatted_url( $url ) {
+		$url = urldecode( $url );
+
+		if ( ! strstr( $url, '://' ) ) {
+			$url = 'https://' . $url;
+		}
+
+		return $url;
 	}
 
 	/**
@@ -167,12 +182,16 @@ class WC_Auth {
 		}
 
 		foreach ( array( 'return_url', 'callback_url' ) as $param ) {
-			if ( false === filter_var( urldecode( $_REQUEST[ $param ] ), FILTER_VALIDATE_URL ) ) {
+			$param = $this->get_formatted_url( $_REQUEST[ $param ] );
+
+			if ( false === filter_var( $param, FILTER_VALIDATE_URL ) ) {
 				throw new Exception( sprintf( __( 'The %s is not a valid URL', 'woocommerce' ), $param ) );
 			}
 		}
 
-		if ( 0 !== stripos( urldecode( $_REQUEST['callback_url'] ), 'https://' ) ) {
+		$callback_url = $this->get_formatted_url( $_REQUEST['callback_url'] );
+
+		if ( 0 !== stripos( $callback_url, 'https://' ) ) {
 			throw new Exception( __( 'The callback_url need to be over SSL', 'woocommerce' ) );
 		}
 	}
@@ -248,7 +267,7 @@ class WC_Auth {
 			)
 		);
 
-		$response = wp_safe_remote_post( esc_url_raw( urldecode( $url ) ), $params );
+		$response = wp_safe_remote_post( esc_url_raw( $url ), $params );
 
 		if ( is_wp_error( $response ) ) {
 			throw new Exception( $response->get_error_message() );
@@ -305,7 +324,7 @@ class WC_Auth {
 			if ( 'login' == $route && ! is_user_logged_in() ) {
 				wc_get_template( 'auth/form-login.php', array(
 					'app_name'     => $_REQUEST['app_name'],
-					'return_url'   => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ),
+					'return_url'   => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), $this->get_formatted_url( $_REQUEST['return_url'] ) ),
 					'redirect_url' => $this->build_url( $_REQUEST, 'authorize' ),
 				) );
 
@@ -325,7 +344,7 @@ class WC_Auth {
 			} else if ( 'authorize' == $route && current_user_can( 'manage_woocommerce' ) ) {
 				wc_get_template( 'auth/form-grant-access.php', array(
 					'app_name'    => $_REQUEST['app_name'],
-					'return_url'  => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ),
+					'return_url'  => add_query_arg( array( 'success' => 0, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), $this->get_formatted_url( $_REQUEST['return_url'] ) ),
 					'scope'       => $this->get_i18n_scope( wc_clean( $_REQUEST['scope'] ) ),
 					'permissions' => $this->get_permissions_in_scope( wc_clean( $_REQUEST['scope'] ) ),
 					'granted_url' => wp_nonce_url( $this->build_url( $_REQUEST, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
@@ -341,10 +360,10 @@ class WC_Auth {
 				}
 
 				$consumer_data = $this->create_keys( $_REQUEST['app_name'], $_REQUEST['user_id'], $_REQUEST['scope'] );
-				$response      = $this->post_consumer_data( $consumer_data, $_REQUEST['callback_url'] );
+				$response      = $this->post_consumer_data( $consumer_data, $this->get_formatted_url( $_REQUEST['callback_url'] ) );
 
 				if ( $response ) {
-					wp_redirect( esc_url_raw( add_query_arg( array( 'success' => 1, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), urldecode( $_REQUEST['return_url'] ) ) ) );
+					wp_redirect( esc_url_raw( add_query_arg( array( 'success' => 1, 'user_id' => wc_clean( $_REQUEST['user_id'] ) ), $this->get_formatted_url( $_REQUEST['return_url'] ) ) ) );
 					exit;
 				}
 			} else {

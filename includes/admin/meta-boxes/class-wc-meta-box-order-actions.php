@@ -49,7 +49,7 @@ class WC_Meta_Box_Order_Actions {
 
 						if ( ! empty( $mails ) ) {
 							foreach ( $mails as $mail ) {
-								if ( in_array( $mail->id, $available_emails ) && 'yes' === $mail->enabled ) {
+								if ( in_array( $mail->id, $available_emails ) && 'no' !== $mail->enabled ) {
 									echo '<option value="send_email_'. esc_attr( $mail->id ) .'">' . esc_html( $mail->title ) . '</option>';
 								}
 							}
@@ -57,7 +57,7 @@ class WC_Meta_Box_Order_Actions {
 						?>
 					</optgroup>
 
-					<option value="regenerate_download_permissions"><?php _e( 'Generate download permissions', 'woocommerce' ); ?></option>
+					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
 
 					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
@@ -97,6 +97,7 @@ class WC_Meta_Box_Order_Actions {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
+		global $wpdb;
 
 		// Order data saved, now get it so we can manipulate status
 		$order = wc_get_order( $post_id );
@@ -135,9 +136,14 @@ class WC_Meta_Box_Order_Actions {
 				// Change the post saved message
 				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
 
-			} elseif ( $action == 'regenerate_download_permissions' ) {
+			} elseif ( 'regenerate_download_permissions' === $action ) {
 
 				delete_post_meta( $post_id, '_download_permissions_granted' );
+				$wpdb->delete( 
+					$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+					array( 'order_id' => $post_id ),
+					array( '%d' )
+				);
 				wc_downloadable_product_permissions( $post_id );
 
 			} else {

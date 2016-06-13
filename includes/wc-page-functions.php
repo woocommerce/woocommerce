@@ -120,7 +120,9 @@ function wc_nav_menu_items( $items ) {
 
 		if ( ! empty( $customer_logout ) ) {
 			foreach ( $items as $key => $item ) {
-				if ( strstr( $item->url, $customer_logout ) ) {
+				$path = parse_url( $item->url, PHP_URL_PATH );
+				$query = parse_url( $item->url, PHP_URL_QUERY );
+				if ( strstr( $path, $customer_logout ) || strstr( $query, $customer_logout ) ) {
 					unset( $items[ $key ] );
 				}
 			}

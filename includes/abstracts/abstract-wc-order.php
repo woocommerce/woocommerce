@@ -180,13 +180,15 @@ abstract class WC_Abstract_Order {
 	/**
 	 * Set the payment method for the order.
 	 *
-	 * @param WC_Payment_Gateway $payment_method
+	 * @param WC_Payment_Gateway|string $payment_method
 	 */
-	public function set_payment_method( $payment_method ) {
-
+	public function set_payment_method( $payment_method = '' ) {
 		if ( is_object( $payment_method ) ) {
 			update_post_meta( $this->id, '_payment_method', $payment_method->id );
 			update_post_meta( $this->id, '_payment_method_title', $payment_method->get_title() );
+		} else {
+			update_post_meta( $this->id, '_payment_method', '' );
+			update_post_meta( $this->id, '_payment_method_title', '' );
 		}
 	}
 
@@ -663,12 +665,14 @@ abstract class WC_Abstract_Order {
 	 * @return bool success or fail.
 	 */
 	public function calculate_taxes() {
-		$tax_total    = 0;
-		$taxes        = array();
-		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
+		$tax_total          = 0;
+		$shipping_tax_total = 0;
+		$taxes              = array();
+		$shipping_taxes     = array();
+		$tax_based_on       = get_option( 'woocommerce_tax_based_on' );
 
 		// If is_vat_exempt is 'yes', or wc_tax_enabled is false, return and do nothing.
-		if ( 'yes' === $this->is_vat_exempt or ! wc_tax_enabled() ) {
+		if ( 'yes' === $this->is_vat_exempt || ! wc_tax_enabled() ) {
 			return false;
 		}
 
@@ -729,32 +733,48 @@ abstract class WC_Abstract_Order {
 			}
 		}
 
-		// Now calculate shipping tax
-		$shipping_methods = $this->get_shipping_methods();
+		// Calc taxes for shipping
+		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
+			$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
-		if ( ! empty( $shipping_methods ) ) {
-			$matched_tax_rates = array();
-			$tax_rates         = WC_Tax::find_rates( array(
-				'country'   => $country,
-				'state'     => $state,
-				'postcode'  => $postcode,
-				'city'      => $city,
-				'tax_class' => ''
-			) );
+			// Inherit tax class from items
+			if ( '' === $shipping_tax_class ) {
+				$tax_classes = WC_Tax::get_tax_classes();
 
-			if ( ! empty( $tax_rates ) ) {
-				foreach ( $tax_rates as $key => $rate ) {
-					if ( isset( $rate['shipping'] ) && 'yes' === $rate['shipping'] ) {
-						$matched_tax_rates[ $key ] = $rate;
+				foreach ( $tax_classes as $tax_class ) {
+					$tax_class = sanitize_title( $tax_class );
+					if ( in_array( $tax_class, $found_tax_classes ) ) {
+						$tax_rates = WC_Tax::find_shipping_rates( array(
+							'country'   => $country,
+							'state'     => $state,
+							'postcode'  => $postcode,
+							'city'      => $city,
+							'tax_class' => $tax_class,
+						) );
+						break;
 					}
 				}
+			} else {
+				$tax_rates = WC_Tax::find_shipping_rates( array(
+					'country'   => $country,
+					'state'     => $state,
+					'postcode'  => $postcode,
+					'city'      => $city,
+					'tax_class' => 'standard' === $shipping_tax_class ? '' : $shipping_tax_class,
+				) );
 			}
 
-			$shipping_taxes     = WC_Tax::calc_shipping_tax( $this->order_shipping, $matched_tax_rates );
-			$shipping_tax_total = WC_Tax::round( array_sum( $shipping_taxes ) );
-		} else {
-			$shipping_taxes     = array();
-			$shipping_tax_total = 0;
+			$line_taxes          = WC_Tax::calc_tax( $item['cost'], $tax_rates, false );
+			$line_tax            = max( 0, array_sum( $line_taxes ) );
+			$shipping_tax_total += $line_tax;
+
+			wc_update_order_item_meta( $item_id, '_line_tax', wc_format_decimal( $line_tax ) );
+			wc_update_order_item_meta( $item_id, '_line_tax_data', array( 'total' => $line_taxes ) );
+
+			// Sum the item taxes
+			foreach ( array_keys( $shipping_taxes + $line_taxes ) as $key ) {
+				$shipping_taxes[ $key ] = ( isset( $line_taxes[ $key ] ) ? $line_taxes[ $key ] : 0 ) + ( isset( $shipping_taxes[ $key ] ) ? $shipping_taxes[ $key ] : 0 );
+			}
 		}
 
 		// Save tax totals
@@ -1118,7 +1138,7 @@ abstract class WC_Abstract_Order {
 			'country'       => $this->shipping_country
 		), $this );
 
-		return apply_filters( 'woocommerce_shipping_address_map_url', 'http://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
+		return apply_filters( 'woocommerce_shipping_address_map_url', 'https://maps.google.com/maps?&q=' . urlencode( implode( ', ', $address ) ) . '&z=16', $this );
 	}
 
 	/**
@@ -1343,6 +1363,11 @@ abstract class WC_Abstract_Order {
 			$tax_totals[ $code ]->label             = isset( $tax[ 'label' ] ) ? $tax[ 'label' ] : $tax[ 'name' ];
 			$tax_totals[ $code ]->amount           += $tax[ 'tax_amount' ] + $tax[ 'shipping_tax_amount' ];
 			$tax_totals[ $code ]->formatted_amount  = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ), array('currency' => $this->get_order_currency()) );
+		}
+
+		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
+			$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
+			$tax_totals = array_intersect_key( $tax_totals, $amounts );
 		}
 
 		return apply_filters( 'woocommerce_order_tax_totals', $tax_totals, $this );
@@ -1661,7 +1686,7 @@ abstract class WC_Abstract_Order {
 			$shipping_methods = $this->get_shipping_methods();
 
 			foreach ( $shipping_methods as $shipping ) {
-				$labels[] = $shipping['name'];
+				$labels[] = $shipping['name'] ? $shipping['name'] : __( 'Shipping', 'woocommerce' );
 			}
 		}
 
@@ -2006,7 +2031,7 @@ abstract class WC_Abstract_Order {
 		$args     = wp_parse_args( $args, $defaults );
 		$template = $args['plain_text'] ? 'emails/plain/email-order-items.php' : 'emails/email-order-items.php';
 
-		wc_get_template( $template, array(
+		wc_get_template( $template, apply_filters( 'woocommerce_email_order_items_args', array(
 			'order'               => $this,
 			'items'               => $this->get_items(),
 			'show_download_links' => $this->is_download_permitted() && ! $args['sent_to_admin'],
@@ -2016,7 +2041,7 @@ abstract class WC_Abstract_Order {
 			'image_size'          => $args['image_size'],
 			'plain_text'          => $args['plain_text'],
 			'sent_to_admin'       => $args['sent_to_admin']
-		) );
+		) ) );
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $this );
 	}
@@ -2121,19 +2146,18 @@ abstract class WC_Abstract_Order {
 		// Get cancel endpoint
 		$cancel_endpoint = $this->get_cancel_endpoint();
 
-		return apply_filters( 'woocommerce_get_cancel_order_url', wp_nonce_url( add_query_arg( array(
+		return apply_filters( 'woocommerce_get_cancel_order_url', esc_url( add_query_arg( array(
 			'cancel_order' => 'true',
 			'order'        => $this->order_key,
 			'order_id'     => $this->id,
-			'redirect'     => $redirect
-		), $cancel_endpoint ), 'woocommerce-cancel_order' ) );
+			'redirect'     => $redirect,
+		), $cancel_endpoint ) ) );
 	}
 
 	/**
 	 * Generates a raw (unescaped) cancel-order URL for use by payment gateways.
 	 *
 	 * @param string $redirect
-	 *
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
@@ -2146,7 +2170,6 @@ abstract class WC_Abstract_Order {
 			'order'        => $this->order_key,
 			'order_id'     => $this->id,
 			'redirect'     => $redirect,
-			'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' )
 		), $cancel_endpoint ) );
 	}
 
@@ -2340,7 +2363,7 @@ abstract class WC_Abstract_Order {
 		}
 
 		if ( ! wp_update_post( $update_post_data ) ) {
-			$this->add_order_note( sprintf( __( 'Unable to update order from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ), 0, $manual );
+			$this->add_order_note( sprintf( __( 'Unable to update order from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ), 0, $manual );
 			return false;
 		}
 
@@ -2349,7 +2372,7 @@ abstract class WC_Abstract_Order {
 
 		// Status was changed.
 		if ( $new_status !== $old_status ) {
-			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %s to %s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
+			$this->add_order_note( trim( $note . ' ' . sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $old_status ), wc_get_order_status_name( $new_status ) ) ), 0, $manual );
 			do_action( 'woocommerce_order_status_' . $old_status . '_to_' . $new_status, $this->id );
 			do_action( 'woocommerce_order_status_changed', $this->id, $old_status, $new_status );
 		} else {
@@ -2596,9 +2619,9 @@ abstract class WC_Abstract_Order {
 						$item_name = $_product->get_sku() ? $_product->get_sku(): $item['product_id'];
 
 						if ( isset( $item['variation_id'] ) && $item['variation_id'] ) {
-							$this->add_order_note( sprintf( __( 'Item %s variation #%s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock) );
+							$this->add_order_note( sprintf( __( 'Item %1$s variation #%2$s stock reduced from %3$s to %4$s.', 'woocommerce' ), $item_name, $item['variation_id'], $new_stock + $qty, $new_stock) );
 						} else {
-							$this->add_order_note( sprintf( __( 'Item %s stock reduced from %s to %s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock) );
+							$this->add_order_note( sprintf( __( 'Item %1$s stock reduced from %2$s to %3$s.', 'woocommerce' ), $item_name, $new_stock + $qty, $new_stock) );
 						}
 						$this->send_stock_notifications( $_product, $new_stock, $item['qty'] );
 					}
@@ -2718,6 +2741,6 @@ abstract class WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function is_editable() {
-		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ) ), $this );
+		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft', 'failed' ) ), $this );
 	}
 }

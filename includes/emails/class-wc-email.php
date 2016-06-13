@@ -83,7 +83,7 @@ class WC_Email extends WC_Settings_API {
 
 	/**
 	 * Object this email is for, for example a customer, product, or email.
-	 * @var object
+	 * @var object|bool
 	 */
 	public $object;
 
@@ -284,7 +284,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get email attachments.
 	 *
-	 * @return string|array
+	 * @return string
 	 */
 	public function get_attachments() {
 		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object );
@@ -533,12 +533,14 @@ class WC_Email extends WC_Settings_API {
 		// Save regular options
 		parent::process_admin_options();
 
+		$post_data = $this->get_post_data();
+
 		// Save templates
-		if ( isset( $_POST['template_html_code'] ) ) {
-			$this->save_template( $_POST['template_html_code'], $this->template_html );
+		if ( isset( $post_data['template_html_code'] ) ) {
+			$this->save_template( $post_data['template_html_code'], $this->template_html );
 		}
-		if ( isset( $_POST['template_plain_code'] ) ) {
-			$this->save_template( $_POST['template_plain_code'], $this->template_plain );
+		if ( isset( $post_data['template_plain_code'] ) ) {
+			$this->save_template( $post_data['template_plain_code'], $this->template_plain );
 		}
 	}
 

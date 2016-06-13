@@ -60,6 +60,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tbody>
 	</table>
 	<p class="submit">
-		<input type="submit" class="button-primary" value="<?php esc_attr_e( 'Save Changes', 'woocommerce' ) ?>" />
+		<input type="submit" class="button-primary" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ) ?>" />
 	</p>
 </form>

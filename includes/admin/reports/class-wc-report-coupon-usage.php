@@ -111,7 +111,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 		);
 
 		$legend[] = array(
-			'title' => sprintf( __( '%d coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
+			'title' => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
 			'color' => $this->chart_colours['coupon_count' ],
 			'highlight_series' => 0
 		);
@@ -194,7 +194,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 							'filter_range' => false
 						) );
 
-						if ( ! is_null( $used_coupons ) ) :
+						if ( ! empty( $used_coupons ) && is_array( $used_coupons ) ) :
 					?>
 						<select id="coupon_codes" name="coupon_codes" class="wc-enhanced-select" data-placeholder="<?php esc_attr_e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
 							<option value=""><?php _e( 'All coupons', 'woocommerce' ); ?></option>
@@ -251,7 +251,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'filter_range' => true
 				) );
 
-				if ( ! is_null( $most_popular ) ) {
+				if ( ! empty( $most_popular ) && is_array( $most_popular ) ) {
 					foreach ( $most_popular as $coupon ) {
 						echo '<tr class="' . ( in_array( $coupon->coupon_code, $this->coupon_codes ) ? 'active' : '' ) . '">
 							<td class="count" width="1%">' . $coupon->coupon_count . '</td>
@@ -298,8 +298,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					'filter_range' => true
 				) );
 
-				if ( ! is_null( $most_discount ) ) {
-
+				if ( ! empty( $most_discount ) && is_array( $most_discount ) ) {
 					foreach ( $most_discount as $coupon ) {
 						echo '<tr class="' . ( in_array( $coupon->coupon_code, $this->coupon_codes ) ? 'active' : '' ) . '">
 							<td class="count" width="1%">' . wc_price( $coupon->discount_amount ) . '</td>

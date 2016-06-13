@@ -45,6 +45,7 @@ class WC_HTTPS {
 				add_action( 'template_redirect', array( __CLASS__, 'unforce_https_template_redirect' ) );
 			}
 		}
+		add_action( 'http_api_curl', array( __CLASS__, 'http_api_curl' ), 10, 3 );
 	}
 
 	/**
@@ -111,6 +112,18 @@ class WC_HTTPS {
 				wp_safe_redirect( 'http://' . ( ! empty( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'] ) . $_SERVER['REQUEST_URI'] );
 				exit;
 			}
+		}
+	}
+
+	/**
+	 * Force posts to PayPal to use TLS v1.2. See:
+	 * 		https://core.trac.wordpress.org/ticket/36320
+	 * 		https://core.trac.wordpress.org/ticket/34924#comment:13
+	 * 		https://www.paypal-knowledge.com/infocenter/index?page=content&widgetview=true&id=FAQ1914&viewlocale=en_US
+	 */
+	public static function http_api_curl( $handle, $r, $url ) {
+		if ( strstr( $url, 'https://' ) && ( strstr( $url, '.paypal.com/nvp' ) || strstr( $url, '.paypal.com/cgi-bin/webscr' ) ) ) {
+			curl_setopt( $handle, CURLOPT_SSLVERSION, 6 );
 		}
 	}
 }

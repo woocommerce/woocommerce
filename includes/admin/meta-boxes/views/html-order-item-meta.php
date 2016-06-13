@@ -33,7 +33,7 @@
                     $meta['meta_key']   = wc_attribute_label( wc_sanitize_taxonomy_name( $meta['meta_key'] ) );
                     $meta['meta_value'] = isset( $term->name ) ? $term->name : $meta['meta_value'];
                 } else {
-                    $meta['meta_key']   = apply_filters( 'woocommerce_attribute_label', wc_attribute_label( $meta['meta_key'], $_product ), $meta['meta_key'] );
+                    $meta['meta_key']   = wc_attribute_label( $meta['meta_key'], $_product );
                 }
 
                 echo '<tr><th>' . wp_kses_post( rawurldecode( $meta['meta_key'] ) ) . ':</th><td>' . wp_kses_post( wpautop( make_clickable( rawurldecode( $meta['meta_value'] ) ) ) ) . '</td></tr>';

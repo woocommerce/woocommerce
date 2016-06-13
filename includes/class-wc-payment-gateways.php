@@ -78,17 +78,18 @@ class WC_Payment_Gateways {
 			'WC_Gateway_Paypal',
 		);
 
-		$simplify_countries = (array) apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) );
+		/**
+		 * Simplify Commerce is @deprecated in 2.6.0. Only load when enabled.
+		 */
+		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && in_array( WC()->countries->get_base_country(), apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ) ) ) {
+			$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
 
-		if ( in_array( WC()->countries->get_base_country(), $simplify_countries ) ) {
-			if ( class_exists( 'WC_Subscriptions_Order' ) || class_exists( 'WC_Pre_Orders_Order' ) ) {
-				if ( ! function_exists( 'wcs_create_renewal_order' ) ) { // Subscriptions < 2.0
-					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce_Deprecated';
-				} else {
+			if ( ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] ) {
+				if ( function_exists( 'wcs_create_renewal_order' ) ) {
 					$load_gateways[] = 'WC_Addons_Gateway_Simplify_Commerce';
+				} else {
+					$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 				}
-			} else {
-				$load_gateways[] = 'WC_Gateway_Simplify_Commerce';
 			}
 		}
 
@@ -118,8 +119,6 @@ class WC_Payment_Gateways {
 
 	/**
 	 * Get gateways.
-	 *
-	 * @access public
 	 * @return array
 	 */
 	public function payment_gateways() {
@@ -132,6 +131,15 @@ class WC_Payment_Gateways {
 		}
 
 		return $_available_gateways;
+	}
+
+	/**
+	 * Get array of registered gateway ids
+	 * @since 2.6.0
+	 * @return array of strings
+	 */
+	public function get_payment_gateway_ids() {
+		return wp_list_pluck( $this->payment_gateways, 'id' );
 	}
 
 	/**

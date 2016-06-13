@@ -439,7 +439,7 @@ class WC_CLI_Order extends WC_CLI_Command {
 			// order status
 			if ( ! empty( $data['status'] ) ) {
 
-				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '' );
+				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
 			}
 
 			// customer ID
@@ -985,6 +985,8 @@ class WC_CLI_Order extends WC_CLI_Command {
 		if ( isset( $item['subtotal_tax'] ) ) {
 			$item_args['totals']['subtotal_tax'] = floatval( $item['subtotal_tax'] );
 		}
+
+		$item_args = apply_filters( 'woocommerce_cli_order_line_item_args', $item_args, $item, $order, $action );
 
 		if ( $creating ) {
 

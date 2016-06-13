@@ -24,10 +24,10 @@ class WC_Product_Variation extends WC_Product {
 	public $parent;
 
 	/** @public string Stores the shipping class of the variation. */
-	public $variation_shipping_class         = false;
+	public $variation_shipping_class         = '';
 
 	/** @public int Stores the shipping class ID of the variation. */
-	public $variation_shipping_class_id      = false;
+	public $variation_shipping_class_id      = 0;
 
 	/** @public unused vars @deprecated in 2.2 */
 	public $variation_has_sku                = true;
@@ -80,9 +80,9 @@ class WC_Product_Variation extends WC_Product {
 		/* Get main product data from parent (args) */
 		$this->id = ! empty( $args['parent_id'] ) ? intval( $args['parent_id'] ) : wp_get_post_parent_id( $this->variation_id );
 
-		// The post doesn't have a parent id, therefore its invalid.
+		// The post doesn't have a parent id, therefore its invalid and we should prevent this being created.
 		if ( empty( $this->id ) ) {
-			return;
+			throw new Exception( sprintf( 'No parent product set for variation #%d', $this->variation_id ), 422 );
 		}
 
 		$this->product_type = 'variation';
@@ -154,7 +154,6 @@ class WC_Product_Variation extends WC_Product {
 	 * @return int variation (post) ID
 	 */
 	public function get_id() {
-
 		return $this->variation_id;
 	}
 
@@ -170,11 +169,20 @@ class WC_Product_Variation extends WC_Product {
 	/**
 	 * Wrapper for get_permalink. Adds this variations attributes to the URL.
 	 *
-	 * @param  $cart item array If the cart item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
+	 * @param  $item_object item array If a cart or order item is passed, we can get a link containing the exact attributes selected for the variation, rather than the default attributes.
 	 * @return string
 	 */
-	public function get_permalink( $cart_item = null ) {
-		return add_query_arg( array_map( 'urlencode', array_filter( isset( $cart_item['variation'] ) ? $cart_item['variation'] : $this->variation_data ) ), get_permalink( $this->id ) );
+	public function get_permalink( $item_object = null ) {
+		if ( ! empty( $item_object['variation'] ) ) {
+			$data = $item_object['variation'];
+		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
+			$data_keys    = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
+			$data_values  = wp_list_pluck( $item_object['item_meta_array'], 'value' );
+			$data         = array_intersect_key( array_combine( $data_keys, $data_values ), $this->variation_data );
+		} else {
+			$data = $this->variation_data;
+		}
+		return add_query_arg( array_map( 'urlencode', array_filter( $data ) ), get_permalink( $this->id ) );
 	}
 
 	/**
@@ -346,17 +354,20 @@ class WC_Product_Variation extends WC_Product {
 	 * Gets the main product image.
 	 *
 	 * @param string $size (default: 'shop_thumbnail')
+	 * @param bool True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
-	public function get_image( $size = 'shop_thumbnail', $attr = array() ) {
+	public function get_image( $size = 'shop_thumbnail', $attr = array(), $placeholder = true ) {
 		if ( $this->variation_id && has_post_thumbnail( $this->variation_id ) ) {
 			$image = get_the_post_thumbnail( $this->variation_id, $size, $attr );
 		} elseif ( has_post_thumbnail( $this->id ) ) {
 			$image = get_the_post_thumbnail( $this->id, $size, $attr );
 		} elseif ( ( $parent_id = wp_get_post_parent_id( $this->id ) ) && has_post_thumbnail( $parent_id ) ) {
 			$image = get_the_post_thumbnail( $parent_id, $size , $attr);
-		} else {
+		} elseif ( $placeholder ) {
 			$image = wc_placeholder_img( $size );
+		} else {
+			$image = '';
 		}
 		return $image;
 	}
@@ -403,18 +414,20 @@ class WC_Product_Variation extends WC_Product {
 	 * @return bool
 	 */
 	public function is_in_stock() {
-		// If we're managing stock at variation level, check stock levels
-		if ( true === $this->managing_stock() ) {
-			if ( $this->backorders_allowed() ) {
-				return true;
-			} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				return false;
-			} else {
-				return $this->stock_status === 'instock';
-			}
-		} else {
-			return $this->stock_status === 'instock';
+		$status = $this->stock_status === 'instock';
+
+		/**
+		 * Sanity check to ensure stock qty is not lower than 0 but still listed
+		 * instock.
+		 *
+		 * Check is not required for products on backorder since they can be
+		 * instock regardless of actual stock quantity.
+		 */
+		if ( true === $this->managing_stock() && ! $this->backorders_allowed() && $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount' ) ) {
+			$status = false;
 		}
+
+		return apply_filters( 'woocommerce_variation_is_in_stock', $status );
 	}
 
 	/**
@@ -530,47 +543,46 @@ class WC_Product_Variation extends WC_Product {
 	 * @return string
 	 */
 	public function get_availability() {
-		$availability = $class = '';
+		// Default to in-stock
+		$availability = __( 'In stock', 'woocommerce' );
+		$class        = 'in-stock';
 
-		if ( $this->managing_stock() ) {
-			if ( $this->is_in_stock() && $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount' ) ) {
-				switch ( get_option( 'woocommerce_stock_format' ) ) {
-					case 'no_amount' :
-						$availability = __( 'In stock', 'woocommerce' );
-					break;
-					case 'low_amount' :
-						if ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-							$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_stock_quantity() );
-
-							if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-								$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
-							}
-						} else {
-							$availability = __( 'In stock', 'woocommerce' );
-						}
-					break;
-					default :
-						$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_stock_quantity() );
-
-						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-							$availability .= ' ' . __( '(can be backordered)', 'woocommerce' );
-						}
-					break;
-				}
-				$class        = 'in-stock';
-			} elseif ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-				$availability = __( 'Available on backorder', 'woocommerce' );
-				$class        = 'available-on-backorder';
-			} elseif ( $this->backorders_allowed() ) {
-				$availability = __( 'In stock', 'woocommerce' );
-				$class        = 'in-stock';
-			} else {
-				$availability = __( 'Out of stock', 'woocommerce' );
-				$class        = 'out-of-stock';
-			}
-		} elseif ( ! $this->is_in_stock() ) {
+		// If out of stock, this takes priority over all other settings.
+		if ( ! $this->is_in_stock() ) {
 			$availability = __( 'Out of stock', 'woocommerce' );
 			$class        = 'out-of-stock';
+
+		// Any further we can assume status is set to in stock.
+		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
+			$availability = __( 'Available on backorder', 'woocommerce' );
+			$class        = 'available-on-backorder';
+
+		} elseif ( true === $this->managing_stock() ) {
+			switch ( get_option( 'woocommerce_stock_format' ) ) {
+				case 'no_amount' :
+					$availability = __( 'In stock', 'woocommerce' );
+				break;
+				case 'low_amount' :
+					if ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
+						$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_stock_quantity() );
+
+						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+							$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
+						}
+					} else {
+						$availability = __( 'In stock', 'woocommerce' );
+					}
+				break;
+				default :
+					$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_stock_quantity() );
+
+					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
+						$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
+					}
+				break;
+			}
+		} elseif ( 'parent' === $this->managing_stock() ) {
+			return parent::get_availability();
 		}
 
 		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );

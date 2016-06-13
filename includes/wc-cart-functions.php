@@ -73,7 +73,7 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 		$show_qty = false;
 	}
 
-	if ( ! $show_qty ) {
+	if ( ! $show_qty && ! is_array( $products ) ) {
 		$products = array_fill_keys( array_values( $products ), 1 );
 	}
 
@@ -87,7 +87,7 @@ function wc_add_to_cart_message( $products, $show_qty = false ) {
 
 	// Output success messages
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
-		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wp_get_referer() ? wp_get_referer() : home_url() );
+		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wp_get_raw_referer() ? wp_validate_redirect( wp_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
 		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue Shopping', 'woocommerce' ), esc_html( $added_text ) );
 	} else {
 		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View Cart', 'woocommerce' ), esc_html( $added_text ) );

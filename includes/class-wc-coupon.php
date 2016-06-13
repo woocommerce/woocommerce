@@ -320,9 +320,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$coupon_id = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 
 		if ( false === $coupon_id ) {
-			$sql       = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $this->get_code() );
-			$coupon_id = apply_filters( 'woocommerce_get_coupon_id_from_code', $wpdb->get_var( $sql ), $this->get_code() );
-			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $coupon_id, 'coupons' );
+			$sql = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $this->get_code() );
+
+			if ( $coupon_id = apply_filters( 'woocommerce_get_coupon_id_from_code', $wpdb->get_var( $sql ), $this->get_code() ) ) {
+				wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $coupon_id, 'coupons' );
+			}
 		}
 		return absint( $coupon_id );
 	}
@@ -872,8 +874,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param  int  $user_id
 	 * @throws Exception
 	 */
-	private function validate_user_usage_limit( $user_id = null ) {
-		if ( ! $user_id ) {
+	private function validate_user_usage_limit( $user_id = 0 ) {
+		if ( empty( $user_id ) ) {
 			$user_id = get_current_user_id();
 		}
 		if ( $this->get_usage_limit_per_user() > 0 && is_user_logged_in() && $this->get_id() ) {
@@ -903,7 +905,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_minimum_amount() {
-		if ( $this->get_minimum_amount() > 0 && wc_format_decimal( $this->get_minimum_amount() ) > wc_format_decimal( WC()->cart->subtotal ) ) {
+		if ( $this->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $this->get_minimum_amount() > WC()->cart->get_displayed_subtotal(), $this ) ) {
 			throw new Exception( self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET );
 		}
 	}
@@ -914,7 +916,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_maximum_amount() {
-		if ( $this->get_maximum_amount() > 0 && wc_format_decimal( $this->get_maximum_amount() ) < wc_format_decimal( WC()->cart->subtotal ) ) {
+		if ( $this->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $this->get_maximum_amount() <= WC()->cart->get_displayed_subtotal(), $this ) ) {
 			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
 		}
 	}
@@ -1197,6 +1199,67 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		return apply_filters( 'woocommerce_coupon_is_valid_for_product', $valid, $product, $this, $values );
+	}
+
+	/**
+	 * Get discount amount for a cart item.
+	 *
+	 * @param  float $discounting_amount Amount the coupon is being applied to
+	 * @param  array|null $cart_item Cart item being discounted if applicable
+	 * @param  boolean $single True if discounting a single qty item, false if its the line
+	 * @return float Amount this coupon has discounted
+	 */
+	public function get_discount_amount( $discounting_amount, $cart_item = null, $single = false ) {
+		$discount      = 0;
+		$cart_item_qty = is_null( $cart_item ) ? 1 : $cart_item['quantity'];
+
+		if ( $this->is_type( array( 'percent_product', 'percent' ) ) ) {
+			$discount = $this->coupon_amount * ( $discounting_amount / 100 );
+
+		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
+			/**
+			 * This is the most complex discount - we need to divide the discount between rows based on their price in.
+			 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows.
+			 * with no price (free) don't get discounted.
+			 *
+			 * Get item discount by dividing item cost by subtotal to get a %.
+			 *
+			 * Uses price inc tax if prices include tax to work around https://github.com/woothemes/woocommerce/issues/7669 and https://github.com/woothemes/woocommerce/issues/8074.
+			 */
+			if ( wc_prices_include_tax() ) {
+				$discount_percent = ( $cart_item['data']->get_price_including_tax() * $cart_item_qty ) / WC()->cart->subtotal;
+			} else {
+				$discount_percent = ( $cart_item['data']->get_price_excluding_tax() * $cart_item_qty ) / WC()->cart->subtotal_ex_tax;
+			}
+			$discount         = ( $this->coupon_amount * $discount_percent ) / $cart_item_qty;
+
+		} elseif ( $this->is_type( 'fixed_product' ) ) {
+			$discount = min( $this->coupon_amount, $discounting_amount );
+			$discount = $single ? $discount : $discount * $cart_item_qty;
+		}
+
+		$discount = min( $discount, $discounting_amount );
+
+		// Handle the limit_usage_to_x_items option
+		if ( $this->is_type( array( 'percent_product', 'fixed_product' ) ) ) {
+			if ( $discounting_amount ) {
+				if ( '' === $this->limit_usage_to_x_items ) {
+					$limit_usage_qty = $cart_item_qty;
+				} else {
+					$limit_usage_qty              = min( $this->limit_usage_to_x_items, $cart_item_qty );
+					$this->limit_usage_to_x_items = max( 0, $this->limit_usage_to_x_items - $limit_usage_qty );
+				}
+				if ( $single ) {
+					$discount = ( $discount * $limit_usage_qty ) / $cart_item_qty;
+				} else {
+					$discount = ( $discount / $cart_item_qty ) * $limit_usage_qty;
+				}
+			}
+		}
+
+		$discount = wc_cart_round_discount( $discount, WC_ROUNDING_PRECISION );
+
+		return apply_filters( 'woocommerce_coupon_get_discount_amount', $discount, $discounting_amount, $cart_item, $single, $this );
 	}
 
 	/**

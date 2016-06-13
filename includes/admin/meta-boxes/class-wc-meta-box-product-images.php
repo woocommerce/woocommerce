@@ -38,9 +38,9 @@ class WC_Meta_Box_Product_Images {
 						$product_image_gallery = implode( ',', $attachment_ids );
 					}
 
-					$attachments = array_filter( explode( ',', $product_image_gallery ) );
-
-					$update_meta = false;
+					$attachments         = array_filter( explode( ',', $product_image_gallery ) );
+					$update_meta         = false;
+					$updated_gallery_ids = array();
 
 					if ( ! empty( $attachments ) ) {
 						foreach ( $attachments as $attachment_id ) {
@@ -49,7 +49,6 @@ class WC_Meta_Box_Product_Images {
 							// if attachment is empty skip
 							if ( empty( $attachment ) ) {
 								$update_meta = true;
-
 								continue;
 							}
 

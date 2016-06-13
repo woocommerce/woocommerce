@@ -41,9 +41,9 @@ class WC_Admin_Taxonomies {
 
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
-		if ( $attribute_taxonomies ) {
-			foreach ( array_keys( $attribute_taxonomies ) as $attribute ) {
-				add_action( $attribute . '_pre_add_form', array( $this, 'product_attribute_description' ) );
+		if ( ! empty( $attribute_taxonomies ) ) {
+			foreach ( $attribute_taxonomies as $attribute ) {
+				add_action( 'pa_' . $attribute->attribute_name . '_pre_add_form', array( $this, 'product_attribute_description' ) );
 			}
 		}
 
@@ -153,6 +153,24 @@ class WC_Admin_Taxonomies {
 					jQuery( '.remove_image_button' ).hide();
 					return false;
 				});
+
+				jQuery( document ).ajaxComplete( function( event, request, options ) {
+					if ( request && 4 === request.readyState && 200 === request.status
+						&& options.data && 0 <= options.data.indexOf( 'action=add-tag' ) ) {
+
+						var res = wpAjax.parseAjaxResponse( request.responseXML, 'ajax-response' );
+						if ( ! res || res.errors ) {
+							return;
+						}
+						// Clear Thumbnail fields on submit
+						jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+						jQuery( '#product_cat_thumbnail_id' ).val( '' );
+						jQuery( '.remove_image_button' ).hide();
+						// Clear Display type field on submit
+						jQuery( '#display_type' ).val( '' );
+						return;
+					}
+				} );
 
 			</script>
 			<div class="clear"></div>
@@ -289,11 +307,14 @@ class WC_Admin_Taxonomies {
 	 * @return array
 	 */
 	public function product_cat_columns( $columns ) {
-		$new_columns          = array();
-		$new_columns['cb']    = $columns['cb'];
-		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
+		$new_columns = array();
 
-		unset( $columns['cb'] );
+		if ( isset( $columns['cb'] ) ) {
+			$new_columns['cb'] = $columns['cb'];
+			unset( $columns['cb'] );
+		}
+
+		$new_columns['thumb'] = __( 'Image', 'woocommerce' );
 
 		return array_merge( $new_columns, $columns );
 	}
@@ -319,7 +340,7 @@ class WC_Admin_Taxonomies {
 			}
 
 			// Prevent esc_url from breaking spaces in urls for image embeds
-			// Ref: http://core.trac.wordpress.org/ticket/23605
+			// Ref: https://core.trac.wordpress.org/ticket/23605
 			$image = str_replace( ' ', '%20', $image );
 
 			$columns .= '<img src="' . esc_url( $image ) . '" alt="' . esc_attr__( 'Thumbnail', 'woocommerce' ) . '" class="wp-post-image" height="48" width="48" />';

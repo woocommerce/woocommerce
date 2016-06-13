@@ -29,11 +29,10 @@ class WC_Embed {
 	public static function init() {
 
 		// Filter all of the content that's going to be embedded.
-		add_filter( 'the_title', array( __CLASS__, 'the_title' ), 10 );
 		add_filter( 'the_excerpt_embed', array( __CLASS__, 'the_excerpt' ), 10 );
 
 		// Make sure no comments display. Doesn't make sense for products.
-		remove_action( 'embed_content_meta', 'print_embed_comments_button' );
+		add_action( 'embed_content_meta', array( __CLASS__, 'remove_comments_button' ), 5 );
 
 		// In the comments place let's display the product rating.
 		add_action( 'embed_content_meta', array( __CLASS__, 'get_ratings' ), 5 );
@@ -43,23 +42,14 @@ class WC_Embed {
 	}
 
 	/**
-	 * Create the title for embedded products - we want to add the price to it.
+	 * Remove comments button on product embeds.
 	 *
-	 * @since 2.4.11
-	 * @param string $title Embed title.
-	 * @return string
+	 * @since 2.6.0
 	 */
-	public static function the_title( $title ) {
-		// Make sure we're only affecting embedded products.
+	public static function remove_comments_button() {
 		if ( self::is_embedded_product() ) {
-
-			// Get product.
-			$_product = wc_get_product( get_the_ID() );
-
-			// Add the price.
-			$title = $title . '<span class="wc-embed-price">' . $_product->get_price_html() . '</span>';
+			remove_action( 'embed_content_meta', 'print_embed_comments_button' );
 		}
-		return $title;
 	}
 
 	/**
@@ -85,8 +75,13 @@ class WC_Embed {
 	public static function the_excerpt( $excerpt ) {
 		global $post;
 
+		// Get product.
+		$_product = wc_get_product( get_the_ID() );
+
 		// Make sure we're only affecting embedded products.
 		if ( self::is_embedded_product() ) {
+			echo '<p><span class="wc-embed-price">' . $_product->get_price_html() . '</span></p>';
+
 			if ( ! empty( $post->post_excerpt ) ) {
 				ob_start();
 				woocommerce_template_single_excerpt();
@@ -161,7 +156,10 @@ class WC_Embed {
 				margin: 0 0 1em;
 			}
 			.wc-embed-price {
-				float:right;
+				display: block;
+				opacity: .75;
+				font-weight: 700;
+				margin-top: -.75em;
 			}
 			.wc-embed-rating {
 				display: inline-block;

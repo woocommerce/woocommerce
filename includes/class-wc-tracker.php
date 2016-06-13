@@ -60,7 +60,7 @@ class WC_Tracker {
 		update_option( 'woocommerce_tracker_last_send', time() );
 
 		$params   = self::get_tracking_data();
-		$response = wp_safe_remote_post( self::$api_url, array(
+		wp_safe_remote_post( self::$api_url, array(
 				'method'      => 'POST',
 				'timeout'     => 45,
 				'redirection' => 5,
@@ -103,6 +103,13 @@ class WC_Tracker {
 		$all_plugins                = self::get_all_plugins();
 		$data['active_plugins']     = $all_plugins['active_plugins'];
 		$data['inactive_plugins']   = $all_plugins['inactive_plugins'];
+
+		// Jetpack & WooCommerce Connect
+		$data['jetpack_version']    = defined( 'JETPACK__VERSION' ) ? JETPACK__VERSION : 'none';
+		$data['jetpack_connected']  = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_active' ) && Jetpack::is_active() ) ? 'yes' : 'no';
+		$data['jetpack_is_staging'] = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() ) ? 'yes' : 'no';
+		$data['connect_installed']  = class_exists( 'WC_Connect_Loader' ) ? 'yes' : 'no';
+		$data['connect_active']     = ( class_exists( 'WC_Connect_Loader' ) && wp_next_scheduled( 'wc_connect_fetch_service_schemas' ) ) ? 'yes' : 'no';
 
 		// Store count info
 		$data['users']              = self::get_user_counts();

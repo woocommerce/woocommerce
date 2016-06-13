@@ -279,7 +279,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details );
 
 		if ( ! empty( $bacs_accounts ) ) {
-			echo '<h2>' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
+			echo '<h2 class="wc-bacs-bank-details-heading">' . __( 'Our Bank Details', 'woocommerce' ) . '</h2>' . PHP_EOL;
 
 			foreach ( $bacs_accounts as $bacs_account ) {
 
@@ -289,7 +289,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					echo '<h3>' . wp_unslash( implode( ' - ', array_filter( array( $bacs_account->account_name, $bacs_account->bank_name ) ) ) ) . '</h3>' . PHP_EOL;
 				}
 
-				echo '<ul class="order_details bacs_details">' . PHP_EOL;
+				echo '<ul class="wc-bacs-bank-details order_details bacs_details">' . PHP_EOL;
 
 				// BACS account fields shown on the thanks page and in emails
 				$account_fields = apply_filters( 'woocommerce_bacs_account_fields', array(
@@ -357,7 +357,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 */
 	public function get_country_locale() {
 
-		if ( ! $this->locale ) {
+		if ( empty( $this->locale ) ) {
 
 			// Locale information to be used - only those that are not 'Sort Code'
 			$this->locale = apply_filters( 'woocommerce_get_bacs_locale', array(

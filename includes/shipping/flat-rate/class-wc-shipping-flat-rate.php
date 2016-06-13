@@ -26,7 +26,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$this->method_description    = __( 'Lets you charge a fixed rate for shipping.', 'woocommerce' );
 		$this->supports              = array(
 			'shipping-zones',
-			'instance-settings'
+			'instance-settings',
+			'instance-settings-modal',
 		);
 		$this->init();
 
@@ -39,8 +40,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	public function init() {
 		$this->instance_form_fields = include( 'includes/settings-flat-rate.php' );
 		$this->title                = $this->get_option( 'title' );
-		$this->availability         = $this->get_option( 'availability' );
-		$this->countries            = $this->get_option( 'countries' );
 		$this->tax_status           = $this->get_option( 'tax_status' );
 		$this->cost                 = $this->get_option( 'cost' );
 		$this->type                 = $this->get_option( 'type', 'class' );
@@ -53,7 +52,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
-		include_once( 'includes/class-wc-eval-math.php' );
+		include_once( WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php' );
 
 		// Allow 3rd parties to process shipping cost arguments
 		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
@@ -122,9 +121,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$rate = array(
-			'id'    => $this->id . $this->instance_id,
-			'label' => $this->title,
-			'cost'  => 0,
+			'id'      => $this->get_rate_id(),
+			'label'   => $this->title,
+			'cost'    => 0,
+			'package' => $package,
 		);
 
 		// Calculate the costs
@@ -135,7 +135,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost( $cost, array(
 				'qty'  => $this->get_package_item_qty( $package ),
-				'cost' => $package['contents_cost']
+				'cost' => $package['contents_cost'],
 			) );
 		}
 
@@ -194,7 +194,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		 * 			$method->add_rate( $new_rate );
 		 * 		}.
 		 */
-		do_action( 'woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate, $package );
+		do_action( 'woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate );
 	}
 
 	/**

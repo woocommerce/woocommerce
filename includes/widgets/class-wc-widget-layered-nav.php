@@ -60,7 +60,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$attribute_array      = array();
 		$attribute_taxonomies = wc_get_attribute_taxonomies();
 
-		if ( $attribute_taxonomies ) {
+		if ( ! empty( $attribute_taxonomies ) ) {
 			foreach ( $attribute_taxonomies as $tax ) {
 				if ( taxonomy_exists( wc_attribute_taxonomy_name( $tax->attribute_name ) ) ) {
 					$attribute_array[ $tax->attribute_name ] = $tax->attribute_name;
@@ -146,6 +146,15 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		if ( 0 === sizeof( $terms ) ) {
 			return;
+		}
+
+		switch ( $orderby ) {
+			case 'name_num' :
+				usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
+			break;
+			case 'parent' :
+				usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
+			break;
 		}
 
 		ob_start();
@@ -276,9 +285,12 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$link = add_query_arg( 'orderby', wc_clean( $_GET['orderby'] ), $link );
 		}
 
-		// Search Arg
+		/**
+		 * Search Arg.
+		 * To support quote characters, first they are decoded from &quot; entities, then URL encoded.
+		 */
 		if ( get_search_query() ) {
-			$link = add_query_arg( 's', get_search_query(), $link );
+			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query() ) ), $link );
 		}
 
 		// Post Type Arg
@@ -421,9 +433,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 			echo esc_html( $term->name );
 
-			echo ( $count > 0 || $option_is_set ) ? '</a>' : '</span>';
+			echo ( $count > 0 || $option_is_set ) ? '</a> ' : '</span> ';
 
-			echo ' <span class="count">(' . absint( $count ) . ')</span></li>';
+			echo apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term );
+
+			echo '</li>';
 		}
 
 		echo '</ul>';

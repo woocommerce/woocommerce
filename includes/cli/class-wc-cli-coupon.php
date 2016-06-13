@@ -241,7 +241,7 @@ class WC_CLI_Coupon extends WC_CLI_Command {
 				throw new WC_CLI_Exception( 'woocommerce_cli_invalid_coupon', sprintf( __( 'Invalid coupon ID or code: %s', 'woocommerce' ), $args[0] ) );
 			}
 
-			$coupon_post = get_post( $coupon->id );
+			$coupon_post = get_post( $coupon->get_id() );
 			$coupon_data = array(
 				'id'                           => $coupon->get_id(),
 				'code'                         => $coupon->get_code(),

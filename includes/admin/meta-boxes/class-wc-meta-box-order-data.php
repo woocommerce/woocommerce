@@ -179,11 +179,16 @@ class WC_Meta_Box_Order_Data {
 								echo ' (' . esc_html( $transaction_id ) . ')';
 							}
 						}
+
+						if ( $order->paid_date ) {
+							printf( ' ' . _x( 'on %s @ %s', 'on date at time', 'woocommerce' ), date_i18n( get_option( 'date_format' ), strtotime( $order->paid_date ) ), date_i18n( get_option( 'time_format' ), strtotime( $order->paid_date ) ) );
+						}
+
 						echo '. ';
 					}
 
 					if ( $ip_address = get_post_meta( $post->ID, '_customer_ip_address', true ) ) {
-						echo __( 'Customer IP', 'woocommerce' ) . ': ' . esc_html( $ip_address );
+						echo __( 'Customer IP', 'woocommerce' ) . ': <span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>';
 					}
 				?></p>
 
@@ -477,6 +482,8 @@ class WC_Meta_Box_Order_Data {
 		$date = date_i18n( 'Y-m-d H:i:s', $date );
 
 		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_date = %s, post_date_gmt = %s WHERE ID = %s", $date, get_gmt_from_date( $date ), $post_id ) );
+
+		clean_post_cache( $post_id );
 
 		// If customer changed, update any downloadable permissions
 		if ( $customer_changed ) {

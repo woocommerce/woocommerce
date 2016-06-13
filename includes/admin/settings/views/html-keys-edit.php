@@ -93,7 +93,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		} else {
 			?>
 			<p class="submit">
-				<?php submit_button( __( 'Save Changes', 'woocommerce' ), 'primary', 'update_api_key', false ); ?>
+				<?php submit_button( __( 'Save changes', 'woocommerce' ), 'primary', 'update_api_key', false ); ?>
 				<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=api&section=keys' ) ), 'revoke' ) ); ?>"><?php _e( 'Revoke Key', 'woocommerce' ); ?></a>
 			</p>
 			<?php

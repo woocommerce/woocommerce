@@ -50,7 +50,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 */
 	public function __construct() {
 		$this->import_page = 'woocommerce_tax_rate_csv';
-		$this->delimiter   = empty( $_POST['delimiter'] ) ? ',' : wc_clean( $_POST['delimiter'] );
+		$this->delimiter   = empty( $_POST['delimiter'] ) ? ',' : (string) wc_clean( $_POST['delimiter'] );
 	}
 
 	/**
@@ -98,9 +98,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 		if ( function_exists( 'gc_enable' ) ) {
 			gc_enable();
 		}
-		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
-			@set_time_limit( 0 );
-		}
+		wc_set_time_limit( 0 );
 		@ob_flush();
 		@flush();
 		@ini_set( 'auto_detect_line_endings', '1' );

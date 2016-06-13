@@ -1,17 +1,16 @@
 <?php
-namespace WooCommerce\Tests\CRUD;
 
 /**
  * Meta
  * @package WooCommerce\Tests\CRUD
  */
-class Meta extends \WC_Unit_Test_Case {
+class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
 
 	/**
 	 * Create a test post we can add/test meta against.
 	 */
 	public function create_test_post() {
-		$object = new \WC_Mock_WC_data();
+		$object = new WC_Mock_WC_Data();
 		$object->set_content( 'testing' );
 		$object->save();
 		return $object;
@@ -21,7 +20,7 @@ class Meta extends \WC_Unit_Test_Case {
 	 * Create a test user we can add/test meta against.
 	 */
 	public function create_test_user() {
-		$object = new \WC_Mock_WC_data();
+		$object = new WC_Mock_WC_Data();
 		$object->set_meta_type( 'user' );
 		$object->set_object_id_field( 'user_id' );
 		$object->set_content( 'testing@woo.dev' );
@@ -94,10 +93,14 @@ class Meta extends \WC_Unit_Test_Case {
 		", $object_id ) );
 
 		foreach ( $raw_metadata as $meta ) {
-			$metadata[ $meta->meta_id ] = (object) array( 'key' => $meta->meta_key, 'value' => $meta->meta_value );
+			$metadata[] = (object) array(
+				'key'     => $meta->meta_key,
+				'value'   => $meta->meta_value,
+				'meta_id' =>  $meta->meta_id,
+			);
 		}
 
-		$object = new \WC_Mock_WC_data();
+		$object = new WC_Mock_WC_Data();
 		$object->set_meta_data( $metadata );
 
 		$this->assertEquals( $metadata, $object->get_meta_data() );
@@ -195,6 +198,19 @@ class Meta extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 'val1', $object->get_meta( 'test_meta_key' ) );
 		$this->assertEquals( 'val2', $object->get_meta( 'test_meta_key_2' ) );
+	}
+
+	/**
+	 * Test adding meta data/updating meta data just added without keys colliding when changing
+	 * data before a save.
+	 */
+	function test_add_meta_data_overwrite_before_save() {
+		$object = new WC_Mock_WC_Data;
+		$object->add_meta_data( 'test_field_0', 'another field', true );
+		$object->add_meta_data( 'test_field_1', 'another field', true );
+		$object->add_meta_data( 'test_field_2', 'val1', true );
+		$object->update_meta_data( 'test_field_0', 'another field 2' );
+		$this->assertEquals( 'val1', $object->get_meta( 'test_field_2' ) );
 	}
 
 }

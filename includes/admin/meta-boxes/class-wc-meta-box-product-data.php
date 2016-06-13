@@ -82,9 +82,9 @@ class WC_Meta_Box_Product_Data {
 		?>
 		<div class="panel-wrap product_data">
 
-			<span class="type_box"> &mdash; <?php echo $type_box; ?></span>
+			<span class="type_box hidden"> &mdash; <?php echo $type_box; ?></span>
 
-			<ul class="product_data_tabs wc-tabs" style="display:none;">
+			<ul class="product_data_tabs wc-tabs">
 				<?php
 					$product_data_tabs = apply_filters( 'woocommerce_product_data_tabs', array(
 						'general' => array(
@@ -145,7 +145,7 @@ class WC_Meta_Box_Product_Data {
 
 				echo '</div>';
 
-				echo '<div class="options_group pricing show_if_simple show_if_external">';
+				echo '<div class="options_group pricing show_if_simple show_if_external hidden">';
 
 					// Price
 					woocommerce_wp_text_input( array( 'id' => '_regular_price', 'label' => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')', 'data_type' => 'price' ) );
@@ -168,7 +168,7 @@ class WC_Meta_Box_Product_Data {
 
 				echo '</div>';
 
-				echo '<div class="options_group show_if_downloadable">';
+				echo '<div class="options_group show_if_downloadable hidden">';
 
 					?>
 					<div class="form-field downloadable_files">
@@ -280,7 +280,7 @@ class WC_Meta_Box_Product_Data {
 				?>
 			</div>
 
-			<div id="inventory_product_data" class="panel woocommerce_options_panel">
+			<div id="inventory_product_data" class="panel woocommerce_options_panel hidden">
 
 				<?php
 
@@ -354,7 +354,7 @@ class WC_Meta_Box_Product_Data {
 
 			</div>
 
-			<div id="shipping_product_data" class="panel woocommerce_options_panel">
+			<div id="shipping_product_data" class="panel woocommerce_options_panel hidden">
 
 				<?php
 
@@ -410,7 +410,7 @@ class WC_Meta_Box_Product_Data {
 
 			</div>
 
-			<div id="product_attributes" class="panel wc-metaboxes-wrapper">
+			<div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
 				<div class="toolbar toolbar-top">
 					<span class="expand-close">
 						<a href="#" class="expand_all"><?php _e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php _e( 'Close', 'woocommerce' ); ?></a>
@@ -423,7 +423,7 @@ class WC_Meta_Box_Product_Data {
 							// Array of defined attribute taxonomies
 							$attribute_taxonomies = wc_get_attribute_taxonomies();
 
-							if ( $attribute_taxonomies ) {
+							if ( ! empty( $attribute_taxonomies ) ) {
 								foreach ( $attribute_taxonomies as $tax ) {
 									$attribute_taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
 									$label = $tax->attribute_label ? $tax->attribute_label : $tax->attribute_name;
@@ -462,7 +462,7 @@ class WC_Meta_Box_Product_Data {
 									$metabox_class[]    = $taxonomy;
 									$attribute_label    = wc_attribute_label( $taxonomy );
 								} else {
-									$attribute_label    = apply_filters( 'woocommerce_attribute_label', $attribute['name'], $attribute['name'] );
+									$attribute_label    = apply_filters( 'woocommerce_attribute_label', $attribute['name'], $attribute['name'], false );
 								}
 
 								include( 'views/html-product-attribute.php' );
@@ -478,7 +478,7 @@ class WC_Meta_Box_Product_Data {
 				</div>
 				<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 			</div>
-			<div id="linked_product_data" class="panel woocommerce_options_panel">
+			<div id="linked_product_data" class="panel woocommerce_options_panel hidden">
 
 				<div class="options_group">
 
@@ -545,7 +545,7 @@ class WC_Meta_Box_Product_Data {
 				<?php do_action( 'woocommerce_product_options_related' ); ?>
 			</div>
 
-			<div id="advanced_product_data" class="panel woocommerce_options_panel">
+			<div id="advanced_product_data" class="panel woocommerce_options_panel hidden">
 
 				<div class="options_group hide_if_external">
 					<?php
@@ -613,14 +613,14 @@ class WC_Meta_Box_Product_Data {
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 		?>
-		<div id="variable_product_options" class="panel wc-metaboxes-wrapper"><div id="variable_product_options_inner">
+		<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden"><div id="variable_product_options_inner">
 
 			<?php if ( ! $variation_attribute_found ) : ?>
 
 				<div id="message" class="inline notice woocommerce-message">
 					<p><?php _e( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ); ?></p>
 					<p>
-						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'http://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
+						<a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woothemes.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php _e( 'Learn more', 'woocommerce' ); ?></a>
 					</p>
 				</div>
 
@@ -840,7 +840,7 @@ class WC_Meta_Box_Product_Data {
 
 		// Unique SKU
 		$sku     = get_post_meta( $post_id, '_sku', true );
-		$new_sku = wc_clean( $_POST['_sku'] );
+		$new_sku = (string) wc_clean( $_POST['_sku'] );
 
 		if ( '' == $new_sku ) {
 			update_post_meta( $post_id, '_sku', '' );
@@ -960,16 +960,7 @@ class WC_Meta_Box_Product_Data {
 			}
 		}
 
-		if ( ! function_exists( 'attributes_cmp' ) ) {
-			function attributes_cmp( $a, $b ) {
-				if ( $a['position'] == $b['position'] ) {
-					return 0;
-				}
-
-				return ( $a['position'] < $b['position'] ) ? -1 : 1;
-			}
-		}
-		uasort( $attributes, 'attributes_cmp' );
+		uasort( $attributes, 'wc_product_attribute_uasort_comparison' );
 
 		/**
 		 * Unset removed attributes by looping over previous values and
@@ -977,7 +968,7 @@ class WC_Meta_Box_Product_Data {
 		 */
 		$old_attributes = array_filter( (array) maybe_unserialize( get_post_meta( $post_id, '_product_attributes', true ) ) );
 
-		if ( $old_attributes ) {
+		if ( ! empty( $old_attributes ) ) {
 			foreach ( $old_attributes as $key => $value ) {
 				if ( empty( $attributes[ $key ] ) && ! empty( $value['is_taxonomy'] ) && taxonomy_exists( $key ) ) {
 					wp_set_object_terms( $post_id, array(), $key );
@@ -1000,10 +991,10 @@ class WC_Meta_Box_Product_Data {
 			update_post_meta( $post_id, '_sale_price_dates_to', '' );
 
 		} else {
-			$date_from     = isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';
-			$date_to       = isset( $_POST['_sale_price_dates_to'] ) ? wc_clean( $_POST['_sale_price_dates_to'] )     : '';
-			$regular_price = isset( $_POST['_regular_price'] ) ? wc_clean( $_POST['_regular_price'] )                 : '';
-			$sale_price    = isset( $_POST['_sale_price'] ) ? wc_clean( $_POST['_sale_price'] )                       : '';
+			$date_from     = (string) isset( $_POST['_sale_price_dates_from'] ) ? wc_clean( $_POST['_sale_price_dates_from'] ) : '';
+			$date_to       = (string) isset( $_POST['_sale_price_dates_to'] ) ? wc_clean( $_POST['_sale_price_dates_to'] )     : '';
+			$regular_price = (string) isset( $_POST['_regular_price'] ) ? wc_clean( $_POST['_regular_price'] )                 : '';
+			$sale_price    = (string) isset( $_POST['_sale_price'] ) ? wc_clean( $_POST['_sale_price'] )                       : '';
 
 			update_post_meta( $post_id, '_regular_price', '' === $regular_price ? '' : wc_format_decimal( $regular_price ) );
 			update_post_meta( $post_id, '_sale_price', '' === $sale_price ? '' : wc_format_decimal( $sale_price ) );
@@ -1035,7 +1026,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		// Update parent if grouped so price sorting works and stays in sync with the cheapest child
-		if ( $post->post_parent > 0 || 'grouped' == $product_type || $_POST['previous_parent_id'] > 0 ) {
+		if ( $post->post_parent > 0 || 'grouped' === $product_type || $_POST['previous_parent_id'] > 0 ) {
 
 			$clear_parent_ids = array();
 
@@ -1043,7 +1034,7 @@ class WC_Meta_Box_Product_Data {
 				$clear_parent_ids[] = $post->post_parent;
 			}
 
-			if ( 'grouped' == $product_type ) {
+			if ( 'grouped' === $product_type ) {
 				$clear_parent_ids[] = $post_id;
 			}
 
@@ -1388,17 +1379,17 @@ class WC_Meta_Box_Product_Data {
 				// Stock handling
 				update_post_meta( $variation_id, '_manage_stock', $manage_stock );
 
-				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
-				if ( ! empty( $variable_stock_status[ $i ] ) ) {
-					wc_update_product_stock_status( $variation_id, $variable_stock_status[ $i ] );
-				}
-
 				if ( 'yes' === $manage_stock ) {
 					update_post_meta( $variation_id, '_backorders', wc_clean( $variable_backorders[ $i ] ) );
 					wc_update_product_stock( $variation_id, wc_stock_amount( $variable_stock[ $i ] ) );
 				} else {
 					delete_post_meta( $variation_id, '_backorders' );
 					delete_post_meta( $variation_id, '_stock' );
+				}
+
+				// Only update stock status to user setting if changed by the user, but do so before looking at stock levels at variation level
+				if ( ! empty( $variable_stock_status[ $i ] ) ) {
+					wc_update_product_stock_status( $variation_id, $variable_stock_status[ $i ] );
 				}
 
 				// Price handling

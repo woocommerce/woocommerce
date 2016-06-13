@@ -28,7 +28,19 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$this->init();
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_flat_rate_shipping_add_rate', array( $this, 'calculate_extra_shipping' ), 10, 3 );
+		add_action( 'woocommerce_flat_rate_shipping_add_rate', array( $this, 'calculate_extra_shipping' ), 10, 2 );
+	}
+
+	/**
+	 * Process and redirect if disabled.
+	 */
+	public function process_admin_options() {
+		parent::process_admin_options();
+
+		if ( 'no' === $this->settings[ 'enabled' ] ) {
+			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
+			exit;
+		}
 	}
 
 	/**
@@ -72,7 +84,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
-		include_once( 'includes/class-wc-eval-math.php' );
+		include_once( WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php' );
 
 		$locale   = localeconv();
 		$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
@@ -140,9 +152,10 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$rate = array(
-			'id'    => $this->id,
-			'label' => $this->title,
-			'cost'  => 0,
+			'id'      => $this->id,
+			'label'   => $this->title,
+			'cost'    => 0,
+			'package' => $package,
 		);
 
 		// Calculate the costs
@@ -187,6 +200,8 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 			$rate['cost'] += $highest_class_cost;
 		}
 
+		$rate['package'] = $package;
+
 		// Add the rate
 		if ( $has_costs ) {
 			$this->add_rate( $rate );
@@ -212,7 +227,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		 * 			$method->add_rate( $new_rate );
 		 * 		}.
 		 */
-		do_action( 'woocommerce_flat_rate_shipping_add_rate', $this, $rate, $package );
+		do_action( 'woocommerce_flat_rate_shipping_add_rate', $this, $rate );
 	}
 
 	/**
@@ -261,7 +276,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 * Additonal rates defined like this:
 	 * 	Option Name | Additional Cost [+- Percents%] | Per Cost Type (order, class, or item).
 	 */
-	public function calculate_extra_shipping( $method, $rate, $package ) {
+	public function calculate_extra_shipping( $method, $rate ) {
 		if ( $this->options ) {
 			$options = array_filter( (array) explode( "\n", $this->options ) );
 
@@ -273,12 +288,13 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 				$extra_rate          = $rate;
 				$extra_rate['id']    = $this->id . ':' . urldecode( sanitize_title( $this_option[0] ) );
 				$extra_rate['label'] = $this_option[0];
-				$extra_cost          = $this->get_extra_cost( $this_option[1], $this_option[2], $package );
+				$extra_cost          = $this->get_extra_cost( $this_option[1], $this_option[2], $rate['package'] );
 				if ( is_array( $extra_rate['cost'] ) ) {
 					$extra_rate['cost']['order'] = $extra_rate['cost']['order'] + $extra_cost;
 				} else {
 					$extra_rate['cost'] += $extra_cost;
 				}
+
 				$this->add_rate( $extra_rate );
 			}
 		}

@@ -109,8 +109,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type'     => 'select',
 					'options'  => array(
 						''              => __( 'Show products', 'woocommerce' ),
-						'subcategories' => __( 'Show categories &amp; subcategories', 'woocommerce' ),
-						'both'          => __( 'Show both', 'woocommerce' ),
+						'subcategories' => __( 'Show categories', 'woocommerce' ),
+						'both'          => __( 'Show categories &amp; products', 'woocommerce' ),
 					),
 					'desc_tip' =>  true,
 				),
@@ -126,7 +126,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'options'  => array(
 						''              => __( 'Show products', 'woocommerce' ),
 						'subcategories' => __( 'Show subcategories', 'woocommerce' ),
-						'both'          => __( 'Show both', 'woocommerce' ),
+						'both'          => __( 'Show subcategories &amp; products', 'woocommerce' ),
 					),
 					'desc_tip' =>  true,
 				),
@@ -175,7 +175,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'title' => __( 'Product Images', 'woocommerce' ),
 					'type' 	=> 'title',
-					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'http://wordpress.org/extend/plugins/regenerate-thumbnails/' ),
+					'desc' 	=> sprintf( __( 'These settings affect the display and dimensions of images in your catalog - the display on the front-end will still be affected by CSS styles. After changing these settings you may need to <a href="%s">regenerate your thumbnails</a>.', 'woocommerce' ), 'https://wordpress.org/extend/plugins/regenerate-thumbnails/' ),
 					'id' 	=> 'image_options'
 				),
 

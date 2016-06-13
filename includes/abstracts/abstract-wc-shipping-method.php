@@ -22,6 +22,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * - shipping-zones Shipping zone functionality + instances
 	 * - instance-settings Instance settings screens.
 	 * - settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
+	 * - instance-settings-modal Allows the instance settings to be loaded within a modal in the zones UI.
 	 * @var array
 	 */
 	public $supports = array( 'settings' );
@@ -207,17 +208,39 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
+	 * Returns a rate ID based on this methods ID and instance, with an optional
+	 * suffix if distinguishing between multiple rates.
+	 * @since 2.6.0
+	 * @param string $suffix
+	 * @return string
+	 */
+	public function get_rate_id( $suffix = '' ) {
+		$rate_id = array( $this->id );
+
+		if ( $this->instance_id ) {
+			$rate_id[] = $this->instance_id;
+		}
+
+		if ( $suffix ) {
+			$rate_id[] = $suffix;
+		}
+
+		return implode( ':', $rate_id );
+	}
+
+	/**
 	 * Add a shipping rate. If taxes are not set they will be calculated based on cost.
 	 * @param array $args (default: array())
 	 */
 	public function add_rate( $args = array() ) {
 		$args = wp_parse_args( $args, array(
-			'id'        => '', // ID for the rate
+			'id'        => $this->get_rate_id(), // ID for the rate. If not passed, this id:instance default will be used.
 			'label'     => '', // Label for the rate
 			'cost'      => '0', // Amount or array of costs (per item shipping)
 			'taxes'     => '', // Pass taxes, or leave empty to have it calculated for you, or 'false' to disable calculations
 			'calc_tax'  => 'per_order', // Calc tax per_order or per_item. Per item needs an array of costs
-			'meta_data' => array() // Array of misc meta data to store along with this rate - key value pairs.
+			'meta_data' => array(), // Array of misc meta data to store along with this rate - key value pairs.
+			'package'   => false, // Package array this rate was generated for @since 2.6.0
 		) );
 
 		// ID and label are required
@@ -244,6 +267,16 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			foreach ( $args['meta_data'] as $key => $value ) {
 				$rate->add_meta_data( $key, $value );
 			}
+		}
+
+		// Store package data
+		if ( $args['package'] ) {
+			$items_in_package = array();
+			foreach ( $args['package']['contents'] as $item ) {
+				$product = $item['data'];
+				$items_in_package[] = $product->get_title() . ' &times; ' . $item['quantity'];
+			}
+			$rate->add_meta_data( __( 'Items', 'woocommerce' ), implode( ', ', $items_in_package ) );
 		}
 
 		$this->rates[ $args['id'] ] = $rate;
@@ -345,17 +378,28 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
+	 * Return admin options as a html string.
+	 * @return string
+	 */
+	public function get_admin_options_html() {
+		if ( $this->instance_id ) {
+			$settings_html = $this->generate_settings_html( $this->get_instance_form_fields(), false );
+		} else {
+			$settings_html = $this->generate_settings_html( $this->get_form_fields(), false );
+		}
+
+		return '<table class="form-table">' . $settings_html . '</table>';
+	}
+
+	/**
 	 * Output the shipping settings screen.
 	 */
 	public function admin_options() {
-		if ( $this->instance_id ) {
-			echo wp_kses_post( wpautop( $this->get_method_description() ) );
-			echo '<table class="form-table">' . $this->generate_settings_html( $this->get_instance_form_fields(), false ) . '</table>';
-		} else {
+		if ( ! $this->instance_id ) {
 			echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
-			echo wp_kses_post( wpautop( $this->get_method_description() ) );
-			echo '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>';
 		}
+		echo wp_kses_post( wpautop( $this->get_method_description() ) );
+		echo $this->get_admin_options_html();
 	}
 
 	/**
@@ -445,10 +489,12 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		if ( $this->instance_id ) {
 			$this->init_instance_settings();
 
+			$post_data = $this->get_post_data();
+
 			foreach ( $this->get_instance_form_fields() as $key => $field ) {
 				if ( 'title' !== $this->get_field_type( $field ) ) {
 					try {
-						$this->instance_settings[ $key ] = $this->get_field_value( $key, $field );
+						$this->instance_settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
 					} catch ( Exception $e ) {
 						$this->add_error( $e->getMessage() );
 					}

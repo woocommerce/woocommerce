@@ -6,6 +6,8 @@ if [ $1 == 'before' ]; then
 	# composer install fails in PHP 5.2
 	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
 
+	composer self-update
+
 	# install php-coveralls to send coverage info
 	composer init --require=satooshi/php-coveralls:0.7.0 -n
 	composer install --no-interaction

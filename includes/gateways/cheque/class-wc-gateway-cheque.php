@@ -22,10 +22,10 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
      */
 	public function __construct() {
 		$this->id                 = 'cheque';
-		$this->icon               = apply_filters('woocommerce_cheque_icon', '');
+		$this->icon               = apply_filters( 'woocommerce_cheque_icon', '' );
 		$this->has_fields         = false;
-		$this->method_title       = __( 'Cheque', 'woocommerce' );
-		$this->method_description = __( 'Allows cheque payments. Why would you take cheques in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases for testing order emails and the \'success\' pages etc.', 'woocommerce' );
+		$this->method_title       = _x( 'Check Payments', 'Check payment method', 'woocommerce' );
+		$this->method_description = __( 'Allows check payments. Why would you take checks in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases for testing order emails and the \'success\' pages etc.', 'woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -53,21 +53,21 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Enable Cheque Payment', 'woocommerce' ),
+				'label'   => __( 'Enable Check Payments', 'woocommerce' ),
 				'default' => 'yes'
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => __( 'Cheque Payment', 'woocommerce' ),
+				'default'     => _x( 'Check Payments', 'Check payment method', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'description' => array(
 				'title'       => __( 'Description', 'woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
-				'default'     => __( 'Please send your cheque to Store Name, Store Street, Store Town, Store State / County, Store Postcode.', 'woocommerce' ),
+				'default'     => __( 'Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'instructions' => array(
@@ -113,7 +113,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		// Mark as on-hold (we're awaiting the cheque)
-		$order->update_status( 'on-hold', __( 'Awaiting cheque payment', 'woocommerce' ) );
+		$order->update_status( 'on-hold', _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
 
 		// Reduce stock levels
 		$order->reduce_order_stock();

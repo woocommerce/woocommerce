@@ -157,7 +157,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 					<th class="total_row"><?php _e( 'Net profit', 'woocommerce' ); ?> <?php echo wc_help_tip( __( "Total sales minus shipping and tax.", 'woocommerce' ) ); ?></th>
 				</tr>
 			</thead>
-			<?php if ( $tax_rows ) : ?>
+			<?php if ( ! empty( $tax_rows ) ) : ?>
 				<tbody>
 					<?php
 					foreach ( $tax_rows as $date => $tax_row ) {

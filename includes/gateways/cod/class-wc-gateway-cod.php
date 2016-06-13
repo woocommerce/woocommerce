@@ -196,11 +196,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
      * @return array
      */
 	public function process_payment( $order_id ) {
-
 		$order = wc_get_order( $order_id );
 
-		// Mark as processing (payment won't be taken until delivery)
-		$order->update_status( apply_filters( 'woocommerce_cod_process_payment_order_status', 'processing' ), __( 'Payment to be made upon delivery.', 'woocommerce' ) );
+		// Mark as processing or on-hold (payment won't be taken until delivery)
+		$order->update_status( apply_filters( 'woocommerce_cod_process_payment_order_status', $order->has_downloadable_item() ? 'on-hold' : 'processing', $order ), __( 'Payment to be made upon delivery.', 'woocommerce' ) );
 
 		// Reduce stock levels
 		$order->reduce_order_stock();

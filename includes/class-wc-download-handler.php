@@ -73,6 +73,8 @@ class WC_Download_Handler {
 			$query .= "AND download_id = %s ";
 		}
 
+		$query .= "ORDER BY downloads_remaining DESC";
+
 		return $wpdb->get_row( $wpdb->prepare( $query, array( $args['email'], $args['order_key'], $args['product_id'], $args['download_id'] ) ) );
 	}
 
@@ -333,9 +335,7 @@ class WC_Download_Handler {
 	 * Check and set certain server config variables to ensure downloads work as intended.
 	 */
 	private static function check_server_config() {
-		if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
-			@set_time_limit( 0 );
-		}
+		wc_set_time_limit( 0 );
 		if ( function_exists( 'get_magic_quotes_runtime' ) && get_magic_quotes_runtime() && version_compare( phpversion(), '5.4', '<' ) ) {
 			set_magic_quotes_runtime( 0 );
 		}
@@ -417,7 +417,7 @@ class WC_Download_Handler {
 	 */
 	private static function download_error( $message, $title = '', $status = 404 ) {
 		if ( ! strstr( $message, '<a ' ) ) {
-			$message .= ' <a href="' . esc_url( home_url() ) . '" class="wc-forward">' . __( 'Go to homepage', 'woocommerce' ) . '</a>';
+			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . __( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
 		wp_die( $message, $title, array( 'response' => $status ) );
 	}

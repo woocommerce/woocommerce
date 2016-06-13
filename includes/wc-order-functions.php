@@ -215,7 +215,7 @@ function wc_is_order_status( $maybe_status ) {
  *
  * @since  2.2
  * @param  mixed $the_order Post object or post ID of the order.
- * @return WC_Order
+ * @return WC_Order|WC_Refund
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
@@ -604,7 +604,12 @@ function wc_delete_order_item( $item_id ) {
  * @return bool
  */
 function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
-	return update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value );
+	if ( update_metadata( 'order_item', $item_id, $meta_key, $meta_value, $prev_value ) ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
+		wp_cache_delete( $cache_key, 'orders' );
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -615,10 +620,15 @@ function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_valu
  * @param mixed $meta_key
  * @param mixed $meta_value
  * @param bool $unique (default: false)
- * @return bool
+ * @return int New row ID or 0
  */
 function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = false ) {
-	return add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique );
+	if ( $meta_id = add_metadata( 'order_item', $item_id, $meta_key, $meta_value, $unique ) ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
+		wp_cache_delete( $cache_key, 'orders' );
+		return $meta_id;
+	}
+	return 0;
 }
 
 /**
@@ -632,7 +642,12 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
  * @return bool
  */
 function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
-	return delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all );
+	if ( delete_metadata( 'order_item', $item_id, $meta_key, $meta_value, $delete_all ) ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'item_meta_array_' . $item_id;
+		wp_cache_delete( $cache_key, 'orders' );
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -866,12 +881,7 @@ function wc_create_refund( $args = array() ) {
 							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
 						case 'shipping' :
-							$shipping        = new stdClass();
-							$shipping->label = $order_items[ $refund_item_id ]['name'];
-							$shipping->id    = $order_items[ $refund_item_id ]['method_id'];
-							$shipping->cost  = wc_format_refund_total( $refund_item['refund_total'] );
-							$shipping->taxes = array_map( 'wc_format_refund_total', $refund_item['refund_tax'] );
-
+							$shipping    = new WC_Shipping_Rate( $order_items[ $refund_item_id ]['method_id'], $order_items[ $refund_item_id ]['name'], wc_format_refund_total( $refund_item['refund_total'] ), array_map( 'wc_format_refund_total', $refund_item['refund_tax'] ), $order_items[ $refund_item_id ]['method_id'] );
 							$new_item_id = $refund->add_shipping( $shipping );
 							wc_add_order_item_meta( $new_item_id, '_refunded_item_id', $refund_item_id );
 						break;
@@ -961,7 +971,7 @@ function wc_order_fully_refunded( $order_id ) {
 	}
 
 	// Create the refund object
-	$refund = wc_create_refund( array(
+	wc_create_refund( array(
 		'amount'     => $max_refund,
 		'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
 		'order_id'   => $order_id,

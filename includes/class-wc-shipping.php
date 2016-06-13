@@ -23,7 +23,7 @@ class WC_Shipping {
 	/** @var bool True if shipping is enabled. */
 	public $enabled					 = false;
 
-	/** @var array Stores methods loaded into woocommerce. */
+	/** @var array|null Stores methods loaded into woocommerce. */
 	public $shipping_methods         = null;
 
 	/** @var float Stores the cost of shipping */
@@ -131,7 +131,7 @@ class WC_Shipping {
 	 * @return array
 	 */
 	public function load_shipping_methods( $package = array() ) {
-		if ( $package ) {
+		if ( ! empty( $package ) ) {
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
 		} else {
@@ -162,6 +162,9 @@ class WC_Shipping {
 			}
 			$method = new $method();
 		}
+		if ( is_null( $this->shipping_methods ) ) {
+			$this->shipping_methods = array();
+		}
 		$this->shipping_methods[ $method->id ] = $method;
 	}
 
@@ -169,7 +172,7 @@ class WC_Shipping {
 	 * Unregister shipping methods.
 	 */
 	public function unregister_shipping_methods() {
-		$this->shipping_methods = array();
+		$this->shipping_methods = null;
 	}
 
 	/**
@@ -196,7 +199,7 @@ class WC_Shipping {
 			$classes                = get_terms( 'product_shipping_class', array( 'hide_empty' => '0', 'orderby' => 'name' ) );
 			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
-		return $this->shipping_classes;
+		return apply_filters( 'woocommerce_get_shipping_classes', $this->shipping_classes );
 	}
 
 	/**
@@ -239,7 +242,7 @@ class WC_Shipping {
 
 		// Calculate costs for passed packages
 		foreach ( $packages as $package_key => $package ) {
-			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package );
+			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package, $package_key );
 		}
 
 		/**
@@ -280,7 +283,7 @@ class WC_Shipping {
 
 				// If not set, not available, or available methods have changed, set to the DEFAULT option
 				if ( empty( $chosen_method ) || ! isset( $package['rates'][ $chosen_method ] ) || $method_count !== sizeof( $package['rates'] ) ) {
-					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], $chosen_method ), $package['rates'] );
+					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], $chosen_method ), $package['rates'], $chosen_method );
 					$chosen_methods[ $i ] = $chosen_method;
 					$method_counts[ $i ]  = sizeof( $package['rates'] );
 					do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
@@ -313,17 +316,19 @@ class WC_Shipping {
 	 * Calculates each shipping methods cost. Rates are stored in the session based on the package hash to avoid re-calculation every page load.
 	 *
 	 * @param array $package cart items
+	 * @param int   $package_key Index of the package being calculated. Used to cache multiple package rates.
 	 * @return array
 	 */
-	public function calculate_shipping_for_package( $package = array() ) {
-		if ( ! $this->enabled || ! $package ) {
+	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
+		if ( ! $this->enabled || empty( $package ) ) {
 			return false;
 		}
 
 		// Check if we need to recalculate shipping for this package
 		$package_hash   = 'wc_ship_' . md5( json_encode( $package ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
 		$status_options = get_option( 'woocommerce_status_options', array() );
-		$stored_rates   = WC()->session->get( 'shipping_for_package' );
+		$session_key    = 'shipping_for_package_' . $package_key;
+		$stored_rates   = WC()->session->get( $session_key );
 
 		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || ! empty( $status_options['shipping_debug_mode'] ) ) {
 			// Calculate shipping method rates
@@ -340,7 +345,7 @@ class WC_Shipping {
 			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
 
 			// Store in session to avoid recalculation
-			WC()->session->set( 'shipping_for_package', array(
+			WC()->session->set( $session_key, array(
 				'package_hash' => $package_hash,
 				'rates'        => $package['rates']
 			) );

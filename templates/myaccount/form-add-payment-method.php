@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     http://docs.woothemes.com/document/template-structure/
+ * @see     https://docs.woothemes.com/document/template-structure/
  * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.6.0
@@ -20,45 +20,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-wc_get_template( 'myaccount/navigation.php' ); ?>
+if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateways() ) : ?>
+	<form id="add_payment_method" method="post">
+		<div id="payment" class="woocommerce-Payment">
+			<ul class="woocommerce-PaymentMethods payment_methods methods">
+				<?php
+					// Chosen Method.
+					if ( count( $available_gateways ) ) {
+						current( $available_gateways )->set_current();
+					}
 
-<div class="my-account-content">
-	<?php if ( $available_gateways = WC()->payment_gateways->get_available_payment_gateways() ) : ?>
-		<form id="add_payment_method" method="post">
-			<div id="payment">
-				<ul class="payment_methods methods">
-					<?php
-						// Chosen Method.
-						if ( count( $available_gateways ) ) {
-							current( $available_gateways )->set_current();
-						}
-
-						foreach ( $available_gateways as $gateway ) {
-							?>
-							<li class="payment_method_<?php echo $gateway->id; ?>">
-								<input id="payment_method_<?php echo $gateway->id; ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
-								<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
-								<?php
-									if ( $gateway->has_fields() || $gateway->get_description() ) {
-										echo '<div class="payment_box payment_method_' . $gateway->id . '" style="display: none;">';
-										$gateway->payment_fields();
-										echo '</div>';
-									}
-								?>
-							</li>
+					foreach ( $available_gateways as $gateway ) {
+						?>
+						<li class="woocommerce-PaymentMethod woocommerce-PaymentMethod--<?php echo $gateway->id; ?> payment_method_<?php echo $gateway->id; ?>">
+							<input id="payment_method_<?php echo $gateway->id; ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> />
+							<label for="payment_method_<?php echo $gateway->id; ?>"><?php echo $gateway->get_title(); ?> <?php echo $gateway->get_icon(); ?></label>
 							<?php
-						}
-					?>
-				</ul>
+								if ( $gateway->has_fields() || $gateway->get_description() ) {
+									echo '<div class="woocommerce-PaymentBox woocommerce-PaymentBox--' . $gateway->id . ' payment_box payment_method_' . $gateway->id . '" style="display: none;">';
+									$gateway->payment_fields();
+									echo '</div>';
+								}
+							?>
+						</li>
+						<?php
+					}
+				?>
+			</ul>
 
-				<div class="form-row">
-					<?php wp_nonce_field( 'woocommerce-add-payment-method' ); ?>
-					<input type="submit" class="button alt" id="place_order" value="<?php esc_attr_e( 'Add Payment Method', 'woocommerce' ); ?>" />
-					<input type="hidden" name="woocommerce_add_payment_method" id="woocommerce_add_payment_method" value="1" />
-				</div>
+			<div class="form-row">
+				<?php wp_nonce_field( 'woocommerce-add-payment-method' ); ?>
+				<input type="submit" class="woocommerce-Button woocommerce-Button--alt button alt" id="place_order" value="<?php esc_attr_e( 'Add Payment Method', 'woocommerce' ); ?>" />
+				<input type="hidden" name="woocommerce_add_payment_method" id="woocommerce_add_payment_method" value="1" />
 			</div>
-		</form>
-	<?php else : ?>
-		<p><?php esc_html_e( 'Sorry, it seems that there are no payment methods which support adding a new payment method. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ); ?></p>
-	<?php endif; ?>
-</div>
+		</div>
+	</form>
+<?php else : ?>
+	<p><?php esc_html_e( 'Sorry, it seems that there are no payment methods which support adding a new payment method. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ); ?></p>
+<?php endif; ?>

@@ -4,11 +4,13 @@ filter:
   - apigen/*
   - dummy-data/*
   - i18n/*
-  - includes/api/v1/*
-  - includes/api/v2/*
+  - includes/api/legacy/*
   - includes/libraries/*
   - includes/updates/*
-  - includes/gateways/simplify-commerce/includes/*
+  - includes/gateways/simplify-commerce/*
+  - includes/shipping/legacy-*
+  - includes/wc-deprecated-functions.php
+  - includes/class-wc-legacy-api.php
 
 checks:
   php:
