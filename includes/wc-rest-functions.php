@@ -166,7 +166,7 @@ function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
 		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'string' ) );
 	}
 
-	if ( 'data' === $args['format'] ) {
+	if ( 'date' === $args['format'] ) {
 		$regex = '#^\d{4}-\d{2}-\d{2}$#';
 
 		if ( ! preg_match( $regex, $value, $matches ) ) {
