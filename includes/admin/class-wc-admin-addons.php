@@ -116,9 +116,9 @@ class WC_Admin_Addons {
 		}
 
 		$url = add_query_arg( array(
-			'utm_source'   => 'product',
-			'utm_medium'   => 'upsell',
-			'utm_campaign' => 'wcaddons',
+			'utm_source'   => 'addons',
+			'utm_medium'   => 'product',
+			'utm_campaign' => 'woocommerceplugin',
 			'utm_content'  => $utm_content,
 		), $url );
 
