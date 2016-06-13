@@ -206,12 +206,12 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 			return $setting;
 		}
 
+		$update_data = array();
+		$update_data[ $setting['id'] ] = $request['value'];
+
+		WC_Admin_Settings::save_fields( array( $setting ), $update_data );
+
 		$response = $this->prepare_item_for_response( $setting, $request );
-		$value    = $this->sanitize_setting_value( $setting, $request['value'] );
-
-		$response->set_data( array_merge( $response->get_data(), compact( 'value' ) ) );
-
-		update_option( $setting['id'], $value );
 
 		return rest_ensure_response( $response );
 	}
