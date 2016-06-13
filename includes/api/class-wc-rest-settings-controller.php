@@ -125,7 +125,7 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 		foreach ( $settings as $setting ) {
 			$setting = $this->filter_setting( $setting );
 			if ( $this->is_setting_type_valid( $setting['type'] ) ) {
-				$setting['value']    = $this->get_value( $setting['id'] );
+				$setting['value']    = WC_Admin_Settings::get_option( $setting['id'] );
 				$filtered_settings[] = $setting;
 			}
 		}
@@ -225,7 +225,7 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data          = $this->filter_setting( $item );
-		$data['value'] = $this->get_value( $data['id'] );
+		$data['value'] = WC_Admin_Settings::get_option( $data['id'] );
 
 		$context = empty( $request['context'] ) ? 'view' : $request['context'];
 		$data    = $this->add_additional_fields_to_object( $data, $request );

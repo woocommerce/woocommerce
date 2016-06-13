@@ -109,34 +109,6 @@ class WC_REST_Settings_API_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get a value from WP's settings API.
-	 *
-	 * @since  2.7.0
-	 * @param  string $setting
-	 * @param  string $default
-	 * @return mixed
-	 */
-	public function get_value( $setting, $default = '' ) {
-		if ( strstr( $setting, '[' ) ) { // Array value.
-			parse_str( $setting, $setting_array );
-			$setting = current( array_keys( $setting ) );
-			$values  = get_option( $setting, '' );
-			$key     = key( $setting_array[ $setting ] );
-			$value   = isset( $values[ $key ] ) ? $values[ $key ] : null;
-		} else { // Single value.
-			$value = get_option( $setting, null );
-		}
-
-		if ( is_array( $value ) ) {
-			$value = array_map( 'stripslashes', $value );
-		} elseif ( ! is_null( $value ) ) {
-			$value = stripslashes( $value );
-		}
-
-		return $value === null ? $default : $value;
-	}
-
-	/**
 	 * Filters out bad values from the settings array/filter so we
 	 * only return known values via the API.
 	 *
