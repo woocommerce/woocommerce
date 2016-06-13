@@ -101,6 +101,22 @@ class Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test /settings without valid permissions/creds.
+	 * @since 2.7.0
+	 * @covers WC_Rest_Settings_Groups_Controller::get_items
+	 */
+	public function test_get_groups_none_registered() {
+		wp_set_current_user( $this->user );
+
+		remove_all_filters( 'woocommerce_settings_groups' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings' ) );
+		$this->assertEquals( 500, $response->get_status() );
+
+		WC_Helper_Settings::register();
+	}
+
+	/**
 	 * Test groups schema.
 	 * @since 2.7.0
 	 */
@@ -144,14 +160,16 @@ class Settings extends WC_Unit_Test_Case {
 	public function test_get_group() {
 		wp_set_current_user( $this->user );
 
+		// test route callback receiving an empty group id
+		$result = $this->endpoint->get_group_settings( '' );
+		$this->assertIsWPError( $result );
+
 		// test getting a group that does not exist
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/not-real' ) );
-		$data = $response->get_data();
 		$this->assertEquals( 404, $response->get_status() );
 
 		// test getting the 'invalid' group
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/settings/invalid' ) );
-		$data = $response->get_data();
 		$this->assertEquals( 404, $response->get_status() );
 
 		// test getting a valid group
@@ -367,6 +385,44 @@ class Settings extends WC_Unit_Test_Case {
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
+	/**
+	 * Tests the GET single setting route handler receiving an empty setting ID.
+	 */
+	public function test_get_setting_empty_setting_id() {
+		$result = $this->endpoint->get_setting( 'test', '' );
+
+		$this->assertIsWPError( $result );
+	}
+
+	/**
+	 * Tests the GET single setting route handler receiving an invalid setting ID.
+	 */
+	public function test_get_setting_invalid_setting_id() {
+		$result = $this->endpoint->get_setting( 'test', 'invalid' );
+
+		$this->assertIsWPError( $result );
+	}
+
+	/**
+	 * Tests the GET single setting route handler encountering an invalid setting type.
+	 */
+	public function test_get_setting_invalid_setting_type() {
+		$controller = $this->getMock( 'WC_Rest_Settings_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
+
+		$controller
+			->expects( $this->any() )
+			->method( 'get_group_settings' )
+			->will( $this->returnValue( WC_Helper_Settings::register_test_settings( array() ) ) );
+
+		$controller
+			->expects( $this->any() )
+			->method( 'is_setting_type_valid' )
+			->will( $this->returnValue( false ) );
+
+		$result = $controller->get_setting( 'test', 'woocommerce_enable_lightbox' );
+
+		$this->assertIsWPError( $result );
+	}
 
 	/**
 	 * Test updating a single setting without valid user permissions.
@@ -402,6 +458,22 @@ class Settings extends WC_Unit_Test_Case {
 		) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test updating a bad setting ID.
+	 * @since 2.7.0
+	 * @covers WC_Rest_Settings_Controller::update_item
+	 */
+	public function test_update_setting_bad_setting_id() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/settings/test/invalid' );
+		$request->set_body_params( array(
+			'value' => 'test',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
