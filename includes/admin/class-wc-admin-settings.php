@@ -662,10 +662,14 @@ class WC_Admin_Settings {
 	 * Loops though the woocommerce options array and outputs each field.
 	 *
 	 * @param array $options Options array to output
+	 * @param array $data Optional. Data to use for saving. Defaults to $_POST.
 	 * @return bool
 	 */
-	public static function save_fields( $options ) {
-		if ( empty( $_POST ) ) {
+	public static function save_fields( $options, $data = null ) {
+		if ( is_null( $data ) ) {
+			$data = $_POST;
+		}
+		if ( empty( $data ) ) {
 			return false;
 		}
 
@@ -683,17 +687,17 @@ class WC_Admin_Settings {
 				parse_str( $option['id'], $option_name_array );
 				$option_name  = current( array_keys( $option_name_array ) );
 				$setting_name = key( $option_name_array[ $option_name ] );
-				$raw_value    = isset( $_POST[ $option_name ][ $setting_name ] ) ? wp_unslash( $_POST[ $option_name ][ $setting_name ] ) : null;
+				$raw_value    = isset( $data[ $option_name ][ $setting_name ] ) ? wp_unslash( $data[ $option_name ][ $setting_name ] ) : null;
 			} else {
 				$option_name  = $option['id'];
 				$setting_name = '';
-				$raw_value    = isset( $_POST[ $option['id'] ] ) ? wp_unslash( $_POST[ $option['id'] ] ) : null;
+				$raw_value    = isset( $data[ $option['id'] ] ) ? wp_unslash( $data[ $option['id'] ] ) : null;
 			}
 
 			// Format the value based on option type.
 			switch ( $option['type'] ) {
 				case 'checkbox' :
-					$value = is_null( $raw_value ) ? 'no' : 'yes';
+					$value = in_array( $raw_value, array( 'yes', 'no' ) ) ? $raw_value : 'no';
 					break;
 				case 'textarea' :
 					$value = wp_kses_post( trim( $raw_value ) );
