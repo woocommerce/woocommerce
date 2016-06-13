@@ -129,7 +129,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Map between taxonomy name and arg's key.
 		$taxonomies = array(
-			'product_type'           => 'type',
 			'product_cat'            => 'category',
 			'product_tag'            => 'tag',
 			'product_shipping_class' => 'shipping_class',
@@ -146,6 +145,17 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					'terms'    => $terms,
 				);
 			}
+		}
+
+		// Filter product type by slug.
+		if ( ! empty( $request['type'] ) ) {
+			$terms = explode( ',', $request['type'] );
+
+			$tax_query[] = array(
+				'taxonomy' => 'product_type',
+				'field'    => 'slug',
+				'terms'    => $terms,
+			);
 		}
 
 		// Filter by attribute and term.
