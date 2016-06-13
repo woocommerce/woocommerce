@@ -993,7 +993,7 @@ function wc_order_search( $term ) {
 	global $wpdb;
 
 	$term     = str_replace( 'Order #', '', wc_clean( $term ) );
-	$post_ids = false;
+	$post_ids = array();
 
 	// Search fields.
 	$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(

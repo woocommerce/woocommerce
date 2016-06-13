@@ -431,7 +431,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 		if ( ! empty( $args['s'] ) ) {
 			$order_ids = wc_order_search( $args['s'] );
 
-			if ( is_array( $order_ids ) ) {
+			if ( ! empty( $order_ids ) ) {
 				unset( $args['s'] );
 				$args['post__in'] =  array_merge( $order_ids, array( 0 ) );
 			}

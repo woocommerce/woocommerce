@@ -1516,7 +1516,7 @@ class WC_Admin_Post_Types {
 
 		$post_ids = wc_order_search( $_GET['s'] );
 
-		if ( is_array( $post_ids ) ) {
+		if ( ! empty( $post_ids ) ) {
 			// Remove "s" - we don't want to search order name.
 			unset( $wp->query_vars['s'] );
 
