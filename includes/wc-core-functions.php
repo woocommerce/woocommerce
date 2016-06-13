@@ -1249,19 +1249,18 @@ function wc_get_wildcard_postcodes( $postcode ) {
  * @since 2.6.0
  * @param string $postcode Postcode you want to match against stored postcodes
  * @param array $objects Array of postcode objects from Database
- * @param string $object_compare_key DB column name for the ID.
+ * @param string $object_id_key DB column name for the ID.
  * @param string $object_compare_key DB column name for the value.
- * @param string $object_id_key
- * @return array Array of matching object ID and values.
+ * @return array Array of matching object ID and matching values.
  */
 function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key ) {
 	$postcode           = wc_normalize_postcode( $postcode );
 	$wildcard_postcodes = array_map( 'wc_clean', wc_get_wildcard_postcodes( $postcode ) );
-	$postcodes          = array_map( 'wc_normalize_postcode', wp_list_pluck( $objects, $object_compare_key, $object_id_key ) );
 	$matches            = array();
 
-	foreach ( $postcodes as $object_id => $compare_against ) {
-		$compare = $postcode;
+	foreach ( $objects as $object ) {
+		$object_id       = $object->$object_id_key;
+		$compare_against = $object->$object_compare_key;
 
 		// Handle postcodes containing ranges.
 		if ( strstr( $compare_against, '...' ) ) {
@@ -1275,18 +1274,22 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 
 			// If the postcode is non-numeric, make it numeric.
 			if ( ! is_numeric( $min ) || ! is_numeric( $max ) ) {
-				$compare = wc_make_numeric_postcode( $compare );
+				$compare = wc_make_numeric_postcode( $postcode );
 				$min     = str_pad( wc_make_numeric_postcode( $min ), strlen( $compare ), '0' );
 				$max     = str_pad( wc_make_numeric_postcode( $max ), strlen( $compare ), '0' );
+			} else {
+				$compare = $postcode;
 			}
 
 			if ( $compare >= $min && $compare <= $max ) {
-				$matches[ $object_id ] = $compare_against;
+				$matches[ $object_id ]   = isset( $matches[ $object_id ] ) ? $matches[ $object_id ]: array();
+				$matches[ $object_id ][] = $compare_against;
 			}
 
 		// Wildcard and standard comparison.
 		} elseif ( in_array( $compare_against, $wildcard_postcodes ) ) {
-			$matches[ $object_id ] = $compare_against;
+			$matches[ $object_id ]   = isset( $matches[ $object_id ] ) ? $matches[ $object_id ]: array();
+			$matches[ $object_id ][] = $compare_against;
 		}
 	}
 

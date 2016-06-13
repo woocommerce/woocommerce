@@ -348,13 +348,16 @@ class WC_API_Products extends WC_API_Resource {
 
 			$variation = $product->get_child( $child_id );
 
-			if ( ! $variation->exists() )
+			if ( ! $variation->exists() ) {
 				continue;
+			}
+
+			$post_data = get_post( $variation->get_variation_id() );
 
 			$variations[] = array(
 				'id'                => $variation->get_variation_id(),
-				'created_at'        => $this->server->format_datetime( $variation->get_post_data()->post_date_gmt ),
-				'updated_at'        => $this->server->format_datetime( $variation->get_post_data()->post_modified_gmt ),
+				'created_at'        => $this->server->format_datetime( $post_data->post_date_gmt ),
+				'updated_at'        => $this->server->format_datetime( $post_data->post_modified_gmt ),
 				'downloadable'      => $variation->is_downloadable(),
 				'virtual'           => $variation->is_virtual(),
 				'permalink'         => $variation->get_permalink(),

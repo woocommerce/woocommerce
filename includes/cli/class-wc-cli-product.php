@@ -2057,10 +2057,10 @@ class WC_CLI_Product extends WC_CLI_Command {
 	}
 
 	/**
-	 * Get product image as attachment
+	 * Sets product image as attachment and returns the attachment ID.
 	 *
 	 * @since  2.5.0
-	 * @param  int $upload
+	 * @param  array $upload
 	 * @param  int $id
 	 * @return int
 	 */

@@ -30,7 +30,6 @@ class WC_Admin_Notices {
 	private static $core_notices = array(
 		'install'             => 'install_notice',
 		'update'              => 'update_notice',
-		'updating'            => 'updating_notice',
 		'template_files'      => 'template_file_check_notice',
 		'theme_support'       => 'theme_check_notice',
 		'legacy_shipping'     => 'legacy_shipping_notice',
@@ -190,15 +189,13 @@ class WC_Admin_Notices {
 	 * If we need to update, include a message with the update button.
 	 */
 	public static function update_notice() {
-		include( 'views/html-notice-update.php' );
-	}
-
-	/**
-	 * If we are updating, show progress.
-	 */
-	public static function updating_notice() {
 		if ( version_compare( get_option( 'woocommerce_db_version' ), WC_VERSION, '<' ) ) {
-			include( 'views/html-notice-updating.php' );
+			$updater = new WC_Background_Updater();
+			if ( ! $updater->is_updating() ) {
+				include( 'views/html-notice-update.php' );
+			} else {
+				include( 'views/html-notice-updating.php' );
+			}
 		} else {
 			include( 'views/html-notice-updated.php' );
 		}

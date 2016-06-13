@@ -1,25 +1,54 @@
 <?php
+/**
+ * WP Async Request
+ *
+ * @package WP-Background-Processing
+ */
 
 if ( ! class_exists( 'WP_Async_Request' ) ) {
+
+	/**
+	 * Abstract WP_Async_Request class.
+	 *
+	 * @abstract
+	 */
 	abstract class WP_Async_Request {
 
 		/**
+		 * Prefix
+		 *
+		 * (default value: 'wp')
+		 *
 		 * @var string
+		 * @access protected
 		 */
 		protected $prefix = 'wp';
 
 		/**
+		 * Action
+		 *
+		 * (default value: 'async_request')
+		 *
 		 * @var string
+		 * @access protected
 		 */
 		protected $action = 'async_request';
 
 		/**
-		 * @var string
+		 * Identifier
+		 *
+		 * @var mixed
+		 * @access protected
 		 */
 		protected $identifier;
 
 		/**
+		 * Data
+		 *
+		 * (default value: array())
+		 *
 		 * @var array
+		 * @access protected
 		 */
 		protected $data = array();
 
@@ -36,7 +65,7 @@ if ( ! class_exists( 'WP_Async_Request' ) ) {
 		/**
 		 * Set data used during the request
 		 *
-		 * @param array $data
+		 * @param array $data Data.
 		 *
 		 * @return $this
 		 */
