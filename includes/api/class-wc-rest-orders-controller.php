@@ -412,6 +412,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			);
 		}
 
+		// Search by product.
 		if ( ! empty( $request['product'] ) ) {
 			$order_ids = $wpdb->get_col( $wpdb->prepare( "
 				SELECT order_id
@@ -424,6 +425,16 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			$order_ids = ! empty( $order_ids ) ? $order_ids : array( 0 );
 
 			$args['post__in'] = $order_ids;
+		}
+
+		// Search.
+		if ( ! empty( $args['s'] ) ) {
+			$order_ids = wc_order_search( $args['s'] );
+
+			if ( is_array( $order_ids ) ) {
+				unset( $args['s'] );
+				$args['post__in'] =  array_merge( $order_ids, array( 0 ) );
+			}
 		}
 
 		return $args;
