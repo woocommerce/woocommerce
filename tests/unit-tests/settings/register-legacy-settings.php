@@ -18,7 +18,19 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		$this->page = new WC_Settings_General(); 
+		$mock_page = $this->getMock( 'WC_Settings_General' );
+
+		$mock_page
+			->expects( $this->any() )
+			->method( 'get_id' )
+			->will( $this->returnValue( 'page-id' ) );
+
+		$mock_page
+			->expects( $this->any() )
+			->method( 'get_label' )
+			->will( $this->returnValue( 'Page Label' ) );
+
+		$this->page = $mock_page;
 	}
 
 	/**
@@ -144,4 +156,75 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected, $actual );
 	}
 
+	/**
+	 * @covers WC_Register_Legacy_Settings::register_legacy_settings
+	 */
+	public function test_register_legacy_settings_one_section() {
+		$this->page
+			->expects( $this->any() )
+			->method( 'get_sections' )
+			->will( $this->returnValue( array() ) );
+
+		$this->page
+			->expects( $this->once() )
+			->method( 'get_settings' )
+			->with( $this->equalTo( 0 ) )
+			->will( $this->returnValue( array() ) );
+
+		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
+
+		$expected = array();
+		$actual   = $legacy_settings->register_legacy_settings( array() );
+
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @covers WC_Register_Legacy_Settings::register_legacy_settings
+	 */
+	public function test_register_legacy_settings() {
+		$this->page
+			->expects( $this->any() )
+			->method( 'get_sections' )
+			->will( $this->returnValue( array() ) );
+
+		$settings = array(
+			array(
+				'id'   => 'setting-1',
+				'type' => 'text',
+			),
+			array(
+				'type' => 'no-id',
+			),
+			array(
+				'id'   => 'setting-2',
+				'type' => 'textarea',
+			),
+		);
+
+		$this->page
+			->expects( $this->any() )
+			->method( 'get_settings' )
+			->will( $this->returnValue( $settings ) );
+
+		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
+
+		$expected = array(
+			array(
+				'id'          => 'setting-1',
+				'type'        => 'text',
+				'label'       => '',
+				'description' => '',
+			),
+			array(
+				'id'          => 'setting-2',
+				'type'        => 'textarea',
+				'label'       => '',
+				'description' => '',
+			),
+		);
+		$actual   = $legacy_settings->register_legacy_settings( array() );
+
+		$this->assertEquals( $expected, $actual );
+	}
 }
