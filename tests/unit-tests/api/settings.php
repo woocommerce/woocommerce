@@ -405,52 +405,6 @@ class Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Makes sure our sanitize function runs correctly for different types.
-	 * @since 2.7.0
-	 */
-	public function test_sanitize_setting() {
-		$endpoint = new WC_Rest_Settings_Controller;
-
-		// checkbox
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'checkbox', 'default' => 'yes' ), 'no' );
-		$this->assertEquals( 'no', $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'checkbox', 'default' => 'yes' ), 'yes' );
-		$this->assertEquals( 'yes', $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'checkbox', 'default' => 'yes' ), 'invalid' );
-		$this->assertEquals( 'yes', $value );
-
-		// email
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'email' ), 'test@woo.local' );
-		$this->assertEquals( 'test@woo.local', $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'email' ), '     admin@woo.local!     ' );
-		$this->assertEquals( 'admin@woo.local', $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'email' ), 'blah' );
-		$this->assertEquals( '', $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'email', 'default' => 'woo@woo.local' ), 'blah' );
-		$this->assertEquals( 'woo@woo.local', $value );
-
-		// textarea
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'textarea' ), ' <strong>blah</strong>' );
-		$this->assertEquals( '<strong>blah</strong>', $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'textarea' ), '<script></script><strong>blah</strong>' );
-		$this->assertEquals( '<strong>blah</strong>', $value );
-
-		// multiselect / multiselect countries
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'multiselect' ), array( 'test', '<test ' ) );
-		$this->assertEquals( array( 'test', '&lt;test' ), $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'multi_select_countries' ), array( 'test', '<test ' ) );
-		$this->assertEquals( array( 'test', '&lt;test' ), $value );
-
-		// image_width
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'image_width' ), array( 'width' => ' 100%', 'height' => '25px ' ) );
-		$this->assertEquals( array( 'width' => '100%', 'height' => '25px', 'crop' => 0 ), $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'image_width' ), array( 'width' => '100%', 'height' => '25px', 'crop' => 'something' ) );
-		$this->assertEquals( array( 'width' => '100%', 'height' => '25px', 'crop' => 1 ), $value );
-		$value = $endpoint->sanitize_setting_value( array( 'id' => 'test', 'type' => 'image_width', 'default' => array( 'width' => '50px', 'height' => '50px', 'crop' => true ) ), array() );
-		$this->assertEquals( array( 'width' => '50px', 'height' => '50px', 'crop' => 1 ), $value );
-	}
-
-	/**
 	* Tests our classic setting registration to make sure settings added for WP-Admin are available over the API.
 	* @since  2.7.0
 	*/
