@@ -56,32 +56,48 @@ class WC_Register_Legacy_Settings {
 		foreach ( $legacy_sections as $legacy_section => $legacy_section_label ) {
 			$legacy_settings = $this->page->get_settings( $legacy_section );
 			foreach ( $legacy_settings as $legacy_setting ) {
-				if ( ! isset( $legacy_setting['id'] ) ) {
-					continue;
+				$new_setting = $this->new_setting_from_legacy( $legacy_setting );
+				if ( $new_setting ) {
+					$settings[] = $new_setting;
 				}
-				$new_setting = array(
-					'id'          => $legacy_setting['id'],
-					'label'       => ( ! empty( $legacy_setting['title'] ) ? $legacy_setting['title'] : '' ),
-					'description' => ( ! empty( $legacy_setting['desc'] ) ? $legacy_setting['desc'] : '' ),
-					'type'        => $legacy_setting['type'],
-				);
-				if ( isset( $legacy_setting['default'] ) ) {
-					$new_setting['default'] = $legacy_setting['default'];
-				}
-				if ( isset( $legacy_setting['options'] ) ) {
-					$new_setting['options'] = $legacy_setting['options'];
-				}
-				if ( isset( $legacy_setting['desc_tip'] ) ) {
-					if ( true === $legacy_setting['desc_tip'] ) {
-						$new_setting['tip'] = $legacy_setting['desc'];
-					} else if ( ! empty( $legacy_setting['desc_tip'] ) ) {
-						$new_setting['tip'] = $legacy_setting['desc_tip'];
-					}
-				}
-				$settings[] = $new_setting;
 			}
 		}
 		return $settings;
+	}
+
+	/**
+	 * Convert a "legacy" setting (WC_Settings_Page::get_settings()) into the format expected
+	 * for the REST API Settings Controller
+	 *
+	 * @param $legacy_setting Settings array, as produced by a subclass of WC_Settings_Page.
+	 *
+	 * @return array|bool Boolean false if legacy setting has no ID, Array of converted new setting otherwise.
+	 */
+	public function new_setting_from_legacy( $legacy_setting ) {
+		if ( ! isset( $legacy_setting['id'] ) ) {
+			return false;
+		}
+		$new_setting = array(
+			'id'          => $legacy_setting['id'],
+			'label'       => ( ! empty( $legacy_setting['title'] ) ? $legacy_setting['title'] : '' ),
+			'description' => ( ! empty( $legacy_setting['desc'] ) ? $legacy_setting['desc'] : '' ),
+			'type'        => $legacy_setting['type'],
+		);
+		if ( isset( $legacy_setting['default'] ) ) {
+			$new_setting['default'] = $legacy_setting['default'];
+		}
+		if ( isset( $legacy_setting['options'] ) ) {
+			$new_setting['options'] = $legacy_setting['options'];
+		}
+		if ( isset( $legacy_setting['desc_tip'] ) ) {
+			if ( true === $legacy_setting['desc_tip'] ) {
+				$new_setting['tip'] = $legacy_setting['desc'];
+			} else if ( ! empty( $legacy_setting['desc_tip'] ) ) {
+				$new_setting['tip'] = $legacy_setting['desc_tip'];
+			}
+		}
+
+		return $new_setting;
 	}
 }
 

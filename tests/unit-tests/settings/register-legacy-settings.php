@@ -54,4 +54,94 @@ class WC_Tests_Register_Legacy_Settings extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected, $actual );
 	}
 
+	public function new_setting_from_legacy_provider() {
+		return array(
+			// No "id" case
+			array(
+				array(
+					'type' => 'some-type-with-no-id',
+				),
+				false,
+			),
+			// All optional properties except 'desc_tip'
+			array(
+				array(
+					'id'      => 'setting-id',
+					'type'    => 'select',
+					'title'   => 'Setting Name',
+					'desc'    => 'Setting Description',
+					'default' => 'one',
+					'options' => array( 'one', 'two' ),
+				),
+				array(
+					'id'          => 'setting-id',
+					'type'        => 'select',
+					'label'       => 'Setting Name',
+					'description' => 'Setting Description',
+					'default'     => 'one',
+					'options'     => array( 'one', 'two' ),
+				),
+			),
+			// Boolean 'desc_tip' defaulting to 'desc' value
+			array(
+				array(
+					'id'       => 'setting-id',
+					'type'     => 'select',
+					'title'    => 'Setting Name',
+					'desc'     => 'Setting Description',
+					'desc_tip' => true,
+				),
+				array(
+					'id'          => 'setting-id',
+					'type'        => 'select',
+					'label'       => 'Setting Name',
+					'description' => 'Setting Description',
+					'tip'         => 'Setting Description',
+				),
+			),
+			// String 'desc_tip'
+			array(
+				array(
+					'id'       => 'setting-id',
+					'type'     => 'select',
+					'title'    => 'Setting Name',
+					'desc'     => 'Setting Description',
+					'desc_tip' => 'Setting Tip',
+				),
+				array(
+					'id'          => 'setting-id',
+					'type'        => 'select',
+					'label'       => 'Setting Name',
+					'description' => 'Setting Description',
+					'tip'         => 'Setting Tip',
+				),
+			),
+			// Empty 'title' and 'desc'
+			array(
+				array(
+					'id'       => 'setting-id',
+					'type'     => 'select',
+				),
+				array(
+					'id'          => 'setting-id',
+					'type'        => 'select',
+					'label'       => '',
+					'description' => '',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider new_setting_from_legacy_provider
+	 * @covers WC_Register_Legacy_Settings::new_setting_from_legacy
+	 */
+	public function test_new_setting_from_legacy( $input, $expected ) {
+		$legacy_settings = new WC_Register_Legacy_Settings( $this->page );
+
+		$actual = $legacy_settings->new_setting_from_legacy( $input );
+
+		$this->assertEquals( $expected, $actual );
+	}
+
 }
