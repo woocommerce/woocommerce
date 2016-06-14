@@ -114,8 +114,6 @@ class WC_REST_Authentication {
 		// Get user data.
 		$user = $this->get_user_data_by_consumer_key( $consumer_key );
 		if ( empty( $user ) ) {
-			$wc_rest_authentication_error = new WP_Error( 'woocommerce_rest_authentication_error', __( 'Consumer Key is invalid.', 'woocommerce' ), array( 'status' => 401 ) );
-
 			return false;
 		}
 
