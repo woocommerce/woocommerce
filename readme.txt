@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Missing localized format for line taxes in orders screen.
 * Fix - Hour and time fields pattern on the orders screen.
 * Fix - PayPal does not allow free products, but paid shipping. Workaround by sending shipping as a line item if it is the only cost.
+* Tweak - Hide 'payment methods' screen if no methods support it.
 
 = 2.6.0 - 14/06/16 =
 * Feature - Introduced Shipping Zone functionality, and re-usable instance based shipping methods.
