@@ -48,6 +48,35 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+	}
+
+	/**
+	 * Get a single Shipping Zone.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public function get_item( $request ) {
+		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $request['id'] );
+
+		if ( false === $zone ) {
+			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$data = $zone->get_data();
+		$data = $this->prepare_item_for_response( $data, $request );
+		$data = $this->prepare_response_for_collection( $data );
+
+		return rest_ensure_response( $data );
 	}
 
 	/**
