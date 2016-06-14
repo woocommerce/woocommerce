@@ -69,4 +69,71 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '/wc/v1/shipping/zones', $routes );
 		$this->assertArrayHasKey( '/wc/v1/shipping/zones/(?P<id>[\d-]+)', $routes );
 	}
+
+	/**
+	 * Test getting all Shipping Zones.
+	 * @since 2.7.0
+	 */
+	public function test_get_zones() {
+		wp_set_current_user( $this->user );
+
+		// No zones by default
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones' ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $data ), 0 );
+
+		// Create a zone and make sure it's in the response
+		$this->create_shipping_zone( 'Zone 1' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones' ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $data ), 1 );
+		$this->assertEquals( array(
+			'id'     => 1,
+			'name'   => 'Zone 1',
+			'order'  => 0,
+			'_links' => array(
+				'self'       => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/1' ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones' ),
+					),
+				),
+			),
+		), $data[0] );
+	}
+
+	/**
+	 * Test /shipping/zones without valid permissions/creds.
+	 * @since 2.7.0
+	 */
+	public function test_get_shipping_zones_without_permission() {
+		wp_set_current_user( 0 );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones' ) );
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test /shipping/zones while Shipping is disabled in WooCommerce.
+	 * @since 2.7.0
+	 */
+	public function test_get_shipping_zones_disabled_shipping() {
+		wp_set_current_user( $this->user );
+
+		add_filter( 'wc_shipping_enabled', '__return_false' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones' ) );
+		$this->assertEquals( 404, $response->get_status() );
+
+		remove_filter( 'wc_shipping_enabled', '__return_false' );
+	}
 }
