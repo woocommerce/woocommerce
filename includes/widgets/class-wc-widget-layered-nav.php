@@ -267,6 +267,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$link = home_url();
 		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id('shop') ) ) {
 			$link = get_post_type_archive_link( 'product' );
+		} elseif( is_product_category() ) {
+			$link = get_term_link( get_query_var('product_cat'), 'product_cat' );
+		} elseif( is_product_tag() ) {
+			$link = get_term_link( get_query_var('product_tag'), 'product_tag' );
 		} else {
 			$link = get_term_link( get_query_var('term'), get_query_var('taxonomy') );
 		}
