@@ -171,7 +171,9 @@ class WC_Gateway_Paypal_Request {
 			}
 
 			// Add shipping costs. Paypal ignores anything over 5 digits (999.99 is the max).
-			if ( $order->get_total_shipping() > 0 && $order->get_total_shipping() < 999.99 ) {
+			// We also check that shipping is not the **only** cost as PayPal won't allow payment
+			// if the items have no cost.
+			if ( $order->get_total_shipping() > 0 && $order->get_total_shipping() < 999.99 && $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) !== $this->number_format( $order->get_total(), $order ) ) {
 				$line_item_args['shipping_1'] = $this->number_format( $order->get_total_shipping(), $order );
 			} elseif ( $order->get_total_shipping() > 0 ) {
 				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->number_format( $order->get_total_shipping(), $order ) );
@@ -193,7 +195,9 @@ class WC_Gateway_Paypal_Request {
 			$this->add_line_item( $all_items_name ? $all_items_name : __( 'Order', 'woocommerce' ), 1, $this->number_format( $order->get_total() - $this->round( $order->get_total_shipping() + $order->get_shipping_tax(), $order ), $order ), $order->get_order_number() );
 
 			// Add shipping costs. Paypal ignores anything over 5 digits (999.99 is the max).
-			if ( $order->get_total_shipping() > 0 && $order->get_total_shipping() < 999.99 ) {
+			// We also check that shipping is not the **only** cost as PayPal won't allow payment
+			// if the items have no cost.
+			if ( $order->get_total_shipping() > 0 && $order->get_total_shipping() < 999.99 && $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) !== $this->number_format( $order->get_total(), $order ) ) {
 				$line_item_args['shipping_1'] = $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order );
 			} elseif ( $order->get_total_shipping() > 0 ) {
 				$this->add_line_item( sprintf( __( 'Shipping via %s', 'woocommerce' ), $order->get_shipping_method() ), 1, $this->number_format( $order->get_total_shipping() + $order->get_shipping_tax(), $order ) );
