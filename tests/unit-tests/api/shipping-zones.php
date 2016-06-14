@@ -154,4 +154,39 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'order', $properties );
 		$this->assertFalse( $properties['order']['required'] );
 	}
+
+	/**
+	 * Test Shipping Zone create endpoint.
+	 * @since 2.7.0
+	 */
+	public function test_create_shipping_zone() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v1/shipping/zones' );
+		$request->set_body_params( array(
+			'name'  => 'Test Zone',
+			'order' => 1,
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array(
+			'id'     => $data['id'],
+			'name'   => 'Test Zone',
+			'order'  => 1,
+			'_links' => array(
+				'self'       => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $data['id'] ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones' ),
+					),
+				),
+			),
+		), $data );
+	}
 }
