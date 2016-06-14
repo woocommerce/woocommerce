@@ -2483,7 +2483,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						),
 					),
 				),
-				'grouped_products_ids' => array(
+				'grouped_products' => array(
 					'description' => __( 'List of grouped products ID.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),

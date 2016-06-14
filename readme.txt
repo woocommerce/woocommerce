@@ -160,6 +160,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 = 2.6.1 =
 * Dev - Restored missing WC_Settings_API::init_form_fields() method.
+* Dev - Fixed returned data from products images, changed `title` to `name`.
+* Dev - Fixed products schema for `grouped_products`.
 * Fix - Missing localized format for line taxes in orders screen.
 * Fix - Hour and time fields pattern on the orders screen.
 * Fix - PayPal does not allow free products, but paid shipping. Workaround by sending shipping as a line item if it is the only cost.
