@@ -51,6 +51,71 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Get all Shipping Zones.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		$zones = WC_Shipping_Zones::get_zones();
+		$data  = array();
+
+		foreach ( $zones as $zone_obj ) {
+			$zone   = $this->prepare_item_for_response( $zone_obj, $request );
+			$zone   = $this->prepare_response_for_collection( $zone );
+			$data[] = $zone;
+		}
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Prepare the Shipping Zone for the REST response.
+	 *
+	 * @param array $item Shipping Zone.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response $response
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$data = array(
+			'id'    => $item['zone_id'],
+			'name'  => $item['zone_name'],
+			'order' => $item['zone_order'],
+		);
+
+		$context = empty( $request['context'] ) ? 'view' : $request['context'];
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $data['id'] ) );
+
+		return $response;
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param int $zone_id Given Shipping Zone ID.
+	 * @return array Links for the given Shipping Zone.
+	 */
+	protected function prepare_links( $zone_id ) {
+		$base  = '/' . $this->namespace . '/' . $this->rest_base;
+		$links = array(
+			'self'       => array(
+				'href' => rest_url( trailingslashit( $base ) . $zone_id ),
+			),
+			'collection' => array(
+				'href' => rest_url( $base ),
+			),
+		);
+
+		return $links;
+	}
+
+	/**
 	 * Check whether a given request has permission to read Shipping Zones.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
