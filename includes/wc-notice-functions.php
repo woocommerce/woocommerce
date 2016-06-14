@@ -91,6 +91,19 @@ function wc_add_notice( $message, $notice_type = 'success' ) {
 }
 
 /**
+ * Set all notices at once.
+ * @since 2.6.0
+ */
+function wc_set_notices( $notices ) {
+	if ( ! did_action( 'woocommerce_init' ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.6' );
+		return;
+	}
+	WC()->session->set( 'wc_notices', $notices );
+}
+
+
+/**
  * Unset all notices.
  *
  * @since 2.1
@@ -163,10 +176,10 @@ function wc_get_notices( $notice_type = '' ) {
 
 	$all_notices = WC()->session->get( 'wc_notices', array() );
 
-	if ( empty ( $notice_type ) ) {
+	if ( empty( $notice_type ) ) {
 		$notices = $all_notices;
-	} elseif ( isset( $all_notices[$notice_type] ) ) {
-		$notices = $all_notices[$notice_type];
+	} elseif ( isset( $all_notices[ $notice_type ] ) ) {
+		$notices = $all_notices[ $notice_type ];
 	} else {
 		$notices = array();
 	}
