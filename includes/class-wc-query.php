@@ -631,6 +631,22 @@ class WC_Query {
 			);
 		}
 
+		if ( ! empty( $args['product_cat'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'product_cat',
+				'terms'    => array( $args['product_cat'] ),
+				'field'    => 'slug',
+			);
+		}
+
+		if ( ! empty( $args['product_tag'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'product_tag',
+				'terms'    => array( $args['product_tag'] ),
+				'field'    => 'slug',
+			);
+		}
+
 		return $tax_query;
 	}
 
