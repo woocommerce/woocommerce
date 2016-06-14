@@ -46,6 +46,12 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 
@@ -118,6 +124,29 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 		}
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Create a single Shipping Zone.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function create_item( $request ) {
+		$zone = new WC_Shipping_Zone( null );
+
+		if ( ! is_null( $request->get_param( 'name' ) ) ) {
+			$zone->set_zone_name( $request->get_param( 'name' ) );
+		}
+
+		if ( ! is_null( $request->get_param( 'order' ) ) ) {
+			$zone->set_zone_order( $request->get_param( 'order' ) );
+		}
+
+		$zone->create();
+		$request->set_param( 'id', $zone->get_id() );
+
+		return $this->get_item( $request );
 	}
 
 	/**
