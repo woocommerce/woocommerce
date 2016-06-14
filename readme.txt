@@ -159,6 +159,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 == Changelog ==
 
 = 2.6.1 =
+* Fix - Missing localized format for line taxes in orders screen.
+* Fix - Hour and time fields pattern on the orders screen.
 * Fix - PayPal does not allow free products, but paid shipping. Workaround by sending shipping as a line item if it is the only cost.
 
 = 2.6.0 - 14/06/16 =
