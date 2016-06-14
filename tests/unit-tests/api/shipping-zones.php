@@ -189,4 +189,58 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 			),
 		), $data );
 	}
+
+	/**
+	 * Test Shipping Zone update endpoint.
+	 * @since 2.7.0
+	 */
+	public function test_update_shipping_zone() {
+		wp_set_current_user( $this->user );
+
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/shipping/zones/' . $zone->get_id() );
+		$request->set_body_params( array(
+			'name'  => 'Zone Test',
+			'order' => 2,
+		) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array(
+			'id'     => $zone->get_id(),
+			'name'   => 'Zone Test',
+			'order'  => 2,
+			'_links' => array(
+				'self'       => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones' ),
+					),
+				),
+			),
+		), $data );
+	}
+
+	/**
+	 * Test Shipping Zone update endpoint with a bad zone ID.
+	 * @since 2.7.0
+	 */
+	public function test_update_shipping_zone_invalid_id() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/shipping/zones/1' );
+		$request->set_body_params( array(
+			'name'  => 'Zone Test',
+			'order' => 2,
+		) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
 }
