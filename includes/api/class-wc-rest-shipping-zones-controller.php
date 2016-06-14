@@ -55,6 +55,12 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 				'callback'            => array( $this, 'get_item' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_item' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 	}
@@ -112,6 +118,38 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 		}
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Update a single Shipping Zone.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function update_item( $request ) {
+		$zone = $this->get_zone( $request->get_param( 'id' ) );
+
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$zone_changed = false;
+
+		if ( ! is_null( $request->get_param( 'name' ) ) ) {
+			$zone->set_zone_name( $request->get_param( 'name' ) );
+			$zone_changed = true;
+		}
+
+		if ( ! is_null( $request->get_param( 'order' ) ) ) {
+			$zone->set_zone_order( $request->get_param( 'order' ) );
+			$zone_changed = true;
+		}
+
+		if ( $zone_changed ) {
+			$zone->save();
+		}
+
+		return $this->get_item( $request );
 	}
 
 	/**
