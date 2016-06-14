@@ -26,7 +26,6 @@ class WC_Admin_API_Keys {
 
 	/**
 	 * Check if is API Keys settings page.
-	 *
 	 * @return bool
 	 */
 	private function is_api_keys_settings_page() {
@@ -35,7 +34,7 @@ class WC_Admin_API_Keys {
 			&& isset( $_GET['tab'] )
 			&& 'api' == $_GET['tab']
 			&& isset( $_GET['section'] )
-			&& 'keys' == isset( $_GET['section'] );
+			&& 'keys' == $_GET['section'];
 	}
 
 	/**
