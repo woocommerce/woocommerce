@@ -216,7 +216,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$found = false;
 
 		if ( $taxonomy !== $this->get_current_taxonomy() ) {
-			$term_counts          = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
+			// When getting counts, use 'or' to exclude self. We don't need 'and' because dropdown fields can only choose 1 option anyway.
+			$term_counts          = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, 'or' );
 			$_chosen_attributes   = WC_Query::get_layered_nav_chosen_attributes();
 			$taxonomy_filter_name = str_replace( 'pa_', '', $taxonomy );
 
