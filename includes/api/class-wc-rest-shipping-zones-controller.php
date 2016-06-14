@@ -60,16 +60,32 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Retrieve a Shipping Zone by it's ID.
+	 *
+	 * @param int $zone_id Shipping Zone ID.
+	 * @return WC_Shipping_Zone|WP_Error
+	 */
+	protected function get_zone( $zone_id ) {
+		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+
+		if ( false === $zone ) {
+			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		return $zone;
+	}
+
+	/**
 	 * Get a single Shipping Zone.
 	 *
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $request['id'] );
+		$zone = $this->get_zone( $request->get_param( 'id' ) );
 
-		if ( false === $zone ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
 		}
 
 		$data = $zone->get_data();
