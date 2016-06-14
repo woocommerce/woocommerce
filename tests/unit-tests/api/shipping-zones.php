@@ -136,4 +136,22 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 
 		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
+
+	/**
+	 * Test Shipping Zone schema.
+	 * @since 2.7.0
+	 */
+	public function test_get_shipping_zone_schema() {
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v1/shipping/zones' );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+		$properties = $data['schema']['properties'];
+		$this->assertEquals( 3, count( $properties ) );
+		$this->assertArrayHasKey( 'id', $properties );
+		$this->assertTrue( $properties['id']['readonly'] );
+		$this->assertArrayHasKey( 'name', $properties );
+		$this->assertTrue( $properties['name']['required'] );
+		$this->assertArrayHasKey( 'order', $properties );
+		$this->assertFalse( $properties['order']['required'] );
+	}
 }
