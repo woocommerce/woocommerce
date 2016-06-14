@@ -123,9 +123,9 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data = array(
-			'id'    => $item['zone_id'],
+			'id'    => (int) $item['zone_id'],
 			'name'  => $item['zone_name'],
-			'order' => $item['zone_order'],
+			'order' => (int) $item['zone_order'],
 		);
 
 		$context = empty( $request['context'] ) ? 'view' : $request['context'];
