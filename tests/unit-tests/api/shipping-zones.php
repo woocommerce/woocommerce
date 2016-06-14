@@ -243,4 +243,47 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 404, $response->get_status() );
 	}
+
+	/**
+	 * Test getting a single Shipping Zone.
+	 * @since 2.7.0
+	 */
+	public function test_get_single_shipping_zone() {
+		wp_set_current_user( $this->user );
+
+		$zone     = $this->create_shipping_zone( 'Test Zone' );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array(
+			'id'     => $zone->get_id(),
+			'name'   => 'Test Zone',
+			'order'  => 0,
+			'_links' => array(
+				'self'       => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones' ),
+					),
+				),
+			),
+		), $data );
+	}
+
+	/**
+	 * Test getting a single Shipping Zone with a bad zone ID.
+	 * @since 2.7.0
+	 */
+	public function test_get_single_shipping_zone_invalid_id() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/1' ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
 }
