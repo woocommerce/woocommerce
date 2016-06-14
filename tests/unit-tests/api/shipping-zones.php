@@ -43,6 +43,24 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Helper method to create a Shipping Zone.
+	 *
+	 * @param string $name Zone name.
+	 * @param int    $order Optional. Zone sort order.
+	 * @return WC_Shipping_Zone
+	 */
+	protected function create_shipping_zone( $name, $order = 0 ) {
+		$zone = new WC_Shipping_Zone( null );
+		$zone->set_zone_name( $name );
+		$zone->set_zone_order( $order );
+		$zone->save();
+
+		$this->zones[] = $zone;
+
+		return $zone;
+	}
+
+	/**
 	 * Test route registration.
 	 * @since 2.7.0
 	 */
