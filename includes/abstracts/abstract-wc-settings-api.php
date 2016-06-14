@@ -75,6 +75,17 @@ abstract class WC_Settings_API {
 	}
 
 	/**
+	 * Initialise settings form fields.
+	 *
+	 * Add an array of fields to be displayed
+	 * on the gateway's settings screen.
+	 *
+	 * @since  1.0.0
+	 * @return string
+	 */
+	public function init_form_fields() {}
+
+	/**
 	 * Return the name of the option in the WP DB.
 	 * @since 2.6.0
 	 * @return string
