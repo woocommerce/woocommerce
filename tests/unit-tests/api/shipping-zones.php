@@ -49,10 +49,11 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 	 * @param int    $order Optional. Zone sort order.
 	 * @return WC_Shipping_Zone
 	 */
-	protected function create_shipping_zone( $name, $order = 0 ) {
+	protected function create_shipping_zone( $name, $order = 0, $locations = array() ) {
 		$zone = new WC_Shipping_Zone( null );
 		$zone->set_zone_name( $name );
 		$zone->set_zone_order( $order );
+		$zone->set_locations( $locations );
 		$zone->save();
 
 		$this->zones[] = $zone;
@@ -68,6 +69,7 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v1/shipping/zones', $routes );
 		$this->assertArrayHasKey( '/wc/v1/shipping/zones/(?P<id>[\d-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v1/shipping/zones/(?P<id>[\d-]+)/locations', $routes );
 	}
 
 	/**
@@ -305,5 +307,45 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/1' ) );
 
 		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test getting Shipping Zone Locations.
+	 * @since 2.7.0
+	 */
+	public function test_get_locations() {
+		wp_set_current_user( $this->user );
+
+		// Create a zone
+		$zone = $this->create_shipping_zone( 'Zone 1', 0, array(
+			array(
+				'code' => 'US',
+				'type' => 'country',
+			),
+		) );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() . '/locations' ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $data ), 1 );
+		$this->assertEquals( array(
+			array(
+				'code'   => 'US',
+				'type'   => 'country',
+				'_links' => array(
+					'collection' => array(
+						array(
+							'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() . '/locations' ),
+						),
+					),
+					'describes' => array(
+						array(
+							'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() ),
+						),
+					),
+				),
+			),
+		), $data );
 	}
 }
