@@ -116,6 +116,10 @@ class WC_Install {
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
 		}
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) {
+			do_action( 'wp_wc_updater_cron' );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
+		}
 	}
 
 	/**

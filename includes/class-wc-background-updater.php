@@ -50,6 +50,27 @@ class WC_Background_Updater extends WP_Background_Process {
 	}
 
 	/**
+	 * Handle cron healthcheck
+	 *
+	 * Restart the background process if not already running
+	 * and data exists in the queue.
+	 */
+	public function handle_cron_healthcheck() {
+		if ( $this->is_process_running() ) {
+			// Background process already running.
+			return;
+		}
+
+		if ( $this->is_queue_empty() ) {
+			// No data to process.
+			$this->clear_scheduled_event();
+			return;
+		}
+
+		$this->handle();
+	}
+
+	/**
 	 * Schedule fallback event.
 	 */
 	protected function schedule_event() {
