@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
-class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Controller {
+class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_Controller_Base {
 
 	/**
 	 * Endpoint namespace.

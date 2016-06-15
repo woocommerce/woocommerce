@@ -20,21 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
-class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v1';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'shipping/zones';
+class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controller_Base {
 
 	/**
 	 * Register the routes for Shipping Zones.
@@ -44,12 +30,12 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
 			),
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -59,32 +45,16 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
 			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
-	}
-
-	/**
-	 * Retrieve a Shipping Zone by it's ID.
-	 *
-	 * @param int $zone_id Shipping Zone ID.
-	 * @return WC_Shipping_Zone|WP_Error
-	 */
-	protected function get_zone( $zone_id ) {
-		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
-
-		if ( false === $zone ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		return $zone;
 	}
 
 	/**
@@ -225,24 +195,6 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Controller {
 		);
 
 		return $links;
-	}
-
-	/**
-	 * Check whether a given request has permission to read Shipping Zones.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_shipping_enabled() ) {
-			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.' ), array( 'status' => 404 ) );
-		}
-
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 
 	/**
