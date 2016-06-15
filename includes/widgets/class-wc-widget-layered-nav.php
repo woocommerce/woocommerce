@@ -352,8 +352,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$tax_query      = new WP_Tax_Query( $tax_query );
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
-		$post_type      = !is_array( $wp_the_query->query_vars['post_type'] ) ? array( $wp_the_query->query_vars['post_type'] ) : $wp_the_query->query_vars['post_type'];
-		$where          = apply_filters('woocommerce_filtered_term_product_counts_where_clause', "WHERE {$wpdb->posts}.post_type IN ('" . implode("','", array_map( 'esc_sql', $post_type )) . "') AND {$wpdb->posts}.post_status = 'publish'");
+		$post_type      = is_array( $wp_the_query->query_vars['post_type'] ) ? $wp_the_query->query_vars['post_type'] : array( $wp_the_query->query_vars['post_type'] );
+        $where          = apply_filters( 'woocommerce_get_filtered_term_product_counts_query_where', "WHERE {$wpdb->posts}.post_type IN ('" . implode("','", array_map( 'esc_sql', $post_type )) . "') AND {$wpdb->posts}.post_status = 'publish'", $term_ids, $taxonomy, $query_type );
 
 		$sql  = "
 			SELECT COUNT( {$wpdb->posts}.ID ) as term_count, term_count_relationships.term_taxonomy_id as term_count_id FROM {$wpdb->posts}
