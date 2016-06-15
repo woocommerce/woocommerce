@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - API - Fixed returned data from product images (changed `title` to `name`).
 * Dev - API - Fixed products schema for `grouped_products`.
 * Tweak - Hide 'payment methods' screen if no methods support it.
+* Tweak - If shipping method count changes, reset to default.
 
 = 2.6.0 - 14/06/16 =
 * Feature - Introduced Shipping Zone functionality, and re-usable instance based shipping methods.
