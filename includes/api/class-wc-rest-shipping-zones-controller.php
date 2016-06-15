@@ -192,6 +192,9 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 			'collection' => array(
 				'href' => rest_url( $base ),
 			),
+			'describedby' => array(
+				'href' => rest_url( trailingslashit( $base ) . $zone_id . '/locations' ),
+			),
 		);
 
 		return $links;

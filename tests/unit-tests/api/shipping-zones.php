@@ -107,6 +107,11 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 						'href' => rest_url( '/wc/v1/shipping/zones' ),
 					),
 				),
+				'describedby' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/1/locations' ),
+					),
+				),
 			),
 		), $data[0] );
 	}
@@ -186,6 +191,11 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 						'href' => rest_url( '/wc/v1/shipping/zones' ),
 					),
 				),
+				'describedby' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $data['id'] . '/locations' ),
+					),
+				),
 			),
 		), $data );
 	}
@@ -221,6 +231,11 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 				'collection' => array(
 					array(
 						'href' => rest_url( '/wc/v1/shipping/zones' ),
+					),
+				),
+				'describedby' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() . '/locations' ),
 					),
 				),
 			),
@@ -269,6 +284,11 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 				'collection' => array(
 					array(
 						'href' => rest_url( '/wc/v1/shipping/zones' ),
+					),
+				),
+				'describedby' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() . '/locations' ),
 					),
 				),
 			),
