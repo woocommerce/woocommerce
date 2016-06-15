@@ -348,4 +348,16 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 			),
 		), $data );
 	}
+
+	/**
+	 * Test getting Shipping Zone Locations with a bad zone ID.
+	 * @since 2.7.0
+	 */
+	public function test_get_locations_invalid_id() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/1/locations' ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
 }
