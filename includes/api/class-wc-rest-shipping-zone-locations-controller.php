@@ -32,15 +32,21 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
 			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_items' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
 	}
 
 	/**
-	 * Get all Shipping Zones.
+	 * Get all Shipping Zone Locations.
 	 *
 	 * @param WP_REST_Request $request
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
 		$zone = $this->get_zone( $request['id'] );
@@ -59,6 +65,35 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 		}
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Update all Shipping Zone Locations.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_items( $request ) {
+		$zone = $this->get_zone( $request['id'] );
+
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$raw_locations = $request->get_json_params();
+		$locations     = array();
+
+		foreach ( $raw_locations as $raw_location ) {
+			if ( empty( $raw_location['code'] ) || empty( $raw_location['type'] ) ) {
+				continue;
+			}
+			$locations[] = $raw_location;
+		}
+
+		$zone->set_locations( $locations );
+		$zone->save();
+
+		return $this->get_items( $request );
 	}
 
 	/**
