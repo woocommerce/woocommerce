@@ -352,14 +352,14 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$tax_query      = new WP_Tax_Query( $tax_query );
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
-		$post_type      = (array)$wp_the_query->query_vars['post_type'];
-		$where          = "WHERE {$wpdb->posts}.post_type IN ('" . implode("','", $post_type) . "') AND {$wpdb->posts}.post_status = 'publish'";
+		$post_type      = !is_array( $wp_the_query->query_vars['post_type'] ) ? array( $wp_the_query->query_vars['post_type'] ) : $wp_the_query->query_vars['post_type'];
+		$where          = apply_filters('woocommerce_filtered_term_product_counts_where_clause', "WHERE {$wpdb->posts}.post_type IN ('" . implode("','", array_map( 'esc_sql', $post_type )) . "') AND {$wpdb->posts}.post_status = 'publish'");
 
 		$sql  = "
 			SELECT COUNT( {$wpdb->posts}.ID ) as term_count, term_count_relationships.term_taxonomy_id as term_count_id FROM {$wpdb->posts}
 			INNER JOIN {$wpdb->term_relationships} AS term_count_relationships ON ({$wpdb->posts}.ID = term_count_relationships.object_id)
 			" . $tax_query_sql['join'] . $meta_query_sql['join'] . "
-			" . apply_filters('woocommerce_filtered_term_product_counts_where_clause', $where ) . "
+			" . $where . "
 			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
 			AND term_count_relationships.term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
 			GROUP BY term_count_relationships.term_taxonomy_id;
