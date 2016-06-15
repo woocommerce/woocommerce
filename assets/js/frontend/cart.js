@@ -335,8 +335,6 @@ jQuery( function( $ ) {
 		 * @param {Object} evt The JQuery event
 		 */
 		cart_submit: function( evt ) {
-			evt.preventDefault();
-
 			var $form = $( evt.currentTarget );
 			var $submit = $( document.activeElement );
 			var $clicked = $( 'input[type=submit][clicked=true]' );
@@ -349,9 +347,11 @@ jQuery( function( $ ) {
 			}
 
 			if ( $clicked.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+				evt.preventDefault();
 				this.quantity_update( $form );
 
 			} else if ( $clicked.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+				evt.preventDefault();
 				this.apply_coupon( $form );
 			}
 		},
