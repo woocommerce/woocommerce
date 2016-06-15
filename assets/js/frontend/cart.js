@@ -169,7 +169,7 @@ jQuery( function( $ ) {
 		 * @param {Object} evt The JQuery event.
 		 */
 		shipping_method_selected: function( evt ) {
-			var target = evt.target;
+			var target = evt.currentTarget;
 
 			var shipping_methods = {};
 
@@ -207,7 +207,7 @@ jQuery( function( $ ) {
 		shipping_calculator_submit: function( evt ) {
 			evt.preventDefault();
 
-			var $form = $( evt.target );
+			var $form = $( evt.currentTarget );
 
 			block( $form );
 			block( $( 'div.cart_totals' ) );
@@ -335,9 +335,7 @@ jQuery( function( $ ) {
 		 * @param {Object} evt The JQuery event
 		 */
 		cart_submit: function( evt ) {
-			evt.preventDefault();
-
-			var $form = $( evt.target );
+			var $form = $( evt.currentTarget );
 			var $submit = $( document.activeElement );
 			var $clicked = $( 'input[type=submit][clicked=true]' );
 
@@ -349,9 +347,11 @@ jQuery( function( $ ) {
 			}
 
 			if ( $clicked.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+				evt.preventDefault();
 				this.quantity_update( $form );
 
 			} else if ( $clicked.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+				evt.preventDefault();
 				this.apply_coupon( $form );
 			}
 		},
@@ -409,8 +409,8 @@ jQuery( function( $ ) {
 			evt.preventDefault();
 
 			var cart = this;
-			var $tr = $( evt.target ).parents( 'tr' );
-			var coupon = $( evt.target ).attr( 'data-coupon' );
+			var $tr = $( evt.currentTarget ).parents( 'tr' );
+			var coupon = $( evt.currentTarget ).attr( 'data-coupon' );
 
 			block( $tr.parents( 'table' ) );
 
@@ -472,7 +472,7 @@ jQuery( function( $ ) {
 		item_remove_clicked: function( evt ) {
 			evt.preventDefault();
 
-			var $a = $( evt.target );
+			var $a = $( evt.currentTarget );
 			var $form = $a.parents( 'form' );
 
 			block( $form );
