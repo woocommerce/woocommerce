@@ -360,4 +360,83 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 404, $response->get_status() );
 	}
+
+	/**
+	 * Test Shipping Zone Locations update endpoint.
+	 * @since 2.7.0
+	 */
+	public function test_update_locations() {
+		wp_set_current_user( $this->user );
+
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/shipping/zones/' . $zone->get_id() . '/locations' );
+		$request->add_header( 'Content-Type', 'application/json' );
+		$request->set_body( json_encode( array(
+			array(
+				'code' => 'UK',
+				'type' => 'country',
+			),
+			array(
+				'code' => 'US', // test that locations missing "type" aren't saved
+			),
+			array(
+				'code' => 'SW1A0AA',
+				'type' => 'postcode',
+			),
+			array(
+				'type' => 'continent', // test that locations missing "code" aren't saved
+			),
+		) ) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( count( $data ), 2 );
+		$this->assertEquals( array(
+			array(
+				'code'   => 'UK',
+				'type'   => 'country',
+				'_links' => array(
+					'collection' => array(
+						array(
+							'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() . '/locations' ),
+						),
+					),
+					'describes' => array(
+						array(
+							'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() ),
+						),
+					),
+				),
+			),
+			array(
+				'code'   => 'SW1A0AA',
+				'type'   => 'postcode',
+				'_links' => array(
+					'collection' => array(
+						array(
+							'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() . '/locations' ),
+						),
+					),
+					'describes' => array(
+						array(
+							'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() ),
+						),
+					),
+				),
+			),
+		), $data );
+	}
+
+	/**
+	 * Test updating Shipping Zone Locations with a bad zone ID.
+	 * @since 2.7.0
+	 */
+	public function test_update_locations_invalid_id() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v1/shipping/zones/1/locations' ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
 }
