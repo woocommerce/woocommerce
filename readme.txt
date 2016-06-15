@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - Restored missing WC_Settings_API::init_form_fields() method to prevent potential errors in 3rd party gateways.
 * Dev - API - Fixed returned data from product images (changed `title` to `name`).
 * Dev - API - Fixed products schema for `grouped_products`.
+* Dev - API - Fixed products attribute options when contains `,`.
 * Tweak - Hide 'payment methods' screen if no methods support it.
 * Tweak - If shipping method count changes, reset to default.
 

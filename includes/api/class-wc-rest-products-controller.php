@@ -346,6 +346,23 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get attribute options.
+	 *
+	 * @param int $product_id
+	 * @param array $attribute
+	 * @return array
+	 */
+	protected function get_attribute_options( $product_id, $attribute ) {
+		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
+			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
+		} elseif ( isset( $attribute['value'] ) ) {
+			return array_map( 'trim', explode( '|', $attribute['value'] ) );
+		}
+
+		return array();
+	}
+
+	/**
 	 * Get the attributes for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product
@@ -376,15 +393,14 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			}
 		} else {
 			foreach ( $product->get_attributes() as $attribute ) {
-				// Taxonomy-based attributes are comma-separated, others are pipe (|) separated.
 				if ( $attribute['is_taxonomy'] ) {
 					$attributes[] = array(
-						'id'        => $attribute['is_taxonomy'] ? wc_attribute_taxonomy_id_by_name( $attribute['name'] ) : 0,
+						'id'        => wc_attribute_taxonomy_id_by_name( $attribute['name'] ),
 						'name'      => $this->get_attribute_taxonomy_label( $attribute['name'] ),
 						'position'  => (int) $attribute['position'],
 						'visible'   => (bool) $attribute['is_visible'],
 						'variation' => (bool) $attribute['is_variation'],
-						'options'   => array_map( 'trim', explode( ',', $product->get_attribute( $attribute['name'] ) ) ),
+						'options'   => $this->get_attribute_options( $product->id, $attribute ),
 					);
 				} else {
 					$attributes[] = array(
@@ -393,7 +409,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						'position'  => (int) $attribute['position'],
 						'visible'   => (bool) $attribute['is_visible'],
 						'variation' => (bool) $attribute['is_variation'],
-						'options'   => array_map( 'trim', explode( '|', $product->get_attribute( $attribute['name'] ) ) ),
+						'options'   => $this->get_attribute_options( $product->id, $attribute ),
 					);
 				}
 			}
