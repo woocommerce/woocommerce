@@ -141,12 +141,12 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		// Set up our temporary arguments to grab a product post.
 		$tmp_args = array(
-			'post_type' => 'products',
+			'post_type' => 'product',
 			'posts_per_page' => 1,
 		);
 
 		// Grab the first product.
-		$tmp_product = get_posts( $args )[0];
+		$tmp_product = get_posts( $tmp_args )[0];
 
 		// Determine which taxonomies are available to products.
 		$product_taxonomies = get_object_taxonomies( $tmp_product );
