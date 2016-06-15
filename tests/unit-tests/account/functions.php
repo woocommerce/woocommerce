@@ -16,7 +16,6 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 			'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 			'orders'          => __( 'Orders', 'woocommerce' ),
 			'edit-address'    => __( 'Addresses', 'woocommerce' ),
-			'payment-methods' => __( 'Payment Methods', 'woocommerce' ),
 			'edit-account'    => __( 'Account Details', 'woocommerce' ),
 			'customer-logout' => __( 'Logout', 'woocommerce' ),
 		), wc_get_account_menu_items() );
