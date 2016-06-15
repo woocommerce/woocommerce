@@ -85,16 +85,27 @@ jQuery( function( $ ) {
 		} else {
 			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
 			$( 'table.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
-			$( '.cart_totals' ).replaceWith( $new_totals );
 
 			if ( $error.length > 0 ) {
 				show_notice( $error );
 			} else if ( $message.length > 0 ) {
 				show_notice( $message );
 			}
+
+			update_cart_totals_div( $new_totals );
 		}
 
 		$( document.body ).trigger( 'updated_wc_div' );
+	};
+
+	/**
+	 * Update the .cart_totals div with a string of html.
+	 *
+	 * @param {String} html_str The HTML string with which to replace the div.
+	 */
+	var update_cart_totals_div = function( html_str ) {
+		$( '.cart_totals' ).replaceWith( html_str );
+		$( document.body ).trigger( 'updated_cart_totals' );
 	};
 
 	/**
@@ -173,9 +184,18 @@ jQuery( function( $ ) {
 				shipping_method: shipping_methods
 			};
 
-			$.post( get_url( 'update_shipping_method' ), data, function( response ) {
-				$( 'div.cart_totals' ).replaceWith( response );
-				$( document.body ).trigger( 'updated_shipping_method' );
+			$.ajax( {
+				type:     'post',
+				url:      get_url( 'update_shipping_method' ),
+				data:     data,
+				dataType: 'html',
+				success:  function( response ) {
+					update_cart_totals_div( response );
+				},
+				complete: function() {
+					unblock( $( 'div.cart_totals' ) );
+					$( document.body ).trigger( 'updated_shipping_method' );
+				}
 			} );
 		},
 
@@ -194,9 +214,9 @@ jQuery( function( $ ) {
 
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
-											.attr( 'name', 'calc_shipping' )
-											.attr( 'value', 'x' )
-											.appendTo( $form );
+							.attr( 'name', 'calc_shipping' )
+							.attr( 'value', 'x' )
+							.appendTo( $form );
 
 			// Make call to actual form post URL.
 			$.ajax( {
@@ -300,9 +320,11 @@ jQuery( function( $ ) {
 			$.ajax( {
 				url:      get_url( 'get_cart_totals' ),
 				dataType: 'html',
-				success: function( response ) {
-					$( 'div.cart_totals' ).replaceWith( response );
-					$( document.body ).trigger( 'updated_cart_totals' );
+				success:  function( response ) {
+					update_cart_totals_div( response );
+				},
+				complete: function() {
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
 		},
