@@ -41,27 +41,21 @@ class WC_Background_Updater extends WP_Background_Process {
 	 */
 	public function dispatch() {
 		$dispatched = parent::dispatch();
+		$logger     = new WC_Logger();
 
 		if ( is_wp_error( $dispatched ) ) {
 			$this->error = $dispatched->get_error_message();
-			add_action( 'admin_notices', array( $this, 'dispatch_error' ) );
+			$logger->add( 'wc_db_updates', sprintf( 'Unable to dispatch WooCommerce updater: %s', $this->error ) );
 		}
 	}
 
 	/**
-	 * Schedule event
+	 * Schedule fallback event.
 	 */
 	protected function schedule_event() {
 		if ( ! wp_next_scheduled( $this->cron_hook_identifier ) ) {
-			wp_schedule_event( time() + 10, $this->cron_interval_identifier, $this->cron_hook_identifier );
+			wp_schedule_event( time() + 30, $this->cron_interval_identifier, $this->cron_hook_identifier );
 		}
-	}
-
-	/**
-	 * Error shown when the updater cannot dispatch.
-	 */
-	public function dispatch_error() {
-		echo '<div class="error"><p>' . __( 'Unable to dispatch WooCommerce updater:', 'woocommerce' ) . ' ' . esc_html( $this->error ) . '</p></div>';
 	}
 
 	/**
