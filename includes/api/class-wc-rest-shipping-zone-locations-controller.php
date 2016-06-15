@@ -83,7 +83,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 		$raw_locations = $request->get_json_params();
 		$locations     = array();
 
-		foreach ( $raw_locations as $raw_location ) {
+		foreach ( (array) $raw_locations as $raw_location ) {
 			if ( empty( $raw_location['code'] ) || empty( $raw_location['type'] ) ) {
 				continue;
 			}
