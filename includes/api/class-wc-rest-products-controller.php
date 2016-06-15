@@ -134,6 +134,31 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			'product_shipping_class' => 'shipping_class',
 		);
 
+		/*
+		 * TO-DO: Figure out a better way to get all taxonomies available
+		 * to a custom post type than grabbing an entire post.
+		*/
+
+		// Set up our temporary arguments to grab a product post.
+		$tmp_args = array(
+			'post_type' => 'products',
+			'posts_per_page' => 1,
+		);
+
+		// Grab the first product.
+		$tmp_product = get_posts( $args )[0];
+
+		// Determine which taxonomies are available to products.
+		$product_taxonomies = get_object_taxonomies( $tmp_product );
+
+		// If any taxonomies available to products aren't already in the
+		// $taxonomies array, append them.
+		foreach ( $product_taxonomies as $product_tax ) {
+			if ( ! isset( $taxonomies[ $product_tax ] ) ) {
+				$taxonomies[ $product_tax ] = str_replace( ' ', '_', strtolower( $product_tax ) );
+			}
+		}
+
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
