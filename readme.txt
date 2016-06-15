@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - SKUs prop on products shortcode.
 * Fix - Layered nav counts when term_id does not match term_taxonomy_id (before splitting).
 * Fix - Fixed referer links from cart messages in WP 4.4.
+* Dev - content-product.php and content-product_cat.php contained the wrong version.
 * Dev - Restored missing WC_Settings_API::init_form_fields() method to prevent potential errors in 3rd party gateways.
 * Dev - API - Fixed returned data from product images (changed `title` to `name`).
 * Dev - API - Fixed products schema for `grouped_products`.
