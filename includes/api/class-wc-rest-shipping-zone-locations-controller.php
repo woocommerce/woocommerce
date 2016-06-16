@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * REST API Shipping Zone Locations class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Controller
+ * @extends WC_REST_Shipping_Zones_Controller_Base
  */
 class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_Controller_Base {
 
