@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.1 =
+= 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
 * Fix - Improved the hour and time fields validation pattern on the orders screen.
 * Fix - PayPal does not allow free products, but paid shipping. Workaround by sending shipping as a line item if it is the only cost.
@@ -201,6 +201,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Ignore catalog visibility on products shortcode when specifying IDs or SKUs.
 * Tweak - Added context to checkout error messages.
 * Tweak - Added SKU field to grouped products.
+* Tweak - Moved SKU field to inventory tab.
 * Tweak - Support qty display in cart messages.
 * Tweak - Hide min order amount field when not needed in shipping settings.
 * Tweak - If shipping < 999.99, use 'shipping' arg when passing values to PayPal.
