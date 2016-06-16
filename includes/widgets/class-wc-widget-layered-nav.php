@@ -334,7 +334,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @return array
 	 */
 	protected function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
-		global $wpdb;
+		global $wpdb, $wp_the_query;
 
 		$tax_query  = WC_Query::get_main_tax_query();
 		$meta_query = WC_Query::get_main_meta_query();
@@ -351,6 +351,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$tax_query      = new WP_Tax_Query( $tax_query );
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$post_type      = is_array( $wp_the_query->query_vars['post_type'] ) ? $wp_the_query->query_vars['post_type'] : array( $wp_the_query->query_vars['post_type'] );
+		$where          = apply_filters( 'woocommerce_get_filtered_term_product_counts_query_where', "WHERE {$wpdb->posts}.post_type IN ('" . implode("','", array_map( 'esc_sql', $post_type )) . "') AND {$wpdb->posts}.post_status = 'publish'", $term_ids, $taxonomy, $query_type );
 
 		$sql  = "
 			SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id FROM {$wpdb->posts}
@@ -358,7 +360,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
 			" . $tax_query_sql['join'] . $meta_query_sql['join'] . "
-			WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish'
+			" . $where . "
 			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
 			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
 			GROUP BY terms.term_id;
