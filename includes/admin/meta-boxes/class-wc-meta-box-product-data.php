@@ -37,16 +37,9 @@ class WC_Meta_Box_Product_Data {
 			$product_type = apply_filters( 'default_product_type', 'simple' );
 		}
 
-		$product_type_selector = apply_filters( 'product_type_selector', array(
-			'simple'   => __( 'Simple product', 'woocommerce' ),
-			'grouped'  => __( 'Grouped product', 'woocommerce' ),
-			'external' => __( 'External/Affiliate product', 'woocommerce' ),
-			'variable' => __( 'Variable product', 'woocommerce' )
-		), $product_type );
-
 		$type_box = '<label for="product-type"><select id="product-type" name="product-type"><optgroup label="' . esc_attr__( 'Product Type', 'woocommerce' ) . '">';
 
-		foreach ( $product_type_selector as $value => $label ) {
+		foreach ( wc_get_product_types() as $value => $label ) {
 			$type_box .= '<option value="' . esc_attr( $value ) . '" ' . selected( $product_type, $value, false ) .'>' . esc_html( $label ) . '</option>';
 		}
 

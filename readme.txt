@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - SKUs prop on products shortcode.
 * Fix - Layered nav counts when term_id does not match term_taxonomy_id (before splitting).
 * Fix - Fixed referer links from cart messages in WP 4.4.
+* Fix - Fix the showing/hiding of panels when terms do not exist by using wc_get_product_types() for retrieving product types.
 * Dev - content-product.php and content-product_cat.php contained the wrong version.
 * Dev - Show "matching zone" notice on the frontend when shipping debug mode is on.
 * Dev - Restored missing WC_Settings_API::init_form_fields() method to prevent potential errors in 3rd party gateways.
