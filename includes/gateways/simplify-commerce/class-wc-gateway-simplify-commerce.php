@@ -452,7 +452,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC {
 			$payment_response = $this->do_payment( $order, $order->get_total(), $pass_tokens );
 
 			if ( is_wp_error( $payment_response ) ) {
-				throw new Exception( $payment_response->get_error_message() );
+				throw new Simplify_ApiException( $payment_response->get_error_message() );
 			} else {
 				// Remove cart
 				WC()->cart->empty_cart();
