@@ -17,6 +17,10 @@
  * @package     WooCommerce/Templates
  * @version     2.6.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 ?>
 
 <p>
