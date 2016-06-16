@@ -13,12 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version  2.7.0
  * @since    2.7.0
  */
-class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
+class WC_Rest_Settings_Controller extends WC_REST_Controller {
 
 	/**
 	 * WP REST API namespace/version.
 	 */
 	protected $namespace = 'wc/v1';
+
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'settings';
 
 	/**
 	 * Register routes.
@@ -29,7 +36,7 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'permissions_check' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -150,6 +157,21 @@ class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 			'parent_id'   => '',
 			'sub_groups'  => array(),
 		);
+	}
+
+	/**
+	 * Makes sure the current user has access to READ the settings APIs.
+	 *
+	 * @since  2.7.0
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
 	}
 
 	/**
