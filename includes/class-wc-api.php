@@ -121,9 +121,6 @@ class WC_API extends WC_Legacy_API {
 
 		// Init REST API routes.
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
-
-		// Register legacy settings to the REST API.
-		add_action( 'rest_api_init', array( $this, 'register_legacy_settings' ) );
 	}
 
 	/**
@@ -179,6 +176,9 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.6.0
 	 */
 	public function register_rest_routes() {
+		// Register legacy settings to the REST API.
+		$this->register_legacy_settings();
+
 		$controllers = array(
 			'WC_REST_Coupons_Controller',
 			'WC_REST_Customer_Downloads_Controller',
