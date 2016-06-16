@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version  2.7.0
  * @since    2.7.0
  */
-class WC_Rest_Settings_Groups_Controller extends WC_REST_Settings_API_Controller {
+class WC_Rest_Settings_Controller extends WC_REST_Settings_API_Controller {
 
 	/**
 	 * WP REST API namespace/version.

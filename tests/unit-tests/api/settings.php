@@ -103,7 +103,7 @@ class Settings extends WC_Unit_Test_Case {
 	/**
 	 * Test /settings without valid permissions/creds.
 	 * @since 2.7.0
-	 * @covers WC_Rest_Settings_Groups_Controller::get_items
+	 * @covers WC_Rest_Settings_Controller::get_items
 	 */
 	public function test_get_groups_none_registered() {
 		wp_set_current_user( $this->user );
