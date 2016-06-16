@@ -13,12 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version  2.7.0
  * @since    2.7.0
  */
-class WC_Rest_Settings_Options_Controller extends WC_REST_Settings_API_Controller {
+class WC_Rest_Settings_Options_Controller extends WC_REST_Controller {
 
 	/**
 	 * WP REST API namespace/version.
 	 */
 	protected $namespace = 'wc/v1';
+
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'settings';
 
 	/**
 	 * Register routes.
@@ -29,7 +36,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Settings_API_Controlle
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'permissions_check' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
@@ -38,7 +45,7 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Settings_API_Controlle
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'batch_items' ),
-				'permission_callback' => array( $this, 'permissions_check' ),
+				'permission_callback' => array( $this, 'update_items_permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
 			'schema' => array( $this, 'get_public_batch_schema' ),
@@ -48,12 +55,12 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Settings_API_Controlle
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'permissions_check' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'permissions_check' ),
+				'permission_callback' => array( $this, 'update_items_permissions_check' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -257,6 +264,86 @@ class WC_Rest_Settings_Options_Controller extends WC_REST_Settings_API_Controlle
 		);
 
 		return $links;
+	}
+
+	/**
+	 * Makes sure the current user has access to READ the settings APIs.
+	 *
+	 * @since  2.7.0
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Makes sure the current user has access to WRITE the settings APIs.
+	 *
+	 * @since  2.7.0
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Filters out bad values from the settings array/filter so we
+	 * only return known values via the API.
+	 *
+	 * @since 2.7.0
+	 * @param  array $setting
+	 * @return array
+	 */
+	public function filter_setting( $setting ) {
+		$setting = array_intersect_key(
+			$setting,
+			array_flip( array_filter( array_keys( $setting ), array( $this, 'allowed_setting_keys' ) ) )
+		);
+
+		if ( empty( $setting['options'] ) ) {
+			unset( $setting['options'] );
+		}
+
+		return $setting;
+	}
+
+	/**
+	 * Callback for allowed keys for each setting response.
+	 *
+	 * @since  2.7.0
+	 * @param  string $key Key to check
+	 * @return boolean
+	 */
+	public function allowed_setting_keys( $key ) {
+		return in_array( $key, array(
+			'id', 'label', 'description', 'default', 'tip',
+			'placeholder', 'type', 'options', 'value',
+		) );
+	}
+
+	/**
+	 * Boolean for if a setting type is a valid supported setting type.
+	 *
+	 * @since  2.7.0
+	 * @param  string  $type
+	 * @return boolean
+	 */
+	public function is_setting_type_valid( $type ) {
+		return in_array( $type, array(
+			'text', 'email', 'number', 'color', 'password',
+			'textarea', 'select', 'multiselect', 'radio', 'checkbox',
+			'multi_select_countries', 'image_width',
+		) );
 	}
 
 	/**
