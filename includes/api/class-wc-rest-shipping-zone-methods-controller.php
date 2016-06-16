@@ -86,7 +86,30 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
+		$response->add_links( $this->prepare_links( $request['zone_id'], $item->instance_id ) );
+
 		return $response;
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param int $zone_id Given Shipping Zone ID.
+	 * @param int $instance_id Given Shipping Zone Method Instance ID.
+	 * @return array Links for the given Shipping Zone Method.
+	 */
+	protected function prepare_links( $zone_id, $instance_id ) {
+		$base  = '/' . $this->namespace . '/' . $this->rest_base . '/' . $zone_id;
+		$links = array(
+			'collection' => array(
+				'href' => rest_url( $base . '/methods' ),
+			),
+			'describes'  => array(
+				'href' => rest_url( $base ),
+			),
+		);
+
+		return $links;
 	}
 
 	/**
