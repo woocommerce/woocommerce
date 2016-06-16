@@ -347,23 +347,30 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 		}
 
-		$meta_query     = new WP_Meta_Query( $meta_query );
-		$tax_query      = new WP_Tax_Query( $tax_query );
-		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
-		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$meta_query      = new WP_Meta_Query( $meta_query );
+		$tax_query       = new WP_Tax_Query( $tax_query );
+		$meta_query_sql  = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
+		$tax_query_sql   = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		$sql  = "
-			SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id FROM {$wpdb->posts}
+		// Generate query
+		$query           = array();
+		$query['select'] = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id";
+		$query['from']   = "FROM {$wpdb->posts}";
+		$query['join']   = "
 			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON {$wpdb->posts}.ID = term_relationships.object_id
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-			" . $tax_query_sql['join'] . $meta_query_sql['join'] . "
-			WHERE {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish'
+			" . $tax_query_sql['join'] . $meta_query_sql['join'];
+		$query['where']   = "
+			WHERE {$wpdb->posts}.post_type IN ( 'product' )
+			AND {$wpdb->posts}.post_status = 'publish'
 			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
 			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
-			GROUP BY terms.term_id;
 		";
-		$results = $wpdb->get_results( $sql );
+		$query['group_by'] = "GROUP BY terms.term_id";
+		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
+		$query             = implode( ' ', $query );
+		$results           = $wpdb->get_results( $query );
 
 		return wp_list_pluck( $results, 'term_count', 'term_count_id' );
 	}
