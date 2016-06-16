@@ -30,11 +30,6 @@ class WC_Background_Updater extends WP_Background_Process {
 	protected $action = 'wc_updater';
 
 	/**
-	 * @var string
-	 */
-	protected $error = '';
-
-	/**
 	 * Dispatch updater.
 	 *
 	 * Updater will still run via cron job if this fails for any reason.
@@ -44,8 +39,7 @@ class WC_Background_Updater extends WP_Background_Process {
 		$logger     = new WC_Logger();
 
 		if ( is_wp_error( $dispatched ) ) {
-			$this->error = $dispatched->get_error_message();
-			$logger->add( 'wc_db_updates', sprintf( 'Unable to dispatch WooCommerce updater: %s', $this->error ) );
+			$logger->add( 'wc_db_updates', sprintf( 'Unable to dispatch WooCommerce updater: %s', $dispatched->get_error_message() ) );
 		}
 	}
 
