@@ -158,6 +158,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+Fix - wc_add_to_cart_message() when non-array is passed.
+
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
 * Fix - Improved the hour and time fields validation pattern on the orders screen.
