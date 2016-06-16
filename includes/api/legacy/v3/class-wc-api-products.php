@@ -2353,7 +2353,9 @@ class WC_API_Products extends WC_API_Resource {
 			'timeout' => 10
 		) );
 
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		if ( is_wp_error( $response ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s: %s', 'woocommerce' ), $image_url, $response->get_error_message() ), 400 );
+		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
 		}
 
