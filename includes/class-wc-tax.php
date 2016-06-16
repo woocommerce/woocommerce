@@ -286,11 +286,11 @@ class WC_Tax {
 		$criteria[] = $wpdb->prepare( "tax_rate_class = %s", sanitize_title( $tax_class ) );
 
 		// Pre-query postcode ranges for PHP based matching.
-		$postcode_search = wc_get_wildcard_postcodes( $postcode );
+		$postcode_search = wc_get_wildcard_postcodes( $postcode, $country );
 		$postcode_ranges = $wpdb->get_results( "SELECT tax_rate_id, location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE location_type = 'postcode' AND location_code LIKE '%...%';" );
 
 		if ( $postcode_ranges ) {
-			$matches         = wc_postcode_location_matcher( $postcode, $postcode_ranges, 'tax_rate_id', 'location_code' );
+			$matches = wc_postcode_location_matcher( $postcode, $postcode_ranges, 'tax_rate_id', 'location_code', $country );
 			if ( ! empty( $matches ) ) {
 				foreach ( $matches as $matched_postcodes ) {
 					$postcode_search = array_merge( $postcode_search, $matched_postcodes );
@@ -818,7 +818,8 @@ class WC_Tax {
 		if ( ! is_array( $postcodes ) ) {
 			$postcodes = explode( ';', $postcodes );
 		}
-		self::_update_tax_rate_locations( $tax_rate_id, array_diff( array_map( 'wc_normalize_postcode', array_filter( $postcodes ) ), array( '*' ) ), 'postcode' );
+		// No normalization - postcodes are matched against both normal and formatted versions to support wildcards.
+		self::_update_tax_rate_locations( $tax_rate_id, array_diff( array_map( 'trim',  array_map( 'strtoupper', array_filter( $postcodes ) ) ), array( '*' ) ), 'postcode' );
 	}
 
 	/**

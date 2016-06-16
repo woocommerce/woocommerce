@@ -132,8 +132,14 @@ class WC_Shipping {
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
+			$status_options         = get_option( 'woocommerce_status_options', array() );
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
+
+			// Debug output
+			if ( ! empty( $status_options['shipping_debug_mode'] ) ) {
+				wc_add_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' );
+			}
 		} else {
 			$this->shipping_methods = array();
 		}
