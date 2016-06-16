@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - If shipping method count changes, reset to default.
 * Tweak - Avoid normalization of zone postcodes so wildcard matching can be performed on postcodes with spaces. E.g. SP1 *
 * Tweak - Allow max_fee in addition to min_fee in flat rate costs fields.
+* Tweak - Wrap order_schema_markup() output in hidden div in case script tag is stripped.
 
 = 2.6.0 - 14/06/16 =
 * Feature - Introduced Shipping Zone functionality, and re-usable instance based shipping methods.

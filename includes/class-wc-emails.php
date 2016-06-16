@@ -373,7 +373,7 @@ class WC_Emails {
 
 		$markup = apply_filters( 'woocommerce_email_order_schema_markup', $markup, $sent_to_admin, $order );
 
-		echo '<script type="application/ld+json">' . wp_json_encode( (object) $markup ) . '</script>';
+		echo '<div style="display:none;"><script type="application/ld+json">' . wp_json_encode( (object) $markup ) . '</script></div>';
 	}
 
 	/**
