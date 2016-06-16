@@ -100,16 +100,3 @@ class WC_Register_Legacy_Settings {
 		return $new_setting;
 	}
 }
-
-/**
- * Register legacy settings to the REST API.
- * @since  2.7.0
- */
- function wc_settings_api_register_legacy() {
-	 $pages = WC_Admin_Settings::get_settings_pages();
-	 foreach ( $pages as $page ) {
-		 new WC_Register_Legacy_Settings( $page );
-	 }
- }
-
-add_action( 'rest_api_init', 'wc_settings_api_register_legacy' );

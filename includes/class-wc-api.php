@@ -121,6 +121,9 @@ class WC_API extends WC_Legacy_API {
 
 		// Init REST API routes.
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+
+		// Register legacy settings to the REST API.
+		add_action( 'rest_api_init', array( $this, 'register_legacy_settings' ) );
 	}
 
 	/**
@@ -204,6 +207,17 @@ class WC_API extends WC_Legacy_API {
 		foreach ( $controllers as $controller ) {
 			$this->$controller = new $controller();
 			$this->$controller->register_routes();
+		}
+	}
+
+	/**
+	 * Register legacy settings to the REST API.
+	 * @since  2.7.0
+	 */
+	public function register_legacy_settings() {
+		$pages = WC_Admin_Settings::get_settings_pages();
+		foreach ( $pages as $page ) {
+			new WC_Register_Legacy_Settings( $page );
 		}
 	}
 }
