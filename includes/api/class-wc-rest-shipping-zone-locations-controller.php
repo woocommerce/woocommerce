@@ -160,7 +160,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
 					'arg_options' => array(
-						'sanitize_callback' => 'absint',
+						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'enum'        => array(
 						'postcode',
@@ -180,5 +180,4 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 
 		return $schema;
 	}
-
 }
