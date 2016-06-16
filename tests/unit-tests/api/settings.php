@@ -17,7 +17,7 @@ class Settings extends WC_Unit_Test_Case {
 		global $wp_rest_server;
 		$this->server = $wp_rest_server = new WP_Test_Spy_REST_Server;
 		do_action( 'rest_api_init' );
-		$this->endpoint = new WC_Rest_Settings_Controller();
+		$this->endpoint = new WC_Rest_Settings_Options_Controller();
 		WC_Helper_Settings::register();
 		$this->user = $this->factory->user->create( array(
 			'role' => 'administrator',
@@ -407,7 +407,7 @@ class Settings extends WC_Unit_Test_Case {
 	 * Tests the GET single setting route handler encountering an invalid setting type.
 	 */
 	public function test_get_setting_invalid_setting_type() {
-		$controller = $this->getMock( 'WC_Rest_Settings_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
+		$controller = $this->getMock( 'WC_Rest_Settings_Options_Controller', array( 'get_group_settings', 'is_setting_type_valid' ) );
 
 		$controller
 			->expects( $this->any() )
@@ -463,7 +463,7 @@ class Settings extends WC_Unit_Test_Case {
 	/**
 	 * Test updating a bad setting ID.
 	 * @since 2.7.0
-	 * @covers WC_Rest_Settings_Controller::update_item
+	 * @covers WC_Rest_Settings_Options_Controller::update_item
 	 */
 	public function test_update_setting_bad_setting_id() {
 		wp_set_current_user( $this->user );
