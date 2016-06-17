@@ -465,7 +465,7 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting all Shipping Zone Methods.
+	 * Test getting all Shipping Zone Methods and getting a single Shipping Zone Method.
 	 * @since 2.7.0
 	 */
 	public function test_get_methods() {
@@ -478,11 +478,8 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 		$method      = $methods[ $instance_id ];
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods' ) );
-		$data = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( count( $data ), 1 );
-		$this->assertContains( array(
+		$data     = $response->get_data();
+		$expected = array(
 			'instance_id'        => $instance_id,
 			'title'              => $method->instance_settings['title'],
 			'order'              => $method->method_order,
@@ -507,17 +504,44 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 					),
 				),
 			),
-		), $data );
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $data ), 1 );
+		$this->assertContains( $expected, $data );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $expected, $data );
 	}
 
 	/**
 	 * Test getting all Shipping Zone Methods with a bad zone ID.
 	 * @since 2.7.0
 	 */
-	public function test_get_methods_invalid_id() {
+	public function test_get_methods_invalid_zone_id() {
 		wp_set_current_user( $this->user );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/1/methods' ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/1/methods/1' ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test getting a single Shipping Zone Method with a bad ID.
+	 * @since 2.7.0
+	 */
+	public function test_get_methods_invalid_method_id() {
+		wp_set_current_user( $this->user );
+
+		$zone     = $this->create_shipping_zone( 'Zone 1' );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/1' ) );
 
 		$this->assertEquals( 404, $response->get_status() );
 	}
