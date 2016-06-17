@@ -53,18 +53,36 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	}
 
 	/**
-	 * Check whether a given request has permission to access Shipping Zones.
+	 * Check whether a given request has permission to read Shipping Zones.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function permissions_check( $request ) {
+	public function get_items_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check whether a given request has permission to edit Shipping Zones.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_items_permissions_check( $request ) {
+		if ( ! wc_shipping_enabled() ) {
+			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.' ), array( 'status' => 404 ) );
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
