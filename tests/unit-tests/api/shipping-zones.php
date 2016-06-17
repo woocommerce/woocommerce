@@ -81,12 +81,34 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 	public function test_get_zones() {
 		wp_set_current_user( $this->user );
 
-		// No zones by default
+		// "Rest of the World" zone exists by default
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones' ) );
 		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( count( $data ), 0 );
+		$this->assertEquals( count( $data ), 1 );
+		$this->assertContains( array(
+			'id'     => 0,
+			'name'   => 'Rest of the World',
+			'order'  => 0,
+			'_links' => array(
+				'self'       => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/0' ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones' ),
+					),
+				),
+				'describedby' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/0/locations' ),
+					),
+				),
+			),
+		), $data );
 
 		// Create a zone and make sure it's in the response
 		$this->create_shipping_zone( 'Zone 1' );
@@ -95,8 +117,8 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( count( $data ), 1 );
-		$this->assertEquals( array(
+		$this->assertEquals( count( $data ), 2 );
+		$this->assertContains( array(
 			'id'     => 1,
 			'name'   => 'Zone 1',
 			'order'  => 0,
@@ -117,7 +139,7 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 					),
 				),
 			),
-		), $data[0] );
+		), $data );
 	}
 
 	/**
@@ -438,6 +460,64 @@ class WC_Tests_API_Shipping_Zones extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v1/shipping/zones/1/locations' ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test getting all Shipping Zone Methods.
+	 * @since 2.7.0
+	 */
+	public function test_get_methods() {
+		wp_set_current_user( $this->user );
+
+		// Create a shipping method and make sure it's in the response
+		$zone        = $this->create_shipping_zone( 'Zone 1' );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		$methods     = $zone->get_shipping_methods();
+		$method      = $methods[ $instance_id ];
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods' ) );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( $data ), 1 );
+		$this->assertContains( array(
+			'instance_id'        => $instance_id,
+			'title'              => $method->instance_settings['title'],
+			'order'              => $method->method_order,
+			'enabled'            => ( 'yes' === $method->enabled ),
+			'method_id'          => $method->id,
+			'method_title'       => $method->method_title,
+			'method_description' => $method->method_description,
+			'_links'             => array(
+				'self'       => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id ),
+					),
+				),
+				'collection' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() . '/methods' ),
+					),
+				),
+				'describes' => array(
+					array(
+						'href' => rest_url( '/wc/v1/shipping/zones/' . $zone->get_id() ),
+					),
+				),
+			),
+		), $data );
+	}
+
+	/**
+	 * Test getting all Shipping Zone Methods with a bad zone ID.
+	 * @since 2.7.0
+	 */
+	public function test_get_methods_invalid_id() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v1/shipping/zones/1/methods' ) );
 
 		$this->assertEquals( 404, $response->get_status() );
 	}
