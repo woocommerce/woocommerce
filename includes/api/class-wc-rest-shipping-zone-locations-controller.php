@@ -142,7 +142,9 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$single_location_schema = array(
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'shipping_zone_location',
 			'type'       => 'object',
 			'properties' => array(
 				'code' => array(
@@ -171,13 +173,7 @@ class WC_REST_Shipping_Zone_Locations_Controller extends WC_REST_Shipping_Zones_
 				),
 			),
 		);
-		$schema = array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'shipping_zone_locations',
-			'type'    => 'array',
-			'items'   => $this->add_additional_fields_schema( $single_location_schema )
-		);
 
-		return $schema;
+		return $this->add_additional_fields_schema( $schema );
 	}
 }
