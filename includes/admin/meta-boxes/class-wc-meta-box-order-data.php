@@ -201,7 +201,7 @@ class WC_Meta_Box_Order_Data {
 						</p>
 
 						<p class="form-field form-field-wide wc-order-status"><label for="order_status"><?php _e( 'Order status:', 'woocommerce' ) ?> <?php
-							if ( $order->has_status( 'pending' ) ) {
+							if ( $order->needs_payment() ) {
 								printf( '<a href="%s">%s &rarr;</a>',
 									esc_url( $order->get_checkout_payment_url() ),
 									__( 'Customer payment page', 'woocommerce' )
