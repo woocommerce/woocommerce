@@ -96,7 +96,6 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 
 		foreach ( $methods as $method_obj ) {
 			$method = $this->prepare_item_for_response( $method_obj, $request );
-			$method = $this->prepare_response_for_collection( $method );
 			$data[] = $method;
 		}
 
@@ -129,6 +128,8 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 		$response = rest_ensure_response( $data );
 
 		$response->add_links( $this->prepare_links( $request['zone_id'], $item->instance_id ) );
+
+		$response = $this->prepare_response_for_collection( $response );
 
 		return $response;
 	}
