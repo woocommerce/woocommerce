@@ -84,7 +84,15 @@ class WC_REST_Shipping_Zones_Controller extends WC_REST_Shipping_Zones_Controlle
 	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
+		$rest_of_the_world = $this->get_zone( 0 );
+
+		// "Rest of the World" should always exist, but handle the case where it doesn't.
+		if ( is_wp_error( $rest_of_the_world ) ) {
+			return $rest_of_the_world;
+		}
+
 		$zones = WC_Shipping_Zones::get_zones();
+		array_unshift( $zones, $rest_of_the_world->get_data() );
 		$data  = array();
 
 		foreach ( $zones as $zone_obj ) {
