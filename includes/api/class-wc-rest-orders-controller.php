@@ -541,7 +541,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				update_post_meta( $order->id, '_payment_method', $request['payment_method'] );
 			}
 			if ( ! empty( $request['payment_method_title'] ) ) {
-				update_post_meta( $order->id, '_payment_method_title', $request['payment_method'] );
+				update_post_meta( $order->id, '_payment_method_title', $request['payment_method_title'] );
 			}
 			if ( true === $request['set_paid'] ) {
 				$order->payment_complete( $request['transaction_id'] );
