@@ -333,7 +333,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$available = $this->is_enabled();
 
 		// Country availability (legacy, for non-zone based methods)
-		if ( ! $this->instance_id ) {
+		if ( ! $this->instance_id && $available ) {
 			$countries = is_array( $this->countries ) ? $this->countries : array();
 
 			switch ( $this->availability ) {
