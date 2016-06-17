@@ -34,6 +34,48 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
 		) );
+
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<zone_id>[\d-]+)/methods/(?P<instance_id>[\d-]+)', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+			),
+			'schema' => array( $this, 'get_public_item_schema' ),
+		) );
+	}
+
+	/**
+	 * Get a single Shipping Zone Method.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		$zone = $this->get_zone( $request['zone_id'] );
+
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$instance_id = (int) $request['instance_id'];
+		$methods     = $zone->get_shipping_methods();
+		$method      = false;
+
+		foreach ( $methods as $method_obj ) {
+			if ( $instance_id === $method_obj->instance_id ) {
+				$method = $method_obj;
+				break;
+			}
+		}
+
+		if ( false === $method ) {
+			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( "Resource doesn't exist.", 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$data = $this->prepare_item_for_response( $method, $request );
+
+		return rest_ensure_response( $data );
 	}
 
 	/**
@@ -101,6 +143,9 @@ class WC_REST_Shipping_Zone_Methods_Controller extends WC_REST_Shipping_Zones_Co
 	protected function prepare_links( $zone_id, $instance_id ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base . '/' . $zone_id;
 		$links = array(
+			'self' => array(
+				'href' => rest_url( $base . '/methods/' . $instance_id ),
+			),
 			'collection' => array(
 				'href' => rest_url( $base . '/methods' ),
 			),
