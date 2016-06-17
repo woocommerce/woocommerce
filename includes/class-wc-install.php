@@ -560,7 +560,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY payment_token_id (payment_token_id),
-  KEY meta_key (meta_key)
+  KEY meta_key (meta_key($max_index_length))
 ) $collate;
 		";
 
