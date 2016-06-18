@@ -336,7 +336,7 @@ class WC_Emails {
 			'orderNumber'    => strval( $order->get_order_number() ),
 			'priceCurrency'  => $order->get_order_currency(),
 			'price'          => $order->get_total(),
-			'acceptedOffer'  => count( $accepted_offers ) > 1 ? $accepted_offers : $accepted_offers[0],
+			'acceptedOffer'  => $accepted_offers,
 			'url'            => $order->get_view_order_url(),
 		);
 
