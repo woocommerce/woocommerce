@@ -60,7 +60,7 @@ abstract class WC_Settings_API {
 	 * Set default required properties for each field.
 	 * @param array
 	 */
-	private function set_defaults( $field ) {
+	protected function set_defaults( $field ) {
 		if ( ! isset( $field['default'] ) ) {
 			$field['default'] = '';
 		}
