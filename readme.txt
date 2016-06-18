@@ -158,7 +158,15 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-Fix - wc_add_to_cart_message() when non-array is passed.
+= 2.6.2 - xx/xx/16 =
+* Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.
+* Fix - is_available check for legacy shipping methods.
+* Fix - wc_add_to_cart_message() when non-array is passed.
+* Fix - Maximum coupon check should allow the 'maximum' value.
+* Fix - Potential notices when leaving out 'default' field for shipping instances.
+* Fix - wp_cache_flush after term meta migration/update.
+* Fix - wc_add_to_cart_message() when non-array is passed.
+* Tweak - Made customer pay link display if order needs_payment() rather than checking pending status.
 
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
