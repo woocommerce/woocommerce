@@ -1798,9 +1798,9 @@ class WC_API_Products extends WC_API_Resource {
 		) );
 
 		if ( is_wp_error( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url . ': ' . $response->get_error_message() ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), 400 );
 		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure we have a file name and type

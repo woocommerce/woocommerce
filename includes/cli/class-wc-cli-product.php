@@ -2019,9 +2019,9 @@ class WC_CLI_Product extends WC_CLI_Command {
 		) );
 
 		if ( is_wp_error( $response ) ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url . ': ' . $response->get_error_message() ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ) );
 		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ) );
+			throw new WC_CLI_Exception( 'woocommerce_cli_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) );
 		}
 
 		// Ensure we have a file name and type

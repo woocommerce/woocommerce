@@ -65,9 +65,9 @@ function wc_rest_upload_image_from_url( $image_url ) {
 	) );
 
 	if ( is_wp_error( $response ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url . ': ' . $response->get_error_message() ), array( 'status' => 400 ) );
+		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), array( 'status' => 400 ) );
 	} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
+		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 	}
 
 	// Ensure we have a file name and type.
