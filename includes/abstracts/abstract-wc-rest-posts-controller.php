@@ -657,7 +657,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		);
 
 		$post_type_obj = get_post_type_object( $this->post_type );
-		if ( $post_type_obj->hierarchical ) {
+		if ( isset( $post_type_obj->hierarchical ) && $post_type_obj->hierarchical ) {
 			$params['parent'] = array(
 				'description'       => __( 'Limit result set to those of particular parent ids.', 'woocommerce' ),
 				'type'              => 'array',
