@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Potential notices when leaving out 'default' field for shipping instances.
 * Fix - wp_cache_flush after term meta migration/update.
 * Fix - wc_add_to_cart_message() when non-array is passed.
+* Fix - woocommerce_redirect_single_search_result type check was incorrect.
 * Tweak - Made customer pay link display if order needs_payment() rather than checking pending status.
 
 = 2.6.1 - 16/06/16 =
