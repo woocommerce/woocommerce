@@ -113,6 +113,15 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get post types.
+	 *
+	 * @return array
+	 */
+	protected function get_post_types() {
+		return array( 'product', 'product_variation' );
+	}
+
+	/**
 	 * Query args.
 	 *
 	 * @param array $args
