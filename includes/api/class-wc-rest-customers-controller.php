@@ -684,7 +684,7 @@ class WC_REST_Customers_Controller extends WC_REST_Controller {
 				),
 				'total_spent' => array(
 					'description' => __( 'Total amount spent.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

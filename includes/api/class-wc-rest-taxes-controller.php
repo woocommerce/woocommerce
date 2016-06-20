@@ -592,7 +592,7 @@ class WC_REST_Taxes_Controller extends WC_REST_Controller {
 				),
 				'rate' => array(
 					'description' => __( 'Tax rate.', 'woocommerce' ),
-					'type'        => 'float',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'name' => array(
