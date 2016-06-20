@@ -1,0 +1,28 @@
+engines:
+  phpcodesniffer:
+    enabled: true
+    config:
+      standard: "WordPress"
+  eslint:
+    enabled: true
+  scss-lint:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - php
+        #mass_threshold: 30
+      - javascript
+exclude_paths:
+  - tests/*
+  - apigen/*
+  - dummy-data/*
+  - i18n/*
+  - includes/api/legacy/*
+  - includes/libraries/*
+  - includes/updates/*
+  - includes/gateways/simplify-commerce/*
+  - includes/shipping/legacy-*
+  - includes/wc-deprecated-functions.php
+  - includes/class-wc-legacy-api.php
