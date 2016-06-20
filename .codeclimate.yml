@@ -12,7 +12,6 @@ engines:
     config:
       languages:
       - php
-        #mass_threshold: 30
       - javascript
 exclude_paths:
   - tests/*
