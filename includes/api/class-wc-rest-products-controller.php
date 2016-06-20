@@ -642,7 +642,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 
 		if ( $product->is_type( 'variation' ) && $product->parent ) {
 			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $product->parent ) ),
+				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $product->parent->id ) ),
 			);
 		} elseif ( $product->is_type( 'simple' ) && ! empty( $product->post->post_parent ) ) {
 			$links['up'] = array(
