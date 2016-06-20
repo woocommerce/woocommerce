@@ -220,8 +220,10 @@ class WC_Shipping_Zone extends WC_Data {
 		if ( sizeof( $location_parts ) > $max ) {
 			$remaining = sizeof( $location_parts ) - $max;
 			return sprintf( _n( '%s and %d other region', '%s and %d other regions', $remaining, 'woocommerce' ), implode( ', ', array_splice( $location_parts, 0, $max ) ), $remaining );
-		} else {
+		} elseif ( ! empty( $location_parts ) ) {
 			return implode( ', ', $location_parts );
+		} else {
+			return __( 'Everywhere', 'woocommerce' );
 		}
 	}
 

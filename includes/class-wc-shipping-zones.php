@@ -133,7 +133,8 @@ class WC_Shipping_Zones {
 			$criteria = array();
 			$criteria[] = $wpdb->prepare( "( ( location_type = 'country' AND location_code = %s )", $country );
 			$criteria[] = $wpdb->prepare( "OR ( location_type = 'state' AND location_code = %s )", $country . ':' . $state );
-			$criteria[] = $wpdb->prepare( "OR ( location_type = 'continent' AND location_code = %s ) )", $continent );
+			$criteria[] = $wpdb->prepare( "OR ( location_type = 'continent' AND location_code = %s )", $continent );
+			$criteria[] = "OR ( location_type IS NULL ) )";
 
 			// Postcode range and wildcard matching
 			$postcode_locations = $wpdb->get_results( "SELECT zone_id, location_code FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE location_type = 'postcode';" );
@@ -151,7 +152,7 @@ class WC_Shipping_Zones {
 			// Get matching zones
 			$matching_zone_id = $wpdb->get_var( "
 				SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
-				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id
+				LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id AND location_type != 'postcode'
 				WHERE " . implode( ' ', $criteria ) . "
 				ORDER BY zone_order ASC LIMIT 1
 			" );

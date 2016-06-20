@@ -168,6 +168,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - wc_add_to_cart_message() when non-array is passed.
 * Fix - woocommerce_redirect_single_search_result type check was incorrect.
 * Tweak - Made customer pay link display if order needs_payment() rather than checking pending status.
+* Tweak - Zones - Wording clarifications.
+* Tweak - Zones - Match zones with postcodes but no country.
+* Tweak - Zones - Match zones with no regions as 'everywhere'.
 
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
