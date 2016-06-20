@@ -26,3 +26,10 @@ exclude_paths:
   - includes/shipping/legacy-*
   - includes/wc-deprecated-functions.php
   - includes/class-wc-legacy-api.php
+  - assets/js/accounting/**
+  - assets/js/jquery-*
+  - assets/js/prettyPhoto/*
+  - assets/js/round/*
+  - assets/js/select2/*
+  - assets/js/stupidtable/*
+  - assets/js/zeroclipboard/*
