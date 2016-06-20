@@ -2556,13 +2556,18 @@ table.wc-shipping-zones, table.wc-shipping-zone-methods, table.wc-shipping-class
 }
 
 .wc-backbone-modal .wc-shipping-zone-method-selector {
-	padding: 2px;
+	p {
+		margin-top: 0;
+	}
 	.wc-shipping-zone-method-description {
-		margin: 1em 0;
+		margin: .75em 1px 0;
 		line-height: 1.5em;
+		color: #999;
+		font-style: italic;
 	}
 	select {
 		width: 100%;
+		cursor: pointer;
 	}
 }
 
@@ -4941,7 +4946,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: 51px;
+	padding-bottom: 55px;
 
 	header,
 	article {
@@ -4950,23 +4955,23 @@ table.bar_chart {
 	}
 
 	.wc-backbone-modal-header {
-		height: 50px;
+		height: auto;
 		background: #fcfcfc;
-		padding: 0 50px 0 16px;
+		padding: 1em 1.5em;
 		border-bottom: 1px solid #ddd;
 
 		h1 {
 			margin: 0;
 			font-size: 18px;
 			font-weight: 700;
-			line-height: 50px;
+			line-height: 1.5em;
 		}
 
 		.modal-close-link {
 			cursor: pointer;
 			color: #777;
-			height: 50px;
-			width: 50px;
+			height: 54px;
+			width: 54px;
 			padding: 0;
 			position: absolute;
 			top: 0;
@@ -5000,8 +5005,18 @@ table.bar_chart {
 	}
 
 	article {
-		padding: 10px 16px;
+		padding: 1.5em;
 
+		p {
+			margin: 1.5em 0;
+		}
+		p:first-child {
+			margin-top: 0;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
 		.pagination {
 			padding: 10px 0 0;
 			text-align: center;
@@ -5014,7 +5029,7 @@ table.bar_chart {
 		right: 0;
 		bottom: 0;
 		z-index: 100;
-		padding: 10px 16px;
+		padding: 1em 1.5em;
 		background: #fcfcfc;
 		border-top: 1px solid #dfdfdf;
 		box-shadow: 0 -4px 4px -4px rgba(0,0,0,0.1);
