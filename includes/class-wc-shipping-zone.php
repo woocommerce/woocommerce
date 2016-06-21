@@ -351,7 +351,7 @@ class WC_Shipping_Zone extends WC_Data {
 	public function add_location( $code, $type ) {
 		if ( $this->is_valid_location_type( $type ) ) {
 			if ( 'postcode' === $type ) {
-				$code = trim( strtoupper( $code ) ); // No normalization - postcodes are matched against both normal and formatted versions to support wildcards.
+				$code = trim( strtoupper( str_replace( chr( 226 ) . chr( 128 ) . chr( 166 ), '...', $code ) ) ); // No normalization - postcodes are matched against both normal and formatted versions to support wildcards.
 			}
 			$location = array(
 				'code' => wc_clean( $code ),

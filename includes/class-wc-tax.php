@@ -819,7 +819,10 @@ class WC_Tax {
 			$postcodes = explode( ';', $postcodes );
 		}
 		// No normalization - postcodes are matched against both normal and formatted versions to support wildcards.
-		self::_update_tax_rate_locations( $tax_rate_id, array_diff( array_map( 'trim',  array_map( 'strtoupper', array_filter( $postcodes ) ) ), array( '*' ) ), 'postcode' );
+		foreach ( $postcodes as $key => $postcode ) {
+			$postcodes[ $key ] = strtoupper( trim( str_replace( chr( 226 ) . chr( 128 ) . chr( 166 ), '...', $postcode ) ) );
+		}
+		self::_update_tax_rate_locations( $tax_rate_id, array_diff( array_filter( $postcodes ), array( '*' ) ), 'postcode' );
 	}
 
 	/**
