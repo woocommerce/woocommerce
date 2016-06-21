@@ -1310,8 +1310,6 @@ class WC_Geo_IP {
 						|| ( $this->databaseType == self::GEOIP_ISP_EDITION_V6 )
 						|| ( $this->databaseType == self::GEOIP_LOCATIONA_EDITION )
 						|| ( $this->databaseType == self::GEOIP_ACCURACYRADIUS_EDITION )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV0_V6 )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1_V6 )
 						|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION_REV1 )
 						|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION_REV1_V6 )
 						|| ( $this->databaseType == self::GEOIP_USERTYPE_EDITION )
