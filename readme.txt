@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Zones - Match zones with postcodes but no country.
 * Tweak - Zones - Match zones with no regions as 'everywhere'.
 * Tweak - Validate price format for Flat Rate and Local Pickup.
+* Tweak - Added view_admin_dashboard cap for disabling the admin access restriction in custom roles.
 
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
