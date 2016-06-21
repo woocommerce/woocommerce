@@ -134,7 +134,7 @@ add_filter( 'loop_end', 'woocommerce_reset_loop' );
 
 /**
  * Products RSS Feed.
- *
+ * @deprecated 2.6
  * @access public
  */
 function wc_products_rss_feed() {

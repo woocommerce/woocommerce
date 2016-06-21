@@ -264,6 +264,11 @@ class WC_Query {
 			}
 		}
 
+		// Fix product feeds
+		if ( $q->is_feed() && $q->is_post_type_archive( 'product' ) ) {
+			$q->is_comment_feed = false;
+		}
+
 		// Special check for shops with the product archive on front
 		if ( $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 
