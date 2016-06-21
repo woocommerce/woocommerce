@@ -334,7 +334,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$default = array();
 
 		if ( $product->is_type( 'variable' ) ) {
-			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
+			foreach ( array_filter( (array) get_post_meta( $product->id, '_default_attributes', true ), 'strlen' ) as $key => $value ) {
 				if ( 0 === strpos( $key, 'pa_' ) ) {
 					$default[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $key ),
