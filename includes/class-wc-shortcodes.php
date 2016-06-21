@@ -60,7 +60,7 @@ class WC_Shortcodes {
 		$function,
 		$atts    = array(),
 		$wrapper = array(
-			'class'  => 'woocommerce',
+			'class'  => apply_filters('woocommerce_shortcode_class', 'woocommerce'),
 			'before' => null,
 			'after'  => null
 		)
