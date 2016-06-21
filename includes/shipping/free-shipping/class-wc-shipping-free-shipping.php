@@ -46,6 +46,18 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * @return array
 	 */
 	public function get_instance_form_fields() {
+		wc_enqueue_js( "
+			jQuery( function( $ ) {
+				$('#woocommerce_free_shipping_requires').change(function(){
+					if ( $(this).val() === 'coupon' || $(this).val() === '' ) {
+						$('#woocommerce_free_shipping_min_amount').closest('tr').hide();
+					} else {
+						$('#woocommerce_free_shipping_min_amount').closest('tr').show();
+					}
+				}).change();
+			});
+		" );
+
 		return array(
 			'title' => array(
 				'title' 		=> __( 'Title', 'woocommerce' ),
@@ -76,18 +88,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'desc_tip'		=> true
 			)
 		);
-
-		wc_enqueue_js( "
-			jQuery( function( $ ) {
-				$('#woocommerce_free_shipping_requires').change(function(){
-					if ( $(this).val() === 'coupon' || $(this).val() === '' ) {
-						$('#woocommerce_free_shipping_min_amount').closest('tr').hide();
-					} else {
-						$('#woocommerce_free_shipping_min_amount').closest('tr').show();
-					}
-				}).change();
-			});
-		" );
 	}
 
 	/**
