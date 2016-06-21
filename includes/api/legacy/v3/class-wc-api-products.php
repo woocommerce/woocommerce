@@ -2353,8 +2353,10 @@ class WC_API_Products extends WC_API_Resource {
 			'timeout' => 10
 		) );
 
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s', 'woocommerce' ), $image_url ), 400 );
+		if ( is_wp_error( $response ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), 400 );
+		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), 400 );
 		}
 
 		// Ensure we have a file name and type.
@@ -2455,6 +2457,23 @@ class WC_API_Products extends WC_API_Resource {
 	}
 
 	/**
+	 * Get attribute options.
+	 *
+	 * @param int $product_id
+	 * @param array $attribute
+	 * @return array
+	 */
+	protected function get_attribute_options( $product_id, $attribute ) {
+		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
+			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
+		} elseif ( isset( $attribute['value'] ) ) {
+			return array_map( 'trim', explode( '|', $attribute['value'] ) );
+		}
+
+		return array();
+	}
+
+	/**
 	 * Get the attributes for a product or product variation
 	 *
 	 * @since 2.1
@@ -2481,21 +2500,13 @@ class WC_API_Products extends WC_API_Resource {
 		} else {
 
 			foreach ( $product->get_attributes() as $attribute ) {
-
-				// taxonomy-based attributes are comma-separated, others are pipe (|) separated
-				if ( $attribute['is_taxonomy'] ) {
-					$options = explode( ',', $product->get_attribute( $attribute['name'] ) );
-				} else {
-					$options = explode( '|', $product->get_attribute( $attribute['name'] ) );
-				}
-
 				$attributes[] = array(
 					'name'      => wc_attribute_label( $attribute['name'], $product ),
 					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
 					'position'  => (int) $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
-					'options'   => array_map( 'trim', $options ),
+					'options'   => $this->get_attribute_options( $product->id, $attribute ),
 				);
 			}
 		}

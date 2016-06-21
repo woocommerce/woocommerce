@@ -47,9 +47,14 @@ class WC_Shortcode_My_Account {
 				wc_get_template( 'myaccount/form-login.php' );
 			}
 		 } else {
-			 wc_print_notices();
-			 ob_start();
-			 self::my_account( $atts );
+			// Start output buffer since the html may need discarding for BW compatibility
+			ob_start();
+
+			// Collect notices before output
+			$notices = wc_get_notices();
+
+			// Output the new account page
+			self::my_account( $atts );
 
 			/**
 			 * Deprecated my-account.php template handling. This code should be
@@ -64,7 +69,9 @@ class WC_Shortcode_My_Account {
 						continue;
 					}
 					if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
-						ob_clean();
+						ob_clean(); // Clear previous buffer
+						wc_set_notices( $notices );
+						wc_print_notices();
 						do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
 						break;
 					}
@@ -73,6 +80,7 @@ class WC_Shortcode_My_Account {
 				_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
 			}
 
+			// Send output buffer
 			ob_end_flush();
 		}
 	}

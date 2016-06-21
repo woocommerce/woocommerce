@@ -132,8 +132,14 @@ class WC_Shipping {
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
+			$status_options         = get_option( 'woocommerce_status_options', array() );
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
+
+			// Debug output
+			if ( ! empty( $status_options['shipping_debug_mode'] ) && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! wc_has_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' ) ) {
+				wc_add_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' );
+			}
 		} else {
 			$this->shipping_methods = array();
 		}
@@ -283,7 +289,7 @@ class WC_Shipping {
 
 				// If not set, not available, or available methods have changed, set to the DEFAULT option
 				if ( empty( $chosen_method ) || ! isset( $package['rates'][ $chosen_method ] ) || $method_count !== sizeof( $package['rates'] ) ) {
-					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], $chosen_method ), $package['rates'], $chosen_method );
+					$chosen_method        = apply_filters( 'woocommerce_shipping_chosen_method', $this->get_default_method( $package['rates'], false ), $package['rates'], $chosen_method );
 					$chosen_methods[ $i ] = $chosen_method;
 					$method_counts[ $i ]  = sizeof( $package['rates'] );
 					do_action( 'woocommerce_shipping_method_chosen', $chosen_method );

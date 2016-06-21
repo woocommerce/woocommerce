@@ -405,7 +405,7 @@ class WC_Coupon {
 	 * @throws Exception
 	 */
 	private function validate_maximum_amount() {
-		if ( $this->maximum_amount > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', wc_format_decimal( $this->maximum_amount ) <= WC()->cart->get_displayed_subtotal(), $this ) ) {
+		if ( $this->maximum_amount > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', wc_format_decimal( $this->maximum_amount ) < WC()->cart->get_displayed_subtotal(), $this ) ) {
 			throw new Exception( self::E_WC_COUPON_MAX_SPEND_LIMIT_MET );
 		}
 	}

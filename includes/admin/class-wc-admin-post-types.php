@@ -1508,80 +1508,22 @@ class WC_Admin_Post_Types {
 	 * @param WP_Query $wp
 	 */
 	public function shop_order_search_custom_fields( $wp ) {
-		global $pagenow, $wpdb;
+		global $pagenow;
 
 		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'shop_order' ) {
 			return;
 		}
 
-		$search_fields = array_map( 'wc_clean', apply_filters( 'woocommerce_shop_order_search_fields', array(
-			'_order_key',
-			'_billing_company',
-			'_billing_address_1',
-			'_billing_address_2',
-			'_billing_city',
-			'_billing_postcode',
-			'_billing_country',
-			'_billing_state',
-			'_billing_email',
-			'_billing_phone',
-			'_shipping_address_1',
-			'_shipping_address_2',
-			'_shipping_city',
-			'_shipping_postcode',
-			'_shipping_country',
-			'_shipping_state'
-		) ) );
+		$post_ids = wc_order_search( $_GET['s'] );
 
-		$search_order_id = str_replace( 'Order #', '', $_GET['s'] );
-
-		// Search orders
-		if ( is_numeric( $search_order_id ) ) {
-			$post_ids = array_unique( array_merge(
-				$wpdb->get_col(
-					$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%d%%';", absint( $search_order_id ) )
-				),
-				array( absint( $search_order_id ) )
-			) );
-		} elseif ( ! empty( $search_fields ) ) {
-			$post_ids = array_unique( array_merge(
-				$wpdb->get_col(
-					$wpdb->prepare( "
-						SELECT DISTINCT p1.post_id
-						FROM {$wpdb->postmeta} p1
-						INNER JOIN {$wpdb->postmeta} p2 ON p1.post_id = p2.post_id
-						WHERE
-							( p1.meta_key = '_billing_first_name' AND p2.meta_key = '_billing_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-						OR
-							( p1.meta_key = '_shipping_first_name' AND p2.meta_key = '_shipping_last_name' AND CONCAT(p1.meta_value, ' ', p2.meta_value) LIKE '%%%s%%' )
-						OR
-							( p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%s%%' )
-						",
-						wc_clean( $_GET['s'] ), wc_clean( $_GET['s'] ), wc_clean( $_GET['s'] )
-					)
-				),
-				$wpdb->get_col(
-					$wpdb->prepare( "
-						SELECT order_id
-						FROM {$wpdb->prefix}woocommerce_order_items as order_items
-						WHERE order_item_name LIKE '%%%s%%'
-						",
-						wc_clean( $_GET['s'] )
-					)
-				)
-			) );
-		} else {
-			$post_ids = false;
-		}
-
-		if ( is_array( $post_ids ) ) {
-			// Remove s - we don't want to search order name
+		if ( ! empty( $post_ids ) ) {
+			// Remove "s" - we don't want to search order name.
 			unset( $wp->query_vars['s'] );
 
-			// so we know we're doing this
+			// so we know we're doing this.
 			$wp->query_vars['shop_order_search'] = true;
 
-			// Search by found posts
+			// Search by found posts.
 			$wp->query_vars['post__in'] = array_merge( $post_ids, array( 0 ) );
 		}
 	}

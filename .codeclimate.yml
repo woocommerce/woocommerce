@@ -1,0 +1,34 @@
+engines:
+  phpcodesniffer:
+    enabled: true
+    config:
+      standard: "WordPress"
+  eslint:
+    enabled: true
+  scss-lint:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - php
+      - javascript
+exclude_paths:
+  - tests/*
+  - apigen/*
+  - dummy-data/*
+  - i18n/*
+  - includes/api/legacy/*
+  - includes/libraries/*
+  - includes/updates/*
+  - includes/gateways/simplify-commerce/*
+  - includes/shipping/legacy-*
+  - includes/wc-deprecated-functions.php
+  - includes/class-wc-legacy-api.php
+  - assets/js/accounting/**
+  - assets/js/jquery-*
+  - assets/js/prettyPhoto/*
+  - assets/js/round/*
+  - assets/js/select2/*
+  - assets/js/stupidtable/*
+  - assets/js/zeroclipboard/*

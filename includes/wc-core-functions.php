@@ -1229,17 +1229,19 @@ function wc_help_tip( $tip, $allow_html = false ) {
  * Return a list of potential postcodes for wildcard searching.
  * @since 2.6.0
  * @param  string $postcode
+ * @param  string $country to format postcode for matching.
  * @return string[]
  */
-function wc_get_wildcard_postcodes( $postcode ) {
-	$postcodes         = array( '*', strtoupper( $postcode ), strtoupper( $postcode ) . '*' );
-	$postcode_length   = strlen( $postcode );
-	$wildcard_postcode = strtoupper( $postcode );
+function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
+	$postcodes       = array( $postcode );
+	$postcode        = wc_format_postcode( $postcode, $country );
+	$postcodes[]     = $postcode;
+	$postcode_length = strlen( $postcode );
 
 	for ( $i = 0; $i < $postcode_length; $i ++ ) {
-		$wildcard_postcode = substr( $wildcard_postcode, 0, -1 );
-		$postcodes[] = $wildcard_postcode . '*';
+		$postcodes[] = substr( $postcode, 0, ( $i + 1 ) * -1 ) . '*';
 	}
+
 	return $postcodes;
 }
 
@@ -1248,14 +1250,15 @@ function wc_get_wildcard_postcodes( $postcode ) {
  * postcodes to find matches for numerical ranges, and wildcards.
  * @since 2.6.0
  * @param string $postcode Postcode you want to match against stored postcodes
- * @param array $objects Array of postcode objects from Database
+ * @param array  $objects Array of postcode objects from Database
  * @param string $object_id_key DB column name for the ID.
  * @param string $object_compare_key DB column name for the value.
+ * @param string $country Country from which this postcode belongs. Allows for formatting.
  * @return array Array of matching object ID and matching values.
  */
-function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key ) {
+function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $object_compare_key, $country = '' ) {
 	$postcode           = wc_normalize_postcode( $postcode );
-	$wildcard_postcodes = array_map( 'wc_clean', wc_get_wildcard_postcodes( $postcode ) );
+	$wildcard_postcodes = array_map( 'wc_clean', wc_get_wildcard_postcodes( $postcode, $country ) );
 	$matches            = array();
 
 	foreach ( $objects as $object ) {

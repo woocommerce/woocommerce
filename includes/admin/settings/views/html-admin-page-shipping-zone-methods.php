@@ -98,6 +98,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<article>
 					<form action="" method="post">
 						<div class="wc-shipping-zone-method-selector">
+							<p><?php esc_html_e( 'Choose the shipping method you wish to add. Only shipping methods which support zones are listed.', 'woocommerce' ); ?></p>
+
 							<select name="add_method_id">
 								<?php
 									foreach ( WC()->shipping->load_shipping_methods() as $method ) {

@@ -85,16 +85,27 @@ jQuery( function( $ ) {
 		} else {
 			$( 'table.shop_table.cart' ).closest( 'form' ).replaceWith( $new_form );
 			$( 'table.shop_table.cart' ).closest( 'form' ).find( 'input[name="update_cart"]' ).prop( 'disabled', true );
-			$( '.cart_totals' ).replaceWith( $new_totals );
 
 			if ( $error.length > 0 ) {
 				show_notice( $error );
 			} else if ( $message.length > 0 ) {
 				show_notice( $message );
 			}
+
+			update_cart_totals_div( $new_totals );
 		}
 
 		$( document.body ).trigger( 'updated_wc_div' );
+	};
+
+	/**
+	 * Update the .cart_totals div with a string of html.
+	 *
+	 * @param {String} html_str The HTML string with which to replace the div.
+	 */
+	var update_cart_totals_div = function( html_str ) {
+		$( '.cart_totals' ).replaceWith( html_str );
+		$( document.body ).trigger( 'updated_cart_totals' );
 	};
 
 	/**
@@ -158,7 +169,7 @@ jQuery( function( $ ) {
 		 * @param {Object} evt The JQuery event.
 		 */
 		shipping_method_selected: function( evt ) {
-			var target = evt.target;
+			var target = evt.currentTarget;
 
 			var shipping_methods = {};
 
@@ -173,9 +184,18 @@ jQuery( function( $ ) {
 				shipping_method: shipping_methods
 			};
 
-			$.post( get_url( 'update_shipping_method' ), data, function( response ) {
-				$( 'div.cart_totals' ).replaceWith( response );
-				$( document.body ).trigger( 'updated_shipping_method' );
+			$.ajax( {
+				type:     'post',
+				url:      get_url( 'update_shipping_method' ),
+				data:     data,
+				dataType: 'html',
+				success:  function( response ) {
+					update_cart_totals_div( response );
+				},
+				complete: function() {
+					unblock( $( 'div.cart_totals' ) );
+					$( document.body ).trigger( 'updated_shipping_method' );
+				}
 			} );
 		},
 
@@ -187,16 +207,16 @@ jQuery( function( $ ) {
 		shipping_calculator_submit: function( evt ) {
 			evt.preventDefault();
 
-			var $form = $( evt.target );
+			var $form = $( evt.currentTarget );
 
 			block( $form );
 			block( $( 'div.cart_totals' ) );
 
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
-											.attr( 'name', 'calc_shipping' )
-											.attr( 'value', 'x' )
-											.appendTo( $form );
+							.attr( 'name', 'calc_shipping' )
+							.attr( 'value', 'x' )
+							.appendTo( $form );
 
 			// Make call to actual form post URL.
 			$.ajax( {
@@ -300,9 +320,11 @@ jQuery( function( $ ) {
 			$.ajax( {
 				url:      get_url( 'get_cart_totals' ),
 				dataType: 'html',
-				success: function( response ) {
-					$( 'div.cart_totals' ).replaceWith( response );
-					$( document.body ).trigger( 'updated_cart_totals' );
+				success:  function( response ) {
+					update_cart_totals_div( response );
+				},
+				complete: function() {
+					unblock( $( 'div.cart_totals' ) );
 				}
 			} );
 		},
@@ -313,9 +335,7 @@ jQuery( function( $ ) {
 		 * @param {Object} evt The JQuery event
 		 */
 		cart_submit: function( evt ) {
-			evt.preventDefault();
-
-			var $form = $( evt.target );
+			var $form = $( evt.currentTarget );
 			var $submit = $( document.activeElement );
 			var $clicked = $( 'input[type=submit][clicked=true]' );
 
@@ -327,9 +347,11 @@ jQuery( function( $ ) {
 			}
 
 			if ( $clicked.is( '[name="update_cart"]' ) || $submit.is( 'input.qty' ) ) {
+				evt.preventDefault();
 				this.quantity_update( $form );
 
 			} else if ( $clicked.is( '[name="apply_coupon"]' ) || $submit.is( '#coupon_code' ) ) {
+				evt.preventDefault();
 				this.apply_coupon( $form );
 			}
 		},
@@ -387,8 +409,8 @@ jQuery( function( $ ) {
 			evt.preventDefault();
 
 			var cart = this;
-			var $tr = $( evt.target ).parents( 'tr' );
-			var coupon = $( evt.target ).attr( 'data-coupon' );
+			var $tr = $( evt.currentTarget ).parents( 'tr' );
+			var coupon = $( evt.currentTarget ).attr( 'data-coupon' );
 
 			block( $tr.parents( 'table' ) );
 
@@ -450,7 +472,7 @@ jQuery( function( $ ) {
 		item_remove_clicked: function( evt ) {
 			evt.preventDefault();
 
-			var $a = $( evt.target );
+			var $a = $( evt.currentTarget );
 			var $form = $a.parents( 'form' );
 
 			block( $form );

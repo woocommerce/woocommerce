@@ -82,6 +82,7 @@ class WC_Install {
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'init_background_updater' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'in_plugin_update_message-woocommerce/woocommerce.php', array( __CLASS__, 'in_plugin_update_message' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -89,8 +90,13 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
+	}
 
-		// Init background updates
+	/**
+	 * Init background updates
+	 */
+	public static function init_background_updater() {
+		include_once( 'class-wc-background-updater.php' );
 		self::$background_updater = new WC_Background_Updater();
 	}
 
@@ -115,6 +121,10 @@ class WC_Install {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
+		}
+		if ( ! empty( $_GET['force_update_woocommerce'] ) ) {
+			do_action( 'wp_wc_updater_cron' );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
 		}
 	}
 
@@ -550,7 +560,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokenmeta (
   meta_value longtext NULL,
   PRIMARY KEY  (meta_id),
   KEY payment_token_id (payment_token_id),
-  KEY meta_key (meta_key)
+  KEY meta_key (meta_key($max_index_length))
 ) $collate;
 		";
 

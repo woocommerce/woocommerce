@@ -62,6 +62,9 @@ class WC_Shortcode_Cart {
 		// Update Shipping
 		if ( ! empty( $_POST['calc_shipping'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce-cart' ) ) {
 			self::calculate_shipping();
+
+			// Also calc totals before we check items so subtotals etc are up to date
+			WC()->cart->calculate_totals();
 		}
 
 		// Check cart items are valid

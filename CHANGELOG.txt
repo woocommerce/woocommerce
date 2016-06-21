@@ -1,5 +1,25 @@
 == Changelog ==
 
+= 2.6.1 - 16/06/16 =
+* Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
+* Fix - Improved the hour and time fields validation pattern on the orders screen.
+* Fix - PayPal does not allow free products, but paid shipping. Workaround by sending shipping as a line item if it is the only cost.
+* Fix - SKUs prop on products shortcode.
+* Fix - Layered nav counts when term_id does not match term_taxonomy_id (before splitting).
+* Fix - Fixed referer links from cart messages in WP 4.4.
+* Fix - Fix the showing/hiding of panels when terms do not exist by using wc_get_product_types() for retrieving product types.
+* Dev - content-product.php and content-product_cat.php contained the wrong version.
+* Dev - Show "matching zone" notice on the frontend when shipping debug mode is on.
+* Dev - Restored missing WC_Settings_API::init_form_fields() method to prevent potential errors in 3rd party gateways.
+* Dev - API - Fixed returned data from product images (changed `title` to `name`).
+* Dev - API - Fixed products schema for `grouped_products`.
+* Dev - API - Fixed products attribute options when contains `,`.
+* Tweak - Hide 'payment methods' screen if no methods support it.
+* Tweak - If shipping method count changes, reset to default.
+* Tweak - Avoid normalization of zone postcodes so wildcard matching can be performed on postcodes with spaces. E.g. SP1 *
+* Tweak - Allow max_fee in addition to min_fee in flat rate costs fields.
+* Tweak - Wrap order_schema_markup() output in hidden div in case script tag is stripped.
+
 = 2.6.0 - 14/06/16 =
 * Feature - Introduced Shipping Zone functionality, and re-usable instance based shipping methods.
 * Feature - Tabbed "My Account" area.
@@ -25,6 +45,7 @@
 * Tweak - Ignore catalog visibility on products shortcode when specifying IDs or SKUs.
 * Tweak - Added context to checkout error messages.
 * Tweak - Added SKU field to grouped products.
+* Tweak - Moved SKU field to inventory tab.
 * Tweak - Support qty display in cart messages.
 * Tweak - Hide min order amount field when not needed in shipping settings.
 * Tweak - If shipping < 999.99, use 'shipping' arg when passing values to PayPal.

@@ -20,10 +20,8 @@ add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
 /**
  * WP Header.
  *
- * @see  wc_products_rss_feed()
  * @see  wc_generator_tag()
  */
-add_action( 'wp_head', 'wc_products_rss_feed' );
 add_action( 'get_the_generator_html', 'wc_generator_tag', 10, 2 );
 add_action( 'get_the_generator_xhtml', 'wc_generator_tag', 10, 2 );
 

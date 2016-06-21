@@ -30,38 +30,47 @@ class WC_Background_Updater extends WP_Background_Process {
 	protected $action = 'wc_updater';
 
 	/**
-	 * @var string
-	 */
-	protected $error = '';
-
-	/**
 	 * Dispatch updater.
 	 *
 	 * Updater will still run via cron job if this fails for any reason.
 	 */
 	public function dispatch() {
 		$dispatched = parent::dispatch();
+		$logger     = new WC_Logger();
 
 		if ( is_wp_error( $dispatched ) ) {
-			$this->error = $dispatched->get_error_message();
-			add_action( 'admin_notices', array( $this, 'dispatch_error' ) );
+			$logger->add( 'wc_db_updates', sprintf( 'Unable to dispatch WooCommerce updater: %s', $dispatched->get_error_message() ) );
 		}
 	}
 
 	/**
-	 * Schedule event
+	 * Handle cron healthcheck
+	 *
+	 * Restart the background process if not already running
+	 * and data exists in the queue.
+	 */
+	public function handle_cron_healthcheck() {
+		if ( $this->is_process_running() ) {
+			// Background process already running.
+			return;
+		}
+
+		if ( $this->is_queue_empty() ) {
+			// No data to process.
+			$this->clear_scheduled_event();
+			return;
+		}
+
+		$this->handle();
+	}
+
+	/**
+	 * Schedule fallback event.
 	 */
 	protected function schedule_event() {
 		if ( ! wp_next_scheduled( $this->cron_hook_identifier ) ) {
 			wp_schedule_event( time() + 10, $this->cron_interval_identifier, $this->cron_hook_identifier );
 		}
-	}
-
-	/**
-	 * Error shown when the updater cannot dispatch.
-	 */
-	public function dispatch_error() {
-		echo '<div class="error"><p>' . __( 'Unable to dispatch WooCommerce updater:', 'woocommerce' ) . ' ' . esc_html( $this->error ) . '</p></div>';
 	}
 
 	/**

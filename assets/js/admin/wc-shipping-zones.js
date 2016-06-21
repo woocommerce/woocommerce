@@ -219,7 +219,7 @@
 							$method_list.prepend( '<li class="wc-shipping-zone-method"><a href="admin.php?page=wc-settings&amp;tab=shipping&amp;instance_id=' + instance_id + '" class="' + class_name + '">' + shipping_method.title + '</a></li>' );
 						} );
 					} else {
-						$method_list.prepend( '<li class="wc-shipping-zone-method">&ndash;</li>' );
+						$method_list.prepend( '<li class="wc-shipping-zone-method">' + data.strings.no_shipping_methods_offered + '</li>' );
 					}
 				},
 				onSubmit: function( event ) {

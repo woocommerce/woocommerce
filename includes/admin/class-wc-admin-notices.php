@@ -191,10 +191,10 @@ class WC_Admin_Notices {
 	public static function update_notice() {
 		if ( version_compare( get_option( 'woocommerce_db_version' ), WC_VERSION, '<' ) ) {
 			$updater = new WC_Background_Updater();
-			if ( ! $updater->is_updating() ) {
-				include( 'views/html-notice-update.php' );
-			} else {
+			if ( $updater->is_updating() || ! empty( $_GET['do_update_woocommerce'] ) ) {
 				include( 'views/html-notice-updating.php' );
+			} else {
+				include( 'views/html-notice-update.php' );
 			}
 		} else {
 			include( 'views/html-notice-updated.php' );

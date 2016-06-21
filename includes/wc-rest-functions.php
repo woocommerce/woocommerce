@@ -21,28 +21,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * See https://developer.wordpress.org/reference/functions/mysql_to_rfc3339/
  *
  * @since 2.6.0
- * @param string       $date_gmt
- * @param string|null  $date
+ * @param string       $date
  * @return string|null ISO8601/RFC3339 formatted datetime.
  */
-function wc_rest_prepare_date_response( $date_gmt, $date = null ) {
+function wc_rest_prepare_date_response( $date ) {
 	// Check if mysql_to_rfc3339 exists first!
 	if ( ! function_exists( 'mysql_to_rfc3339' ) ) {
 		return null;
 	}
 
-	// Use the date if passed.
-	if ( isset( $date ) ) {
-		return mysql_to_rfc3339( $date );
-	}
-
-	// Return null if $date_gmt is empty/zeros.
-	if ( '0000-00-00 00:00:00' === $date_gmt ) {
+	// Return null if $date is empty/zeros.
+	if ( '0000-00-00 00:00:00' === $date ) {
 		return null;
 	}
 
 	// Return the formatted datetime.
-	return mysql_to_rfc3339( $date_gmt );
+	return mysql_to_rfc3339( $date );
 }
 
 /**
@@ -70,7 +64,9 @@ function wc_rest_upload_image_from_url( $image_url ) {
 		'timeout' => 10
 	) );
 
-	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+	if ( is_wp_error( $response ) ) {
+		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), array( 'status' => 400 ) );
+	} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 	}
 
@@ -172,7 +168,7 @@ function wc_rest_validate_reports_request_arg( $value, $request, $param ) {
 		return new WP_Error( 'woocommerce_rest_invalid_param', sprintf( __( '%1$s is not of type %2$s', 'woocommerce' ), $param, 'string' ) );
 	}
 
-	if ( 'data' === $args['format'] ) {
+	if ( 'date' === $args['format'] ) {
 		$regex = '#^\d{4}-\d{2}-\d{2}$#';
 
 		if ( ! preg_match( $regex, $value, $matches ) ) {

@@ -39,7 +39,7 @@ return apply_filters( 'woocommerce_tax_settings', array(
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
 		'css'      => 'min-width:150px;',
-		'default'  => 'title',
+		'default'  => '',
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
 		'options'  => array( '' => __( 'Shipping tax class based on cart items', 'woocommerce' ), 'standard' => __( 'Standard', 'woocommerce' ) ) + $classes_options,

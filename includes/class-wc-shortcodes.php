@@ -348,14 +348,14 @@ class WC_Shortcodes {
 			);
 
 			// Ignore catalog visibility
-			$query_args['meta_query'] = WC()->query->stock_status_meta_query();
+			$query_args['meta_query'] = array_merge( $query_args['meta_query'], WC()->query->stock_status_meta_query() );
 		}
 
 		if ( ! empty( $atts['ids'] ) ) {
 			$query_args['post__in'] = array_map( 'trim', explode( ',', $atts['ids'] ) );
 
 			// Ignore catalog visibility
-			$query_args['meta_query'] = WC()->query->stock_status_meta_query();
+			$query_args['meta_query'] = array_merge( $query_args['meta_query'], WC()->query->stock_status_meta_query() );
 		}
 
 		return self::product_loop( $query_args, $atts, 'products' );
