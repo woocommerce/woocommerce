@@ -914,7 +914,7 @@ class WC_API_Products extends WC_API_Resource {
 						$attributes[ $taxonomy ] = array(
 							'name'         => $taxonomy,
 							'value'        => '',
-							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+							'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
 							'is_taxonomy'  => $is_taxonomy
@@ -935,7 +935,7 @@ class WC_API_Products extends WC_API_Resource {
 					$attributes[ $attribute_slug ] = array(
 						'name'         => wc_clean( $attribute['name'] ),
 						'value'        => $values,
-						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+						'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
 						'is_taxonomy'  => $is_taxonomy
