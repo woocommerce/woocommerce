@@ -15,7 +15,7 @@ $settings = array(
 		'type' 			=> 'text',
 		'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 		'default'		=> __( 'Flat Rate', 'woocommerce' ),
-		'desc_tip'		=> true
+		'desc_tip'		=> true,
 	),
 	'tax_status' => array(
 		'title' 		=> __( 'Tax Status', 'woocommerce' ),
@@ -24,16 +24,16 @@ $settings = array(
 		'default' 		=> 'taxable',
 		'options'		=> array(
 			'taxable' 	=> __( 'Taxable', 'woocommerce' ),
-			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' )
-		)
+			'none' 		=> _x( 'None', 'Tax status', 'woocommerce' ),
+		),
 	),
 	'cost' => array(
 		'title' 		=> __( 'Cost', 'woocommerce' ),
-		'type' 			=> 'text',
+		'type' 			=> 'price',
 		'placeholder'	=> '',
 		'description'	=> $cost_desc,
 		'default'		=> '0',
-		'desc_tip'		=> true
+		'desc_tip'		=> true,
 	)
 );
 
