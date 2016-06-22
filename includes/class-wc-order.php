@@ -96,16 +96,23 @@ class WC_Order extends WC_Abstract_Order {
 	 * Sales are also recorded for products.
 	 * Finally, record the date of payment.
 	 *
+	 * Order must exist.
+	 *
 	 * @param string $transaction_id Optional transaction id to store in post meta.
+	 * @return bool success
 	 */
 	public function payment_complete( $transaction_id = '' ) {
+		if ( ! $this->get_id() ) {
+			return false;
+		}
+
 		do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
 		if ( ! empty( WC()->session ) ) {
 			WC()->session->set( 'order_awaiting_payment', false );
 		}
 
-		if ( $this->get_id() && $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
+		if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
 			$order_needs_processing = false;
 
 			if ( sizeof( $this->get_items() ) > 0 ) {
@@ -133,6 +140,8 @@ class WC_Order extends WC_Abstract_Order {
 		} else {
 			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
 		}
+
+		return true;
 	}
 
 	/**
@@ -377,7 +386,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Updates status of order immediately.
+	 * Updates status of order immediately. Order must exist.
 	 * @uses WC_Order::set_status()
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {

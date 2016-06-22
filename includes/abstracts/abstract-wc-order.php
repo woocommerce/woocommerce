@@ -33,7 +33,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $_data = array(
 		'id'                 => 0,
 		'parent_id'          => 0,
-		'status'             => '',
+		'status'             => 'pending',
 		'type'               => 'shop_order',
 		'order_key'          => '',
 		'currency'           => '',
