@@ -849,7 +849,7 @@ function wc_create_refund( $args = array() ) {
 		$order  = wc_get_order( $args['order_id'] );
 
 		// Refund currency is the same used for the parent order
-		update_post_meta( $refund_id, '_order_currency', $order->get_order_currency() );
+		update_post_meta( $refund_id, '_order_currency', $order->get_currency() );
 
 		// Negative line items
 		if ( sizeof( $args['line_items'] ) > 0 ) {
@@ -906,7 +906,7 @@ function wc_create_refund( $args = array() ) {
 		$refund->calculate_totals( false );
 
 		// Set total to total refunded which may vary from order items
-		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1, 'total' );
+		$refund->set_total( wc_format_decimal( $args['amount'] ) * -1 );
 
 		do_action( 'woocommerce_refund_created', $refund_id, $args );
 	}

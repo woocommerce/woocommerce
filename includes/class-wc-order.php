@@ -1195,7 +1195,7 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
-	 * Adds a note (comment) to the order.
+	 * Adds a note (comment) to the order. Order must exist.
 	 *
 	 * @param string $note Note to add.
 	 * @param int $is_customer_note (default: 0) Is this a note for the customer?
@@ -1203,6 +1203,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int Comment ID.
 	 */
 	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false ) {
+		if ( ! $this->get_id() ) {
+			return 0;
+		}
+
 		if ( is_user_logged_in() && current_user_can( 'edit_shop_order', $this->get_id() ) && $added_by_user ) {
 			$user                 = get_user_by( 'id', get_current_user_id() );
 			$comment_author       = $user->display_name;
@@ -1278,13 +1282,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return array of WC_Order_Refund objects
 	 */
 	public function get_refunds() {
-		if ( empty( $this->refunds ) || ! is_array( $this->refunds ) ) {
-			$this->refunds = wc_get_orders( array(
-				'type'   => 'shop_order_refund',
-				'parent' => $this->get_id(),
-				'limit'  => -1,
-			) );
-		}
+		$this->refunds = wc_get_orders( array(
+			'type'   => 'shop_order_refund',
+			'parent' => $this->get_id(),
+			'limit'  => -1,
+		) );
 		return $this->refunds;
 	}
 

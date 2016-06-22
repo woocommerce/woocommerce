@@ -44,11 +44,11 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
-     * Read from the database.
-     * @since 2.7.0
-     * @param int $id ID of object to read.
-     */
-    public function read( $id ) {
+	 * Read from the database.
+	 * @since 2.7.0
+	 * @param int $id ID of object to read.
+	 */
+	public function read( $id ) {
 		parent::read( $id );
 
 		// Read additonal order data
@@ -153,39 +153,39 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
-     * Magic __get method for backwards compatibility.
-     * @param string $key
-     * @return mixed
-     */
-    public function __get( $key ) {
+	 * Magic __get method for backwards compatibility.
+	 * @param string $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
 		_doing_it_wrong( $key, 'Refund properties should not be accessed directly.', '2.7' );
 
-        /**
-         * Maps legacy vars to new getters.
-         */
-        if ( 'reason' === $key ) {
-            return $this->get_refund_reason();
+		/**
+		 * Maps legacy vars to new getters.
+		 */
+		if ( 'reason' === $key ) {
+			return $this->get_refund_reason();
 		} elseif ( 'refund_amount' === $key ) {
-            return $this->get_refund_amount();
+			return $this->get_refund_amount();
 		}
 		return parent::__get( $key );
 	}
 
 	/**
-     * Gets an refund from the database.
-     * @deprecated 2.7
-     * @param int $id (default: 0).
-     * @return bool
-     */
-    public function get_refund( $id = 0 ) {
-        _deprecated_function( 'get_refund', '2.7', 'read' );
-        if ( ! $id ) {
-            return false;
-        }
-        if ( $result = get_post( $id ) ) {
-            $this->populate( $result );
-            return true;
-        }
-        return false;
-    }
+	 * Gets an refund from the database.
+	 * @deprecated 2.7
+	 * @param int $id (default: 0).
+	 * @return bool
+	 */
+	public function get_refund( $id = 0 ) {
+		_deprecated_function( 'get_refund', '2.7', 'read' );
+		if ( ! $id ) {
+			return false;
+		}
+		if ( $result = get_post( $id ) ) {
+			$this->populate( $result );
+			return true;
+		}
+		return false;
+	}
 }

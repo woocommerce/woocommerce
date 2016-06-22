@@ -566,7 +566,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$this->assertFalse( $object->needs_shipping_address() );
 
-		// @todo
+		$object = WC_Helper_Order::create_order();
+		$this->assertTrue( $object->needs_shipping_address() );
 	}
 
 	/**
@@ -576,7 +577,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$this->assertFalse( $object->has_downloadable_item() );
 
-		// @todo
+		$object = WC_Helper_Order::create_order();
+		$this->assertFalse( $object->has_downloadable_item() );
 	}
 
 	/**
@@ -645,5 +647,151 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$id     = $object->save();
 		$this->assertEquals( '?view-order=' . $id, $object->get_view_order_url() );
+	}
+
+	/**
+	 * Test: add_order_note
+	 */
+	function test_add_order_note() {
+		$object     = new WC_Order();
+		$id         = $object->save();
+		$comment_id = $object->add_order_note( "Hello, I am a fish" );
+		$this->assertTrue( $comment_id > 0 );
+
+		$comment = get_comment( $comment_id );
+		$this->assertEquals( "Hello, I am a fish", $comment->comment_content );
+	}
+
+	/**
+	 * Test: get_customer_order_notes
+	 */
+	function test_get_customer_order_notes() {
+		$object     = new WC_Order();
+		$id         = $object->save();
+
+		$this->assertCount( 0, $object->get_customer_order_notes() );
+
+		$object->add_order_note( "Hello, I am a fish", true );
+		$object->add_order_note( "Hello, I am a fish", false );
+		$object->add_order_note( "Hello, I am a fish", true );
+
+		$this->assertCount( 2, $object->get_customer_order_notes() );
+	}
+
+	/**
+	 * Test: get_refunds
+	 */
+	function test_get_refunds() {
+		$object     = new WC_Order();
+		$id         = $object->save();
+
+		$this->assertCount( 0, $object->get_refunds() );
+
+		wc_create_refund( array(
+			'order_id'   => $id,
+			'amount'     => '100',
+			'line_items' => array(),
+		) );
+
+		$this->assertCount( 1, $object->get_refunds() );
+	}
+
+	/**
+	 * Test: get_total_refunded
+	 */
+	function test_get_total_refunded() {
+		$object = new WC_Order();
+		$object->set_total( 400 );
+		$id     = $object->save();
+		wc_create_refund( array(
+			'order_id'   => $id,
+			'amount'     => '100',
+			'line_items' => array(),
+		) );
+		wc_create_refund( array(
+			'order_id'   => $id,
+			'amount'     => '100',
+			'line_items' => array(),
+		) );
+		$this->assertEquals( 200, $object->get_total_refunded() );
+	}
+
+	/**
+	 * Test: get_total_tax_refunded
+	 */
+	function test_get_total_tax_refunded() {
+		$object = new WC_Order();
+		$this->assertEquals( 0, $object->get_total_tax_refunded() );
+	}
+
+	/**
+	 * Test: get_total_shipping_refunded
+	 */
+	function test_get_total_shipping_refunded() {
+		$object = new WC_Order();
+		$this->assertEquals( 0, $object->get_total_shipping_refunded() );
+	}
+
+	/**
+	 * Test: get_total_shipping_refunded
+	 */
+	function test_get_total_qty_refunded() {
+		$object = new WC_Order();
+		$this->assertEquals( 0, $object->get_total_shipping_refunded() );
+	}
+
+	/**
+	 * Test: get_qty_refunded_for_item
+	 */
+	function test_get_qty_refunded_for_item() {
+		$object = new WC_Order();
+		$this->assertEquals( 0, $object->get_qty_refunded_for_item( 2 ) );
+	}
+
+	/**
+	 * Test: test_get_total_refunded_for_item
+	 */
+	function test_get_total_refunded_for_item() {
+		$object = new WC_Order();
+		$this->assertEquals( 0, $object->get_total_refunded_for_item( 2 ) );
+	}
+
+	/**
+	 * Test: get_tax_refunded_for_item
+	 */
+	function test_get_tax_refunded_for_item() {
+		$object = new WC_Order();
+		$this->assertEquals( 0, $object->get_tax_refunded_for_item( 1, 1 ) );
+	}
+
+	/**
+	 * Test: get_total_tax_refunded_by_rate_id
+	 */
+	function test_get_total_tax_refunded_by_rate_id() {
+		$object = new WC_Order();
+		$this->assertEquals( 0, $object->get_total_tax_refunded_by_rate_id( 2 ) );
+	}
+
+	/**
+	 * Test: get_remaining_refund_amount
+	 */
+	function test_get_remaining_refund_amount() {
+		$object = new WC_Order();
+		$object->set_total( 400 );
+		$id     = $object->save();
+		wc_create_refund( array(
+			'order_id'   => $id,
+			'amount'     => '100',
+			'line_items' => array(),
+		) );
+		$this->assertEquals( 300, $object->get_remaining_refund_amount() );
+	}
+
+	/**
+	 * Test: get_total_tax_refunded_by_rate_id
+	 */
+	function test_get_remaining_refund_items() {
+		$object = WC_Helper_Order::create_order();
+		$this->assertEquals( 4, $object->get_remaining_refund_items() );
 	}
 }

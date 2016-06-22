@@ -175,6 +175,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Map standard post data
 		$this->set_id( $order_id );
+		$this->set_parent_id( $post_object->post_parent );
 		$this->set_date_created( $post_object->post_date );
 		$this->set_date_modified( $post_object->post_modified );
 		$this->set_status( $post_object->post_status );
