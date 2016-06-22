@@ -1008,7 +1008,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * See if order matches cart_hash.
 	 * @return bool
 	 */
-	public function has_cart_hash( $cart_hash ) {
+	public function has_cart_hash( $cart_hash = '' ) {
 		return hash_equals( $this->get_cart_hash(), $cart_hash );
 	}
 

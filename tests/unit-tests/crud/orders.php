@@ -514,4 +514,136 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->set_shipping_country( 'US' );
 		$this->assertEquals( 'Barney Rubble<br/>Bedrock Ltd.<br/>34 Stonepants avenue<br/>Rockville<br/>Bedrock, BOULDER 00001<br/>United States (US)', $object->get_formatted_shipping_address() );
 	}
+
+	/**
+	 * Test: has_cart_hash
+	 */
+	function test_has_cart_hash() {
+		$object = new WC_Order();
+		$this->assertFalse( $object->has_cart_hash( '12345' ) );
+		$set_to = '12345';
+		$object->set_cart_hash( $set_to );
+		$this->assertTrue( $object->has_cart_hash( '12345' ) );
+	}
+
+	/**
+	 * Test: is_editable
+	 */
+	function test_is_editable() {
+		$object = new WC_Order();
+		$object->set_status( 'pending' );
+		$this->assertTrue( $object->is_editable() );
+		$object->set_status( 'processing' );
+		$this->assertFalse( $object->is_editable() );
+	}
+
+	/**
+	 * Test: is_paid
+	 */
+	function test_is_paid() {
+		$object = new WC_Order();
+		$object->set_status( 'pending' );
+		$this->assertFalse( $object->is_paid() );
+		$object->set_status( 'processing' );
+		$this->assertTrue( $object->is_paid() );
+	}
+
+	/**
+	 * Test: is_download_permitted
+	 */
+	function test_is_download_permitted() {
+		$object = new WC_Order();
+		$object->set_status( 'pending' );
+		$this->assertFalse( $object->is_download_permitted() );
+		$object->set_status( 'completed' );
+		$this->assertTrue( $object->is_download_permitted() );
+	}
+
+	/**
+	 * Test: needs_shipping_address
+	 */
+	function test_needs_shipping_address() {
+		$object = new WC_Order();
+		$this->assertFalse( $object->needs_shipping_address() );
+
+		// @todo
+	}
+
+	/**
+	 * Test: has_downloadable_item
+	 */
+	function test_has_downloadable_item() {
+		$object = new WC_Order();
+		$this->assertFalse( $object->has_downloadable_item() );
+
+		// @todo
+	}
+
+	/**
+	 * Test: needs_payment
+	 */
+	function test_needs_payment() {
+		$object = new WC_Order();
+
+		$object->set_status( 'pending' );
+		$this->assertFalse( $object->needs_payment() );
+
+		$object->set_total( 100 );
+		$this->assertTrue( $object->needs_payment() );
+
+		$object->set_status( 'processing' );
+		$this->assertFalse( $object->needs_payment() );
+	}
+
+	/**
+	 * Test: get_checkout_payment_url
+	 */
+	function test_get_checkout_payment_url() {
+		$object = new WC_Order();
+		$id     = $object->save();
+		$this->assertEquals( '?order-pay=' . $id . '&pay_for_order=true&key=' . $object->get_order_key(), $object->get_checkout_payment_url() );
+	}
+
+	/**
+	 * Test: get_checkout_order_received_url
+	 */
+	function test_get_checkout_order_received_url() {
+		$object = new WC_Order();
+		$object->set_order_key( 'xxx' );
+		$id     = $object->save();
+		$this->assertEquals( '?order-received=' . $id . '&key=' . $object->get_order_key(), $object->get_checkout_order_received_url() );
+	}
+
+	/**
+	 * Test: get_cancel_order_url
+	 */
+	function test_get_cancel_order_url() {
+		$object = new WC_Order();
+		$this->assertInternalType( 'string', $object->get_cancel_order_url() );
+	}
+
+	/**
+	 * Test: get_cancel_order_url_raw
+	 */
+	function test_get_cancel_order_url_raw() {
+		$object = new WC_Order();
+		$this->assertInternalType( 'string', $object->get_cancel_order_url_raw() );
+	}
+
+	/**
+	 * Test: get_cancel_endpoint
+	 */
+	function test_get_cancel_endpoint() {
+		$object = new WC_Order();
+		$this->assertEquals( 'http://example.org/', $object->get_cancel_endpoint() );
+	}
+
+	/**
+	 * Test: get_view_order_url
+	 */
+	function test_get_view_order_url() {
+		$object = new WC_Order();
+		$id     = $object->save();
+		$this->assertEquals( '?view-order=' . $id, $object->get_view_order_url() );
+	}
 }
