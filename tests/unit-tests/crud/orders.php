@@ -15,6 +15,227 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: get_type
+	 */
+	function test_get_order_type() {
+		$object = new WC_Order();
+		$id = $object->save();
+		$this->assertEquals( 'shop_order', $object->get_order_type() );
+	}
+
+	/**
+	 * Test: get_data
+	 */
+	function test_get_data() {
+		$object = new WC_Order();
+		$this->assertInternalType( 'array', $object->get_data() );
+	}
+
+	/**
+	 * Test: get_id
+	 */
+	function test_get_id() {
+		$object = new WC_Order();
+		$id = $object->save();
+		$this->assertEquals( $id, $object->get_id() );
+	}
+
+	/**
+	 * Test: get_parent_id
+	 */
+	function test_get_parent_id() {
+		$object = new WC_Order();
+		$set_to = 100;
+		$object->set_parent_id( $set_to );
+		$this->assertEquals( $set_to, $object->get_parent_id() );
+	}
+
+	/**
+	 * Test: get_order_number
+	 */
+	function test_get_order_number() {
+		$object = new WC_Order();
+		$id     = $object->save();
+		$this->assertEquals( $id, $object->get_order_number() );
+	}
+
+	/**
+	 * Test: get_order_key
+	 */
+	function test_get_order_key() {
+		$object = new WC_Order();
+		$set_to = 'some_key';
+		$object->set_order_key( $set_to );
+		$this->assertEquals( $set_to, $object->get_order_key() );
+	}
+
+	/**
+	 * Test: get_currency
+	 */
+	function test_get_currency() {
+		$object = new WC_Order();
+		$set_to = 'USD';
+		$object->set_currency( $set_to );
+		$this->assertEquals( $set_to, $object->get_currency() );
+	}
+
+	/**
+	 * Test: get_version
+	 */
+	function test_get_version() {
+		$object = new WC_Order();
+		$set_to = '2.7.0';
+		$object->set_version( $set_to );
+		$this->assertEquals( $set_to, $object->get_version() );
+	}
+
+	/**
+	 * Test: get_prices_include_tax
+	 */
+	function test_get_prices_include_tax() {
+		$object = new WC_Order();
+		$set_to = 'USD';
+		$object->set_prices_include_tax( 1 );
+		$this->assertEquals( true, $object->get_prices_include_tax() );
+	}
+
+	/**
+	 * Test: get_date_created
+	 */
+	function test_get_date_created() {
+		$object = new WC_Order();
+		$object->set_date_created( '2016-12-12' );
+		$this->assertEquals( '1481500800', $object->get_date_created() );
+
+		$object->set_date_created( '1481500800' );
+		$this->assertEquals( 1481500800, $object->get_date_created() );
+	}
+
+	/**
+	 * Test: get_date_modified
+	 */
+	function test_get_date_modified() {
+		$object = new WC_Order();
+		$object->set_date_modified( '2016-12-12' );
+		$this->assertEquals( '1481500800', $object->get_date_modified() );
+
+		$object->set_date_modified( '1481500800' );
+		$this->assertEquals( 1481500800, $object->get_date_modified() );
+	}
+
+	/**
+	 * Test: get_customer_id
+	 */
+	function test_get_customer_id() {
+		$object = new WC_Order();
+		$set_to = 10;
+		$object->set_customer_id( $set_to );
+		$this->assertEquals( $set_to, $object->get_customer_id() );
+	}
+
+	/**
+	 * Test: get_user
+	 */
+	function test_get_user() {
+		$object = new WC_Order();
+		$this->assertEquals( false, $object->get_user() );
+		$set_to = '1';
+		$object->set_customer_id( $set_to );
+		$this->assertInstanceOf( 'WP_User', $object->get_user() );
+	}
+
+	/**
+	 * Test: get_discount_total
+	 */
+	function test_get_discount_total() {
+		$object = new WC_Order();
+		$object->set_discount_total( 50 );
+		$this->assertEquals( 50, $object->get_discount_total() );
+	}
+
+	/**
+	 * Test: get_discount_tax
+	 */
+	function test_get_discount_tax() {
+		$object = new WC_Order();
+		$object->set_discount_tax( 5 );
+		$this->assertEquals( 5, $object->get_discount_tax() );
+	}
+
+	/**
+	 * Test: get_shipping_total
+	 */
+	function test_get_shipping_total() {
+		$object = new WC_Order();
+		$object->set_shipping_total( 5 );
+		$this->assertEquals( 5, $object->get_shipping_total() );
+	}
+
+	/**
+	 * Test: get_shipping_tax
+	 */
+	function test_get_shipping_tax() {
+		$object = new WC_Order();
+		$object->set_shipping_tax( 5 );
+		$this->assertEquals( 5, $object->get_shipping_tax() );
+	}
+
+	/**
+	 * Test: get_cart_tax
+	 */
+	function test_get_cart_tax() {
+		$object = new WC_Order();
+		$object->set_cart_tax( 5 );
+		$this->assertEquals( 5, $object->get_cart_tax() );
+	}
+
+	/**
+	 * Test: get_total
+	 */
+	function test_get_total() {
+		$object = new WC_Order();
+		$object->set_total( 5 );
+		$this->assertEquals( 5, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_tax
+	 */
+	function test_get_total_tax() {
+		$object = new WC_Order();
+		$object->set_cart_tax( 5 );
+		$object->set_shipping_tax( 5 );
+		$this->assertEquals( 10, $object->get_total_tax() );
+	}
+
+	/**
+	 * Test: get_total_discount
+	 */
+	function test_get_total_discount() {
+		$object = new WC_Order();
+		$object->set_discount_total( 50 );
+		$object->set_discount_tax( 5 );
+		$this->assertEquals( 50, $object->get_total_discount() );
+		$this->assertEquals( 55, $object->get_total_discount( false ) );
+	}
+
+	/**
+	 * Test: get_subtotal
+	 */
+	function test_get_subtotal() {
+		$object = WC_Helper_Order::create_order();
+		$this->assertEquals( 40, $object->get_subtotal() );
+	}
+
+	/**
+	 * Test: get_tax_totals
+	 */
+	function test_get_tax_totals() {
+		$object = WC_Helper_Order::create_order();
+		$this->assertEquals( array(), $object->get_tax_totals() );
+	}
+
+	/**
 	 * Test: CRUD
 	 */
 	function test_CRUD() {
