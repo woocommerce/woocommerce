@@ -144,7 +144,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_billing_state() {
 		$object = new WC_Order();
-		$set_to = 'Jurassic America';
+		$set_to = 'Boulder';
 		$object->set_billing_state( $set_to );
 		$this->assertEquals( $set_to, $object->get_billing_state() );
 	}
@@ -258,7 +258,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	function test_get_shipping_state() {
 		$object = new WC_Order();
-		$set_to = 'Jurassic America';
+		$set_to = 'Boulder';
 		$object->set_shipping_state( $set_to );
 		$this->assertEquals( $set_to, $object->get_shipping_state() );
 	}
@@ -281,5 +281,237 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$set_to = 'US';
 		$object->set_shipping_country( $set_to );
 		$this->assertEquals( $set_to, $object->get_shipping_country() );
+	}
+
+	/**
+	 * Test: get_payment_method
+	 */
+	function test_get_payment_method() {
+		$object = new WC_Order();
+		$set_to = 'paypal';
+		$object->set_payment_method( $set_to );
+		$this->assertEquals( $set_to, $object->get_payment_method() );
+	}
+
+	/**
+	 * Test: get_payment_method_title
+	 */
+	function test_get_payment_method_title() {
+		$object = new WC_Order();
+		$set_to = 'PayPal';
+		$object->set_payment_method_title( $set_to );
+		$this->assertEquals( $set_to, $object->get_payment_method_title() );
+	}
+
+	/**
+	 * Test: get_transaction_id
+	 */
+	function test_get_transaction_id() {
+		$object = new WC_Order();
+		$set_to = '12345';
+		$object->set_transaction_id( $set_to );
+		$this->assertEquals( $set_to, $object->get_transaction_id() );
+	}
+
+	/**
+	 * Test: get_customer_ip_address
+	 */
+	function test_get_customer_ip_address() {
+		$object = new WC_Order();
+		$set_to = '192.168.1.1';
+		$object->set_customer_ip_address( $set_to );
+		$this->assertEquals( $set_to, $object->get_customer_ip_address() );
+	}
+
+	/**
+	 * Test: get_customer_user_agent
+	 */
+	function test_get_customer_user_agent() {
+		$object = new WC_Order();
+		$set_to = 'UAstring';
+		$object->set_customer_user_agent( $set_to );
+		$this->assertEquals( $set_to, $object->get_customer_user_agent() );
+	}
+
+	/**
+	 * Test: get_created_via
+	 */
+	function test_get_created_via() {
+		$object = new WC_Order();
+		$set_to = 'WooCommerce';
+		$object->set_created_via( $set_to );
+		$this->assertEquals( $set_to, $object->get_created_via() );
+	}
+
+	/**
+	 * Test: get_customer_note
+	 */
+	function test_get_customer_note() {
+		$object = new WC_Order();
+		$set_to = 'Leave on porch.';
+		$object->set_customer_note( $set_to );
+		$this->assertEquals( $set_to, $object->get_customer_note() );
+	}
+
+	/**
+	 * Test: get_date_completed
+	 */
+	function test_get_date_completed() {
+		$object = new WC_Order();
+		$object->set_date_completed( '2016-12-12' );
+		$this->assertEquals( '1481500800', $object->get_date_completed() );
+
+		$object->set_date_completed( '1481500800' );
+		$this->assertEquals( 1481500800, $object->get_date_completed() );
+	}
+
+	/**
+	 * Test: get_date_paid
+	 */
+	function test_get_date_paid() {
+		$object = new WC_Order();
+		$set_to = 'PayPal';
+		$object->set_date_paid( '2016-12-12' );
+		$this->assertEquals( 1481500800, $object->get_date_paid() );
+
+		$object->set_date_paid( '1481500800' );
+		$this->assertEquals( 1481500800, $object->get_date_paid() );
+	}
+
+	/**
+	 * Test: get_cart_hash
+	 */
+	function test_get_cart_hash() {
+		$object = new WC_Order();
+		$set_to = '12345';
+		$object->set_cart_hash( $set_to );
+		$this->assertEquals( $set_to, $object->get_cart_hash() );
+	}
+
+	/**
+	 * Test: get_address
+	 */
+	function test_get_address() {
+		$object = new WC_Order();
+
+		$billing = array(
+			'first_name' => 'Fred',
+			'last_name'  => 'Flintstone',
+			'company'    => 'Bedrock Ltd.',
+			'address_1'  => '34 Stonepants avenue',
+			'address_2'  => 'Rockville',
+			'city'       => 'Bedrock',
+			'state'      => 'Boulder',
+			'postcode'   => '00001',
+			'country'    => 'US',
+			'email'      => '',
+			'phone'      => '',
+		);
+
+		$shipping = array(
+			'first_name' => 'Barney',
+			'last_name'  => 'Rubble',
+			'company'    => 'Bedrock Ltd.',
+			'address_1'  => '34 Stonepants avenue',
+			'address_2'  => 'Rockville',
+			'city'       => 'Bedrock',
+			'state'      => 'Boulder',
+			'postcode'   => '00001',
+			'country'    => 'US',
+		);
+
+		$object->set_billing_first_name( 'Fred' );
+		$object->set_billing_last_name( 'Flintstone' );
+		$object->set_billing_company( 'Bedrock Ltd.' );
+		$object->set_billing_address_1( '34 Stonepants avenue' );
+		$object->set_billing_address_2( 'Rockville' );
+		$object->set_billing_city( 'Bedrock' );
+		$object->set_billing_state( 'Boulder' );
+		$object->set_billing_postcode( '00001' );
+		$object->set_billing_country( 'US' );
+
+		$object->set_shipping_first_name( 'Barney' );
+		$object->set_shipping_last_name( 'Rubble' );
+		$object->set_shipping_company( 'Bedrock Ltd.' );
+		$object->set_shipping_address_1( '34 Stonepants avenue' );
+		$object->set_shipping_address_2( 'Rockville' );
+		$object->set_shipping_city( 'Bedrock' );
+		$object->set_shipping_state( 'Boulder' );
+		$object->set_shipping_postcode( '00001' );
+		$object->set_shipping_country( 'US' );
+
+		$this->assertEquals( $billing, $object->get_address() );
+		$this->assertEquals( $shipping, $object->get_address( 'shipping' ) );
+	}
+
+	/**
+	 * Test: get_shipping_address_map_url
+	 */
+	function test_get_shipping_address_map_url() {
+		$object = new WC_Order();
+		$object->set_shipping_first_name( 'Barney' );
+		$object->set_shipping_last_name( 'Rubble' );
+		$object->set_shipping_company( 'Bedrock Ltd.' );
+		$object->set_shipping_address_1( '34 Stonepants avenue' );
+		$object->set_shipping_address_2( 'Rockville' );
+		$object->set_shipping_city( 'Bedrock' );
+		$object->set_shipping_state( 'Boulder' );
+		$object->set_shipping_postcode( '00001' );
+		$object->set_shipping_country( 'US' );
+		$this->assertEquals( 'http://maps.google.com/maps?&q=Barney%2C+Rubble%2C+Bedrock+Ltd.%2C+34+Stonepants+avenue%2C+Rockville%2C+Bedrock%2C+Boulder%2C+00001%2C+US&z=16', $object->get_shipping_address_map_url() );
+	}
+
+	/**
+	 * Test: get_formatted_billing_full_name
+	 */
+	function test_get_formatted_billing_full_name() {
+		$object = new WC_Order();
+		$object->set_billing_first_name( 'Fred' );
+		$object->set_billing_last_name( 'Flintstone' );
+		$this->assertEquals( 'Fred Flintstone', $object->get_formatted_billing_full_name() );
+	}
+
+	/**
+	 * Test: get_formatted_shipping_full_name
+	 */
+	function test_get_formatted_shipping_full_name() {
+		$object = new WC_Order();
+		$object->set_shipping_first_name( 'Barney' );
+		$object->set_shipping_last_name( 'Rubble' );
+		$this->assertEquals( 'Barney Rubble', $object->get_formatted_shipping_full_name() );
+	}
+
+	/**
+	 * Test: get_formatted_billing_address
+	 */
+	function test_get_formatted_billing_address() {
+		$object = new WC_Order();
+		$object->set_billing_first_name( 'Fred' );
+		$object->set_billing_last_name( 'Flintstone' );
+		$object->set_billing_company( 'Bedrock Ltd.' );
+		$object->set_billing_address_1( '34 Stonepants avenue' );
+		$object->set_billing_address_2( 'Rockville' );
+		$object->set_billing_city( 'Bedrock' );
+		$object->set_billing_state( 'Boulder' );
+		$object->set_billing_postcode( '00001' );
+		$object->set_billing_country( 'US' );
+		$this->assertEquals( 'Fred Flintstone<br/>Bedrock Ltd.<br/>34 Stonepants avenue<br/>Rockville<br/>Bedrock, BOULDER 00001<br/>United States (US)', $object->get_formatted_billing_address() );
+	}
+
+	/**
+	 * Test: get_formatted_shipping_address
+	 */
+	function test_get_formatted_shipping_address() {
+		$object = new WC_Order();
+		$object->set_shipping_first_name( 'Barney' );
+		$object->set_shipping_last_name( 'Rubble' );
+		$object->set_shipping_company( 'Bedrock Ltd.' );
+		$object->set_shipping_address_1( '34 Stonepants avenue' );
+		$object->set_shipping_address_2( 'Rockville' );
+		$object->set_shipping_city( 'Bedrock' );
+		$object->set_shipping_state( 'Boulder' );
+		$object->set_shipping_postcode( '00001' );
+		$object->set_shipping_country( 'US' );
+		$this->assertEquals( 'Barney Rubble<br/>Bedrock Ltd.<br/>34 Stonepants avenue<br/>Rockville<br/>Bedrock, BOULDER 00001<br/>United States (US)', $object->get_formatted_shipping_address() );
 	}
 }
