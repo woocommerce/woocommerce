@@ -334,7 +334,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 		$default = array();
 
 		if ( $product->is_type( 'variable' ) ) {
-			foreach ( (array) get_post_meta( $product->id, '_default_attributes', true ) as $key => $value ) {
+			foreach ( array_filter( (array) get_post_meta( $product->id, '_default_attributes', true ), 'strlen' ) as $key => $value ) {
 				if ( 0 === strpos( $key, 'pa_' ) ) {
 					$default[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $key ),
@@ -1012,10 +1012,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						$attributes[ $attribute_name ] = array(
 							'name'         => $attribute_name,
 							'value'        => '',
-							'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+							'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 							'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 							'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-							'is_taxonomy'  => true,
+							'is_taxonomy'  => 1,
 						);
 					}
 
@@ -1033,10 +1033,10 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 					$attributes[ sanitize_title( $attribute_name ) ] = array(
 						'name'         => $attribute_name,
 						'value'        => $values,
-						'position'     => isset( $attribute['position'] ) ? absint( $attribute['position'] ) : 0,
+						'position'     => isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0',
 						'is_visible'   => ( isset( $attribute['visible'] ) && $attribute['visible'] ) ? 1 : 0,
 						'is_variation' => ( isset( $attribute['variation'] ) && $attribute['variation'] ) ? 1 : 0,
-						'is_taxonomy'  => false,
+						'is_taxonomy'  => 0,
 					);
 				}
 			}
