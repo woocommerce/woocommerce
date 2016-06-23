@@ -142,7 +142,7 @@ jQuery(function( $ ) {
 
 		if ( 'table' === export_format ) {
 
-			$( this ).closest( 'div' ).find( 'thead tr,tbody tr' ).each( function() {
+			$( this ).offsetParent().find( 'thead tr,tbody tr' ).each( function() {
 				$( this ).find( 'th, td' ).each( function() {
 					var value = $( this ).text();
 					value = value.replace( '[?]', '' );
@@ -152,7 +152,7 @@ jQuery(function( $ ) {
 				csv_data += '\n';
 			});
 
-			$( this ).closest( 'div' ).find( 'tfoot tr' ).each( function() {
+			$( this ).offsetParent().find( 'tfoot tr' ).each( function() {
 				$( this ).find( 'th, td' ).each( function() {
 					var value = $( this ).text();
 					value = value.replace( '[?]', '' );
