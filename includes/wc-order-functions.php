@@ -1019,7 +1019,7 @@ function wc_order_search( $term ) {
 	if ( is_numeric( $term ) ) {
 		$post_ids = array_unique( array_merge(
 			$wpdb->get_col(
-				$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%d%%';", absint( $term ) )
+				$wpdb->prepare( "SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "') AND p1.meta_value LIKE '%%%s%%';", wc_clean( $term ) )
 			),
 			array( absint( $term ) )
 		) );
