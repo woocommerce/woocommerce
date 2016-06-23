@@ -300,6 +300,9 @@ jQuery( function( $ ) {
 
 						var $form = $( 'form.checkout' );
 
+						// Remove notices from all sources
+						$( '.woocommerce-error, .woocommerce-message' ).remove();
+
 						// Add new errors returned by this event
 						if ( data.messages ) {
 							$form.prepend( '<div class="woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' );
