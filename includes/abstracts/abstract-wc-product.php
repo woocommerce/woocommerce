@@ -641,7 +641,7 @@ class WC_Product {
 	 * @return bool
 	 */
 	public function backorders_require_notification() {
-		return apply_filters( 'woocommerce_product_backorders_require_notification', $this->managing_stock() && $this->backorders === 'notify' ? true : false, $this->id, $this );
+		return apply_filters( 'woocommerce_product_backorders_require_notification', $this->managing_stock() && $this->backorders === 'notify' ? true : false, $this );
 	}
 
 	/**
