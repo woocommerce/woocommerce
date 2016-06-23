@@ -1088,12 +1088,13 @@ class WC_API_Products extends WC_API_Resource {
 				update_post_meta( $product_id, '_stock', '' );
 
 				wc_update_product_stock_status( $product_id, 'instock' );
-			} elseif ( 'variable' === $product_type ) {
-				update_post_meta( $product_id, '_stock', '' );
 			} elseif ( 'yes' == $managing_stock ) {
 				update_post_meta( $product_id, '_backorders', $backorders );
 
-				wc_update_product_stock_status( $product_id, $stock_status );
+				// Stock status is always determined by children so sync later.
+				if ( 'variable' !== $product_type ) {
+					wc_update_product_stock_status( $product_id, $stock_status );
+				}
 
 				// Stock quantity
 				if ( isset( $data['stock_quantity'] ) ) {

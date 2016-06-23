@@ -1177,12 +1177,13 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				update_post_meta( $product->id, '_stock', '' );
 
 				wc_update_product_stock_status( $product->id, 'instock' );
-			} elseif ( 'variable' === $product_type ) {
-				update_post_meta( $product->id, '_stock', '' );
 			} elseif ( 'yes' === $manage_stock ) {
 				update_post_meta( $product->id, '_backorders', $backorders );
 
-				wc_update_product_stock_status( $product->id, $stock_status );
+				// Stock status is always determined by children so sync later.
+				if ( 'variable' !== $product_type ) {
+					wc_update_product_stock_status( $product->id, $stock_status );
+				}
 
 				// Stock quantity.
 				if ( isset( $request['stock_quantity'] ) ) {
