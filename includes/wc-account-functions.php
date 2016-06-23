@@ -87,10 +87,12 @@ function wc_get_account_menu_items() {
 	);
 
 	// Remove empty items.
-	$downloads = WC()->customer->get_downloadable_products();
+	if ( ! empty( WC()->customer ) ) {
+		$downloads = WC()->customer->get_downloadable_products();
 
-	if ( ! sizeof( $downloads ) ) {
-		unset( $items['downloads'] );
+		if ( ! sizeof( $downloads ) ) {
+			unset( $items['downloads'] );
+		}
 	}
 
 	// Check if payment gateways support add new payment methods.
