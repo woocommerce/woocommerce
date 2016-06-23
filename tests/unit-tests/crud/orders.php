@@ -236,6 +236,311 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: remove_order_items
+	 */
+	function test_remove_order_items() {
+		$product = WC_Helper_Product::create_simple_product();
+		$object  = new WC_Order();
+		$object->save();
+		$item_id = $object->add_product( $product, array( 'qty' => 4 ) );
+		$item_id = $object->add_product( $product, array( 'qty' => 2 ) );
+		$this->assertCount( 2, $object->get_items() );
+		$object->remove_order_items();
+		$this->assertCount( 0, $object->get_items() );
+	}
+
+	/**
+	 * Test: get_items
+	 */
+	function test_get_items() {
+		$object  = new WC_Order();
+		$object->save();
+		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 2 ) );
+		$this->assertCount( 2, $object->get_items() );
+	}
+
+	/**
+	 * Test: get_fees
+	 */
+	function test_get_fees() {
+		$object  = new WC_Order();
+		$object->save();
+		$object->add_fee( (object) array(
+			'name'      => 'Some Fee',
+			'taxable'   => true,
+			'amount'    => '100',
+			'tax_class' => '',
+			'tax'       => '',
+			'tax_data'  => '',
+		) );
+		$this->assertCount( 1, $object->get_fees() );
+	}
+
+	/**
+	 * Test: get_taxes
+	 */
+	function test_get_taxes() {
+		global $wpdb;
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$object  = new WC_Order();
+		$object->save();
+		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->calculate_totals();
+		$this->assertCount( 1, $object->get_taxes() );
+
+		$object->add_tax(
+			array(
+				'rate_id'            => '100',
+				'tax_total'          => '100',
+				'shipping_tax_total' => '0',
+			)
+		);
+
+		$this->assertCount( 2, $object->get_taxes() );
+
+		// Cleanup
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * Test: get_shipping_methods
+	 */
+	function test_get_shipping_methods() {
+		$object  = new WC_Order();
+		$object->save();
+		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
+		$this->assertCount( 1, $object->get_shipping_methods() );
+	}
+
+	/**
+	 * Test: get_shipping_method
+	 */
+	function test_get_shipping_method() {
+		$object  = new WC_Order();
+		$object->save();
+		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
+		$this->assertEquals( 'Flat rate shipping', $object->get_shipping_method() );
+		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping 2', '10', array(), 'flat_rate' ) );
+		$this->assertEquals( 'Flat rate shipping, Flat rate shipping 2', $object->get_shipping_method() );
+	}
+
+	/**
+	 * Test: get_used_coupons
+	 */
+	function test_get_used_coupons() {
+		$object  = new WC_Order();
+		$object->save();
+		$object->add_coupon(
+			array(
+				'code'         => '12345',
+				'discount'     => '10',
+				'discount_tax' => '5',
+			)
+		);
+		$this->assertCount( 1, $object->get_used_coupons() );
+	}
+
+	/**
+	 * Test: get_item_count
+	 */
+	function test_get_item_count() {
+		$object  = new WC_Order();
+		$object->save();
+		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 2 ) );
+		$this->assertEquals( 6, $object->get_item_count() );
+	}
+
+	/**
+	 * Test: get_item
+	 */
+	function test_get_item() {
+		$object  = new WC_Order();
+		$object->save();
+
+		$item_id = $object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Product );
+
+		$item_id = $object->add_coupon(
+			array(
+				'code'         => '12345',
+				'discount'     => '10',
+				'discount_tax' => '5',
+			)
+		);
+		$this->assertTrue( $object->get_item( $item_id ) instanceOf WC_Order_Item_Coupon );
+	}
+
+	/**
+	 * Test: add_payment_token
+	 */
+	function test_add_payment_token() {
+		$object  = new WC_Order();
+		$object->save();
+		$this->assertFalse( $object->add_payment_token( 'fish' ) );
+		$token = new WC_Payment_Token_Stub();
+		$token->set_extra( __FUNCTION__ );
+		$token->set_token( time() );
+		$token->create();
+		$this->assertTrue( 0 < $object->add_payment_token( $token ) );
+	}
+
+	/**
+	 * Test: get_payment_tokens
+	 */
+	function test_get_payment_tokens() {
+		$object  = new WC_Order();
+		$object->save();
+		$token = new WC_Payment_Token_Stub();
+		$token->set_extra( __FUNCTION__ );
+		$token->set_token( time() );
+		$token->create();
+		$object->add_payment_token( $token );
+		$this->assertCount( 1, $object->get_payment_tokens() );
+	}
+
+	/**
+	 * Test: calculate_shipping
+	 */
+	function test_calculate_shipping() {
+		$object = new WC_Order();
+		$object->save();
+		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
+		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
+		$object->calculate_shipping();
+		$this->assertEquals( 20, $object->get_shipping_total() );
+	}
+
+	/**
+	 * Test: calculate_taxes
+	 */
+	function test_calculate_taxes() {
+		global $wpdb;
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
+		$object->calculate_taxes();
+		$this->assertEquals( 5, $object->get_total_tax() );
+
+		// Cleanup
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * Test: calculate_totals
+	 */
+	function test_calculate_totals() {
+		global $wpdb;
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => ''
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
+		$object->calculate_totals();
+		$this->assertEquals( 55, $object->get_total() );
+
+		// Cleanup
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * Test: has_status
+	 */
+	function test_has_status() {
+		$object = new WC_Order();
+		$this->assertFalse( $object->has_status( 'completed' ) );
+		$this->assertFalse( $object->has_status( array( 'processing', 'completed' ) ) );
+		$this->assertTrue( $object->has_status( 'pending' ) );
+		$this->assertTrue( $object->has_status( array( 'processing', 'pending' ) ) );
+	}
+
+	/**
+	 * Test: has_shipping_method
+	 */
+	function test_has_shipping_method() {
+		$object  = new WC_Order();
+		$object->save();
+		$this->assertFalse( $object->has_shipping_method( 'flat_rate_shipping' ) );
+		$object->add_shipping( new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' ) );
+		$this->assertTrue( $object->has_shipping_method( 'flat_rate_shipping' ) );
+	}
+
+	/**
+	 * Test: key_is_valid
+	 */
+	function test_key_is_valid() {
+		$object = new WC_Order();
+		$object->save();
+		$this->assertFalse( $object->key_is_valid( '1234' ) );
+		$object->set_order_key( '1234' );
+		$this->assertTrue( $object->key_is_valid( '1234' ) );
+	}
+
+	/**
+	 * Test: has_free_item
+	 */
+	function test_has_free_item() {
+		$object  = new WC_Order();
+		$object->save();
+		$object->add_product( WC_Helper_Product::create_simple_product(), array( 'qty' => 4 ) );
+		$this->assertFalse( $object->has_free_item() );
+
+		$free_product = WC_Helper_Product::create_simple_product();
+		$free_product->set_price( 0 );
+		$object->add_product( $free_product, array( 'qty' => 4 ) );
+		$this->assertTrue( $object->has_free_item() );
+	}
+
+	/**
 	 * Test: CRUD
 	 */
 	function test_CRUD() {

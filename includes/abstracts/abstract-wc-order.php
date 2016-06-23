@@ -822,7 +822,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return array
 	 */
 	public function get_used_coupons() {
-		return array_map( 'trim', wp_list_pluck( $this->get_items( 'coupon' ), 'name' ) );
+		$coupon_codes = array();
+		if ( $coupons = $this->get_items( 'coupon' ) ) {
+			foreach ( $coupons as $coupon ) {
+				$coupon_codes[] = $coupon->get_code();
+			}
+		}
+		return $coupon_codes;
 	}
 
 	/**
