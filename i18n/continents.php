@@ -54,7 +54,7 @@ return array(
     'SA' => array(
         'name'      => __( 'South America', 'woocommerce' ),
         'countries' => array(
-            'AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'FK', 'GF', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'
+            'AR', 'BO', 'BR', 'CL', 'CO', 'CW', 'EC', 'FK', 'GF', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'
         )
     )
 );
