@@ -776,7 +776,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		global $wpdb;
 		$get_items_sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ", $this->get_id() ) . "AND order_item_type IN ( '" . implode( "','", array_map( 'esc_sql', (array) $type ) ) . "' ) ORDER BY order_item_id;";
 		$items         = $wpdb->get_results( $get_items_sql );
-		$items         = array_map( array( $this, 'get_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
+
+		if ( ! empty( $items ) ) {
+			$items = array_map( array( $this, 'get_item' ), array_combine( wp_list_pluck( $items, 'order_item_id' ), $items ) );
+		} else {
+			$items = array();
+		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this );
 	}
