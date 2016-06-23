@@ -177,7 +177,6 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Zones - Wording clarifications.
 * Tweak - Zones - Match zones with postcodes but no country.
 * Tweak - Zones - Match zones with no regions as 'everywhere'.
-* Tweak - Validate price format for Flat Rate and Local Pickup.
 * Tweak - Added view_admin_dashboard cap for disabling the admin access restriction in custom roles.
 * Tweak - Revised stock display based on feedback to hide 'in stock' message if stock management is off.
 
