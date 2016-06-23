@@ -400,6 +400,15 @@ class WC_Product_Variation extends WC_Product {
 	}
 
 	/**
+	 * Get total stock - This is the stock of parent and children combined.
+	 *
+	 * @return int
+	 */
+	public function get_total_stock() {
+		return $this->get_stock_quantity();
+	}
+
+	/**
 	 * Returns the tax status. Always use parent data.
 	 *
 	 * @return string
@@ -535,57 +544,6 @@ class WC_Product_Variation extends WC_Product {
 		} else {
 			return $this->parent->increase_stock( $amount );
 		}
-	}
-
-	/**
-	 * Returns the availability of the product.
-	 *
-	 * @return string
-	 */
-	public function get_availability() {
-		// Default to in-stock
-		$availability = __( 'In stock', 'woocommerce' );
-		$class        = 'in-stock';
-
-		// If out of stock, this takes priority over all other settings.
-		if ( ! $this->is_in_stock() ) {
-			$availability = __( 'Out of stock', 'woocommerce' );
-			$class        = 'out-of-stock';
-
-		// Any further we can assume status is set to in stock.
-		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
-			$availability = __( 'Available on backorder', 'woocommerce' );
-			$class        = 'available-on-backorder';
-
-		} elseif ( true === $this->managing_stock() ) {
-			switch ( get_option( 'woocommerce_stock_format' ) ) {
-				case 'no_amount' :
-					$availability = __( 'In stock', 'woocommerce' );
-				break;
-				case 'low_amount' :
-					if ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_low_stock_amount' ) ) {
-						$availability = sprintf( __( 'Only %s left in stock', 'woocommerce' ), $this->get_stock_quantity() );
-
-						if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-							$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
-						}
-					} else {
-						$availability = __( 'In stock', 'woocommerce' );
-					}
-				break;
-				default :
-					$availability = sprintf( __( '%s in stock', 'woocommerce' ), $this->get_stock_quantity() );
-
-					if ( $this->backorders_allowed() && $this->backorders_require_notification() ) {
-						$availability .= ' ' . __( '(also available on backorder)', 'woocommerce' );
-					}
-				break;
-			}
-		} elseif ( 'parent' === $this->managing_stock() ) {
-			return parent::get_availability();
-		}
-
-		return apply_filters( 'woocommerce_get_availability', array( 'availability' => $availability, 'class' => $class ), $this );
 	}
 
 	/**
