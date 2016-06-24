@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Grouped product range display when child is free.
 * Fix - Remove discount when checking free shipping min amount.
 * Dev - API - Fixed variable product stock at product level.
+* Dev - CLI - Introduces `woocommerce_cli_get_product_variable_types` filter.
 * Tweak - Made customer pay link display if order needs_payment() rather than checking pending status.
 * Tweak - Zones - Wording clarifications.
 * Tweak - Zones - Match zones with postcodes but no country.
