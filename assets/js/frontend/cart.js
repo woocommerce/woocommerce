@@ -28,7 +28,7 @@ jQuery( function( $ ) {
 	 * @return {bool} True if the DOM Element is UI Blocked, false if not.
 	 */
 	var is_blocked = function( $node ) {
-		return $node.is( '.processing' );
+		return $node.is( '.processing' ) || $node.parents( '.processing' ).length;
 	};
 
 	/**
@@ -37,13 +37,15 @@ jQuery( function( $ ) {
 	 * @param {JQuery Object} $node
 	 */
 	var block = function( $node ) {
-		$node.addClass( 'processing' ).block( {
-			message: null,
-			overlayCSS: {
-				background: '#fff',
-				opacity: 0.6
-			}
-		} );
+		if ( ! is_blocked( $node ) ) {
+			$node.addClass( 'processing' ).block( {
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			} );
+		}
 	};
 
 	/**
@@ -209,8 +211,8 @@ jQuery( function( $ ) {
 
 			var $form = $( evt.currentTarget );
 
-			block( $form );
 			block( $( 'div.cart_totals' ) );
+			block( $form );
 
 			// Provide the submit button value because wc-form-handler expects it.
 			$( '<input />' ).attr( 'type', 'hidden' )
