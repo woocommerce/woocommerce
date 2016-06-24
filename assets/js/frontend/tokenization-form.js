@@ -37,6 +37,13 @@
 
 					// Trigger change event
 					$( ':input.woocommerce-SavedPaymentMethods-tokenInput:checked', $target ).trigger( 'change' );
+
+					// Hide "save card" if "Create Account" is not checked.
+					// Check that the field is shown in the form - some plugins and force create account remove it
+					if ( $( 'input#createaccount' ).length && ! $('input#createaccount').is( ':checked' ) ) {
+						$wcTokenizationForm.hideSaveNewCheckbox();
+      				}
+
 				};
 
 				this.hideForm = function() {
