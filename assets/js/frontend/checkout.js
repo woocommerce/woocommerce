@@ -277,6 +277,9 @@ jQuery( function( $ ) {
 						return;
 					}
 
+					// Remove any notices added previously
+					$( '.woocommerce-NoticeGroup-updateOrderReview' ).remove();
+
 					var termsCheckBoxChecked = $( '#terms' ).prop( 'checked' );
 
 					// Always update the fragments
@@ -297,11 +300,12 @@ jQuery( function( $ ) {
 
 						var $form = $( 'form.checkout' );
 
+						// Remove notices from all sources
 						$( '.woocommerce-error, .woocommerce-message' ).remove();
 
-						// Add new errors
+						// Add new errors returned by this event
 						if ( data.messages ) {
-							$form.prepend( data.messages );
+							$form.prepend( '<div class="woocommerce-NoticeGroup-updateOrderReview">' + data.messages + '</div>' );
 						} else {
 							$form.prepend( data );
 						}
