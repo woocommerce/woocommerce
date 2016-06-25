@@ -540,6 +540,20 @@ function wc_get_product_types() {
 function wc_product_has_unique_sku( $product_id, $sku ) {
 	global $wpdb;
 
+	$run_query = null;
+	/**
+	 * Change result of unique SKU check without running query.
+	 *
+	 * @since 2.5.6
+	 * 
+	 * @param null|bool $run_query If is null query will be run, if not query will not be run and this value will be returned.
+	 * @param int $product_id ID of product
+	 * @param string $sku The SKU
+	 */
+	if ( null != apply_filters( 'wc_product_has_unique_sku_pre_query', $run_query, $product_id, $sku ) ) {
+		return boolval( $run_query );
+	}
+	
 	$sku_found = $wpdb->get_var( $wpdb->prepare( "
 		SELECT $wpdb->posts.ID
 		FROM $wpdb->posts
