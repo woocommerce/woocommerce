@@ -49,24 +49,31 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function get_children() {
 		if ( ! is_array( $this->children ) || empty( $this->children ) ) {
-			$transient_name = 'wc_product_children_' . $this->id;
-			$this->children = array_filter( array_map( 'absint', (array) get_transient( $transient_name ) ) );
 
-			if ( empty( $this->children ) ) {
+        	$transient_name = 'wc_product_children_' . $this->id;
+			$wc_manage_access = is_user_logged_in() && current_user_can( 'manage_woocommerce' ) ? true : false;
+			
+			if ( !$wc_manage_access ) $this->children = array_filter( array_map( 'absint', (array) get_transient( $transient_name ) ) );
 
-				$args = apply_filters( 'woocommerce_grouped_children_args', array(
-					'post_parent' 	=> $this->id,
-					'post_type'		=> 'product',
-					'orderby'		=> 'menu_order',
-					'order'			=> 'ASC',
-					'fields'		=> 'ids',
-					'post_status'	=> 'publish',
-					'numberposts'	=> -1,
-				) );
+        	if ( empty( $this->children ) ) {
+				
+				$post_status = array('publish');
+				
+				if ( $wc_manage_access ) array_push( $post_status, 'private' );
+
+        		$args = apply_filters( 'woocommerce_grouped_children_args', array(
+        			'post_parent' 	=> $this->id,
+        			'post_type'		=> 'product',
+        			'orderby'		=> 'menu_order',
+        			'order'			=> 'ASC',
+        			'fields'		=> 'ids',
+        			'post_status'	=> $post_status,
+        			'numberposts'	=> -1,
+        		) );
 
 				$this->children = get_posts( $args );
 
-				set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
+				if ( !$wc_manage_access ) set_transient( $transient_name, $this->children, DAY_IN_SECONDS * 30 );
 			}
 		}
 		return (array) $this->children;
