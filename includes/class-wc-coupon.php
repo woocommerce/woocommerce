@@ -656,7 +656,7 @@ class WC_Coupon {
 		}
 
 		// Specific product ID's excluded from the discount
-		if ( sizeof( $this->exclude_product_ids ) && sizeof( array_intersect( $product_ids, $this->product_ids ) ) ) {
+		if ( sizeof( $this->exclude_product_ids ) && sizeof( array_intersect( $product_ids, $this->exclude_product_ids ) ) ) {
 			$valid = false;
 		}
 
