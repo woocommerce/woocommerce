@@ -486,7 +486,7 @@ class WC_Coupon {
 	 * All exclusion rules must pass at the same time for a product coupon to be valid.
 	 */
 	private function validate_excluded_items() {
-		if ( ! WC()->cart->is_empty() ) {
+		if ( ! WC()->cart->is_empty() && $this->is_type( wc_get_product_coupon_types() ) ) {
 			$valid = false;
 
 			foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
