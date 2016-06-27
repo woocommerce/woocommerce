@@ -1314,6 +1314,9 @@ if ( ! function_exists( 'woocommerce_cart_totals' ) ) {
 	 * @subpackage	Cart
 	 */
 	function woocommerce_cart_totals() {
+		if ( is_checkout() ) {
+			return;
+		}
 		wc_get_template( 'cart/cart-totals.php' );
 	}
 }
@@ -1328,11 +1331,14 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 	 * @param  string $orderby (default: 'rand')
 	 */
 	function woocommerce_cross_sell_display( $posts_per_page = 2, $columns = 2, $orderby = 'rand' ) {
+		if ( is_checkout() ) {
+			return;
+		}
 		wc_get_template( 'cart/cross-sells.php', array(
-				'posts_per_page' => $posts_per_page,
-				'orderby'        => $orderby,
-				'columns'        => $columns
-			) );
+			'posts_per_page' => $posts_per_page,
+			'orderby'        => $orderby,
+			'columns'        => $columns
+		) );
 	}
 }
 
