@@ -483,6 +483,26 @@ class WC_Coupon {
 	}
 
 	/**
+	 * All exclusion rules must pass at the same time for a product coupon to be valid.
+	 */
+	private function validate_excluded_items() {
+		if ( ! WC()->cart->is_empty() ) {
+			$valid = false;
+
+			foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				if ( $this->is_valid_for_product( $cart_item['data'], $cart_item ) ) {
+					$valid = true;
+					break;
+				}
+			}
+
+			if ( ! $valid ) {
+				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
+			}
+		}
+	}
+
+	/**
 	 * Cart discounts cannot be added if non-eligble product is found in cart.
 	 */
 	private function validate_cart_excluded_items() {
@@ -582,6 +602,7 @@ class WC_Coupon {
 			$this->validate_product_ids();
 			$this->validate_product_categories();
 			$this->validate_sale_items();
+			$this->validate_excluded_items();
 			$this->validate_cart_excluded_items();
 
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $this ) ) {
