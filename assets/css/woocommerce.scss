@@ -1617,9 +1617,11 @@ p.demo_store {
 }
 
 /**
- * Cart page
+ * Cart/checkout page
  */
-.woocommerce-cart {
+.woocommerce-cart,
+.woocommerce-checkout,
+#add_payment_method {
 	table.cart {
 		.product-thumbnail {
 			min-width: 32px;
@@ -1745,12 +1747,6 @@ p.demo_store {
 			}
 		}
 	}
-}
-
-/**
- * Checkout
- */
-.woocommerce-checkout, #add_payment_method {
 	.checkout {
 		.col-2 {
 			h3#ship-to-different-address {
