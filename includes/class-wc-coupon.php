@@ -456,30 +456,6 @@ class WC_Coupon {
 	}
 
 	/**
-	 * Ensure coupon is valid for product categories in the cart is valid or throw exception.
-	 *
-	 * @throws Exception
-	 */
-	private function validate_excluded_product_categories() {
-		if ( sizeof( $this->exclude_product_categories ) > 0 ) {
-			$valid_for_cart = false;
-			if ( ! WC()->cart->is_empty() ) {
-				foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-					$product_cats = wc_get_product_cat_ids( $cart_item['product_id'] );
-
-					// If we find an item with a cat NOT in our disallowed cat list, the coupon is valid
-					if ( empty( $product_cats ) || sizeof( array_diff( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
-						$valid_for_cart = true;
-					}
-				}
-			}
-			if ( ! $valid_for_cart ) {
-				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
-			}
-		}
-	}
-
-	/**
 	 * Ensure coupon is valid for sale items in the cart is valid or throw exception.
 	 *
 	 * @throws Exception
@@ -502,6 +478,26 @@ class WC_Coupon {
 			}
 			if ( ! $valid_for_cart ) {
 				throw new Exception( self::E_WC_COUPON_NOT_VALID_SALE_ITEMS );
+			}
+		}
+	}
+
+	/**
+	 * All exclusion rules must pass at the same time for a product coupon to be valid.
+	 */
+	private function validate_excluded_items() {
+		if ( ! WC()->cart->is_empty() && $this->is_type( wc_get_product_coupon_types() ) ) {
+			$valid = false;
+
+			foreach( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+				if ( $this->is_valid_for_product( $cart_item['data'], $cart_item ) ) {
+					$valid = true;
+					break;
+				}
+			}
+
+			if ( ! $valid ) {
+				throw new Exception( self::E_WC_COUPON_NOT_APPLICABLE );
 			}
 		}
 	}
@@ -605,8 +601,8 @@ class WC_Coupon {
 			$this->validate_maximum_amount();
 			$this->validate_product_ids();
 			$this->validate_product_categories();
-			$this->validate_excluded_product_categories();
 			$this->validate_sale_items();
+			$this->validate_excluded_items();
 			$this->validate_cart_excluded_items();
 
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $this ) ) {
@@ -642,42 +638,35 @@ class WC_Coupon {
 
 		$valid        = false;
 		$product_cats = wc_get_product_cat_ids( $product->id );
+		$product_ids  = array( $product->id, ( isset( $product->variation_id ) ? $product->variation_id : 0 ), $product->get_parent() );
 
 		// Specific products get the discount
-		if ( sizeof( $this->product_ids ) > 0 ) {
-			if ( in_array( $product->id, $this->product_ids ) || ( isset( $product->variation_id ) && in_array( $product->variation_id, $this->product_ids ) ) || in_array( $product->get_parent(), $this->product_ids ) ) {
-				$valid = true;
-			}
+		if ( sizeof( $this->product_ids ) && sizeof( array_intersect( $product_ids, $this->product_ids ) ) ) {
+			$valid = true;
 		}
 
 		// Category discounts
-		if ( sizeof( $this->product_categories ) > 0 ) {
-			if ( sizeof( array_intersect( $product_cats, $this->product_categories ) ) > 0 ) {
-				$valid = true;
-			}
+		if ( sizeof( $this->product_categories ) && sizeof( array_intersect( $product_cats, $this->product_categories ) ) ) {
+			$valid = true;
 		}
 
+		// No product ids - all items discounted
 		if ( ! sizeof( $this->product_ids ) && ! sizeof( $this->product_categories ) ) {
-			// No product ids - all items discounted
 			$valid = true;
 		}
 
 		// Specific product ID's excluded from the discount
-		if ( sizeof( $this->exclude_product_ids ) > 0 ) {
-			if ( in_array( $product->id, $this->exclude_product_ids ) || ( isset( $product->variation_id ) && in_array( $product->variation_id, $this->exclude_product_ids ) ) || in_array( $product->get_parent(), $this->exclude_product_ids ) ) {
-				$valid = false;
-			}
+		if ( sizeof( $this->exclude_product_ids ) && sizeof( array_intersect( $product_ids, $this->exclude_product_ids ) ) ) {
+			$valid = false;
 		}
 
 		// Specific categories excluded from the discount
-		if ( sizeof( $this->exclude_product_categories ) > 0 ) {
-			if ( sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) > 0 ) {
-				$valid = false;
-			}
+		if ( sizeof( $this->exclude_product_categories ) && sizeof( array_intersect( $product_cats, $this->exclude_product_categories ) ) ) {
+			$valid = false;
 		}
 
 		// Sale Items excluded from discount
-		if ( $this->exclude_sale_items == 'yes' ) {
+		if ( 'yes' === $this->exclude_sale_items ) {
 			$product_ids_on_sale = wc_get_product_ids_on_sale();
 
 			if ( isset( $product->variation_id ) ) {
