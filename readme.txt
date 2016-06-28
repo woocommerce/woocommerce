@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - is_available check for legacy shipping methods.
 * Fix - wc_add_to_cart_message() when non-array is passed.
 * Fix - Maximum coupon check should allow the 'maximum' value.
+* Fix - Product coupon logic to avoid applying non-applicable coupons.
 * Fix - Potential notices when leaving out 'default' field for shipping instances.
 * Fix - wp_cache_flush after term meta migration/update.
 * Fix - wc_add_to_cart_message() when non-array is passed.
@@ -173,14 +174,20 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Removed non-existent country (Netherlands Antilles) from https://en.wikipedia.org/wiki/ISO_3166-1.
 * Fix - Grouped product range display when child is free.
 * Fix - Remove discount when checking free shipping min amount.
+* Fix - Prevent blocking the same element multiple times on cart page.
+* Fix - Don't sync ratings right after a new comment to prevent rating sync whilst rating meta does not exist yet.
+* Fix - Fix product RSS feeds when using shop base.
 * Dev - API - Fixed variable product stock at product level.
 * Dev - CLI - Introduces `woocommerce_cli_get_product_variable_types` filter.
+* Dev - Allow notices to be grouped on checkout after certain events.
 * Tweak - Made customer pay link display if order needs_payment() rather than checking pending status.
 * Tweak - Zones - Wording clarifications.
 * Tweak - Zones - Match zones with postcodes but no country.
 * Tweak - Zones - Match zones with no regions as 'everywhere'.
 * Tweak - Added view_admin_dashboard cap for disabling the admin access restriction in custom roles.
 * Tweak - Revised stock display based on feedback to hide 'in stock' message if stock management is off.
+* Tweak - Allow external product SKUs.
+* Tweak - PT (Portugal) postcode format.
 
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
