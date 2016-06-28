@@ -178,8 +178,8 @@ class WC_Session_Handler extends WC_Session {
 	 */
 	public function save_data() {
 		// Dirty if something changed - prevents saving nothing new
-		$dataChanged = (serialize($this->_data) != $this->_data_org);
-		if ( $this->_dirty && $this->has_session() && $dataChanged ) {
+		$data_changed = ( serialize($this->_data) != $this->_data_org );
+		if ( $this->_dirty && $this->has_session() && $data_changed ) {
 			global $wpdb;
 
 			$wpdb->replace(
