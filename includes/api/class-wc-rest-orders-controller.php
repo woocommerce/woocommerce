@@ -129,6 +129,7 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 			'parent_id'            => $post->post_parent,
 			'status'               => $order->get_status(),
 			'order_key'            => $order->order_key,
+			'number'               => $order->get_order_number(),
 			'currency'             => $order->get_order_currency(),
 			'version'              => $order->order_version,
 			'prices_include_tax'   => $order->prices_include_tax,
@@ -1152,6 +1153,12 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 				),
 				'order_key' => array(
 					'description' => __( 'Order key.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'number' => array(
+					'description' => __( 'Order number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
