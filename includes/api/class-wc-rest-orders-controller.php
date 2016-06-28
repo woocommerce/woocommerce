@@ -300,8 +300,10 @@ class WC_REST_Orders_Controller extends WC_REST_Posts_Controller {
 					);
 				}
 
-				foreach ( $fee_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
-					$fee_tax[ $tax_rate_id ]['subtotal'] = $tax;
+				if ( isset( $fee_line_taxes['subtotal'] ) ) {
+					foreach ( $fee_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
+						$fee_tax[ $tax_rate_id ]['subtotal'] = $tax;
+					}
 				}
 
 				$fee_line['taxes'] = array_values( $fee_tax );
