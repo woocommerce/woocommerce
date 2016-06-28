@@ -162,6 +162,23 @@ jQuery( function( $ ) {
 		$( '.hide_if_' + product_type ).hide();
 
 		$( 'input#_manage_stock' ).change();
+
+		// Hide empty panels/tabs after display
+		$( '.woocommerce_options_panel' ).each( function() {
+			var $children = $( this ).children( '.options_group' );
+
+			if ( 0 === $children.length ) {
+				return;
+			}
+
+			var $invisble = $children.filter( function() { return 'none' === $( this ).css( 'display' ); } );
+
+			// Hide panel
+			if ( $invisble.length === $children.length ) {
+				var $id = $( this ).prop( 'id' );
+				$( '.product_data_tabs' ).find( 'li a[href="#' + $id + '"]' ).parent().hide();
+			}
+		} );
 	}
 
 	// Sale price schedule
