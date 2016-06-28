@@ -235,7 +235,6 @@ class WC_Comments {
 		delete_post_meta( $post_id, '_wc_average_rating' );
 		delete_post_meta( $post_id, '_wc_rating_count' );
 		delete_post_meta( $post_id, '_wc_review_count' );
-		WC_Product::sync_average_rating( $post_id );
 	}
 
 	/**

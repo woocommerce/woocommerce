@@ -1160,7 +1160,7 @@ class WC_Product {
 		global $wpdb;
 
 		$counts     = array();
-		$raw_counts = $wpdb->get_results( $wpdb->prepare("
+		$raw_counts = $wpdb->get_results( $wpdb->prepare( "
 			SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
 			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
 			WHERE meta_key = 'rating'
