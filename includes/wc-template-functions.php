@@ -448,7 +448,7 @@ if ( ! function_exists( 'woocommerce_demo_store' ) ) {
 			$notice = __( 'This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'woocommerce' );
 		}
 
-		echo apply_filters( 'woocommerce_demo_store', '<p class="demo_store">' . wp_kses_post( $notice ) . '</p>'  );
+		echo apply_filters( 'woocommerce_demo_store', '<p class="demo_store">' . wp_kses_post( $notice ) . '</p>', $notice );
 	}
 }
 
