@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://www.woothemes.com/woocommerce/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.6.1
+ * Version: 2.6.2
  * Author: WooThemes
  * Author URI: https://woothemes.com
  * Requires at least: 4.4
@@ -35,7 +35,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '2.6.1';
+	public $version = '2.6.2';
 
 	/**
 	 * The single instance of the class.
