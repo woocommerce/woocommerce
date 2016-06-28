@@ -72,6 +72,9 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 					'delivery_url' => array(
 						'required' => true,
 					),
+					'secret' => array(
+						'required' => true,
+					),
 				) ),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -166,7 +169,7 @@ class WC_REST_Webhooks_Controller extends WC_REST_Posts_Controller {
 		$webhook->set_delivery_url( $request['delivery_url'] );
 
 		// Set secret.
-		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : wc_webhook_generate_secret() );
+		$webhook->set_secret( ! empty( $request['secret'] ) ? $request['secret'] : '' );
 
 		// Set status.
 		if ( ! empty( $request['status'] ) ) {
