@@ -86,13 +86,11 @@ function wc_get_account_menu_items() {
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	);
 
-	// Remove empty items.
-	if ( ! empty( WC()->customer ) ) {
-		$downloads = WC()->customer->get_downloadable_products();
+	// Remove downloads if no downloadable products exist.
+	$downloads = wc_get_customer_download_permissions( get_current_user_id() );
 
-		if ( ! sizeof( $downloads ) ) {
-			unset( $items['downloads'] );
-		}
+	if ( ! sizeof( $downloads ) ) {
+		unset( $items['downloads'] );
 	}
 
 	// Check if payment gateways support add new payment methods.
