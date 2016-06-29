@@ -508,7 +508,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_billing_email() {
-		return sanitize_email( $this->_data['billing']['email'] );
+		return $this->_data['billing']['email'];
 	}
 
 	/**
@@ -685,9 +685,6 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted billing full name.
-	 *
-	 * @since 2.4.0
-	 *
 	 * @return string
 	 */
 	public function get_formatted_billing_full_name() {
@@ -696,9 +693,6 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Get a formatted shipping full name.
-	 *
-	 * @since 2.4.0
-	 *
 	 * @return string
 	 */
 	public function get_formatted_shipping_full_name() {
@@ -908,7 +902,6 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Set the payment method.
-	 * @since 2.2.0
 	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 2.7
 	 */
 	public function set_payment_method( $payment_method = '' ) {

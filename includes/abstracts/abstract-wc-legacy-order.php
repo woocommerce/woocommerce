@@ -21,7 +21,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 *
 	 * Note this does not update order totals.
 	 *
-	 * @since 2.2
 	 * @param object|int $item order item ID or item object.
 	 * @param WC_Product $product
 	 * @param array $args data to update.
@@ -71,7 +70,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 	/**
 	 * Update coupon for order. Note this does not update order totals.
-	 * @since 2.2
 	 * @param object|int $item
 	 * @param array $args
 	 * @return int updated order item ID
@@ -110,7 +108,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 *
 	 * Note this does not update the order total.
 	 *
-	 * @since 2.2
 	 * @param object|int $item
 	 * @param array $args
 	 * @return int updated order item ID
@@ -147,7 +144,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 *
 	 * Note this does not update order totals.
 	 *
-	 * @since 2.2
 	 * @param object|int $item
 	 * @param array $args
 	 * @return int updated order item ID
@@ -220,7 +216,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 	/**
 	 * Set the customer address.
-	 * @since 2.2.0
 	 * @param array $address Address data.
 	 * @param string $type billing or shipping.
 	 */
@@ -235,7 +230,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 
 	/**
 	 * Set an order total.
-	 * @since 2.2.0
 	 * @param float $amount
 	 * @param string $total_type
 	 * @return bool
@@ -499,7 +493,6 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 * Expand item meta into the $item array.
 	 * @deprecated 2.7.0 Item meta no longer expanded due to new order item
 	 *		classes. This function now does nothing to avoid data breakage.
-	 * @since 2.4.0
 	 * @param array $item before expansion.
 	 * @return array
 	 */

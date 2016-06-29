@@ -2255,6 +2255,7 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 if ( ! function_exists( 'wc_display_item_meta' ) ) {
 	/**
 	 * Display item meta data.
+	 * @since  2.7.0
 	 * @param  WC_Item $item
 	 * @param  array   $args
 	 * @return string|void
@@ -2295,6 +2296,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 	/**
 	 * Display item download links.
+	 * @since  2.7.0
 	 * @param  WC_Item $item
 	 * @param  array   $args
 	 * @return string|void

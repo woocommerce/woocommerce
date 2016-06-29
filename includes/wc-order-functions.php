@@ -1059,7 +1059,7 @@ function wc_order_search( $term ) {
 /**
  * Update total sales amount for each product within a paid order.
  *
- * @since 2.6.0
+ * @since 2.7.0
  * @param int $order_id
  */
 function wc_update_total_sales_counts( $order_id ) {
@@ -1093,7 +1093,7 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' )
 /**
  * Update used coupon amount for each coupon within an order.
  *
- * @since 2.6.0
+ * @since 2.7.0
  * @param int $order_id
  */
 function wc_update_coupon_usage_counts( $order_id ) {
@@ -1144,7 +1144,7 @@ add_action( 'woocommerce_order_status_cancelled', 'wc_update_total_sales_counts'
 
 /**
  * When a payment is complete, we can reduce stock levels for items within an order.
- * @since 2.6.0
+ * @since 2.7.0
  * @param int $order_id
  */
 function wc_maybe_reduce_stock_levels( $order_id ) {
@@ -1157,7 +1157,7 @@ add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
 
 /**
  * Reduce stock levels for items within an order.
- * @since 2.6.0
+ * @since 2.7.0
  * @param int $order_id
  */
 function wc_reduce_stock_levels( $order_id ) {
