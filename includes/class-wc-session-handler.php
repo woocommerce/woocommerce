@@ -66,7 +66,7 @@ class WC_Session_Handler extends WC_Session {
 		}
 
 		$this->_data = $this->get_session_data();
-		$this->_data_org = serialize($this->_data);
+		$this->_data_org = json_encode($this->_data);
 
 		// Actions
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
@@ -178,7 +178,7 @@ class WC_Session_Handler extends WC_Session {
 	 */
 	public function save_data() {
 		// Dirty if something changed - prevents saving nothing new
-		$data_changed = ( serialize($this->_data) != $this->_data_org );
+		$data_changed = ( json_encode($this->_data) != $this->_data_org );
 		if ( $this->_dirty && $this->has_session() && $data_changed ) {
 			global $wpdb;
 
