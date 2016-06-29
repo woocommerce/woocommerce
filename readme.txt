@@ -177,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Prevent blocking the same element multiple times on cart page.
 * Fix - Don't sync ratings right after a new comment to prevent rating sync whilst rating meta does not exist yet.
 * Fix - Fix product RSS feeds when using shop base.
+* Fix - woocommerce_local_pickup_methods comparison by stripping instance IDs before the check.
 * Dev - API - Fixed variable product stock at product level.
 * Dev - CLI - Introduces `woocommerce_cli_get_product_variable_types` filter.
 * Dev - Allow notices to be grouped on checkout after certain events.
