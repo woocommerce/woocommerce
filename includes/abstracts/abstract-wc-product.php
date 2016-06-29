@@ -691,7 +691,7 @@ class WC_Product {
 		if ( ! $this->is_in_stock() ) {
 			$availability = __( 'Out of stock', 'woocommerce' );
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
-			$availability = __( 'Available on backorder', 'woocommerce' );
+			$availability = $this->backorders_require_notification() ? __( 'Available on backorder', 'woocommerce' ) : __( 'In stock', 'woocommerce' );
 		} elseif ( $this->managing_stock() ) {
 			switch ( get_option( 'woocommerce_stock_format' ) ) {
 				case 'no_amount' :
@@ -730,7 +730,7 @@ class WC_Product {
 	protected function get_availability_class() {
 		if ( ! $this->is_in_stock() ) {
 			$class = 'out-of-stock';
-		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
+		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) && $this->backorders_require_notification() ) {
 			$class = 'available-on-backorder';
 		} else {
 			$class = 'in-stock';
