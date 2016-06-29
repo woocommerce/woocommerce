@@ -214,6 +214,7 @@ return array(
 	'SC' => __( 'Seychelles', 'woocommerce' ),
 	'SL' => __( 'Sierra Leone', 'woocommerce' ),
 	'SG' => __( 'Singapore', 'woocommerce' ),
+	'SX' => __( 'Sint Maarten', 'woocommerce' ),
 	'SK' => __( 'Slovakia', 'woocommerce' ),
 	'SI' => __( 'Slovenia', 'woocommerce' ),
 	'SB' => __( 'Solomon Islands', 'woocommerce' ),
@@ -263,5 +264,5 @@ return array(
 	'WS' => __( 'Samoa', 'woocommerce' ),
 	'YE' => __( 'Yemen', 'woocommerce' ),
 	'ZM' => __( 'Zambia', 'woocommerce' ),
-	'ZW' => __( 'Zimbabwe', 'woocommerce' )
+	'ZW' => __( 'Zimbabwe', 'woocommerce' ),
 );
