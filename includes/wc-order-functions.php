@@ -729,7 +729,7 @@ function wc_orders_count( $status ) {
 		return 0;
 	}
 
-	$cache_key = "wc-orders-{$status}";
+	$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . $status;
 	$cached_count = wp_cache_get( $cache_key, 'counts' );
 
 	if ( false !== $cached_count ) {
