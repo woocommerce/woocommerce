@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, jshreve, code
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront
 Requires at least: 4.4
 Tested up to: 4.5
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
-= 2.6.2 - xx/xx/16 =
+= 2.6.2 - 30/06/16 =
 * Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.
 * Fix - is_available check for legacy shipping methods.
 * Fix - wc_add_to_cart_message() when non-array is passed.
@@ -188,8 +188,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Added view_admin_dashboard cap for disabling the admin access restriction in custom roles.
 * Tweak - Revised stock display based on feedback to hide 'in stock' message if stock management is off and only show available on backorder if notifying customer.
 * Tweak - Allow external product SKUs.
-* Tweak - PT (Portugal) postcode format.
-* Tweak - JP (Japan) postcode format.
+* Tweak - PT (Portugal) and JP (Japan) postcode formats.
 * Tweak - Sort products from the `[product_category]` shortcode by menu order.
 * Tweak - Improve wc_orders_count() performance by running a query to count only posts of the given status.
 
