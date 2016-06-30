@@ -736,43 +736,31 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			$gallery = array();
 
 			foreach ( $images as $image ) {
-				if ( isset( $image['position'] ) && 0 === $image['position'] ) {
-					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
-					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-						$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
+				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
-						if ( is_wp_error( $upload ) ) {
-							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
-						}
-
-						$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
+					if ( is_wp_error( $upload ) ) {
+						throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
 					}
 
+					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
+				}
+
+				if ( isset( $image['position'] ) && 0 === $image['position'] ) {
 					set_post_thumbnail( $product->id, $attachment_id );
 				} else {
-					$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
-
-					if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-						$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
-
-						if ( is_wp_error( $upload ) ) {
-							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
-						}
-
-						$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
-					}
-
 					$gallery[] = $attachment_id;
 				}
 
 				// Set the image alt if present.
-				if ( ! empty( $image['alt'] ) && $attachment_id ) {
+				if ( ! empty( $image['alt'] ) ) {
 					update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
 				}
 
 				// Set the image name if present.
-				if ( ! empty( $image['name'] ) && $attachment_id ) {
+				if ( ! empty( $image['name'] ) ) {
 					wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
 				}
 			}
@@ -781,7 +769,7 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 				update_post_meta( $product->id, '_product_image_gallery', implode( ',', $gallery ) );
 			}
 		} else {
-			delete_post_thumbnail( $product->id );
+			delete_post_meta( $product->id, '_thumbnail_id' );
 			update_post_meta( $product->id, '_product_image_gallery', '' );
 		}
 	}
@@ -1378,14 +1366,18 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 			if ( isset( $variation['image'] ) && is_array( $variation['image'] ) ) {
 				$image = current( $variation['image'] );
 				if ( $image && is_array( $image ) ) {
-					if ( isset( $image['position'] ) && isset( $image['src'] ) && 0 === $image['position'] ) {
-						$upload = wc_rest_upload_image_from_url( wc_clean( $image['src'] ) );
+					if ( isset( $image['position'] ) && 0 === $image['position'] ) {
+						$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
-						if ( is_wp_error( $upload ) ) {
-							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+						if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+							$upload = wc_rest_upload_image_from_url( wc_clean( $image['src'] ) );
+
+							if ( is_wp_error( $upload ) ) {
+								throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+							}
+
+							$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
 						}
-
-						$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->id );
 
 						// Set the image alt if present.
 						if ( ! empty( $image['alt'] ) ) {
@@ -1397,9 +1389,6 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 							wp_update_post( array( 'ID' => $attachment_id, 'post_title' => $image['name'] ) );
 						}
 
-						update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
-					} elseif ( isset( $image['position'] ) && isset( $image['id'] ) && 0 < $image['id'] && 0 === $image['position'] ) {
-						$attachment_id = $image['id'];
 						update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
 					}
 				} else {

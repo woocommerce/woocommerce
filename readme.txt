@@ -182,6 +182,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Dev - API - Fixed variable product stock at product level.
 * Dev - CLI - Introduces `woocommerce_cli_get_product_variable_types` filter.
 * Dev - Allow notices to be grouped on checkout after certain events.
+* Dev - API - Allows save images by ID with product variations.
 * Tweak - Made customer pay link display if order needs_payment() rather than checking pending status.
 * Tweak - Zones - Wording clarifications.
 * Tweak - Zones - Match zones with postcodes but no country.
