@@ -158,6 +158,9 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 
 == Changelog ==
 
+= 2.6.2 - xx/xx/16 =
+* Dev - API - Added support for WP REST API with custom URL prefix.
+
 = 2.6.2 - 30/06/16 =
 * Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.
 * Fix - is_available check for legacy shipping methods.
