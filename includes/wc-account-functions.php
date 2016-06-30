@@ -104,11 +104,16 @@ function wc_get_account_menu_items() {
 
 	// Check if payment gateways support add new payment methods.
 	if ( isset( $items['payment-methods'] ) ) {
+		$support_payment_methods = false;
 		foreach ( WC()->payment_gateways->get_available_payment_gateways() as $gateway ) {
 			if ( $gateway->supports( 'add_payment_method' ) || $gateway->supports( 'tokenization' ) ) {
-				unset( $items['payment-methods'] );
+				$support_payment_methods = true;
 				break;
 			}
+		}
+
+		if ( ! $support_payment_methods ) {
+			unset( $items['payment-methods'] );
 		}
 	}
 
