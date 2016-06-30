@@ -33,7 +33,7 @@ class WC_REST_Authentication {
 			return false;
 		}
 
-		$rest_prefix = trailingslashit( rest_get_url_prefix() );;
+		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
 		// Check if our endpoint.
 		$woocommerce = false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc/' );
