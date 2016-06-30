@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Don't sync ratings right after a new comment to prevent rating sync whilst rating meta does not exist yet.
 * Fix - Fix product RSS feeds when using shop base.
 * Fix - woocommerce_local_pickup_methods comparison by stripping instance IDs before the check.
+* Fix - During password resets, use cookie to store reset key and user login to avoid them being exposed in the URL/referer headers.
 * Dev - API - Fixed variable product stock at product level.
 * Dev - CLI - Introduces `woocommerce_cli_get_product_variable_types` filter.
 * Dev - Allow notices to be grouped on checkout after certain events.
