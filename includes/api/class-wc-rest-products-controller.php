@@ -1398,6 +1398,9 @@ class WC_REST_Products_Controller extends WC_REST_Posts_Controller {
 						}
 
 						update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
+					} elseif ( isset( $image['position'] ) && isset( $image['id'] ) && 0 < $image['id'] && 0 === $image['position'] ) {
+						$attachment_id = $image['id'];
+						update_post_meta( $variation_id, '_thumbnail_id', $attachment_id );
 					}
 				} else {
 					delete_post_meta( $variation_id, '_thumbnail_id' );
