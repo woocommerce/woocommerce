@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - PT (Portugal) and JP (Japan) postcode formats.
 * Tweak - Sort products from the `[product_category]` shortcode by menu order.
 * Tweak - Improve wc_orders_count() performance by running a query to count only posts of the given status.
+* Tweak - To allow my account page tabs to be disabled without code, you can now set the endpoint value to a blank string.
 
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
