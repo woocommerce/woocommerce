@@ -157,7 +157,9 @@ class WC_Query {
 		$mask = $this->get_endpoints_mask();
 
 		foreach ( $this->query_vars as $key => $var ) {
-			add_rewrite_endpoint( $var, $mask );
+			if ( ! empty( $var ) ) {
+				add_rewrite_endpoint( $var, $mask );
+			}
 		}
 	}
 
