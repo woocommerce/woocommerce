@@ -168,8 +168,8 @@ class WC_Shortcodes {
 		$atts = shortcode_atts( array(
 			'per_page' => '12',
 			'columns'  => '4',
-			'orderby'  => 'title',
-			'order'    => 'desc',
+			'orderby'  => 'menu_order title',
+			'order'    => 'asc',
 			'category' => '',  // Slugs
 			'operator' => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
 		), $atts );

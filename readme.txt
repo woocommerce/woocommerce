@@ -189,6 +189,8 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Tweak - Revised stock display based on feedback to hide 'in stock' message if stock management is off.
 * Tweak - Allow external product SKUs.
 * Tweak - PT (Portugal) postcode format.
+* Tweak - JP (Japan) postcode format.
+* Tweak - Sort products from the `[product_category]` shortcode by menu order.
 
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
