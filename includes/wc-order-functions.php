@@ -719,18 +719,29 @@ function wc_processing_order_count() {
  * @return int
  */
 function wc_orders_count( $status ) {
-	$count = 0;
+	global $wpdb;
 
+	$count = 0;
+	$status = 'wc-' . $status;
 	$order_statuses = array_keys( wc_get_order_statuses() );
 
-	if ( ! in_array( 'wc-' . $status, $order_statuses ) ) {
+	if ( ! in_array( $status, $order_statuses ) ) {
 		return 0;
 	}
 
-	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
-		$this_count  = wp_count_posts( $type, 'readable' );
-		$count      += isset( $this_count->{'wc-' . $status} ) ? $this_count->{'wc-' . $status} : 0;
+	$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . $status;
+	$cached_count = wp_cache_get( $cache_key, 'counts' );
+
+	if ( false !== $cached_count ) {
+		return $cached_count;
 	}
+
+	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
+		$query = "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
+		$count += $wpdb->get_var( $wpdb->prepare( $query, $type, $status ) );
+	}
+
+	wp_cache_set( $cache_key, $count, 'counts' );
 
 	return $count;
 }
