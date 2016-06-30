@@ -214,7 +214,6 @@ return array(
 	'SC' => __( 'Seychelles', 'woocommerce' ),
 	'SL' => __( 'Sierra Leone', 'woocommerce' ),
 	'SG' => __( 'Singapore', 'woocommerce' ),
-	'SX' => __( 'Sint Maarten', 'woocommerce' ),
 	'SK' => __( 'Slovakia', 'woocommerce' ),
 	'SI' => __( 'Slovenia', 'woocommerce' ),
 	'SB' => __( 'Solomon Islands', 'woocommerce' ),

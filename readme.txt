@@ -171,7 +171,7 @@ Yes you can! Join in on our [GitHub repository](http://github.com/woothemes/wooc
 * Fix - Javascript show/hide of option in free shipping method.
 * Fix - Convert ellipsis to three periods when saving postcodes.
 * Fix - Prevent get_terms returning duplicates.
-* Fix - Removed non-existent country (Netherlands Antilles) from https://en.wikipedia.org/wiki/ISO_3166-1 and added missing Sint Maarten.
+* Fix - Removed non-existent country (Netherlands Antilles) from https://en.wikipedia.org/wiki/ISO_3166-1.
 * Fix - Grouped product range display when child is free.
 * Fix - Remove discount when checking free shipping min amount.
 * Fix - Prevent blocking the same element multiple times on cart page.
