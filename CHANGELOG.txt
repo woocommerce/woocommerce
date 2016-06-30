@@ -1,5 +1,42 @@
 == Changelog ==
 
+= 2.6.2 - 30/06/16 =
+* Fix - Set max index length on woocommerce_payment_tokenmeta table for utf8mb4 support.
+* Fix - is_available check for legacy shipping methods.
+* Fix - wc_add_to_cart_message() when non-array is passed.
+* Fix - Maximum coupon check should allow the 'maximum' value.
+* Fix - Product coupon logic to avoid applying non-applicable coupons.
+* Fix - Potential notices when leaving out 'default' field for shipping instances.
+* Fix - wp_cache_flush after term meta migration/update.
+* Fix - wc_add_to_cart_message() when non-array is passed.
+* Fix - woocommerce_redirect_single_search_result type check was incorrect.
+* Fix - Javascript show/hide of option in free shipping method.
+* Fix - Convert ellipsis to three periods when saving postcodes.
+* Fix - Prevent get_terms returning duplicates.
+* Fix - Removed non-existent country (Netherlands Antilles) from https://en.wikipedia.org/wiki/ISO_3166-1.
+* Fix - Grouped product range display when child is free.
+* Fix - Remove discount when checking free shipping min amount.
+* Fix - Prevent blocking the same element multiple times on cart page.
+* Fix - Don't sync ratings right after a new comment to prevent rating sync whilst rating meta does not exist yet.
+* Fix - Fix product RSS feeds when using shop base.
+* Fix - woocommerce_local_pickup_methods comparison by stripping instance IDs before the check.
+* Fix - During password resets, use cookie to store reset key and user login to avoid them being exposed in the URL/referer headers.
+* Dev - API - Fixed variable product stock at product level.
+* Dev - CLI - Introduces `woocommerce_cli_get_product_variable_types` filter.
+* Dev - Allow notices to be grouped on checkout after certain events.
+* Dev - API - Allows save images by ID with product variations.
+* Tweak - Made customer pay link display if order needs_payment() rather than checking pending status.
+* Tweak - Zones - Wording clarifications.
+* Tweak - Zones - Match zones with postcodes but no country.
+* Tweak - Zones - Match zones with no regions as 'everywhere'.
+* Tweak - Added view_admin_dashboard cap for disabling the admin access restriction in custom roles.
+* Tweak - Revised stock display based on feedback to hide 'in stock' message if stock management is off and only show available on backorder if notifying customer.
+* Tweak - Allow external product SKUs.
+* Tweak - PT (Portugal) and JP (Japan) postcode formats.
+* Tweak - Sort products from the `[product_category]` shortcode by menu order.
+* Tweak - Improve wc_orders_count() performance by running a query to count only posts of the given status.
+* Tweak - To allow my account page tabs to be disabled without code, you can now set the endpoint value to a blank string.
+
 = 2.6.1 - 16/06/16 =
 * Fix - Added missing localized format for line taxes in orders screen to prevent total miscalculation in manual orders.
 * Fix - Improved the hour and time fields validation pattern on the orders screen.
