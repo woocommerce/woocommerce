@@ -74,6 +74,9 @@ class WC_Helper_Product {
 			'post_status' => 'publish'
 		) );
 
+		// Set it as variable.
+		wp_set_object_terms( $product_id, 'variable', 'product_type' );
+
 		// Price related meta
 		update_post_meta( $product_id, '_price', '10' );
 		update_post_meta( $product_id, '_min_variation_price', '10' );
